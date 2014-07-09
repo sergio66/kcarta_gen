@@ -1,0 +1,100 @@
+ !!!!!!this is a namelist template file to make Forward Models
+ $nm_params
+ namecomment	=  '******* PARAMS section *******'
+ kLongOrShort = 0
+ kCKD         = 24
+ kSurfTemp    = 1
+ !!!read in profile from rtp, but set up atmosphere using old style
+ kRTP         = 0
+ $end
+
+ $nm_frqncy
+ namecomment	=  '******* FRQNCY section *******'
+ !was 705-905
+ rf1	        = 780.0
+ rf2    	= 805.0
+
+ $end
+
+ $nm_molgas
+ namecomment	=  '******* MOLGAS section *******'
+ !use all kcomp gases + continuum
+ iNGas	   =            -1
+ $end
+
+ $nm_xscgas
+ namecomment	=  '******* XSCGAS section *******'
+ !use all xsec gases
+ iNxsec	=            -1
+ $end
+
+ $nm_prfile
+ namecomment	=  '******* PRFILE section *******'
+ iRTP           =  1
+ caPfname	=  'klayers.op.rtp'
+ $end
+
+ $nm_weight
+ namecomment	=  '******* WEIGHT section *******'
+ !this is to develop fast forward models
+ !recall gases 101, 102 are separate
+ iNpmix	=             1
+ caaMixFileLines        = 
+    !all gases have weight 1.0 
+    '1   -1    1.0    -1'
+ $end
+
+ $nm_radnce
+ namecomment	=  '******* RADNCE section *******'
+ !1 atmospheres
+ iNatm          =  1
+
+ ! no solar, fast thermal, emissivity file
+ iaMPSetForRad(1)   =  1
+ raPressStop(1)     =  0.0000
+ raPressStart(1)    =  1013.0
+ raTSpace(1)        =   2.960000
+ raTSurf(1)         =  0.0
+ raSatAngle(1)      =  0.0000000E+00
+ raSatHeight(1)     =   1.000000
+ iakSolar(1)        =  -1
+ rakSolarAngle(1)   =  25.0000000E+00
+ cakSolarRefl(1)    =  'NONESPECIFIED'
+ iakThermal(1)      =   0
+ rakThermalAngle(1) =  -1.000000
+ iakThermalJacob(1) =   1
+ caEmissivity(1)    =   '../DATA/General/emissivity.dat'
+ raSetEmissivity(1) =  1.000000
+
+ $end
+
+ $nm_jacobn
+ namecomment	=  '******* JACOBN section *******'
+ iJacob	=             0
+ $end
+
+ $nm_spectr
+ namecomment	=  '******* SPECTRA section ******'
+ iNumNewGases	=             -1
+ $end
+
+ $nm_scattr
+ namecomment	=  '******* SCATTR section *******'
+ iNclouds	   =            -1
+ $end
+
+
+ $nm_output
+ namecomment	=  '******* OUTPUT section *******'
+ caComment      = ' OUTPUTS all MP, and rads of atms at TOA'
+
+ iaPrinter	=    3
+ iaGPMPAtm	=    -1
+ iaNp           =    1
+ raaOp          =    00.0
+
+ $end
+
+ $nm_endinp
+ namecomment	=  '******* ENDINP section *******'
+ $end

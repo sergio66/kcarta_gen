@@ -1,0 +1,9 @@
+wehrli85.txt is from 
+   http://rredc.nrel.gov/solar/spectra/am0/wehrli1985.new.html
+with units for the 3 columns of
+ 	  nm	  W/sm/nm   W/sm
+
+     199.5     0.005  5.498E-3
+     200.5     0.007  1.253E-2
+
+solar_vis_dat is from SBDARTA/V2.4/spectra.f  with units w/m2/micron

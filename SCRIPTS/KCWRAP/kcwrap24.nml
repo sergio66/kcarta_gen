@@ -1,0 +1,82 @@
+ $nm_params
+ namecomment	=  '******* PARAMS section *******'
+ !water continuum CKD v2.4
+ KCKD = 24
+ !no headers in output file .... use readkcBasic
+ kLongOrShort = 0 
+ !drive everything from this .nml file
+ kRTP = +1
+ $end
+
+ $nm_frqncy
+ namecomment	=  '******* FRQNCY section *******'
+ rf1	        = 605.0
+ rf2    	= 2830.0
+ $end
+
+ $nm_molgas
+ namecomment	=  '******* MOLGAS section *******'
+ !use all gases in MOLGAS
+ iNGas	=            -1
+ $end
+
+ $nm_xscgas
+ namecomment	=  '******* XSCGAS section *******'
+ !use all gases in XSCGAS
+ iNxsec	=             -1
+ $end
+
+ $nm_prfile
+ namecomment	=  '******* PRFILE section *******'
+ iRTP           =  1
+ caPfname       =  'mypNEW.op.rtp'
+ $end
+
+ $nm_weight
+ namecomment	=  '******* WEIGHT section *******'
+ !this is to do standard rad transfer
+ iNpmix	=             1
+ caaMixFileLines	= 
+    !all gases have weight 1.0
+    '1   -1    1.0    -1'
+ $end
+
+ $nm_radnce
+ namecomment	=  '******* RADNCE section *******'
+ !atmospheres set from RTP file
+ iNatm          =  -1
+ $end
+
+ $nm_jacobn
+ namecomment	=  '******* JACOBN section *******'
+ !no jacobians
+ iJacob	=             0
+ $end
+
+ $nm_spectr
+ namecomment	=  '******* SPECTRA section ******'
+ !no external spectra
+ iNumNewGases	=             -1
+ $end
+
+ $nm_scattr
+ namecomment	=  '******* SCATTR section *******'
+ !no scattering
+ iNclouds	  =             -1
+ $end
+
+ $nm_output
+ namecomment	=  '******* OUTPUT section *******'
+ caComment      = 'data at TOP of atm for downlook instr'
+ caLogFile      = 'kcwrap.log'
+ !dump out radiance at GND
+ iaPrinter(1)	=    3
+ iaGPMPAtm(1)	=   -1
+ iaNp(1)        =    1
+ raaOp(1,1)     =    00.0
+
+ $end
+
+ $nm_endinp
+ namecomment	=  '******* ENDINP section *******'
+ $end

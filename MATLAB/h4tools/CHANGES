@@ -1,0 +1,41 @@
+
+CHANGES FROM VERSION 2.1 TO VERSION 2.2
+---------------------------------------
+
+Added sdload.m and sdsave.m; these are basically just more user
+friendly versions of h4sdread.m and h4sdwrite.m
+
+mat2sdsid.m and sdsid2mat.m now treat dimension names properly
+
+
+CHANGES FROM VERSION 1 to VERSION 2
+------------------------------------
+
+The new RTP reader and writer, rtpread.m and rtpwrite.m, are now
+the simpler versions that read and write HDF4 RTP data as a structure
+of arrays, while the new rtpread2.m and rtpwrite2.m read and write
+HDF4 RTP data as a array of structures.
+
+The new rtpread2.m and rtpwrite2.m should work as exact replacements
+for the old rtpread.m and rtpwrite.m.
+
+The new rtpread.m and rtpwrite.m are faster because they do not
+transpose the data from a structure of arrays to an array of
+structures, they do not create the pseudo-field "gamnt", and they
+do not do as much checking of the data, particularly for writes.
+
+The name of the user interface readers and writers have been
+changed, as follows:
+
+     Version 1 names             Version 2 names
+
+  mat2h4vs.m, h4vs2mat.m     h4vswrite.m, h4vsread.m   
+  mat2h4sd.m, h4sd2mat.m     h4sdwrite.m, h4sdread.m
+  mat2h4sg.m, h4sg2mat.m     h4sgwrite.m, h4sgread.m
+
+For performance reasons, the vdata routines rtpread.m, rtpwrite.m,
+h4vsread.m, and h4vswrite.m were changed to read or write a structure
+of arrays, rather than an array of structures.  The new procedures
+rtpread2.m and rtpwrite2.m read and write an array of structures,
+and are a direct replacement for the V1 rtpread.m and rtpwrite.m
+

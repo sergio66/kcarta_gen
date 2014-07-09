@@ -1,0 +1,78 @@
+\section{Significant Changes from v1.07 to v1.08}
+This version now has both DISORT and RTSPEC interfaced to the code, to allow 
+for scattering computations. When in RTSPEC mode, solar cannot be included
+either for up or down looking instruments. 
+
+The namelist $nm_scattr$ section has been slightly extended, so that \\
+  1) we tell the code which scattering model to use\\
+          kWhichScatterCode = +1 for TWOSTR\\
+          kWhichScatterCode = +2 for RTSPEC\\
+          kWhichScatterCode = +3 for DISORT\\
+
+  2) if we are using DISORT, then we have 3 options to speed up the code
+       kScatter  = +1, DISORT will do rad tranfer on kDisStep pts 
+                        (pts 1,1 + J, 1 +2J, 1 + 3J ... etc where 
+                         J=kMaxPts DIV kDisStep
+                   The code will then do a linear interpolation of the
+                   chosen pts ``interp(raFchosen,raInten) -> (raWaves,I)'' \\
+                       
+       kScatter  = +2, DISORT will do rad tranfer on kDisStep pts 
+                       These points are chosen so that they are the lowest 
+                       optical depth points (in layer closest to gnd)
+                   The code will then do a linear interpolation of the
+                   chosen points ``interp(raKchosen,raInten) -> (raK,I)'' \\
+
+       kScatter  = +3, DISORT will do rad tranfer on kDisStep pts 
+                       These points are chosen so that they span the min
+                       to max optical depth points (in layer closest to gnd)
+                   The code will then do a linear interpolation of the
+                   chosen points ``interp(raKchosen,raInten) -> (raK,I)''\\
+
+     Conversely if we are using RTSPEC, then we set the model used (single, 
+       eddington or hybrid) by setting kScatter  = +1 , +2 or +3 \\
+
+  3) for DISORT to run fast, we can set the number of streams used
+       kDis\_nstr  (defaulted to 16)\\
+
+  4) for DISORT to run fast, we can set the number of wavenumber points 
+     stepped over kDis\_Pts (defaulted to 400)\\
+
+  5) Introduced a new parameter into *SCATTR, raExp(j), where j is
+     the cloud under consideration. If set to 0 and a cloud is 
+     ``expanded'' from ``one'' layer to layers (p1,p2), the IWP of each of 
+     these layers is the same, and sums up to IWP. 
+     If set to other than 0 and a cloud is ``expanded'' from ``one'' layer 
+     to layers (p1,p2), the IWP of the individual layers is exponentially 
+     decreased roughly as exp(-raExp(j)*p1/p), but the total IWP remains that
+     set by the user
+
+   6) Changed RTSPEC so that clouds that occupy completely 
+      different regions, can be processed. Eg if cloud 1 is an
+      aerosol cloud layer from KCARTA layers 4-5, and cloud 2 is a 
+      cirrus cloud from kCARTA layers 43-46, this is handled by 
+      setting a ``third'' cloud from layers 6-42, with IWP=0.0
+
+The namelist $nm_radnce$ section has had the meanings of settings of some
+parameters slightly altered, in particular raTSpace and iaKSolar for an
+uplooking instrument : \\
+For the nonscattering kCARTA algorithm, raTSpace(i) should always be 2.7K or 
+thereabouts. If iaKSolar(i) = -1 then sun is NOT in FOV, while if iaKSolar(i) 
+= 0,1 then sun IS IN FOV, at satellite view angle. Thus raKSolarAngle(i) is 
+irrelevant.
+
+For the scattering RTSPEC algorithm, raTSpace(i) should always be 2.7K or 
+thereabouts. The sun CANNOT be in the FOV, so iaKSolar(i) = -1 is the only
+allowed possibility. 
+
+For the scattering DISORT algorithm, raTSpace(i) should always be 2.7K or 
+thereabouts. If iaKSolar(i) = -1 then sun is NOT ON, while if iaKSolar(i) = 
+0,1 then sun is on, at arbitrary angle. Thus raKSolarAngle(i) is VERY relevant
+
+The *SCATTR is more general in that it ``expands'' a cloud according
+to user parameters. Eg if cloud is from 259-390 mb, all the 
+user has to do is say cloud has ``1'' layer, give the IWP/DME
+and these two start/stop pressures ... the code will 
+automatically figure out that there are more than 1 kLAYERS 
+layers used by this cloud. As long as the cloud has sequential
+layering, from TOP to BOTTOM, the code is happy .
+

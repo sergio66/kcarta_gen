@@ -1,0 +1,51 @@
+c this file does the interfacing between K.F.Evan's array dimensions,
+c and those of kCARTA
+
+      include 'kcarta.param'
+
+cccccccccccccccccccccc ORIGINAL rtspec variables ccccccccccccccccccccc
+cc
+ccC         Scattering table variables: 
+cc      INTEGER  MAXTAB, MAXGRID, MAXSCAT
+cc      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5)
+cc      INTEGER  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
+cc      REAL     MUTAB(MAXGRID,MAXSCAT)
+cc      REAL     DMETAB(MAXGRID,MAXSCAT), WAVETAB(MAXGRID,MAXSCAT)
+cc      REAL     MUINC(2)
+cc      REAL     TABEXTINCT(MAXTAB,MAXSCAT), TABSSALB(MAXTAB,MAXSCAT)
+cc      REAL     TABASYM(MAXTAB,MAXSCAT)
+cc      REAL     TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
+cc      REAL     TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
+cc
+ccC         Radiative transfer variables: 
+cc      INTEGER  MAXABSNU, MAXNZ, MAXSPEC
+cc      PARAMETER (MAXABSNU=100000, MAXNZ=100, MAXSPEC=10) 
+cc      INTEGER NUMSPEC, NSCATTAB, NCLDLAY, NABSNU, NLEV
+cc      INTEGER ICLDTOP, ICLDBOT, IOBS, ISCATTAB(MAXNZ)
+cc      INTEGER I, J, L, M, JNU1, JNU2
+cc      LOGICAL OUTTB(MAXSPEC), OUTTRIANG(MAXSPEC), BINARYABSFILE
+cc      REAL    ZOBS, MUOBS, ZTOP, IWP(MAXNZ), DME(MAXNZ)
+cc      REAL    SFCTEMP, SFCEMIS
+cc      REAL    ONU, RADOBS, OUTRAD
+cc      REAL    HEIGHT(MAXNZ), TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)
+cc      REAL*8  ABSNU1, ABSNU2, ABSDELNU
+cc      REAL*8  OUTNU1(MAXSPEC), OUTNU2(MAXSPEC), OUTDELNU(MAXSPEC)
+cc      REAL*8  WAVENO, ONU1, ONU2, INVOUTDELNU, WT1, WT2
+cc      REAL*8  SUMWT1, SUMWT2, SUMRAD1, SUMRAD2
+cc      CHARACTER*100 SCATFILE(MAXSCAT), ABSFILE(MAXSPEC), OUTPUTFILE
+cc      CHARACTER*1   RTMODEL, ABSTYPE
+cc      CHARACTER*24  OUTUNITS, OUTAVERAGING
+
+cccccccccccccccccccccc interfaced rtspec dimensions ccccccccccccccccccccc
+C         Scattering table variables: 
+      INTEGER  MAXTAB, MAXGRID, MAXSCAT 
+      PARAMETER (MAXTAB=10*25*500*8, MAXGRID=kMaxPts, MAXSCAT=kMaxClouds) 
+
+C         Radiative transfer variables:  
+      INTEGER  MAXABSNU, MAXNZ 
+c maxabsnu = number of frequency points
+c maxnz    = max number of levels ==== 1 + max number of layers
+      PARAMETER (MAXABSNU=kMaxPts, MAXNZ=kProfLayer+1)
+
+ 
+

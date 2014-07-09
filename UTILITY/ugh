@@ -1,0 +1,1346 @@
+G77(1)                                GNU                               G77(1)
+
+
+
+NNAAMMEE
+       g77 - GNU project Fortran 77 compiler
+
+SSYYNNOOPPSSIISS
+       g77 [--cc│--SS│--EE]
+           [--gg] [--ppgg] [--OO_l_e_v_e_l]
+           [--WW_w_a_r_n...] [--ppeeddaannttiicc]
+           [--II_d_i_r...] [--LL_d_i_r...]
+           [--DD_m_a_c_r_o[=_d_e_f_n]...] [--UU_m_a_c_r_o]
+           [--ff_o_p_t_i_o_n...] [--mm_m_a_c_h_i_n_e_-_o_p_t_i_o_n...]
+           [--oo _o_u_t_f_i_l_e] _i_n_f_i_l_e...
+
+       Only the most useful options are listed here; see below for the remain-
+       der.
+
+DDEESSCCRRIIPPTTIIOONN
+       The gg7777 command supports all the options supported by the ggcccc command.
+
+       All ggcccc and gg7777 options are accepted both by gg7777 and by ggcccc (as well as
+       any other drivers built at the same time, such as gg++++), since adding
+       gg7777 to the ggcccc distribution enables acceptance of gg7777 options by all of
+       the relevant drivers.
+
+       In some cases, options have positive and negative forms; the negative
+       form of --ffffoooo would be --ffnnoo--ffoooo.  This manual documents only one of
+       these two forms, whichever one is not the default.
+
+OOPPTTIIOONNSS
+       Here is a summary of all the options specific to GNU Fortran, grouped
+       by type.  Explanations are in the following sections.
+
+       _O_v_e_r_a_l_l _O_p_t_i_o_n_s
+           --ffvveerrssiioonn  --ffsseett--gg7777--ddeeffaauullttss  --ffnnoo--ssiilleenntt
+
+       _S_h_o_r_t_h_a_n_d _O_p_t_i_o_n_s
+           --ffff6666  --ffnnoo--ff6666  --ffff7777  --ffnnoo--ff7777  --ffnnoo--uuggllyy
+
+       _F_o_r_t_r_a_n _L_a_n_g_u_a_g_e _O_p_t_i_o_n_s
+           --ffffrreeee--ffoorrmm  --ffnnoo--ffiixxeedd--ffoorrmm  --ffff9900 --ffvvxxtt  --ffddoollllaarr--ookk  --ffnnoo--bbaacckk--
+           ssllaasshh --ffnnoo--uuggllyy--aarrggss  --ffnnoo--uuggllyy--aassssiiggnn  --ffnnoo--uuggllyy--aassssuummeedd
+           --ffuuggllyy--ccoommmmaa  --ffuuggllyy--ccoommpplleexx  --ffuuggllyy--iinniitt  --ffuuggllyy--llooggiinntt --ffoonneettrriipp
+           --ffttyyppeelleessss--bboozz --ffiinnttrriinn--ccaassee--iinniittccaapp  --ffiinnttrriinn--ccaassee--uuppppeerr --ffiinn--
+           ttrriinn--ccaassee--lloowweerr  --ffiinnttrriinn--ccaassee--aannyy --ffmmaattcchh--ccaassee--iinniittccaapp
+           --ffmmaattcchh--ccaassee--uuppppeerr --ffmmaattcchh--ccaassee--lloowweerr  --ffmmaattcchh--ccaassee--aannyy
+           --ffssoouurrccee--ccaassee--uuppppeerr  --ffssoouurrccee--ccaassee--lloowweerr --ffssoouurrccee--ccaassee--pprreesseerrvvee
+           --ffssyymmbbooll--ccaassee--iinniittccaapp  --ffssyymmbbooll--ccaassee--uuppppeerr --ffssyymmbbooll--ccaassee--lloowweerr
+           --ffssyymmbbooll--ccaassee--aannyy --ffccaassee--ssttrriicctt--uuppppeerr  --ffccaassee--ssttrriicctt--lloowweerr
+           --ffccaassee--iinniittccaapp  --ffccaassee--uuppppeerr  --ffccaassee--lloowweerr  --ffccaassee--pprreesseerrvvee
+           --ffff22cc--iinnttrriinnssiiccss--ddeelleettee  --ffff22cc--iinnttrriinnssiiccss--hhiiddee --ffff22cc--iinnttrriinn--
+           ssiiccss--ddiissaabbllee  --ffff22cc--iinnttrriinnssiiccss--eennaabbllee --ffbbaadduu7777--iinnttrriinnssiiccss--ddeelleettee
+           --ffbbaadduu7777--iinnttrriinnssiiccss--hhiiddee --ffbbaadduu7777--iinnttrriinnssiiccss--ddiissaabbllee
+           --ffbbaadduu7777--iinnttrriinnssiiccss--eennaabbllee --ffff9900--iinnttrriinnssiiccss--ddeelleettee  --ffff9900--iinnttrriinn--
+           ssiiccss--hhiiddee --ffff9900--iinnttrriinnssiiccss--ddiissaabbllee  --ffff9900--iinnttrriinnssiiccss--eennaabbllee
+           --ffggnnuu--iinnttrriinnssiiccss--ddeelleettee  --ffggnnuu--iinnttrriinnssiiccss--hhiiddee --ffggnnuu--iinnttrriinn--
+           ssiiccss--ddiissaabbllee  --ffggnnuu--iinnttrriinnssiiccss--eennaabbllee --ffmmiill--iinnttrriinnssiiccss--ddeelleettee
+           --ffmmiill--iinnttrriinnssiiccss--hhiiddee --ffmmiill--iinnttrriinnssiiccss--ddiissaabbllee  --ffmmiill--iinnttrriinn--
+           ssiiccss--eennaabbllee --ffuunniixx--iinnttrriinnssiiccss--ddeelleettee  --ffuunniixx--iinnttrriinnssiiccss--hhiiddee
+           --ffuunniixx--iinnttrriinnssiiccss--ddiissaabbllee  --ffuunniixx--iinnttrriinnssiiccss--eennaabbllee --ffvvxxtt--iinnttrriinn--
+           ssiiccss--ddeelleettee  --ffvvxxtt--iinnttrriinnssiiccss--hhiiddee --ffvvxxtt--iinnttrriinnssiiccss--ddiissaabbllee
+           --ffvvxxtt--iinnttrriinnssiiccss--eennaabbllee --ffffiixxeedd--lliinnee--lleennggtthh--_n
+           --ffffiixxeedd--lliinnee--lleennggtthh--nnoonnee
+
+       _W_a_r_n_i_n_g _O_p_t_i_o_n_s
+           --ffssyynnttaaxx--oonnllyy  --ppeeddaannttiicc  --ppeeddaannttiicc--eerrrroorrss  --ffppeeddaannttiicc --ww
+           --WWnnoo--gglloobbaallss  --WWiimmpplliicciitt  --WWuunnuusseedd  --WWuunniinniittiiaalliizzeedd --WWaallll  --WWssuurr--
+           pprriissiinngg --WWeerrrroorr  --WW
+
+       _D_e_b_u_g_g_i_n_g _O_p_t_i_o_n_s
+           --gg
+
+       _O_p_t_i_m_i_z_a_t_i_o_n _O_p_t_i_o_n_s
+           --mmaalliiggnn--ddoouubbllee --ffffllooaatt--ssttoorree  --ffffoorrccee--mmeemm  --ffffoorrccee--aaddddrr
+           --ffnnoo--iinnlliinnee --ffffaasstt--mmaatthh  --ffssttrreennggtthh--rreedduuccee  --ffrreerruunn--ccssee--aafftteerr--lloooopp
+           --ffuunnssaaffee--mmaatthh--ooppttiimmiizzaattiioonnss --ffffiinniittee--mmaatthh--oonnllyy --ffnnoo--ttrraappppiinngg--mmaatthh
+           --ffeexxppeennssiivvee--ooppttiimmiizzaattiioonnss  --ffddeellaayyeedd--bbrraanncchh --ffsscchheedduullee--iinnssnnss
+           --ffsscchheedduullee--iinnssnn22  --ffccaalllleerr--ssaavveess --ffuunnrroollll--llooooppss  --ffuunnrroollll--aallll--llooooppss
+           --ffnnoo--mmoovvee--aallll--mmoovvaabblleess  --ffnnoo--rreedduuccee--aallll--ggiivvss --ffnnoo--rreerruunn--lloooopp--oopptt
+
+       _D_i_r_e_c_t_o_r_y _O_p_t_i_o_n_s
+           --II_d_i_r  --II--
+
+       _C_o_d_e _G_e_n_e_r_a_t_i_o_n _O_p_t_i_o_n_s
+           --ffnnoo--aauuttoommaattiicc  --ffiinniitt--llooccaall--zzeerroo  --ffnnoo--ff22cc --ffff22cc--lliibbrraarryy
+           --ffnnoo--uunnddeerrssccoorriinngg  --ffnnoo--iiddeenntt --ffppcccc--ssttrruucctt--rreettuurrnn
+           --ffrreegg--ssttrruucctt--rreettuurrnn --ffsshhoorrtt--ddoouubbllee  --ffnnoo--ccoommmmoonn  --ffppaacckk--ssttrruucctt
+           --ffzzeerrooss  --ffnnoo--sseeccoonndd--uunnddeerrssccoorree --ffeemmuullaattee--ccoommpplleexx --ffaalliiaass--cchheecckk
+           --ffaarrgguummeenntt--aalliiaass --ffaarrgguummeenntt--nnooaalliiaass  --ffnnoo--aarrgguummeenntt--nnooaalliiaass--gglloobbaall
+           --ffnnoo--gglloobbaallss  --ffffllaatttteenn--aarrrraayyss --ffbboouunnddss--cchheecckk  --ffffoorr--
+           ttrraann--bboouunnddss--cchheecckk
+
+       Compilation can involve as many as four stages: preprocessing, code
+       generation (often what is really meant by the term ‘‘compilation’’),
+       assembly, and linking, always in that order.  The first three stages
+       apply to an individual source file, and end by producing an object
+       file; linking combines all the object files (those newly compiled, and
+       those specified as input) into an executable file.
+
+       For any given input file, the file name suffix determines what kind of
+       program is contained in the file---that is, the language in which the
+       program is written is generally indicated by the suffix.  Suffixes spe-
+       cific to GNU Fortran are listed below.
+
+       _f_i_l_e..ff
+       _f_i_l_e..ffoorr
+       _f_i_l_e..FFOORR
+           Fortran source code that should not be preprocessed.
+
+           Such source code cannot contain any preprocessor directives, such
+           as "#include", "#define", "#if", and so on.
+
+           You can force ..ff files to be preprocessed by ccpppp by using --xx
+           ff7777--ccpppp--iinnppuutt.
+
+       _f_i_l_e..FF
+       _f_i_l_e..ffpppp
+       _f_i_l_e..FFPPPP
+           Fortran source code that must be preprocessed (by the C preproces-
+           sor ccpppp, which is part of GCC).
+
+           Note that preprocessing is not extended to the contents of files
+           included by the "INCLUDE" directive---the "#include" preprocessor
+           directive must be used instead.
+
+       _f_i_l_e..rr
+           Ratfor source code, which must be preprocessed by the rraattffoorr com-
+           mand, which is available separately (as it is not yet part of the
+           GNU Fortran distribution).  A public domain version in C is at
+           <hhttttpp::////sseeppwwwwww..ssttaannffoorrdd..eedduu//sseepp//pprrooff//rraattffoorr..sshhaarr..22>.
+
+       UNIX users typically use the _f_i_l_e_._f and _f_i_l_e_._F nomenclature.  Users of
+       other operating systems, especially those that cannot distinguish
+       upper-case letters from lower-case letters in their file names, typi-
+       cally use the _f_i_l_e_._f_o_r and _f_i_l_e_._f_p_p nomenclature.
+
+       Use of the preprocessor ccpppp allows use of C-like constructs such as
+       "#define" and "#include", but can lead to unexpected, even mistaken,
+       results due to Fortran’s source file format.  It is recommended that
+       use of the C preprocessor be limited to "#include" and, in conjunction
+       with "#define", only "#if" and related directives, thus avoiding in-
+       line macro expansion entirely.  This recommendation applies especially
+       when using the traditional fixed source form.  With free source form,
+       fewer unexpected transformations are likely to happen, but use of con-
+       structs such as Hollerith and character constants can nevertheless
+       present problems, especially when these are continued across multiple
+       source lines.  These problems result, primarily, from differences
+       between the way such constants are interpreted by the C preprocessor
+       and by a Fortran compiler.
+
+       Another example of a problem that results from using the C preprocessor
+       is that a Fortran comment line that happens to contain any characters
+       ‘‘interesting’’ to the C preprocessor, such as a backslash at the end
+       of the line, is not recognized by the preprocessor as a comment line,
+       so instead of being passed through ‘‘raw’’, the line is edited accord-
+       ing to the rules for the preprocessor.  For example, the backslash at
+       the end of the line is removed, along with the subsequent newline,
+       resulting in the next line being effectively commented out---unfortu-
+       nate if that line is a non-comment line of important code!
+
+       _N_o_t_e_: The --ttrraaddiittiioonnaall and --uunnddeeff flags are supplied to ccpppp by default,
+       to help avoid unpleasant surprises.
+
+       This means that ANSI C preprocessor features (such as the ## operator)
+       aren’t available, and only variables in the C reserved namespace (gen-
+       erally, names with a leading underscore) are liable to substitution by
+       C predefines.  Thus, if you want to do system-specific tests, use, for
+       example, ##iiffddeeff ____lliinnuuxx____ rather than ##iiffddeeff lliinnuuxx.  Use the --vv option
+       to see exactly how the preprocessor is invoked.
+
+       Unfortunately, the --ttrraaddiittiioonnaall flag will not avoid an error from any-
+       thing that ccpppp sees as an unterminated C comment, such as:
+
+               C Some Fortran compilers accept /* as starting
+               C an inline comment.
+
+       The following options that affect overall processing are recognized by
+       the gg7777 and ggcccc commands in a GNU Fortran installation:
+
+       --ffvveerrssiioonn
+           Ensure that the gg7777 version of the compiler phase is reported, if
+           run, and, starting in "egcs" version 1.1, that internal consistency
+           checks in the _f_7_7_1 program are run.
+
+           This option is supplied automatically when --vv or ----vveerrbboossee is spec-
+           ified as a command-line option for gg7777 or ggcccc and when the result-
+           ing commands compile Fortran source files.
+
+           In GCC 3.1, this is changed back to the behavior ggcccc displays for
+           ..cc files.
+
+       --ffsseett--gg7777--ddeeffaauullttss
+           _V_e_r_s_i_o_n _i_n_f_o_: This option was obsolete as of "egcs" version 1.1.
+           The effect is instead achieved by the "lang_init_options" routine
+           in _g_c_c_/_g_c_c_/_f_/_c_o_m_._c.
+
+           Set up whatever ggcccc options are to apply to Fortran compilations,
+           and avoid running internal consistency checks that might take some
+           time.
+
+           This option is supplied automatically when compiling Fortran code
+           via the gg7777 or ggcccc command.  The description of this option is pro-
+           vided so that users seeing it in the output of, say, gg7777 --vv under-
+           stand why it is there.
+
+           Also, developers who run "f771" directly might want to specify it
+           by hand to get the same defaults as they would running "f771" via
+           gg7777 or ggcccc However, such developers should, after linking a new
+           "f771" executable, invoke it without this option once, e.g. via
+           "./f771 -quiet < /dev/null", to ensure that they have not intro-
+           duced any internal inconsistencies (such as in the table of intrin-
+           sics) before proceeding---gg7777 will crash with a diagnostic if it
+           detects an inconsistency.
+
+       --ffnnoo--ssiilleenntt
+           Print (to "stderr") the names of the program units as they are com-
+           piled, in a form similar to that used by popular UNIX ff7777 implemen-
+           tations and ff22cc
+
+       SShhoorrtthhaanndd OOppttiioonnss
+
+       The following options serve as ‘‘shorthand’’ for other options accepted
+       by the compiler:
+
+       --ffuuggllyy
+           _N_o_t_e_: This option is no longer supported.  The information, below,
+           is provided to aid in the conversion of old scripts.
+
+           Specify that certain ‘‘ugly’’ constructs are to be quietly
+           accepted.  Same as:
+
+                   -fugly-args -fugly-assign -fugly-assumed
+                   -fugly-comma -fugly-complex -fugly-init
+                   -fugly-logint
+
+           These constructs are considered inappropriate to use in new or
+           well-maintained portable Fortran code, but widely used in old code.
+
+       --ffnnoo--uuggllyy
+           Specify that all ‘‘ugly’’ constructs are to be noisily rejected.
+           Same as:
+
+                   -fno-ugly-args -fno-ugly-assign -fno-ugly-assumed
+                   -fno-ugly-comma -fno-ugly-complex -fno-ugly-init
+                   -fno-ugly-logint
+
+       --ffff6666
+           Specify that the program is written in idiomatic FORTRAN 66.  Same
+           as --ffoonneettrriipp --ffuuggllyy--aassssuummeedd.
+
+           The --ffnnoo--ff6666 option is the inverse of --ffff6666.  As such, it is the
+           same as --ffnnoo--oonneettrriipp --ffnnoo--uuggllyy--aassssuummeedd.
+
+           The meaning of this option is likely to be refined as future ver-
+           sions of gg7777 provide more compatibility with other existing and
+           obsolete Fortran implementations.
+
+       --ffff7777
+           Specify that the program is written in idiomatic UNIX FORTRAN 77
+           and/or the dialect accepted by the ff22cc product.  Same as --ffbbaacckk--
+           ssllaasshh --ffnnoo--ttyyppeelleessss--bboozz.
+
+           The meaning of this option is likely to be refined as future ver-
+           sions of gg7777 provide more compatibility with other existing and
+           obsolete Fortran implementations.
+
+       --ffnnoo--ff7777
+           The --ffnnoo--ff7777 option is _n_o_t the inverse of --ffff7777.  It specifies that
+           the program is not written in idiomatic UNIX FORTRAN 77 or ff22cc but
+           in a more widely portable dialect.  --ffnnoo--ff7777 is the same as
+           --ffnnoo--bbaacckkssllaasshh.
+
+           The meaning of this option is likely to be refined as future ver-
+           sions of gg7777 provide more compatibility with other existing and
+           obsolete Fortran implementations.
+
+       OOppttiioonnss CCoonnttrroolllliinngg FFoorrttrraann DDiiaalleecctt
+
+       The following options control the dialect of Fortran that the compiler
+       accepts:
+
+       --ffffrreeee--ffoorrmm
+       --ffnnoo--ffiixxeedd--ffoorrmm
+           Specify that the source file is written in free form (introduced in
+           Fortran 90) instead of the more-traditional fixed form.
+
+       --ffff9900
+           Allow certain Fortran-90 constructs.
+
+           This option controls whether certain Fortran 90 constructs are rec-
+           ognized.  (Other Fortran 90 constructs might or might not be recog-
+           nized depending on other options such as --ffvvxxtt, --ffff9900--iinnttrriinn--
+           ssiiccss--eennaabbllee, and the current level of support for Fortran 90.)
+
+       --ffvvxxtt
+           Specify the treatment of certain constructs that have different
+           meanings depending on whether the code is written in GNU Fortran
+           (based on FORTRAN 77 and akin to Fortran 90) or VXT Fortran (more
+           like VAX FORTRAN).
+
+           The default is --ffnnoo--vvxxtt.  --ffvvxxtt specifies that the VXT Fortran
+           interpretations for those constructs are to be chosen.
+
+       --ffddoollllaarr--ookk
+           Allow $$ as a valid character in a symbol name.
+
+       --ffnnoo--bbaacckkssllaasshh
+           Specify that \\ is not to be specially interpreted in character and
+           Hollerith constants a la C and many UNIX Fortran compilers.
+
+           For example, with --ffbbaacckkssllaasshh in effect, AA\\nnBB specifies three char-
+           acters, with the second one being newline.  With --ffnnoo--bbaacckkssllaasshh, it
+           specifies four characters, AA, \\, nn, and BB.
+
+           Note that gg7777 implements a fairly general form of backslash pro-
+           cessing that is incompatible with the narrower forms supported by
+           some other compilers.  For example, ’’AA\\000033BB’’ is a three-character
+           string in gg7777 whereas other compilers that support backslash might
+           not support the three-octal-digit form, and thus treat that string
+           as longer than three characters.
+
+       --ffnnoo--uuggllyy--aarrggss
+           Disallow passing Hollerith and typeless constants as actual argu-
+           ments (for example, CCAALLLL FFOOOO((44HHAABBCCDD))).
+
+       --ffuuggllyy--aassssiiggnn
+           Use the same storage for a given variable regardless of whether it
+           is used to hold an assigned-statement label (as in AASSSSIIGGNN 1100 TTOO II)
+           or used to hold numeric data (as in II == 33).
+
+       --ffuuggllyy--aassssuummeedd
+           Assume any dummy array with a final dimension specified as 11 is
+           really an assumed-size array, as if ** had been specified for the
+           final dimension instead of 11.
+
+           For example, DDIIMMEENNSSIIOONN XX((11)) is treated as if it had read DDIIMMEENNSSIIOONN
+           XX((**)).
+
+       --ffuuggllyy--ccoommmmaa
+           In an external-procedure invocation, treat a trailing comma in the
+           argument list as specification of a trailing null argument, and
+           treat an empty argument list as specification of a single null
+           argument.
+
+           For example, CCAALLLL FFOOOO((,,)) is treated as CCAALLLL FFOOOO((%%_VV_AA_LL((00)),, %%_VV_AA_LL((00)))).
+           That is, _t_w_o null arguments are specified by the procedure call
+           when --ffuuggllyy--ccoommmmaa is in force.  And FF == _FF_UU_NN_CC_((_)) is treated as FF ==
+           FFUUNNCC((%%_VV_AA_LL((00)))).
+
+           The default behavior, --ffnnoo--uuggllyy--ccoommmmaa, is to ignore a single trail-
+           ing comma in an argument list.  So, by default, CCAALLLL FFOOOO((XX,,)) is
+           treated exactly the same as CCAALLLL FFOOOO((XX)).
+
+       --ffuuggllyy--ccoommpplleexx
+           Do not complain about RREEAALL((_e_x_p_r)) or AAIIMMAAGG((_e_x_p_r)) when _e_x_p_r is a
+           "COMPLEX" type other than "COMPLEX(KIND=1)"---usually this is used
+           to permit "COMPLEX(KIND=2)" ("DOUBLE COMPLEX") operands.
+
+           The --ffff9900 option controls the interpretation of this construct.
+
+       --ffnnoo--uuggllyy--iinniitt
+           Disallow use of Hollerith and typeless constants as initial values
+           (in "PARAMETER" and "DATA" statements), and use of character con-
+           stants to initialize numeric types and vice versa.
+
+           For example, DDAATTAA II//’’FF’’//,, CCHHRRVVAARR//6655//,, JJ//44HHAABBCCDD// is disallowed by
+           --ffnnoo--uuggllyy--iinniitt.
+
+       --ffuuggllyy--llooggiinntt
+           Treat "INTEGER" and "LOGICAL" variables and expressions as poten-
+           tial stand-ins for each other.
+
+           For example, automatic conversion between "INTEGER" and "LOGICAL"
+           is enabled, for many contexts, via this option.
+
+       --ffoonneettrriipp
+           Executable iterative "DO" loops are to be executed at least once
+           each time they are reached.
+
+           ANSI FORTRAN 77 and more recent versions of the Fortran standard
+           specify that the body of an iterative "DO" loop is not executed if
+           the number of iterations calculated from the parameters of the loop
+           is less than 1.  (For example, DDOO 1100 II == 11,, 00.)  Such a loop is
+           called a _z_e_r_o_-_t_r_i_p _l_o_o_p.
+
+           Prior to ANSI FORTRAN 77, many compilers implemented "DO" loops
+           such that the body of a loop would be executed at least once, even
+           if the iteration count was zero.  Fortran code written assuming
+           this behavior is said to require _o_n_e_-_t_r_i_p _l_o_o_p_s.  For example, some
+           code written to the FORTRAN 66 standard expects this behavior from
+           its "DO" loops, although that standard did not specify this behav-
+           ior.
+
+           The --ffoonneettrriipp option specifies that the source file(s) being
+           compiled require one-trip loops.
+
+           This option affects only those loops specified by the (iterative)
+           "DO" statement and by implied-"DO" lists in I/O statements.  Loops
+           specified by implied-"DO" lists in "DATA" and specification
+           (non-executable) statements are not affected.
+
+       --ffttyyppeelleessss--bboozz
+           Specifies that prefix-radix non-decimal constants, such as ZZ’’AABBCCDD’’,
+           are typeless instead of "INTEGER(KIND=1)".
+
+           You can test for yourself whether a particular compiler treats the
+           prefix form as "INTEGER(KIND=1)" or typeless by running the follow-
+           ing program:
+
+                   EQUIVALENCE (I, R)
+                   R = Z’ABCD1234’
+                   J = Z’ABCD1234’
+                   IF (J .EQ. I) PRINT *, ’Prefix form is TYPELESS’
+                   IF (J .NE. I) PRINT *, ’Prefix form is INTEGER’
+                   END
+
+           Reports indicate that many compilers process this form as "INTE-
+           GER(KIND=1)", though a few as typeless, and at least one based on a
+           command-line option specifying some kind of compatibility.
+
+       --ffiinnttrriinn--ccaassee--iinniittccaapp
+       --ffiinnttrriinn--ccaassee--uuppppeerr
+       --ffiinnttrriinn--ccaassee--lloowweerr
+       --ffiinnttrriinn--ccaassee--aannyy
+           Specify expected case for intrinsic names.  --ffiinnttrriinn--ccaassee--lloowweerr is
+           the default.
+
+       --ffmmaattcchh--ccaassee--iinniittccaapp
+       --ffmmaattcchh--ccaassee--uuppppeerr
+       --ffmmaattcchh--ccaassee--lloowweerr
+       --ffmmaattcchh--ccaassee--aannyy
+           Specify expected case for keywords.  --ffmmaattcchh--ccaassee--lloowweerr is the
+           default.
+
+       --ffssoouurrccee--ccaassee--uuppppeerr
+       --ffssoouurrccee--ccaassee--lloowweerr
+       --ffssoouurrccee--ccaassee--pprreesseerrvvee
+           Specify whether source text other than character and Hollerith con-
+           stants is to be translated to uppercase, to lowercase, or preserved
+           as is.  --ffssoouurrccee--ccaassee--lloowweerr is the default.
+
+       --ffssyymmbbooll--ccaassee--iinniittccaapp
+       --ffssyymmbbooll--ccaassee--uuppppeerr
+       --ffssyymmbbooll--ccaassee--lloowweerr
+       --ffssyymmbbooll--ccaassee--aannyy
+           Specify valid cases for user-defined symbol names.  --ffssyymm--
+           bbooll--ccaassee--aannyy is the default.
+
+       --ffccaassee--ssttrriicctt--uuppppeerr
+           Same as --ffiinnttrriinn--ccaassee--uuppppeerr --ffmmaattcchh--ccaassee--uuppppeerr --ffssoouurrccee--ccaassee--pprree--
+           sseerrvvee --ffssyymmbbooll--ccaassee--uuppppeerr.  (Requires all pertinent source to be in
+           uppercase.)
+
+       --ffccaassee--ssttrriicctt--lloowweerr
+           Same as --ffiinnttrriinn--ccaassee--lloowweerr --ffmmaattcchh--ccaassee--lloowweerr --ffssoouurrccee--ccaassee--pprree--
+           sseerrvvee --ffssyymmbbooll--ccaassee--lloowweerr.  (Requires all pertinent source to be in
+           lowercase.)
+
+       --ffccaassee--iinniittccaapp
+           Same as --ffiinnttrriinn--ccaassee--iinniittccaapp --ffmmaattcchh--ccaassee--iinniittccaapp
+           --ffssoouurrccee--ccaassee--pprreesseerrvvee --ffssyymmbbooll--ccaassee--iinniittccaapp.  (Requires all
+           pertinent source to be in initial capitals, as in PPrriinntt
+           **,,SSqqRRtt((VVaalluuee)).)
+
+       --ffccaassee--uuppppeerr
+           Same as --ffiinnttrriinn--ccaassee--aannyy --ffmmaattcchh--ccaassee--aannyy --ffssoouurrccee--ccaassee--uuppppeerr
+           --ffssyymmbbooll--ccaassee--aannyy.  (Maps all pertinent source to uppercase.)
+
+       --ffccaassee--lloowweerr
+           Same as --ffiinnttrriinn--ccaassee--aannyy --ffmmaattcchh--ccaassee--aannyy --ffssoouurrccee--ccaassee--lloowweerr
+           --ffssyymmbbooll--ccaassee--aannyy.  (Maps all pertinent source to lowercase.)
+
+       --ffccaassee--pprreesseerrvvee
+           Same as --ffiinnttrriinn--ccaassee--aannyy --ffmmaattcchh--ccaassee--aannyy --ffssoouurrccee--ccaassee--pprreesseerrvvee
+           --ffssyymmbbooll--ccaassee--aannyy.  (Preserves all case in user-defined symbols,
+           while allowing any-case matching of intrinsics and keywords.  For
+           example, ccaallll FFoooo((ii,,II)) would pass two _d_i_f_f_e_r_e_n_t variables named ii
+           and II to a procedure named FFoooo.)
+
+       --ffbbaadduu7777--iinnttrriinnssiiccss--ddeelleettee
+       --ffbbaadduu7777--iinnttrriinnssiiccss--hhiiddee
+       --ffbbaadduu7777--iinnttrriinnssiiccss--ddiissaabbllee
+       --ffbbaadduu7777--iinnttrriinnssiiccss--eennaabbllee
+           Specify status of UNIX intrinsics having inappropriate forms.
+           --ffbbaadduu7777--iinnttrriinnssiiccss--eennaabbllee is the default.
+
+       --ffff22cc--iinnttrriinnssiiccss--ddeelleettee
+       --ffff22cc--iinnttrriinnssiiccss--hhiiddee
+       --ffff22cc--iinnttrriinnssiiccss--ddiissaabbllee
+       --ffff22cc--iinnttrriinnssiiccss--eennaabbllee
+           Specify status of f2c-specific intrinsics.  --ffff22cc--iinnttrriinnssiiccss--eennaabbllee
+           is the default.
+
+       --ffff9900--iinnttrriinnssiiccss--ddeelleettee
+       --ffff9900--iinnttrriinnssiiccss--hhiiddee
+       --ffff9900--iinnttrriinnssiiccss--ddiissaabbllee
+       --ffff9900--iinnttrriinnssiiccss--eennaabbllee
+           Specify status of F90-specific intrinsics.  --ffff9900--iinnttrriinnssiiccss--eennaabbllee
+           is the default.
+
+       --ffggnnuu--iinnttrriinnssiiccss--ddeelleettee
+       --ffggnnuu--iinnttrriinnssiiccss--hhiiddee
+       --ffggnnuu--iinnttrriinnssiiccss--ddiissaabbllee
+       --ffggnnuu--iinnttrriinnssiiccss--eennaabbllee
+           Specify status of Digital’s COMPLEX-related intrinsics.
+           --ffggnnuu--iinnttrriinnssiiccss--eennaabbllee is the default.
+
+       --ffmmiill--iinnttrriinnssiiccss--ddeelleettee
+       --ffmmiill--iinnttrriinnssiiccss--hhiiddee
+       --ffmmiill--iinnttrriinnssiiccss--ddiissaabbllee
+       --ffmmiill--iinnttrriinnssiiccss--eennaabbllee
+           Specify status of MIL-STD-1753-specific intrinsics.  --ffmmiill--iinnttrriinn--
+           ssiiccss--eennaabbllee is the default.
+
+       --ffuunniixx--iinnttrriinnssiiccss--ddeelleettee
+       --ffuunniixx--iinnttrriinnssiiccss--hhiiddee
+       --ffuunniixx--iinnttrriinnssiiccss--ddiissaabbllee
+       --ffuunniixx--iinnttrriinnssiiccss--eennaabbllee
+           Specify status of UNIX intrinsics.  --ffuunniixx--iinnttrriinnssiiccss--eennaabbllee is the
+           default.
+
+       --ffvvxxtt--iinnttrriinnssiiccss--ddeelleettee
+       --ffvvxxtt--iinnttrriinnssiiccss--hhiiddee
+       --ffvvxxtt--iinnttrriinnssiiccss--ddiissaabbllee
+       --ffvvxxtt--iinnttrriinnssiiccss--eennaabbllee
+           Specify status of VXT intrinsics.  --ffvvxxtt--iinnttrriinnssiiccss--eennaabbllee is the
+           default.
+
+       --ffffiixxeedd--lliinnee--lleennggtthh--_n
+           Set column after which characters are ignored in typical fixed-form
+           lines in the source file, and through which spaces are assumed (as
+           if padded to that length) after the ends of short fixed-form lines.
+
+           Popular values for _n include 72 (the standard and the default), 80
+           (card image), and 132 (corresponds to ‘‘extended-source’’ options
+           in some popular compilers).  _n may be nnoonnee, meaning that the entire
+           line is meaningful and that continued character constants never
+           have implicit spaces appended to them to fill out the line.
+           --ffffiixxeedd--lliinnee--lleennggtthh--00 means the same thing as
+           --ffffiixxeedd--lliinnee--lleennggtthh--nnoonnee.
+
+       OOppttiioonnss ttoo RReeqquueesstt oorr SSuupppprreessss WWaarrnniinnggss
+
+       Warnings are diagnostic messages that report constructions which are
+       not inherently erroneous but which are risky or suggest there might
+       have been an error.
+
+       You can request many specific warnings with options beginning --WW, for
+       example --WWiimmpplliicciitt to request warnings on implicit declarations.  Each
+       of these specific warning options also has a negative form beginning
+       --WWnnoo-- to turn off warnings; for example, --WWnnoo--iimmpplliicciitt.  This manual
+       lists only one of the two forms, whichever is not the default.
+
+       These options control the amount and kinds of warnings produced by GNU
+       Fortran:
+
+       --ffssyynnttaaxx--oonnllyy
+           Check the code for syntax errors, but don’t do anything beyond
+           that.
+
+       --ppeeddaannttiicc
+           Issue warnings for uses of extensions to ANSI FORTRAN 77.  --ppeeddaann--
+           ttiicc also applies to C-language constructs where they occur in GNU
+           Fortran source files, such as use of \\ee in a character constant
+           within a directive like ##iinncclluuddee.
+
+           Valid ANSI FORTRAN 77 programs should compile properly with or
+           without this option.  However, without this option, certain GNU
+           extensions and traditional Fortran features are supported as well.
+           With this option, many of them are rejected.
+
+           Some users try to use --ppeeddaannttiicc to check programs for strict ANSI
+           conformance.  They soon find that it does not do quite what they
+           want---it finds some non-ANSI practices, but not all.  However,
+           improvements to gg7777 in this area are welcome.
+
+       --ppeeddaannttiicc--eerrrroorrss
+           Like --ppeeddaannttiicc, except that errors are produced rather than warn-
+           ings.
+
+       --ffppeeddaannttiicc
+           Like --ppeeddaannttiicc, but applies only to Fortran constructs.
+
+       --ww  Inhibit all warning messages.
+
+       --WWnnoo--gglloobbaallss
+           Inhibit warnings about use of a name as both a global name (a sub-
+           routine, function, or block data program unit, or a common block)
+           and implicitly as the name of an intrinsic in a source file.
+
+           Also inhibit warnings about inconsistent invocations and/or defini-
+           tions of global procedures (function and subroutines).  Such incon-
+           sistencies include different numbers of arguments and different
+           types of arguments.
+
+       --WWiimmpplliicciitt
+           Warn whenever a variable, array, or function is implicitly
+           declared.  Has an effect similar to using the "IMPLICIT NONE"
+           statement in every program unit.  (Some Fortran compilers provide
+           this feature by an option named --uu or //WWAARRNNIINNGGSS==DDEECCLLAARRAATTIIOONNSS.)
+
+       --WWuunnuusseedd
+           Warn whenever a variable is unused aside from its declaration.
+
+       --WWuunniinniittiiaalliizzeedd
+           Warn whenever an automatic variable is used without first being
+           initialized.
+
+           These warnings are possible only in optimizing compilation, because
+           they require data-flow information that is computed only when opti-
+           mizing.  If you don’t specify --OO, you simply won’t get these warn-
+           ings.
+
+           These warnings occur only for variables that are candidates for
+           register allocation.  Therefore, they do not occur for a variable
+           whose address is taken, or whose size is other than 1, 2, 4 or 8
+           bytes.  Also, they do not occur for arrays, even when they are in
+           registers.
+
+           Note that there might be no warning about a variable that is used
+           only to compute a value that itself is never used, because such
+           computations may be deleted by data-flow analysis before the warn-
+           ings are printed.
+
+           These warnings are made optional because GNU Fortran is not smart
+           enough to see all the reasons why the code might be correct despite
+           appearing to have an error.  Here is one example of how this can
+           happen:
+
+                   SUBROUTINE DISPAT(J)
+                   IF (J.EQ.1) I=1
+                   IF (J.EQ.2) I=4
+                   IF (J.EQ.3) I=5
+                   CALL FOO(I)
+                   END
+
+           If the value of "J" is always 1, 2 or 3, then "I" is always ini-
+           tialized, but GNU Fortran doesn’t know this.  Here is another com-
+           mon case:
+
+                   SUBROUTINE MAYBE(FLAG)
+                   LOGICAL FLAG
+                   IF (FLAG) VALUE = 9.4
+                   ...
+                   IF (FLAG) PRINT *, VALUE
+                   END
+
+           This has no bug because "VALUE" is used only if it is set.
+
+       --WWaallll
+           The --WWuunnuusseedd and --WWuunniinniittiiaalliizzeedd options combined.  These are all
+           the options which pertain to usage that we recommend avoiding and
+           that we believe is easy to avoid.  (As more warnings are added to
+           gg7777 some might be added to the list enabled by --WWaallll.)
+
+       The remaining --WW...... options are not implied by --WWaallll because they warn
+       about constructions that we consider reasonable to use, on occasion, in
+       clean programs.
+
+       --WWssuurrpprriissiinngg
+           Warn about ‘‘suspicious’’ constructs that are interpreted by the
+           compiler in a way that might well be surprising to someone reading
+           the code.  These differences can result in subtle, compiler-depen-
+           dent (even machine-dependent) behavioral differences.  The con-
+           structs warned about include:
+
+           *   Expressions having two arithmetic operators in a row, such as
+               XX**--YY.  Such a construct is nonstandard, and can produce unex-
+               pected results in more complicated situations such as XX****--YY**ZZ.
+               gg7777 along with many other compilers, interprets this example
+               differently than many programmers, and a few other compilers.
+               Specifically, gg7777 interprets XX****--YY**ZZ as ((XX****((--YY))))**ZZ, while oth-
+               ers might think it should be interpreted as XX****((--((YY**ZZ)))).
+
+               A revealing example is the constant expression 22****--22**11.., which
+               gg7777 evaluates to .25, while others might evaluate it to 0., the
+               difference resulting from the way precedence affects type pro-
+               motion.
+
+               (The --ffppeeddaannttiicc option also warns about expressions having two
+               arithmetic operators in a row.)
+
+           *   Expressions with a unary minus followed by an operand and then
+               a binary operator other than plus or minus.  For example, --22****22
+               produces a warning, because the precedence is --((22****22)), yielding
+               -4, not ((--22))****22, which yields 4, and which might represent what
+               a programmer expects.
+
+               An example of an expression producing different results in a
+               surprising way is --II**SS, where _I holds the value --22114477448833664488 and
+               _S holds 00..55.  On many systems, negating _I results in the same
+               value, not a positive number, because it is already the lower
+               bound of what an "INTEGER(KIND=1)" variable can hold.  So, the
+               expression evaluates to a positive number, while the
+               ‘‘expected’’ interpretation, ((--II))**SS, would evaluate to a nega-
+               tive number.
+
+               Even cases such as --II**JJ produce warnings, even though, in most
+               configurations and situations, there is no computational dif-
+               ference between the results of the two interpretations---the
+               purpose of this warning is to warn about differing interpreta-
+               tions and encourage a better style of coding, not to identify
+               only those places where bugs might exist in the user’s code.
+
+           *   "DO" loops with "DO" variables that are not of integral
+               type---that is, using "REAL" variables as loop control vari-
+               ables.  Although such loops can be written to work in the
+               ‘‘obvious’’ way, the way gg7777 is required by the Fortran stan-
+               dard to interpret such code is likely to be quite different
+               from the way many programmers expect.  (This is true of all
+               "DO" loops, but the differences are pronounced for non-integral
+               loop control variables.)
+
+       --WWeerrrroorr
+           Make all warnings into errors.
+
+       --WW  Turns on ‘‘extra warnings’’ and, if optimization is specified via
+           --OO, the --WWuunniinniittiiaalliizzeedd option.  (This might change in future ver-
+           sions of gg7777
+
+           ‘‘Extra warnings’’ are issued for:
+
+           *   Unused parameters to a procedure (when --WWuunnuusseedd also is speci-
+               fied).
+
+           *   Overflows involving floating-point constants (not available for
+               certain configurations).
+
+       Some of these have no effect when compiling programs written in
+       Fortran:
+
+       --WWccoommmmeenntt
+       --WWffoorrmmaatt
+       --WWppaarreenntthheesseess
+       --WWsswwiittcchh
+       --WWsswwiittcchh--ddeeffaauulltt
+       --WWsswwiittcchh--eennuumm
+       --WWttrraaddiittiioonnaall
+       --WWsshhaaddooww
+       --WWiidd--ccllaasshh--_l_e_n
+       --WWllaarrggeerr--tthhaann--_l_e_n
+       --WWccoonnvveerrssiioonn
+       --WWaaggggrreeggaattee--rreettuurrnn
+       --WWrreedduunnddaanntt--ddeeccllss
+           These options all could have some relevant meaning for GNU Fortran
+           programs, but are not yet supported.
+
+       OOppttiioonnss ffoorr DDeebbuuggggiinngg YYoouurr PPrrooggrraamm oorr GGNNUU FFoorrttrraann
+
+       GNU Fortran has various special options that are used for debugging
+       either your program or gg7777
+
+       --gg  Produce debugging information in the operating system’s native for-
+           mat (stabs, COFF, XCOFF, or DWARF).  GDB can work with this debug-
+           ging information.
+
+           A sample debugging session looks like this (note the use of the
+           breakpoint):
+
+                   $ cat gdb.f
+                         PROGRAM PROG
+                         DIMENSION A(10)
+                         DATA A /1.,2.,3.,4.,5.,6.,7.,8.,9.,10./
+                         A(5) = 4.
+                         PRINT*,A
+                         END
+                   $ g77 -g -O gdb.f
+                   $ gdb a.out
+                   ...
+                   (gdb) break MAIN__
+                   Breakpoint 1 at 0x8048e96: file gdb.f, line 4.
+                   (gdb) run
+                   Starting program: /home/toon/g77-bugs/./a.out
+                   Breakpoint 1, MAIN__ () at gdb.f:4
+                   4             A(5) = 4.
+                   Current language:  auto; currently fortran
+                   (gdb) print a(5)
+                   $1 = 5
+                   (gdb) step
+                   5             PRINT*,A
+                   (gdb) print a(5)
+                   $2 = 4
+                   ...
+
+           One could also add the setting of the breakpoint and the first run
+           command to the file _._g_d_b_i_n_i_t in the current directory, to simplify
+           the debugging session.
+
+       OOppttiioonnss TThhaatt CCoonnttrrooll OOppttiimmiizzaattiioonn
+
+       Most Fortran users will want to use no optimization when developing and
+       testing programs, and use --OO or --OO22 when compiling programs for late-
+       cycle testing and for production use.  However, note that certain diag-
+       nostics---such as for uninitialized variables---depend on the flow
+       analysis done by --OO, i.e. you must use --OO or --OO22 to get such diagnos-
+       tics.
+
+       The following flags have particular applicability when compiling For-
+       tran programs:
+
+       --mmaalliiggnn--ddoouubbllee
+           (Intel x86 architecture only.)
+
+           Noticeably improves performance of gg7777 programs making heavy use of
+           "REAL(KIND=2)" ("DOUBLE PRECISION") data on some systems.  In par-
+           ticular, systems using Pentium, Pentium Pro, 586, and 686 implemen-
+           tations of the i386 architecture execute programs faster when
+           "REAL(KIND=2)" ("DOUBLE PRECISION") data are aligned on 64-bit
+           boundaries in memory.
+
+           This option can, at least, make benchmark results more consistent
+           across various system configurations, versions of the program, and
+           data sets.
+
+           _N_o_t_e_: The warning in the ggcccc documentation about this option does
+           not apply, generally speaking, to Fortran code compiled by gg7777
+
+           _A_l_s_o _a_l_s_o _n_o_t_e_: The negative form of --mmaalliiggnn--ddoouubbllee is
+           --mmnnoo--aalliiggnn--ddoouubbllee, not --bbeenniiggnn--ddoouubbllee.
+
+       --ffffllooaatt--ssttoorree
+           Might help a Fortran program that depends on exact IEEE conformance
+           on some machines, but might slow down a program that doesn’t.
+
+           This option is effective when the floating-point unit is set to
+           work in IEEE 854 ‘extended precision’---as it typically is on x86
+           and m68k GNU systems---rather than IEEE 754 double precision.
+           --ffffllooaatt--ssttoorree tries to remove the extra precision by spilling data
+           from floating-point registers into memory and this typically
+           involves a big performance hit.  However, it doesn’t affect inter-
+           mediate results, so that it is only partially effective.  ‘Excess
+           precision’ is avoided in code like:
+
+                   a = b + c
+                   d = a * e
+
+           but not in code like:
+
+                         d = (b + c) * e
+
+           For another, potentially better, way of controlling the precision,
+           see FFllooaattiinngg--ppooiinntt pprreecciissiioonn.
+
+       --ffffoorrccee--mmeemm
+       --ffffoorrccee--aaddddrr
+           Might improve optimization of loops.
+
+       --ffnnoo--iinnlliinnee
+           Don’t compile statement functions inline.  Might reduce the size of
+           a program unit---which might be at expense of some speed (though it
+           should compile faster).  Note that if you are not optimizing, no
+           functions can be expanded inline.
+
+       --ffffaasstt--mmaatthh
+           Might allow some programs designed to not be too dependent on IEEE
+           behavior for floating-point to run faster, or die trying.  Sets
+           --ffuunnssaaffee--mmaatthh--ooppttiimmiizzaattiioonnss, --ffffiinniittee--mmaatthh--oonnllyy, and --ffnnoo--ttrraapp--
+           ppiinngg--mmaatthh.
+
+       --ffuunnssaaffee--mmaatthh--ooppttiimmiizzaattiioonnss
+           Allow optimizations that may be give incorrect results for certain
+           IEEE inputs.
+
+       --ffffiinniittee--mmaatthh--oonnllyy
+           Allow optimizations for floating-point arithmetic that assume that
+           arguments and results are not NaNs or +-Infs.
+
+           This option should never be turned on by any --OO option since it can
+           result in incorrect output for programs which depend on an exact
+           implementation of IEEE or ISO rules/specifications.
+
+           The default is --ffnnoo--ffiinniittee--mmaatthh--oonnllyy.
+
+       --ffnnoo--ttrraappppiinngg--mmaatthh
+           Allow the compiler to assume that floating-point arithmetic will
+           not generate traps on any inputs.  This is useful, for example,
+           when running a program using IEEE "non-stop" floating-point arith-
+           metic.
+
+       --ffssttrreennggtthh--rreedduuccee
+           Might make some loops run faster.
+
+       --ffrreerruunn--ccssee--aafftteerr--lloooopp
+       --ffeexxppeennssiivvee--ooppttiimmiizzaattiioonnss
+       --ffddeellaayyeedd--bbrraanncchh
+       --ffsscchheedduullee--iinnssnnss
+       --ffsscchheedduullee--iinnssnnss22
+       --ffccaalllleerr--ssaavveess
+           Might improve performance on some code.
+
+       --ffuunnrroollll--llooooppss
+           Typically improves performance on code using iterative "DO" loops
+           by unrolling them and is probably generally appropriate for For-
+           tran, though it is not turned on at any optimization level.  Note
+           that outer loop unrolling isn’t done specifically; decisions about
+           whether to unroll a loop are made on the basis of its instruction
+           count.
+
+           Also, no ‘loop discovery’[1] is done, so only loops written with
+           "DO" benefit from loop optimizations, including---but not limited
+           to---unrolling.  Loops written with "IF" and "GOTO" are not cur-
+           rently recognized as such.  This option unrolls only iterative "DO"
+           loops, not "DO WHILE" loops.
+
+       --ffuunnrroollll--aallll--llooooppss
+           Probably improves performance on code using "DO WHILE" loops by
+           unrolling them in addition to iterative "DO" loops.  In the absence
+           of "DO WHILE", this option is equivalent to --ffuunnrroollll--llooooppss but pos-
+           sibly slower.
+
+       --ffnnoo--mmoovvee--aallll--mmoovvaabblleess
+       --ffnnoo--rreedduuccee--aallll--ggiivvss
+       --ffnnoo--rreerruunn--lloooopp--oopptt
+           In general, the optimizations enabled with these options will lead
+           to faster code being generated by GNU Fortran; hence they are
+           enabled by default when issuing the gg7777 command.
+
+           --ffmmoovvee--aallll--mmoovvaabblleess and --ffrreedduuccee--aallll--ggiivvss will enable loop opti-
+           mization to move all loop-invariant index computations in nested
+           loops over multi-rank array dummy arguments out of these loops.
+
+           --ffrreerruunn--lloooopp--oopptt will move offset calculations resulting from the
+           fact that Fortran arrays by default have a lower bound of 1 out of
+           the loops.
+
+           These three options are intended to be removed someday, once loop
+           optimization is sufficiently advanced to perform all those trans-
+           formations without help from these options.
+
+       OOppttiioonnss CCoonnttrroolllliinngg tthhee PPrreepprroocceessssoorr
+
+       These options control the C preprocessor, which is run on each C source
+       file before actual compilation.
+
+       Some of these options also affect how gg7777 processes the "INCLUDE"
+       directive.  Since this directive is processed even when preprocessing
+       is not requested, it is not described in this section.
+
+       However, the "INCLUDE" directive does not apply preprocessing to the
+       contents of the included file itself.
+
+       Therefore, any file that contains preprocessor directives (such as
+       "#include", "#define", and "#if") must be included via the "#include"
+       directive, not via the "INCLUDE" directive.  Therefore, any file con-
+       taining preprocessor directives, if included, is necessarily included
+       by a file that itself contains preprocessor directives.
+
+       OOppttiioonnss ffoorr DDiirreeccttoorryy SSeeaarrcchh
+
+       These options affect how the ccpppp preprocessor searches for files speci-
+       fied via the "#include" directive.  Therefore, when compiling Fortran
+       programs, they are meaningful when the preprocessor is used.
+
+       Some of these options also affect how gg7777 searches for files specified
+       via the "INCLUDE" directive, although files included by that directive
+       are not, themselves, preprocessed.  These options are:
+
+       --II--
+       --II_d_i_r
+           These affect interpretation of the "INCLUDE" directive (as well as
+           of the "#include" directive of the ccpppp preprocessor).
+
+           Note that --II_d_i_r must be specified _w_i_t_h_o_u_t any spaces between --II and
+           the directory name---that is, --IIffoooo//bbaarr is valid, but --II ffoooo//bbaarr is
+           rejected by the gg7777 compiler (though the preprocessor supports the
+           latter form).  Also note that the general behavior of --II and
+           "INCLUDE" is pretty much the same as of --II with "#include" in the
+           ccpppp preprocessor, with regard to looking for _h_e_a_d_e_r_._g_c_c files and
+           other such things.
+
+       OOppttiioonnss ffoorr CCooddee GGeenneerraattiioonn CCoonnvveennttiioonnss
+
+       These machine-independent options control the interface conventions
+       used in code generation.
+
+       Most of them have both positive and negative forms; the negative form
+       of --ffffoooo would be --ffnnoo--ffoooo.  In the table below, only one of the forms
+       is listed---the one which is not the default.  You can figure out the
+       other form by either removing nnoo-- or adding it.
+
+       --ffnnoo--aauuttoommaattiicc
+           Treat each program unit as if the "SAVE" statement was specified
+           for every local variable and array referenced in it.  Does not
+           affect common blocks.  (Some Fortran compilers provide this option
+           under the name --ssttaattiicc.)
+
+       --ffiinniitt--llooccaall--zzeerroo
+           Specify that variables and arrays that are local to a program unit
+           (not in a common block and not passed as an argument) are to be
+           initialized to binary zeros.
+
+           Since there is a run-time penalty for initialization of variables
+           that are not given the "SAVE" attribute, it might be a good idea to
+           also use --ffnnoo--aauuttoommaattiicc with --ffiinniitt--llooccaall--zzeerroo.
+
+       --ffnnoo--ff22cc
+           Do not generate code designed to be compatible with code generated
+           by ff22cc use the GNU calling conventions instead.
+
+           The ff22cc calling conventions require functions that return type
+           "REAL(KIND=1)" to actually return the C type "double", and func-
+           tions that return type "COMPLEX" to return the values via an extra
+           argument in the calling sequence that points to where to store the
+           return value.  Under the GNU calling conventions, such functions
+           simply return their results as they would in GNU C---"REAL(KIND=1)"
+           functions return the C type "float", and "COMPLEX" functions return
+           the GNU C type "complex" (or its "struct" equivalent).
+
+           This does not affect the generation of code that interfaces with
+           the "libg2c" library.
+
+           However, because the "libg2c" library uses ff22cc calling conventions,
+           gg7777 rejects attempts to pass intrinsics implemented by routines in
+           this library as actual arguments when --ffnnoo--ff22cc is used, to avoid
+           bugs when they are actually called by code expecting the GNU call-
+           ing conventions to work.
+
+           For example, IINNTTRRIINNSSIICC AABBSS;;CCAALLLL FFOOOO((AABBSS)) is rejected when --ffnnoo--ff22cc
+           is in force.  (Future versions of the gg7777 run-time library might
+           offer routines that provide GNU-callable versions of the routines
+           that implement the ff22cc intrinsics that may be passed as actual
+           arguments, so that valid programs need not be rejected when
+           --ffnnoo--ff22cc is used.)
+
+           CCaauuttiioonn:: If --ffnnoo--ff22cc is used when compiling any source file used in
+           a program, it must be used when compiling _a_l_l Fortran source files
+           used in that program.
+
+       --ffff22cc--lliibbrraarryy
+           Specify that use of "libg2c" (or the original "libf2c") is
+           required.  This is the default for the current version of gg7777
+
+           Currently it is not valid to specify --ffnnoo--ff22cc--lliibbrraarryy.  This option
+           is provided so users can specify it in shell scripts that build
+           programs and libraries that require the "libf2c" library, even when
+           being compiled by future versions of gg7777 that might otherwise
+           default to generating code for an incompatible library.
+
+       --ffnnoo--uunnddeerrssccoorriinngg
+           Do not transform names of entities specified in the Fortran source
+           file by appending underscores to them.
+
+           With --ffuunnddeerrssccoorriinngg in effect, gg7777 appends two underscores to names
+           with underscores and one underscore to external names with no
+           underscores.  (gg7777 also appends two underscores to internal names
+           with underscores to avoid naming collisions with external names.
+           The --ffnnoo--sseeccoonndd--uunnddeerrssccoorree option disables appending of the second
+           underscore in all cases.)
+
+           This is done to ensure compatibility with code produced by many
+           UNIX Fortran compilers, including ff22cc which perform the same trans-
+           formations.
+
+           Use of --ffnnoo--uunnddeerrssccoorriinngg is not recommended unless you are experi-
+           menting with issues such as integration of (GNU) Fortran into
+           existing system environments (vis-a-vis existing libraries, tools,
+           and so on).
+
+           For example, with --ffuunnddeerrssccoorriinngg, and assuming other defaults like
+           --ffccaassee--lloowweerr and that jj(()) and _mm_aa_xx____cc_oo_uu_nn_tt_((_)) are external functions
+           while mmyy__vvaarr and llvvaarr are local variables, a statement like
+
+                   I = J() + MAX_COUNT (MY_VAR, LVAR)
+
+           is implemented as something akin to:
+
+                   i = j_() + max_count__(&my_var__, &lvar);
+
+           With --ffnnoo--uunnddeerrssccoorriinngg, the same statement is implemented as:
+
+                   i = j() + max_count(&my_var, &lvar);
+
+           Use of --ffnnoo--uunnddeerrssccoorriinngg allows direct specification of user-
+           defined names while debugging and when interfacing gg7777 code with
+           other languages.
+
+           Note that just because the names match does _n_o_t mean that the
+           interface implemented by gg7777 for an external name matches the
+           interface implemented by some other language for that same name.
+           That is, getting code produced by gg7777 to link to code produced by
+           some other compiler using this or any other method can be only a
+           small part of the overall solution---getting the code generated by
+           both compilers to agree on issues other than naming can require
+           significant effort, and, unlike naming disagreements, linkers nor-
+           mally cannot detect disagreements in these other areas.
+
+           Also, note that with --ffnnoo--uunnddeerrssccoorriinngg, the lack of appended under-
+           scores introduces the very real possibility that a user-defined
+           external name will conflict with a name in a system library, which
+           could make finding unresolved-reference bugs quite difficult in
+           some cases---they might occur at program run time, and show up only
+           as buggy behavior at run time.
+
+           In future versions of gg7777 we hope to improve naming and linking
+           issues so that debugging always involves using the names as they
+           appear in the source, even if the names as seen by the linker are
+           mangled to prevent accidental linking between procedures with
+           incompatible interfaces.
+
+       --ffnnoo--sseeccoonndd--uunnddeerrssccoorree
+           Do not append a second underscore to names of entities specified in
+           the Fortran source file.
+
+           This option has no effect if --ffnnoo--uunnddeerrssccoorriinngg is in effect.
+
+           Otherwise, with this option, an external name such as MMAAXX__CCOOUUNNTT is
+           implemented as a reference to the link-time external symbol
+           mmaaxx__ccoouunntt__, instead of mmaaxx__ccoouunntt____.
+
+       --ffnnoo--iiddeenntt
+           Ignore the ##iiddeenntt directive.
+
+       --ffzzeerrooss
+           Treat initial values of zero as if they were any other value.
+
+           As of version 0.5.18, gg7777 normally treats "DATA" and other state-
+           ments that are used to specify initial values of zero for variables
+           and arrays as if no values were actually specified, in the sense
+           that no diagnostics regarding multiple initializations are pro-
+           duced.
+
+           This is done to speed up compiling of programs that initialize
+           large arrays to zeros.
+
+           Use --ffzzeerrooss to revert to the simpler, slower behavior that can
+           catch multiple initializations by keeping track of all initializa-
+           tions, zero or otherwise.
+
+           _C_a_u_t_i_o_n_: Future versions of gg7777 might disregard this option (and
+           its negative form, the default) or interpret it somewhat differ-
+           ently.  The interpretation changes will affect only non-standard
+           programs; standard-conforming programs should not be affected.
+
+       --ffeemmuullaattee--ccoommpplleexx
+           Implement "COMPLEX" arithmetic via emulation, instead of using the
+           facilities of the ggcccc back end that provide direct support of
+           "complex" arithmetic.
+
+           (ggcccc had some bugs in its back-end support for "complex" arith-
+           metic, due primarily to the support not being completed as of ver-
+           sion 2.8.1 and "egcs" 1.1.2.)
+
+           Use --ffeemmuullaattee--ccoommpplleexx if you suspect code-generation bugs, or expe-
+           rience compiler crashes, that might result from gg7777 using the "COM-
+           PLEX" support in the ggcccc back end.  If using that option fixes the
+           bugs or crashes you are seeing, that indicates a likely gg7777 bugs
+           (though, all compiler crashes are considered bugs), so, please
+           report it.  (Note that the known bugs, now believed fixed, produced
+           compiler crashes rather than causing the generation of incorrect
+           code.)
+
+           Use of this option should not affect how Fortran code compiled by
+           gg7777 works in terms of its interfaces to other code, e.g. that com-
+           piled by ff22cc
+
+           As of GCC version 3.0, this option is not necessary anymore.
+
+           _C_a_u_t_i_o_n_: Future versions of gg7777 might ignore both forms of this
+           option.
+
+       --ffaalliiaass--cchheecckk
+       --ffaarrgguummeenntt--aalliiaass
+       --ffaarrgguummeenntt--nnooaalliiaass
+       --ffnnoo--aarrgguummeenntt--nnooaalliiaass--gglloobbaall
+           _V_e_r_s_i_o_n _i_n_f_o_: These options are not supported by versions of gg7777
+           based on ggcccc version 2.8.
+
+           These options specify to what degree aliasing (overlap) is permit-
+           ted between arguments (passed as pointers) and "COMMON" (external,
+           or public) storage.
+
+           The default for Fortran code, as mandated by the FORTRAN 77 and
+           Fortran 90 standards, is --ffaarrgguummeenntt--nnooaalliiaass--gglloobbaall.  The default
+           for code written in the C language family is --ffaarrgguummeenntt--aalliiaass.
+
+           Note that, on some systems, compiling with --ffffoorrccee--aaddddrr in effect
+           can produce more optimal code when the default aliasing options are
+           in effect (and when optimization is enabled).
+
+       --ffnnoo--gglloobbaallss
+           Disable diagnostics about inter-procedural analysis problems, such
+           as disagreements about the type of a function or a procedure’s
+           argument, that might cause a compiler crash when attempting to
+           inline a reference to a procedure within a program unit.  (The
+           diagnostics themselves are still produced, but as warnings, unless
+           --WWnnoo--gglloobbaallss is specified, in which case no relevant diagnostics
+           are produced.)
+
+           Further, this option disables such inlining, to avoid compiler
+           crashes resulting from incorrect code that would otherwise be diag-
+           nosed.
+
+           As such, this option might be quite useful when compiling existing,
+           ‘‘working’’ code that happens to have a few bugs that do not gener-
+           ally show themselves, but which gg7777 diagnoses.
+
+           Use of this option therefore has the effect of instructing gg7777 to
+           behave more like it did up through version 0.5.19.1, when it paid
+           little or no attention to disagreements between program units about
+           a procedure’s type and argument information, and when it performed
+           no inlining of procedures (except statement functions).
+
+           Without this option, gg7777 defaults to performing the potentially
+           inlining procedures as it started doing in version 0.5.20, but as
+           of version 0.5.21, it also diagnoses disagreements that might cause
+           such inlining to crash the compiler as (fatal) errors, and warns
+           about similar disagreements that are currently believed to not
+           likely to result in the compiler later crashing or producing incor-
+           rect code.
+
+       --ffffllaatttteenn--aarrrraayyss
+           Use back end’s C-like constructs (pointer plus offset) instead of
+           its "ARRAY_REF" construct to handle all array references.
+
+           _N_o_t_e_: This option is not supported.  It is intended for use only by
+           gg7777 developers, to evaluate code-generation issues.  It might be
+           removed at any time.
+
+       --ffbboouunnddss--cchheecckk
+       --ffffoorrttrraann--bboouunnddss--cchheecckk
+           Enable generation of run-time checks for array subscripts and sub-
+           string start and end points against the (locally) declared minimum
+           and maximum values.
+
+           The current implementation uses the "libf2c" library routine
+           "s_rnge" to print the diagnostic.
+
+           However, whereas ff22cc generates a single check per reference for a
+           multi-dimensional array, of the computed offset against the valid
+           offset range (0 through the size of the array), gg7777 generates a
+           single check per _s_u_b_s_c_r_i_p_t expression.  This catches some cases of
+           potential bugs that ff22cc does not, such as references to below the
+           beginning of an assumed-size array.
+
+           gg7777 also generates checks for "CHARACTER" substring references,
+           something ff22cc currently does not do.
+
+           Use the new --ffffoorrttrraann--bboouunnddss--cchheecckk option to specify bounds-check-
+           ing for only the Fortran code you are compiling, not necessarily
+           for code written in other languages.
+
+           _N_o_t_e_: To provide more detailed information on the offending sub-
+           script, gg7777 provides the "libg2c" run-time library routine "s_rnge"
+           with somewhat differently-formatted information.  Here’s a sample
+           diagnostic:
+
+                   Subscript out of range on file line 4, procedure rnge.f/bf.
+                   Attempt to access the -6-th element of variable b[subscript-2-of-2].
+                   Aborted
+
+           The above message indicates that the offending source line is line
+           4 of the file _r_n_g_e_._f, within the program unit (or statement func-
+           tion) named bbff.  The offended array is named bb.  The offended array
+           dimension is the second for a two-dimensional array, and the
+           offending, computed subscript expression was --66.
+
+           For a "CHARACTER" substring reference, the second line has this
+           appearance:
+
+                   Attempt to access the 11-th element of variable a[start-substring].
+
+           This indicates that the offended "CHARACTER" variable or array is
+           named aa, the offended substring position is the starting (leftmost)
+           position, and the offending substring expression is 1111.
+
+           (Though the verbage of "s_rnge" is not ideal for the purpose of the
+           gg7777 compiler, the above information should provide adequate diag-
+           nostic abilities to it users.)
+
+       Some of these do _n_o_t work when compiling programs written in Fortran:
+
+       --ffppcccc--ssttrruucctt--rreettuurrnn
+       --ffrreegg--ssttrruucctt--rreettuurrnn
+           You should not use these except strictly the same way as you used
+           them to build the version of "libg2c" with which you will be link-
+           ing all code compiled by gg7777 with the same option.
+
+       --ffsshhoorrtt--ddoouubbllee
+           This probably either has no effect on Fortran programs, or makes
+           them act loopy.
+
+       --ffnnoo--ccoommmmoonn
+           Do not use this when compiling Fortran programs, or there will be
+           Trouble.
+
+       --ffppaacckk--ssttrruucctt
+           This probably will break any calls to the "libg2c" library, at the
+           very least, even if it is built with the same option.
+
+EENNVVIIRROONNMMEENNTT
+       GNU Fortran currently does not make use of any environment variables to
+       control its operation above and beyond those that affect the operation
+       of ggcccc.
+
+BBUUGGSS
+       For instructions on reporting bugs, see <hhttttpp::////ggcccc..ggnnuu..oorrgg//bbuuggss..hhttmmll>.
+       Use of the ggccccbbuugg script to report bugs is recommended.
+
+FFOOOOTTNNOOTTEESS
+       1.  _l_o_o_p _d_i_s_c_o_v_e_r_y refers to the process by which a compiler, or indeed
+           any reader of a program, determines which portions of the program
+           are more likely to be executed repeatedly as it is being run.  Such
+           discovery typically is done early when compiling using optimization
+           techniques, so the ‘‘discovered’’ loops get more attention---and
+           more run-time resources, such as registers---from the compiler.  It
+           is easy to ‘‘discover’’ loops that are constructed out of looping
+           constructs in the language (such as Fortran’s "DO").  For some pro-
+           grams, ‘‘discovering’’ loops constructed out of lower-level con-
+           structs (such as "IF" and "GOTO") can lead to generation of more
+           optimal code than otherwise.
+
+SSEEEE AALLSSOO
+       _g_p_l(7), _g_f_d_l(7), _f_s_f_-_f_u_n_d_i_n_g(7), _c_p_p(1), _g_c_o_v(1), _g_c_c(1), _a_s(1), _l_d(1),
+       _g_d_b(1), _a_d_b(1), _d_b_x(1), _s_d_b(1) and the Info entries for _g_c_c, _c_p_p, _g_7_7,
+       _a_s, _l_d, _b_i_n_u_t_i_l_s and _g_d_b.
+
+AAUUTTHHOORR
+       See the Info entry for gg7777 for contributors to GCC and G77.
+
+CCOOPPYYRRIIGGHHTT
+       Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004 Free Soft-
+       ware Foundation, Inc.
+
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.2 or
+       any later version published by the Free Software Foundation; with the
+       Invariant Sections being ‘‘GNU General Public License’’ and ‘‘Funding
+       Free Software’’, the Front-Cover texts being (a) (see below), and with
+       the Back-Cover Texts being (b) (see below).  A copy of the license is
+       included in the _g_f_d_l(7) man page.
+
+       (a) The FSF’s Front-Cover Text is:
+
+            A GNU Manual
+
+       (b) The FSF’s Back-Cover Text is:
+
+            You have freedom to copy and modify this GNU Manual, like GNU
+            software.  Copies published by the Free Software Foundation raise
+            funds for GNU development.
+
+
+
+gcc-3.4.6                         2006-08-23                            G77(1)

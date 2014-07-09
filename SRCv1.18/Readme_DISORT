@@ -1,0 +1,596 @@
+Tilak put Kurucz solar data (0.3 to 1.0 um) on /asl/data/solar_irrad/
+Solar atlases from ACE (FTS limb measurements), ATMOS, Kurucz, and the
+National Renewable Energy Lab (NREL) releases are in
+tara.rs.umbc.edu:/asl/data/solar_irrad/ The latter includes airmass
+zero extraterrestrial reference spectrum (e490_00a_am0.txt), Wehrli
+compilation, and the Gueymard atlas.  The latter includes airmass zero
+extraterrestrial reference spectrum (e490_00a_am0.txt), Wehrli
+compilation, and the Gueymard atlas. The NREL atlases are from
+
+http://rredc.nrel.gov/solar/spectrum/am0/
+
+has moved to 
+
+http://www.nrel.gov/rredc/
+http://www.nrel.gov/rredc/solar_resource.html
+http://rredc.nrel.gov/solar/spectra/am0/
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+An improvedhigh-resolutionsolarreferencespectrumfor
+earth’s atmospheremeasurementsintheultraviolet,
+visible, andnearinfrared
+K. Chance, R.L.Kurucz
+Harvard-Smithsonian CenterforAstrophysics,Cambridge,MA02138,USA
+a r t i c l e info
+Article history:
+Received 16November2009
+Received inrevisedform
+28 January2010
+Accepted 29January2010
+Keywords:
+Solar spectrum
+Remote sensing
+Atmospheric spectroscopy
+Journal ofQuantitativeSpectroscopy&RadiativeTransfer111(2010)1289–1295
+
+get (http://kurucz.harvard.edu/sun/irradiance2005/irradthu.dat).
+curl http://kurucz.harvard.edu/sun/irradiance2005/irradthuwn.dat >& irradthuwn.dat
+
+ 
+http://arm.mrcsb.com/sbdart/html/sbdart_browser/html_code/sbdart/drt.f.html
+
+http://www.met.reading.ac.uk/~qb717363/adient/rfm-disort/
+
+http://www.atm.ox.ac.uk/code/orac/aerosol/download/lutcode/aerLUT.f
+
+      PROGRAM AERLUT
+
+!-------------------------------------------------------------------------
+! PURPOSE: SCATTERING CALCULATIONS FOR AEROSOL LAYERS 
+!     IN A PLANE-PARALLEL ATMOSPHERE AT SOLAR WAVELENGTHS. 
+!     BASED ON SUBROUTINE DISORT.
+!
+! Routines called 
+! DISORT:   The discrete ordinates radiative transfer program
+! BDREF:    Sets bidirectional reflectance of lower boundary
+! GETMOM:   Sets phase function Legendre coefficients
+!
+!
+! Author: Steven Marsh 
+! Original version: March 2004
+!
+!-------------------------------------------------------------------------
+
+
+
+! PARAMETERS - Later some of these may be declared as variables 
+! and read from a driver file. Subsequently arrays defined using these values 
+! need to be allocated.
+
+      PARAMETER (NLYR = 32)     ! No of layers in DISORT model 
+                                ! correspond to Levels of US Std Atmos 
+      PARAMETER (NLVL = 33)     ! ALWAYS NO LAYERS + 1
+      PARAMETER (NSTR = 60)     ! No of Streams in DISORT model  
+      PARAMETER (NMOM = 60)     ! No moments for phase function of aerosols
+      PARAMETER (NTAU = 2)      ! No of optical depths for calculations.
+      PARAMETER (NUMU = 20)     ! No of zenith angles to be specified
+      PARAMETER (NPHI = 11)     ! No of azimith angles to be specified
+      PARAMETER (NPRNT = 5)     ! No elements in PRNT array - always 5
+      PARAMETER (SCH = 1)       ! First channel to calculate LUTs for
+      PARAMETER (ECH = 4)       ! End channel to calculate LUTs for
+      PARAMETER (NCH = 4)       ! Number of channels
+      PARAMETER (NR = 20)       ! Number of Radii in LUT
+      PARAMETER (NOPD = 9)      ! Number OPD values in LUT
+      PARAMETER (REFPRES = 1013.25) ! Reference pressure
+      PARAMETER (NSOL = 10)     ! No of solar angles
+      PARAMETER (SOLRES = 10)   ! Resolution of solar angles
+      PARAMETER (UMURES = 10)   ! Resolution of satellite viewing
+      PARAMETER (PHIRES = 18)   ! Resolution of relative azimuth
+!----------------------------------------------------------------------------
+! DISORT variables
+      REAL DTAUC(NLYR)          ! layer Optical Depths
+      REAL SSALB(NLYR)          ! layer single scattering albedo
+      REAL PMOM(0:NMOM,NLYR)    ! Phase moments for particles
+      REAL TEMPER (0:NLYR)      ! Termperatures of levels
+      REAL UTAU(NTAU)           ! Optical depths of Interest
+      REAL RFLDIR(NTAU)         ! Direct beam flux
+      REAL RFLDN(NTAU)          ! Diffuse down flux
+      REAL FLUP(NTAU)           ! Diffuse up flux
+      REAL DFDT(NTAU)           ! Flux divergence
+      REAL UAVG(NTAU)           ! Mean intensity
+      REAL UMU(NUMU)            ! Viewing angles - zenith
+      REAL PHI(NPHI)            ! Viewing angles - rel azimuth
+      REAL UU(NUMU,NTAU,NPHI)   ! Output reflectances matrix
+      REAL ALBMED(NUMU)         ! Medium albedo as function of inc beam(IBCND=1)
+      REAL TRNMED(NUMU)         ! Transmissity of medium (for IBCND = 1 only)
+      REAL WVNMLO               ! Lowest wavenumbr of spectral interest (plank true)
+      REAL WVNMHI               ! Highest wavenumber (plank = true only)
+      REAL FBEAM                ! Intensity of incident parallel beam at TOA
+      REAL UMU0                 ! Polar angle cosine on incident beam
+      REAL PHI0                 ! Azimuth angle on incident beam
+      REAL FISOT                ! Intensity TOA isotropic illumination
+      REAL ALBEDO               ! Surface albedo
+      REAL BTEMP                ! Bottom boundayr temp (plank = true only)
+      REAL TTEMP                ! Top boundary temp (plank = true only)
+      REAL TEMIS                ! Emissivity of top boundary (plank = true only)
+      REAL ACCUR                ! Convergence criterion for azimuthal series.
+
+      REAL TFBD(NOPD,NSOL,NR)   ! Diffuse transmission solar beam flux
+      REAL RBD(NOPD,NUMU/2,NSOL,NPHI,NR) ! Bidirectional reflectance
+      REAL TBD(NOPD,NUMU/2,NSOL,NPHI,NR) ! Diffuse transmission solar beam
+      REAL RFD(NOPD,NR)         ! Reflection isotropic radiation flux
+      REAL TFD(NOPD,NR)         ! Transmission isotropic radiation flux
+      REAL TD(NOPD,NUMU/2,NR)     ! Transmission of isotropic radiance
+      REAL RD(NOPD,NUMU/2,NR)     ! Reflectance of isotropic radiance
+      REAL TB(NOPD,NSOL,NR)     ! Direct transmission of solar beam
+      
+
+
+      INTEGER IBCND             ! Boundary conditions
+      INTEGER MAXCLY            ! Max number of layers for DISORT array dim
+      INTEGER MAXULV            ! Max number user layeres "  "
+      INTEGER MAXUMU            ! Max number viewing angles "   "
+      INTEGER MAXPHI            ! Max number rel azi angles "   "
+      INTEGER MAXMOM            ! Max number phase moments "     "
+      
+      LOGICAL USRTAU            ! User to specify optical depths
+      LOGICAL USRANG            ! "             " view angles
+      LOGICAL LAMBER            ! "             " Lambertian surface 
+      LOGICAL PLANK             ! "             " temp profile
+      LOGICAL ONLYFL            ! "             " return fluxes only
+      LOGICAL PRNT(NPRNT)       ! "              " DISORT print thing
+      
+      CHARACTER HEADER *127     ! "              " Another DISORT print thing 
+      
+!-----------------------------------------------------------------------------
+! Layer variables
+      REAL G(NLYR)              ! Asymmetry parameter
+      REAL TAURAY(NLYR)         ! Rayleigh scattering optical depth
+      REAL TAUGAS(NLYR)         ! Gaseous absorption optical depth
+      REAL TAUAER(NLYR)         ! Aerosol optical depths
+
+!----------------------------------------------------------------------------
+!LEVEL variables
+      REAL PRESS(NLVL)          ! Presssure Levels from US std atmos
+      REAL HEIGHT(NLVL)         ! Height levels "   "     "
+      REAL GASLVL(NLVL)         ! Gas OPD to TOA from MODTRAN
+      REAL RAYLVL(NLVL)         ! Rayleigh OPD to TOA from calculation
+
+!--------------------------------------------------------------------------
+!  loop Variables
+
+      INTEGER IOD               ! Aerosol optical depth
+      INTEGER IR                ! Particle effective radius
+      INTEGER ILY               ! Layer number (0 top, NLYR surface)
+      INTEGER ILV               ! Level number  (0 top, NLYR surface)
+      INTEGER ICH               ! Channel
+      INTEGER ISOL              ! Sun zenith angle
+      INTEGER ISAT              ! View zenith angle
+      INTEGER LC                ! GETMOM calling loop variable
+      INTEGER STARTCH           ! Start channel loop variable
+      INTEGER ENDCH             ! End channel loop variable
+
+!--------------------------------------------------------------------------
+! DRIVER FILE VARIABLES
+      CHARACTER  LUTType*10
+      CHARACTER RUN_TYPE*3
+      CHARACTER BUFFER*10
+      CHARACTER  DOMIE*3
+      REAL REALREFIND(NLYR,NCH) ! Real refractive index for Mie calc
+      REAL IMAGREFIND(NLYR,NCH) ! Imaginary refractive index for Mie calc
+      REAL AEROP(NLYR)          ! Aerosol OPD
+      INTEGER NUMAEROSLAYERS    ! numbr of aerosol containing layers
+      INTEGER LAYERINDEX        ! Index for aerosol containing layers
+      CHARACTER DRV_NAME*50     ! Driver file name
+!-------------------------------------------------------------------------
+! Miscellaneous Variables
+      REAL BEXT(NCH,NR)         ! Extinction values
+      REAL GG                   ! Temp variable used for call to GETMOM
+      REAL TOTALOPD             ! Total optical depth of atmos layer for DISORT
+      REAL SSAERO(NCH,NR,NLYR)  ! Aerosol single scattering albedo
+      REAL GAERO(NCH,NR,NLYR)   ! Aerosl asymmetry parameter
+      REAL EXTAERO(NCH,NR,NLYR) ! Aerosol extinction
+      REAL SOL (NSOL)           ! Solar angle
+      REAL LOPD(NOPD)           ! Log 10 of aerosol optical depth
+      REAL SAT(NUMU/2)          ! Satellite angles in degrees for LUT header
+      REAL TAU_R                ! Total column rayleigh scattering OPD
+      REAL PI                   ! PI
+      REAL DEG2RAD              ! Deg to Radians conversion
+      REAL AEROPTOT             ! Total aerosol OPD 
+      REAL DELR                 ! Change in Radius (constant across range)
+      REAL DELOPD               ! Change in OPD (constant across range)
+      CHARACTER GASOPDFILENAME *80 ! Filename of MODTRAN data
+      CHARACTER USSTDATM *80    ! 
+      CHARACTER OUTFNAME *80    ! Filname for LUT files
+      INTEGER DIFFUSE           ! Specifier for DIFFUSE calculations
+      INTEGER BEAM              ! Specifier for BEAM calculations
+      INTEGER EMISSION          ! Specifier for EMISSION (not implemented)
+      INTEGER ISOLSTART         ! Start solar angle
+      INTEGER ISOLEND           ! End solar angle
+      INTEGER HFNUMU            ! NUMU divided by 2 (INTEGER still)
+
+!---------------------------------------------------------------------
+! ARRAY VARIABLES DEFINED IN CODE
+      REAL CHAN(NCH) /0.55,0.67,0.87,1.60/
+
+      CHARACTER CHANCH(NCH) /'1','2','3','4'/
+
+      REAL LUTOPD(NOPD) /0.0078125,0.015625,0.03125,0.0625,0.125,0.25,
+     $       0.5,1.0,2.0/
+
+      REAL LUTRE(NR) / -2.00000,-1.84224,-1.68424,-1.52637,-1.36845,
+     $     -1.21056,-1.05262,-0.894728,-0.736838,-0.578939,
+     $     -0.421052,-0.263157,-0.105263,0.0526324,0.210527,
+     $     0.368421,0.526316,0.684211,0.842105,1.00000/
+
+     
+
+      
+! END of Declarations
+!---------------------------------------------------------------------------
+
+
+
+!---------------------------------------------------------------------------
+! **********************PROGRAMME BEGINS HERE******************************!
+!---------------------------------------------------------------------------
+! SOME VARIABLES WHICH REMAIN CONSTANT - MAINLY FOR DISORT
+      PI=4.*ATAN(1.0)
+      DEG2RAD = PI/180.0
+      USRTAU = .TRUE.
+      USRANG = .TRUE. 
+      UTAU(1) = 0.0  ! ALWAYS OBSERVE REFLECTANCE FROM TOA
+      IBCND     = 0
+      LAMBER    = .TRUE.
+      ONLYFL    = .FALSE.
+      PHI0      = 0.0
+      ALBEDO    = 0.0
+      PLANK     = .FALSE.
+      ACCUR = 1E-8
+      DELR = LUTRE(2) - LUTRE(1)
+      LOPD = LOG10(LUTOPD)      !OPTICAL DEPTH IN LOG10 SPACE
+      DELOPD = LOPD(2) - LOPD(1) 
+      HFNUMU = NUMU/2
+      STARTCH = SCH
+      ENDCH = ECH
+
+! CALCULATE USER DEFINED ANGLES - ZENITH
+      DO I=1,HFNUMU             !NUMU MUST BE EVEN
+         UMU(I) = -COS((I-1) * UMURES * DEG2RAD)
+         UMU(NUMU+1-I) = COS(FLOAT(I-1)*UMURES*DEG2RAD)
+         SAT(I) = (I-1) * UMURES
+      ENDDO
+      UMU(HFNUMU) = -0.01       !CANT HAVE ZERO UMU IN DISORT
+      UMU(HFNUMU+1) = 0.01
+
+! CALCULATE USER DEFINED RELATIVE AZIMUTH ANGLES
+      DO IPHI=1,NPHI
+         PHI(IPHI) = (IPHI-1) * PHIRES 
+      ENDDO
+! CALCULATE USER DEFINED SOLAR ZENITH ANGLES
+      DO ISOL=1,NSOL
+         SOL(ISOL) = (ISOL-1)*SOLRES  
+      ENDDO
+
+! Assign dimension variables for DISORT
+
+      MAXCLY = NLYR             ! MAX DIM OF DTAUC SSALB TEMPER
+      MAXULV = NTAU             ! DIM OF UTAU RFLDIR RFLDN FLUP DFDT
+      MAXUMU = NUMU             ! DIM OF UMU
+      MAXPHI = NPHI             ! DIM OF PHI
+      MAXMOM = NMOM             ! FIRST DIM OF PMOM
+
+
+! SET VARIABLES TO ZERO ------------------------------
+      AEROP= 0.0
+      AEROPTOT = 0.0
+! -----------------------------------------------------
+                                ! READ DRIVER FILE
+      CALL GETENV('AERLUT_DRV_FILE',DRV_NAME)
+      PRINT*,'Reading Driver File: ',DRV_NAME
+
+      OPEN (20, FILE = DRV_NAME, STATUS='old')
+      
+!     READ IN LUT CALCULATION TYPE FROM DRIVER FILE 
+      read (20,*) LUTType
+      
+      IF (LUTType .EQ. 'DIFFUSE') then 
+         DIFFUSE = 1
+         BEAM = 0
+         EMISSION = 0   
+         PRINT*,'Calculating DIFFUSE case'
+
+      ELSEif (LUTType .EQ. 'BEAM') then 
+         DIFFUSE = 0
+         BEAM = 1
+         EMISSION = 0       
+         PRINT*,'Calculating BEAM case'
+
+      ELSEif (LUTType .EQ. 'EMISSION') then 
+         DIFFUSE = 0
+         BEAM = 0
+         EMISSION = 1
+         PRINT*,'EMISSION NOT IMPLEMENTED YET - SORRY!'
+         STOP
+      ELSE 
+         PRINT*,'INVALID TRANSMISSION TYPE IN DRIVER FILE'
+         STOP
+      ENDIF
+      READ (20,*) RUN_TYPE
+      print*,RUN_TYPE
+      READ (20,*) DOMIE
+      IF (DOMIE .EQ. 'YES') THEN
+         PRINT*,'***Sorry MIE calculations are not implemented yet***'
+         STOP
+      ENDIF
+      READ (20,*) NUMAEROSLAYERS
+      PRINT*,'NUMBER OF AEROSOL LAYERS: ',NUMAEROSLAYERS
+      DO I=1,NUMAEROSLAYERS
+         READ(20,*) LAYERINDEX
+         IF (LAYERINDEX .LT. 1 .OR. LAYERINDEX .GT. NLYR) THEN
+            PRINT*,'ERROR IN LAYER INDEX: ',LAYERINDEX
+            STOP
+         ENDIF
+         READ (20,*) AEROP(LAYERINDEX)
+         AEROPTOT = AEROPTOT + AEROP(LAYERINDEX)
+         IF (DOMIE .EQ. 'YES') THEN
+            DO J= 1,NCH          
+               READ (20,*) REALREFIND(I,J),IMAGREFIND(I,J)
+            ENDDO     
+         ENDIF  
+         IF (DOMIE .EQ. 'NO') THEN
+            DO ICH=1,NCH
+               READ (20,*) SSAERO(ICH,:,LAYERINDEX)
+               READ (20,*) GAERO(ICH,:,LAYERINDEX)
+               READ (20,*) EXTAERO(ICH,:,LAYERINDEX)
+            ENDDO
+         ENDIF
+      ENDDO
+      CLOSE(20)
+! END OF DRIVER FILE READING
+
+!     Assign extinction values to Bext matrix. Only assigning last values read
+!     which assumes they are constant as a function of layer.
+      Bext(:,:)=EXTAERO(:,:,LAYERINDEX)
+
+                                ! READ HEIGHT/PRESSURE DATA
+      USSTDATM = 'midsatm.dat'
+      OPEN (20,FILE = USSTDATM, STATUS='OLD')
+      DO ILV=1,NLVL
+         READ (20,*) HEIGHT(ILV),PRESS(ILV)
+      ENDDO
+      CLOSE(20)
+
+! DISORT VARIABLES WHICH VARY ACCORDING TO WHETHER BEAM OR DIFFUSE
+! TABLES ARE BEING CALCULATED
+      IF (BEAM .EQ. 1) THEN
+         FBEAM = 100.           ! Incident intensity
+         FISOT = 0.             ! Intensity of top  isotropic illuminaton 
+      ELSE IF (DIFFUSE .EQ. 1) THEN
+         FBEAM = 0.             ! Incident intensity
+         FISOT = 100.           ! Intensity of top  isotropic illuminaton
+!         SOL = 50.              ! fixed solar zenith angle for the diffuse case.  
+         FLUX=FISOT*PI
+      ENDIF
+! Assign loop extema for solar angles
+      IF (BEAM .EQ. 1) THEN
+         ISOLSTART = 1
+         ISOLEND = NSOL
+      ELSE IF (DIFFUSE .EQ. 1) THEN
+         ISOLSTART = 6          !only loop over 1 SOL of 50 degrees.
+         ISOLEND = 6
+      ENDIF
+
+!----------------------------------------------
+! BEGINNING OF LOOPS                          !
+!----------------------------------------------
+                                ! LOOP AROUND CHANNEL
+      DO ICH = STARTCH,ENDCH
+         WVL=CHAN(ICH)
+! TOTAL COLUMN RAYLEIGH OPTICAL DEPTH
+         TAU_R =(PRESS(NLVL)/REFPRES)/
+     $        (117.03*WVL**4 - 1.316*WVL**2)
+
+! READ IN MODTRAN GAS OPD FROM DATA FILES
+! FIRST IDENTIFY FILE NAME 
+         IF (ICH .EQ. 1) THEN
+            GASOPDFILENAME='ModtranGasOpd_055.dat'
+         ELSEIF (ICH .EQ. 2) THEN
+            GASOPDFILENAME='ModtranGasOpd_067.dat'
+         ELSEIF (ICH .EQ. 3) THEN
+            GASOPDFILENAME='ModtranGasOpd_087.dat'
+         ELSEIF (ICH .EQ. 4) THEN
+            GASOPDFILENAME='ModtranGasOpd_160.dat'
+         ENDIF
+! NOW OPEN CHANNEL SPECIFIC FILE         
+         OPEN (20, FILE = GASOPDFILENAME, STATUS='old')
+! READ MODTRAN DATA INTO GASLVL LEVELS         
+          DO ILV = 1, NLVL
+             READ (20,*) GASLVL(ILV)
+          ENDDO
+          CLOSE(20)
+! CALCULATE RAYLEIGH SCATTERING VALUES AT LEVELS 
+          DO ILV = 1, NLVL
+             RAYLVL(ILV) =  TAU_R*EXP(-0.1188*(HEIGHT(ILV))-
+     $            0.00116*(HEIGHT(ILV))**2)
+          ENDDO
+         
+                                ! LOOP AROUND SOLAR ANGLE  
+
+
+         DO ISOL = ISOLSTART,ISOLEND                      
+            IF (SOL(ISOL) .EQ. 90.) SOL(ISOL) = 89.0! DISORT PROB AT 90
+            IF (BEAM .EQ. 1 ) UMU0 = COS(SOL(ISOL)*DEG2RAD)
+                                ! fixed solar zenith angle for the diffuse case.
+            IF (DIFFUSE .EQ. 1) UMU0 = COS(50*DEG2RAD)
+                                ! LOOP AROUND AEROSOL OPTICAL DEPTH
+            DO IOD = 1,NOPD
+! CALULATE OPTICAL DEPTH VALUES
+               TAUAER = LUTOPD(IOD) * (AEROP/AEROPTOT)
+               
+                                ! LOOP AROUND PARTICLE SIZE
+               DO IR = 1,NR  
+                                ! REFERENCE AEROSOL OPD TO 0.55 um with ExtRatio
+                  EXTRATIO=(Bext(ICH,IR)/Bext(1,IR)) 
+                  TOTALOPD = 0.0             
+                  DO ILY =1,NLYR
+                     ILV=ILY+1  ! DEFINE ILV TO LEVEL ABOVE LAYER
+                                ! Populate DTAUC, SSALB and G arrays for DISORT
+                     
+                     
+                                ! TAUGAS AND TAURAY CALCULATED FROM DIFFERENCE IN  OPD AT 2 LEVELS 
+                                ! SURROUNDING THE LAYER.         
+                     TAUGAS(ILY) = GASLVL(ILV) - GASLVL(ILV-1)
+                     TAURAY(ILY) = RAYLVL(ILV) - RAYLVL(ILV-1)
+
+                     DTAUC(ILY) = TAURAY(ILY) + TAUGAS(ILY)
+     $                    + TAUAER(ILY)*EXTRATIO
+                     
+                     SSALB(ILY) = (TAURAY(ILY) + 
+     $                    SSAERO(ICH,IR,ILY)*TAUAER(ILY)*EXTRATIO)/
+     $                    DTAUC(ILY)
+                     
+                     G(ILY) = GAERO(ICH,IR,ILY)*SSAERO(ICH,IR,ILY)*
+     $                    TAUAER(ILY)*EXTRATIO/
+     $                    (TAURAY(ILY) + SSAERO(ICH,IR,ILY)*
+     $                    TAUAER(ILY)*EXTRATIO)
+                     
+                     TOTALOPD = TOTALOPD + DTAUC(ILY)
+                  ENDDO
+                  
+                                ! Call GETMOM to generate phase functions for each layer from Asymmetry parameter (G)
+                                ! uses temporary variable GG as FORTRAN will not allow G(LC) to be passed to GETMOM
+                  DO  LC = 1, NLYR
+                     IF (G(LC) .EQ. 0.0) THEN
+                        CALL  GETMOM( 2, 0.0, NMOM, PMOM(0,LC) )
+                     ELSE
+                        GG = G(LC)
+                        CALL  GETMOM( 3, GG, NMOM, PMOM(0,LC) )
+                     ENDIF
+                  ENDDO
+                  
+                  UTAU(2)  = TOTALOPD
+
+!                  PRINT*,' '
+!                  PRINT*,'***********************'
+!                  PRINT*,'AER OPD',LUTOPD(IOD)
+!                  PRINT*,'EFF RAD',LUTRE(IR)
+!                  PRINT*,'TAURAY',TAURAY
+!                  PRINT*,'TAUGAS',TAUGAS
+!                  PRINT*,'TAUAER',TAUAER
+!                  PRINT*,'ASSYM PARA',G
+!                  PRINT*,'SSALB',SSALB
+!                  PRINT*,'DTAUC',DTAUC
+!                  PRINT*,'EXTRATIO',EXTRATIO
+!                  PRINT*,'UTAU',UTAU
+!                  PRINT*,'***********************'
+                  
+                                !  Call DISORT radiative transfer code 
+                  
+                  
+                  CALL  DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER,
+     &                 WVNMLO, WVNMHI, USRTAU, NTAU, UTAU, NSTR,
+     &                 USRANG, NUMU, UMU, NPHI, PHI, IBCND, FBEAM,
+     &                 UMU0, PHI0, FISOT, LAMBER, ALBEDO, BTEMP,
+     &                 TTEMP, TEMIS, PLANK, ONLYFL, ACCUR, PRNT,
+     &                 HEADER, MAXCLY, MAXULV, MAXUMU, MAXPHI,
+     &                 MAXMOM, RFLDIR, RFLDN, FLUP, DFDT, UAVG, UU,
+     &                 ALBMED, TRNMED )
+                  
+! WRITE DISORT OUTPUT TO VARIABLES                                 
+                  IF (DIFFUSE .EQ. 1) THEN
+                     RFD(IOD,IR) = 100.*FLUP(1)/FLUX
+                     TFD(IOD,IR) = 100.*RFLDN(NTAU)/FLUX
+                     
+                     DO ISAT=1,HFNUMU  
+                        RD(IOD,(HFNUMU+1)-ISAT,IR) = UU(ISAT+HFNUMU,1,1)
+                        TD(IOD,ISAT,IR) = UU(ISAT,2,1)
+                     ENDDO
+                  ELSE IF (BEAM .EQ. 1) THEN
+                     TB(IOD,ISOL,IR)   = 100*RFLDIR(NTAU)/RFLDIR(1)
+                     TFBD(IOD,ISOL,IR) = 100*RFLDN(NTAU)/RFLDIR(1)
+                     DO IPH=1,NPHI
+                        DO ISAT=1,HFNUMU
+                           RBD(IOD,HFNUMU+1-ISAT,ISOL,IPH,IR) = UU(ISAT+HFNUMU,1,IPH) * PI
+                           TBD(IOD,ISAT,ISOL,IPH,IR) = UU(ISAT,NTAU,IPH) * PI
+                        ENDDO
+                     ENDDO 
+                  ENDIF                  
+               ENDDO            ! IR Loop
+            ENDDO               ! IOD Loop
+         ENDDO                  ! ISOL Loop
+! WRITE BEAM PRODUCTS TO LUT FILES
+         IF (BEAM .EQ. 1) THEN
+            OUTFNAME='ATSR-2_'//RUN_TYPE//'_RBD_Ch'//CHANCH(ICH)//'.sad'
+            OPEN(14,FILE=OUTFNAME,STATUS='NEW',form='FORMATTED')
+            WRITE(14,'(10E14.6)') WVL                           
+            WRITE(14,*) NOPD,DELOPD
+            WRITE(14,'(10E14.6)') LOPD   
+            WRITE(14,*) HFNUMU,UMURES           
+            WRITE(14,'(10E14.6)') SAT                   
+            WRITE(14,*) NSOL,SOLRES          
+            WRITE(14,'(10E14.6)') SOL                   
+            WRITE(14,*) NPHI,PHIRES            
+            WRITE(14,'(10E14.6)') PHI                    
+            WRITE(14,*) NR,DELR                
+            WRITE(14,'(10E14.6)') LUTRE                          
+            WRITE(14,'(10E14.6)') RBD
+            CLOSE(14)
+            OUTFNAME='ATSR-2_'//RUN_TYPE//'_TB_Ch'//CHANCH(ICH)//'.sad'
+            OPEN(15,FILE=OUTFNAME,STATUS='NEW',form='FORMATTED')   
+            WRITE(15,'(10E14.6)') WVL                           
+            WRITE(15,*) NOPD,DELOPD                    
+            WRITE(15,'(10E14.6)') LOPD                          
+            WRITE(15,*) NSOL,SOLRES                          
+            WRITE(15,'(10E14.6)') SOL                            
+            WRITE(15,*) NR,DELR                   
+            WRITE(15,'(10E14.6)') LUTRE                          
+            WRITE(15,'(10E14.6)') TB
+            CLOSE(15) 
+            OUTFNAME='ATSR-2_'//RUN_TYPE//'_TBD_Ch'//CHANCH(ICH)//'.sad'
+            OPEN(16,FILE=OUTFNAME,STATUS='NEW',form='FORMATTED')
+            WRITE(16,'(10E14.6)') WVL                          
+            WRITE(16,*) NOPD,DELOPD                            
+            WRITE(16,'(10E14.6)') LOPD                         
+            WRITE(16,*) HFNUMU,UMURES                        
+            WRITE(16,'(10E14.6)') SAT                    
+            WRITE(16,*) NSOL,SOLRES                          
+            WRITE(16,'(10E14.6)') SOL                   
+            WRITE(16,*) NPHI,PHIRES               
+            WRITE(16,'(10E14.6)') PHI                          
+            WRITE(16,*) NR,DELR                          
+            WRITE(16,'(10E14.6)') LUTRE                         
+            WRITE(16,'(10E14.6)') TBD
+            WRITE(16,'(10E14.6)') TFBD
+            CLOSE(16)     
+         ELSE IF (DIFFUSE .EQ. 1) THEN
+            OUTFNAME='ATSR-2_'//RUN_TYPE//'_TD_Ch'//CHANCH(ICH)//'.sad'
+            OPEN(11,FILE=OUTFNAME,STATUS='NEW',form='FORMATTED')
+            WRITE(11,'(10E14.6)') WVL
+            WRITE(11,*) NOPD,DELOPD
+            WRITE(11,'(10E14.6)') LOPD
+            WRITE(11,*) NSOL,SOLRES
+            WRITE(11,'(10E14.6)') SOL
+            WRITE(11,*) NR,DELR
+            WRITE(11,'(10E14.6)') LUTRE
+            WRITE(11,'(10E14.6)') TD
+            WRITE(11,'(10E14.6)') TFD
+            CLOSE(11)
+            OUTFNAME='ATSR-2_'//RUN_TYPE//'_RD_Ch'//CHANCH(ICH)//'.sad'
+            OPEN(12,FILE=OUTFNAME,STATUS='NEW',form='FORMATTED')
+            WRITE(12,'(10E14.6)') WVL
+            WRITE(12,*) NOPD,DELOPD
+            WRITE(12,'(10E14.6)') LOPD
+            WRITE(12,*) NSOL,SOLRES
+            WRITE(12,'(10E14.6)') SOL
+            WRITE(12,*) NR,DELR
+            WRITE(12,'(10E14.6)') LUTRE
+            WRITE(12,'(10E14.6)') RD
+            WRITE(12,'(10E14.6)') RFD
+            CLOSE(12)  
+         ENDIF            
+      ENDDO                     ! ICH Loop
+      PRINT*,'LUTs Generated'
+      END
+      

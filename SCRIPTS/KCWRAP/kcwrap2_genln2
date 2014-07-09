@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+# NAME
+#
+#   kcwrap2  -- wrapper for klayers, kcarta, and sconv
+#
+# SYNOPSIS
+#
+#   kcwrap2 [-s sfile] [-n1 pnum] [-n2 pnum] infile outfile
+#
+#     infile     RTP input file
+#     outfile    RTP output file
+#
+# OPTIONS
+#
+#   -s sfile     specify an HDF SRF file
+#   -n1 pnum     specify first RTP profile number 
+#   -n2 pnum     specify last RTP profile number 
+#   -laypro      flag to output layers profiles
+#
+# DISCUSSION
+#
+#   "outfile" becomes outfile<n>.rtp, so don't give it a suffix,
+#   it is OK for it to include a path
+#
+#   "infile" can have a path and suffix, it is used just as given
+#
+#   see kcwrap for more information 
+#
+
+# no graphic environment
+DISPLAY=""
+export DISPLAY
+
+# kcwrap location
+# kcwrap="/home/motteler/radtrans/kcwrap/kcwrap"
+kcwrap="/home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap_CKD51_genln2"
+
+# reassignable kcwrap parameters
+sfile="/asl/data/airs/srf/srftablesV10.hdf"       # SRF HDF file
+n1=1                                              # first profile
+n2=48   					  # last profile
+infile=""                                         # input file name
+outfile=""                                        # output file name
+laypro=""                                         # layer output flag
+
+# process input arguments
+while test $# -gt 0
+do
+  case $1 in
+    -s)      shift; sfile=$1; shift ;;
+    -n1)     shift; n1=$1; shift ;;
+    -n2)     shift; n2=$1; shift ;;
+    -laypro) shift; laypro="-laypro" ;;
+    -?)      echo "kcwrap: unknown option $1"; exit 1 ;;
+     *)      infile=$1; outfile=$2; shift 2; shift $# ;;
+  esac
+done
+
+# loop over profile indices
+ind=$n1
+while test $ind -le $n2
+do
+
+  # run kcwrap
+  $kcwrap $laypro -s $sfile -n $ind $infile $outfile${ind}.rtp \
+       > $outfile${ind}.log 2>&1
+
+  ind=`expr $ind  + 1`
+done
+

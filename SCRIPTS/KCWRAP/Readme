@@ -1,0 +1,14 @@
+
+the main source for this is Howard Motteler
+
+main code is called "kcwrap," saved on /home/motteler/radtrans/kcwrap/kcwrap
+this script allows user to do one kcarta run, from an input RTP file that 
+can have more than one profile
+       kcwrap [-s sfile] [-n pnum] infile outfile
+
+howard has also written couple of other wrappers for this
+ kcwrap2 can call kcwrap, for profiles n1 thru n2
+        kcwrap2 [-s sfile] [-n1 pnum] [-n2 pnum] infile outfile
+
+while "kcdemo1" is a wrapper that shares multiple profiles in the same RTP 
+files across multiple processors. does not seem to work, so use kcdemo0

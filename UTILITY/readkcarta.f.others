@@ -1,0 +1,350 @@
+c this program takes in the UNFORMATTED output from atmos.x and allows the
+c user to read the final radiance and save to a FORMATTED or UNFORMATTED file
+
+c either do Gaussian SRF,AIRS SRF or NOAA SRF -- 
+c see paramSRF.f for AIRS details, paramNOAA for NOAA details
+
+c NOTE : Absoft behaves very wierdly with fseek,ftell
+c so for Linux machines, use g77 or PDF Fortran
+c wherever you see g77 in this file and readbinary.f, comment out 
+c      iDummy = fseek(iIOUN,idatasize,1)    !!!!if using PDF(Linux) or SGI
+c and use the 
+c      CALL fseek(iIOUN,idatasize,1)         !!!!if using g77
+
+      IMPLICIT NONE
+
+      include 'convolve.param'
+
+c the definitions of all these variables are found in the subroutines
+      CHARACTER*80 caInName
+      CHARACTER*130 caaMixedPathInfo(kMixFilRows)
+      INTEGER iIOUN,iNumPathsOut
+      INTEGER iNpmix,iNumMixPathsOut,iNatm
+      INTEGER iaNumLayersOut(kMaxAtm),iaNumLayersInAtm(kMaxAtm)
+
+      REAL rFr1,rFr2
+
+      INTEGER iLorS,iNOAA,iInstrType
+      INTEGER iInstr,rInPointSp,rInStart,rFWHM
+      INTEGER iBinOrText
+
+      INTEGER iOutNumber,iaNumOut(kMaxPrint),iDummy,iDatapoints
+      INTEGER iTotal,iStart,iStore,iFreqPts
+      REAL rTemp,raFreq(kMaxEntire)
+      REAL raEntire(kMaxEntire),raConvolve(kMaxEntire)
+      INTEGER iI,iJ,iK,iLoop,iStartOffset,iJump,iDataSize,iWhichStore
+
+      INTEGER FTELL,FSEEK
+
+ 90   CONTINUE
+      iInstrtype=0
+
+      print *,'Do you want a text or binary output? (-1/1) '
+      read *,iBinOrText
+
+      print *,'Enter INPUT binary file name '
+      read 1000,caInName
+ 1000 FORMAT(A80)
+
+c first read header to figure out iStore ******************
+      iIOUN=10
+      OPEN(UNIT=iIOUN,FILE=caInName,STATUS='OLD',FORM='UNFORMATTED')
+
+      CALL readmainheader(iIOUN,rFr1,rFr2,iLorS)
+
+      CALL readgaspaths(iIOUN,iNumPathsOut,iLorS)
+
+      CALL readmixedpaths(iIOUN,iNpmix,iNumMixPathsOut,iLorS)
+
+      IF (iNpmix .EQ. 0) THEN
+        iNumMixPathsOut=0
+        END IF
+
+      CALL readatmospheres(iIOUN,iNpmix,iNatm,iaNumLayersInAtm,
+     $                     iaNumLayersOut)
+
+      IF (iNatm .EQ. 0) THEN
+        DO ii=1,iNatm
+          iaNumLayersOut(ii)=0
+          END DO
+        END IF
+
+      IF (iNatm .GT.  0) THEN
+        DO ii=1,iNatm
+          IF (iaNumLayersOut(ii) .EQ. -1) THEN
+            iaNumLayersOut(ii)=iaNumLayersInAtm(ii)
+            END IF
+          END DO
+        END IF
+
+c this is the number of paths/mixed paths/layers that will be output each chunk
+      iStore=0
+      DO ii=1,iNatm
+        iStore=iStore+iaNumLayersOut(ii)
+        END DO                                 !num of radiances to output
+
+      iWhichStore=iNumPathsOut+iNumMixPathsOut !num of paths/MP to output
+      iStore=iStore+iWhichStore                !total num to output
+
+      IF (iBinOrText .LT. 0) THEN
+        print *,'For each k-comp file used in the atmos.x run '
+        print *,'Total # of paths to output = ',iNumPathsOut
+        print *,'Total # of mixed paths to output = ',iNumMixPathsOut
+        print *,'Total # of radiances to output = ',iStore-iWhichStore
+        print *,'GRAND total to be output = ',iStore
+        print *,'Enter which of the above you want to store : '
+        read *,iWhichStore
+        END IF
+
+c the following info is for each k-comp file
+
+cccccccc this is the summary info that HAS to be read in!!!!!!!!
+      read(iIOUN) iTotal,iOutNumber
+      read(iIOUN) (iaNumOut(iI),iI=1,iOutNumber)
+      iStartOffset=ftell(iIOUN)  !figure out EXACTLY where data starts
+      iJ=0
+      DO iI=1,iOutNumber
+        iJ=iJ+iaNumOut(iI)
+        END DO
+      IF (iJ .NE. iStore) THEN
+        print *,'hmm : number of things to read  aintcha jivin'
+        STOP
+        END IF
+
+c figure out the frequencies
+      CALL findfreqs(iIOUN,iFreqPts,iDataSize,
+     $                     iaNumOut,iOutNumber,iTotal,raFreq)
+
+      IF (abs(rFr1-raFreq(1)) .GT. 0.02) THEN
+        print *,'lower freq bounds make no sense'
+        STOP
+        END IF       
+      IF (abs(rFr2-raFreq(iFreqPts)) .GT. 0.02) THEN
+        print *,'upper freq bounds make no sense'
+        STOP
+        END IF       
+
+      iLoop=0
+      DO iJ=1,iOutnumber
+
+c jump to point in file where main data blocks start
+        iDummy=fseek(iIOUN,iStartOffset,0)  
+
+        iJump=0
+        DO iI=1,iJ-1
+c jump to point in file where data for output option iJ starts 
+cc        READ(iIOUN) iMainType,iSubMainType,iNumberOut  
+cc        READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta  
+          iJump=iJump+4+(3*4)+4          
+          iJump=iJump+(4+(4*4)+4)        !this reads the above 2 header lines
+          !this reads all the data in iaNumOut(iI)
+          iJump=iJump+(4+(kMaxPts*4)+4)*iaNumOut(iI)
+          END DO
+        iDummy=fseek(iIOUN,iJump,1)
+
+c now skip over frequency header
+cc      READ(iIOUN) iMainType,iSubMainType,iNumberOut  
+cc      READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta  
+        iJump=4+(3*4)+4          
+        iJump=iJump+(4+(4*4)+4)        !this reads the above 2 header lines
+        iDummy=fseek(iIOUN,iJump,1)
+
+        iStart=ftell(iIOUN)
+
+        print *,'outoption  ',iJ, ' of ',iOutnumber
+
+        DO iK = 1,iaNumOut(iJ)
+          iDummy=fseek(iIOUN,iStart,0) !should be at the start of needed data
+          iJump=(4+(kMaxPts*4)+4)*(iK-1)
+          iDummy=fseek(iIOUN,iJump,1) !should be at the start of needed data
+
+          CALL ReadData(iIOUN,iDataSize,raEntire,iDataPoints,iTotal)
+
+          IF (iDataPoints .NE. iFreqPts) THEN
+            print *,'iDataPoints .NE. iFreqPts',iDataPoints,iFreqPts
+            STOP
+            END IF
+             
+c this is to test the reading functions!
+c if iLoop==1 then print the header info at top of output data file
+          iLoop=iLoop+1
+          CALL output2(raFreq,iFreqPts,raEntire,iStore,
+     $                  caInName,
+     $                  iLoop,iBinOrText,iWhichStore)
+
+          END DO
+        END DO
+      CLOSE(iIOUN)
+
+      END 
+
+c************************************************************************
+c this subroutine reads the freqs
+      SUBROUTINE findfreqs(iIOUN,iFreqPts,iDataSize,
+     $           iaNumOut,iOutNumber,iTotal,raFreq)
+
+      include 'convolve.param'
+
+      REAL raFreq(kMaxEntire)
+      INTEGER iTotal,iIOUN,iOutNumber,iDataSize,iaNumOut(kMaxPrint)
+      INTEGER iFreqPts
+
+      INTEGER iI,iJ,iL,iMainType,iSubMainType,ikMaxPts,iNumberOut
+      INTEGER offset,iK,iF,iDummy,iWhere
+      REAL rFrLow,rFrHigh,rDelta 
+      INTEGER FTELL,FSEEK
+
+      iF=0
+      DO iI=1,iTotal
+        iWhere=FTELL(iIOUN)
+        DO iJ=1,iOutnumber
+          READ(iIOUN) iMainType,iSubMainType,iNumberOut
+          READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta
+          offset=(ikMaxPts*4 + 2*4)*iaNumOut(iJ)
+          iDummy=fseek(iIOUN,offset,1)
+          END DO
+
+        iDataSize=FTELL(iIOUN)
+        !set up raFreq
+        if (abs(rDelta-0.0025) .le. 0.00001) then
+          rDelta=0.0025
+          end if       
+        DO iL=1,ikMaxPts
+          iF=iF+1
+          raFreq(iF)=rFrLow+(iL-1)*rDelta
+          END DO
+        END DO
+
+      iFreqPts=iF
+
+      iDataSize=iDataSize-iWhere
+      iDataSize=iDataSize-(ikMaxPts*4 + 2*4)    !this is one data block)
+
+      RETURN
+      END
+
+c************************************************************************
+      SUBROUTINE output2(raFreq,iFreqPts,raEntire,
+     $       iStore,caInName,iLoop,iBinOrText,iWhichStore)
+
+      include 'convolve.param'
+
+      REAL raEntire(kMaxEntire),raFreq(kMaxEntire)
+      INTEGER iFreqPts,iStore,iLoop,iBinOrText
+      INTEGER iWhichStore
+      CHARACTER*80 caInName
+
+c local variables
+      CHARACTER*80 caOutName
+      INTEGER iI,iJ,iIOUN
+
+      iIOUN=11
+      
+c get the name of output file
+      CALL GetOutName2(caInName,caOutName,iBinOrText)
+
+      IF (iBinOrText .EQ. 1) THEN            !binary format for rdairs.m
+c put in the header info ... iI tells how many spectra to expect
+c only need to save this header when we are outputting the VERY first spectra
+        IF (iLoop .EQ. 1) THEN
+          ii=iStore
+          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',
+     $         FORM='UNFORMATTED')
+          write(iIOUN) 1,iFreqPts,iI
+          write(iIOUN) (raFreq(iI),iI=1,iFreqPts)
+          CLOSE(iIOUN)
+          END IF
+c now output!!!
+        OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='OLD',
+     $     FORM='UNFORMATTED',ACCESS='APPEND')
+          write(iIOUN) (raEntire(iJ),iJ=1,iFreqPts)
+        CLOSE(iIOUN)
+        END IF
+
+      IF (iBinOrText .EQ. -1) THEN     !column text format for rdairs.m
+c put in the header info ... iI tells how many spectra to expect
+c only need to save this header when we are outputting the VERY first spectra
+        IF (iLoop .EQ. iWhichStore) THEN
+          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',
+     $         FORM='FORMATTED')
+          DO iJ=1,iFreqPts
+            write(iIOUN,5050) raFreq(iJ),raEntire(iJ)
+            END DO
+          CLOSE(iIOUN)
+          END IF
+        END IF
+ 5050 FORMAT(f10.4,'  ',1pe12.5)
+
+      RETURN
+      END   
+
+c************************************************************************
+c this takes the input file name, finds the root (before .dat or .datJAC) 
+c and appends .datCON
+      SUBROUTINE GetOutName(caInName,caOutName)
+
+      CHARACTER*80 caInName,caOutName
+      
+      INTEGER iI
+
+      DO iI=1,80
+        caOutName(iI:iI)=' '
+        END DO
+
+c search for the .dat in caInName
+      iI=80
+ 15   CONTINUE
+      IF ((caInName(iI:iI) .NE. '.') .AND. (iI .GT. 1)) THEN
+        iI=iI-1
+        GO TO 15
+        END IF
+      IF (iI .EQ. 1) THEN
+        print *,'wierd input name!!'
+        STOP
+        END IF
+
+      caOutName(1:iI)=caInName(1:iI)
+      caOutName(iI+1:iI+6)='datCON'
+
+      RETURN
+      END
+c************************************************************************
+c this takes the input file name, finds the root (before .dat or .datJAC) 
+c and appends .datCON
+      SUBROUTINE GetOutName2(caInName,caOutName,iBinOrText)
+
+      CHARACTER*80 caInName,caOutName
+      INTEGER iBinOrText
+      
+      INTEGER iI
+
+      DO iI=1,80
+        caOutName(iI:iI)=' '
+        END DO
+
+c search for the .dat in caInName
+      iI=80
+ 15   CONTINUE
+      IF ((caInName(iI:iI) .NE. '.') .AND. (iI .GT. 1)) THEN
+        iI=iI-1
+        GO TO 15
+        END IF
+      IF (iI .EQ. 1) THEN
+        print *,'wierd input name!!'
+        STOP
+        END IF
+
+      caOutName(1:iI)=caInName(1:iI)
+      IF (iBinOrText .GT. 0) THEN
+        caOutName(iI+1:iI+6)='datCON'
+      ELSE
+        caOutName(iI+1:iI+6)='datTXT'
+        END IF
+
+      RETURN
+      END
+c************************************************************************
+
+
+
+

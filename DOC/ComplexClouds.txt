@@ -1,0 +1,145 @@
+June 2001
+
+ComplexClouds.txt
+=================
+
+This is an extension of the earlier work done on including cloud scattering
+into the radiative transfer of the Fast Forward Models.
+
+The first work used a simple "zero scattering, zero asymmetry" algorithm, to
+include scattering effects. This will work well when the actual scattering
+parameters reflect this assumption, as would be the case for ice particles
+in the 10 um window region. However, as is easily appreciated, this ideal
+situation is satisfied only in a small fraction of wavenumber intervals. A
+more realistic model would include the single scattering albedo and the 
+asymmetry factor.
+
+In the FarInfrared region, the radiances change with temperature more rapidly 
+than in the NearIR/sub visible regions. Conversely, the effects of solar
+beam (and scattering) are negligible in the Far IR, but become increasingly 
+important as the wavenumbers increase. 
+
+The current work implements a two stream model, that includes the effects of 
+variations in temperature across a layer, as well as the effects of solar 
+beam scattering in a layer. To simplify the code, we will assume the cloud
+only occupies one layer; however this restriction can easily be relaxed and
+the "adding of layers"  has already been implemented in kCARTA
+
+
+----------------------------- TOA
+
+  \ (idn)      /isolar       /I(out)
+   \          /  dn         /
+    \        /             /
+----------------------------- cld top
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+----------------------------- cld bot
+    /                   /
+   /(iup)              /I(in )
+  /                   /
+
+----------------------------- GND
+
+The code needs the following (assume for each wavenumber) :
+  idn = downward stream radiation at mu = 1/sqrt(3), at cloud top
+  iup = upward   stream radiation at mu = 1/sqrt(3), at cloud base
+        this is the radiation that includes surface terms, reflected solar and
+        reflected background thermal
+  isolar = downward solar radiation at mu = mu_sun, at cloud top
+  I(in)  = upward radiation at mu                   at cloud base
+  I(out) = upward radiation at mu                   at cloud top
+
+Given the cloud extinction depth (E), then
+  I(out) = I(in)*exp(-E/mu) + 
+           (idn*Re + iup*Tr + Emission + isolar*Sun)*exp(-E/mu)
+where Re,Tr,Emission,Sun are computed from the cloud scattering parameters
+such as asymmetry, single scattering albedo, top and bottom temperatures. 
+Note that since these four terms (Re,Tr,...) are computed from the two stream 
+radiation and *scattered* into the viewed beam, this implies that 
+Tr + Re + Emission <> 1. For the two streams at +/- 1/sqrt(3), energy is indeed
+conserved!
+
+Here is a short excerpt of the relevant code (for N = 1 layer) :
+for the downlooking (AIRS) code, all you need to compute is i6 (and thus all
+you need is procedure t_r_e_arb_up_Solar_prof)
+
+{
+  rad_0     = I(in);            raaK(ii,:) = optical depth due to gases
+  i6        = I(out);           raCldExtD  = extiction depth due to cloud
+  istream_m = idn;              raCldSctD  = scattering depth due to cloud
+  istream_p = iup;              raCldAsym  = asymmetry parameter
+  rSun      = isolar;           Tb,Tt      = cloud layer temperatures
+}
+ 
+  if N == 1             %% bloody simple 
+
+    ii = max(iaCldLayer);
+    raLayOptD  = raCldExtD + raaK(ii,:);  
+    Tb   = templevels(ii);
+    Tt   = templevels(ii+1);
+    w0 = raCldSctD./raLayOptD;  
+    g = raCldAsym; 
+    tau00 = raLayOptD;
+    raBoo      = raCldExtD + raaK(ii,:);      
+
+    cumsum2 = 0;    %%%%does not need to be updated, as this is always TOP 
+    tau2 = tau00; 
+    expN = exp(-tau2/abs(mu_view)); 
+
+    [tr_up,re_up,emiss_up,sun_up] = ... 
+           t_r_e_arb_up_Solar_prof(raF,g,w0,Tb,Tt,Bb,Bt,rSun,... 
+                          mu_sun,mu_view,tau00,cumsum2);  
+    t2u = tr_up;   r2u = re_up;     sig2p = emiss_up;      s2p = sun_up; 
+    i6 = rad_0 + ((r2u.*istream_m + t2u.*istream_p) + sig2p + rSun.*s2p); 
+    i6 = i6.*expN; 
+
+    [tr_dn,re_dn,emiss_dn,sun_dn] = ... 
+         t_r_e_arb_down_Solar_prof(raF,g,w0,Tb,Tt,Bb,Bt,rSun,... 
+                          mu_sun,mu_view,tau00,cumsum2);  
+    t2d = tr_dn;   r2d = re_dn;     sig2m = emiss_dn;      s2m = sun_dn; 
+    i6d = raDummy + ((t2d.*istream_m + r2d.*istream_p) + sig2m + rSun.*s2m); 
+    i6d = i6d.*expN; 
+    end
+
+------------------------------------------------------------------------
+
+April 2001
+
+SimpleClouds.txt
+================
+
+We are implementing a "zero scattering" algorithm to include the effects of 
+clouds in the atmosphere. This algorithm ignores the phase scattering 
+information (related to the asymmetry paramater "g"), and cannot
+be used in the presence of a solar beam. It works best in regions where the
+single scattering albedo and asymmetry factor are close to 0. Another point 
+to note is that we supply the Mie scattering tables for clouds made of ice 
+particles whose average diameter ranges from from 0.1 to 100 um in size; 
+water clouds would have similar overall properties, but would have lower 
+extinction optical depths. 
+
+The simplicity  of the model means that its results are only applicable for 
+(ice) cirrus clouds in the 8-10 um region, as the single scattering albedo 
+and the asymmetry parameter are close to zero in that region. For ice paths 
+of upto 10 g/m2, this model produces errors of less than about 1 K (when 
+compared to DISORT or RTSPEC) in the 8-10 um region. For similar cirrus 
+clouds in the 3.5 um region, this same model can produce errors of about 15 K.
+
+Useful references include
+1) Numerically stable algotrithm for discrete ordinate method radiative 
+transfer in multiple scattering and emitting layered media, K. Stamnes et al,
+Applied Optics Vol 27, No 12, 1988 (pg 2502)
+2) A Hybrid Eddington Single Scattering Radiative Transfer Model for computing
+radiances from Thermally Emitting Atmospheres, M. Deeter and K. F. Evans, 
+JQSRT 1998
+3) Infrared Emission of Laboratory Ice Clouds, C.G. Schmitt and W. P. Arnott,
+JSQRT 1998
+
+--------------------------------------------------------------------------
+Sergio DeSouza-Machado
+Dept of Physics                                           sergio@umbc.edu
+University of Maryland Baltimore County              ph  : (410)-455-1944
+1000 Hilltop Circle                                  fax : (410)-455-1072
+Baltimore, MD 21250                http://asl.umbc.edu/~sergio/index.html
+
+

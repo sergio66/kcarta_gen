@@ -1,0 +1,61 @@
+Hi Sergio,
+
+I guess the best way to make the changes is to search for several things in the code. These are:
+
+STRUCTURE
+RECORD
+
+These both need to be changed to type. You can find the formatting for TYPE in any of the new fortran
+90 code. The STRUCTURE only appears in rtp/include/rtpdefs.f
+
+So the format for STRUCTURE is (from an example for RTPHEAD)
+
+STRUCTURE / RTPHEAD/
+
+..... lines of code that won't change
+
+
+END STRUCTURE
+
+This becomes:
+
+TYPE RTPHEAD   ! notice that the /  is gone
+
+.... same lines of code
+
+
+END STRUCTURE
+
+
+Then you need to find the RECORD statements in Src:
+
+
+RECORD / RTPHEAD / PROF
+
+becomes
+
+TYPE(RTPHEAD) PROF
+
+Then you need to find anywhere that you see the structures used to define a variable, such as:
+
+
+HEAD.vchan(I) = FREQ(I)
+
+and change it to
+
+HEAD%vchan(I) = FREQ(I)
+
+
+and that is most of it. I don't have a record of exactly where it was done, but you can compare the files
+in /home/tangborn/git/sarta/Src_rtpV201_pclsam_slabcloud_hg3
+
+with those in /home/tangborn/git/sarta/Src_cloudy_old
+
+using xxidff  and see the differences. Also have a look in
+
+/home/tangborn/git/rtp/include and /home/tangborn/git/rtp/original_include to see
+the differences there.
+
+But I will be at UMBC tomorrow and can explain more.
+
+Andy

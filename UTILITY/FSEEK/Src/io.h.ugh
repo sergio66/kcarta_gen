@@ -1,0 +1,138 @@
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+#ifndef IO_H
+#define IO_H
+
+/*Why me?
+I am far more than glue.  I'm logical glue; I'm the devil according 
+to some people.
+
+This file exists to:
+1.)  Abstract fopen type functions for easier use.
+2.)  Centralize common methods like:
+a.)  Reading a whole file.
+b.)  Writing to a file.
+c.)  Opening a file and making sure that the directory
+    structure to support it exists.
+3.)  Scanning for a directory's contents.
+4.)  Doing 3 recursively.
+5.)  Finding system time and representing it in human
+      Readable form.
+
+*/
+
+
+#include <stdio.h>
+
+typedef int bool;
+
+struct elog_io_file
+{
+	FILE *file;
+};
+
+struct elog_io_dir
+{
+	char *path;
+	char **dir;
+	struct elog_io_dir **subDir;
+};
+
+#define ELOG_IO_READ 0
+#define ELOG_IO_WRITE 1
+#define ELOG_IO_RW 2
+
+#define ELOG_IO_STAT_ERR 0
+#define ELOG_IO_STAT_DIR 1
+#define ELOG_IO_STAT_FILE 2
+#define ELOG_IO_STAT_FIFO 3
+#define ELOG_IO_STAT_SCK 4
+#define ELOG_IO_STAT_LNK 5
+#define ELOG_IO_STAT_OTHER 6
+
+char *openNative(const char *fileName, unsigned int *len);
+
+
+void elog_io_helper();
+//a function to print out various CLI information.
+char *elog_io_reader(const char *fileName, int* length);
+//Opens fileName, gets length, reads that many bytes.
+bool elog_io_writer(char* fileName, char *text, long* len);
+//Writes text to fileName.
+char *elog_io_open(char *fileName); //deprecated
+//Pre:  fileName should contain a valid path to a file.
+//Post:  returns the text of the file if it is native, else it returns
+//a pointer to NULL and executes the necessary app.
+void elog_io_readLine(char *doc, struct elog_io_file *in, int chunk);
+//Pre:  in is a pointer to a declared and opened file
+//Post:  reads a chunk of data
+struct elog_io_file *elog_io_initialize(const char *fileName, int mode);
+//Pre:
+//Post:  returns opened filestream
+
+void elog_io_setHandle(struct elog_io_file *f, int loc);
+//Pre:  file is an opened hangle
+//Post:  sets location to loc, moves the filepointer.
+
+unsigned char *elog_io_readRestofFile(struct elog_io_file *in, unsigned int *len);
+//Pre:  in is a opened file handle, len doesn't need to be set
+//Post:  returns the remaining data in the file from the handles
+//	 current position
+
+//int elog_io_lenOfFile(istream &in);
+//void elog_io_readFile(istream &in, long &length, char *buffer);
+
+void elog_io_writeLine(struct elog_io_file *f, const void *data, unsigned int len);
+//Pre:  f is initialized, data is valid array of size len
+//Post:  writes data to f, and does not write an endline
+//Note:  IF len is 0, function assumed data is a c string.
+
+void elog_io_close(struct elog_io_file *f);
+//Pre: f is been initialized
+//Post:  handle will be closed
+
+char *elog_io_read_realLine(struct elog_io_file *f);
+//Pre:  f must be opened
+//Post:  Reads from the current position until a \n.
+//Note:  Quite slow.
+
+char **elog_io_dirContents(const char *dir);
+//Pre:  dir is a valid directory path
+//Post:  Returns the contents of the directory as an array of fileNames.
+
+struct elog_io_dir *elog_io_recurseDir(const char *dir, const char *path);
+//Pre: dir is a valid directory path
+//Post: Returns the contents of the directory and its subdirectories.
+
+void elog_io_dir_free(struct elog_io_dir *);
+//Pre: given dir exists and is allowed to be freed
+//Post:  Memory is freed.
+
+char *elog_io_date();
+//Pre:
+//Post:  Returns the current date as a string: March 25th, 2005\n 3:30PM
+
+int elog_io_mkdir(const char *dir);
+//Pre:
+//Post:  dir is made
+
+int elog_io_stat(const char *file);
+//Pre
+//Post:
+
+//#include "io.cc"
+#endif
+

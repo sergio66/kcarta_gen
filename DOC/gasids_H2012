@@ -1,0 +1,166 @@
+see /home/sergio/KCARTA/SCRIPTS/comp_irdatabase.sc
+## we have to quit double counting gases in LBL vs XSC
+##   we have decided gases 30/81 : gas 30 is too weak
+##   we have decided gases 35/61 : gas 35 is too weak
+##   we have decided gases 41/80 : gas 41 is too weak
+##   we have decided gases 42/54 : gas 42 is too weak, except at 631 cm-1
+delete gases 30 35 41 42 ... important for the Matlab kCARTA version
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+New gases (not gonna be used by us) are 43-51
+See /home/sergio//SPECTRA/Global_Data_HITRAN2012/TIPS_2012_try_include1.f 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Copied from /asl/packages/klayersV205/Doc/gas_xsec_ids.txt
+The recommended reference profile for the new kcarta database
+currrently under construction is:
+
+/asl/packages/klayersV205/Data/refprof_usstd2010.mat
+
+So far the revised klayers only exists as a "g80" variant
+   /asl/packages/klayersV205/BinV105/klayers_g80_wetwater
+   /asl/packages/klayersV205/BinV201/klayers_g80_wetwater
+The "g80" refers to RTP allowing up to 80 gases but only
+800 channels (the standard rtpV201 allows only 16 gases but
+4231 channels).  I think the g80 version of RTP will work
+OK with kcarta (its not intended for sarta).  Note it uses
+a non-standard build of the RTP library
+   /asl/packages/rtpV201_g80
+
+Scott Hannon, July 2010
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Recommended HITRAN gas and cross-section gas ID numbers.
+Updated: 16 July 2010, S.Hannon
+
+Comments:
+   Gas IDs 1-42 correspond to the HITRAN 2008 database.  Gas IDs
+   40-42 are new for HITRAN2008.
+
+   Gas IDs 51-63 are the numbers we (UMBC) use with some of the
+   cross-section gases included in the XSEC supplement to the
+   HITRAN 2000 database.  We extended the XSEC IDs to 64-81
+   in July 2010.
+
+   Gas IDs 101 and 102 are the numbers used by the kCARTA program
+   to specify the self- and foreign-broadened components of the
+   water continuum.
+
+   Gas IDs 201 and above are the IDs we (UMBC) use to specify clouds
+   profiles (amounts).  These cloud IDs are merely a numeric label
+   to identify a particular cloud profile, and they do imply any
+   particular set of cloud properties other than the profile.
+   That is, "201" means "this profile is for cloud1" regardless
+   of composition of the cloud, particle size, etc.  In general
+   the cloud profile should will need to be supplemented by a
+   separate set of RTP fields to specify all additional relevant
+   cloud properties (cloud type code number, particle size, cloud
+   fraction, et cetera).
+
+ ID  name     common name
+---- -------- -----------------
+   1 H2O      water
+   2 CO2      carbon dioxide
+   3 O3       ozone
+   4 N2O      nitrous oxide
+   5 CO       carbon monoxide
+   6 CH4      methane
+   7 O2       (diatomic) oxygen
+   8 NO       nitric oxide
+   9 SO2      sulfur dioxide
+  10 NO2
+  11 NH3      ammonia
+  12 HNO3     nitric acid
+  13 OH       hydroxyl
+  14 HF       hydrogen floride
+  15 HCl      hydrocloric acid
+  16 HBr      hydrogen bromide
+  17 HI
+  18 ClO
+  19 OCS      carbonyl sulfide
+  20 H2CO
+  21 HOCl
+  22 N2       (diatmoic) nitrogen
+  23 HCN
+  24 CH3Cl
+  25 H2O2
+  26 C2H2     acetylene
+  27 C2H6     ethane
+  28 PH3
+  29 COF2
+  30 SF6 [also see 81]   <<<<<<<<<<<<<<<<<<<<<<<<<< no longer here, only in XSEC
+  31 H2S
+  32 HCOOH    formic acid
+  33 HO2
+  34 O        atomic oxygen
+  35 ClONO2 [also see 61]  <<<<<<<<<<<<<<<<<<<<<<<<<<< no longer here, only in XSEC
+  36 NO+
+  37 HOBr
+  38 C2H4     ethylene
+  39 CH3OH    methanol
+  40 CH3Br
+  41 CH3CN [also see 80]
+  42 CF4 [also see 54]   <<<<<<<<<<<<<<<<<<<<<<<<<<< no longer here, only in XSEC
+%%%
+  %% these are new in H2012, but UNUSED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  43 C4H2 
+  44 H3CN
+  45 H2
+  46 CS
+  47 SO3
+  %% these are new in H2012, but UNUSED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%%%
+  51 CCl3F    CFC-11
+  52 CCl2F2   CFC-12
+  53 CClF3    CFC-13
+  54 CF4      CFC-14 [also see 42]
+  55 CHCl2F   HCFC-21
+  56 CHClF2   HCFC-22
+  57 C2Cl3F3  CFC-113
+  58 C2Cl2F4  CFC-114
+  59 C2ClF5   CFC-115
+  60 CCl4
+  61 ClONO2 [also see 35]
+  62 N2O5
+  63 HNO4
+%%% 64-74 requested by Evan Fishbein, 28 June 2010
+  64 C2F6          hexafluoroethane
+  65 CHCl2CF3      HCFC-123
+  66 CHClFCF3      HCFC-124
+  67 CH3CCl2F      HCFC-141b
+  68 CH3CClF2      HCFC-142b
+  69 CHCl2CF2CF3   HCFC-225ca
+  70 CClF2CF2CHClF HCFC-225cb
+  71 CH2F2         HFC-32
+  72 CHF2CF3       HFC-134a
+  73 CF3CH3        HFC-143a
+  74 CH3CHF2       HFC-152a
+%%%
+  75 C6F6          benzene
+  76 CHF2CF3       HFC-125
+  77 CHF2CHF2      HFC-134   
+  78 SF5CF3
+  79 CH3C(O)OONO2  PAN (Peroxy Acetyl Nitrate)
+  80 CH3CN [also see 41]
+  81 SF6 [also see 30]
+%%%
+  82-100 not in use
+%%%
+ 101 kCARTA H2O self-broadened continuum
+ 102 kCARTA H2O foreign-broadened continuum
+%%%
+ 103-200 not in use
+%%%
+ 201 cloud1 ice/water/whatever amount
+ 202 cloud2 ice/water/whatever amount
+ 203 cloud3 ice/water/whatever amount
+%%%
+ 204-300 not in use
+%%%
+ 301 cloud1 particle size
+ 302 cloud2 particle size
+ 303 cloud3 particle size
+%%%
+No numbers past 303 are in use
+
+---end of file---

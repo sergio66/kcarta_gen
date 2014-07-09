@@ -1,0 +1,262 @@
+Introduction
+-------------
+
+Read this file first!  Before proceeding, you should go to the DOC
+subdirectory and print copies of
+
+  - ReadMeFirst.ps, which tells you how to install, run and test the 
+    programs in the package.
+
+  - kcarta1.10.ps, which is the complete user manual for the package. 
+
+  - bkcarta1.10.ps, which is the user manual for the basic features of KCARTA.
+
+To run kCARTA, you need the coefficient database, the source code and the 
+auxiliary data files; all these are distributed separately.  The current 
+version of the source code is distributed as kcarta1.10.tar. which will
+expand as the directory kcartaV110, with subdirectories as described
+below, in the "Brief Overview" section. The auxiliary files are distributed 
+as kcartaDATA.tar and include files such as the TOA solar radiance, 
+CKD water continuum files, test regression point profiles and so on.
+
+In addition, you also need to separately pick up the RTP and KLAYERS 
+distributions, and compile them. As with the kCARTA package, these are also 
+available on our anonymous ftp site ftp://asl.umbc.edu:/pub/packages. 
+
+******************** WARNING **************************
+As supplied, the kCARTA code works with the KLAYERS and RTP packages that 
+existed when kCARTA was compiled, run, tested and then finally tarred. As 
+time goes on, any or all of these packages could evolve, and so what is 
+mentioned in the documentation, or in the Makefiles, include files etc, might 
+not be what you get on the web. We welcome questions, AFTER you have 
+ascertained that what you have, as far as you can tell, REALLY does NOT work! 
+This includes older/newer versions of the klayers, rtp packages, paths to 
+include files, data files etc! It is the user's responsibility to set/check 
+all these!
+******************** WARNING **************************
+
+Separate makefiles are supplied for the main kCARTA code, in the SRC (or 
+SRCv1.10) directory; for the utility programs, in the UTILITY directory.
+
+To compile and install kcarta and the associated utilities, you almost 
+certainly need to edit the supplied makefiles to work with your particular
+system and complier; this is discussed in more detail below, in the
+section on "Compiling and Installing" kCARTA.  The default makefile
+settings are for Absoft Linux with most optimizations turned on. The code has 
+been tested on SGI workstations, SUN workstations, and on LINUX 
+Intel machines using Portland Group and Absoft f77. 
+
+The utility programs, which are used to read the binary output produced
+by kCARTA, run fastest if they can use the nonstandard F77 "fseek" feature.
+Because this is nonstandard, our testing shows that the SGI, SUN and Portland 
+Group F77 fseek function behaves the same way as the (LINUX) g77 subroutine 
+calls; however, we have not got it to work correctly at all with Absoft F77. 
+So you can either
+  a) use the READwoFSEEK version, which would be slower or
+  b) hope that your fseek version works as we assume it will. 
+We supply two versions of our readers : *.f.g77 where fseek is a subroutine, 
+and *.f.others where fseek is a function. After determining what is best for
+your compiler, make the appropriate symbolic links and type "make".
+
+For Linux we suggest compiling the UTILITY/readk* readers with g77, as 
+this is a generic compiler on all machines. You will see that our 
+package comes with the read*.f files symbolically linked to the 
+read*.f.g77 files, as we use g77 for our readers (which calls fseek as a 
+subroutine); this was done (and can simply be done) by typing link2g77.sc. 
+If you have fancier machines/compilers such as SUN or SGI (or 
+Portland Group f77 for Linux), the fseek functions seem to behave correctly. 
+In that case you can symbolically link the read*.f files to read*.f.others,
+by typing link2others.sc
+
+******************* 
+The rest of the UTILITY code, and the SRC code uses structures and so 
+cannot be compiled with g77. Absoft, PDF, Sun and SGI f77 work 
+successfully in this case.
+******************* 
+
+Before the program can be run, it needs to be able to access the
+associated database of compact absorption coefficients; this is
+discussed in the section "The Coefficient Database," below.
+
+Once the program and associated utilities have been compiled, and
+the database made accessible, it should be tested; see ReadMeFirst1.10.ps
+for more information. This file will also have a bunch of flow diagrams
+in it, explaining the various scripts we supply, interactions of the
+various packages we supply and so on .... 
+
+
+A Brief Overview of the Package
+--------------------------------
+
+ BIN      home for executables
+          After you type "make" in either SRC or UTILITY, successful 
+          compilation in either subdir will put the executables here
+
+ DOC      somewhat detailed documentation
+
+ INCLUDE  parameter include files
+          You need to edit these files to tell kCARTA where to find very
+          important files at run time, and how large to set its arrays
+          at compile time
+
+ LIB      blas libraries
+          We are having wierd problems with the Linux supplied libraries
+          (uppercase vs lowercase). So we recommend compiling our 
+          LIB/blas.ref package with the uppercase option (as supplied), and
+          linking to it and the LU77 library
+
+ MATLAB   sample matlab v5.0+ code to read and plot kCARTA output
+          So much easier and convenient than the f77 readers
+
+ SCATTERCODE
+          If you want to do scattering computations, this subdirectory will
+          let you generate MIE parameter files (using Frank Evans code)
+
+ SCRIPTS  demonstration shell scripts
+          comp.sc       figures out what compressed database files you have
+                        and puts results in KCARTADATA/General/xsec107.param,
+                        KCARTADATA/General/comp107.param
+                        You might need to edit this file as necessary, since 
+                        you need to set the same paths to the database and to
+                        KCARTADATA/General that is in kcarta.param
+          makeprof.sc   takes in a specified point profile, and runs it
+                        through makeRTP.x (to change it to a RTP format). The
+                        resulting file is then run through klayers, and 
+                        now this final resulting RTP file can be used as a
+                        layer averaged profile for KCARTA
+                        Usage : basic.sc inprofile outRTPfile
+          basic.sc      takes a user specified .nml (namelist) file and 
+                        produces a KCARTA output file
+                        Usage : basic.sc inNameListFile outkcfile
+
+ SRC      source code 
+          The kCARTA source code is here .. database uncompression, clear
+          sky radiative transfer and jacobians, scattering using RTSPEC,
+          DISORT and kTWOSTREAM. The Makefile produces :
+          make, make basic : produces ../BIN/bkcarta.x == basic kCARTA version
+          make scat        : produces ../BIN/kcarta.x  == scattering kCARTA 
+
+ TEST     files and directories to see if your installation of KCARTA worked.
+          You might need to edit test.sc and diffemeall.sc to get the 
+          subdirectories correctly set up
+          test.sc        runs one profile thru ../BIN/bkcarta.x for a series 
+                         of small frequency intervals.
+          diffemall.sc   reads in the output produced by running test.sc and
+                         compares the results to files we supply. Modulo small
+                         errors in number representation, there should be no
+                         differences betweene what you get and what we supply!
+
+          Your f77 compiler might support namelists, but it might not like
+          comment lines (starting with a "!"). SO you need to go to the 
+          SCRIPTS/BASIC directory and type either link2SUN.sc or link2SGI.sc;
+          the first provides links to namelist files with helpful comments in
+          them, that the Absoft and SGI compilers happily handle; the second
+          provides links to namelist files without helpful comments in  them, 
+          that the PDF and SUN compilers are happy with.
+
+          Similarly, if you want to try the test template namelist files in 
+          the KCARTADATA/TemplateNML directory, we provide two script files, 
+          link2SGI.sc and link2SUN.sc, which provide the same effects as above.
+
+ UTILITY  various utility programs 
+          If your fseek works fine, great! (set the symbolic links correctly)
+          If not, you need to use the slower READwoFSEEK readers
+          The Makefile in this directory produces the following executables
+          in the ../BIN directory : 
+          readkcarta.x    this reads the output versions of KCARTA that include
+                          summaries of input namelist friver file and profile
+          readkcBasic.x   this reads simplest basic output version of KCARTA
+          readjacob.x     this reads the jacobian output of KCARTA
+          readflux.x      this reads the flux output of KCARTA
+          makeRTPfile.x   this takes in a text point profile and outputs
+                          an RTP point profile
+          compdatabase.x  this will fly thru your compressed database files
+                          and produce a summary of which files you do have. 
+                          This list is needed by KCARTA at run time.
+
+ WORK     your KCARTA testing and running is done here
+          This directory does not come with the TAR package, so to prove you 
+          read this file, you need to make this subdir. Else when you go to 
+          the  TEST directory and type "test.sc" things will go awry.
+
+kLAYERS and RTP packages
+-------------------------
+
+The user needs to pick up, compile the above packages in order to successfully
+run kCARTA. RTP is a HDF file format that we use to store profiles, 
+atmospheric boundary conditions (and measured radiances). kLAYERS allows
+the user to go from pressure level profiles, to the 100 AIRS layer profiles 
+that kCARTA needs. Both of these packages have their own documentation etc.
+
+Compiling and Installing kCARTA
+--------------------------------
+
+A sample makefile is provided, in the SRC subdirectory, that has
+been tested with SGI MIPS F77, Linux Portland Group F77 and Linux Absoft
+F77.  In general it's a good idea to do the initial compilation
+and testing with optimization turned off and array bounds checking
+turned on; when things are working OK this should be reversed
+(optimization on and array checking off) for a considerable speedup.
+
+If your system does not have the BLAS library, you can use the
+supplied copy of the BLAS reference implementation, in LIB/blas.ref.
+(though in general this won't be as fast as a custom library).  A
+sample makefile to build this library is provided.  If you are using
+Linux g77 Fortran, you may be able to link with the the precompiled
+BLAS library that is included.  In any case, make sure the "LIB =..."
+line in the Makefile is set to point to the right BLAS library.
+
+As mentioned above, please make sure you have picked up and successfully 
+compiled the kLAYERS and RTP packages. 
+
+The Coefficient Database and Other Data Files
+---------------------------------------------
+
+The database of compact absorption coefficients is approximately
+600 MBytes, and is distributed separately, typically on CD ROM or
+tape.  This database consists of sets of file in the directories
+CompDataBase and WaterDataBase, and are needed by kCARTA at run time. 
+Parameter file kcarta.param tells the code where these files are stored on
+your local system.  
+
+Separate versions of the database are provided for little-endian
+(e.g., Intel) and big-endian (e.g. MIPS) architectures; make sure
+you get the right version for your machine.  (Because the database
+is a mix of 4-byte int's, 8-byte floats, Fortran record lengths,
+and character strings, a simple byte swap can't be used here.)
+
+Other binary files such as xsecdata.dat, the solar radiance and water 
+continuum files, are in the KCARTADATA/General/ directory which comes from the
+kcartaDATA.tar package.  These files are also supplied in big- and little- 
+endian versions.
+
+The INCLUDE/kcarta.param needs to be edited correctly to point to the actual 
+paths/directories eg on our local system here at UMBC, the 
+1) database is at 
+      PARAMETER (kWaterPath  = '/asl/data/kcarta/v20.ieee-le/h2o.ieee-le/')
+      PARAMETER (kCO2Path    = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+      PARAMETER (kCompPath   = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+2)continuum, solar and cross-section data is at
+      PARAMETER (kCKDPath    = 
+     $              '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/')
+      PARAMETER (kSolarPath = 
+     $              '/asl/data/kcarta/KCARTADATA/General/SOLARieee_le/')
+      PARAMETER (kXsecFile  = 
+     $              '/asl/data/kcarta/KCARTADATA/General/xsecdata.dat.intel')
+3)database listing files comp107.param and xsec107.param are at
+      PARAMETER (kXsecParamFile = 
+     $              '/asl/data/kcarta/KCARTADATA/General/xsec107.param')
+      PARAMETER (kCompParamFile = 
+     $              '/asl/data/kcarta/KCARTADATA/General/comp107.param')
+
+Updates to spectroscopy (post AIRS launch May 2002)
+---------------------------------------------------
+
+kCARTA was validated using spectra from campaigns such as CAMEX, WINTEX and
+CLAMS. After the AIRS instrument was launched in May 2002, we were able to 
+validate (clear sky) kCARTA against literally thousands of spectra. Based on 
+theseAIRS observations, a couple of changes were made to the kCARTA 
+spectroscopy. One was the 4.3um CO2 bandhead, while the other was a 
+broader fix to the water vapor continuum (800-1200 cm-1, 2500-2700 cm-1 
+window regions, as well as the 1300-1650 cm-1 band). These changes are in a 
+state of flux, and you might not pick up the latest improvements.

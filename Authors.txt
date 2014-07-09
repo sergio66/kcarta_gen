@@ -1,0 +1,63 @@
+Copyright 1996-2013, 
+L. Larrabee Strow,  Sergio DeSouza-Machado, Howard Motteler and Scott Hannon
+Atmospheric Spectroscopy Laboratory
+
+kCARTA is distributed under the terms of the GNU GPL v3
+
+See Copyright.txt
+
+------------------------------------------------------------------------
+
+Code development
+
+Larabee Strow     : Principal Investigator
+
+Sergio DeSouza-Machado 
+                  : Coding up jacobian computations during uncompression.
+                    Accurate background thermal radiation computation, and 
+                    scattering and flux computation codes.
+
+Scott Hannon      : Spline interpolation of database during uncompression and 
+                    RTA testing, prototype clear sky radiative transfer 
+                    algorithm.
+
+Howard Motteler   : Database generation, SVD compression and testing, RTA 
+                    testing; rtp (hdf) interfacing development and implementation. 
+
+------------------------------------------------------------------------
+Information about lineparameters contained in the HITRAN database can be 
+found eg in
+  Rothman et. al, The HITRAN 2008 molecular spectroscopic database, JQSRT
+  (2009) v110 pgs 533-572
+
+The Matlab based UMBC-LBL code was used to generate spectral lineshapes 
+using the HITRAN database; more information can be found in the following
+technical report : 
+  De Souza-Machado, S., Strow, L.L., Tobin,D., Motteler,H.E. and Hannon, S.E,.
+  UMBC-LBL: An Algorithm to Compute Line-by-Line Spectra. University of 
+  Maryland Baltimore County, Department of Physics, 2002
+  {http://asl.umbc.edu/rta/lbl.html}
+
+The SVD-based algorithm used to compress and un-compress the lookup tables used
+by kCARTA is described in
+  Strow,L.L., Motteler,H.E., Benson,R.G., Hannon,S.E. and De Souza-Machado, S.
+  Fast Computation of Monochromatic Infrared Atmospheric Transmittances using 
+  Compressed Look-Up Tables, JQSRT (1998) v59 pgs 481-493
+
+------------------------------------------------------------------------
+Water continuum models, and O2 and N2 continuums, used in kCARTA mostly come 
+from one or both of the following
+a) LBLRTM suite of codes 
+   See eg Clough, S. A., M. W. Shephard, E. J. Mlawer, J. S. Delamere, 
+    M. J. Iacono, K. Cady-Pereira, S. Boukabara, and P. D. Brown, Atmospheric 
+    radiative transfer modeling: a summary of the AER codes, Short 
+    Communication, J. Quant. Spectrosc. Radiat. Transfer, 91, 233-244, 2005.
+    Also see http://rtweb.aer.com/continuum_whats_new.html             
+b) GENLN2
+   See eg Edwards, D. P. (1992), GENLN2: A general line-by-line atmospheric 
+     transmittance and radiance model, Version 3.0 description and user guide, 
+     NCAR/TN-367-STR, National Center for Atmospheric Research, Boulder, Co.
+c) Depending on spectral region, code may use specialized continuum (eg UV 03) 
+
+Any or all of the above may be licensed separately.
+

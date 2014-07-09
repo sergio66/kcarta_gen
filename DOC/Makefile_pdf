@@ -1,0 +1,37 @@
+
+SHELL = /bin/sh
+
+TEXHOME = /usr/bin/
+
+all: kcarta1.11.pdf bkcarta1.10.pdf ReadMeFirst.pdf
+
+kcarta1.11.pdf: kcarta1.11.tex ASL_defs.tex
+	$(TEXHOME)pdflatex kcarta1.11.tex
+
+kcarta1.10.pdf: kcarta1.10.tex ASL_defs.tex
+	$(TEXHOME)pdflatex kcarta1.10.tex
+
+bkcarta1.10.pdf: bkcarta1.10.tex ASL_defs.tex
+	$(TEXHOME)pdflatex bkcarta1.10.tex && \
+	$(TEXHOME)pdflatex bkcarta1.10.tex 
+
+ReadMeFirst.pdf: ReadMeFirst.tex ASL_defs.tex
+	$(TEXHOME)pdflatex ReadMeFirst.tex && \
+	$(TEXHOME)pdflatex ReadMeFirst.tex
+
+readme0.97.ps: readme0.97.tex
+	$(TEXHOME)pdflatex readme0.97.tex && \
+	$(TEXHOME)pdflatex readme0.97.tex
+
+kcarta0.96.ps: kcarta0.96.tex ASL_defs.tex
+	$(TEXHOME)pdflatex kcarta0.96.tex && \
+	$(TEXHOME)pdflatex kcarta0.96.tex
+
+readme0.96.ps: readme0.96.tex
+	$(TEXHOME)pdflatex readme0.96.tex && \
+	$(TEXHOME)pdflatex readme0.96.tex
+
+clean:
+	rm *.aux *.lof *.dvi *.log *.lot *.toc *~ 2> /dev/null || true
+
+

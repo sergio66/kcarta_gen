@@ -1,0 +1,28 @@
+
+
+We are implementing a "zero scattering" algorithm to include the effects of 
+clouds in the atmosphere. This algorithm ignores the phase scattering 
+information (related to the asymmetry paramater "g"), and cannot
+be used in the presence of a solar beam. It works best in regions where the
+single scattering albedo and asymmetry factor are close to 0. Another point 
+to note is that we supply the Mie scattering tables for clouds made of ice 
+particles whose average diameter ranges from from 0.1 to 100 um in size; 
+water clouds would have similar overall properties, but would have lower 
+extinction optical depths. 
+
+The simplicity  of the model means that its results are only applicable for 
+(ice) cirrus clouds in the 8-10 um region, as the single scattering albedo 
+and the asymmetry parameter are close to zero in that region. For ice paths 
+of upto 10 g/m2, this model produces errors of less than about 1 K (when 
+compared to DISORT or RTSPEC) in the 8-10 um region. For similar cirrus 
+clouds in the 3.5 um region, this same model can produce errors of about 15 K.
+
+Useful references include
+1) Numerically stable algotrithm for discrete ordinate method radiative 
+transfer in multiple scattering and emitting layered media, K. Stamnes et al,
+Applied Optics Vol 27, No 12, 1988 (pg 2502)
+2) A Hybrid Eddington Single Scattering Radiative Transfer Model for computing
+radiances from Thermally Emitting Atmospheres, M. Deeter and K. F. Evans, 
+JQSRT 1998
+3) Infrared Emission of Laboratory Ice Clouds, C.G. Schmitt and W. P. Arnott,
+JSQRT 1998

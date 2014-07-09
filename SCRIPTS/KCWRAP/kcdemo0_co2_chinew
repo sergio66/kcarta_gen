@@ -1,0 +1,127 @@
+#!/bin/sh
+#
+# this is a simple demo, normally this would be run with a loop
+### if you have runaway processes, do
+### killall bkcarta.x.CHINEW; killall kcwrap2; killall kcwrap_CKD51
+
+###before we used /carrot/s1/Hannon/Airs/2002/06/14/clear_ip.rtp which had
+###320 profiles; scott has changed things and clearg005_ip.rtp has 402 profiles
+###so use  /carrot/s1/motteler/airs/2002/06/14/clearg005/ckd24/allrad.rtp
+###same as /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp
+
+# no graphic environment
+DISPLAY=""
+export DISPLAY
+
+ssh -x airs1 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+           -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 1 -n2 20 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs1.log 2>&1 &
+
+ssh -x airs2 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 21 -n2 40 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs2.log 2>&1 &
+
+ssh -x airs3 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 41 -n2 60 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs3.log 2>&1 &
+
+ssh -x airs4 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 61 -n2 80 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs4.log 2>&1 &
+
+ssh -x airs5 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 81 -n2 100 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs5.log 2>&1 &
+
+ssh -x airs6 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 101 -n2 120 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs6.log 2>&1 &
+
+ssh -x airs7 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 121 -n2 140 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs7.log 2>&1 &
+
+ssh -x airs8 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 141 -n2 160 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs8.log 2>&1 &
+
+ssh -x airs9 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 161 -n2 180 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs9.log 2>&1 &
+
+ssh -x airs10 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 181 -n2 200 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs10.log 2>&1 &
+
+ssh -x airs11 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 201 -n2 220 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs11.log 2>&1 &
+
+ssh -x airs12 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 221 -n2 240 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs12.log 2>&1 &
+
+ssh -x airs13 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 241 -n2 260 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs13.log 2>&1 &
+
+ssh -x airs14 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 261 -n2 280 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs14.log 2>&1 &
+
+ssh -x airs15 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 281 -n2 300 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs15.log 2>&1 &
+
+ssh -x airs16 "cd /airs/s1/sergio; \
+           /home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2 \
+	   -s /asl/data/airs/srf/srftables_020614v1.hdf \
+	   -n1 301 -n2 320 \
+	   /carrot/s1/sergio/Airs/2002/06/14/clearg005/ckd24/allrad.rtp \
+	   /carrot/s1/sergio/Airs/2002/06/14/CKD51_CO2CHINEW/clear_op" > airs16.log 2>&1 &
+

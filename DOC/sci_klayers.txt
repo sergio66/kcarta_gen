@@ -1,0 +1,322 @@
+
+    ===================================================
+    Science related notes for the kCARTA LAYERS package
+    ===================================================
+    Profile Interpolation & Integration for the kCARTA layers
+    Organization: University of Maryland Baltimore County (UMBC)
+    Programmer: Scott Hannon (email: umbc.edu)
+    Date: 12 February 1998 (based on 25 July 1996 notes for AIRS_LAYERS)
+
+Introduction:
+------------
+
+This file explains some of the physical/mathematical and practical 
+considerations in the development of the kCARTA layers code.  The layers
+program was originally written to support the development of a fast
+transmittance model for the AIRS (Atmospheric Infra-Red Sounder) satellite
+instrument.  The kCARTA layers are exactly the same as the AIRS layers.
+
+The basic problem is to convert a profile supplied at arbitrary points in
+the atmosphere and interpolate between the points to form slab-average
+or slab-integrated values.  The creation of a layering code such as this
+one is complicated by the interaction of many of the profile variables, as
+well as the presumed variation of these across the layer. For example, a
+layer defined as the region between two fixed pressure levels will not, in
+general, have the same thickness for profiles with different values of
+temperature and water mixing ratios.  This is because layer thickness is a
+function of air density (which depends on temperature and mixing ratio) and
+gravity (which depends primarily on altitude and latitude).  This directly
+impacts the integrated layer absorber amounts.
+
+
+The Hydrostatic Equation:
+------------------------
+The kCARTA layers program is based upon solving the hydrostatic equation.
+The hydrostatic equation (which assumes negligible vertical acceleration
+of the air) is used to relate pressure to altitude:
+
+  dP(z)/dz = -g(z) * D(z)
+
+  where:
+     P = air pressure
+     z = altitude above Earth's surface
+     g = gravitational acceleration; a known expression (see note 2)
+     D = air mass density = C(z) * P(z)/T(z), where C(z) is the mass of one
+         mole of air divided by the gas constant R, and T(z) is the
+         temperature. C varies only slightly with altitude and profile (see
+         note 1).
+
+   Note 1: The Molecular Mass of Air
+   ---------------------------------
+   The virial coefficients of air are small enough that for realistic Earth
+   profiles air may be treated as an ideal gas. For example, the miniumum
+   molar volume for an ideal gas is:
+
+      Vmin = R * Tmin / Pmax
+   
+   Suppose Tmin = 200 K and Pmax 1100 mb. Then:
+
+      Vmin = ( 8.314 (N.m)/(K.mol) * (100 cm/m) * 200 K ) /
+         ( 1100 mb * 100 (N/m^2)/mb * (m/(100 cm))^2 )
+
+      Vmin = 1.5E+4 cm^3/mol 
+
+   From the "American Institute of Physics Handbook" (pg 4-169) the first
+   order virial coefficient for air at 200K is Bv = -38.241 cm^3/mol, so
+   for this worst-case example, R for air is:
+
+      R_air = R_ideal * (1 + Bv/V)
+
+      R_air = R_ideal * (1 - 38.241/1.5E+4) = 0.9975 * R_ideal
+
+   Thus we can say that for realistic Earth profiles we should be able to
+   treat R as a constant to within better than 0.25%.
+
+   "Air" is a mixture of various gas molecules, and so the mass of one mole
+   of air depends upon the masses of the different molecules making up the
+   air as well as their mixing ratios. If the mixing ratios of the various
+   atmospheric gases vary, so will the molecular mass of air. However, for
+   altitudes in the atmosphere below about 100 km, the molecular mass of
+   "dry air" (ie all elements except for water) stays nearly constant at
+   28.97 grams per mole. Thus the variation in "air" molecular mass is due
+   almost entirely to variations in the water mixing ratio.
+
+   For example, an extremely wet profile might have a mixing ratio for water
+   that goes as high as 10^5 ppmv (Parts Per Million, Volume) somewhere near
+   the Earth's surface. Since water has a mass of 18.01 g/mol, then the air
+   molecular mass in this case is:
+      (1 - 10^5/10^6)*28.97 + (10^5/10^6)*18.01 = 27.87 g/mol
+   which is about 4% less than dry air. Thus we must conclude that treating
+   the molecular mass strictly as a constant may lead to errors of up to 4%
+   for layers below, say, 10 km.
+
+   Note 2: Gravity as a Function of Altitude
+   -----------------------------------------
+   Gravity as used here refers to the total downward acceleration acting on
+   a body in the Earth's atmosphere. It consists not only of gravitational
+   acceleration, but also the centripetal acceleration due to the Earth's
+   rotation (and possibly wind as well). It may be expressed as:
+      g(z) = g_surface - change_in_centripetal_acceleration(z) -
+         change_in_gravitation(z).
+   We make the approximations:
+      change_in_centripetal_acceletaion(z) =V_surface^2/r - V_total^2/R
+   and
+      change_in_gravitation(z) = gravitation_at_surface*(1 - r^2/R^2)
+   where r is the Earth's radius (as a function of latitude):
+      r = sqrt( b^2/[ 1 - (1 - b^2/a^2)*cos^2(latitude) ] )
+      with a = equatorial radius = 6.378388E+6 m,
+      and b = polar radius = 6.356911E+6 m ,
+   R is the total distance from the Earth's center:
+      R = r + z
+      where z is the altitude above the Earth's surface,
+   V_surface^2 is the square of the speed of the Earth's surface:
+      V_surface = 2*pi*r*f*cos(latitude), with f = 1/86400 rev/sec,
+   V_total^2 is the square of the total speed of the air (parallel to the
+      Earth's surface) due to the Earth's rotation and winds:
+      V_total^2 = [2*pi*R*f*cos(latitude) + V_wind_east]^2 + V_wind_north^2
+   and g_surface is the surface gravity given by:
+      g_surface = 9.780455*[ 1 + 5.30157E-6*sin^2(latitude)
+         - 5.85E-6*sin^2(2*latitude)
+         + 6.40E-6*cos(latitude)*cos(2*[longitude + 18 degrees]) ] m/s^2
+      (from "American Institute of Physics Handbook", 1963, pg 102).
+
+   At the north pole (latitude = 90 degrees):
+   For z = 0 km and no wind, g =  9.832307 m/s^2
+   For z = 0 km and a wind of 30 m/s blowing south, g = 9.832166 m/s^2
+   for z = 85 km and no wind, g = 9.574548 m/s^2
+   For z = 85km and a wind of 90 m/s blowing south, g = 9.573291 m/s^2
+
+   At the equator (latitude = 0 degrees, longitude = 0):
+   For z = 0 km and no wind, g = 9.780505 m/s^2
+   For z = 0 km and a wind of 30 m/s blowing south, g = 9.780364 m/s^2
+   For z = 0 km and a wind of 30 m/s blowing east (in the same direction as
+      the Earth's rotation), g = 9.776001 m/s^2
+   For z = 85 km and no wind, g = 9.523619 m/s^2
+   For z = 85 km and a wind of 90 m/s blowing south, g = 9.522366 m/s^2
+   For z = 85 km and a wind of 90 m/s blowing east, g = 9.509275 m/s^2
+
+   Thus we can see the effects of altitude are about 2.7%, while latitude
+   is about 0.5% and winds are less than a 0.2% effect. This is at a level
+   where the variation of gravity should be accounted for, but over small
+   distances (a couple km or less) it can be treated as a constant.
+
+
+An Approximation to the Hydrostatic Equation:
+--------------------------------------------
+Returning to the hydrostatic equation:
+
+   dP(z)/dz = -g(z) * C(z) * P(z)/T(z)
+ 
+we make the finite thin-slab approximations:
+
+   dP = delta_P = (P2 - P1)
+   dz = delta_z = (z2 - z1) = layer thickness
+   g(z) = gavg
+   P(z) = Pavg
+   T(z) = Tavg
+   C(z) = Cavg
+
+and solve for layer thickness, getting:
+
+   delta_z = - delta_P * Tavg / ( gavg * Cavg * Pavg )
+
+Thus we need to somehow define Tavg, gavg, Cavg, and Pavg.
+
+To calculate gavg, ideally we would like to use g(zavg). But since we do not
+yet know the layer thickness, it is not obvious what zavg might be. However,
+we do know that for thin layers (ie delta_z is small) that the difference
+
+    g(z) - g(z + delta_z)
+
+should be very small, and thus we may make he approximation:
+
+    gavg = g(z_at_top_of_layer_below) 
+
+Thus if we start out at a known ground height z0, and we work upward over the
+layers, we can approximate gavg for all the layers. Note that we may use this
+method to calculate delta_z for a layer and then say 
+
+   zavg = z_top_of_layer_below +  delta_z/2
+
+and then calculate gavg = g(zavg) and use this to re-calculate delta_z
+before going on to the next layer. But it's probably not worth the extra
+effort; the first approximation of zavg should be good enough.
+
+To calculate Cavg, we might make the assumption that the air density would
+make a good weighting factor for C and say:
+
+   Cavg = (D1*C1 + D2*C2) / (D1 + D2) 
+
+where D1 and D2 are the air densities:
+
+   D = C * P / T
+
+at the two layer boundaries.
+
+The calculation of Tavg and Pavg should, in principle, somehow make use of
+the gas mixing ratio. However, for our application (the Fast Transmittance
+Code), we would like to have only one pressure and temperature that applies
+to all gases, rather than one pressure and temperature for each gas. Thus
+it might not be wise to make use of the mixing ratios when calculating Tavg
+and Pavg.
+
+For Tavg, we might treat it in a manner similar to Cavg and say:
+
+   Tavg = (D1*T1 + D2*T2) / (D1 + D2)
+
+For Pavg we need to be even more careful; we do not want any profile specific
+dependence at all. Therefore we fall back on the crude approximation that:
+
+    P = B*exp(A*z)
+
+and so z varies as the ln(P). While this approximation is certainly very
+crude if applied over the entire atmosphere, for our purposes we are only
+applying it to thin layers.
+
+Thus if we take the average of P with respect to z:
+
+   Pavg = ( integral{z1 to z2}: P(z)*dz) / ( integral{z1 to z2}: dz )
+
+The integrations are simple, giving:
+
+   Pavg = ( (P2/A) - (P1/A) ) / (z2 - z1)
+
+Since
+
+   P = B*exp(A*z),  then  z = (1/A)*ln(P/B)
+
+and so substituting for z1 and z2 gives:
+
+   Pavg = (1/A) * (P2 - P1) / ( (1/A)*ln(P2/B) - (1/A)*ln(P1/B) )
+
+   Pavg = (P2 - P1) / ( ln(P2/B) - ln (P1/B)
+
+   Pavg = (P2 - P1)/ln(P2/P1)
+
+Thus we have an equation for Pavg that depends only upon P and the implicit
+assumption that z varies approximately as ln(P).
+
+
+Layer Amounts:
+-------------
+A layer amount of the type required by kCARTA can be calculated using the
+equation:
+
+   A = den_ref * (Pavg/Tavg) * MRavg * delta_z
+
+where
+   den_ref = 1.2027E-12 (kmole/cm^2)*(K/mb)*(1/ppmv)*(1/m)
+   Pavg, Tavg, and delta_z are as defined earlier, and
+   MRavg = the average mixing ratio.
+
+with MRavg perhaps being approximated by:
+
+   MRavg = (D1*MR1 + D2*MR2)/(D1 + D2)
+
+Here the mixing ratio MR refers to the fractional part (ppmv = Parts Per
+Million, Volume) of the "air" consisting of a specific gas.  We should be
+careful here to note that even if some gas has a fairly constant mixing ratio
+with respect to "dry air", there will still be some variation in the "air"
+mixing ratio due to the displacement of "dry air particles" by the molecules
+of gases that do vary depending upon the profile.  Typically only water varies
+enough to be worth noting.  Thus if a mixing ratio of any gas except water is
+specified with respect to "dry air", its "wet air" mixing ratio should be
+modified:
+
+  Any gas except water:  MRwet = MRdry * (1 - MRwater/10^6)
+
+where all mixing ratios are in ppmv.
+
+In the case of water, the conversion is
+
+  Water (only):    MRwet = 10^6 * MRdry/(MRdry + 10^6)
+
+where again all mixing ratios are in ppmv.  Currently the layers program 
+does *NOT* do a dry-to-wet mixing ratio conversion for water.  Therefore the
+user needs to take care to always use a wet ppmv mixing ratio for water with
+these programs.
+
+
+Layers and Levels:
+-----------------
+As we use the terms, we mean different things when we speak of "layers" and
+"levels".  A "level" refers to a point value, while a "layer" refers to a
+finite thickness slab value.  We define our layers using levels as layer
+boundaries. For AIRS, the definition is:
+
+   Plev(i) = exp( (7/2) * ln( A*i^2 + B*i + C ) )
+
+where
+   i refers to the level number (an integer counter)
+   and A, B, C are constants which obey the relation (exact):
+      Plev(i=1)=1100, Plev(i=38)=300, Plev(i=101)=5.0E-3 mb
+   with approximate values:
+      A = -1.5508E-4
+      B = -5.5937E-2
+      C =  7.4516
+
+These 101 level boundaries define the 100 AIRS layers; that is the AIRS layers
+are the slabs between each adjacent pair of levels.
+
+Typically, profile variables vary to some degree with altitude, so that in
+general these variables vary between levels and across layers.  Since these
+variables are usually considered to vary continuously with altitude, it is
+necessary to make use of some relation that describes in what manner the
+values vary between level data points.  This is necessary both to interpolate
+the supplied data points onto the desired levels (if they are not supplied at
+these levels), and to describe how the variables change across a layer.
+
+Ideally, the profile data points should be supplied at a fine enough vertical
+resolution such that any reasonable assumption about how things vary between
+adjacent data points will give acceptibly accurate results. For example, we
+make use of the following assumptions:
+
+    Mixing ratios vary roughly as the logarithm of pressure
+    Temperature varies roughly as the logarithm of pressure
+    Altitude varies very roughly as the logarithm of pressure
+
+Or another way of saying the same thing is that we assume mixing ratios and
+temperature vary linearly with altitude, while pressure varies exponentially
+with altitude.
+
+Scott.

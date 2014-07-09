@@ -1,0 +1,39 @@
+c include the parameters in kcarta.param
+
+      include '../../INCLUDE/kcarta.param'
+
+c define some specfic parameters
+      INTEGER kAirs,kAirsChannelPts
+      PARAMETER (kAirs=2373,kAirsChannelPts=60000) 
+
+      INTEGER kStore,kChPoints
+      PARAMETER (kStore=400,kChPoints=2500) 
+
+c these next 3 are for the FORTRAN file that reads in the unformatted file
+c kMaxEntire & Number of monochromatic frequency points for an entire run 
+c              (eg from 605 to 2805 cm-1, we have 2200/0.0025 pts)\\ \hline
+c kMaxOut &      kGasStore*kMaxLayer + kMixFilRows + (kMaxAtm+1)*kMaxLayer\\
+c              This is number of output paths/MP/layers/radiances per 
+c              25 cm-1 chunk. Typical number = 400\\ \hline
+c kMaxExtra & (kMaxDQ+2)*kMaxLayer+4. This is
+c             max number of output jacobians - 100 for tempr, kMaxDQ*100 for
+c             gas amounts, 100 for weighting functions and 4 surface 
+c             derivatives.   Note you have to figure out this parameter 
+c             for the TOTAL number  of atmospheres! Typical number = 404
+c kMaxOut  == kGasStore*kMaxLayer + kMixFilRows + (kMaxAtm+1)*kMaxLayer
+c             (max number of output paths/MP/layers/radiances in raaData)
+      INTEGER kMaxOut,kMaxEntire
+      PARAMETER (kMaxOut=1000,kMaxEntire=900000)
+c this is for reading in the Jacobiand
+      INTEGER kMaxExtra
+      PARAMETER (kMaxExtra=704)
+
+
+
+
+
+
+
+
+
+

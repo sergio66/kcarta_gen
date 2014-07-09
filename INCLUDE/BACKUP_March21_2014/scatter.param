@@ -1,0 +1,105 @@
+c~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+c~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+c this file does the interfacing between K.F.Evan's RTSPEC array dimensions,
+c and those of kCARTA
+
+c this file does the interfacing between Stamnes et al DISORT array dimensions,
+c and those of kCARTA
+
+      include '../INCLUDE/kcarta.param'
+
+cccccccccccccccccccccc ORIGINAL rtspec variables ccccccccccccccccccccc
+cc
+ccC         Scattering table variables: 
+cc      INTEGER  MAXTAB, MAXGRID, MAXSCAT
+cc      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5)
+cc      INTEGER  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
+cc      REAL     MUTAB(MAXGRID,MAXSCAT)
+cc      REAL     DMETAB(MAXGRID,MAXSCAT), WAVETAB(MAXGRID,MAXSCAT)
+cc      REAL     MUINC(2)
+cc      REAL     TABEXTINCT(MAXTAB,MAXSCAT), TABSSALB(MAXTAB,MAXSCAT)
+cc      REAL     TABASYM(MAXTAB,MAXSCAT)
+cc      REAL     TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
+cc      REAL     TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
+cc
+ccC         Radiative transfer variables: 
+cc      INTEGER  MAXABSNU, MAXNZ, MAXSPEC
+cc      PARAMETER (MAXABSNU=100000, MAXNZ=100, MAXSPEC=10) 
+cc      INTEGER NUMSPEC, NSCATTAB, NCLDLAY, NABSNU, NLEV
+cc      INTEGER ICLDTOP, ICLDBOT, IOBS, ISCATTAB(MAXNZ)
+cc      INTEGER I, J, L, M, JNU1, JNU2
+cc      LOGICAL OUTTB(MAXSPEC), OUTTRIANG(MAXSPEC), BINARYABSFILE
+cc      REAL    ZOBS, MUOBS, ZTOP, IWP(MAXNZ), DME(MAXNZ)
+cc      REAL    SFCTEMP, SFCEMIS
+cc      REAL    ONU, RADOBS, OUTRAD
+cc      REAL    HEIGHT(MAXNZ), TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)
+cc      REAL*8  ABSNU1, ABSNU2, ABSDELNU
+cc      REAL*8  OUTNU1(MAXSPEC), OUTNU2(MAXSPEC), OUTDELNU(MAXSPEC)
+cc      REAL*8  WAVENO, ONU1, ONU2, INVOUTDELNU, WT1, WT2
+cc      REAL*8  SUMWT1, SUMWT2, SUMRAD1, SUMRAD2
+cc      CHARACTER*100 SCATFILE(MAXSCAT), ABSFILE(MAXSPEC), OUTPUTFILE
+cc      CHARACTER*1   RTMODEL, ABSTYPE
+cc      CHARACTER*24  OUTUNITS, OUTAVERAGING
+
+cccccccccccccccccccccc interfaced rtspec dimensions ccccccccccccccccccccc
+C         Scattering table variables: 
+c      need MAXTAB >= (NMUOBS*NDME*NWAVE)
+      INTEGER  MAXTAB, MAXGRID, MAXSCAT 
+c      PARAMETER (MAXTAB=10*25*500*8, MAXGRID=kMaxPts, MAXSCAT=kMaxClouds) 
+c      PARAMETER (MAXTAB=10*25*500, MAXGRID=kMaxPts,MAXSCAT=kMaxClouds) 
+c      PARAMETER (MAXTAB=10*10*2600, MAXGRID=kMaxPts, MAXSCAT=kMaxClouds) 
+c      PARAMETER (MAXTAB=10*10*2200, MAXGRID=kMaxPts, MAXSCAT=kMaxClouds) 
+      PARAMETER (MAXTAB=10*10*2600, MAXGRID=kMaxPts, MAXSCAT=kMaxClouds)
+
+C         Radiative transfer variables:  
+      INTEGER  MAXABSNU, MAXNZ 
+c maxabsnu = number of frequency points
+c maxnz    = max number of levels ==== 1 + max number of layers
+      PARAMETER (MAXABSNU=kMaxPts, MAXNZ=kProfLayer+1)
+cthis is for the number of phase function points
+      INTEGER   MAXPHASE
+      PARAMETER (MAXPHASE=128)  !read this many phase points each time
+
+c************************************************************************
+
+c~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+c~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+c this file also does the interfacing between DISORT and KCARTA arrays
+
+c  LOCAL SYMBOLIC DIMENSIONS (have big effect on storage requirements): 
+c 
+c       MXCLY  = Max no. of computational layers 
+c       MXULV  = Max no. of output levels 
+c       MXCMU  = Max no. of computation polar angles 
+c       MXUMU  = Max no. of output polar angles 
+c       MXPHI  = Max no. of output azimuthal angles 
+c       MXSQT  = Max no. of square roots of integers (for LEPOLY) 
+
+      INTEGER maxcly             !max number of computational layers
+      INTEGER maxulv             !max number of output user levels
+      INTEGER maxcmu             !max number of computational polar angles 
+                                 !(should be EVEN)
+      INTEGER maxumu             !max number of user polar angles
+      INTEGER maxphi             !max number of user azimuth angles
+      INTEGER maxsqt             !max number of square roots of integers
+      INTEGER maxmom             !max number of legendre polys=streamnums
+
+c      PARAMETER (maxcly = kProfLayer, maxulv = maxcly+1, maxmom = 299 ) 
+      PARAMETER (maxphi = 3, maxumu = 10)
+      PARAMETER (maxsqt = 1000, maxcmu = 12)
+      PARAMETER (maxcly = kProfLayer, maxulv = maxcly+1, maxmom = 1 ) 
+c space saver dimensions!!!!!!!!!!!!!!!!!
+c      PARAMETER (maxphi = 2, maxumu = 2)
+c      PARAMETER (maxsqt = 10, maxcmu = 2)
+c      PARAMETER (maxcly = 1, maxulv = maxcly+1, maxmom = 1 ) 
+
+c raUseEmissivity is emissivity vector assigned for current 25 cm-1 chunk
+c raBiDirRefl     is bidirectilnal reflectivity 
+c DISORTsurfpress is surface pressure
+      REAL DISORTsurfPress
+      INTEGER DISORTiI
+      DOUBLE PRECISION DISORTraBiDirRefl(kMaxPts)
+
+      COMMON/DISORTBLK1/DISORTiI
+      COMMON/DISORTBLK2/DISORTsurfPress
+      COMMON/DISORTBLK3/DISORTraBiDirRefl

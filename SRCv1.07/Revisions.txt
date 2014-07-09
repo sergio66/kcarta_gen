@@ -1,0 +1,485 @@
+v1.07
+-----
+This is the version that will be used with our new kCompressed Database.
+We will allow "two new" gases in with this, the self part and the foreign part 
+of the water continuum. The profiles for these will obviously be the same
+as that of water vapor. Temperature and "amount" Jacobians will be computed
+for these gases, which will have gasIDs 101 and 102. The CKD data is in 
+binary files, and so kcarta.param needs the user to set the path to these
+binary files.
+
+One can only use the self and foreign continuums if water is one of the
+gases in the profile, and if kCKD >= 0 (ie water continuum is turned on).
+If one only wants to see the continuum (eg dump out path spectra of
+self continuum only), one can easily tailor the driver namelist file to
+do this eg set water (gasID = 1) weight to 0.0
+
+1/16/02         Fixed bug in VACONV; angles were not changing correctly
+                with altitude.  NOTE: Sergio is no longer maintaining
+                V1.07, so the fix has been applied to *this* particular
+                SRCV1.07 only.  The fix has been applied to the current
+                version, V1.10.
+
+7/12/00         Fixed a bug in one of the arrays (iagases was specified with 
+                size kMaxGas in some routines, kGasStore in others; it has now 
+                been set to kMaxGas in all routines)
+
+7/4/00          Modified the scatter input routine (in n_rad_jac_scat.f) to
+                allow user to use same scattering table for different layers 
+                of atmosphere. This might be hazardous, as cloud temperatures 
+                used in the Mie scattering routines might not be consistent 
+                with some of the atmosphere layers used by kCARTA. However, 
+                this will easily allow one scattering table to be used with a
+                multilayer cloud
+
+7/2/00          Fixed bug in upward looking radiance; raInten was NOT being 
+                set, and so if doJacobOutput = 1, would give bizzare answers
+                Note these changes have NOT been tested for sun in FOV 
+
+7/2/00          Fixed bug in doJacobOutput for uplook instr .... had to 
+                correctly set variable iLower in main part of jac_up.f 
+
+7/2/00          Fixed bug in jac_up; if kJacobOuput=1, it was not 
+                computing d(BT)/drad
+
+6/13/00         Cleaned up a bug in reading scatter namelist section
+
+6/13/00         Cleaned up a bug in setting scatter layer temperatures
+
+v1.06
+-----
+Major change is to use namelists instead of kcarta driver files
+To maintain backwards compatibility with previous versions, all the s_* files
+that were previously used to parse in the driver input files, are now grouped
+separately in directory NAMELIST. When the code is compiled and linked, it 
+produes an executable that can parse in the old input driver files, and
+write out a namelist file that kcartav1.06+ can use
+
+Note that this namelist producer still does quite a bit of error checking, 
+as is the case for the old s_*.f files; however, not all error checking is
+done thoroughly eg in output section, there is no error checking done.
+
+The new namelist reader files do the same amount of error checking as did the
+s_*.f files
+
+Note that ReadNewData will NOT add on water continuum if asked for ie it  
+assumes that the externally supplied water spectra is just the pure lineshape 
+(lorentz/voigt/local) PLUS the necessary continuum 
+
+7/12/00         Fixed a bug in one of the arrays (iagases was specified with 
+                size kMaxGas in some routines, kGasStore in others; it has now 
+                been set to kMaxGas in all routines)
+
+7/2/00          Fixed bug in upward looking radiance; raInten was NOT being 
+                set, and so if doJacobOutput = 1, would give bizzare answers
+
+7/2/00          Fixed bug in doJacobOutput for uplook instr .... had to 
+                correctly set variable iLower in main part of jac_up.f 
+
+7/2/00          Fixed bug in jac_up; if kJacobOuput=1, it was not 
+                computing d(BT)/drad
+ 
+4/18/00         When reading in radiance section, kCARTA checks to see if
+                surface temperatures are ridiculous! Or if emissivities are < 0
+
+4/4/00          "pprof" in PrepareOutput (file s_writefile.f) was mistakenly
+                outputting kProfLayer+1 values, instead of kProfLayer values
+                This has now been fixed, ; also affects readkcarta.f/m and 
+                readkcstd.m
+
+3/23/00         Parameter KXsecFormat tells code whether or not to
+                use kCompressed files (+1) or the Xsec binary file (-1)
+                for the minor cross section gases (gasID 51-63)
+
+3/15/00         Sent files through g77, Absoft77 to clear little errors
+                g77 does not seem to be too happy with namelists in that it
+                wants different names for subroutine arguments, as compared
+                to namelist symbols
+
+3/14/00         File "DumbFile" is a temporary file that is created at runtime
+
+v1.05
+-----
+
+Major changes are 
+1) to treat the cross section gases the same way as the rest of the gases ie 
+   use a compressed database for them as well
+2) to use the water vapor continuum in the same fashion as that of the CKD
+   model ie use kwater=(klorentz-basement) + CKD
+
+3/1/00          Fixed subroutines calcon2.3,2.4 so that the self continuum
+                contribution is smoothly interpolated across 10 cm-1 chunks
+
+2/24/00         Fixed kcartamain.f so that kStdFlux is closed at end of run
+
+2/24/00         Fixed routine in rad_scat.f so that raInten is not set to 0.0
+                and thus driving part of the jacobian calculations nuts!
+
+2/14/00         Making interface_rtspec more clear about upward/downward
+                satellite, by being more careful about the sign of muobs
+
+2/10/00         Instead of reading in a (large) text file that contains the
+                scattering data from sscatmie.f, kCARTA can read in a 
+                smaller binary file. This file is produced by running
+                program "translate" found in the RTSPEC directory.
+                This involves setting new parameter "binary" to +1 in
+                the *SCATTR section
+
+1/11/00         Rewriting kcoeffMAIN.f so that there no longer are 
+                different calls for the cross section gases. This means calls 
+                to routines calq,calxsc have been removed
+
+11/3/99         Adding on CKDv2.4 .. parameter kCKD can now be -1,0,21,23,24
+                Subroutine xspl() added to kcartamisc.f so that the coarse
+                grid of S296,S260,F296 data can be immediately splined
+                onto the finer kCARTA grid. 
+
+                However, note that this feature cannot be used in SRCv1.04, 
+                as the water lineshape in the database was not computed using 
+                the local definition ie can only use CKDv0,21 or 23 in 
+                kCARTAv1.04-
+
+                There is no need to use h2o*_wb.f to complement fixing the 
+                CKD2.3 code, as kCARTA database was computed using Lorentz 
+                lineshape instead of local lineshape (=lorentz-basement).
+                Thus all we have to do is to use the continuum code from
+                GENLN2, with the modified h2o*.f data blocks (which add on
+                the basement term).
+
+v1.04
+-----
+
+The radiative transfer routines can now do one of the following three :  
+  1) radiance, flux and jacobian computations for a clear sky
+  2) read in external spectra for a gas; do radiance, flux computations
+  3) radiance computations for a scattering atmosphere for a downlooking
+     instrument. Solar contribution not included. Backgnd thermal not
+     included. Only the radiance at TOA can be output.
+
+11/19/99        Fixing bugs in the interface to rtspec.f
+                Also adding on some subroutines so that clear sky radiative
+                  transfer routines of rtspec.f, though slightly different, 
+                  give answers that are within 0.05K of kCARTA answers ... 
+                  this is especially important wrt background thermal.
+                Note that if instrument is low in atmosphere, the scattering
+                  code does not accurately add on TOA-instrument 
+                  radiance -- as long as instrument is higher than the 
+                  boundary found in function FindBoundary(raWaves), this 
+                  will give < 0.05 K error, else error could creep upwards 
+                  as arccos(3/5) is used instead of more accurate 
+                  diffusive angle
+                Remember that rtspec cannot include solar contribution
+ 
+10/28/99        Fixed two bugs in CKDv2.3, after looking at LBLRTMv50.1
+                and v5.10
+
+9/28/99         Include solar spectrum into radiance computations. 
+                This means that *RADNCE options changed slightly --- now 
+                for a downward looking instrument, parameter iSolar means :
+                    -1 => no solar
+                     0 => use solar, at T=5600K
+                     1 => use solar, with more detailed spectrum
+
+                For an upward looking instrument, Tspace now has 2 options
+                   T > 0 use temperature as specified
+                   T < 0 use sun in FOV, with spectrum obtained from 
+                     datafiles
+                  Thus eg T = 2.96   ==> no sun in FOV
+                          T = 5600   ==> compute solar spectrum using 5600K
+                          T = -1     ==> use solar data files
+
+                Path to the data files for solar spectra are given by
+                parameter kSolarPath in file kcarta.param
+
+9/9/99          Changed *SPECTR so that new spectroscopy for more than
+                one gas can be read in per run. Also fixed it so that
+                if any of the new gases is water vapor, you *can* add on the
+                required water continuum using kCARTA
+
+8/19/99         Fixed a bug in the parameters for one subroutines in 
+                in file kcoeffSPLJAC.f (iDoDQ was an extra parameter in the
+                subroutine definitions, and has been taken out)
+                WaterAmountJAC (v1.04) === SplineWaterDerivativeSPL (v1.01)
+
+8/19/99         Removed the "implicit none" definition in subroutine
+                calcon23 in calcon.f and put it in the Makefile
+ 
+8/17/99         Fixed a bug in the indexing of d(BT)/dq*q downlook jacobians
+                This bug fix also is done in v1.01 
+
+6/30/99         Fixed a bug in the diffusive approximation (backgnd thermal)
+                computation --- there was a mixup between 100 and kProfLayer
+
+6/17/99         Fixed a bug in satellite viewing angle conversion
+
+5/25/99         Put in *SCATTR section into the file s_scatter_spectra.f
+                Also have new parameter kMaxClouds in kcarta.param
+
+5/20/99         Interfacing K.F.Evans rtspec.f code with kCARTA
+                    Frank Evans  University of Colorado   September 1998
+                    Co-authors:
+                      Merritt Deeter  (single scattering layer routines)
+                      Aaron Evans     (multilayer code, spectral segments)  
+                scatter.param sets array dimensions in rtspec.f to be the 
+                same as those in kcarta.param
+
+5/19/99         Put in *SPECTR section into file s_scatter_spectra.f
+                This section allows the user to choose ONE gas, and have 
+                kCARTA read in LBL spectra produced by some other code
+                for defined spectral regions. These regions have to overlap 
+                the kCARTA chunks eg 705-730, 1255-1280 etc
+                If this option is used, then JACOBN cannot be used!!
+                Also, the code will simply read in the spectra, and weight 
+                it appropriately ... it will not do any further scaling. In
+                other words, it is the users responsibility to make sure the
+                spectra read in were computed with the correct layer amounts
+                and temperatures.
+
+5/4/99          Bug in SetEmissivity in rad_misc.f has been fixed
+
+5/3/99          The gauss-legendre weights for accurate background thermal
+                and flux computations, have been moved to gauss.param
+
+4/30/99         Parameter kProfile is no longer in use
+                It is replaced by parameter kFlux : 
+                -1 : default (no flux computations)
+                +1 : the radiance flux for each layer in current atmosphere
+                     is computed, as fcn of wavenumber.
+                     Results are in units of radiances
+                +2 : the radiance flux for each layer in current atmosphere
+                     is computed, as fcn of wavenumber. These fluxes are 
+                     then appropriately multiplied to change units to 
+                     kelvins s-1 (mult=1/(Cp density dz)). 
+                If results are dumped to screen (using the command line 
+                arguments), the flux computations are output in file 
+                flux.dat. Else they are saved to radfilename_FLUX
+                   kcarta.x driverfile ==> 
+                      rad results, jacob results to screen; 
+                      flux results to flux.dat
+                   kcarta.x driverfile radfilename jacobfile ==> 
+                       rad results to radfilename
+                       jacob results to jacobfile
+                       flux results to radfile_FLUX
+                Reader readflux.f in UTILITY, or readflux.m in MATLAB, can
+                be used to read in the flux files
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+v1.03
+-----
+
+this allows the user to have more or less than 100 layers!!!!!!!!
+in other words, can subdivide bottom AIRS layers, and thicken top AIRS
+layers. Use with profiles made by KLAYERS/LookUp1.03
+The prototype for this code is kCARTAv1.02 and KLAYERS/UpLook1.02
+
+**** This version is a significant rewrite/ rearrangement of the code ****
+
+4/23/99         If the CKD abs coefficients are computed, and found to be
+                slightly less than 0 (k <= - 1e7), then they are set to 0, 
+                and the code keeps on running with a warning.
+                If they are large and negative, then the code halts.
+                Ditto for the cross section gases.
+                Similarly, the code stops if it finds negative temperatures,
+                gas amounts, pressures or partial pressures in either the
+                reference profiles or actula profile.
+
+4/20/99         Boundary conditions in *RADNCE no longer affect the mixing 
+                table. This means that the same *WEIGHTS set can be used 
+                for different atmospheres. This has led to a rewrite of
+                the radioance and jacobian routines.
+
+4/19/99         renamed and/or rearranged many of the strings*.f files
+                as well as the radiance and jacobian files
+
+4/14/99         Found a bug in radiance for uppermost fractional layer
+                in downward looking instrument, in subroutine 
+                RadianceInterpolate. Cleaned up/ rewrote the radiance 
+                interpolation subroutines for up and down look instruments.
+
+4/14/99         Found a bug in backgndthermal ... if you set kBackThermal=0,
+                kCARTA always used acos(3/5) in upper layers and more 
+                accurate angle in lower layers, even if you asked it to 
+                use rAngle
+
+4/8/99          PrepareOutput also dumps out pressure levels and parameters 
+                M1000mb,M100mb,MSubLayer,M50mb,M10mb,MThickLayer
+                So a "enhanced" readmainheader.m, .f  set of readers needed
+
+4/6/99          New parameter in kcarta.param allows user to put in a 
+                profile that has more or less than 100 AIRS layers!!!!!!
+                This is parameter kProfLayer <=> kMaxLayer
+                The program splines in temperature AND pressure!!!! onto 
+                this finer and not so finer layering grid
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+v1.02
+-----
+
+this allows the user to have more than 100 layers!!!!!!!!
+in other words, can subdivide bottom AIRS layers to make them finer.
+Use with profiles made by KLAYERS/UpLookSrc1.02
+
+3/30/99         Fixed a bug in *WEIGHTS. This means couple of relevant  
+                subroutines in strings3.f have been updated
+
+3/10/99         New parameter in kcarta.param allows user to put in a 
+                profile that has more than 100 AIRS layers!!!!!!
+                This is parameter kProfLayer >= kMaxLayer
+                The program splines in temperature AND pressure!!!! onto 
+                this finer layering grid
+                The porogram also needs the new pressure levels grid!!!!!
+
+                Also variable kMaxLayerJac has been renamed to kProfLayerJac
+
+3/14/99         Variable kNewRefProf is a text string that says where to
+                find the new reference profiles
+
+                rdprof.f has been renamed strings4.f
+
+2/17/99         kcoeffSPL.f split into two files : 
+                kcoeffSPL and kcoeffSPLJAC.f where all non Jacobian code is
+                in the first file
+                SplineWaterDerivativeSPL  renamed to WaterAmountInterpolate
+                WaterAmountInterpolateSPL renamed to WaterAmount_TempJAC
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+v1.01
+-----
+
+COMMENT : changes made to allow user to redefine his surface temperature. 
+This has meant that parameter 7 (that was UNUSED in v1.00) has been renamed 
+from kCO2 to kSurfTemp, and now has 2 different meanings : -1 use the 
+specified surface temperature, and +1 use an interpolated temperature 
+PLUS an offset that is set by the surface temperature
+
+11/20/98   	The meaning of parameter 7 (kSurfTemp in *PARAMS) is now
+                -1.0 : use surface temperature set by user in *RADNCE
+                +1.0 : use surface temperature interpolated by pressure 
+                       levels and added to offset set by user in *RADNCE
+                       Note that the interpolation is smooth in AVERAGE
+                       pressure, and not in actual pressure
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+v1.00
+-----
+
+COMMENT : minor changes to ensure the *OUTPUT section has first paths,
+then mixed paths then radiances specified (ie order is important).
+Also, the short form INPUT profile is no longer allowed ie kProfile=+1
+only. This is because we need correct partial pressures when computing
+the variable water widths. This also makes the use of parameter 7
+irrelevant, and the value is now fixed at 1.0
+
+10/21/98        Corrected vaconv (satellite local angle computation)
+                in that everything now is consistently in km : kLayers
+                profile, sat height in *RADNCE etc
+8/26/98         The user has to be careful in specifying the order of
+                output data in *OUTPUT (so that the readers are not
+                confused)
+8/26/98         The meaning of parameter 6 (kProfile in *PARAMS) is now
+                -1 : read in specified KLAYERS user profile ONLY
+10/5/98   	The meaning of parameter 7 (kCO2 in *PARAMS) is now
+                1.0 : the multiplier for CO2
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
+v0.99
+-----
+
+COMMENT : revision to change the meaning of parameter 6 in *PARAMS. This 
+meant quite a few changes in strings2.f, as the previous subroutines were 
+geared to expect only water and ozone ........
+
+7/7/98          The meaning of parameter 6 (kProfile in *PARAMS) is now
+                -1 : read in user supplied profile. For whatever gas 
+                    specified in MOLGAS/XSCGAS but not found in the 
+                    profile, just read  in the reference profile
+                    If the user specifies a profile file to be read in,
+                    the temperatures of the extra gases (read in from the
+                    reference profiles) are that of water or the first   
+                    gas found in the user supplied profile.
+                +1 : read in specified regression profile  
+    
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+v0.98
+------
+
+COMMENT : revisions mainly to add CKDv2.3
+          have option 8 in *PARAMS to set d/Dt=Planck or tau or both
+          also rewrote the output stuff slightly 
+
+5/14/98         Rewrote wrtout, wrtout_head so that the program only opens
+		and closes the output and jacobian binary files once
+		This was to keep the poor Absoft compiler happy (pshaw!)
+
+5/13/98		Rewrote temperature Jacobians so that option 8 in *PARAMS
+                sets d/Dt=Planck or tau or both (-2,-1,0); default=0
+                Note that if you choose kTempJac other than 0, than your
+                gas jacobians should not become become messed up.
+                Also this option only works for down look instr (ie has no
+                effect on jacobians for uplook instr)
+
+5/13/98		fixed a bug in *JACOBN reader that did not allow this
+                section to be parsed in if STATIC turned off
+
+4/29/98		Rewrote some subroutines in strings2.f so that if 
+		kProfile = 1, the program does NOT need MOLGAS to have
+                water and or ozone
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+v0.97
+------
+
+COMMENT : revisions are mainly to increase wavenumber spread from
+605-2805, to 205-605,605-2805. These two regions are kept separate
+since the wavenumber point spacing in them will be unequal (0.001 in
+205-605, and 0.0025 in 605-2805). However, the number of points in each
+k-comp file is kept at 10000 (hence 10 cm-1 in the first region, and 25
+cm-1 in the second region).
+
+This means a lot of the core subroutines (eg GetFileFreqs in misc.f was
+rewritten),  as was the main loop structure in kcartamain.f. We also 
+rewrote subroutine wrtout, so a new set of readers is needed.
+
+kOutBlock has been removed !!!!!!!
+in other words, can only dump out 10000 pts each time!!!!
+iFrlow,iFrHigh=1,kMaxPts
+
+*XSCGAS has been changed so that the name of xscdata file is no longer 
+in this section; instead it has been moved to kcarta.param
+
+kNetCDF has been removed. the code can only output binary Fortran files.
+We will probably write a fortran --> NetCDF translator in the future
+
+kCARTA is now command line driven 
+  kcarta.x [infile [outfile [jacfile]]]
+thus *OUTPUT no longer has caOutName
+and caJacobName is no longer caOutName + 'JAC'
+errors are written to stderr
+warning meassages are written to kWarnFile == 'warning.msg' or '/dev/null'
+header.head no longer exists; it is part of warning.msg
+
+5/13/98		fixed a bug in *JACOBN reader that did not allow this
+                section to be parsed in if STATIC turned off
+
+4/29/98         Fixed a bug in the d/dT temperature Jacobian (jacob.f) 
+
+4/27/98		Main loop slightly rewritten so that subroutine Initialize
+		only called if the abs copeffs DNE for the particular
+                10000 pt chunk. In addition the call to set iaPaths has
+                been moved so that this loop called IFF we want paths to
+                be output
+
+4/27/98         Fixed CrossSection() in kcoeffMAIN.f so that we don't have
+                to worry about initialized stuff in kcartamain.f
+
+4/27/98		Fixed writesummary.m in ../MATLAB
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

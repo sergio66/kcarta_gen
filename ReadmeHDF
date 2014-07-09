@@ -1,0 +1,30 @@
+HDF versions are pretty good about backwards compatibility for simple 
+applications like RTP.
+
+The Fortran part of HDF generally needs to be built with the same
+Fortran you are using when you link with it.  The HDF distribution
+includes very extensive Fortran tests, but they are for a particular
+compiler.  So if you build HDF with the Fortran set as g77, which I
+think is the default, you would be likely to have problems with say
+Absoft or Portland Group.  (More precisely, HDF itself is in C, and
+mostly doesn't care what it is linked to; but to make sure it works
+with your Fortran, it is safest to do the install that way, as it
+will test the compatibility, and whatever Fortran flags are needed
+to get things to work will be similar to what you need in linking
+applications.)
+
+It is possible that our install trees (at /asl/umbc) would work for 
+you.  But it's not too likely, because it's built for Absoft, and 
+because you can sometimes have lower-level library problems going 
+between different versions of Linux.  In case you want to try it, we 
+have put a tarred version in /pub/motteler/HDF4.1r5.tar.gz, 
+accessible by anonymous FTP at asl.umbc.edu.  This version was built 
+to install in /usr/local, and might not work elsewhere, but it can't 
+hurt to try it.
+
+You do not need to be root to download and install HDF for yourself,
+in your own user space; I have done that many times to test things.
+That way you can build it for whatever Fortran and OS you have.  
+The configure scripts in the HDF distribution are pretty smart, but
+you do need to tell it where to install itself and what Fortran to
+use.

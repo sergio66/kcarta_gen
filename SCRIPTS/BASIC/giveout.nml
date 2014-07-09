@@ -1,0 +1,116 @@
+ !!!!!!this is a namelist template file to make Forward Models
+ $nm_params
+ namecomment	=  '******* PARAMS section *******'
+ kLongOrShort = 0
+ kCKD         = 24
+ kSurfTemp    = +1.0
+ $end
+
+ $nm_frqncy
+ namecomment	=  '******* FRQNCY section *******'
+ !was 705-905
+ rf1	        = 930.0
+ rf2    	= 980.0
+
+ $end
+
+ $nm_molgas
+ namecomment	=  '******* MOLGAS section *******'
+ !use all kcomp gases + continuum
+ iNGas	   =            -1
+ $end
+
+ $nm_xscgas
+ namecomment	=  '******* XSCGAS section *******'
+ !use all xsec gases
+ iNxsec	=            -1
+ $end
+
+ $nm_prfile
+ namecomment	=  '******* PRFILE section *******'
+ caPfname	=  'basic.prof'
+ $end
+
+ $nm_weight
+ namecomment	=  '******* WEIGHT section *******'
+ !this is to develop fast forward models
+ !recall gases 101, 102 are separate
+ iNpmix	=             6
+ caaMixFileLines        = 
+    !all gases except water, ozone and continuum have weight 1.0 (F)
+    '1   -1    1.0    4',
+    '   1 0.0  3 0.0   101  0.0  102  0.0',
+    !all gases except ozone and continuum have weight 1.0 (FW)
+    '2   -1    1.0    3',
+    '   3  0.0 101  0.0  102  0.0',
+    !all gases have weight 1.0 except for continuum (FWO)
+    '3   -1    1.0    2',
+    '101  0.0  102  0.0',
+    !all gases except water and continuum have weight 1.0 (FO)
+    '4   -1    1.0    3',
+    '   1  0.0 101  0.0  102  0.0',
+    !all gases except continuum have weight 0.0 (Continuum)
+    '5   -1    0.0    2',
+    '   101  1.0  102  1.0',
+    !all gases have weight 1.0 
+    '6   -1    1.0    -1',
+ $end
+
+ $nm_radnce
+ namecomment	=  '******* RADNCE section *******'
+ !1 atmospheres
+ iNatm          =  1
+
+ ! no solar, fast thermal, emissivity file
+ iaMPSetForRad(1)   =  6
+ raPressStop(1)     =  0.0000
+ raPressStart(1)    =  1013.0
+ raTSpace(1)        =   2.960000
+ raTSurf(1)         =  0.0
+ raSatAngle(1)      =  0.0000000E+00
+ raSatHeight(1)     =   1.000000
+ iakSolar(1)        =  -1
+ rakSolarAngle(1)   =  25.0000000E+00
+ rakSolarRefl(1)    =   1.0
+ iakThermal(1)      =   0
+ rakThermalAngle(1) =  -1.000000
+ iakThermalJacob(1) =   1
+ caEmissivity(1)    =   '../DATA/General/emissivity.dat'
+ raSetEmissivity(1) =  -1.000000
+
+ $end
+
+ $nm_jacobn
+ namecomment	=  '******* JACOBN section *******'
+ iJacob	=             0
+ $end
+
+ $nm_spectr
+ namecomment	=  '******* SPECTRA section ******'
+ iNumNewGases	=             -1
+ $end
+
+ $nm_scattr
+ namecomment	=  '******* SCATTR section *******'
+ iNclouds	   =            -1
+ $end
+
+
+ $nm_output
+ namecomment	=  '******* OUTPUT section *******'
+ caComment      = ' OUTPUTS all MP, and rads of atms at TOA'
+
+ iaPrinter(1)	=    2
+ iaGPMPAtm(1)	=    -1
+ iaNp(1)        =    -1
+
+ iaPrinter(2)	=    3
+ iaGPMPAtm(2)	=    -1
+ iaNp(2)        =    1
+ raaOp(2,1)     =    00.0
+
+ $end
+
+ $nm_endinp
+ namecomment	=  '******* ENDINP section *******'
+ $end

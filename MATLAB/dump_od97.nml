@@ -1,0 +1,111 @@
+ $nm_params
+ namecomment	=  '******* PARAMS section *******'
+ KCKD = 1
+ kLongOrShort = -1
+ kJacobOutput = -1
+ kRTP = -1
+ kSurfTemp = 1
+ kFlux = -1
+ $end
+
+ $nm_frqncy
+ namecomment	=  '******* FRQNCY section *******'
+ rf1	        = 930
+ rf2    	= 980
+ rf1	        = 780
+ rf2    	= 830
+ rf1	        = 1205
+ rf2    	= 1255
+
+ $end
+
+ $nm_molgas
+ namecomment	=  '******* MOLGAS section *******'
+ !use all gases in MOLGAS
+ iNGas	=            -1
+ $end
+
+ $nm_xscgas
+ namecomment	=  '******* XSCGAS section *******'
+ !use all gases in XSCGAS
+ iNxsec	=             -1
+ $end
+
+ $nm_prfile
+ namecomment	=  '******* PRFILE section *******'
+ iBinOrAsc    = 1
+ iNclouds_RTP = 0
+ caaCloudFile  = 'MIEDATA/CIRRUS/cirrus_405_2905_220'
+ iMPSetForRadRTP = 1
+ iRTP            = 1
+ caPFname= 'std.prof'
+ $end
+
+ $nm_weight
+ namecomment	=  '******* WEIGHT section *******'
+ !this is to develop fast forward models
+ iNpmix	=             1
+ caaMixFileLines(1)	= 
+    !all gases have weight 1.0 except for 5 gases
+    '1   -1    1.0    5'
+ caaMixFileLines(2)	= 
+    !being gasID 1, 5, 6, 101, 102 = water, CO,CH4
+    '1   1.0  101 1.0 102 1.0 5 1.0 6 1.0'
+ $end
+
+ $nm_radnce
+ namecomment	=  '******* RADNCE section *******'
+ iNatm          =  -1
+
+ iaMPSetForRad(1)   =  1
+ raPressStart(1)    =  00.0000
+ raPressStop(1)     =  1013.25
+ raTSpace(1)        =  2.960000
+ raTSurf(1)         =  0.0
+ raSatAngle(1)      =  0
+ raSatHeight(1)     =   -1.000000
+ iakSolar(1)        =  +1
+ rakSolarAngle(1)   =  0
+ iakThermal(1)      =   -1
+ rakThermalAngle(1) =  -1.000000
+ iakThermalJacob(1) =   1
+ caEmissivity(1)    =   '/asl/data/kcarta/KCARTADATA/General/emissivity.dat'
+ raSetEmissivity(1) =  -1.000000
+ $end
+
+ $nm_jacobn
+ namecomment	=  '******* JACOBN section *******'
+ !no jacobians
+ iJacob =             0
+ iaJacob(1) = 2
+ $end
+
+ $nm_spectr
+ namecomment	=  '******* SPECTRA section ******'
+ !no external spectra
+ iNumNewGases	=             -1
+ $end
+
+ $nm_nonlte
+ namecomment	=  '******* NONLTE section ******'
+ iNumNLTEGases	=            -1
+ $end
+
+ $nm_scattr
+ namecomment	=  '******* SCATTR section *******'
+ iNclouds          =           -1
+ $end
+
+ $nm_output
+ namecomment	=  '******* OUTPUT section *******'
+ !dump out ODs
+ iaPrinter(1)   =    1
+ iaGPMPAtm(1)   =    -1
+ iaNp(1)        =    -1
+
+ $end
+
+ $nm_endinp
+ namecomment	=  '******* ENDINP section *******'
+ $end
+

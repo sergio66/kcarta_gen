@@ -1,0 +1,2 @@
+tar -cf rtpreaders.tar *.m README
+gzip rtpreaders.tar

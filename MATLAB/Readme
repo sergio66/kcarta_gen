@@ -1,0 +1,38 @@
+total 74
+
+-rw-r--r-- 1 sergio pi_strow 15399 Jul  8  2010 readkcstd.m
+-rw-r--r-- 1 sergio users    15187 Sep 13  2005 readkcstd_be.m
+-rw-r--r-- 1 sergio users     4140 May 17  2007 readkcBasic.m
+-rw-r--r-- 1 sergio users     8544 May 17  2007 readkcjac.m
+-rw-r--r-- 1 sergio users     7203 May 17  2007 readkcflux.m
+
+-rw-r--r-- 1 sergio users     5241 Apr  1  2005 readkcUA.m
+-rw-r--r-- 1 sergio pi_strow  9372 May  8 20:00 readkcplanck.m
+-rw-r--r-- 1 sergio users     7032 Apr  7  2004 readkcBloat.m
+
+-rw-r--r-- 1 sergio users    11283 Nov 30  2001 readkcprofile.m
+
+drwxr-xr-x 2 sergio pi_strow    41 Aug 11  2010 h4tools
+-rw-r-xr-- 1 sergio users     2179 Aug 14  2007 rdairs.m
+-rw-r--r-- 1 sergio pi_strow   459 Oct 29  2010 readsolar.m
+-rw-r--r-- 1 sergio pi_strow  1211 Aug  6  2010 ttorad.m
+-rw-r--r-- 1 sergio pi_strow  1457 Aug  6  2010 rad2bt.m
+
+-rw-r--r-- 1 sergio pi_strow  4733 Aug  6  2010 rtpwrite.m
+-rw-r--r-- 1 sergio pi_strow  3408 Aug  6  2010 rtpread.m
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[d,w]   = readkcstd('junk.dat');       %% read in usual (lower atm) opt depths/radiances
+[d,w]   = readkcbasic('basic.dat');    %% read in basic (lower atm) opt depths/radiances
+[d,w]   = readkcprofile('junk.dat');   %% reads in profile info
+[df,w]  = readkcflux('junk.dat_FLUX'); %% read in fluxes
+[dj,w]  = readkcflux('junk.jac');      %% read in jacs
+
+[dUA,w] = readkcUA('junk.dat_UA');    %% reads in UA opt depths 
+                                      %% and then 0.005   mb ( 80 km) radiances
+                                      %% and then 0.00005 mb (120 km) radiances
+[dPlanck,w] = readkcPlanck('junk.dat_PLANCK');    %% reads in lower atm/UA planck modifiers
+[dBolat,w]  = readkcBloat('junk.dat_BLOAT');      %% reads in lower atm/UA ods/rads at 0.0005 cm-1
+
+

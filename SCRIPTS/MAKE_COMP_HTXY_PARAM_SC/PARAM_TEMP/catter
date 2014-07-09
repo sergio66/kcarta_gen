@@ -1,0 +1,2 @@
+cat comp_fir15_30.param comp_fir30_50.param comp_fir50_80.param comp_fir80_150.param comp_fir140_310.param comp_fir300_510.param comp_fir500_605.param comp_ir605_2830.param comp_nir2830_3330.param > testH2012.param
+

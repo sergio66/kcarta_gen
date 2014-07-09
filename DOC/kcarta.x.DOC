@@ -1,0 +1,85 @@
+
+there are various iterations of the bkcarta.x code in the /BIN directory :
+
+  H1992  means the HITRAN 1992 CO2 database, HITRAN 1998 for other gases
+         note that you should use iWeight= 1.1212 for CO2 here
+  H1996  means the HITRAN 1996 database
+  HT1998 means the HITRAN 1998 database, with Toth
+
+  v20_23 in general means a blend of the HT1998 (v20) and HITRAN 2000 (v23)
+         CO2 databases
+  v23    means a HITRAN 2000 (v23) CO2 databases, which used improved blending
+         of the CO2 linemixing in the 2380 region
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+A) General versions (after August 2002)
+bkcarta.x                latest compiled version, not renamed!
+                         almost certainly uses the HT1998 database
+                         watch out; probably does not have CO2 CHI on
+
+bkcarta.x.CHI_A_v20_23_CO2 
+                         this uses all gases : HT1998 database, except CO2
+                         which uses a blend of v20 and v23 databases
+                         use v20 everywhere except at 2355,2380,2405 where we 
+                         use the v23 database
+                         Also, use modified CHI function at 2255,2280
+                         (see AIRSPRODUCTS/FIRSTLIGHT/triangle_2280_a.m)
+     PARAMETER (kCO2Path    = '/carrot/s1/sergio/CO2database/v20_23.ieee-le/') 
+
+bkcarta.x.CHI_v20_23_CO2 this uses all gases : HT1998 database, except CO2
+                         which uses a blend of v20 and v23 databases
+                         use v20 everywhere except at 2355,2380,2405 where we 
+                         use the v23 database
+                         Also, use CHI function at 2255,2280
+                         (see AIRSPRODUCTS/FIRSTLIGHT/triangle_2280.m)
+     PARAMETER (kCO2Path    = '/carrot/s1/sergio/CO2database/v20_23.ieee-le/') 
+
+bkcarta.x.v20_23_CO2     this uses all gases : HT1998 database, except CO2
+                         which uses a blend of v20 and v23 databases
+                         use v20 everywhere except at 2355,2380,2405 where we 
+                         use the v23 database
+                         NO chi functions here!!! (co2_4um_fudge commented out)
+     PARAMETER (kCO2Path    = '/carrot/s1/sergio/CO2database/v20_23.ieee-le/') 
+
+bkcarta.x.v23_CO2        this uses all gases : HT1998 database, except CO2
+                         which uses the v23 database.
+                         this database improves things in 2380-2405, but hurts
+                         things in the 2220-2260 region
+      PARAMETER (kCO2Path    = '/asl/data/kcarta/v23.ieee-le/etc.ieee-le/'
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+B) Older general versions (prior to AUG 2002)
+
+bkcarta.x.HT1998         this uses run6,run6co2 for all gases (HT1998 database)
+bkcarta.x.NOCHI          this uses run6,run6co2 for all gases (HT1998 database)
+      the above three are all the same !!!
+      PARAMETER (kWaterPath  = '/asl/data/kcarta/v20.ieee-le/h2o.ieee-le/')
+      PARAMETER (kCO2Path    = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+      PARAMETER (kCompPath   = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+
+------------------------------------------------------------------------
+C) To improve CO2 in the 2280, 2380 regions
+bkcarta.x.CHI            CHI function used for CO2 2380 regions
+bkcarta.x.CHINEW         CHI function used for CO2 2255,2280,
+                         and the 2355,2380,2405 regions
+      PARAMETER (kWaterPath  = '/asl/data/kcarta/v20.ieee-le/h2o.ieee-le/')
+      PARAMETER (kCO2Path    = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+      PARAMETER (kCompPath   = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+
+------------------------------------------------------------------------
+D) To compare to GENLN2 linemixing
+bkcarta.x.H1992          CO2 uses H92 Genln2 database, HT1998 for others
+      PARAMETER (kWaterPath  = '/asl/data/kcarta/v20.ieee-le/h2o.ieee-le/')
+      PARAMETER (kCO2Path    = '/asl/data/kcarta/v10.ieee-le/etc.ieee-le/')
+      PARAMETER (kCompPath   = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+
+------------------------------------------------------------------------
+E) To compare to the old database (early version of kCARTA, pre 1998)
+bkcarta.x.1996database   should use 1996 database (v10ieee-le). 
+                         ** fails becuz comp.HT1998 was used at compilation, 
+                         instead of comp.H1996 
+      PARAMETER (kWaterPath  = '/asl/data/kcarta/v10.ieee-le/h2o.ieee-le/')
+      PARAMETER (kCO2Path    = '/asl/data/kcarta/v10.ieee-le/etc.ieee-le/')
+      PARAMETER (kCompPath   = '/asl/data/kcarta/v10.ieee-le/etc.ieee-le/')
+
+------------------------------------------------------------------------

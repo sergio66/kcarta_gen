@@ -1,0 +1,11 @@
+#      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2008_IR.v1.ieee-le/h2o_ALLISO.ieee-le/')
+#      PARAMETER (kCompPath       = '/asl/data/kcarta/H2008_IR.v1.ieee-le/etc.ieee-le/')
+#      PARAMETER (kCKDPath        = '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/')
+#      PARAMETER (kCKD_Compr_Path = '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/Compr/')
+#      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2008_IR.v1.ieee-le/hDo.ieee-le/')
+
+tar -cvf /asl/data/kcarta/water_hdo_etc_H2008_IR_v1.ieee-le.tar          \
+   /asl/data/kcarta/H2008_IR.v1.ieee-le/h2o_ALLISO.ieee-le/*             \
+   /asl/data/kcarta/H2008_IR.v1.ieee-le/hDo.ieee-le/*                    \
+   /asl/data/kcarta/H2008_IR.v1.ieee-le/etc.ieee-le/*                    \
+   /asl/data/kcarta/KCARTADATA/RefProf_July2010.For.v115up_CO2ppmv385/refgas*

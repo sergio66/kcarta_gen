@@ -1,0 +1,25 @@
+Currently you will find the (nonscattering) version of kCARTAv1.10 on the web.
+Do an anonymous ftp to asl.umbc.edu (or use the web) :
+   database is at /kcarta/data    (both big endian and little endian)
+   source code is at /packages
+     kcartagiveout110.tar.gz : nonscattering source code
+     kcartaDATA.tar.gz       : has some extra data files that are useful
+     kcartaMATLAB.tar.gz     : some Matlab code (readers for kCARTA output)
+Extra source code you need is also at /packages
+    klayersV204.tar.gz       : takes levels data, and changes it to "layers"
+    rtpV105.tar.gz           : the data files in/out of klayers and kCARTA
+                               are in this hdf format
+
+This version has been debugged and tested by quite a few people, and a variety
+of users around the world, using various flavors of Unix and Fortran 
+compilers. It's not guaranteed to be 100% bug free, but most probably, if you 
+don't understand the output from kCARTA, it is because it did exactly what 
+you commanded (i.e. read the user manual beforehand!!!). This applied 
+equally to the KLAYERS and RTP packages!
+
+I am usually available to answer questions!
+
+Sergio DeSouza-Machado
+sergio@umbc.edu
+
+

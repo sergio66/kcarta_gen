@@ -1,0 +1,254 @@
+#!/bin/sh
+#
+# NAME
+#
+#   kcwrap  -- wrapper for klayers, kcarta, and sconv
+#
+# SYNOPSIS
+#
+#   kcwrap [-s sfile] [-n pnum] infile outfile
+#
+#     infile     RTP input file
+#     outfile    RTP output file
+#
+# OPTIONS
+#
+#   -s sfile     specify an HDF SRF file
+#   -n pnum	 specify an RTP profile number 
+#   -laypro      flag to output layers profiles
+#
+# DESCRIPTION
+#
+#   kcwrap reads an RTP level profile and calls the klayers, kcarta, 
+#   and assorted matlab scripts to add convolved radiances to the file.
+#
+# BUGS
+#
+#   - only does a single profile at a time
+#   - mixing shell and matlab code is an inherently messy business
+#   - some kcarta parameters are set by running sed on a namelist file
+#
+# H. Motteler, 4 Mar 02
+#
+
+# no graphic environment
+DISPLAY=""
+export DISPLAY
+
+# fixed paths to programs
+klayers="/asl/packages/klayers/Bin/klayers_airs"  # klayers executable
+kcarta="/asl/packages/kcartaV110/BIN/bkcarta.x"	  # kcarta executable
+kcnlist1="/asl/packages/kcartaV110/SCRIPTS/kcwrap.nml" # kcarta namelist
+
+# fixed paths to matlab scripts
+sconv="/asl/matlab/sconv"			  # convolution routines
+rtptools="/asl/matlab/rtptools"			  # other RTP utilities
+h4tools="/asl/matlab/h4tools"			  # RTP reader and writer
+readkc="/asl/packages/kcartaV110/MATLAB"	  # kcarta binary reader
+
+# reassignable kcwrap parameters
+sfile="/asl/data/airs/srf/srftablesV10.hdf"	  # SRF HDF file
+pnum=1						  # profile number
+infile=""					  # input file name
+outfile=""					  # output file name
+laypro=0					  # layer output flag
+
+# process input arguments
+while test $# -gt 0
+do
+  case $1 in
+    -s)      shift; sfile=$1; shift ;;
+    -n)      shift; pnum=$1; shift ;;
+    -laypro) shift; laypro=1 ;;
+    -?)      echo "kcwrap: unknown option $1"; exit 1 ;;
+     *)      infile=$1; outfile=$2; shift 2; shift $# ;;
+  esac
+done
+
+# get a reasonably unique file ID
+fid=${RANDOM}
+
+# set the names of our working files
+klayin="klayin.${fid}"      # klayers input file
+klayout="klayout.${fid}"    # klayers output/kcarta input file
+kcnlist2="kcnlist2.${fid}"  # modified kcarta namelist file
+kcbinout="kcbinout.${fid}"  # kcarta binary output file 
+# kcmsglog="kcmsglog.${fid}"  # kcarta message log file
+kcmsglog="kcwrap.log"      # kcarta message log file
+kcerror="kcerror.${fid}"    # error flag file
+
+# delete any old copies of the working files
+rm ${klayin} ${klayout} ${kcnlist2} ${kcbinout} ${kcmsglog} ${kcerror} \
+   2> /dev/null || true
+
+# sanity check for files 
+# echo "kcwrap:"
+# echo "   input file      = $infile"
+# echo "   output file     = $outfile"
+# echo "   profile number  = $pnum"
+# echo "   SRF file        = $sfile"
+# echo "   klayers input   = $klayin"
+# echo "   klayers output  = $klayout"
+# echo "   kcarta namelist = $kcnlist"
+# echo "   kcarta bin out  = $kcbinout"
+# echo "   error flag file = $kcerror"
+# echo "   klayers executable = $klayers"
+# echo "   kcarta executable  = $kcarta"
+# echo "   kcarta initial namelist = $kcnlist"
+# echo "   matlab convolution routines = $sconv"
+# echo "   matlab RTP reader and writer = $h4tools"
+# echo "   matlab kcarta binary reader  = $readkc"
+
+# check the RTP input profile 
+# ====================== start matlab code ======================
+matlab <<MATEND
+
+% reset the error string
+lasterr('');
+
+% add local paths
+addpath('${sconv}')
+addpath('${h4tools}')
+addpath('${rtptools}')
+
+% do a basic sanity check of the proffered profile
+if ~rtpcheck('${infile}', 'kcarta');
+  eval(sprintf('!touch %s', '${kcerror}'));
+  fprintf(1, '\n');
+  quit
+end  
+
+% read the RTP file
+fprintf(1, '\nreading the RTP input file ...\n')
+[head, hattr, prof, pattr] = rtpread2('${infile}');
+
+% get the spanning frequency band
+[v1, v2] = cnum2vspan(head.ichan);
+head.vcmin = v1;
+head.vcmax = v2;
+
+% save only the selected profile
+prof = prof(${pnum});
+
+% write the updated single-profile RTP file
+fprintf(1, '\nwriting the klayers RTP input file ...\n')
+rtpwrite2('${klayin}', head, hattr, prof, pattr);
+
+% on any errors, create an error file to warn the shell
+if ~isempty(lasterr)
+   eval(sprintf('!touch %s', '${kcerror}'));
+end
+
+fprintf(1, '\n');
+quit
+MATEND
+# ======================= end matlab code =======================
+echo
+
+# check for matlab errors
+if test -e ${kcerror}
+then
+  rm ${kcerror}
+  echo "kcwrap: ERROR -- MatLab error when checking input profile"
+  exit 1
+fi
+
+# run klayers
+echo "kcwrap: klayers fin=${klayin} fout=${klayout} nwant=-1"
+${klayers} fin=${klayin} fout=${klayout} nwant=-1
+if test $? -ne 0
+then
+  echo "kcwrap: ERROR -- klayers error"
+  exit 1
+fi
+
+# edit the kcarta namelist file
+if test ! -e ${kcnlist1}
+then 
+  echo "kcwrap: ERROR -- can't find ${kcnlist1}"
+  exit 1
+fi
+echo "kcwrap: editing the namelist file"
+cat ${kcnlist1} | sed -e "s/mypNEW.op.rtp/${klayout}/" > ${kcnlist2}
+if test $? -ne 0
+then
+  echo "kcwrap: ERROR -- error editing namelist file"
+  exit 1
+fi
+
+# run kcarta
+echo "kcwrap: kcarta ${kcnlist2} ${kcbinout}"
+${kcarta} ${kcnlist2} ${kcbinout}
+if test $? -ne 0
+then
+  echo "kcwrap: ERROR -- kcarta error"
+  exit 1
+fi
+
+# convolve the kcarta output
+# ====================== start matlab code ======================
+matlab <<MATEND
+
+% reset the error string
+lasterr('');
+
+% add local paths
+addpath('${sconv}')
+addpath('${h4tools}')
+addpath('${readkc}')
+
+% call readkc to get the latest radiances
+[rin, fin] = readkcBasic('${kcbinout}');
+
+% read the RTP file again, to add radiances
+if ${laypro}
+  prof = '${klayout}';
+  fprintf(1, '\nreopening the klayers RTP output file ...\n')
+else
+  prof = '${klayin}';
+  fprintf(1, '\nreopening the klayers RTP input file ...\n')
+end
+[head, hattr, prof, pattr] = rtpread(prof);
+
+% do the convolution
+fprintf(1, '\ndoing the convolution ...\n')
+[rout1, fout1] = sconv2(rin, fin, head.ichan, '${sfile}');
+
+% save convolved data; assumes a single profile
+prof.rcalc = rout1;
+
+% update the header field set flags
+if isfield(head, 'pfields')
+  head.pfields = head.pfields + 2;
+end
+
+% write the updated RTP file
+fprintf(1, '\nwriting the RTP output file ...\n')
+rtpwrite('${outfile}', head, hattr, prof, pattr)
+
+% on any errors, create error file warn the shell
+if ~isempty(lasterr)
+   eval(sprintf('touch %s', '${kcerror}'));
+end
+
+fprintf(1, '\n');
+quit
+MATEND
+# ======================= end matlab code =======================
+echo
+
+# check for matlab errors
+if test -e ${kcerror}
+then
+  rm ${kcerror}
+  echo "kcwrap: ERROR -- MatLab error in convolution subsection"
+  exit 1
+fi
+
+# clean up working files
+rm ${klayin} ${klayout} ${kcnlist2} ${kcbinout} ${kcmsglog} ${kcerror} \
+   2> /dev/null || true
+
+# return success
+exit 0
+

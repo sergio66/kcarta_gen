@@ -1,0 +1,98 @@
+:
+### run this script with makeprof.sc inprofile outRTPfile
+### this script uses f77 to take a text sonde point profile and convert it
+### to a RTP file for klayers to use
+
+### SYNOPSIS : basic.sc inprofile outRTPfile
+### 
+### name of script                           = basic.sc
+### path/name of input text point profile    = inprofile
+### path/name of RTP layer file from KLAYERS = outRTPfile
+
+### assumes the following subdir structure
+### ---- KLAYERS --- Bin
+### ---- KCARTA ---- WORK
+###         |------- SCRIPTS
+###         |------- BIN
+###         |------- UTILITY
+
+clear
+
+####check to see if the WORK subdir exits
+
+if [ -d ../WORK ]
+then
+#  echo "../WORK directory exists .. no need to create"
+  echo " "
+else 
+  echo "#############################"
+  echo "creating ../WORK subdirectory"
+  echo "#############################"
+  mkdir ../WORK
+fi
+
+######check to see if input profile for klayers.x $1 exists
+if [ -r "$1" ]
+then
+  echo " "
+else
+  echo "kLAYERS input file " $1 "does not exist!"
+  exit
+fi
+
+### #make sure that the text point profile --> RTP file converter exists
+if [ -x ../BIN/makeRTPfile.x ]
+then
+  echo "  "
+else 
+  echo "###############################################################"
+  echo "WARNING : ../BIN/makeRTPfile.x not found!!!!"
+  echo "Will attempt to create ../BIN/makeRTPfile.x "
+  echo "assuming your ../UTILITY/Makefile is correct"
+  echo "###############################################################"
+
+  cd ../UTILITY
+  make
+  cd ../SCRIPTS
+fi
+
+######## then ensure klayers.x exists ################
+#make sure that the klayers executable exists
+if [ -x ../../KLAYERS/Bin/klayers_airs ]
+then
+  echo "  "
+else 
+  echo "###############################################################"
+  echo "WARNING : ../../KLAYERS/Bin/klayers_airs not found!!!!"
+  echo "Will attempt to create ../../KLAYERS/Bin/klayers_airs files"
+  echo "assuming your ../../KLAYERS/Src_klayers/Makefile is correct"
+  echo "###############################################################"
+
+  cd ../../KLAYERS/Src_klayers
+  make
+  cd ../../KCARTA/SCRIPTS
+fi
+
+
+######## first run the text point profile thru makeRTPfile.x ################
+cp $1 ../WORK/klayers.sonde.ip
+cd ../WORK
+echo "using F77 to change sonde profile "$1" into a .rtp file "
+echo "running point profile "$1" thru --> makeRTPfile.x <-- "
+echo "klayers.sonde.ip" > makeRTPin
+../BIN/makeRTPfile.x < makeRTPin
+/bin/mv makeRTPfile.ip.rtp klayers.ip.rtp
+
+######## then run the RTP point profile thru klayers.x ################
+cd ../../KLAYERS/Bin
+echo "running sonde rtp profile "$1" thru --> klayers_airs <-- "
+klayers_airs fin='../../KCARTA/WORK/klayers.ip.rtp' \
+                    fout='../../KCARTA/WORK/klayers.op.rtp' nwant='-1'
+
+### go to WORK and rename klayers.op.rtp appropriately
+cd ../../KCARTA/WORK
+rm klayers.ip.rtp klayers.sonde.ip makeRTPin
+mv klayers.op.rtp $2 
+
+########### come back to SCRIPTS ########################
+cd ../SCRIPTS

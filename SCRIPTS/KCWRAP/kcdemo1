@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# a simple demo of running kcwrap on a set of processors
+
+#run this on /airs/s1/sergio
+
+# no graphic environment
+DISPLAY=""
+export DISPLAY
+
+rundir="/airs/s1/sergio"
+
+srfsrc="/asl/data/airs/srf/srftables_020614v1.hdf"
+
+fin="/carrot/s1/Hannon/2002/06/14/clear_ip.rtp"
+
+fout="/carrot/s1/sergio/Airs/2002/06/14/CKD51/clear_op"
+
+kcwrap2="/home/sergio/KCARTA/SCRIPTS/KCWRAP/kcwrap2"
+
+### there are 16 airs processor nodes
+plist="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+
+### there are 320 profiles in the clear_ip.rtp file
+nj=20
+
+for i in $plist
+do
+
+  n1=`expr $nj \* \( $i - 1 \) + 1`
+  n2=`expr $nj \* $i`
+
+  echo ssh -x airs1 "cd $rundir; \
+                     $kcwrap2 -s $srfsrc -n1 $n1 -n2 $n2 $fin $fout"
+
+done
+

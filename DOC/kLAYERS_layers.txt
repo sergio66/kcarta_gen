@@ -1,0 +1,260 @@
+kCARTA(v1.01-)
+--------------
+
+The original kCARTA/kLAYERS package allowed the user to define an Earth
+atmosphere within the pressure levels used for the AIRS instrument. 101 
+pressure levels were used, ranging from 1100 mb (this roughly corresponds 
+to a point typically about 600m below the Earth's surface) to 0.005 mb 
+(this is about 100 km above the Earth's surface). This means there are 
+100 AIRS layers, with the layers closer to the ground having thicknesses 
+of about 250m, while the higher layers get thicker and thicker.
+
+These AIRS levels were developed by Scott Hannon and Larrabee Strow at
+UMBC (among others in the AIRS team) so that when the output
+kCARTA radiance at 0.0025 cm-1 spacing is convolved over an AIRS
+instrument function (which is about 1 cm-1 FWHM), the brightness
+temperature errors between this layering and finer layerings, were less 
+than about 0.1 K
+
+AIRS is a downward looking instrument. However, some users might want to
+use the KCARTA/kLAYERS package for an upward looking instrument. Since 
+there can be significant absorption right in front of an upward looking
+instrument, the original AIRS layers would be too thick in many of the
+spectral regions, leading to quite large discrepancies between observed 
+radiances and those predicted by the kCARTA radiative transfer code. 
+
+************************************************************************
+
+kCARTA(v1.03+)
+--------------
+
+To correct this, a new kCARTA/kLAYERS package has been developed. By 
+setting some parameters in kLAYERS/LookUp1.03, the package now allows
+the user to use finer layers closer to the Earth's surface, and 
+thicker layers near the top of the atmosphere (TOA) : 
+  M1000mb, M100mb and MSubLayers allow the user to use a finer
+     sublayering in the lower layers, 
+  M50mb, M10mb and MThickLayer, allow the user to stick some of the upper
+    AIRS layers together, making thicker layers near the TOA. 
+The default AIRS layering is used in  the rest of the layers, with the 
+lowest and highest pressure levels still being 0.005 and 1100 mb 
+repectively. Note that if the user sets parameter MSubLayer=1,
+MThickLayer=1, this means that there is no difference between the 
+original 100 AIRS layers and the layers that klayers.x computes. 
+
+A pictorial summary is shown below :
+  from pressure level 1        to  level M1000mb : use AIRS layering
+  from pressure level M1000mb  to  level M100mb  : use finer layers 
+  from pressure level M100mb   to  level M50mb   : use AIRS layering 
+  from pressure level M50mb    to  level M10mb   : use thicker layers 
+  from pressure level M10mb    to  level 101     : use AIRS layering 
+
+The finer layers are the AIRS layers, divided equally (in pressure) into  
+MSubLayers, and the thicker layers are the AIRS layers, stuck MThickLayers  
+together, as shown below:  
+ 
+ 101      -------------                    ----------------------  D 
+ 
+  
+ 
+ 100      -------------                    ---------------------- 
+ 
+ 
+ 
+ 99       -------------                    ---------------------- 
+ 
+ 
+ 
+ 98       -------------                    ---------------------- 
+ 
+ 
+ M10mb    =============                    ======================= C     
+
+    
+  t       -------------                     
+  h 
+  i 
+  c       -------------                    ---------------------- 
+  k 
+  e 
+  r       -------------                     
+    
+    
+M50mb     =============                   =======================  B 
+ 
+ 
+   
+M100mb+1  -------------                    ---------------------- 
+                   
+ 
+M100mb    =============                    ======================  A 
+             -----                              ----------- 
+             -----                              ----------- 
+          -------------                    ---------------------- 
+ s           -----                              ----------- 
+ u           -----                              ----------- 
+ b            ...                                  ... 
+ d        -------------                    ---------------------- 
+ i           -----                              ----------- 
+ v           -----                              ----------- 
+ i        -------------                    ---------------------- 
+ d           -----                              ----------- 
+ e           -----                              ----------- 
+          -------------                    ---------------------- 
+             -----                              ----------- 
+             -----                              ----------- 
+M1000mb   =============                    ======================  M1000mb 
+
+              ...                                  ... 
+ 
+    002   ---------------                   ---------------------- 002 
+ 
+ 
+    001   ----------------                  ---------------------- 001 
+ 
+This means that kCARTA can now handle input profiles with more or less than 
+the 100 AIRS layers that the kCompressed Database is built upon. To do this,
+there is now a very strong coupling between running klayers.x and running
+kcarta.x.  
+
+klayers.x has to be run first, since it sets up the new pressure layering 
+that the user wants. The simplest way to do this is to :
+1) set parameters MSUBLAYER,M1000mb,M100mb,MTHICKLAYER,M50mb,M10mb
+   in incLAY.param  .. see below
+2) compile klayers.x (use "make")
+3) run the required profile thru klayers.x using script file klayers.sc : 
+   this will first run the US Standard Profile thru klayers.x (generating a 
+   set of new reference profiles that kCARTA requires), and then runs the
+   the required profile thru klayers.x, producing file fort.30
+
+now the user is ready to compile the kCARTA code :
+4) go to SRC directory
+   the user has to set parameter kProfLayer in kcarta.param so that it 
+   matches up with MYNLAY from klayers.x ... this can easily be done by 
+   looking at NewRefProfiles/outincLAY.param
+5) compile the code (type "make")
+
+kcarta.x is now ready to be run.
+
+
+KLAYERS modificiations : these are in LookUp1.03
+-------------------------------------------------
+
+Before compiling the code, the user needs to tell klayers.x how and where 
+the layers are to be subdivided, and where the reference profiles are to 
+be read from/saved to. This is done by appropriately  editing the lines 
+that lie between the ******* delimiters, shown below. 
+
+The user has to use the code in KLAYERS/LookUpv1.03 ... the code has to be 
+compiled, with the wanted parameters set correctly in incLAY.param. 
+This file is reproduced below : 
+
+
+       INTEGER MYNLAY, MXIN, NGRID, NSUBLV, MXGAS, MXAFGL
+       INTEGER kMaxLayer,MSUBLAYER,M1000mb,M100mb
+       INTEGER MTHICKLAYER,M50mb,M10mb,Mabove,Mbelow,Msub,Minter,Msuper
+       CHARACTER*80 kRefPath,kRefNewPath
+
+c************************************************************************
+c************************************************************************
+c               USER SETS  THESE VALUES 
+c these are reference profile names
+C     kRefPath     = where the original 100 layer reference profiles reside
+C     kNewRefPath  = where the new refrence profiles will reside
+      PARAMETER(kRefPath='../../DATA/RefProf/')
+      PARAMETER(kRefNewPath='../../SRC/NewRefProfiles/')
+
+c ******** need M1000mb <= M100mb <= M50mb <= M10mb ***************
+C this is for the layers to be subdivided
+C      M100mb      = top level beyond which no more subdivision done
+C      M1000mb     = bottom level beyond which no more subdivision done
+C      MSUBLAYER   = how many levels to divide AIRS pressure levels lying
+c                    between M1000mb and M100mb into 
+c                    (=1 if no subdivision wanted)
+c      PARAMETER(M1000mb=1,M100mb=51,MSUBLAYER=10)
+
+c      PARAMETER(M1000mb=4,M100mb=7,MSUBLAYER=3)
+      PARAMETER(M1000mb=4,M100mb=7,MSUBLAYER=1)
+
+C this is for the layers to be stuck together (thickened)
+C      M10mb       = top level beyond which no more thickening done
+C      M50mb       = bottom level beyond which no more thickening done
+C      MTHICKLAYER = how many layers to stick together
+c                    (=1 if no thickening wanted)
+c         want to make sure that ((M10mb-M50mb)/MTHICKLAYER) is integer
+
+c      PARAMETER(M50mb=10,M10mb=25,MTHICKLAYER=5)
+      PARAMETER(M50mb=10,M10mb=25,MTHICKLAYER=1)
+
+C      MXIN        = max number of input profile levels
+C      NGRID       = default number of fine sub-grids per layer
+      PARAMETER(MXIN=3000,NGRID=40)
+
+c************************************************************************
+c************************************************************************
+c DO NOT TOUCH BELOW THIS!!!!!!!!!!!!!!!!!!
+
+c from 1        to M1000mb  there are    (M1000mb-1)                  layers
+c from M1000mb  to M100mb   there are    (M1000mb-M100mb)*MSUBLAYER+1 layers
+c from M100mb   to M50mb    there are    (M100mb-M50mb)               layers
+c from M50mb    to M10mb    there are    (M10mb-M50mb)/MTHICKLAYER+1  layers
+c from M10mb+1  to 101      there are    101-M10mb                    layers
+      PARAMETER(Mbelow  = M1000mb-1)
+      PARAMETER(Msub    = ((M100mb-M1000mb)*MSUBLAYER))
+      PARAMETER(Minter  = M50mb-M100mb)      
+      PARAMETER(Msuper  = (INT(M10mb-M50mb)/(1.0*MTHICKLAYER)))
+      PARAMETER(Mabove  = 101-M10mb)
+
+C     kMaxGas = number of kCARTA gases which need q/qref(36)
+      INTEGER kMaxGas
+      PARAMETER(kMaxGas=36)
+
+C      kMaxLayer   = number of AIRS layers (default === 100)
+C      MXGAS       = number of gases to include in the computed profile
+c these are values for an uplooking instrument
+      PARAMETER(kMaxLayer=100, MXGAS=44)
+
+C      MYNLAY      = number of desired output layers ( >= kMaxLayer)
+C      NSUBLV      = max number of sublayers (total over layers)
+      PARAMETER(MYNLAY  = Mbelow+Msub+MInter+MSuper+Mabove)
+      PARAMETER(NSUBLV=(MYNLAY*2*NGRID+1))
+
+c this is the maximum of MYNLAY,kMaxLayer
+      INTEGER maxmax
+      PARAMETER(MAXMAX=max(MYNLAY,kMaxLayer))
+
+
+KCARTA MODIFICATIONS : these are in SRCv1.03+
+---------------------------------------------
+
+1) the user has to set parameter kProfLayer in kcarta.param so that it 
+   matches up with MYNLAY from above
+2) Also, the US Standard Profile has to have been run through the KLAYERS 
+   source code, so that a set of NewRefProfiles files have been created
+   for kCARTA to use.
+3) Then compile the kCARTA code. Hopefully it is now ready to be run.
+
+4) When running, the code then goes thru the usual algorithm : 
+      read in .ip driver file, and read in kLAYERS profile
+      read in NewRefProfiles profiles
+      for each gas, go thru and uncompress :
+        - first do a spline interpolation of K matrix so that
+          it is enlarged from (B,100) to (B,MYNLAY) where B is number of 
+          basis vectors. 
+        - Note that for some layers, there is no need to do a pressure 
+          interpolation, as the layers match the AIRS layers. 
+        - then adjust the interpolated points for 
+             (NEW ref amt/AIRS ref amt)
+        - Note that for CO2 and H2O, while doing this adjustment, have to 
+          be careful about the exponential (^4) ...
+        - now proceed as before, doing a spline
+          interpolation in temperature, then uncompression (multiplying U*K 
+          where U are the basis vectors and K is the pressure,temperature 
+          interpolated matrix). 
+        - If the gas is H2O or CO2, then do  ^4.
+        - scale for gas amounts
+      do radiance and or jacobian calculations (if specified)
+3) readkcarta.m works fine! 
+4) Cross sections, CKD and Jacobians work fine!
+
+************************************************************************

@@ -1,0 +1,206 @@
+:
+### run this script with basic.sc inprofile outkcfile
+### this script uses f77 to take a text sonde point profile and convert it
+### to a RTP file for klayers to use; after that KCARTA is run; after that
+### the kcarta readers are called to produce a simple binary file that can
+### easily be read in
+
+### SYNOPSIS : basic.sc inprofile outkcfile
+### 
+### name of script                        = basic.sc
+### path/name of input text point profile = inprofile
+### path/name of output KCARTA binary     = ../WORK/outkcfile
+###
+### other files created (in ../WORK subdir) are
+###    klayers.op.rtp  RTP layer file from KLAYERS
+###    basic110.nml    namelist file to drive KCARTA (from SCRIPTS/BASIC)
+###    warning.msg     error or chirpy messages that come from kCARTA
+###    outfile.bin     file that come out of readkcBasic.x
+
+### assumes the following subdir structure
+### ---- KLAYERS --- Bin
+### ---- KCARTA ---- WORK
+###         |------- SCRIPTS
+###         |------- BIN
+###         |------- UTILITY
+
+clear
+
+####check to see if the WORK subdir exits
+
+if [ -d ../WORK ]
+then
+#  echo "../WORK directory exists .. no need to create"
+  echo " "
+else 
+  echo "#############################"
+  echo "creating ../WORK subdirectory"
+  echo "#############################"
+  mkdir ../WORK
+fi
+
+######check to see if input profile for klayers.x $1 exists
+if [ -r "$1" ]
+then
+  echo " "
+else
+  echo "kLAYERS input file " $1 "does not exist!"
+  exit
+fi
+
+######check to see if kcarta.x output file $2 exists
+if [ -r "../WORK/$2" ]
+then
+  echo "kCARTA output file " $2 "already exists!"
+  echo "Cannot overwrite!"
+  exit
+fi
+
+######check to see if readkcBasic.x output file exists
+if [ -r ../WORK/outfile.bin ]
+then
+  echo "after running kCARTA, this script calls the readkcBasic.x reader"
+  echo "that creates file ../WORK/outfile.bin. This output file already"
+  echo "exists! Cannot overwrite!"
+  exit
+fi
+
+#### make sure that the klayers executable exists
+if [ -x ../../KLAYERS/Bin/klayers_airs ]
+then
+  echo "  "
+else 
+  echo "###############################################################"
+  echo "WARNING : ../../KLAYERS/Bin/klayers_airs not found!!!!"
+  echo "Will attempt to create ../../KLAYERS/Bin/klayers_airs files"
+  echo "assuming your ../../KLAYERS/Src_klayers/Makefile is correct"
+  echo "###############################################################"
+
+  cd ../../KLAYERS/Src_klayers
+  make
+  cd ../../KCARTA/SCRIPTS
+fi
+
+###### make sure that the text point profile --> RTP file converter exists
+if [ -x ../BIN/makeRTPfile.x ]
+then
+  echo "  "
+else 
+  echo "###############################################################"
+  echo "WARNING : ../BIN/makeRTPfile.x not found!!!!"
+  echo "Will attempt to create ../BIN/makeRTPfile.x "
+  echo "assuming your ../UTILITY/Makefile is correct"
+  echo "###############################################################"
+
+  cd ../UTILITY
+  make
+  cd ../SCRIPTS
+fi
+
+######## first run the text point profile thru makeRTPfile.x ################
+cp $1 ../WORK/klayers.sonde.ip
+cd ../WORK
+echo "using F77 to change sonde profile "$1" into a .rtp file "
+echo "running point profile "$1" thru --> makeRTPfile.x <-- "
+echo "klayers.sonde.ip" > makeRTPin
+../BIN/makeRTPfile.x < makeRTPin
+/bin/mv makeRTPfile.ip.rtp klayers.ip.rtp
+
+######## then run the RTP point profile thru klayers.x ################
+cd ../../KLAYERS/Bin
+echo "running sonde rtp profile "$1" thru --> klayers_airs <-- "
+klayers_airs fin='../../KCARTA/WORK/klayers.ip.rtp' \
+                    fout='../../KCARTA/WORK/klayers.op.rtp' nwant='-1'
+
+########### now run the basic.nml file ####################
+echo "     "
+echo "     "
+echo "     "
+cd ../../KCARTA/WORK
+
+#make sure that the bkcarta executable exists
+if [ -x ../BIN/bkcarta.x ]
+then
+#  echo "../BIN/bkcarta.x exists .. no need to create"
+  echo "  "
+else 
+  echo "###############################################################"
+  echo "WARNING : ../BIN/bkcarta.x not found!!!!"
+  echo "Will attempt to create bkcarta.x file"
+  echo "Assuming that your ../SRC/Makefile is set up correctly"
+  echo "              your ../SRC/kcarta.param is set up correctly"
+  echo "              your BLAS matrix libraries set up correctly"
+  echo "###############################################################"
+  cd ../SRC
+  make
+  cd ../WORK
+fi
+
+/bin/rm warning.msg  2> /dev/null !! true
+/bin/cp ../SCRIPTS/BASIC/basic110 .
+/bin/cp ../SCRIPTS/BASIC/basic110.nml .
+
+SEDSTR='s/\//\\\//g'
+REALOUT=`echo $2 | sed $SEDSTR`
+sed -e "s/outkcfile/$REALOUT/g" basic110 > kcartabasic110
+echo "running --> kcarta <-- to produce outputfile "$2
+chmod +x kcartabasic110
+kcartabasic110
+echo "display last few lines of warning.msg, which tells if kCARTA worked!!"
+tail -3 warning.msg
+/bin/rm basic110 kcartabasic110 klayers.ip.rtp klayers.sonde.* makeRTPin
+
+########### now read in the file and reshape the matrix ####################
+echo "     "
+echo "     "
+echo "     "
+
+#make sure that the readkcBasic executable exists
+if [ -x ../BIN/readkcBasic.x ]
+then
+#  echo "../BIN/readkcBasic.x exists .. no need to create"
+  echo "  "
+else 
+  echo "###############################################################"
+  echo "WARNING : ../BIN/readkcBasic.x not found!!!!"
+  echo "Will attempt to create ../BIN/readkcBasic.x file"
+  echo "Assuming your ../UTILITY/Makefile is ok "
+  echo "              compiler supports FSEEKS "
+  echo "###############################################################"
+  cd ../UTILITY
+  make
+  cd ../WORK
+fi
+
+/bin/rm gnuplotfile.txt  2> /dev/null !! true
+/bin/rm outfile.bin  2> /dev/null !! true
+/bin/cp ../SCRIPTS/BASIC/basic3 .
+
+SEDSTR='s/\//\\\//g'
+REALREAD=`echo $2 | sed $SEDSTR`
+sed -e "s/outkcfile/$REALREAD/g" basic3 > readkcBasic3
+
+echo "reshaping file to binary file --> outfile.bin <-- "
+chmod +x readkcBasic3
+readkcBasic3
+/bin/rm basic3 readkcBasic3
+
+
+######### if you want to display text file with gnuplot
+if [ -r /usr/bin/gnuplot ]
+then
+  /bin/rm gnuplotfile.txt  2> /dev/null !! true
+  /bin/cp ../SCRIPTS/BASIC/basic3txt .
+
+  SEDSTR='s/\//\\\//g'
+  REALREAD=`echo $2 | sed $SEDSTR`
+  sed -e "s/outkcfile/$REALREAD/g" basic3txt > readkcBasic3txt
+
+  echo "reshaping first column of binary file --> gnuplotfile.txt <-- "
+  chmod +x readkcBasic3txt
+  readkcBasic3txt
+  gnuplot ../SCRIPTS/BASIC/gnuplotter
+  /bin/rm basic3txt readkcBasic3txt gnuplotfile.txt
+fi
+########### come back to SCRIPTS ########################
+cd ../SCRIPTS
