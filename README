@@ -1,0 +1,33 @@
+kCARTA is a pseudo-monochromatic radiative transfer code, which uses
+an accurately pre-computed database of optical depths. The code was
+designed to be the Reference ClearSky Forward Model for NASA's AIRS
+instrument, which is a hyperspectral infared nadir sounder. This means
+the infrared (605-2830 cm-1) optical depths and clear sky radiances,
+at 0.0025 cm-1 resolution, have been extensively compared against
+other codes (such as GENLN) and validated during numerous AIRS
+campaigns.
+
+The kCARTA code is designed to be fast, accurate and easy-to-use;
+compressed optical depths come from a Matlab-based line-by-line code
+which currently uses the HITRAN 2012 lineshape parameters, with CO2
+linemixing and MT-CKDv2.5 water continuum.
+
+In addition, some scattering and radiative flux routines are packaged
+with the code, and the optical depth databse has been extended to
+encompass 15 - 44000 cm-1 (FIR to UV), though we only provide limited
+support for these. kCARTA is available both in f77 and Matlab.
+
+In order to run kCARTA, the user also needs to install/download
+a) hdf packages
+b) rtp package, which is our native file format for storing
+   atmospheric geophysical variables and instrument view geometry
+   parameters, needed for RT calculations
+c) klayers package, which takes in a LEVELS rtp file and profuces a LAYERS avg rtp
+   file, needed for RT calculations
+
+Code was developed jointly by
+  L.Larrabee Strow        Principal Investigator
+  Sergio DeSouza-Machado  Radiative Transfer, Jacobians, Fluxes, Scattering
+  Howard Motteler         SVD Compression and OD uncompression routines
+  Scott Hannon            Code testing, developing, overseeing
+
