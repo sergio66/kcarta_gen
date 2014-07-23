@@ -354,10 +354,12 @@ PARAMS = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile
 
 PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile
 
+###### OBJSMAIN_JPL   for all features : jacobians, scatter, flux, but as stand alone JPL exec
 ###### OBJSMAIN       for all features : jacobians, scatter, flux
 ###### OBJSMAIN_BASIC for none of kCARTA features
 
 OBJSMAIN       = kcartamain.o    kcartamisc.o    spline_and_sort.o  freqfile.o
+OBJSMAIN_JPL   = kcartajpl.o     kcartamisc.o    spline_and_sort.o  freqfile.o
 OBJSMAIN_BASIC = kcartabasic.o   kcartamisc.o    spline_and_sort.o  freqfile.o
 
 OBJSRTP        = n_main.o rtp_interface.o
@@ -485,6 +487,10 @@ SCATTER_ALL = $(OBSSCAT5)
 OBJS = $(SCATTER_ALL) $(OBJSMAIN) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
        $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
 
+### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJS_BASIC 
+OBJSJPL = $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+          $(OBSRAD_BASIC) $(OBSSCAT_COMMON) $(OBSJAC_CLD) $(OBJSSTRING) 
+
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
 OBJS_BASIC = $(OBJSMAIN_BASIC) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
              $(OBSRAD_BASIC) $(OBSSCAT_COMMON) $(OBSJAC_CLR) $(OBJSSTRING) \
@@ -564,7 +570,7 @@ datafix370_H2000:
       cd ../; \
       cd ../SRCv1.18
 
-############## the four executables ##################################
+############## the five executables ##################################
 ##### (1) complete kcarta (memory hog) with jacobians, all scattering codes
 scat: kcarta.x
 	mv kcarta.x ../BIN/kcarta.x
@@ -585,7 +591,7 @@ bkcarta.x : $(OBJS_BASIC) $(OBJSRTP)
 kcartabasic.o : kcartabasic.f $(PARAMS)
 	$(F77) -c $(FLAGS) $(UFLAG) kcartabasic.f
 
-##### (3) complete kcarta (memory hog) with jacobians, all scattering codes, TEXT levels input
+##### (3) complete kcarta (memory hog) with jacobians, all scattering codes, TEXT levels/layers input
 scatTXT: kcartaTXT.x
 	mv kcartaTXT.x ../BIN/kcartaTXT.x
 
@@ -595,7 +601,7 @@ kcartaTXT.x : $(OBJS) $(OBJS_TXT)
 kcartamainTXT.o : kcartamain.f $(PARAMS)
 	$(F77) -c $(FLAGS) $(UFLAG) kcartamain.f
 
-##### (2) basic kcarta (easy on memory) with no jacobs, fluxes or scattering, TEXT levels input
+##### (4) basic kcarta (easy on memory) with no jacobs, fluxes or scattering, TEXT levels/layers input
 basicTXT: bkcartaTXT.x
 	mv bkcartaTXT.x ../BIN/bkcartaTXT.x
 
@@ -608,6 +614,28 @@ kcartabasicTXT.o : kcartabasic.f $(PARAMS)
 #### kcartachunk.x no longer supported
 ##### (5) complete kcarta (memory hog) with jacobians, all scattering codes; chunk by chunk
 ##### not worth it since we can put separate profiles per processor, just as easily
+
+##### (5) complete kcarta (memory hog) with jacobians, [all scattering codes], but as standalone
+jpl: jpl.x
+	mv jpl.x ../BIN/jpl.x
+
+jpl.x : $(OBJSJPL) $(OBJSRTP)
+	$(F77) -o jpl.x $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
+
+kcartajpl.o : kcartajpl.f $(PARAMS)
+	$(F77) -c $(FLAGS) $(UFLAG) kcartajpl.f
+
+##### (6) complete kcarta (memory hog) with jacobians, a[ll scattering codes], but as standalone
+#####  TEXT levels/layers input
+jplTXT: jplTXT.x
+	mv jplTXT.x ../BIN/jplTXT.x
+
+jplTXT.x : $(OBJSJPL) $(OBJS_TXT)
+	$(F77) -o jplTXT.x $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJS_TXT)
+
+kcartajplTXT.o : kcartajpl.f $(PARAMS)
+	$(F77) -c $(FLAGS) $(UFLAG) kcartajpl.f
+
 
 ################ OPTICAL DEPTHS (LTE and NLTE) ###########################
 ###### lte routines

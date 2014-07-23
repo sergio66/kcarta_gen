@@ -360,9 +360,16 @@ computations, even with scattering (introduce a OLR computation) etc]
   rad_main.f          iColJac = +1            dump out col jacs or not
   scatter_all_misc.f  iLogOrLinear = +1       linear interp for w,g; log for e
 
+                  for LBLRTM TAPE 5/6 input
+  n_layers.f          iReplaceZeroProf = +1    user wants to replace ZERO everywhere gas profile with climatology
+  n_pth_mix.f         iAddLBLRTM = +1          user wants to add on missing profiles even if they were 
+                                               not specified in TAPE5 or TAPE6
+
 03/31/14        kRTP = -10 reads in text based levels input
                 kRTP = -5 reads in LBLRTM based levels input (TAPE 5)
                 kRTP = -6 reads in LBLRTM based layers input (TAPE 6, edited)
+                kRTP = +2 reads JPL/NOAA style LAYERS profile; set atm from namelist
+
                   The first part of this file contains info from TAPE5 upto NUMBER of LEVELS
                     to read. 
                   This is replaced with NUMBER of LAYERS from which to read info, plus 
@@ -515,6 +522,15 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+7/23/14         Added couple more iDefaults while reading in text input from LBLRTM TAPE5/TAPE6
+                This way the code can add on missing gases (which were not specified in TAPE5)
+                and if the gases were specified in TAPE5 but with a "everywhere 0" profile, then
+                the code adds on the US STD profile for that gas
+
+7/14/14         Writing kcartajpl.f and modifying some routines, so that kcarta can be 
+                called as a stand-alone routine; kRTP = +2 means use arguments for setting layers, 
+                rather than reading in a profile from RTP or TXT or LBLRTM
+
 7/9/14          For git and tar reasons, moved scatter_all_misc.f to clear_scatter_misc.f
 
 4/05/14         http://www.atmos.umd.edu/~ytma/lblrtm/lblrtm_instructions.html

@@ -590,7 +590,7 @@ c   pressures at which things are output
       END
 
 c************************************************************************
-c this subroutine does some more initialixations
+c this subroutine does some more initializations
       SUBROUTINE SomeMoreInits(iMixFileLines,iVertTempSet,iNpMix,raaMix) 
  
       IMPLICIT NONE
@@ -602,10 +602,10 @@ c this subroutine does some more initialixations
  
       INTEGER iFileIDLO,iFileIDhi
 
-c this is if kRTP = -10 (user supplied levels profile) or -5,-6 (TAPE5/TAPE6 from LBLRTM)
-c 1,2,3 = SurfPress/SurfTemp/SurfHgt
-c 4,5   = ViewHgt and ViewAngle/direction
-c 6     = Based on (4=ViewHgt) the code figures out highest pressure at which rad is to be output
+c these are needd to be set if kRTP = -10 (user supplied levels profile) or -5,-6 (TAPE5/TAPE6 from LBLRTM)
+c   1,2,3 = SurfPress/SurfTemp/SurfHgt
+c   4,5   = ViewHgt and ViewAngle/direction
+c   6     = Based on (4=ViewHgt) the code figures out highest pressure at which rad is to be output
       DO iFileIDLO = 1,10
         raRTP_TxtInput(iFileIDLO) = -9999
       END DO
@@ -847,217 +847,6 @@ c is CO2
       RETURN
       END
 
-c************************************************************************
-c this subroutine does the command line stuff
-      SUBROUTINE DoCommandLineChunks(iMicrosoft,caDriverName,caOutName,
-     $                         caJacobFile,iOutFileName,
-     $                         rStartChunk_commandline,rStopChunk_commandline)
-
-      IMPLICIT NONE
-
-      include '../INCLUDE/kcarta.param'
-
-c run with one of these four possibilities
-c   kcartachunk.x IN_NMLfile OUT_RADfile 
-c   kcartachunk.x IN_NMLfile OUT_RADfile OUT_JACFILE
-c   kcartachunk.x IN_NMLfile OUT_RADfile             -iStartChunk -iStopChunk
-c   kcartachunk.x IN_NMLfile OUT_RADfile OUT_JACFILE -iStartChunk -iStopChunk
-
-c these are the start and stop chunks
-      REAL rStartChunk_commandline,rStopChunk_commandline
-c caDriverName is the name of the driver file to be processed 
-      CHARACTER*80 caDriverName 
-c caOutName is the name of the unformatted output file name 
-c integer iOutFileName tells whether or not there is a driver name, or 
-c dump output to Unit 6 
-      INTEGER iOutFileName 
-      CHARACTER*80 caOutName 
-c caJacobFile is the name of the unformatted output file name for Jacobians 
-      CHARACTER*80 caJacobFile 
-c this tells if we have MS Product ie no command line stuff!
-      INTEGER iMicroSoft
-c this is the number of args
-      INTEGER iargc 
-
-      INTEGER iDummy,iError,iX,iY
-      CHARACTER*80 caJunk
-      CHARACTER*5  ca5
-
- 12   FORMAT(I5)
-      rStartChunk_commandline = 0605.0
-      rStopChunk_commandline  = 2830.0
-
-      IF (iMicroSoft .GT. 0) THEN 
-         
-        !no command line options .. do this! 
-        print *,'Enter (1) if standard kcarta computation   (605-2830 cm-1)' 
-        print *,'      (2) if kcarta + jacobian computation (605-2830 cm-1)'  
-        print *,'      (3) if standard kcarta computation   (r1-r2 cm-1)' 
-        print *,'      (4) if kcarta + jacobian computation (r1-r2 cm-1)'  
-        read *,iDummy 
-        IF ((iDummy .GT. 4) .OR. (iDummy .LT. 1)) THEN  
-          write(kStdErr,*) 'Microsoft user : please enter 1,2,3 or 4' 
-          CALL DoSTOP 
-        END IF 
-       
-        print *,'Enter driver namelist filename (enclose in quotes) : ' 
-        read *,caDriverName 
-        kStdDriver = kStdDriverKK 
- 
-        print *,'Enter output standard filename  (enclose in quotes) : ' 
-        read *,caOutName 
-        kStdkCarta = kStdkCartaKK 
-        iOutFileName  =  1 
- 
-        IF (iDummy .EQ. 2) THEN 
-          print *,'Enter output jacobian filename  (enclose in quotes) : ' 
-          read *,caJacobFile 
-          kStdJacob = kStdJacobKK 
-        END IF 
-
-        IF (iDummy .GE. 3) THEN 
-          print *,'Enter StartChunk_commandline,StopChunk_commandline : ' 
-          read *,rStartChunk_commandline,rStopChunk_commandline
-        END IF 
-
-        iMicrosoft = iDummy    !tells number of output files (w/o flux, planck)
-       
-       ELSE 
-         !use command line stuff 
-         iDummy = iargc() 
- 
-         IF (iDummy .GT. 5) THEN  
-           write(kStdErr,*) 'more than five arguments in command line' 
-           write(kStdErr,*) 'is NOT allowed' 
-           CALL DoSTOP 
-         END IF 
-
-         iOutFileName = -1         !assume no name 
-         !! we know first two arguments are IN_NMLfile OUT_RADfile
-         DO iError = 1,iDummy 
-           IF (iError .EQ. 1) THEN 
-             CALL getarg(1,caDriverName) 
-             IF (caDriverName(1:1) .NE. '-') THEN 
-               kStdDriver = kStdDriverKK 
-             ELSE
-               write (kStdErr,*) caDriverName
-               write (kStdErr,*) 'oops, expected a valid input nml filename'
-               CALL DoStop
-             END IF 
-           END IF 
- 
-           IF (iError .EQ. 2) THEN 
-             CALL getarg(2,caOutName) 
-             IF (caOutName(1:1) .NE. '-') THEN 
-               iOutFileName = 1 
-               kStdkCarta = kStdkCartaKK 
-             ELSE
-               write (kStdErr,*) caOutName
-               write (kStdErr,*) 'oops, expected a valid output filename'
-               CALL DoStop
-             END IF 
-           END IF 
- 
-           IF (iError .EQ. 3) THEN
-             IF  (iDummy .EQ. 3) THEN 
-               !! we know third (and last) argument is OUT_JACFILE
-               CALL getarg(3,caJacobFile) 
-               IF (caJacobFile(1:1) .NE. '-') THEN 
-                 kStdJacob = kStdJacobKK 
-               ELSE
-                 write (kStdErr,*) caJacobFile
-                 write (kStdErr,*) 'oops, expected a valid jacobian filename'
-                 CALL DoStop
-               END IF 
-             ELSEIF (iDummy .EQ. 4) THEN 
-               !! we know third argument is -iStartChunk_commandline 
-               CALL getarg(3,caJunk) 
-               IF (caJunk(1:1) .NE. '-') THEN 
-                 write(kStdErr,*) 'with 4 input arguments, third should be'
-                 write(kStdErr,*) '    -iStartChunk_commandline'
-                 CALL DoStop
-               ELSE
-                 caJunk(1:1) = ' '
-                 ca5(1:5) = caJunk(1:5)
-                 read(ca5,12) iX
-                 rStartChunk_commandline = iX * 1.0
-               END IF 
-             ELSEIF (iDummy .EQ. 5) THEN 
-               !! we know third argument is OUT_JACFILE
-               CALL getarg(3,caJacobFile) 
-               IF (caJacobFile(1:1) .NE. '-') THEN 
-                 kStdJacob = kStdJacobKK 
-               END IF 
-             END IF 
-           END IF
-
-           IF (iError .EQ. 4) THEN
-             IF (iDummy .EQ. 4) THEN 
-               !! we know fourth (and last) argument is -iStopChunk_commandline
-               CALL getarg(4,caJunk) 
-               IF (caJunk(1:1) .NE. '-') THEN 
-                 write(kStdErr,*) 'with 4 input arguments, fourth should be'
-                 write(kStdErr,*) '    -iStopChunk_commandline'
-                 CALL DoStop
-               ELSE
-                 caJunk(1:1) = ' '
-                 ca5(1:5) = caJunk(1:5)
-                 read(ca5,12) iX
-                 rStopChunk_commandline = iX * 1.0
-               END IF 
-             ELSEIF (iDummy .EQ. 5) THEN 
-               !! we know fourth argument is -iStartChunk_commandline
-               CALL getarg(4,caJunk) 
-               IF (caJunk(1:1) .NE. '-') THEN 
-                 write(kStdErr,*) 'with 5 input arguments, fourth should be'
-                 write(kStdErr,*) '    -iStartChunk_commandline'
-                 CALL DoStop
-               ELSE
-                 caJunk(1:1) = ' '
-                 ca5(1:5) = caJunk(1:5)
-                 read(ca5,12) iX
-                 rStartChunk_commandline = iX * 1.0
-               END IF 
-             END IF
-           END IF 
-
-           IF (iError .EQ. 5) THEN 
-             IF (iDummy .EQ. 5) THEN 
-               !! we know fifth (and last) argument is -iStopChunk_commandline
-               CALL getarg(5,caJunk) 
-               IF (caJunk(1:1) .NE. '-') THEN 
-                 write(kStdErr,*) 'with 5 input arguments, fifth should be'
-                 write(kStdErr,*) '    -iStopChunk_commandline'
-                 CALL DoStop
-               ELSE
-                 caJunk(1:1) = ' '
-                 ca5(1:5) = caJunk(1:5)
-                 read(ca5,12) iX
-                 rStopChunk_commandline = iX * 1.0
-               END IF 
-             END IF
-           END IF 
-
-         END DO 
- 
-c        print *,'in  nml file = ',caDriverName
-c        print *,'out rad file = ',caOutName
-c        print *,'out jac file = ',caJacobFile
-c        print *,'start,stop = ',rStartChunk_commandline,rStopChunk_commandline
-c        call dostop
-        IF (iDummy .EQ. 4) THEN
-          !!really, this is two file names, plus start/stop
-          iDummy = 2
-        ELSEIF (iDummy .EQ. 5) THEN
-          !!really, this is three file names, plus start/stop
-          iDummy = 3
-        END IF
-        iMicrosoft = iDummy-1  !tells number of output files (w/o flux,planck)
-      END IF 
-
-      RETURN
-      END 
- 
 c************************************************************************
 c this subroutine does the command line stuff
       SUBROUTINE DoCommandLine(iMicrosoft,caDriverName,caOutName,
@@ -2023,13 +1812,14 @@ c              1 == want to use user supplied surface temp in *RADNCE as
 c                     an offset to pressure interpolated temperature
       kSurfTemp = -1     
 
-c kRTP = -5 : read LBLRTM style LAYERS profile (edited TAPE 6); set atm from namelist
-c kRTP = -6 : read LBLRTM style LEVELS profile (       TAPE 5); set atm from namelist
+c kRTP = -5  : read LBLRTM style LAYERS profile (edited TAPE 6); set atm from namelist
+c kRTP = -6  : read LBLRTM style LEVELS profile (       TAPE 5); set atm from namelist
 c kRTP = -10 : read TEXT style LEVELS   profile; set atm from namelist
 c kRTP = -2  : read GENLN4 style LAYERS profile; set atm from namelist
 c kRTP = -1  : read old style kLAYERS   profile; set atm from namelist
 c kRTP =  0  : read RTP style kLAYERS   profile; set atm from namelist
 c kRTP = +1  : read RTP style kLAYERS   profile; set atm from RTP file
+c kRTP = +2  : use JPL/NOAA style LAYERS profile; set atm from namelist
       kRTP = 1
 
 c kTempJac == -2 if we only want d/dT(planck) in temperature jacobian
@@ -2268,15 +2058,23 @@ c      END IF
       !!!kRTP = -1  : read old    style LAYERS profile; set atm from namelist
       !!!kRTP =  0  : read RTP   style kLAYERS profile; set atm from namelist
       !!!kRTP = +1  : read RTP   style kLAYERS profile; set atm from RTP file
-      IF ((kRTP .NE. -5) .AND. (kRTP .NE. -6) .AND. 
+      !!!kRTP = +2  : use JPL/NOAA style LAYERS profile; set atm from namelist
+      IF ((kRTP .NE. -5) .AND. (kRTP .NE. -6) .AND. (kRTP .NE. +2) .AND. 
      $    (kRTP .NE. -10) .AND. ((kRTP .LT. -2) .OR. (kRTP .GT. 1))) THEN
-        write(kStdErr,*) 'Need to set RTP = -10,-6,-5,-2,-1,0, or +1'
+        write(kStdErr,*) 'Need to set RTP = -10,-6,-5,-2,-1,0,+1,+2'
         write(kStdErr,*) 'Please reset kRTP and retry'
         CALL DoSTOP 
       END IF
 
-      IF ((kSurfTemp .GT. 0) .AND. (kRTP .GT. 0)) THEN
+      IF ((kSurfTemp .GT. 0) .AND. (kRTP .EQ. 1)) THEN
         write(kStdErr,*) 'Cannot read surface temperature info from RTP file'
+        write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
+        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
+        CALL DoSTOP 
+      END IF
+
+      IF ((kSurfTemp .GT. 0) .AND. (kRTP .EQ. 2)) THEN
+        write(kStdErr,*) 'Cannot read surface temperature info from JPL/NOAA input'
         write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
         write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
         CALL DoSTOP 

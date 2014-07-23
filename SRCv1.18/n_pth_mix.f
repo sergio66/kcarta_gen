@@ -1157,8 +1157,7 @@ c set raaStore from the elements stored in raStore
       write(kStdWarn,*) ' ' 
       DO iGas=1,iNumGases 
         DO iLay=1,iNumLayers 
-          raaMix(iMPReadIn*iNumLayers+iLay,iGas)=
-     $             raStore(iaInputOrder(iGas))
+          raaMix(iMPReadIn*iNumLayers+iLay,iGas) = raStore(iaInputOrder(iGas))
         END DO 
       END DO 
 
@@ -2448,7 +2447,6 @@ c this is new code, same as in subr ReadRefProf (in n_pth_mix.f)
       END
 
 c************************************************************************
-
 c this subroutine adds on US STandard Profile gas amounts for those gases NOT
 c in the RTP profile (using h.ptype = 2 or even 1)
       SUBROUTINE AddOnStandardProfile(
@@ -2487,7 +2485,7 @@ c local variables
       cN = 'N'
 
       write(kStdWarn,*) '  '
-      write(kStdWarn,*) 'read STD profiles for ',iNumberOfGasesRead, ' gases ...'
+      write(kStdWarn,*) 'read in USER SUPPLIED profiles for ',iNumberOfGasesRead, ' gases ...'
 
 c this is the list of gases for which we need profiles
       iK = 0
@@ -2506,21 +2504,23 @@ c            write(kStdWarn,200) iI,iaInputOrder(iI),cN
         END IF
       END DO
 
-      !!! now do gasids 101,102,103
-      iI = 1
-      IF (iaInputOrder(iI) .EQ. 1) THEN
-        IF (iaWhichGasRead(iI) .EQ. +1) THEN
-          write(kStdWarn,200) iI,101,cY
-          write(kStdWarn,200) iI,102,cY
-          write(kStdWarn,200) iI,103,cY
-        ELSE  
-          write(kStdWarn,200) iI,101,cN
-          write(kStdWarn,200) iI,102,cN
-          write(kStdWarn,200) iI,103,cN
-        END IF
-      END IF
-      write(kStdWarn,*) ' '
+c ---->>> this already taken care of in previous loop  July 2014
+c      !!! now do gasids 101,102,103
+c      iI = 1
+c      IF (iaInputOrder(iI) .EQ. 1) THEN
+c        IF (iaWhichGasRead(iI) .EQ. +1) THEN
+c          write(kStdWarn,200) iI,101,cY
+c          write(kStdWarn,200) iI,102,cY
+c          write(kStdWarn,200) iI,103,cY
+c        ELSE  
+c          write(kStdWarn,200) iI,101,cN
+c          write(kStdWarn,200) iI,102,cN
+c          write(kStdWarn,200) iI,103,cN
+c        END IF
+c      END IF
+c ---->>> this already taken care of in previous loop  July 2014
 
+      write(kStdWarn,*) ' '
  200  FORMAT('yi, idgas = ',I5,I5,'  ',A1)
 
 c this is the list of gases for which we have read in the profiles
@@ -2608,6 +2608,7 @@ c local vars
       CHARACTER c1,c2
       CHARACTER*2 c12
       CHARACTER*100 caLine
+      INTEGER iDefault,iAddLBLRTM
 
 c      caFname0 = kUSStd
       caFname0 = kOrigRefPath
@@ -2656,11 +2657,19 @@ c      caFname0 = '/home/sergio/KCARTADATA/USSTD/us_std_gas_'
       DO i1 = 1,2
         caFname(iLen+i1:iLen+i1) = c12(i1:i1)
       END DO
+
+      iDefault = -1
+      iAddLBLRTM = -1   !! if profile missing and kRTP = -5 or -6, do not add
+      iAddLBLRTM = +1   !! if profile missing and kRTP = -5 or -6, do     add
+
       IF ((kRTP .NE. -5) .AND. (kRTP .NE. -6)) THEN
 c       write(kStdWarn,*) 'need to add on US Std for ',iIDgas, ' from ',caFname
         write(kStdWarn,*) 'need to add on US Std for ',iIDgas
-      ELSEIF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
+      ELSEIF (((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) .AND. (iAddLBLRTM .EQ. -1)) THEN
         write(kStdWarn,*) 'need to add on US Std for ',iIDgas,' LBLRTM set raQ=0'
+      ELSEIF (((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) .AND. (iAddLBLRTM .EQ. +1)) THEN
+        write(kStdWarn,*) 'need to add on US Std for ',iIDgas,' LBLRTM set raQ=0, reset and add profile'
+        write(kStdErr,*) 'need to add on US Std for ',iIDgas,' LBLRTM set raQ=0, reset and add profile'
       END IF
 
  1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)  
@@ -2695,7 +2704,7 @@ c this is new code, same as in subr ReadRefProf (in n_pth_mix.f)
       IF (caLine(1:1) .NE. '!') THEN
         iLay=iLay+1
         READ(caLine,*) iX,raPx(iLay),raPPx(iLay),raTx(iLay),raQx(iLay)
-        IF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
+        IF (((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) .AND. (iAddLBLRTM .EQ. -1)) THEN
           raPPx(iLay) = 0.0
           raQx(iLay) = 0.0
         END IF

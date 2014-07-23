@@ -90,7 +90,8 @@ c local
       REAL gamma,z,dz,slope,amount,junk
       REAL rFracBot
 
-      REAL raPX(kProfLayer+1),raZX(kProfLayer+1),raTX(kProfLayer+1),raaG_MRX(kProfLayer+1,kMaxGas),raLayDensityX(kProfLayer+1)
+      REAL raPX(kProfLayer+1),raZX(kProfLayer+1),raTX(kProfLayer+1)
+      REAL raaG_MRX(kProfLayer+1,kMaxGas),raLayDensityX(kProfLayer+1)
       
       CALL Init_n_layers(iKCARTADirectionUPorDOWN,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,
      $                    rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta) 
@@ -117,9 +118,9 @@ c but then CONVERTED to MR (gasunit 12)
        END IF
 
       IF (kRTP .NE. -6) THEN
-        !! have read LEVELS profile, so need to itack on necessary info above this profile, and integrate !!
-        !! have read LEVELS profile, so need to itack on necessary info above this profile, and integrate !!
-        !! have read LEVELS profile, so need to itack on necessary info above this profile, and integrate !!
+        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
+        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
+        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
 
         ! >>>> tack on Standard Profile to User Profile; 
         ! >>>> if needed; also add on some more gases if needed, at bottom of profile to TOA
@@ -1816,8 +1817,8 @@ c testing
           END IF
         END DO
       END IF
- 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '))
- 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '),A7)
+ 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '))
+ 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '),A7)
 
 c now find pressure output corresponding to HGT output from LBLRTM
       IF (kRTP .EQ. -20) THEN
@@ -1999,11 +2000,11 @@ c output
 
 c local var
       INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor,iLBL_Levs,iaJunk(20),iNumLevsXsec,iNXsec,iLBROutBdryHorP
-      REAL raX(kMaxGas),rX,rP,rT,rF1,rF2,rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH
+      REAL raX(kMaxGas),rX,rP,rT,rF1,rF2,rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH,raSumCheck(kMaxGas)
       CHARACTER*80 caStr,caStrX,caStrY
       CHARACTER*30 caStr30
       CHARACTER*1  c1
-      INTEGER iWriteRTP
+      INTEGER iWriteRTP,iNumGasesBAD,iaBadGasProfile(kMaxGas),iDefault,iReplaceZeroProf
 
       rPmin = +1.0e6
       rPmax = -1.0e+6
@@ -2064,17 +2065,20 @@ c this should read /home/sergio/IR_NIR_VIS_UV_RTcodes/LBLRTM/LBLRTM12.2/lblrtm/r
       END IF
 
       READ (iIOUN2,*) (raLBL_Hgts(iJ),iJ=1,iLBL_Levs)
-
+      
       raRTP_TxtInput(6) = +raLBL_Hgts(iLBL_Levs)    !! default, assume hgt in km
       IF  (iLBROutBdryHorP .LT. 0) raRTP_TxtInput(6) = -raLBL_Hgts(iLBL_Levs)
 
       READ (iIOUN2,*) iNumLevs
+      iNumLevs = abs(iNumLevs)
       IF (iNumLevs .GT. 2*kProfLayer) THEN
         write(kStdErr,*) 'iNumLevs .GT. 2*kProfLayer',iNumLevs,kProfLayer
         CALL DoStop
       END IF
 
 c see eg http://shadow.eas.gatech.edu/~vvt/lblrtm/lblrtm_inst.html
+c       http://www.ssec.wisc.edu/~paulv/Fortran90/AtmProfile/Modules.html
+c       https://svn.ssec.wisc.edu/repos/uwphysret/trunk/mfiles/compute_F.m
 c       JCHAR = 1-6           - default to value for specified model atmosphere
 c              = " ",A         - volume mixing ratio (ppmv)
 c              = B             - number density (cm-3)
@@ -2089,8 +2093,12 @@ c              = I             - available for user definition
         iaG(iG) = iG
         iaGasUnits(iG) = 10   !!! assume hardcoded ppmv
       END DO
+
+      DO iJ = 1,iNumGases
+        raSumCheck(iJ) = 0.0
+      END DO
         
-      DO iL = 1,iNumLevs
+      DO iL = 1,iNumLevs              !!! >>>>>>>>>>>>>>>>>>>> start reading the MOLGAS profiles
         ! READ (iIOUN2,*) rH,rP,rT,caStrX
         READ (iIOUN2,111) caStrY
         READ(caStrY,*) rH,rP,rT
@@ -2099,7 +2107,7 @@ c              = I             - available for user definition
         caStr30 = caStrX(11:40)
 
         IF (iL .EQ. 1) THEN
-          DO iJ=1,iNumGases
+          DO iJ=1,iNumGases            
             c1 = caStr30(iJ:iJ)
             IF (c1 .EQ. 'A') iaGasUnits(iJ) = 10
             IF (c1 .EQ. ' ') iaGasUnits(iJ) = 10
@@ -2121,7 +2129,11 @@ c              = I             - available for user definition
           END DO
         END IF
 
-        READ (iIOUN2,*) (raX(iG),iG=1,iNumGases)
+        READ (iIOUN2,*) (raX(iJ),iJ=1,iNumGases)
+        DO iJ = 1,iNumGases
+          raSumCheck(iJ) = raSumCheck(iJ) + raX(iJ)
+        END DO
+
         raP(iL) = rP * 100.0  !! change from mb to N/m2
         raT(iL) = rT
         IF (rPmax .LE. raP(iL)) rPmax = raP(iL)
@@ -2133,7 +2145,6 @@ c              = I             - available for user definition
 
         IF (iL .EQ. 1) THEN
           rPSurf = raP(1)/100 !! because we redo this below
-
           IF ((rHSurf .GT. rHmaxKCarta) .OR. (rHSurf .LT. rHminKCarta)) THEN
             write(kStdErr,*) 'need rHmaxKCarta >= rHSurf >= rHminKCarta but have'
             write(kStdErr,*) '(rHmaxKCarta,rHSurf,rHminKCarta) = ',rHmaxKCarta,rHSurf,rHminKCarta
@@ -2150,12 +2161,48 @@ c              = I             - available for user definition
             CALL DoStop
           END IF
         END IF
+      END DO       !!!! <<<<<<<<<<<<<<<<<<<< done reading the MOLGAS profiles
+
+      !! now see if data was acutally read in
+      iNumGasesBAD = 0
+      DO iJ = 1,iNumGases
+        IF (raSumCheck(iJ) .LT. 1.0e-20) THEN
+          write(kStdWarn,*) ' reading in TAPE5, following gas had    zero profile column sum ',iJ,raSumCheck(iJ)
+          iNumGasesBAD = iNumGasesBAD + 1
+          iaBadGasProfile(iNumGasesBAD) = iJ
+        ELSE
+          write(kStdWarn,*) ' reading in TAPE5, following gas had nonzero profile column sum ',iJ,raSumCheck(iJ)
+        END IF
       END DO
+
+      !! need to fix the BAD gases
+      iDefault = +1
+      iReplaceZeroProf = -1    !! assume user knows why there is a ZERO everywhere gas profile
+      iReplaceZeroProf = +1    !! assume user wants to replace ZERO everywhere gas profile with climatology
+
+      IF ((iDefault .NE. iReplaceZeroProf) .AND. (iNumGasesBAD .GT. 0)) THEN
+        write(kStdErr,*) 'in ReadInput_LBLRTM_ProfileTAPE5 : user wants to replace zero prof with climatology'
+        write(kStdErr,*) 'iDefault = ',iDefault,' iReplaceZeroProf = ',iReplaceZeroProf
+        write(kStdWarn,*) 'in ReadInput_LBLRTM_ProfileTAPE5 : user wants to replace zero prof with climatology'
+        write(kStdWarn,*) 'iDefault = ',iDefault,' iReplaceZeroProf = ',iReplaceZeroProf 
+      END IF
+      IF ((iNumGasesBAD .GT. 0) .AND. (iReplaceZeroProf .GT. 0)) THEN
+        DO iG = 1,iNumGasesBAD
+          CALL substitute_tape5_profile_for_climatology(iaBadGasProfile(iG),iNumLevs,raP,raaG_MR)
+          iaGasUnits(iaBadGasProfile(iG)) = 10
+          raSumCheck(iaBadGasProfile(iG)) = 0.0
+          DO iJ = 1,iNumLevs
+            raSumCheck(iaBadGasProfile(iG)) = raSumCheck(iaBadGasProfile(iG)) + 
+     $                                        raaG_MR(iJ,iaBadGasProfile(iG))
+          END DO
+          write(kStdWarn,*) 'reset ZERO gas profile for gasID ',iaBadGasProfile(iG),' ppmv sum = ',raSumCheck(iaBadGasProfile(iG))
+        END DO
+      END IF
 
       !! now see if there are xsec gases
       READ (iIOUN2,5030,ERR=13,END=13) caStr
       READ(caStr,*) iNXsec
-      IF (iNXsec .GT. 0) THEN
+      IF (iNXsec .GT. 0) THEN    !!!! >>>>>>>>>>>>>>> start reading XSCGAS profiles
         READ (iIOUN2,5030,ERR=13,END=13) caStr     !!!! xsec names 
         CALL XsecNamesLBL(caStr,iaG,iaGasUnits,iNumGases,iNXsec,kRTP)
         READ (iIOUN2,*) iNumLevsXsec
@@ -2200,7 +2247,7 @@ c              = I             - available for user definition
           END DO
         END DO
         iNumGases = iNumGases + iNXsec
-      END IF
+      END IF     !!! end reading xsc gas profiles
 
  13   CONTINUE
       CLOSE(iIOUN2) 
@@ -2885,7 +2932,7 @@ c              = I             - available for user definition
       READ(caStr,*) iNXsec
       IF (iNXsec .GT. 0) THEN
         READ (iIOUN2,5030,ERR=13,END=13) caStr     !!!! xsec names 
-        CALL XsecNamesLBL(caStr,iaG,iaGasUnits,iNumGases,iNXsec)
+        CALL XsecNamesLBL(caStr,iaG,iaGasUnits,iNumGases,iNXsec,kRTP)
         READ (iIOUN2,*) iNumLevsXsec
         IF (iNumLevsXsec .GT. 2*kProfLayer) THEN
           write(kStdErr,*) 'iNumLevsXsec .GT. 2*kProfLayer',iNumLevsXsec,kProfLayer
@@ -3031,7 +3078,7 @@ c local var
       write(kStdWarn,*) 'p.nlevs = ',iNumLevs,';'
       write(kStdWarn,*) 'p.spres = ',rPsurf/100.0,';'
       write(kStdWarn,*) 'p.stemp = ',rTSurf,';'
-      write(kStdWarn,*) 'p.salti = ',rHSurf,'WOWOWOWOW;'
+      write(kStdWarn,*) 'p.salti = ',rHSurf,'; %%%% WOWOWOWOWOW'
 
       ca8 = 'p.plevs'
         CALL write_stringnice(ca8,raP,0.01,8,iNumLevs)
@@ -3201,8 +3248,8 @@ c local
           END IF
         END DO
       END IF
- 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '))
- 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '),A7)
+ 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '))
+ 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '),A7)
 
 c now find pressure output corresponding to HGT output from LBLRTM
       IF (kRTP .EQ. -20) THEN
@@ -3225,4 +3272,233 @@ c now find pressure output corresponding to HGT output from LBLRTM
       RETURN
       END
 
+c************************************************************************
+c if TAPE5 has zeros everywhere for a certain gas, this reads in a US Std profile and stuffs it in
+      SUBROUTINE substitute_tape5_profile_for_climatology(iG,iNumLevs,raP,raaG_MR)
+
+      IMPLICIT NONE
+      include '../INCLUDE/kcarta.param'
+
+c input
+      INTEGER iG             ! which gasID to put in profile
+      INTEGER iNumLevs       ! how many levs in profile
+      REAL raP(2*kProfLayer) ! pressure levels
+c input/output
+      REAL raaG_MR(2*kProfLayer,kMaxGas)
+
+c local vars
+      REAL raX(2*kProfLayer)
+      INTEGER iL
+
+      CALL ReadRefProf_Levels2(iG,raP,iNumLevs,raX)
+
+      DO iL = 1,iNumLevs
+        raaG_MR(iL,iG) = raX(iL)
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************
+      SUBROUTINE ReadRefProf_Levels2(iGasID,raP,iNumLevsIN,raX)
+
+      IMPLICIT NONE
+      include '../INCLUDE/kcarta.param'
+
+c input
+      INTEGER iGasID,iNumLevsIN
+      REAL raP(2*kProfLayer)
+c output
+      REAL raX(2*kProfLayer)
+
+c local
+      REAL raRx110Temp(2*kProfLayer),raRx110MR(2*kProfLayer),raRx110Press(2*kProfLayer)
+      REAL rLat,raJunk(kProfLayer*2)
+      CHARACTER*80 caPFname,caStr,caComment
+      INTEGER iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec,iNumLevsx
+
+      caPFname = kcaLevsRefProf
+
+      IF ((kAFGLProf .LT. 1) .OR. (kAFGLProf .GT. 6)) THEN
+        write(kStdErr,*) 'Need 1 <= kAFGLProf <= 6, but kAFGLProf = ',kAFGLProf
+        CALL DoStop
+      END IF
+
+      iErr = 0
+      iIOUN2 = kProfileUnit
+      OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED',
+     $    IOSTAT=iErrIO)
+      IF (iErrIO .NE. 0) THEN
+          iErr=1
+          WRITE(kStdErr,1070) iErrIO, caPfname
+          CALL DoSTOP
+      ENDIF
+ 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A80)
+      kProfileUnitOpen=1
+
+      iAFGL = 0
+      iFoundGas = -1
+      
+  10  CONTINUE
+      READ(iIOUN2,1080) caStr
+      IF (caStr(1:1) .EQ. '!') THEN 
+        GOTO 10   !! keep reading comments
+      ELSE
+        READ (caStr,*) iNumLevsx
+      END IF
+      IF (iNumLevsx .GT. 2*kProfLayer) THEN
+        write(kStdErr,*) 'oops iNumLevsx .GT. 2*kProfLayer ',iNumLevsx,kProfLayer*2
+        CALL DoStop
+      END IF
+
+  20  CONTINUE
+      iAFGL = iAFGL + 1
+
+  30  CONTINUE  
+      READ(iIOUN2,1080) caStr
+      IF (caStr(1:1) .EQ. '!') THEN 
+        GOTO 30   !! keep reading comments
+      ELSE  
+        caComment = caStr          
+      END IF
+
+  40  CONTINUE
+      READ(iIOUN2,1080) caStr
+      IF (caStr(1:1) .EQ. '!') THEN 
+        GOTO 40   !! keep reading comments
+      ELSE
+        READ (caStr,*) rLat
+      END IF
+c      write(kStdWarn,*) 'iAFGL Profile ',iAFGL,' rLat ',rLat, ' : ',caComment
+
+      READ(iIOUN2,1080) caStr   !! comment
+      READ(iIOUN2,1080) caStr   !! Altitude(km)
+      READ(iIOUN2,*) (rajunk(iI),iI=1,iNumLevsx)
+
+      IF (iAFGL .EQ. kAFGLProf) THEN
+c        write(kStdWarn,*) 'Reading in P/T for kAFGLProf profile ',iAFGL
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! Press(mb)
+        READ(iIOUN2,*) (raRx110Press(iI),iI=1,iNumLevsx)
+
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! Temp(K)
+        READ(iIOUN2,*) (raRx110Temp(iI),iI=1,iNumLevsx)
+
+c        write(kStdWarn,*) '   need to find profile for gasID ',iGasID
+      ELSE
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! Press(mb)
+        READ(iIOUN2,*) (raJunk(iI),iI=1,iNumLevsx)
+
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! Temp(K)
+        READ(iIOUN2,*) (raJunk(iI),iI=1,iNumLevsx)
+      END IF
+
+      READ(iIOUN2,1080) caStr   !! comment
+      READ(iIOUN2,1080) caStr   !! density (cm-3)
+      READ(iIOUN2,*) (rajunk(iI),iI=1,iNumLevsx)
+
+      DO iG = 1,7
+        IF (iG .EQ. iGasID) THEN
+c          write(kStdWarn,*) 'Reading in GasID ',iG,' profile from kAFGLprof profile ',iAFGL
+          iFoundGas = +1
+          READ(iIOUN2,1080) caStr   !! comment
+          READ(iIOUN2,1080) caStr   !! gas name
+          READ(iIOUN2,*) (raRx110MR(iI),iI=1,iNumLevsx)
+        ELSE
+          READ(iIOUN2,1080) caStr   !! comment
+          READ(iIOUN2,1080) caStr   !! gas name
+          READ(iIOUN2,*) (raJunk(iI),iI=1,iNumLevsx)
+        END IF
+      END DO
+
+      IF ((iAFGL .EQ. kAFGLProf) .AND. (iFoundGas .GT. 0)) THEN 
+        GOTO 60   !! found the AFGL prof and found the gas; done!
+      ELSEIF ((iAFGL .EQ. 6) .AND. (iFoundGas .LT. 0)) THEN 
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! modend
+        GOTO 50   !! found the AFGL prof but not found the gas
+      ELSEIF ((iAFGL .LT. 6) .OR. (iFoundGas .LT. 0)) THEN 
+        !! either did not find the gas or the AFGL prof
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! modend
+        GOTO 20
+      END IF
+
+ 50   CONTINUE 
+      READ(iIOUN2,1080) caStr   !! comment
+      READ(iIOUN2,1080) caStr   !! constituent profs
+      READ(iIOUN2,1080) caStr   !! comment
+      READ(iIOUN2,1080) caStr   !! mingas
+
+      iG = 7
+ 55   CONTINUE
+      iG = iG + 1
+      IF (iG .EQ. iGasID) THEN
+c        write(kStdWarn,*) 'Reading in minor absorbing GasID ',iG,' profile from AFGL profile ',iAFGL
+        iFoundGas = +1
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! gas name
+        READ(iIOUN2,*) (raRx110MR(iI),iI=1,iNumLevsx)
+      ELSE
+        READ(iIOUN2,1080) caStr   !! comment
+        READ(iIOUN2,1080) caStr   !! gas name
+        READ(iIOUN2,*) (raJunk(iI),iI=1,iNumLevsx)
+      END IF
+      IF ((iG .LT. 28) .AND. (iFoundGas .LT. 0)) THEN
+        GOTO 55
+      END IF
+      
+      IF (iFoundGas .LT. 0) THEN
+        !! bweh try xsec gases
+ 123    CONTINUE
+        READ(iIOUN2,1080) caStr   !! comment
+        IF (caStr(1:1) .EQ. '!') THEN
+          GOTO 123
+        ELSEIF (caStr(1:6) .EQ. 'DATEND') THEN
+          GOTO 60       !!! oh oh end of file, give up!!!!!              
+        ELSE
+          READ (caStr,*) iXsec
+          IF (iXsec .EQ. iGasID) THEN 
+            iFoundGas = 1
+            READ(iIOUN2,*) (raRx110MR(iI),iI=1,iNumLevsx)          
+          ELSE
+            READ(iIOUN2,*) (raJunk(iI),iI=1,iNumLevsx)          
+            GOTO 123
+          END IF
+        END IF
+      END IF
+
+ 60   CONTINUE
+      CLOSE(iIOUN2) 
+      kProfileUnitOpen=-1
+ 1080 FORMAT(A80)
+
+      IF (iFoundGas .LT. 0) THEN
+        !! finally give up
+        write(kStdErr,*) 'read 6 AFGL profs, gases 1-7,8-28, and XSEC gases but did not find gas OOPS',iGasID
+        CALL DOStop
+      END IF
+
+c*************************
+c finally interp these onto the raP pressure levels
+      DO iI = 1,iNumLevsx
+        raRx110Press(iI) = raRx110Press(iI) * 100.0  !! change mb --> N/m2
+c        print *,iI,raRx110Press(iI),raRx110Temp(iI),raRx110MR(iI)
+      END DO
+
+c      CALL r_sort_loglinear(raRx110Press,raRx110Temp,iNumLevsx,PLEVx110,raJunk,2*kProfLayer)
+c      DO iI = 1,2*kProfLayer
+c        raRx110Temp(iI) = raJunk(iI)
+c      END DO
+      CALL r_sort_loglinear(raRx110Press,raRx110MR,iNumLevsx,raP,raJunk,iNumLevsIN)
+      DO iI = 1,iNumLevsIN
+        raX(iI) = raJunk(iI)
+      END DO
+c      iNumLevsx = 2*kProfLayer
+
+      RETURN
+      END
 c************************************************************************

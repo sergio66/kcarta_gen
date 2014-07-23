@@ -41,12 +41,12 @@ c local variables
 
       CHARACTER*7 caWord
 
-      caWord='*MOLGAS'
+      caWord = '*MOLGAS'
 
-      DO iInt=1,kMaxGas
-        iaMOLgases(iInt)=0
-        iaTemp(iInt)=0
-        END DO
+      DO iInt = 1,kMaxGas
+        iaMOLgases(iInt) = 0
+        iaTemp(iInt) = 0
+      END DO
 
 c allow iNgas = -114,-1,or > 0 where
 c -114  means allow LBL gases which were in older kcarta versions (upto v1.14)
@@ -55,12 +55,12 @@ c -1    means allow ALL LBL gases from the new HITRAN208 = 1..42
 c > 0   means you choose the gases (using iaGasesNL)
 
 c read the no of gases stored in the file
-      iErr=-1      
+      iErr = -1      
       IF (iNgas .GT. 0) THEN
          write(kStdWarn,*) 'including user specified lbl gases'
 c use the molecular ID's from the namelist file 
-        DO iInt=1,iNgas
-          iNotMainGas=MainGas(iaGasesNL(iInt))
+        DO iInt = 1,iNgas
+          iNotMainGas = MainGas(iaGasesNL(iInt))
           IF (iNotMainGas .LT. 0) THEN
             write(kStdErr,*) 'Invalid MOLGAS GasID',iaGasesNL(iInt),' entered'
             write(kStdErr,*) 'Please check *MOLGAS and retry'
@@ -68,184 +68,21 @@ c use the molecular ID's from the namelist file
             write(kStdErr,*) 'probably entered less gasIDs than you promised '
             CALL DoSTOP 
           ELSE
-            iaTemp(iInt)=iaGasesNL(iInt)
-            END IF
-          END DO      
+            iaTemp(iInt) = iaGasesNL(iInt)
+          END IF
+        END DO      
+        CALL add_molgas(iNgas,iaGasesNL,iaMOLgases)   !! user specified gases
 
       ELSEIF (iNgas .EQ. -1) THEN
-         write(kStdWarn,*) 'including all lbl gases from 1 to ', kGasComp 
-         write(kStdWarn,*) ' plus 101,102,103 for Self,Forn cont, heavy water'
-c use ALL gases in the compressed database for v1.15+
-c  check to see the following reference profiles exist : 1,2,3,4,5,6,7,8,9
-c         10,11,12,X,X,15,16,X,18,19,20,21,22,23,X,25,26,27,28,X,X,31,32,...42 
-c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
-        iNgas=0
-        DO iC=1,kGasComp
-          iaInDataBase(iC)=-1
-          END DO
-        DO iC=1,kGasComp
-          iTag=-1
-          iCC=iCheckCompDataBase(iC,-100.0,-100.0,iTag,iErr)
-          IF (iCC .GT. 0) THEN
-            iNgas=iNgas+1
-            iaInDataBase(iC)=1
-            END IF
-          END DO
-c now based on which gases were found, reset array iaTemp
-        iCC=1
-        DO iC=1,kGasComp
-          IF (iaInDataBase(iC) .GT. 0) THEN
-            write(kStdWarn,*)'Including gasID ',iC,' in comp database'
-            iaTemp(iCC)=iC
-            iCC=iCC+1
-            END IF
-          END DO
+        CALL add_molgas(iNgas,iaGasesNL,iaMOLgases)   !! latest version, uses 42 molgas
 
-        IF (kCKD .GE. 0) THEN
-          DO iC=kNewGasLo,kNewGasHi
-            write(kStdWarn,*)'Including gasID ',iC,' in comp database'
-            iaTemp(iCC)=iC
-            iCC=iCC+1
-            iNgas=iNgas+1
-            END DO
-          END IF
-
-        !!!heavy water
-        iC=kNewGasHi+1
-        write(kStdWarn,*)'Including gasID ',iC,' in comp database'
-        iaTemp(iCC)=iC
-        iCC=iCC+1
-        iNgas=iNgas+1
-
-      ELSE IF (iNgas .EQ. -114) THEN
-c use ALL gases in the compressed database for c1.14-
-c  check to see the following reference profiles exist : 1,2,3,4,5,6,7,8,9
-c         10,11,12,X,X,15,16,X,18,19,20,21,22,23,X,25,26,27,28,X,X,31
-c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
-        iKC114gases = 31
-         write(kStdWarn,*) 'including v114- lbl gases from 1 to ',iKC114gases
-         write(kStdWarn,*) ' plus 101,102,103 for Self,Forn cont, heavy water'
-        iNgas=0
-        DO iC=1,iKC114gases
-          iaInDataBase(iC)=-1
-          END DO
-        DO iC=1,iKC114gases
-          iTag=-1
-          iCC=iCheckCompDataBase(iC,-100.0,-100.0,iTag,iErr)
-          IF (iCC .GT. 0) THEN
-            iNgas=iNgas+1
-            iaInDataBase(iC)=1
-            END IF
-          END DO
-c now based on which gases were found, reset array iaTemp
-        iCC=1
-        DO iC=1,iKC114gases
-          IF (iaInDataBase(iC) .GT. 0) THEN
-            write(kStdWarn,*)'Including gasID ',iC,' in comp database'
-            iaTemp(iCC)=iC
-            iCC=iCC+1
-            END IF
-          END DO
-
-        IF (kCKD .GE. 0) THEN
-          DO iC=kNewGasLo,kNewGasHi
-            write(kStdWarn,*)'Including gasID ',iC,' in comp database'
-            iaTemp(iCC)=iC
-            iCC=iCC+1
-            iNgas=iNgas+1
-            END DO
-          END IF
-
-        !!!heavy water
-        iC=kNewGasHi+1
-        write(kStdWarn,*)'Including gasID ',iC,' in comp database'
-        iaTemp(iCC)=iC
-        iCC=iCC+1
-        iNgas=iNgas+1
+      ELSE IF (iNgas .EQ. -114) THEN                  !! use only 31 gases for older versions
+        CALL add_molgas(iNgas,iaGasesNL,iaMOLgases)
 
       ELSE 
         write(kStdErr,*) 'molgas4 can only process iNGas = -114,-1, or > 0'
-        CALL DOSTOP
-        END IF
-
-c check the molecular ID's are between 1 and kGasComp , and
-c kNewGasLo and kNewGasHi+1
-c (should be in the compressed data base)
-c if iNgas = -1, everything should have been set correctly above; if user
-c enetered in the GasIDs him/her self, there could be mistakes
-      DO iC=1,iNgas
-        iNotMainGas=MainGas(iaTemp(iC))
-          IF (iNotMainGas .LT. 0) THEN
-c gas does not exist in the compressed base ... stop
-          WRITE(kStdErr,777) iaTemp(iC),1,kGasComp
-  777       FORMAT('Error in MOLGAS!! found Gas ID  = ',I2,'(
-     $ MOLGAS ID''s should be between ',I2,' and ',I2 ,')')
-          CALL DoSTOP
-          END IF
-c check to see if kcomp files do exist
-        iTag=-1
-        IF (iaTemp(IC) .LE. kGasComp) THEN
-          iCC=iCheckCompDataBase(iaTemp(iC),-100.0,-100.0,iTag,iErr)
-          IF (iCC .LT. 0) THEN
-            WRITE(kStdWarn,780) iaTemp(iC)
-            END IF
-        ELSEIF (iaTemp(IC) .LE. kNewGasHi) THEN
-          WRITE(kStdWarn,785) iaTemp(iC)
-        ELSEIF (iaTemp(IC) .EQ. kNewGasHi+1) THEN
-          WRITE(kStdWarn,787) iaTemp(iC)
-          END IF
-        END DO
- 780  FORMAT('Warning! GasID ',I3,' not in compressed data base')
- 785  FORMAT('Warning! GasID ',I3,' is a new continuum gas')
- 787  FORMAT('Warning! GasID ',I3,' is heavy water (gasID = 1, HITRAN isotope = 4)')
-      
-      iNgasesCheck=iNgas
-
-c set the identities of the gases whose abs spectra are in files
-c iaMOLgases keeps track of how many times the GasID has been found, so that
-c no double counting of the gases (between MOLGAS and XSCGAS) is done
-      DO iInt=1,iNgas
-        iaMOLgases(iaTemp(iInt))=iaMOLgases(iaTemp(iInt))+1
-        END DO
-
-c check to see that the same gas ID has not been entered more than once
-      DO iInt=1,iNgas
-        IF ((iaMOLgases(iaTemp(iInt)).GT.1) .OR. 
-     $      (iaMOLgases(iaTemp(iInt)).LT.0)) THEN
-          write(kStdErr,*) 'Gas ID',iaTemp(iInt),' entered more than'
-          write(kStdErr,*)'once. Please check *MOLGAS and retry'
-          CALL DoSTOP 
-          END IF
-        END DO
-
-      iNgas=iNgasesCheck
-      write(kStdWarn,*) 'MOLGAS ... gases stored are ',iNgas
-      DO iInt=1,kGasComp
-        IF (iaMOLgases(iInt) .GT. 0) THEN
-          write(kStdWarn,*) '     going to use compressed database gas ',iInt
-          END IF
-        END DO
-
-      DO iInt=kNewGasLo,kNewGasHi
-        IF (iaMOLgases(iInt) .GT. 0) THEN
-          write(kStdWarn,*) '     going to use new continuum gas ',iInt
-          END IF
-        END DO
-
-      iInt=kNewGasHi+1
-      IF (iaMOLgases(iInt) .GT. 0) THEN
-        write(kStdWarn,*) '     going to use new heavy water gas ',iInt
-        END IF
-
-      IF (kCKD .GE. 0) THEN
-        DO iInt=kNewGasLo,kNewGasHi
-          IF (iaMOLgases(iInt) .LE. 0) THEN
-            write(kStdWarn,*) 'Cannot have CKD on and gasIDs 101/102 unused'
-            write(kStdErr,*) 'Cannot have CKD on and gasIDs 101/102 unused'
-            Call DoSTOP
-            END IF
-          END DO
-        END IF
+      CALL DOSTOP
+      END IF
         
       RETURN
       END
@@ -282,12 +119,12 @@ c local variables
       INTEGER iaTemp(kMaxGas),iTag
       INTEGER iaInDataBase(kMaxLayer)      
       INTEGER iKC114gases
-      caWord='*XSCGAS'
+      caWord = '*XSCGAS'
 
-      DO iInt=1,kMaxGas
-        iaXSCgases(iInt)=0
-        iaTemp(iInt)=0
-        END DO
+      DO iInt = 1,kMaxGas
+        iaXSCgases(iInt) = 0
+        iaTemp(iInt) = 0
+      END DO
 
 c allow iNxsec = -114,-1,or > 0 where
 c -114  means allow LBL gases which were in older kcarta versions (upto v1.14)
@@ -295,11 +132,11 @@ c       which was 51..63
 c -1    means allow ALL XSC gases from the new HITRAN208 = 51..81
 c > 0   means you choose the gases (using iaLXsecNL)
 
-      iErr=-1
+      iErr = -1
       IF (iNxsec .GT. 0) THEN
          write(kStdWarn,*) 'including user specified xsc gases'
 c use the xsec gas ID's from the namelist file 
-        DO iInt=1,iNXsec
+        DO iInt = 1,iNXsec
           IF ((iaLXsecNL(iInt) .LT. kGasXsecLo) .OR. 
      $        (iaLXsecNL(iInt) .GT. kGasXsecHi)) THEN
             write(kStdErr,*) 'Invalid XSCGAS GasID',iaLXsecNL(iInt),' entered'
@@ -308,116 +145,13 @@ c use the xsec gas ID's from the namelist file
             write(kStdErr,*) 'probably entered less gasIDs than you promised '
             CALL DoSTOP 
           ELSE
-            iaTemp(iInt)=iaLXsecNL(iInt)
-            END IF
-          END DO      
-
-      ELSE IF (iNxsec .EQ. -1) THEN
-         write(kStdWarn,*) 'including all xsc gases from ',kGasXsecLo, ' to ',
-     $ kGasXsecHi
-c use all gases in the xsec database
-c  check to see the following reference profiles exist : 51..82
-        iNxsec=0
-        DO iC=kGasXsecLo,kGasXsecHi
-          iaInDataBase(iC)=-1
-          END DO
-        DO iC=kGasXsecLo,kGasXsecHi
-          iTag=-1
-          iCC=iCheckXsecDataBase(iC,-100.0,-100.0,iTag,iErr)
-          IF (iCC .GT. 0) THEN
-            iNxsec=iNxsec+1
-            iaInDataBase(iC)=1
-            END IF
-          END DO
-c now based on which gases were found, reset array iaTemp
-        iCC=1
-        DO iC=kGasXsecLo,kGasXsecHi
-          IF (iaInDataBase(iC) .GT. 0) THEN
-            write(kStdWarn,*) 'Including gasID ',iC,' in xsec database'
-            iaTemp(iCC)=iC
-            iCC=iCC+1
-            END IF
-          END DO
-
-      ELSE IF (iNxsec .EQ. -114) THEN
-        iKC114gases = 63
-         write(kStdWarn,*) 'including v114- xsc gases from ',kGasXsecLo,' to ',
-     $ iKC114gases
-c use all gases in the xsec database
-c  check to see the following reference profiles exist : 51..63
-        iNxsec=0
-        DO iC=kGasXsecLo,iKC114gases
-          iaInDataBase(iC)=-1
-          END DO
-        DO iC=kGasXsecLo,iKC114gases
-          iTag=-1
-          iCC=iCheckXsecDataBase(iC,-100.0,-100.0,iTag,iErr)
-          IF (iCC .GT. 0) THEN
-            iNxsec=iNxsec+1
-            iaInDataBase(iC)=1
-            END IF
-          END DO
-c now based on which gases were found, reset array iaTemp
-        iCC=1
-        DO iC=kGasXsecLo,iKC114gases
-          IF (iaInDataBase(iC) .GT. 0) THEN
-            write(kStdWarn,*) 'Including gasID ',iC,' in xsec database'
-            iaTemp(iCC)=iC
-            iCC=iCC+1
-            END IF
-          END DO
-
+            iaTemp(iInt) = iaLXsecNL(iInt)
+          END IF
+        END DO      
+        CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! now check the veracity of these gases
       ELSE 
-        write(kStdErr,*) 'xscgas4 can only process iNXsec = -114,-1, or > 0'
-        CALL DOSTOP
-        END IF
- 
-c check the molecular ID's are between kGasXsecLo and kXsecGasHi
-c (should be in the cross sec data base)
-c if iNXsec = -1, everything should have been set correctly above; if user
-c enetered in the GasIDs him/her self, there could be mistakes
-      DO iC=1,iNXsec
-        IF ((iaTemp(iC).LT.kGasXsecLo).OR.(iaTemp(iC).GT.kGasXsecHi)) THEN
-c gas does not exist in the xsec data base ... stop
-          WRITE(kStdErr,777) iaTemp(iC),kGasXsecLo,kGasXsecHi
- 777      FORMAT('Error in XSCGAS!! found Gas ID  = ',I2,'(
-     $ XSCGAS ID''s should be between ',I2,' and ',I2 ,')')
-           CALL DoSTOP
-           END IF
-c check to see if cross section data files for this gas does exist
-         iTag=-1
-         iCC=iCheckXsecDataBase(iaTemp(iC),-100.0,-100.0,iTag,iErr)
-         IF (iCC .LT. 0) THEN
-           WRITE(kStdWarn,780) iaTemp(iC)
- 780       FORMAT('Warning! GasID ',I2,' not in xsec data base')
-           END IF
-         END DO        
-
-      iNXsecCheck=iNXsec
-c set the identities of the gases whose molecular cross sections are in file
-c iaXSCgases keeps track of how many times the GasID has been found, so that
-c no double counting of the gases (between MOLGAS and XSCGAS) is done
-      DO iInt=1,iNXsec
-        iaXSCgases(iaTemp(iInt))=iaXSCgases(iaTemp(iInt))+1
-        END DO
-
-c check to see that the same gas ID has not been entered more than once
-      DO iInt=1,iNXsec
-        IF ((iaXSCgases(iaTemp(iInt)).GT.1) .OR. 
-     $      (iaXSCgases(iaTemp(iInt)).LT.0)) THEN
-          write(kStdErr,*) 'Gas ID ',iaTemp(iInt),' entered more than'
-          write(kStdErr,*) 'once Please check *XSCGAS and retry'
-          CALL DoSTOP 
-          END IF
-        END DO
-
-      iNXsec=iNXsecCheck
-      write(kStdWarn,*)'cross section gases stored are ',iNXsec
-      DO iInt=kGasXsecLo,kGasXsecHi
-        IF (iaXSCgases(iInt) .GT. 0) THEN
-          write(kStdWarn,*) 'CrossSect database gas ',iInt
-          END IF
-        END DO
+        CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! add and check veracity of all xsec gases
+      END IF
 
       RETURN
       END
@@ -445,22 +179,22 @@ c local variables
       CHARACTER*7 caWord
       INTEGER iNumLinesRead,iCount,iErr
 
-      caWord='*SPECTR'
-      iErr=-1
+      caWord = '*SPECTR'
+      iErr = -1
 
  5030 FORMAT(A130) 
 
-      iNumLinesRead=0 
+      iNumLinesRead = 0 
  13   IF (iNumLinesRead .GT. 0) THEN 
-        iErr=1 
+        iErr = 1 
         WRITE(kStdErr,5010) caWord 
         CALL DoSTOP 
         END IF 
  5010 FORMAT('Error reading section ',A7) 
 
-      iNumLinesRead=1
+      iNumLinesRead = 1
 c read how many gases will have new spectroscopy
-      iErr=-1  
+      iErr = -1  
       IF ((iNumNewGases .LT. 1) .OR. (iNumNewGases .GT. kGasStore)) THEN  
         write(kStdErr,*)'need a valid number of gases in *SPECTRA!!'  
         write(kStdErr,*)'must be > 0, < kGasStore!!'
@@ -468,7 +202,7 @@ c read how many gases will have new spectroscopy
         CALL DoSTOP  
         END IF
 
-      DO iCount=1,iNumNewGases
+      DO iCount = 1,iNumNewGases
         IF ((iaNewGasID(iCount) .LT. 1) .OR. 
      $      (iaNewGasID(iCount) .GT. kMaxGas)) THEN 
           write(kStdErr,*)'need a valid gas ID in *SPECTRA!!' 
@@ -834,34 +568,34 @@ c     $         iRTP,iRegr,caNONLTETempKC)
           END IF
         END DO    
       
-      caWord='*NONLTE'
-      iErr=-1
+      caWord = '*NONLTE'
+      iErr = -1
  
 c we are calling this routine a little early in n_main ... need to reassign 
 c iaGases correctly
 c upto this point eg if gas IDs were 1,3,5,22,51 then
-c iaGasesIn(1)=iaGasesIn(3)=iaGasesIn(5)=iaGasesIn(22)=iaGasesIn(51) = 1
+c iaGasesIn(1) = iaGasesIn(3) = iaGasesIn(5) = iaGasesIn(22) = iaGasesIn(51)  =  1
 c all other iaGasesIn(iN) = -1
 c we have to redo this so that iaGases contains the LIST
 c iaGases(1,2,3,4,5) = 1,3,5,22,51  all else -1
-      DO iInt=1,kMaxGas
-        iaDumb(iInt)=iaGasesIn(iInt)
-        iaGases(iInt)=-1
+      DO iInt = 1,kMaxGas
+        iaDumb(iInt) = iaGasesIn(iInt)
+        iaGases(iInt) = -1
         END DO
 
-      iType=1
-      DO iInt=1,kMaxGas
+      iType = 1
+      DO iInt = 1,kMaxGas
         IF (iaDumb(iInt) .GT. 0) THEN
-          iaGases(iType) = iInt
+          iaGases(iType)  =  iInt
           iType = iType + 1
           END IF
         END DO
 
  5030 FORMAT(A130) 
 
-      iNumLinesRead=0 
+      iNumLinesRead = 0 
  13   IF (iNumLinesRead .GT. 0) THEN 
-        iErr=1 
+        iErr = 1 
         WRITE(kStdErr,5010) caWord 
         CALL DoSTOP 
         END IF 
@@ -873,9 +607,9 @@ c iaGases(1,2,3,4,5) = 1,3,5,22,51  all else -1
           END IF
         END DO
 
-      iNumLinesRead=1
+      iNumLinesRead = 1
 c read how many gases will have new nonLTE spectroscopy
-      iErr=-1  
+      iErr = -1  
       IF ((iNumNLTEGases .LT. 1) .OR. (iNumNLTEGases .GT. kGasStore)) THEN  
         write(kStdErr,*)'need a valid number of gases in *NONLTE!!'  
         write(kStdErr,*)'must be > 0, < kGasStore!!'
@@ -883,7 +617,7 @@ c read how many gases will have new nonLTE spectroscopy
         CALL DoSTOP  
         END IF
 
-      DO iLTEIn=1,iNumNLTEGases
+      DO iLTEIn = 1,iNumNLTEGases
         IF ((iaNLTEGasID(iLTEIn) .LT. 1) .OR. 
      $      (iaNLTEGasID(iLTEIn) .GT. kMaxGas)) THEN 
           write(kStdErr,*)'need a valid gas ID in *SPECTRA!!' 
@@ -1706,4 +1440,297 @@ c local vars
       RETURN
       END
 
+c************************************************************************
+c subroutine adds in the molgases
+      SUBROUTINE add_molgas(iNgas,iaGasesNL,iaMOLgases)
+
+      IMPLICIT NONE
+
+      INCLUDE '../INCLUDE/kcarta.param'
+
+c input/output
+      INTEGER iNgas
+c output
+      INTEGER iaGasesNL(kGasComp),iaMOLgases(kMaxGas)
+
+c local
+      INTEGER iMax,iC,iCC,iaInDataBase(kGasComp),iTag,iErr,iaTemp(kMaxGas)
+      INTEGER iNotMainGas,iNgasesCheck,iInt,iWhichKC
+      INTEGER iCheckCompDataBase,MainGas
+
+      iWHichKC = iNgas
+
+      IF (iWhichKC .EQ. -1) THEN
+        !! this is kc1.15 or later
+c use ALL gases in the compressed database for v1.15+
+c  check to see the following reference profiles exist : 1,2,3,4,5,6,7,8,9
+c         10,11,12,X,X,15,16,X,18,19,20,21,22,23,X,25,26,27,28,X,X,31,32,...42 
+c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
+        iMax = kGasComp
+        write(kStdWarn,*) 'including all lbl gases from 1 to ', kGasComp 
+        write(kStdWarn,*) ' plus 101,102,103 for Self,Forn cont, heavy water'
+      ELSEIF (iWhichKC .EQ. -114) THEN
+        !! this is kc1.14 or earlier
+c use ALL gases in the compressed database for c1.14-
+c  check to see the following reference profiles exist : 1,2,3,4,5,6,7,8,9
+c         10,11,12,X,X,15,16,X,18,19,20,21,22,23,X,25,26,27,28,X,X,31
+c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
+        iMax = 31
+        write(kStdWarn,*) 'including v114- lbl gases from 1 to ',iMax
+        write(kStdWarn,*) ' plus 101,102,103 for Self,Forn cont, heavy water'
+      ELSEIF (iWHichKC .GT. 0) THEN
+        write(kStdWarn,*) 'using user sepcified list'
+      ELSE
+        write(kStdErr,*) 'need iWhichKC = -1 or -114 or > 0'
+        CALL DoStop
+      END IF
+         
+      IF (iWhichKC .LT. 0) THEN
+        iNgas = 0
+        DO iC = 1,kGasComp
+          iaInDataBase(iC) = -1
+        END DO
+        DO iC = 1,kGasComp
+          iTag = -1
+          iCC = iCheckCompDataBase(iC,-100.0,-100.0,iTag,iErr)
+          IF (iCC .GT. 0) THEN
+            iNgas = iNgas+1
+            iaInDataBase(iC) = 1
+          END IF
+        END DO
+c now based on which gases were found, reset array iaTemp
+        iCC = 1
+        DO iC = 1,kGasComp
+          IF (iaInDataBase(iC) .GT. 0) THEN
+            write(kStdWarn,*)'Including gasID ',iC,' in comp database'
+            iaTemp(iCC) = iC
+            iCC = iCC+1
+          END IF
+        END DO
+
+        IF (kCKD .GE. 0) THEN
+          DO iC = kNewGasLo,kNewGasHi
+            write(kStdWarn,*)'Including gasID ',iC,' in comp database'
+            iaTemp(iCC) = iC
+            iCC = iCC+1
+            iNgas = iNgas+1
+          END DO
+        END IF
+
+        !!!heavy water
+        iC = kNewGasHi+1
+        write(kStdWarn,*)'Including gasID ',iC,' in comp database'
+        iaTemp(iCC) = iC
+        iCC = iCC+1
+        iNgas = iNgas+1
+      END IF
+
+c check the molecular ID's are between 1 and kGasComp , and
+c kNewGasLo and kNewGasHi+1
+c (should be in the compressed data base)
+c if iNgas = -1, everything should have been set correctly above; if user
+c enetered in the GasIDs him/her self, there could be mistakes
+      DO iC = 1,iNgas
+        iNotMainGas = MainGas(iaTemp(iC))
+        IF (iNotMainGas .LT. 0) THEN
+c gas does not exist in the compressed base ... stop
+          WRITE(kStdErr,777) iaTemp(iC),1,kGasComp
+  777       FORMAT('Error in MOLGAS!! found Gas ID   =  ',I2,'(
+     $ MOLGAS ID''s should be between ',I2,' and ',I2 ,')')
+          CALL DoSTOP
+        END IF
+c check to see if kcomp files do exist
+        iTag = -1
+        IF (iaTemp(IC) .LE. kGasComp) THEN
+          iCC = iCheckCompDataBase(iaTemp(iC),-100.0,-100.0,iTag,iErr)
+          IF (iCC .LT. 0) THEN
+            WRITE(kStdWarn,780) iaTemp(iC)
+          END IF
+        ELSEIF (iaTemp(IC) .LE. kNewGasHi) THEN
+          WRITE(kStdWarn,785) iaTemp(iC)
+        ELSEIF (iaTemp(IC) .EQ. kNewGasHi+1) THEN
+          WRITE(kStdWarn,787) iaTemp(iC)
+        END IF
+      END DO
+ 780  FORMAT('Warning! GasID ',I3,' not in compressed data base')
+ 785  FORMAT('Warning! GasID ',I3,' is a new continuum gas')
+ 787  FORMAT('Warning! GasID ',I3,' is heavy water (gasID  =  1, HITRAN isotope  =  4)')
+      
+      iNgasesCheck = iNgas
+
+c set the identities of the gases whose abs spectra are in files
+c iaMOLgases keeps track of how many times the GasID has been found, so that
+c no double counting of the gases (between MOLGAS and XSCGAS) is done
+      DO iInt = 1,iNgas
+        iaMOLgases(iaTemp(iInt)) = iaMOLgases(iaTemp(iInt))+1
+      END DO
+
+c check to see that the same gas ID has not been entered more than once
+      DO iInt = 1,iNgas
+        IF ((iaMOLgases(iaTemp(iInt)).GT.1) .OR. 
+     $      (iaMOLgases(iaTemp(iInt)).LT.0)) THEN
+          write(kStdErr,*) 'Gas ID',iaTemp(iInt),' entered more than'
+          write(kStdErr,*)'once. Please check *MOLGAS and retry'
+          CALL DoSTOP 
+        END IF
+      END DO
+
+      iNgas = iNgasesCheck
+      write(kStdWarn,*) 'MOLGAS ... gases stored are ',iNgas
+      DO iInt = 1,kGasComp
+        IF (iaMOLgases(iInt) .GT. 0) THEN
+          write(kStdWarn,*) '     going to use compressed database gas ',iInt
+        END IF
+      END DO
+
+      DO iInt = kNewGasLo,kNewGasHi
+        IF (iaMOLgases(iInt) .GT. 0) THEN
+          write(kStdWarn,*) '     going to use new continuum gas ',iInt
+        END IF
+      END DO
+
+      iInt = kNewGasHi+1
+      IF (iaMOLgases(iInt) .GT. 0) THEN
+        write(kStdWarn,*) '     going to use new heavy water gas ',iInt
+      END IF
+
+      IF (kCKD .GE. 0) THEN
+        DO iInt = kNewGasLo,kNewGasHi
+          IF (iaMOLgases(iInt) .LE. 0) THEN
+            write(kStdWarn,*) 'Cannot have CKD on and gasIDs 101/102 unused'
+            write(kStdErr,*) 'Cannot have CKD on and gasIDs 101/102 unused'
+            Call DoSTOP
+          END IF
+        END DO
+      END IF
+
+      RETURN
+      END
+
+c************************************************************************
+c subroutine adds in the xsecgases
+      SUBROUTINE add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)
+
+      IMPLICIT NONE
+
+      INCLUDE '../INCLUDE/kcarta.param'
+
+c input/output
+      INTEGER iNXsec
+      INTEGER iaLXsecNL(kGasXSecHi-kGasXSecLo+1),iaXSCgases(kMaxGas)
+
+c local
+      INTEGER iInt,iErr,iC,iCC,iCheckXsecDataBase,iNXsecCheck
+      INTEGER iaTemp(kMaxGas),iTag
+      INTEGER iaInDataBase(kMaxLayer)      
+      INTEGER iKC114gases
+
+      IF (iNxsec .EQ. -1) THEN
+         write(kStdWarn,*) 'including all xsc gases from ',kGasXsecLo, ' to ', kGasXsecHi
+c use all gases in the xsec database
+c  check to see the following reference profiles exist : 51..82
+        iNxsec = 0
+        DO iC = kGasXsecLo,kGasXsecHi
+          iaInDataBase(iC) = -1
+        END DO
+        DO iC = kGasXsecLo,kGasXsecHi
+          iTag = -1
+          iCC = iCheckXsecDataBase(iC,-100.0,-100.0,iTag,iErr)
+          IF (iCC .GT. 0) THEN
+            iNxsec = iNxsec+1
+            iaInDataBase(iC) = 1
+          END IF
+        END DO
+c now based on which gases were found, reset array iaTemp
+        iCC = 1
+        DO iC = kGasXsecLo,kGasXsecHi
+          IF (iaInDataBase(iC) .GT. 0) THEN
+            write(kStdWarn,*) 'Including gasID ',iC,' in xsec database'
+            iaTemp(iCC) = iC
+            iCC = iCC+1
+          END IF
+        END DO
+
+      ELSE IF (iNxsec .EQ. -114) THEN
+        iKC114gases = 63
+         write(kStdWarn,*) 'including v114- xsc gases from ',kGasXsecLo,' to ',
+     $ iKC114gases
+c use all gases in the xsec database
+c  check to see the following reference profiles exist : 51..63
+        iNxsec = 0
+        DO iC = kGasXsecLo,iKC114gases
+          iaInDataBase(iC) = -1
+        END DO
+        DO iC = kGasXsecLo,iKC114gases
+          iTag = -1
+          iCC = iCheckXsecDataBase(iC,-100.0,-100.0,iTag,iErr)
+          IF (iCC .GT. 0) THEN
+            iNxsec = iNxsec+1
+            iaInDataBase(iC) = 1
+          END IF
+        END DO
+c now based on which gases were found, reset array iaTemp
+        iCC = 1
+        DO iC = kGasXsecLo,iKC114gases
+          IF (iaInDataBase(iC) .GT. 0) THEN
+            write(kStdWarn,*) 'Including gasID ',iC,' in xsec database'
+            iaTemp(iCC) = iC
+            iCC = iCC+1
+          END IF
+        END DO
+
+      ELSE 
+        write(kStdErr,*) 'xscgas4 can only process iNXsec = -114,-1, or > 0'
+        CALL DOSTOP
+      END IF
+ 
+c check the molecular ID's are between kGasXsecLo and kXsecGasHi
+c (should be in the cross sec data base)
+c if iNXsec = -1, everything should have been set correctly above; if user
+c enetered in the GasIDs him/her self, there could be mistakes
+      DO iC = 1,iNXsec
+        IF ((iaTemp(iC).LT.kGasXsecLo).OR.(iaTemp(iC).GT.kGasXsecHi)) THEN
+c gas does not exist in the xsec data base ... stop
+          WRITE(kStdErr,777) iaTemp(iC),kGasXsecLo,kGasXsecHi
+ 777      FORMAT('Error in XSCGAS!! found Gas ID  = ',I2,'(
+     $ XSCGAS ID''s should be between ',I2,' and ',I2 ,')')
+           CALL DoSTOP
+         END IF
+c check to see if cross section data files for this gas does exist
+         iTag = -1
+         iCC = iCheckXsecDataBase(iaTemp(iC),-100.0,-100.0,iTag,iErr)
+         IF (iCC .LT. 0) THEN
+           WRITE(kStdWarn,780) iaTemp(iC)
+ 780       FORMAT('Warning! GasID ',I2,' not in xsec data base')
+         END IF
+       END DO        
+
+      iNXsecCheck=iNXsec
+c set the identities of the gases whose molecular cross sections are in file
+c iaXSCgases keeps track of how many times the GasID has been found, so that
+c no double counting of the gases (between MOLGAS and XSCGAS) is done
+      DO iInt = 1,iNXsec
+        iaXSCgases(iaTemp(iInt)) = iaXSCgases(iaTemp(iInt))+1
+      END DO
+
+c check to see that the same gas ID has not been entered more than once
+      DO iInt = 1,iNXsec
+        IF ((iaXSCgases(iaTemp(iInt)).GT.1) .OR. 
+     $      (iaXSCgases(iaTemp(iInt)).LT.0)) THEN
+          write(kStdErr,*) 'Gas ID ',iaTemp(iInt),' entered more than'
+          write(kStdErr,*) 'once Please check *XSCGAS and retry'
+          CALL DoSTOP 
+        END IF
+      END DO
+
+      iNXsec = iNXsecCheck
+      write(kStdWarn,*)'cross section gases stored are ',iNXsec
+      DO iInt = kGasXsecLo,kGasXsecHi
+        IF (iaXSCgases(iInt) .GT. 0) THEN
+          write(kStdWarn,*) 'CrossSect database gas ',iInt
+        END IF
+      END DO      
+
+      RETURN
+      END
 c************************************************************************

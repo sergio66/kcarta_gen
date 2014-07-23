@@ -1554,6 +1554,8 @@ c set up raParams; recall all are integers, so change to real!!!
       raParams(11) = -98765.0  !!dummy variables
       raParams(12) = -98765.0  !!dummy variables 
 
+      write(kStdWarn,*) 'kCKD = ',kCKD
+
 c check to make sure that the user first wanted to specify paths, then mixed 
 c paths, then radiances; else STOP ie we have to find paPrinter(iI)=1,2,3 or
 c in that order eg 1,1,1,1 or 2,3,3,3,3  but not 3,1,1 etc
@@ -2484,7 +2486,10 @@ c for each atmosphere, how many layers
         iDumpAllUARads = -1
         END IF
 
- 7171 FORMAT(I4,' ',I4,' ',2(E11.5,' '),F11.5,'  ',E11.5)  
+c f77 format specifiers : the 1P is to shift things over by 1 decimal point
+c http://docs.oracle.com/cd/E19957-01/805-4939/z40007437a2e/index.html
+c ../DOC/F77FormatSpecifiers.pdf
+ 7171 FORMAT(I4,' ',I4,' ',2(1P E11.5,' '),0PF11.5,'  ',1P E11.5)  
 
       RETURN
       END

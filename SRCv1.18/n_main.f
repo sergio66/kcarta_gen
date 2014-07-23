@@ -1235,7 +1235,7 @@ c ******** RADNCE section
       cngwat = max(cngwat1,cngwat2)
       IF (cfrac12 .GE. cfrac) cfrac12 = cfrac
 
-      IF (kRTP .GT. 0) THEN
+      IF ((kRTP .EQ. 0) .OR. (kRTP .EQ. 1))  THEN
         write(kStdWarn,*) 'cfrac12 = ',cfrac12
         write(kStdWarn,*) 'cfrac1,cngwat1,ctype1,ctop1 = ',cfrac1,cngwat1,ctype1,ctop1
         write(kStdWarn,*) 'cfrac2,cngwat2,ctype2,ctop2 = ',cfrac2,cngwat2,ctype2,ctop2
@@ -1262,7 +1262,7 @@ c ******** RADNCE section
       IF ((cfrac .le. 0.0) .AND. (iNclouds_RTP .LE. 0)) THEN
         write (kStdWarn,*) 'successfully checked radnce .....'
         write(kStdWarn,*) ' '
-        IF (kRTP .GT. 0) THEN
+        IF ((kRTP .EQ. 0) .OR. (kRTP .EQ. 1))  THEN
           !!! went thru rtp file and found cfrac = 0
           write (kStdWarn,*) 'no scattering required .....'
         END IF

@@ -818,7 +818,7 @@ c radiation travelling downwards to instrument on ground
       iLowest  =  kProfLayer - iProfileLayers + 1
 
 c the first two IF statements assume instrument looks down
-      IF (kRTP .LT. 0) THEN
+      IF ((kRTP .LT. 0) .OR. (kRTP .EQ. +2)) THEN
         !!!using the usual kLAYERS kProfLayer stuff
         IF (rPressStart .GE. rPressStop) THEN
           IF (rPressStop .LT. raPressLevels(kProfLayer+1)) THEN 

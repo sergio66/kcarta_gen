@@ -1,6 +1,7 @@
 %%% tests everything except rtp_interface.f and *unused.f
 
 g77test = '/usr/bin/g77 -fcase-lower -ffixed-line-length-120 -c ';
+g77test = '/usr/bin/g77 -fcase-lower -ffixed-line-length-132 -c ';
 thedir = dir('/home/sergio/kcartaV118/SRCv1.18/*.f');
 nfiles = length(thedir)
 

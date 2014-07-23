@@ -297,14 +297,14 @@ c local variables
 
       caWord='*PTHFIL'
 
-      !!!kRTP = -6 : read LBLRTM       LAYERS profile; set atm from namelist
-      !!!kRTP = -5 : read LBLRTM       LEVELS profile; set atm from namelist
-      !!!kRTP = -10 : read              LEVELS profile; set atm from namelist
-      !!!kRTP = -2  : read GENLN4 style LAYERS profile; set atm from namelist
-      !!!kRTP = -1  : read old style   kLAYERS profile; set atm from namelist
-      !!!kRTP =  0  : read RTP style   kLAYERS profile; set atm from namelist
-      !!!kRTP = +1  : read RTP style   kLAYERS profile; set atm from RTP file
-
+      !!!kRTP = -6 : read LBLRTM         LAYERS profile; set atm from namelist
+      !!!kRTP = -5 : read LBLRTM         LEVELS profile; set atm from namelist
+      !!!kRTP = -10 : read               LEVELS profile; set atm from namelist
+      !!!kRTP = -2  : read GENLN4 style  LAYERS profile; set atm from namelist
+      !!!kRTP = -1  : read old style     kLAYERS profile; set atm from namelist
+      !!!kRTP =  0  : read RTP style     kLAYERS profile; set atm from namelist
+      !!!kRTP = +1  : read RTP style     kLAYERS profile; set atm from RTP file
+      !!!kRTP = +2  : use JPL/NOAA style LAYERS profile; set atm from namelist
       iNumLinesRead=0
       IF ((kRTP .LT. 0) .AND. (kRTP .GT. -3) .AND. (iGenln4 .GT. 0)) THEN
         write(kStdWarn,*) 'KCARTA expecting text GENLN4 style input profile'
@@ -312,8 +312,11 @@ c local variables
         write(kStdWarn,*) 'KCARTA expecting text KLAYERS style input profile'
       ELSEIF (kRTP .LT. -3) THEN
         write(kStdWarn,*) 'KCARTA expecting text LEVELS style input profile'
-      ELSEIF (kRTP .GE. 0) THEN
+      ELSEIF ((kRTP .EQ. 0) .OR. (kRTP .EQ. 1)) THEN
         write(kStdWarn,*) 'KCARTA expecting RTP hdf style input profile'
+      ELSEIF (kRTP .EQ. 2) THEN
+        write(kStdWarn,*) 'KCARTA expecting JPL/NOAA based profile input from arguments'
+        write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
       ENDIF
 
       IF ((iAFGLProf .LT. 1) .OR. (iAFGLProf .GT. 6)) THEN
@@ -340,7 +343,6 @@ c local variables
      $      iNpath,caPfName,raPressLevels,raThickness,raTPressLevels,
      $      iProfileLayers)
         END IF
-cccc NOPE NO MORE iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
       ELSEIF (kRTP .GE. 0) THEN
         write(kStdWarn,*) 'new style RTP profile to be read is  : '
         write(kStdWarn,5040) caPfname
@@ -349,6 +351,9 @@ cccc NOPE NO MORE iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
      $      iProfileLayers,raPressLevels,raThickness)
+      ELSEIF (kRTP .EQ. 2) THEN
+        write(kStdWarn,*) 'NOAA/JPL layers profile '
+        write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
       ELSEIF (kRTP .EQ. -10) THEN
         write(kStdWarn,*) 'LEVELS style TEXT profile to be read is  : '
         write(kStdWarn,5040) caPfname
@@ -357,7 +362,7 @@ cccc NOPE NO MORE iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
      $      iNpath,caPfName,iRTP,
      $      iProfileLayers,raPressLevels,raThickness)                                 
       ELSEIF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
-        write(kStdWarn,*) 'LBLRTM style TEXT profile to be read is  : '
+        write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
         write(kStdWarn,5040) caPfname
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
@@ -880,7 +885,6 @@ c make sure you only do things for gases 1- 63
             plays(i) = (prof.plevs(i)-prof.plevs(i+1))/
      $                 log(prof.plevs(i)/prof.plevs(i+1))
             rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
-            print *,i,rP,rT
             IF (iDownWard .EQ. -1) THEN
               !!! this automatically puts partial pressure in ATM, assuming 
               !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
@@ -2203,6 +2207,13 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
 
       rf1 = head.vcmin
       rf2 = head.vcmax
+
+      IF ((rf1 .LT. 0) .AND. (rf2 .LT. 0)) THEN
+        write(kStdWarn,*) 'radnce4rtp : resetting head.vcmin from ',rf1,' to 605.0'
+        rf1 = 605.0
+        write(kStdWarn,*) 'radnce4rtp : resetting head.vcmax from ',rf2,' to 2830.0'
+        rf2 = 2830.0
+      END IF
 
       caWord = '*RADNCE'
       iErr = -1

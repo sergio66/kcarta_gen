@@ -206,7 +206,7 @@ where the symbols respectively stand for optical depth (dimensionless), gas
 amount (kmoles/cm2), gas absorption (cm2/kmol) and $cos(view angle)$, then 
 the finite diference colum gas jacobian is 
 given by the difference between the new and unperturbed radiances 
-$\delta r$ = $r_{new} - r-{0}$ when the gas amounts in layers $1$ to $N$ are 
+$\delta r$ = $r_{new} - r_{0}$ when the gas amounts in layers $1$ to $N$ are 
 perturbed by a fraction $\delta$. The (finite differences) column jacobians 
 can be obtained from the (gas) layer analytic jacobians using
 \[
@@ -312,7 +312,7 @@ variables. If not, then edit file ``scatter\_disort\_code.f'' and change all
 occurences of real to double precision}
 
 \textcolor{red}
-{The \kc Makefile produces two different executables. 
+{The \kc Makefile produces three different executables. 
 \begin{itemize}
 \item $kcarta.x$ contains all the features of kCARTA (optical depths, clear 
 sky radiative transfer, clear sky jacobians and fluxes, $SCATTERING$ 
@@ -320,8 +320,17 @@ radiances and fluxes. However, this version uses a $LOT$ of memory
 \item $bkcarta.x$ contains only the most basic features of kCARTA 
 (optical depths and clear sky radiative transfer). This version uses 
 very little memory.
+\item $kcarta\_sa.x$ is a "stand-alone" version that contains only the
+most basic features of kCARTA (optical depths and clear sky radiative
+transfer), also uses very little memory.
 \end{itemize}
 }
+
+In addition, a "txt" version of the all three files can be made, where the
+profile that is read in comes in from a text file; this way a user can supply
+a LBLRTM-based levels profile and have kCARTA run (technically, kcarta\_saTXT.x is the
+same as kcarta\_sa.x as the input profile/scan angle/surface params comes from arguments
+supplied to the stand-alone routine).
 
 The speed and features of the code make it an appealing alternative to other
 existing ``line by line'' codes such as {\sf GENLN2} and {\sf LBLRTM}.
@@ -1612,7 +1621,9 @@ cross section gases, and a lookup table format for the CKD computations.
 \item {\sf jac\_up.f} : jacobian code for up looking instrument
 \item {\sf jac\_down.f} : jacobian code for down looking instrument
 
-\item {\sf kcartamain.f} : main \kc source file
+\item {\sf kcartamain.f} : main \kc source file, with scattering flux jacobians
+\item {\sf kcartabasic.f} : main \kc source file, with flux jacobians
+\item {\sf kcartajpl.f} : standalone \kc source file, with flux jacobians
 \item {\sf kcartamisc.f} : misc routines eg splines
 
 \item {\sf kcoeffMAIN.f} : set up calls to compute LTE absorption coefficients
@@ -2279,11 +2290,12 @@ calculating the Jacobians for an uplook instrument) \\
                               should not mess up gas amount jacobians \\
   &              & {-2}  & use temp dependence only in Planck. Note this
                               should not mess up gas amount jacobians \\ \hline
-9 & {\sf kRTP}   & -10,-2,-1,0,1   & (integer) whether or not to use an RTP file. 
+9 & {\sf kRTP}   & -10,-6,-5,-2,-1,0,1,2  & (integer) whether or not to use an RTP file. 
                                  Can have arbitrary number of layers per gas in
                                  each profile, as long as N <= kProfLayer 
                                  (except for the kRPT=-1 case, where number of
                                   layers per gas must equal kProflayer \\
+  &              & {+2}      & standalone version, where profile and scan angles etc comes in via argument list \\
   &              & {\bf +1}  & {\bf RTP style profile, RTP atmosphere, 
                                 scatter defn}\\
   &              & {0}       & RTP style profile, user atmosphere, 
@@ -2293,8 +2305,8 @@ calculating the Jacobians for an uplook instrument) \\
                                  number of layers in profile == kProfLayer\\
   &              & {-2}      & GENLN4 style ``layers'' profile, user 
                                  atmosphere, scatter defn\\ 
-  &              & {-5}     & LEVELS INPUT LBLRTM TAPE5; sets missing gas amts to 0
-  &              & {-6}     & LAYERS INPUT LBLRTM modified TAPE6; sets missing gas amts to 0
+  &              & {-5}     & LEVELS INPUT LBLRTM TAPE5; sets missing gas amts to 0\\
+  &              & {-6}     & LAYERS INPUT LBLRTM modified TAPE6; sets missing gas amts to 0\\
   &              & {-10}     & LEVELS INPUT text file profile, user 
                                  atmosphere, scatter defn\\ \hline
 10 & {\sf kActualJacs}  & -1,20,30,40,50,100  & (integer) how many jacs to 
@@ -2354,7 +2366,8 @@ with correct background thermal}
 \subsection{$nm\_frqncy$ (mandatory)}
 
 This section specifies the frequency start/stop endpoints.  If kRTP = -10,-5,-6,-2,-1,0 
-the user has to speciy the start/stop wavenumbers that kCARTA has to process. 
+the user has to speciy the start/stop wavenumbers that kCARTA has to process (while
+if kRTP = +2, the code automatically uses 605 to 2830 \wn)
 The format here is
 
 \medskip
@@ -2478,6 +2491,11 @@ The total number of gases to be used in building up the atmosphere is
 
 \label{inprofile}
 
+If kRTP = +2, then the profile comes in via arguments to the main calling routine (see kcartajpl.f).
+8 gases are assumed for now, namely WV,CO2,O3,N2O,Co,CH4,SO2, HN03; in addition the temperature
+profilem emissivities, surface parameters )(pressure, temperature, emissivity, reflectivity) also
+need to be supplied.
+
 If kRTP = -5 or -6, then kCARTA reads in a text LBLRTM file; TAPE5 in the first case and
 modified TAPE6 in the second case. The reader is simple, so not guaranteed to read in 
 any and all TAPE5 correctly. Similarly the modified TAPE6 reader expects first few lines
@@ -2522,7 +2540,6 @@ gasUNITS  = eg MR, g/g, RH, same as klayers
 where p(i) is in mb, T(i) is in K and MR are dimensionless 0 < MR < 1
 and N <= kProfLayer*2
 \end{verbatim}
-
 
 If kRTP = -2,-1, this means the user wishes to use an old style (text) GELN4/
 kLAYERS file for the profile. So in addition the user simply has to specify 

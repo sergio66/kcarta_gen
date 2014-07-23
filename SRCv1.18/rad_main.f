@@ -1618,6 +1618,7 @@ c      END DO
         END DO
       END IF
 
+c allison
 c      DO iFr = 1,1
 c        print *,1,raFreq(iFr),raUseEmissivity(iFr),raThermal(iFr),
 c     $     rThermalRefl,
