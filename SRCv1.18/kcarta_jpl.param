@@ -104,6 +104,11 @@ c iNewIn         is just a variable that tells us if new gas to be used
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore)
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT),iNewIn
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT)
+c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
+c iaAltDirs      tells which gases we want to use alternate compressed files
+c caaaAltDirs    tells the name of the files associated with the alternate compressed files
+      INTEGER iaAltDirs(kGasStore),iNumAltDirs
+      CHARACTER*80 caaAltDirs(kGasStore) 
 
 c this is for nonLTE
 c iNLTE_SlowORFast tells whether to use slow accurate (+1) fast SARTA (-1) 

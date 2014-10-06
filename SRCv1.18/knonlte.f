@@ -519,12 +519,15 @@ c junk to read in HITRAN
       DOUBLE PRECISION dVibCenter      !!!from D. Edwards NLTE files
       INTEGER iStartUse,iaJ_UorL(kHITRAN)
 
+      INTEGER iJunkNum,iaJunk(kGasStore)
+
 c see if current gas ID needs nonLTE spectroscopy
       iLTEIn      = -1
       iWhichChunk = -1
       iDoNLTE     = -1
+      iJunkNum    = -1
 
-      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID)
+      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
 
       IF (iLTEIn .GT. 0) THEN
         CALL LowerAtmNLTERefs(raRPressX,raRPPressX,raRTempx,raRAmtx)
@@ -936,15 +939,18 @@ c     iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
       INTEGER OutsideSpectra,NewDataChunk,iDoVoigtChi
       INTEGER iL,iFr,iDoNLTE
 
+      INTEGER iJunkNum,iaJunk(kGasStore)
+
 c see if current gas ID needs nonLTE spectroscopy
       iLTEIn      = -1
       iWhichChunk = -1
       iDoNLTE     = -1
+      iJunkNum    = -1
 
       !! set up nlte strengths etc
       CALL SetUpNLTEStrengths(dLineStrenMin,dDeltaFreqNLTE,iDoVoigtChi)
 
-      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID)
+      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
       IF (iLTEIn .GT. 0) THEN
         iWhichChunk = 
      $        NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
@@ -1223,12 +1229,15 @@ c local variables
       INTEGER iLTEIn,iWhichChunk,iFr,iL,iGas,iFloor,iJump,iType,iTypeUA
       INTEGER OutsideSPectra,NewDataChunk,iIOUN,iFileErr
       DOUBLE PRECISION dTemp1,dfFine
+      INTEGER iJunkNum,iaJunk(kGasStore)
 
       iChunk_DoNLTE = -1 !!assume everything IS in LTE
+      iJunkNum    = -1
 
+      write(kStdWarn,*) 'Checking NLTE Gases using OutsideSpectra ...'
       DO iGas = 1,iNumGases
         iWhichChunk = -1
-        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID)
+        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
         IF ((iLTEIn .GT. 0) .AND. (kSolarAngle .GE. 0 .AND. kSolarAngle .LE. 90)) THEN
           iWhichChunk = 
      $        NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)

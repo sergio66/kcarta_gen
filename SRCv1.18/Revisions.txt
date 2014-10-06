@@ -257,6 +257,12 @@ v1.18   Included National Renewable Energy Lab (NREL) SOLAR database to make
         ie jacobians only possible for usual (100) AIRS layers between 
         1100-0.005 mb
 
+        SPECTRA section now allows you to specify an "alternative" compressed database
+        for some of gases 1-81,103 other than what is set in 
+          kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+        So though they are are set by user at compile time, the user can use this way to 
+        load in alternate water/CO2/other optical depths at run time
+
 v1.17 : Doomed attempt to speed up code by using input profile(s) for only
         certain gases eg 1,2,3,4,5,6,9,12 ... and relying on US Std for other
         gases. This made code full of if then - else - end if, could produce
@@ -522,6 +528,12 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+10/06/14        SPECTRA now allows you to specify alternate compressed directories for 
+                gases whose ID >= 3 and <= 800 (ie ozone through to xsec gases, but not H2O, CO2)
+                  iNumAltDirs = number of gases which we want to use alternative compressed databases for
+                  iaAltDirs   = which gases to do alternates
+                  caaaAltDirs = directory names
+
 7/23/14         Added couple more iDefaults while reading in text input from LBLRTM TAPE5/TAPE6
                 This way the code can add on missing gases (which were not specified in TAPE5)
                 and if the gases were specified in TAPE5 but with a "everywhere 0" profile, then

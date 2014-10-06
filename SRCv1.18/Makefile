@@ -236,14 +236,14 @@ UFLAG =
 #FLAGS = -v -g -W -A -C -N3 -s -N109
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
-#FLAGS = -w -W -C -O -A -N3 -s -f -N15                                               ####
-#FLAGS_RTP = -w -W -O -C -N3 -s                                                      ####
+FLAGS = -w -W -C -O -A -N3 -s -f -N15                                               ####
+FLAGS_RTP = -w -W -O -C -N3 -s                                                      ####
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #
 #### when you are sure code works, turn off -C and turn up -03 #### 
-FLAGS = -w -W -O3 -A -N3 -s -f -N15 
-FLAGS_RTP = -w -W -O3 -N3 -s 
+#FLAGS = -w -W -O3 -A -N3 -s -f -N15 
+#FLAGS_RTP = -w -W -O3 -N3 -s 
 #### when you are sure code works, turn off -C and turn up -03 #### 
 #
 #### when you are sure code works, turn off -C and turn up -04 #### 

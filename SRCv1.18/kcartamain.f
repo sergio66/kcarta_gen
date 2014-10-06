@@ -139,6 +139,11 @@ c iNewIn         is just a variable that tells us if new gas to be used
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore)
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT),iNewIn
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT)
+c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
+c iaAltDirs      tells which gases we want to use alternate compressed files
+c caaaAltDirs    tells the name of the files associated with the alternate compressed files
+      INTEGER iaAltDirs(kGasStore),iNumAltDirs
+      CHARACTER*80 caaAltDirs(kGasStore) 
 
 c this is for nonLTE
 c iNLTE_SlowORFast tells whether to use slow accurate (+1) fast SARTA (-1) 
@@ -361,7 +366,7 @@ c these are for Matlab style kCOmp Corner Weights
 
 c these are actually used
       INTEGER iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
-      INTEGER DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft,OutsideSpectra
+      INTEGER DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft
       INTEGER IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi,iFr
 
 c these are temporary dumy variables
@@ -438,6 +443,7 @@ c read in the driver namelist file and profile
      $   cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,
      $   iCldProfile,raaKlayersCldAmt,
      $     iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks,
+     $      iNumAltDirs,iaAltDirs,caaAltDirs,
      $   raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $   iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $   caaStrongLines,iaNLTEBands,
@@ -821,13 +827,14 @@ c iDoDQ = -1 if no need to do gas jacobian, do temp jacobian
 c iDoDQ > 0  if need to do gas jacobian, do temp jacobian
 
 c compute the abs coeffs
-          CALL UsualLTEUncompress(iGas,iaGases,iNumNewGases,iaNewGasID,
+          CALL UsualLTEUncompress(iGas,iaGases,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          raTAmt,raTTemp,raTPress,raTPartPress,iaCont,
      $          pProf,iProfileLayers,
      $          raVertTemp,iVertTempSet,rFileStartFr,iTag,iActualTag,
-     $          raFreq,iError,iDoDQ,
-     $          iSplineType,caaaNewChunks,iaNewData,iaaNewChunks,
+     $          raFreq,iError,iDoDQ,iSplineType,
+     $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
+     $          iNumAltDirs,iaAltDirs,caaAltDirs,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,

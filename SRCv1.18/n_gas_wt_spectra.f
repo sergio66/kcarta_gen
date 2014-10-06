@@ -498,6 +498,7 @@ c local variables
       INTEGER iRegr,iMethod,iDefault
       REAL raTemp(kProfLayer)
       CHARACTER*80 caaaNLTEBandsOrig(kGasStore,kNumkCompT) 
+      INTEGER iJunkNum,iaJunk(kGasStore)
 
       CALL NLTEBandMapper(iNumNLTEGases,iaNLTEGasID,iaNLTEBands,caaaNLTEBands)
 
@@ -670,9 +671,10 @@ c ********************** this is using the user supplied info *************
 c now figure out above which height the NLTE starts, for the strong bands
 c iaNLTEStart2350 is for STRONGEST NLTE bands, in 4 um region ahem!
 c ************* this is using the D. Edwards/M. Lopez-Puertas info ************
+      iJunkNum    = -1      
       rH = 1.0e10             !!!dumb large number, too high!!!!!!
       DO iGas = 1,iNumGases
-        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID)
+        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
         IF (iLTEIn .GT. 0) THEN
           rHN = raNLTEstart(iLTEIn)*1000     !!!NLTE start height in m
           rH = min(rH,rHN)

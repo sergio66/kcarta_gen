@@ -220,6 +220,7 @@ c read in the driver namelist file and profile
      $   cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,
      $   iCldProfile,raaKlayersCldAmt,
      $     iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks,
+     $     iNumAltDirs,iaAltDirs,caaAltDirs,
      $   raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $   iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $   caaStrongLines,iaNLTEBands,
@@ -576,13 +577,14 @@ c iDoDQ = -1 if no need to do gas jacobian, do temp jacobian
 c iDoDQ > 0  if need to do gas jacobian, do temp jacobian
 
 c compute the abs coeffs
-          CALL UsualLTEUncompress(iGas,iaGases,iNumNewGases,iaNewGasID,
+          CALL UsualLTEUncompress(iGas,iaGases,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          raTAmt,raTTemp,raTPress,raTPartPress,iaCont,
      $          pProf,iProfileLayers,
      $          raVertTemp,iVertTempSet,rFileStartFr,iTag,iActualTag,
-     $          raFreq,iError,iDoDQ,
-     $          iSplineType,caaaNewChunks,iaNewData,iaaNewChunks,
+     $          raFreq,iError,iDoDQ,iSplineType,
+     $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
+     $          iNumAltDirs,iaAltDirs,caaAltDirs,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
@@ -1093,7 +1095,8 @@ c scatter info
 c scatter cloudprofile info
      $      iCldProfile,raaKlayersCldAmt,
 c new spectroscopy
-     $      iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
+     $     iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
+     $     iNumAltDirs,iaAltDirs,caaAltDirs,
 c nonLTE
      $      raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
      $      iaNLTEChunks,iaaNLTEChunks,
@@ -1327,6 +1330,11 @@ c caaaNewChunks  tells the name of the files associated with the chunks
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore) 
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
+c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
+c iaAltDirs      tells which gases we want to use alternate compressed files
+c caaAltDirs    tells the name of the files associated with the alternate compressed files
+      INTEGER iaAltDirs(kGasStore),iNumAltDirs
+      CHARACTER*80 caaAltDirs(kGasStore)
 
 c this is for nonLTE
 c raNLTEstrength   tells how strongly to add on the new files (default 1.0)
@@ -1779,11 +1787,19 @@ c ******** JACOBN section
 c ******** SPECTRA section
       namecomment = '******* SPECTRA section *******'
       iNumNewGases = -1
+      iNumAltDirs  = -1
       IF (iNumNewGases .GT. 0) THEN
         iNewLBL = 1
         CALL spectra4(iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,
      $                caaaNewChunks)
         write (kStdWarn,*) 'successfully checked spectra .....'
+        CALL printstar      
+        iaKeyword(12) = 1
+      ELSEIF (iNumAltDirs .GT. 0) THEN
+        iNewLBL = 2
+        write(kStdWarn,*) 'Will be substituting compressed files for ',iNumAltDirs,' gases : ',
+     $   (iaAltDirs(iInt),iInt=1,iNumAltDirs)
+        write(kStdWarn,*) 'successfully checked spectra .....'
         CALL printstar      
         iaKeyword(12) = 1
       END IF

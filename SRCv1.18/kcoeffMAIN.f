@@ -21,13 +21,14 @@ c Also, if iGasID > kMaxDQ then we do not need to calculate d/dq, only d/dT
 c contribution. Since kMaxDQ >= 1, water d/dq,d/dT always calculated
 c************************************************************************
 c this is the MAIN routine
-      SUBROUTINE UsualLTEUncompress(iGas,iaGases,iNumNewGases,iaNewGasID,
+      SUBROUTINE UsualLTEUncompress(iGas,iaGases,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          raTAmt,raTTemp,raTPress,raTPartPress,iaCont,
      $          pProf,iProfileLayers,
      $          raVertTemp,iVertTempSet,
-     $          rFileStartFr,iTag,iActualTag,raFreq,iError,iDoDQ,
-     $          iSplineType,caaaNewChunks,iaNewData,iaaNewChunks,
+     $          rFileStartFr,iTag,iActualTag,raFreq,iError,iDoDQ,iSplineType,
+     $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
+     $          iNumAltDirs,iaAltDirs,caaAltDirs,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
@@ -42,11 +43,13 @@ c this is the MAIN routine
 c input vars
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore)
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
+      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
+      INTEGER iaAltDirs(kGasStore),iNumAltDirs
+      CHARACTER*80 caaAltDirs(kGasStore) 
       INTEGER iGas,iaGases(kMaxGas)
       INTEGER iProfileLayers,iVertTempSet,iError,iDoDQ
       INTEGER iSplineType,iL_low,iL_high,iTag,iActualTag
       INTEGER iaCONT(kGasStore)
-      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
 c these are the individual reference profiles, at kProfLayer layers 
       REAL raRAmt(kProfLayer),raRTemp(kProfLayer) 
       REAL raRPartPress(kProfLayer),raRPress(kProfLayer) 
@@ -80,9 +83,13 @@ c local vars
       INTEGER iNewIn,OutSideSpectra,NewDataChunk,iWhichChunk
       INTEGER ix
 
-      iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID)
+      kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+
+      iNewIn = -1
+      iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltDirs,iaAltDirs)
       IF (iNewIn .LT. 0) THEN
         !use kCompressed Database w/o worrying
+        kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
         CALL GasContribution(iGas,iaGases(iGas),kProfLayer,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          pProf,iProfileLayers,
@@ -96,7 +103,9 @@ c local vars
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22)
           END IF
-      IF (iNewIn .GT. 0) THEN
+
+      IF ((iNewIn .GE. 1) .AND. (iNewIn .LT. 1000)) THEN
+        !!!! new monochromatic spectra from file
         iWhichChunk=NewDataChunk(iNewIn,iaNewData,iaaNewChunks,
      $                               rFileStartFr)
         IF (iWhichChunk .GT. 0) THEN
@@ -108,6 +117,7 @@ c local vars
      $            kaFrStep(iTag),rFileStartFr*1.00000)
         ELSE
           !use kCompressed Database w/o worrying
+          kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
           CALL GasContribution(iGas,iaGases(iGas),kProfLayer,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          pProf,iProfileLayers,
@@ -120,8 +130,25 @@ c local vars
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22)
-
         END IF
+      END IF
+
+      IF ((iNewIn .GE. 1001) .AND. (iNewIn .LT. 10000)) THEN
+        !!!! use alternate compressed database
+        kAltDir = +1   !! overwrite one of kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath        
+        CALL GasContributionAlternateDataBase(iGas,iaGases(iGas),kProfLayer,
+     $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
+     $          pProf,iProfileLayers,
+     $          raTAmt,raTTemp,raTPress,raTPartPress,iaCont,kXsecFile,
+     $          raVertTemp,iVertTempSet,rFileStartFr,iTag,iActualTag,
+     $          raFreq,iError,iDoDQ,
+     $          daaDQ,daaDT,daaGasAbCoeff,iSplineType,
+     $                   iaP1,iaP2,raP1,raP2,
+     $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
+     $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
+     $                   iaQ11,iaQ12,raQ11,raQ12,
+     $                   iaQ21,iaQ22,raQ21,raQ22,
+     $          iNewIN-1000,iNumAltDirs,iaAltDirs,caaAltDirs)
       END IF
 
 c      if (iGas .EQ. 1) then
@@ -207,6 +234,8 @@ c local variables
 
       iErr = -1
 
+      kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+
       IF (((1 .LE. iGasID) .AND. (iGasID .LE. kGasComp)) .OR. 
      $    (iGasID .EQ. kNewGasHi+1)) THEN
         kFrStep = kaFrStep(iTag)
@@ -276,6 +305,138 @@ c local variables
           END IF
         END IF
       END IF
+
+      RETURN
+      END
+
+c************************************************************************
+c this subroutine gets the contribution of the i-th gas to the
+c absorbtion coefficients. Using the reference profile, it scales the
+c contribution accordingly
+c also, the gases are weighted by raaMix (from MIXFIL)
+c iGasID is the gas ID, while rFileStartFr identifies the wavenumber block
+c same as GasContribution except it substitudes COMPRESSED DATABASE
+      SUBROUTINE GasContributionAlternateDatabase(iCount,iGasID,iRefLayer,
+     $  raRAmt,raRTemp,raRPress,raRPartPress,iL,iU,pProf,iProfileLayers,
+     $  raAmt,raTemp,raPress,raPartPress,iaCont,caXsecF,
+     $  raVTemp,iVTSet,rFileStartFr,iTag,iActualTag,raFreq,iErr,iDoDQ,
+     $  daaDQ,daaDT,daaTemp,
+     $  iSPlineType,
+     $                   iaP1,iaP2,raP1,raP2,
+     $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
+     $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
+     $                   iaQ11,iaQ12,raQ11,raQ12,
+     $                   iaQ21,iaQ22,raQ21,raQ22,
+     $          iNewIN,iNumAltDirs,iaAltDirs,caaAltDirs)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c pProf     = actual layers (from kLAYERS) avg pressure, in iProfileLayers
+c iCount    = which of the iNumGases is being processed
+c iGasID    = iaGasID(iCount) = gas ID of current gas
+c iRefLayer = number of layers in the reference profiles (=kProfLayer)
+c iL,iU     = min/max layer number for each gas profile (=1,kProfLayer)
+c iaCont    = whether or not to do continuum calculation .. iaCont(iCount)
+c caXecF    = file name of cross section data
+c daaTemp   = matrix containing the uncompressed k-spectra
+c raVtemp   = vertical temperature profile for the Mixed paths
+c iVTSet    = has the vertical temp been set, to check current temp profile
+c rFileStartFr   = which k-comp file chunk to uncompress
+c iTag      = which k-comp file chunk to uncompress
+c raFreq    = wavenumber array
+c iErr      = errors (mainly associated with file I/O)
+c daaDQ     = analytic Jacobian wrt gas amount
+c daaDT     = analytic Jacobian wrt temperature
+c iDoDQ     = -2 if no amt,temp jacs, -1 if no amt jacs, > 0 if amt,temp jacs
+      REAL raAmt(kProfLayer),raTemp(kProfLayer),pProf(kProfLayer)
+      REAL raPress(kProfLayer),raPartPress(kProfLayer)
+      INTEGER iaCont(kMaxGas),iVTSet,iTag,iProfileLayers
+      REAL raVTemp(kProfLayer),raFreq(kMaxPts)
+      INTEGER iCount,iGasID,iL,iU,iErr,iRefLayer
+      INTEGER iActualTag,iDoDQ,iSplineType
+      CHARACTER*80 caXsecF
+      REAL raRAmt(kProfLayer),raRTemp(kProfLayer),kFrStep,rFileStartFr
+      REAL raRPartPress(kProfLayer),raRPress(kProfLayer)
+      DOUBLE PRECISION daaTemp(kMaxPts,kProfLayer)
+      DOUBLE PRECISION daaDT(kMaxPtsJac,kProfLayerJac)
+      DOUBLE PRECISION daaDQ(kMaxPtsJac,kProfLayerJac)
+c the Matlab weights
+      INTEGER iaP1(kProfLayer),iaP2(kProfLayer)
+      REAL    raP1(kProfLayer),raP2(kProfLayer)
+      INTEGER iaT11(kProfLayer),iaT12(kProfLayer),
+     $        iaT21(kProfLayer),iaT22(kProfLayer)
+      REAL    raT11(kProfLayer),raT12(kProfLayer),
+     $        raT21(kProfLayer),raT22(kProfLayer)
+      REAL    raJT11(kProfLayer),raJT12(kProfLayer),
+     $        raJT21(kProfLayer),raJT22(kProfLayer)
+      INTEGER iaQ11(kProfLayer),iaQ12(kProfLayer),
+     $        iaQ21(kProfLayer),iaQ22(kProfLayer)
+      REAL    raQ11(kProfLayer),raQ12(kProfLayer),
+     $        raQ21(kProfLayer),raQ22(kProfLayer)
+c the alt database
+      INTEGER iNewIN,iNumAltDirs,iaAltDirs(kGasStore)
+      CHARACTER*80 caaAltDirs(kGasStore)
+
+c local variables
+      INTEGER iFr,iLay
+
+      iErr = -1
+
+      DO iFr = 1,80
+        kcaAltDir(iFr:iFr) = ' '
+      END DO
+      DO iFr = 1,80
+        kcaAltDir = caaAltDirs(iNewIN)
+      END DO 
+      write(kStdWarn,*) '>>> substituting caCompressedDataPath for gasID ',iGasID
+      write(kStdWarn,80) kcaAltDir
+
+      IF ( ((1 .LE. iGasID) .AND. (iGasID .LE. kGasComp)) .OR. (iGasID .EQ. kNewGasHi+1)) THEN
+        kFrStep = kaFrStep(iTag)
+        CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress,
+     $    raRPartPress,iL,iU,raVTemp,iVTSet,rFileStartFr,iTag,iActualTag,
+     $    raFreq,iErr,raAmt,raTemp,raPress,raPartPress,iaCont,
+     $    pProf,iProfileLayers,iDoDQ,
+     $    daaDQ,daaDT,daaTemp,iSPlineType,
+     $                   iaP1,iaP2,raP1,raP2,
+     $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
+     $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
+     $                   iaQ11,iaQ12,raQ11,raQ12,
+     $                   iaQ21,iaQ22,raQ21,raQ22)
+      END IF
+
+      IF ((kGasXsecLo .LE. iGasID) .AND. (iGasID .LE. kGasXsecHi)) THEN
+        kFrStep = kaFrStep(iTag)
+        IF (KXsecFormat .GT. 0) THEN
+          write (kStdWarn,*) ' xsec gas : using kCompressed Database format'
+          CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress,
+     $      raRPartPress,iL,iU,raVTemp,iVTSet,rFileStartFr,iTag,iActualTag,
+     $      raFreq,iErr,raAmt,raTemp,raPress,raPartPress,iaCont,
+     $      pProf,iProfileLayers,iDoDQ,
+     $      daaDQ,daaDT,daaTemp,iSPlineType,
+     $                   iaP1,iaP2,raP1,raP2,
+     $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
+     $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
+     $                   iaQ11,iaQ12,raQ11,raQ12,
+     $                   iaQ21,iaQ22,raQ21,raQ22)
+        ELSE
+          write(kStdWarn,*) ' xsec gas : using old style binary file format'
+          write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'
+          CALL DoStop
+        END IF
+      END IF
+
+      IF ((kNewGasLo .LE. iGasID) .AND. (iGasID .LE. kNewGasHi)) THEN
+        IF (kCKD .GE. 0) THEN           !add on continuum
+          kFrStep = kaFrStep(iTag)
+          write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'
+          CALL DoStop
+        END IF
+      END IF
+
+ 80   FORMAT(A80)
 
       RETURN
       END
@@ -549,9 +710,13 @@ c differently than if the gas is one of the others
 
 c************************************************************************
 c this function checks to see if there is NEW data for the  current gas
-c if so, it returns a positive integer that tells the code which spectra
-c dataset to use (from *SPECTRA) , else it returns -1
-      INTEGER FUNCTION OutsideSpectra(iGasID,iNumNewGases,iaNewGasID) 
+c   if so, it returns a positive integer that tells the code which spectra
+c   dataset to use (from *SPECTRA) ** would be between 1 to 110 ** 
+c this function then checks to see if there is ALT COMPRESSED DATABASE data for the  current gas
+c   if so, it returns a positive integer that tells the code which spectra
+c   dataset to use (from *SPECTRA) ** would be between 1001 to 1110 **  
+c else it returns -1
+      INTEGER FUNCTION OutsideSpectra(iGasID,iNumNewGases,iaNewGasID,iNumAltDirs,iaAltDirs) 
 
       IMPLICIT NONE
 
@@ -561,7 +726,11 @@ c iGasID       tells current gasID
 c iNumNewGases tells how many new gases to use
 c iaNewGasID   tells the gasIDs of the new gases
       INTEGER iGasID, iNumNewGases, iaNewGasID(kGasStore)
+c iNumAltDirs  tells if we need to use alternate compressed gas dirs
+c iaAltDirs    tells which gases gave compressed data stored in alternate dirs
+      INTEGER iNumAltDirs,iaAltDirs(kGasStore)
 
+c local vars
       INTEGER iI,iJ
 
       iI = -1
@@ -575,7 +744,26 @@ c search to see if there is new data!
         ELSEIF (iJ  .LT. iNumNewGases) THEN
           iJ = iJ + 1
           GOTO 10
+        END IF       
+        IF (iI .GT. 0) THEN
+          write(kStdWarn,*) '>>> found alternate monochromatic SPECTRA for gasID ',iGasID
+          IF (iGASID .EQ. 2) write(kStdWarn,*) '  >>> gasID = 2, could be NLTE check ...'
+        END IF
+
+      ELSEIF (iNumAltDirs .GT. 0) THEN
+        iJ = 1
+c search to see if there is new data!     
+ 20     CONTINUE
+        IF (iaAltDirs(iJ) .EQ. iGasID) THEN
+          iI = iJ
+        ELSEIF (iJ  .LT. iNumNewGases) THEN
+          iJ = iJ + 1
+          GOTO 20
         END IF        
+        IF (iI .GT. 0) THEN
+          write(kStdWarn,*) '>>> found alternate COMPRESSED DATABASE for gasID ',iGasID
+        END IF
+        IF (iI .GT. 0) iI = iI + 1000
       END IF
 
       OutsideSpectra = iI
