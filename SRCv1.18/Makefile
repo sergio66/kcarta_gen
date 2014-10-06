@@ -1,5 +1,6 @@
 #
 # makefile to build kcarta.x
+# >>>>>>>>  make basic >>>>>>>>>>>>>>>>>>
 #
 # "make" or "make scat" will compile kcarta.x and move it to
 # its home in the ../BIN directory
@@ -154,10 +155,12 @@ RTPLIB = -L$(RTPHOME)/lib -lrtp
 ### rtpV105 on taro.umbc.edu
 #RTPINC = -I/asl/packages/rtpV105/include
 #RTPDEFS_FILE = /asl/packages/rtpV105/include/rtpdefs.f
+
 ### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 RTPINC = -I/asl/packages/rtpV201_g80/include
 RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs.f
 #RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs_f90.f90
+
 ### 16 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #RTPINC = -I/asl/packages/rtpV201/include
 #RTPDEFS_FILE = /asl/packages/rtpV201/include/rtpdefs.f
@@ -185,7 +188,7 @@ SHELL = /bin/sh
 # -O3 : heavy optimization
 # -64 : 64-bit objects (libraries must match)
 #
-#F77=/usr/bin/f77
+#FORTRANX=/usr/bin/f77
 ## FLAGS = -static -C -col120
 #FLAGS = -static -O2 -64 -col120 -C
 #UFLAG = -u
@@ -216,16 +219,16 @@ SHELL = /bin/sh
 # -P    profiling info for debugging with "gprof", also do final 
 #       linking, compile as 
 # kcarta: $(OBJS) $(OBJSPY) 
-#       $(F77) -P $(OBJS) $(OBJSPY) $(RTPLIB) $(HDFLIB) $(FLIB) 
+#       $(FORTRANX) -P $(OBJS) $(OBJSPY) $(RTPLIB) $(HDFLIB) $(FLIB) 
 # after compiling the code with f77 -P, a file "gmon.out" is produced 
 # so then do     gprof ../BIN/bkcarta.x gmon.out >& ugh; more ugh
-#F77=f77 -P 
+#FORTRANX=f77 -P 
 ############ 
 #
-#F77=f77
-#F77=f77 -P
-F77=/asl/opt/absoft/absoft10.0/bin/af77
-#F77=/asl/opt/absoft/absoft10.0/bin/af77 -P
+#FORTRANX=f77
+#FORTRANX=f77 -P
+FORTRANX=/asl/opt/absoft/absoft10.0/bin/af77
+#FORTRANX=/asl/opt/absoft/absoft10.0/bin/af77 -P
 #
 #### UFLAG = -N114  ### this is now obsolete
 UFLAG = 
@@ -258,14 +261,14 @@ FDOUBLE = -N2 -N113
 # However it is a good compile test for the rest of the code
 # Linux with g77
 # ---------------
-#F77=/usr/bin/g77
+#FORTRANX=/usr/bin/g77
 #FLAGS= -fcase-lower -ffixed-line-length-120
 #LIBS = -L ../LIB -lblas
 
 #Linux with PGF Fortran
 #----------------------
-#F77 = pgf77
-#F77 = pgf90
+#FORTRANX = pgf77
+#FORTRANX = pgf90
 #UFLAG = -Mdclchk
 ###FLAGS = -Mextend -Mbounds -Mupcase -O2
 ###FLAGS = -Mextend -Mnoupcase -O3
@@ -283,7 +286,7 @@ FDOUBLE = -N2 -N113
 # -w     ignore warning
 # -g     link w/ debugging info (don't use w/ optimization)
 # 
-#F77 = /opt/SUNWspro/bin/f77
+#FORTRANX = /opt/SUNWspro/bin/f77
 #### FLAGS = -c -g -u -O0  don't seem to need -static
 #### FLAGS = -e -fast -w 
 #FLAGS = -e -fast -w
@@ -303,7 +306,7 @@ FDOUBLE = -N2 -N113
 #       v7 for earlier SPARC chips  (sun4c or sun4m for Sun4-630/670/690)
 # -dalign to be compatible with the Sun Performance library
 # -xlic_lib=sunperf Link option for selecting the Sun Performance library
-#F77=f77
+#FORTRANX=f77
 #FLAGS = -O3 -dalign -xarch=v8plus -e -w
 #LIBS  = -xlic_lib=sunperf
 
@@ -314,7 +317,7 @@ FDOUBLE = -N2 -N113
 # -C             : run time checks on array and character subscripts
 # -O4            : optimization
 # -names lowercase : change all cases
-#F77=f77
+#FORTRANX=f77
 #FLAGS = -extend_source -C -names lowercase -warn argument_checking
 #LIBS  = -lblas
 
@@ -468,10 +471,10 @@ OBSSCAT_ONE  = $(OBSSCAT_PERTURB)  $(OBSSCAT_COMMON) scatter_interface.o
 OBSSCAT_RAY  = $(OBSSCAT_RAYLEIGH) $(OBSSCAT_COMMON) scatter_interface.o
 OBSSCAT_GRAY = $(OBSSCAT_GRAYCLD)  $(OBSSCAT_COMMON) scatter_interface.o
 OBSSCAT_PCL  = $(OBSSCAT_PCLSAM)   $(OBSSCAT_COMMON) scatter_interface.o
+
 #OBSSCAT5 = $(OBSSCAT_DISORT)   $(OBSSCAT_RTSPEC)    $(OBSSCAT_TWOSTR) \
 #           $(OBSSCAT_PERTURB)  $(OBSSCAT_PCLSAM)    $(OBSSCAT_COMMON) \
 #           $(OBSSCAT_RAYLEIGH) $(OBSSCAT_GRAYCLD)    scatter_interface.o
-
 OBSSCAT5 = $(OBSSCAT_RTSPEC)    \
            $(OBSSCAT_PCLSAM)    $(OBSSCAT_COMMON) \
            $(OBSSCAT_GRAYCLD)    scatter_interface.o
@@ -576,40 +579,40 @@ scat: kcarta.x
 	mv kcarta.x ../BIN/kcarta.x
 
 kcarta.x : $(OBJS) $(OBJSRTP)
-	$(F77) -o kcarta.x $(FLAGS) $(OBJS) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
+	$(FORTRANX) -o kcarta.x $(FLAGS) $(OBJS) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
 
 kcartamain.o : kcartamain.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcartamain.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamain.f
 
 ##### (2) basic kcarta (easy on memory) with no jacobs, fluxes or scattering
 basic: bkcarta.x
 	mv bkcarta.x ../BIN/bkcarta.x
 
 bkcarta.x : $(OBJS_BASIC) $(OBJSRTP)
-	$(F77) -o bkcarta.x $(FLAGS) $(OBJS_BASIC) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
+	$(FORTRANX) -o bkcarta.x $(FLAGS) $(OBJS_BASIC) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
 
 kcartabasic.o : kcartabasic.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcartabasic.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f
 
 ##### (3) complete kcarta (memory hog) with jacobians, all scattering codes, TEXT levels/layers input
 scatTXT: kcartaTXT.x
 	mv kcartaTXT.x ../BIN/kcartaTXT.x
 
 kcartaTXT.x : $(OBJS) $(OBJS_TXT)
-	$(F77) -o kcartaTXT.x $(FLAGS) $(OBJS) $(OBJS_TXT) $(LIBS)
+	$(FORTRANX) -o kcartaTXT.x $(FLAGS) $(OBJS) $(OBJS_TXT) $(LIBS)
 
 kcartamainTXT.o : kcartamain.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcartamain.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamain.f
 
 ##### (4) basic kcarta (easy on memory) with no jacobs, fluxes or scattering, TEXT levels/layers input
 basicTXT: bkcartaTXT.x
 	mv bkcartaTXT.x ../BIN/bkcartaTXT.x
 
 bkcartaTXT.x : $(OBJS_BASIC) $(OBJS_TXT)
-	$(F77) -o bkcartaTXT.x $(FLAGS) $(OBJS_BASIC) $(OBJS_TXT) $(LIBS)
+	$(FORTRANX) -o bkcartaTXT.x $(FLAGS) $(OBJS_BASIC) $(OBJS_TXT) $(LIBS)
 
 kcartabasicTXT.o : kcartabasic.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcartabasic.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f
 
 #### kcartachunk.x no longer supported
 ##### (5) complete kcarta (memory hog) with jacobians, all scattering codes; chunk by chunk
@@ -620,10 +623,10 @@ jpl: jpl.x
 	mv jpl.x ../BIN/jpl.x
 
 jpl.x : $(OBJSJPL) $(OBJSRTP)
-	$(F77) -o jpl.x $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
+	$(FORTRANX) -o jpl.x $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
 
 kcartajpl.o : kcartajpl.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcartajpl.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f
 
 ##### (6) complete kcarta (memory hog) with jacobians, a[ll scattering codes], but as standalone
 #####  TEXT levels/layers input
@@ -631,258 +634,258 @@ jplTXT: jplTXT.x
 	mv jplTXT.x ../BIN/jplTXT.x
 
 jplTXT.x : $(OBJSJPL) $(OBJS_TXT)
-	$(F77) -o jplTXT.x $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJS_TXT)
+	$(FORTRANX) -o jplTXT.x $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJS_TXT)
 
 kcartajplTXT.o : kcartajpl.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcartajpl.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f
 
 
 ################ OPTICAL DEPTHS (LTE and NLTE) ###########################
 ###### lte routines
 kcartamisc.o : kcartamisc.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcartamisc.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamisc.f
 
 spline_and_sort.o : spline_and_sort.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) spline_and_sort.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) spline_and_sort.f
 
 freqfile.o : freqfile.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) freqfile.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) freqfile.f
 
 ### kCompressed Database uncompression routines, continuum and
 ### old xsec routines
 kcoeffMAIN.o : kcoeffMAIN.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcoeffMAIN.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffMAIN.f
 
 kcont_xsec.o : kcont_xsec.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcont_xsec.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcont_xsec.f
 
 kcoeffSPL.o : kcoeffSPL.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcoeffSPL.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffSPL.f
 
 kcoeffSPLJAC.o : kcoeffSPLJAC.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcoeffSPLJAC.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffSPLJAC.f
 
 kcoeff_FAST.o : kcoeff_FAST.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcoeff_FAST.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST.f
 
 kcoeff_FAST_details.o : kcoeff_FAST_details.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcoeff_FAST_details.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST_details.f
 
 kcoeff_FAST_details2.o : kcoeff_FAST_details2.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcoeff_FAST_details2.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST_details2.f
 
 ##### nonlte routines
 knonlte.o : knonlte.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) knonlte.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) knonlte.f
 
 kbloat.o : kbloat.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kbloat.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kbloat.f
 
 klineshapes.o : klineshapes.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) klineshapes.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) klineshapes.f
 
 kreadVTprofiles.o : kreadVTprofiles.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kreadVTprofiles.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kreadVTprofiles.f
 
 kpredictVT.o : kpredictVT.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kpredictVT.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kpredictVT.f
 
 kcousin.o : kcousin.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kcousin.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcousin.f
 
 kvoigt_cousin.o : kvoigt_cousin.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) kvoigt_cousin.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kvoigt_cousin.f
 
 klinemix.o : klinemix.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) klinemix.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) klinemix.f
 
 ###########  NON SCATTERING RADIATIVE TRANSFER CODE ######################
 rad_main.o : rad_main.f $(PARAMS) 
-	$(F77) -c $(FLAGS) $(UFLAG) rad_main.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_main.f
 
 rad_limb.o : rad_limb.f $(PARAMS) 
-	$(F77) -c $(FLAGS) $(UFLAG) rad_limb.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_limb.f
 
 rad_misc.o : rad_misc.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) rad_misc.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_misc.f
 
 rad_diff.o : rad_diff.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) rad_diff.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_diff.f
 
 rad_quad.o : rad_quad.f $(PARAMS) ../INCLUDE/gauss.param
-	$(F77) -c $(FLAGS) $(UFLAG) rad_quad.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_quad.f
 
 rad_flux.o : rad_flux.f $(PARAMS) ../INCLUDE/gauss.param
-	$(F77) -c $(FLAGS) $(UFLAG) rad_flux.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_flux.f
 
 ###########  SCATTERING RADIATIVE TRANSFER CODE ###########################
 #### many of the routines in here are common to all scattering codes 
 clear_scatter_misc.o : clear_scatter_misc.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) clear_scatter_misc.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) clear_scatter_misc.f 
 
 singlescatter.o : singlescatter.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) singlescatter.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) singlescatter.f 
 
 #### this is the inteface to all scattering codes 
 scatter_interface.o : scatter_interface.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_interface.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_interface.f 
 
 ### this is Sergio Machado's kTwoStream (+solar) radtransfer code 
 scatter_twostream_main.o : scatter_twostream_main.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_twostream_main.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_twostream_main.f 
  
 scatter_twostream_code.o : scatter_twostream_code.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_twostream_code.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_twostream_code.f 
  
 scatter_twostream_guts.o : scatter_twostream_guts.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) $(FDOUBLE) scatter_twostream_guts.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) $(FDOUBLE) scatter_twostream_guts.f 
  
 scatter_twostream_flux.o : scatter_twostream_flux.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_twostream_flux.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_twostream_flux.f 
  
 #### this is Frank Evans RTSPEC
 scatter_rtspec_main.o : scatter_rtspec_main.f  $(PARAMS_SCAT) 
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_rtspec_main.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rtspec_main.f
 
 scatter_rtspec_code.o : scatter_rtspec_code.f  $(PARAMS_SCAT) 
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_rtspec_code.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rtspec_code.f
 
 scatter_rtspec_flux.o : scatter_rtspec_flux.f $(PARAMS_SCAT)
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_rtspec_flux.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rtspec_flux.f
 
 #### this is Kurt Stamnes DISORT
 scatter_disort_main.o : scatter_disort_main.f  $(PARAMS_SCAT) 
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_disort_main.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_main.f
 
 scatter_disort_flux.o : scatter_disort_flux.f  $(PARAMS_SCAT) 
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_disort_flux.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_flux.f
 
 scatter_disort_code.o : scatter_disort_code.f  $(PARAMS_SCAT) 
-	$(F77) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_code.f
+	$(FORTRANX) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_code.f
 
 scatter_disort_misc.o : scatter_disort_misc.f  $(PARAMS_SCAT) 
-	$(F77) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_misc.f
+	$(FORTRANX) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_misc.f
 
 ### this is essentially Scott Hannon black/gray cloud
 scatter_graycld_main.o : scatter_graycld_main.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_graycld_main.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_graycld_main.f 
  
 scatter_graycld_code.o : scatter_graycld_code.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_graycld_code.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_graycld_code.f 
 
 ### this is simple Rayleigh scattering for nir/vis/uv
 scatter_rayleigh_main.o : scatter_rayleigh_main.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_rayleigh_main.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rayleigh_main.f 
  
 scatter_rayleigh_code.o : scatter_rayleigh_code.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_rayleigh_code.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rayleigh_code.f 
  
 ### this is Sergio Machado's kPerturb (no solar) radtransfer code 
 scatter_perturb_main.o : scatter_perturb_main.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_perturb_main.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_perturb_main.f 
  
 scatter_perturb_code.o : scatter_perturb_code.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_perturb_code.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_perturb_code.f 
  
 #scatter_perturb_flux.o : scatter_perturb_flux.f  $(PARAMS_SCAT)  
-#	$(F77) -c $(FLAGS) $(UFLAG) scatter_perturb_flux.f 
+#	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_perturb_flux.f 
  
 ### this is Chou, Lee, Tsay, Fu's PCLSAM radtransfer code 
 scatter_pclsam_main.o : scatter_pclsam_main.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_pclsam_main.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_pclsam_main.f 
  
 scatter_pclsam_code.o : scatter_pclsam_code.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_pclsam_code.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_pclsam_code.f 
  
 scatter_pclsam_flux.o : scatter_pclsam_flux.f  $(PARAMS_SCAT)  
-	$(F77) -c $(FLAGS) $(UFLAG) scatter_pclsam_flux.f 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_pclsam_flux.f 
  
 ########################## Jacobian code ################################
 jac_main.o : jac_main.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) jac_main.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_main.f
 
 jac_up.o : jac_up.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) jac_up.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_up.f
 
 jac_down.o : jac_down.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) jac_down.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_down.f
 
 jac_limb.o : jac_limb.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) jac_limb.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_limb.f
 
 jac_pclsam_up.o : jac_pclsam_up.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) jac_pclsam_up.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_pclsam_up.f
 
 jac_pclsam_down.o : jac_pclsam_down.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) jac_pclsam_down.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_pclsam_down.f
 
 ############################## misc and I/O routines #####################
 s_writefile.o : s_writefile.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) s_writefile.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) s_writefile.f
 
 s_misc.o : s_misc.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) s_misc.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) s_misc.f
 
 n_main.o : n_main.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) n_main.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_main.f
 
 n_mainTXT.o : n_mainTXT.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) n_mainTXT.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_mainTXT.f
 
 n_pth_mix.o : n_pth_mix.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) n_pth_mix.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_pth_mix.f
 
 n_layers.o : n_layers.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) n_layers.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_layers.f
 
 n_gas_wt_spectra.o : n_gas_wt_spectra.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) n_gas_wt_spectra.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_gas_wt_spectra.f
 
 n_rad_jac_scat.o : n_rad_jac_scat.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) n_rad_jac_scat.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_rad_jac_scat.f
 
 n_output.o : n_output.f $(PARAMS)
-	$(F77) -c $(FLAGS) $(UFLAG) n_output.f
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_output.f
 
 rtp_interface.o : rtp_interface.f $(PARAMS_RTP) $(RTPDEFS_FILE)
-	$(F77) -c $(RTPINC) $(FLAGS) $(UFLAG) rtp_interface.f
+	$(FORTRANX) -c $(RTPINC) $(FLAGS) $(UFLAG) rtp_interface.f
 
 ################# (OLDER) CON AND XSEC stuff #############################
 #calcon.o: calcon.f $(PARAMS)
-#	$(F77) -c $(FLAGS) $(UFLAG) calcon.f
+#	$(FORTRANX) -c $(FLAGS) $(UFLAG) calcon.f
 
 #calconCKD2.4.o: calconCKD2.4.f $(PARAMS)
-#	$(F77) -c $(FLAGS) $(UFLAG) calconCKD2.4.f
+#	$(FORTRANX) -c $(FLAGS) $(UFLAG) calconCKD2.4.f
 
 #calconCKD2.4.data.o: calconCKD2.4.data.f $(PARAMS)
-#	$(F77) -c $(FLAGS) calconCKD2.4.data.f
+#	$(FORTRANX) -c $(FLAGS) calconCKD2.4.data.f
 
 ####this is for the correct CKD defn
 #h2oft0_wb.o: h2oft0_wb.f $(PARAMS)
-#	$(F77) -c $(FLAGS) h2oft0_wb.f
+#	$(FORTRANX) -c $(FLAGS) h2oft0_wb.f
 
 #h2ost0_wb.o: h2ost0_wb.f $(PARAMS)
-#	$(F77) -c $(FLAGS) h2ost0_wb.f
+#	$(FORTRANX) -c $(FLAGS) h2ost0_wb.f
 
 #h2ost1_wb.o: h2ost1_wb.f $(PARAMS)
-#	$(F77) -c $(FLAGS) h2ost1_wb.f
+#	$(FORTRANX) -c $(FLAGS) h2ost1_wb.f
 
 #####this is for the GENLN2 versions
 #h2oft0.o: h2oft0.f $(PARAMS)
-#	$(F77) -c $(FLAGS) h2oft0.f
+#	$(FORTRANX) -c $(FLAGS) h2oft0.f
 
 #h2ost0.o: h2ost0.f $(PARAMS)
-#	$(F77) -c $(FLAGS) h2ost0.f
+#	$(FORTRANX) -c $(FLAGS) h2ost0.f
 
 #h2ost1.o: h2ost1.f $(PARAMS)
-#	$(F77) -c $(FLAGS) h2ost1.f
+#	$(FORTRANX) -c $(FLAGS) h2ost1.f
 
 #### this is if kCompressed Database DOES NOT EXIST for gasID 51-63
 #calq.o: calq.f $(PARAMS) 
-#	$(F77) -c $(FLAGS) calq.f 
+#	$(FORTRANX) -c $(FLAGS) calq.f 
  
 #calxsc.o: calxsc.f $(PARAMS) 
-#	$(F77) -c $(FLAGS) $(UFLAG) calxsc.f 
+#	$(FORTRANX) -c $(FLAGS) $(UFLAG) calxsc.f 
 
 clean: 
 	rm *.o *~ 2> /dev/null || true

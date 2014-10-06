@@ -1,0 +1,9 @@
+#
+# kcarta top-level git ignore file
+#
+# The top-level ignore does two things--it sets general exclusions
+# for various file types, and excludes a list of specific directories.
+# File types can be added back in subdirectory .gitignore files as
+# needed
+
+*.dat
