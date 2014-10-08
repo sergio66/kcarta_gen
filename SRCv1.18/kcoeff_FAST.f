@@ -938,8 +938,7 @@ c local variables associated with uncompressing the database
       DOUBLE PRECISION dSfreq,dFStep,daToffset(kMaxTemp)
       DOUBLE PRECISION daaaKX(kMaxK,kMaxTemp,kMaxLayer)
       DOUBLE PRECISION daaUX(kMaxPts,kMaxK)
-      INTEGER iaChiChunks(kMaxGas),iChiChunks,iDoFudge,WhichGasPosn
-      INTEGER iLLS,iCO2Chi,iDefault,iLowerOrUpper,iJ,iJunk
+      INTEGER iLowerOrUpper,iJ,iJunk
 
       iIOUN = kCompUnit
       IF ((iGasID .NE .kNewGasLo) .AND. (iGasID .NE .kNewGasHi)) THEN
@@ -1039,67 +1038,10 @@ c convert absorption coefficient correctly if necessary
 c now compute optical depth = gas amount * abs coeff
       CALL AmtScale(daaAbsCoeff,raPAmt)
       
+      ! print *,iGasID,int(rFileStartFr),kAltDir
+
       IF (iGasID .EQ. 2) THEN 
-        iCO2Chi = 0  !!no chi fixes applied .. with database being
-          !!PARAMETER (kCO2Path = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/') 
-          !!this would be the original linemix from RAL, before AIRS was
-          !!launced in April 2002
-        iCO2Chi = 3 !!new after March 2004; fixes 4 + 15 um;
-        iCO2Chi = 2 !!default prior to Mar 2004; only fixes 4um; leaves wiggles
-        iDefault = 2
-
-        iCO2Chi = 0
-        iCO2Chi = 2
-
-        IF (kCO2_UMBCorHARTMAN .EQ. +1) THEN
-          iCO2Chi = iCO2Chi   !! ie stick to (+2) option, to turn on CO2 chi when using UMBC linemix
-        ELSEIF (kCO2_UMBCorHARTMAN .EQ. -1) THEN
-          iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing
-      END IF
-
-        IF (iCO2Chi .NE. iDefault) THEN
-          write(kStdErr,*) ' CO2 chi fudge iCO2Chi,iDefault = ',iCO2Chi,iDefault
-          write(kStdErr,*) ' kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN
-      END IF
-
-        IF (iCO2Chi .EQ. 2) THEN
-c this is old; prior to March 2004
-c notice how we only need to fudge fix 2255,2280 and 2305,2405 chunks here!
-          iChiChunks = 4
-          iaChiChunks(1) = 2255
-          iaChiChunks(2) = 2280
-          iaChiChunks(3) = 2380
-          iaChiChunks(4) = 2405
-        ELSE IF (iCO2Chi .EQ. 3) THEN
-c this is new; after March 2004
-c notice we fix 15 um and 4 um here
-          iChiChunks = 18
-          iaChiChunks(1)  =  630
-          iaChiChunks(2)  =  655
-          iaChiChunks(3)  =  680
-          iaChiChunks(4)  =  705
-          iaChiChunks(5)  =  730
-          iaChiChunks(6)  =  755
-          iaChiChunks(7)  = 2180
-          iaChiChunks(8)  = 2205
-          iaChiChunks(9)  = 2230
-          iaChiChunks(10) = 2255
-          iaChiChunks(11) = 2280
-          iaChiChunks(12) = 2355
-          iaChiChunks(13) = 2380
-          iaChiChunks(14) = 2405
-          iaChiChunks(15) = 2430
-          iaChiChunks(16) = 2530
-          iaChiChunks(17) = 2555
-          iaChiChunks(18) = 2580
-        END IF
-        IF (iCO2Chi .GT. 0) THEN
-          iDoFudge = WhichGasPosn(int(rFileStartFr),iaChiChunks,iChiChunks)
-          IF (iDoFudge .GT. 0) THEN
-            CALL co2_4um_fudge(daaAbsCoeff,rFileStartFr,
-     $                         iCO2Chi,iaChiChunks,iChiChunks)
-          END IF 
-        END IF
+        CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
       END IF 
        
       RETURN
