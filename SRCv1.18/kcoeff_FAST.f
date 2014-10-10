@@ -1038,7 +1038,7 @@ c convert absorption coefficient correctly if necessary
 c now compute optical depth = gas amount * abs coeff
       CALL AmtScale(daaAbsCoeff,raPAmt)
       
-      ! print *,iGasID,int(rFileStartFr),kAltDir
+      ! print *,iGasID,int(rFileStartFr),kAltDirs
 
       IF (iGasID .EQ. 2) THEN 
         CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)

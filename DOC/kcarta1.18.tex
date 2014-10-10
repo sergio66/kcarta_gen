@@ -673,9 +673,16 @@ filling the field of view.  Jacobians will be computed and output
 for all the three atmospheres.
 
 We have now added on scattering routines and the ability to import line by 
-line spectra computed by an external code. In the example below, we use 
+line spectra computed by an external code. You can either \newline
+(a) compute spectra for the particular atmospheric profile you are working with
+    and ask \kc to read in those spectra or \newline
+(b) compute an entire compressed database for the gas you are interested in,
+    and ask \kc to use that new compressed database for the gas(es) you are
+    want to substitute \newline
+In the example below, we use 
 externally generated spectra for some CO2 regions and for some N2O regions. 
-In addition, a two layer cloud is also specified.
+In addition, a two layer cloud is also specified. $iNumAltComprDirs$ also 
+tells the code to use alternate compressed databases for CO2,O3,CH4,O2 and N2
 
 The output section asks \kc to output radiances for all three
 atmospheres (at different pressure levels), output all layer-to-space
@@ -910,6 +917,20 @@ Here is the sample namelist river file (which we name example.nml) :
    iaaNewChunks(2,1)    =           2280
    caaaNewChunks(2,1)     =   '../DATANEW/nitrousoxide2255'
    caaaNewChunks(2,1)     =   '../DATANEW/nitrousoxide2280'
+
+ !use new databases
+ iNumAltComprDirs = 5
+ iaAltComprDirs(1) = 2
+ iaAltComprDirs(2) = 3
+ iaAltComprDirs(3) = 6
+ iaAltComprDirs(4) = 7
+ iaAltComprDirs(5) = 22
+ caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(4)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(5)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+
  $end
 
  $nm_nonlte 
@@ -4746,7 +4767,40 @@ The information required in this section is of the following form\\
 \ttab ...\\
 \ttab }
 
-$iaNewGasIDIiI)$ is the HITRAN gasID of the gas that the user is supplying 
+and 
+
+{\sf 
+\ttab iNumAltComprDirs   = \\
+\ttab iaAltComprDirs(iI)  = \\
+\ttab iaAltComprDirs(iI)   = \\ 
+\ttab \ttab   caaAltComprDirs(1)    =  \\
+\ttab \ttab   caaAltComprDirs(2)    =  \\
+\ttab \ttab   caaAltComprDirs(3)    =  \\
+\ttab ...\\
+\ttab }
+
+Note you cannot have both iNumNewgases and iNumAltCOmprDirs set positive ie 
+either one or the other is allowed, not both.
+
+The user specifies that he/she wants to supply compressed databases
+for $iNumAltComprDirs$.  $iaAltComprDirs(iI)$ is the HITRAN gasID of
+the gas that the user is supplying externally computed compressed
+databases for, while $caaAltComprDirs(iI)$ is a character array
+telling the code in which directory the new compressed tables lie. So
+for example 
+\newline
+\medskip
+\ttab  iNumAltComprDirs   =             2 \\
+\ttab  iaAltComprDirs(1)  =             1\\
+\ttab  iaAltComprDirs(2)   =            5\\
+\ttab  \ttab      caaAltComprDirs(1)     =   '../DATA/Compressed/gas1/'\\
+\ttab  \ttab      caaAltComprDirs(2)     =   '../DATA/Compressed/gas5/'\\
+tells the ocde that there are 2 alternate compressed databases, one
+for gas 1 and the other for gas 5; the directories are also specified.
+
+The user specifies that he/she wants to supply spectral tables for 
+$iNumNewGases$.
+$iaNewGasIDI(iI)$ is the HITRAN gasID of the gas that the user is supplying 
 externally computed absorption spectra for. $iaNewData(iI)$ is an integer 
 value denoting the number of kCompressed chunks that the data will be 
 supplied for. For each of these new chunks, $iaaNewChunks(iI,iJ)$ 

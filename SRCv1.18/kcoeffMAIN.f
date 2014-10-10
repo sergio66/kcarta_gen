@@ -28,7 +28,7 @@ c this is the MAIN routine
      $          raVertTemp,iVertTempSet,
      $          rFileStartFr,iTag,iActualTag,raFreq,iError,iDoDQ,iSplineType,
      $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
-     $          iNumAltDirs,iaAltDirs,caaAltDirs,
+     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
@@ -44,8 +44,8 @@ c input vars
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore)
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
-      INTEGER iaAltDirs(kGasStore),iNumAltDirs
-      CHARACTER*80 caaAltDirs(kGasStore) 
+      INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
+      CHARACTER*80 caaAltComprDirs(kGasStore) 
       INTEGER iGas,iaGases(kMaxGas)
       INTEGER iProfileLayers,iVertTempSet,iError,iDoDQ
       INTEGER iSplineType,iL_low,iL_high,iTag,iActualTag
@@ -83,13 +83,13 @@ c local vars
       INTEGER iNewIn,OutSideSpectra,NewDataChunk,iWhichChunk
       INTEGER ix
 
-      kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+      kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
 
       iNewIn = -1
-      iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltDirs,iaAltDirs)
+      iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs)
       IF (iNewIn .LT. 0) THEN
         !use kCompressed Database w/o worrying
-        kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+        kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
         CALL GasContribution(iGas,iaGases(iGas),kProfLayer,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          pProf,iProfileLayers,
@@ -117,7 +117,7 @@ c local vars
      $            kaFrStep(iTag),rFileStartFr*1.00000)
         ELSE
           !use kCompressed Database w/o worrying
-          kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+          kAltComprDirs = -1  !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
           CALL GasContribution(iGas,iaGases(iGas),kProfLayer,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          pProf,iProfileLayers,
@@ -135,7 +135,7 @@ c local vars
 
       IF ((iNewIn .GE. 1001) .AND. (iNewIn .LT. 10000)) THEN
         !!!! use alternate compressed database
-        kAltDir = +1   !! overwrite one of kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath        
+        kAltComprDirs = +1 !!overwrite one of kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath        
         CALL GasContributionAlternateDataBase(iGas,iaGases(iGas),kProfLayer,
      $          raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,
      $          pProf,iProfileLayers,
@@ -148,7 +148,7 @@ c local vars
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22,
-     $          iNewIN-1000,iNumAltDirs,iaAltDirs,caaAltDirs)
+     $          iNewIN-1000,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs)
       END IF
 
 c      if (iGas .EQ. 1) then
@@ -234,7 +234,7 @@ c local variables
 
       iErr = -1
 
-      kAltDir = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+      kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
 
       IF (((1 .LE. iGasID) .AND. (iGasID .LE. kGasComp)) .OR. 
      $    (iGasID .EQ. kNewGasHi+1)) THEN
@@ -327,7 +327,7 @@ c same as GasContribution except it substitudes COMPRESSED DATABASE
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22,
-     $          iNewIN,iNumAltDirs,iaAltDirs,caaAltDirs)
+     $          iNewIN,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs)
 
       IMPLICIT NONE
 
@@ -376,8 +376,8 @@ c the Matlab weights
       REAL    raQ11(kProfLayer),raQ12(kProfLayer),
      $        raQ21(kProfLayer),raQ22(kProfLayer)
 c the alt database
-      INTEGER iNewIN,iNumAltDirs,iaAltDirs(kGasStore)
-      CHARACTER*80 caaAltDirs(kGasStore)
+      INTEGER iNewIN,iNumAltComprDirs,iaAltComprDirs(kGasStore)
+      CHARACTER*80 caaAltComprDirs(kGasStore)
 
 c local variables
       INTEGER iFr,iLay
@@ -385,13 +385,11 @@ c local variables
       iErr = -1
 
       DO iFr = 1,80
-        kcaAltDir(iFr:iFr) = ' '
+        kcaAltComprDirs(iFr:iFr) = ' '
       END DO
-      DO iFr = 1,80
-        kcaAltDir = caaAltDirs(iNewIN)
-      END DO 
+      kcaAltComprDirs = caaAltComprDirs(iNewIN)
       write(kStdWarn,*) '>>> substituting caCompressedDataPath for gasID ',iGasID
-      write(kStdWarn,80) kcaAltDir
+      write(kStdWarn,80) kcaAltComprDirs
 
       IF ( ((1 .LE. iGasID) .AND. (iGasID .LE. kGasComp)) .OR. (iGasID .EQ. kNewGasHi+1)) THEN
         kFrStep = kaFrStep(iTag)
@@ -716,7 +714,7 @@ c this function then checks to see if there is ALT COMPRESSED DATABASE data for 
 c   if so, it returns a positive integer that tells the code which spectra
 c   dataset to use (from *SPECTRA) ** would be between 1001 to 1110 **  
 c else it returns -1
-      INTEGER FUNCTION OutsideSpectra(iGasID,iNumNewGases,iaNewGasID,iNumAltDirs,iaAltDirs) 
+      INTEGER FUNCTION OutsideSpectra(iGasID,iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs) 
 
       IMPLICIT NONE
 
@@ -726,9 +724,9 @@ c iGasID       tells current gasID
 c iNumNewGases tells how many new gases to use
 c iaNewGasID   tells the gasIDs of the new gases
       INTEGER iGasID, iNumNewGases, iaNewGasID(kGasStore)
-c iNumAltDirs  tells if we need to use alternate compressed gas dirs
-c iaAltDirs    tells which gases gave compressed data stored in alternate dirs
-      INTEGER iNumAltDirs,iaAltDirs(kGasStore)
+c iNumAltComprDirs  tells if we need to use alternate compressed gas dirs
+c iaAltComprDirs    tells which gases gave compressed data stored in alternate dirs
+      INTEGER iNumAltComprDirs,iaAltComprDirs(kGasStore)
 
 c local vars
       INTEGER iI,iJ
@@ -750,13 +748,13 @@ c search to see if there is new data!
           IF (iGASID .EQ. 2) write(kStdWarn,*) '  >>> gasID = 2, could be NLTE check ...'
         END IF
 
-      ELSEIF (iNumAltDirs .GT. 0) THEN
+      ELSEIF (iNumAltComprDirs .GT. 0) THEN
         iJ = 1
 c search to see if there is new data!     
  20     CONTINUE
-        IF (iaAltDirs(iJ) .EQ. iGasID) THEN
+        IF (iaAltComprDirs(iJ) .EQ. iGasID) THEN
           iI = iJ
-        ELSEIF (iJ  .LT. iNumAltDirs) THEN
+        ELSEIF (iJ  .LT. iNumAltComprDirs) THEN
           iJ = iJ + 1
           GOTO 20
         END IF        
@@ -1287,7 +1285,7 @@ c convert absorption coefficient correctly if necessary
 c now compute optical depth = gas amount * abs coeff
       CALL AmtScale(daaAbsCoeff,raPAmt)
       
-c      print *,iGasID,int(rFileStartFr),kAltDir
+c      print *,iGasID,int(rFileStartFr),kAltComprDirs
 
       IF (iGasID .EQ. 2) THEN
         CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
@@ -1330,9 +1328,9 @@ c        iCO2Chi = iCO2Chi   !! ie stick to (+2) option, to turn on CO2 chi when
 c      ELSEIF (kCO2_UMBCorHARTMAN .EQ. -1) THEN
 c        iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing
 c      END IF
-      IF ((kCO2_UMBCorHARTMAN .EQ. +1) .AND. (kAltDir .EQ. -1)) THEN
+      IF ((kCO2_UMBCorHARTMAN .EQ. +1) .AND. (kAltComprDirs .EQ. -1)) THEN
         iCO2Chi = iCO2Chi   !! ie stick to (+2) option, to turn on CO2 chi when using UMBC linemix
-      ELSEIF ((kCO2_UMBCorHARTMAN .EQ. -1) .OR. (kAltDir .EQ. +1)) THEN
+      ELSEIF ((kCO2_UMBCorHARTMAN .EQ. -1) .OR. (kAltComprDirs .EQ. +1)) THEN
         iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing, pr other databases
       END IF
 

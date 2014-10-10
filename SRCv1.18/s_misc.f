@@ -553,7 +553,7 @@ c keeping in mind that the water files may be in a directory by themselves
         CALL DoStop         
       END IF
 
-      IF (kAltDir .EQ. +1) caDir = kcaAltDir   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      IF (kAltComprDirs .EQ. +1) caDir = kcaAltComprDirs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       iLenDir = iLeftjust_lenstr(caDir,len(caDir))
 

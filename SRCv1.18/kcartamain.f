@@ -139,11 +139,11 @@ c iNewIn         is just a variable that tells us if new gas to be used
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore)
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT),iNewIn
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT)
-c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
-c iaAltDirs      tells which gases we want to use alternate compressed files
-c caaaAltDirs    tells the name of the files associated with the alternate compressed files
-      INTEGER iaAltDirs(kGasStore),iNumAltDirs
-      CHARACTER*80 caaAltDirs(kGasStore) 
+c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
+c iaAltComprDirs      tells which gases we want to use alternate compressed files
+c caaaAltComprDirs    tells the name of the files associated with the alternate compressed files
+      INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
+      CHARACTER*80 caaAltComprDirs(kGasStore) 
 
 c this is for nonLTE
 c iNLTE_SlowORFast tells whether to use slow accurate (+1) fast SARTA (-1) 
@@ -443,7 +443,7 @@ c read in the driver namelist file and profile
      $   cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,
      $   iCldProfile,raaKlayersCldAmt,
      $     iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks,
-     $      iNumAltDirs,iaAltDirs,caaAltDirs,
+     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
      $   raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $   iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $   caaStrongLines,iaNLTEBands,
@@ -452,6 +452,11 @@ c read in the driver namelist file and profile
      $   iSetBloat,caPlanckBloatFile,caOutBloatFile,caOutUABloatFile,
      $   iDoUpperAtmNLTE,caaUpperMixRatio,caPlanckUAfile,caOutUAFile,
      $       caOutName)
+
+      IF ((iNumNewGases .GT. 0) .AND. (iNumAltComprDirs .GT. 0)) THEN
+        write(kStdErr,*) 'SPECTRA section : confusing : you specifies iNumNewGases > 0, iNumAltComprDirs > 0'
+        CALL DoStop
+      END IF
 
       CALL compute_co2_mixratio(raaPress,raaPartPress,raaAmt,iaNumLayer(1),raFracBot(1),rCO2MixRatio)
 
@@ -834,7 +839,7 @@ c compute the abs coeffs
      $          raVertTemp,iVertTempSet,rFileStartFr,iTag,iActualTag,
      $          raFreq,iError,iDoDQ,iSplineType,
      $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
-     $          iNumAltDirs,iaAltDirs,caaAltDirs,
+     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,

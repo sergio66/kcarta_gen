@@ -153,9 +153,9 @@ c (kcarta.x) and when it cannot (bkcarta.x)
       COMMON/ComBlock7/kScatter,kWhichScatterCode,kAllowScatter
 
 c thse are for overwriting the compressed database dirs (from SCATTER)
-      INTEGER kAltDir
-      CHARACTER*80 kcaAltDir
-      COMMON/ComBlock8/kAltDir,kcaAltDir
+      INTEGER kAltComprDirs
+      CHARACTER*80 kcaAltComprDirs
+      COMMON/ComBlock8/kAltComprDirs,kcaAltComprDirs
 
 c 2007
 c NOTE there are 38 main gases in the HITRAN database;  plus about 13

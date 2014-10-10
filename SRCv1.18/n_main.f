@@ -44,7 +44,7 @@ c scatter info from .nml file
      $   iaCloudNumAtm1,iaaCloudWhichAtm1,raCloudFrac1, 
 c new spectroscopy
      $   iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1,
-     $   iNumAltDirs1,iaAltDirs1,caaAltDirs1,
+     $   iNumAltComprDirs1,iaAltComprDirs1,caaAltComprDirs1,
 c  non LTE
      $   raNLTEstrength1,iNumNLTEGases1,iNLTE_SlowORFast1,
      $   iaNLTEGasID1,iaNLTEChunks1,iaaNLTEChunks1,caaStrongLines1,
@@ -216,13 +216,13 @@ c caaaNewChunks  tells the name of the files associated with the chunks
       INTEGER iNumNewGases1,iaaNewChunks1(kGasStore,kNumkCompT)
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
       CHARACTER*80 caaaNewChunks1(kGasStore,kNumkCompT) 
-c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
-c iaAltDirs      tells which gases we want to use alternate compressed files
-c caaAltDirs    tells the name of the files associated with the alternate compressed files
-      INTEGER iaAltDirs(kGasStore),iNumAltDirs
-      INTEGER iaAltDirs1(kGasStore),iNumAltDirs1
-      CHARACTER*80 caaAltDirs(kGasStore)
-      CHARACTER*80 caaAltDirs1(kGasStore)
+c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
+c iaAltComprDirs      tells which gases we want to use alternate compressed files
+c caaAltComprDirs    tells the name of the files associated with the alternate compressed files
+      INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
+      INTEGER iaAltComprDirs1(kGasStore),iNumAltComprDirs1
+      CHARACTER*80 caaAltComprDirs(kGasStore)
+      CHARACTER*80 caaAltComprDirs1(kGasStore)
 
 c this is for non LTE
 c raNLTEstrength    tells how strongly to add on the LTE files
@@ -288,7 +288,7 @@ c local variables
       NAMELIST /nm_jacobn/namecomment,iJacob,iaJacob
       NAMELIST /nm_spectr/namecomment,iNumNewGases,iaNewGasID,iaNewData,
      $                    iaaNewChunks,caaaNewChunks,
-     $                    iNumAltDirs,iaAltDirs,caaAltDirs
+     $                    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs
       NAMELIST /nm_nonlte/namecomment,iNumNLTEGases,iaNLTEGasID,iaNLTEChunks,
      $          iaaNLTEChunks,caaStrongLines,iNLTE_SlowORFast,
      $          raNLTEstrength,raNLTEstart,iaNLTEBands,caaaNLTEBands,
@@ -346,7 +346,7 @@ c default rads and jacs
       iJacob       = 0          !assume no jacobians to be done
 
 c default NLTE
-      iNumAltDirs      = -1      !assume no alternate compressed dirs
+      iNumAltComprDirs      = -1      !assume no alternate compressed dirs
       iNumNewGases     = -1      !assume no new spectroscopy
       iNumNLTEGases    = -1      !assume no nonLTE
       iNLTE_SlowORFast = +1      !but if we do NLTE, use slow accurate mode
@@ -612,12 +612,12 @@ c      END IF
           caaaNewChunks1(iI,iJ) = caaaNewChunks(iI,iJ)
         END DO
       END DO
-      iNumAltDirs1 = iNumAltDirs
+      iNumAltComprDirs1 = iNumAltComprDirs
       DO iI = 1,kGasStore
-        iaAltDirs1(iI) = iaAltDirs(iI)
+        iaAltComprDirs1(iI) = iaAltComprDirs(iI)
       END DO
       DO iI = 1,kGasStore
-        caaAltDirs1(iI) = caaAltDirs(iI)
+        caaAltComprDirs1(iI) = caaAltComprDirs(iI)
       END DO
       write (kStdWarn,*) 'successfully read in spectra .....'
       CALL printstar      
@@ -791,7 +791,7 @@ c scatter cloudprofile info
      $      iCldProfile,raaKlayersCldAmt,
 c new spectroscopy
      $      iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
-     $      iNumAltDirs,iaAltDirs,caaAltDirs,
+     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
 c nonLTE
      $      raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
      $      iaNLTEChunks,iaaNLTEChunks,
@@ -987,11 +987,11 @@ c caaaNewChunks  tells the name of the files associated with the chunks
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore) 
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
-c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
-c iaAltDirs      tells which gases we want to use alternate compressed files
-c caaAltDirs    tells the name of the files associated with the alternate compressed files
-      INTEGER iaAltDirs(kGasStore),iNumAltDirs
-      CHARACTER*80 caaAltDirs(kGasStore)
+c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
+c iaAltComprDirs      tells which gases we want to use alternate compressed files
+c caaAltComprDirs    tells the name of the files associated with the alternate compressed files
+      INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
+      CHARACTER*80 caaAltComprDirs(kGasStore)
 
 c this is for nonLTE
 c raNLTEstrength   tells how strongly to add on the new files (default 1.0)
@@ -1065,7 +1065,7 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
      $      raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase,
      $      iaaScatTable,iaCloudScatType,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm,raCloudFrac,
      $    iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
-     $    iNumAltDirs,iaAltDirs,caaAltDirs,
+     $    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
      $    raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $    iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $    caaStrongLines,iaNLTEBands,raNLTEstart,caaaNLTEBands,
@@ -1419,10 +1419,10 @@ c ******** SPECTRA section
         write (kStdWarn,*) 'successfully checked spectra .....'
         CALL printstar      
         iaKeyword(12) = 1
-      ELSEIF (iNumAltDirs .GT. 0) THEN
+      ELSEIF (iNumAltComprDirs .GT. 0) THEN
         iNewLBL = 2
-        write(kStdWarn,*) 'Will be substituting compressed files for ',iNumAltDirs,' gases : ',
-     $   (iaAltDirs(iInt),iInt=1,iNumAltDirs)
+        write(kStdWarn,*) 'Will be substituting compressed files for ',iNumAltComprDirs,' gases : ',
+     $   (iaAltComprDirs(iInt),iInt=1,iNumAltComprDirs)
         write(kStdWarn,*) 'successfully checked spectra .....'
         CALL printstar      
         iaKeyword(12) = 1
@@ -1447,7 +1447,7 @@ c ******** NONLTE section
        END IF
 
       IF (iNumNLTEGases .GT. 0) THEN
-        !! this kinda goes against iNewLBL = 2 set abive if iNumAltDirs .GT. 0 ....
+        !! this kinda goes against iNewLBL = 2 set abive if iNumAltComprDirs .GT. 0 ....
         iNewLBL = 1   
         iNonlte = +1
         CALL nonlte(
