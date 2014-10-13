@@ -827,6 +827,7 @@ c            print *,iG,iL,iL-iAbove,raOffset(iG),rAdjust
 c >>>>>>>>>>>>>>>>>>>>>>>>> CO2 adjust; growth rate = 2 ppmv/yr
       rCO2ppmv = 370.0
       IF ((rYear .GT. 1970) .AND. (kPlanet .EQ. 03)) THEN
+        !! should be dt = (yy-2002) + mm/12;  rCO2ppmv = 370 + 2*dt;
         rCO2ppmv = 370.0 + (rYear-2002)*2.0
 
         !! now see if CO2 was originally there

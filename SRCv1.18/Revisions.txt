@@ -29,8 +29,8 @@ a) hdf packages
 b) rtp package, which is our native file format for storing
    atmospheric geophysical variables and instrument view geometry
    parameters, needed for RT calculations
-c) klayers package, which takes in a LEVELS rtp file and profuces a LAYERS avg rtp
-   file, needed for RT calculations
+c) klayers package, which takes in a LEVELS rtp file and profuces a 
+   LAYERS avg rtp file, needed for RT calculations
 
 Code was developed jointly by 
   L.Larrabee Strow        Principal Investigator
@@ -244,7 +244,8 @@ v1.18   Included National Renewable Energy Lab (NREL) SOLAR database to make
         And kRTP = -5/-6 reads in a LBLRTM based levels input file and 
         processes that!
         These would be TAPE5 and modified TAPE6
-        For these two cases, when "adding on missing gases", the gasamts are set to 0
+        For these two cases, when "adding on missing gases", the gasamts 
+        are set to 0
 
         Introduced (BUGGY) NLTE database for CO2 from 2205 - 2430 cm-1 (or 2205
         to 2405 cm-1 chunks). This database covers optical depths and planck
@@ -257,11 +258,11 @@ v1.18   Included National Renewable Energy Lab (NREL) SOLAR database to make
         ie jacobians only possible for usual (100) AIRS layers between 
         1100-0.005 mb
 
-        SPECTRA section now allows you to specify an "alternative" compressed database
-        for some of gases 1-81,103 other than what is set in 
+        SPECTRA section now allows you to specify an "alternative" compressed 
+        database  for some of gases 1-81,103 other than what is set in 
           kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
-        So though they are are set by user at compile time, the user can use this way to 
-        load in alternate water/CO2/other optical depths at run time
+        So though they are are set by user at compile time, the user can use 
+        SEPCTRA to load in alternate water/CO2/other optical depths at run time
 
 v1.17 : Doomed attempt to speed up code by using input profile(s) for only
         certain gases eg 1,2,3,4,5,6,9,12 ... and relying on US Std for other
@@ -367,35 +368,44 @@ computations, even with scattering (introduce a OLR computation) etc]
   scatter_all_misc.f  iLogOrLinear = +1       linear interp for w,g; log for e
 
                   for LBLRTM TAPE 5/6 input
-  n_layers.f          iReplaceZeroProf = +1    user wants to replace ZERO everywhere gas profile with climatology
-  n_pth_mix.f         iAddLBLRTM = +1          user wants to add on missing profiles even if they were 
-                                               not specified in TAPE5 or TAPE6
+  n_layers.f          iReplaceZeroProf = +1   user wants to replace ZERO 
+                                              everywhere gas profile with 
+                                              climatology
+  n_pth_mix.f         iAddLBLRTM = +1         user wants to add on missing 
+                                              profiles even if they were 
+                                              not specified in TAPE5 or TAPE6
 
 03/31/14        kRTP = -10 reads in text based levels input
                 kRTP = -5 reads in LBLRTM based levels input (TAPE 5)
                 kRTP = -6 reads in LBLRTM based layers input (TAPE 6, edited)
-                kRTP = +2 reads JPL/NOAA style LAYERS profile; set atm from namelist
+                kRTP = +2 reads JPL/NOAA style LAYERS profile; 
+                          set atm from namelist
 
-                  The first part of this file contains info from TAPE5 upto NUMBER of LEVELS
-                    to read. 
-                  This is replaced with NUMBER of LAYERS from which to read info, plus 
-                    number of XSEC gases
-                  Then search for "P(MB)       T(K)    ALPHL    ALPHD    ALPHV   ZETA "
-                    in TAPE6, and cut and paste the layers/levels info from there!!
-                  See example in DOC/TAPE6_Klayers; the code assumes the gasIDs are
-                  sequential (ie it is reading in gas1-7 on first bunch, gas 8-15 in next 
-                  bunch, gas J to J+7 etc (*ie in sets of 8*); this is followed by XSEC 
-                  gases (if any)
+                The first part of this file contains info from TAPE5 upto 
+                NUMBER of LEVELS to read. 
+                This is replaced with NUMBER of LAYERS from which to read 
+                info, plus number of XSEC gases
+     Then search for "P(MB)       T(K)    ALPHL    ALPHD    ALPHV   ZETA "
+                in TAPE6, and cut and paste the layers/levels info from there!!
+                See example in DOC/TAPE6_Klayers; code assumes the gasIDs are
+                sequential (ie reading gas1-7 on first bunch, gas 8-15 in next 
+                bunch, gas J to J+7 etc (*ie in sets of 8*); followed by XSEC 
+                gases (if any)
                 So *** 1 *** read in TAPE5, and 
-                     (a) where TAPE5 gives nlevs you want computations at (eg 52) replace this with nlays (eg 97)
-                     (b) similarly where TAPE5 gave the pressure levels of the input, give AIRS Plevs(1:97)
-                     (c) Then where TAPE5 gives number of LEVS at which radiosonde profile is given at (eg 123)
-                         replace this with number of LAYERS in the TAPE6 file, and number of XSEC gases
+                     (a) where TAPE5 gives nlevs you want computations at  
+                         (eg 52) replace this with nlays (eg 97)
+                     (b) similarly where TAPE5 gave the pressure levels of the
+                         input, give AIRS Plevs(1:97)
+                     (c) Then where TAPE5 gives number of LEVS at which 
+                         radiosonde profile is given at (eg 123)
+                         replace this with number of LAYERS in the TAPE6 file,
+                         and number of XSEC gases
                     *** 2 *** read in TAPE6, including 
-                         0LAYER                          P(MB)       T(K)    ALPHL    ALPHD
+         0LAYER                          P(MB)       T(K)    ALPHL    ALPHD
                     and below
 
-        For these two LBLRTM cases, when "adding on missing gases", the gasamts are set to 0
+        For these two LBLRTM cases, when "adding on missing gases", the 
+        gasamts are set to 0
 
 03/21/11        In "SUBROUTINE compressed" default is now to use Matlab based
                 weights idea to uncompress the kComp Database, rather than the
@@ -528,22 +538,26 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
-10/06/14        SPECTRA now allows you to specify alternate compressed directories for 
-                gases whose ID >= 3 and <= 800 (ie ozone through to xsec gases, but not H2O, CO2)
-                  iNumAltDirs = number of gases which we want to use alternative compressed databases for
-                  iaAltDirs   = which gases to do alternates
-                  caaaAltDirs = directory names
+10/06/14        SPECTRA now allows you to specify alternate compressed 
+                directories for gases (other than continumm g101,102)
+                  iNumAltComprDirs = number of gases which we want to use 
+                                     alternative compressed databases for
+                  iaAltComprDirs   = which gases to do alternates
+                  caaaAltComprDirs = directory names
 
-7/23/14         Added couple more iDefaults while reading in text input from LBLRTM TAPE5/TAPE6
-                This way the code can add on missing gases (which were not specified in TAPE5)
-                and if the gases were specified in TAPE5 but with a "everywhere 0" profile, then
+7/23/14         Added couple more iDefaults while reading in text input from 
+                LBLRTM TAPE5/TAPE6. This way the code can add on missing gases
+                (which were not specified in TAPE5) and if the gases were 
+                specified in TAPE5 but with a "everywhere 0" profile, then
                 the code adds on the US STD profile for that gas
 
-7/14/14         Writing kcartajpl.f and modifying some routines, so that kcarta can be 
-                called as a stand-alone routine; kRTP = +2 means use arguments for setting layers, 
+7/14/14         Wrote kcartajpl.f and modifying some routines, so that 
+                kcarta can be called as a stand-alone routine; 
+                kRTP = +2 means use arguments for setting layers, 
                 rather than reading in a profile from RTP or TXT or LBLRTM
 
-7/9/14          For git and tar reasons, moved scatter_all_misc.f to clear_scatter_misc.f
+7/9/14          For git and tar reasons, moved scatter_all_misc.f to 
+                clear_scatter_misc.f
 
 4/05/14         http://www.atmos.umd.edu/~ytma/lblrtm/lblrtm_instructions.html
                 kRTP = -5 
