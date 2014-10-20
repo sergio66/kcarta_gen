@@ -1457,7 +1457,7 @@ c output
 
 c local
       INTEGER iMax,iC,iCC,iaInDataBase(kGasComp),iTag,iErr,iaTemp(kMaxGas)
-      INTEGER iNotMainGas,iNgasesCheck,iInt,iWhichKC
+      INTEGER iNotMainGas,iNgasesCheck,iInt,iWhichKC,iYesWV,i101,i102,i103
       INTEGER iCheckCompDataBase,MainGas
 
       iWHichKC = iNgas
@@ -1525,19 +1525,51 @@ c now based on which gases were found, reset array iaTemp
         iaTemp(iCC) = iC
         iCC = iCC+1
         iNgas = iNgas+1
+
+      ELSEIF (iWhichKC .GT. 0) THEN
+        iYesWV = -1
+        i101 = -1
+        i102 = -1
+        i103 = -1
+        DO iC = 1,iWhichKC
+          iaTemp(iC) = iaGasesNL(iC)
+          IF (iaTemp(iC). EQ. 1) iYesWV = +1
+          IF (iaTemp(iC). EQ. 101) i101 = +1
+          IF (iaTemp(iC). EQ. 102) i102 = +1
+          IF (iaTemp(iC). EQ. 103) i103 = +1
+        END DO
+        IF ((kCKD .GE. 0) .AND. (iYesWV .GT. 0) .AND. (i101 .EQ. -1)) THEN
+          !! need to add on g101
+          iWhichKC = iWhichKC + 1
+          iaTemp(iWhichKC) = 101
+          iaGasesNL(iWhichKC) = 101
+        END IF
+        IF ((kCKD .GE. 0) .AND. (iYesWV .GT. 0) .AND. (i102 .EQ. -1)) THEN
+          !! need to add on g102
+          iWhichKC = iWhichKC + 1
+          iaTemp(iWhichKC) = 102
+          iaGasesNL(iWhichKC) = 102
+        END IF
+        IF ((kCKD .GE. 0) .AND. (iYesWV .GT. 0) .AND. (i102 .EQ. -1)) THEN
+          !! need to add on g103
+          iWhichKC = iWhichKC + 1
+          iaTemp(iWhichKC) = 103
+          iaGasesNL(iWhichKC) = 103
+        END IF
+        iNgas = iWhichKC
       END IF
 
 c check the molecular ID's are between 1 and kGasComp , and
 c kNewGasLo and kNewGasHi+1
 c (should be in the compressed data base)
 c if iNgas = -1, everything should have been set correctly above; if user
-c enetered in the GasIDs him/her self, there could be mistakes
+c entered in the GasIDs him/her self, there could be mistakes
       DO iC = 1,iNgas
         iNotMainGas = MainGas(iaTemp(iC))
         IF (iNotMainGas .LT. 0) THEN
 c gas does not exist in the compressed base ... stop
-          WRITE(kStdErr,777) iaTemp(iC),1,kGasComp
-  777       FORMAT('Error in MOLGAS!! found Gas ID   =  ',I2,'(
+          WRITE(kStdErr,777) iC,iaTemp(iC),1,kGasComp
+  777       FORMAT('Error in MOLGAS!! iC = ',I2,' found Gas ID   =  ',I2,'(
      $ MOLGAS ID''s should be between ',I2,' and ',I2 ,')')
           CALL DoSTOP
         END IF
@@ -1681,6 +1713,10 @@ c now based on which gases were found, reset array iaTemp
           END IF
         END DO
 
+      ELSEIF (iNXsec .GT. 0) THEN
+        DO iC = 1,iNXsec
+          iaTemp(iC) = iaLXsecNL(iC)
+        END DO
       ELSE 
         write(kStdErr,*) 'xscgas4 can only process iNXsec = -114,-1, or > 0'
         CALL DOSTOP

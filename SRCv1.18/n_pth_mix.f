@@ -22,44 +22,47 @@ c output
       REAL raTPressLevels(kProfLayer+1)           
 
 c local
-      INTEGER iI,iJ,iOffSet
+      INTEGER iI,iJ,iOffSet,iCO2_ind
       REAL raT(kProfLayer),raP(kProfLayer),rX,rY,logP(kProfLayer),rPmin,rPmax,dx
       REAL grav0,grav,Re,Rd,raGeopotentialThick1(kProfLayer),raGeopotentialThick2(kProfLayer)
       REAL rInt,raTX(10),raPX(10),p2h
+
+      iCO2_ind = 2                 !! assume we have CO2 in profile
 
       Re    = kPlanetRadius        !! Planet radius
       grav0 = kGravity             !! m/s2
       Rd    = kSpecificGasDryAir   !!  specific gas constant for dry air J K−1kg−1  
 
       IF (iaGases(2) .NE. 1) THEN
-        write(kStdErr,*) 'No CO2 in your profile?????????????? '
-        CALL DoStop
+        write(kStdErr,*) 'No CO2 in your profile??????????? have to "check" T(z) some other way'
+        iCO2_ind = 1     !!! hopefully there is water!!!!
       END IF
 
-c      print *,iProfileLayers
       iOffSet = kProfLayer-iProfileLayers
 
       rPmin = +1.0e10
       rPmax = -1.0e10
       iI = 20
-      IF ((raaPress(iI,2) .GT. raaPress(iI+1,2)) .AND. (raaPress(iI+1,2) .GT. raaPress(iI+2,2))) THEN
+      IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND. (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) 
+     $  THEN
         !! pressures decreasing with index; use CO2 temps and pressures
         DO iI = kProfLayer-iProfileLayers+1,kProfLayer
           iJ = iI-iOffSet
-          raP(iJ) = raaPress(kProfLayer-iJ+1,2)*kAtm2mb
+          raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
           logP(iJ) = log(raP(iJ))
-          raT(iJ) = raaTemp(kProfLayer-iJ+1,2)
+          raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
           IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
           IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
 c           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
         END DO
-      ELSEIF ((raaPress(iI,2) .LT. raaPress(iI+1,2)) .AND. (raaPress(iI+1,2) .LT. raaPress(iI+2,2))) THEN
+      ELSEIF 
+     $((raaPress(iI,iCO2_ind) .LT. raaPress(iI+1,iCO2_ind)) .AND. (raaPress(iI+1,iCO2_ind) .LT. raaPress(iI+2,iCO2_ind))) THEN
         !! pressures increasing with index; use CO2 temps and pressures
         DO iI = kProfLayer-iProfileLayers+1,kProfLayer
           iJ = iI-iOffSet
-          raP(iJ) = raaPress(iJ,2)*kAtm2mb
+          raP(iJ) = raaPress(iJ,iCO2_ind)*kAtm2mb
           logP(iJ) = log(raP(iJ))
-          raT(iJ) = raaTemp(iJ,2)
+          raT(iJ) = raaTemp(iJ,iCO2_ind)
           IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
           IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
 c          print *,'b',iJ,raP(iJ),raT(iJ)

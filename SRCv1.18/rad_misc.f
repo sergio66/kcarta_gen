@@ -1514,7 +1514,6 @@ c************************************************************************
 c this subroutine computes the gauss-legendre abscissa weights and points
 c from Numerical Recipes
 c nn is the number of points <= kProfLayer, x,w are output abscissa and wts
-
       SUBROUTINE FindGauss(nn,daX,daW)
        
       IMPLICIT NONE
@@ -1584,6 +1583,43 @@ c nn is the number of points <= kProfLayer, x,w are output abscissa and wts
         daW1(n+1-i) = daW(i)
       END DO
  
+      RETURN
+      END
+
+c************************************************************************ 
+c this subroutine reads in the first moment (l=1) quadrature points and weights
+c using results in Table 1, second column (m=1) of
+c "Gaussian Quadrature and Application to Infrared Radiation" by J.Li
+c Journal of Atmospheric Sciences, v57, pg 753 (2000)
+      SUBROUTINE FindGauss2(nn,daX,daW)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+      INTEGER nn
+      DOUBLE PRECISION daX(kGauss),daW(kGauss)
+
+      IF (nn .EQ. 1) THEN
+        daX(1) = 2.0/3.0
+        daW(1) = 1.0/2.0
+      ELSEIF (nn .EQ. 2) THEN
+        daX(1) = 0.3550510
+        daX(2) = 0.8449489
+        daW(1) = 0.1819856
+        daW(2) = 0.3180414
+      ELSEIF (nn .EQ. 3) THEN
+        daX(1) = 0.2123405
+        daX(2) = 0.5905331
+        daX(3) = 0.9114120
+        daW(1) = 0.0698270
+        daW(2) = 0.2292411
+        daW(3) = 0.2009319
+      ELSE
+        write(kStdErr,*) 'FindGauss2 : need nn = 1,2,or 3, not ',nn
+        CALL DoStop
+      END IF
+
       RETURN
       END
 

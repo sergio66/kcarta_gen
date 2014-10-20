@@ -2005,7 +2005,7 @@ c local var
       CHARACTER*80 caStr,caStrX,caStrY
       CHARACTER*30 caStr30
       CHARACTER*1  c1
-      INTEGER iWriteRTP,iNumGasesBAD,iaBadGasProfile(kMaxGas),iDefault,iReplaceZeroProf
+      INTEGER iWriteRTP,iNumGasesBAD,iaBadGasProfile(kMaxGas),iDefault,iReplaceZeroProf,iCONTN
 
       rPmin = +1.0e6
       rPmax = -1.0e+6
@@ -2025,9 +2025,43 @@ c local var
       ENDIF
       kProfileUnitOpen=1
 
-c this should read /home/sergio/IR_NIR_VIS_UV_RTcodes/LBLRTM/LBLRTM12.2/lblrtm/run_examples/run_example_user_defined_upwelling/TAPE5
-      READ (iIOUN2,5030,ERR=13,END=13) caStr
-      READ (iIOUN2,5030,ERR=13,END=13) caStr
+      iDefault = 5
+      iCONTN = 6    !!! user specifies continuum settings in free format on additional line (assume all = 1)
+      iCONTN = 5    !!! assume all continuums turned on (= 1)
+
+      IF ((iCONTN .NE. iDefault) .AND. (iDefault .EQ. 5)) THEN
+        write(kStdWarn,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
+        write(kStdWarn,*) 'While reading in LBLRTM TAPE5, not expecting extra line for Continuum settings'
+        write(kStdErr,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
+        write(kStdErr,*) 'While reading in LBLRTM TAPE5, not expecting extra line for Continuum settings'
+      ELSEIF ((iCONTN .NE. iDefault) .AND. (iDefault .EQ. 6)) THEN
+        write(kStdWarn,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
+        write(kStdWarn,*) 'While reading in LBLRTM TAPE5, expecting extra line for Continuum settings'
+        write(kStdErr,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
+        write(kStdErr,*) 'While reading in LBLRTM TAPE5, expecting extra line for Continuum settings'
+      END IF
+
+c this should read 
+c /home/sergio/IR_NIR_VIS_UV_RTcodes/LBLRTM/LBLRTM12.2/lblrtm/run_examples/run_example_user_defined_upwelling/TAPE5
+      !! reads HI=1 F4=1 CN=5 AE=0 EM=0 SC=0 FI=0 PL=0 TS=0 AM=0 MG=1 LA=0 OD=1 XS=0    0    0
+      !! reads HI=1 F4=1 CN=6 AE=0 EM=0 SC=0 FI=0 PL=0 TS=0 AM=0 MG=1 LA=0 OD=1 XS=0    0    0
+      READ (iIOUN2,5030,ERR=13,END=13) caStr  
+      !! need to edit file; if CN=5, no need for this next line
+      !! need to edit file; if CN=6,    need     this next line as it "specifies" the continuum
+      !!   XSELF, XFRGN, XCO2C, XO3CN, XO2CN, XN2CN, XRAYL in free format
+      !!     XSELF  H2O self broadened continuum absorption multiplicative factor
+      !!     XFRGN  H2O foreign broadened continuum absorption multiplicative factor
+      !!     XCO2C  CO2 continuum absorption multiplicative factor
+      !!     XO3CN  O3 continuum absorption multiplicative factor
+      !!     XO2CN  O2 continuum absorption multiplicative factor
+      !!     XN2CN  N2 continuum absorption multiplicative factor
+      !!      XRAYL Rayleigh extinction multiplicative factor
+      IF (iCONTN .EQ. 6) THEN
+        !! read in XSELF, XFRGN, XCO2C, XO3CN, XO2CN, XN2CN, XRAYL; assume all set to 1
+        READ (iIOUN2,5030,ERR=13,END=13) caStr
+        write(kStdWarn,*) 'read in XSELF, XFRGN, XCO2C, XO3CN, XO2CN, XN2CN, XRAYL .... value is'
+        write(kStdWarn,*) caStr
+      END IF
 
       READ (iIOUN2,*) rF1,rF2
       write(kStdWarn,*) 'LBLRTM input indicates start/stop wavenumbers are ',rF1,rF2
