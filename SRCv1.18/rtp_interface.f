@@ -3,6 +3,7 @@ c University of Maryland Baltimore County
 c All Rights Resered
 
 c this file deals with reading in the RTP file
+c scientific format ESW.n   http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap05/format.html
 
 c************************************************************************
 c this subroutine deals with figuring out the wavenumbers
@@ -392,7 +393,8 @@ c notice here that gA == first gas in the MOLGAS, usually water
  5000 CONTINUE
 
       iLBLDIS = -1     !!! do not dump out stuff for LBLDIS to use
-      iLBLDIS = +1     !!! do     dump out stuff for LBLDIS to use
+      iLBLDIS = +7     !!! do     dump out stuff for LBLDIS to use (TAPE7)
+      iLBLDIS = +16    !!! do     dump out stuff for RRTM   to use (TAPEX)
       !!!! this is for LBLDIS =======================<<<<<<< >>>>=============
       !!!! pressures in mb, temps in K, heights in km, gas amounts in mol/cm2
       !!!! only dump gases(1:7) for "var" gases, gas 22 (N2) as the broadener
@@ -401,9 +403,31 @@ c notice here that gA == first gas in the MOLGAS, usually water
  9877 FORMAT(7(E14.8,' '))
  9876 FORMAT(6(E14.8,' '))
  9872 FORMAT(2(E14.8,' '))
+
       caStr='<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>
      $>>>>>>>>>>>'
-      IF ((iLBLDIS .GT. 0) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+
+      IF ((iLBLDIS .EQ. 16) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+        write(kStdWarn,5040) caStr
+        write(kStdWarn,*) 'RRTM PSEUDO IN (ie incorrect format!!) --- start cut below this line ----'
+        write(kStdWarn,5040) caPFName
+        caStr = '$ start of info'
+        write(kStdWarn,5040) caStr
+        caStr = '                                                 0                   1              4  0 '
+        write(kStdWarn,5040) caStr
+        caStr = 'Stemp 1 0 Emis ' 
+        write(kStdWarn,5040) caStr
+        write(kStdWarn,*) 1,iProfileLayers,7,1.000
+        DO iL = kProfLayer-iProfileLayers+1,kProfLayer
+          write(kStdWarn,*) raaPress(iL,1),raaTemp(iL,1),raPressLevels(iL),raaTemp(iL,1),raPressLevels(iL+1),raaTemp(iL,1)
+          write(kStdWarn,3030) kAvog*raaAmt(iL,1),kAvog*raaAmt(iL,2),kAvog*raaAmt(iL,3),
+     $                         kAvog*raaAmt(iL,4),kAvog*raaAmt(iL,5),kAvog*raaAmt(iL,6),
+     $                         kAvog*raaAmt(iL,7),kAvog*raaAmt(iL,22)
+        END DO
+      END IF
+ 3030 FORMAT(8('   ',ES10.4))
+
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
         write(kStdWarn,5040) caStr
         write(kStdWarn,*) 'LBLRTM TAPE7 --- start cut below this line ----'
         write(kStdWarn,5040) caPFName
@@ -442,19 +466,21 @@ c notice here that gA == first gas in the MOLGAS, usually water
       END IF
       !!!! this is for LBLDIS =======================<<<<<<< >>>>=============
        
-      write(kStdWarn,*) '  '
-      caStr160=' Lay    P(gA)      PP(gA)       Temp        GasID=       GasID=   
-     $   GasID=       GasID=       GasID=       GasID=       GasID=    
-     $   GasID='
-      write(kStdWarn,5030) caStr160
-      write(kStdWarn,*) '                                           ',
-     $    iaDispGasID(1),'         ',iaDispGasID(2),'         ',iaDispGasID(3),
-     $    iaDispGasID(4),'         ',iaDispGasID(5),'         ',iaDispGasID(6),
-     $    iaDispGasID(9),'         ',iaDispGasID(12)
-      caStr='----------------------------------------------------------------
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+        write(kStdWarn,*) '  '
+        caStr160 = ' Lay    P(gA)      PP(gA)       Temp        GasID=       GasID=    GasID='
+        castr160 = castr160 // '       GasID=       GasID=       GasID=       GasID=       GasID='
+        write(kStdWarn,5030) caStr160
+        write(kStdWarn,*) '                                           ',
+     $      iaDispGasID(1),'         ',iaDispGasID(2),'         ',iaDispGasID(3),
+     $      iaDispGasID(4),'         ',iaDispGasID(5),'         ',iaDispGasID(6),
+     $      iaDispGasID(9),'         ',iaDispGasID(12)
+        caStr='----------------------------------------------------------------
      $-----------'
-      write(kStdWarn,5040) caStr  
-      IF ((iLBLDIS .GT. 0) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+        write(kStdWarn,5040) caStr  
+      END IF
+
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
         write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt -- start cut below this line --'
         DO iL = kProfLayer-iProfileLayers+1,kProfLayer
           rP = raaPress(iL,1)
@@ -464,7 +490,7 @@ c notice here that gA == first gas in the MOLGAS, usually water
      $        raaAmt(iL,6),raaAmt(iL,9),raaAmt(iL,12)
         END DO
       END IF
-      IF ((iLBLDIS .GT. 0) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
         write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt --- end cut above this line ---'
       END IF
 
@@ -477,7 +503,7 @@ c notice here that gA == first gas in the MOLGAS, usually water
       END DO
 
  5030 FORMAT(A160)
- 5040 FORMAT(A75)
+ 5040 FORMAT(A80)
  5050 FORMAT(I3,' ',6(E11.5,' ')) 
  5060 FORMAT(I3,' ',11(E11.5,' ')) 
 

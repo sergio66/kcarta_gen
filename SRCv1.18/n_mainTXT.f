@@ -2252,7 +2252,7 @@ c notice here that gA == first gas in the MOLGAS, usually water
       END DO
 
  5030 FORMAT(A160)
- 5040 FORMAT(A75)
+ 5040 FORMAT(A80)
  5050 FORMAT(I3,' ',6(E11.5,' ')) 
  5060 FORMAT(I3,' ',11(E11.5,' ')) 
 
