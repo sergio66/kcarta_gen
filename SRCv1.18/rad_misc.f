@@ -1615,8 +1615,17 @@ c Journal of Atmospheric Sciences, v57, pg 753 (2000)
         daW(1) = 0.0698270
         daW(2) = 0.2292411
         daW(3) = 0.2009319
+      ELSEIF (nn .EQ. 4) THEN
+        daX(1) = 0.1397599
+        daX(2) = 0.4164096
+        daX(3) = 0.7231570
+        daX(4) = 0.9428958
+        daW(1) = 0.0311810
+        daW(2) = 0.1298475
+        daW(3) = 0.2034646
+        daW(4) = 0.1355069
       ELSE
-        write(kStdErr,*) 'FindGauss2 : need nn = 1,2,or 3, not ',nn
+        write(kStdErr,*) 'FindGauss2 : need nn = 1,2,3 or 4 not ',nn
         CALL DoStop
       END IF
 

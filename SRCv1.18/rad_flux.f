@@ -4631,6 +4631,7 @@ c to do the local absorptive cloud
       INTEGER iCloudLayerTop,iCloudLayerBot,iiDiv
 
       iGaussPts = 3  !!! default
+      iGaussPts = 4  !!! default
 
       IF (iGaussPts .GT. kGauss) THEN
         write(kStdErr,*) 'need iGaussPts < kGauss'
