@@ -262,13 +262,13 @@ v1.18   Included National Renewable Energy Lab (NREL) SOLAR database to make
         database  for some of gases 1-81,103 other than what is set in 
           kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
         So though they are are set by user at compile time, the user can use 
-        SEPCTRA to load in alternate water/CO2/other optical depths at run time
+        SPECTRA to load in alternate water/CO2/other optical depths at run time
 
 v1.17 : Doomed attempt to speed up code by using input profile(s) for only
         certain gases eg 1,2,3,4,5,6,9,12 ... and relying on US Std for other
         gases. This made code full of if then - else - end if, could produce
         large BT errors in final radiances, at a very small gain in speed.
-        So this is unsupported and will not be updated. Ever.
+        So this is unsupported and will not be updated. Ever. XYZXYZXYZXYZXYZXYZ
 
 v1.16 : Using Howard Mottler's Matlab based ideas to uncompress the database.
         This makes the code much cleaner, and a little faster.
@@ -556,6 +556,8 @@ v1.18
                                      alternative compressed databases for
                   iaAltComprDirs   = which gases to do alternates
                   caaaAltComprDirs = directory names
+                  rAltMinFr,rAltMaxFr (default 605,2830) allow you to tell the
+                    code in which band to look for these new gases
 
 7/23/14         Added couple more iDefaults while reading in text input from 
                 LBLRTM TAPE5/TAPE6. This way the code can add on missing gases

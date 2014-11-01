@@ -674,7 +674,7 @@ c ************* this is using the D. Edwards/M. Lopez-Puertas info ************
       iJunkNum    = -1      
       rH = 1.0e10             !!!dumb large number, too high!!!!!!
       DO iGas = 1,iNumGases
-        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
+        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,2205.0,605.0,2830.0)
         IF (iLTEIn .GT. 0) THEN
           rHN = raNLTEstart(iLTEIn)*1000     !!!NLTE start height in m
           rH = min(rH,rHN)
@@ -876,7 +876,7 @@ c local variables
       CHARACTER*7 caWord
       INTEGER iNumLinesRead,iErr,iI,iaDumb(kMaxGas),iaGases(kMaxGas)
       REAL rH,rHN
-      INTEGER iStrongISO,iStrongJL,iStrongJU,iStrongGASID,iLTEIn,OutsideSpectra
+      INTEGER iStrongISO,iStrongJL,iStrongJU,iStrongGASID,iLTEIn
       INTEGER iNLTEStart2350,iJ,iG
 
       INTEGER iBand,iGasID,iNum,iISO,iLineMixBand,iInt,iType,iGas,iDoVoigtChi

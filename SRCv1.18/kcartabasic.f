@@ -142,8 +142,10 @@ c iNewIn         is just a variable that tells us if new gas to be used
 c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
 c caaAltComprDirs    tells the name of the files associated with the alternate compressed files
+c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
       CHARACTER*80 caaAltComprDirs(kGasStore)
+      REAL          rAltMinFr,rAltMaxFr
 
 c this is for nonLTE
 c iNLTE_SlowORFast tells whether to use slow accurate (+1) fast SARTA (-1) 
@@ -445,7 +447,7 @@ c read in the driver namelist file and profile
      $   cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,
      $   iCldProfile,raaKlayersCldAmt,
      $       iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks,
-     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
+     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $   raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $   iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $   caaStrongLines,iaNLTEBands,
@@ -827,7 +829,7 @@ c compute the abs coeffs
      $          raVertTemp,iVertTempSet,rFileStartFr,iTag,iActualTag,
      $          raFreq,iError,iDoDQ,iSplineType,
      $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
-     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
+     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,

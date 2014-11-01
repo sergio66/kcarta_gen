@@ -44,7 +44,7 @@ c scatter info from .nml file
      $   iaCloudNumAtm1,iaaCloudWhichAtm1,raCloudFrac1, 
 c new spectroscopy
      $   iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1,
-     $   iNumAltComprDirs1,iaAltComprDirs1,caaAltComprDirs1,
+     $   iNumAltComprDirs1,iaAltComprDirs1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1,
 c  non LTE
      $   raNLTEstrength1,iNumNLTEGases1,iNLTE_SlowORFast1,
      $   iaNLTEGasID1,iaNLTEChunks1,iaaNLTEChunks1,caaStrongLines1,
@@ -218,11 +218,13 @@ c caaaNewChunks  tells the name of the files associated with the chunks
       CHARACTER*80 caaaNewChunks1(kGasStore,kNumkCompT) 
 c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
-c caaAltComprDirs    tells the name of the files associated with the alternate compressed files
+c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
+c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
       INTEGER iaAltComprDirs1(kGasStore),iNumAltComprDirs1
       CHARACTER*80 caaAltComprDirs(kGasStore)
       CHARACTER*80 caaAltComprDirs1(kGasStore)
+      REAL rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
 
 c this is for non LTE
 c raNLTEstrength    tells how strongly to add on the LTE files
@@ -288,7 +290,8 @@ c local variables
       NAMELIST /nm_jacobn/namecomment,iJacob,iaJacob
       NAMELIST /nm_spectr/namecomment,iNumNewGases,iaNewGasID,iaNewData,
      $                    iaaNewChunks,caaaNewChunks,
-     $                    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs
+     $                    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
+     $                    rAltMinFr,rAltMaxFr
       NAMELIST /nm_nonlte/namecomment,iNumNLTEGases,iaNLTEGasID,iaNLTEChunks,
      $          iaaNLTEChunks,caaStrongLines,iNLTE_SlowORFast,
      $          raNLTEstrength,raNLTEstart,iaNLTEBands,caaaNLTEBands,
@@ -327,6 +330,10 @@ c default HITRAN regular gases and XSEC gases
       DO iI = 1,kGasXSecHi-kGasXSecLo+1
         iaLXsecNL(iI)=-100
       END DO
+
+c assume if subbing SPECTRA, only for 605-2830 cm-1 chunk
+      rAltMinFr = 605.0
+      rAltMaxFr = 2830.0
 
 c default profile info
       caPFname = 'dummyfile_profile'
@@ -619,6 +626,8 @@ c      END IF
       DO iI = 1,kGasStore
         caaAltComprDirs1(iI) = caaAltComprDirs(iI)
       END DO
+      rAltMinFr1 = rAltMinFr
+      rAltMaxFr1 = rAltMaxFr
       write (kStdWarn,*) 'successfully read in spectra .....'
       CALL printstar      
 
@@ -791,7 +800,7 @@ c scatter cloudprofile info
      $      iCldProfile,raaKlayersCldAmt,
 c new spectroscopy
      $      iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
-     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
+     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
 c nonLTE
      $      raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
      $      iaNLTEChunks,iaaNLTEChunks,
@@ -989,9 +998,11 @@ c caaaNewChunks  tells the name of the files associated with the chunks
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
 c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
-c caaAltComprDirs    tells the name of the files associated with the alternate compressed files
+c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
+c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
       CHARACTER*80 caaAltComprDirs(kGasStore)
+      REAL          rAltMinFr,rAltMaxFr
 
 c this is for nonLTE
 c raNLTEstrength   tells how strongly to add on the new files (default 1.0)
@@ -1065,7 +1076,7 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
      $      raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase,
      $      iaaScatTable,iaCloudScatType,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm,raCloudFrac,
      $    iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
-     $    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
+     $    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $    raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $    iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $    caaStrongLines,iaNLTEBands,raNLTEstart,caaaNLTEBands,

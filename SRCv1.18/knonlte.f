@@ -527,7 +527,7 @@ c see if current gas ID needs nonLTE spectroscopy
       iDoNLTE     = -1
       iJunkNum    = -1
 
-      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
+      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,raFreq(1),605.0,2830.0)
 
       IF (iLTEIn .GT. 0) THEN
         CALL LowerAtmNLTERefs(raRPressX,raRPPressX,raRTempx,raRAmtx)
@@ -950,7 +950,7 @@ c see if current gas ID needs nonLTE spectroscopy
       !! set up nlte strengths etc
       CALL SetUpNLTEStrengths(dLineStrenMin,dDeltaFreqNLTE,iDoVoigtChi)
 
-      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
+      iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,raFreq(1),605.0,2830.0)
       IF (iLTEIn .GT. 0) THEN
         iWhichChunk = 
      $        NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
@@ -1237,7 +1237,7 @@ c local variables
       write(kStdWarn,*) 'Checking NLTE Gases using OutsideSpectra ...'
       DO iGas = 1,iNumGases
         iWhichChunk = -1
-        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk)
+        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,2205.0,605.0,2830.0)
         IF ((iLTEIn .GT. 0) .AND. (kSolarAngle .GE. 0 .AND. kSolarAngle .LE. 90)) THEN
           iWhichChunk = 
      $        NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)

@@ -28,7 +28,7 @@ c this is the MAIN routine
      $          raVertTemp,iVertTempSet,
      $          rFileStartFr,iTag,iActualTag,raFreq,iError,iDoDQ,iSplineType,
      $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
-     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
+     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
@@ -58,6 +58,7 @@ c these are the user specified layer profiles
       REAL raTPartPress(kProfLayer),raTPress(kProfLayer) 
       REAL pProf(kProfLayer),raVertTemp(kProfLayer),raFreq(kMaxPts)
       REAL rFileStartFr
+      REAL rAltMinFr,rAltMaxFr
 c the Matlab weights
       INTEGER iaP1(kProfLayer),iaP2(kProfLayer)
       REAL    raP1(kProfLayer),raP2(kProfLayer)
@@ -86,7 +87,8 @@ c local vars
       kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
 
       iNewIn = -1
-      iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs)
+      iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs,
+     $                        rFileStartFr,rAltMinFr,rAltMaxFr)
       IF (iNewIn .LT. 0) THEN
         !use kCompressed Database w/o worrying
         kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
@@ -148,7 +150,7 @@ c local vars
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22,
-     $          iNewIN-1000,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs)
+     $          iNewIN-1000,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr)
       END IF
 
 c      if (iGas .EQ. 1) then
@@ -327,7 +329,7 @@ c same as GasContribution except it substitudes COMPRESSED DATABASE
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22,
-     $          iNewIN,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs)
+     $          iNewIN,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr)
 
       IMPLICIT NONE
 
@@ -378,6 +380,7 @@ c the Matlab weights
 c the alt database
       INTEGER iNewIN,iNumAltComprDirs,iaAltComprDirs(kGasStore)
       CHARACTER*80 caaAltComprDirs(kGasStore)
+      REAL rAltMinFr,rAltMaxFr
 
 c local variables
       INTEGER iFr,iLay
@@ -714,7 +717,8 @@ c this function then checks to see if there is ALT COMPRESSED DATABASE data for 
 c   if so, it returns a positive integer that tells the code which spectra
 c   dataset to use (from *SPECTRA) ** would be between 1001 to 1110 **  
 c else it returns -1
-      INTEGER FUNCTION OutsideSpectra(iGasID,iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs) 
+      INTEGER FUNCTION OutsideSpectra(iGasID,iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs,
+     $                                rFileStartFr,rAltMinFr,rAltMaxFr) 
 
       IMPLICIT NONE
 
@@ -727,6 +731,8 @@ c iaNewGasID   tells the gasIDs of the new gases
 c iNumAltComprDirs  tells if we need to use alternate compressed gas dirs
 c iaAltComprDirs    tells which gases gave compressed data stored in alternate dirs
       INTEGER iNumAltComprDirs,iaAltComprDirs(kGasStore)
+c these tell the start/stop wavenumbers for  alternate database (and we are looking at chunk rFileStartFr)
+      REAL rAltMinFr,rAltMaxFr,rFileStartFr
 
 c local vars
       INTEGER iI,iJ
@@ -748,7 +754,9 @@ c search to see if there is new data!
           IF (iGASID .EQ. 2) write(kStdWarn,*) '  >>> gasID = 2, could be NLTE check ...'
         END IF
 
-      ELSEIF (iNumAltComprDirs .GT. 0) THEN
+      ELSEIF ((iNumAltComprDirs .GT. 0) .AND. (rFileStartFr+0.05 .GE. rAltMinFr-0.05) 
+     $                                  .AND. (rFileStartFr-0.05 .LE. rAltMaxFr+0.05)) THEN
+        !! should really look at (rFileStartFr+kaBlockSize(iTag)-0.05 .LE. rAltMaxFr+0.05)
         iJ = 1
 c search to see if there is new data!     
  20     CONTINUE
@@ -763,6 +771,8 @@ c search to see if there is new data!
         END IF
         IF (iI .GT. 0) iI = iI + 1000
       END IF
+
+c      print *,iNumNewGases,iNumAltComprDirs,rFileStartFr,rAltMinFr,rAltMaxFr,iI
 
       OutsideSpectra = iI
 
