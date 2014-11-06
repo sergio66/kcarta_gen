@@ -142,7 +142,7 @@ c retrievals."
       write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end) = ',
      $         iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
-      iDefault = 1
+      iDefault = -1
       iAccOrLoopFlux = +1         !!! fast accurate, default E3
       iAccOrLoopFlux = -1         !!! slow looping over gaussian angles
       IF (iDefault .NE. iAccOrLoopFlux) THEN 
@@ -157,7 +157,7 @@ c retrievals."
         print *,'clrsky iDefault,iVary = ',iDefault,iVary
       END IF 
 
-      iDefault = +1
+      iDefault = +2
       iMuDMu_or_Moment = +1         !!! use mu dmu == gaussian legendre weights and points
       iMuDMu_or_Moment = +2         !!! use first order integral (Jun Li JAS 2000 paper)
       IF (iDefault .NE. iMuDMu_or_Moment) THEN 
@@ -2841,7 +2841,8 @@ c -------------------
 c for layer L, we have upward flux thru its top level, and downward flux
 c              thru its bottom level
 
-      SUBROUTINE flux_slowloopLinearVaryT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress,
+      SUBROUTINE flux_slowloopLinearVaryT(raFreq,raVTemp,raaAbs0,
+     $    rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
      $    raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP,
@@ -3302,7 +3303,10 @@ c ie where instrument is
 c then do the bottom of this layer
           DO iLay = iNumLayer,iNumLayer 
             iL = iaRadLayer(iLay) 
-            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
+c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
+            CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+     $                      rCosAngle,rFracTop,
+     $                      3,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
@@ -3311,7 +3315,10 @@ c then do the bottom of this layer
 c then continue upto top of ground layer
           DO iLay = iNumLayer-1,2,-1 
             iL = iaRadLayer(iLay) 
-            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
+c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
+            CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+     $                      rCosAngle,1.0,
+     $                      3,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                            raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
@@ -3320,7 +3327,10 @@ c then continue upto top of ground layer
 c do very bottom of bottom layer ie ground!!!
           DO iLay = 1,1 
             iL = iaRadLayer(iLay) 
-            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
+c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
+            CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+     $                      rCosAngle,rFracBot,
+     $                      3,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
@@ -3342,7 +3352,7 @@ c initialize the radiation to that at the bottom of the atmosphere
         END DO 
 
 c now loop over the layers, for the particular angle 
-
+ 
 c first do the pressure level boundary at the very bottom of atmosphere
 c ie where ground is
         iLay = 1
@@ -5061,7 +5071,8 @@ c -------------------
 c for layer L, we have upward flux thru its top level, and downward flux
 c              thru its bottom level
 
-      SUBROUTINE flux_moment_slowloopLinearVaryT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress,
+      SUBROUTINE flux_moment_slowloopLinearVaryT(raFreq,raVTemp,raaAbs0,
+     $    rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
      $    raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP,
@@ -5519,7 +5530,10 @@ c ie where instrument is
 c then do the bottom of this layer
           DO iLay = iNumLayer,iNumLayer 
             iL = iaRadLayer(iLay) 
-            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
+c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
+            CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+     $                      rCosAngle,rFracTop,
+     $                      4,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5528,7 +5542,10 @@ c then do the bottom of this layer
 c then continue upto top of ground layer
           DO iLay = iNumLayer-1,2,-1 
             iL = iaRadLayer(iLay) 
-            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
+c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
+            CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+     $                      rCosAngle,1.0,
+     $                      4,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                            raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5537,7 +5554,10 @@ c then continue upto top of ground layer
 c do very bottom of bottom layer ie ground!!!
           DO iLay = 1,1 
             iL = iaRadLayer(iLay) 
-            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
+c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
+             CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+     $                      rCosAngle,rFracBot,
+     $                      4,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5574,7 +5594,7 @@ c then do the top of this layer
 c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
           CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracBot,
-     $                      3,raTemp)
+     $                      4,raTemp)
           DO iFr = 1,kMaxPts 
             raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5587,7 +5607,7 @@ c then continue upto bottom of top layer
 c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
           CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,1.0,
-     $                      3,raTemp)
+     $                      4,raTemp)
 c          print *,iL,'+',raTemp(1),rMPTemp,rCosAngle
           DO iFr = 1,kMaxPts 
             raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+
@@ -5601,7 +5621,7 @@ c do very top of top layer ie where instrument is!!!
 c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
           CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracTop,
-     $                      3,raTemp)
+     $                      4,raTemp)
           DO iFr = 1,kMaxPts 
             raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5611,6 +5631,13 @@ c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,ra
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+
+c        DO iFr = 1,100
+c          print *,iFr,raVT1(iFr),raPressLevels(iFr),raTPressLevels(iFr),
+c     $                           raPressLevels(iFr+1),raTPressLevels(iFr+1)
+c        END DO
+c        print *,'bobobo'
+c        CALL DoStop
 
       RETURN
       END

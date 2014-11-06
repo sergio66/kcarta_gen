@@ -232,11 +232,24 @@ if nargin == 2
   fclose (fout);
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ilen = 1 : length(wnums);
 dv  = 0.0025;
 dvx = dv;
 dvx = mean(diff(wnums));
 if (max(diff(wnums)) - min(diff(wnums))) > 0.0001
   error('oops! cannot figure out point spacing!');
   end
-ilen = 1 : length(wnums);
-wnums = floor(wnums(1)) + (ilen-1)*dvx;
+
+iPower = -9:+3;
+remain = dvx ./ (10.^iPower);
+boo = find(remain < 10,1);
+dvxnew = round(10*remain(boo))/10 * 10^(iPower(boo));
+
+if (abs(dvxnew/dvx) - 1) < 1e-5
+  wnums = wnums(1) + (ilen-1)*dvxnew;
+else
+  disp('warning ... in readkcflux.m ... could not figure out wnum spacing!!!')
+  wnums = floor(wnums(1)) + (ilen-1)*dvx;
+end

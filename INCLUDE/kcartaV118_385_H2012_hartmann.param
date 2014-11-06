@@ -99,6 +99,9 @@ c this is to account for heavy water in the 605-2830, 2830-3330 cm-1 bands
 c These are the 0,0025 cm-1 resolution bands
 c so first     band starts at 0605 and ends at 1955 cm-1 (ie last chunk is 1930 cm-1)
 c while second band starts at 2405 and ends at 3555 cm-1 (ie last chunk is 3530 cm-1)
+c >>>>>>> NOTE that ALL the water isotope datafiles are in kWaterIsotopePath
+c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and 
+c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER*80 kWaterIsotopePath
       PARAMETER (kWaterIsotopePath = '#/H2012.ieee-le/IR605/hdo.ieee-le/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1

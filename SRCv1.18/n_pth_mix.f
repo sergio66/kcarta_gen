@@ -8,7 +8,8 @@ c also, the REFERENCE profile reading subroutine is here
 
 c************************************************************************
 c this subroutine computes the temperatures at the pressure levels
-      SUBROUTINE Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress,raThickness,raPressLevels,raTPressLevels)
+      SUBROUTINE Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress,raThickness,
+     $  raPressLevels,raTPressLevels)
 
       IMPLICIT NONE
 
