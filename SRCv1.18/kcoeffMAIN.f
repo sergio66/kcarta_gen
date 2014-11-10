@@ -88,7 +88,7 @@ c local vars
 
       iNewIn = -1
       iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs,
-     $                        rFileStartFr,rAltMinFr,rAltMaxFr)
+     $                        rFileStartFr,rAltMinFr,rAltMaxFr,iTag)
       IF (iNewIn .LT. 0) THEN
         !use kCompressed Database w/o worrying
         kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
@@ -718,7 +718,7 @@ c   if so, it returns a positive integer that tells the code which spectra
 c   dataset to use (from *SPECTRA) ** would be between 1001 to 1110 **  
 c else it returns -1
       INTEGER FUNCTION OutsideSpectra(iGasID,iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs,
-     $                                rFileStartFr,rAltMinFr,rAltMaxFr) 
+     $                                rFileStartFr,rAltMinFr,rAltMaxFr,iTag) 
 
       IMPLICIT NONE
 
@@ -727,7 +727,8 @@ c else it returns -1
 c iGasID       tells current gasID
 c iNumNewGases tells how many new gases to use
 c iaNewGasID   tells the gasIDs of the new gases
-      INTEGER iGasID, iNumNewGases, iaNewGasID(kGasStore)
+c iTag         tells the kcompressed band code is looking at
+      INTEGER iGasID, iNumNewGases, iaNewGasID(kGasStore),iTag
 c iNumAltComprDirs  tells if we need to use alternate compressed gas dirs
 c iaAltComprDirs    tells which gases gave compressed data stored in alternate dirs
       INTEGER iNumAltComprDirs,iaAltComprDirs(kGasStore)
@@ -754,9 +755,10 @@ c search to see if there is new data!
           IF (iGASID .EQ. 2) write(kStdWarn,*) '  >>> gasID = 2, could be NLTE check ...'
         END IF
 
+c      ELSEIF ((iNumAltComprDirs .GT. 0) .AND. (rFileStartFr+0.05 .GE. rAltMinFr-0.05) 
+c     $                                  .AND. (rFileStartFr-0.05 .LE. rAltMaxFr+0.05)) THEN
       ELSEIF ((iNumAltComprDirs .GT. 0) .AND. (rFileStartFr+0.05 .GE. rAltMinFr-0.05) 
-     $                                  .AND. (rFileStartFr-0.05 .LE. rAltMaxFr+0.05)) THEN
-        !! should really look at (rFileStartFr+kaBlockSize(iTag)-0.05 .LE. rAltMaxFr+0.05)
+     $                                  .AND. (rFileStartFr+kaBlSize(iTag)-0.05 .LE. rAltMaxFr+0.05)) THEN
         iJ = 1
 c search to see if there is new data!     
  20     CONTINUE

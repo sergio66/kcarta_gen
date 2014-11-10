@@ -474,7 +474,7 @@ c tells the name of the GENLN2 ip file that has mixing ratios!
       CHARACTER*80 caaUpperMixRatio(kGasStore) 
 c this is pressure levels info
       REAL raPressLevels(kProfLayer+1),raLayerHeight(kProfLayer) 
-      INTEGER iProfileLayers 
+      INTEGER iProfileLayers
 
 c output variable : converts NLTE start heights to AIRS layers
       INTEGER iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
@@ -674,7 +674,7 @@ c ************* this is using the D. Edwards/M. Lopez-Puertas info ************
       iJunkNum    = -1      
       rH = 1.0e10             !!!dumb large number, too high!!!!!!
       DO iGas = 1,iNumGases
-        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,2205.0,605.0,2830.0)
+        iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,2205.0,605.0,2830.0,20)
         IF (iLTEIn .GT. 0) THEN
           rHN = raNLTEstart(iLTEIn)*1000     !!!NLTE start height in m
           rH = min(rH,rHN)
