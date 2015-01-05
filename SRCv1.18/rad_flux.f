@@ -150,9 +150,10 @@ c retrievals."
       END IF 
 
       iDefault = +3
-      iVary = +1         !!! exponentially varying T across each layer
-      iVary = -1         !!! constant T in each layer
-      iVary = +3         !!! linearly varying T across each layer
+      iVary = +1           !!! exponentially varying T across each layer
+      iVary = +3           !!! linearly varying T across each layer
+      iVary = -1           !!! constant T in each layer
+      iVary = kTemperVary  !!! see "SomeMoreInits" in kcartamisc.f
       IF (iDefault .NE. iVary) THEN 
         print *,'clrsky iDefault,iVary = ',iDefault,iVary
       END IF 

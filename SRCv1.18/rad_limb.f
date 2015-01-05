@@ -629,12 +629,14 @@ c retrievals."
       write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=',
      $         iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
-      iVary = +1             !!!temperature in layer varies
+      iVary = +1             !!!temperature in layer varies exponentially
       iVary = -1             !!!temperature in layer constant USE THIS!!!!
       iVary = iKnowTP        !!!we know layer temperatures, as well as level temps!
                               
       iVary = -1             !!!temperature in layer constant USE THIS!!!!
-      iVary = +1             !!!temperature in layer varies
+      iVary = +1             !!!temperature in layer varies exponentially
+
+      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
 
       IF (iDownward .EQ. 1) THEN
         IF (iVary .EQ. -1) THEN     !!!temperature in layer constant

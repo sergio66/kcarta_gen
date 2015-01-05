@@ -1,6 +1,6 @@
-function [data, wnums] = readkcflux(kfile, dfile)
+function [data, wnums, hr] = readkcflux(kfile, dfile)
 
-% function [data, wnums] = readkcflux(kfile, dfile)
+% function [data, wnums, hr] = readkcflux(kfile, dfile)
 %
 % readkcflux is a simple reader & unchunker for kcarta flux output files
 %
@@ -13,6 +13,8 @@ function [data, wnums] = readkcflux(kfile, dfile)
 %
 %   data   - a w by n array of data from kcarta
 %   wnums  - a w by 1 vector of data wavenumbers
+%   [hr    - optional heating rate, if the input file is *_ALL, which
+%          - has up/down fluxes from which heating rate can be derived]
 %
 % If the input parameter dfile is specified, then the data array
 % is written to file dfile, and the return values [data, wnums]
@@ -33,6 +35,8 @@ function [data, wnums] = readkcflux(kfile, dfile)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+hr = [];
 
 [fin,msg] = fopen(kfile, 'r');
 if fin == -1
@@ -252,4 +256,46 @@ if (abs(dvxnew/dvx) - 1) < 1e-5
 else
   disp('warning ... in readkcflux.m ... could not figure out wnum spacing!!!')
   wnums = floor(wnums(1)) + (ilen-1)*dvx;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if length(strfind(kfile,'_ALL')) > 0
+  ix = input('this looks like up/dn fluxes at all levels : plot the fluxes and heating rates?? (-1/+1) : ');
+  if ix > 0
+    [mm,nn] = size(data);
+    dw = mean(diff(wnums));
+    nnx = 1:nn/2;
+
+    fprintf(1,'w(1) w(end) dw = %8.6f %8.6f %8.6f wn \n',wnums(1),wnums(end),dw)
+
+    upflux = sum(data(:,1:nn/2))*dw/1000;
+    dnflux = sum(data(:,nn/2+(1:nn/2)))*dw/1000;
+    netxkc = upflux - dnflux;  %% upwell - downwell flux at each level
+
+    plevs = load('airslevels.dat');
+    plevs = plevs(101-nn/2+1:end);
+    hgt = p2h(plevs)/1000;
+
+    figure(1);
+      plot(upflux,hgt,'bo-',dnflux,hgt,'ro-'); hold on; 
+      plot(netxkc,hgt,'k',diff(netxkc)*10,hgt(1:end-1),'g','linewidth',2); hold off; grid
+      title(' (b) upwell flux (r) dnwell flux W/m2 \newline (k) net=up-dn W/m2 (g) 10*flux div=dnet/dz  W/m2/layer',...
+            'fontsize',10);
+      ylabel('hgt (km)')
+
+    figure(2); 
+      n = input('enter number of decimal points (1,2,3 ... or -1 for all) : ');
+      if n < 0
+        plevsx = plevs;
+      else
+        plevsx = round(plevs*10^n)/10^n;
+      end
+      htxkc  = diff(netxkc) ./ diff(plevsx') * 8.4391;
+      plot(htxkc,hgt(1:end-1),'r'); grid on; title('cooling rate K/day')
+      ylabel('hgt (km)')
+
+      hr(:,1) = htxkc;
+      hr(:,2) = hgt(1:end-1);
+
+  end
 end

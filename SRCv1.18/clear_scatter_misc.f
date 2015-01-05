@@ -3283,7 +3283,7 @@ c input parameters
       REAL rCos                         !satellite view angle
       REAL rFrac                        !fractional (0<f<1) or full (|f| > 1.0)
       INTEGER iVary                     !should we model temp dependance???
-                                        !+1 yes EXP, 0 yes LINEAR, -1 no 
+                                        !+1 yes EXP, +2 yes LINEAR, -1 no    !!! ORIGINALLY 0 = linear so sheck this
 c output parameters
       REAL raInten(kMaxPts)             !input  : intensity at bottom of layer
                                         !output : intensity at top of layer
@@ -3310,7 +3310,7 @@ c local variables
         iBeta = kProfLayer+1
       END IF
 
-      IF ((iBeta .GE. kProfLayer-15) .AND. (iVaryVary .EQ. 0)) THEN
+      IF ((iBeta .GE. kProfLayer-15) .AND. (iVaryVary .GE. 2)) THEN
         !!!! if we use RTSPEC, we get junky results close to TOA because of
         !!!! real vs double precision
         iVaryVary = -1
@@ -3326,13 +3326,13 @@ c local variables
       !!!!this is how temperature in layer varies with tau
       IF (iVaryVary .EQ. +1) THEN        !!!!exponential in tau dependance of T
         rBooga = log(TEMP(iBeta+1)/TEMP(iBeta))
-      ELSEIF (iVaryVary .EQ. 0) THEN       !!!!linear in tau dependance of T
+      ELSEIF (iVaryVary .GE. 2) THEN       !!!!linear in tau dependance of T
         rBooga = 0.0
       ELSEIF (iVaryVary .EQ. -1) THEN       !!!!no tau dependance of T
         rBooga = 0.0
       END IF
 
-      IF (iVaryVary .EQ. 0) THEN    
+      IF (iVaryVary .GE. 2) THEN    
         iRTSPEC = 1             
       ELSE 
         iRTSPEC = -1    !!!RTSPEC does a simple "exponential in rad" way
@@ -3415,7 +3415,7 @@ c input parameters
       REAL rCos                         !satellite view angle
       REAL rFrac                        !fractional (0<f<1) or full (|f| = 1.0) 
       INTEGER iVary                     !should we model temp dependance???
-                                        !+1 yes EXP, 0 yes LINEAR, -1 no 
+                                        !+1 yes EXP, 2 yes LINEAR, -1 no     !!! originally 0 = linear so sheck this 
 c output parameters
       REAL raInten(kMaxPts)             !input  : intensity at top of layer
                                         !output : intensity at bottom of layer
@@ -3443,13 +3443,13 @@ c local variables
       !!!!this is how temperature in layer varies with tau
       IF (iVary .EQ. +1) THEN          !!!!exponential in tau dependance of T
         rBooga = log(TEMP(iBeta+1)/TEMP(iBeta))
-      ELSEIF (iVary .EQ. 0) THEN       !!!!linear in tau dependance of T
+      ELSEIF (iVary .GE. 2) THEN       !!!!linear in tau dependance of T
         rBooga = 0.0
       ELSEIF (iVary .EQ. -1) THEN       !!!!no tau dependance of T
         rBooga = 0.0
       END IF
 
-      IF (iVary .EQ. 0) THEN    
+      IF (iVary .GE. 2) THEN    
         iRTSPEC = 1             !!!RTSPEC does a simple "linear in tau" way
       ELSE 
         iRTSPEC = -1

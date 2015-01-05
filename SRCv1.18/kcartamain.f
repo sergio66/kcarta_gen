@@ -1084,6 +1084,17 @@ c (need to check if any of the printing options set iPrinter=2).
         END IF
 
 c******************* RADIANCE CALCS *************************************
+c easiest way to test OLR and flux : put this delta function in OD at all wavenumbers!
+c          write(kStdErr,*) 'resetting OD to delta ------------>>>>>>>>>>>>>'
+c          DO iInt = 1,kProfLayer
+c            DO iFr = 1,kMaxPts
+c              raaSumAbCoeff(iFr,iInt) = 0.0
+c            END DO
+c          END DO
+c          DO iFr = 1,kMaxPts
+c            raaSumAbCoeff(iFr,60) = 1000.0
+c          END DO
+          
 c FINALLY, now that we have computed all the mixed paths, 
 c we can build up the atmospheres iAtm=1,iNatm if iPrinter=3 is set for
 c that particular atmosphere. As the forward model can take a while to grind

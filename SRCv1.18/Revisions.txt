@@ -264,6 +264,17 @@ v1.18   Included National Renewable Energy Lab (NREL) SOLAR database to make
         So though they are are set by user at compile time, the user can use 
         SPECTRA to load in alternate water/CO2/other optical depths at run time
 
+        Global common block parameter "kTemperVary" now sets, in "SomeMoreInits"
+        what the temperature variation in a layer is
+          -2 : turn off Planck emission in "scatter_twostream_code.f"
+          -1 : constant
+          +1 : exponential in tau
+          +2 : linear in tau, simple  v2
+          +3 : linear in tau, ala RRTM, LBLRTM v3
+          +4 : linear in tau, ala RRTM, LBLRTM v4
+       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
+       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
+
 v1.17 : Doomed attempt to speed up code by using input profile(s) for only
         certain gases eg 1,2,3,4,5,6,9,12 ... and relying on US Std for other
         gases. This made code full of if then - else - end if, could produce
@@ -340,11 +351,11 @@ computations, even with scattering (introduce a OLR computation) etc]
                       iMatlab = +1            use Matlab uncompression ideas
   rad_quad.f          iGaussQuad = 0          fast,accurate gauss quadrature
   rtp_interface.f     iWhichScatterCode = 1   use TwoStream from RTP files
-  rad_main.f          iVary = -1              use constant layer T
-      iVary = -1       !temperature in layer constant USE THIS!!!!
-      iVary = +1       !temperature in layer varies
-      iVary = +2       !temperature in layer varies linearly, simple
-      iVary = +3       !temperature in layer varies linearly, ala RRTM, LBLRTM
+  rad_main.f          iVary = -1              use constant layer T, set by kTemperVary
+      kTemperVary = -1       !temperature in layer constant USE THIS!!!!
+      kTemperVary = +1       !temperature in layer varies exponentially
+      kTemperVary = +2       !temperature in layer varies linearly, simple
+      kTemperVary = +3       !temperature in layer varies linearly, ala RRTM, LBLRTM
 
                   for NLTE
   kreadVTprofiles.f   iCurrent = +1           use eg 385 ppmv in UA, or rely 
@@ -484,12 +495,13 @@ computations, even with scattering (introduce a OLR computation) etc]
 07/05/03        kCARTA can output a file containing the Planck modifiers.
                 This file is in the same output format as the flux file
                 Control for turning this on/off is at run time; go to
-                nm_params and set kFlux = -1,1,2,3 (off) or 0 (on)
-                1 = up/dn flux at each layer
-                2 = heating rate at each layer
-                3 = upgoing flux at each layer
+                nm_params and set kFlux = -1,1..6
+                1 = dngoing flux at each level
+                2 = up-dn heating rate at each layer
+                3 = upgoing flux at each level
                 4 = OLR at TOA
                 5 = OLR/flux at tropopause/DNW 
+                6 = up/dn flux at each level
 
 06/09/03        Use some of the Matlab code ideas, to switch CO2 chi function
                 between cousin and linemix/birnbaum as necessary
@@ -794,11 +806,11 @@ v1.18
                 605,2830 respectively
 
 6/20/13         iVary has constant, exponential, linear in tau variations for 
-                upwelling RT
-      iVary = -1     !!!temperature in layer constant USE THIS!!!!
-      iVary = +1     !!!temperature in layer varies
-      iVary = +2     !!!temperature in layer varies linearly, simple
-      iVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM
+                upwelling RT, as set by kTemperVary
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!!
+      kTemperVary = +1     !!!temperature in layer varies exponentially 
+      kTemperVary = +2     !!!temperature in layer varies linearly, simple
+      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM
 
 6/7/13          Changed names of FLUX files, as the contents now more or less 
                 correspond to what RRTM uses

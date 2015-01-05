@@ -610,6 +610,33 @@ c   6     = Based on (4=ViewHgt) the code figures out highest pressure at which 
         raRTP_TxtInput(iFileIDLO) = -9999
       END DO
 
+c this is TEMPERATURE variation in layer
+c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
+c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
+      kTemperVary = +1     !!!temperature in layer varies
+      kTemperVary = +2     !!!temperature in layer varies linearly, simple
+      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM DEFAULT 06/2013
+      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM DEFAULT 11/2014
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA
+
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT
+      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM
+
+      IF (kTemperVary .EQ. -1) THEN
+        write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'
+      ELSEIF (kTemperVary .EQ. +1) THEN
+        write(kStdWarn,*) 'kTemperVary = +1     !!!temperature in layer varies'
+      ELSEIF (kTemperVary .EQ. +2) THEN
+        write(kStdWarn,*) 'kTemperVary = +2     !!!temperature in layer varies linearly, simple v2'
+      ELSEIF (kTemperVary .EQ. +3) THEN
+        write(kStdWarn,*) 'kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v3'
+      ELSEIF (kTemperVary .EQ. +4) THEN
+        write(kStdWarn,*) 'kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4'
+      ELSE
+        write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
+        CALL DoStop
+      END IF 
+
 c this is really for Mie scattering and VIS/UV ocean reflectance
       kSolAzi = 0.0
       kSatAzi = 0.0

@@ -642,6 +642,8 @@ c retrievals."
       iVary = +3             !!!temperature in layer varies linearly, ala RRTM, LBLRTM
       iVary = -1             !!!temperature in layer constant USE THIS!!!! 
 
+      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
+
       IF (iDefault .NE. iVary) THEN    
         write(kStdErr,*)'iDefault, iVary in rad_main',iDefault,iVary
         write(kStdWarn,*)'iDefault, iVary in rad_main',iDefault,iVary

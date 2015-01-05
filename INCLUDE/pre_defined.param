@@ -128,23 +128,23 @@ c *** note kPlanckOut set in s_writefile.f  ie right now, it is NOT an option
 c these next few parameters are set in *RADNCE and *JACOBN
 c rtp file azimuths used in Mie Scattering and Ocean Refl
 c rtp file also may give latitude and month (via rtime)
-      INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle
+      INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
       REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult
       REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
       PARAMETER (kDefaultColMult = 0.1)
       COMMON/ComBlock4/kSolar,kThermal,kThermalJacob,kJacobian,
-     $                 kSetThermalAngle
+     $                 kSetThermalAngle,kTemperVary
       COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
      $                 kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
       INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
       COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
 
 c kDis_Nstr,kDis_Pts : make DISORT run faster
-c kTemperVary : check how temp variations in TWOSTREAM affect the radiances
+c kTemperVary : check how temp variations in OD affect the radiances
 c kAvgMin     : is there too little scattering in kTWOSTREAM? Then speed up!!
       DOUBLE PRECISION kAvgMin
-      INTEGER kDis_Nstr,kDis_Pts,kTemperVary
-      COMMON/ComDISORT/kDis_Nstr,kDis_Pts,kTemperVary
+      INTEGER kDis_Nstr,kDis_Pts
+      COMMON/ComDISORT/kDis_Nstr,kDis_Pts
       COMMON/ComHGPhase/kAvgMin
 c these next few parameters are set in *SCATTR
 c It also tells the RTP code or the general code when it can do scattering 
