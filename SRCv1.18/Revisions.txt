@@ -553,6 +553,21 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.18
 -----
 
+01/22/15        Put in error checking of mixed path weights into "GetMixVertTemp"
+                so that if the mixed paths are all set to 0 incorrectly, code stops
+
+01/05/15
+        Global common block parameter "kTemperVary" now sets, in "SomeMoreInits"
+        what the temperature variation in a layer is
+          -2 : turn off Planck emission in "scatter_twostream_code.f"
+          -1 : constant
+          +1 : exponential in tau
+          +2 : linear in tau, simple  v2
+          +3 : linear in tau, ala RRTM, LBLRTM v3
+          +4 : linear in tau, ala RRTM, LBLRTM v4
+       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
+       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
+
 10/17/14        Fixed bug in nm_molgas and nm_xscgas ... if user wanted to specify
                 which molgases, xscgases he/she wants to use, the code was incorrectly
                 not finding any gas; this has been fixed. In addition if MOLGAS=2 (CO2)

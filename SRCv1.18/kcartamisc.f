@@ -619,8 +619,8 @@ c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LIN
       kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM DEFAULT 11/2014
       kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA
 
-      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT
       kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT
 
       IF (kTemperVary .EQ. -1) THEN
         write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'
@@ -2155,19 +2155,42 @@ c iCO2        = which of the gases is CO2 .. if -1, none are CO2
       REAL raaMix(kMixFilRows,kGasStore)
 
 c local variables
-      INTEGER iI,iJ,iL,MP2Lay
+      INTEGER iI,iJ,iL,MP2Lay,iBad
       REAL rT,rW
 
+      iBad = 0
       DO iI = 1,kMixFilRows
         raMixVertTemp(iI) = 0.0
       END DO
 
+c kGasTemp  ==  1 if we use the CO2 profile temperatures (if present)
+c              -1 if we just do the weighted average to find the MixVertTemps
+c default = -1
+
+      rW = 0.0
+      DO iJ = 1,iNumGases
+        rW = rW+raaMix(50,iJ)
+      END DO
+      IF (rW .LE. 0.00001) THEN
+        write(kStdErr,*) 'arbitrarily tested LAYER 50, mixed path weights = 0 .. perhaps you have nm_weight wrong???'
+        write(kStdErr,*) 'eg caaMixFileLines(1) = 1   -1    0.0    -1   is NOT propoer input!!!'
+        CALL DoStop
+      END IF
+        
       IF ((kGasTemp .EQ. 1) .AND. (iCO2 .GT. 0)) THEN
 c user wants the CO2 profile to be the temperature profile
         DO iI = 1,iNpmix
           iL = MP2Lay(iI)
           raMixVertTemp(iI) = raaTemp(iL,iCO2)
         END DO
+c      ELSEIF ((kGasTemp .EQ. -1) .AND. (iCO2 .GT. 0) .AND. raaMix(50,iCO2) .LE. 0.001) THEN
+c user wants the CO2 profile to be the temperature profile, but CO2 wgt == 0, so this is an OOPS moment, quick fix
+c        write(kStdErr,*) 'oops in GetMixVertTemp,,kGasTemp,iCO2 = ',kGasTemp,iCO2
+c        DO iI = 1,iNpmix
+c          iL = MP2Lay(iI)
+c          raMixVertTemp(iI) = raaTemp(iL,iCO2)
+c          write(kStdErr,*) 'oops in GetMixVertTemp, iI,raMixVertTemp(iI) = ',iI,raMixVertTemp(iI)
+c        END DO
       ELSE
 c calculate the weights      
         DO iI = 1,iNpmix
@@ -2179,10 +2202,19 @@ c calculate the weights
             rW = rW+raaMix(iI,iJ)
           END DO
           rT = rT/rW
+          IF (rW .LE. 0.00001) THEN
+            iBad = iBad + 1
+            write(kStdErr,*) 'hmm, mixed path weight = 0 in GetMixVertTemp for layer ',iI
+          END IF
           raMixVertTemp(iI) = rT
 c if the weights are set so that mixed path defines unique layers
 c these temperatures should now be equal
         END DO
+        IF (iBad .GT. 0) THEN
+          write(kStdErr,*) 'had total ',iBad,' mixed path weights = 0 .. perhaps you have nm_weight wrong???'
+          write(kStdErr,*) 'eg caaMixFileLines(1) = 1   -1    0.0    -1   is NOT propoer input!!!'
+          CALL DoStop
+        END IF
       END IF
 
       RETURN
