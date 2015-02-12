@@ -45,6 +45,17 @@ c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 
+c NOTE 1
+c if you use Scott's last version of v107 then try
+c      PARAMETER (kCompParamFile = '#/KCARTADATA/General/compHT2007_test.param_andy')
+c   as it includes info for both /asl/data/kcarta/KCARTADATA/General/xsecHT2007_test.param and
+c                              /asl/data/kcarta/KCARTADATA/General/compHT2007_test.param
+c   looks like this is what he used for 
+c      PARAMETER (kWaterPath  = '/asl/data/kcarta/v07.ieee-le/h2o.ieee-le/')
+c      PARAMETER (kCompPath   = '/asl/data/kcarta/v07.ieee-le/etc.ieee-le/')
+c   when making most recent (2008-2010 version) of SARTA
+c NOTE 1
+
 c this was generic test (ie only had the 605-2830 cm-1 in it)
 c      PARAMETER (kCompParamFile = '#/KCARTADATA/General/compHT2012.param')
 c this was generic test (ie only had the 605-2830 cm-1 in it)
