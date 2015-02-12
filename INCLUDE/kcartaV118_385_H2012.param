@@ -47,7 +47,10 @@ c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 
 c NOTE 1
 c if you use Scott's last version of v107 then try
-c      PARAMETER (kCompParamFile = '#/KCARTADATA/General/compHT2007_test.param_andy')
+c      PARAMETER (kCompParamFile = '/asl/data/kcarta/KCARTADATA/General/compHT2007_test.param_andy')
+c      PARAMETER (kXsecParamFile = '/asl/data/kcarta/KCARTADATA/General/compHT2007_test.param_andy')
+c      PARAMETER (kWaterPath = '/asl/data/kcarta/v07.ieee-le/h2o.ieee-le/')
+c      PARAMETER (kCompPath  = '/asl/data/kcarta/v07.ieee-le/etc.ieee-le/')
 c   as it includes info for both /asl/data/kcarta/KCARTADATA/General/xsecHT2007_test.param and
 c                              /asl/data/kcarta/KCARTADATA/General/compHT2007_test.param
 c   looks like this is what he used for 

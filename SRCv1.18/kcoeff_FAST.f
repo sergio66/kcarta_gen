@@ -946,6 +946,7 @@ c local variables associated with uncompressing the database
       ELSE
         CALL CompFileNameCKD(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
       END IF
+
       CALL rdcomp(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts,iNLay,
      $              iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort,
      $              daaaKX,daaUX)

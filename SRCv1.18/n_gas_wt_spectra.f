@@ -1458,9 +1458,18 @@ c output
 c local
       INTEGER iMax,iC,iCC,iaInDataBase(kGasComp),iTag,iErr,iaTemp(kMaxGas)
       INTEGER iNotMainGas,iNgasesCheck,iInt,iWhichKC,iYesWV,i101,i102,i103
-      INTEGER iCheckCompDataBase,MainGas
+      INTEGER iCheckCompDataBase,MainGas,iDefault
 
       iWHichKC = iNgas
+      
+      iDefault = iNgas
+
+c      iDefault = -114     !!!! do this if going back to v1.07 for testing Scott SARTA
+
+      iWhichKC = iDefault
+      IF (iDefault .NE. iNgas) THEN
+        write(kStdErr,*) ' >>>>>>>>>>>>>>>>      yayayayayayayayaya molgas -114'
+      END IF
 
       IF (iWhichKC .EQ. -1) THEN
         !! this is kc1.15 or later
@@ -1500,6 +1509,7 @@ c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
             iaInDataBase(iC) = 1
           END IF
         END DO
+
 c now based on which gases were found, reset array iaTemp
         iCC = 1
         DO iC = 1,kGasComp
@@ -1657,9 +1667,20 @@ c local
       INTEGER iInt,iErr,iC,iCC,iCheckXsecDataBase,iNXsecCheck
       INTEGER iaTemp(kMaxGas),iTag
       INTEGER iaInDataBase(kMaxLayer)      
-      INTEGER iKC114gases
+      INTEGER iKC114gases,iWhichXSC,iDefault
 
-      IF (iNxsec .EQ. -1) THEN
+      iWhichXSC = iNXsec
+
+      iDefault = iNXsec
+
+c      iDefault = -114     !!!! do this if going back to v1.07 for testing Scott SARTA
+
+      iWhichXSC = iDefault
+      IF (iDefault .NE. iNXsec) THEN
+        write(kStdErr,*) ' >>>>>>>>>>>>>>>>      yayayayayayayayaya xscgas -114'
+      END IF
+
+      IF (iWhichXSC .EQ. -1) THEN
          write(kStdWarn,*) 'including all xsc gases from ',kGasXsecLo, ' to ', kGasXsecHi
 c use all gases in the xsec database
 c  check to see the following reference profiles exist : 51..82
@@ -1685,7 +1706,7 @@ c now based on which gases were found, reset array iaTemp
           END IF
         END DO
 
-      ELSE IF (iNxsec .EQ. -114) THEN
+      ELSE IF (iWhichXSC .EQ. -114) THEN
         iKC114gases = 63
          write(kStdWarn,*) 'including v114- xsc gases from ',kGasXsecLo,' to ',
      $ iKC114gases
@@ -1713,7 +1734,7 @@ c now based on which gases were found, reset array iaTemp
           END IF
         END DO
 
-      ELSEIF (iNXsec .GT. 0) THEN
+      ELSEIF (iWhichXSC .GT. 0) THEN
         DO iC = 1,iNXsec
           iaTemp(iC) = iaLXsecNL(iC)
         END DO

@@ -29,7 +29,7 @@ c local variables
       REAL rLower,rHigher
 
 c assume GASID , freqs are wrong
-      iCheckXsecDataBase=-1
+      iCheckXsecDataBase = -1
 
       caFName = kXsecParamFile
       iIOUN = kTempUnit
@@ -39,13 +39,14 @@ c assume GASID , freqs are wrong
       IF (kXsecFormat .LT. 0) THEN      
 ccccccccccc this is the original format : read old style xsec.param file
         IF (iFileErr .NE. 0) THEN
-          iErr=0
+          iErr = 0
           WRITE(kStdErr,103) iFileErr,caFName
  103      FORMAT('ERROR! number ',I5,' opening xsec database file : 
      $    ',/,A84)
           CALL DoSTOP
         END IF
-        kTempUnitOpen=1
+
+        kTempUnitOpen = 1
 
 c read file util GASID, freq bounds match found or EOF
  20     READ(iIOUN,5020,END=777) caLine
@@ -54,19 +55,19 @@ c read file util GASID, freq bounds match found or EOF
         IF ((iID .EQ. iGasID) .AND. (rL .LT. 0) .AND. (rH .LT. 0)) THEN
 c basic presence of gas tested for, and found
 c this is the -1 option in XSCGAS
-          iCheckXsecDataBase=1
+          iCheckXsecDataBase = 1
         END IF
 
         IF ((iID .EQ. iGasID) .AND. (rL .GE. rLower) .AND. 
      $    (rH .LE. rHigher)) THEN
 c presence of gas tested for, with freq bounds, and found well within
-          iCheckXsecDataBase=1
+          iCheckXsecDataBase = 1
         END IF
 
         IF ((iID .EQ. iGasID) .AND. (rL .LE. rHigher) .AND. 
      $     (rH .GE. rLower)) THEN
 c presence of gas tested for, with freq bounds, and found
-          iCheckXsecDataBase=1
+          iCheckXsecDataBase = 1
         END IF
 
         IF (iCheckXsecDataBase .LT. 0) THEN
@@ -83,7 +84,7 @@ c read file util GASID, freq bounds match found or EOF
         IF ((iID .EQ. iGasID) .AND. (rL .LT. 0) .AND. (rH .LT. 0)) THEN
 c basic presence of gas tested for, and found
 c this is basically the -1 option in XSCGAS
-          iCheckXSecDataBase=1
+          iCheckXSecDataBase = 1
         END IF
 
         IF ((iID .EQ. iGasID) .AND. (rL .GE. rLower) .AND. 
@@ -91,7 +92,7 @@ c this is basically the -1 option in XSCGAS
 c presence of gas tested for, with freq bounds, and found well within
 c this is when we WANT to UNCOMPRESS files!
           IF (iTag .EQ. iTagIn) THEN   !actually uncompressing stuff
-            iCheckXsecDataBase=1
+            iCheckXsecDataBase = 1
           END IF
         END IF
 
@@ -103,11 +104,12 @@ c this is when we WANT to UNCOMPRESS files!
       END IF
 
       CLOSE(iIOUN)
-      kTempUnitOpen=-1
+      kTempUnitOpen = -1
 
  5020 FORMAT(A80)
       RETURN
       END
+
 c************************************************************************
 c this function checks to see if the comp data file exists for
 c gasID, between freqs rL,rH
@@ -131,7 +133,7 @@ c local variables
       CHARACTER*80 caLine,caFname
 
 c assume GASID , freqs are wrong
-      iCheckCompDataBase=-1
+      iCheckCompDataBase = -1
 
       caFName = kCompParamFile
       iIOUN = kTempUnit
@@ -139,15 +141,15 @@ c assume GASID , freqs are wrong
      $    FORM='FORMATTED',IOSTAT=iFileErr)
 
       IF (iFileErr .NE. 0) THEN
-        iErr=0
+        iErr = 0
         WRITE(kStdErr,103) iFileErr,caFname
  103    FORMAT('ERROR! number ',I5,' opening comp database file : 
      $  ',/,A84)
         CALL DoSTOP
       END IF
-      kTempUnitOpen=1
+      kTempUnitOpen = 1
 
-c read file util GASID, freq bounds match found or EOF
+c read file until GASID, freq bounds match found or EOF
  20   READ(iIOUN,5020,END=777) caLine
  5020 FORMAT(A80)
       READ(caLine,*) iID,rLower,rHigher,iTag
@@ -155,7 +157,7 @@ c read file util GASID, freq bounds match found or EOF
       IF ((iID .EQ. iGasID) .AND. (rL .LT. 0) .AND. (rH .LT. 0)) THEN
 c basic presence of gas tested for, and found
 c this is basically the -1 option in MOLGAS
-        iCheckCompDataBase=1
+        iCheckCompDataBase = 1
       END IF
 
       IF ((iID .EQ. iGasID) .AND. (rL .GE. rLower) .AND. 
@@ -163,7 +165,7 @@ c this is basically the -1 option in MOLGAS
 c presence of gas tested for, with freq bounds, and found well within
 c this is when we WANT to UNCOMPRESS files!
         IF (iTag .EQ. iTagIn) THEN   !actually uncompressing stuff
-          iCheckCompDataBase=1
+          iCheckCompDataBase = 1
         END IF
       END IF
 
@@ -173,10 +175,11 @@ c this is when we WANT to UNCOMPRESS files!
       
  777  CONTINUE
       CLOSE(iIOUN)
-      kTempUnitOpen=-1
+      kTempUnitOpen = -1
 
       RETURN
       END
+
 c************************************************************************
 c this function checks to see if the GAS ID/frequency combination are in
 c the compressed data base or in the xsec database
@@ -196,7 +199,7 @@ c iDoAdd   = -1,+1 tells us if we add on current gas to current 10000 pts
 
       INTEGER iCheckCompDataBase,iCheckXsecDataBase
 
-      iDoAdd=-1
+      iDoAdd = -1
 
  333  FORMAT('---> Warning! No comprsd data gasID ',I3,
      $ ' in ',f10.4,' cm-1 chunk; tagIN = ', I3)
@@ -206,7 +209,7 @@ c iDoAdd   = -1,+1 tells us if we add on current gas to current 10000 pts
 
 c check to see if the k-comp file exists for the (GAS ID/freq) combination
       IF ((1 .LE. iGasID) .AND. (iGasID .LE. kGasComp)) THEN
-        iDoAdd=
+        iDoAdd = 
      $   iCheckCompDataBase(iGasID,raFreq(1),raFreq(kMaxPts),iActualTag,iErr)
         IF (iDoAdd .LT. 0) THEN
           WRITE(kStdWarn,333) iGasID,raFreq(1),iActualTag
@@ -236,7 +239,7 @@ c check to see if the xsec file exists for the (GAS ID/freq) combination
      $ ' in ',f10.4,' cm-1 chunk')
 
       IF ((kGasXsecLo .LE. iGasID) .AND. (iGasID .LE. kGasXsecHi)) THEN
-        iDoAdd=iCheckXsecDataBase(iGasID,raFreq(1),raFreq(kMaxPts),
+        iDoAdd = iCheckXsecDataBase(iGasID,raFreq(1),raFreq(kMaxPts),
      $                            iActualTag,iErr)
         IF (iDoAdd .LT. 0) THEN
           WRITE(kStdWarn,444) iGasID,raFreq(1)
@@ -247,7 +250,7 @@ c check to see if the xsec file exists for the (GAS ID/freq) combination
 
 ccc   IF ((29 .LE. iGasID) .AND. (iGasID .LE. 50)) THEN
       IF ((kGasComp+1 .LE. iGasID) .AND. (iGasID .LE. kGasXsecLo-1)) THEN
-        iDoAdd=-1
+        iDoAdd = -1
         WRITE(kStdWarn,1000) iGasID
  1000   FORMAT('No contribution to absorption cross sections from GAS ID
      $ = ',I2,/,'... skipping to next gas ...')
@@ -263,7 +266,7 @@ c check to see if we need to add on the water continuum
       END IF
 
       IF ((iGasID .LT. 1) .OR. (iGasID .GT. kMaxGas)) THEN
-        iErr=1
+        iErr = 1
         WRITE(kStdWarn,1010) iGasID
  1010   FORMAT('Cannot add contribution of GAS ID = ',I2)
         CALL DoSTOP
@@ -294,12 +297,12 @@ c agrees with what one would expect from kaMinFr,kaMaxFr
         CALL DoStop
       END IF
 
-      DO iJ=1,kW
+      DO iJ = 1,kW
         rF = kMaxPts*kaFrStep(iJ)
         rG = kaBlSize(iJ)
         IF (abs(rF-kaBlSize(iJ)) .GT. kaFrStep(iJ)/2.0) THEN
-          write(kStdErr,*) 'iJ= ',iJ
-          write(kStdErr,*) 'kcarta.param claims kaBlSize(iJ)=',rG
+          write(kStdErr,*) 'iJ =  ',iJ
+          write(kStdErr,*) 'kcarta.param claims kaBlSize(iJ) = ',rG
           write(kStdErr,*) 'while it should be ',rF
           CALL DoSTOP
         END IF
@@ -316,8 +319,8 @@ c agrees with what one would expect from kaMinFr,kaMaxFr
         END IF
       END DO
 
-      iI=0
-      DO iJ=1,kW
+      iI = 0
+      DO iJ = 1,kW
         iI = iI+(kaNumkComp(iJ))
       END DO
       IF (iI .NE. kNumkCompT) THEN
@@ -398,11 +401,11 @@ c if the bands are FIR3,FIR2,FIR1,IR,NIR1,NIR2 onwards then
         rLow = rFrLow
         rHigh = rFrHigh 
         !first round down rFrLow, and round up rFrHigh
-        rFrLow=1.0*INT(rFrLow)
+        rFrLow = 1.0*INT(rFrLow)
         IF (abs(rFrHigh-1.0*INT(rFrHigh)) .GT. 0.000000) THEN
           rFrHigh = rFrHigh+1.0
         END IF
-        rFrHigh=1.0*INT(rFrHigh)
+        rFrHigh = 1.0*INT(rFrHigh)
         write(kStdWarn,*) 'rounded down/up rFrLow/rFrhigh to ',rFrLow,rFrHigh
       ELSE
         write(kStdWarn,*) ' --> for bands with wavenumbers < 140 cm-1, kCARTA'
@@ -519,8 +522,8 @@ c local variables
 c first check lower, upper limits
       CALL CheckLimits(rL,rH)
 
-      iErr=0
-      DO iDummy=1,kW            !compute total number of kCOMP chunks present
+      iErr = 0
+      DO iDummy = 1,kW            !compute total number of kCOMP chunks present
         iErr = iErr+kaNumkComp(iDummy)
       END DO
       IF (iErr .NE. kNumkCompT) THEN
@@ -531,9 +534,9 @@ c first check lower, upper limits
 c note there could be "overlaps" between the q r s files eg
 c     < 1=500-550> <2=550-600>  <3=600-650> <4=650-700>
 c                                  <5=605-630> <6=630-655> <7=655-680> .....
-      iDummy=0 
-      DO iFound=1,kW 
-        DO iInt=1,kaNumkComp(iFound) 
+      iDummy = 0 
+      DO iFound = 1,kW 
+        DO iInt = 1,kaNumkComp(iFound) 
           iDummy = iDummy+1 
           !this is needed by kcartamain.f
           raBlock(iDummy)     = kaMinFr(iFound)+(iInt-1)*kaBlSize(iFound) 
@@ -568,15 +571,15 @@ c now set the fileID's to be used
      $    (iFileIDHi .GE. 1) .AND. (iFileIDHi .LE. kNumkCompT) .AND.
      $    (iFileIDLo .LE. iFileIDHi)  .AND. 
      $    (iTruthLo .GT. 0) .AND. (iTruthHi .GT. 0)) THEN
-        iErr=-1
+        iErr = -1
       ELSE
         write(kStdErr,*) 'Error in setting file '
         write(kStdErr,*) 'lower/upper bounds from *FRQNCY'
         CALL DoSTOP
       END IF
 
-      iJunk = kLongOrShort
-      iJunk = 2
+      iJunk  =  kLongOrShort
+      iJunk  =  2
       IF  (abs(iJunk) .LE. 1) THEN  !! verbose printing
         iFound = iaActualTag(1)
         write(kStdWarn,*) ' '
@@ -624,8 +627,8 @@ c remember that iFileID is basically an index setting equal to iDummy above
 c thus if we know iFileID we know everything!!!!!
       IF (iaActualTag(iFileIDLo) .EQ. iaActualTag(iFileIDHi)) THEN  
         !very easy everything is in either q or r or s database
-        iTotal=0
-        DO iInt=1,(iFileIDHi-iFileIDLo+1)
+        iTotal = 0
+        DO iInt = 1,(iFileIDHi-iFileIDLo+1)
           iTotal = iTotal+1
           iaList(iTotal) = iFileIDLo+(iInt-1)     !save file ID
           IF  (abs(kLongOrShort) .LE. 1) THEN  !! verbose printing
@@ -635,13 +638,13 @@ c thus if we know iFileID we know everything!!!!!
         END DO
       ELSE
         !very hard : mixing of q,r,s databases
-        iTotal=0
+        iTotal = 0
         iTotal = iTotal+1
         iaList(iTotal) = iFileIDLo                !save file ID
         rEnd = raBlockEnd(iaList(iTotal))
         write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)),
      $              raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
-        DO iInt=2,(iFileIDHi-iFileIDLo+1)
+        DO iInt = 2,(iFileIDHi-iFileIDLo+1)
           IF (rEnd .LT. raBlockEnd(iFileIDLo+iInt-1)) THEN
             iTotal = iTotal+1
             iaList(iTotal) = iFileIDLo+(iInt-1)   !save file ID
@@ -1057,26 +1060,26 @@ c   this comes from running the script in abscmp/MAKENIR abscmp/MAKEFIR etc
             !these two tags are the same
             iFileIDHi = iFileIDHi1
             rFileStartFrHi = rFileStartFrHi1
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH1
           ELSE IF (iaActualTag(iFileIDHi2) .EQ. iaActualTag(iFileIDLo2)) THEN
             !these two tags are the same
             iFileIDHi = iFileIDHi2
             rFileStartFrHi = rFileStartFrHi2
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH2
           ELSE IF ((iaActualTag(iFileIDLo2)-iaActualTag(iFileIDHi1)) .LT. 
      $              (iaActualTag(iFileIDLo2)-iaActualTag(iFileIDHi2))) THEN
             !look for min diff between tags
             iFileIDHi = iFileIDHi1
             rFileStartFrHi = rFileStartFrHi1
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH1
           ELSE
             !look for min diff between tags
             iFileIDHi = iFileIDHi2
             rFileStartFrHi = rFileStartFrHi2
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH2
           END IF
         END IF
@@ -1093,46 +1096,46 @@ c   this comes from running the script in abscmp/MAKENIR abscmp/MAKEFIR etc
             !these two tags are the same
             iFileIDHi = iFileIDHi1
             rFileStartFrHi = rFileStartFrHi1
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH1
           ELSE IF (iaActualTag(iFileIDHi2) .EQ. iaActualTag(iFileIDLo2)) THEN
             !these two tags are the same
             iFileIDHi = iFileIDHi2
             rFileStartFrHi = rFileStartFrHi2
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH2
           ELSE IF (iaActualTag(iFileIDHi1) .EQ. iaActualTag(iFileIDLo1)) THEN
             !these two tags are the same
             iFileIDHi = iFileIDHi1
             rFileStartFrHi = rFileStartFrHi1
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH1
           ELSE IF (iaActualTag(iFileIDHi2) .EQ. iaActualTag(iFileIDLo1)) THEN
             !these two tags are the same
             iFileIDHi = iFileIDHi2
             rFileStartFrHi = rFileStartFrHi2
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH2
          !tags are rather different : come to the first acceptable combination
           ELSE IF (iDiff11.EQ.min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
             iFileIDHi = iFileIDHi1
             rFileStartFrHi = rFileStartFrHi1
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH1
           ELSE IF (iDiff21.EQ.min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
             iFileIDHi = iFileIDHi1
             rFileStartFrHi = rFileStartFrHi1
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH1
           ELSE IF (iDiff12.EQ.min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
             iFileIDHi = iFileIDHi2
             rFileStartFrHi = rFileStartFrHi2
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH2
           ELSE IF (iDiff22.EQ.min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
             iFileIDHi = iFileIDHi2
             rFileStartFrHi = rFileStartFrHi2
-            iTruthHi=1
+            iTruthHi = 1
             rH = rH2
           END IF
         END IF
