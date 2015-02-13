@@ -541,6 +541,18 @@ datafix385_H2012:
       cd ../; \
       cd ../SRCv1.18
 
+## this is "simple file" with hardly any comments
+datafix385_H2012_IR_ONLY:
+	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2012_IR_ONLY.param > \
+      ../INCLUDE/kcarta_v118.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v118.param kcarta.param; \
+      cd EARTH_database_params; \
+      lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.18
+
 datafix385_H2012_hartmann_co2:
 	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2012_hartmann.param > \
       ../INCLUDE/kcarta_v118.param; \

@@ -1,0 +1,184 @@
+c the xsec (old style) file
+      CHARACTER*80 kXsecFile
+      PARAMETER (kXsecFile  = 'NotUsed')
+
+c this is the Cousin LineShape file, with 370 ppmv
+      PARAMETER (kCousin_CO2Path = '#/v10.ieee-le/etc.ieee-le/')
+
+c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
+c \\\ this is for the newer gas paths; see pre_defined.param for the  ////
+c \\\ prefix "m","n","v" etc; see       s_misc.f                      ////
+c \\\ these files copied from                                         ////
+c \\\     /strowdata1/s1/sergio/OLD_RUN8_NIRDATABASE/blah/fbin/gah    ////
+
+c !!! f = 020_30 cm-1, at 0.00005 cm-1 spacing (= 0.5 cm-1 chunk span)
+      CHARACTER*80 kWaterPathf,kCompPathf,kCKDPathf
+      PARAMETER (kWaterPathf = 'NOT USED /H2012.ieee-le/FIR15_30/h2o.ieee-le/')
+      PARAMETER (kCompPathf  = 'NOT USED /H2012.ieee-le/FIR15_30/etc.ieee-le/')
+      PARAMETER (kCKDPathf   = 'NOT USED /H2012.ieee-le/FIR15_30/etc.ieee-le/')
+
+c !!! g = 030_50 cm-1, at 0.00010 cm-1 spacing (= 1.0 cm-1 chunk span)
+      CHARACTER*80 kWaterPathg,kCompPathg,kCKDPathg
+      PARAMETER (kWaterPathg = 'NOT USED /H2012.ieee-le/FIR30_50/h2o.ieee-le/')
+      PARAMETER (kCompPathg  = 'NOT USED /H2012.ieee-le/FIR30_50/etc.ieee-le/')
+      PARAMETER (kCKDPathg   = 'NOT USED /H2012.ieee-le/FIR30_50/etc.ieee-le/')
+
+c !!! h = 050_80 cm-1, at 0.00015 cm-1 spacing (= 1.5 cm-1 chunk span)
+      CHARACTER*80 kWaterPathh,kCompPathh,kCKDPathh
+      PARAMETER (kWaterPathh = 'NOT USED /H2012.ieee-le/FIR50_80/h2o.ieee-le/')
+      PARAMETER (kCompPathh  = 'NOT USED /H2012.ieee-le/FIR50_80/etc.ieee-le/')
+      PARAMETER (kCKDPathh   = 'NOT USED /H2012.ieee-le/FIR50_80/etc.ieee-le/')
+
+c !!! j = 080_150 cm-1, at 0.00025 cm-1 spacing (= 2.5 cm-1 chunk span)
+      CHARACTER*80 kWaterPathj,kCompPathj,kCKDPathj
+      PARAMETER (kWaterPathj = 'NOT USED /H2012.ieee-le/FIR80_150/h2o.ieee-le/')
+      PARAMETER (kCompPathj  = 'NOT USED /H2012.ieee-le/FIR80_150/etc.ieee-le/')
+      PARAMETER (kCKDPathj   = 'NOT USED /H2012.ieee-le/FIR80_150/etc.ieee-le/')
+
+c !!! k = 140_310 cm-1, at 0.0005 cm-1 spacing (= 05 cm-1 chunk span)
+      CHARACTER*80 kWaterPathk,kCompPathk,kCKDPathk
+      PARAMETER (kWaterPathk = 'NOT USED /H2012.ieee-le/FIR140_310/h2o.ieee-le/')
+      PARAMETER (kCompPathk  = 'NOT USED /H2012.ieee-le/FIR140_310/etc.ieee-le/')
+      PARAMETER (kCKDPathk   = 'NOT USED /H2012.ieee-le/FIR140_310/etc.ieee-le/')
+
+c !!! p = 300_510 cm-1, at 0.0010 cm-1 spacing (= 10 cm-1 chunk span)
+      CHARACTER*80 kWaterPathp,kCompPathp,kCKDPathp
+      PARAMETER (kWaterPathp = 'NOT USED /H2012.ieee-le/FIR300_510/h2o.ieee-le/')
+      PARAMETER (kCompPathp  = 'NOT USED /H2012.ieee-le/FIR300_510/etc.ieee-le/')
+      PARAMETER (kCKDPathp   = 'NOT USED /H2012.ieee-le/FIR300_510/etc.ieee-le/')
+
+c !!! q = 500_605 cm-1, at 0.0015 cm-1 spacing (= 15 cm-1 chunk span)
+      CHARACTER*80 kWaterPathq,kCompPathq,kCKDPathq
+      PARAMETER (kWaterPathq = 'NOT USED /H2012.ieee-le/FIR500_605/h2o.ieee-le/')
+      PARAMETER (kCompPathq  = 'NOT USED /H2012.ieee-le/FIR500_605/etc.ieee-le/')
+      PARAMETER (kCKDPathq   = 'NOT USED /H2012.ieee-le/FIR500_605/etc.ieee-le/')
+
+c !!! s = 2830-3380 cm-1, at 0.0025 cm-1 spacing (= 25 cm-1 chunk span)
+c !!! note we link to hdo.ieee-le instead of h2o_ALLISO.ieee-le
+      CHARACTER*80 kWaterPaths,kCompPaths,kCKDPaths
+      PARAMETER (kWaterPaths = 'NOT USED /H2012.ieee-le/NIR2830_3580/hdo.ieee-le/')
+      PARAMETER (kCompPaths  = 'NOT USED /H2012.ieee-le/NIR2830_3580/etc.ieee-le/')
+      PARAMETER (kCKDPaths   = 'NOT USED /H2012.ieee-le/NIR2830_3580/etc.ieee-le/')
+
+c !!! m = 3550-5550 cm-1, at 0.01 cm-1 spacing (= 100 cm-1 chunk span)
+      CHARACTER*80 kWaterPathm,kCompPathm,kCKDPathm
+      PARAMETER (kWaterPathm = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR3550_5550/h2o.ieee-le/')
+      PARAMETER (kCompPathm  = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR3550_5550/etc.ieee-le/')
+      PARAMETER (kCKDPathm   = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR3550_5550/etc.ieee-le/')
+
+c !!! n = 5550-8350 cm-1, at 0.015 cm-1 spacing (= 150 cm-1 chunk span)
+      CHARACTER*80 kWaterPathn,kCompPathn,kCKDPathn
+      PARAMETER (kWaterPathn = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR5550_8200/h2o.ieee-le/')
+      PARAMETER (kCompPathn  = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR5550_8200/etc.ieee-le/')
+      PARAMETER (kCKDPathn   = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR5550_8200/etc.ieee-le/')
+
+c !!! o = 8250-12250 cm-1, at 0.025 cm-1 spacing (= 250 cm-1 chunk span)
+      CHARACTER*80 kWaterPatho,kCompPatho,kCKDPatho
+      PARAMETER (kWaterPatho = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR8250_12250/h2o.ieee-le/')
+      PARAMETER (kCompPatho  = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR8250_12250/etc.ieee-le/')
+      PARAMETER (kCKDPatho   = 'NOT USED /H2012.ieee-le/OTHERBANDS/NIR8250_12250/etc.ieee-le/')
+
+c !!! v = 12000-25000 cm-1, at 0.0500 cm-1 spacing (= 500 cm-1 chunk span)
+      CHARACTER*80 kWaterPathv,kCompPathv,kCKDPathv
+      PARAMETER (kWaterPathv = 'NOT USED /H2012.ieee-le/OTHERBANDS/VIS12000_25000/h2o.ieee-le/')
+      PARAMETER (kCompPathv  = 'NOT USED /H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
+      PARAMETER (kCKDPathv   = 'NOT USED /H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
+
+c !!! u = 25000-44000 cm-1, at 0.1000 cm-1 spacing (= 1000 cm-1 chunk span)
+      CHARACTER*80 kWaterPathu,kCompPathu,kCKDPathu
+      PARAMETER (kWaterPathu = 'NOT USED /H2012.ieee-le/OTHERBANDS/UV25000_45000/h2o.ieee-le/')
+      PARAMETER (kCompPathu  = 'NOT USED /H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
+      PARAMETER (kCKDPathu   = 'NOT USED /H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
+
+c >>>>>>>>>>> ignore if you have v1.10 or less <<<<<<<<<<<<<<<<<<<<<<<<<<<
+c kMaxPtsBox   == for NLTE, kcarta does 5 point box car integration
+c so use 5 times asmany points, plus two extra points on either side
+c kCARTA also tries to figure out which is the best ergression profile to use
+c kBoxCarUse tells the code how many points to bloat things by
+      INTEGER kMaxPtsBox,kRegrProf,kBoxCarUse
+      PARAMETER (kBoxCarUse=5)
+      PARAMETER (kMaxPtsBox=kMaxPts*kBoxCarUse,kRegrProf=48)
+c to do stuff at 0.0005 cm-1 spacing, need to "bloat" optical depths
+c if kBloatPts == 1, then cannot bloat up stuff!!
+      INTEGER kBloatPts
+c high res mode; 0.0005 cm-1 spacing 
+      PARAMETER (kBloatPts=kMaxPts*kBoxCarUse) 
+c space saver; everything at 0.0025 cm-01
+c      PARAMETER (kBloatPts=1)     
+c kUpperAtmRefPath == path to upper atm 100 layers reference profiles
+c                  == profiles were used in making upper atm kCARTA database
+      CHARACTER*80 caUpperAtmRefPath
+      PARAMETER (caUpperAtmRefPath= 'Not used')
+c kAuxNLTERefsPath = path to some US STd reference profiles which include LA,UA
+      CHARACTER*80 caAuxNLTERefsPath
+      PARAMETER (caAuxNLTERefsPath = 'Not Used')
+
+c*********************
+c the LineMix,LineParam  and weak CO2 lines 
+c this is where the weak background compressed database files are
+c note we have tested 3 versions so far :
+c   (a) may2004 : leave out 2350,2351,2352,2310,2311,2320,2321           Voigt
+c   (b) dec2004 : leave out 2350,2351,2352,2310,2311,2320,2321,2353,2354 Voigt
+c                 compressed version seems to have been blown away
+c   (c) dec2004 : leave out 2350,2351,2352,2310,2311,2320,2321,2353,2354 Cousin
+c   (d) sep2005 : leave out 2350,2351,2352,2310,2311,2320,2321,2353,2354 Cousin
+c               : leave out 2210,2220,2230,2240...2280 at urging of Manuel
+c ie in (a),(b) the weak lines used the Voight lineshape, while (c) uses the
+c   Cousin lineshape for the weaklines, as this is what GENLN2 does
+c /home/motteler/absdat is actually a symlink to /taro/s2/motteler/abstmp
+c   where the 3 versions reside
+
+c this is where the strong band line params are
+c in the files here are stored the HITRAN line params (stren, freq, width etc)
+      CHARACTER*80 caStrongLineParams
+c this is new, where we have 19 NLTE bands
+      PARAMETER (caStrongLineParams='NotUsed')
+
+c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/, 
+c they have been copied to #; these files have removed 19 NLTE bands
+c this is where we have lower atm weakline database
+      CHARACTER*80 caWeakCO2Path
+      PARAMETER (caWeakCO2Path = 'NotUsed')
+c this is where the upper atm weakline database lies
+      CHARACTER*80 caWeakUpperAtmCO2Path
+      PARAMETER (caWeakUpperAtmCO2Path = 'NotUsed')
+
+c this is where the strong band linemix strengths are
+      CHARACTER*80 caLineMixDir
+      PARAMETER (caLineMixDir='NotUsed')
+c*********************
+
+c the NLTE vib temp profiles
+c this tells the code how many layers/levels to expect in the NLTE profile
+      INTEGER kNLTEProfLayer
+      PARAMETER (kNLTEProfLayer= 150)
+c kRegrPath == path to regression profiles that code needs if it guesses VT
+      CHARACTER*80 kRegrFile
+      PARAMETER (kRegrFile = 'NotUsed')
+c kLOPEZPUERTAS = path to Manuel Lope Puertas files, for regression fits
+      CHARACTER*80 kLopezPuertas
+      PARAMETER (kLopezPuertas = 'NotUsed')
+c kNLTEPolyfits = path to where the polynomial fits to NLTE profiles are
+      CHARACTER*120 kNLTEPolyFits
+      PARAMETER (kNLTEPolyFits = 'NotUsed')
+
+c************************
+c caUA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for UA CO2
+c caLA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for LA CO2
+c this is useful when doing LBL NLTE calcs
+      CHARACTER*80 caUA_US_STD_385ppmv,caLA_US_STD_385ppmv
+      PARAMETER (caUA_US_STD_385ppmv = 'NOT USED')
+      PARAMETER (caLA_US_STD_385ppmv = 'NOT USED')
+cc this is where the compressed NLTE files are, for LOWER and UPPER atm
+c the files are ODs, PlanckCoeffs, as a function of solar zenith angle
+       CHARACTER*120 kCompressedNLTE_LA,kCompressedNLTE_UA
+       PARAMETER (kCompressedNLTE_LA = 'NOT USED')
+       PARAMETER (kCompressedNLTE_UA = 'NOT USED')
+
+c************************************************************************
+c this has the AFGL levels profiles for "layers" code
+c if you set this as 'DNE' then ReadRefProf_Units_laysORlevs will only call the LAYERS ref prof
+       CHARACTER*80 kcaLevsRefProf
+       PARAMETER (kcaLevsRefProf = 'NOT USED')
+
