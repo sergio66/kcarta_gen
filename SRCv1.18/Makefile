@@ -358,13 +358,15 @@ PARAMS = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile
 
 PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile
 
-###### OBJSMAIN_JPL   for all features : jacobians, scatter, flux, but as stand alone JPL exec
-###### OBJSMAIN       for all features : jacobians, scatter, flux
-###### OBJSMAIN_BASIC for none of kCARTA features
+###### OBJSMAIN_PARALLEL  for all features : jacobians, scatter, flux, but as stand alone JPL exec
+###### OBJSMAIN_JPL       for all features : jacobians, scatter, flux, but as stand alone JPL exec
+###### OBJSMAIN           for all features : jacobians, scatter, flux
+###### OBJSMAIN_BASIC     for none of kCARTA features
 
-OBJSMAIN       = kcartamain.o    kcartamisc.o    spline_and_sort.o  freqfile.o
-OBJSMAIN_JPL   = kcartajpl.o     kcartamisc.o    spline_and_sort.o  freqfile.o
-OBJSMAIN_BASIC = kcartabasic.o   kcartamisc.o    spline_and_sort.o  freqfile.o
+OBJSMAIN          = kcartamain.o        kcartamisc.o    spline_and_sort.o  freqfile.o
+OBJSMAIN_JPL      = kcartajpl.o         kcartamisc.o    spline_and_sort.o  freqfile.o
+OBJSMAIN_BASIC    = kcartabasic.o       kcartamisc.o    spline_and_sort.o  freqfile.o
+OBJSMAIN_PARALLEL = kcartaparallel.o    kcartamisc.o    spline_and_sort.o  freqfile.o
 
 OBJSRTP        = n_main.o rtp_interface.o
 
@@ -487,16 +489,20 @@ OBSSCAT5 = $(OBSSCAT_RTSPEC)    \
 ### in addition, you get clear sky radiance, jacobian, flux code compiled
 SCATTER_ALL = $(OBSSCAT5)
 
-### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJS_BASIC 
+### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJSBASIC 
 OBJS = $(SCATTER_ALL) $(OBJSMAIN) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
        $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
 
-### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJS_BASIC 
+### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJSBASIC 
+OBJSPARALLEL = $(SCATTER_ALL) $(OBJSMAIN_PARALLEL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+       $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
+
+### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJSBASIC 
 OBJSJPL = $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
           $(OBSRAD_BASIC) $(OBSSCAT_COMMON) $(OBSJAC_CLD) $(OBJSSTRING) 
 
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
-OBJS_BASIC = $(OBJSMAIN_BASIC) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+OBJSBASIC = $(OBJSMAIN_BASIC) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
              $(OBSRAD_BASIC) $(OBSSCAT_COMMON) $(OBSJAC_CLR) $(OBJSSTRING) \
              
 OBJS_TXT = n_mainTXT.o
@@ -601,8 +607,8 @@ kcartamain.o : kcartamain.f $(PARAMS)
 basic: bkcarta.x
 	mv bkcarta.x ../BIN/bkcarta.x
 
-bkcarta.x : $(OBJS_BASIC) $(OBJSRTP)
-	$(FORTRANX) -o bkcarta.x $(FLAGS) $(OBJS_BASIC) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
+bkcarta.x : $(OBJSBASIC) $(OBJSRTP)
+	$(FORTRANX) -o bkcarta.x $(FLAGS) $(OBJSBASIC) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
 
 kcartabasic.o : kcartabasic.f $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f
@@ -621,8 +627,8 @@ kcartamainTXT.o : kcartamain.f $(PARAMS)
 basicTXT: bkcartaTXT.x
 	mv bkcartaTXT.x ../BIN/bkcartaTXT.x
 
-bkcartaTXT.x : $(OBJS_BASIC) $(OBJS_TXT)
-	$(FORTRANX) -o bkcartaTXT.x $(FLAGS) $(OBJS_BASIC) $(OBJS_TXT) $(LIBS)
+bkcartaTXT.x : $(OBJSBASIC) $(OBJS_TXT)
+	$(FORTRANX) -o bkcartaTXT.x $(FLAGS) $(OBJSBASIC) $(OBJS_TXT) $(LIBS)
 
 kcartabasicTXT.o : kcartabasic.f $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f
@@ -652,6 +658,15 @@ jplTXT.x : $(OBJSJPL) $(OBJS_TXT)
 kcartajplTXT.o : kcartajpl.f $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f
 
+##### (7) complete kcarta (memory hog) with jacobians, all scattering codes
+parallel: kcartaparallel.x
+	mv kcartaparallel.x ../BIN/kcartaparallel.x
+
+kcartaparallel.x : $(OBJSPARALLEL) $(OBJSRTP)
+	$(FORTRANX) -o kcartaparallel.x $(FLAGS) $(OBJSPARALLEL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSRTP)
+
+kcartaparallel.o : kcartaparallel.f $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartaparallel.f
 
 ################ OPTICAL DEPTHS (LTE and NLTE) ###########################
 ###### lte routines
@@ -995,6 +1010,7 @@ ftp: $(KTAR)
 #   as they are no longer needed
 #kc1 = j*.f kcarta*.f kcoeff*.f n*.f \
 #      r*.f s_*.f  INCLUDE/*.param Makefile
+
 giveout:
 	cd ../.. ;				\
 	rm $(KGIVEOUT) 2> /dev/null || true;	\
@@ -1010,35 +1026,35 @@ giveout:
                 kcartaV118/INCLUDE/*.param      \
                 kcartaV118/SRCv1.18/freqfile.f  \
                 kcartaV118/SRCv1.18/j*.f        \
-                kcartaV118/SRCv1.18/k*.f   \
+                kcartaV118/SRCv1.18/k*.f        \
                 kcartaV118/SRCv1.18/n*.f        \
                 kcartaV118/SRCv1.18/r*.f        \
                 kcartaV118/SRCv1.18/s_*.f       \
                 kcartaV118/SRCv1.18/spline_*.f  \
-                kcartaV118/SRCv1.18/clear_scatter_misc.f       \
+                kcartaV118/SRCv1.18/clear_scatter_misc.f  \
                 kcartaV118/SRCv1.18/singlescatter.f       \
                 kcartaV118/SRCv1.18/Makefile    \
 		kcartaV118/UTILITY;		\
 	chmod 664 $(KGIVEOUT)
 
 giveout_bugfix:
-	cd ../.. ;				\
-	rm $(KTARBUGGIVEOUT) 2> /dev/null || true;	\
-	tar -cf $(KTARBUGGIVEOUT)			\
-		kcartaV118/README.1ST		\
-		kcartaV118/INCLUDE		\
-		kcartaV118/DOC/kcarta1.18*	\
-		kcartaV118/SRCv1.18/Makefile    \
-                kcartaV118/SRCv1.18/freqfile.f  \
-                kcartaV118/SRCv1.18/j*.f        \
-                kcartaV118/SRCv1.18/k*.f   \
-                kcartaV118/SRCv1.18/n*.f        \
-                kcartaV118/SRCv1.18/r*.f        \
-                kcartaV118/SRCv1.18/s_*.f       \
-                kcartaV118/SRCv1.18/spline_*.f  \
-                kcartaV118/SRCv1.18/clear_scatter_misc.f       \
-                kcartaV118/SRCv1.18/singlescatter.f       \
-                kcartaV118/SRCv1.18/Makefile;    \
+	cd ../.. ;				         \
+	rm $(KTARBUGGIVEOUT) 2> /dev/null || true;	 \
+	tar -cf $(KTARBUGGIVEOUT)			 \
+		kcartaV118/README.1ST		         \
+		kcartaV118/INCLUDE		         \
+		kcartaV118/DOC/kcarta1.18*	         \
+		kcartaV118/SRCv1.18/Makefile             \
+                kcartaV118/SRCv1.18/freqfile.f           \
+                kcartaV118/SRCv1.18/j*.f                 \
+                kcartaV118/SRCv1.18/k*.f                 \
+                kcartaV118/SRCv1.18/n*.f                 \
+                kcartaV118/SRCv1.18/r*.f                 \
+                kcartaV118/SRCv1.18/s_*.f                \
+                kcartaV118/SRCv1.18/spline_*.f           \
+                kcartaV118/SRCv1.18/clear_scatter_misc.f \
+                kcartaV118/SRCv1.18/singlescatter.f      \
+                kcartaV118/SRCv1.18/Makefile;            \
 	chmod 664 $(KTARBUGGIVEOUT)
 
 giveout_aux:
@@ -1060,6 +1076,5 @@ giveout_aux:
 	    kcartaV118/INCLUDE/*.m          \ 
 	    kcartaV118/UTILITY;             \ 
 	 chmod 664 $(KTARAUX) 
-
 
 ################### DISTRIBUTIONS ########################################

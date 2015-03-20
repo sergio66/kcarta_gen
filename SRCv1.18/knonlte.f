@@ -4873,6 +4873,7 @@ c      !fname='/asl/data/sarta_database/Data_jan04untun/Coef/setnte_oct05.dat';
 c      ![idchan, freq, coef] = rd_nte_be(fname);
 c      !/wrt_nte_le.m
 c      FNCOFN= '/home/sergio/KCARTADATA/NLTE/SARTA_COEFS/setnte_oct05.le.dat'
+c      FNCOFN= '/asl/data/kcarta/KCARTADATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat'
 
       FNCOFN = kSartaNLTE       
       iIOUN = kTempUnit 
@@ -4895,6 +4896,10 @@ C       Read data for this frequency/channel
       NCHNTE = iJ - 1
       CLOSE(iIOUN)
       kTempUnitOpen = -1
+
+c      print *,kSartaNLTE
+c      print *,MXCNTE,NCHNTE,NNCOEF
+c      call dostop
 
       CO2TOP = kCO2ppmv      !! this is the expected CO2 at TOA
       CO2TOP = rCO2MixRatio  !! better to use this, as it comes from profile
