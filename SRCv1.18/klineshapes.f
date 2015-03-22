@@ -827,12 +827,11 @@ c first read the names of all strong bands for the molecule
         write(kStdErr,*) 'In subroutine read_stronglineLTE_lineparameters :' 
         write(kStdErr,*) '  your namelist file says "caaStrongLines" contains'
         write(kStdErr,*) '  the list of strong bands that are in LTE or NLTE'
-        write(kStdErr,*) 'A typical datafile name in "caaStrongLines" is '
+        write(kStdErr,*) 'A typical datafile name in "caaStrongLines" is (from caStrong)'
         write(kStdErr,*) caaCheckNamesIn(1)
         write(kStdErr,*) '  your kcarta.param says "caStrongLineParams" has'
-        write(kStdErr,*) '    typical name of parameter file (line center, 
-     $ width,stren etc )bandfilename to be found '
-        write(kStdErr,*) '    using NLTEBandMapper,caaaNLTEBands(iI,iJ) is : '
+        write(kStdErr,*) '  typical name of parameter file (has eg (line center, width,stren etc)'
+        write(kStdErr,*) 'Bandfilename to be found using NLTEBandMapper,caaaNLTEBands(iI,iJ) is : '
         write(kStdErr,*) caaaNLTEBands(iLTEin,1)
         write(kStdErr,*) 'Cannot find a single match!!! '
         write(kStdErr,*)    'in namelist file check caaStrongLines = '

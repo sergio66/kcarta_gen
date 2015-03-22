@@ -35,7 +35,7 @@ c local
         write (kStdErr,*) 'in subroutine LowerAtmNLTERefs, error reading file  ... '
         WRITE(kStdErr,1070) iErr, caFName 
         CALL DoSTOP 
-        END IF 
+      END IF 
       kTempUnitOpen = +1
 
       iI = 0
@@ -52,7 +52,7 @@ c local
         raRPPressX(iI) = r2
         raRTempX(iI)   = r3
         raRAmtX(iI)    = r4
-        END IF
+      END IF
 
  20   CONTINUE
       READ(iIOUN,123,END=199) caStr
@@ -69,7 +69,7 @@ c local
       kTempUnitOpen = -1 
 
  123  FORMAT(A80)
- 1070 FORMAT('ERROR! number ',I5,' opening upper atm profile:',/,A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening loweAtmNLTE profile:',/,A80) 
 
       RETURN
       END
@@ -144,7 +144,7 @@ c local vars
         write (kStdErr,*) 'error reading file  ... '
         WRITE(kStdErr,1070) iErr, caFName 
         CALL DoSTOP 
-        END IF 
+      END IF 
       kTempUnitOpen = +1
 
       rMax = -1.0
@@ -162,8 +162,8 @@ c local vars
         raUpper_MixRatio(iI) = rPPMV
         IF (rPPMV .GT. rMax) THEN
           rMax = rPPMV
-          END IF
         END IF
+      END IF
 
  20   CONTINUE
       READ(iIOUN,123,END=199) caStr
@@ -173,7 +173,7 @@ c local vars
       raUpper_MixRatio(iI) = rPPMV
       IF (rPPMV .GT. rMax) THEN
         rMax = rPPMV
-        END IF
+      END IF
       GOTO 20
 
   199 CONTINUE
@@ -225,20 +225,20 @@ c now see if we need to swap values (from small to large)
       IF (raUpper_Pres(1) .GT. raUpper_Pres(iNumVibLevels)) THEN
         DO iI = 1,iNumVibLevels
           raTemp(iI) = raUpper_Pres(iNumVibLevels-iI+1)
-          END DO
+        END DO
         DO iI = 1,iNumVibLevels
           raUpper_Pres(iI) = raTemp(iI)
-          END DO
+        END DO
         DO iI = 1,iNumVibLevels
           raTemp(iI) = raUpper_MixRatio(iNumVibLevels-iI+1)
-          END DO
+        END DO
         DO iI = 1,iNumVibLevels
           raUpper_MixRatio(iI) = raTemp(iI)
-          END DO
-        END IF
+        END DO
+      END IF
 
  123  FORMAT(A80)
- 1070 FORMAT('ERROR! number ',I5,' opening upper atm profile:',/,A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening MixRatio atm profile:',/,A80) 
 
       RETURN
       END
@@ -300,7 +300,7 @@ c        print *,iUpperStd_Num,r1,r2,r3,r4,r5
         raUpperTemp_Std(iI)     = r4
         raUpperMixRatio_Std(iI) = r9
         GOTO 555
-        END IF
+      END IF
 
  600  CONTINUE
       close (iIOUN)
@@ -309,7 +309,7 @@ c        print *,iUpperStd_Num,r1,r2,r3,r4,r5
       iUpperStd_Num = iI
 
  123  FORMAT(A120)
- 1070 FORMAT('ERROR! number ',I5,' opening upper atm profile:',/,A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening US Std UA profile:',/,A80) 
 
       RETURN
       END
@@ -345,36 +345,36 @@ c see if we need to swap values (from small to large)
         iSwap = +1
         DO iI = 1,iNumVibLevels
           raTemp(iI) = raTPress1(iNumVibLevels-iI+1)
-          END DO
+        END DO
         DO iI = 1,iNumVibLevels
           raTPressX(iI) = raTemp(iI)
-          END DO
+        END DO
 
         DO iI = 1,iNumVibLevels
           raTemp(iI) = raTTemp1(iNumVibLevels-iI+1)
-          END DO
+        END DO
         DO iI = 1,iNumVibLevels
           raTTempX(iI) = raTemp(iI)
-          END DO
+        END DO
 
         DO iI = 1,iNumVibLevels
           raTemp(iI) = raQtips1(iNumVibLevels-iI+1)
-          END DO
+        END DO
         DO iI = 1,iNumVibLevels
           raQtipsX(iI) = raTemp(iI)
-          END DO
+        END DO
 
         DO iI = 1,iNumVibLevels
           raTemp(iI) = raNLTETemp1(iNumVibLevels-iI+1)
-          END DO
+        END DO
         DO iI = 1,iNumVibLevels
           raNLTETempX(iI) = raTemp(iI)
-          END DO
-        END IF
+        END DO
+      END IF
 
       DO iI = 1,iNumVibLevels
         raLog(iI) = log(raTPressX(iI))
-        END DO
+      END DO
 
       IF (raTPressX(1) .GT. DATABASELEV(kMaxLayer+1)) THEN
         write(kStdErr,*) 'usual AIRS layers lowest,highest press level = ',
@@ -384,7 +384,7 @@ c see if we need to swap values (from small to large)
         write(kStdErr,*) 'hmm rather silly, is it not????'
         write(kStdErr,*) 'expect (raTPressX(iNumVibLevels) .LT. rAIRS_TOA)'
         CALL DOStop
-        END IF
+      END IF
 
 c now check to see if explicitly have to add in the levelpoint = 0.005 mb into
 c  all this, as that is where the usual AIRS levels end
@@ -394,7 +394,7 @@ c  all this, as that is where the usual AIRS levels end
       IF (raTPressX(iAIRS_TOA) .LE. rAIRS_TOA) THEN
         iAIRS_TOA = iAIRS_TOA + 1
         GOTO 80
-        END IF
+      END IF
 
 c check to see if this boundary [iAIRS_TOA - 1, iAIRS_TOA] is "far" from 
 c 0.005 mb as we want layers of about 0.5 km thickness when press ~ 0.005 mb
@@ -413,7 +413,7 @@ c (see ~/KCARTA/INCLUDE/airslevels_upper.param)
           raTTempX(iI+1)    = raTTempX(iI)
           raQTipsX(iI+1)    = raQTipsX(iI)
           raNLTETempX(iI+1) = raNLTETempX(iI)
-          END DO
+        END DO
 
         !! replace elements at this index with the new values
         iI = iAIRS_TOA
@@ -423,7 +423,7 @@ c (see ~/KCARTA/INCLUDE/airslevels_upper.param)
         raNLTETempX(iI) = rY3
  
         iNumVibLevels = iNumVibLevels + 1
-        END IF
+      END IF
 
       IF (iAddNewPt .GT. 0) THEN
         !!we added a point and need to replace raYYY1 with raYYYX
@@ -434,37 +434,37 @@ c (see ~/KCARTA/INCLUDE/airslevels_upper.param)
             raTTemp1(iI)    = raTTempX(iI)
             raQTips1(iI)    = raQTipsX(iI)
             raNLTETemp1(iI) = raNLTETempX(iI)
-            END DO
+          END DO
         ELSEIF (iSwap .GT. 0) THEN
           DO iI = 1,iNumVibLevels
             raTemp(iI) = raTPressX(iNumVibLevels-iI+1)
-            END DO
+          END DO
           DO iI = 1,iNumVibLevels
             raTPress1(iI) = raTemp(iI)
-            END DO
+          END DO
 
           DO iI = 1,iNumVibLevels
             raTemp(iI) = raTTempX(iNumVibLevels-iI+1)
-            END DO
+          END DO
           DO iI = 1,iNumVibLevels
             raTTemp1(iI) = raTemp(iI)
-            END DO
+          END DO
 
           DO iI = 1,iNumVibLevels
             raTemp(iI) = raQtipsX(iNumVibLevels-iI+1)
-            END DO
+          END DO
           DO iI = 1,iNumVibLevels
             raQtips1(iI) = raTemp(iI)
-           END DO
+         END DO
 
           DO iI = 1,iNumVibLevels
             raTemp(iI) = raNLTETempX(iNumVibLevels-iI+1)
-            END DO
+          END DO
           DO iI = 1,iNumVibLevels
             raNLTETemp1(iI) = raTemp(iI)
-            END DO
-          END IF
+          END DO
         END IF
+      END IF
 
       RETURN
       END
@@ -521,7 +521,7 @@ c local vars
       DO iI = 1, kProfLayer
         raLayBot(iI) = raLayerHeight(iI)
         raLayTop(iI) = raLayerHeight(iI) + raThickness(iI)
-        END DO
+      END DO
 
       !!for the usual AIRS layers
       !!using Matlab, eqn is hgt = log(pavg) * p1 + p2
@@ -549,7 +549,7 @@ c local vars
 
       DO iI = 1,kNLTEProfLayer
         raThick1(iI) = 0.0
-        END DO
+      END DO
 
       write(kStdWarn,*) 'doing the LTE profile in STRATOSphere (< 0.005 mb)'
 
@@ -740,7 +740,7 @@ c local variables
         raUpperPartPress(iI) = 0.0        
         raUpperTemp(iI)      = 0.0        
         raUpperGasAmt(iI)    = 0.0        
-        END DO
+      END DO
 
       !!!dope, for the regular kCARTA atmosphere, just a check
       DO iI = 1,iLay-1
@@ -767,7 +767,6 @@ c thus p(g) = (p(total)/(1e6+ppmv)) ppmv
           write(kStdWarn,6543) iI,raUpperPress(iI)*kAtm2mb,raUpperThickness(iI),
      $             raUpperGasAmt(iI),raUpperTemp(iI)
         END IF
-
       END DO
 
       !! now concentrate on upper atm
@@ -908,7 +907,7 @@ c local variables
         raTPartPress(iI) = 0.0        
         raTTemp(iI)      = 0.0        
         raTamt(iI)       = 0.0        
-        END DO
+      END DO
 
       DO iI = 1,iUpper
         iJ = iLay+(iI-1)
@@ -922,7 +921,7 @@ c local variables
         ELSE                                  !!!all levels in LTE
           !raVibQFT(iI)   = 1.0               !!!we have read in correct QV 
           raNLTETemp(iI) = raTavg1(iJ) 
-          END IF
+        END IF
 c ppmv = (number of gas molecules)/(number of air molecules) * 1e6
 c pV = NRT ==> N(g) = p(g) V(a)/RT(g),  N(a) = p(a) V(a)/ RT(a)
 c now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
@@ -939,7 +938,7 @@ c thus p(g) = (p(total)/(1e6+ppmv) ppmv
         raTAmt(iI)       = raTAmt(iI)/1e9/MGC/raTTemp(iI)
 c        write(kStdWarn,1080) kProfLayer+iI,raTPress(iI)*kAtm2mb,
 c     $            raTPartPress(iI)*kAtm2mb,raTTemp(iI),raTamt(iI),rMixRatio
-        END DO
+      END DO
 
 ccccc this is typical kProfLayer (~ 100) CO2 amounts
 ccccc 200 2 0.93681E-05 0.34536E-08   198.16440  0.14706E-09 
@@ -963,7 +962,7 @@ ccccc 200 2 0.93681E-05 0.34536E-08   198.16440  0.14706E-09
           write(kStdWarn,9876) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI),raTTemp(iI),
      $             raTTemp(iI),00.0,
      $             raNLTETemp(iI), raNLTETemp(iI)-raTTemp(iI),raUAMixRatio(iI)
-          END DO
+        END DO
 
         !! compare what we have to US Std UA
         write(kStdWarn,*) 'Comparison between user supplied and US STD kCompressed 35 UA layers'
@@ -1064,7 +1063,7 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
       IF (iDefault .NE. iLogOrLinear) THEN
         write(kStdErr,*) 'In read_nonlte_temperature iDefault,iLogOrLinear' 
         write(kStdErr,*) 'are different : ',iDefault,iLogOrLinear
-        END IF
+      END IF
 
       CALL MapVTprofile2klayers(
      $             iLogOrLinear,iGASID,iISO,daJU(1),dVibCenter,pProf,
@@ -1106,7 +1105,7 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
      $                    raLTETemp(iI),  raLTETemp(iI)-raTTemp(iI),
      $                    raNLTETemp(iI), raNLTETemp(iI)-raTTemp(iI),
      $                    raMixRatio(iI)
-          END DO
+        END DO
 
         write(kStdWarn,*) '  '
         write(kStdWarn,*) '  Comparing NLTE profile to US STD Profile, 2350 Band  '
@@ -1123,8 +1122,8 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
             write(kStdWarn,1234) iI,pProf(iI),raLTETemp(iI),'|',
      $                     raTTemp(iI), raTTemp(iI)-raLTETemp(iI),'|',
      $                     raNLTETemp(iI),raNLTETemp(iI)-raLTETemp(iI)
-            END DO
-          END iF
+          END DO
+        END iF
 
         IF (iBand .EQ. 1) THEN
           write(kStdWarn,*) ' '
@@ -1202,11 +1201,11 @@ c -------------------------------------------------->
           raLTETemp1Swap(iI)  = raKineticVT(iJ)
           raNLTETemp1Swap(iI) = raNLTETempVT(iJ)
           raQTips1Swap(iI)    = raQTipsVT(iJ)
-          END DO
+        END DO
 
         DO iI = 1,kProflayer
           pProf(iI) = log(pProf(iI))
-          END DO
+        END DO
 
         !!!now interpolate the Dave Edwards NLTE profiles to the KCARTA profile
         !!for all bands specified by user
@@ -1219,7 +1218,7 @@ c -------------------------------------------------->
 
         DO iI = 1,kProflayer
           pProf(iI) = exp(pProf(iI))
-          END DO
+        END DO
 
 c -------------------------------------------------->
       ELSEIF (iLogOrLinear .LT. 0) THEN
@@ -1230,7 +1229,7 @@ c -------------------------------------------------->
           raLTETemp1Swap(iI)  = raKineticVT(iJ)
           raNLTETemp1Swap(iI) = raNLTETempVT(iJ)
           raQTips1Swap(iI)    = raQTipsVT(iJ)
-          END DO
+        END DO
 
         !!!now interpolate the Dave Edwards NLTE profiles to the KCARTA profile
         !!for all bands specified by user
@@ -1260,9 +1259,9 @@ c -------------------------------------------------->
                 iLP = iJ 
                 rFac = LOG(raPressVT(iLP)/rP)
                 rFac = rFac/LOG(raPressVT(iLP)/raPressVT(iLP+1))
-                ENDIF 
-              END DO
-            ENDIF 
+              ENDIF 
+            END DO
+          ENDIF 
 
           raLTETemp(iI)  = raKineticVT(iLP) +
      $                     rFac*(raKineticVT(iLP+1)-raKineticVT(iLP)) 
@@ -1270,8 +1269,8 @@ c -------------------------------------------------->
      $                     rFac*(raNLTETempVT(iLP+1)-raNLTETempVT(iLP))
           raVibQFT(iI)   = raQTipsVT(iLP) + 
      $                     rFac*(raQTipsVT(iLP+1)-raQTipsVT(iLP)) 
-          END DO
-        END IF
+        END DO
+      END IF
 c -------------------------------------------------->
 
       RETURN 
@@ -1319,7 +1318,7 @@ c local variables
 
       DO i1 = 1,kHITRAN
         iaJ_UorL(i1) = 0
-        END DO
+      END DO
 
  111  CONTINUE
       iMatchTry = iMatchTry + 1
@@ -1330,17 +1329,16 @@ c local variables
       OPEN(UNIT=iIOun,FILE=caFName,FORM='formatted',STATUS='OLD',IOSTAT=iErr,
      $     ERR = 100)
       IF (iErr .NE. 0) THEN 
+        !this does not get executed as error messgs get handled by line 100
         write (kStdErr,*) 'in subroutine ReadGENLN2_NLTE_Profile, '
-        write (kStdErr,*) 'error reading file  ... '
+        write (kStdErr,*) 'error opening file  ... '
         WRITE(kStdErr,1070) iErr, caFName 
         CALL DoSTOP 
       ELSE
         GOTO 777
-        END IF 
+      END IF 
 
- 100  write(kStdErr,*) 'Error reading NLTE data'
-      write(kStdErr,*) 'Error in readgenln2_nlte_profile'
-      write (kStdErr,*) 'error reading file  ... '
+ 100  write(kStdErr,*) 'In ReadGENLN2_NLTE_Profile, Error reading NLTE data'
       WRITE(kStdErr,1070) iErr, caFName 
       CALL DoStop
 
@@ -1370,7 +1368,7 @@ c local variables
         !!!      NLEV  = NO OF PRESSURE LEVELS FOR THIS MODEL 
         !!! so read in flag, model,nset,ngas,nlev where flag = '***'
         read(caStr,*) ca3,i1,i2,iGasesInFile,iNumVibLevels
-        END IF
+      END IF
 
       !!!! now read number of (gas,isotope) pairs in the file
       !!!! Genln2 directly sez 
@@ -1379,15 +1377,15 @@ c local variables
       iK = 0
       DO iI = 1,kNLTEProfLayer
         iaDummyGasID(iI) = -1
-        END DO
+      END DO
       DO iI = 1,iGasesInFile
         read(iIOUN,*) iaGasIDs(iI),iaVibTemps(iI)
         iVibs0 = iVibs0 + iaVibTemps(iI)
         DO iJ = 1,iaVibTemps(iI)
           iK = iK + 1
           iaDummyGasID(iK) = iaGasIDs(iI)
-          END DO   
-        END DO
+        END DO   
+      END DO
 
       !!!read the presssure levels
       read(iIOUN,*) (raPressVT(iI),iI=1,iNumVibLevels)   !!! in mb
@@ -1399,7 +1397,7 @@ c local variables
         write(kStdErr,*) 'while reading in the NLTE profile : '
         write(kStdErr,*) caFName
         CALL DOStop
-        END IF
+      END IF
 
       !!! read the kinetic temp (LTE)
       !!! this might be SLIGHTLY different from KLAYERS LTE temps, but it is
@@ -1409,7 +1407,7 @@ c local variables
 
       IF (iAllOrSome .EQ. -1) THEN
         GOTO 999    !!!do not need the NLTE stuff
-        END IF
+      END IF
 
       !!!read in the QTIPS_VIB vib partition function profiles
       !!!dummy string that says "!QV   Vibrational Partition functions"
@@ -1424,18 +1422,18 @@ c local variables
         write(kStdErr,*) 'GasID mismatch when reading in vib part fcn profs'
         write(kStdErr,*) 'Expected ',iaDummyGasID(iK),' but got ',iDummyGasID
         CALL DOStop
-        END IF         
+      END IF         
       IF ((iGASID .EQ. iDummyGasID) .and. (iISO .EQ. iDummyISO)) THEN
         DO iI = 1,iNumVibLevels
           raQtipsVT(iI) = raQtipsXVT(iI)
-          END DO
-        END IF
+        END DO
+      END IF
       iVibs = iVibs + 1
       IF (iVibs .LT. iVibs0) THEN
         GOTO 800
       ELSE
         GOTO 820
-        END IF
+      END IF
 
  820  CONTINUE
       !!! read the NLTE temperatures
@@ -1453,12 +1451,12 @@ c local variables
           write(kStdWarn,*) 'matched upper quantum number'
           DO iI = 1,kHitran
             iaJ_UorL(iI) = +1         !!!matched the upper quantum number
-            END DO
+          END DO
           GOTO 999
         ELSE
           GOTO 888
-          END IF
         END IF
+      END IF
 
       IF (iMatchTry .EQ. 2) THEN      !!!trying to match lower quantum numbers
         IF ((iGASID .EQ. iDummyGasID) .and. (iDummyQuantum .EQ. iInputJL)
@@ -1466,12 +1464,12 @@ c local variables
           write(kStdWarn,*) 'matched lower quantum number'
           DO iI = 1,kHitran
             iaJ_UorL(iI) = -1         !!!matched the lower quantum number
-            END DO
+          END DO
           GOTO 999
         ELSE
           GOTO 888
-          END IF
         END IF
+      END IF
 
   999 CONTINUE
 
@@ -1482,24 +1480,24 @@ c local variables
      $     (iAllOrSOme .GT. 0)) THEN
         write(kStdWarn,*) 'Did not find a match for IUSGQ; try ILSGQ ...'
         GOTO 111
-        END IF
+      END IF
 
       IF ((iMatchTry .EQ. 2) .AND. (iaJ_UorL(1) .EQ. 0) .AND. 
      $     (iAllOrSome .GT. 0)) THEN
         write(kStdWarn,*) 'Did not find a match for IUSGQ or ILSGQ ...'
         CALL DoStop
-        END IF
+      END IF
 
       IF ((iAllORSome .GT. 0) .AND. (dVibCenter .LT. 1.0d-2)) THEN
         write (kStdErr,*) 'need to set dVibCenter, but seem not to have'
         write (kStdErr,*) 'been able to do so!'
         Call DoStop
-        END IF
+      END IF
 
       CALL Add005mblevel(iNumVibLevels,
      $                   raPressVT,raKineticVT,raQtipsVT,raNLTETempVT)
 
- 1070 FORMAT('ERROR! number ',I5,' opening upper atm profile:',/,A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening Read GENLN2 nlte profile:',/,A80) 
 
       RETURN
       END
