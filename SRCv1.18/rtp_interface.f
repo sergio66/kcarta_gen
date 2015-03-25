@@ -2450,10 +2450,12 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
           rAngleY = ORIG_SACONV_SUN(rAngleX, 705.00)                !! default AIRS hgt, dangerous
           rAngleY = SACONV_SUN(rAngleX, rSURFaltitude/1000, 705.00) !! default AIRS hgt, dangerous
           rAngleY = -9999
+          write(kStdErr,*) 'trying to figure out scanang, but not enough satzen,zobs info'
+          CALL DoStop
         ENDIF
         write(kStdWarn,*) 'downlook instr : satellite hgt, view angle info : '
-        write(kStdWarn,*) 'scanang, zobs(km), satzen, saconv(satzen,zobs) = ',
-     $    rAngle,rHeight/1000,rAngleX,rAngleY
+        write(kStdWarn,*) 'scanang, zsurf(km),zobs(km), satzen, saconv(satzen,zobs) = '
+        write(kStdWarn,*) rAngle,rSURFaltitude/1000,rHeight/1000,rAngleX,rAngleY
       END IF
 
       IF (prof.upwell .EQ. 2) THEN

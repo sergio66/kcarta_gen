@@ -1114,11 +1114,13 @@ c can compute solar angle at height h
        rPi = 3.1415927
        rEarth = 6370.0
      
-       !! p = Snell's law = n(i) r(i) sin(theta(i)) = constant => (R+h(i)) sin (theta(i)) = constant (assume n(i) = 1)
-       !! so Re sin(theta_earth) = (R+h(i))sin (theta(i))
+       !! p = Snell's law = n(i) r(i) sin(theta(i)) = constant => 
+       !!     (R+h(i)) sin (theta(i)) = constant (assume n(i) = 1)
+       !! so Re sin(theta_earth) = (Re+h(i))sin (theta(i))
 
        rX = (SURFALT + rEarth)/(ALT + rEarth) * sin(LSZA * rPi/180.0)
-       !! SURFALT < ALT ==> ratio in front of sin(LSZA) < 1 ==> local angles get "smaller" the higher you go 
+       !! SURFALT < ALT ==> ratio in front of sin(LSZA) < 1 
+       !!   ==> local angles get "smaller" the higher you go 
 
        if (rX .GT. 0.99999) rX = 0.99999
        if (rX .LT. 0.00000) rX = 0.00000

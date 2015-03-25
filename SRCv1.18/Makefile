@@ -195,6 +195,22 @@ SHELL = /bin/sh
 #LIBS  = -lblas -lcomplib.sgimath
 #FDOUBLE = -r8
 
+# ifort F77
+# ------------
+# -u  : turn off implicit typing of variables
+# -g  : generate debugging information (turns off optimization)
+# -C  : do run time subscript range checking
+# -w0 : inform about unused variables 
+# -O3 : heavy optimization
+# -64 : 64-bit objects (libraries must match)
+#
+FORTRANX=/cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
+FLAGS = -implicit none -static -msse2 -extend-source 132 
+FLAGS = -implicit none -static -msse2 -extend-source 132 -check bounds
+UFLAG = 
+LIBS  = -lblas 
+#FDOUBLE = -r8
+
 # Linux with Absoft Fortran
 # --------------------------
 # Absoft compiler options
@@ -561,6 +577,18 @@ datafix385_H2012_IR_ONLY:
 
 datafix385_H2012_hartmann_co2:
 	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2012_hartmann.param > \
+      ../INCLUDE/kcarta_v118.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v118.param kcarta.param; \
+      cd EARTH_database_params; \
+      lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.18
+
+## this is "simple file" with hardly any comments
+datafix385_H2008_IR_ONLY:
+	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2008_IR_ONLY.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -1061,20 +1089,20 @@ giveout_aux:
 	cd ../.. ;                              \ 
 	rm $(KTARAUX) 2> /dev/null || true;     \ 
 	tar -cf $(KTARAUX)                      \ 
-	    kcartaV118/INCLUDE                  \ 
-	    kcartaV118/TEST/R*		        \
-	    kcartaV118/TEST/b*                  \ 
-	    kcartaV118/TEST/t*                  \ 
-	    kcartaV118/TEST/*.m                 \ 
-	    kcartaV118/TEST/*.sc                \ 
-	    kcartaV118/TEST/COMPARISON_v1.18    \ 
-	    kcartaV118/DOC                  \ 
-	    kcartaV118/MATLAB               \ 
-	    kcartaV118/README.1ST           \ 
-	    kcartaV118/SCRIPTS              \ 
-	    kcartaV118/INCLUDE/*.param      \ 
-	    kcartaV118/INCLUDE/*.m          \ 
-	    kcartaV118/UTILITY;             \ 
+		kcartaV118/INCLUDE                  \ 
+		kcartaV118/TEST/R*		        \
+		kcartaV118/TEST/b*                  \ 
+		kcartaV118/TEST/t*                  \ 
+		kcartaV118/TEST/*.m                 \ 
+		kcartaV118/TEST/*.sc                \ 
+		kcartaV118/TEST/COMPARISON_v1.18    \ 
+		kcartaV118/DOC                  \ 
+		kcartaV118/MATLAB               \ 
+		kcartaV118/README.1ST           \ 
+		kcartaV118/SCRIPTS              \ 
+		kcartaV118/INCLUDE/*.param      \ 
+		kcartaV118/INCLUDE/*.m          \ 
+		kcartaV118/UTILITY;             \ 
 	 chmod 664 $(KTARAUX) 
 
 ################### DISTRIBUTIONS ########################################

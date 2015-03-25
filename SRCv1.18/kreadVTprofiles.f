@@ -1055,6 +1055,11 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
       CALL ReadGENLN2_NLTE_Profile(caFName,daJL,daJU,iaJ_UorL,iGasID,iISO,+1,
      $   iNumVibLevels,raPressVT,raKineticVT,raQtipsVT,raNLTETempVT,dVibCenter)
 
+c      do iI = 1,kProfLayer
+c        print *,iI,raPressVT(iI),raKineticVT(iI),raNLTETempVT(iI),'+',pProf(iI),raTTemp(iI)
+c      end do
+c      call dostop
+
       iLogOrLinear = -1        !! linear interp in log(P)
       iLogOrLinear = +1        !! spline interp in P 
       iLogOrLinear = 0         !! linear interp in P, Dave Edwards way
@@ -1069,7 +1074,7 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
      $             iLogOrLinear,iGASID,iISO,daJU(1),dVibCenter,pProf,
      $             raPressVT,raKineticVT,raNLTETempVT,raQTipsVT,iNumVibLevels,
      $             iProfileLayers,raLTETemp,raNLTETemp,raVibQFT)
-
+      
       iStart = -1
       DO iI = 1,kProfLayer
         !! total molecules in layer 
@@ -1079,7 +1084,7 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
 
       IF (iAllLayersLTE .EQ. +1) THEN    
         !!!all layers in LTE; put all temperatures same as KLAYERS temperatures
-        !!!before March 3, 2005 had raLTETemp=raNLTETemp == raTTemp, raVibQFT=1
+        !!!before March 3, 2005 had raLTETemp = raNLTETemp == raTTemp, raVibQFT=1
 
         !!! after March 3, 2005, just make sure NLTETemp = LTETemp, keep
         !!! the VibQFT as was done by computeQVlte.f
@@ -1100,6 +1105,7 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
           IF (raLTETemp(iI) .LT. 100.0) THEN
             iStart = iI+1
           END IF
+          iStart = (kProfLayer-iProfileLayers+1)
           write(kStdWarn,987) iI,
      $                    pProf(iI),raThickness(iI),raTAmt(iI),raTTemp(iI),
      $                    raLTETemp(iI),  raLTETemp(iI)-raTTemp(iI),
@@ -1279,6 +1285,10 @@ c -------------------------------------------------->
 c************************************************************************
 c this generic routine reads in Dave Edwards NLTE profiles
 c if necessary, it adds on into at 0.005 mb by calling Add005mblevel
+
+c as of March 2015, if the code CANNOT find the band in question, it gives 
+c a warning because it replaces the not-found data with raKineticVT
+
       SUBROUTINE ReadGENLN2_NLTE_Profile(caFName,daJL,daJU,iaJ_UorL,
      $              iGasID,iISO,iAllORSome,
      $              iNumVibLevels,raPressVT,raKineticVT,raQtipsVT,raNLTETempVT,
@@ -1300,11 +1310,11 @@ c output params
       DOUBLE PRECISION dVibCenter
 
 c local variables
-      REAL p,pp,q,t
+      REAL p,pp,q,t,match_band_energy2
       CHARACTER*80 caStr
       CHARACTER*3  ca3
       REAL raQtipsXVT(kNLTEProfLayer),rDummyVibEnergy
-      INTEGER iIOUN,iErr,iInputJU,iInputJL
+      INTEGER iIOUN,iErr,iInputJU,iInputJL,iSetQVT
       INTEGER i1,i2,iGasesInFile,iVibs0,iVibs,iI,iJ,iK
       INTEGER iaGasIDs(kGasComp),iaVibTemps(kGasComp)
       INTEGER iDummy1,iDummyGasID,iDummyISO,iDummyNum,iDummyQuantum
@@ -1347,8 +1357,8 @@ c local variables
 
       iInputJU = nint(daJU(1))
       iInputJL = nint(daJL(1))
-      write(kStdWarn,*) 'get NLTE profile for',iGASID,iISO,iInPutJL,iInputJU
-      write(kStdWarn,*) caFName
+      write(kStdWarn,*) ' try to get NLTE profile for gid,iso,JL,JU = ',iGASID,iISO,iInPutJL,iInputJU
+      write(kStdWarn,*) ' from user supplied profile(s) in ',caFName
      
       !! Dave Edwards info does start GND = 1, TOA = 120 so things are fine
  123  FORMAT(A80)
@@ -1391,20 +1401,19 @@ c local variables
       read(iIOUN,*) (raPressVT(iI),iI=1,iNumVibLevels)   !!! in mb
 
       !!! read the kinetic temperatures
-      read(iIOUN,*) iDummy1
-      IF (iDummy1 .NE. 0) THEN
-        write(kStdErr,*) 'Expected a "0" between pressure levels and LTE temps'
-        write(kStdErr,*) 'while reading in the NLTE profile : '
-        write(kStdErr,*) caFName
-        CALL DOStop
-      END IF
-
-      !!! read the kinetic temp (LTE)
       !!! this might be SLIGHTLY different from KLAYERS LTE temps, but it is
       !!! important to use THESE temperatures when computing the population
       !!! ratios r1,r2, and associated parameters
+      read(iIOUN,*) iDummy1
+      IF (iDummy1 .NE. 0) THEN
+        write(kStdErr,*) 'Expected a "0" between pressure levels and LTE temps'
+        write(kStdErr,*) 'during reading in the NLTE profile : '
+        write(kStdErr,*) caFName
+        CALL DOStop
+      END IF
+      !!! read the kinetic temp (LTE)
       read(iIOUN,*) (raKineticVT(iI),iI=1,iNumVibLevels)    
-
+      
       IF (iAllOrSome .EQ. -1) THEN
         GOTO 999    !!!do not need the NLTE stuff
       END IF
@@ -1414,6 +1423,7 @@ c local variables
       read(iIOUN,123) caStr      
       iVibs = 0
       iK = 0
+      iSetQVT = -1
  800  CONTINUE
       read(iIOUN,*) iDummyGasID,iDummyISO
       read(iIOUN,*) (raQtipsXVT(iI),iI=1,iNumVibLevels)        
@@ -1424,6 +1434,7 @@ c local variables
         CALL DOStop
       END IF         
       IF ((iGASID .EQ. iDummyGasID) .and. (iISO .EQ. iDummyISO)) THEN
+        iSetQVT = +1
         DO iI = 1,iNumVibLevels
           raQtipsVT(iI) = raQtipsXVT(iI)
         END DO
@@ -1436,15 +1447,17 @@ c local variables
       END IF
 
  820  CONTINUE
-      !!! read the NLTE temperatures
-      !!!dummy string that says "!TV   Vibrational Temperatures"
 
+      !!!dummy string that says "!TV   Vibrational Temperatures"
       read(iIOUN,123) caStr      
+
+      !!! read the NLTE temperatures
  888  CONTINUE
-      read(iIOUN,*) iDummyNum,iDummyGASID,iDummyISO,iDummyQuantum,
+      read(iIOUN,*,END=999) iDummyNum,iDummyGASID,iDummyISO,iDummyQuantum,
      $               rDummyVibEnergy
       dVibCenter = rDummyVibEnergy * 1.0d0
       read(iIOUN,*) (raNLTETempVT(iI),iI=1,iNumVibLevels)     !!! in K
+
       IF (iMatchTry .EQ. 1) THEN      !!!trying to match upper quantum numbers
         IF ((iGASID .EQ. iDummyGasID) .and. (iDummyQuantum .EQ. iInputJU)
      $    .AND. (iISO .EQ. iDummyISO)) THEN
@@ -1484,8 +1497,31 @@ c local variables
 
       IF ((iMatchTry .EQ. 2) .AND. (iaJ_UorL(1) .EQ. 0) .AND. 
      $     (iAllOrSome .GT. 0)) THEN
+        write(kStdErr,*) 'Did not find a match for IUSGQ or ILSGQ ...'
+        write(kStdErr,*) '  iGASID,iISO,iInputJL,iInputJU = ',iGASID,iISO,iInputJL,iInputJU
+        write(kStdErr,*) '  replacing with Kintetic (LTE) temp'
+
         write(kStdWarn,*) 'Did not find a match for IUSGQ or ILSGQ ...'
-        CALL DoStop
+        write(kStdWarn,*) '  iGASID,iISO,iInputJL,iInputJU = ',iGASID,iISO,iInputJL,iInputJU
+        write(kStdWarn,*) '  replacing with Kintetic (LTE) temp'
+
+        dVibCenter = match_band_energy2(iGASID,iISO,iInputJU)*1.0d0
+        DO iI = 1,kHitran
+          iaJ_UorL(iI) = +1         !!!matched the upper quantum number
+        END DO
+
+        !!! did not find what we are looking for, set NLTE output temp to this
+        DO iI = 1,iNumVibLevels
+          raNLTETempVT(iI) = raKineticVT(iI)
+        END DO
+        IF (iSetQVT .LT. 0) THEN
+          write(kStdErr,*) 'Did not find partition fcns for (GasID ISO), setting to 1.0 ',iGASID,iISO
+          write(kStdWarn,*) 'Did not find partition fcns for (GasID ISO), setting to 1.0 ',iGASID,iISO
+          DO iI = 1,iNumVibLevels
+            raQtipsVT(iI) = 1.0
+          END DO
+        END IF
+c      CALL DoStop     
       END IF
 
       IF ((iAllORSome .GT. 0) .AND. (dVibCenter .LT. 1.0d-2)) THEN
@@ -1503,4 +1539,121 @@ c local variables
       END
 
 c************************************************************************
+c this function matches up CO2 band center energies with ISO and HITRAIN id
+      REAL FUNCTION match_band_energy2(iGID,iISO,iHITRAN)
 
+c see  NONLTE/driver_make_nlte_prof.m 
+c   IL    MOL   IDMOL  ISO   IDISO  LEVEL   IDAFGL  ENERGY(cm-1) 
+c    1 CO2       2    626      1     1101      2     667.38000 
+c    2 CO2       2    626      1    10002      3    1285.40900 
+c    3 CO2       2    626      1     2201      4    1335.13200 
+c    4 CO2       2    626      1    10001      5    1388.18500 
+c    5 CO2       2    626      1    11102      6    1932.47000 
+c    6 CO2       2    626      1     3301      7    2003.24600 
+c    7 CO2       2    626      1    11101      8    2076.85600 
+c    8 CO2       2    626      1       11      9    2349.14300 
+c    9 CO2       2    626      1    20003     10    2548.36700 
+c   10 CO2       2    626      1    12202     11    2585.02200 
+c   11 CO2       2    626      1    20002     12    2671.14300 
+c   12 CO2       2    626      1     4401     13    2671.71700 
+c   13 CO2       2    626      1    12201     14    2760.72500 
+c   14 CO2       2    626      1    20001     15    2797.13600 
+c   15 CO2       2    626      1     1111     16    3004.01200 
+c   16 CO2       2    626      1    10012     23    3612.84200 
+c   17 CO2       2    626      1     2211     24    3659.27300 
+c   18 CO2       2    626      1    10011     25    3714.78300 
+c   19 CO2       2    636      2     1101      2     648.47802 
+c   20 CO2       2    636      2    10002      3    1265.82800 
+c   21 CO2       2    636      2     2201      4    1297.26400 
+c   22 CO2       2    636      2    10001      5    1370.06300 
+c   23 CO2       2    636      2       11      9    2283.48800 
+c   24 CO2       2    636      2     1111     16    2920.23900 
+c   25 CO2       2    636      2    10012     23    3527.73800 
+c   26 CO2       2    636      2     2211     24    3580.75000 
+c   27 CO2       2    636      2    10011     25    3632.91000 
+c   28 CO2       2    628      3     1101      2     662.37300 
+c   29 CO2       2    628      3    10002      3    1259.42600 
+c   30 CO2       2    628      3     2201      4    1325.14100 
+c   31 CO2       2    628      3    10001      5    1365.84400 
+c   32 CO2       2    628      3    11102      6    1901.73700 
+c   33 CO2       2    628      3     3301      7    1988.32800 
+c   34 CO2       2    628      3    11101      8    2049.33910 
+c   35 CO2       2    628      3       11      9    2332.11300 
+c   36 CO2       2    627      4     1101      2     664.72900 
+c   37 CO2       2    627      4    10002      3    1272.28700 
+c   38 CO2       2    627      4     2201      4    1329.84300 
+c   39 CO2       2    627      4    10001      5    1376.02700 
+c   40 CO2       2    627      4    11102      6    1916.69500 
+c   41 CO2       2    627      4     3301      7    1995.35200 
+c   42 CO2       2    627      4    11101      8    2062.09910 
+c   43 CO2       2    627      4       11      9    2340.01400 
+c   44 CO2       2    626      1    11112     36    4247.70500 
+c   45 CO2       2    626      1     3311     37    4314.91300 
+c   46 CO2       2    626      1    11111     38    4390.62900 
+c   47 CO2       2    628      3     1111     16    2982.11200 
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param' 
+
+c input vars
+      INTEGER iGID,iISO,iHITRAN
+c output vars
+      REAL rJunk
+  
+c local vars
+      INTEGER iaISO_table(47)
+      INTEGER iaID_hitranID(47)
+      REAL    raEnergy(47)
+      INTEGER iFound, iI,iMax 
+
+      DATA iaISO_table/1,     1,     1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+     c                 1,     1,     1,     1,     1,     1,     2,     2,     2,     2,     2,     2,
+     C                 2,     2,     2,     3,     3,     3,     3,     3,     3,     3,     3,     4,
+     c                 4,     4,     4,     4,     4,     4,     4,     1,     1,     1,     3/
+      DATA iaID_hitranID/2,     3,     4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
+     c                   14,    15,    16,    23,    24,    25,    2,     3,    4,     5,     9,     16,
+     c                   23,    24,    25,     2,     3,     4,    5,     6,    7,     8,     9,     2,
+     c                   3,     4,     5,     6,     7,     8,     9,    36,    37,    38,    16/
+      DATA raEnergy/0.6674,    1.2854,    1.3351,    1.3882,    1.9325,    2.0032,    2.0769,
+     c              2.3491,    2.5484,    2.5850,    2.6711,    2.6717,    2.7607,    2.7971,
+     c              3.0040,    3.6128,    3.6593,    3.7148,    0.6485,    1.2658,    1.2973,
+     c              1.3701,    2.2835,    2.9202,    3.5277,    3.5808,    3.6329,    0.6624,
+     c              1.2594,    1.3251,    1.3658,    1.9017,    1.9883,    2.0493,    2.3321,
+     c              0.6647,    1.2723,    1.3298,    1.3760,    1.9167,    1.9954,    2.0621,
+     c              2.3400,    4.2477,    4.3149,    4.3906,    2.9821/
+      IF (iGID .NE. 2) THEN
+        write(kStdErr,*) 'need gasID = 2 in REAL FUNCTION match_band_energy2'
+        CALL DoStop
+      END IF
+      IF ((iISO .LT. 1) .OR. (iISO .GT. 4)) THEN
+        write(kStdErr,*) 'need iISO = 1,2,3,4 in REAL FUNCTION match_band_energy2'
+        CALL DoStop
+      END IF
+     
+      rJunk = -1.0
+      iFound = -1
+
+      iMax = 47
+      iI = 1
+ 10   CONTINUE
+      IF (iI .LE. iMax) THEN
+        IF ((iaISO_table(iI) .EQ. iISO) .AND. (iaID_hitranID(iI) .EQ. iHITRAN)) THEN
+          iFound = 1
+          rJunk = raEnergy(iI)
+        ELSE
+          iI = iI + 1
+          GOTO 10
+        END IF
+      END IF
+
+      IF (iFound .LT. 0) THEN
+        write(kStdErr,*) 'did not find band match in in REAL FUNCTION match_band_energy2'
+        CALL DoStop
+      END IF
+
+      match_band_energy2 = rJunk * 1000.0
+
+      RETURN 
+      END
+c************************************************************************      

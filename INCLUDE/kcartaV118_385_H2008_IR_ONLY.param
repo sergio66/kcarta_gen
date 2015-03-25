@@ -1,10 +1,10 @@
-ccc sed so /asl/data/kcarta/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
-ccc sed so /asl/data/kcarta/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
-ccc sed so /asl/data/kcarta/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
+ccc sed so #/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
+ccc sed so #/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
+ccc sed so #/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
 
 c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-c this include file has a lot of /asl/data/kcarta so that the 
+c this include file has a lot of # so that the 
 c Makefile uses SED, changing them to actual distribution directory DISTDIR
 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -26,7 +26,7 @@ c kOrigRefPath == path to original 100 layers reference profiles
 c              == these profiles were used in making the kCARTA database
       CHARACTER*80 kOrigRefPath
       PARAMETER (kOrigRefPath = 
-     $          '/asl/data/kcarta/KCARTADATA/RefProf_July2010.For.v115up_CO2ppmv385/')
+     $          '#/KCARTADATA/RefProf_July2010.For.v115up_CO2ppmv385/')
 
 c need paths to comp.param and xsec.param == files that detail what gasID's
 c and frequency combinations are in the compressed/crosssection databases
@@ -39,14 +39,14 @@ c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
       CHARACTER*80 kXsecParamFile,kCompParamFile
-      PARAMETER (kXsecParamFile = '/asl/data/kcarta/KCARTADATA/General/xsecHT2010.param')
-      PARAMETER (kCompParamFile = '/asl/data/kcarta/KCARTADATA/General/compHT2010.param')
+      PARAMETER (kXsecParamFile = '#/KCARTADATA/General/xsecHT2010.param')
+      PARAMETER (kCompParamFile = '#/KCARTADATA/General/compHT2010.param')
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
 c >>>>>>>> set correct path (iee_le vs ieee_be) as necessary <<<<<<<<<<<
 c >>>>>>>> change ieee-le to ieee-be for Intel vs SGI <<<<<<<<<<<<<<<<<<
-c DISTDIR = /asl/data/kcarta is ieee-le, while /strowlab/motteler is ieee-be
+c DISTDIR = # is ieee-le, while /strowlab/motteler is ieee-be
 c --------- > (A) these are the water files, and ALL gases EXCEPT CO2
 c kWaterPath      == path to compressed files for water 
 c                   (note gases 101,102 use lookup tables for self, foreign 
@@ -64,10 +64,10 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le using lner.m <<<<<
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
-      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2008_IR.v1.ieee-le/h2o_ALLISO.ieee-le/')
-      PARAMETER (kCompPath       = '/asl/data/kcarta/H2008_IR.v1.ieee-le/etc.ieee-le/')
-      PARAMETER (kCKDPath        = '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/')
-      PARAMETER (kCKD_Compr_Path = '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/Compr/')
+      PARAMETER (kWaterPath      = '#/H2008_IR.v1.ieee-le/h2o_ALLISO.ieee-le/')
+      PARAMETER (kCompPath       = '#/H2008_IR.v1.ieee-le/etc.ieee-le/')
+      PARAMETER (kCKDPath        = '#/KCARTADATA/General/CKDieee_le/')
+      PARAMETER (kCKD_Compr_Path = '#/KCARTADATA/General/CKDieee_le/Compr/')
 
 c this is to account for heavy water in the 605-2830, 2830-3330 cm-1 bands
 c These are the 0,0025 cm-1 resolution bands
@@ -77,7 +77,7 @@ c >>>>>>> NOTE that ALL the water isotope datafiles are in kWaterIsotopePath
 c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and 
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER*80 kWaterIsotopePath
-      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2008_IR.v1.ieee-le/hDo.ieee-le/')
+      PARAMETER (kWaterIsotopePath = '#/H2008_IR.v1.ieee-le/hDo.ieee-le/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
       PARAMETER (kWaterIsobandStart1 = 1105, kWaterIsobandStop1 = 1730)
@@ -90,7 +90,7 @@ c kCousin_CO2Path == path to alt (cousin) CO2 compressed data files (gasID 2)
 c (a) v10 has the original database, with GENLN2 Cousin lineshape
 c         warning : if you use the v10 database, you will need to bump
 c         up CO2 in your mixed paths by 370/330 ~ 1.1212!!!!!!!!!!!!!!!!!!!
-c      PARAMETER (kCO2Path    = '/asl/data/kcarta/v10.ieee-le/etc.ieee-le/')
+c      PARAMETER (kCO2Path    = '#/v10.ieee-le/etc.ieee-le/')
 c kChiFile        == path to any chi files (for eg CO2 and H20)
 c                    kChiFile tells the code where to look for necessary files
 c                    that improve spectroscopy (they multiply kCompressed 
@@ -101,7 +101,7 @@ c                    the 2355-2505 region, which needs to agree better with
 c                    UMBC-LBL model
 c        would need to set iType = 0 in kcoeffMAIN.f for no fudges
 c this is the chifiles
-      PARAMETER (kChiFile        = '/asl/data/kcarta/KCARTADATA/General/ChiFile/')
+      PARAMETER (kChiFile        = '#/KCARTADATA/General/ChiFile/')
 ccccccc >>>>>>>>
 c \\\\\\\\\\\\\\\\\\\\ this is the history of CO2 files /////////////////////
 c kCO2Path        == path to main linemix CO2 compressed data files (gasID 2)
@@ -113,7 +113,7 @@ c *********** make sure they agree with what set above in kCompParamFile
 
 c kCO2Path        == path to main linemix CO2 compressed data files (gasID 2)
       CHARACTER*80 kCO2Path
-      PARAMETER (kCO2Path = '/asl/data/kcarta/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')  !! default UMBC best
+      PARAMETER (kCO2Path = '#/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')  !! default UMBC best
 
       INTEGER kCO2_UMBCorHARTMAN
       PARAMETER (kCO2_UMBCorHARTMAN = +1)
@@ -127,14 +127,14 @@ c kCO2ppmv       == CO2 ppmv used in the kCARTA database, for LTE 1 .. 100 layer
       CHARACTER*80 kCO2ppmvFile,kCO2ppmvFileBack,kCO2ppmvFileBackUA
       INTEGER      kCO2ppmv
       PARAMETER (kCO2ppmv           = 385)
-      PARAMETER (kCO2ppmvFile       = '/asl/data/kcarta/KCARTADATA/General/refgas2_385ppmv')
-      PARAMETER (kCO2ppmvFileBack   = '/asl/data/kcarta/KCARTADATA/General/refgas2Back_385ppmv')
-      PARAMETER (kCO2ppmvFileBackUA = '/asl/data/kcarta/KCARTADATA/General/refgas2BackUA_385ppmv')
+      PARAMETER (kCO2ppmvFile       = '#/KCARTADATA/General/refgas2_385ppmv')
+      PARAMETER (kCO2ppmvFileBack   = '#/KCARTADATA/General/refgas2Back_385ppmv')
+      PARAMETER (kCO2ppmvFileBackUA = '#/KCARTADATA/General/refgas2BackUA_385ppmv')
 
 c --------- > (C) these are the extra needed files
 c also need paths to where the xsec, CKD and Solar Radiance Files are
       CHARACTER*80 kSolarPath
-      PARAMETER (kSolarPath = '/asl/data/kcarta/KCARTADATA/General/SOLARieee_le/')
+      PARAMETER (kSolarPath = '#/KCARTADATA/General/SOLARieee_le/')
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -190,12 +190,12 @@ c this is for the NLTE files
 c this is where the Fast Model NLTE coeffs are
        CHARACTER*120 kSartaNLTE
 c SARTAv106 version, only has 6 predictors (assumes co2 = 370ppmv)
-c PARAMETER (kSartaNLTE = '/asl/data/kcarta/KCARTADATA/NLTE/SARTA_COEFS/setnte_oct05.le.dat')
+c PARAMETER (kSartaNLTE = '#/KCARTADATA/NLTE/SARTA_COEFS/setnte_oct05.le.dat')
 c SARTAv108 version, has 7 predictors (assumes co2 >= 370ppmv)
 c see incFTC_airs_apr08_m130_m150_template_cal_exper.f in
 c /asl/packages/sartaV108/Src_rtpV201
        PARAMETER (kSartaNLTE = 
-     $     '/asl/data/kcarta/KCARTADATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat')
+     $     '#/KCARTADATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat')
 
 c*************************
 

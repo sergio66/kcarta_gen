@@ -1282,7 +1282,8 @@ c        print *,iI,raLogTPress1(iI),raTPress1(iI),raTTemp1(iI),raNLTEtemp1(iI)
       END DO
 
       !! now interp this onto raPavg
-      do iI = iStart,kProfLayer
+      DO iI = iStart,kProfLayer
+c        print *,iI,iStart,kProfLayer,iI-iStart+1
         raPJunk(iI-iStart+1) = raPAvg(iI)
         rX = log(raPAvg(iI))
         CALL rsplin(raLogTPress1,raTX1,raJunk,iNumVibLevels,rX,rY)
