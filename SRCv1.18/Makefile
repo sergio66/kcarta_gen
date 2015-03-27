@@ -195,22 +195,6 @@ SHELL = /bin/sh
 #LIBS  = -lblas -lcomplib.sgimath
 #FDOUBLE = -r8
 
-# ifort F77
-# ------------
-# -u  : turn off implicit typing of variables
-# -g  : generate debugging information (turns off optimization)
-# -C  : do run time subscript range checking
-# -w0 : inform about unused variables 
-# -O3 : heavy optimization
-# -64 : 64-bit objects (libraries must match)
-#
-FORTRANX=/cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
-FLAGS = -implicit none -static -msse2 -extend-source 132 
-FLAGS = -implicit none -static -msse2 -extend-source 132 -check bounds
-UFLAG = 
-LIBS  = -lblas 
-#FDOUBLE = -r8
-
 # Linux with Absoft Fortran
 # --------------------------
 # Absoft compiler options
@@ -274,6 +258,24 @@ FLAGS_RTP = -w -W -O3 -N3 -s
 LIBS = -lU77 -L../LIB/blas.ref -lblas
 FDOUBLE = -N2 -N113
 
+# ifort F77
+# ------------
+# -u  : turn off implicit typing of variables
+# -g  : generate debugging information (turns off optimization)
+# -C  : do run time subscript range checking
+# -w0 : inform about unused variables 
+# -O3 : heavy optimization
+# -64 : 64-bit objects (libraries must match)
+#
+# see https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
+# -i8 -I${MKLROOT}/include/mic/ilp64 -I${MKLROOT}/include -mmic
+#FORTRANX=/cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
+#FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase
+#FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase -check bounds
+#UFLAG = 
+#LIBS  = -lblas 
+#FDOUBLE = -r8
+
 # Warning: this will not compile the structures (rtp_interface.f)
 # However it is a good compile test for the rest of the code
 # Linux with g77
@@ -285,7 +287,7 @@ FDOUBLE = -N2 -N113
 #Linux with PGF Fortran
 #----------------------
 #FORTRANX = pgf77
-#FORTRANX = pgf90
+##FORTRANX = pgf90
 #UFLAG = -Mdclchk
 ###FLAGS = -Mextend -Mbounds -Mupcase -O2
 ###FLAGS = -Mextend -Mnoupcase -O3
@@ -1103,6 +1105,6 @@ giveout_aux:
 		kcartaV118/INCLUDE/*.param      \ 
 		kcartaV118/INCLUDE/*.m          \ 
 		kcartaV118/UTILITY;             \ 
-	 chmod 664 $(KTARAUX) 
+	chmod 664 $(KTARAUX) 
 
 ################### DISTRIBUTIONS ########################################

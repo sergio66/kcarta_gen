@@ -388,6 +388,10 @@ computations, even with scattering (introduce a OLR computation) etc]
                                               profiles even if they were 
                                               not specified in TAPE5 or TAPE6
 
+  kcont_xsec.f        iMethod = 0 (default)   Old style look up tables
+                      iMethod = 1             New continuum compressed tables
+                                              are set in SUBROUTINE AddContinuum
+
 03/31/14        kRTP = -10 reads in text based levels input
                 kRTP = -5 reads in LBLRTM based levels input (TAPE 5)
                 kRTP = -6 reads in LBLRTM based layers input (TAPE 6, edited)
@@ -1211,6 +1215,32 @@ v1.14
                 from the directory kWaterPath,kWaterPaths
                 Within this range gas1 (isotopes 1,2,3,5,6) and gas103 (isotope
                 4) are uncompressed from kWaterIsotopePath
+
+                See subroutine CompFileName in s_misc.f
+                If Chunks lie between 605 and 2830 cm-1
+                  does some conniptions (well documented in code) to
+                  switch between g1 and g103 filedirs, depending on 
+                  kWaterIsobandStart/Stop1 and kWaterIsobandStart/Stop2
+                So for example, in the H2012 version
+
+                  605-1930 cm-1 had HDO plus other isotopes, so get
+                  breakout from IR605/hdo.ieee-le/
+                    /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/r1905_g1.dat   
+                    /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/r1905_g103.dat 
+                    /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/r1930_g1.dat
+                    /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/r1930_g103.dat 
+
+                  1930 - 2405 cm-1 did NOT have HDO isotopes, so go to
+                  h2o_ALLISO.ieee-le and get the "default" all iso
+                  (which cannot have ISO=4 in 1930-2405 cm-1 because there are
+                  no HDO lines in this region, but would have HDO lines in other regions)
+                     /asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/r1955_g1.dat
+                     /asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/r1980_g1.dat
+                     /asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/r2005_g1.dat
+                     /asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/r2030_g1.dat
+                     /asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/r2055_g1.dat
+                     /asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/r2080_g1.dat
+                     /asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/r2105_g1.dat
 
 12/31/09        Changed iFileStartFr to rFileStartFr to account for noninteger
                 chunk starts eg 87.5. This meant a major revamp of kCARTA code

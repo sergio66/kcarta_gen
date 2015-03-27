@@ -74,9 +74,12 @@ c local variables
         !! warning so far only CKD1,6,25 has these tables ....
         iMethod = 1        !! use compressed data for 605-2830 cm-1
         iDefault = +1      !! new method, uses kCompressed chunks
+
+        !decided to switch back to look up tables, as Matlab version uses this
+        iMethod = 0        !! use look up tables
+        iDefault = 0       !! use look up tables
       END IF
 
-c      iMethod = 0    !! make it use old method
       IF (iDefault .NE. iMethod) THEN
         write(kStdErr,*) 'adding on CKD : iDefault,iMethod = ',iDefault,iMethod
       END IF

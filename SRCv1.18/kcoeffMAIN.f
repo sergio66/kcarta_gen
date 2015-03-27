@@ -1572,14 +1572,17 @@ c the tuning to INDIVIDUAL gas optical depths (ie daaAbsCoeff)
 c basically copied from SUBROUTINE water_sarta_fudge
       SUBROUTINE generic_sarta_tunmult(iGasID,raFreq,raaAbsCoeff,iSARTAChi)
 
-      include '../INCLUDE/kcarta.param'
+      IMPLICIT NONE
 
+      include '../INCLUDE/kcarta.param'
+      
 c input
 c   iSARTAChi = -1 for no chi, +1 for AIRS, +2 for IASI, +3 for CrIS
 c   iGasID    = gasID
 c   raFreq    = wavenumber array
 c  raaAbsCoeff = gas OD
 
+      INTEGER iGasID,iSARTAChi
       REAL rFileStartFr,raFreq(kMaxPts)
       REAL raaAbsCoeff(kMaxPts,kProfLayer)
 

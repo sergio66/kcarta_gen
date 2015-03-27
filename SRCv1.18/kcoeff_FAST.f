@@ -28,13 +28,13 @@ c raPTemp         = actual temperature profile
 c raPPart         = actual water vapor partial pressure profile
 c
 c output
-c     iaP1,iaP2    are the indices          for pressure    offsets
-c     raP1,raP2    are the weights          for pressure    offsets
+c     iaP1,iaP2      are the indices          for pressure    offsets
+c     raP1,raP2      are the weights          for pressure    offsets
 c     iaT11,iaT12    are the indices          for temperature offsets
 c     raT11,raT12    are the weights          for temperature offsets
 c     raJT11,raJT12  are the jacobian weights for temperature offsets
-c     iaWlo,iaWhi    are the indices          for WV    offsets
-c     raWlo,raWhi    are the weights          for WV    offsets
+c     iaQ11,iaQ12    are the indices          for WV    offsets
+c     raQ11,raQ12    are the weights          for WV    offsets
                      
       REAL    raPTemp(kProfLayer),pProf(kProfLayer),raPPart(kProfLayer)
       INTEGER iProfileLayers,iSplineType
