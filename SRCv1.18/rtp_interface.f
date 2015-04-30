@@ -2443,7 +2443,7 @@ c so the conversion is  p.scanang = orig_saconv_sun( p.satzen,prof.zobs);  %% by
 c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by Sergio
       write(kStdWarn,*) ' '
       IF (prof.upwell .EQ. 1) THEN
-        IF (rHeight .GT. 2.0) THEN
+        IF ((rHeight .GT. 2.0) .AND. (abs(rAngleX) .LE. 90)) THEN
           rAngleY = ORIG_SACONV_SUN(rAngleX, rHeight)
           rAngleY = SACONV_SUN(rAngleX, rSURFaltitude/1000, rHeight/1000)
         ELSE
@@ -2490,25 +2490,26 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
           END IF
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. -1) .AND. (iOKzobs .EQ. +1))) THEN
-          write(kStdWarn,*) 'satzen or zobs or both do not make sense',rAngleX,rHeight*1000
-          rAngle = rAngle   !!! no need to do anything
+          !!rAngle = rAngle   !!! cannot, or do not need, to do anything
+          write(kStdWarn,*) 'satzen wierd, zobs ok',rAngleX,rHeight/1000
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. +1) .AND. (iOKzobs .EQ. -1))) THEN
-          write(kStdWarn,*) 'satzen or zobs or both do not make sense',rAngleX,rHeight*1000
-          rAngle = rAngle   !!! no need to do anything
+          !!rAngle = rAngle   !!! cannot, or do not need, to do anything
+          write(kStdWarn,*) 'satzen ok, zobs wierd',rAngleX,rHeight/1000
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. -1) .AND. (iOKzobs .EQ. -1))) THEN
-          write(kStdWarn,*) 'satzen or zobs or both do not make sense',rAngleX,rHeight*1000
-          rAngle = rAngle   !!! no need to do anything
+          !!rAngle = rAngle   !!! cannot, or do not need, to do anything
+          write(kStdWarn,*) 'neither satzen or zobs make sense',rAngleX,rHeight/1000
         ELSEIF ((iOKscanang .EQ. -1) .AND. 
      $          ((iOKsatzen .EQ. +1) .AND. (iOKzobs .EQ. +1))) THEN
-          !! satzen or zobs or both make sense, scanang is incorrect
+          !! satzen and zobs make sense, scanang is wierd
           rAngle = rAngleY   !!! no need to do anything
           write(kStdWarn,*) 'scanang does not make sense, but satzen,zobs do'
           write(kSTdWarn,*) 'using satzen to derive scanang (AIRS preference!!)'
         END IF
       END IF
 
+      write(kStdWarn,*) 'iOKscanang,iOKsatzen,iOKzobs = ',iOKscanang,iOKsatzen,iOKzobs
       write(kStdWarn,*) 'using kCARTA scanang = ',rAngle
       write(kStdWarn,*) ' '
 c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -136,12 +136,15 @@ HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
 ### rtpV105 on taro.umbc.edu
 #RTPHOME = /asl/packages/rtpV105
 #RTPLIB = -L$(RTPHOME)/lib -lrtp
-### rtpV201 on taro.umbc.edu
+### rtpV201 on taro.umbc.edu for g80, this works <<<<<<<<<<<<<<
 RTPHOME = /asl/packages/rtpV201_g80
 RTPLIB = -L$(RTPHOME)/lib -lrtp
-### rtpV201 on taro.umbc.edu
-#RTPHOME = /asl/packages/rtpV201
+### rtpV201 on compiled with ifort
+#RTPHOME = /home/sergio/git/rtp/rtpV201
 #RTPLIB = -L$(RTPHOME)/lib -lrtp
+### rtpV201 on taro.umbc.edu
+##RTPHOME = /asl/packages/rtpV201
+##RTPLIB = -L$(RTPHOME)/lib -lrtp
 
 # ---------------
 # RTP include dir
@@ -164,6 +167,8 @@ RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs.f
 ### 16 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #RTPINC = -I/asl/packages/rtpV201/include
 #RTPDEFS_FILE = /asl/packages/rtpV201/include/rtpdefs.f
+#RTPINC = -I/home/sergio/git/rtp/rtpV201/include
+#RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
 
 SHELL = /bin/sh
 
@@ -271,7 +276,7 @@ FDOUBLE = -N2 -N113
 # -i8 -I${MKLROOT}/include/mic/ilp64 -I${MKLROOT}/include -mmic
 #FORTRANX=/cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
 #FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase
-#FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase -check bounds
+##FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase -check bounds
 #UFLAG = 
 #LIBS  = -lblas 
 #FDOUBLE = -r8
@@ -530,7 +535,8 @@ OBJS_TXT = n_mainTXT.o
 ################## MAIN PART OF MAKEFILE ###############################
 ########################################################################
 # executables live in ../BIN; note you need to set the DISTDIR
-DISTDIR = /asl/data/kcarta
+DISTDIR    = /asl/data/kcarta
+DISTDIRGEN = /asl/data/kcarta_sergio
 
 ## this just updates the cource code
 #EXECS = basic scat basicTXT scatTXT
@@ -555,7 +561,7 @@ datafix400:
       cd ../SRCv1.18
 
 datafix385_H2012:
-	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2012.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/kcartaV118_385_H2012.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -567,7 +573,7 @@ datafix385_H2012:
 
 ## this is "simple file" with hardly any comments
 datafix385_H2012_IR_ONLY:
-	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2012_IR_ONLY.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g'  ../INCLUDE/kcartaV118_385_H2012_IR_ONLY.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -590,7 +596,7 @@ datafix385_H2012_hartmann_co2:
 
 ## this is "simple file" with hardly any comments
 datafix385_H2008_IR_ONLY:
-	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2008_IR_ONLY.param > \
+	sed 's|\#|$(DISTDIR)|g' 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/kcartaV118_385_H2008_IR_ONLY.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -941,7 +947,7 @@ rtp_interface.o : rtp_interface.f $(PARAMS_RTP) $(RTPDEFS_FILE)
 #### this is if kCompressed Database DOES NOT EXIST for gasID 51-63
 #calq.o: calq.f $(PARAMS) 
 #	$(FORTRANX) -c $(FLAGS) calq.f 
- 
+
 #calxsc.o: calxsc.f $(PARAMS) 
 #	$(FORTRANX) -c $(FLAGS) $(UFLAG) calxsc.f 
 
@@ -1004,7 +1010,7 @@ matlab:
 	tar -cf $(KMATLAB)			\
 		kcartaV118/MATLAB;		\
 	chmod 664 $(KMATLAB)
-		        
+
 data:
 	cd ../.. ;				\
 	rm $(KDATA) 2> /dev/null || true;	\
@@ -1088,23 +1094,23 @@ giveout_bugfix:
 	chmod 664 $(KTARBUGGIVEOUT)
 
 giveout_aux:
-	cd ../.. ;                              \ 
-	rm $(KTARAUX) 2> /dev/null || true;     \ 
-	tar -cf $(KTARAUX)                      \ 
-		kcartaV118/INCLUDE                  \ 
-		kcartaV118/TEST/R*		        \
-		kcartaV118/TEST/b*                  \ 
-		kcartaV118/TEST/t*                  \ 
-		kcartaV118/TEST/*.m                 \ 
-		kcartaV118/TEST/*.sc                \ 
-		kcartaV118/TEST/COMPARISON_v1.18    \ 
-		kcartaV118/DOC                  \ 
-		kcartaV118/MATLAB               \ 
-		kcartaV118/README.1ST           \ 
-		kcartaV118/SCRIPTS              \ 
-		kcartaV118/INCLUDE/*.param      \ 
-		kcartaV118/INCLUDE/*.m          \ 
-		kcartaV118/UTILITY;             \ 
+	cd ../.. ;                              \
+	rm $(KTARAUX) 2> /dev/null || true;     \
+	tar -cf $(KTARAUX)                      \
+		kcartaV118/INCLUDE                  \
+		kcartaV118/TEST/R*		     \
+		kcartaV118/TEST/b*                  \
+		kcartaV118/TEST/t*                  \
+		kcartaV118/TEST/*.m                 \
+		kcartaV118/TEST/*.sc                \
+		kcartaV118/TEST/COMPARISON_v1.18    \
+		kcartaV118/DOC                  \
+		kcartaV118/MATLAB               \
+		kcartaV118/README.1ST           \
+		kcartaV118/SCRIPTS              \
+		kcartaV118/INCLUDE/*.param      \
+		kcartaV118/INCLUDE/*.m          \
+		kcartaV118/UTILITY;             \
 	chmod 664 $(KTARAUX) 
 
 ################### DISTRIBUTIONS ########################################
