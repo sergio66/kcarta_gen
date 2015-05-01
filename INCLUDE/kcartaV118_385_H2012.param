@@ -210,15 +210,21 @@ c !!! o = 8250-12250 cm-1, at 0.025 cm-1 spacing (= 250 cm-1 chunk span)
 
 c !!! v = 12000-25000 cm-1, at 0.0500 cm-1 spacing (= 500 cm-1 chunk span)
       CHARACTER*80 kWaterPathv,kCompPathv,kCKDPathv
-      PARAMETER (kWaterPathv = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/h2o.ieee-le/')
-      PARAMETER (kCompPathv  = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
-      PARAMETER (kCKDPathv   = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
+c      PARAMETER (kWaterPathv = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/h2o.ieee-le/')
+c      PARAMETER (kCompPathv  = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
+c      PARAMETER (kCKDPathv   = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
+      PARAMETER (kWaterPathv = '^/H2004_otherbands.ieee-le/VIS12000_25000/h2o.ieee-le/')
+      PARAMETER (kCompPathv  = '^/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
+      PARAMETER (kCKDPathv   = '^/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
 
 c !!! u = 25000-44000 cm-1, at 0.1000 cm-1 spacing (= 1000 cm-1 chunk span)
       CHARACTER*80 kWaterPathu,kCompPathu,kCKDPathu
-      PARAMETER (kWaterPathu = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/h2o.ieee-le/')
-      PARAMETER (kCompPathu  = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
-      PARAMETER (kCKDPathu   = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
+c      PARAMETER (kWaterPathu = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/h2o.ieee-le/')
+c      PARAMETER (kCompPathu  = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
+c      PARAMETER (kCKDPathu   = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
+      PARAMETER (kWaterPathu = '^/H2004_otherbands.ieee-le/UV25000_45000/h2o.ieee-le/')
+      PARAMETER (kCompPathu  = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
+      PARAMETER (kCKDPathu   = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
 
       CHARACTER*80 kCousin_CO2Path,kChiFile
 c kCousin_CO2Path == path to alt (cousin) CO2 compressed data files (gasID 2)

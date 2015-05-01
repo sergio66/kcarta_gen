@@ -1496,7 +1496,7 @@ c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
         write(kStdErr,*) 'need iWhichKC = -1 or -114 or > 0'
         CALL DoStop
       END IF
-         
+
       IF (iWhichKC .LT. 0) THEN
         iNgas = 0
         DO iC = 1,kGasComp
@@ -1510,7 +1510,7 @@ c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
             iaInDataBase(iC) = 1
           END IF
         END DO
-
+	
 c now based on which gases were found, reset array iaTemp
         iCC = 1
         DO iC = 1,kGasComp
