@@ -612,7 +612,7 @@ v1.18
                   beginning of TAPE5, plus layers info from TAPE6; 
                 see examples in DOC
 
-3/31/04         "mini" klayers means we no longer need rtp files; so Makefile 
+3/31/14         "mini" klayers means we no longer need rtp files; so Makefile 
                 has 4 options together with "clean"
                   make clean
                   make == make basic

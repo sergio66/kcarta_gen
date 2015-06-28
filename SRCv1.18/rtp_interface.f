@@ -101,7 +101,7 @@ c this subroutine deals with the 'RADNCE' keyword
      $   iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $   iaNumLayer,iaaRadLayer,raProfileTemp,
      $   raSatAzimuth,raSolAzimuth,raWindSpeed,
-     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP,
      $   raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 
       IMPLICIT NONE
@@ -143,7 +143,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
       REAL raPressLevels(kProfLayer+1)
       INTEGER iProfileLayers
-      REAL cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,cngwat,raCemis(kMaxClouds)
+      REAL cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,cngwat,raCemis(kMaxClouds)
       INTEGER ctype1,ctype2
       REAL raCprtop(kMaxClouds), raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds), raCpsize(kMaxClouds)
@@ -175,6 +175,8 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
        ctype2 = -9999
        ctop1 = -100.0
        ctop2 = -100.0
+       cbot1 = -100.0
+       cbot2 = -100.0
 
        DO iI = 1,kMaxClouds
          raCngwat(iI) = 0.0
@@ -211,7 +213,7 @@ c       END DO
      $   raSatAzimuth,raSolAzimuth,raWindSpeed,
      $   iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $   iaNumLayer,iaaRadLayer,raProfileTemp,
-     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP,
      $   raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
       END IF
 
@@ -2123,7 +2125,7 @@ c this subroutine deals with the 'RADNCE' keyword, but for new .rtp files
      $   raSatAzimuth,raSolAzimuth,raWindSpeed,
      $   iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $   iaNumLayer,iaaRadLayer,raProfileTemp,
-     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP,
      $   raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 
       IMPLICIT NONE
@@ -2162,7 +2164,7 @@ c raPressLevels are the actual pressure levels from the KLAYERS file
       INTEGER iProfileLayers,ctype1,ctype2
       REAL raPressLevels(kProfLayer+1)
 
-      REAL cfrac12,cFrac1,cFrac2,cngwat1,cngwat2,ctop1,ctop2,raCemis(kMaxClouds)
+      REAL cfrac12,cFrac1,cFrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,raCemis(kMaxClouds)
       REAL raCprtop(kMaxClouds), raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds), raCpsize(kMaxClouds)
       INTEGER iaCtype(kMaxClouds),iMPSetForRadRTP
@@ -2195,13 +2197,13 @@ c local variables
       INTEGER iDirection,iW,iInt
       INTEGER iC,iNumLinesRead
       REAL FindSurfaceTemp,rSize1,rSize2
-      INTEGER iInstrType
+      INTEGER iInstrType,iTop1,iTop2,iBot1,iBot2
 
 c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer i,j,k,iG,upwell,iOKscanang,iOKzobs,iOKsatzen
       REAL raHeight(kProfLayer+1),raThickness(kProfLayer),pobs,pobs1,pTemp,rSURFaltitude
       REAL r1,rEms,rAngleX,rAngleY,saconv_sun,orig_saconv_sun
-      INTEGER*4 i4CTYPE1,i4CTYPE2
+      INTEGER*4 i4CTYPE1,i4CTYPE2,iNclouds_RTP_black
  
       integer rtpopen, rtpread, rtpwrite, rtpclose
       record /RTPHEAD/ head
@@ -2863,25 +2865,32 @@ c      print *,'*********************************************************'
       cfrac1  = prof.cfrac
       cngwat1 = prof.cngwat
       ctop1   = prof.cprtop
+      cbot1   = prof.cprbot      
       rSize1  = prof.cpsize
 
       ctype2  = int(prof.ctype2)
       cfrac2  = prof.cfrac2
       cngwat2 = prof.cngwat2
       ctop2   = prof.cprtop2
+      cbot2   = prof.cprbot2      
       rSize2  = prof.cpsize2
       
       i4ctype1 = prof.ctype
       i4ctype2 = prof.ctype2
-    
-      iNclouds_RTP = 0
+
+      !!! look for black clouds
+      iNclouds_RTP_black = 0
       IF ((prof.ctype .GE.0) .AND. (prof.ctype .LT. 100)) THEN
         raCemis(1) =  prof.cemis(1)
-        iNclouds_RTP = iNclouds_RTP + 1
+        iNclouds_RTP_black = iNclouds_RTP_black + 1
       END IF
       IF ((prof.ctype2 .GE.0) .AND. (prof.ctype2 .LT. 100)) THEN
         raCemis(2) =  prof.cemis2(1)
-        iNclouds_RTP = iNclouds_RTP + 1
+        iNclouds_RTP_black = iNclouds_RTP_black + 1
+      END IF
+      IF (iNclouds_RTP_black .GT. 0) THEN
+        write(kStdWarn,*) 'hmm, iNclouds_RTP_black > 0 so resetting iNclouds_RTP'
+	iNclouds_RTP = iNclouds_RTP_black
       END IF
 
       IF (((ctype1 .LT. 100) .OR. (ctype1 .GE. 400)) .AND. (cfrac1 .GT. 0)) THEN
@@ -2900,15 +2909,46 @@ c      print *,'*********************************************************'
         write(kStdErr,*) '  cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
         write(kStdErr,*) '  ctype1,ctype2 = ',ctype1,ctype2
         write(kStdErr,*) '  setting cfrac1 = cfrac12 = cfrac2'
-         ctop1  = ctop2
+        ctop1  = ctop2
+        cbot1  = cbot2	
         cfrac1  = cfrac2
         cfrac12 = cfrac2
         iNclouds_RTP = 2
         prof.cfrac   = cfrac1
         prof.cfrac12 = cfrac12
-        prof.cprtop  = ctop1 
+        prof.cprtop  = ctop1
+        prof.cprbot  = ctop2
       END IF
 
+      IF ((cfrac1 .GT. 0) .AND. (cfrac2 .GT. 0)) THEN
+        iTop1 = -1
+        iTop2 = -1
+        iBot1 = -1
+        iBot2 = -1	
+        !! need to check separation of pressures
+	DO i = 1,kProfLayer+1
+	  IF ((raPressLevels(i) .GT. cbot1) .AND. (raPressLevels(i) .GT. 0))  iBot1 = i
+	  IF ((raPressLevels(i) .GT. cbot2) .AND. (raPressLevels(i) .GT. 0))  iBot2 = i	  
+	END DO
+	DO i = kProfLayer+1,1,-1
+	  IF ((raPressLevels(i) .LT. ctop1) .AND. (raPressLevels(i) .GT. 0))  iTop1 = i
+	  IF ((raPressLevels(i) .LT. ctop2) .AND. (raPressLevels(i) .GT. 0))  iTop2 = i	  	  	  
+	END DO
+        IF ((iTop2-iTop1) .LT. 2) THEN
+          write(kStdWarn,*) 'cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+          write(kStdWarn,*) 'cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+          write(kStdWarn,*) 'oh oh ctop2,cbot1 maybe too close, need to try to adjust the BOTTOM layer of cloud1'
+	  IF ((iTop1-iBot1) .GT. 2) THEN
+	    prof.cprbot = raPressLevels(iBot1+1)-10
+            cbot1 = prof.cprbot
+  	    iBot1 = iBot1 + 1
+	    write(kStdWarn,*) 'readjusted cbot1,iBot1 = ',cBot1,iBot1
+	  ELSE
+	    !! probably nothing to do, as I do not want to adjust ctop1 or ctop2
+	  END IF
+	END IF
+      END IF
+      
       IF (cfrac12 .GT. max(cfrac1,cfrac2)) THEN
         write(kStdErr,*) 'kCARTA assumes cfac12 <= max(cfrac1,cfrac2)'
         write(kStdErr,*) 'cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
@@ -3112,7 +3152,7 @@ c these are to match iaCtype vs iaNML_Ctype
       END IF
 
       iNclouds_RTPX = iNclouds_RTP
-
+      
       IF ((ctype1 .LE. 0) .AND. (ctype2 .LE. 0)) THEN
         write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 0'
         iNclouds_RTP = 0

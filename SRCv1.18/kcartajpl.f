@@ -1393,8 +1393,10 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
       ctype2 = -9999
       cngwat1 = 0.0
       cngwat2 = 0.0
-      ctop1 = 100.0
-      ctop2 = 100.0
+      ctop1 = -100.0
+      ctop2 = -100.0
+      cbot1 = -100.0
+      cbot2 = -100.0
 
 c now do some initializations ... no of gases read in = 0,  
 c assume no of layers to be read in = kProfLayer, no radiance calcs to do 
@@ -1980,10 +1982,10 @@ c ******** duplicate the atmospheres if needed section
           iAtmLoop = 100
           IF ((cngwat2 .GT. 0) .AND. (cfrac2 .GT. 0) .AND. (iaCloudScatType(2) .GT. 0))  THEN
             iNatm    = 5    !! need rclr, r1,r2,r12 ... and then linear combination of these 4
-            write(kStdErr,*)  'TWO PCLSAM clouds : Cld1 [ctop1 cngwat1 cfrac1 cfrac12] = ',
-     $        ctop1,cngwat1,cfrac1,cfrac12
-            write(kStdErr,*)  'TWO PCLSAM clouds : Cld2 [ctop2 cngwat2 cfrac2 cfrac12] = ',
-     $        ctop2,cngwat2,cfrac2,cfrac12
+            write(kStdErr,*)  'TWO PCLSAM clouds : Cld1 [ctop1 cbot1 cngwat1 cfrac1 cfrac12] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,cfrac12
+            write(kStdErr,*)  'TWO PCLSAM clouds : Cld2 [ctop2 cbot2 cngwat2 cfrac2 cfrac12] = ',
+     $        ctop2,cbot2,cngwat2,cfrac2,cfrac12
             write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
             write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
             raAtmLoop(1) = 1.0
@@ -1993,8 +1995,8 @@ c ******** duplicate the atmospheres if needed section
             raAtmLoop(5) = 1.0
           ELSEIF ((cngwat2 .LE. 0) .AND. (cfrac2 .LE. 0) .AND. (iaCloudScatType(2) .LE. 0))  THEN
             iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
-            write(kStdErr,*)  'ONE PCLSAM clouds : [ctop1 cngwat1 cfrac1     ctop2 cngwat2 cfrac2 cfrac12] = ',
-     $        ctop1,cngwat1,cfrac1,'   ',ctop2,cngwat2,cfrac2,'  ',cfrac12
+            write(kStdErr,*)  'ONE PCLSAM clouds : [ctop1 cbot1 cngwat1 cfrac1     ctop2 cbot2 cngwat2 cfrac2 cfrac12] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,'   ',ctop2,cbot2,cngwat2,cfrac2,'  ',cfrac12
             write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
             write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
             raAtmLoop(1) = 1.0
@@ -2003,8 +2005,8 @@ c ******** duplicate the atmospheres if needed section
           ELSE
             write(kStdErr,*) 'Something wrong with (PCLSAM) clouds, cfrac12 = ',cfrac12
             write(kStdErr,*) 'iNatm has remained ',iNatm
-            write(kStdErr,*) 'ctop1,cngwat1,cfrac1,iaCloudScatType(1) = ',ctop1,cngwat1,cfrac1,iaCloudScatType(1)
-            write(kStdErr,*) 'ctop2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cngwat2,cfrac2,iaCloudScatType(2)
+            write(kStdErr,*) 'ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1) = ',ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1)
+            write(kStdErr,*) 'ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2)
             CALL DoStop
           END IF
           CALL duplicate_cloudsky_atm(iAtmLoop,raAtmLoop,

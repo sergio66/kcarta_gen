@@ -973,7 +973,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
 c these variables come in from the RTP file
 c note we can only have Cfrac = 0.0 or 1.0, for whatever cloud(s) in the atm
-      REAL Cfrac,cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,raCemis(kMaxClouds)
+      REAL Cfrac,cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2,raCemis(kMaxClouds)
       REAL raCloudFrac(kMaxClouds,3)
 
       INTEGER ctype1,ctype2
@@ -1053,8 +1053,10 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
       ctype2 = -9999
       cngwat1 = 0.0
       cngwat2 = 0.0
-      ctop1 = 100.0
-      ctop2 = 100.0
+      ctop1 = -100.0
+      ctop2 = -100.0
+      cbot1 = -100.0
+      cbot2 = -100.0
 
       CALL TranslateNameListFile(caDriverName,
      $      rf_low,rf_high,
@@ -1261,7 +1263,7 @@ c ******** RADNCE section
      $       iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $       iaNumLayer,iaaRadLayer,raProfileTemp,
      $       raSatAzimuth,raSolAzimuth,raWindSpeed,
-     $       cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+     $       cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP,
      $       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 
       iaKeyword(8) = 1
@@ -1272,8 +1274,8 @@ c ******** RADNCE section
 
       IF ((kRTP .EQ. 0) .OR. (kRTP .EQ. 1))  THEN
         write(kStdWarn,*) 'cfrac12 = ',cfrac12
-        write(kStdWarn,*) 'cfrac1,cngwat1,ctype1,ctop1 = ',cfrac1,cngwat1,ctype1,ctop1
-        write(kStdWarn,*) 'cfrac2,cngwat2,ctype2,ctop2 = ',cfrac2,cngwat2,ctype2,ctop2
+        write(kStdWarn,*) 'cfrac1,cngwat1,ctype1,ctop1,cbot1 = ',cfrac1,cngwat1,ctype1,ctop1,cbot1
+        write(kStdWarn,*) 'cfrac2,cngwat2,ctype2,ctop2,cbot2 = ',cfrac2,cngwat2,ctype2,ctop2,cbot2
         write(kStdWarn,*) 'iNclouds_RTP = ',iNclouds_RTP
       END IF
 
@@ -1586,10 +1588,10 @@ c ******** duplicate the atmospheres if needed section
           iAtmLoop = 100
           IF ((cngwat2 .GT. 0) .AND. (cfrac2 .GT. 0) .AND. (iaCloudScatType(2) .GT. 0))  THEN
             iNatm    = 5    !! need rclr, r1,r2,r12 ... and then linear combination of these 4
-            write(kStdErr,*)  'TWO PCLSAM clouds : Cld1 [ctop1 cngwat1 cfrac1 cfrac12] = ',
-     $        ctop1,cngwat1,cfrac1,cfrac12
-            write(kStdErr,*)  'TWO PCLSAM clouds : Cld2 [ctop2 cngwat2 cfrac2 cfrac12] = ',
-     $        ctop2,cngwat2,cfrac2,cfrac12
+            write(kStdErr,*)  'TWO PCLSAM clouds : Cld1 [ctop1 cbot1 cngwat1 cfrac1 cfrac12] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,cfrac12
+            write(kStdErr,*)  'TWO PCLSAM clouds : Cld2 [ctop2 cbot2 cngwat2 cfrac2 cfrac12] = ',
+     $        ctop2,cbot2,cngwat2,cfrac2,cfrac12
             write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
             write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
             raAtmLoop(1) = 1.0
@@ -1599,8 +1601,8 @@ c ******** duplicate the atmospheres if needed section
             raAtmLoop(5) = 1.0
           ELSEIF ((cngwat2 .LE. 0) .AND. (cfrac2 .LE. 0) .AND. (iaCloudScatType(2) .LE. 0))  THEN
             iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
-            write(kStdErr,*)  'ONE PCLSAM clouds : [ctop1 cngwat1 cfrac1     ctop2 cngwat2 cfrac2 cfrac12] = ',
-     $        ctop1,cngwat1,cfrac1,'   ',ctop2,cngwat2,cfrac2,'  ',cfrac12
+            write(kStdErr,*)  'ONE PCLSAM clouds : [ctop1 cbot1 cngwat1 cfrac1     ctop2 cbot2 cngwat2 cfrac2 cfrac12] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,'   ',ctop2,cbot2,cngwat2,cfrac2,'  ',cfrac12
             write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
             write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
             raAtmLoop(1) = 1.0
@@ -1609,8 +1611,8 @@ c ******** duplicate the atmospheres if needed section
           ELSE
             write(kStdErr,*) 'Something wrong with (PCLSAM) clouds, cfrac12 = ',cfrac12
             write(kStdErr,*) 'iNatm has remained ',iNatm
-            write(kStdErr,*) 'ctop1,cngwat1,cfrac1,iaCloudScatType(1) = ',ctop1,cngwat1,cfrac1,iaCloudScatType(1)
-            write(kStdErr,*) 'ctop2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cngwat2,cfrac2,iaCloudScatType(2)
+            write(kStdErr,*) 'ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1) = ',ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1)
+            write(kStdErr,*) 'ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2)
             CALL DoStop
           END IF
           CALL duplicate_cloudsky_atm(iAtmLoop,raAtmLoop,
