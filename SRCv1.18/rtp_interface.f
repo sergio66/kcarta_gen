@@ -2938,12 +2938,13 @@ c      print *,'*********************************************************'
           write(kStdWarn,*) 'cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
           write(kStdWarn,*) 'cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
           write(kStdWarn,*) 'oh oh ctop2,cbot1 maybe too close, need to try to adjust the BOTTOM layer of cloud1'
-	  IF ((iTop1-iBot1) .GT. 2) THEN
+	  IF ((iTop1-iBot1) .GE. 2) THEN
 	    prof.cprbot = raPressLevels(iBot1+1)-10
             cbot1 = prof.cprbot
   	    iBot1 = iBot1 + 1
 	    write(kStdWarn,*) 'readjusted cbot1,iBot1 = ',cBot1,iBot1
 	  ELSE
+	    write(kStdWarn,*) 'ooooops : top cloud too thin, try lower cloud ugh??!'
 	    !! probably nothing to do, as I do not want to adjust ctop1 or ctop2
 	  END IF
 	END IF

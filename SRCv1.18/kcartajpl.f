@@ -1312,7 +1312,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
 c these variables come in from the RTP file
 c note we can only have Cfrac = 0.0 or 1.0, for whatever cloud(s) in the atm
-      REAL Cfrac,cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,raCemis(kMaxClouds)
+      REAL Cfrac,cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2,raCemis(kMaxClouds)
       REAL raCloudFrac(kMaxClouds,3)
 
       INTEGER ctype1,ctype2

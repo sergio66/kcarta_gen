@@ -418,7 +418,7 @@ c in the files here are stored the HITRAN line params (stren, freq, width etc)
       CHARACTER*80 caStrongLineParams
 c this is new, where we have 19 NLTE bands
       PARAMETER (caStrongLineParams=
-     $         '/strowdata1/s1/sergio/AIRSCO2/CO2_BANDS_PARAM2/co2_allpqr_')
+     $         '/asl/s1/sergio/AIRSCO2/CO2_BANDS_PARAM2/co2_allpqr_')
 
 c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/, 
 c they have been copied to #; these files have removed 19 NLTE bands
@@ -432,7 +432,7 @@ c this is where the upper atm weakline database lies
 
 c this is where the strong band linemix strengths are
       CHARACTER*80 caLineMixDir
-      PARAMETER (caLineMixDir='/strowdata1/s1/sergio/AIRSCO2/LINEMIXPARAMS/')
+      PARAMETER (caLineMixDir='/asl/s1/sergio/AIRSCO2/LINEMIXPARAMS/')
 c*********************
 
 c the NLTE vib temp profiles

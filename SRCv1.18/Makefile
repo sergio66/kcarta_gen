@@ -130,21 +130,30 @@ HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
 # linux
 # these are gases 1 .. 63
 # RTPLIB = -L/asl/packages/rtpV105/lib -lrtp
+#
 # these are gases 1 .. 63 plus clouds 201 - 203
 # this is on asl.umbc.edu
 # RTPLIB = -L/asl/packages/rtpV105_4500/lib -lrtp
-### rtpV105 on taro.umbc.edu
-#RTPHOME = /asl/packages/rtpV105
-#RTPLIB = -L$(RTPHOME)/lib -lrtp
-### rtpV201 on taro.umbc.edu for g80, this works <<<<<<<<<<<<<<
+#
+# rtpV105 on taro.umbc.edu
+# RTPHOME = /asl/packages/rtpV105
+# RTPLIB = -L$(RTPHOME)/lib -lrtp
+#
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
 RTPHOME = /asl/packages/rtpV201_g80
 RTPLIB = -L$(RTPHOME)/lib -lrtp
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
+#
+### rtpV201 on taro.umbc.edu, 16 gases
+#RTPHOME = /asl/packages/rtpV201
+#RTPLIB = -L$(RTPHOME)/lib -lrtp
+#
 ### rtpV201 on compiled with ifort
 #RTPHOME = /home/sergio/git/rtp/rtpV201
 #RTPLIB = -L$(RTPHOME)/lib -lrtp
-### rtpV201 on taro.umbc.edu
-##RTPHOME = /asl/packages/rtpV201
-##RTPLIB = -L$(RTPHOME)/lib -lrtp
+#
 
 # ---------------
 # RTP include dir
@@ -155,20 +164,26 @@ RTPLIB = -L$(RTPHOME)/lib -lrtp
 # this is on asl.umbc.edu
 # RTPINC = -I/asl/packages/rtpV105_4500/include
 # RTPDEFS_FILE = /asl/packages/rtpV105_4500/include/rtpdefs.f
-### rtpV105 on taro.umbc.edu
+#
+# rtpV105 on taro.umbc.edu
 #RTPINC = -I/asl/packages/rtpV105/include
 #RTPDEFS_FILE = /asl/packages/rtpV105/include/rtpdefs.f
-
-### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#
+### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
 RTPINC = -I/asl/packages/rtpV201_g80/include
 RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs.f
 #RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs_f90.f90
-
+#
 ### 16 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #RTPINC = -I/asl/packages/rtpV201/include
 #RTPDEFS_FILE = /asl/packages/rtpV201/include/rtpdefs.f
 #RTPINC = -I/home/sergio/git/rtp/rtpV201/include
 #RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
+#
+### 16 gases rtpV201 with ifort
+#RTPINC = -I/home/sergio/git/rtp/rtpV201/include
+#RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
+#
 
 SHELL = /bin/sh
 
@@ -271,12 +286,17 @@ FDOUBLE = -N2 -N113
 # -w0 : inform about unused variables 
 # -O3 : heavy optimization
 # -64 : 64-bit objects (libraries must match)
+# -us : puts trailing underscore
 #
 # see https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 # -i8 -I${MKLROOT}/include/mic/ilp64 -I${MKLROOT}/include -mmic
-#FORTRANX=/cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
-#FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase
-##FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase -check bounds
+# see http://fulla.fnal.gov/acml/html/Intro.html#Intro,
+#     https://software.intel.com/en-us/node/510802 claims libimf.a,libm.a automatically linked in
+#
+#FORTRANX = /cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
+#FLAGS_RTP = -implicitnone -static -msse2 -extend-source 132 -O3 -nus
+#FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase -O3 -us
+##FLAGS = -implicitnone -static -msse2 -extend-source 132 -names lowercase -check bounds -us
 #UFLAG = 
 #LIBS  = -lblas 
 #FDOUBLE = -r8
