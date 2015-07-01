@@ -1740,7 +1740,14 @@ c local variables
       REAL rPT,rPB,rSwap,rP1,rP2,rIWP,rIWP0,rPBot,rPTop,rIWPSum,rIWP_mod
       CHARACTER*80 caName
       REAL rCld,rXCld,rCldFull,rCldPart,rFrac1,rFrac2,rPtopX,rPbotX
+      REAL raSurfPres(kMaxAtm)
 
+      write(kStdWarn,*) ' '
+      DO iJ = 1,iNatm
+        raSurfPres(iJ) = max(raPressStart(iJ),raPressStop(iJ))      
+        write(kStdWarn,*) '   surf pres(',iJ,') in ExpandScatter = ',raSurfPres(iJ)
+      END DO
+      
 c first figure out the temp variables to be set
       DO iI = 1,kMaxClouds
         iaCloudNumLayersT(iI) = iaCloudNumLayers(iI)
@@ -1924,11 +1931,21 @@ c note it will occupy the entire layer
      $                  (raPressLevels(iK)-raPressLevels(iK+1))/2
               rPT = raPressLevels(iK) + 
      $                  (raPressLevels(iK+1)-raPressLevels(iK))/2
-              rPB = raPressLevels(iK-1) + 
+              IF (raPressLevels(iK-1) .GT. raPressLevels(iK)) THEN
+                rPB = raPressLevels(iK-1) + 
      $                  (raPressLevels(iK)-raPressLevels(iK-1))/2
+              ELSEIF (raPressLevels(iK-1) .LT. raPressLevels(iK)) THEN
+                rPB = raSurfPres(1)
+	        write(kStdErr,*) '  oh oh, in expand_scatter : cloud near surface???'				
+	        write(kStdErr,*) '  ',iIn,iIndex,rPT,rPB,raSurfPres(1),iK,raPressLevels(iK-1),raPressLevels(iK)		
+	        write(kStdWarn,*) '  oh oh, in expand_scatter : cloud near surface???'				
+	        write(kStdWarn,*) '  ',iIn,iIndex,rPT,rPB,raSurfPres(1),iK,raPressLevels(iK-1),raPressLevels(iK)		
+              END IF
               iIndex = iJ1+(iJ2-1)+iSkipper
               raaPCloudTopT(iIn,iIndex) = rPT
               raaPCloudBotT(iIn,iIndex) = rPB  !! this was rPT before
+c	      print *,'n_rad_jac_scat.f : expand_scatter : ',iIn,iIndex,rPT,rPB,raSurfPres(1),
+c     $                   iK,raPressLevels(iK-1),raPressLevels(iK)	      
               IF (iJ2 .LT. iTop-iBot+1) THEN
                 !!!this is a full layer
                 rXCld = (rCldFull + rCldPart)

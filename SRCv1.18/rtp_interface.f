@@ -2908,16 +2908,45 @@ c      print *,'*********************************************************'
         write(kStdErr,*) '  kCARTA assumes if cfrac1 = 0 then cfrac2  = 0'
         write(kStdErr,*) '  cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
         write(kStdErr,*) '  ctype1,ctype2 = ',ctype1,ctype2
-        write(kStdErr,*) '  setting cfrac1 = cfrac12 = cfrac2'
-        ctop1  = ctop2
-        cbot1  = cbot2	
-        cfrac1  = cfrac2
-        cfrac12 = cfrac2
-        iNclouds_RTP = 2
-        prof.cfrac   = cfrac1
-        prof.cfrac12 = cfrac12
-        prof.cprtop  = ctop1
-        prof.cprbot  = ctop2
+	IF (prof.cngwat .GT. 0) THEN
+          write(kStdErr,*) '  since cngwat1 > 0, now resetting cfrac1 = cfrac12 = cfrac2'
+          ctop1  = ctop2
+          cbot1  = cbot2	
+          cfrac1  = cfrac2
+          cfrac12 = cfrac2
+          iNclouds_RTP = 2
+          prof.cfrac   = cfrac1
+          prof.cfrac12 = cfrac12
+          prof.cprtop  = ctop1
+          prof.cprbot  = ctop2
+	ELSE
+          write(kStdErr,*) '  since cngwat1 <= 0, cfrac1 <=0, reset CLD2 -> CLD1'
+	  !! set cld2 --> cld1
+          cngwat1  = cngwat2	  
+          ctop1  = ctop2
+          cbot1  = cbot2	
+          cfrac1  = cfrac2
+          ctype1  = ctype2
+          iaCtype(1) = ctype1
+	  !! set cld2 --> 0	  
+          cfrac12 = 0.0
+	  cfrac2  = 0.0
+	  cngwat2 = 0.0
+	  ctype2 = -1
+          iNclouds_RTP = 1
+          iaCtype(2) = -1
+	  !! update prof struct	  
+          prof.cfrac   = cfrac1
+          prof.cprtop  = ctop1
+          prof.cprbot  = ctop2
+	  prof.cngwat  = prof.cngwat2
+	  prof.cpsize  = prof.cpsize2
+	  prof.ctype   = prof.ctype2
+	  prof.cfrac2  = 0.0
+	  prof.cngwat2 = 0.0	  
+          prof.cfrac12 = 0.0
+	  prof.ctype2 = -1
+	END IF
       END IF
 
       IF ((cfrac1 .GT. 0) .AND. (cfrac2 .GT. 0)) THEN
@@ -2943,9 +2972,14 @@ c      print *,'*********************************************************'
             cbot1 = prof.cprbot
   	    iBot1 = iBot1 + 1
 	    write(kStdWarn,*) 'readjusted cbot1,iBot1 = ',cBot1,iBot1
+	  ELSEIF ((iTop2-iBot2) .GE. 2) THEN
+	    write(kStdWarn,*) 'ooooops : top cloud too thin, try lower cloud ugh??!'	  
+	    prof.cprtop2 = raPressLevels(iTop2-1)+10
+            ctop2 = prof.cprtop2
+  	    iTop2 = iTop2 -1 1
+	    write(kStdWarn,*) 'readjusted ctop2,iTop2 = ',cTop2,iTop2
 	  ELSE
-	    write(kStdWarn,*) 'ooooops : top cloud too thin, try lower cloud ugh??!'
-	    !! probably nothing to do, as I do not want to adjust ctop1 or ctop2
+	    write(kStdWarn,*) 'ooooops : top AND Bot cloud too thin!!!'
 	  END IF
 	END IF
       END IF
@@ -3313,15 +3347,15 @@ c      iaPhase(1)             = -1       !default to HG phase function
         iaPhase(iI)             = -1       !default to HG phase function
 
         write(kStdWarn,*)    'cloud info for RTP cloud # ',iI
-        write (KStdWarn,222) 'cloud file    = ',caaCloudFile(iI)
-        write (kStdWarn,*)   'cloud top     = ',raCprtop(iI),' mb'
-        write (kStdWarn,*)   'cloud bot     = ',raCprbot(iI),' mb'
-        write (kStdWarn,*)   'cloud IWP     = ',raCngwat(iI),' gm m-2'
-        write (kStdWarn,*)   'particle size = ',raCpsize(iI),' um'
+        write (KStdWarn,223) caaCloudFile(iI)
+        write (kStdWarn,*)   '  cloud top     = ',raCprtop(iI),' mb'
+        write (kStdWarn,*)   '  cloud bot     = ',raCprbot(iI),' mb'
+        write (kStdWarn,*)   '  cloud IWP     = ',raCngwat(iI),' gm m-2'
+        write (kStdWarn,*)   '  particle size = ',raCpsize(iI),' um'
         IF (iI .EQ. 1) THEN
-          write (kStdWarn,*)   'cloud frac    = ',cfrac1
+          write (kStdWarn,*)   '  cloud frac    = ',cfrac1
         ELSEIF (iI .EQ. 2) THEN
-          write (kStdWarn,*)   'cloud frac    = ',cfrac2
+          write (kStdWarn,*)   '  cloud frac    = ',cfrac2
         END IF
       END DO
 
@@ -3351,7 +3385,7 @@ c note it will occupy the entire layer
             rSwap = rPT
             rPT   = rPB
             rPB   = rSwap
-            write (kStdWarn,*) 'Swapped cloud top & bottom pressures'
+            write (kStdWarn,*) 'Swapped cloud top & bottom pressures',iJ1,iJ,rPT,rPB
           END IF
 
           iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
@@ -3369,9 +3403,10 @@ c note it will occupy the entire layer
           iScat=iaaScatTable(iIn,iJ1)
           caName=caaaScatTable(iIn,iJ1)
           write(kStdWarn,*) '   layer #',iJ1,' = kLAYERS pressure layer ',iNum
-          write(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
-          write(kStdWarn,*) '   mean particle size (um)  = ',rP2
-          write(kStdWarn,*) '   scatter table number = ',iScat
+          write(kStdWarn,*) '     layer top/bot press = ',rPT,rPB,' mb'
+          write(kStdWarn,*) '     IWP (or LWP) (gm-2)      = ',rP1
+          write(kStdWarn,*) '     mean particle size (um)  = ',rP2
+          write(kStdWarn,*) '     scatter table number = ',iScat
           write(kStdWarn,222) caName
         END DO 
 
@@ -3520,7 +3555,8 @@ c these are to check that the scattering table names are unique
         END DO
       END DO 
 
- 222  FORMAT(A80) 
+ 222  FORMAT(A80)
+ 223  FORMAT('   cloud file    = ',A80)
  333  CONTINUE
 
       RETURN

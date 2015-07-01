@@ -43,9 +43,9 @@ c local
 
       rPmin = +1.0e10
       rPmax = -1.0e10
-      iI = 20
-      IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND. (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) 
-     $  THEN
+      iI = 25   !!! make this really high up
+      IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND.
+     $    (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) THEN
         !! pressures decreasing with index; use CO2 temps and pressures
         DO iI = kProfLayer-iProfileLayers+1,kProfLayer
           iJ = iI-iOffSet
@@ -57,7 +57,8 @@ c local
 c           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
         END DO
       ELSEIF 
-     $((raaPress(iI,iCO2_ind) .LT. raaPress(iI+1,iCO2_ind)) .AND. (raaPress(iI+1,iCO2_ind) .LT. raaPress(iI+2,iCO2_ind))) THEN
+     $((raaPress(iI,iCO2_ind) .LT. raaPress(iI+1,iCO2_ind)) .AND.
+     $ (raaPress(iI+1,iCO2_ind) .LT. raaPress(iI+2,iCO2_ind))) THEN
         !! pressures increasing with index; use CO2 temps and pressures
         DO iI = kProfLayer-iProfileLayers+1,kProfLayer
           iJ = iI-iOffSet
@@ -69,6 +70,9 @@ c           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
 c          print *,'b',iJ,raP(iJ),raT(iJ)
         END DO
       ELSE
+        DO iJ = iI-2,iI+2
+	  write(kStdErr,*) 'Get_Temp_Plevs ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
+	END DO
         write(kStdErr,*) 'In Get_Temp_Plevs, Pressures neither increasing nor decreasing'
         CALL DoStop
       END IF
