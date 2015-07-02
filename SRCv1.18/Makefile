@@ -258,8 +258,8 @@ FORTRANX=/asl/opt/absoft/absoft10.0/bin/af77  ### <<<<<<< works
 #
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
-FLAGS = -w -W -C -O -A -N3 -s -f -N15                                               ####
-FLAGS_RTP = -w -W -O -C -N3 -s                                                      ####
+#FLAGS = -w -W -C -O -A -N3 -s -f -N15
+#FLAGS_RTP = -w -W -O -C -N3 -s
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #

@@ -1284,7 +1284,7 @@ c %%%%%%%%%%%%% CLOUDY SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, 
      $         raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
      $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag,
-     $              iNLTEStart,raaPlanckCoeff,
+     $              iNLTEStart,rCO2MixRatio,raaPlanckCoeff,
      $              iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
      $              raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
      $              caJacobFile,caJacobFile2,

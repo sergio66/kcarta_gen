@@ -8,6 +8,10 @@ c also, the REFERENCE profile reading subroutine is here
 
 c************************************************************************
 c this subroutine computes the temperatures at the pressure levels
+c since Antartic surface pressures can be as low as 500 mb, CO2.N2O,CO mixing ratios were failing if iBot=20
+c this corresponds to raPresslevls(20) = 596 mb
+c so subr Get_Temp_Plevs (in n_pth_mix.f) and subr compute_co2_mixratio (in kcartamisc.f)
+c both needed to have iBot tweaked to layer 25 or above, which corresponds to raPresslevls(25) = 496 mmb
       SUBROUTINE Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress,raThickness,
      $  raPressLevels,raTPressLevels)
 

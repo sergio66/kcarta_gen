@@ -80,10 +80,12 @@ c       rf1 = 1255
 c       rf2 = 1305
 c       rf1 = 1780
 c       rf2 = 1805
+c       rf1 = 2080
+c       rf2 = 2580
 c       print *,'*********************************************************'
 c       print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for testing'
 c       print *,'*********************************************************'
-      !!! TEST DEBUG
+c      !!! TEST DEBUG
 
       RETURN
       END
@@ -2578,6 +2580,7 @@ c set the B.C.'s
       kWindSpeed = prof.wspeed
 
       kMonth = prof.rtime/(60*60*24*365.25)   !!! tai2utc1993 would say this is years since Jan 1,1993
+      kMonth = prof.rtime/(60*60*24*365.25)   !!! tai2utc1958 would say this is years since Jan 1,1958      
       IF ((kMonth - anint(kMonth)) .GT. 0) THEN
         kMonth = kMonth - anint(kMonth) !! kMonth was between x and (x+0.5) eg 14.3 --> 14.3-14.0 = 0.3
       ELSE

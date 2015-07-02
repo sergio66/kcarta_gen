@@ -5477,7 +5477,7 @@ c this is quick clear sky downlook radT, based on rad_main.f : rad_trans_SAT_LOO
      $    caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,
      $    raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag,
      $    raThickness,raPressLevels,iProfileLayers,pProf,
-     $    raTPressLevels,iKnowTP,
+     $    raTPressLevels,iKnowTP,rCO2MixRatio,
      $         raaRadsX,iNumOutX)
 
       IMPLICIT NONE
@@ -5520,7 +5520,7 @@ c                   user specified value if positive
       CHARACTER*80 caOutName
 c these are to do with the arbitrary pressure layering
       INTEGER iKnowTP,iProfileLayers
-      REAL raThickness(kProfLayer),pProf(kProfLayer),
+      REAL raThickness(kProfLayer),pProf(kProfLayer),rCO2MixRatio,
      $     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
 
 c raaRadsX,iNumOutX are to keep up with cloud fracs
@@ -5549,6 +5549,9 @@ c for specular reflection
       REAL raSpecularRefl(kMaxPts)
       INTEGER iSpecular,iFrX
 
+c for NLTE
+      REAL suncos,scos1,vsec1
+      
       iNumOutX = 0
 
       rThermalRefl=1.0/kPi
@@ -5774,23 +5777,58 @@ c then do the topmost layer (could be fractional)
           rMPTemp = raVT1(iL)
 
           CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-          IF (iDp .GT. 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-            DO iFr=1,iDp
-              CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq,
+
+          IF (iDoSolar .LT. 0) THEN
+            IF (iDp .GT. 0) THEN
+              write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+              DO iFr=1,iDp
+                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq,
      $            raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2,
      $            raSun,-1,iNumLayer,rFracTop,rFracBot,
      $            iProfileLayers,raPressLevels,
      $            iNLTEStart,raaRadsX)
-              CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-              iNumOutX = iNumOutX + 1
+                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+                iNumOutX = iNumOutX + 1
+                DO iFrX = 1,kMaxPts
+                  raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
+                END DO
+              END DO
+            END IF
+	  ELSE
+            IF (iDp .EQ. 1) THEN 	  
+              write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer' 
+
+              suncos = raSunAngles(iaRadLayer(1))           !! at surface
+              scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
+              vsec1  = raLayAngles(iaRadLayer(iNumLayer))   !! at TOA
+
+              suncos = cos(suncos*kPi/180.0)
+              scos1  = cos(scos1*kPi/180.0)
+              vsec1  = 1/cos(vsec1*kPi/180.0)
+
+              DO iFr=1,kMaxPts
+                rT = exp(-raaAbs(iFr,iL)/rCos)
+                rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
+                rPlanck = r1*((raFreq(iFr))**3)/rPlanck
+                raInten2(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT		
+              END DO
+	      
+              CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1,
+     $                  iaRadLayer,iNumlayer,raInten2,rCO2MixRatio)
+              iNumOutX = iNumOutX + 1           
               DO iFrX = 1,kMaxPts
                 raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
               END DO
-            END DO
-          END IF
-        END DO
-      END IF
+c              print *,'abcde',raSunAngles(iaRadLayer(1)),suncos,raFreq(1),raInten(1),raInten2(1)	      
+              CALL wrtout(iIOUN,caOutName,raFreq,raInten2)      
+	      
+            ELSEIF (iDp .GT. 1) THEN
+	      write(kStdErr,*) 'oops in scatter_pclsam_cpde, at NLTE, dump more than 1 rad at TOA???'
+	      CALL DoStop
+	    END IF	  
+	  END IF            !! if iDoSolar       
+        END DO              !! do iLay = iHigh,iHigh
+      END IF                !! if iHigh > 0
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 

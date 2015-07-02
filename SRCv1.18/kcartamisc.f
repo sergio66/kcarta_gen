@@ -3101,6 +3101,10 @@ c pcolor(fc,1:iL,qc(:,(1:iL)+iL*2)'); shading flat; colorbar  %% WGT fcn
 
 c************************************************************************
 c this figures out CO2 mixing ratio
+c since Antartic surface pressures can be as low as 500 mb, CO2.N2O,CO mixing ratios were failing if iBot=20
+c this corresponds to raPresslevls(20) = 596 mb
+c so subr Get_Temp_Plevs (in n_pth_mix.f) and subr compute_co2_mixratio (in kcartamisc.f)
+c both needed to have iBot tweaked to layer 25 or above, which corresponds to raPresslevls(25) = 496 mmb
       SUBROUTINE compute_co2_mixratio(raaPress,raaPartPress,raaAmt,iNumLayer,rFracBot,rCO2MixRatio)
 
       IMPLICIT NONE
@@ -3123,8 +3127,6 @@ c local
       cfac = 10 * 18.015 / (kAvog / 1000)
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>
-      iBot = 20  !! assume profile has started from here!!!!
-      iTop = kProfLayer - iBot
       iBot = kProfLayer - iNumLayer + 1 + 1  !! assume profile has started from here!!!!
       iTop = iBot + 10
       write(kStdWarn,*) 'WATER : Computing average ppmvs in lower trop between lays ',iBot,iTop
@@ -3151,7 +3153,8 @@ c >>>>>>>>>>>>>>>>>>>>>>>>>
       write(kStdWarn,*)' column amount water = ',rX,' mm'
      
 c >>>>>>>>>>>>>>>>>>>>>>>>>
-      iBot = 20  !! assume profile has started from here!!!!
+      iBot = 20                              !! assume profile has started from here !!!!
+      iBot = max(20,kProfLayer-iNumLayer+5)  !! account for p.spres being in Antartic!!!            
       iTop = kProfLayer - iBot
       write(kStdWarn,*) 'CO2 : Computing average ppmvs in lower trop between lays ',iBot,iTop
 
@@ -3198,7 +3201,8 @@ c >>>>>>>>>>>>>>>>>>>>>>>>>
       write(kStdWarn,*)' column amount ozone = ',rX,' du'
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>
-      iBot = 20  !! assume profile has started from here!!!!
+      iBot = 20                              !! assume profile has started from here !!!!
+      iBot = max(20,kProfLayer-iNumLayer+5)  !! account for p.spres being in Antartic!!!            
       iTop = kProfLayer - iBot
       write(kStdWarn,*) 'N2O/CO/CH4 : Computing average ppmvs in lower trop between lays ',iBot,iTop
 

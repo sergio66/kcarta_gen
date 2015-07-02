@@ -556,7 +556,23 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+07/02/15        PCLSAM cloud calcs can now include fast SARTA nlte
 
+07/01/15        Since Antartic surface pressures can be as low as 500 mb, CO2,N2O,CO, 
+                mixing ratios were failing if iBot=20 (raPresslevls(20) = 596 mb)
+                So subr Get_Temp_Plevs (in n_pth_mix.f) and subr compute_co2_mixratio (in kcartamisc.f)
+                both needed to have iBot tweaked to layer 25 or above (raPresslevls(25) = 496 mmb)
+		else eg NLTE failed since OC2 mixratio was NAN, and code could not correctly
+		compute temperatures at pressure levels
+
+06/30/15        Tweaked cloud entering routines in rtp_interface.f, since if there were
+                a) two clouds too close together (bot of cld 1 close to top of cld2)
+		b) one of the clouds too close to surface
+		the code used to
+		a) stop because it said the clouds occupied the same layers
+		b) do a pressure average of (layer above surface, and 0) and say oops this
+		   cloud layer is ABOVE the layer above it, and fail
+		   
 01/22/15        Put in error checking of mixed path weights into "GetMixVertTemp"
                 so that if the mixed paths are all set to 0 incorrectly, code stops
 
