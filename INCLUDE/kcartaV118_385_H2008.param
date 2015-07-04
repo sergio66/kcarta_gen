@@ -342,10 +342,10 @@ c      PARAMETER (kBloatPts=1)
 c kUpperAtmRefPath == path to upper atm 100 layers reference profiles
 c                  == profiles were used in making upper atm kCARTA database
       CHARACTER*80 caUpperAtmRefPath
-      PARAMETER (caUpperAtmRefPath= '#/KCARTADATA/NLTE/UA/')
+      PARAMETER (caUpperAtmRefPath= '^/KCDATA/NLTE/UA/')
 c kAuxNLTERefsPath = path to some US STd reference profiles which include LA,UA
       CHARACTER*80 caAuxNLTERefsPath
-      PARAMETER (caAuxNLTERefsPath = '/asl/data/kcarta/KCARTADATA/NLTE/LA/')
+      PARAMETER (caAuxNLTERefsPath = '^/KCDATA/NLTE/LA/')
 
 c*********************
 c the LineMix,LineParam  and weak CO2 lines 
@@ -373,11 +373,11 @@ c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/,
 c they have been copied to #; these files have removed 19 NLTE bands
 c this is where we have lower atm weakline database
       CHARACTER*80 caWeakCO2Path
-      PARAMETER (caWeakCO2Path = '#/BACKGND_COUSIN/fbin/etc.ieee-le/385ppmv/')
+      PARAMETER (caWeakCO2Path = '^/BACKGND_COUSIN/fbin/etc.ieee-le/385ppmv/')
 c this is where the upper atm weakline database lies
       CHARACTER*80 caWeakUpperAtmCO2Path
       PARAMETER (caWeakUpperAtmCO2Path =
-     $   '#/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/')
+     $   '^/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/')
 
 c this is where the strong band linemix strengths are
       CHARACTER*80 caLineMixDir

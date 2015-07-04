@@ -1210,7 +1210,7 @@ c      END IF
         kBloatNLTEOutUAOpen = -1 
       END IF  
 
-      write(kStdWarn,*) 'end of run!!!!!!!!!!!'
+      write(kStdWarn,*) 'closed files ... !!!!!!!!!!!'
   
       RETURN
       END

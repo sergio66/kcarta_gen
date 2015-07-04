@@ -258,14 +258,14 @@ FORTRANX=/asl/opt/absoft/absoft10.0/bin/af77  ### <<<<<<< works
 #
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
-#FLAGS = -w -W -C -O -A -N3 -s -f -N15
-#FLAGS_RTP = -w -W -O -C -N3 -s
+#FLAGS     = -w -W -C -O -N3 -s -A -f -N15
+#FLAGS_RTP = -w -W -C -O -N3 -s
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #### code development : turn on -C and turn off -02 (check bounds on, no optimization) #### 
 #
 #### when you are sure code works, turn off -C and turn up -03 or -04 #### 
-FLAGS = -w -W -O3 -A -N3 -s -f -N15  ## <<<
-FLAGS_RTP = -w -W -O3 -N3 -s         ## <<
+FLAGS     = -w -W -O3 -N3 -s -A -f -N15  ## <<<
+FLAGS_RTP = -w -W -O3 -N3 -s             ## <<
 #### when you are sure code works, turn off -C and turn up -03 or -04 #### 
 #
 #LIBS = -lU77 -L../LIB/blas.ref -lblas -L/usr/local/absoft/lib -llapack
@@ -290,8 +290,8 @@ FDOUBLE = -N2 -N113                   #<<<
 #     https://software.intel.com/en-us/node/510802 claims libimf.a,libm.a automatically linked in
 #
 #FORTRANX = /cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
-#FLAGS_RTP = -implicitnone -extend-source 132 -O3 -nus
-#FLAGS = -implicitnone -extend-source 132 -names lowercase -O3 -nus
+#FLAGS_RTP = -implicitnone -extend-source 132 -O3 -assume nounderscore
+#FLAGS     = -implicitnone -extend-source 132 -O3 -assume nounderscore -names lowercase
 ###FLAGS = -implicitnone -msse2 -extend-source 132 -names lowercase -check bounds -nus
 #UFLAG = 
 #LIBS  = -lblas 
