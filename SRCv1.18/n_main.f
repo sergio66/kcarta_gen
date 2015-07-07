@@ -356,12 +356,15 @@ c default NLTE
       iNumAltComprDirs      = -1      !assume no alternate compressed dirs
       iNumNewGases     = -1      !assume no new spectroscopy
       iNumNLTEGases    = -1      !assume no nonLTE
-      iNLTE_SlowORFast = +1      !but if we do NLTE, use slow accurate mode
-      iNLTE_SlowORFast = -2      !but if we do NLTE, use fast compressed mode
       iDoUpperAtmNLTE  = -1      !assume do not do upper atm NLTE
       iAllLayersLTE    = -1      !top layers in NLTE, bottom layers in LTE
       iUseWeakBackGnd  = +1      !include computations of weak backgnd lines
       iSetBloat        = -1      !stay at 0.0025 cm-1 spacing
+
+      iNLTE_SlowORFast = +1      !but if we do NLTE, use slow accurate    mode
+      iNLTE_SlowORFast = -2      !but if we do NLTE, use fast compressed  mode (not working well)
+      iNLTE_SlowORFast = -1      !but if we do NLTE, use fast SARTA based mode DEFAULT DEFAULT
+
       DO iI = 1,kGasStore
         raNLTEstrength(iI) = 1.0          !if you add file, assume strength 1
         raNLTEstart(iI)    = 100.0        !assume nonLTE starts bloody high up!

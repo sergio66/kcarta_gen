@@ -923,22 +923,27 @@ v1.18
 05/16/12        iNLTE_SlowORFast = +1 for slow LBL NLTE model
                                  = -1 for fast model from interping SARTA 
                                       fast NLTE
-                                 = -2 for fast NLTE from compress lkup tables
+                                 = -2 for fast NLTE from compress lkup tables DEFAULT
 
                 Use variable iNLTE_SlowORFast = +1   !default slow LBL model
-                             iNLTE_SlowORFast = -1   !fast guess  model
+                             iNLTE_SlowORFast = -1   !fast guess SARTA based model
                              iNLTE_SlowORFast = -2   !fast compressed LBL model
 
-                               iChunk_DoNLTE = -1    !default : LTE
-                This would set iChunk_DoNLTE = +1    !default slow LBL model
-                               iChunk_DoNLTE = +2    !fast guess  model
-                               iChunk_DoNLTE = +3    !fast compressed LBL model
+                                iChunk_DoNLTE = -1    !default : LTE			       
+                Above would set iChunk_DoNLTE = +1    !slow LBL model
+                                iChunk_DoNLTE = +2    !fast guess  model
+                                iChunk_DoNLTE = +3    !fast compressed LBL model
                 For iNLTE_SlowORFast = -1,-2 only need these in .nml file : 
                   iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID(),iaNLTEChunks(),
                   iaaNLTEChunks(,)
       !matlab cd : /home/sergio/KCARTADATA/NLTE/SARTA_COEFS/ 
       !fname='/asl/data/sarta_database/Data_jan04untun/Coef/setnte_oct05.dat'; 
-      ![idchan, freq, coef] = rd_nte_be(fname); 
+      ![idchan, freq, coef] = rd_nte_be(fname);
+
+
+         iNLTE_SlowORFast = -1    !!use the fast SARTA model DEFAULT DEFAULT
+         iNLTE_SlowORFast = -2    !!use the fast COMPRESSED KCARTA model
+         iNLTE_SlowORFast = +1    !!use the slow LBL SARTA model
 
 v1.17           Stand alone, Leave alone
 ------

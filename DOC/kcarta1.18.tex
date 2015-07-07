@@ -4091,11 +4091,12 @@ The information required in this section is of the following form\\
 \ttab caaNLTEBands(1..N,1..P)   = \\
 \ttab
 
-\noindent $iNLTE_SlowORFast$ tells the code whether to use the slow accurate
-LBL model (+1) or regression coefficients used by the fast model (-1). If you
-use the Fast Version (-1), then the only namelist parameters you need to 
-set are iNumNLTEGases,iNLTE\_SlowORFast,iaNLTEGasID(),iaNLTEChunks(a),
-                  iaaNLTEChunks(a,b)
+\noindent $iNLTE_SlowORFast$ tells the code whether to use the slow
+accurate LBL model (+1) or regression coefficients used by the fast
+compressed model (-2) or the SARTA NLTE Fast Model (-1) which is the DEFAULT. If
+you use the Fast Version (-2), then the only namelist parameters you
+need to set are iNumNLTEGases,iNLTE\_SlowORFast,iaNLTEGasID(),iaNLTEChunks(a),
+iaaNLTEChunks(a,b)
 
 \noindent $iNumNLTEGases$ tells the code the number of gases that are in NLTE.
 If NLTEGases = -1, then all gases are in LTE (no gas in NLTE). The code uses 
