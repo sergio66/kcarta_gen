@@ -36,13 +36,13 @@ c      print *,dT,dH98/dH96
 
       IF (iQtips_H98 .NE. iDefault) THEN
         print *,'iQtips_H98,iDefault = ',iQtips_H98,iDefault
-        END IF
+      END IF
 
       IF (iQtips_H98 .GT. 0) THEN  !!call default (most recent)
         CALL qfcnH98(dT,iGasID,iISO,dPartitionFcn,dMass)
       ELSE
         CALL qfcnH96(dT,iGasID,iISO,dPartitionFcn,dMass)
-        END IF
+      END IF
 
       RETURN
       END
@@ -79,16 +79,16 @@ c local variables
           d2 = d1 !!make self coeff == air coeff
         ELSE IF ((d2 .LE. 1.0d-16) .AND. (iGasID .EQ. 1)) THEN
           d2 = d1 * 5.0 !!self coeff
-          END IF
+        END IF
 
         IF (iGasID .EQ. 2) THEN
           d2 = (dPP) * d2 * ((296.0/dLTE) ** (0.685*1.0d0))
         ELSEIF (iGasID .NE. 2) THEN
           d2 = (dPP) * d2 * ((296.0/dLTE) ** dm)
-          END IF
+        END IF
 
         daBroad(iLines) = (d1 + d2)
-        END DO
+      END DO
 
       RETURN
       END
@@ -135,7 +135,7 @@ c local variables
           se = 1.0d0
         ELSE
           se = (1.0d0 - dexp(s2))/(1.0d0 - dexp(s3))
-          END IF
+        END IF
 
         dPartitionFcn = daPartitionFcn(iLines)
         sq = dPartitionFcn
@@ -145,7 +145,7 @@ c local variables
 c no adjustment to SQ due to NLTE
         daQtipsFactor(iLines) = 1.0d0   
 
-        END DO
+      END DO
 
       RETURN
       END
@@ -195,7 +195,7 @@ cc         IF (IGAS .LE. 32) THEN
 cc           CALL QTFCT(IGAS,ISO,VTBOT,SQ)
 cc         ELSEIF (IGAS .GE. 33) THEN
 cc           CALL QTINT(IGAS,ISO,VTBOT,SQ)
-cc         ENDIF
+cc       ENDIF
 cc         IF (IGAS .EQ. 2 .OR. IGAS .EQ. 5) JFAC = 1.0
 cc         IF (IGAS .EQ. 1 .OR. IGAS .EQ. 3) JFAC = 1.5
 cc         SQ = SQ*(TP/VTBOT)**JFAC
@@ -226,7 +226,7 @@ c this is from the new GENLN2 that Dave Edwards sent me
           se = 1.0d0
         ELSE
           se = (1.0d0 - dexp(s2))/(1.0d0 - dexp(s3))
-          END IF
+        END IF
 
         sq = sq_nlte          !!this is partition fcn at NLTE         
         daStrenNLTE(iLines) = dGasAmt*daStren296(iLines)*sb*se*sq*kAvog
@@ -236,8 +236,8 @@ c this is from the new GENLN2 that Dave Edwards sent me
           daQtipsFactor(iLines) = SQ_NLTE/SQ_LTE * 1.0d0
         ELSE
           daQtipsFactor(iLines) = 1.0d0
-          END IF
-        END DO
+        END IF
+      END DO
 
 c     write(*,1234) dLTE,dNLTE,dPartitionFcn,dvibqft
  1234 FORMAT(4(F15.5,' '))
@@ -283,7 +283,7 @@ c don't need this to be output at all, so leave it local
       iTalk = -1          !!!!just summarize things        DEFAULT
       IF (iTalk .NE. iDefault) THEN
         print *,'iTalk,iDefault = ',iTalk,iDefault
-        END IF
+      END IF
 
       !dLTE     is from the KLAYERS profiles (and/or averaged over mixed paths)
       !dLTEr1r2 is from the VibTemp profiles 
@@ -302,7 +302,7 @@ c          print *,'oopsy ... need default low P,Tvib : ',iL,dP,dP/kAtm2mb
 c          dTop = min(dTK,vtdef)
 c          dBot = min(dTK,vtdef)
 c          CALL DoStop
-c          END IF
+c        END IF
 
         dEnergytop = daElower(iLines) + daLineShift(iLines)
         dEnergyBot = daElower(iLines)
@@ -328,7 +328,7 @@ c          END IF
           write(kStdErr,*) 'In NLTEPopulationRatios, had wierd iaJ_UorL'
           write(kStdErr,*) 'iLines,iaJ_UorL(iLines) = ',iLines,iaJ_UorL(iLines)
           CALL DoStop
-          END IF
+        END IF
 
 c !! genln4 stuff        
         dDeltaT = (dTK - dTop)/(dTK*dTop)
@@ -338,7 +338,7 @@ c !! genln4 stuff
 
         IF ((iBdat .EQ. +1) .AND. (iTdat .EQ. -1)) THEN
           daRTop(iLines) = daRBot(iLines)
-          END IF
+        END IF
 
         daDelta(iLines) = dexp(-kPlanck2 * daLineShift(iLines)/dLTE)
 
@@ -350,7 +350,7 @@ c !! genln4 stuff
         ELSE
           daCFactor(iLines) = 0.0d0
           daKFactor(iLines) = 1.0d0
-          END IF
+        END IF
 c        daANLTE(iLines)   = daKfactor(iLines)
 c        daCNLTE(iLines)   = daRTop(iLines)
 
@@ -358,7 +358,7 @@ c        if (iLines .EQ. 41) THEN
 c          write(*,1400) iL,iLines,daLineshift(iLines),dVibCenter,
 c     $                  dLTE,dLTEr1r2,dNLTE,
 c     $                  daRTop(iLines),daKFactor(iLines)
-c          END IF
+c        END IF
 
         IF (iTalk .GT. 0) THEN
           write(*,2000) iLines,daRTop(iLines),daRBot(iLines),daDelta(iLines),
@@ -367,8 +367,8 @@ c          END IF
 
           write(*,2000) iLines,daRTop(iLines),daRBot(iLines),daDelta(iLines),
      $                daCFactor(iLines),daKFactor(iLines)
-          END IF
-        END DO
+        END IF
+      END DO
 
  1400 FORMAT(2(I3,' '),2(F11.5,' '),3(F7.3,' '),2(F10.5,' '))
  2000 FORMAT(I3,' ',D12.4,' ',D12.4,' ',D12.4,' ',D12.4,' ',D12.4,' ',D12.4)
@@ -415,7 +415,7 @@ c local vars
       ELSE
         dBeta  = 1.0d0 !!!if in LTE, rBot = rTop = 1 ==> planck unmodified
         dAlpha = 1.0d0
-        END IF
+      END IF
 
 c      !!!! to test this mode, by setting it to LTE ratios
 c      iAlwaysLTE = -1
@@ -423,7 +423,7 @@ c      IF (iAlwaysLTE .EQ. +1) THEN
 c        !this is the equivalent of iAllLayersLTE = +1 in the namelist file
 c        dBeta  = 1.00d0
 c        dAlpha = 1.00d0
-c        END IF
+c      END IF
 
       RETURN
       END
@@ -484,7 +484,7 @@ c local variables
         write(kStdErr,*) 'in the upper AIRS layers (0.005 - 0.000025 mb)'
         write(kStdErr,*) 'need iUnCompressType -2,-3, not ',iUnCompressType
         CALL DoStop
-        END IF
+      END IF
 
       iIOUN = kCompUnit 
       CALL CompFileName(iUnCompressType,iGasID,rFileStartFr,iTag,iActualTag,
@@ -500,7 +500,7 @@ c check that the file has the data for the correct gas
  1000   FORMAT('Error! file : ',/,A80,/, 
      $         'contains data for GasID ',I3,' not desired GasID : ',I3) 
         CALL DoSTOP 
-        END IF 
+      END IF 
  
 c check that the data file has the right number of layers 
       IF (iNLay .NE. kMaxLayer) THEN 
@@ -509,7 +509,7 @@ c check that the data file has the right number of layers
  1010   FORMAT('Error! file : ',/,A80,/, 
      $         'contains data for ',i3,' layers but kMaxLayer = ',I3) 
         CALL DoSTOP 
-        END IF 
+      END IF 
  
       CALL GetAbsCoeffNOJAC(daaWeakOptDepth,daToffset,daaaKx,daaUx, 
      $         raTTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, 
@@ -518,7 +518,7 @@ c check that the data file has the right number of layers
 c convert absorption coefficient correctly if necessary 
       IF (iKtype .eq. 2) THEN 
         CALL RaisePower(daaWeakOptDepth) 
-        END IF 
+      END IF 
  
 c now compute optical depth = gas amount * abs coeff 
       CALL AmtScale(daaWeakOptDepth,raTAmt) 
@@ -576,7 +576,7 @@ c these are the individual reference profiles
         write(kStdErr,*) 'read_std_optdepths_upper_UA only for CO2'
         write(kStdErr,*) 'you have called it with gasID = ',iGasID
         CALL DoStop
-        END IF
+      END IF
 
 c units : require raTPress,raTPartPress in atm !!!!!!
 c                 raRPress,raXPress     in atm
@@ -592,13 +592,13 @@ c        raTTemp(iI) = raT2(iI)
 c        raTAmt(iI) = raA2(iI)
 c        pProfNLTE_upatm(iI) = raTPress(iI)*kAtm2mb
 c        raUpperPressLevels(iI) = DATABASELEV(iI)
-c        END DO
+c      END DO
 c      iI = 101
 c      raUpperPressLevels(iI) = DATABASELEV(iI)
 c      DO iI = 1,iNumUpperLayers
 c        print *,iI,raTPress(iI),raTPartPress(iI),raTTemp(iI),raTAmt(iI),
 c     $          raUpperPressLevels(iI)
-c        END DO
+c      END DO
 c      print *,'>>>>>>>>>>>>> FANCULA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 
 c      !need to put stuff into (iLowest --> 100) instead of (1 .. iX)
@@ -614,7 +614,7 @@ c      call dostop
         write(kStdErr,*) '  called with iNumUpperLayers = ',iNumUpperLayers
         write(kStdErr,*) '  which gives (bad) iStart = ',iStart
         CALL DoStop
-        END IF
+      END IF
       DO iI = 1,iStart-1
         raXTemp(iI)      = 300.0
         raXAmt(iI)       = 0.0
@@ -625,7 +625,7 @@ c      call dostop
         !! fancula fancula !!
         pProf(iI)        = 1013.0
         raVertTemp(iI)   = 300.0
-        END DO
+      END DO
       DO iI = iStart,kProfLayer
         raXTemp(iI)      = raTTemp(iI-iStart+1)
         raXAmt(iI)       = raTAmt(iI-iStart+1)
@@ -636,7 +636,7 @@ c      call dostop
         !! fancula fancula !!
         pProf(iI)        = pProfNLTE_upatm(iI-iStart+1)
         raVertTemp(iI)   = raTTemp(iI-iStart+1)
-        END DO
+      END DO
 
       CALL upper_co2_default_profile(iGas,iGasID,pProf,iNumUpperLayers,
      $             raUpperPressLevels,iSplineType,
@@ -659,8 +659,8 @@ c      call dostop
       DO iI = iStart,kProfLayer
         DO iFr = 1,kMaxPts
           daaWeakOptDepth(iFr,iI-iStart+1) =  daaWeakOptDepth(iFr,iI)
-          END DO
         END DO
+      END DO
        
       !! and the rest are zeroed
       iL_low = kProfLayer + 1
@@ -668,8 +668,8 @@ c      call dostop
       DO iI = iL_Low,kProfLayer
         DO iFr = 1,kMaxPts
           daaWeakOptDepth(iFr,iI) =  0.0d0
-          END DO
         END DO
+      END DO
 
       RETURN
       END
@@ -711,7 +711,7 @@ c these are the arbitrary profiles (avg press) stored in matrices
         raRTemp(iI)       = 0.0
         raRPress(iI)      = 0.0
         raRPartPress(iI)  = 0.0
-        END DO
+      END DO
 
       iLowerOrUpper = +1
       CALL FindReferenceName(caFName,iGasID,+1)
@@ -794,7 +794,7 @@ c first read the names of all strong bands for the molecule
         write (kStdErr,*) 'datafile that contains names of strong bands'
         WRITE(kStdErr,1070) iErr, caFName 
         CALL DoSTOP 
-        END IF 
+      END IF 
       kTempUnitOpen = 1 
 
       iBands = 0
@@ -804,15 +804,15 @@ c first read the names of all strong bands for the molecule
       IF (caTemp(1:1) .EQ. '!') THEN
         !! this is a comment line, ignore
         GOTO 10
-        END IF
+      END IF
       iRead = iRead + 1
       caaCheckNamesIn(iRead) = caTemp
       DO iI = 1,iaNLTEBands(iLTEin)
         IF (caaaNLTEBands(iLTEin,iI) .EQ. caTemp) THEN
           iBands = iBands + 1
           caaCheckNamesMatch(iBands) = caTemp
-          END IF
-        END DO
+        END IF
+      END DO
       GOTO 10
       
       kTempUnitOpen = -1 
@@ -839,7 +839,7 @@ c first read the names of all strong bands for the molecule
         write(kStdErr,*)    'in kcarta.param check caStrongLineParams = '
         write(kStdErr,*) caStrongLineParams
         CALL DoStop
-        END IF
+      END IF
 
 c find (band) names in caStrong that are NOT in NLTE list caaaNLTEBands!!!!
 c thus find names in caaCheckNamesIn that are NOT in caaCheckNamesMatch
@@ -850,15 +850,15 @@ c thus find names in caaCheckNamesIn that are NOT in caaCheckNamesMatch
           IF (caaCheckNamesIn(iI) .EQ. caaCheckNamesMatch(iJ)) THEN
             iFound = +1        !!!name from caStrong is in the NLTE list
             iStrongNLTEFound  = iStrongNLTEFound + 1
-            ENDIF
-          END DO
+          ENDIF
+        END DO
         IF (iFound .EQ. -1) THEN
           !!!name from caStrong is NOT in the NLTE list
           iK = iK + 1
           caaCheckNamesUse(iK) = caaCheckNamesIn(iI)
           iStrongLTEFound  = iStrongLTEFound + 1
-          END IF
-        END DO
+        END IF
+      END DO
 
       write(kStdWarn,*) 'in subroutine read_stronglineLTE_lineparameters :'
       write(kStdWarn,*) 'found ',iStrongLTEFound ,' strong bands in  LTE'
@@ -871,7 +871,7 @@ c thus find names in caaCheckNamesIn that are NOT in caaCheckNamesMatch
         write(kStdErr,*) 'Check info in caaStrongLines (from nm_nonlte) '
         write(kStdErr,*) '      versus that in NLTEBandMapper subroutine'
         CALL DoStop
-        END IF
+      END IF
 
       IF (iStrongNLTEFound .NE. iaNLTEBands(iLTEin)) THEN
         write(kStdErr,*) 'in subroutine read_stronglineLTE_lineparameters :'
@@ -882,7 +882,7 @@ c thus find names in caaCheckNamesIn that are NOT in caaCheckNamesMatch
         write(kStdErr,*) 'iStrongNLTEFound = ',iStrongNLTEFound
         write(kStdErr,*) 'iaNLTEBands(iLTEin) = ',iaNLTEBands(iLTEin),iLTEin
         CALL DoStop
-        END IF
+      END IF
 
       write(kStdWarn,*) 'putting together the Strong LTE bands .....'
 
@@ -902,7 +902,7 @@ c now read the line parameters of the files
           write (kStdErr,*) 'datafile that contains parameters of strong band'
           WRITE(kStdErr,1070) iErr, caFName 
           CALL DoSTOP 
-          END IF 
+        END IF 
         kTempUnitOpen = 1 
 
         read(iIOUN) iGasID,iNum0,iISO
@@ -916,7 +916,7 @@ c now read the line parameters of the files
           write(kStdErr,*) 'Code can only handle ',kHITRAN,' line parameters '
           write(kStdErr,*) 'Please check kHITRAN in kcarta.param and fix'
           CALL DoStop
-          END IF
+        END IF
 
         read(iIOUN) (daElower0(iI),iI = 1,iNum0)     !lower state energy
         read(iIOUN) (daLineCenter0(iI),iI = 1,iNum0) !line center    
@@ -940,13 +940,13 @@ c now read the line parameters of the files
           daW_forSum(iCumLineSum+iI)      = daW_for0(iI)
           daW_selfSum(iCumLineSum+iI)     = daW_self0(iI)
           daW_tempSum(iCumLineSum+iI)     = daW_temp0(iI)
-          END DO
+        END DO
 
         iCumLineSUm = iCumLineSum + iNum0
 
         close (iIOUN)
         kTempUnitOpen=-1 
-        END DO        
+      END DO        
 
  1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A80) 
  1080 FORMAT(A80) 
@@ -954,7 +954,7 @@ c now read the line parameters of the files
       !bin the linestrengths
       DO iI = 1,10
         iaBin(iI) = 0
-        END DO
+      END DO
       dLMin = +1.0d30
       dLMax = -1.0d30
             
@@ -982,7 +982,7 @@ c now read the line parameters of the files
            iaBin(9) = iaBin(9) + 1
         ELSE 
           iaBin(10) = iaBin(10) + 1
-          END IF
+        END IF
 
         !!!if no need to prune, set all lines as output
         IF (dLineStrenMin .LT. 0.0d0) THEN    !!!use all lines
@@ -1012,8 +1012,8 @@ c now read the line parameters of the files
           daW_for(iNum)      = daW_forSum(iI)      !foreign broadening/atm
           daW_self(iNum)     = daW_selfSum(iI)     !self broadening/atm
           daW_temp(iNum)     = daW_tempSum(iI)     !broadening tempr dependance
-          END IF
-        END DO
+        END IF
+      END DO
 
       write(kStdWarn,*) ' '
       write(kStdWarn,*) 'Backgnd lines : '
@@ -1028,8 +1028,8 @@ c now read the line parameters of the files
         write(kStdWarn,*) '--------------------------------'
         DO iI = 1,10
           write(kStdWarn,300) -19-iI,iaBin(iI)
-          END DO
-        END IF
+        END DO
+      END IF
       write(kStdWarn,*) ' '
 
  300  FORMAT('        ',I4,'             ',I5)
@@ -1041,7 +1041,8 @@ c************************************************************************
 c this subroutine reads in the line parameters for the band in question 
       SUBROUTINE read_lineparameters(iLTEin,iBand,caaaNLTEBands,
      $     iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift,
-     $     daStren296,daW_For,daW_self,daW_temp,iLineMixBand,iDoVoigtChi)
+     $     daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,
+     $     iLineMixBand,iDoVoigtChi)
 
       IMPLICIT NONE 
  
@@ -1057,6 +1058,8 @@ c output params
       DOUBLE PRECISION daJL(kHITRAN),daJU(kHITRAN)
       DOUBLE PRECISION daPshift(kHITRAN),daStren296(kHITRAN),daW_for(kHITRAN)
       DOUBLE PRECISION daW_self(kHITRAN),daW_temp(kHITRAN)
+      DOUBLE PRECISION daJLowerQuantumRot(kHITRAN)
+      CHARACTER*1      caJPQR(kHITRAN)
 
       INTEGER iI,iErr,iIOUN,iJU,iJL
       CHARACTER*80 caFname
@@ -1072,7 +1075,7 @@ c output params
         write (kStdErr,*) 'file that has HITRAN lineparameters'
         WRITE(kStdErr,1070) iErr, caFName 
         CALL DoSTOP 
-        END IF 
+      END IF 
       kTempUnitOpen=1 
 
       read(iIOUN) iGasID,iNum,iISO
@@ -1086,18 +1089,22 @@ c output params
         write(kStdErr,*) 'Code can only handle ',kHITRAN,' line parameters '
         write(kStdErr,*) 'Please check kHITRAN in kcarta.param and fix'
         CALL DoStop
-        END IF
+      END IF
 
       read(iIOUN) (daElower(iI),iI = 1,iNum)     !lower state energy
       read(iIOUN) (daLineCenter(iI),iI = 1,iNum) !line center    
-      read(iIOUN) (daJL(iI),iI = 1,iNum)         !lower quantum number
-      read(iIOUN) (daJU(iI),iI = 1,iNum)         !upper quantum number
+      read(iIOUN) (daJL(iI),iI = 1,iNum)         !lower vib quantum number .. basically SAME for all iI=1,iNum
+      read(iIOUN) (daJU(iI),iI = 1,iNum)         !upper vib quantum number .. basically SAME for all iI=1,iNum
       read(iIOUN) (daPshift(iI),iI = 1,iNum)     !pressure shift of linecenter
       read(iIOUN) (daStren296(iI),iI = 1,iNum)   !line strenght
       read(iIOUN) (daW_for(iI),iI = 1,iNum)      !foreign broadening/atm
       read(iIOUN) (daW_self(iI),iI = 1,iNum)     !self broadening/atm
       read(iIOUN) (daW_temp(iI),iI = 1,iNum)     !broadening tempr dependance
-
+      !! new since July 2015, comes from line.bslq (see lineparameters.m in
+      !! SRCv1.18/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/USUALLAYERS/
+      read(iIOUN) (daJLowerQuantumRot(iI),iI = 1,iNum)  !J lower quantum rotation state
+c      read(iIOUN) (caJPQR(iI),iI = 1,iNum)       !P Q or R
+      
       close (iIOUN)
       kTempUnitOpen=-1 
 
@@ -1125,11 +1132,11 @@ c but be careful about Cousin vs linemix, else code becomes VERY slow
         ELSE
           write(kStdWarn,*) 'strongest CO2 bands : iLineMixBand = +1 (cousin)'
           iLineMixBand = +1
-          END IF
+        END IF
       ELSE
         iLineMixBand = -1
         write(kStdWarn,*) 'medium strength CO2 bands : no linemixing (voigt)'
-        END IF
+      END IF
 
       IF ((iLineMixBand .EQ. 2) .AND. (iJU .NE. 9)) THEN
         !!!only do linemix for 2350, 2351 lines; else do Cousin
@@ -1143,22 +1150,22 @@ c but be careful about Cousin vs linemix, else code becomes VERY slow
         ELSEIF (iISO .GT. 2) THEN
           write(kStdWarn,*) 'iJL, iJU,iSO = ',iJL,iJU,iISO
           write(kStdWarn,*) '   iLineMixBand = +1 (cousin)'
-          END IF
         END IF
+      END IF
         
 c this always makes cousin the happening one!
 c       IF (iLineMixBand .GT. 0) THEN
 c         iLineMixBand = +1
 c         write(kStdWarn,*) 'doing cousin everywhere; reset iLineMixBand = +1'
 c         print *,' ***** reset iLineMixBand = 1   ie linemix --> cousin ****' 
-c         END IF
+c       END IF
 
 c      IF (iLineMixBand .GT. 0) THEN
 c        IF (iDoVoigtChi .GT. 0) THEN
 c          write(kStdErr,*) 'Cannot have idoVoigtChi > 0 ' 
 c          write(kStdErr,*) 'AND try to use Cousin everywhere!'
 c          CALL DoStop
-c          END IF
+c        END IF
 c        print *,' ***** reset iLineMixBand = 1   ie linemix --> cousin ****' 
 c        iLineMixBand = 1
 c        END IF
@@ -1261,8 +1268,8 @@ c        O3 666,          668,         686,         667,         676;
           dMass = 46.0 * 1.0d0
         ELSE
           write (kStdErr,*) 'sorry, no qtips data for CO2 isotope ', iISO
-          END IF
         END IF
+      END IF
 
       IF (iGASID .EQ. 3) THEN
         IF (iISO .EQ. 1) THEN
@@ -1274,13 +1281,13 @@ c        O3 666,          668,         686,         667,         676;
           dMass = 48.0 * 1.0d0
         ELSE
           write (kStdErr,*) 'sorry, no qtips data for O3 isotope ', iISO
-          END IF
         END IF
+      END IF
 
       IF (iFound .LT. 0) THEN
         write (kStdErr,*) 'Sorry qtips did not find gasID/isotope combination'
         CALL DoStop
-        END IF
+      END IF
 
       t = dT
       qt = a + b*T + c*T*T + d*T*T*T
@@ -1376,8 +1383,8 @@ c local variables
           dMass = 46.0 * 1.0d0
         ELSE
           write (kStdErr,*) 'sorry, no qtips data for CO2 isotope ', iISO
-          END IF
         END IF
+      END IF
 
       IF (iGASID .EQ. 3) THEN
         IF (iISO .EQ. 1) THEN
@@ -1389,13 +1396,13 @@ c local variables
           dMass = 48.0 * 1.0d0
         ELSE
           write (kStdErr,*) 'sorry, no qtips data for O3 isotope ', iISO
-          END IF
         END IF
+      END IF
 
       IF (iFound .LT. 0) THEN
         write (kStdErr,*) 'Sorry qtips did not find gasID/isotope combination'
         CALL DoStop
-        END IF
+      END IF
 
       t = dT
       qt = a + b*T + c*T*T + d*T*T*T

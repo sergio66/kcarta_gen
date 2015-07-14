@@ -493,6 +493,8 @@ c local variables
       DOUBLE PRECISION daJL(kHITRAN),daJU(kHITRAN)
       DOUBLE PRECISION daPshift(kHITRAN),daStren296(kHITRAN),daW_for(kHITRAN)
       DOUBLE PRECISION daW_self(kHITRAN),daW_temp(kHITRAN)
+      DOUBLE PRECISION daJLowerQuantumRot(kHITRAN)
+      CHARACTER*1      caJPQR(kHITRAN)
 
       CHARACTER*80 caNONLTETempKC
       INTEGER iRegr,iMethod,iDefault
@@ -684,7 +686,7 @@ c ************* this is using the D. Edwards/M. Lopez-Puertas info ************
             !!read in the lineshape parameters for the band
             CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands,
      $             iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift,
-     $             daStren296,daW_For,daW_self,daW_temp,
+     $             daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,
      $             iLineMixBand,iDoVoigtChi)
             iStrongISO   = iISO
             iStrongJU    = nint(daJU(1))

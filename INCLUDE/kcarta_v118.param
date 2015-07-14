@@ -415,10 +415,11 @@ c   where the 3 versions reside
 
 c this is where the strong band line params are
 c in the files here are stored the HITRAN line params (stren, freq, width etc)
+c this name should be self consistent with "caaStrongLines" in nm_nonlte of namelist file
       CHARACTER*80 caStrongLineParams
 c this is new, where we have 19 NLTE bands
       PARAMETER (caStrongLineParams=
-     $         '/asl/s1/sergio/AIRSCO2/CO2_BANDS_PARAM2/co2_allpqr_')
+     $         '/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/CO2_HIT12/co2_allpqr_')
 
 c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/, 
 c they have been copied to /asl/data/kcarta; these files have removed 19 NLTE bands
@@ -430,9 +431,10 @@ c this is where the upper atm weakline database lies
       PARAMETER (caWeakUpperAtmCO2Path =
      $   '/asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/')
 
-c this is where the strong band linemix strengths are
+c this is where the strong band linemix strengths arel files mmade by SPECTRA/CO2_COMMON/y1s.m
+c see /home/sergio/KCARTA/SRC/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/ReadmeBlog
       CHARACTER*80 caLineMixDir
-      PARAMETER (caLineMixDir='/asl/s1/sergio/AIRSCO2/LINEMIXPARAMS/')
+      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H12/')
 c*********************
 
 c the NLTE vib temp profiles

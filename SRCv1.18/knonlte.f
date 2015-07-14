@@ -1,4 +1,4 @@
-c Copyright 2008  
+c Copyright 2015
 c University of Maryland Baltimore County  
 c All Rights Reserved 
 
@@ -518,7 +518,9 @@ c junk to read in HITRAN
       DOUBLE PRECISION daChi(kMaxPts),daChiBloat(kBloatPts)
       DOUBLE PRECISION dVibCenter      !!!from D. Edwards NLTE files
       INTEGER iStartUse,iaJ_UorL(kHITRAN)
-
+      DOUBLE PRECISION daJLowerQuantumRot(kHITRAN)
+      CHARACTER*1      caJPQR(kHITRAN)
+	    
       INTEGER iJunkNum,iaJunk(kGasStore)
 
 c see if current gas ID needs nonLTE spectroscopy
@@ -672,7 +674,7 @@ c        CALL DOSTOP
        iGasID = iaGases(iGas)
        CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands,
      $     iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift,
-     $     daStren296,daW_For,daW_self,daW_temp,iLineMixBand,iDoVoigtChi)
+     $     daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
 
        CALL read_nonlte_temperature(iGasID,iISO,iLTEin,iBand,caaNLTETemp,
      $     pProf,raPressLevels,raLayerHeight,raThickness,iProfileLayers,
@@ -1752,8 +1754,7 @@ c //////////////----> first compute lineshape of stronger lines, at LTE
         DO iL = iStart,kProfLayer   !!!loop over layers
           dLTE  = raTTemp(iL)*1.0d0
           IF (iNum .GT. 0) THEN
-            write (kStdWarn,*) 'LBL for Strong BackGnd (LTE) Lines : 
-     $iL,T,Q = ',iL,sngl(dLTE),raTamt(iL)
+            write (kStdWarn,*) 'LBL for Strong BackGnd (LTE) Lines : iL,T,Q = ',iL,sngl(dLTE),raTamt(iL)
             CALL compute_lte_spectra_fast(iTag,iActualTag,
      $         daK,raFreq,iGasID,iNum,daIso,
      $         daElower,daLineCenter,daJL,daJU,daPshift,
@@ -2000,8 +2001,7 @@ c ---------------> first compute lineshape of stronger lines, at LTE
         DO iL = 1,iUpper   !!!loop over layers
           IF (iNum .GT. 0) THEN
             dLTE  = raUpperTemp(iL)*1.0d0
-            write (kStdWarn,*) 'LBL for UA Strong BackGnd (LTE) Lines : 
-     $iL,T,Q = ',iL,sngl(dLTE),raUpperGasAmt(iL)
+            write (kStdWarn,*) 'LBL for UA Strong BackGnd (LTE) Lines : iL,T,Q = ',iL,sngl(dLTE),raUpperGasAmt(iL)
             CALL compute_lte_spectra_fast(iTag,iActualTag,
      $         daK,raFreq,iGasID,iNum,daIso,
      $         daElower,daLineCenter,daJL,daJU,daPshift,
@@ -2130,18 +2130,21 @@ c local variables
       DOUBLE PRECISION daChi(kMaxPts),daChiBloat(kBloatPts)
       DOUBLE PRECISION dVibCenter      !!!from D. Edwards NLTE files
       INTEGER iStartUse,iaJ_UorL(kHITRAN)
+      DOUBLE PRECISION daJLowerQuantumRot(kHITRAN)
+      CHARACTER*1      caJPQR(kHITRAN)
+      
 c this is for bloating
       DOUBLE PRECISION daKBloat(kBloatPts),daPBloat(kBloatPts),d1,d2,d3
 
       DO iL = 1,kProfLayer
         raVibQFT(iL) = 1.0
-        END DO
+      END DO
 
       DO iBand = 1,iaNLTEBands(iLTEIn)
         !!read in the lineshape parameters for the band
         CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands,
      $     iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift,
-     $     daStren296,daW_For,daW_self,daW_temp,iLineMixBand,iDoVoigtChi)
+     $     daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
 
         !!read in the NON LTE temperatures amd Vibrational Partition Fcns
         CALL read_nonlte_temperature(iGasID,iISO,iLTEin,iBand,caaNLTETemp,
@@ -2156,7 +2159,7 @@ c this is for bloating
         ELSE
           iStartUse = iStart
           write(kStdWarn,*) ' .. weaker nlte band, istart = ',iStartUse
-          ENDIF
+        ENDIF
 
         !!compute lineshapes, using lineparameters, at layers blah..kProflayer
         DO iL = iStartUse,kProfLayer
@@ -2174,7 +2177,7 @@ c this is for bloating
      $           iPrintTalk,iTag,iActualTag,daK,daPlanck,raFreq,
      $           iGasID,iNum,iISO,daElower,daLineCenter,
      $           daJL,daJU,iaJ_UorL,daPshift,
-     $           daStren296,daW_For,daW_self,daW_temp,dVibCenter,iLineMixBand,
+     $           daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,dVibCenter,iLineMixBand,
      $           iL,raLTETemp,raNLTETemp,raVibQFT,iUpdateSumNLTE,
      $           raTAmt,raTTemp,raTPress,raTPartPress,iAllLayersLTE,
      $           dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength,
@@ -2184,7 +2187,7 @@ c this is for bloating
             daaSumNLTEGasAbCoeff(iFr,iL)= daK(iFr)+daaSumNLTEGasAbCoeff(iFr,iL)
             daaNLTEGasAbCoeff(iFr,iL)   = daK(iFr) + daaNLTEGasAbCoeff(iFr,iL)
             daaPlanckCoeff(iFr,iL)      = daPlanck(iFr)+daaPlanckCoeff(iFr,iL)
-            END DO
+          END DO
 
           IF (iSetBloat .GT. 0) THEN
             DO iFr = 1,kBloatPts
@@ -2194,11 +2197,11 @@ c this is for bloating
      $                                         daaNLTEGasAbCoeffBloat(iFr,iL)
               daaPlanckCoeffBloat(iFr,iL)    = daPBloat(iFr) + 
      $                                         daaPlanckCoeffBloat(iFr,iL)
-              END DO
-            END IF
+            END DO
+          END IF
            
-          END DO    !loop over layers iL = iStart,kProfLayer
-        END DO      !loop over bands
+        END DO    !loop over layers iL = iStart,kProfLayer
+      END DO      !loop over bands
 
       RETURN
       END
@@ -2292,6 +2295,8 @@ c local variables
       DOUBLE PRECISION daW_self(kHITRAN),daW_temp(kHITRAN)
       DOUBLE PRECISION daChi(kMaxPts),daChiBloat(kBloatPts)
       DOUBLE PRECISION dVibCenter      !from Dave Edwards NLTE profiles
+      DOUBLE PRECISION daJLowerQuantumRot(kHITRAN)
+      CHARACTER*1      caJPQR(kHITRAN)      
       INTEGER iChi,iNumMixRatioLevs,iaJ_UorL(kHITRAN)
       REAL raUpper_Pres(2*kProfLayer),raUpper_MixRatio(2*kProfLayer)
 
@@ -2356,7 +2361,7 @@ c the file really should have been opened in SUBROUTINE nonlte_spectra
           !!do a ***dummy*** read to get the iL,iU gas quantum numbers
           CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands,
      $        iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift,
-     $        daStren296,daW_For,daW_self,daW_temp,iLineMixBand,iDoVoigtChi)
+     $        daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
 
           !!read in the upper atm NLTE temperatures
           CALL read_upperatm_nonlte_temperature(
@@ -2374,7 +2379,7 @@ c the file really should have been opened in SUBROUTINE nonlte_spectra
             !!read in the lineshape parameters
             CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands,
      $        iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift,
-     $        daStren296,daW_For,daW_self,daW_temp,iLineMixBand,iDoVoigtChi)
+     $        daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
             !!compute lineshapes, using lineparameters, 
             !!at layers kProflayer+1 .. kProfLayer+iUpper
              DO iL = 1,iUpper
@@ -2391,7 +2396,8 @@ c the file really should have been opened in SUBROUTINE nonlte_spectra
      $           iPrintTalk,iTag,iActualTag,daK,daPlanck,raFreq,
      $           iGasID,iNum,iISO,daElower,daLineCenter,
      $           daJL,daJU,iaJ_UorL,daPshift,
-     $           daStren296,daW_For,daW_self,daW_temp,dVibCenter,iLineMixBand,
+     $           daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,
+     $           dVibCenter,iLineMixBand,
      $           iL,raUpperTemp,raUpperNLTETemp,raVibQFT,iUpdateSumNLTE,
      $           raUpperGasAmt,raUpperTemp,raUpperPress,raUpperPartPress,
      $           iAllLayersLTE,dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength,
@@ -2689,7 +2695,7 @@ c this is done for ONE band, for ONE layer
       SUBROUTINE compute_nlte_spectra_planck_fast(
      $    iBand,iPrintTalk,iTag,iActualTag,daK,daPlanck,raFreq,
      $    iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,iaJ_UorL,daPshift,
-     $    daStren296,daW_For,daW_self,daW_temp,dVibCenter,iLineMixBand,
+     $    daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,dVibCenter,iLineMixBand,
      $    iL,raLTETemp,raNLTEtemp,raVibQFT,iUpdateSumNLTE,
      $    raTAmt,raTTemp,raTPress,raTPartPress,iAllLayersLTE,
      $    dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength,
@@ -2711,6 +2717,8 @@ c input params
       DOUBLE PRECISION daJL(kHITRAN),daJU(kHITRAN)
       DOUBLE PRECISION daPshift(kHITRAN),daStren296(kHITRAN),daW_for(kHITRAN)
       DOUBLE PRECISION daW_self(kHITRAN),daW_temp(kHITRAN)
+      DOUBLE PRECISION daJLowerQuantumRot(kHITRAN)
+      CHARACTER*1      caJPQR(kHITRAN)
       DOUBLE PRECISION dVibCenter
       REAL raTTemp(kProfLayer),raTAmt(kProfLayer),raTPress(kProfLayer)
       REAL raTPartPress(kProfLayer),raFreq(kMaxPts),rNLTEstrength
@@ -2751,7 +2759,7 @@ c this is to spline on the far off lines!!!!
       DOUBLE PRECISION daFudgeF(kMaxPtsBox)
       DOUBLE PRECISION daFudgeM(kMaxPtsBox),daFudgeC(kMaxPtsBox)
 
-      INTEGER iNum1,iTooFar,iLine,iaLineMix(kHITRAN)
+      INTEGER iNum1,iTooFar,iTooFarX,iLine,iaLineMix(kHITRAN)
       INTEGER iDefault,iNoPressureShiftCO2
       DOUBLE PRECISION daYmix(kHitran)
       DOUBLE PRECISION dT,daChi(kMaxPtsBox),dVibQFT
@@ -2782,7 +2790,7 @@ c if we want to dump out line parameters !!!! ugh!!! makes warning.msg LONG!!!!
       iTalk = -1          !!!!just summarize things        DEFAULT
       IF (iTalk .NE. iDefault) THEN
         print *,'iTalk,iDefault = ',iTalk,iDefault
-        END IF
+      END IF
 
       iDefault            = +1 !default for CO2 in the strong bands (linemix)
       iNoPressureShiftCO2 = -1 !allow p shifts for CO2 strong linemix lines
@@ -2792,7 +2800,7 @@ c if we want to dump out line parameters !!!! ugh!!! makes warning.msg LONG!!!!
 
       IF (iNoPressureShiftCO2 .NE. iDefault) THEN
         print *,'iNoPressureShiftCO2,iDefault = ',iNoPressureShiftCO2,iDefault
-        END IF
+      END IF
 
       !!!these are from kLAYERS
       dP      = raTPress(iL)*1.0d0
@@ -2818,18 +2826,18 @@ c if we want to dump out line parameters !!!! ugh!!! makes warning.msg LONG!!!!
         !!find the shifted line centers
         DO iLines = 1, iNum
           daLineShift(iLines) = daLineCenter(iLines) + dP*daPshift(iLines)
-          END DO
+        END DO
       ELSEIF ((iGasID .EQ. 2) .AND. (iNoPressureShiftCO2 .EQ. -1)) THEN
         !!find the shifted line centers
         DO iLines = 1, iNum
           daLineShift(iLines) = daLineCenter(iLines) + dP*daPshift(iLines)
-          END DO
+        END DO
       ELSEIF ((iGasID .EQ. 2) .AND. (iNoPressureShiftCO2 .EQ. +1)) THEN
         !!no pressure shifts for line centers
         DO iLines = 1, iNum
           daLineShift(iLines) = daLineCenter(iLines)
-          END DO
-        END IF
+        END DO
+      END IF
 
       CALL InitRunningMesh(iTag,raFreq,dDeltaFreqNLTE,
      $        dXNear,dXMedium,dXCoarse,iaClose,df,dfFine,
@@ -2840,13 +2848,13 @@ c if we want to dump out line parameters !!!! ugh!!! makes warning.msg LONG!!!!
       iUpdateSumNLTE = -1   !!! assume the band is in LTE
       IF (abs(dLTE - dNLTE) .GE. 5.0d-2) THEN
         iUpdateSumNLTE = +1
-        END IF
+      END IF
 
       DO iFr = 1,kHITRAN
         daRTop(iFr)   = 1.0d0
         daRBot(iFr)   = 1.0d0
         iaClose(iFr)  = +1
-        END DO
+      END DO
 
       !!find the qfcn for this GAS,ISOTOPE combination at LTE
       !!dPartition fcn = q296/qT
@@ -2864,14 +2872,16 @@ c if we want to dump out line parameters !!!! ugh!!! makes warning.msg LONG!!!!
         !!!! individual lines are done either with first order linemix, or with
         !!!! cousin. The reason is that eg P branch for 2350 band, gives sucky
         !!!! results if linemixing is used, while the R branch works fine!
-        CALL CousinVsMix(iaLineMix,iLineMixBand,int(daJU(1)),iISO,daFreq,
+        CALL CousinVsMix(iaLineMix,iLineMixBand,
+     $                   int(daJL(1)),int(daJU(1)),iISO,daFreq,
      $                       daLineShift,daStren296,dVibCenter,iNum)
         CALL birnbaum_coarse(chiBirn,xBirn,iNptsBirn,dLTE,tau2_birn(dP,dPP))
+c	print *,'doing birnbaum_coarse ',iLineMixBand,int(daJL(1)),int(daJU(1)),iISO,daFreq(1)
       ELSE
         DO i1 = 1,iNum
           iaLineMix(i1) = iLineMixBand  !!stick to Cousin or nothing
-          END DO
-        END IF
+        END DO
+      END IF
 
       !!find the line strengths at *** LTE *****
       !!also find QTIPS modifier due to vibration partition function at NLTE
@@ -2883,7 +2893,6 @@ c if we want to dump out line parameters !!!! ugh!!! makes warning.msg LONG!!!!
       !!find the ratios of upper and lower level populations, at 
       !!the local temperature, and the non local vibrational temperature
       !!this is so that we can find the modification to the Planck function
-
       CALL NLTEPopulationRatios(
      $       iL,iNum,dP,dLTE,dLTEr1r2,dNLTE,dVibCenter,
      $       daElower,daLineShift,iaJ_UorL,
@@ -2907,9 +2916,9 @@ c used to be 2317.2
         DO iLines = 1,iNum
           IF (dabs(daLineShift(iLines)-2324.97) .GT. 0.5d0) THEN
             daStrenNLTE(iLines) = 0.0d0
-            END IF
-          END DO
-        END IF
+          END IF
+        END DO
+      END IF
 
       i1 = 1
       i2 = iOneCmFine
@@ -2925,16 +2934,17 @@ c used to be 2317.2
 
         DO iFr = 1,iFineMeshBoxPts
           daPlanckClose(iFr) = 0.0d0
-          END DO
+        END DO
         DO iFr = 1,iMediumMeshBoxPts
           daPlanckMedium(iFr) = 0.0d0
-          END DO
+        END DO
         DO iFr = 1,iCoarseMeshBoxPts
           daPlanckCoarse(iFr) = 0.0d0
-          END DO
+        END DO
 
         !!now loop over the close lines to get the optical depths!
         IF (iDoFine .GT. 0) THEN
+	  iTooFarX = +10000
           iTrue = -1
           DO iLines = 1,iNum
             IF (iaClose(iLines) .GT. 0) THEN
@@ -2946,22 +2956,31 @@ c used to be 2317.2
               CALL voigt_chi(
      $              daFreqFineMesh,iFineMeshBoxPts,daLineShift(iLines),
      $              dLTE,dMass,daBroad(iLines),iaLineMix(iLines),dP,dPP,
-     $              daJU(1),iISO,dVibCenter,
-     $              xBirn,chiBirn,iNptsBirn,daTempClose1,daFudgeF,iDoVoigtChi)
+     $              daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines),iISO,dVibCenter,
+     $              xBirn,chiBirn,iNptsBirn,daTempClose1,daFudgeF,iDoVoigtChi,iTooFar)
+              IF ((iTooFar .GT. 0) .AND. (iTooFar .LT. iTooFarX)) THEN
+	        iTooFarX = iTooFar
+	      END IF
               DO iFr = 1,iFineMeshBoxPts
                 daTempClose(iFr) = daTempClose(iFr) +
      $                           dAlpha*daStrenNLTE(iLines)*daTempClose1(iFr)
                 daPlanckClose(iFr) = daPlanckClose(iFr) +
      $                           dBeta*daStrenNLTE(iLines)*daTempClose1(iFr)
-                END DO
-              END IF  
-            END DO
-
+              END DO
+            END IF  
+          END DO
+          IF (iTooFarX .LT. 100) THEN
+	    print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+          ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
+	    print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	  END IF
           !!!! now do the boxcar
           IF (iTrue .GT. 0) THEN
             CALL DoBoxCar(daTempClose,iFineMeshBoxPts,i1,i2,daK)
             CALL DoBoxCar(daPlanckClose,iFineMeshBoxPts,i1,i2,daPlanck)
-            END IF
+          END IF
 
           IF (iSetBloat .GT. 0) THEN
             CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts,
@@ -2970,12 +2989,13 @@ c used to be 2317.2
             CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts,
      $                           daMedium      ,daPlanckMedium,iCount,
      $                           iWideMeshLoop,i1,i2,1,daPBloat)
-            END IF
           END IF
+        END IF
 
         IF (iDoMedium .GT. 0) THEN
           !!ah well; bite the bullet and do the med lines, even though they
           !!probably contribute nuthin!
+	  iTooFarX = +10000
           iCount = iMediumMeshBoxPts
           DO iLines = 1,iNum
             IF (iaClose(iLines) .EQ. 0) THEN
@@ -2985,17 +3005,28 @@ c used to be 2317.2
      $                    daCFactor,daKFactor,dAlpha,dBeta)      
               CALL voigt_chi(
      $             daMedium,iCount,daLineShift(iLines),dLTE,dMass,
-     $             daBroad(iLines),iaLineMix(iLines),dP,dPP,daJU(1),
+     $             daBroad(iLines),iaLineMix(iLines),dP,dPP,
+     $             daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines),
      $             iISO,dVibCenter,
-     $             xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi)
+     $             xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi,iTooFar)
+              IF ((iTooFar .GT. 0) .AND. (iTooFar .LT. iTooFarX)) THEN
+	        iTooFarX = iTooFar
+	      END IF     
               DO iFr = 1,iCount
                 daTempMedium(iFr) = daTempMedium(iFr) +
      $                              dAlpha*daStrenNLTE(iLines)*yaMedium(iFr)
                 daPlanckMedium(iFr) = daPlanckMedium(iFr) +
      $                              dBeta*daStrenNLTE(iLines)*yaMedium(iFr)
-                END DO
-              END IF
-            END DO
+              END DO
+            END IF
+          END DO
+          IF (iTooFarX .LT. 100) THEN
+	    print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+          ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
+	    print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	  END IF	  
           !!!interpolate the med lines sum onto the near lines
           CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
           CALL dspl(daMedium,daPlanckMedium,iCount,daFreqOutMesh,
@@ -3004,7 +3035,7 @@ c used to be 2317.2
           DO iFr = i1,i2
             daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
             daPlanck(iFr) = daPlanck(iFr) + daTempP(iFr-i1+1)
-            END DO
+          END DO
           IF (iSetBloat .GT. 0) THEN
             CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts,
      $                           daMedium      ,daTempMedium,iCount,
@@ -3012,12 +3043,13 @@ c used to be 2317.2
             CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts,
      $                           daMedium      ,daPlanckMedium,iCount,
      $                           iWideMeshLoop,i1,i2,-1,daPBloat)
-            END IF
           END IF
+        END IF
 
         IF (iDoCoarse .GT. 0) THEN
           !!ah well; bite the bullet and do the far lines, even though they
           !!probably contribute nuthin!
+	  iTooFarX = +10000
           iCount = iCoarseMeshBoxPts
           DO iLines = 1,iNum
             IF (iaClose(iLines) .LT. 0) THEN
@@ -3028,16 +3060,26 @@ c used to be 2317.2
               CALL voigt_chi(
      $           daCoarse,iCount,daLineShift(iLines),dLTE,dMass,
      $           daBroad(iLines),iaLineMix(iLines),
-     $           dP,dPP,daJU(1),iISO,dVibCenter,
-     $           xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi)
+     $           dP,dPP,daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines),iISO,dVibCenter,
+     $           xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi,iTooFar)
+              IF ((iTooFar .GT. 0) .AND. (iTooFar .LT. iTooFarX)) THEN
+	        iTooFarX = iTooFar
+	      END IF     
               DO iFr = 1,iCount
                 daTempCoarse(iFr) = daTempCoarse(iFr) +
      $                              dAlpha*daStrenNLTE(iLines)*yaCoarse(iFr)
                 daPlanckCoarse(iFr) = daPlanckCoarse(iFr) +
      $                              dBeta*daStrenNLTE(iLines)*yaCoarse(iFr)
-                END DO
-              END IF
-            END DO
+              END DO
+            END IF
+          END DO
+          IF (iTooFarX .LT. 100) THEN
+	    print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+          ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
+	    print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	  END IF	  
           !!!interpolate the far lines sum onto the near lines
           CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
           CALL dspl(daCoarse,daPlanckCoarse,iCount,daFreqOutMesh,
@@ -3046,7 +3088,7 @@ c used to be 2317.2
           DO iFr = i1,i2
             daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
             daPlanck(iFr) = daPlanck(iFr) + daTempP(iFr-i1+1)
-            END DO
+          END DO
           IF (iSetBloat .GT. 0) THEN
             CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts,
      $                           daCoarse      ,daTempCoarse,iCount,
@@ -3054,12 +3096,12 @@ c used to be 2317.2
             CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts,
      $                           daCoarse      ,daPlanckCoarse,iCount,
      $                           iWideMeshLoop,i1,i2,-1,daPBloat)
-            END IF
           END IF
+        END IF
 
         i1 = i1 + iOneCmFine
         i2 = i2 + iOneCmFine
-        ENDDO
+      ENDDO
 
 c now make sure everything > 0
       DO iFr = 1,kMaxPts
@@ -3141,7 +3183,7 @@ c output params
       DOUBLE PRECISION daK(kMaxPts)
 
 c local variables
-      INTEGER iFr,iLines,iI,iJ
+      INTEGER iFr,iLines,iI,iJ,iTooFar,iTooFarX
       DOUBLE PRECISION dP,dPP,dGasAmt,dLTE
       DOUBLE PRECISION v0,dPartitionFcn,dMass
       DOUBLE PRECISION daBroad(kHITRAN),daLineShift(kHITRAN)
@@ -3153,7 +3195,7 @@ c local variables
       INTEGER iZZZBloat
 
 c this is to spline on the far off lines!!!!
-      INTEGER iDoCoarse,iDoMedium,iDoFine,iTrue
+      INTEGER iDoCoarse,iDoMedium,iDoFine,iTrue,iISO
       INTEGER iCounter10,iCounter25,iCounter100
       DOUBLE PRECISION daTemp(kMaxPts),daFreq(kMaxPts)
       DOUBLE PRECISION d1,d2,d3,d4,d5,d6,dX1,dX2
@@ -3284,6 +3326,7 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
         !!now loop over the close lines to get the optical depths!
         IF (iDoFine .GT. 0) THEN
           iTrue = -1
+          iTooFarX = +10000
           DO iLines = 1,iNum
             IF (iaClose(iLines) .GT. 0) THEN
               !!do the "close" lines
@@ -3291,15 +3334,26 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
               CALL voigt_chi(
      $              daFreqFineMesh,iFineMeshBoxPts,daLineShift(iLines),
      $              dLTE,daMass(iLines),daBroad(iLines),iLineMixBand,
-     $              dP,dPP,daJU(1),int(daISO(iLines)),dVibCenter,
-     $              xBirn,chiBirn,iNptsBirn,daTempClose1,daFudgeF,iDoVoigtChi)
+     $              dP,dPP,daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter,
+     $              xBirn,chiBirn,iNptsBirn,daTempClose1,daFudgeF,iDoVoigtChi,iTooFar)
+              IF ((iTooFar .GT. 0) .AND. (iTooFar .LT. iTooFarX)) THEN
+	        iTooFarX = iTooFar
+	      END IF     
               DO iFr = 1,iFineMeshBoxPts
                 daTempClose(iFr) = daTempClose(iFr) +
      $                             daStrenLTE(iLines)*daTempClose1(iFr)
                 END DO
               END IF  
             END DO
-
+          IF (iTooFarX .LT. 100) THEN
+	    iISO = int(daISO(1))
+	    print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+          ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
+	    iISO = int(daISO(1))
+	    print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	  END IF
           !!!! now do the boxcar
           IF (iTrue .GT. 0) THEN
             CALL DoBoxCar(daTempClose,iFineMeshBoxPts,i1,i2,daK)
@@ -3309,6 +3363,7 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
         IF (iDoMedium .GT. 0) THEN
           !!ah well; bite the bullet and do the med lines, even though they
           !!probably contribute nuthin!
+	  iTooFarX = +10000
           iCount = iMediumMeshBoxPts
           DO iLines = 1,iNum
             IF (iaClose(iLines) .EQ. 0) THEN
@@ -3316,14 +3371,26 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
               CALL voigt_chi(
      $             daMedium,iCount,daLineShift(iLines),dLTE,
      $             daMass(iLines),daBroad(iLines),iLineMixBand,dP,dPP,
-     $             daJU(1),int(daISO(iLines)),dVibCenter,
-     $             xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi)
+     $             daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter,
+     $             xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi,iTooFar)
+              IF ((iTooFar .GT. 0) .AND. (iTooFar .LT. iTooFarX)) THEN
+	        iTooFarX = iTooFar
+	      END IF     
               DO iFr = 1,iCount
                 daTempMedium(iFr) = daTempMedium(iFr) +
      $                              daStrenLTE(iLines)*yaMedium(iFr)
                 END DO
               END IF
             END DO
+          IF (iTooFarX .LT. 100) THEN
+	    iISO = int(daISO(1))
+	    print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+          ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
+	    iISO = int(daISO(1))
+	    print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	  END IF	    
           !!!interpolate the med lines sum onto the near lines
           CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
           !!!add on the med lines to the near lines
@@ -3335,21 +3402,34 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
         IF (iDoCoarse .GT. 0) THEN
           !!ah well; bite the bullet and do the far lines, even though they
           !!probably contribute nuthin!
-          iCount = iCoarseMeshBoxPts
+	  iTooFarX = +10000
+          iCount = iCoarseMeshBoxPts	  
           DO iLines = 1,iNum
             IF (iaClose(iLines) .LT. 0) THEN
               !!do the "far" lines
               CALL voigt_chi(
      $           daCoarse,iCount,daLineShift(iLines),dLTE,
      $           daMass(iLines),daBroad(iLines),iLineMixBand,dP,dPP,
-     $           daJU(1),int(daISO(iLines)),dVibCenter,
-     $           xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi)
+     $           daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter,
+     $           xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi,iTooFar)
+              IF ((iTooFar .GT. 0) .AND. (iTooFar .LT. iTooFarX)) THEN
+	        iTooFarX = iTooFar
+	      END IF     
               DO iFr = 1,iCount
                 daTempCoarse(iFr) = daTempCoarse(iFr) +
      $                              daStrenLTE(iLines)*yaCoarse(iFr)
                 END DO
               END IF
             END DO
+          IF (iTooFarX .LT. 100) THEN
+	    iISO = int(daISO(1))	  
+	    print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+          ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
+	    iISO = int(daISO(1))	  
+	    print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	  END IF	    
           !!!interpolate the far lines sum onto the near lines
           CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
           !!!add on the far lines to the near lines

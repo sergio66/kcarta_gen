@@ -40,7 +40,7 @@ c local variables
           daSpline(iSpline) = 
      $           (daTempClose(iIm2) + daTempClose(iIm1) + daTempClose(iI) +
      $            daTempClose(iIp1) + daTempClose(iIp2))/5.0d0
-          END DO
+        END DO
       ELSEIF (kBoxCarUse .EQ. 3) THEN
         !do a 3 point average
         iI = -1
@@ -52,17 +52,17 @@ c local variables
           iSpline = iSpline + 1
           daSpline(iSpline) = 
      $        (daTempClose(iIm1) + daTempClose(iI) + daTempClose(iIp1))/3.0d0
-          END DO
+        END DO
       ELSEIF (kBoxCarUse .EQ. 1) THEN
         !do a 1 point average .... do nothing!!!!
         DO iJ = 1,iFineMeshBoxPts
           daSpline(iJ) = daTempClose(iJ)
-          END DO
-        END IF
+        END DO
+      END IF
 
       DO iJ = i1,i2
         daK(iJ) = max(daSpline(iJ-i1+1),0.0d0)
-        END DO
+      END DO
 
       RETURN
       END
@@ -72,7 +72,7 @@ c do we stick to linemix, or switch to Cousin?
 c for testing purposes with Genln2, we have parameter iTestGenln2 = +1
 c where we swtich EVERYTHING to Cousin; else the default is set at 
 c iTestGenln2 = -1 so we use linemixing for the strongest bands
-      SUBROUTINE CousinVsMix(iaLineMix,iLineMixBand,iJU,iISO,daFreq,
+      SUBROUTINE CousinVsMix(iaLineMix,iLineMixBand,iJL,iJU,iISO,daFreq,
      $                       daLineShift,daStren296,dVibCenter,iNum)
 
       IMPLICIT NONE 
@@ -87,6 +87,7 @@ c input parameters
       INTEGER iNum                          !number of lines in band
       DOUBLE PRECISION dVibCenter           !vib center of band
       INTEGER iISO                          !isotope
+      INTEGER iJL                           !lower quantum number      
       INTEGER iJU                           !upper quantum number
 c output parameter
       INTEGER iaLineMix(kHITRAN)            !individual lines linemix coeffs
@@ -106,7 +107,7 @@ c local vars
 
       IF (iTestGenln2 .NE. iDefault) THEN
         print *,'iTestGenln2,iDefault = ',iTestGenln2,iDefault
-        END IF
+      END IF
       
       dsMin = +1.0d36
       dsMax = -1.0d36
@@ -117,13 +118,13 @@ c local vars
         iaWeak(iI) = +1      !!!!assume line is "weak"
         IF (daStren296(iI) .LE. dSmin) dSmin = daStren296(iI)
         IF (daStren296(iI) .GE. dSmax) dSmax = daStren296(iI)
-        END DO
+      END DO
       dDelta = log10(dSmax)-log10(dSmin)
       dThreshold = log10(dSmin) + dThreshold*dDelta
  
       DO iI = 1,iNum
         IF (log10(daStren296(iI)) .GT. dThreshold) iaWeak(iI) = -1
-        END DO
+      END DO
 
       d1 = daFreq(1)
       d2 = daFreq(kMaxPts)
@@ -177,12 +178,12 @@ c local vars
           dfR_Rbranch = 2380.0d0
           iStrong = +1
           IF (iaWeak(iI) .GT. 0) iStrong = -1   !!!weak line in band
-          END IF
+        END IF
 
         IF ((iStrong .EQ. 1) .AND. (iTestGenln2 .EQ. 1)) THEN
           iSwitched = +1
           iStrong = -1
-          END IF
+        END IF
 
         IF ((iLineMixBand .EQ. 2) .AND. (iStrong .GT. 0)) THEN
           !!current 10000 point chunk is way outside the band
@@ -194,27 +195,27 @@ c local vars
             iOut = 1             !!!!switch to Cousin 
           ELSEIF ((d2 .GE. dfR_Rbranch) .AND. (dLineShift .GE. dVibCenter))THEN
             iOut = 1             !!!!switch to Cousin 
-            END IF
+          END IF
           
           !! for some odd reason, do all the P branch lines for 2350 sigsig, 
           !! using the Cousin lineshape
           !! this is because at large pressure I notice FULLMIX << FIRSTORDER
           IF ((dLineShift .LE. dVibCenter)) THEN
             iOut = 1             !!!!switch to Cousin 
-            END IF
+          END IF
             
         ELSEIF ((iLineMixBand .EQ. 2) .AND. (iStrong .LT. 0)) THEN
           !! current line is one of the weaker lines in the band OR
           !! weaker bands in NLTE ... just use Cousin
           iOut = 1
-          END IF
+        END IF
           
         iaLineMix(iI) = iOut
-        END DO
+      END DO
 
       IF (iSwitched .EQ. +1) THEN
         write(kStdWarn,*) 'testing against GENL2; reset from linemix to cousin'
-        END IF
+      END IF
        
       RETURN
       END
@@ -223,8 +224,8 @@ c************************************************************************
 c this subroutine calls the voigt function at whatever resolution
       SUBROUTINE voigt_chi(daFreq,iFreqPts,dLineShift,
      $                 dLTE,dMass,dBroad,iLineMix,dP,dPP,
-     $                 dJU,iISO,dVibCenter,
-     $                 xBirn,chiBirn,iNptsBirn,daLineshape,daFudge,iDoVoigtChi)
+     $                 dJL,dJU,dJLowerQuantumRot,iISO,dVibCenter,
+     $                 xBirn,chiBirn,iNptsBirn,daLineshape,daFudge,iDoVoigtChi,iTooFar)
 
       IMPLICIT NONE 
  
@@ -236,7 +237,7 @@ c input parameters
       DOUBLE PRECISION daFreq(kMaxPts)                !the wavevector
       DOUBLE PRECISION dP,dPP                         !layer pressure
       DOUBLE PRECISION dLineShift,dMass,dBroad        !line parameters
-      DOUBLE PRECISION dLTE,dJU
+      DOUBLE PRECISION dLTE,dJL,dJU,dJLowerQuantumRot
       DOUBLE PRECISION dVibCenter                     !vib center of band
       INTEGER iISO
       DOUBLE PRECISION daFudge(kMaxPtsBox)  !fudge so that we mimic UMBC-LBL
@@ -245,53 +246,57 @@ c this is for birnbaum, if needed
       INTEGER iNptsBirn
       DOUBLE PRECISION xBirn(kMaxPts),chiBirn(kMaxPts)
 c output parameters
-      DOUBLE PRECISION daLineshape(kMaxPtsBox)    !lineshape, at high res
-
+      DOUBLE PRECISION daLineshape(kMaxPtsBox)    ! lineshape, at high res
+      INTEGER iToofar                             ! is the input linecenter too far from linecenters
+                                                  ! found in linemix file (-1 No, +x yes == in(dJLowerQuantumRot))
+                                                  ! if larger than 100, high J so weak line, so dont worry
 c local parameters
       DOUBLE PRECISION daImag(kMaxPtsBox)    !for linemixing calcs
       DOUBLE PRECISION daChi(kMaxPtsBox),dT
       DOUBLE PRECISION df,f0,tau2_birn,tau2
       DOUBLE PRECISION daYmix(kHITRAN),dY
-      INTEGER iFr,iN,iLine,iNum,iTooFar
+      INTEGER iFr,iN,iLine,iNum
 
 c      iDoVoigtChi = -1  !! do not multiply by chi function in voigt_chi; all 
 c                        !!   necesary things will be done by calling 
 c                        !!   Co2_4um_fudge_nlte_fast
 c      iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
 
+      iTooFar = -1
       iN = iFreqPts
+      
       !compute the voigt lineshape at high resolution
-      CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,
-     $             dLTE,dMass,dBroad,iN,dP,dPP)
+      CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
 
       IF (iLineMix .EQ. 1) THEN    !this does cousin
         dT = dLTE
         CALL Cousin(daChi,daFreq,dLineShift,dBroad,dT,dP,dPP,1,iN)
         DO iFr = 1,iN
           daLineshape(iFr) = daLineshape(iFr) * daChi(iFr)
-          END DO
-        END IF
+        END DO
+      END IF
 
       IF (iLineMix .EQ. 2) THEN   !this does linemix
         dT = dLTE
-        CALL linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJU,iISO,dT,dP)
+        CALL linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
 ccc        tau2 = tau2_birn(dP,dPP)
 ccc        CALL birnbaum(daChi,daFreq,dLineShift,dBroad,dT,tau2,iN)
-        CALL birn_interp(daChi,daFreq,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
+        CALL birnbaum_interp(daChi,daFreq,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
+c	print *,'doing birnbaum_interp ',dJL,dJU,iISO,daFreq(1)	
         dY = daYmix(iLine)*dP
         DO iFr = 1,iN
           daLineshape(iFr) = (daLineshape(iFr)+daImag(iFr)*dY)*daChi(iFr)
-          END DO
+        END DO
         IF ((dJU .EQ. 9) .AND. (iISO .EQ. 1) .AND. (iDoVoigtChi .GT. 0)) THEN
           !!oh oh check to see if we need to adjust the linemix to bring it
           !!approximnately equal to UMBC-LBL
           IF ((daFreq(1) .LE. 2505.0d0) .AND. (daFreq(iN) .GE. 2355.0d0)) THEN
             DO iFr = 1,iN
               daLineshape(iFr) = daLineshape(iFr)*daFudge(iFr)
-              END DO
-            END IF
+            END DO
           END IF
         END IF
+      END IF
 
       RETURN
       END
@@ -346,8 +351,8 @@ c local variables
           iChunk = 2480
           FNAME = 'nonlte_co2_fudge_2480.txt'
           iChi = +1
-          END IF
         END IF
+      END IF
 
       IF (iChi .GT. 0) THEN
         CALL FindChiFileName(fname)
@@ -359,14 +364,14 @@ c local variables
           WRITE(kStdErr,1010) IERR, FNAME
  1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
           CALL DoSTOP
-          ENDIF
+        ENDIF
         kTempUnitOpen = 1
         READ(iIOUN,*) (daF(iFr),daChi(iFr),iFr=1,kMaxPts)
         CLOSE(iIOUN)
         kTempUnitOpen = -1
 
         CALL dspl(daF,daChi,kMaxPts,daFreq,daFudge,iN)
-        END IF
+      END IF
 
       RETURN
       END
@@ -403,8 +408,8 @@ cc      DO iFr = 1,iN
 cc        IF (abs(dLineShift - daFreq1(iFr)) .GT. 25.0d0) THEN
 cc          daReal1(iFr) = 0.0d0
 cc          daImag(iFr) = 0.0d0
-cc          END IF
-cc        END DO
+cc        END IF
+cc      END DO
 cc this is bad!
 cc tessa tessa tessa for testing : turn off lineshape +/- 25 cm away!
 
@@ -487,7 +492,7 @@ c local variables
       IF (n_in .gt. kMaxPtsBox) THEN
         write(kStdErr,*)'in vhh2RI.f, n_in .gt. kMaxPtsBox',n_in,kMaxPtsBox
         Call DoStop
-        END IF
+      END IF
 
 c  SORT THE (X,Y) PAIRS INTO THE 4 REGIONS OF THE HUMLIcEK 
 c  EXPRESSIONS OF THE VOIGT LINE PROFILE.
@@ -551,7 +556,7 @@ c
      3     (32066.6-U*(24322.84-U*
      4     (9022.228-U*(2186.181-U*(364.2191-
      5     U*(61.57037-U*(1.841439-U)))))))
-         endif
+       endif
 c
        U = dcmplx(1.0d0, -1.0d0)
 c
@@ -599,7 +604,7 @@ c
      3     (32066.6-U*(24322.84-U*
      4     (9022.228-U*(2186.181-U*(364.2191-
      5     U*(61.57037-U*(1.841439-U)))))))
-         endif
+       endif
 c
        U = dcmplx(1.0d0, -1.0d0)
 c
@@ -641,7 +646,7 @@ cC
 
       IF (iDoVanHuber .NE. +1) THEN
         print *,'doing plain voigt or lorentz, NOT vhh',iDoVanHuber
-        END IF
+      END IF
 
       IF (iDoVanHuber .GT. 0) THEN 
         !!! do VanHuber
@@ -650,7 +655,7 @@ cC
           vtp(ii) = factor*(vtp(ii)+vtm(ii)) 
           wr(ii)  = dreal(vtp(ii)) 
           wi(ii)  = dimag(vtp(ii)) 
-          END DO 
+        END DO 
 
       ELSEIF (iDoVanHuber .LT. 0) THEN 
         !!!! just do voigt; bad at lower wavenumbers!
@@ -658,7 +663,7 @@ cC
           factor  = fact*v(ii)
           wr(ii) = factor*dreal(vtp(ii)) 
           wi(ii) = factor*dimag(vtp(ii)) 
-          END DO
+        END DO
 
       ELSEIF (iDoVanHuber .EQ. 0) THEN 
         !!! just do lorentz; bad at lower wavenumbers, and high altitudes
@@ -668,8 +673,8 @@ cC
           vtp(ii) = brd/(brd*brd + (v(ii)-v0)**2)
           wr(ii) = factor*dreal(vtp(ii)) 
           wi(ii) = 0.0d0
-          END DO
-        END IF
+        END DO
+      END IF
 
       return
       end

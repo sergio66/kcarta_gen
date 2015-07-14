@@ -196,7 +196,11 @@ Future plans
   | Test and run  NLTE Compressed ODs                                      |
   -------------------------------------------------------------------------- 
 
-v1.18   Included National Renewable Energy Lab (NREL) SOLAR database to make 
+v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
+           r = c1*r1 + c2*r2 + c12*r12 + clr*rclr)
+        PCLSAM clouds can also have NLTE calcs
+
+        Included National Renewable Energy Lab (NREL) SOLAR database to make 
         2830-50000 cm-1 region self consistent, put SOLAR database at T=5800K
         between 15-605 cm-1; kept the 605-2830 cm-1 solar database same, for 
         consistency with SARTA
@@ -556,25 +560,40 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+07/14/15        Reworked NLTE code a little; some high J (so weak lines) in the
+                HITRAN database for "strong" bands eg 2350, do not have
+		linemixing coefficients as found by SUBROUTINE linemix ... so
+		this was causing code to crash. Now the code also reads in the
+		"J" values, and if the offending lines have "J" values higher
+		than 100, code says this means
+		the linestrength is quite small, so ignore linemixing not being
+		available
+		
 07/02/15        PCLSAM cloud calcs can now include fast SARTA nlte
 
-07/01/15        Since Antartic surface pressures can be as low as 500 mb, CO2,N2O,CO, 
-                mixing ratios were failing if iBot=20 (raPresslevls(20) = 596 mb)
-                So subr Get_Temp_Plevs (in n_pth_mix.f) and subr compute_co2_mixratio (in kcartamisc.f)
-                both needed to have iBot tweaked to layer 25 or above (raPresslevls(25) = 496 mmb)
-		else eg NLTE failed since OC2 mixratio was NAN, and code could not correctly
-		compute temperatures at pressure levels
+07/01/15        Since Antartic surface pressures can be as low as 500 mb,
+                CO2,N2O,CO, mixing ratios were failing if iBot=20
+		(raPresslevls(20) = 596 mb)
+                So subr Get_Temp_Plevs (in n_pth_mix.f) and
+		subr compute_co2_mixratio (in kcartamisc.f)
+                both needed to have iBot tweaked to layer 25 or above
+		(raPresslevls(25) = 496 mmb)
+		else eg NLTE failed since OC2 mixratio was NAN, and code could
+		not correctlyccompute temperatures at pressure levels
 
-06/30/15        Tweaked cloud entering routines in rtp_interface.f, since if there were
-                a) two clouds too close together (bot of cld 1 close to top of cld2)
+06/30/15        Tweaked cloud entering routines in rtp_interface.f, since if
+                there were
+                a) two clouds too close together (bot of cld 1 close to
+		   top of cld2)
 		b) one of the clouds too close to surface
 		the code used to
 		a) stop because it said the clouds occupied the same layers
-		b) do a pressure average of (layer above surface, and 0) and say oops this
-		   cloud layer is ABOVE the layer above it, and fail
+		b) do a pressure average of (layer above surface, and 0), and say
+		   oops this cloud layer is ABOVE the layer above it, and fail
 		   
 01/22/15        Put in error checking of mixed path weights into "GetMixVertTemp"
-                so that if the mixed paths are all set to 0 incorrectly, code stops
+                so that if the mixed paths are all set to 0 incorrectly, code
+		stops
 
 01/05/15
         Global common block parameter "kTemperVary" now sets, in "SomeMoreInits"
@@ -585,17 +604,20 @@ v1.18
           +2 : linear in tau, simple  v2
           +3 : linear in tau, ala RRTM, LBLRTM v3
           +4 : linear in tau, ala RRTM, LBLRTM v4
-       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
-       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
+       for 2,3,4 look at "clear_scatter_misc.f" subroutine
+         RT_ProfileUPWELL_LINEAR_IN_TAU
+       for 2,3,4 look at "clear_scatter_misc.f" subroutine
+         RT_ProfileDNWELL_LINEAR_IN_TAU
 
 10/17/14        Fixed bug in nm_molgas and nm_xscgas ... if user wanted to specify
-                which molgases, xscgases he/she wants to use, the code was incorrectly
-                not finding any gas; this has been fixed. In addition if MOLGAS=2 (CO2)
-                not specified, this is ok when checking T(z); code uses the supplied T(z)
-                profile of first gas (which should be WV)
+                which molgases, xscgases he/she wants to use, the code was
+		incorrectly not finding any gas; this has been fixed. In addition
+		if MOLGAS=2 (CO2) is not specified, this is ok when checking
+		T(z); code uses the supplied T(z) profile of first gas (which
+		should be WV)
 
-10/17/14        Clear sky flux calcs have been sped up using node points/weights from
-                J. Li's 2000 JAS paper (used in RRTM and LBLRTM)
+10/17/14        Clear sky flux calcs have been sped up using node points/weights
+ 		from J. Li's 2000 JAS paper (used in RRTM and LBLRTM)
 
 10/06/14        SPECTRA now allows you to specify alternate compressed 
                 directories for gases (other than continumm g101,102)
@@ -921,15 +943,15 @@ v1.18
                 atmosphere, especially for the 2350 lines!
 
 05/16/12        iNLTE_SlowORFast = +1 for slow LBL NLTE model
-                                 = -1 for fast model from interping SARTA 
+                                 = -1 DEFAULT for fast model from interping SARTA 
                                       fast NLTE
-                                 = -2 for fast NLTE from compress lkup tables DEFAULT
+                                 = -2 fast NLTE from compress lkup tables 
 
-                Use variable iNLTE_SlowORFast = +1   !default slow LBL model
+                Use variable iNLTE_SlowORFast = +1   !slow LBL model
                              iNLTE_SlowORFast = -1   !fast guess SARTA based model
                              iNLTE_SlowORFast = -2   !fast compressed LBL model
 
-                                iChunk_DoNLTE = -1    !default : LTE			       
+                                iChunk_DoNLTE = -1    !default : LTE	       
                 Above would set iChunk_DoNLTE = +1    !slow LBL model
                                 iChunk_DoNLTE = +2    !fast guess  model
                                 iChunk_DoNLTE = +3    !fast compressed LBL model
@@ -939,7 +961,6 @@ v1.18
       !matlab cd : /home/sergio/KCARTADATA/NLTE/SARTA_COEFS/ 
       !fname='/asl/data/sarta_database/Data_jan04untun/Coef/setnte_oct05.dat'; 
       ![idchan, freq, coef] = rd_nte_be(fname);
-
 
          iNLTE_SlowORFast = -1    !!use the fast SARTA model DEFAULT DEFAULT
          iNLTE_SlowORFast = -2    !!use the fast COMPRESSED KCARTA model
@@ -1066,7 +1087,7 @@ v1.16
                 Right now, the default column multiplier is 0.1 (see
                 variable rDefaultColMult in subroutine find_radiances_coljac)
 
-07/28/11        Updated the SARTA_NLTE calc from v1.06 to v.108 ... this 
+07/28/11        Updated the SARTA_NLTE calc from v1.06 to v1.08 ... this 
                 model takes into account increasing amounts of CO2 (from 
                 default 370 ppmv). See filename = kSartaNLTE
 
@@ -1101,7 +1122,7 @@ v1.16
                              
 v1.15           
 -----
-07/28/11        Updated the SARTA_NLTE calc from v1.06 to v.108 ... this 
+07/28/11        Updated the SARTA_NLTE calc from v1.06 to v1.08 ... this 
                 model takes into account increasing amounts of CO2 (from 
                 default 370 ppmv)
 

@@ -15,7 +15,7 @@ c input parameters
       DOUBLE PRECISION dLTE,dJU      !local kinetic temp, upper state quantum
       INTEGER iISO                   !isotope
 c output parameters
-      CHARACTER*80 caFName1, caFName2
+      CHARACTER*120 caFName1, caFName2
       DOUBLE PRECISION dT1,dT2         
     
 c local variables
@@ -24,15 +24,15 @@ c local variables
       CHARACTER*3 ca3
       DOUBLE PRECISION dT
 
-      DO iI = 1,80
+      DO iI = 1,120
         caFName1(iI:iI) = ' '
         caFName2(iI:iI) = ' '
-        END DO
+      END DO
 
       DO iI = 1,30
         caT1(iI:iI) = ' '
         caT2(iI:iI) = ' '
-        END DO
+      END DO
 
       caFName1 = caLineMixDir
       caFName2 = caLineMixDir
@@ -51,7 +51,7 @@ c local variables
         write(kStdErr,*) 'Unidentified CO2 isotope for linemixing'
         write(kStdErr,*) 'iISO,dJU = ',iISO,dJU
         CALL DoStop
-        END IF
+      END IF
 
       iFound = -1
       IF (dLTE .LT. 150.0d0+0.001d0) THEN
@@ -76,13 +76,13 @@ c local variables
         ELSE
           iI = iI + 1
           GOTO 11
-          END IF
         END IF
+      END IF
 
       IF (iFound .LT. 0) THEN 
         write (kStdErr,*) 'Could not make bounding linemix filenames!'
         Call DoStop
-        END IF
+      END IF
 
       !this now assumes iFound .GT. 0
  12   FORMAT(I3)
@@ -96,16 +96,16 @@ c local variables
 c put everything together
       iI = 1
  10   CONTINUE
-      IF ((caFname1(iI:iI) .NE. ' ') .AND. (iI .LT. 80)) THEN
+      IF ((caFname1(iI:iI) .NE. ' ') .AND. (iI .LT. 120)) THEN
         iI = iI + 1
         GOTO 10
-        END IF
+      END IF
       iJ = 1
  15   CONTINUE
       IF ((caT1(iJ:iJ) .NE. ' ') .AND. (iJ .LT. 30)) THEN
         iJ = iJ + 1
         GOTO 15
-        END IF
+      END IF
       iJ = iJ-2  
 
       caFName1(iI:iI+iJ) = caT1(1:iJ+1)
@@ -113,20 +113,171 @@ c put everything together
 
       iI = 1
  20   CONTINUE
-      IF ((caFname1(iI:iI) .NE. ' ') .AND. (iI .LT. 80)) THEN
+      IF ((caFname1(iI:iI) .NE. ' ') .AND. (iI .LT. 120)) THEN
         iI = iI + 1
         GOTO 20
-        END IF
+      END IF
  25   CONTINUE
       IF ((caFName(iJ:iJ) .NE. ' ') .AND. (iJ .LT. 30)) THEN
         iJ = iJ + 1
         GOTO 25
-        END IF
+      END IF
       iJ = iJ-2  
 
       caFName1(iI:iI+iJ) = caFName(1:iJ+1)
       caFName2(iI:iI+iJ) = caFName(1:iJ+1)
   
+      RETURN
+      END
+
+c************************************************************************
+c this subroutine reads in the LINEMIX parameters 
+      SUBROUTINE linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dLTE,dP)
+
+      IMPLICIT NONE 
+ 
+      include '../INCLUDE/kcarta.param' 
+
+c input params
+      DOUBLE PRECISION dLineShift   !line center
+      DOUBLE PRECISION dLTE         !local kinetic temperature
+      DOUBLE PRECISION dP           !layer pressure
+      INTEGER iISO                  !isotope type
+      DOUBLE PRECISION dJL,dJU            !!lower and upper quantum vibration numbers
+      DOUBLE PRECISION dJLowerQuantumRot  !!lower           quantum rotation number
+c output parameters
+      DOUBLE PRECISION daYmix(kHITRAN)   !line mix coeffs
+      INTEGER iLine                      !which one corresponds to dLineShift
+      INTEGER iNum                       !number of Ymix lines for this band
+      INTEGER iTooFar                    !is dLineShift too far from lines in files?
+      
+c local variables
+      INTEGER iI,iErr,iIOUN,jLow,jHigh,iGasID,iISOTOPE,iFound,iJL,iJU,iJLowQR
+      DOUBLE PRECISION daF1(kHITRAN),daF2(kHITRAN)
+      DOUBLE PRECISION daY1(kHITRAN),daY2(kHITRAN)
+      CHARACTER*120 caFname1,caFName2
+      DOUBLE PRECISION dDiff0,dDiff1,dT1,dT2,dBlah
+      CHARACTER*1 caPorR_1(kHITRAN),caPorR_2(kHITRAN)
+      
+      iTooFar = -1         !!assume this line DOES exist in linemix files
+      iJL = int(dJL)
+      iJU = int(dJU)
+      iJLowQR = int(dJLowerQuantumRot)
+      
+      CALL FindLineMixFiles(dLTE,dJU,iISO,caFName1,caFName2,dT1,dT2)
+
+c open first file
+      iIOun = kTempUnit
+      OPEN(UNIT=iIOun,FILE=caFName1,FORM='formatted',STATUS='OLD',
+     $     IOSTAT=iErr) 
+      IF (iErr .NE. 0) THEN 
+        write (kStdErr,*) 'in subroutine linemix, error reading'
+        write (kStdErr,*) 'file (number 1) that has linemix parameters'
+        WRITE(kStdErr,1070) iErr, caFName1 
+        CALL DoSTOP 
+      END IF 
+      kTempUnitOpen=1 
+
+      read(iIOUN,*) iGasID,iNum,iISOTOPE,jLow,jHigh
+      IF ((iGasID .EQ. 2) .AND. (iISOTOPE .EQ. iISO) .AND. 
+     $    (jHigh .EQ. nint(dJU))) THEN
+         dDiff0 = 1.0d0
+      ELSE
+        write(kStdErr,*) 'linemix reader : other bands'
+        Call DoStop
+      END IF
+
+      IF (iNum .GT. kHITRAN) THEN
+        write(kStdErr,*) 'File has ',iNum,' line parameters for gas ',iGasID
+        write(kStdErr,*) 'Code can only handle ',kHITRAN,' line parameters '
+        write(kStdErr,*) 'Please check kHITRAN in kcarta.param and fix'
+        CALL DoStop
+      END IF
+
+      DO iI = 1,iNum
+c        read(iIOUN,*) jLow,daF1(iI),daY1(iI)
+        read(iIOUN,*) jLow,daF1(iI),daY1(iI),caPorR_1(iI)
+      END DO
+
+      close (iIOUN)
+      kTempUnitOpen=-1 
+
+c open second file
+      iIOun = kTempUnit
+      OPEN(UNIT=iIOun,FILE=caFName2,FORM='formatted',STATUS='OLD',
+     $     IOSTAT=iErr) 
+      IF (iErr .NE. 0) THEN 
+        write (kStdErr,*) 'in subroutine linemix, error reading'
+        write (kStdErr,*) 'file (number 2) that has linemix parameters'	
+        WRITE(kStdErr,1070) iErr, caFName2 
+        CALL DoSTOP 
+      END IF 
+      kTempUnitOpen=1 
+
+      read(iIOUN,*) iGasID,iNum,iISOTOPE,jLow,jHigh
+      IF ((iGasID .EQ. 2) .AND. (iISOTOPE .EQ. iISO) .AND. 
+     $    (jHigh .EQ. nint(dJU))) THEN
+         dDiff0 = 1.0d0
+      ELSE
+        write(kStdErr,*) 'linemix reader : other bands'
+        Call DoStop
+      END IF
+
+      IF (iNum .GT. kHITRAN) THEN
+        write(kStdErr,*) 'File has ',iNum,' line parameters for gas ',iGasID
+        write(kStdErr,*) 'Code can only handle ',kHITRAN,' line parameters '
+        write(kStdErr,*) 'Please check kHITRAN in kcarta.param and fix'
+        CALL DoStop
+      END IF
+
+      DO iI = 1,iNum
+c        read(iIOUN,*) jLow,daF2(iI),daY2(iI)
+        read(iIOUN,*) jLow,daF2(iI),daY2(iI),caPorR_2(iI)	
+      END DO
+
+      close (iIOUN)
+      kTempUnitOpen=-1 
+
+c check that the line centers from the two files are in the same order
+c at the same time, just fill in daYmix for kicks
+      DO iI = 1,iNum
+        dBlah = (daY2(iI)-daY1(iI))/(dT2 - dT1)    !slope between two  curves
+        daYmix(iI) = daY1(iI) + dBlah*(dLTE-dT1)   !linear interpolation 
+c        print *,dLTE,daF1(iI),daYmix(iI)*dP
+        IF (dabs(daF1(iI) - daF2(iI)) .GT. 1.0d-10) THEN
+          write(kStdErr,*) 'Lines in files ',caFName1,caFName2,' are unequal!!'
+          CALL DoStop
+        END IF
+      END DO
+
+      !!now find the closest line to dLineShift, which is the input line
+      iLine = 1
+      dDiff0 = abs(dLineShift - daF1(iLine))
+      DO iI = 1,iNum
+        dDiff1 = abs(dLineShift - daF1(iI))
+        IF (dDiff1 .LE. dDiff0) THEN
+          iLine = iI
+          dDiff0 = dDiff1
+        END IF
+      END DO
+      IF (abs(dDiff0) .ge. 5.0d-3) THEN
+        !!!  old code caused the program to stop
+        !daYmix(iLine) = 0.0d0
+	!iTooFar = +1
+        !print *,'large (df) : line center sent in = ',dLineShift,' smallest diff with lines in file ',abs(dDiff0)
+	!print *,'dJU,iISO = ',dJU,iISO,' T1,T2 (in K) = ',dT1,dT2, 'first linemix file ',caFName1
+        !CALL DoStop
+        !!!  new code tries to see how bad rotation vib quantum number is, if > 100, this is a weak line so dont worry
+        daYmix(iLine) = 0.0d0	
+        iTooFar = iJLowQR
+	! print *,'dLineCenter,diff = ',dLineShift,abs(dDiff0),' dJL,dJU,iISO = ',iJL,iJU,iISO,' JRotQuant ',iJLowQR
+      END IF
+
+c      write(kStdWarn,*) 'f0,df,iLine,ymix= ',sngl(daF1(iLine)),dDiff0,iLine,sngl(daYmix(iLine)*dP)
+     
+ 1070 FORMAT('ERROR! number ',I5,' opening LINEMIX parameter file:',/,A80) 
+ 1080 FORMAT('Opened LineMix parameter file ',A80) 
+
       RETURN
       END
 
@@ -169,7 +320,7 @@ c copied from SPECTRA/CO2_COMMON/co2_param.m
         ps(iFr) = ps(iFr)/kAtm2mb
         pf = pt(iFr) - ps(iFr)
         ratio(iFr) = pf/pt(iFr)
-        END DO
+      END DO
 
       duration_self = dur(1)
       CALL dspl(ratio,dur,4,(dP-dPP)/dP,tau2,1)
@@ -178,149 +329,7 @@ c      print *,'in tau2_birn : ',dPP,dP,(dP-dPP)/dP,tau2,(ratio(iFr),iFr=1,4)
 
       RETURN
       END
-c************************************************************************
-c this subroutine reads in the LINEMIX parameters 
-      SUBROUTINE linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJU,iISO,dLTE,dP)
-
-      IMPLICIT NONE 
- 
-      include '../INCLUDE/kcarta.param' 
-
-c input params
-      DOUBLE PRECISION dLineShift   !line center
-      DOUBLE PRECISION dLTE         !local kinetic temperature
-      DOUBLE PRECISION dP           !layer pressure
-      INTEGER iISO                  !isotope type
-c output parameters
-      DOUBLE PRECISION daYmix(kHITRAN)   !line mix coeffs
-      INTEGER iLine                      !which one corresponds to dLineShift
-      INTEGER iNum                       !number of Ymix lines for this band
-      INTEGER iTooFar               !is dLineShift too far from lines in files?
-
-c local variables
-      INTEGER iI,iErr,iIOUN,jLow,jHigh,iGasID,iISOTOPE,iFound
-      DOUBLE PRECISION daF1(kHITRAN),daF2(kHITRAN)
-      DOUBLE PRECISION daY1(kHITRAN),daY2(kHITRAN)
-      DOUBLE PRECISION dJU   !line centers
-      CHARACTER*80 caFname1,caFName2
-      DOUBLE PRECISION dDiff0,dDiff1,dT1,dT2,dBlah
-       
-      iTooFar = -1         !!assume this line DOES exist in linemix files
-
-      CALL FindLineMixFiles(dLTE,dJU,iISO,caFName1,caFName2,dT1,dT2)
-
-c open first file
-      iIOun = kTempUnit
-      OPEN(UNIT=iIOun,FILE=caFName1,FORM='formatted',STATUS='OLD',
-     $     IOSTAT=iErr) 
-      IF (iErr .NE. 0) THEN 
-        print *,caFName1
-        print *,caFName2
-        write (kStdErr,*) 'in subroutine linemix, error reading'
-        write (kStdErr,*) 'file1 that has linemix parameters'
-        WRITE(kStdErr,1070) iErr, caFName1 
-        CALL DoSTOP 
-        END IF 
-      kTempUnitOpen=1 
-
-      read(iIOUN,*) iGasID,iNum,iISOTOPE,jLow,jHigh
-      IF ((iGasID .EQ. 2) .AND. (iISOTOPE .EQ. iISO) .AND. 
-     $    (jHigh .EQ. nint(dJU))) THEN
-         dDiff0 = 1.0d0
-      ELSE
-        write(kStdErr,*) 'linemix reader : other bands'
-        Call DoStop
-        END IF
-
-      IF (iNum .GT. kHITRAN) THEN
-        write(kStdErr,*) 'File has ',iNum,' line parameters for gas ',iGasID
-        write(kStdErr,*) 'Code can only handle ',kHITRAN,' line parameters '
-        write(kStdErr,*) 'Please check kHITRAN in kcarta.param and fix'
-        CALL DoStop
-        END IF
-
-      DO iI = 1,iNum
-        read(iIOUN,*) jLow,daF1(iI),daY1(iI)
-        END DO
-
-      close (iIOUN)
-      kTempUnitOpen=-1 
-
-c open second file
-      iIOun = kTempUnit
-      OPEN(UNIT=iIOun,FILE=caFName2,FORM='formatted',STATUS='OLD',
-     $     IOSTAT=iErr) 
-      IF (iErr .NE. 0) THEN 
-        write (kStdErr,*) 'in subroutine linemix, error reading'
-        write (kStdErr,*) 'file2 that has linemix parameters'
-        WRITE(kStdErr,1070) iErr, caFName2 
-        CALL DoSTOP 
-        END IF 
-      kTempUnitOpen=1 
-
-      read(iIOUN,*) iGasID,iNum,iISOTOPE,jLow,jHigh
-      IF ((iGasID .EQ. 2) .AND. (iISOTOPE .EQ. iISO) .AND. 
-     $    (jHigh .EQ. nint(dJU))) THEN
-         dDiff0 = 1.0d0
-      ELSE
-        write(kStdErr,*) 'linemix reader : other bands'
-        Call DoStop
-        END IF
-
-      IF (iNum .GT. kHITRAN) THEN
-        write(kStdErr,*) 'File has ',iNum,' line parameters for gas ',iGasID
-        write(kStdErr,*) 'Code can only handle ',kHITRAN,' line parameters '
-        write(kStdErr,*) 'Please check kHITRAN in kcarta.param and fix'
-        CALL DoStop
-        END IF
-
-      DO iI = 1,iNum
-        read(iIOUN,*) jLow,daF2(iI),daY2(iI)
-        END DO
-
-      close (iIOUN)
-      kTempUnitOpen=-1 
-
-c check that the line centers from the two files are in the same order
-c at the same time, just fill in daYmix for kicks
-      DO iI = 1,iNum
-        dBlah = (daY2(iI)-daY1(iI))/(dT2 - dT1)    !slope between two  curves
-        daYmix(iI) = daY1(iI) + dBlah*(dLTE-dT1)   !linear interpolation 
-c        print *,dLTE,daF1(iI),daYmix(iI)*dP
-        IF (dabs(daF1(iI) - daF2(iI)) .GT. 1.0d-10) THEN
-          write(kStdErr,*) 'Lines in files ',caFName1,caFName2,' are unequal!!'
-          CALL DoStop
-          END IF
-        END DO
-
-      !!now find the closest line to dLineShift
-      iLine = 1
-      dDiff0 = abs(dLineShift - daF1(iLine))
-      DO iI = 1,iNum
-        dDiff1 = abs(dLineShift - daF1(iI))
-        IF (dDiff1 .LE. dDiff0) THEN
-          iLine = iI
-          dDiff0 = dDiff1
-          END IF
-        END DO
-      IF (abs(dDiff0) .ge. 5.0d-3) THEN
-        daYmix(iLine) = 0.0d0
-        iTooFar = +1
-        print *,'iTooFar = +1',dLineShift,dJU,iISO
-        print *,'linemix files are : '
-        print *,caFName1
-        print *,caFName2
-        END IF
-
-c      write(kStdWarn,*) 'f0,df,iLine,ymix= ',sngl(daF1(iLine)),
-c     $    dDiff0,iLine,sngl(daYmix(iLine)*dP)
-     
- 1070 FORMAT('ERROR! number ',I5,' opening LINEMIX parameter file:',/,A80) 
- 1080 FORMAT('Opened LineMix parameter file ',A80) 
-
-      RETURN
-      END
-
+      
 c************************************************************************
 c this subroutine finds Birnbaum
 c copied directly from SPECTRA/FORTRANLINUX/birnbaum.f
@@ -413,14 +422,14 @@ c now we load in bbiirrnn.dat
       IF ((caFName(i:i) .NE. ' ') .AND. (i .LT. 80)) THEN
         i = i + 1
         GOTO 1
-        END IF
+      END IF
       caFName1 = 'bbiirrnn.dat'
       j = 1
  2    CONTINUE
       IF ((caFName1(j:j) .NE. ' ') .AND. (j .LT. 80)) THEN
         j = j + 1
         GOTO 2
-        END IF
+      END IF
       caFName(i:i+j-1) = caFName1(1:j)
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      
@@ -440,11 +449,11 @@ c     $                                   FORM='UNFORMATTED')
         IF (abs(dd-temp(k)) .ge. 1e-2) THEN
           write(kStdErr,*) 'hmm : current temp should be ',temp(k),', not ',dd
           CALL DoStop
-          END IF
+        END IF
         DO j=1,ndoc
           read(IOUN) (chi(i,j,k),i=1,npts)
-          END DO
         END DO
+      END DO
 
       close(IOUN)
       kTempUnitOpen=-1  
@@ -460,7 +469,7 @@ cc      v0 = 0.0d0
 cc      nh = kMaxPts
 cc      DO i = 1,kMaxPts
 cc        v(i) = -200.0d0 + (400.0d0/kMaxPts)*(i-1)
-cc        END DO
+cc      END DO
 
 c find which temps (100,150,200,...,400) bracket the needed temp
       j=-1
@@ -536,8 +545,8 @@ c        do the interpolation in temp
          z(i)=chif+(chip-chif)*(T_in-temp(iTemp))/(temp(iTemp+1)-temp(iTemp)) 
          enddo 
 
-       return
-       end
+       RETURN
+       END
 
 c************************************************************************
 c copied directly from SPECTRA/FORTRANLINUX/birnbaum.f
@@ -586,7 +595,7 @@ c local variables
       integer npts,ndoc,ntemp
       parameter(npts=2001,ntemp=7,ndoc=10)
 
-      integer           i,j,k,iTau,iTemp,IOUN
+      integer           i,j,k,iTau,iTemp,IOUN,iERR
       DOUBLE PRECISION  tautau,fdif,fchi,df
       DOUBLE PRECISION  vbc,vtc,dvc,temp(ntemp),doc(ndoc)
 
@@ -630,21 +639,29 @@ c load in bbiirrnn.dat
       IF ((caFName(i:i) .NE. ' ') .AND. (i .LT. 80)) THEN
         i = i + 1
         GOTO 1
-        END IF
+      END IF
       caFName1 = 'bbiirrnn.dat'
       j = 1
  2    CONTINUE
       IF ((caFName1(j:j) .NE. ' ') .AND. (j .LT. 80)) THEN
         j = j + 1
         GOTO 2
-        END IF
+      END IF
       caFName(i:i+j-1) = caFName1(1:j)
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      
       IOUN = kTempUnit
 c this uses the asymmetric functions that Dave Tobin used in his thesis
 c see birn_lookupNEW.m
-      open(unit=IOUN,FILE=caFName,STATUS='OLD',FORM='UNFORMATTED')
+      OPEN(unit=IOUN,FILE=caFName,STATUS='OLD',FORM='UNFORMATTED',IOSTAT=iErr)
+      IF (iErr .NE. 0) THEN 
+        print *,caFName
+        write (kStdErr,*) 'in subroutine birnbaum_coarse, error reading file'
+        WRITE(kStdErr,1070) iErr, caFName
+        CALL DoSTOP 
+      END IF 
+ 1070 FORMAT('ERROR! number ',I5,' opening birnbaum coarse parameter file:',/,A80)
+ 
       kTempUnitOpen=1  
 
 c this uses the symmetric functions that Scott Hannon thinks to use
@@ -657,11 +674,11 @@ c     $                                   FORM='UNFORMATTED')
         IF (abs(dd-temp(k)) .ge. 1e-2) THEN
           write(kStdErr,*) 'hmm : current temp should be ',temp(k),', not ',dd
           CALL DoStop
-          END IF
+        END IF
         DO j=1,ndoc
           read(IOUN) (chi(i,j,k),i=1,npts)
-          END DO
         END DO
+      END DO
 
       close(IOUN)
       kTempUnitOpen = -1  
@@ -678,7 +695,7 @@ cc      v0 = 0.0d0
 cc      nh = kMaxPts
 cc      DO i = 1,kMaxPts
 cc        v(i) = -200.0d0 + (400.0d0/kMaxPts)*(i-1)
-cc        END DO
+cc      END DO
 
       j=-1
       tautau=T_in
@@ -729,7 +746,7 @@ c        print *,'sorry : doc is outside 1:3:5:7:9:11:..:19 e-3'
      $            t*u*y3 + (1.0d0 - t)*u*y4
 cc        print *,i,sngl(T_in),sngl(tautau),sngl(vbc + dvc*(i-1)),
 cc     $          sngl(chi(i,iTau,iTemp)),sngl(chiBirn(i))
-        END DO
+      END DO
 
        iNptsBirn = npts
 
@@ -740,7 +757,7 @@ cc       stop
 
 c************************************************************************
 c uses data from birnbaum_coarse to quickly interp stuff to v
-      subroutine birn_interp(z,v,v0,n_in,chiBirn,xBirn,iNptsBirn)
+      subroutine birnbaum_interp(z,v,v0,n_in,chiBirn,xBirn,iNptsBirn)
 
 c subroutine birnbaum(z,v,v0,n_in,chiBirn,xBirn,iNptsBirn) 
 c this is the birnbaum lineshape using lookup tables
@@ -778,7 +795,7 @@ c the dnu's range from -250 to +250 in steps of 0.25    (npts=2001)
       if (n_in .gt. kMaxPtsBox) THEN
         write(kStdErr,*) 'in birnbaum.f n_in .gt. kMaxPtsBox'
         CALL DoStop
-        END IF
+      END IF
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       nl=1
@@ -795,7 +812,7 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         !do the interpolation in freq
         z(i) = chiBirn(j) + (chiBirn(j+1) - chiBirn(j))*df 
 c        print *,i,sngl(v(i)),sngl(z(i))
-        END DO
+      END DO
 
        RETURN
        END
