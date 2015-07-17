@@ -376,7 +376,7 @@ c local variables
       integer npts,ndoc,ntemp
       parameter(npts=2001,ntemp=7,ndoc=10)
 
-      integer           i,j,k,iTau,iTemp,nl,nh,nstp,IOUN
+      integer           i,j,k,iTau,iTemp,nl,nh,nstp,IOUN,iErr
       DOUBLE PRECISION  tautau,fdif,fchi,df,chil,chiu,chif,chip
       DOUBLE PRECISION  vbc,vtc,dvc,temp(ntemp),doc(ndoc)
 
@@ -436,7 +436,14 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       IOUN = kTempUnit
 c this uses the asymmetric functions that Dave Tobin used in his thesis
 c see birn_lookupNEW.m
-      open(unit=IOUN,FILE=caFName,STATUS='OLD',FORM='UNFORMATTED')
+      open(unit=IOUN,FILE=caFName,STATUS='OLD',FORM='UNFORMATTED',IOSTAT=iErr)
+      IF (iErr .NE. 0) THEN
+        write (kStdErr,*) 'in subroutine birnbaum_coarse, error reading file'
+        WRITE(kStdErr,1070) iErr, caFName
+        CALL DoSTOP 
+      END IF 
+ 1070 FORMAT('ERROR! number ',I5,' opening birnbaum parameter file:',/,A80)
+      
       kTempUnitOpen=1  
 
 c this uses the symmetric functions that Scott Hannon thinks to use
@@ -655,7 +662,6 @@ c this uses the asymmetric functions that Dave Tobin used in his thesis
 c see birn_lookupNEW.m
       OPEN(unit=IOUN,FILE=caFName,STATUS='OLD',FORM='UNFORMATTED',IOSTAT=iErr)
       IF (iErr .NE. 0) THEN 
-        print *,caFName
         write (kStdErr,*) 'in subroutine birnbaum_coarse, error reading file'
         WRITE(kStdErr,1070) iErr, caFName
         CALL DoSTOP 
