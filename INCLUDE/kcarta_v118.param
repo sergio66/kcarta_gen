@@ -419,7 +419,7 @@ c this name should be self consistent with "caaStrongLines" in nm_nonlte of name
       CHARACTER*80 caStrongLineParams
 c this is new, where we have 19 NLTE bands
       PARAMETER (caStrongLineParams=
-     $         '/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/CO2_HIT12/co2_allpqr_')
+     $         '/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/CO2_H12/co2_allpqr_')
 
 c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/, 
 c they have been copied to /asl/data/kcarta; these files have removed 19 NLTE bands

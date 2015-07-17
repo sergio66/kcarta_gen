@@ -1102,7 +1102,7 @@ c output params
       read(iIOUN) (daW_temp(iI),iI = 1,iNum)     !broadening tempr dependance
       !! new since July 2015, comes from line.bslq (see lineparameters.m in
       !! SRCv1.18/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/USUALLAYERS/
-      read(iIOUN) (daJLowerQuantumRot(iI),iI = 1,iNum)  !J lower quantum rotation state
+      read(iIOUN) (daJLowerQuantumRot(iI),iI = 1,iNum)  !J lower quantum rotation state number
 c      read(iIOUN) (caJPQR(iI),iI = 1,iNum)       !P Q or R
       
       close (iIOUN)
@@ -1119,23 +1119,23 @@ c but be careful about Cousin vs linemix, else code becomes VERY slow
       IF (iGasID .EQ. 2) THEN
         IF ((iJL .EQ. 4) .AND. (iJU .EQ. 24) .AND. (iISO .EQ. 1)) THEN
           iLineMixBand = +2
-          write(kStdWarn,*) 'strong CO2 band : deldel (2310) iLineMixBand = +2'
+          write(kStdWarn,*) 'very strong CO2 band : deldel (2310) iLineMixBand = +2'
         ELSEIF ((iJL .EQ. 2).AND.(iJU .EQ.16) .AND. (iISO .EQ. 1)) THEN
           iLineMixBand = +2
-          write(kStdWarn,*) 'strong CO2 band : pi pi  (2320) iLineMixBand = +2'
+          write(kStdWarn,*) 'very strong CO2 band : pi pi  (2320) iLineMixBand = +2'
         ELSEIF ((iJL .EQ. 1).AND. (iJU .EQ.9) .AND. (iISO .EQ. 1)) THEN
           iLineMixBand = +2
-          write(kStdWarn,*) 'strong CO2 band : sigsig (2350) iLineMixBand = +2'
+          write(kStdWarn,*) 'very strong CO2 band : sigsig (2350) iLineMixBand = +2'
         ELSEIF ((iJL .EQ. 1).AND. (iJU .EQ.9) .AND. (iISO .EQ. 2)) THEN
           iLineMixBand = +2
-          write(kStdWarn,*) 'strong CO2 band : sigsig (2351) iLineMixBand = +2'
+          write(kStdWarn,*) 'very strong CO2 band : sigsig (2351) iLineMixBand = +2'
         ELSE
-          write(kStdWarn,*) 'strongest CO2 bands : iLineMixBand = +1 (cousin)'
+          write(kStdWarn,*) 'strong CO2 bands : iLineMixBand = +1 (cousin)'
           iLineMixBand = +1
         END IF
       ELSE
         iLineMixBand = -1
-        write(kStdWarn,*) 'medium strength CO2 bands : no linemixing (voigt)'
+        write(kStdWarn,*) 'not a CO2  band : no linemixing (voigt) : iLineMixBand = -1'
       END IF
 
       IF ((iLineMixBand .EQ. 2) .AND. (iJU .NE. 9)) THEN

@@ -2177,7 +2177,8 @@ c this is for bloating
      $           iPrintTalk,iTag,iActualTag,daK,daPlanck,raFreq,
      $           iGasID,iNum,iISO,daElower,daLineCenter,
      $           daJL,daJU,iaJ_UorL,daPshift,
-     $           daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,dVibCenter,iLineMixBand,
+     $           daStren296,daW_For,daW_self,daW_temp,
+     $           daJLowerQuantumRot,caJPQR,dVibCenter,iLineMixBand,
      $           iL,raLTETemp,raNLTETemp,raVibQFT,iUpdateSumNLTE,
      $           raTAmt,raTTemp,raTPress,raTPartPress,iAllLayersLTE,
      $           dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength,
@@ -2695,7 +2696,8 @@ c this is done for ONE band, for ONE layer
       SUBROUTINE compute_nlte_spectra_planck_fast(
      $    iBand,iPrintTalk,iTag,iActualTag,daK,daPlanck,raFreq,
      $    iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,iaJ_UorL,daPshift,
-     $    daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,dVibCenter,iLineMixBand,
+     $    daStren296,daW_For,daW_self,daW_temp,
+     $    daJLowerQuantumRot,caJPQR,dVibCenter,iLineMixBand,
      $    iL,raLTETemp,raNLTEtemp,raVibQFT,iUpdateSumNLTE,
      $    raTAmt,raTTemp,raTPress,raTPartPress,iAllLayersLTE,
      $    dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength,
@@ -2971,10 +2973,10 @@ c used to be 2317.2
           END DO
           IF (iTooFarX .LT. 100) THEN
 	    print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
 	    print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
 	  END IF
           !!!! now do the boxcar
           IF (iTrue .GT. 0) THEN
@@ -3022,10 +3024,10 @@ c used to be 2317.2
           END DO
           IF (iTooFarX .LT. 100) THEN
 	    print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
 	    print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
 	  END IF	  
           !!!interpolate the med lines sum onto the near lines
           CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
@@ -3075,10 +3077,10 @@ c used to be 2317.2
           END DO
           IF (iTooFarX .LT. 100) THEN
 	    print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
 	    print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
 	  END IF	  
           !!!interpolate the far lines sum onto the near lines
           CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
@@ -3348,11 +3350,11 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
           IF (iTooFarX .LT. 100) THEN
 	    iISO = int(daISO(1))
 	    print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
 	    iISO = int(daISO(1))
 	    print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
 	  END IF
           !!!! now do the boxcar
           IF (iTrue .GT. 0) THEN
@@ -3385,11 +3387,11 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
           IF (iTooFarX .LT. 100) THEN
 	    iISO = int(daISO(1))
 	    print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
 	    iISO = int(daISO(1))
 	    print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
 	  END IF	    
           !!!interpolate the med lines sum onto the near lines
           CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
@@ -3424,11 +3426,11 @@ c     ie these lines are always 2-25 cm-1 away from current wide mesh
           IF (iTooFarX .LT. 100) THEN
 	    iISO = int(daISO(1))	  
 	    print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           ELSEIF ((iTooFarX .GE. 100) .AND. (iTooFarX .NE. 10000)) THEN
 	    iISO = int(daISO(1))	  
 	    print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-	    print *,'   iLines out of iNum : vibctr,JL,JU,iISO = ',iLines,iNum,dVibCenter,int(daJL(iLines)),int(daJU(iLines)),iISO
+	    print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
 	  END IF	    
           !!!interpolate the far lines sum onto the near lines
           CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1) 
