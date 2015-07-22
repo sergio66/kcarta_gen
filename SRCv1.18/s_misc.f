@@ -630,6 +630,8 @@ c as given by 00,40,60,80,85,90
       IF (iLineMix .LT. 100) THEN
 c no need to worry : only LTE gases in any band
 c filenames eg r2205_g3.dat means "r" prefix, 2205 cm-1 chunk, g3
+c note the caTemp3 would be either '2' or '3' as those are the only
+c gases we do linemix for. So iLen3 == 1, and caTemp9 would be 9 characters long
         caTemp9 = '_g' // caTemp3(1:iLen3) // '.dat'  
 
 c else we need to worry about NLTE ODs and Planck coeffs in 

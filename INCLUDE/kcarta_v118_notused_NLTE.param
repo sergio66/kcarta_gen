@@ -151,7 +151,7 @@ c      PARAMETER (caWeakUpperAtmCO2Path = 'NotUsed')
      $   '/asl/data/kcarta/BACKGND_11SEPT2005_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/')
 
 c this is where the strong band linemix strengths are
-      CHARACTER*80 caLineMixDir
+      CHARACTER*120 caLineMixDir
 c      PARAMETER (caLineMixDir='NotUsed')
       PARAMETER (caLineMixDir='/asl/s1/sergio/AIRSCO2/LINEMIXPARAMS/')
 c*********************

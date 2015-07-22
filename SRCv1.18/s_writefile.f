@@ -1470,9 +1470,11 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       CHARACTER*80 caJacobFile,caJacobFile2,caFluxFile,caPlanckFile
 
       INTEGER CheckDoubleEntry,iImportant
-      INTEGER iNatmJac,iaLayerJac(kMaxAtm),iIOUN_Flux,iIOUN_Planck
+      INTEGER iNatmJac,iaLayerJac(kMaxAtm),iIOUN_Flux,iIOUN_Planck,iIOUN_Cloud
       REAL raParams(kMaxUserSet),raPActualAvg(kProfLayer),rP
-
+      CHARACTER*4 caStrJunk(7)
+      CHARACTER*80 caFCloudName
+      
       !this is for kLongOrShort = 0
       INTEGER iTag,iTotalStuff      
       INTEGER iCo2,iaCO2path(kProfLayer),iaLayerFlux(kMaxAtm)
@@ -1858,6 +1860,54 @@ c--------------- OUTPUT BINARY FILE --------------------------------
         CALL DoStop
       END IF
 
+      IF ((kRTP .GE. 0) .AND. (kWhichScatterCode .EQ. 5)) THEN
+        !! write out cloud info, straight from RTP file and after manipulation
+	DO iI = 1,80
+	  caFCloudName(iI:iI) = ' '
+	END DO
+        caFCloudName = caOutName
+	iJ = 80
+	DO WHILE ((caFCloudName(iJ:iJ) .EQ. ' ') .AND. (iJ. GT. 0))
+	  iJ = iJ -1
+        END DO
+	iJ = iJ + 1
+	caFCloudName(iJ:iJ+3) = '_CLD'
+	
+        caStrJunk(1) = 'typ '
+        caStrJunk(2) = 'ctop'
+        caStrJunk(3) = 'cbot'
+        caStrJunk(4) = 'cng '
+        caStrJunk(5) = 'csz '
+        caStrJunk(6) = 'frac'
+        caStrJunk(7) = 'fr12'            
+        write(kStdWarn,*) ' '
+        write(kStdWarn,*)'  after expand_scatter'
+        write(kStdWarn,*)'    Cloud1  (before/after)        Cloud2 (before/after)'
+        write(kStdWarn,*)'-------------------------------------------------------'            
+        DO iI=1,7
+          write(kStdWarn,*) caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),'<>',
+     $raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
+        END DO
+
+        OPEN(UNIT=iIOUN_Cloud,FILE=caFCloudName,FORM='FORMATTED',STATUS='NEW',
+     $       IOSTAT=iFileErr)
+        IF (iFileErr .NE. 0) THEN
+          WRITE(kStdErr,103) iFileErr, caFCloudName
+          write(kStdErr,*)'make sure the cloud dump file does not exist!' 
+          CALL DoSTOP
+        END IF
+	kTempUnitOpen = 1
+	write(iIOUN_Cloud,*) '% rows 1-7 are ctype(101/201/301=W/I/A),cprtop(mb),cprbot(mb),cngwat(g/m2),cpsize(um),cfrac and cfrac12'
+	write(iIOUN_Cloud,*) '% cols 1-4 are CLOUD 1 (old/new) and CLOUD 2 (old/new)'
+        DO iI=1,7
+          write(iIOUN_Cloud,*) raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
+        END DO
+        CLOSE(iIOUN_Cloud)
+	kTempUnitOpen = -1
+      END IF
+c      write(kStdWarn,*) 's_writefile debug jpl clouds sarta vs kcarta'
+c      call dostop	
+      
 c next open unformatted file as a fresh file to be written to
       IF (iIOUN1 .NE. 6) THEN
         OPEN(UNIT=iIOUN1,FILE=caOutName,STATUS='NEW',
@@ -1869,7 +1919,6 @@ c if file error, inform user and stop program
           CALL DoSTOP
         END IF
       END IF
- 
  103  FORMAT('ERROR! number ',I5,' opening binary data file : ',/,A80)
 
       kStdkCartaOpen=1

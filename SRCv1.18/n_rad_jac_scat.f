@@ -1160,8 +1160,8 @@ c iaaScatTable associates a file number with each scattering table
 c caaaScatTable associates a file name with each scattering table
 c caaCloudName is the furry little things name
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers)
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers)
-      CHARACTER*80 caaCloudName(kMaxClouds)
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers)
+      CHARACTER*120 caaCloudName(kMaxClouds)
 c iaCloudNumAtm stores which cloud is to be used with how many atmosphere
 c iaCloudWhichAtm stores which cloud is to be used with which atmospheres
       INTEGER iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
@@ -1182,10 +1182,11 @@ c cloud info
 
 c local variables
       CHARACTER*7 caWord
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       INTEGER iNumLinesRead,iIn,iNum,iaTemp(kMixFilRows)
       INTEGER FindCloudLayer,iJ,iScat,iI,iJ1,iErr,iTop,iBot
-      REAL rPT,rPB,rP1,rP2,r1,r2,rSwap
+      REAL rPT,rPB,rP1,rP2,r1,r2,rSwap,raaJunkCloudTB(2,2)
+      REAL raCprtop(kMaxClouds),raCprbot(kMaxClouds)
 c these are to check that the scattering table names are unique
       INTEGER iaTable(kCloudLayers*kMaxClouds)
       CHARACTER*80 caaTable(kCloudLayers*kMaxClouds)
@@ -1345,8 +1346,8 @@ c now do sanity checks
 
       write(kStdWarn,*) 'from NML scatter, cfrac1,cngwat1,cfrac2,cngwat2,cfrac12 = ',
      $ cfrac1,cngwat1,cfrac2,cngwat2,cfrac12
-
-      CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,
+      
+      CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB,
      $     caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable,
      $     iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp,
      $     raPressLevels,iProfileLayers,
@@ -1701,7 +1702,7 @@ c      stop
 
 c************************************************************************
 c this subroutine will expand the number of cloud layers from 1 to whatever
-      SUBROUTINE ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,
+      SUBROUTINE ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB,
      $     caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable,
      $     iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp,
      $     raPressLevels,iProfileLayers,
@@ -1712,14 +1713,14 @@ c this subroutine will expand the number of cloud layers from 1 to whatever
       include '../INCLUDE/scatter.param'
 
       INTEGER iProfileLayers
-      REAL raPressLevels(kProfLayer+1)
+      REAL raPressLevels(kProfLayer+1),raaJunkCloudTB(2,2)
       INTEGER iaCloudNumLayers(kMaxClouds),iaCloudNumAtm(kMaxClouds)
-      REAL raaPCloudTop(kMaxClouds,kCloudLayers)
-      REAL raaPCloudBot(kMaxClouds,kCloudLayers)
-      CHARACTER*80 caaCloudName(kMaxClouds)
+      REAL raaPCloudTop(kMaxClouds,kCloudLayers),raCprtop(kMaxClouds)
+      REAL raaPCloudBot(kMaxClouds,kCloudLayers),raCprbot(kMaxClouds)
+      CHARACTER*120 caaCloudName(kMaxClouds)
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2),raExp(kMaxClouds) 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers)
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers)
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers)
       INTEGER iaaCloudWhichAtm(kMaxClouds,kMaxAtm),iNclouds
       REAL raFracTop(kMaxAtm),raFracBot(kMaxAtm)
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -1727,10 +1728,10 @@ c this subroutine will expand the number of cloud layers from 1 to whatever
       INTEGER iaCloudNumLayersT(kMaxClouds),iaCloudNumAtmT(kMaxClouds)
       REAL raaPCloudTopT(kMaxClouds,kCloudLayers)
       REAL raaPCloudBotT(kMaxClouds,kCloudLayers)
-      CHARACTER*80 caaCloudNameT(kMaxClouds)
+      CHARACTER*120 caaCloudNameT(kMaxClouds)
       REAL raaaCloudParamsT(kMaxClouds,kCloudLayers,2) 
       INTEGER iaaScatTableT(kMaxClouds,kCloudLayers)
-      CHARACTER*80 caaaScatTableT(kMaxClouds,kCloudLayers)
+      CHARACTER*120 caaaScatTableT(kMaxClouds,kCloudLayers)
       INTEGER iaaCloudWhichAtmT(kMaxClouds,kMaxAtm),iNatm
 
 c local variables
@@ -1738,11 +1739,12 @@ c local variables
       INTEGER iIn,iJ1,iScat,iJ2,iIndex,iSkipper
       INTEGER iTop,iBot,FindCloudLayer,iNum
       REAL rPT,rPB,rSwap,rP1,rP2,rIWP,rIWP0,rPBot,rPTop,rIWPSum,rIWP_mod
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       REAL rCld,rXCld,rCldFull,rCldPart,rFrac1,rFrac2,rPtopX,rPbotX
       REAL raSurfPres(kMaxAtm)
 
       write(kStdWarn,*) ' '
+      write(kStdWarn,*) ' <<<<<<<<<<<<<<<<<        EXPAND SCATTER               >>>>>>>>>>>>>>> '      
       DO iJ = 1,iNatm
         raSurfPres(iJ) = max(raPressStart(iJ),raPressStop(iJ))      
         write(kStdWarn,*) '   surf pres(',iJ,') in ExpandScatter = ',raSurfPres(iJ)
@@ -1807,7 +1809,7 @@ c set individual cloud layer parameters but STRETCH the cloud out as necessary
 c from pressure level rPT to pressure level rPB
 c note it will occupy the entire layer
         DO iJ1 = 1,iJ
-          !top and bottom pressures CloudName/Type  IWP/LWP DME          
+          !top and bottom pressures CloudName/Type  IWP/LWP DME
           rPT = raaPCloudTop(iIn,iJ1)
           rPB = raaPCloudBot(iIn,iJ1)
 
@@ -1835,6 +1837,9 @@ c note it will occupy the entire layer
             CALL DoStop
           END IF
 
+          raaJunkCloudTB(iIn,1) = raPressLevels(iTop+1)
+          raaJunkCloudTB(iIn,2) = raPressLevels(iBot)
+
           IF ((iTop - iBot) .EQ. 0) THEN 
             !nothing special : user defined ONE layer, keep things as they are
             rP1 = raaaCloudParams(iIn,iJ1,1)        !IWP
@@ -1844,7 +1849,6 @@ c note it will occupy the entire layer
 
             raaPCloudTopT(iIn,iJ1) = rPT
             raaPCloudBotT(iIn,iJ1) = rPB
-
             CALL FullPlusPartialLayer(rPT,rPB,iTop,iBot,raPressLevels,
      $                                raPressStart,raPressStop,
      $                                raFracTop,raFracBot,iNatm,rIWP_Mod)
@@ -1958,15 +1962,19 @@ c     $                   iK,raPressLevels(iK-1),raPressLevels(iK)
                 rIWP = rIWP0/rXCld*exp(raExp(iIn)*(rPBot-rPT)/(rPBot-rPTop))
                 rIWPSum = rIWPSum + exp(raExp(iIn)*(rPBot-rPT)/(rPBot-rPTop))
               ELSEIF ((abs(raExp(iIn)) .LT. 0.001)) THEN
-                !!!before 3/06, do equal distribution of particles among layers
-                !rFrac1 = 1/rXCld
-                !rIWP = rIWP0*rFrac1
-                !!!after 3/06, distribute according to pressure levels
+                !!!before March 06, do equal distribution of particles among layers
+                rFrac1 = 1/rXCld
+                rIWP = rIWP0*rFrac1
+
+                !!!after March 06, distribute according to pressure levels
                 rFrac2 = raPressLevels(iK)-raPressLevels(iK+1)
-                rFrac2 = rFrac2/(rPBotX-rPTopX)
+                rFrac2 = rFrac2/(rPBotX-rPTopX)		
                 rIWP  = rIWP0*rFrac2
-c                print *,rFrac1,rFrac2,raPressLevels(iK),raPressLevels(iK+1),
-c     $                  rPBotX,rPTopX
+
+                !! Jul 2015, see how rFrac1 works!
+                !rIWP = rIWP0*rFrac1
+		
+                !print *,iJ2,rFrac1,rFrac2,raPressLevels(iK),raPressLevels(iK+1),rPBotX,rPTopX
               END IF
               raaaCloudParamsT(iIn,iIndex,1) = rIWP
               raaaCloudParamsT(iIn,iIndex,2) = raaaCloudParams(iIn,iJ1,2)
@@ -2027,7 +2035,8 @@ c then reset the variables
         END DO
       END DO
 
-      write(kStdWarn,*) 'Ended Checking/Expanding Initial Cloud Info .....'
+      write(kStdWarn,*) 'Ended Checking/Expanding Initial Cloud Info ..... exiting expandscatter'
+      write(kStdWarn,*) ' <<<<<<<<<<<<<<<<<    exit EXPAND SCATTER            >>>>>>>>>>>>>>> '            
       write(kStdWarn,*) '  ' 
 
       RETURN

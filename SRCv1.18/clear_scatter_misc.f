@@ -55,7 +55,7 @@ c!!!      INTEGER  MAXTAB, MAXGRID
         WRITE(kStdErr,1010) IERR, SCATFILE
         CALL DoSTOP 
         ENDIF 
- 1010 FORMAT('ERROR! number ',I5,' opening scatter data file:',/,A80) 
+ 1010 FORMAT('ERROR! number ',I5,' opening scatter data file:',/,A120) 
 
       kTempUnitOpen=1
       READ(kTempUnit) NMUOBS
@@ -93,7 +93,6 @@ c          print *,IW,ID,K2,K3
      $       TABSSALB(K2+1), TABASYM(K2+1)
 c          print *,K2,DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1),
 c     $       TABSSALB(K2+1), TABASYM(K2+1)
-
           READ(kTempUnit) (TABPHI1UP(IMU+K3), IMU = 1, NMUOBS)
           READ(kTempUnit) (TABPHI2UP(IMU+K3), IMU = 1, NMUOBS)
           READ(kTempUnit) (TABPHI1DN(IMU+K3), IMU = 1, NMUOBS)
@@ -104,9 +103,11 @@ c     $       TABSSALB(K2+1), TABASYM(K2+1)
       CLOSE (kTempUnit)
       kTempUnitOpen=-1
 
-c      write(kStdWarn,*)'success : read in binary scattr data from file = '
-c      write(kStdWarn,1020) scatfile
+      write(kStdWarn,*)'success : read in binary scattr data from file = '
+      write(kStdWarn,1020) scatfile
 
+c      call dostop
+      
  1020 FORMAT(A70)
 
       RETURN
@@ -1250,7 +1251,7 @@ c iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
 c iaaScatTable associates a file number with each scattering table  
 c caaaScatTable associates a file name with each scattering table  
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers)  
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers)  
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers)  
 c raaaCloudParams stores IWP, cloud mean particle size  
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2)  
 c this is just to set everything about clouds relative to TOA layer 
@@ -1274,7 +1275,7 @@ C       TABPHI??? are phase function info for incident directions
       
 ccc      INTEGER  MAXTAB, MAXGRID, MAXSCAT 
 ccc      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5) 
-      CHARACTER*80 SCATFILE(MAXSCAT) 
+      CHARACTER*120 SCATFILE(MAXSCAT) 
  
       INTEGER  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT) 
       REAL     MUTAB(MAXGRID,MAXSCAT) 
@@ -1307,7 +1308,7 @@ c ---------------------------- local variables ----------------------------
       REAL    dmetab_phase(kProfLayer)
       INTEGER indx(MAXNZ),iscattab0(maxnz),iiDiv,i1
  
-      CHARACTER*80 caName 
+      CHARACTER*120 caName 
       CHARACTER*1 caScale(MAXSCAT) 
  
       !initialise all scattering info to null 
@@ -1436,7 +1437,8 @@ c INTEGER iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
       END DO      !!!!!!!!main       DO iIn=1,iNclouds  
 
 C     Only read in scattering tables that are needed for this atm 
-      iReadTable = 1 
+      iReadTable = 1
+      
       IF (iReadTable .GT. 0) THEN 
         IF (iBinaryFile .EQ. 1) THEN 
           DO I = 1, NSCATTAB  
@@ -1493,7 +1495,7 @@ C     Only read in scattering tables that are needed for this atm
         ELSE IF (iBinaryFile .EQ. 0) THEN 
           DO I = 1, NSCATTAB  
             IF (iaScatTable_With_Atm(I).GT. 0) THEN 
-              write(kStdWarn,*) 'Reading ascii scatter data for table #',I 
+              write(kStdWarn,*) 'Reading "special" ascii scatter data for table #',I 
               CALL READ_SSCATTAB_SPECIAL(SCATFILE(I),
      $          caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I),  
      $          NWAVETAB(I), WAVETAB(1,I), 
@@ -3952,14 +3954,14 @@ c this subroutine reads in the phase info associated with the file
       include '../INCLUDE/scatter.param'
 
 c input : the scattering file name
-      CHARACTER*80 SCATFILE
+      CHARACTER*120 SCATFILE
       REAL raFreq(kMaxPts),rDmePhase      !!!wavenumber and particle size
       REAL DMETAB_PHASE(kProfLayer)        !!!partice size info
       INTEGER ndme                         !!!number of particles
 c output : the phase info associated with the cloud; else use HG
       REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
 
-      CHARACTER*80 caPhaseFile
+      CHARACTER*120 caPhaseFile
       INTEGER iI,iErr,iN,iJ,iS,iJump
       REAL rW,rD,rX,rY,rMid,slope
 
@@ -3982,7 +3984,7 @@ c output : the phase info associated with the cloud; else use HG
         WRITE(kStdErr,1010) IERR, SCATFILE
         CALL DoSTOP 
         ENDIF 
- 1010 FORMAT('ERROR! number ',I5,' opening phase scatter data file:',/,A80) 
+ 1010 FORMAT('ERROR! number ',I5,' opening phase scatter data file:',/,A120) 
       kTempUnitOpen=1
 
       read(kTempUnit,*) rW,rD,iN,rX,rY    !!!read the first line
@@ -4360,7 +4362,7 @@ c iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
 c iaaScatTable associates a file number with each scattering table  
 c caaaScatTable associates a file name with each scattering table  
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers)  
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers)  
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers)  
 c raaaCloudParams stores IWP, cloud mean particle size  
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2)  
 c this is just to set everything about clouds relative to TOA layer 
@@ -4386,7 +4388,7 @@ C       TABPHI??? are phase function info for incident directions
       
 ccc      INTEGER  MAXTAB, MAXGRID, MAXSCAT 
 ccc      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5) 
-      CHARACTER*80 SCATFILE(MAXSCAT) 
+      CHARACTER*120 SCATFILE(MAXSCAT) 
  
       INTEGER  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT) 
       REAL     MUTAB(MAXGRID,MAXSCAT) 
@@ -4420,7 +4422,7 @@ c ---------------------------- local variables ----------------------------
       REAL    dmetab_phase(kProfLayer)
       INTEGER indx(MAXNZ),iscattab0(maxnz),iiDiv
  
-      CHARACTER*80 caName 
+      CHARACTER*120 caName 
       CHARACTER*1 caScale(MAXSCAT)  
 
       REAL rX,rY,raTempLay(kProfLayer),rT

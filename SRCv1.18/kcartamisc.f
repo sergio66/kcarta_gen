@@ -610,6 +610,17 @@ c   6     = Based on (4=ViewHgt) the code figures out highest pressure at which 
         raRTP_TxtInput(iFileIDLO) = -9999
       END DO
 
+c these are for seeing how cloud params are overwritten
+c raaRTPCloudParams0(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
+c raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
+c this gets set in rtp_interface.f
+      DO iFileIDLO = 1,7
+        raaRTPCloudParams0(1,iFileIDLO) = -1.0
+	raaRTPCloudParamsF(1,iFileIDLO) = -1.0
+        raaRTPCloudParams0(2,iFileIDLO) = -1.0
+	raaRTPCloudParamsF(2,iFileIDLO) = -1.0
+      END DO
+      
 c this is TEMPERATURE variation in layer
 c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
 c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
@@ -3567,7 +3578,7 @@ c iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
 c iaaScatTable associates a file number with each scattering table 
 c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
 c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
       REAL raaPCloudTop(kMaxClouds,kCloudLayers)

@@ -254,7 +254,7 @@ c local parameters
       DOUBLE PRECISION daImag(kMaxPtsBox)    !for linemixing calcs
       DOUBLE PRECISION daChi(kMaxPtsBox),dT
       DOUBLE PRECISION df,f0,tau2_birn,tau2
-      DOUBLE PRECISION daYmix(kHITRAN),dY
+      DOUBLE PRECISION daYmix(kHITRAN),daYmixALL(kHITRAN),dY
       INTEGER iFr,iN,iLine,iNum
 
 c      iDoVoigtChi = -1  !! do not multiply by chi function in voigt_chi; all 
@@ -264,7 +264,7 @@ c      iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
 
       iTooFar = -1
       iN = iFreqPts
-      
+
       !compute the voigt lineshape at high resolution
       CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
 
@@ -278,11 +278,20 @@ c      iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
 
       IF (iLineMix .EQ. 2) THEN   !this does linemix
         dT = dLTE
+c compare linemix vs linemixALL	
+c        CALL linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
+c        CALL linemixALL(dLineShift,daYmixALL,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
+c	do iN = 1,120
+c          print *,iN,dLineShift,daYmix(iN),daYmixALL(iN),daYmixALL(iN)/daYmix(iN)
+c	end do
+c	call dostop
         CALL linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
+
 ccc        tau2 = tau2_birn(dP,dPP)
 ccc        CALL birnbaum(daChi,daFreq,dLineShift,dBroad,dT,tau2,iN)
-        CALL birnbaum_interp(daChi,daFreq,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
 c	print *,'doing birnbaum_interp ',dJL,dJU,iISO,daFreq(1)	
+        CALL birnbaum_interp(daChi,daFreq,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
+	
         dY = daYmix(iLine)*dP
         DO iFr = 1,iN
           daLineshape(iFr) = (daLineshape(iFr)+daImag(iFr)*dY)*daChi(iFr)

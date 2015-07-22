@@ -1298,8 +1298,8 @@ c iaaScatTable associates a file number with each scattering table
 c caaaScatTable associates a file name with each scattering table 
 c iaCloudScatType tells the (SARTA) cloud type, associated woth caaaScatTable
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers),iaCloudScatType(kMaxClouds)
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaCloudName(kMaxClouds)
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaCloudName(kMaxClouds)
 c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
 c raPCloudTop,raPCloudBot define cloud top and bottom pressures 
@@ -1319,7 +1319,7 @@ c note we can only have Cfrac = 0.0 or 1.0, for whatever cloud(s) in the atm
       REAL raCprtop(kMaxClouds), raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds), raCpsize(kMaxClouds)
       INTEGER iaCtype(kMaxClouds),ibinorasc,iMPSetForRadRTP,iNclouds_RTP,iAFGLProf
-      CHARACTER*80 caaCloudFile(kMaxClouds)
+      CHARACTER*120 caaCloudFile(kMaxClouds)
 c cloud profile info
       INTEGER iCldProfile,iaCldTypes(kMaxClouds)
       REAL raaKlayersCldAmt(kProfLayer,kMaxWater)
@@ -1691,6 +1691,7 @@ c ******** RADNCE section
           !in this subroutine, iNclouds is set equal to Nclouds_RTP
           CALL SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop,
      $       cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,
+     $       ctop1,ctop2,cbot1,cbot2,     
      $       iNclouds_RTP,iaKsolar,
      $       caaScatter,raaScatterPressure,raScatterDME,raScatterIWP,
      $       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,

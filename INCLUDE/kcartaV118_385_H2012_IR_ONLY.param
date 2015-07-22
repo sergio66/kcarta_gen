@@ -1,5 +1,6 @@
 ccc sed so #/KCDATA/ becomes /asl/data/kcarta/KCDATA
 ccc sed so ^/KCDATA/ becomes /asl/data/kcarta_sergio/KCDATA
+ccc sed so #/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
 
 c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

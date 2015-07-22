@@ -433,8 +433,8 @@ c this is where the upper atm weakline database lies
 
 c this is where the strong band linemix strengths arel files mmade by SPECTRA/CO2_COMMON/y1s.m
 c see /home/sergio/KCARTA/SRC/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/ReadmeBlog
-      CHARACTER*80 caLineMixDir
-      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H12/')
+      CHARACTER*120 caLineMixDir
+      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H12_385/')
 c*********************
 
 c the NLTE vib temp profiles

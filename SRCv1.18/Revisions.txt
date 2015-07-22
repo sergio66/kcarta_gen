@@ -197,7 +197,7 @@ Future plans
   -------------------------------------------------------------------------- 
 
 v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
-           r = c1*r1 + c2*r2 + c12*r12 + clr*rclr)
+           r = c1*r1 + c2*r2 + c12*r12 + clr*rclr
         PCLSAM clouds can also have NLTE calcs
 
         Included National Renewable Energy Lab (NREL) SOLAR database to make 
@@ -206,7 +206,7 @@ v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
         consistency with SARTA
 
         Making the PCLSAM scattering mimic the SARTA fast model : 
-                  r = c1' r1 + c2' r2 + c12 r12 + clr  rclr
+                  r = c1' r1 + c2' r2 + c12 r12 + clr rclr
         where c1' = c1 - c12 = cloud 1 alone
               c2' = c2 - c12 = cloud 2 alone
 
@@ -560,6 +560,48 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+07/21/15        If kCARTA reads cloud info from RTP (cprtop/cprbot, cngwat etc)
+                and computations are PCLSAM, then they duplicate SARTA cloud.
+		kCARTA manipulates cloud top/bottom so they occupy complete layers.
+		This means "cprop/cprtop2/cprbot/cprbot2" can change, and so
+		a seven row, four column textfile "fname_CLD" is dumped out
+		with the following info
+        caStrJunk(1) = 'typ '
+        caStrJunk(2) = 'ctop'
+        caStrJunk(3) = 'cbot'
+        caStrJunk(4) = 'cng '
+        caStrJunk(5) = 'csz '
+        caStrJunk(6) = 'frac'
+        caStrJunk(7) = 'fr12'            
+        write(kStdWarn,*) ' '
+        write(kStdWarn,*)'  after expand_scatter'
+        write(kStdWarn,*)'    Cloud1  (before/after)        Cloud2 (before/after)'
+        write(kStdWarn,*)'-------------------------------------------------------'            
+        DO iI=1,7
+          write(kStdWarn,*)caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),'<>',
+     $raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
+        END DO
+		
+	
+07/17/15        Regenerated linemix coeffs (using eg HITRAN2012); see
+                   SRCv1.18/NONLTE
+		for details
+                VT_48PROFILES_120_385ppmv_v118
+		  contains scripts to generate NLTE and LTE kcarta spectra
+		M_Files_for_kcarta_NLTE_LBL_runs
+		  contains code to regenrate linemix coeffs (using run8co2)
+		M_LopezPuertasF90_code
+		  takes LTE profile and produces NLTE VT profiles
+		MATLAB_Wrapper_LopezPuertasF90_code is wrapper code
+		TEST_NLTE contains some test code (andlone LTE vs NLTE run)
+		
+drwxrwxr-x 2 sergio pi_strow  4096 Jul 17 17:22 TEST_NLTE
+drwxrwxr-x 7 sergio pi_strow 24576 Jul 17 16:37 VT_48PROFILES_120_385ppmv_v118
+drwxrwxr-x 5 sergio pi_strow  4096 Jul 17 15:01 M_Files_for_kcarta_NLTE_LBL_runs
+drwxrwxr-x 3 sergio pi_strow  4096 Jul 14 00:07 MATLAB_Wrapper_LopezPuertasF90_code
+-rw-rw-r-- 1 sergio pi_strow   435 Jul 11 14:57 Readme
+drwxrwxr-x 3 sergio pi_strow  4096 Jul  4 13:00 M_LopezPuertasF90_code
+
 07/14/15        Reworked NLTE code a little; some high J (so weak lines) in the
                 HITRAN database for "strong" bands eg 2350, do not have
 		linemixing coefficients as found by SUBROUTINE linemix ... so

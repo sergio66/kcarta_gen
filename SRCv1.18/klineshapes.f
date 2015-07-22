@@ -945,7 +945,7 @@ c now read the line parameters of the files
         iCumLineSUm = iCumLineSum + iNum0
 
         close (iIOUN)
-        kTempUnitOpen=-1 
+        kTempUnitOpen = -1 
       END DO        
 
  1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A80) 
@@ -1076,7 +1076,7 @@ c output params
         WRITE(kStdErr,1070) iErr, caFName 
         CALL DoSTOP 
       END IF 
-      kTempUnitOpen=1 
+      kTempUnitOpen = 1 
 
       read(iIOUN) iGasID,iNum,iISO
       write(kstdWarn,*) ' '
@@ -1103,11 +1103,16 @@ c output params
       !! new since July 2015, comes from line.bslq (see lineparameters.m in
       !! SRCv1.18/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/USUALLAYERS/
       read(iIOUN) (daJLowerQuantumRot(iI),iI = 1,iNum)  !J lower quantum rotation state number
+c      print *,'here',caFName
 c      read(iIOUN) (caJPQR(iI),iI = 1,iNum)       !P Q or R
-      
-      close (iIOUN)
-      kTempUnitOpen=-1 
+c      print *,'here2'      
 
+      close (iIOUN)
+      kTempUnitOpen = -1
+      
+c 10   FORMAT(A1)
+c      print *,(caJPQR(iI),iI = 1,iNum)
+      
       iJU = nint(daJU(1))
       iJL = nint(daJL(1))
 

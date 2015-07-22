@@ -1,4 +1,4 @@
-c Copyright 2001
+c Copyright 2015
 c University of Maryland Baltimore County 
 c All Rights Resered
 
@@ -2870,7 +2870,7 @@ c      print *,'*********************************************************'
       ctop1   = prof.cprtop
       cbot1   = prof.cprbot      
       rSize1  = prof.cpsize
-
+      
       ctype2  = int(prof.ctype2)
       cfrac2  = prof.cfrac2
       cngwat2 = prof.cngwat2
@@ -2881,6 +2881,25 @@ c      print *,'*********************************************************'
       i4ctype1 = prof.ctype
       i4ctype2 = prof.ctype2
 
+c raaRTPCloudParams0(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
+      raaRTPCloudParams0(1,1) = ctype1
+      raaRTPCloudParams0(1,2) = ctop1
+      raaRTPCloudParams0(1,3) = cbot1
+      raaRTPCloudParams0(1,4) = cngwat1
+      raaRTPCloudParams0(1,5) = rSize1
+      raaRTPCloudParams0(1,6) = cfrac1
+      raaRTPCloudParams0(1,7) = cfrac12
+c raaRTPCloudParams0(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile      
+      raaRTPCloudParams0(2,1) = ctype2
+      raaRTPCloudParams0(2,2) = ctop2
+      raaRTPCloudParams0(2,3) = cbot2
+      raaRTPCloudParams0(2,4) = cngwat2
+      raaRTPCloudParams0(2,5) = rSize2
+      raaRTPCloudParams0(2,6) = cfrac2
+      raaRTPCloudParams0(2,7) = cfrac12
+c raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
+c raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
+      
       !!! look for black clouds
       iNclouds_RTP_black = 0
       IF ((prof.ctype .GE.0) .AND. (prof.ctype .LT. 100)) THEN
@@ -2967,9 +2986,9 @@ c      print *,'*********************************************************'
 	  IF ((raPressLevels(i) .LT. ctop2) .AND. (raPressLevels(i) .GT. 0))  iTop2 = i	  	  	  
 	END DO
         IF ((iTop2-iTop1) .LT. 2) THEN
-          write(kStdWarn,*) 'cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
-          write(kStdWarn,*) 'cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
-          write(kStdWarn,*) 'oh oh ctop2,cbot1 maybe too close, need to try to adjust the BOTTOM layer of cloud1'
+          write(kStdWarn,*) 'orig cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+          write(kStdWarn,*) 'orig cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+          write(kStdWarn,*) 'ctop2,cbot1 maybe too close, need to try to adjust the BOTTOM layer of cloud1'
 	  IF ((iTop1-iBot1) .GE. 2) THEN
 	    prof.cprbot = raPressLevels(iBot1+1)-10
             cbot1 = prof.cprbot
@@ -2984,6 +3003,8 @@ c      print *,'*********************************************************'
 	  ELSE
 	    write(kStdWarn,*) 'ooooops : top AND Bot cloud too thin!!!'
 	  END IF
+          write(kStdWarn,*) 'final cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+          write(kStdWarn,*) 'final cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
 	END IF
       END IF
       
@@ -3003,11 +3024,16 @@ c      print *,'*********************************************************'
         ELSE
           raCemis(i) = 1.0               !assume cloud totally emissive
         END IF
+        IF ((prof.ctype .GE. 201) .AND. (prof.ctype .LT. 300) .AND. (prof.cpsize .GT. 120)) THEN
+	  write(kStdErr,*) '201 <= prof.ctype <= 300, ice particles too large; reset to 120 um from',prof.cpsize
+	  write(kStdWarn,*) '201 <= prof.ctype <= 300, ice particles too large; reset to 120 um from',prof.cpsize
+	  prof.cpsize = 119.999
+	END IF
         raCngwat(i) = prof.cngwat*1.00 !IWP
         raCpsize(i) = prof.cpsize*1.00 !in microns
         raCprtop(i) = prof.cprtop
         raCprbot(i) = prof.cprbot
-
+	
         i = 2
         iaCtype(i) =  prof.ctype2        !cloud type 1=cirrus 2=water etc
         IF ((prof.ctype2 .GE.0) .AND. (prof.ctype2 .LT. 100)) THEN
@@ -3016,6 +3042,11 @@ c      print *,'*********************************************************'
         ELSE
           raCemis(i) = 1.0               !assume cloud totally emissive
         END IF
+        IF ((prof.ctype2 .GE. 201) .AND. (prof.ctype2 .LT. 300) .AND. (prof.cpsize2 .GT. 120)) THEN
+	  write(kStdErr,*) '201 <= prof.ctype2 <= 300, ice particles too large; reset to 120 um from ',prof.cpsize2
+	  write(kStdWarn,*) '201 <= prof.ctype2 <= 300, ice particles too large; reset to 120 um from ',prof.cpsize2
+	  prof.cpsize2 = 119.999
+	END IF	
         raCngwat(i) = prof.cngwat2*1.00  !IWP
         raCpsize(i) = prof.cpsize2*1.00  !in microns
         raCprtop(i) = prof.cprtop2
@@ -3036,6 +3067,32 @@ c      print *,'*********************************************************'
         END DO
       END IF
 
+c raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   first reset
+      raaRTPCloudParamsF(1,1) = iaCtype(1)
+      raaRTPCloudParamsF(1,2) = prof.cprtop
+      raaRTPCloudParamsF(1,3) = prof.cprbot
+      raaRTPCloudParamsF(1,4) = prof.cngwat
+      raaRTPCloudParamsF(1,5) = prof.cpsize
+      raaRTPCloudParamsF(1,6) = prof.cfrac
+      raaRTPCloudParamsF(1,7) = prof.cfrac12
+c raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   first reset
+      raaRTPCloudParamsF(2,1) = iaCtype(2)
+      raaRTPCloudParamsF(2,2) = prof.cprtop2
+      raaRTPCloudParamsF(2,3) = prof.cprbot2
+      raaRTPCloudParamsF(2,4) = prof.cngwat2
+      raaRTPCloudParamsF(2,5) = prof.cpsize2
+      raaRTPCloudParamsF(2,6) = prof.cfrac2
+      raaRTPCloudParamsF(2,7) = prof.cfrac12
+
+c      print *,' '
+c      print *,'initial readjusts (if needed) after reading in rtp file'
+c      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
+c      print *,'-------------------------------------------------------'      
+c      DO I=1,7
+c        print *,I,raaRTPCloudParams0(1,i),raaRTPCloudParamsF(1,i),'X0',raaRTPCloudParams0(2,i),raaRTPCloudParamsF(2,i)
+c      END DO
+c      call dostop
+      
       RETURN
       END
 
@@ -3043,7 +3100,8 @@ c************************************************************************
 c this subroutine quickly sets up stuff for ONE atmosphere
 c there could be more than one cloud
       SUBROUTINE SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop,
-     $    cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,iNclouds_RTP,iaKsolar,
+     $    cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,
+     $    ctop1,ctop2,cbot1,cbot2,iNclouds_RTP,iaKsolar,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP,
      $    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,
      $    iBinORasc,caaCloudFile,iaNML_Ctype,
@@ -3062,10 +3120,11 @@ c input params
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
       !these are the cloud parameters read in from the RTP file
       REAL Cfrac,cfrac1,cfrac2,cfrac12,raCemis(kMaxClouds),cngwat1,cngwat2
+      REAL ctop1,ctop2,cbot1,cbot2
       REAL raCprtop(kMaxClouds),  raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds),  raCpsize(kMaxClouds)
       INTEGER iaCtype(kMaxClouds),iBinORasc,iNclouds_RTP
-      CHARACTER*80 caaCloudFile(kMaxClouds)
+      CHARACTER*120 caaCloudFile(kMaxClouds)
       INTEGER iaNML_Ctype(kMaxClouds)
 c output params, 
 c     above set into the cloud parameters .....
@@ -3082,8 +3141,8 @@ c iaCloudWhichAtm stores which cloud is to be used with which atmospheres
 c iaaScatTable associates a file number with each scattering table 
 c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaCloudName(kMaxClouds)
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaCloudName(kMaxClouds)
 c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
 c raPCloudTop,raPCloudBot define cloud top and bottom pressures 
@@ -3102,20 +3161,21 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       INTEGER iNatm
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
 c local variables
       INTEGER iJ1,iI,iIn,iJ,iScat,iaTemp(kMixFilRows),iTop,iBot,iNum,iErr
-      REAL rPT,rPB,rP1,rP2,rSwap,r1,r2
-      CHARACTER*80 caName
+      REAL rPT,rPB,rP1,rP2,rSwap,r1,r2,raaJunkCloudTB(2,2)
+      CHARACTER*120 caName
       INTEGER FindCloudLayer
 c these are to check that the scattering table names are unique
       INTEGER iaTable(kCloudLayers*kMaxClouds),iWhichScatterCode,iDefault
-      CHARACTER*80 caaTable(kCloudLayers*kMaxClouds)
+      CHARACTER*120 caaTable(kCloudLayers*kMaxClouds)
 c these are to match iaCtype vs iaNML_Ctype
       INTEGER iFound1,iFound2,iNclouds_RTPX
+      CHARACTER*4 caStrJunk(7)
 
       IF (kAllowScatter .EQ. -1) THEN
         write(kStdErr,*) 'bkcarta.x (basic) version does not allow scattering'
@@ -3363,7 +3423,7 @@ c      iaPhase(1)             = -1       !default to HG phase function
       END DO
 
       !!now have to stretch out the cloud if necessary
-      CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,
+      CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB,
      $     caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable,
      $     iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp,
      $     raPressLevels,iProfileLayers,
@@ -3406,13 +3466,51 @@ c note it will occupy the entire layer
           iScat=iaaScatTable(iIn,iJ1)
           caName=caaaScatTable(iIn,iJ1)
           write(kStdWarn,*) '   layer #',iJ1,' = kLAYERS pressure layer ',iNum
-          write(kStdWarn,*) '     layer top/bot press = ',rPT,rPB,' mb'
+          write(kStdWarn,*) '     avg layer press = ',rPT,' mb'
+c          write(kStdWarn,*) '     layer top/bot press = ',rPT,rPB,' mb'	  
           write(kStdWarn,*) '     IWP (or LWP) (gm-2)      = ',rP1
           write(kStdWarn,*) '     mean particle size (um)  = ',rP2
           write(kStdWarn,*) '     scatter table number = ',iScat
           write(kStdWarn,222) caName
         END DO 
 
+c raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+c      raaRTPCloudParamsF(1,1) = iaCtype(1)
+      raaRTPCloudParamsF(1,2) = raaJunkCloudTB(1,1)
+      raaRTPCloudParamsF(1,3) = raaJunkCloudTB(1,2)
+c      raaRTPCloudParamsF(1,4) = prof.cngwat
+c      raaRTPCloudParamsF(1,5) = prof.cpsize
+c      raaRTPCloudParamsF(1,6) = prof.cfrac
+c      raaRTPCloudParamsF(1,7) = prof.cfrac12
+c raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+c      raaRTPCloudParamsF(2,1) = iaCtype(2)
+      raaRTPCloudParamsF(2,2) = raaJunkCloudTB(2,1)
+      raaRTPCloudParamsF(2,3) = raaJunkCloudTB(2,2)
+c      raaRTPCloudParamsF(2,4) = prof.cngwat2
+c      raaRTPCloudParamsF(2,5) = prof.cpsize2
+c      raaRTPCloudParamsF(2,6) = prof.cfrac2
+c      raaRTPCloudParamsF(2,7) = prof.cfrac12
+
+      caStrJunk(1) = 'typ '
+      caStrJunk(2) = 'ctop'
+      caStrJunk(3) = 'cbot'
+      caStrJunk(4) = 'cng '
+      caStrJunk(5) = 'csz '
+      caStrJunk(6) = 'frac'
+      caStrJunk(7) = 'fr12'            
+c      print *,' '
+c      print *,'  after expandscatter'
+c      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
+c      print *,'-------------------------------------------------------'            
+c      DO iJ1=1,7
+c        print *,iJ1,caStrJunk(iJ1),raaRTPCloudParams0(1,iJ1),raaRTPCloudParamsF(1,iJ1),'XF',
+c     $raaRTPCloudParams0(2,iJ1),raaRTPCloudParamsF(2,iJ1)
+c      END DO
+      ctop1 = raaRTPCloudParamsF(1,2)
+      cbot1 = raaRTPCloudParamsF(1,3)      
+      ctop2 = raaRTPCloudParamsF(2,2)
+      cbot2 = raaRTPCloudParamsF(2,3)      
+      
 c set how many, and which atmospheres to use with this cloud
         iNum=iaCloudNumAtm(iIn)
         IF (iNum .GT. iNatm) THEN
@@ -3558,8 +3656,8 @@ c these are to check that the scattering table names are unique
         END DO
       END DO 
 
- 222  FORMAT(A80)
- 223  FORMAT('   cloud file    = ',A80)
+ 222  FORMAT(A120)
+ 223  FORMAT('   cloud file    = ',A120)
  333  CONTINUE
 
       RETURN
@@ -3693,7 +3791,8 @@ c   iNclouds_RTP   = how many clouds are claimed to be in the new .rtp file
       INTEGER iRTP,iProfileLayers,iNclouds_RTP,iBinOrAsc
       INTEGER iNclouds2, iNclouds3  ! added ESM
       INTEGER iaCloudScatType(kMaxCLouds)
-      CHARACTER*80 caPFname,caCloudPfname,caaCloudFile(kMaxClouds)
+      CHARACTER*80 caPFname,caCloudPfname
+      CHARACTER*120 caaCloudFile(kMaxClouds)
 c output params  -------------------------------------------------->
 c   kMaxClouds == 5
 c   raaKlayersCldAmt = cloud profiles(s) in g/m2
@@ -3715,8 +3814,8 @@ c iaCloudWhichAtm stores which cloud is to be used with which atmospheres
 c iaaScatTable associates a file number with each scattering table 
 c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaCloudName(kMaxClouds)
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaCloudName(kMaxClouds)
 c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
 c raPCloudTop,raPCloudBot define cloud top and bottom pressures 
@@ -3729,7 +3828,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       REAL cfrac1,cfrac2
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
       INTEGER iaCtype(kMaxClouds)
@@ -3750,7 +3849,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       INTEGER   iactype_rtp(kMaxClouds)
  
       INTEGER iaNML_CtypeX(kMaxClouds),iaMatchX(kMaxClouds)
-      CHARACTER*80 caaCloudFileX(kMaxClouds)
+      CHARACTER*120 caaCloudFileX(kMaxClouds)
 
       integer   ii,ij,ik      ! added ESM
       integer rtpopen, rtpread, rtpwrite, rtpclose, ifindj ! added ESM

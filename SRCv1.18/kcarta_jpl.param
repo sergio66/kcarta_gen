@@ -85,7 +85,7 @@ c raPCloudTop,raPCloudBot define cloud top and bottom pressures
 c iaaScatTable associates a file number with each scattering table 
 c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
 c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
 c this tells if there is phase info associated with the cloud; else use HG
