@@ -560,6 +560,14 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+08/09/15        kcarta.x does scattering, and the .nml fie needs to have
+                iNcloud_RTP > 0
+                If you want to use the same RTP file to drive clear calcs,
+		then simply run bkcarta.x ... the code now looks at
+		cloudparams, but since you are running bkcarta.x then
+		kAllowScatter = -1. So it prints a warning msg, and turns off
+		all cloud parameters, allowing clear calcs to be done
+		
 07/21/15        If kCARTA reads cloud info from RTP (cprtop/cprbot, cngwat etc)
                 and computations are PCLSAM, then they duplicate SARTA cloud.
 		kCARTA manipulates cloud top/bottom so they occupy complete layers.
