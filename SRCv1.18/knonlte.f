@@ -4945,7 +4945,6 @@ c     !!/asl/packages/sartaV108/Src/incFTC_airs_apr08_m130_m150_template_cal.f
       PRED4 = SCOS1*VSEC1
       PRED5 = SCOS1*THIGH
       PRED6 = SUNCOS
-c      print *,'sartanlte pred : ',PRED1,PRED2,PRED3,PRED4,PRED5,PRED6
 
 c      !/asl/packages/sartaV106/Src/incFTC_apr05_nte.f
 c      FNCOFN= '/asl/data/sarta_database/Data_jan04untun/Coef/setnte_oct05.dat'
@@ -4999,22 +4998,27 @@ c      call dostop
 
 c this is new; see calnte.f in eg sartaV108/Src_rtpV201
 c this accounts for changing concentration of CO2
-C         Adjust DRAD for CO2 mixing ratio
-c          DRAD=DRAD*(COEFN(7,I)*(CO2TOP - CO2NTE) + 1.0)
+C       Adjust DRAD for CO2 mixing ratio
+c       DRAD=DRAD*(COEFN(7,I)*(CO2TOP - CO2NTE) + 1.0)
         
         raDrad(iI) = raDrad(iI)*(COEFN(7,iI)*(CO2TOP - CO2NTE) + 1.0)
-c        print *,iI,raDrad(iI)
-        END DO
+c       print *,iI,raFrad(iI),raDrad(iI)
+      END DO
 
-      CALL rspl(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts)
+c      print *,'sarta nlte oops'
+c      print *,'sartanlte pred : ',PRED1,PRED2,PRED3,PRED4,PRED5,PRED6,COEFN(7,iI-1),rCO2MixRatio,CO2TOP,CO2NTE
+c      CALL DoStop      
+
+      CALL rspl(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts)    !! too dangerous,   small 4 um lte rads, wiggly NLTE correction 
+      CALL rlinear(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts) !! hopefully safer, small 4 um lte rads, straightline NLTE correction
       DO iI = 1,kMaxPts
-        IF ((raFreq(iI) .LT. raFrad(1)) .OR. 
-     $  (raFreq(iI) .GT. raFrad(NCHNTE))) THEN
+        IF ((raFreq(iI) .LT. raFrad(1)) .OR. (raFreq(iI) .GT. raFrad(NCHNTE))) THEN
           raDkcarta(iI) = 0.0
-          END IF
-c        print *,iI,raFreq(iI),raDkcarta(iI),raInten(iI)
-        raInten(iI) = raInten(iI) + raDkcarta(iI)
-        END DO
+        END IF
+c       print *,iI,raFreq(iI),raDkcarta(iI),raInten(iI)
+        !! LTE rad is raInten(iI); NLTE correction raDkcarta(iI) should be positive; if negative then just stick to the LTE rad
+        raInten(iI) = max(raInten(iI) + raDkcarta(iI),raInten(iI))
+      END DO
 
       RETURN
       END

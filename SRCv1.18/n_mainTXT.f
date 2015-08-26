@@ -1305,6 +1305,27 @@ c ******** RADNCE section
           write (kStdWarn,*) 'no scattering required .....'
         END IF
 
+      ELSEIF ((cfrac .gt. 0.0) .AND. (iNclouds_RTP .GT. 0) .AND. (kAllowScatter .LT. 0)) THEN
+        write (kStdWarn,*) 'successfully checked radnce .....'
+        write(kStdWarn,*) ' '
+        IF ((kRTP .EQ. 0) .OR. (kRTP .EQ. 1))  THEN
+          !!! went thru rtp file and found cfrac > 0 but iNclouds_RTP .GT. 0
+	  write(kStdErr,*) ' >>>> this is bkcarta.x so no scattering!!! '
+	  write(kStdErr,*) ' >>>> so you are contradicting yourself .... cfrac,cfrac2 = ',cfrac,cfrac2,' iNclouds_RTP = ',iNclouds_RTP
+	  write(kStdErr,*) ' >>>> as this is bkcarta.x assuming you do NOT want scattering, doing clear sky, turning off cloud info'
+
+	  write(kStdWarn,*) ' >>>>> this is bkcarta.x so no scattering!!! '
+	  write(kStdWarn,*) ' >>>>> so you are contradicting yourself .... cfrac,cfrac2 = ',cfrac,cfrac2,' iNclouds_RTP = ',iNclouds_RTP
+	  write(kStdWarn,*) ' >>>>> as this is bkcarta.x assuming you do NOT want scattering, doing clear sky, turning off cloud info'
+
+          iNclouds_RTP = -1
+	  cfrac = -1.0
+	  cfrac2 = -1.0
+	  ctype1 = -1
+	  ctype2 = -1	  
+          write (kStdWarn,*) 'no scattering required .....'
+        END IF
+
       ELSEIF ( (((cfrac1 .gt. 0.001) .AND. (ctype1 .LE. 10)) .OR.
      $          ((cfrac2 .gt. 0.001) .AND. (ctype2 .LE. 10)))  .AND. (iNclouds_RTP .GT. 0)) THEN
         write (kStdWarn,*) 'successfully checked radnce .....'
