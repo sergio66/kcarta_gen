@@ -117,10 +117,21 @@
 # this is on asl.umbc.edu
 # HDF_INSTALL = /usr/local/hdf
 # HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
+
 # this is on taro.umbc.edu
-# set HDFHOME to point to the local HDF installation
-HDF_INSTALL = /asl/opt
-HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
+# set HDFHOME to point to the local HDF installation, pre Aug 2015
+# HDF_INSTALL = /asl/opt
+# HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
+
+# Paul has split things post Aug 2015
+HDF_INSTALL1 = /asl/opt/hdf/4.2r4
+HDFLIB1   = -L$(HDF_INSTALL1)/lib -lmfhdf -ldf -ljpeg -lz
+
+# more libs
+HDF_INSTALL2 = /asl/opt/szip/2.1
+HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
+
+HDFLIB = $(HDFLIB1) $(HDFLIB2)
 
 # ---------
 # RTP flags
