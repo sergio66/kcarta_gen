@@ -2506,13 +2506,13 @@ c^^^^^^^^^^^^^ check to see if linear interp will help^^^^^^^^^^^^^^^^^^^
             !!!recall raYgiven(iI) is swtiched GND = kMaxLayer,100=TOA
             IF (rxpt .LT. pMin100) r = raYgivenP(1)          !!TOA amt
             IF (rxpt .GT. pMax100) r = raYgivenP(kMaxLayer)  !!GND amt
-            write (kStdWarn,*) 'gasID,layer,ref amount (reset to)= ',
-     $ iGasID,iI,r
+            write (kStdWarn,*) 'gasID,layer,ref amount (reset to) ',iGasID,iI,r
+            write (kStdErr,*)  'gasID,layer,ref amount (reset to) ',iGasID,iI,r	    
             raRAmt(iI) = r
-            do iJ = 1,kMaxLayer
-              print *,'moolah',iGas,iJ,raXgivenP(iJ),raYgivenP(iJ),raaPress(iJ,iGas)
-            end do
-            call dostop
+            !do iJ = 1,kMaxLayer
+            !  print *,'moolah',iGas,iJ,raXgivenP(iJ),raYgivenP(iJ),raaPress(iJ,iGas)
+            !end do
+            !call dostop
 
           END IF
         END IF

@@ -1,20 +1,23 @@
-function [data, wnums, hr] = readkcflux(kfile, dfile)
+function [data, wnums, plevs, hgt, hr] = readkcflux(kfile, plevsIN, dfile)
 
-% function [data, wnums, hr] = readkcflux(kfile, dfile)
+% function [data, wnums, plevs, hgt, hr] = readkcflux(kfile, plevsIN, dfile)
 %
 % readkcflux is a simple reader & unchunker for kcarta flux output files
 %
 % INPUTS
 %
-%   kfile  - kcarta jacobian output file
-%   dfile  - readkcflux output file (optional)
+%   kfile    - kcarta jacobian output file
+%   plevsIN  - input pressure levels (should be same grid as where flux was computed) (optional)
+%   dfile    - readkcflux output file (optional)
 %
 % OUTPUTS
 %
 %   data   - a w by n array of data from kcarta
 %   wnums  - a w by 1 vector of data wavenumbers
-%   [hr    - optional heating rate, if the input file is *_ALL, which
-%          - has up/down fluxes from which heating rate can be derived]
+%   plevs  - output pressure (mb) .. useful if plevsIN was not sent in
+%   hgt    - output height   (km) .. 
+%   hr    - optional heating rate, if the input file is *_ALL, which
+%          - has up/down fluxes from which heating rate can be derived
 %
 % If the input parameter dfile is specified, then the data array
 % is written to file dfile, and the return values [data, wnums]
@@ -132,7 +135,7 @@ noutrow = nchunk * 10000;       % number of output rows
 noutcol = sum(nODBrows);        % number of output columns
 ODBrowdat = zeros(10000, 1);    % ODB row data buffer
 
-if nargin == 1
+if nargin == 1 | nargin == 2
  
   % initialize output arrays
   data = zeros(noutrow, noutcol);
@@ -209,7 +212,7 @@ for chunk = 1:nchunk
         error(['fread failed, odb=',num2str(odb),' chunk=',num2str(chunk)]);
       end
       flen2 = fread(fin, 1, 'integer*4');
-       if nargin == 1
+       if nargin == 1 | nargin == 2
         % write ODBrowdat to the data array
         outrows = (chunk-1) * 10000 + 1 : chunk * 10000;
         outcol = cumODBrow;
@@ -232,9 +235,30 @@ for chunk = 1:nchunk
 
 fclose(fin);
 
-if nargin == 2 
+if nargin == 3 
   fclose (fout);
 end
+
+[mm,nn] = size(data);
+if nargin == 1
+  plevs = load('airslevels.dat');  %% from GND to TOA, decreasing p; 101 levels
+  if length(strfind(kfile,'_ALL')) > 0    
+    plevs = plevs(101-nn/2+1:end);
+  else
+    plevs = plevs(101-nn+1:end);
+  end
+else
+  plevs = plevsIN;
+  if plevs(20) < plevs(30)
+    plevs = flip(plevs);
+  end
+  if length(strfind(kfile,'_ALL')) > 0      
+    plevs = plevs(length(plevs)-nn/2+1:end);
+  else
+    plevs = plevs(length(plevs)-nn+1:end);    
+  end
+end
+hgt   = p2h(plevs)/1000;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -259,43 +283,5 @@ else
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if length(strfind(kfile,'_ALL')) > 0
-  ix = input('this looks like up/dn fluxes at all levels : plot the fluxes and heating rates?? (-1/+1) : ');
-  if ix > 0
-    [mm,nn] = size(data);
-    dw = mean(diff(wnums));
-    nnx = 1:nn/2;
-
-    fprintf(1,'w(1) w(end) dw = %8.6f %8.6f %8.6f wn \n',wnums(1),wnums(end),dw)
-
-    upflux = sum(data(:,1:nn/2))*dw/1000;
-    dnflux = sum(data(:,nn/2+(1:nn/2)))*dw/1000;
-    netxkc = upflux - dnflux;  %% upwell - downwell flux at each level
-
-    plevs = load('airslevels.dat');
-    plevs = plevs(101-nn/2+1:end);
-    hgt = p2h(plevs)/1000;
-
-    figure(1);
-      plot(upflux,hgt,'bo-',dnflux,hgt,'ro-'); hold on; 
-      plot(netxkc,hgt,'k',diff(netxkc)*10,hgt(1:end-1),'g','linewidth',2); hold off; grid
-      title(' (b) upwell flux (r) dnwell flux W/m2 \newline (k) net=up-dn W/m2 (g) 10*flux div=dnet/dz  W/m2/layer',...
-            'fontsize',10);
-      ylabel('hgt (km)')
-
-    figure(2); 
-      n = input('enter number of decimal points (1,2,3 ... or -1 for all) : ');
-      if n < 0
-        plevsx = plevs;
-      else
-        plevsx = round(plevs*10^n)/10^n;
-      end
-      htxkc  = diff(netxkc) ./ diff(plevsx') * 8.4391;
-      plot(htxkc,hgt(1:end-1),'r'); grid on; title('cooling rate K/day')
-      ylabel('hgt (km)')
-
-      hr(:,1) = htxkc;
-      hr(:,2) = hgt(1:end-1);
-
-  end
-end
+plot_fluxes
+plot_heatingrates
