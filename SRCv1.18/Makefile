@@ -577,7 +577,7 @@ all : $(EXECS)
 alldist : $(EXECSDIST)
 
 datafix400:
-	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_400.param > \
+	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_400.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -611,7 +611,7 @@ datafix385_H2012_IR_ONLY:
       cd ../SRCv1.18
 
 datafix385_H2012_hartmann_co2:
-	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2012_hartmann.param > \
+	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2012_hartmann.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -623,7 +623,7 @@ datafix385_H2012_hartmann_co2:
 
 ## this is "simple file" with hardly any comments
 datafix385_H2008_IR_ONLY:
-	sed 's|\#|$(DISTDIR)|g' 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/kcartaV118_385_H2008_IR_ONLY.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/kcartaV118_385_H2008_IR_ONLY.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -634,7 +634,7 @@ datafix385_H2008_IR_ONLY:
       cd ../SRCv1.18
 
 datafix385_H2008:
-	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_385_H2008.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/kcartaV118_385_H2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -645,7 +645,7 @@ datafix385_H2008:
       cd ../SRCv1.18
 
 datafix370_H2000:
-	sed 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_370_H2000.param > \
+	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_370_H2000.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
