@@ -1593,7 +1593,7 @@ c this subroutine reads in the first moment (l=1) quadrature points and weights
 c using results in Table 1, second column (m=1) of
 c "Gaussian Quadrature and Application to Infrared Radiation" by J.Li
 c Journal of Atmospheric Sciences, v57, pg 753 (2000)
-      SUBROUTINE FindGauss2(nn,daX,daW)
+      SUBROUTINE FindGauss2old(nn,daX,daW)
 
       IMPLICIT NONE
 
@@ -1631,6 +1631,58 @@ c Journal of Atmospheric Sciences, v57, pg 753 (2000)
         CALL DoStop
       END IF
 
+      RETURN
+      END
+
+c************************************************************************ 
+c this subroutine reads in the first moment (l=1) quadrature points and weights
+c using results in Table 1, second column (m=1) of
+c "Gaussian Quadrature and Application to Infrared Radiation" by J.Li
+c Journal of Atmospheric Sciences, v57, pg 753 (2000)
+c also see RRTM code v3.3 rtreg.ffor more decimal points
+      SUBROUTINE FindGauss2(nn,daX,daW)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+      INTEGER nn,ii
+      DOUBLE PRECISION daX(kGauss),daW(kGauss)
+
+      IF (nn .EQ. 1) THEN
+        daX(1) = 3.0/2.0
+        daW(1) = 1.0/2.0
+      ELSEIF (nn .EQ. 2) THEN
+        daX(1) = 2.81649655
+        daX(2) = 1.18350343
+        daW(1) = 0.1819586183
+        daW(2) = 0.3180413817
+      ELSEIF (nn .EQ. 3) THEN
+        daX(1) = 4.70941630
+        daX(2) = 1.69338507
+        daX(3) = 1.09719858
+        daW(1) = 0.0698269799
+        daW(2) = 0.2292411064
+        daW(3) = 0.2009319137
+      ELSEIF (nn .EQ. 4) THEN
+        daX(1) = 7.15513024
+        daX(2) = 2.40148179
+        daX(3) = 1.38282560
+        daX(4) = 1.06056257
+        daW(1) = 0.0311809710
+        daW(2) = 0.1298475476
+        daW(3) = 0.2034645680
+        daW(4) = 0.1355069134
+      ELSE
+        write(kStdErr,*) 'FindGauss2 : need nn = 1,2,3 or 4 not ',nn
+        CALL DoStop
+      END IF
+
+      DO ii = 1,nn
+        !change from secant to cosine
+        daX(ii) = 1.0/daX(ii)
+      END DO
+      
       RETURN
       END
 

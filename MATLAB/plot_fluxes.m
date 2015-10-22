@@ -16,7 +16,7 @@ if length(strfind(kfile,'_ALL')) > 0
     figure(1);
       plot(upflux,hgt,'ro-',dnflux,hgt,'bo-'); hold on; 
       plot(netxkc,hgt,'k',diff(netxkc)*10,hgt(1:end-1),'g','linewidth',2); hold off; grid
-      title(' (b) upwell flux (r) dnwell flux W/m2 \newline (k) net=up-dn W/m2 (g) 10*flux div=dnet/dz  W/m2/layer',...
+      title(' (r) upwell flux (b) dnwell flux W/m2 \newline (k) net=up-dn W/m2 (g) 10*flux div=dnet/dz  W/m2/layer',...
             'fontsize',10);
       ylabel('hgt (km)')
 

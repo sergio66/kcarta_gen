@@ -630,8 +630,8 @@ c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LIN
       kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM DEFAULT 11/2014
       kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA
 
-      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM
-      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!! DEFAULT, for RADS
+      kTemperVary = +3     !!!temperature in layer varies linearly  !!! ala RRTM, LBLRTM, but messes up clear RADS
 
       IF (kTemperVary .EQ. -1) THEN
         write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'

@@ -48,7 +48,7 @@ c raLayAngles   = array containijng layer dependent sun angles
 c raLayAngles   = array containijng layer dependent satellite view angles
 c raFreq    = frequencies of the current 25 cm-1 block being processed
 c raaAbs     = matrix containing the mixed path abs coeffs
-c raVTemp    = vertical temperature profile associated with the mixed paths
+c raVTemp    = vertical temperature profile associated with the mixed paths : LAYER TEMPERATURES
 c caFluxFile  = name of output binary file
 c iOutNum    = which of the *output printing options this corresponds to
 c iAtm       = atmosphere number
@@ -66,7 +66,7 @@ c raSurface,raSun,raThermal are the cumulative contributions from
 c              surface,solar and backgrn thermal at the surface
 c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified value if positive
-c raTPressLevels,iKnowTP are for temperatures at the LEVELS
+c raTPressLevels,iKnowTP are for temperatures at the LEVELS : LEVEL TEMPERATURES
       INTEGER iProfileLayers,iKnowTP
       REAL pProf(kProfLayer),raThickness(kProfLayer)
       REAL raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
