@@ -204,7 +204,7 @@ c these are to read in the binary file
 
 c figure out the filename
       CALL CKDFileName(caFName,iGasID,iTag)
-
+      
       iIOUN = kTempUnit 
 c open file and load in data
       OPEN(UNIT=iIOUN,FILE=caFname,STATUS='OLD',FORM='UNFORMATTED',

@@ -834,9 +834,9 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh
-      REAL raaLayTrans(kMaxPts,kProfLayer),r1,r2,rPlanck,rMPTemp
+      REAL raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
       REAL raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
-      REAL raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2,ttorad
+      REAL raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
 
 c to do the thermal,solar contribution
       REAL rThermalRefl
@@ -903,9 +903,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
 
       write(kStdWarn,*) 'Using LAYER TEMPERATURE VARIATION'
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
       iCloudLayerTop = -1
       iCloudLayerBot = -1
@@ -1009,11 +1006,7 @@ c initialize the solar and thermal contribution to 0
         raThermal(iFr)=0.0
 c and also surface!!!
         raSurface(iFr) = 0.0
-
-c use 2.73 K for initalization
-        rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-        rPlanck = r1*((raFreq(iFr)**3))/rPlanck
-        raInten(iFr) = rPlanck
+        raInten(iFr) = ttorad(raFreq(iFr),rMPTemp)
         END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -1026,14 +1019,12 @@ c first get the Mixed Path temperature for this radiating layer
         rMPTemp = raVT1(iL)
         IF (iL .LT. iNLTEStart) THEN
           DO iFr=1,kMaxPts
-            rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck
+            rPlanck =ttorad(raFreq(iFr),rMPTemp)
             raaEmission(iFr,iLay)=(1.0-raaLayTrans(iFr,iLay))*rPlanck
             END DO
         ELSEIF (iL .GE. iNLTEStart) THEN
           DO iFr=1,kMaxPts
-            rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck * raaPlanckCoeff(iFr,iL)
+            rPlanck =ttorad(raFreq(iFr),rMPTemp) * raaPlanckCoeff(iFr,iL)	  
             raaEmission(iFr,iLay)=(1.0-raaLayTrans(iFr,iLay))*rPlanck
             END DO
           END IF
@@ -1302,11 +1293,11 @@ c this is for Rayleigh
 c local variables
       REAL raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
       INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-      REAL raaLayTrans(kMaxPts,kProfLayer),r1,r2,rPlanck,rMPTemp
+      REAL raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
       REAL raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
       REAL raaLay2Sp(kMaxPts,kProfLayer),rCO2
       REAL raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
-      REAL rDum1,rDum2,ttorad
+      REAL rDum1,rDum2
 c to do the thermal,solar contribution
       REAL rThermalRefl
       INTEGER iDoThermal,iDoSolar,MP2Lay
@@ -1356,9 +1347,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -1495,14 +1483,10 @@ c         print*,iLay,raFreq(1),raVT1(iL),raaAbs(1,iL)
       DO iFr=1,kMaxPts
 c initialize the solar and thermal contribution to 0
         raSun(iFr)=0.0
-        raThermal(iFr)=0.0
+        raThermal(iFr) = 0.0
 c and also surface!!!
         raSurface(iFr) = 0.0
-
-c use 2.73 K for initalization
-        rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-        rPlanck = r1*((raFreq(iFr)**3))/rPlanck
-        raInten(iFr) = rPlanck
+        raInten(iFr)   = ttorad(raFreq(iFr),rMPTemp)
         END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -1521,8 +1505,7 @@ c first get the Mixed Path temperature for this radiating layer
         iLModKprofLayer = mod(iL,kProfLayer)
         !normal, no LTE emission stuff
         DO iFr=1,kMaxPts
-          rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-          rPlanck = r1*((raFreq(iFr)**3))/rPlanck
+          rPlanck = ttorad(raFreq(iFr),rMPTemp)
           raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
           END DO
         END DO
@@ -1536,7 +1519,6 @@ c instead of background thermal, do rad transfer from TOA to "surface" which is 
         DO iFr=1,kMaxPts
           raInten(iFr) = raInten(iFr)*raaLayTrans(iFr,iLay) + raaEmission(iFr,iLay)*(1-raaLayTrans(iFr,iLay))
         END DO
-c      print *,iLay,raFreq(1),raInten(1)
       END DO
 
 c see if we have to add on the solar contribution

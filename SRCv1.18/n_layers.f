@@ -315,7 +315,8 @@ c local
       INTEGER iL,iJ,iMid,ifloor,iErr,iG,iaPreset(kMaxGas),iFound
       REAL rX,raR100Amt(kMaxLayer+10),raR100PartPress(kMaxLayer+10)
       CHARACTER*80 caRefFName
-      INTEGER iEarth,iMars,iaEarth(8),iaMars(2),iPreset,iNumLevsX
+      CHARACTER*3 ca3
+      INTEGER iEarth,iMars,iaEarth(8),iaMars(2),iPreset,iNumLevsX,iIndex
 
       DATA (iaEarth(iG),iG=1,8) /01,02,03,04,05,06,09,12/      !! 8 important Earth atm molecules
       DATA (iaMars(iG),iG=1,2)  /02,22/                        !! 2 important Mars  atm molecules
@@ -372,7 +373,10 @@ c local
           END DO
 
         ELSEIF ((kPlanet .EQ. 3) .AND. (laysORlevs .EQ. -1)) THEN
-          IF (kcaLevsRefProf(1:3) .EQ. 'DNE') THEN
+	  !ca3 = kcaLevsRefProf(1:3)
+	  ca3 = 'DNE'
+	  iIndex = index(kcaLevsRefProf,'DNE')
+          IF (iIndex .GT. 0) THEN
             write(kStdErr,*) 'oops : do not have a set of Levels Reference Profiles'
             CALL DoStop
           END IF
@@ -724,11 +728,12 @@ c input/output var
 
 c local var
       !! individual reference profiles, at kMaxLayer layers, in terms of MR = PPress/Press
-      INTEGER iaG0(kMaxGas),iNumGases0,i2,iFound,iaGasUnits0(kMaxGas)
+      INTEGER iaG0(kMaxGas),iNumGases0,i2,iFound,iaGasUnits0(kMaxGas),iIndex
       REAL raaR100MR(kMaxLayer+10,kMaxGas),raR100Temp(kMaxLayer+10),raR100Press(kMaxLayer+10)
       INTEGER iL,iG,iAbove,iMerge,iRefLevels,laysORlevs
       REAL rToffset,rJunk,raOffset(kMaxGas),raJunk(kMaxLayer+10)
       REAL rCO2ppmv,rAdjust,rCH4ppbv
+      CHARACTER*3 ca3
 
 c first read in reference profile, and if needed info for other gases
 c     read in additional gases eg from ERA/ECM we get gas 1,3 but we would like gas 1,2,3,4,5,6,8,12
@@ -740,7 +745,10 @@ c     read in ref profiles (eg for Gas2 since Mars, Earth, Venus all have CO2 in
       END DO
       laysORlevs = +1   !! orig, read in reference P,PP and get mix ratio using PP/P for each gas
       laysORlevs = -1   !! new,  read in one of 6 AFGL P/T/ppmv level profiles
-      IF ((laysORlevs .EQ. -1) .AND. (kcaLevsRefProf(1:3) .EQ. 'DNE')) THEN
+      !ca3 = kcaLevsRefProf(1:3)
+      ca3 = 'DNE'
+      iIndex = index(kcaLevsRefProf,'DNE')
+      IF ((laysORlevs .EQ. -1) .AND. (iIndex .GT. 0)) THEN
         write(kStdWarn,*) 'oops : do not have a set of Levels Reference Profiles; code is setting laysORlevs = +1'
         laysORlevs = +1
       END IF

@@ -875,23 +875,20 @@ C     using the Fast Diffusivity Approx
 
 c local variables
       INTEGER iLay,iL,iLp1,iBdryP1,iSecondEnd,iCase
-      REAL r1,r2,rPlanck,rMPTemp,rFreqAngle,rFreqAngle_m1
+      REAL rPlanck,rMPTemp,rFreqAngle,rFreqAngle_m1
 
 c to do the angular integration
       REAL rAngleTr_m1,rAngleTr,rL2G,rL2Gm1
-      REAL FindDiffusiveAngleExp,rDiff,rCosDiff
+      REAL FindDiffusiveAngleExp,rDiff,rCosDiff,ttorad
 
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
-
-      iBdryP1=NLev
-      iCase=-1
+      iBdryP1 = NLev
+      iCase   = -1
 
 c note that we are not as careful as  FastBDRYL2GDiffusiveApprox in that we
 c do not completely fill up atmospehere to include layers above instrument
 c (if intrument is not at TOA)    
-      iS=nlev-1
-      iE=1
+      iS = nlev-1
+      iE = 1
 c now we have 3 different cases to consider
 c CASE A1 : easy -- this is do ENTIRE atmnosphere
 c iS=100   iE~1   iS > iB > iE    ==> do iS->iB using acos(3/5)
@@ -900,19 +897,19 @@ c CASE A2 : easy -- this is do instr-gnd
 c iS~50    iE~1   iS > iB > iE    ==> do iS->iB using acos(3/5)
 c                                     do iB->iE using accurate diffusive approx
        IF ((iS .GE. iBdry) .AND. (iBdry .GE. iE)) THEN
-         iCase=1
+         iCase   = 1
          iBdryP1 = iBdry+1
        END IF
 c CASE B : quite easy -- this is do atmosphere -- instr
 c iS=100   iE>iB                  ==> do iS->iE using acos(3/5)
        IF ((iS .GE. iBdry) .AND. (iBdry .LE. iE)) THEN
-         iCase=2
+         iCase   = 2
          iBdryP1 = iE
        END IF
 c CASE C : easy -- this is do instr-gnd
 c iS~50    iE~1   iB > iS,iE      ==> do iB->iE using accurate diffusive approx
        IF ((iBdry .GE. iS) .AND. (iBdry .GE. iE)) THEN
-         iCase=3
+         iCase = 3
          iBdry = iS
        END IF
 
@@ -922,20 +919,19 @@ c iS~50    iE~1   iB > iS,iE      ==> do iB->iE using accurate diffusive approx
       END IF
 
 c ****** now map 1 .. iNumLayer ------> iNumlayer .. 1      *******
-      iBdryP1=nlev-iBdryP1+1
-      iBdry=nlev-iBdry+1
-      iE=nlev-1
-      iS=1
+      iBdryP1 = nlev-iBdryP1+1
+      iBdry   = nlev-iBdry+1
+      iE      = nlev-1
+      iS      = 1
 c ******** also note iLm1 ---> iLp1
       
-      rDiff=(kThermalAngle*kPi/180.0)
-      rCosDiff=cos(rDiff)
+      rDiff    = (kThermalAngle*kPi/180.0)
+      rCosDiff = cos(rDiff)
 
       if (TOA_to_instr .LT. 0) THEN
-        RAD0DN0 = kPLANCK1 *WAVENO**3 
-     $            / (EXP(kPlanck2*WAVENO/kTSpace) - 1) 
+	RAD0DN0 = ttorad(WAVENO,kTspace)
       else 
-        RAD0DN0=TOA_to_instr
+        RAD0DN0 = TOA_to_instr
       END IF        
 
 c     now just go from TOA to instrument .. assume there are no clouds
@@ -944,36 +940,35 @@ c      RAD0DN0=RAD0DN0*exp(-TOA_to_instr)
       RAD0DN(1) = RAD0DN0
 
 c initalize raL2G,raL2Gm1 
-      rL2G=0.0
-      rL2Gm1=0.0
+      rL2G   = 0.0
+      rL2Gm1 = 0.0
 
 c calculate rL2Gm1 which is the L2G transmission from layer iS-1 to ground
-      DO iLay=2,nlev-1
-        iL = iLay
-        rL2Gm1=rL2Gm1+tau(iL)
+      DO iLay = 2,nlev-1
+        iL     = iLay
+        rL2Gm1 = rL2Gm1+tau(iL)
       END DO
 c calculate rL2G which is the L2G transmission from layer iS to ground
 c and initialise the angles
-      rL2G=rL2Gm1+tau(1)
+      rL2G = rL2Gm1+tau(1)
 
 c do top part of atmosphere, where we can use acos(3/5)
       IF ((iCase .EQ. 1)  .OR. (iCase. EQ. 2)) THEN
 c go from top of atmosphere to boundary
         DO iLay = iS,iBdryp1
-          iL = iLay
-          iLp1 = iLay+1
-          rMPTemp=temp(iL)
+          iL      = iLay
+          iLp1    = iLay+1
+          rMPTemp = temp(iL)
 c find the diffusive angles for the layer beneath
-          rAngleTr_m1=exp(-rL2Gm1/rCosDiff)
-          rAngleTr=exp(-rL2G/rCosDiff)
+          rAngleTr_m1 = exp(-rL2Gm1/rCosDiff)
+          rAngleTr    = exp(-rL2G/rCosDiff)
 c Planckian emissions
-          rPlanck=exp(r2*waveno/rMPTemp)-1.0
-          rPlanck=r1*((waveno**3))/rPlanck
-          RAD0DN0=RAD0DN0+rPlanck*(rAngleTr_m1-rAngleTr)
+	  rPlanck = ttorad(waveno,rMPTemp)
+          RAD0DN0 = RAD0DN0 + rPlanck*(rAngleTr_m1-rAngleTr)
           RAD0DN(1) = RAD0DN0          
 c get ready for the layer beneath
-          rL2G=rL2Gm1
-          rL2Gm1=rL2Gm1-tau(iLp1)
+          rL2G   = rL2Gm1
+          rL2Gm1 = rL2Gm1-tau(iLp1)
         END DO
       END IF
 
@@ -982,28 +977,27 @@ c go from boundary to ground, or iE
 c do bottom part of atmosphere ACCURATELY
 
         iSecondEnd=nlev-1
-        rAngleTr=FindDiffusiveAngleExp(rL2G)
-        rFreqAngle=rAngleTr
+        rAngleTr   = FindDiffusiveAngleExp(rL2G)
+        rFreqAngle = rAngleTr
 
         DO iLay = iBdry,iSecondEnd
           iL = iLay
-          iLp1 = iLay+1
-          rMPTemp=temp(iL)
+          iLp1    = iLay+1
+          rMPTemp = temp(iL)
 c find the diffusive angles for the layer beneath
-          rAngleTr_m1=FindDiffusiveAngleExp(rL2Gm1)
-          rFreqAngle_m1=rAngleTr_m1
-          rAngleTr_m1=exp(-rL2Gm1/rAngleTr_m1)
-          rAngleTr=rFreqAngle
-          rAngleTr=exp(-rL2G/rAngleTr)
+          rAngleTr_m1   = FindDiffusiveAngleExp(rL2Gm1)
+          rFreqAngle_m1 = rAngleTr_m1
+          rAngleTr_m1   = exp(-rL2Gm1/rAngleTr_m1)
+          rAngleTr      = rFreqAngle
+          rAngleTr      = exp(-rL2G/rAngleTr)
 c Planckian emissions
-          rPlanck=exp(r2*WAVENO/rMPTemp)-1.0
-          rPlanck=r1*((WAVENO**3))/rPlanck
-          RAD0DN0=RAD0DN0+rPlanck*(rAngleTr_m1-rAngleTr)
+	  rPlanck = ttorad(waveno,rMPTemp)	  
+          RAD0DN0 = RAD0DN0+rPlanck*(rAngleTr_m1-rAngleTr)
           RAD0DN(1) = RAD0DN0          
 c get ready for the layer beneath
-          rL2G=rL2Gm1
-          rL2Gm1=rL2Gm1-tau(iLp1)
-          rFreqAngle=rFreqAngle_m1
+          rL2G       = rL2Gm1
+          rL2Gm1     = rL2Gm1-tau(iLp1)
+          rFreqAngle = rFreqAngle_m1
         END DO
 
       END IF
@@ -1011,7 +1005,7 @@ c get ready for the layer beneath
 c whether we did gaussian quadrature or diffusive approx, we now need the 2pi
 c factor from the azimuthal integration
 c however, there is also an average factor of 0.5 ==> overall, we need "pi"
-      RAD0DN0=RAD0DN0*kPi
+      RAD0DN0 = RAD0DN0*kPi
 
       RETURN
       END
@@ -2259,7 +2253,7 @@ c             calculate the attenuation due to the extra terms
 c raExtraSun = solar radiation incident at posn of instrument NOT USED! 
       REAL raExtraSun(kMaxPts) 
       REAL rSunTemp,rOmegaSun,rSunAngle
-      REAL r1,r2,rPlanck,rCos,raKabs(kMaxPts) 
+      REAL ttorad,rCos,raKabs(kMaxPts) 
       INTEGER iL,iI,iFr,iExtraSun,MP2Lay
       INTEGER iaRadLayerTemp(kMixFilRows),iT,iLay 
       REAL rExtraFac
@@ -2268,16 +2262,12 @@ c raExtraSun = solar radiation incident at posn of instrument NOT USED!
       rExtraFac = kPi     !! for a few days after 01/17/06
       rExtraFac = 1.0     !! after 01/27/06
           
-      r1 = sngl(kPlanck1) 
-      r2 = sngl(kPlanck2) 
-
       IF (iDoSolar .EQ. 0) THEN 
         !use 5700K
         rSunTemp = kSunTemp 
         DO iFr=1,kMaxPts
 c compute the Plank radiation from the sun 
-          rPlanck    = exp(r2*raFreq(iFr)/rSunTemp)-1.0 
-          raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+	  raSun(iFr) = ttorad(raFreq(iFr),rSunTemp)
         END DO 
       ELSEIF (iDoSolar .EQ. 1) THEN 
         !read in data from file
@@ -3548,7 +3538,7 @@ c input parameters
       REAL raaAbs(kMaxPts,kMixFilRows)  !mixing table
       INTEGER iL                        !which row of mix table
       REAL tempLEV(maxnz)               !level temperature profile (1+kProfLayer)
-      REAL tempLAY(kProfLayer)          !layer temperature profile (0+kProfLayer)
+      REAL tempLAY(kMixFilRows)         !layer temperature profile (0+kProfLayer)
       REAL rCos                         !satellite view angle
       REAL rFrac                        !fractional (0<f<1) or full (|f| > 1.0)
       INTEGER iVary                     !should we model temp dependance??? +2,+3,+4
@@ -3563,11 +3553,15 @@ c local variables
       REAL raIntenAvg(kMaxPts)
       REAL rZeta,rZeta2,rAbs,rTrans
 
-      IF ((iVary .LT. 2) .AND. (iVary .GT. 4)) THEN
+      IF (iVary .LT. 2) THEN
         write(kStdErr,*) 'this is upwell for linear in tau .. need iVary = 2 or 3 or 4'
         CALL DoStop
       END IF
 
+c      IF (iVary .EQ. 41) iVary = 42     !!! have debugged 04, 42 for small tau O(tau)
+      IF (iVary .EQ. 41) iVary = 04     !!! have debugged 04, 42 for small tau O(tau^2)
+c      print *,'up RT linear in tau ivary = ',ivary
+      
       IF (rFrac .LT. 0) THEN
         write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileUPWELL_LINTAU, reset to > 0'
         rFrac = abs(rFrac)
@@ -3706,12 +3700,17 @@ c        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(i
         !!! LINEAR IN TAU, GENLN2 style
         DO iFr = 1,kMaxPts
           rAbs = raaAbs(iFr,iL)/rCos*rFrac
-          rTrans = exp(-rAbs)	  
           rZeta = 2*(raIntenAvg(iFr)-raIntenP1(iFr))
-          rFcn = (1-rTrans)*(raIntenP1(iFr) + rZeta/rAbs) - rTrans * rZeta
-          if (iFr .EQ. 1) THEN
-            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-          end if	  
+	  IF (rAbs .GE. 0.05) THEN
+            rTrans = exp(-rAbs)	  	  
+            rFcn = (1-rTrans)*(raIntenP1(iFr) + rZeta/rAbs) - rTrans * rZeta
+	  ELSE
+            rTrans = 1 - rAbs	  	  
+	    rFcn = rAbs*raIntenP1(iFr) + rZeta*(1-rAbs/2) - rTrans * rZeta
+	  END IF
+c          if (iFr .EQ. 1) THEN
+c            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
+c          end if	  
           raInten(iFr) = raInten(iFr)*rTrans + rFcn
         END DO
 
@@ -3778,7 +3777,7 @@ c input parameters
       REAL raaAbs(kMaxPts,kMixFilRows)  !mixing table
       INTEGER iL                        !which row of mix table
       REAL tempLEV(maxnz)               !level temperature profile (1+kProfLayer)
-      REAL tempLAY(kProfLayer)          !layer temperature profile (0+kProfLayer)
+      REAL tempLAY(kMixFilRows)         !layer temperature profile (0+kProfLayer)
       REAL rCos                         !satellite view angle
       REAL rFrac                        !fractional (0<f<1) or full (|f| > 1.0)
       INTEGER iVary                     !should we model temp dependance??? +2,+3,+4
@@ -3798,8 +3797,8 @@ c        print *,iFr,tempLEV(iFr),tempLAY(iFr),tempLEV(iFr+1)
 c      END DO
 c      print *,'humbug'
 c      call DoStop
-      
-      IF ((iVary .LT. 2) .AND. (iVary .GT. 4)) THEN
+
+      IF (iVary .LT. 2) THEN
         write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
         CALL DoStop
       END IF
@@ -3808,6 +3807,10 @@ c      call DoStop
         write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
         rFrac = abs(rFrac)
       END IF
+
+c      IF (iVary .EQ. 41) iVary = 42     !!! have debugged 04, 42 for small tau O(tau)
+      IF (iVary .EQ. 41) iVary = 04     !!! have debugged 04, 42 for small tau O(tau^2)
+c       print *,'dn RT linear in tau ivary = ',iVary
 
       iBeta = MOD(iL,kProfLayer)
       IF (iBeta .EQ. 0) THEN
@@ -3825,15 +3828,15 @@ c      call DoStop
       END IF
       CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
 
-      IF (iVary .EQ. 4) THEN
+      IF (iVary .GE. 4) THEN
         !! new option
         CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
         CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
-        !DO iFr = 1,kMaxPts
-        !  raIntenAvg(iFr) = 0.5 * (raIntenP(iFr) + raIntenP1(iFr))
-        !END DO
+c        !DO iFr = 1,kMaxPts
+c        !  raIntenAvg(iFr) = 0.5 * (raIntenP(iFr) + raIntenP1(iFr))
+c        !END DO
       END IF
       
       IF (iVary .EQ. 2) THEN 
@@ -3951,12 +3954,17 @@ c        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY
         !!! LINEAR IN TAU, GENLN2 style
         DO iFr = 1,kMaxPts
           rAbs = raaAbs(iFr,iL)/rCos*rFrac
-          rTrans = exp(-rAbs)
           rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
-          rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
-          if (iFr .EQ. 1) THEN
-            print *,'down',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-          end if
+	  IF (rAbs .GE. 0.05) THEN
+            rTrans = exp(-rAbs)	  
+            rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
+	  ELSE
+            rTrans = 1 - rAbs	  	  
+	    rFcn = rAbs*raIntenP(iFr) + rZeta*(1-rAbs/2) - rTrans * rZeta
+	  END IF	    
+c          if (iFr .EQ. 1) THEN
+c            print *,'down',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
+c          end if
           raInten(iFr) = raInten(iFr)*rTrans + rFcn
         END DO
 
@@ -5653,9 +5661,9 @@ c raaRadsX,iNumOutX are to keep up with cloud fracs
 
 c local variables
       INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-      REAL rCos,raInten2(kMaxPts),r1,r2,rPlanck,rMPTemp
+      REAL rCos,raInten2(kMaxPts),rMPTemp
       REAL raaLay2Sp(kMaxPts,kProfLayer),rCO2
-      REAL rDum1,rDum2,ttorad
+      REAL rDum1,rDum2
 c to do the thermal,solar contribution
       REAL rThermalRefl
       INTEGER iDoThermal,iDoSolar,MP2Lay
@@ -5665,7 +5673,7 @@ c for the NLTE which is not used in this routine
          
       REAL raOutFrac(kProfLayer),rT
       REAL raVT1(kMixFilRows),InterpTemp
-      REAL bt2rad,t2s
+      REAL bt2rad,ttorad,t2s,rPlanck
       INTEGER iFr1,find_tropopause,troplayer
       INTEGER iCloudLayerTop,iCloudLayerBot
 
@@ -5696,9 +5704,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -5731,13 +5736,13 @@ c this has to be the array used for BackGndThermal and Solar
       END DO
 c if the bottommost layer is fractional, interpolate!!!!!!
       iL = iaRadLayer(1)
-      raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+      raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
       write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL) 
 c if the topmost layer is fractional, interpolate!!!!!!
 c this is hardly going to affect thermal/solar contributions (using this temp 
 c instead of temp of full layer at 100 km height!!!!!!
       iL = iaRadLayer(iNumLayer)
-      raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+      raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
       write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL) 
 
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
@@ -5758,8 +5763,7 @@ c initialize the solar and thermal contribution to 0
         raSun(iFr)=0.0
         raThermal(iFr)=0.0
 c compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        rPlanck=exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raInten(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raInten(iFr) = ttorad(raFreq(iFr),rTSurf)
         raSurface(iFr) = raInten(iFr)
       END DO
 
@@ -5849,8 +5853,7 @@ c since we might have to do fractions!
 c now do the radiative transfer thru this bottom layer
         DO iFr=1,kMaxPts
           rT = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
-          rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-          rPlanck = r1*((raFreq(iFr))**3)/rPlanck
+          rPlanck = ttorad(raFreq(iFr),rMPTemp)
           raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
         END DO
 c        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
@@ -5859,7 +5862,7 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 c then do the rest of the layers till the last but one(all will be full)
       DO iLay=2,iHigh-1
          iL = iaRadLayer(iLay)
-         rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+         rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
          rMPTemp = raVT1(iL)
 c see if this mixed path layer is in the list iaOp to be output
 c since we might have to do fractions!
@@ -5883,8 +5886,7 @@ c since we might have to do fractions!
 c now do the radiative transfer thru this complete layer
         DO iFr=1,kMaxPts
           rT = exp(-raaAbs(iFr,iL)/rCos)
-          rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-          rPlanck = r1*((raFreq(iFr))**3)/rPlanck
+          rPlanck = ttorad(raFreq(iFr),rMPTemp)
           raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
         END DO
 c        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
@@ -5897,7 +5899,7 @@ c then do the topmost layer (could be fractional)
                                !! and rads get printed again!!!!!
         DO iLay = iHigh,iHigh
           iL = iaRadLayer(iLay)
-          rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+          rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
           rMPTemp = raVT1(iL)
 
           CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
@@ -5932,8 +5934,7 @@ c then do the topmost layer (could be fractional)
 
               DO iFr=1,kMaxPts
                 rT = exp(-raaAbs(iFr,iL)/rCos)
-                rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-                rPlanck = r1*((raFreq(iFr))**3)/rPlanck
+                rPlanck = ttorad(raFreq(iFr),rMPTemp)
                 raInten2(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT		
               END DO
 	      
@@ -6020,7 +6021,7 @@ c raaRadsX,iNumOutX are to keep up with cloud fracs
 
 c local variables
       INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-      REAL rCos,raInten2(kMaxPts),r1,r2,rPlanck,rMPTemp
+      REAL rCos,raInten2(kMaxPts),rMPTemp
       REAL raaLay2Sp(kMaxPts,kProfLayer),rCO2
       REAL rDum1,rDum2,ttorad
 c to do the thermal,solar contribution
@@ -6032,7 +6033,7 @@ c for the NLTE which is not used in this routine
          
       REAL raOutFrac(kProfLayer),rT
       REAL raVT1(kMixFilRows),InterpTemp
-      REAL bt2rad,t2s
+      REAL bt2rad,t2s,rPlanck
       INTEGER iFr1,find_tropopause,troplayer
       INTEGER iCloudLayerTop,iCloudLayerBot
 
@@ -6060,9 +6061,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -6095,19 +6093,19 @@ c this has to be the array used for BackGndThermal and Solar
       END DO
 c if the bottommost layer is fractional, interpolate!!!!!!
       iL = iaRadLayer(1)
-      raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+      raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
       write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL) 
 c if the topmost layer is fractional, interpolate!!!!!!
 c this is hardly going to affect thermal/solar contributions (using this temp 
 c instead of temp of full layer at 100 km height!!!!!!
       iL = iaRadLayer(iNumLayer)
-      raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+      raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
       write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL) 
 
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
 
 c find the lowest layer that we need to output radiances for
-      iHigh=+100000000
+      iHigh = +100000000
       DO iLay=1,iNp
         IF (iaOp(iLay) .LT. iHigh) THEN
           iHigh = iaOp(iLay)
@@ -6134,13 +6132,11 @@ c this figures out the solar intensity at the ground
 
       iLay = 1
       iL = iaRadLayer(iLay)
-      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = kTSpace
       DO iFr=1,kMaxPts
         rT = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
-        rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-        rPlanck = r1*((raFreq(iFr))**3)/rPlanck
-        raInten(iFr) = rPlanck
+        raInten(iFr) = ttorad(raFreq(iFr),rMPTemp)
       END DO
 
 c now we can compute the downwelling radiation!!!!!
@@ -6176,8 +6172,7 @@ c since we might have to do fractions!
 c now do the radiative transfer thru this bottom layer
         DO iFr=1,kMaxPts
           rT = exp(-raaAbs(iFr,iL)*rFracTop/rCos)
-          rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-          rPlanck = r1*((raFreq(iFr))**3)/rPlanck
+	  rPlanck = ttorad(raFreq(iFr),rMPTemp)
           raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
         END DO
 c        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
@@ -6210,8 +6205,7 @@ c since we might have to do fractions!
 c now do the radiative transfer thru this complete layer
         DO iFr=1,kMaxPts
           rT = exp(-raaAbs(iFr,iL)/rCos)
-          rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-          rPlanck = r1*((raFreq(iFr))**3)/rPlanck
+	  rPlanck = ttorad(raFreq(iFr),rMPTemp)
           raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
         END DO
 c        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777

@@ -3548,11 +3548,11 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-      REAL raaLayTrans(kMaxPts,kProfLayer),r1,r2,rPlanck,rMPTemp
+      REAL raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
       REAL raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
       REAL raaLay2Sp(kMaxPts,kProfLayer),rCO2
       REAL raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
-      REAL rDum1,rDum2,ttorad,rOmegaSun
+      REAL rDum1,rDum2,rOmegaSun
 c to do the thermal,solar contribution
       REAL rThermalRefl
       INTEGER iDoThermal,iDoSolar,MP2Lay
@@ -3561,7 +3561,7 @@ c to do the thermal,solar contribution
       REAL raOutFrac(kProfLayer)
       REAL raVT1(kMixFilRows),InterpTemp
       INTEGER iIOUN,find_tropopause,troplayer
-      REAL bt2rad,t2s
+      REAL bt2rad,t2s,ttorad
       INTEGER iFr1
 
       iIOUN = iIOUN_IN
@@ -3584,9 +3584,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -3637,14 +3634,14 @@ c this has to be the array used for BackGndThermal and Solar
 
 c if the bottommost layer is fractional, interpolate!!!!!!
       iL=iaRadLayer(1)
-      raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+      raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
       write(kStdWarn,*) 'slow nlte radmodel ...'
       write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL) 
 c if the topmost layer is fractional, interpolate!!!!!!
 c this is hardly going to affect thermal/solar contributions (using this temp 
 c instead of temp of full layer at 100 km height!!!!!!
       iL=iaRadLayer(iNumLayer)
-      raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+      raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
       write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL) 
 
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
@@ -3718,12 +3715,10 @@ c             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracTop + raAbsCloud(iFr)
       
       DO iFr=1,kMaxPts
 c initialize the solar and thermal contribution to 0
-        raSun(iFr)=0.0
-        raThermal(iFr)=0.0
-c compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        rPlanck=exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raInten(iFr)=r1*((raFreq(iFr))**3)/rPlanck
-        raSurface(iFr)=raInten(iFr)
+        raSun(iFr)     = 0.0
+        raThermal(iFr) = 0.0
+        raInten(iFr)   = ttorad(raFreq(iFr),rTSurf)
+        raSurface(iFr) = raInten(iFr)
         END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -3764,15 +3759,13 @@ c first get the Mixed Path temperature for this radiating layer
         IF (iLModKprofLayer .LT. iNLTEStart) THEN   
           !normal, no LTE emission stuff
           DO iFr=1,kMaxPts
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)
             raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
             END DO
         ELSEIF (iLModKprofLayer .GE. iNLTEStart) THEN
           !new; LTE emission stuff
           DO iFr=1,kMaxPts
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck * raaPlanckCoeff(iFr,iL)
+            rPlanck = ttorad(raFreq(iFr),rMPTemp) * raaPlanckCoeff(iFr,iL)
             raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
             END DO
           END IF
@@ -4041,7 +4034,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-      REAL raaLayTrans(kMaxPts,kProfLayer),r1,r2,rPlanck,rMPTemp
+      REAL raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
       REAL raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
       REAL raaLay2Sp(kMaxPts,kProfLayer),rCO2
       REAL raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
@@ -4085,9 +4078,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -4217,12 +4207,10 @@ c             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracTop + raAbsCloud(iFr)
       
       DO iFr=1,kMaxPts
 c initialize the solar and thermal contribution to 0
-        raSun(iFr)=0.0
-        raThermal(iFr)=0.0
-c compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        rPlanck=exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raInten(iFr)=r1*((raFreq(iFr))**3)/rPlanck
-        raSurface(iFr)=raInten(iFr)
+        raSun(iFr)     = 0.0
+        raThermal(iFr) = 0.0
+        raInten(iFr)   = ttorad(raFreq(iFr),rTSurf)
+        raSurface(iFr) = raInten(iFr)
         END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -4244,8 +4232,7 @@ c        write (kStdWarn,*) 'adding on SARTA NLTE if DAYTIME'
 c first get the Mixed Path temperature for this radiating layer
         rMPTemp=raVT1(iL)
         DO iFr=1,kMaxPts
-          rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-          rPlanck = r1*((raFreq(iFr)**3))/rPlanck
+          rPlanck = ttorad(raFreq(iFr),rMPTemp)
           raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
           END DO
         END DO
@@ -4487,7 +4474,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-      REAL raaLayTrans(kMaxPts,kProfLayer),r1,r2,rPlanck,rMPTemp
+      REAL raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
       REAL raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
       REAL raaLay2Sp(kMaxPts,kProfLayer),rCO2
       REAL raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
@@ -4523,9 +4510,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -4657,12 +4641,10 @@ c             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracTop + raAbsCloud(iFr)
       
       DO iFr=1,kMaxPts
 c initialize the solar and thermal contribution to 0
-        raSun(iFr)=0.0
-        raThermal(iFr)=0.0
-c compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        rPlanck=exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raInten(iFr)=r1*((raFreq(iFr))**3)/rPlanck
-        raSurface(iFr)=raInten(iFr)
+        raSun(iFr)     = 0.0
+        raThermal(iFr) = 0.0
+        raInten(iFr)   = ttorad(raFreq(iFr),rTSurf)
+        raSurface(iFr) = raInten(iFr)
         END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -4703,15 +4685,13 @@ c first get the Mixed Path temperature for this radiating layer
         IF (iLModKprofLayer .LT. iNLTEStart) THEN   
           !normal, no LTE emission stuff
           DO iFr=1,kMaxPts
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)
             raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
             END DO
         ELSEIF (iLModKprofLayer .GE. iNLTEStart) THEN
           !new; LTE emission stuff
           DO iFr=1,kMaxPts
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck * raaPlanckCoeff(iFr,iL)
+            rPlanck = ttorad(raFreq(iFr),rMPTemp) * raaPlanckCoeff(iFr,iL)
             raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
             END DO
           END IF

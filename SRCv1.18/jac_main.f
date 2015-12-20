@@ -314,6 +314,7 @@ c radBTdr is the derivative result
       INTEGER iFr
       REAL r1,r2,r3,r4
 
+      !! need these for derivatives of Planck
       r1 = sngl(kPlanck1)
       r2 = sngl(kPlanck2)
 
@@ -461,6 +462,7 @@ c local variables
       REAL r1,r2,r3,r4,r5,rad,dradDT
       INTEGER iFr
 
+      !! need these for derivatives of Planck
       r1 = sngl(kPlanck1)
       r2 = sngl(kPlanck2)
 

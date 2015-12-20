@@ -125,7 +125,7 @@ c do some initializations
       END
 c************************************************************************ 
 c this subroutine finds the name of the CKD binary file
-      SUBROUTINE CKDFileName(caFName,iGasID,iTag,iActualTag)
+      SUBROUTINE CKDFileName(caFName,iGasID,iTag)
 
       IMPLICIT NONE
 
@@ -134,7 +134,7 @@ c this subroutine finds the name of the CKD binary file
 c iGasID      = current ID of gas to be processed (101=self,102=foreign)
 c caFName     = name of file that contains CKD data
       CHARACTER*120 caFName
-      INTEGER iGasID,iTag,iActualTag
+      INTEGER iGasID,iTag
 
 c local variables
       CHARACTER*2 caString,caTemp

@@ -624,15 +624,17 @@ c this gets set in rtp_interface.f
 c this is TEMPERATURE variation in layer
 c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
 c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
       kTemperVary = +1     !!!temperature in layer varies
       kTemperVary = +2     !!!temperature in layer varies linearly, simple
-      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM DEFAULT 06/2013
-      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM DEFAULT 11/2014
-      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA
+      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
+      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
+      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx
+      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau)
 
-      kTemperVary = -1     !!!temperature in layer constant USE THIS!!! DEFAULT, for RADS
-      kTemperVary = +3     !!!temperature in layer varies linearly  !!! ala RRTM, LBLRTM, but messes up clear RADS
-
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau)
+      
       IF (kTemperVary .EQ. -1) THEN
         write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'
       ELSEIF (kTemperVary .EQ. +1) THEN
@@ -642,7 +644,11 @@ c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LIN
       ELSEIF (kTemperVary .EQ. +3) THEN
         write(kStdWarn,*) 'kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v3'
       ELSEIF (kTemperVary .EQ. +4) THEN
-        write(kStdWarn,*) 'kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4'
+        write(kStdWarn,*) 'kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau^2)'
+      ELSEIF (kTemperVary .EQ. +41) THEN
+        write(kStdWarn,*) 'kTemperVary = +41    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 (Pade)'
+      ELSEIF (kTemperVary .EQ. +42) THEN
+        write(kStdWarn,*) 'kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau)'
       ELSE
         write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
         CALL DoStop
@@ -3305,16 +3311,17 @@ c iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
 
 c local var
       INTEGER iX,iY
-      REAL rX
+      REAL rX,SACONV_SUN,ORIG_SACONV_SUN,VACONV
 
 c first find out how many raAtmLoop the user did set
       iX = 1
       DO WHILE ((iX .LE. kMaxAtm) .AND. (raAtmLoop(iX) .GE. 0.0))
         iX = iX + 1
+	IF (iX .GT. kMaxAtm) GOTO 10
       END DO
-      iX = iX - 1 
  10   CONTINUE   
-
+      iX = iX - 1 
+      
       write(kStdWarn,*) ' >>>> Duplicate Clear Sky Params from Atm # 1 for ',iX,' atmospheres'
       iNatm = iX
       DO iX = 2,iNatm
@@ -3392,23 +3399,27 @@ c now set the param you need to set
           raaPrBdry(iX,2)  = raAtmLoop(iX)
         END DO
 
-      ELSEIF (iAtmLoop .EQ. 3) THEN
-        write(kStdWarn,*) '  Resetting raScanAng for looping'
-        write(kStdErr,*)  '  Resetting raScanAng for looping'
+      ELSEIF (iAtmLoop .EQ. 3) THEN	
+        write(kStdWarn,*) '  Resetting raSatZen for looping (so need to compute scanang)'
+        write(kStdErr,*)  '  Resetting raSatZen for looping (so need to compute scanang)'
         IF (iaLimb(1) .GT. 0) THEN
           write(kStdErr,*) 'Atm 1 set up for Limb sounding'
           write(kStdErr,*) '  so cannot willy nilly reset scanang'
           write(kStdErr,*) 'Go and reset raStartPress instead'
           CALL DoStop
         ELSE
+          write(kStdWarn,*) '  changing user input SatZen (angle at gnd)  to TOA Instr ScanAng '
           DO iX = 1,iNatm
             raSatAngle(iX) = raAtmLoop(iX)
+            !!!! positive number so this is genuine input angle that will vary with layer height
+            raSatAngle(iX) = SACONV_SUN(raAtmLoop(iX),0.0,705.0)	    
+	    write(kStdWarn,*) '  ',raAtmLoop(iX),' ---> ',raSatAngle(iX)
           END DO
         END IF
-
+      
       ELSEIF (iAtmLoop .EQ. 4) THEN
-        write(kStdWarn,*) '  Resetting raSolAng for looping'
-        write(kStdErr,*)  '  Resetting raSolAng for looping'
+        write(kStdWarn,*) '  Resetting raSolZen for looping'
+        write(kStdErr,*)  '  Resetting raSolZen for looping'
         DO iX = 1,iNatm
           rakSolarAngle(iX) = raAtmLoop(iX)
         END DO

@@ -19,7 +19,7 @@ c for me in the RTP file!
 c output
       REAL rf1,rf2           !the low and high end wavenumbers
 c input
-      CHARACTER*130 caPFname !the RTP file to peruse
+      CHARACTER*80 caPFname !the RTP file to peruse
       INTEGER iRTP           !which profile to read
       INTEGER inpath
 c local variables for RTP file
@@ -29,7 +29,7 @@ c local variables for RTP file
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
 c other local variables
@@ -58,6 +58,13 @@ c      write(kStdWarn,*) 'read close status = ', status
       rf1 = head.vcmin
       rf2 = head.vcmax
 
+      IF (head.ngas .GT. MAXGAS) THEN
+        !! see /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
+        write(kStdErr,*) ,' >>>> number of gases in RTP     file = ',head.ngas
+        write(kStdErr,*) ,' >>>> number of gases in RTPDEFS      = ',MAXGAS
+	CallDoStop
+      END IF
+      
       IF ((rf1 .LT. 0) .AND. (rf2 .LT. 0)) THEN
         write(kStdWarn,*) 'resetting head.vcmin from ',rf1,' to 605.0'
         rf1 = 605.0
@@ -166,7 +173,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       INTEGER iRTP
-      CHARACTER*130 caPFName
+      CHARACTER*80 caPFName
 
       INTEGER iI
 
@@ -429,7 +436,7 @@ c notice here that gA == first gas in the MOLGAS, usually water
      $                         kAvog*raaAmt(iL,7),kAvog*raaAmt(iL,22)
         END DO
       END IF
- 3030 FORMAT(8('   ',ES10.4))
+ 3030 FORMAT(8('   ',E10.4))
 
       IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
         write(kStdWarn,5040) caStr
@@ -567,7 +574,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
       fname(1:80) = caPFName(1:80)
@@ -688,7 +695,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       logical isfinite
 
@@ -1205,7 +1212,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       logical isfinite
 
@@ -1709,7 +1716,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       logical isfinite
 
@@ -2190,7 +2197,7 @@ c raPressLevels are the actual pressure levels from the KLAYERS file
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       REAL raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
       INTEGER iRTP     !!!tells which profile info, radiance info, to read
-      CHARACTER*130  caPFName !!!tells which profile 
+      CHARACTER*80  caPFName !!!tells which profile 
 
 c local variables
       CHARACTER*7 caWord
@@ -2213,10 +2220,11 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       real rf1,rf2
-
+      integer iI
+      
       fname(1:80) = caPFName(1:80)
 
       write(kStdWarn,*) 'Using RTP file to set atm info ....'
@@ -2274,11 +2282,11 @@ c now get the relevant info from rchan,prof
           pobs1 = raPressLevels(iProfileLayers+1)
           pobs = pobs1
         END IF
-        upwell = ((kProfLayer + 1) - prof.nlevs) + 1
-        IF (pobs1  .gt. raPressLevels(upwell)) THEN
+        iI = ((kProfLayer + 1) - prof.nlevs) + 1
+        IF (pobs1  .gt. raPressLevels(iI)) THEN
           write(kStdWarn,*) 'From reading info in RTP file, reset prof.pobs'
-          write(kStdWarn,*) 'from ',pobs1,' to ',raPressLevels(upwell)
-          pobs1 = raPressLevels(upwell)
+          write(kStdWarn,*) 'from ',pobs1,' to ',raPressLevels(iI)
+          pobs1 = raPressLevels(iI)
           pobs = pobs1
         END IF
       END IF
@@ -2287,7 +2295,7 @@ c now get the relevant info from rchan,prof
 c testing
 c      prof.satzen = -abs(prof.satzen)
 c      prof.zobs   = -1000
-c       prof.scanang = -abs(prof.scanang) * 1000
+c      prof.scanang = -abs(prof.scanang) * 1000
 
       !!!assume the instrument is downlooking, from TOA
       upwell = 1
@@ -3858,7 +3866,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
       DO iI = 1,kMaxClouds
@@ -4433,7 +4441,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
       MGC = kMGC

@@ -1591,8 +1591,12 @@ c ******** duplicate the atmospheres if needed section
       IF ((iNatm .EQ. 1) .AND. (iAtmLoop .GT. 0) .AND. (iNclouds .GT. 0)) THEN
         write(kStdErr,*) 'Can only "duplicate" one CLEAR atmosphere'
         CALL DoStop
-      END IF
-      IF ((iNatm .EQ. 1) .AND. (iAtmLoop .GT. 0) .AND. (iNclouds .LE. 0)) THEN
+      ELSEIF ((iNatm .GT. 1) .AND. (iAtmLoop .GT. 0)) THEN
+        write(kStdErr,*) 'Can only "duplicate" ONE CLEAR atmosphere'
+        write(kStdErr,*) 'ie if iAtmLoop .GT. 0 then iNatm = 1 (if driven by nml file),'
+        write(kStdErr,*) '                             or 0/-1 (if driven by rtp file)'
+        CALL DoStop
+      ELSEIF ((iNatm .EQ. 1) .AND. (iAtmLoop .GT. 0) .AND. (iNclouds .LE. 0)) THEN
         CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop,
      $            iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels,
      $            iaSetEms,raaaSetEmissivity,raSetEmissivity,
@@ -1601,12 +1605,6 @@ c ******** duplicate the atmospheres if needed section
      $            iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $            raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop,
      $            raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
-      END IF
-      IF ((iNatm .GT. 1) .AND. (iAtmLoop .GT. 0)) THEN
-        write(kStdErr,*) 'Can only "duplicate" ONE CLEAR atmosphere'
-        write(kStdErr,*) 'ie if iAtmLoop .GT. 0 then iNatm = 1 (if driven by nml file),'
-        write(kStdErr,*) '                             or 0/-1 (if driven by rtp file)'
-        CALL DoStop
       END IF
 
       IF (iResetCldFracs .LT. 0) THEN
@@ -1621,17 +1619,23 @@ c ******** duplicate the atmospheres if needed section
      $        ctop2,cbot2,cngwat2,cfrac2,cfrac12,ctype2
             write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
             write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
-            raAtmLoop(1) = 1.0
-            raAtmLoop(2) = 1.0
-            raAtmLoop(3) = 1.0
-            raAtmLoop(4) = 1.0
-            raAtmLoop(5) = 1.0
+	    IF (kMaxAtm .LT. 5) THEN
+	      write(kStdErr,*) 'trying to duplicate 5 atm but kMaxAtm = ',kMaxAtm
+	      Call DoStop
+	    END IF
+	    DO iInt = 1,kMaxAtm
+              raAtmLoop(iInt) = 1.0
+            END DO
           ELSEIF ((cngwat2 .LE. 0) .AND. (cfrac2 .LE. 0) .AND. (iaCloudScatType(2) .LE. 0))  THEN
             iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
             write(kStdErr,*) 'ONE PCLSAM cloud : [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ',
      $        ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12	    
             write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
             write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
+	    IF (kMaxAtm .LT. 3) THEN
+	      write(kStdErr,*) 'trying to duplicate 3 atm but kMaxAtm = ',kMaxAtm
+	      Call DoStop
+	    END IF	    
             raAtmLoop(1) = 1.0
             raAtmLoop(2) = 1.0
             raAtmLoop(3) = 1.0

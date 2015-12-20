@@ -339,13 +339,13 @@ computations, even with scattering (introduce a OLR computation) etc]
 
             DEFAULT : 
 
-                 for SARTA tuning multipliers
+(A)                 for SARTA tuning multipliers
   kcartabasic.f       iSARTAChi = -1          for no tuning (default)
   kcartamain.f                  = +1          for AIRS tuning
   kcartachunk.f                 = +2          for IASI tuning
                                 = +3          for CrIS tuning
 
-                 for LTE, clear sky, scatter codes
+(B)                 for LTE, clear sky, scatter codes, OD calcs
   kcartamain.f        iSplinetype = +1        for splines/linear
   kcartabasic.f       iSplinetype = +1        for splines/linear  
   kcoeffMAIN.f        iCO2Chi = 2             AIRS analysis for 15 um, 4um
@@ -355,13 +355,15 @@ computations, even with scattering (introduce a OLR computation) etc]
                       iMatlab = +1            use Matlab uncompression ideas
   rad_quad.f          iGaussQuad = 0          fast,accurate gauss quadrature
   rtp_interface.f     iWhichScatterCode = 1   use TwoStream from RTP files
+
+(C)                for Radiative Trnsfer (layer temperature variations)
   rad_main.f          iVary = -1              use constant layer T, set by kTemperVary
       kTemperVary = -1       !temperature in layer constant USE THIS!!!!
       kTemperVary = +1       !temperature in layer varies exponentially
       kTemperVary = +2       !temperature in layer varies linearly, simple
       kTemperVary = +3       !temperature in layer varies linearly, ala RRTM, LBLRTM
 
-                  for NLTE
+(D)                  for NLTE
   kreadVTprofiles.f   iCurrent = +1           use eg 385 ppmv in UA, or rely 
                                               on MR given in caaUpperMixRatio
   knonlte.f           iTalk = -1              short summary of NLTE info
@@ -378,11 +380,11 @@ computations, even with scattering (introduce a OLR computation) etc]
   knonlte.f           iDoCO2Continuum = -1    Use CO2 continuum or not
   n_gas_wt_spectra.f  iMethod = 2             Use polynm coeffs to predict NLTE
 
-                  for COLUMN JACS
+(E)                  for COLUMN JACS
   rad_main.f          iColJac = +1            dump out col jacs or not
   scatter_all_misc.f  iLogOrLinear = +1       linear interp for w,g; log for e
 
-                  for LBLRTM TAPE 5/6 input
+(F)                  for LBLRTM TAPE 5/6 input
   n_layers.f          iReplaceZeroProf = +1   user wants to replace ZERO 
                                               everywhere gas profile with 
                                               climatology
@@ -428,6 +430,7 @@ computations, even with scattering (introduce a OLR computation) etc]
         For these two LBLRTM cases, when "adding on missing gases", the 
         gasamts are set to 0
 
+(G)ENERAL
 03/21/11        In "SUBROUTINE compressed" default is now to use Matlab based
                 weights idea to uncompress the kComp Database, rather than the
                 earlier splines and/or linear interps. This should be a speedup
@@ -555,11 +558,37 @@ computations, even with scattering (introduce a OLR computation) etc]
                 in file rad_quad.f
                 DEFAULT : iGaussQuad = 0
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 Details : Bug fixes/ clarifications and new features/updates/improvements
 -------------------------------------------------------------------------
 
 v1.18
 -----
+
+12/18/15        Moved angle routines (eg find gauss angles, saconv, vaconv)
+                from rad_misc.f to rad_angles.f
+
+                Tweaked code using ifort77 compiler
+
+                If kTemperVary == 4 and iAtmLoop = 3 (do multiple
+                atmosphere, changing satzen) then
+                "rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_CONST_LAYER_ANGLE"
+                does upwelling radiative transfer, using these input
+                angles at ALL layers ie effectively mimics the RT for
+                flux clacs, which are done at same angle
+
+                For T(z) very small, so that h nu /K T >> 1, the ifort
+		compiler was giving planck radiances of infty or
+		nan. So now I do a check, and if this is a large
+		number, I set expt(hv/kT)-1 = 1.0e10. GOt rid of
+		"inhouse" ttorad, and now code always calls
+		ttorad(raFreq(iFr),rT) instead of each routine doing
+		its own ttorad
+		
 08/09/15        kcarta.x does scattering, and the .nml fie needs to have
                 iNcloud_RTP > 0
                 If you want to use the same RTP file to drive clear calcs,

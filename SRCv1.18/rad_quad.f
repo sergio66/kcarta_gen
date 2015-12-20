@@ -128,22 +128,17 @@ c              this would affect the backgnd thermal calculation
 
       INTEGER iFr,iAngle,iGasuuPts
 
-      REAL raTemp(kMaxPts),r1,r2,rCosAngle
-      REAL rPlanck,raIntenAtmos(kMaxPts)
+      REAL raTemp(kMaxPts),rCosAngle
+      REAL rPlanck,raIntenAtmos(kMaxPts),ttorad
 
       REAL rMPTemp,rAngleTrans,rAngleEmission
       INTEGER iL,iLay,iGaussPts
-
-c compute the emission from the top of atm == eqn 4.26 of Genln2 manual
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
       iGaussPts = kGauss
       CALL FindGauss(iGaussPts,daGaussPt,daGaussWt)
 
       DO iFr=1,kMaxPts
-        rPlanck=exp(r2*raFreq(iFr)/rTSpace)-1.0
-        raIntenAtmos(iFr)=r1*((raFreq(iFr))**3)/rPlanck
+        raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
         END DO
 
       IF (iExtraThermal .LT. 0) THEN
@@ -161,33 +156,30 @@ c now loop over the layers, for the particular angle
             iL=iaRadLayer(iLay)
             rMPTemp=raVT1(iL)
             DO iFr=1,kMaxPts
-              rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-              rPlanck=r1*((raFreq(iFr)**3))/rPlanck
-              rAngleTrans=exp(-raaAbs(iFr,iL)/rCosAngle)
-              rAngleEmission=(1.0-rAngleTrans)*rPlanck
-              raTemp(iFr)=rAngleEmission+raTemp(iFr)*rAngleTrans
+              rPlanck        = ttorad(raFreq(iFr),rMPTemp)
+              rAngleTrans    = exp(-raaAbs(iFr,iL)/rCosAngle)
+              rAngleEmission = (1.0-rAngleTrans)*rPlanck
+              raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
               END DO
             END DO
           DO iLay=iNumLayer-1,2,-1
-            iL=iaRadLayer(iLay)
-            rMPTemp=raVT1(iL)
+            iL = iaRadLayer(iLay)
+            rMPTemp = raVT1(iL)
             DO iFr=1,kMaxPts
-              rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-              rPlanck=r1*((raFreq(iFr)**3))/rPlanck
-              rAngleTrans=exp(-raaAbs(iFr,iL)/rCosAngle)
-              rAngleEmission=(1.0-rAngleTrans)*rPlanck
-              raTemp(iFr)=rAngleEmission+raTemp(iFr)*rAngleTrans
+              rPlanck        = ttorad(raFreq(iFr),rMPTemp)	    
+              rAngleTrans    = exp(-raaAbs(iFr,iL)/rCosAngle)
+              rAngleEmission = (1.0-rAngleTrans)*rPlanck
+              raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
               END DO
             END DO
           DO iLay=1,1
             iL=iaRadLayer(iLay)
             rMPTemp=raVT1(iL)
             DO iFr=1,kMaxPts
-              rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-              rPlanck=r1*((raFreq(iFr)**3))/rPlanck
-              rAngleTrans=exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle)
-              rAngleEmission=(1.0-rAngleTrans)*rPlanck
-              raTemp(iFr)=rAngleEmission+raTemp(iFr)*rAngleTrans
+              rPlanck        = ttorad(raFreq(iFr),rMPTemp)	    	    
+              rAngleTrans    = exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle)
+              rAngleEmission = (1.0-rAngleTrans)*rPlanck
+              raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
               END DO
             END DO
 c add the contribution from this angle to raThermal -- the sin(theta) is from
@@ -195,8 +187,7 @@ c the solid angle contribution ===d(cos(theta))
 c but all this is absorbed into the Gaussian weight daGaussWt(iAngle)
 c the cos(theta) weight due to geometry of viewing the area 
           DO iFr=1,kMaxPts
-            raThermal(iFr)=raThermal(iFr)+
-     $                   raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
+            raThermal(iFr)=raThermal(iFr)+raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
             END DO
           END DO
         END IF
@@ -209,25 +200,23 @@ c remember the mu's are already defined by the Gaussian pts cosine(theta)
           rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the top of the atmosphere 
           DO iFr=1,kMaxPts
-            raTemp(iFr)=raIntenAtmos(iFr)
+            raTemp(iFr) = raIntenAtmos(iFr)
             END DO
 c now loop over the layers, for the particular angle
           DO iLay=iT,iNumLayer+1,-1
             iL=iaRadLayerTemp(iLay)
             rMPTemp=raVT1(iL)
             DO iFr=1,kMaxPts
-              rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-              rPlanck=r1*((raFreq(iFr)**3))/rPlanck
-              rAngleTrans=exp(-raaAbs(iFr,iL)/rCosAngle)
-              rAngleEmission=(1.0-rAngleTrans)*rPlanck
-              raTemp(iFr)=rAngleEmission+raTemp(iFr)*rAngleTrans
+              rPlanck        = ttorad(raFreq(iFr),rMPTemp)	    	    	    
+              rAngleTrans    = exp(-raaAbs(iFr,iL)/rCosAngle)
+              rAngleEmission = (1.0-rAngleTrans)*rPlanck
+              raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
               END DO
             END DO
 c add the contribution from this angle to raThermal -- do the weighting AFTER
 c the next set of loops
           DO iFr=1,kMaxPts
-            raExtraThermal(iFr)=raExtraThermal(iFr)+
-     $                   raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
+            raExtraThermal(iFr)=raExtraThermal(iFr)+raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
             END DO
 
 c do instrument to ground-1
@@ -236,11 +225,10 @@ c now loop over the layers, for the particular angle
             iL=iaRadLayerTemp(iLay)
             rMPTemp=raVT1(iL)
             DO iFr=1,kMaxPts
-              rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-              rPlanck=r1*((raFreq(iFr)**3))/rPlanck
-              rAngleTrans=exp(-raaAbs(iFr,iL)/rCosAngle)
-              rAngleEmission=(1.0-rAngleTrans)*rPlanck
-              raTemp(iFr)=rAngleEmission+raTemp(iFr)*rAngleTrans
+              rPlanck        = ttorad(raFreq(iFr),rMPTemp)	    	    	    	    
+              rAngleTrans    = exp(-raaAbs(iFr,iL)/rCosAngle)
+              rAngleEmission = (1.0-rAngleTrans)*rPlanck
+              raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
               END DO
             END DO
 do bottom most layer
@@ -248,11 +236,10 @@ do bottom most layer
             iL=iaRadLayerTemp(iLay)
             rMPTemp=raVT1(iL)
             DO iFr=1,kMaxPts
-              rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0
-              rPlanck=r1*((raFreq(iFr)**3))/rPlanck
-              rAngleTrans=exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle)
-              rAngleEmission=(1.0-rAngleTrans)*rPlanck
-              raTemp(iFr)=rAngleEmission+raTemp(iFr)*rAngleTrans
+              rPlanck        = ttorad(raFreq(iFr),rMPTemp)	    	    	    	    	    
+              rAngleTrans    = exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle)
+              rAngleEmission = (1.0-rAngleTrans)*rPlanck
+              raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
               END DO
             END DO
 c add the contribution from this angle to raThermal -- the sin(theta) is from
@@ -260,8 +247,7 @@ c the solid angle contribution ===d(cos(theta))
 c but all this is absorbed into the Gaussian weight daGaussWt(iAngle)
 c the cos(theta) weight due to geometry of viewing the area 
           DO iFr=1,kMaxPts
-            raThermal(iFr)=raThermal(iFr)+
-     $                   raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
+            raThermal(iFr)=raThermal(iFr)+raTemp(iFr)*SNGL(daGaussWt(iAngle))*rCosAngle
             END DO
           END DO
 
@@ -309,15 +295,12 @@ c              this would affect the backgnd thermal calculation
 
       INTEGER iFr
 
-      REAL r1,r2,rPlanck,raIntenAtmos(kMaxPts)
+      REAL ttorad,rPlanck,raIntenAtmos(kMaxPts)
 
 c compute the emission from the top of atm == eqn 4.26 of Genln2 manual
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
       DO iFr=1,kMaxPts
-        rPlanck=exp(r2*raFreq(iFr)/rTSpace)-1.0
-        raIntenAtmos(iFr)=r1*((raFreq(iFr))**3)/rPlanck
+        raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
         END DO
 
 c select diffusivity angles, depending on frequency and layers
@@ -325,7 +308,7 @@ c initialize to space blackbdy radiation
       IF (iExtraThermal .LT. 0) THEN
 c do rad tranfer from TOP of atmosphere down to gnd
         DO iFr=1,kMaxPts
-          raThermal(iFr)=raIntenAtmos(iFr)
+          raThermal(iFr) = raIntenAtmos(iFr)
           END DO
         CALL ExactL2GDiffusiveApprox(iNumLayer,iNumLayer,1,iaRadLayer,
      $               raVT1,raFreq,raaAbs,
@@ -333,14 +316,14 @@ c do rad tranfer from TOP of atmosphere down to gnd
       ELSE IF (iExtraThermal .GT. 0) THEN
 c do rad tranfer from TOP of atmosphere down to instrument
         DO iFr=1,kMaxPts
-          raExtraThermal(iFr)=raIntenAtmos(iFr)
+          raExtraThermal(iFr) = raIntenAtmos(iFr)
           END DO
         CALL ExactL2GDiffusiveApprox(iT,iT,iNumLayer+1,iaRadLayerTemp,
      $               raVT1,raFreq,raaAbs,
      $               raExtraThermal,rFracTop,rFracBot,iDefinedTopLayer)
 c do rad tranfer from instrument down to ground
         DO iFr=1,kMaxPts
-          raThermal(iFr)=raExtraThermal(iFr)
+          raThermal(iFr) = raExtraThermal(iFr)
           END DO
         CALL ExactL2GDiffusiveApprox(iT,iNumLayer,1,iaRadLayerTemp,
      $                   raVT1,raFreq,raaAbs,
@@ -349,12 +332,12 @@ c do rad tranfer from instrument down to ground
 
 c this is the thermal diffusive approx ==> multiply by 0.5
       DO iFr=1,kMaxPts
-        raThermal(iFr)=raThermal(iFr)*0.5
+        raThermal(iFr) = raThermal(iFr)*0.5
         END DO
 
       IF ((iExtraThermal .GT. 0) .AND. (kJacobian .GT. 0)) THEN
         DO iFr=1,kMaxPts
-          raExtraThermal(iFr)=0.5*raExtraThermal(iFr)
+          raExtraThermal(iFr) = 0.5*raExtraThermal(iFr)
           END DO
         END IF
 
@@ -400,15 +383,12 @@ c iS,iE      = layers between which we want to stop the calculations
  
 c local variables 
       INTEGER iFr,iLay,iL,iLm1,iEnd 
-      REAL r1,r2,rPlanck,rMPTemp 
+      REAL ttorad,rPlanck,rMPTemp 
       REAL raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts) 
  
 c to do the angular integration 
       REAL rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts) 
       REAL FindDiffusiveAngleExp
- 
-      r1 = sngl(kPlanck1) 
-      r2 = sngl(kPlanck2) 
  
 c need iS > iE 
       IF (iS .LT. iE) THEN 
@@ -473,9 +453,7 @@ c find the diffusive angles for the layer beneath
           rAngleTr=exp(-raL2G(iFr)/rAngleTr) 
  
 c Planckian emissions 
-          rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-          rPlanck=r1*((raFreq(iFr)**3))/rPlanck 
- 
+          rPlanck=ttorad(raFreq(iFr),rMPTemp) 
           raTemp(iFr)=raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr) 
  
 c get ready for the layer beneath 
@@ -497,8 +475,7 @@ c else it has alreadyy been included in the loop above
           rAngleTr=raFreqAngle(iFr) 
           rAngleTr=exp(-raL2G(iFr)/rAngleTr) 
   
-          rPlanck=exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-          rPlanck=r1*((raFreq(iFr)**3))/rPlanck 
+          rPlanck=ttorad(raFreq(iFr),rMPTemp)
           raTemp(iFr)=raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr) 
           END DO 
         END IF 
@@ -634,15 +611,10 @@ c              this would affect the backgnd thermal calculation
       INTEGER iPi,iFr,iAngle
 
       REAL raTemp(kMaxPts),raTemp2(kMaxPts),raFreqAngle(kMaxPts),rAngle
-      REAL rPlanck,raIntenAtmos(kMaxPts),rDelta,r1,r2
-
-c compute the emission from the top of atm == eqn 4.26 of Genln2 manual
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
+      REAL rPlanck,raIntenAtmos(kMaxPts),rDelta,r1,r2,ttorad
 
       DO iFr=1,kMaxPts
-        rPlanck=exp(r2*raFreq(iFr)/rTSpace)-1.0
-        raIntenAtmos(iFr)=r1*((raFreq(iFr))**3)/rPlanck
+        raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
         END DO
 
 c do actual integration over (0,pi)

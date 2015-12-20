@@ -146,16 +146,20 @@ c retrievals."
       iAccOrLoopFlux = +1         !!! fast accurate, default E3
       iAccOrLoopFlux = -1         !!! slow looping over gaussian angles
       IF (iDefault .NE. iAccOrLoopFlux) THEN 
-        print *,'clrsky iDefault,iAccOrLoopFlux = ',iDefault,iAccOrLoopFlux
+        print *,'clrsky flux iDefault,iAccOrLoopFlux = ',iDefault,iAccOrLoopFlux
       END IF 
 
-      iDefault = +3
+      iDefault = +4
       iVary = +1           !!! exponentially varying T across each layer
-      iVary = +3           !!! linearly varying T across each layer
+      iVary = +3           !!! linearly varying T across each layer, v1
+      iVary = +4           !!! linearly varying T across each layer, v2  (42 has been debugged for small tau)
       iVary = -1           !!! constant T in each layer
+      
       iVary = kTemperVary  !!! see "SomeMoreInits" in kcartamisc.f
+                             !!! this is a COMPILE time variable
+			     
       IF (iDefault .NE. iVary) THEN 
-        print *,'clrsky iDefault,iVary = ',iDefault,iVary
+        print *,'clrsky flux iDefault,iVary = ',iDefault,iVary
       END IF 
 
       iDefault = +2
@@ -231,14 +235,14 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
      $      raThickness,raPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
-        ELSEIF ((iVary .EQ. +3) .AND. (iAccOrLoopFlux .EQ. -1)) THEN
+        ELSEIF (((iVary .EQ. +3) .OR. (iVary .EQ. 4) .OR. (iVary .EQ. 41) .OR. (iVary .EQ. 42))
+     $      	.AND. (iAccOrLoopFlux .EQ. -1)) THEN
           !!!loop over angles
             CALL flux_moment_slowloopLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
      $      raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
-
         ELSE
           write(kStdErr,*) 'not coded up these clear sky flux routines'
           CALL DoStop
@@ -334,7 +338,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,rPlanck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -407,11 +411,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal=0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -537,13 +538,11 @@ c highest layer that we need to output radiances for = iNumLayer
       write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
       write(kStdWarn,*) 'topindex in atmlist where flux required =',iHigh
       
-      DO iFr = 1,kMaxPts
 c initialize the solar and thermal contribution to 0
-        raSun(iFr) = 0.0
+      DO iFr = 1,kMaxPts
+        raSun(iFr)     = 0.0
         raThermal(iFr) = 0.0
-c compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr)      = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -595,8 +594,7 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to instrument 
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 c first come from TOA to layer above instrument
@@ -617,8 +615,7 @@ c don't really need iT from AddUppermostLayers so use it here
             rMPTemp = raVT1(iL) 
             DO iFr = 1,kMaxPts 
               rAngleTrans = exp(-raaAbs(iFr,iL)*(1-rFracTop)/rCos)
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raDown(iFr) = rAngleEmission+raDown(iFr)*rAngleTrans 
             END DO   
@@ -634,8 +631,7 @@ c don't really need iT from AddUppermostLayers so use it here
             rMPTemp = raVT1(iL) 
             DO iFr = 1,kMaxPts 
               rAngleTrans = exp(-raaAbs(iFr,iL)/rCos)
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)	      
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raDown(iFr) = rAngleEmission+raDown(iFr)*rAngleTrans 
             END DO   
@@ -647,8 +643,7 @@ c don't really need iT from AddUppermostLayers so use it here
             rMPTemp = raVT1(iL) 
             DO iFr = 1,kMaxPts 
               rAngleTrans = exp(-raaAbs(iFr,iL)*(1-rFracTop)/rCos)
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)	      	      
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raDown(iFr) = rAngleEmission+raDown(iFr)*rAngleTrans 
             END DO   
@@ -725,7 +720,7 @@ c loop over angles for downward flux
       IF (kFlux .LE. 3 .OR. kFLux .GE. 5) THEN   
         !!!do down and up going fluxes
         DO iAngle  =  1,iGausspts
-          write(kStdWarn,*) 'downward flux, angular index = ',iAngle 
+          write(kStdWarn,*) 'downward flux, angular index = ',iAngle,' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
           rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the top of the atmosphere  
@@ -746,9 +741,8 @@ c then do the bottom of this layer
           DO iLay = iNumLayer,iNumLayer 
             iL = iaRadLayer(iLay) 
             rMPTemp = raVT1(iL) 
-            DO iFr = 1,kMaxPts 
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+            DO iFr = 1,kMaxPts
+	      rPlanck = ttorad(raFreq(iFr),rMPTemp)
               rAngleTrans = exp(-raaAbs(iFr,iL)*rFracTop/rCosAngle) 
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -760,9 +754,8 @@ c then continue upto top of ground layer
           DO iLay = iNumLayer-1,2,-1 
             iL = iaRadLayer(iLay) 
             rMPTemp = raVT1(iL) 
-            DO iFr = 1,kMaxPts 
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+            DO iFr = 1,kMaxPts
+	      rPlanck = ttorad(raFreq(iFr),rMPTemp)	    
               rAngleTrans = exp(-raaAbs(iFr,iL)/rCosAngle) 
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -774,9 +767,8 @@ c do very bottom of bottom layer ie ground!!!
           DO iLay = 1,1 
             iL = iaRadLayer(iLay) 
             rMPTemp = raVT1(iL) 
-            DO iFr = 1,kMaxPts 
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+            DO iFr = 1,kMaxPts
+	      rPlanck = ttorad(raFreq(iFr),rMPTemp)	    	    
               rAngleTrans = exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle) 
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -791,7 +783,7 @@ c^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
 c loop over angles for upward flux
 
       DO iAngle = 1,iGaussPts 
-        write(kStdWarn,*) 'upward flux, angular index = ',iAngle 
+        write(kStdWarn,*) 'upward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
         rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the bottom of the atmosphere  
@@ -812,9 +804,8 @@ c then do the top of this layer
         DO iLay = 1,1 
           iL = iaRadLayer(iLay) 
           rMPTemp = raVT1(iL) 
-          DO iFr = 1,kMaxPts 
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+          DO iFr = 1,kMaxPts
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)	    	    	  
             rAngleTrans = exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle) 
             rAngleEmission = (1.0-rAngleTrans)*rPlanck 
             raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -826,9 +817,8 @@ c then continue upto bottom of top layer
         DO iLay = 2,iNumLayer-1
           iL = iaRadLayer(iLay) 
           rMPTemp = raVT1(iL) 
-          DO iFr = 1,kMaxPts 
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+          DO iFr = 1,kMaxPts
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)	    	    	  	  
             rAngleTrans = exp(-raaAbs(iFr,iL)/rCosAngle) 
             rAngleEmission = (1.0-rAngleTrans)*rPlanck 
             raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -840,9 +830,8 @@ c do very top of top layer ie where instrument is!!!
         DO iLay = iNumLayer,iNumLayer
           iL = iaRadLayer(iLay) 
           rMPTemp = raVT1(iL) 
-          DO iFr = 1,kMaxPts 
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+          DO iFr = 1,kMaxPts
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)	    	    	  	  	  
             rAngleTrans = exp(-raaAbs(iFr,iL)*rFracTop/rCosAngle) 
             rAngleEmission = (1.0-rAngleTrans)*rPlanck 
             raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -944,7 +933,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,rPlanck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -1010,11 +999,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal = 0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1  =  sngl(kPlanck1)
-      r2  =  sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -1133,8 +1119,7 @@ c instead of temp of full layer at 100 km height!!!!!!
         iL      = iaRadLayer(iLay) 
         rMPTemp = raVT1(iL) 
         DO iFr = 1,kMaxPts 
-          rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-          raaRad(iFr,iL) = r1*((raFreq(iFr)**3))/rPlanck 
+          raaRad(iFr,iL) = ttorad(raFreq(iFr),rMPTemp)
         END DO
       END DO
 
@@ -1153,9 +1138,7 @@ c highest layer that we need to output radiances for = iNumLayer
 c initialize the solar and thermal contribution to 0
         raSun(iFr) = 0.0
         raThermal(iFr) = 0.0
-c compute the emission from the surface alone  =  =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
@@ -1203,8 +1186,7 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to instrument 
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 c first come from TOA to layer above instrument
@@ -1740,7 +1722,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,rPlanck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -1815,11 +1797,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal=0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -1968,8 +1947,7 @@ c initialize the solar and thermal contribution to 0
         raSun(iFr) = 0.0
         raThermal(iFr) = 0.0
 c compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -2021,8 +1999,7 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to ground
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSPace)
       END DO
 
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
@@ -2133,7 +2110,7 @@ c loop over angles for downward flux
       IF (kFlux .LE. 3 .OR. kFLux .GE. 5) THEN   
         !!!do down and up going fluxes
         DO iAngle  =  1,iGausspts
-          write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle 
+          write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
           rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the top of the atmosphere  
@@ -2184,7 +2161,7 @@ c^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
 c loop over angles for upward flux
 
       DO iAngle = 1,iGaussPts 
-        write(kStdWarn,*) 'upward flux, angular index = ',iAngle 
+        write(kStdWarn,*) 'upward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
         rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the bottom of the atmosphere  
@@ -2325,7 +2302,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,rPlanck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -2393,11 +2370,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal = 0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -2530,8 +2504,7 @@ c instead of temp of full layer at 100 km height!!!!!!
         iL      = iaRadLayer(iLay) 
         rMPTemp = raVT1(iL) 
         DO iFr = 1,kMaxPts 
-          rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-          raaRad(iFr,iL) = r1*((raFreq(iFr)**3))/rPlanck 
+          raaRad(iFr,iL) = ttorad(raFreq(iFr),rMPTemp)
         END DO
       END DO
 
@@ -2551,8 +2524,7 @@ c initialize the solar and thermal contribution to 0
         raSun(iFr) = 0.0
         raThermal(iFr) = 0.0
 c compute the emission from the surface alone  =  =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
@@ -2600,8 +2572,7 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to instrument 
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 c first come from TOA to layer above instrument
@@ -2891,7 +2862,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,rPlanck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -2966,11 +2937,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal=0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -3118,9 +3086,7 @@ c highest layer that we need to output radiances for = iNumLayer
 c initialize the solar and thermal contribution to 0
         raSun(iFr) = 0.0
         raThermal(iFr) = 0.0
-c compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -3172,8 +3138,7 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to ground
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
 
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
@@ -3284,7 +3249,7 @@ c loop over angles for downward flux
       IF (kFlux .LE. 3 .OR. kFLux .GE. 5) THEN   
         !!!do down and up going fluxes
         DO iAngle  =  1,iGausspts
-          write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle 
+          write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
           rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the top of the atmosphere  
@@ -3344,7 +3309,7 @@ c^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
 c loop over angles for upward flux
 
       DO iAngle = 1,iGaussPts 
-        write(kStdWarn,*) 'upward flux, angular index = ',iAngle 
+        write(kStdWarn,*) 'upward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
         rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the bottom of the atmosphere  
@@ -3495,7 +3460,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,rPlanck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -3563,11 +3528,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal = 0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -3699,8 +3661,7 @@ c instead of temp of full layer at 100 km height!!!!!!
         iL      = iaRadLayer(iLay) 
         rMPTemp = raVT1(iL) 
         DO iFr = 1,kMaxPts 
-          rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-          raaRad(iFr,iL) = r1*((raFreq(iFr)**3))/rPlanck 
+          raaRad(iFr,iL) = ttorad(raFreq(iFr),rMPTemp)
         END DO
       END DO
 
@@ -3720,8 +3681,7 @@ c initialize the solar and thermal contribution to 0
         raSun(iFr) = 0.0
         raThermal(iFr) = 0.0
 c compute the emission from the surface alone  =  =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
@@ -3769,9 +3729,9 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to instrument 
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
+      
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 c first come from TOA to layer above instrument
 c don't really need iT from AddUppermostLayers so use it here
@@ -4501,7 +4461,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,rPlanck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -4582,11 +4542,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal=0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -4718,8 +4675,7 @@ c initialize the solar and thermal contribution to 0
         raSun(iFr) = 0.0
         raThermal(iFr) = 0.0
 c compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -4771,8 +4727,7 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to instrument 
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 c first come from TOA to layer above instrument
@@ -4793,8 +4748,7 @@ c don't really need iT from AddUppermostLayers so use it here
             rMPTemp = raVT1(iL) 
             DO iFr = 1,kMaxPts 
               rAngleTrans = exp(-raaAbs(iFr,iL)*(1-rFracTop)/rCos)
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raDown(iFr) = rAngleEmission+raDown(iFr)*rAngleTrans 
             END DO   
@@ -4810,8 +4764,7 @@ c don't really need iT from AddUppermostLayers so use it here
             rMPTemp = raVT1(iL) 
             DO iFr = 1,kMaxPts 
               rAngleTrans = exp(-raaAbs(iFr,iL)/rCos)
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)	      
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raDown(iFr) = rAngleEmission+raDown(iFr)*rAngleTrans 
             END DO   
@@ -4823,8 +4776,7 @@ c don't really need iT from AddUppermostLayers so use it here
             rMPTemp = raVT1(iL) 
             DO iFr = 1,kMaxPts 
               rAngleTrans = exp(-raaAbs(iFr,iL)*(1-rFracTop)/rCos)
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)	      
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raDown(iFr) = rAngleEmission+raDown(iFr)*rAngleTrans 
             END DO   
@@ -4901,7 +4853,7 @@ c loop over angles for downward flux
       IF (kFlux .LE. 3 .OR. kFLux .GE. 5) THEN   
         !!!do down and up going fluxes
         DO iAngle  =  1,iGausspts
-          write(kStdWarn,*) 'downward flux, angular index = ',iAngle 
+          write(kStdWarn,*) 'downward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
           rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the top of the atmosphere  
@@ -4922,9 +4874,8 @@ c then do the bottom of this layer
           DO iLay = iNumLayer,iNumLayer 
             iL = iaRadLayer(iLay) 
             rMPTemp = raVT1(iL) 
-            DO iFr = 1,kMaxPts 
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+            DO iFr = 1,kMaxPts
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)	      	    
               rAngleTrans = exp(-raaAbs(iFr,iL)*rFracTop/rCosAngle) 
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -4936,9 +4887,8 @@ c then continue upto top of ground layer
           DO iLay = iNumLayer-1,2,-1 
             iL = iaRadLayer(iLay) 
             rMPTemp = raVT1(iL) 
-            DO iFr = 1,kMaxPts 
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+            DO iFr = 1,kMaxPts
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)	      	    	    
               rAngleTrans = exp(-raaAbs(iFr,iL)/rCosAngle) 
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -4950,9 +4900,8 @@ c do very bottom of bottom layer ie ground!!!
           DO iLay = 1,1 
             iL = iaRadLayer(iLay) 
             rMPTemp = raVT1(iL) 
-            DO iFr = 1,kMaxPts 
-              rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-              rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+            DO iFr = 1,kMaxPts
+              rPlanck = ttorad(raFreq(iFr),rMPTemp)	      	    	    	    
               rAngleTrans = exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle) 
               rAngleEmission = (1.0-rAngleTrans)*rPlanck 
               raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -4967,7 +4916,7 @@ c^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
 c loop over angles for upward flux
 
       DO iAngle = 1,iGaussPts 
-        write(kStdWarn,*) 'upward flux, angular index = ',iAngle 
+        write(kStdWarn,*) 'upward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle)) 
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
         rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the bottom of the atmosphere  
@@ -4988,9 +4937,8 @@ c then do the top of this layer
         DO iLay = 1,1 
           iL = iaRadLayer(iLay) 
           rMPTemp = raVT1(iL) 
-          DO iFr = 1,kMaxPts 
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+          DO iFr = 1,kMaxPts
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)	      	    	    	    	  
             rAngleTrans = exp(-raaAbs(iFr,iL)*rFracBot/rCosAngle) 
             rAngleEmission = (1.0-rAngleTrans)*rPlanck 
             raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -5002,9 +4950,8 @@ c then continue upto bottom of top layer
         DO iLay = 2,iNumLayer-1
           iL = iaRadLayer(iLay) 
           rMPTemp = raVT1(iL) 
-          DO iFr = 1,kMaxPts 
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+          DO iFr = 1,kMaxPts
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)	      	    	    	    	  	  
             rAngleTrans = exp(-raaAbs(iFr,iL)/rCosAngle) 
             rAngleEmission = (1.0-rAngleTrans)*rPlanck 
             raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -5016,9 +4963,8 @@ c do very top of top layer ie where instrument is!!!
         DO iLay = iNumLayer,iNumLayer
           iL = iaRadLayer(iLay) 
           rMPTemp = raVT1(iL) 
-          DO iFr = 1,kMaxPts 
-            rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0 
-            rPlanck = r1*((raFreq(iFr)**3))/rPlanck 
+          DO iFr = 1,kMaxPts
+            rPlanck = ttorad(raFreq(iFr),rMPTemp)	      	    	    	    	  	  	  
             rAngleTrans = exp(-raaAbs(iFr,iL)*rFracTop/rCosAngle) 
             rAngleEmission = (1.0-rAngleTrans)*rPlanck 
             raTemp(iFr) = rAngleEmission+raTemp(iFr)*rAngleTrans 
@@ -5121,7 +5067,7 @@ c this is for absorptive clouds
 
 c local variables
       INTEGER iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-      REAL rCos,r1,r2,rPlanck,rMPTemp
+      REAL rCos,ttorad,Planck,rMPTemp
       REAL raDown(kMaxPts),raUp(kMaxPts)
       REAL raThermal(kMaxPts),raSunAngles(kMaxPts)
 c we need to compute upward and downward flux at all boundaries ==>
@@ -5138,7 +5084,7 @@ c to do the thermal,solar contribution
 
       REAL rCosAngle,raTemp(kMaxPts)
       REAL raVT1(kMixFilRows),InterpTemp
-      INTEGER iIOUN,iAngle,iGaussPts,find_tropopause,troplayer
+      INTEGER iIOUN,iAngle,iGaussPts,find_tropopause,troplayer,iVary,iDefault
 
 c to do the local absorptive cloud
       REAL raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts) 
@@ -5146,6 +5092,21 @@ c to do the local absorptive cloud
       INTEGER iCloudLayerTop,iCloudLayerBot,iiDiv
 
       REAL TEMP(MAXNZ),ravt2(maxnz),raJunk(kMaxPts)
+
+      iDefault = -1          !!!temperature in layer constant USE THIS!!!!
+
+      iVary = +2             !!!temperature in layer varies linearly, simple
+      iVary = +1             !!!temperature in layer varies exponentially
+      iVary = +3             !!!temperature in layer varies linearly, ala RRTM, LBLRTM
+      iVary = -1             !!!temperature in layer constant USE THIS!!!! 
+
+      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
+                             !!! this is a COMPILE time variable
+
+      IF (iDefault .NE. iVary) THEN    
+        write(kStdErr,*) 'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
+        write(kStdWarn,*)'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
+      END IF
 
       iGaussPts = 4  !!! default, works fine for clr sky
 
@@ -5161,12 +5122,12 @@ c to do the local absorptive cloud
       write(kStdWarn,*) 'Computing fluxes ..............'
       write(kStdWarn,*) '  '
 
-      rThermalRefl=1.0/kPi
+      rThermalRefl = 1.0/kPi
       
-      DO iLay=1,kProfLayer
-        DO iFr=1,kMaxPts
-          raaUpFlux(iFr,iLay)=0.0
-          raaDownFlux(iFr,iLay)=0.0
+      DO iLay = 1,kProfLayer
+        DO iFr = 1,kMaxPts
+          raaUpFlux(iFr,iLay) = 0.0
+          raaDownFlux(iFr,iLay) = 0.0
         END DO
       END DO
 
@@ -5176,11 +5137,11 @@ c if iDoSolar = -1, then solar contribution = 0
 c comment this out in v1.10+ as this is already set in n_rad_jac_scat.f
 c      IF (iDoSolar .GE. 0) THEN    !set the solar reflectivity
 c        IF (kSolarRefl .LT. 0.0) THEN
-c          DO iFr=1,kMaxPts
-c            raSunRefl(iFr)=(1.0-raUseEmissivity(iFr))/kPi
+c          DO iFr = 1,kMaxPts
+c            raSunRefl(iFr) = (1.0-raUseEmissivity(iFr))/kPi
 c          END DO
 c        ELSE
-c          DO iFr=1,kMaxPts
+c          DO iFr = 1,kMaxPts
 c            raSunRefl(iFr) = kSolarRefl
 c          END DO
 c        END IF
@@ -5190,14 +5151,11 @@ c if iDoThermal = -1 ==> thermal contribution = 0
 c if iDoThermal = +1 ==> do actual integration over angles
 c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal = kThermal
-      iDoThermal=0       !!make sure thermal included, but done quickly
+      iDoThermal = 0       !!make sure thermal included, but done quickly
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -5346,8 +5304,7 @@ c initialize the solar and thermal contribution to 0
         raSun(iFr) = 0.0
         raThermal(iFr) = 0.0
 c compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-        rPlanck = exp(r2*raFreq(iFr)/rTSurf)-1.0
-        raUp(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
 c compute the emission of the individual mixed path layers in iaRadLayer
@@ -5399,8 +5356,7 @@ c let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
 
 c this is the background thermal down to ground
       DO iFr = 1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0 
-        raDown(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
 
 c propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
@@ -5511,7 +5467,7 @@ c loop over angles for downward flux
       IF (kFlux .LE. 3 .OR. kFLux .GE. 5) THEN   
         !!!do down and up going fluxes
         DO iAngle  =  1,iGausspts
-          write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle 
+          write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
           rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the top of the atmosphere  
@@ -5528,13 +5484,14 @@ c ie where instrument is
             raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
           END DO
+
 c then do the bottom of this layer
           DO iLay = iNumLayer,iNumLayer 
             iL = iaRadLayer(iLay) 
 c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
             CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracTop,
-     $                      4,raTemp)
+     $                      iVary,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5542,11 +5499,11 @@ c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,
           END DO 
 c then continue upto top of ground layer
           DO iLay = iNumLayer-1,2,-1 
-            iL = iaRadLayer(iLay) 
+            iL = iaRadLayer(iLay)
 c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
             CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,1.0,
-     $                      4,raTemp)
+     $                      iVary,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                            raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5558,7 +5515,7 @@ c do very bottom of bottom layer ie ground!!!
 c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
              CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracBot,
-     $                      4,raTemp)
+     $                      iVary,raTemp)
             DO iFr = 1,kMaxPts 
               raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5571,7 +5528,7 @@ c^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
 c loop over angles for upward flux
 
       DO iAngle = 1,iGaussPts 
-        write(kStdWarn,*) 'upward flux, angular index = ',iAngle 
+        write(kStdWarn,*) 'upward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
 c remember the mu's are already defined by the Gaussian pts cosine(theta) 
         rCosAngle = SNGL(daGaussPt(iAngle))
 c initialize the radiation to that at the bottom of the atmosphere  
@@ -5591,11 +5548,11 @@ c ie where ground is
 c then do the top of this layer
         DO iLay = 1,1 
           iL = iaRadLayer(iLay) 
-          rMPTemp = ravt2(iL) 
+          rMPTemp = ravt2(iL)
 c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
           CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracBot,
-     $                      4,raTemp)
+     $                      iVary,raTemp)
           DO iFr = 1,kMaxPts 
             raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))
@@ -5604,11 +5561,11 @@ c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,ra
 c then continue upto bottom of top layer
         DO iLay = 2,iNumLayer-1
           iL = iaRadLayer(iLay) 
-          rMPTemp = ravt2(iL) 
+          rMPTemp = ravt2(iL)
 c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
           CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,1.0,
-     $                      4,raTemp)
+     $                      iVary,raTemp)
 c          print *,iL,'+',raTemp(1),rMPTemp,rCosAngle
           DO iFr = 1,kMaxPts 
             raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+
@@ -5622,7 +5579,7 @@ c do very top of top layer ie where instrument is!!!
 c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
           CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracTop,
-     $                      4,raTemp)
+     $                      iVary,raTemp)
           DO iFr = 1,kMaxPts 
             raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+
      $                          raTemp(iFr)*SNGL(daGaussWt(iAngle))

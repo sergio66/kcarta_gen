@@ -483,10 +483,10 @@ c rFracTop/rFracBot  == fractional top/bottom layers
       INTEGER iAtm,iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iProfileLayers
 
 c local variables
-      REAL r1,r2
-      REAL r3,r4,r5,rAngle,rCos,raVT1(kMixFilRows),InterpTemp
+      REAL r1,r2,r3,r4,r5,rAngle,rCos,raVT1(kMixFilRows),InterpTemp,ttorad
       INTEGER iLay,iFr,iL,iM2,iMM2,MP2Lay
 
+      ! need these for derivative of Planck
       r1 = sngl(kPlanck1)
       r2 = sngl(kPlanck2)
 

@@ -133,8 +133,7 @@ c iS,iE are the start/stop layers between which to do transfer
 
 c local variables
       INTEGER iFr,iLay,iL,iLm1,iBdry0,iBdry,iBdryP1,iSecondEnd,iCase
-      REAL r1,r2,rPlanck,rMPTemp,raFreqAngle(kMaxPts),
-     $                           raFreqAngle_m1(kMaxPts)
+      REAL ttorad,rMPTemp,raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts),rPlanck
 
 c to do the angular integration
       REAL rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts)
@@ -143,9 +142,6 @@ c to do the angular integration
 
       iS = iaRadLayer(iS0)
       iE = iaRadLayer(iE0)
-
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
 
       iCase  = -1
       iBdry  = FindBoundary(raFreq,iProfileLayers,raPressLevels,iaRadLayer)
@@ -243,12 +239,11 @@ c find the diffusive angles for the layer beneath
             rAngleTr_m1  = exp(-raL2Gm1(iFr)/rCosDiff)
             rAngleTr     = exp(-raL2G(iFr)/rCosDiff)
 c Planckian emissions
-            rPlanck      = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck      = r1*((raFreq(iFr)**3))/rPlanck
-            raTemp(iFr)  = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+            rPlanck      = ttorad(raFreq(iFr),rMPTemp)
+            raTemp(iFr)  = raTemp(iFr) + rPlanck*(rAngleTr_m1-rAngleTr)
 c get ready for the layer beneath
             raL2G(iFr)   = raL2Gm1(iFr)
-            raL2Gm1(iFr) = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
+            raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
           END DO
         END DO
       END IF
@@ -291,8 +286,7 @@ c find the diffusive angles for the layer beneath
             rAngleTr            = raFreqAngle(iFr)
             rAngleTr            = exp(-raL2G(iFr)/rAngleTr)
 c Planckian emissions
-            rPlanck     = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck     = r1*((raFreq(iFr)**3))/rPlanck
+            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
             raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
 c get ready for the layer beneath
             raL2G(iFr)       = raL2Gm1(iFr)
@@ -309,8 +303,7 @@ c now do the bottommost layer, recalling its transmission = 1.0 always
           DO iFr=1,kMaxPts
             rAngleTr    = raFreqAngle(iFr)
             rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
-            rPlanck     = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-            rPlanck     = r1*((raFreq(iFr)**3))/rPlanck
+            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
             raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
           END DO
         END IF
@@ -351,7 +344,7 @@ c              this would affect the backgnd thermal calculation
       INTEGER iaRadLayer(kProfLayer),iT,iaRadLayerTemp(kMixFilRows)
       INTEGER iNumLayer,iExtraThermal
 
-      REAL rThetaEff,r1,r2,raIntenAtmos(kMaxPts),rPlanck
+      REAL rThetaEff,raIntenAtmos(kMaxPts),ttorad
       REAL raTemp(kMaxPts),raFreqAngle(kMaxPts)
       INTEGER iFr
 
@@ -363,13 +356,8 @@ c**** note that CALL RadiativeTranfer(a,b,...,iWeightFactor) has
 c iWeightFactor === 1. All the factors of "0.5" are taken care of in
 c call DoDiffusivityApprox******
 
-c compute the emission from the top of atm == eqn 4.26 of Genln2 manual
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
-
-      DO iFr=1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0
-        raIntenAtmos(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+      DO iFr=1,kMaxPts      
+        raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
 
 c ORIG CODE : at ALL layers 1 .. iNumLayer, use ONE diffusivity angle for 
@@ -452,24 +440,16 @@ c raExtraThermal = thermal radiation above posn of instrument
       INTEGER iNumLayer,iExtraThermal,iProfileLayers
 
 c local vars
-      REAL rThetaEff,r1,r2,raIntenAtmos(kMaxPts),rPlanck
+      REAL rThetaEff,raIntenAtmos(kMaxPts),ttorad
       INTEGER iFr,iL
 
 c this is the diffusivity approx angle, in radians
       rThetaEff = kThermalAngle*kPi/180.0
 
-c compute the emission from the top of atm == eqn 4.26 of Genln2 manual
-      r1 = sngl(kPlanck1)
-      r2 = sngl(kPlanck2)
-
-c warning, if raFreq(1) > 1.0e+2 then at real precision, then at T = 2.96K
-c            rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0  >>> 0 == INF
-c but then the next line you are doing r1 v^3/rPlanck so this becomes 0
       DO iFr=1,kMaxPts
-        rPlanck = exp(r2*raFreq(iFr)/rTSpace)-1.0
-        raIntenAtmos(iFr) = r1*((raFreq(iFr))**3)/rPlanck
+        raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
-
+      
 c select diffusivity angles, depending on frequency and layers
 c (acos(3/5) at top layers, diffusivity parametrization at bottom layers)
 c initialize to space blackbdy radiation
