@@ -1039,7 +1039,7 @@ c         = array initialized to sum(k) from TOA to instr if instr inside atm
       INTEGER iaRadLayerTemp(kMixFilRows),iT,iExtra 
       INTEGER iI,iFr,iJ
 
-      REAL waveno,rad,k,mudown
+      REAL waveno,rad,k,mudown,ttorad
  
       iExtra=-1 
  
@@ -1054,8 +1054,7 @@ c the layer, not on top of it
 
       DO iFr=1,kMaxPts
         waveno=raFreq(iFr)
-        raExtra(iFr) = KPLANCK1 *WAVENO**3
-     $            / (EXP(kPlanck2*WAVENO/kTSpace) - 1)
+        raExtra(iFr) = ttorad(WAVENO,kTSpace)
         raExtra(iFr) = 0.0 
       END DO 
  
@@ -1105,16 +1104,14 @@ ccccccccccccc this is new .. where subroutine differs from AddUpperMostLayers
         MUDOWN=3.0/5.0
         DO iFr=1,kMaxPts
           waveno=raFreq(iFr)
-          raExtra(iFr) = KPLANCK1 *WAVENO**3
-     $            / (EXP(kPlanck2*WAVENO/kTSpace) - 1)
+          raExtra(iFr) = ttorad(WAVENO,kTSpace)
         END DO
         DO iI = iT,iNumLayer+1,-1
           iJ = iaRadLayerTemp(iI)
           DO iFr=1,kMaxPts
             waveno=raFreq(iFr)
             k=raaAbs(iFr,iJ)
-            rad = kPLANCK1 *WAVENO**3
-     $            / (EXP(kPlanck2*WAVENO/raVTemp(iJ)) - 1)
+	    rad = ttorad(WAVENO,raVTemp(iJ))
             raExtra(iFr) = raExtra(iFr)*exp(-k/MUDOWN)+rad*(1-exp(-k/MUDOWN))
           END DO
         END DO
@@ -1124,8 +1121,7 @@ ccccccccccccc this is new .. where subroutine differs from AddUpperMostLayers
           DO iFr=1,kMaxPts
             waveno=raFreq(iFr)
             k=raaAbs(iFr,iJ)*(1-rFracTop)
-            rad = kPLANCK1 *WAVENO**3
-     $            / (EXP(kPlanck2*WAVENO/raVTemp(iJ)) - 1)
+            rad = ttorad(WAVENO,raVTemp(iJ))
             raExtra(iFr) = raExtra(iFr)*exp(-k/MUDOWN)+rad*(1-exp(-k/MUDOWN))
           END DO
         END DO
@@ -3577,9 +3573,11 @@ c      print *,'up RT linear in tau ivary = ',ivary
       END IF
 
       CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
-      CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXXXXXXXXXX
+      CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
       CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                              !! (which is NOT necessarily average of above 2)
+c      print *,'moo',iL,iBeta,TEMPLEV(iBeta),TEMPLEV(iBeta+1)
+      
 c      IF (iVary .EQ. 4) THEN
 c        ! new option
 c        DO iFr = 1,kMaxPts
@@ -3821,13 +3819,15 @@ c       print *,'dn RT linear in tau ivary = ',iVary
         iBeta = kProfLayer
       END IF
 
-      IF (iBeta .GT. 1) THEN
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta-1),raIntenP1)
-      ELSEIF (iBeta .EQ. 1) THEN
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP1)
+      IF (iVary .LT. 4) THEN
+        IF (iBeta .GT. 1) THEN
+          CALL ttorad_array(raFreq,TEMPLEV(iBeta-1),raIntenP1)
+        ELSEIF (iBeta .EQ. 1) THEN
+          CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP1)
+        END IF
+        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
       END IF
-      CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
-
+      
       IF (iVary .GE. 4) THEN
         !! new option
         CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX

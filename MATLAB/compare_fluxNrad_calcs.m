@@ -1,4 +1,4 @@
-function compare_fluxNrad_calcss(w,rad,flux,UD)
+function compare_fluxNrad_calcs(w,rad,flux,UD)
 
 %% compares RT calcs at all levels (except at start boundary) vs flux at all levels
 %% M = number of layers, so M+1 = number of levels
@@ -56,66 +56,3 @@ figure(2); clf; plot(quick_flux_from_rads - subset_flux,1:M,'linewidth',2); grid
   if UD == -1
     set(gca,'ydir','reverse')
   end
-
-%{
-> flux_levels = compute_flux_from_4radstreams(w,d2x);
-number of levels =  97
-Out of memory. Type HELP MEMORY for your options.
-
-Error in compute_flux_from_4radstreams (line 51)
-  flux_levels = flux_levels + daW(jj)*rads(:,ind)*2*pi;
-
->> whos
-  Name                  Size                     Bytes  Class     Attributes
-
-  ans                   1x1                          8  double
-    d20              890000x97                 690640000  double
-      d2x              890000x388               2762560000  double
-        flux1            890000x196               1395520000  double
-	  flux_levels      890000x97                 690640000  double
-	    w                     1x890000               7120000  double
-
->> clear flux_levels
->> flux_levels = compute_flux_from_4radstreams(w,d2x);
-number of levels =  97
->> sergio = sum(flux_levels,1) * dw/1000;
-Undefined function or variable 'dw'.
-
->> dw=0.0025;
->> sergio = sum(flux_levels,1) * dw/1000;
->> plot(sergio-bah(2:86),flipud(plevsIN(1:85)),'rx-'); grid
-Undefined function or variable 'bah'.
-
->> bah = flux1(:,98:196); bah = sum(bah,1)*dw/1000;
->> plot(sergio-bah(2:97))
-Error using -
-Matrix dimensions must agree.
-
->> whos sergio bah
-  Name        Size            Bytes  Class     Attributes
-
-  bah         1x99              792  double
-    sergio      1x97              776  double
-
->> bah = flux1(:,99:196); bah = sum(bah,1)*dw/1000;
->> plot(sergio-bah(2:97))
-Error using -
-Matrix dimensions must agree.
-
->> whos sergio bah
-  Name        Size            Bytes  Class     Attributes
-
-  bah         1x98              784  double
-    sergio      1x97              776  double
-
->> plot(sergio-bah(2:98))
->> plot(sergio)
->> plot(sergio,1:97)
->> plot(sergio,1:97,bah(2:98),1:97)
->> plot(sergio,1:97,flipud(bah(2:98)),1:97)
->>
->> plot(sergio,1:97,fliplr(bah(2:98)),1:97)
->> plot(sergio,1:97,fliplr(bah(1:97)),1:97)
->> plot(sergio-fliplr(bah(1:97)),1:97)
-
-%}

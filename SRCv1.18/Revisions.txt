@@ -362,7 +362,11 @@ computations, even with scattering (introduce a OLR computation) etc]
       kTemperVary = +1       !temperature in layer varies exponentially
       kTemperVary = +2       !temperature in layer varies linearly, simple
       kTemperVary = +3       !temperature in layer varies linearly, ala RRTM, LBLRTM
-
+  n_pth_mix.f
+    need to turn layer temperatures into level temperatures
+      iInterpType = +1    ! spline, default
+      iInterpType = -1    ! linear
+	    
 (D)                  for NLTE
   kreadVTprofiles.f   iCurrent = +1           use eg 385 ppmv in UA, or rely 
                                               on MR given in caaUpperMixRatio

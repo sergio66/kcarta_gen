@@ -47,24 +47,19 @@ c             calculate the attenuation due to the extra terms
 c raExtraSun = solar radiation incident at posn of instrument NOT USED! 
       REAL raExtraSun(kMaxPts),raSun(kMaxPts),rU,muSun
       REAL rSunTemp,rOmegaSun,rSunAngle
-      REAL r1,r2,rPlanck,muSat,raKabs(kMaxPts),hg2_azimuth_real,rSilly
+      REAL ttorad,muSat,raKabs(kMaxPts),hg2_azimuth_real,rSilly
       INTEGER iL,iI,iFr,iExtraSun,MP2Lay
       INTEGER iaRadLayerTemp(kMixFilRows),iT,iLay
       REAL rNoScale
 
       rNoScale = 1.0
 
-      r1 = sngl(kPlanck1) 
-      r2 = sngl(kPlanck2) 
-
       IF (iDoSolar .EQ. 0) THEN 
         !use 5700K
         write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
         rSunTemp = kSunTemp 
         DO iFr=1,kMaxPts
-c compute the Plank radiation from the sun 
-          rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0 
-          raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+          raSun(iFr) = ttorad(raFreq(iFr),rSunTemp)
           END DO 
       ELSEIF (iDoSolar .EQ. 1) THEN 
         write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
@@ -361,22 +356,17 @@ c             calculate the attenuation due to the extra terms
 c raExtraSun = solar radiation incident at posn of instrument NOT USED! 
       REAL raTau(kMaxPts),raSun(kMaxPts),rU,muSun,raTauSum(kMaxPts)
       REAL rSunTemp,rOmegaSun,rSunAngle,rFrac
-      REAL r1,r2,rPlanck,muSat,raKabs(kMaxPts),hg2_real,rSilly
+      REAL ttorad,muSat,raKabs(kMaxPts),hg2_real,rSilly
       INTEGER iL,iI,iFr,iExtraSun,MP2Lay
       INTEGER iaRadLayerTemp(kMixFilRows),iT,iLay,iLow
       REAL rSolarScatter,rNoScale
-
-      r1 = sngl(kPlanck1) 
-      r2 = sngl(kPlanck2) 
 
       IF (iDoSolar .EQ. 0) THEN 
         !use 5700K
         write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
         rSunTemp = kSunTemp 
         DO iFr=1,kMaxPts
-c compute the Plank radiation from the sun 
-          rPlanck    = exp(r2*raFreq(iFr)/rSunTemp)-1.0 
-          raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+          raSun(iFr) = ttorad(raFreq(iFr),rSunTemp)
           END DO 
       ELSEIF (iDoSolar .EQ. 1) THEN 
         write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
@@ -491,24 +481,19 @@ c             calculate the attenuation due to the extra terms
 c raExtraSun = solar radiation incident at posn of instrument NOT USED! 
       REAL raExtraSun(kMaxPts),raSun(kMaxPts),rU,muSun
       REAL rSunTemp,rOmegaSun,rSunAngle
-      REAL r1,r2,rPlanck,muSat,raKabs(kMaxPts),hg2_real,rSilly
+      REAL ttorad,muSat,raKabs(kMaxPts),hg2_real,rSilly
       INTEGER iL,iI,iFr,iExtraSun,MP2Lay
       INTEGER iaRadLayerTemp(kMixFilRows),iT,iLay
       REAL rNoScale
 
       rNoScale = 1.0
 
-      r1 = sngl(kPlanck1) 
-      r2 = sngl(kPlanck2) 
-
       IF (iDoSolar .EQ. 0) THEN 
         !use 5700K
         write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
         rSunTemp = kSunTemp 
         DO iFr=1,kMaxPts
-c compute the Plank radiation from the sun 
-          rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0 
-          raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+          raSun(iFr) = ttorad(raFreq(iFr),rSunTemp)
           END DO 
       ELSEIF (iDoSolar .EQ. 1) THEN 
         write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
@@ -652,24 +637,19 @@ c             calculate the attenuation due to the extra terms
 c raExtraSun = solar radiation incident at posn of instrument NOT USED! 
       REAL raExtraSun(kMaxPts),raSun(kMaxPts),rU,muSun
       REAL rSunTemp,rOmegaSun,rSunAngle
-      REAL r1,r2,rPlanck,muSat,raKabs(kMaxPts),hg2_real,rSilly
+      REAL ttorad,muSat,raKabs(kMaxPts),hg2_real,rSilly
       INTEGER iL,iI,iFr,iExtraSun,MP2Lay
       INTEGER iaRadLayerTemp(kMixFilRows),iT,iLay
       REAL rNoScale
 
       rNoScale = 1.0
 
-      r1 = sngl(kPlanck1) 
-      r2 = sngl(kPlanck2) 
-
       IF (iDoSolar .EQ. 0) THEN 
         !use 5700K
         write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
         rSunTemp = kSunTemp 
         DO iFr=1,kMaxPts
-c compute the Plank radiation from the sun 
-          rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0 
-          raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck 
+          raSun(iFr) = ttorad(raFreq(iFr),rSunTemp)
           END DO 
       ELSEIF (iDoSolar .EQ. 1) THEN 
         write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'

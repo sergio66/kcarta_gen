@@ -1188,8 +1188,8 @@ c to do the thermal,solar contribution
       DOUBLE PRECISION daSunBloat(kBloatPts)
       REAL             raThermalBloat(kBloatPts),raSunReflBloat(kBloatPts)
       DOUBLE PRECISION daThermalBloat(kBloatPts),daSunReflBloat(kBloatPts)
-      REAL             rThermalRefl,rCos,r1,r2,rPlanck,rMPTemp
-      DOUBLE PRECISION dThermalRefl,dCos,d1,d2,dPlanck,dMPTemp
+      REAL             rThermalRefl,rCos,rPlanck,rMPTemp
+      DOUBLE PRECISION dThermalRefl,dCos,dPlanck,dMPTemp,dttorad
       REAL             raVT1(kMixFilRows),rXYZ
       DOUBLE PRECISION daVT1(kMixFilRows),dXYZ
       INTEGER iDoThermal,iDoSolar,MP2Lay
@@ -1289,8 +1289,6 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
 
-      d1 = kPlanck1
-      d2 = kPlanck2
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -1424,15 +1422,13 @@ c first get the Mixed Path temperature for this radiating layer
         IF (iLModKprofLayer .LT. iNLTEStart) THEN   
           !normal, no LTE emission stuff
           DO iFr=1,kBloatPts
-            dPlanck = dexp(d2*daFreqBloat(iFr)/dMPTemp)-1.0d0
-            dPlanck = d1*((daFreqBloat(iFr)**3))/dPlanck
+            dPlanck = dttorad(daFreqBloat(iFr),dMPTemp)
             daaEmission(iFr,iLay) = (1.0-daaLayTrans(iFr,iLay))*dPlanck
             END DO
         ELSEIF (iLModKprofLayer .GE. iNLTEStart) THEN
           !new; LTE emission stuff
           DO iFr=1,kBloatPts
-            dPlanck = dexp(d2*daFreqBloat(iFr)/dMPTemp)-1.0d0
-            dPlanck = d1*((daFreqBloat(iFr)**3))/dPlanck
+            dPlanck = dttorad(daFreqBloat(iFr),dMPTemp)	  
             dPlanck = dPlanck*daaPlanckCoeffBloat(iFr,iL)
             daaEmission(iFr,iLay) = (1.0-daaLayTrans(iFr,iLay))*dPlanck
             END DO

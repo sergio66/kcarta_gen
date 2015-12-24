@@ -671,3 +671,624 @@ c also see RRTM code v3.3 rtreg.ffor more decimal points
       END
 
 c************************************************************************ 
+c this function does the expintegral raY = E3(raX), using recursion
+      SUBROUTINE expint3(raX,raY)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      REAL raX(kMaxPts)
+c output vars
+      REAL raY(kMaxPts)
+
+c local vars
+      INTEGER iI
+
+      CALL expint(raX,raY)               !do y = expint(x)
+      DO iI = 1,kMaxPts
+        IF (raX(iI) .LT. 1.0e-28) THEN
+          raY(iI) = 0.5
+        ELSEIF (raX(iI) .LT. 0.0) THEN
+          write(kStdErr,*) 'in expint3 iI,raX(iI) = ',iI,raX(iI)
+          write(kStdErr,*) 'cannot have negative values!'
+          CALL DoStop
+        ELSE
+          raY(iI) = (exp(-raX(iI))*(1-raX(iI)) + (raX(iI)**2)*raY(iI))/2.0
+        END IF
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************
+c this function does the expintegral raY = E2(raX), using recursion
+      SUBROUTINE expint2(raX,raY)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      REAL raX(kMaxPts)
+c output vars
+      REAL raY(kMaxPts)
+
+c local vars
+      INTEGER iI
+
+      CALL expint(raX,raY)               !do y = expint(x)
+      DO iI = 1,kMaxPts
+        IF (raX(iI) .LT. 1.0e-28) THEN
+          raY(iI) = 1.0
+        ELSEIF (raX(iI) .LT. 0.0) THEN
+          write(kStdErr,*) 'in expint2 iI,raX(iI) = ',iI,raX(iI)
+          write(kStdErr,*) 'cannot have negative values!'
+          CALL DoStop
+        ELSE
+          raY(iI) = exp(-raX(iI)) - raX(iI)*raY(iI)
+        END IF
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************
+c this function does the expintegral raY = E1(raX), ala Matlab
+c really, this can be found in any Math handbook, or on the web
+c assumes input raX has no elements == 0, and all are real
+      SUBROUTINE expint(raX,raY)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      REAL raX(kMaxPts)
+c output vars
+      REAL raY(kMaxPts)
+
+c local vars
+      INTEGER iI,iJ,iK,iFr,iFound,iN
+      INTEGER iaPositive(kMaxPts),iPos,iaNegative(kMaxPts),iNeg
+      DOUBLE PRECISION p(9),egamma,daX(kMaxPts),daY(kMaxPts),dImag
+      COMPLEX*16 daZ(kMaxPts)
+      DOUBLE PRECISION daPterm(kMaxPts),daTerm(kMaxPts)
+      DOUBLE PRECISION am2(kMaxPts),am1(kMaxPts),bm2(kMaxPts),bm1(kMaxPts)
+      DOUBLE PRECISION f(kMaxPts),oldf(kMaxPts),alpha,beta,a,b
+
+      DATA (P(iJ),iJ=1,9)/
+     $ -3.602693626336023d-09, -4.819538452140960d-07, -2.569498322115933d-05, 
+     $ -6.973790859534190d-04, -1.019573529845792d-02, -7.811863559248197d-02, 
+     $ -3.012432892762715d-01, -7.773807325735529d-01,  8.267661952366478d+00/
+
+      DO iFr = 1,kMaxPts
+        daY(iFr) = 0.0D0
+        DO iJ = 1,9
+          iI = 9-iJ
+          daY(iFr) = daY(iFr) + p(iJ)*((raX(iFr)*1.0D0)**iI)
+        END DO
+      END DO     
+
+c polyv = polyval(p,real(x))
+c k = find( abs(imag(x)) <= polyv )   this is iPos, except imag(x) == 0 always
+      iPos = 0
+      iNeg = 0
+      dImag = 0.0D0
+      DO iFr = 1,kMaxPts
+        IF (dImag .LE. daY(iFr)) THEN
+          iPos = iPos + 1
+          iaPositive(iPos) = iFr
+        ELSE
+          iNeg = iNeg + 1
+          iaNegative(iNeg) = iFr
+        END IF
+      END DO
+
+c ---------- these are for x >= 0 ------------------------------------------
+      IF (iPos .GE. 1) THEN
+        egamma = 5.7721566490153286061D-1
+        DO iK = 1,iPos
+          iFr = iaPositive(iK)
+          daX(iFr) = raX(iFr)*1.0d0
+          daZ(iFr) = -egamma - cdlog(dcmplx(daX(iFr),0.0D0))
+          daPterm(iFr) = daX(iFr)
+          daterm(iFr)  = daX(iFr)
+        END DO
+
+        iJ = 1
+
+ 10     CONTINUE
+        iJ = iJ + 1
+
+        DO iK = 1,iPos
+          iFr = iaPositive(iK)
+          daZ(iFr) = daZ(iFr) + daTerm(iFr)
+          daPterm(iFr) = -daX(iFr) * daPterm(iFr)/iJ
+          daTerm(iFr)  = daPterm(iFr)/iJ
+        END DO
+
+c check for convergence
+        iFound = -1
+        DO iK = 1,iPos
+          iFr = iaPositive(iK)
+          IF (abs(daTerm(iFr)) .GT. 1.0d-16*cdabs(daZ(iFr))) THEN
+            iFound = +1
+            GOTO 11
+          END IF
+        END DO  
+ 11      CONTINUE
+
+        IF (iFound .GT. 0) THEN
+          GOTO 10
+        END IF
+
+        DO iK = 1,iPos
+          iFr = iaPositive(iK)
+          raY(iFr) = sngl(dreal(daZ(iFr)))
+        END DO
+      END IF
+
+c ---------- these are for x < 0  ------------------------------------------
+      IF (iNeg .GE. 1) THEN
+        iN = 1  !calculating E1(x)
+
+        DO iK = 1,iNeg
+          iFr = iaNegative(iK)
+          daX(iFr)  = raX(iFr)*1.0d0
+          am2(iFr)  = 0.0D0
+          bm2(iFr)  = 1.0D0
+          am1(iFr)  = 1.0D0
+          bm1(iFr)  = daX(iFr)
+          f(iFr)    = am1(iFr)/bm1(iFr)  
+          oldf(iFr) = 1.0D100
+        END DO
+
+        iJ = 2
+ 20     CONTINUE
+
+        ! calculate the coefficients of the recursion formulas for j even
+        alpha = iN - 1+(iJ/2) ! note: beta= 1
+
+        DO iK = 1,iNeg
+          iFr = iaNegative(iK)
+    
+          !calculate A(j), B(j), and f(j)
+          a = am1(iFr) + alpha * am2(iFr)
+          b = bm1(iFr) + alpha * bm2(iFr)
+   
+          ! save new normalized variables for next pass through the loop
+          !  note: normalization to avoid overflow or underflow
+          am2(iFr) = am1(iFr) / b
+          bm2(iFr) = bm1(iFr) / b
+          am1(iFr) = a / b
+          bm1(iFr) = 1.0D0
+    
+          oldf(iFr) =f(iFr)
+          f(iFr) = am1(iFr)
+        END DO
+
+        iJ = iJ+1
+
+        ! calculate the coefficients for j odd
+        alpha = (iJ-1)/2
+        DO iK = 1,iNeg
+          iFr = iaNegative(iK)
+          beta = daX(iFr)
+          a = beta * am1(iFr) + alpha * am2(iFr)
+          b = beta * bm1(iFr) + alpha * bm2(iFr)
+          am2(iFr) = am1(iFr) / b
+          bm2(iFr) = bm1(iFr) / b
+          am1(iFr) = a / b
+          bm1(iFr) = 1.0D0
+          oldf(iFr) = f(iFr)
+          f(iFr) = am1(iFr)
+        END DO
+
+        iJ = iJ+1
+   
+c check for convergence
+        iFound = -1
+        DO iK = 1,iNeg
+          iFr = iaNegative(iK)
+          IF (abs(f(iFr)-oldf(iFr)) .GT. 1.0d-14*abs(f(iFr))) THEN
+            iFound = +1
+            GOTO 21
+          END IF
+        END DO  
+ 21     CONTINUE
+
+        IF (iFound .GT. 0) THEN
+          GOTO 20
+        END IF
+
+        DO iK = 1,iNeg
+          iFr = iaNegative(iK)
+          daY(iFr) =  exp(-daX(iFr)) * f(iFr)
+          !!! daY is really complex, but ignore the imag part : 
+          !!!     - i*pi*((real(xk)<0)&(imag(xk)==0)) 
+          raY(iFr) = sngl(daY(iFr))
+        END DO
+
+      END IF
+
+      RETURN
+      END 
+
+c************************************************************************
+c calls function to do expintegral raY = E(n,raX), ala Numerical Recipes
+c this should be faster than the Matlab version
+      SUBROUTINE expintfast3(raX,raY)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      REAL raX(kMaxPts)
+c output vars
+      REAL raY(kMaxPts)
+
+c local vars
+      INTEGER iI
+      REAL fastExpint
+
+      DO iI = 1,kMaxPts
+        IF (raX(iI) .LT. 0.0) THEN
+          write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
+          write(kStdErr,*) 'cannot have negative values!'
+          CALL DoStop
+        ELSE
+          raY(iI) = fastExpint(3,raX(iI))
+        END IF
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************
+c this is fast exponential integrals, from Numerical recipes
+c called by SUBROUTINE expintfast3(n,raX)
+
+      REAL FUNCTION fastExpint(n,x)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      INTEGER n
+      REAL x
+
+c local vars
+      INTEGER MaxIT
+      REAL Euler,FPmin,Eps
+
+      INTEGER i,ii,nm1
+      REAL r,fact,del,psi,a,b,c,d,h
+   
+      r      = 0.0
+      MaxIT = 100
+      Euler = 0.5772156649
+      FPMin = 1.0e-30
+      Eps   = 1.0e-7
+
+      nm1 = n-1
+      IF (n .EQ. 0) THEN
+        r = exp(-x)/x
+      ELSEIF (x .LE. Eps) THEN
+        r = 1.0/nm1
+      ELSEIF (x .GT. 1.0) THEN
+        b = x + n
+        c = 1/FPmin
+        d = 1.0/b
+        h = d
+        DO i = 1,MAXIT
+          a = -i*(nm1+i)
+          b = b + 2.0
+          d = 1/(a*d+b)
+          c = b + a/c
+          del = c*d
+          h = h*del
+          IF (abs(del-1) .le. eps) THEN
+            r = h*exp(-x)
+            GOTO 10
+          END IF
+        END DO
+
+      ELSEIF ((x .GE. Eps) .AND. (x .LE. 1.0)) THEN
+        !set first term ... wow
+        IF (nm1 .NE. 0) THEN
+          r = 1.0/nm1
+        ELSE
+          r = -log(x) - Euler
+        END IF
+        fact = 1.0
+        DO i = 1,MaxIT
+          fact = fact * (-x/i)
+          IF (i .NE. nm1) THEN
+            del = -fact/(i-nm1)
+          ELSE
+            psi = -euler
+            DO ii = 1,nm1
+              psi = psi + 1.0/ii
+            END DO
+            del = fact*(-log(x) + psi)
+          END IF
+          r = r + del
+          IF (abs(del) .LT. abs(r)*Eps) GOTO 10
+        END DO
+      END IF
+  
+ 10   CONTINUE
+      fastExpint = r
+
+      RETURN
+      END
+
+c************************************************************************
+c does expintegral raY = E3(raX), using fifth order polynom fits to expint3
+      SUBROUTINE expintsuperfast3_6(raX,raY)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      REAL raX(kMaxPts)
+c output vars
+      REAL raY(kMaxPts)
+
+c local vars
+      INTEGER iI,i,j,iWhich
+      REAL fastExpint,raaPout(5,6)
+
+      !!this is for x > 0.00 and x <= 0.10
+      DATA ((raaPout(i,j),j=1,6),i=1,1)/
+     +  4.999997490759554e-01, -9.952726790169388e-01,  2.469512034408480e+00,
+     + -1.666132334280038e+01,  1.120106392322948e+02, -3.420299925382391e+02/
+
+      !!this is for x > 0.10 and x <= 1.00
+      DATA ((raaPout(i,j),j=1,6),i=2,2)/
+     +  4.964930888860016e-01,  -9.002236958326287e-01,  1.058882468914909e+00,
+     + -9.590227134465121e-01,   5.595049802866501e-01, -1.460130149043994e-01/
+
+      !!this is for x > 1.00 and x <= 6.00
+      DATA ((raaPout(i,j),j=1,6),i=3,3)/
+     +  9.348983139232728e-03,   8.153540216831002e-01, -1.318262705075364e+00,
+     +  1.507590471592263e+00,  -9.895617788618024e-01,  2.739113519528383e-01/
+
+      !!this is for x > 6.00 and x <= 10.00
+      DATA ((raaPout(i,j),j=1,6),i=4,4)/
+     +  3.700147480617722e-04,   9.814904610819430e-01, -2.593611383300170e+00,
+     +  6.727199620937857e+00,  -1.257888244164997e+01,  1.144472478235488e+01/
+
+      !!this is for x > 10.00 and x <= 20.00
+      DATA ((raaPout(i,j),j=1,6),i=5,5)/
+     +   3.360502391024836e-05,  9.969795018873142e-01, -2.884279567510683e+00,
+     +   9.510785069482322e+00, -2.619205947978609e+01,  3.863540676528253e+01/
+
+      DO iI = 1,kMaxPts
+        raY(iI) = 0.0
+        IF (raX(iI) .LT. 0.0) THEN
+          write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
+          write(kStdErr,*) 'cannot have negative values!'
+          CALL DoStop
+        ELSEIF (raX(iI) .LE. 0.1) THEN
+          iWhich = 1
+          DO j = 1,6
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+          END DO
+        ELSEIF (raX(iI) .LE. 1.0) THEN
+          iWhich = 2
+          DO j = 1,6
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+          END DO
+        ELSEIF (raX(iI) .LE. 6.0) THEN
+          iWhich = 3
+          DO j = 1,6
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raX(iI))
+        ELSEIF (raX(iI) .LE. 10.0) THEN
+          iWhich = 4
+          DO j = 1,6
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raX(iI))
+        ELSEIF (raX(iI) .LE. 20.0) THEN          
+          iWhich = 5
+          DO j = 1,6
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raX(iI))
+        ELSE !!   expint3(x) <= 1e-10 for x >= 20
+          iWhich = 6
+          raY(iI) = 0.0
+        END IF
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************
+c does expintegral raY = E3(raX), using 2 - 5 order polynom fits to expint3
+      SUBROUTINE expintsuperfast3(raX,raY)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      REAL raX(kMaxPts)
+c output vars
+      REAL raY(kMaxPts)
+
+c local vars
+      INTEGER iI,i,j,iWhich,iaMax(5),iCnt
+      REAL fastExpint,raaPout(5,6)
+
+      DATA (iaMax(i),i=1,5) /3, 6, 6, 3, 3/
+
+      !!this is for x > 0.00 and x <= 0.10
+      DATA ((raaPout(i,j),j=1,3),i=1,1)/
+     +  4.999958864847588e-01, -9.704714999886551e-01,  1.357944294418206e+00/
+
+      !!this is for x > 0.10 and x <= 1.00
+      DATA ((raaPout(i,j),j=1,6),i=2,2)/
+     +  4.964930888860016e-01,  -9.002236958326287e-01,  1.058882468914909e+00,
+     + -9.590227134465121e-01,   5.595049802866501e-01, -1.460130149043994e-01/
+
+      !!this is for x > 1.00 and x <= 6.00
+      DATA ((raaPout(i,j),j=1,6),i=3,3)/
+     +  9.348983139232728e-03,   8.153540216831002e-01, -1.318262705075364e+00,
+     +  1.507590471592263e+00,  -9.895617788618024e-01,  2.739113519528383e-01/
+
+      !!this is for x > 6.00 and x <= 10.00
+      DATA ((raaPout(i,j),j=1,3),i=4,4)/
+     +  6.850600578733759e-03,   8.121694943009118e-01, -9.875485935560442e-01/
+
+      !!this is for x > 10.00 and x <= 20.00
+      DATA ((raaPout(i,j),j=1,3),i=5,5)/
+     +  1.873706336320716e-03,   9.115323790575932e-01, -1.489123902774130e+00/
+
+      DO iI = 1,kMaxPts
+        raY(iI) = 0.0
+        IF (raX(iI) .LT. 0.0) THEN
+          write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
+          write(kStdErr,*) 'cannot have negative values!'
+          CALL DoStop
+        ELSEIF (raX(iI) .LE. 0.1) THEN
+          iWhich = 1
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+          END DO
+        ELSEIF (raX(iI) .LE. 1.0) THEN
+          iWhich = 2
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+          END DO
+        ELSEIF (raX(iI) .LE. 6.0) THEN
+          iWhich = 3
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raX(iI))
+        ELSEIF (raX(iI) .LE. 10.0) THEN
+          iWhich = 4
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raX(iI))
+        ELSEIF (raX(iI) .LE. 20.0) THEN          
+          iWhich = 5
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raX(iI))
+        ELSE !!   expint3(x) <= 1e-10 for x >= 20
+          iWhich = 6
+          raY(iI) = 0.0
+        END IF
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************
+c does expintegral raY = E3(raX), using 2 - 5 order polynom fits to expint3
+      SUBROUTINE expintsuperfast3matrix(iL,raaX,raY)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input vars
+      REAL raaX(kMaxPts,*)
+      INTEGER iL
+c output vars
+      REAL raY(kMaxPts)
+
+c local vars
+      INTEGER iI,i,j,iWhich,iaMax(5),iCnt
+      REAL fastExpint,raaPout(5,6)
+
+      DATA (iaMax(i),i=1,5) /3, 6, 6, 3, 3/
+
+      !!this is for x > 0.00 and x <= 0.10
+      DATA ((raaPout(i,j),j=1,3),i=1,1)/
+     +  4.999958864847588e-01, -9.704714999886551e-01,  1.357944294418206e+00/
+
+      !!this is for x > 0.10 and x <= 1.00
+      DATA ((raaPout(i,j),j=1,6),i=2,2)/
+     +  4.964930888860016e-01,  -9.002236958326287e-01,  1.058882468914909e+00,
+     + -9.590227134465121e-01,   5.595049802866501e-01, -1.460130149043994e-01/
+
+      !!this is for x > 1.00 and x <= 6.00
+      DATA ((raaPout(i,j),j=1,6),i=3,3)/
+     +  9.348983139232728e-03,   8.153540216831002e-01, -1.318262705075364e+00,
+     +  1.507590471592263e+00,  -9.895617788618024e-01,  2.739113519528383e-01/
+
+      !!this is for x > 6.00 and x <= 10.00
+      DATA ((raaPout(i,j),j=1,3),i=4,4)/
+     +  6.850600578733759e-03,   8.121694943009118e-01, -9.875485935560442e-01/
+
+      !!this is for x > 10.00 and x <= 20.00
+      DATA ((raaPout(i,j),j=1,3),i=5,5)/
+     +  1.873706336320716e-03,   9.115323790575932e-01, -1.489123902774130e+00/
+
+      DO iI = 1,kMaxPts
+        raY(iI) = 0.0
+        IF (raaX(iI,iL) .LT. 0.0) THEN
+          write(kStdErr,*) 'in expint iI,raaX(iI,iL) = ',iI,raaX(iI,iL)
+          write(kStdErr,*) 'cannot have negative values!'
+          CALL DoStop
+        ELSEIF (raaX(iI,iL) .LE. 0.1) THEN
+          iWhich = 1
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
+          END DO
+        ELSEIF (raaX(iI,iL) .LE. 1.0) THEN
+          iWhich = 2
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
+          END DO
+        ELSEIF (raaX(iI,iL) .LE. 6.0) THEN
+          iWhich = 3
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raaX(iI,iL))
+        ELSEIF (raaX(iI,iL) .LE. 10.0) THEN
+          iWhich = 4
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raaX(iI,iL))
+        ELSEIF (raaX(iI,iL) .LE. 20.0) THEN          
+          iWhich = 5
+          iCnt = iaMax(iWhich)
+          DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
+          END DO
+          raY(iI) = raY(iI)*exp(-raaX(iI,iL))
+        ELSE !!   expint3(x) <= 1e-10 for x >= 20
+          iWhich = 6
+          raY(iI) = 0.0
+        END IF
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************

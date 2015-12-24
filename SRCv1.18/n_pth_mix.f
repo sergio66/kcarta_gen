@@ -27,7 +27,7 @@ c output
       REAL raTPressLevels(kProfLayer+1)           
 
 c local
-      INTEGER iI,iJ,iOffSet,iCO2_ind
+      INTEGER iI,iJ,iOffSet,iCO2_ind,iDefault,iInterpType
       REAL raT(kProfLayer),raP(kProfLayer),rX,rY,logP(kProfLayer),rPmin,rPmax,dx
       REAL grav0,grav,Re,Rd,raGeopotentialThick1(kProfLayer),raGeopotentialThick2(kProfLayer)
       REAL rInt,raTX(10),raPX(10),p2h
@@ -81,11 +81,25 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
         CALL DoStop
       END IF
 
+      iInterpType = -1    ! linear
+      iInterpType = +1    ! spline
+      iDefault = +1       ! spline is default
+      IF (iDefault .NE. iInterpType) THEN
+        write(kStdErr,*) 'in Get_Temp_Plevs, default is take layer temps and spline interp them to plevs'
+        write(kStdErr,*) '                   we are   taking layer temps and linear interp them to plevs'
+      END IF
+      
       DO iI = 1,kProfLayer+1
         IF (raPressLevels(iI) .GT. 0) THEN
-          IF ((log(raPressLevels(iI)) .GE. rPmin) .AND. (log(raPressLevels(iI)) .LE. rPmax)) THEN 
-            CALL rspl(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+          IF ((log(raPressLevels(iI)) .GE. rPmin) .AND. (log(raPressLevels(iI)) .LE. rPmax)) THEN
+	    !! most of the points
+	    IF (iInterpType .EQ. +1) THEN
+              CALL rspl(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+	    ELSE
+              CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
+	    END IF
           ELSE
+	    !! couple or so points at the top or bottom boundaries
             CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
           END IF
           raTPressLevels(iI) = rY
@@ -94,18 +108,19 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
         END IF
       END DO
 
+ 1234 FORMAT(I3,5(' ',F10.4))
 c      DO iI = kProfLayer-iProfileLayers+1,kProfLayer
-c        print *,iI,raPressLevels(iI),raP(kProfLayer-iI+1),raPressLevels(iI+1),
+c        write(*,1234) iI,raPressLevels(iI),raP(kProfLayer-iI+1),raPressLevels(iI+1),
 c     $             raT(kProfLayer-iI+1),raTPressLevels(iI)
 c      END DO
 c      iI = kProfLayer + 1
-c        print *,iI,raPressLevels(iI),raPressLevels(iI),raPressLevels(iI),
+c      write(*,1234) iI,raPressLevels(iI),raPressLevels(iI),raPressLevels(iI),
 c     $             raT(1),raTPressLevels(iI)
-
-c      DO iI = kProfLayer-iProfileLayers+1,kProfLayer+1
-c        print *,iI,iProfileLayers,raPressLevels(iI),raTPressLevels(iI)
-c      END DO
-
+cc      DO iI = kProfLayer-iProfileLayers+1,kProfLayer+1
+cc        print *,iI,iProfileLayers,raPressLevels(iI),raTPressLevels(iI)
+cc      END DO
+c      call dostop
+      
 c hyposometric equation
 c now find geopotential thickness = Rd/g integral_p1^p2 T(p) d(ln(p)) = 
 c   Rd/g 0.5(T1+T2) (ln(p2)-ln(p1)) = Rd/g 0.5(T1+T2) ln(p2/p1)

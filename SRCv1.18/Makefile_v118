@@ -473,10 +473,10 @@ OBJSXSEC     = calxsc.o calq.o
 #######################################################################
 
 OBSRAD       = rad_main.o rad_diff.o  rad_quad.o rad_misc.o rad_flux.o \
-               rad_limb.o rad_angles.o
+               rad_limb.o rad_angles.o rad_vis_uv.o
 
 OBSRAD_BASIC = rad_main.o rad_diff.o  rad_quad.o rad_misc.o rad_flux.o \
-               rad_limb.o rad_angles.o
+               rad_limb.o rad_angles.o rad_vis_uv.o
 
 OBSJAC_CLR   = jac_main.o jac_up.o jac_down.o jac_limb.o
 
@@ -803,6 +803,9 @@ rad_main.o : rad_main.f $(PARAMS)
 
 rad_limb.o : rad_limb.f $(PARAMS) 
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_limb.f
+
+rad_vis_uv.o : rad_vis_uv.f $(PARAMS) 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_vis_uv.f
 
 rad_misc.o : rad_misc.f $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_misc.f
