@@ -197,7 +197,7 @@ c these are temporarily used
       REAL raaOp1(kMaxPrint,kProfLayer),rMaxMinLBLRTMOp
 
       IF ((kRTP .EQ. -10) .OR. (kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
-        write (kStdWarn,*) 'Need to reset some output params since they were read from text LVLS/LBLRTM code'
+        write (kStdWarn,*) 'Need to reset some output params as they came from text LVLS/LBLRTM code'
         write(kStdWarn,*) 'raaOp(1,1) = ',raaOp(1,1),' --> ',raRTP_TxtInput(6),' mb'
         rMaxMinLBLRTMOp = +1.0e10
         iMaxMinLBLRTMOp = 1

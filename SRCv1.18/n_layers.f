@@ -112,10 +112,10 @@ c but then CONVERTED to MR (gasunit 12)
         CALL ReadInput_LBLRTM_ProfileTAPE6(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
      $                          iNumLays,rPSurf,rTSurf,rHSurf,iNumGases,
      $                          raPX,raTX,raLayDensityX,raZX,iaG,iaGasUnits,raaG_MRX,rPMin,rPMax,rYear,rLat,rLon)
-       ELSE
-         write(kStdErr,*) 'huh?? reading text levels file or text LBLRTM TAPE5/TAPE6 MODIFIED',kRTP
-         Call DoStop
-       END IF
+      ELSE
+        write(kStdErr,*) 'huh?? reading text levels file or text LBLRTM TAPE5/TAPE6 MODIFIED',kRTP
+        Call DoStop
+      END IF
 
       IF (kRTP .NE. -6) THEN
         !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
@@ -136,9 +136,15 @@ c but then CONVERTED to MR (gasunit 12)
 
         ! >>> interp onto the kCARTA database profiles
         ! >>> also sort the gasIDs into increasing order
+	
         CALL InterpUser2kCARTA(iNumLevs,iNumGases,iaG,raP,raT,raaG_MR,rPMin,rPMax,rPSurf,rTSurf,rPmaxKCarta,
      $                       PLEV_KCARTADATABASE_AIRS,raPX,raTX,raaG_MRX,iLowestLev)
-
+     
+c      do iL = 1,iNumlevs
+c        print *,'hmm4',iL,raP(iL),raT(iL),raaG_MR(iL,1),raPX(iL),raTX(iL),raaG_MRX(iL,1)
+c      end do
+c      call dostop
+      
         ! find pseudo temperature at this level
         ! recall pav = (p2-p1)/log(p2/p1)
         !        tav = (T2-T1)/log(p2/p1)
@@ -146,8 +152,9 @@ c but then CONVERTED to MR (gasunit 12)
         ! see eg line 1108 of n_rad_jac_scat.f
         rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/
      $         (PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
-        write(kStdWarn,*) ' ' 
-        write(kStdWarn,*)' PLEV_KCARTADATABASE_AIRS(iLowestLev),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev+1) = '
+        write(kStdWarn,*) ' '
+	write(kStdWarn,*) 'iX = iLowestLev ==>'
+        write(kStdWarn,*)' PLEV_KCARTADATABASE_AIRS(iX),rPSurf,PLEV_KCARTADATABASE_AIRS(iX+1) = '
         write(kStdWarn,*) PLEV_KCARTADATABASE_AIRS(iLowestLev),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev+1)
         write(kStdWarn,*) 'rfracBot = ',rFracBot
   
@@ -238,17 +245,17 @@ c local
       REAL raTempMR(kMaxLayer+10),raTempP(kMaxLayer+10),raTempMRX(2*kMaxLayer)
 
 c first find pressures that span rPmin < rP < rPmax
-      IF (raR100Press(iRefLevels) .GT. rPmin) THEN
+      IF (raR100Press(iRefLevels) .GT. rPmin*100.0) THEN
         write(kSTdErr,*) 'iRefLevels = ',iRefLevels
         write(kStdErr,*) 'oops min pressure in ref database = ',raR100Press(iRefLevels),' N/m2'
-        write(kStdErr,*) 'need this to be SMALLER than min pressure in supplied user profile = ',rPmin
+        write(kStdErr,*) 'should be SMALLER than min pressure in supplied user profile = ',rPmin*100.0,' N/m2'
         CALL DoStop
       END IF
 
-      IF (raR100Press(1) .LT. rPmax) THEN
+      IF (raR100Press(1) .LT. rPmax*100.0) THEN
         write(kSTdErr,*) 'iRefLevels = ',iRefLevels
         write(kStdErr,*) 'oops max pressure in ref database = ',raR100Press(1),' N/m2'
-        write(kStdErr,*) 'need this to be GREATER than max pressure in supplied user profile = ',rPmax
+        write(kStdErr,*) 'should be GREATER than max pressure in supplied user profile = ',rPmax*100,' N/m2'
         CALL DoStop
       END IF
 
@@ -963,6 +970,10 @@ c local var
       REAL raTemp(2*kProfLayer),raTempX(kProfLayer),raArr(kMaxGas),raaG_MRX2(kProfLayer+1,kMaxGas)
 
 c see which kCARTA pressure level is equal to or greater than surface pressure
+      write(kStdWarn,*) '--------------------------------------------------------------------------'
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) ' >>> prep : klayers within kcarta : interp usergrid onto 101 levels grid >>>'
+      
       iLowestLev = kMaxLayer
  10   CONTINUE
       IF ((PLEV_KCARTADATABASE_AIRS(iLowestLev) .LT. rPSurf) .AND. (iLowestLev .GT. 1)) THEN
@@ -978,9 +989,9 @@ c see which kCARTA pressure level is equal to or greater than surface pressure
 c fill in raPressureJunk, which is the pressure grid onto which we need to interpolate T,MR onto
       DO iL = 1,kMaxLayer-iLowestLev+1
         iNumUse = iL
-        raPX(iL) = PLEV_KCARTADATABASE_AIRS(iLowestLev+iL)
+        raPX(iL) = PLEV_KCARTADATABASE_AIRS(iLowestLev+iL)/100.0  ! input press in mb, so change plev_kcarta to mb
       END DO
-
+      
 c now interpolate T and MR onto this grid
       Call r_sort_loglinear(raP,raT,iNumLevs,raPX,raTX,iNumUse)
       DO iG = 1,iNumGases
@@ -992,7 +1003,14 @@ c now interpolate T and MR onto this grid
           raaG_MRX(iL,iG) = raTempX(iL)
         END DO
       END DO
+      
+c      DO iL = 1,kMaxLayer-iLowestLev+1
+c        write(*,1234) iL,raP(iL),raT(iL),raaG_MR(iL,1),raPX(iL),raTX(iL),raaG_MRX(iL,1)
+c      END DO
+c      call dostop
 
+ 1234 FORMAT(I3,2(' ',F10.4),' ',E10.4,2(' ',F10.4),' ',E10.4)
+ 
 c need to be careful with last point; linear maybe better than spline if raP(iNumLevs) > raPX(iNumUse)
       iHigh = iNumUse
  20   CONTINUE
@@ -1046,6 +1064,8 @@ c sort according to iaIndex
           raaG_MRX(iL,iG) = raaG_MRX2(iL,iaIndex(iG))
         END DO
       END DO
+
+      write(kStdWarn,*) '--------------------------------------------------------------------------'
       
       RETURN
       END
@@ -1469,6 +1489,10 @@ c************************************************************************
 c this subroutine does the klayers integrations, integrals over P
 c so this is more similar to kLAYERs, CRTM
 c this is nwer code; it ignores surface as "lowest level and only uses the user level info
+
+c >>>>>>>> raPout comes in mb
+c >>>>>>>> and goes out in N/m2
+
       SUBROUTINE DoIntegrateLevels2Layers_wrtP(rHSurf,rPSurf,rTSurf,iLowestLev,iNumGases,iaG,rLat,rLon,
      $               PAVG_KCARTADATABASE_AIRS,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,rfracBot,
      $               raPX,raTX,raaG_MRX,raPout,raAmountOut,raTout,raZout,raaQout,raaPartPressOut)
@@ -1501,7 +1525,8 @@ c local
 
       rConvertQ = 6.022141e23/1e4     ! multiply by this to change moles/m2 to molecules/cm2
       rConvertQ = kAvog/1000/1.0e4    ! multiply by this to change moles/m2 to molecules/cm2
-
+      rConvertQ = rConvertQ * 100.0   !but if input p is in mb, we need to change to N/m2 by this factor
+      
       DO iL = 1,kProfLayer
         DO iG = 1,iNumGases
           raaQout(iL,iG) = 0.0
@@ -1516,6 +1541,9 @@ c local
       iNFine = 10
       iNFine = 200
       iNFine = 50
+
+      write(kStdWarn,*) '  '
+      write(kStdWarn,*) '  >>>>>>>>>>>> doing the Levels --> Layers intergation >>>>>>>>>>>>>>>>>>>'      
 
 c >>>>>>>>>>
       !! set up temporary arrays/matrices for interping onto sublevels
@@ -1539,6 +1567,8 @@ c http://cimss.ssec.wisc.edu/~paulv/Fortran90/Profile_Utility/profile_units_conv
 c see /home/sergio/KCARTA/DOC/NotesOnAtmosphericProfilesAndQuantities.pdf
 c     /home/sergio/KCARTA/DOC/sci_klayers.txt
 
+ 1234 FORMAT(I3,' ',F10.4,' ' ,I3,6(' ',F10.4),1(' ',E10.4),3(' ',F10.4))
+ 
       z = rHSurf !! need to kludge this
       zWoo = rHSurf
       iWoo = -1
@@ -1546,7 +1576,8 @@ c     /home/sergio/KCARTA/DOC/sci_klayers.txt
       DO iL = iLowestLev,iLowestLev
         raPout(iL) = log(PLEV_KCARTADATABASE_AIRS(iL)/PLEV_KCARTADATABASE_AIRS(iL+1))
         raPout(iL) = (PLEV_KCARTADATABASE_AIRS(iL) - PLEV_KCARTADATABASE_AIRS(iL+1))/raPout(iL)
-
+        raPout(iL) = raPout(iL)/100.0    !!! change N/m2 to mb
+	
         z0 = z
         iJ = iL - iLowestLev + 1
 
@@ -1556,9 +1587,11 @@ c     /home/sergio/KCARTA/DOC/sci_klayers.txt
 
         !!! >>>>>>  this is starting out at         rP = PLEV_KCARTADATABASE_AIRS(iL)        rT = rTSurfx  >>>>>>>>
         rP = PLEV_KCARTADATABASE_AIRS(iL)
+	rP = rP/100.0    !!! change N/m2 to mb
         CALL r_sort_loglinear(raXYZPress,raXYZTemp,iUpperLev,rP,rT,1)
-        
-        dlnp = log(PLEV_KCARTADATABASE_AIRS(iL)) - log(PLEV_KCARTADATABASE_AIRS(iL+1))
+
+        !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = loag(a/c)
+        dlnp = log(PLEV_KCARTADATABASE_AIRS(iL)) - log(PLEV_KCARTADATABASE_AIRS(iL+1))  
         dlnp = dlnp / (iNFine)
 
         !! information for current (sub)level
@@ -1642,7 +1675,7 @@ c          print *,iLoop,PLEV_KCARTADATABASE_AIRS(iL),rP,amount*rConvertQ,(amoun
         raAmountOut(iL) = amount*rConvertQ           ! change moles/m2 to molecules/cm2
         raZout(iL+1)    = z
 
-c        print *,iL,(z-z0),iJ,raTX(iJ),rTSurf,rP,PLEV_KCARTADATABASE_AIRS(iL+1),rT,raTout(iL),
+c        write(*,1234) iL,(z-z0),iJ,raTX(iJ),rTSurf,rP,PLEV_KCARTADATABASE_AIRS(iL+1),rT,raTout(iL),
 c     $        raAmountOut(iL),raZout(iL+1),raPout(iL),z/1000
       END DO
 
@@ -1652,7 +1685,7 @@ c     $        raAmountOut(iL),raZout(iL+1),raPout(iL),z/1000
       raZout(iL+1) = +(z-zWoo)
       write(kStdWarn,*) '  need to displace lowest layer heights'
       write(kStdWarn,*) '  Lowest Level (m), rHSurf (m) Upper Levl(m) = ',-(zWoo - z0),z0,+(z-zWoo)
-      write(kStdWarn,*) '  Plowest,pSurf,pHighest (mb) ',PLEV_KCARTADATABASE_AIRS(iL),rPSurf,
+      write(kStdWarn,*) '  plowest,pSurf,pLowest+1 (mb) ',PLEV_KCARTADATABASE_AIRS(iL),rPSurf,
      $                                                   PLEV_KCARTADATABASE_AIRS(iL+1)
       z = z - zWoo
 
@@ -1669,15 +1702,18 @@ c go to TOA
         !! compute avg pressure of layer
         raPout(iL) = log(PLEV_KCARTADATABASE_AIRS(iL)/PLEV_KCARTADATABASE_AIRS(iL+1))
         raPout(iL) = (PLEV_KCARTADATABASE_AIRS(iL) - PLEV_KCARTADATABASE_AIRS(iL+1))/raPout(iL)
-
+        raPout(iL) = raPout(iL)/100.0    !!! change N/m2 to mb
+	
         iJ = iL - iLowestLev + 1
         rP = PLEV_KCARTADATABASE_AIRS(iL)
+	rP = rP/100.0    !!! change N/m2 to mb	
         rT = raXYZTemp(iJ)
         
         amount = 0.0
         rTsum  = 0.0
         rWgt = 0.0
 
+        !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = loag(a/c)
         dlnp = log(PLEV_KCARTADATABASE_AIRS(iL)) - log(PLEV_KCARTADATABASE_AIRS(iL+1))
         dlnp = dlnp / (iNFine)
 
@@ -1753,16 +1789,17 @@ c            raaQout(iL,iG) = raaQout(iL,iG) + (q_n + q_np1)/2 * rConvertQ
         raAmountOut(iL) = amount * rConvertQ     ! change moles/m2 to molecules/cm2
         raZout(iL+1)    = z
 
-c        print *,iL,(z-z0),iJ,raTX(iJ),rTSurf,rP,PLEV_KCARTADATABASE_AIRS(iL+1),rT,raTout(iL),
+c        write(*,1234) iL,(z-z0),iJ,raTX(iJ),rTSurf,rP,PLEV_KCARTADATABASE_AIRS(iL+1),rT,raTout(iL),
 c     $        raAmountOut(iL),raZout(iL+1),raPout(iL),z/1000
       END DO
-
+      
       write(kStdWarn,*) 'Topmost press level is at z = ',z,' meters'
       !! raZout is in meters
       !! raaQout is in moles/m2
       DO iL = iLowestLev,kProfLayer
         rThick = abs(raZout(iL) - raZout(iL+1)) * 100.0
-        rT = raTout(iL)  
+        rT = raTout(iL)
+	raPout(iL) = raPout(iL) * 100.0    !! change mb to N/m2
         DO iG = 1,iNumGases
           raaPartPressOut(iL,iG) = raaQout(iL,iG) / raAmountOut(iL) * raPout(iL)
         END DO
@@ -1807,8 +1844,8 @@ c testing
         !! show the RH for gas 1
         write(kStdWarn,*) ' '
         write(kStdWarn,*) 'Checking Relative Humidity'
-        write(kStdWarn,*) ' iX   Lay  P(mb)    zav(km)  dz(km)   T(K)     PP(mb)  SVP(mb)    RH      Q         Q1         Q2'
-        write(kStdWarn,*) '-------------------------------------------------------------------------------------------------------'
+        write(kStdWarn,113) ' iX   Lay  P(mb)    zav(km)  dz(km)   T(K)     PP(mb)  SVP(mb)    RH      QTot      Q1..Qn'
+        write(kStdWarn,113) '------------------------------------------------------------------------------------------'
         DO iL = iLowestLev,kProfLayer
           z    = (raZout(iL) + raZout(iL+1))/2/1000
           zWoo = (raZout(iL+1) - raZout(iL))/1000
@@ -1828,6 +1865,7 @@ c testing
       END IF
  111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '))
  112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '),A7)
+ 113  FORMAT(A90)
 
 c now find pressure output corresponding to HGT output from LBLRTM
       IF (kRTP .EQ. -20) THEN
@@ -1847,6 +1885,8 @@ c now find pressure output corresponding to HGT output from LBLRTM
         END IF
       END IF
 
+      write(kStdWarn,*) '  >>>>>>>>>>>> finished the Levels --> Layers intergation >>>>>>>>>>>>>>>>>>>'
+      
       RETURN
       END
 
@@ -1869,7 +1909,7 @@ c output
 
 c local var
       INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor
-      REAL raX(kMaxGas),rX,rP,rT
+      REAL raX(kMaxGas),rX,rP,rT,raP_Nm2(2*kProfLayer)
       CHARACTER*80 caStr
 
       rPmin = +1.0e6
@@ -1933,7 +1973,9 @@ c local var
       write(kStdWarn,*) 'PSurf = ',rPSurf,' mb;  TSurf = ',rTSurf,' K '
       DO iL = 1,iNumLevs
         READ (iIOUN2,*) rP,rT,(raX(iJ),iJ=1,iNumGases)
-        raP(iL) = rP * 100.0  !! change from mb to N/m2
+c        raP(iL) = rP * 100.0  !! change from mb to N/m2
+        raP_Nm2(iL) = rP * 100.0  !! change from mb to N/m2
+        raP(iL) = rP
         raT(iL) = rT
         IF (rPmax .LE. raP(iL)) rPmax = raP(iL)
         IF (rPmin .GT. raP(iL)) rPmin = raP(iL)
@@ -1947,13 +1989,14 @@ c local var
       kProfileUnitOpen=-11
 
  5030 FORMAT(A80)
+ 
+      write(kStdWarn,*)'  KCARTA Database : max/min press (mb) = ',rPmaxKCarta/100.0,rPminKCarta/100.0
+      write(kStdWarn,*)'  kCARTA Database : max/min height (m) = ',rHmaxKCarta,rHminKCarta
+      write(kStdWarn,*)'input file : spres (mb)/Height(km)      = ',rPSurf,rHSurf
+
       rPSurf = rPSurf * 100.0
       rHSurf = rHSurf * 1000.0
 
-      write(kStdWarn,*)'  KCARTA Database : max/min press (mb) = ',rPmaxKCarta/100.0,rPminKCarta/100.0
-      write(kStdWarn,*)'  kCARTA Database : max/min height (m) = ',rHmaxKCarta,rHminKCarta
-      write(kStdWarn,*)'input file : spres/sHeight      = ',rPSurf,rHSurf
-     
 c make sure pressures are decreasing with index ie layers going higher and higher
       IF (raP(1) .LT. raP(2)) THEN
         !!! need to swap!!!
@@ -1980,1364 +2023,12 @@ c make sure pressures are decreasing with index ie layers going higher and highe
 
 c now change all units to MR
       DO iG = 1,iNumGases
-        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR)
+        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP_Nm2,raT,raaG_MR)
         DO iL = 1,iNumLevs
           raaG_MR(iL,iG) =  raaG_MR(iL,iG) / 1.0e6
           iaGasUnits(iG) = 12
         END DO
       END DO         
-
-      RETURN
-      END
-
-c************************************************************************
-      SUBROUTINE  ReadInput_LBLRTM_ProfileTAPE5(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
-     $                          iNumLevs,rPSurf,rTSurf,rHSurf,iNumGases,raP,raT,
-     $                          iaG,iaGasUnits,raaG_MR,rPMin,rPMax,rYear,rLat,rLon)
-
-      IMPLICIT NONE
-     
-      INCLUDE '../INCLUDE/kcarta.param'
-
-c input
-      CHARACTER*80 caPfName
-      REAL rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
-c output
-      INTEGER iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
-      REAL rPmin,rPmax,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon
-      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas)
-
-c local var
-      INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor,iLBL_Levs,iaJunk(20),iNumLevsXsec,iNXsec,iLBROutBdryHorP
-      REAL raX(kMaxGas),rX,rP,rT,rF1,rF2,rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH,raSumCheck(kMaxGas)
-      CHARACTER*80 caStr,caStrX,caStrY
-      CHARACTER*30 caStr30
-      CHARACTER*1  c1
-      INTEGER iWriteRTP,iNumGasesBAD,iaBadGasProfile(kMaxGas),iDefault,iReplaceZeroProf,iCONTN
-
-      rPmin = +1.0e6
-      rPmax = -1.0e+6
-      iNXsec = -1
-
-      write(kSTdWarn,*) 'Reading in LBLRTM TAPE5 .....'
-
-      iIOUN2 = kProfileUnit
-      OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED',
-     $    IOSTAT=iErrIO)
-      IF (iErrIO .NE. 0) THEN
-          iErr=1
-          WRITE(kStdErr,1070) iErrIO, caPfname
- 1070     FORMAT('ERROR! number ',I5,' opening PRFILE path LBLRTM profile file'
-     $            ,/,A80)
-          CALL DoSTOP
-      ENDIF
-      kProfileUnitOpen=1
-
-      iDefault = 5
-      iCONTN = 6    !!! user specifies continuum settings in free format on additional line (assume all = 1)
-      iCONTN = 5    !!! assume all continuums turned on (= 1)
-
-      IF ((iCONTN .NE. iDefault) .AND. (iDefault .EQ. 5)) THEN
-        write(kStdWarn,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
-        write(kStdWarn,*) 'While reading in LBLRTM TAPE5, not expecting extra line for Continuum settings'
-        write(kStdErr,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
-        write(kStdErr,*) 'While reading in LBLRTM TAPE5, not expecting extra line for Continuum settings'
-      ELSEIF ((iCONTN .NE. iDefault) .AND. (iDefault .EQ. 6)) THEN
-        write(kStdWarn,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
-        write(kStdWarn,*) 'While reading in LBLRTM TAPE5, expecting extra line for Continuum settings'
-        write(kStdErr,*) 'subroutine ReadInput_LBLRTM_ProfileTAPE5  iDefault,iCONTN = ',iDefault,iCONTN
-        write(kStdErr,*) 'While reading in LBLRTM TAPE5, expecting extra line for Continuum settings'
-      END IF
-
-c this should read 
-c /home/sergio/IR_NIR_VIS_UV_RTcodes/LBLRTM/LBLRTM12.2/lblrtm/run_examples/run_example_user_defined_upwelling/TAPE5
-      !! reads HI=1 F4=1 CN=5 AE=0 EM=0 SC=0 FI=0 PL=0 TS=0 AM=0 MG=1 LA=0 OD=1 XS=0    0    0
-      !! reads HI=1 F4=1 CN=6 AE=0 EM=0 SC=0 FI=0 PL=0 TS=0 AM=0 MG=1 LA=0 OD=1 XS=0    0    0
-      READ (iIOUN2,5030,ERR=13,END=13) caStr  
-      !! need to edit file; if CN=5, no need for this next line
-      !! need to edit file; if CN=6,    need     this next line as it "specifies" the continuum
-      !!   XSELF, XFRGN, XCO2C, XO3CN, XO2CN, XN2CN, XRAYL in free format
-      !!     XSELF  H2O self broadened continuum absorption multiplicative factor
-      !!     XFRGN  H2O foreign broadened continuum absorption multiplicative factor
-      !!     XCO2C  CO2 continuum absorption multiplicative factor
-      !!     XO3CN  O3 continuum absorption multiplicative factor
-      !!     XO2CN  O2 continuum absorption multiplicative factor
-      !!     XN2CN  N2 continuum absorption multiplicative factor
-      !!      XRAYL Rayleigh extinction multiplicative factor
-      IF (iCONTN .EQ. 6) THEN
-        !! read in XSELF, XFRGN, XCO2C, XO3CN, XO2CN, XN2CN, XRAYL; assume all set to 1
-        READ (iIOUN2,5030,ERR=13,END=13) caStr
-        write(kStdWarn,*) 'read in XSELF, XFRGN, XCO2C, XO3CN, XO2CN, XN2CN, XRAYL .... value is'
-        write(kStdWarn,*) caStr
-      END IF
-
-      READ (iIOUN2,*) rF1,rF2
-      write(kStdWarn,*) 'LBLRTM input indicates start/stop wavenumbers are ',rF1,rF2
-
-      READ (iIOUN2,*) rTSurf
-      write(kStdWarn,*) 'LBLRTM input indicates STEMP is ',rTSurf
-
-      READ (iIOUN2,*) (iaJunk(iL),iL = 1,9)
-      iLBL_Levs = iaJunk(3)
-      iNumGases = iaJunk(6)
-      IF (iLBL_Levs .LT. 0) THEN
-        write(kStdWarn,*) 'looks like boundaries for calculations specified in mb'
-        iLBL_Levs = abs(iLBL_Levs)
-        iLBROutBdryHorP = -1
-      ELSE
-        iLBROutBdryHorP = +1
-        write(kStdWarn,*) 'looks like boundaries for calculations specified in km'
-      END IF
-
-      write(kStdWarn,*) 'TAPE5 implies kCARTA compute ODs at ',iLBL_Levs,' press/heights, for iNumGases = ',iNumGases
-      IF (iLBL_Levs .GT. kProfLayer) THEN
-        write(kStdErr,*) 'though irrelevant for kCARTA calcs, it will not be able to read in the pressures/heights'
-        write(kStdErr,*) iLBL_Levs,kProfLayer
-        CALL DoStop
-      END IF
-      IF (iNumGases .GT. kMaxGas) THEN
-        write(kStdErr,*) 'iNumGases .GT. kMaxGas',iNumGases,kMaxGas
-        CALL DoStop
-      END IF
-
-      READ (iIOUN2,*) rTophgt,rHSurf,rViewAngle
-      IF (iLBROutBdryHorP .EQ. +1) THEN
-        write(kStdWarn,*) 'LBLRTM input indicates start/stop hgts are ',rHSUrf,rTopHgt,' with view angle ',rViewAngle
-      ELSEIF (iLBROutBdryHorP .EQ. -1) THEN
-        write(kStdWarn,*) 'LBLRTM input indicates start/stop press ',rHSUrf,rTopHgt,' with view angle ',rViewAngle
-      END IF
-
-      READ (iIOUN2,*) (raLBL_Hgts(iJ),iJ=1,iLBL_Levs)
-      
-      raRTP_TxtInput(6) = +raLBL_Hgts(iLBL_Levs)    !! default, assume hgt in km
-      IF  (iLBROutBdryHorP .LT. 0) raRTP_TxtInput(6) = -raLBL_Hgts(iLBL_Levs)
-
-      READ (iIOUN2,*) iNumLevs
-      iNumLevs = abs(iNumLevs)
-      IF (iNumLevs .GT. 2*kProfLayer) THEN
-        write(kStdErr,*) 'iNumLevs .GT. 2*kProfLayer',iNumLevs,kProfLayer
-        CALL DoStop
-      END IF
-
-c see eg http://shadow.eas.gatech.edu/~vvt/lblrtm/lblrtm_inst.html
-c       http://www.ssec.wisc.edu/~paulv/Fortran90/AtmProfile/Modules.html
-c       https://svn.ssec.wisc.edu/repos/uwphysret/trunk/mfiles/compute_F.m
-c       JCHAR = 1-6           - default to value for specified model atmosphere
-c              = " ",A         - volume mixing ratio (ppmv)
-c              = B             - number density (cm-3)
-c              = C             - mass mixing ratio (gm/kg)
-c              = D             - mass density (gm m-3)
-c              = E             - partial pressure (mb)
-c              = F             - dew point temp (K) *H2O only*
-c              = G             - dew point temp (C) *H2O only*
-c              = H             - relative humidity (percent) *H2O only*
-c              = I             - available for user definition
-      DO iG = 1,iNumGases
-        iaG(iG) = iG
-        iaGasUnits(iG) = 10   !!! assume hardcoded ppmv
-      END DO
-
-      DO iJ = 1,iNumGases
-        raSumCheck(iJ) = 0.0
-      END DO
-        
-      DO iL = 1,iNumLevs              !!! >>>>>>>>>>>>>>>>>>>> start reading the MOLGAS profiles
-        ! READ (iIOUN2,*) rH,rP,rT,caStrX
-        READ (iIOUN2,111) caStrY
-        READ(caStrY,*) rH,rP,rT
-        IF (iL .EQ. 1) rHSUrf = rH
-        caStrX = caStrY(31:80)
-        caStr30 = caStrX(11:40)
-
-        IF (iL .EQ. 1) THEN
-          DO iJ=1,iNumGases            
-            c1 = caStr30(iJ:iJ)
-            IF (c1 .EQ. 'A') iaGasUnits(iJ) = 10
-            IF (c1 .EQ. ' ') iaGasUnits(iJ) = 10
-            IF (c1 .EQ. 'B') iaGasUnits(iJ) = -1
-            IF (c1 .EQ. 'C') iaGasUnits(iJ) = 20
-            IF (c1 .EQ. 'D') iaGasUnits(iJ) = -1
-            IF (c1 .EQ. 'E') iaGasUnits(iJ) = -1
-            IF (c1 .EQ. 'F') iaGasUnits(iJ) = 42
-            IF (c1 .EQ. 'G') iaGasUnits(iJ) = 43             
-            IF (c1 .EQ. 'H') iaGasUnits(iJ) = 40
-            IF (c1 .EQ. 'I') iaGasUnits(iJ) = -1
-            
-            IF (iaGasUnits(iJ) .LT. 0) THEN
-              write(kStdErr,*) 'LBLRTM --> kCarta not set up to deal with gas units ',c1,' for gas number ',iJ
-              CALL DOStop
-            ELSE
-              write(kStdWarn,*) 'LBLRTM gas number ',iJ,' "units" ',c1,' = kCARTA levels units of ',iaGasUnits(iJ)
-            END IF
-          END DO
-        END IF
-
-        READ (iIOUN2,*) (raX(iJ),iJ=1,iNumGases)
-        DO iJ = 1,iNumGases
-          raSumCheck(iJ) = raSumCheck(iJ) + raX(iJ)
-        END DO
-
-        raP(iL) = rP * 100.0  !! change from mb to N/m2
-        raT(iL) = rT
-        IF (rPmax .LE. raP(iL)) rPmax = raP(iL)
-        IF (rPmin .GT. raP(iL)) rPmin = raP(iL)
-        DO iJ = 1,iNumGases
-          raaG_MR(iL,iJ) = raX(iJ)
-        END DO
- 111    FORMAT(A80)
-
-        IF (iL .EQ. 1) THEN
-          rPSurf = raP(1)/100 !! because we redo this below
-          IF ((rHSurf .GT. rHmaxKCarta) .OR. (rHSurf .LT. rHminKCarta)) THEN
-            write(kStdErr,*) 'need rHmaxKCarta >= rHSurf >= rHminKCarta but have'
-            write(kStdErr,*) '(rHmaxKCarta,rHSurf,rHminKCarta) = ',rHmaxKCarta,rHSurf,rHminKCarta
-            CALL DoStop
-          END IF
-          IF ((rPSurf .GT. rPmaxKCarta) .OR. (rPSurf .LT. rPminKCarta)) THEN
-            write(kStdErr,*) 'need rPmaxKCarta >= rPSurf >= rPminKCarta but have'
-            write(kStdErr,*) '(rPmaxKCarta,rPSurf,rPminKCarta) = ',rPmaxKCarta,rPSurf,rPminKCarta
-            CALL DoStop
-          END IF
-          IF ((rTSurf .GT. kStempMax) .OR. (rTSurf .LT. kStempMin)) THEN
-            write(kStdErr,*) 'need kStempMax >= rTSurf >= kStempMin but have'
-            write(kStdErr,*) '(kStempMax,rTSurf,kStempMin) = ',kStempMax,rTSurf,kStempMin
-            CALL DoStop
-          END IF
-        END IF
-      END DO       !!!! <<<<<<<<<<<<<<<<<<<< done reading the MOLGAS profiles
-
-      !! now see if data was acutally read in
-      iNumGasesBAD = 0
-      DO iJ = 1,iNumGases
-        IF (raSumCheck(iJ) .LT. 1.0e-20) THEN
-          write(kStdWarn,*) ' reading in TAPE5, following gas had    zero profile column sum ',iJ,raSumCheck(iJ)
-          iNumGasesBAD = iNumGasesBAD + 1
-          iaBadGasProfile(iNumGasesBAD) = iJ
-        ELSE
-          write(kStdWarn,*) ' reading in TAPE5, following gas had nonzero profile column sum ',iJ,raSumCheck(iJ)
-        END IF
-      END DO
-
-      !! need to fix the BAD gases
-      iDefault = +1
-      iReplaceZeroProf = -1    !! assume user knows why there is a ZERO everywhere gas profile
-      iReplaceZeroProf = +1    !! assume user wants to replace ZERO everywhere gas profile with climatology
-
-      IF ((iDefault .NE. iReplaceZeroProf) .AND. (iNumGasesBAD .GT. 0)) THEN
-        write(kStdErr,*) 'in ReadInput_LBLRTM_ProfileTAPE5 : user wants to replace zero prof with climatology'
-        write(kStdErr,*) 'iDefault = ',iDefault,' iReplaceZeroProf = ',iReplaceZeroProf
-        write(kStdWarn,*) 'in ReadInput_LBLRTM_ProfileTAPE5 : user wants to replace zero prof with climatology'
-        write(kStdWarn,*) 'iDefault = ',iDefault,' iReplaceZeroProf = ',iReplaceZeroProf 
-      END IF
-      IF ((iNumGasesBAD .GT. 0) .AND. (iReplaceZeroProf .GT. 0)) THEN
-        DO iG = 1,iNumGasesBAD
-          CALL substitute_tape5_profile_for_climatology(iaBadGasProfile(iG),iNumLevs,raP,raaG_MR)
-          iaGasUnits(iaBadGasProfile(iG)) = 10
-          raSumCheck(iaBadGasProfile(iG)) = 0.0
-          DO iJ = 1,iNumLevs
-            raSumCheck(iaBadGasProfile(iG)) = raSumCheck(iaBadGasProfile(iG)) + 
-     $                                        raaG_MR(iJ,iaBadGasProfile(iG))
-          END DO
-          write(kStdWarn,*) 'reset ZERO gas profile for gasID ',iaBadGasProfile(iG),' ppmv sum = ',raSumCheck(iaBadGasProfile(iG))
-        END DO
-      END IF
-
-      !! now see if there are xsec gases
-      READ (iIOUN2,5030,ERR=13,END=13) caStr
-      READ(caStr,*) iNXsec
-      IF (iNXsec .GT. 0) THEN    !!!! >>>>>>>>>>>>>>> start reading XSCGAS profiles
-        READ (iIOUN2,5030,ERR=13,END=13) caStr     !!!! xsec names 
-        CALL XsecNamesLBL(caStr,iaG,iaGasUnits,iNumGases,iNXsec,kRTP)
-        READ (iIOUN2,*) iNumLevsXsec
-        IF (iNumLevsXsec .GT. 2*kProfLayer) THEN
-          write(kStdErr,*) 'iNumLevsXsec .GT. 2*kProfLayer',iNumLevsXsec,kProfLayer
-          CALL DoStop
-        END IF
-        IF (iNumLevsXsec .NE. iNumLevs) THEN
-          write(kStdErr,*) 'iNumLevsXsec .NE. iNumLevs',iNumLevsXsec,iNumLevs
-          CALL DoStop
-        END IF
-        DO iL = 1,iNumLevsXsec
-          READ (iIOUN2,111,ERR=13,END=13) caStrY
-          caStr30 = caStrY(16:45)
-          IF (iL .EQ. 1) THEN
-            DO iJ=1,iNXsec
-              c1 = caStr30(iJ:iJ)
-              IF (c1 .EQ. 'A') iaGasUnits(iJ+iNumGases) = 10
-              IF (c1 .EQ. ' ') iaGasUnits(iJ+iNumGases) = 10
-              IF (c1 .EQ. 'B') iaGasUnits(iJ+iNumGases) = -1
-              IF (c1 .EQ. 'C') iaGasUnits(iJ+iNumGases) = 20
-              IF (c1 .EQ. 'D') iaGasUnits(iJ+iNumGases) = -1
-              IF (c1 .EQ. 'E') iaGasUnits(iJ+iNumGases) = -1
-              IF (c1 .EQ. 'F') iaGasUnits(iJ+iNumGases) = 42
-              IF (c1 .EQ. 'G') iaGasUnits(iJ+iNumGases) = 43             
-              IF (c1 .EQ. 'H') iaGasUnits(iJ+iNumGases) = 40
-              IF (c1 .EQ. 'I') iaGasUnits(iJ+iNumGases) = -1
-              
-              IF (iaGasUnits(iJ+iNumGases) .LT. 0) THEN
-                write(kStdErr,*) 'LBLRTM --> kCarta not set up to deal with gas units ',c1,' for gas number ',iJ
-                CALL DOStop
-              ELSE
-                write(kStdWarn,*) 'LBLRTM xsec number ',iJ,' is of "units" ',c1,' = kCARTA input levels units of ',
-     $              iaGasUnits(iJ+iNumGases)
-              END IF
-            END DO
-          END IF
-
-          READ (iIOUN2,*) (raX(iG),iG=1,iNXsec)
-          DO iJ = 1,iNXsec
-            raaG_MR(iL,iJ+iNumGases) = raX(iJ)
-          END DO
-        END DO
-        iNumGases = iNumGases + iNXsec
-      END IF     !!! end reading xsc gas profiles
-
- 13   CONTINUE
-      CLOSE(iIOUN2) 
-      kProfileUnitOpen = -11
-
- 5030 FORMAT(A80)
-
-      raRTP_TxtInput(1) = rPSurf
-      raRTP_TxtInput(2) = rTSurf
-      raRTP_TxtInput(3) = rHSurf    !! km
-      raRTP_TxtInput(4) = rTophgt   !! km
-      raRTP_TxtInput(5) = rViewAngle  !! if 0 < ang < 90, then radiation travelling down to instr, else rad travelling up to instr
-
-      rPSurf = rPSurf * 100.0
-      rHSurf = rHSurf * 1000.0
-
-      write(kStdWarn,*)'  KCARTA Database : max/min press (mb) = ',rPmaxKCarta/100.0,rPminKCarta/100.0
-      write(kStdWarn,*)'  kCARTA Database : max/min height (m) = ',rHmaxKCarta,rHminKCarta
-      write(kStdWarn,*)'input file : spres/sHeight      = ',rPSurf,rHSurf
-     
-c make sure pressures are decreasing with index ie layers going higher and higher
-      IF (raP(1) .LT. raP(2)) THEN
-        !!! need to swap!!!
-        iMid = ifloor(iNumLevs/2.0)
-        DO iL = 1,iMid
-          iJ = iNumLevs-iL+1
-          rX = raP(iJ)
-          raP(iJ) = raP(iL)
-          raP(iL) = rX
-
-          rX = raT(iJ)
-          raT(iJ) = raT(iL)
-          raT(iL) = rX
-
-          DO iG = 1,iNumGases
-            raX(iG) = raaG_MR(iJ,iG)
-            raaG_MR(iJ,iG) = raaG_MR(iL,iG)
-            raaG_MR(iL,iG) = raX(iG)
-          END DO
-        END DO
-      END IF
-      write(kStdWarn,*) 'input file : Highest altitude (lowest press) = ',raP(iNumLevs)/100.0,' mb at level ',iNumLevs
-      write(kStdWarn,*) ' '
-
-      iWriteRTP = +1
-      IF (iWriteRTP .GT. 0) THEN
-        CALL lblrtm2rtp(rF1,rF2,rPmin,rPmax,iNumGases,iaG,iaGasUnits,iNumLevs,rPSurf,rTSurf,rHSurf,
-     $                  raP,raT,raaG_MR)
-      END IF
-
-c now change all units to MR
-      DO iG = 1,iNumGases
-        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR)
-        DO iL = 1,iNumLevs
-          raaG_MR(iL,iG) =  raaG_MR(iL,iG) / 1.0e6
-          iaGasUnits(iG) = 12
-        END DO
-      END DO         
-
-      RETURN
-      END
-
-c************************************************************************
-      SUBROUTINE  ReadInput_LBLRTM_ProfileTAPE6(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
-     $                          iNumLays,rPSurf,rTSurf,rHSurf,iNumGases,raPX,raTX,raLayDensityX,raZX,
-     $                          iaG,iaGasUnits,raaG_MRX,rPMin,rPMax,rYear,rLat,rLon)
-
-      IMPLICIT NONE
-     
-      INCLUDE '../INCLUDE/kcarta.param'
-
-c input
-      CHARACTER*80 caPfName
-      REAL rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
-c output
-      INTEGER iNumLays,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
-      REAL rPmin,rPmax,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon
-      REAL raPX(kProfLayer+1),raTX(kProfLayer+1),raaG_MRX(kProfLayer+1,kMaxGas),raLayDensityX(kProfLayer+1)
-      REAL raZX(kProfLayer+1)
-
-c local var
-      INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor,iLBL_Levs,iaJunk(20),iNumLevsXsec,iNXsec,iLBROutBdryHorP
-      REAL raX(kMaxGas),rX,rP,rT,rF1,rF2,rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH,r1,r2,r3,r4,r5,r6
-      CHARACTER*80 caStrX,caStrY
-      CHARACTER*120 caStr
-      CHARACTER*30 caStr30
-      CHARACTER*1  c1
-      CHARACTER*2  c2a,c2b
-      INTEGER iWriteRTP,iCountGases,iGCnt,iPass
-      INTEGER i1,i2,i3,i4,i5,i6
-
-      rPmin = +1.0e6
-      rPmax = -1.0e+6
-      iNXsec = -1
-
-      write(kSTdWarn,*) 'Reading in modified LBLRTM TAPE6 = HEAD TAPE5 + MID TAPE6.....'
-      iIOUN2 = kProfileUnit
-      OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED',
-     $    IOSTAT=iErrIO)
-      IF (iErrIO .NE. 0) THEN
-          iErr=1
-          WRITE(kStdErr,1070) iErrIO, caPfname
- 1070     FORMAT('ERROR! number ',I5,' opening PRFILE path LBLRTM profile file'
-     $            ,/,A80)
-          CALL DoSTOP
-      ENDIF
-      kProfileUnitOpen=1
-
-c this should read /home/sergio/IR_NIR_VIS_UV_RTcodes/LBLRTM/LBLRTM12.2/lblrtm/run_examples/run_example_user_defined_upwelling/TAPE5
-      READ (iIOUN2,5030,ERR=111,END=111) caStr
-      READ (iIOUN2,5030,ERR=111,END=111) caStr
-
-      READ (iIOUN2,*) rF1,rF2
-      write(kStdWarn,*) 'LBLRTM input indicates start/stop wavenumbers are ',rF1,rF2
-
-      READ (iIOUN2,*) rTSurf
-      write(kStdWarn,*) 'LBLRTM input indicates STEMP is ',rTSurf
-
-      READ (iIOUN2,*) (iaJunk(iL),iL = 1,9)
-      iLBL_Levs = iaJunk(3)
-      iNumGases = iaJunk(6)
-      IF (iLBL_Levs .LT. 0) THEN
-        write(kStdWarn,*) 'looks like boundaries for calculations specified in mb'
-        iLBL_Levs = abs(iLBL_Levs)
-        iLBROutBdryHorP = -1
-      ELSE
-        iLBROutBdryHorP = +1
-        write(kStdWarn,*) 'looks like boundaries for calculations specified in km'
-      END IF
-
-      write(kStdWarn,*) 'TAPE5 implies kCARTA compute ODs at ',iLBL_Levs,' press/heights, for iNumGases = ',iNumGases
-      IF (iLBL_Levs .GT. kProfLayer) THEN
-        write(kStdErr,*) 'though irrelevant for kCARTA calcs, it will not be able to read in the pressures/heights'
-        write(kStdErr,*) iLBL_Levs,kProfLayer
-        CALL DoStop
-      END IF
-      IF (iNumGases .GT. kMaxGas) THEN
-        write(kStdErr,*) 'iNumGases .GT. kMaxGas',iNumGases,kMaxGas
-        CALL DoStop
-      END IF
-
-      READ (iIOUN2,*) rTophgt,rHSurf,rViewAngle
-      IF (iLBROutBdryHorP .EQ. +1) THEN
-        write(kStdWarn,*) 'LBLRTM input indicates start/stop hgts are ',rHSUrf,rTopHgt,' with view angle ',rViewAngle
-      ELSEIF (iLBROutBdryHorP .EQ. -1) THEN
-        write(kStdWarn,*) 'LBLRTM input indicates start/stop press are ',rHSUrf,rTopHgt,' with view angle ',rViewAngle
-      END IF
-
-      READ (iIOUN2,*) (raLBL_Hgts(iJ),iJ=1,iLBL_Levs)
-
-      raRTP_TxtInput(6) = +raLBL_Hgts(iLBL_Levs)    !! default, assume hgt in km
-      IF  (iLBROutBdryHorP .LT. 0) raRTP_TxtInput(6) = -raLBL_Hgts(iLBL_Levs)
-
-      READ (iIOUN2,*) iNumLays,iNXsec
-      write(kSTdWarn,*) 'Reading TAPE6 info for ',iNumLays,' layers and ',iNumGases,' molgases and ',iNXsec,' xsecgases'
-
-      IF (iNumLays .GT. kProfLayer) THEN
-        write(kStdErr,*) 'iNumLays .GT. kProfLayer',iNumLays,kProfLayer
-        CALL DoStop
-      END IF
-
-      !! we now read every gas 1 .. iNumGases  in edited TAPE6 == molecules/cm2
-      DO iG = 1,iNumGases
-        iaG(iG) = iG
-        iaGasUnits(iG) = 1   !!! assume hardcoded molecules/cm2
-      END DO
-
-      READ(iIOUN2,5030) caStr      
-      IF (caStr(1:6) .NE. '0LAYER') THEN
-        write(kStdErr,*) 'oops, expecting string : 0LAYER                          P(MB)       T(K)    ALPHL    ALPHD    ALPHV ...'
-        write(kStdErr,*) 'but instead got ',caSTr
-        CALL DOStop
-      END IF
-      !READ(iIOUN2,5030) caStr      
-      !IF (caStr(1:6) .NE. '     ') THEN
-      !  write(kStdErr,*) 'expecting blank string but got ',caStr
-      !  CALL DOStop
-      !END IF
-
-      DO iL = 1,iNumLays
-        READ (iIOUN2,*) i1,i2,r1,c2a,r2,c2b,rP,rT
-        raZX(iL)   = r1
-        raZX(iL+1) = r2
-c        print *,iL,iNumLays,raZX(iL),rP,rT
-      END DO
-
-      iPass = 1
-      iCountGases = 0
-      iGCnt = min(7,iNumGases)  !! in first pass, read at most 7 gases
-      write(kSTdWarn,*) '  Reading ',iGCnt,' gases from TAPE6 at pass ',iPass
-      READ(iIOUN2,5030) caStr      !! blank except for 1 at beginning
-      READ(iIOUN2,5030) caStr      !! eg LBLRTM    14/07/04  22:24:32
-      READ(iIOUN2,5030) caStr      !! eg MOLECULAR AMOUNTS (MOL/CM**2) BY LAYER
-      READ(iIOUN2,5030) caStr      !! eg P(MB)      T(K)   IPATH         H2O 
-      DO iL = 1,iNumLays
-        READ (iIOUN2,*) i1,i2,r1,c2a,r2,c2b,rP,rT,i6,(raX(iG),iG=1,iGCnt)
-        raZX(iL)   = r1
-        raZX(iL+1) = r2
-        raPX(iL) = rP * 100.0  !! change from mb to N/m2
-        raTX(iL) = rT
-        IF (rPmax .LE. raPX(iL)) rPmax = raPX(iL)
-        IF (rPmin .GT. raPX(iL)) rPmin = raPX(iL)
-        IF (iL .EQ. 1) THEN
-          rPSurf = raPX(1)/100 !! because we redo this below
-        END IF
-        DO iG=1,iGCnt
-          raaG_MRX(iL,iG+iCountGases) = raX(iG)
-        END DO
-        raLayDensityX(iL) = raX(7)*100.0/20.9    !! turn OXYGEN amount into proxy for AIR, assuming VMR of 0.209
-      END DO
-      READ(iIOUN2,5030) caStr      !! ACCUMULATED MOLECULAR AMOUNTS FOR TOTAL PATH
-      READ(iIOUN2,5030) caStr      !! eg 0 97  0.000 TO 82.724 KM 
-      iCountGases = iCountGases + iGCnt
-
- 15   CONTINUE
-      IF ((iNumGases .EQ. iCountGases) .AND. (iNXsec .EQ. 0)) GOTO 111     !!! done, just close file!!!!
-      IF ((iNumGases .EQ. iCountGases) .AND. (iNXsec .GT. 0)) GOTO 23      !!! done with main gases, need to read xsec gases
-
-      ! need to do this if need to read in more gases
-      iPass = iPass + 1
-      iGCnt = min(8,iNumGases-iCountGases)      
-      write(kSTdWarn,*) '  Reading ',iGCnt,' gases from TAPE6 at pass ',iPass
-      READ(iIOUN2,5030) caStr      !! eg 1blank
-      READ(iIOUN2,5030) caStr      !! LBLRTM    14/07/04  22:24:32
-      READ(iIOUN2,5030) caStr      !! eg MOLECULAR AMOUNTS (MOL/CM**2) BY LAYER
-      READ(iIOUN2,5030) caStr      !! eg P(MB)      T(K)   IPATH         H2O 
-      DO iL = 1,iNumLays
-        READ (iIOUN2,*) i1,i2,r1,c2a,r2,c2b,rP,rT,i6,(raX(iG),iG=1,iGCnt)
-        raZX(iL)   = r1
-        raZX(iL+1) = r2
-        raPX(iL) = rP * 100.0  !! change from mb to N/m2
-        raTX(iL) = rT
-        IF (rPmax .LE. raPX(iL)) rPmax = raPX(iL)
-        IF (rPmin .GT. raPX(iL)) rPmin = raPX(iL)
-        IF (iL .EQ. 1) THEN
-          rPSurf = raPX(1)/100 !! because we redo this below
-        END IF
-        DO iG=1,iGCnt
-          raaG_MRX(iL,iG+iCountGases) = raX(iG)
-        END DO
-        !!!! raLayDensityX(iL) = raX(7)*100.0/20.9    !! turn OXYGEN amount into proxy for AIR, assuming VMR of 0.209
-      END DO
-      iCountGases = iCountGases + iGCnt
-      READ(iIOUN2,5030) caStr      !! ACCUMULATED MOLECULAR AMOUNTS FOR TOTAL PATH
-      READ(iIOUN2,5030) caStr      !! eg 0 97  0.000 TO 82.724 KM 
-      GOTO 15      
-
- 23   CONTINUE    !! finished reading in LAYER amounts for main gases, now read in LEVELS
-      DO i1 = 1,iPass
-        READ(iIOUN2,5030) caStr         !! blank
-        READ(iIOUN2,5030) caStr      !! ----
-        READ(iIOUN2,5030) caStr      !!  MIXING RATIOS BY LAYER
-        READ(iIOUN2,5030) caStr      !!   P(MB)      T(K)   IPATH         H2O           CO2 
-        DO i2 = 1,iNumLays
-          READ(iIOUN2,5030) caStr      !! mix ratios
-        END DO
-        READ(iIOUN2,5030) caStr      !! blank
-        READ(iIOUN2,5030) caStr      !! LBLRTM    14/07/04  22:24:32
-      END DO
-
-      !!! now ready to read in xsec gases, assume you only need 1 pass
-      READ(iIOUN2,5030) caStr      !! blank
-      READ(iIOUN2,5030) caStr      !!  *****  CROSS SECTIONS  *****
-      READ(iIOUN2,5030) caStr      !! MOLECULAR AMOUNTS (MOL/CM**2) BY LAYER
-      READ(iIOUN2,5030) caStr      !! P(MB)      T(K)   IPATH     F11           F14           F22
-      caStr = caStr(56:120)
-c      print *,caStr
-      CALL XsecNamesLBL(caStr,iaG,iaGasUnits,iNumGases,iNXsec,kRTP)
-      IF (iNXsec .GT. 7) THEN
-        write(kStdWarn,*) 'oops assumed at most 7 xsec gases, so only 1 pass ... need to modify code for > 7 gases'
-        CALL DOStop
-      END IF
-      DO iL = 1,iNumLays
-        READ (iIOUN2,*) i1,i2,r1,c2a,r2,c2b,rP,rT,i6,(raX(iG),iG=1,iNXsec)
-        raZX(iL)   = r1
-        raZX(iL+1) = r2
-        raPX(iL) = rP * 100.0  !! change from mb to N/m2
-        raTX(iL) = rT
-        IF (rPmax .LE. raPX(iL)) rPmax = raPX(iL)
-        IF (rPmin .GT. raPX(iL)) rPmin = raPX(iL)
-        IF (iL .EQ. 1) THEN
-          rPSurf = raPX(1)/100 !! because we redo this below
-        END IF
-        DO iG=1,iNXsec
-          raaG_MRX(iL,iG+iNumGases) = raX(iG)
-        END DO
-        !!!! raLayDensityX(iL) = raX(7)*100.0/20.9    !! turn OXYGEN amount into proxy for AIR, assuming VMR of 0.209
-      END DO
-      
- 111  CONTINUE
-      CLOSE(iIOUN2) 
-      kProfileUnitOpen = -11
-      iNumGases = iNumGases + iNXsec
-
-c      DO iG = 1,iNumGases
-c        print *,iG,iaG(iG),iaGasUnits(iG)
-c      END DO
-
- 5030 FORMAT(A120)
-
-      raRTP_TxtInput(1) = rPSurf
-      raRTP_TxtInput(2) = rTSurf
-      raRTP_TxtInput(3) = rHSurf    !! km
-      raRTP_TxtInput(4) = rTophgt   !! km
-      raRTP_TxtInput(5) = rViewAngle  !! if 0 < ang < 90, then radiation travelling down to instr, else rad travelling up to instr
-
-      rPSurf = rPSurf * 100.0
-      rHSurf = rHSurf * 1000.0
-
-      write(kStdWarn,*)'  KCARTA Database : max/min press (mb) = ',rPmaxKCarta/100.0,rPminKCarta/100.0
-      write(kStdWarn,*)'  kCARTA Database : max/min height (m) = ',rHmaxKCarta,rHminKCarta
-      write(kStdWarn,*)'input file : spres/sHeight      = ',rPSurf,rHSurf
-     
-c make sure pressures are decreasing with index ie layers going higher and higher
-      IF (raPX(1) .LT. raPX(2)) THEN
-        !!! need to swap!!!
-        iMid = ifloor(iNumLays/2.0)
-        DO iL = 1,iMid
-          iJ = iNumLays-iL+1
-          rX = raPX(iJ)
-          raPX(iJ) = raPX(iL)
-          raPX(iL) = rX
-
-          rX = raTX(iJ)
-          raTX(iJ) = raTX(iL)
-          raTX(iL) = rX
-
-          DO iG = 1,iNumGases
-            raX(iG) = raaG_MRX(iJ,iG)
-            raaG_MRX(iJ,iG) = raaG_MRX(iL,iG)
-            raaG_MRX(iL,iG) = raX(iG)
-          END DO
-        END DO
-      END IF
-      write(kStdWarn,*) 'input file : Highest altitude (lowest press) = ',raPX(iNumLays)/100.0,' mb at level ',iNumLays
-      write(kStdWarn,*) ' '
-
-c      iWriteRTP = +1
-c      IF (iWriteRTP .GT. 0) THEN
-c        CALL lblrtm2rtp(rF1,rF2,rPmin,rPmax,iNumGases,iaG,iaGasUnits,iNumLevs,rPSurf,rTSurf,rHSurf,
-c     $                  raP,raT,raaG_MR)
-c      END IF
-
-c now change all units to MR
-c      DO iG = 1,iNumGases
-c        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR)
-c        DO iL = 1,iNumLevs
-c          raaG_MR(iL,iG) =  raaG_MR(iL,iG) / 1.0e6
-c          iaGasUnits(iG) = 12
-c        END DO
-c      END DO         
-
-      RETURN
-      END
-
-c************************************************************************
-c parses LBLRTM xsec names and finds gas ids
-      SUBROUTINE XsecNamesLBL(caStr,iaG,iaGasUnits,iNumGases,iNXsec,iLBLTapeType)
-
-      IMPLICIT NONE
-
-      include '../INCLUDE/kcarta.param'
-
-c input
-      CHARACTER*80 caStr
-      INTEGER iNXsec,iLBLTapeType
-c input/output
-      INTEGER iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
-
-c local
-      INTEGER iaX(kMaxGas),iG,i1,i2
-      CHARACTER*10 caStr10
-      CHARACTER*15 caStr15
-
-      IF (iLBLTapeType .EQ. -5) THEN
-        DO iG = 1,iNXsec
-          i1 = 01 + (iG-1)*10
-          i2 = 10 + (iG-1)*10
-          caStr10 = caStr(i1:i2)
-          CALL mapXsecname_to_XsecID(caStr10,iG,iaX)
-        END DO
-
-        DO iG = iNumGases+1,iNumGases+iNXsec
-          iaG(iG) = iaX(iG-iNumGases)
-          iaGasUnits(iG) = 10   !!! assume hardcoded ppmv
-        END DO
-
-      ELSEIF (iLBLTapeType .EQ. -6) THEN
-        DO iG = 1,iNXsec
-          i1 = 01 + (iG-1)*15
-          i2 = 10 + (iG-1)*15
-          caStr15 = caStr(i1:i2)
-          caStr10 = caSTR15(1:10)
-          CALL mapXsecname_to_XsecID(caStr10,iG,iaX)
-        END DO
-
-        DO iG = iNumGases+1,iNumGases+iNXsec
-          iaG(iG) = iaX(iG-iNumGases)
-          iaGasUnits(iG) = 1   !!! assume hardcoded molecules/cm2
-        END DO
-      END IF
-
-      RETURN
-      END
-
-c************************************************************************
-c this maps xsecnames to xsec IDs
-      SUBROUTINE mapXsecname_to_XsecID(caStr10,iG,iaX)
-
-      IMPLICIT NONE
-
-      include '../INCLUDE/kcarta.param'
-
-c input
-      CHARACTER*10 caStr10  !! str we need to compare
-      INTEGER iG            !! index
-c input/output
-      INTEGER iaX(kMaxGas)  !! modify xsec ID according to strcmp
-
-c local 
-      INTEGER iI,iFound,iChecked
-      CHARACTER*10 caaNamesA(13)
-      CHARACTER*10 caaNamesB(13)
-      CHARACTER*10 caaNamesC(13)
-      CHARACTER*10 caX
-      
-      IF (caStr10(1:1) .NE. ' ') THEN
-        caX = caStr10
-      ELSE
-        CALL adjustleftstr(caStr10,caX)
-      END IF
-
-      caaNamesA(1) = 'CCL3F'
-        caaNamesB(1) = 'F11'
-        caaNamesC(1) = 'CFC11'
-      caaNamesA(2) = 'CCL2F2'
-        caaNamesB(2) = 'F12'
-        caaNamesC(2) = 'CFC12'
-      caaNamesA(3) = 'CCLF3'
-        caaNamesB(3) = 'F13'
-        caaNamesC(3) = 'CFC13'
-      caaNamesA(4) = 'CF4'
-        caaNamesB(4) = 'F14'
-        caaNamesC(4) = 'CFC14'
-      caaNamesA(5) = 'CHCL2F'
-        caaNamesB(5) = 'CFC21'
-        caaNamesC(5) = 'F21'
-      caaNamesA(6) = 'CHC2F2'
-        caaNamesB(6) = 'CFC22'
-        caaNamesC(6) = 'F22'
-      caaNamesA(7) = 'C2CL3F3'
-        caaNamesB(7) = 'CFC113'
-        caaNamesC(7) = 'F113'
-      caaNamesA(8) = 'C2CL2F4'
-        caaNamesB(8) = 'CFC114'
-        caaNamesC(8) = 'F114'
-      caaNamesA(9) = 'C2CLF5'
-        caaNamesB(9) = 'CFC115'
-        caaNamesC(9) = 'F115'
-      caaNamesA(10) = 'CCL4'
-        caaNamesB(10) = 'CCL4'
-        caaNamesC(10) = ' '
-      caaNamesA(11) = 'CLONO2'
-        caaNamesB(11) = 'CLONO2'
-        caaNamesC(11) = 'CLNO3'
-      caaNamesA(12) = 'N2O5'
-        caaNamesB(12) = 'N2O5'
-        caaNamesC(12) = ' '
-      caaNamesA(13) = 'HNO4'
-        caaNamesB(13) = 'HNO4'
-        caaNamesC(13) = ' '
-
-      iaX(iG) = -1
-      iFound = -1
-      iChecked = 1
- 10   CONTINUE
-      IF ((caaNamesA(iChecked) .EQ. caX) .OR. (caaNamesB(iChecked) .EQ. caX) .OR. (caaNamesC(iChecked) .EQ. caX)) THEN
-        iFound = iChecked
-      END IF
-
-      IF ((iFound .LT. 0) .AND. (iChecked .LT. 13)) THEN
-        iChecked = iChecked + 1
-        GOTO 10
-      END IF
-
-      IF (iFound .LT. 0) THEN
-        write(kStdErr,*) 'Reading LBLRTM file; could not find xsec match for ',caX
-        CALL DOStop
-      ELSE
-        iaX(iG) = 50 + iChecked
-        write(kStdWarn,*) '  LBLRTM xsec gas = ',caX,' corresponds to gasID ',iaX(iG)
-      END IF
-
-      RETURN
-      END
-
-c                           -------------------------------------------------
-c                             Alias(1)           Alias(2)           Alias(3)           Alias(4)
-c                            ----------         ----------         ----------         ----------
-c                            CLONO2              CLNO3
-c                            HNO4
-c                            CHCL2F                                 CFC21              F21
-c                            CCL4
-c                            CCL3F               CFCL3              CFC11              F11
-c                            CCL2F2              CF2CL2             CFC12              F12
-c                            C2CL2F4             C2F4CL2            CFC114             F114
-c                            C2CL3F3             C2F3CL3            CFC113             F113
-c                            N2O5
-c                            HNO3
-c                            CF4                                    CFC14              F14
-c                            CHCLF2              CHF2CL             CFC22              F22
-c                            CCLF3                                  CFC13              F13
-c                            C2CLF5                                 CFC115             F115
-
-c************************************************************************
-c this is a much more detailed LBLRTM reader
-      SUBROUTINE  ReadInput_DetailedLBLRTM_Profile(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
-     $                          iNumLevs,rPSurf,rTSurf,rHSurf,iNumGases,raP,raT,
-     $                          iaG,iaGasUnits,raaG_MR,rPMin,rPMax,rYear,rLat,rLon)
-
-      IMPLICIT NONE
-     
-      INCLUDE '../INCLUDE/kcarta.param'
-
-c input
-      CHARACTER*80 caPfName
-      REAL rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
-c output
-      INTEGER iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
-      REAL rPmin,rPmax,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon
-      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas)
-
-c local var
-      INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor,iLBL_Levs,iaJunk(20),iNumLevsXsec,iNXsec,iLBROutBdryHorP
-      REAL raX(kMaxGas),rX,rP,rT,rF1,rF2,rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH
-      CHARACTER*80 caStr,caStrX,caStrY
-      CHARACTER*30 caStr30
-      CHARACTER*1  c1
-
-      rPmin = +1.0e6
-      rPmax = -1.0e+6
-      iNXsec = -1
-
-      iIOUN2 = kProfileUnit
-      OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED',
-     $    IOSTAT=iErrIO)
-      IF (iErrIO .NE. 0) THEN
-          iErr=1
-          WRITE(kStdErr,1070) iErrIO, caPfname
- 1070     FORMAT('ERROR! number ',I5,' opening PRFILE path LBLRTM profile file'
-     $            ,/,A80)
-          CALL DoSTOP
-      ENDIF
-      kProfileUnitOpen=1
-
-c this should read /home/sergio/IR_NIR_VIS_UV_RTcodes/LBLRTM/LBLRTM12.2/lblrtm/run_examples/run_example_user_defined_upwelling/TAPE5
-      READ (iIOUN2,5030,ERR=13,END=13) caStr
-      READ (iIOUN2,5030,ERR=13,END=13) caStr
-
-      READ (iIOUN2,*) rF1,rF2
-      write(kStdWarn,*) 'LBLRTM input indicates start/stop wavenumbers are ',rF1,rF2
-
-      READ (iIOUN2,*) rTSurf
-      write(kStdWarn,*) 'LBLRTM input indicates STEMP is ',rTSurf
-
-      READ (iIOUN2,*) (iaJunk(iL),iL = 1,9)
-      iLBL_Levs = iaJunk(3)
-      iNumGases = iaJunk(6)
-      IF (iLBL_Levs .LT. 0) THEN
-        write(kStdWarn,*) 'looks like boundaries for calculations specified in mb'
-        iLBL_Levs = abs(iLBL_Levs)
-        iLBROutBdryHorP = -1
-      ELSE
-        iLBROutBdryHorP = +1
-        write(kStdWarn,*) 'looks like boundaries for calculations specified in km'
-      END IF
-
-      write(kStdWarn,*) 'TAPE5 implies kCARTA compute ODs at ',iLBL_Levs,' press/heights, for iNumGases = ',iNumGases
-      IF (iLBL_Levs .GT. kProfLayer) THEN
-        write(kStdErr,*) 'though irrelevant for kCARTA calcs, it will not be able to read in the pressures/heights'
-        write(kStdErr,*) iLBL_Levs,kProfLayer
-        CALL DoStop
-      END IF
-      IF (iNumGases .GT. kMaxGas) THEN
-        write(kStdErr,*) 'iNumGases .GT. kMaxGas',iNumGases,kMaxGas
-        CALL DoStop
-      END IF
-
-      READ (iIOUN2,*) rTophgt,rHSurf,rViewAngle
-      write(kStdWarn,*) 'LBLRTM input indicates start/stop hgts are ',rHSUrf,rTopHgt,' with view angle ',rViewAngle
-
-      READ (iIOUN2,*) (raLBL_Hgts(iJ),iJ=1,iLBL_Levs)
-
-      raRTP_TxtInput(6) = +raLBL_Hgts(iLBL_Levs)    !! default, assume hgt in km
-      IF  (iLBROutBdryHorP .LT. 0) raRTP_TxtInput(6) = -raLBL_Hgts(iLBL_Levs)
-
-      READ (iIOUN2,*) iNumLevs
-      IF (iNumLevs .GT. 2*kProfLayer) THEN
-        write(kStdErr,*) 'iNumLevs .GT. 2*kProfLayer',iNumLevs,kProfLayer
-        CALL DoStop
-      END IF
-
-c see eg http://shadow.eas.gatech.edu/~vvt/lblrtm/lblrtm_inst.html
-c       JCHAR = 1-6           - default to value for specified model atmosphere
-c              = " ",A         - volume mixing ratio (ppmv)
-c              = B             - number density (cm-3)
-c              = C             - mass mixing ratio (gm/kg)
-c              = D             - mass density (gm m-3)
-c              = E             - partial pressure (mb)
-c              = F             - dew point temp (K) *H2O only*
-c              = G             - dew point temp (C) *H2O only*
-c              = H             - relative humidity (percent) *H2O only*
-c              = I             - available for user definition
-      DO iG = 1,iNumGases
-        iaG(iG) = iG
-        iaGasUnits(iG) = 10   !!! assume hardcoded ppmv
-      END DO
-        
-      DO iL = 1,iNumLevs
-        ! READ (iIOUN2,*) rH,rP,rT,caStrX
-        READ (iIOUN2,111) caStrY
-        READ(caStrY,*) rH,rP,rT
-        caStrX = caStrY(31:80)
-        caStr30 = caStrX(11:40)
-
-        IF (iL .EQ. 1) THEN
-          DO iJ=1,iNumGases
-            c1 = caStr30(iJ:iJ)
-            IF (c1 .EQ. 'A') iaGasUnits(iJ) = 10
-            IF (c1 .EQ. ' ') iaGasUnits(iJ) = 10
-            IF (c1 .EQ. 'B') iaGasUnits(iJ) = -1
-            IF (c1 .EQ. 'C') iaGasUnits(iJ) = 20
-            IF (c1 .EQ. 'D') iaGasUnits(iJ) = -1
-            IF (c1 .EQ. 'E') iaGasUnits(iJ) = -1
-            IF (c1 .EQ. 'F') iaGasUnits(iJ) = 42
-            IF (c1 .EQ. 'G') iaGasUnits(iJ) = 43             
-            IF (c1 .EQ. 'H') iaGasUnits(iJ) = 40
-            IF (c1 .EQ. 'I') iaGasUnits(iJ) = -1
-            
-            IF (iaGasUnits(iJ) .LT. 0) THEN
-              write(kStdErr,*) 'LBLRTM --> kCarta not set up to deal with gas units ',c1,' for gas number ',iJ
-              CALL DOStop
-            ELSE
-              write(kStdWarn,*) 'LBLRTM gas number ',iJ,' "units" ',c1,' = kCARTA levels units of ',iaGasUnits(iJ)
-            END IF
-          END DO
-        END IF
-
-        READ (iIOUN2,*) (raX(iG),iG=1,iNumGases)
-        raP(iL) = rP * 100.0  !! change from mb to N/m2
-        raT(iL) = rT
-        IF (rPmax .LE. raP(iL)) rPmax = raP(iL)
-        IF (rPmin .GT. raP(iL)) rPmin = raP(iL)
-        DO iJ = 1,iNumGases
-          raaG_MR(iL,iJ) = raX(iJ)
-        END DO
- 111    FORMAT(A80)
-
-        IF (iL .EQ. 1) THEN
-          rPSurf = raP(1)/100 !! because we redo this below
-
-          IF ((rHSurf .GT. rHmaxKCarta) .OR. (rHSurf .LT. rHminKCarta)) THEN
-            write(kStdErr,*) 'need rHmaxKCarta >= rHSurf >= rHminKCarta but have'
-            write(kStdErr,*) '(rHmaxKCarta,rHSurf,rHminKCarta) = ',rHmaxKCarta,rHSurf,rHminKCarta
-            CALL DoStop
-          END IF
-          IF ((rPSurf .GT. rPmaxKCarta) .OR. (rPSurf .LT. rPminKCarta)) THEN
-            write(kStdErr,*) 'need rPmaxKCarta >= rPSurf >= rPminKCarta but have'
-            write(kStdErr,*) '(rPmaxKCarta,rPSurf,rPminKCarta) = ',rPmaxKCarta,rPSurf,rPminKCarta
-            CALL DoStop
-          END IF
-          IF ((rTSurf .GT. kStempMax) .OR. (rTSurf .LT. kStempMin)) THEN
-            write(kStdErr,*) 'need kStempMax >= rTSurf >= kStempMin but have'
-            write(kStdErr,*) '(kStempMax,rTSurf,kStempMin) = ',kStempMax,rTSurf,kStempMin
-            CALL DoStop
-          END IF
-        END IF
-      END DO
-
-      !! now see if there are xsec gases
-      READ (iIOUN2,5030,ERR=13,END=13) caStr
-      READ(caStr,*) iNXsec
-      IF (iNXsec .GT. 0) THEN
-        READ (iIOUN2,5030,ERR=13,END=13) caStr     !!!! xsec names 
-        CALL XsecNamesLBL(caStr,iaG,iaGasUnits,iNumGases,iNXsec,kRTP)
-        READ (iIOUN2,*) iNumLevsXsec
-        IF (iNumLevsXsec .GT. 2*kProfLayer) THEN
-          write(kStdErr,*) 'iNumLevsXsec .GT. 2*kProfLayer',iNumLevsXsec,kProfLayer
-          CALL DoStop
-        END IF
-        IF (iNumLevsXsec .NE. iNumLevs) THEN
-          write(kStdErr,*) 'iNumLevsXsec .NE. iNumLevs',iNumLevsXsec,iNumLevs
-          CALL DoStop
-        END IF
-        DO iL = 1,iNumLevsXsec
-          READ (iIOUN2,111,ERR=13,END=13) caStrY
-          caStr30 = caStrY(16:45)
-          IF (iL .EQ. 1) THEN
-            DO iJ=1,iNXsec
-              c1 = caStr30(iJ:iJ)
-              IF (c1 .EQ. 'A') iaGasUnits(iJ+iNumGases) = 10
-              IF (c1 .EQ. ' ') iaGasUnits(iJ+iNumGases) = 10
-              IF (c1 .EQ. 'B') iaGasUnits(iJ+iNumGases) = -1
-              IF (c1 .EQ. 'C') iaGasUnits(iJ+iNumGases) = 20
-              IF (c1 .EQ. 'D') iaGasUnits(iJ+iNumGases) = -1
-              IF (c1 .EQ. 'E') iaGasUnits(iJ+iNumGases) = -1
-              IF (c1 .EQ. 'F') iaGasUnits(iJ+iNumGases) = 42
-              IF (c1 .EQ. 'G') iaGasUnits(iJ+iNumGases) = 43             
-              IF (c1 .EQ. 'H') iaGasUnits(iJ+iNumGases) = 40
-              IF (c1 .EQ. 'I') iaGasUnits(iJ+iNumGases) = -1
-              
-              IF (iaGasUnits(iJ+iNumGases) .LT. 0) THEN
-                write(kStdErr,*) 'LBLRTM --> kCarta not set up to deal with gas units ',c1,' for gas number ',iJ
-                CALL DOStop
-              ELSE
-                write(kStdWarn,*) 'LBLRTM xsec number ',iJ,' is of "units" ',c1,' = kCARTA input levels units of ',
-     $              iaGasUnits(iJ+iNumGases)
-              END IF
-            END DO
-          END IF
-
-          READ (iIOUN2,*) (raX(iG),iG=1,iNXsec)
-          DO iJ = 1,iNXsec
-            raaG_MR(iL,iJ+iNumGases) = raX(iJ)
-          END DO
-        END DO
-        iNumGases = iNumGases + iNXsec
-      END IF
-
- 13   CONTINUE
-      CLOSE(iIOUN2) 
-      kProfileUnitOpen = -11
-
- 5030 FORMAT(A80)
-
-      raRTP_TxtInput(1) = rPSurf
-      raRTP_TxtInput(2) = rTSurf
-      raRTP_TxtInput(3) = rHSurf    !! km
-      raRTP_TxtInput(4) = rTophgt   !! km
-      raRTP_TxtInput(5) = rViewAngle  !! if 0 < ang < 90, then radiation travelling down to instr, else rad travelling up to instr
-
-      rPSurf = rPSurf * 100.0
-      rHSurf = rHSurf * 1000.0
-
-      write(kStdWarn,*)'  KCARTA Database : max/min press (mb) = ',rPmaxKCarta/100.0,rPminKCarta/100.0
-      write(kStdWarn,*)'  kCARTA Database : max/min height (m) = ',rHmaxKCarta,rHminKCarta
-      write(kStdWarn,*)'input file : spres/sHeight      = ',rPSurf,rHSurf
-     
-c make sure pressures are decreasing with index ie layers going higher and higher
-      IF (raP(1) .LT. raP(2)) THEN
-        !!! need to swap!!!
-        iMid = ifloor(iNumLevs/2.0)
-        DO iL = 1,iMid
-          iJ = iNumLevs-iL+1
-          rX = raP(iJ)
-          raP(iJ) = raP(iL)
-          raP(iL) = rX
-
-          rX = raT(iJ)
-          raT(iJ) = raT(iL)
-          raT(iL) = rX
-
-          DO iG = 1,iNumGases
-            raX(iG) = raaG_MR(iJ,iG)
-            raaG_MR(iJ,iG) = raaG_MR(iL,iG)
-            raaG_MR(iL,iG) = raX(iG)
-          END DO
-        END DO
-      END IF
-      write(kStdWarn,*) 'input file : Highest altitude (lowest press) = ',raP(iNumLevs)/100.0,' mb at level ',iNumLevs
-      write(kStdWarn,*) ' '
-
-c now change all units to MR
-      DO iG = 1,iNumGases
-        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR)
-        DO iL = 1,iNumLevs
-          raaG_MR(iL,iG) =  raaG_MR(iL,iG) / 1.0e6
-          iaGasUnits(iG) = 12
-        END DO
-      END DO         
-
-      RETURN
-      END
-
-c************************************************************************
-c this writes the LBLRTM input so you can cut and paste into Matlab, and save RTP file
-c now write the klayers stuff
-      SUBROUTINE lblrtm2rtp(rF1,rF2,rPmin,rPmax,iNumGases,iaG,iaGasUnits,iNumLevs,rPSurf,rTSurf,rHSurf,
-     $                  raP,raT,raaG_MR)
-
-      IMPLICIT NONE
-
-      include '../INCLUDE/kcarta.param'
-
-c input
-      INTEGER iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
-      REAL rPmin,rPmax,rPSurf,rTSurf,rHSurf,rF1,rF2
-      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas)
-
-c local var
-      REAL raX(2*kProfLayer)
-      INTEGER iL,iG,iLeftjust_lenstr
-      CHARACTER*8 ca8
-      CHARACTER*6 ca6
-      CHARACTER*2 ca2
-
-      write(kStdWarn,*) ' '
-      write(kStdWarn,*) ' '
-      write(kStdWarn,*) ' >>>>>>>>>>>>>>>>> LBLRTM --> RTP file cut >>>>>>>>>>>>>>>>>>>'
-      write(kStdWarn,*) ' '
-      write(kStdWarn,*) ' '
-
-      write(kStdWarn,*) 'h.vcmin = ',rF1,';'
-      write(kStdWarn,*) 'h.vcmax = ',rF2,';'
-      write(kStdWarn,*) 'h.pmin = ',rPmin/100.0,';'
-      write(kStdWarn,*) 'h.pmax = ',rPmax/100.0,';'
-      write(kStdWarn,*) 'h.ngas = ',iNumGases,';'
-      IF (iaGasUnits(1) .GT. 1) THEN
-        write(kStdWarn,*) 'h.ptype = 0;'
-        write(kStdWarn,*) 'h.pfields = 1;'
-      ELSEIF (iaGasUnits(1) .EQ. 1) THEN
-        write(kStdWarn,*) 'h.ptype = 1;'
-        write(kStdWarn,*) 'h.pfields = 1;'
-      END IF
-      write(kStdWarn,*) 'h.glist = [',(iaG(iG),iG=1,iNumGases),']'';'
-      write(kStdWarn,*) 'h.gunit = [',(iaGasUnits(iG),iG=1,iNumGases),']'';'
-
-      write(kStdWarn,*) 'p.nlevs = ',iNumLevs,';'
-      write(kStdWarn,*) 'p.spres = ',rPsurf/100.0,';'
-      write(kStdWarn,*) 'p.stemp = ',rTSurf,';'
-      write(kStdWarn,*) 'p.salti = ',rHSurf,'; %%%% WOWOWOWOWOW'
-
-      ca8 = 'p.plevs'
-        CALL write_stringnice(ca8,raP,0.01,8,iNumLevs)
-      ca8 = 'p.ptemp'
-        CALL write_stringnice(ca8,raT,1.00,8,iNumLevs)
-
-      DO iG = 1,iNumGases
-        CALL int2str(iaG(iG),ca2)
-        ca6 = 'p.gas_'
-        ca8 = ca6 // ca2
-        DO iL = 1,iNumLevs
-          raX(iL) = raaG_MR(iL,iG)
-        END DO
-        CALL write_stringnice(ca8,raX,1.00,8,iNumLevs)
-      END DO
-
-      write(kStdWarn,*) ' '
-      write(kStdWarn,*) ' '
-      write(kStdWarn,*) ' >>>>>>>>>>>>>>>>> LBLRTM --> RTP file cut >>>>>>>>>>>>>>>>>>>'
-      write(kStdWarn,*) ' '
-      write(kStdWarn,*) ' '
-      
-      RETURN
-      END
-
-c************************************************************************
-c this simply writes the strings nicely
-      SUBROUTINE write_stringnice(ca8,raX,rScale,iNumItemsPerLine,iNumLevs)
-
-      IMPLICIT NONE
-
-      include '../INCLUDE/kcarta.param'
-
-c input
-      CHARACTER*8 ca8
-      INTEGER iNumLevs,iNumItemsPerLine
-      REAL raX(2*kProfLayer),rScale
-
-c local var
-      INTEGER iL,iY,iFull,iPart,i1,i2,iFloor
-      REAL raY(2*kProfLayer)
-
-      iFull = ifloor(iNumLevs*1.0/iNumItemsPerLine)
-      
-        DO iL = 1,iNumLevs
-        raY(iL) = raX(iL) * rScale
-      END DO
-
-      write(kStdWarn,*) ca8,' = [...'
-      DO iL = 1,iFull
-        i1 = 1 + (iL-1)* iNumItemsPerLine
-        i2 = i1 + iNumItemsPerLine - 1
-c        print *,iL,i1,i2
-        write(kStdWarn,*) (raY(iY),iY=i1,i2),' ...'
-      END DO
-      IF (i2 .LT. iNumLevs) THEN
-        i1 = i2 + 1
-        i2 = iNumLevs
-c        print *,9999,i1,i2
-        write(kStdWarn,*) (raY(iY),iY=i1,i2),' ...'
-      END IF
-      write(kStdWarn,*) ']'';'
-
-      RETURN
-      END
-
-c************************************************************************
-c this subroutine just takes the LBLRTM mol/cm2 TAPE6 profile and does some simple calcs
-      SUBROUTINE DoLBLRTMLayers2KCARTALayers(rHSurf,rPSurf,rTSurf,iNumLays,iNumGases,iaG,rLat,rLon,
-     $               PAVG_KCARTADATABASE_AIRS,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,rfracBot,
-     $               raPX,raTX,raLayDensityX,raaG_MRX,
-     $               raPout,raAmountOut,raTout,raZout,raaQout,raaPartPressOut,iLowestLev)
-
-      IMPLICIT NONE
-
-      include '../INCLUDE/kcarta.param'
-
-c input
-      REAL rHSurf,rPSurf,rTSurf,PAVG_KCARTADATABASE_AIRS(kMaxLayer),PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
-      REAL DATABASELEVHEIGHTS(kMaxLayer+1),rfracBot,rLat,rLon
-      INTEGER iNumLays,iNumGases,iaG(kMaxGas)
-      REAL raPX(kProfLayer+1),raTX(kProfLayer+1),raLayDensityX(kProfLayer+1),raaG_MRX(kProfLayer+1,kMaxGas)
-c output
-      REAL raTout(kProfLayer),raAmountOut(kProfLayer),raZout(kProfLayer+1),raPout(kProfLayer)
-      REAL raaQout(kProfLayer,kMaxGas),raaPartPressOut(kProfLayer,kMaxGas)
-      INTEGER iLowestLev
-
-c local
-      INTEGER iL,iCnt,iJ,iNFine,iSmallLoop,iG,iLoop,iUpperLev
-      REAL z,rP,rPTry,rdPWant,rdP,rT,amount,slope,dz,z0,gravity,gamma,junk,rTsum,rWgt,damount
-      REAL rMolarMass_n,rMolarMass_np1,rMR_water_n,rMR_water_np1,rPP,rSVP,rAmt,rThick
-      REAL dlnp,rP_n,rP_np1,rT_n,rT_np1,rTX,rPX,density_n,density_np1,amount_n,amount_np1,Pav,Tav,SpHeatDryAir
-      REAL raXYZPress(kMaxlayer+1+1)
-      REAL raXYZTemp(kMaxlayer+1+1)
-      REAL raaXYZ_MR(kMaxlayer+1+1,kMaxGas)
-      REAL raXYZ_MRwater(kMaxlayer+1+1)
-      REAL raJunk(kMaxLayer),rMR_n,rMR_np1,q_n,q_np1,raJunk2(kMaxLayer)
-      REAL zWoo,rConvertQ,grav_earth,wexsvp,rRH
-      INTEGER iWoo
-
-      DO iL = 1,kProfLayer
-        DO iG = 1,iNumGases
-          raaQout(iL,iG) = 0.0
-        END DO
-      END DO
-
-      IF ((kPlanet .EQ. 3) .AND. (iaG(1) .NE. 1)) THEN
-        write (kStdErr,*) 'Need GasID(1) = 1 (WV) for Planet Earth'
-        Call DoStop
-      END IF
-
-      iLowestLev = kProfLayer - iNumLays + 1
-
-      rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/
-     $         (PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
-      ! just readjust the layer info read in, and tack on additional gas profiles from refgas
-      write(kSTdWarn,*) 'iLowestLev = ',iLowestLev,' rfracBot = ',rFracBot
-      write(kStdWarn,*) 'PLEV_KCARTADATABASE_AIRS(iLowestLev+1),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev) = ',
-     $   PLEV_KCARTADATABASE_AIRS(iLowestLev+1),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev)
-
-      DO iL = iLowestLev,kProfLayer
-        raZout(iL) = DATABASELEVHEIGHTS(iL)
-        raPout(iL) = raPX(iL-iLowestLev+1)
-        raTout(iL) = raTX(iL-iLowestLev+1)
-        raAmountOut(iL) = raLayDensityX(iL-iLowestLev+1) 
-        IF (iL .EQ. iLowestLev) raAmountout(iL) = raAmountout(iL)/rFracBot
-        DO iG = 1,iNumGases
-          raaQout(iL,iG) = raaG_MRX(iL-iLowestLev+1,iG)
-          IF (iL .EQ. iLowestLev) raaQout(iL,iG) = raaQout(iL,iG)/rFracBot
-          raaPartPressOut(iL,iG) = raaG_MRX(iL-iLowestLev+1,iG)/raLayDensityX(iL-iLowestLev+1) * raPX(iL-iLowestLev+1)
-        END DO
-      END DO
-
-      IF ((iLowestLev-1) .GE. 1) THEN
-        DO iL = 1,iLowestLev-1
-          raPout(iL) = log(PLEV_KCARTADATABASE_AIRS(iL)/PLEV_KCARTADATABASE_AIRS(iL+1))
-          raPout(iL) = (PLEV_KCARTADATABASE_AIRS(iL) - PLEV_KCARTADATABASE_AIRS(iL+1))/raPout(iL)
-          raTout(iL) = kStempMin
-          DO iG = 1,iNumGases
-            raaPartPressOut(iL,iG) = 0.0
-            raaQout(iL,iG) = 0.0
-            raaG_MRX(iL,iG) = 0.0
-          END DO
-        END DO
-      END IF
-
-      IF (kPlanet .EQ. 3) THEN
-        !! show the RH for gas 1
-        write(kStdWarn,*) ' '
-        write(kStdWarn,*) 'NOT Checking Relative Humidity'
-        write(kStdWarn,*) ' iX   Lay  P(mb)    zav(km)  dz(km)   T(K)     PP(mb)  SVP(mb)    RH      Q         Q1         Q2'
-        write(kStdWarn,*) '-------------------------------------------------------------------------------------------------------'
-        DO iL = iLowestLev,kProfLayer
-          z    = (raZout(iL) + raZout(iL+1))/2/1000
-          zWoo = (raZout(iL+1) - raZout(iL))/1000
-          rP   = raPout(iL)            !! N/m2
-          rT   = raTout(iL)
-          rPP  = raaPartPressOut(iL,1) !! N/m2
-          rSVP = 0.0
-          rRH  = 0.0
-          IF (rRH .LE. 100.0) THEN
-            write(kStdWarn,111) iL-iLowestLev+1,iL,rP/100.0,z,zWoo,rT,rPP/100.0,rSVP/100,rRH,raAmountOut(iL),
-     $ (raaQout(iL,iG),iG=1,6)
-          ELSE
-            write(kStdWarn,112) iL-iLowestLev+1,iL,rP/100.0,z,zWoo,rT,rPP/100.0,rSVP/100,rRH,raAmountOut(iL),
-     $ (raaQout(iL,iG),iG=1,6),' ***** '
-          END IF
-        END DO
-      END IF
- 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '))
- 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '),A7)
-
-c now find pressure output corresponding to HGT output from LBLRTM
-      IF (kRTP .EQ. -20) THEN
-        IF (raRTP_TxtInput(6) .GT. 0) THEN
-          !!! input level boundaries in km, change to mb
-          DO iL = iLowestLev,kProfLayer
-            raJunk(iL-iLowestLev+1) = raZout(iL)          
-            raJunk2(iL-iLowestLev+1) = raPout(iL)          
-          END DO
-          CALL r_sort_linear(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo,1)
-          write(kStdWarn,*)'LBLRTM output height of ',raRTP_TxtInput(4),' km corresponds to ',zWoo,' N/m2'
-          raRTP_TxtInput(6) = zWoo/100.0  !! mb
-        ELSEIF (raRTP_TxtInput(6) .LT. 0) THEN
-          !!! input level boundaries in mb     
-          raRTP_TxtInput(6) = abs(raRTP_TxtInput(6)) * 100.0
-          write(kStdWarn,*)'LBLRTM output pressure of ',raRTP_TxtInput(6),' N/m2'
-        END IF
-      END IF
-
-      RETURN
-      END
-
-c************************************************************************
-c if TAPE5 has zeros everywhere for a certain gas, this reads in a US Std profile and stuffs it in
-      SUBROUTINE substitute_tape5_profile_for_climatology(iG,iNumLevs,raP,raaG_MR)
-
-      IMPLICIT NONE
-      include '../INCLUDE/kcarta.param'
-
-c input
-      INTEGER iG             ! which gasID to put in profile
-      INTEGER iNumLevs       ! how many levs in profile
-      REAL raP(2*kProfLayer) ! pressure levels
-c input/output
-      REAL raaG_MR(2*kProfLayer,kMaxGas)
-
-c local vars
-      REAL raX(2*kProfLayer)
-      INTEGER iL
-
-      CALL ReadRefProf_Levels2(iG,raP,iNumLevs,raX)
-
-      DO iL = 1,iNumLevs
-        raaG_MR(iL,iG) = raX(iL)
-      END DO
 
       RETURN
       END

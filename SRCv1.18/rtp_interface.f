@@ -323,7 +323,11 @@ c local variables
         write(kStdWarn,*) 'KCARTA expecting text GENLN4 style input profile'
       ELSEIF ((kRTP .LT. 0) .AND. (kRTP .GT. -3) .AND. (iGenln4 .LT. 0)) THEN
         write(kStdWarn,*) 'KCARTA expecting text KLAYERS style input profile'
-      ELSEIF (kRTP .LT. -3) THEN
+      ELSEIF (kRTP .EQ. -5) THEN
+        write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE5 style input profile'
+      ELSEIF (kRTP .EQ. -6) THEN
+        write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE6 style input profile'
+      ELSEIF (kRTP .EQ. -10) THEN
         write(kStdWarn,*) 'KCARTA expecting text LEVELS style input profile'
       ELSEIF ((kRTP .EQ. 0) .OR. (kRTP .EQ. 1)) THEN
         write(kStdWarn,*) 'KCARTA expecting RTP hdf style input profile'
@@ -382,7 +386,7 @@ c local variables
      $      iNpath,caPfName,iRTP,
      $      iProfileLayers,raPressLevels,raThickness)                                 
       END IF
-
+      
 c this piece of "output" displays the amounts for the first 3 gases
 c also displays temperature of first stored gas.
 c if less than 3 gases stored it is smart enuff to display <= 3 gas amts

@@ -11,111 +11,7 @@ function [fUP,fDN,radsUP,radsDN] = do_flux_630_2805_linear_in_tau_const_angle(w,
 %
 % also look at /home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/v3.3/rrtm_lw/MATLAB/flux_rrtm_padeVSkvcarta.m
 
-%{
-example usage :
-take an   rtp profile, have p.upwell = +1, dump out ODS, fluxes, 4 upwelling rads, read them in
-take same rtp profile, have p.upwell = +2, dump out      fluxes, 4 dnwelling rads, read them in
-
-[h,ha,p,pa] = rtpread('test_night_unit_emiss_uplook.rtp');  %% p.upwell = 2
-[h,ha,p,pa] = rtpread('test_night_unit_emiss.rtp');         %% p.upwell = 1
-
-[ods,w]     = readkcstd('junky.dat');   %% dump out ODs at all layers
-[radKCDN,w] = readkcstd('junky.dat');   %% dump out DNwell rads at all levels
-[radKCUP,w] = readkcstd('junky.dat');   %% dump out UPwell rads at all levels
-
-[rad0,w]    = readkcstd('junky.dat');       %% dump out TOA rad
-[flux0,w]   = readkcflux('junky.dat_ALL');  %% dump out up/dn fluxes
-
-[fUP,fDN,radsUP,radsDN] = do_flux_630_2805_linear_in_tau_const_angle(w,ods,p,42);
-
->> whos rads*
-  Name             Size                      Bytes  Class     Attributes
-
-  radKCDN      30000x490                 117600000  double   % dnwell rads, f77
-  radKCUP      30000x490                 117600000  double   % upwell rads, f77
-  radsDN          4x99x30000             95040000  double   % dnwell rads, this code
-  radsUP          4x99x30000             95040000  double   % upwell rads, this code
-
-
-nlays = 98;
-nlays = 85;
-
-nlevs = nlays+1;
-
-figure(1); clf; 
-%% downwelling radiation
-rs = radKCDN(:,(1:nlays)+0*nlays);    %% from f77 kcarta
-ru = squeeze(radsDN(1,:,:));  %% from this matlab code
-lay = nlays-6:nlays-1; plot(w,rad2bt(w,rs(:,lay))-rad2bt(w,ru(nlevs-lay,:)')); title('downwell')
-
-figure(2); clf
-%% upwelling radiation
-rs = radKCUP(:,(1:nlays)+0*nlays);
-ru = squeeze(radsUP(1,:,:));  %% from this matlab code
-lay = nlays-6:nlays-1; plot(w,rad2bt(w,rs(:,lay))-rad2bt(w,ru(lay+1,:)'),'.-'); title('upwell')
-
-figure(1); clf; plot(w,flux0(:,(1:nlevs)+0*nlevs)-fUP');
-figure(2); clf; plot(w,flux0(:,(1:nlevs)+1*nlevs)-fDN');
-
-dxx = 0.0025/1000;
-
-palts = p.palts(1:p.nlevs); palts = flipud(palts)/1000;
-
-figure(1); clf
-plot(sum(flux0(:,(1:nlevs)+0*nlevs),1)*dxx,palts,'bx-',sum(fUP,2)*dxx,palts,'r',...
-     -sum(flux0(:,(1:nlevs)+1*nlevs),1)*dxx,palts,'cx-',-sum(fDN,2)*dxx,palts,'m','linewidth',2)
-grid on
-hl = legend('f77 kcarta up','matlab up','f77 kcarta dn','matlab dn','location','northwest');
-set(hl,'fontsize',10)
-xlabel('Flux W/m2'); ylabel('hgt km')
-
-figure(2); clf
-plot(sum(flux0(:,(1:nlevs)+0*nlevs),1)*dxx - sum(fUP,2)'*dxx,palts,'b',...
-     sum(flux0(:,(1:nlevs)+1*nlevs),1)*dxx - sum(fDN,2)'*dxx,palts,'r','linewidth',2)
-grid on
-hl = legend('f77 kcarta - matlab up','f77 kcarta - matlab dn','location','northwest');
-set(hl,'fontsize',10)
-xlabel('\Delta Flux W/m2'); ylabel('hgt km')
-
-%%% for Chris H, RTM flux
-%dlist = dir('/asl/s1/chepplew/data/rfm/od_lay_zen_equ_15um_a_*.asc');
-dlist = dir('/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/v3.3/rrtm_lw/AnuDudhia_RFM/FromChrisH_Dec2015/od_lay_zen_equ_15um_a_*.asc');
-nfils = length(dlist);
-fprintf(1,'Found %d files\n',nfils);
-clear nu fz fzmn;
-fzall = [];
-for ifn = 1:nfils
-  fin = ['/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/v3.3/rrtm_lw/AnuDudhia_RFM/FromChrisH_Dec2015/' dlist(ifn).name];
-  FH = fopen(fin,'r');
-  for i=1:3
-     hdr1{i} = fgetl(FH);
-  end
-
-  junk   = fgetl(FH);                           % field specs
-  params = textscan(junk,'%f %f %f %f %s');
-  npnts  = params{1}(1);
-  nu     = [params{2}(1):params{3}(1):params{4}(1)];     % {2} wn start, {3} wn step, {4} wn end.
-  fz     = fscanf(FH,'%e',[Inf]);
-  fzall = [fzall fz];
-  fclose(FH);
-  fzmn(ifn) = sum(fz) * params{3};
-  %clear fz junk;
-end
-whos fzmn
-
-alts = [0:1:89];
-figure(1);clf;semilogx(fzmn,alts,'.-');grid on;
-xlabel('Opt Depth');ylabel('Height km');title('Layer OD 630-700wn zen.mix.ctm.h12');
-%saveas(gcf,'./figs/lay_od_zen_630_700wn_zen_mix_ctm_h12.png','png')
-
-plot(1:100,ods(1,:),1:90,fzall(1,:))
-semilogy(1:85,ods(1,16:100),'bo-',1:90,fzall(1,:),'r','linewidth',2); hl=legend('kcarta','rrtm');
-figure(1); semilogy(w,sum(ods,2),nu,sum(fzall,2),'linewidth',2); hl=legend('kcarta','rrtm');
-figure(2); allKC = interp1(w,sum(ods,2),nu); plot(nu,sum(fzall,2) ./ allKC'); title('RRTM/KCARTA')
-
-wah = sum(ods,1); plot(wah(12:100),p.palts); set(gca,'ydir','reverse')
-
-%}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 plevsx = p.plevs(1:p.nlevs);
 plevsx = flipud(plevsx);
@@ -125,9 +21,13 @@ plevsx = flipud(plevsx);
 %rrtm_up_flux = sum(squeeze(rrtm_results.heating_rate_info(1,4:16,:,3)));
 %rrtm_dn_flux = sum(squeeze(rrtm_results.heating_rate_info(1,4:16,:,4)));
 
+mn_sergio = 101;    %% ODs are always 100 layers, even if p.nlevs is less than 100
+mn_rrtm = min(101,length(p.ptemp)+1); %% RTM gives exact number of layers
+mn = mn_sergio;
+
 for ii = 1 : p.nlevs
   %% upwelling flux
-  laykc = 101-(p.nlevs-1) + (ii-1)-1;
+  laykc = mn-(p.nlevs-1) + (ii-1)-1;
   play  = (p.nlevs-1) - (ii-1)+1;
   fUP(ii,:) = 0;
   %fprintf(1,'ii+ laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6f \n',ii,laykc,play,p.ptemp(play),d(300,laykc))  
@@ -173,7 +73,7 @@ vt1(1:3) = vt1x(1:3); %% use linear inter for first (TOA), as that if what f77 k
 
 for ii = 1 : p.nlevs
   %% upwelling flux
-  laykc = 101-(p.nlevs-1) + (ii-1)-1;
+  laykc = mn-(p.nlevs-1) + (ii-1)-1;
   play  = (p.nlevs-1) - (ii-1)+1;
   fUP(ii,:) = 0;
   if ii == 1
@@ -225,7 +125,7 @@ disp(' ')
 
 for ii = p.nlevs : -1 : 1
   %% downwelling flux
-  laykc = 101-(p.nlevs-1) + (ii-1)-1+1;
+  laykc = mn-(p.nlevs-1) + (ii-1)-1+1;
   play  = (p.nlevs-1) - (ii-1);  
   fDN(ii,:) = 0;
   if ii < p.nlevs 

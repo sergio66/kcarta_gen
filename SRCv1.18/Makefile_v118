@@ -306,8 +306,8 @@ FDOUBLE = -N2 -N113                   #<<<
 # $ module load intel/compiler/64/15.0/full
 FORTRANX = /cm/shared/apps/intel/composer_xe/2015.3.187/bin/intel64/ifort
 #FLAGS_RTP = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -check bounds -assume nounderscore
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info
-FLAGS = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
+FLAGS = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info
+#FLAGS = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
 #UFLAG = 
 LIBS  = -lblas -mkl
 FDOUBLE = -r8
@@ -429,7 +429,7 @@ OBJSRTP        = n_main.o rtp_interface.o
 
 OBJSSTRING     = s_writefile.o       s_misc.o                           \
                  n_gas_wt_spectra.o  n_pth_mix.o      n_rad_jac_scat.o  \
-                 n_output.o          n_layers.o       
+                 n_output.o          n_layers.o       n_layers_lblrtm.o
  
 OBS_LTE_OPTDPH  = kcoeffMAIN.o       kcoeffSPL.o        kcoeffSPLJAC.o\
                   kcont_xsec.o       kcoeff_FAST.o \
@@ -941,6 +941,9 @@ n_pth_mix.o : n_pth_mix.f $(PARAMS)
 
 n_layers.o : n_layers.f $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_layers.f
+
+n_layers_lblrtm.o : n_layers_lblrtm.f $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_layers_lblrtm.f
 
 n_gas_wt_spectra.o : n_gas_wt_spectra.f $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_gas_wt_spectra.f

@@ -14,7 +14,7 @@ c ==> g/cp d(Flux)/dp = g/cp (-z0/p) d(Flux)/dz
 c ==> g z0 = k T / m
 c 
 c BUT WHAT IS "T"???????? It varies through the profile, so z0 varies as well!!!
-c so LBLRTM and my fluxes are different!
+c so LBLRTM and constant-in-tau fluxes are different!
 c
 c************************************************************************
 c************** This file has the forward model routines  ***************
@@ -5093,6 +5093,42 @@ c to do the local absorptive cloud
 
       REAL TEMP(MAXNZ),ravt2(maxnz),raJunk(kMaxPts)
 
+c for LBLRTM TAPE5/TAPE6
+      INTEGER iLBLRTMZero
+      REAL raaAbs_LBLRTM_zeroUA(kMaxPts,kMixFilRows)
+
+      iLBLRTMZero = -iNumlayer
+      IF (kLBLRTM_toa .GT. 0) THEN
+        iLay = 1
+ 8888   CONTINUE
+        IF ((iLay .LT. iNumLayer) .AND. (raPressLevels(iaaRadLayer(iAtm,iLay)) .GT. kLBLRTM_toa)) THEN
+	  iLay = iLay + 1
+	  GOTO 8888
+	END IF
+	IF (iLay .LT. 1) iLay = 1
+	IF (iLay .GT. iNumLayer) iLay = iNumLayer
+        iLBLRTMZero = iLay
+	write(kStdWarn,*)'input TOA from LBLRTM TAPE5/6 was ',kLBLRTM_toa,' mb'
+	write(kStdWarn,*) '  hmm for flux need to zero ODS from iLay = ',iLBLRTMZero,' which corresponds to '
+	write(kStdWarn,*) '  radiating layer ',iaaRadLayer(iAtm,iLay),'at p = ',raPressLevels(iaaRadLayer(iAtm,iLay)),' mb'
+	write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at p = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
+      END IF
+
+      DO iLay = 1,iNumLayer
+        iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
+      END DO
+      DO iLay = 1,iNumLayer
+        IF (iLay .LE. iLBLRTMZero) THEN
+          DO iFr = 1,kMaxPts
+            raaAbs_LBLRTM_zeroUA(iFr,iaRadLayer(iLay)) = raaAbs0(iFr,iaRadLayer(iLay)) 
+          END DO
+	ELSE
+          DO iFr = 1,kMaxPts
+            raaAbs_LBLRTM_zeroUA(iFr,iaRadLayer(iLay)) = 0.0
+          END DO
+	END IF
+      END DO
+
       iDefault = -1          !!!temperature in layer constant USE THIS!!!!
 
       iVary = +2             !!!temperature in layer varies linearly, simple
@@ -5109,6 +5145,8 @@ c to do the local absorptive cloud
       END IF
 
       iGaussPts = 4  !!! default, works fine for clr sky
+      iGaussPts = 1  !!! haha not too bad at all ....
+      iGaussPts = 3  !!! LBLRTM uses this
 
       IF (iGaussPts .GT. kGauss) THEN
         write(kStdErr,*) 'need iGaussPts < kGauss'
@@ -5211,6 +5249,7 @@ c DO NOT SORT THESE NUMBERS!!!!!!!!
         iL = iiDiv*kProfLayer + iLay
         DO iFr = 1,kMaxPts
           raaAbs(iFr,iL) = raaAbs0(iFr,iL)
+          raaAbs(iFr,iL) = raaAbs_LBLRTM_zeroUA(iFr,iL)	  
         END DO
       END DO
 

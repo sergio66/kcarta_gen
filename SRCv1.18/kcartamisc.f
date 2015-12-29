@@ -660,7 +660,14 @@ c this is really for Mie scattering and VIS/UV ocean reflectance
       kWindSpeed = 0.0
       kLatitude = 0.0
       kMonth = 1.0
-
+c this is to stop the code flux calcs at LBLRTM toa, default = -1 so keep doing calcs till 0.005 mb
+c else if kLBLRTM_toa > 0 then the flux code
+c   finds the highest layer whose pressure is greater than this
+c   sets all ODS to 0 above this layer so essentially
+c     rU = rUp0 exp(-k) + B(T) (1-exp(-k)) --> r0 for upwelling rad
+c     rD = 0 since the downwelling rad is initialized with ttorad(f,2.7) ~ 0
+      kLBLRTM_toa = -1.0
+      
 c assume no *mixfil section 
       iMixFileLines = -1 
  
@@ -1242,13 +1249,21 @@ c assumes the message ends with '$'
       include '../INCLUDE/kcarta.param'
 
       INTEGER iI,iFound
-      CHARACTER*80 caMessage,caMessage2
+      CHARACTER     caMessage*(*)
+      CHARACTER*120 caMessage2
 
       DO iI = 1,80
         caMessage2(iI:iI) = ' '
       END DO
 
       iI = 80
+      iI = len(caMessage)
+      IF (iI .GT. 120) THEN
+        write(kStdErr,*) 'lengthh of error message is over 120 characters!'
+	write(kStdErr,*) caMessage
+        CALL DoStop
+      END IF
+
  5    CONTINUE
       IF ((caMessage(iI:iI) .NE. '$') .AND. (iI .GT. 1)) THEN
         iI = iI - 1
@@ -1266,7 +1281,7 @@ c      write(kStdErr,*) 'length of caMessage = ',iI
       write(kStdErr,10) caMessage2
       CALL DoStop
 
- 10   FORMAT(A80)
+ 10   FORMAT(A120)
 
       RETURN
       END
@@ -3146,7 +3161,7 @@ c local
 c >>>>>>>>>>>>>>>>>>>>>>>>>
       iBot = kProfLayer - iNumLayer + 1 + 1  !! assume profile has started from here!!!!
       iTop = iBot + 10
-      write(kStdWarn,*) 'WATER : Computing average ppmvs in lower trop between lays ',iBot,iTop
+      write(kStdWarn,*) 'WATER : Compute lower trop <ppmv> between lays ',iBot,iTop
 
       rX = 0.0
       iCount = 0
@@ -3173,7 +3188,7 @@ c >>>>>>>>>>>>>>>>>>>>>>>>>
       iBot = 20                              !! assume profile has started from here !!!!
       iBot = max(20,kProfLayer-iNumLayer+5)  !! account for p.spres being in Antartic!!!            
       iTop = kProfLayer - iBot
-      write(kStdWarn,*) 'CO2 : Computing average ppmvs in lower trop between lays ',iBot,iTop
+      write(kStdWarn,*) 'CO2 : Compute lower trop <ppmv> between lays ',iBot,iTop      
 
       rX = 0.0
       iCount = 0
@@ -3188,7 +3203,7 @@ c >>>>>>>>>>>>>>>>>>>>>>>>>
 c >>>>>>>>>>>>>>>>>>>>>>>>>
       iBot = 40  !! assume profile has started from here!!!!
       iTop = 70
-      write(kStdWarn,*) 'O3 : Computing average ppmvs in lower trop between lays ',iBot,iTop
+      write(kStdWarn,*) 'O3 : Compute lower trop <ppmv> between lays ',iBot,iTop      
 
       rX = 0.0
       iCount = 0
@@ -3221,7 +3236,7 @@ c >>>>>>>>>>>>>>>>>>>>>>>>>
       iBot = 20                              !! assume profile has started from here !!!!
       iBot = max(20,kProfLayer-iNumLayer+5)  !! account for p.spres being in Antartic!!!            
       iTop = kProfLayer - iBot
-      write(kStdWarn,*) 'N2O/CO/CH4 : Computing average ppmvs in lower trop between lays ',iBot,iTop
+      write(kStdWarn,*) 'N2O/CO/CH4 : Compute lower trop <ppmv> between lays ',iBot,iTop            
 
       rX = 0.0
       iCount = 0

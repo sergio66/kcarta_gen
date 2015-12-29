@@ -441,12 +441,13 @@ c if the bands are FIR3,FIR2,FIR1,IR,NIR1,NIR2 onwards then
       write (kStdWarn,*) 'File info : '
       write (kStdWarn,*) '#,rBlock,iFile,iTagIndex,iActualTag,iFileStep,iList'
       write (kStdWarn,*) '----------------------------------------------'
-      do iDummy = iFileIDLo,iFileIDHi
-        write(kStdWarn,*) iDummy,raBlock(iDummy),raFiles(iDummy),
+      DO iDummy = iFileIDLo,iFileIDHi
+        write(kStdWarn,111) iDummy,raBlock(iDummy),raFiles(iDummy),
      $    iaTagIndex(iDummy),iaActualTag(iDummy),
      $    raFileStep(iDummy),iaList(iDummy-iFileIDLo+1)
       END DO
-
+ 111  FORMAT(I4,2(' ',F10.4),2(' ',I3),' ',F10.4,' ',I5)
+ 
       IF (iaActualTag(iaList(1)) .NE. iaActualTag(iaList(iTotal))) THEN
         write(kStdWarn,*) 'Start file tag = ',iaActualTag(iaList(1))
         write(kStdWarn,*) 'Stop  file tag = ',iaActualTag(iaList(iTotal))

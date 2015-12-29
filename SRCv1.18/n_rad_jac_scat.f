@@ -145,8 +145,9 @@ c local variables
       REAL rTbdy,rTSurf,rAngle,rPressStart,rPressStop,rHeight
       INTEGER iDirection,iW,iInt
       INTEGER iC,iaStory(kProfLayer),iNumLinesRead
-      REAL FindSurfaceTemp
-
+      REAL FindSurfaceTemp,rJunk
+      INTEGER iFake
+      
       caWord = '*RADNCE'
       iErr = -1
 
@@ -196,10 +197,31 @@ c read in how many atmospheres
         END IF
       END IF
 
+      iFake = -1
+      IF ((iNatm .LT. 1) .AND. ((KRTP. EQ. -10) .OR. (kRTP .EQ. -5) .OR. (kRTP .EQ. -6))) THEN
+        write(kStdErr,*) 'oh oh looks like kRTP = -10,-6 or -5 and you forgot to set nm_radnce'
+        write(kStdErr,*) 'trying to fake things so iNatm = +1'
+	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>'
+        write(kStdWarn,*) 'oh oh looks like kRTP = -10,-6 or -5 and you forgot to set nm_radnce'
+        write(kStdWarn,*) 'trying to fake things so iNatm = +1'
+	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>'	
+        iNatm = 1
+	iFake = +1
+      END IF
+      
       iC = 0
 c now loop iNatm times
       DO iC = 1,iNatm
         iW = iaMPSetForRad(iC)
+
+        IF ((iFake .GT. 0) .AND. (raPressStart(iC) .LT. raPressStop(iC))) THEN
+	  write(kStdWarn,*) '  since we are "faking" an atm, do it for upwelling radiation (downlook intr)'
+	  write(kStdWarn,*) '  swap raPressStart and raPressStop for atm ',iC
+	  rJunk = raPressStart(iC)
+	  raPressStart(iC) = raPressStop(iC)
+	  raPressStop(iC) = rJunk
+	END IF
+	
         rPressStart = raPressStart(iC)
         rPressStop = raPressStop(iC)
         rTbdy = raTSpace(iC)

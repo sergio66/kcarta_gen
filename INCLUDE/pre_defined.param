@@ -131,11 +131,14 @@ c rtp file also may give latitude and month (via rtime)
       INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
       REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult
       REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
+c this is LBLRTM TPAPE5 toa
+      REAL kLBLRTM_toa
       PARAMETER (kDefaultColMult = 0.1)
       COMMON/ComBlock4/kSolar,kThermal,kThermalJacob,kJacobian,
      $                 kSetThermalAngle,kTemperVary
       COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
-     $                 kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
+     $                 kSolAzi,kSatAzi,
+     $                 kWindSpeed,kLatitude,kMonth,kLBLRTM_toa
       INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
       COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
 

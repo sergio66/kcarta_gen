@@ -163,12 +163,13 @@ c        END DO
           rInt = rInt*log(raPX(iJ+1)/raPX(iJ))
           raGeopotentialThick2(iI) = raGeopotentialThick2(iI) + Rd/grav * abs(rInt)
         END DO
-        write(kStdWarn,*) iI,p2h(raPressLevels(iI)),raThickness(iI),
+        write(kStdWarn,111) iI,p2h(raPressLevels(iI)),raThickness(iI),
      $             raGeopotentialThick1(iI),raGeopotentialThick2(iI),
      $             (1-raGeopotentialThick1(iI)/raThickness(iI))*100,
      $             (1-raGeopotentialThick2(iI)/raThickness(iI))*100
       END DO
-
+ 111  FORMAT(I3,6('  ',F10.4))
+ 
 c so GeoHgt1/2 and Error1/2 shows Scotts klayers and my hypersometric equation, are quite consistent
 
       write(kStdWarn,*) '------------------------------------------------------------'
