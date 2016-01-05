@@ -850,6 +850,8 @@ c compute the abs coeffs
      $                   iaQ21,iaQ22,raQ21,raQ22)
 
 c see if current gas ID needs nonLTE spectroscopy
+          iLTEIn = -1
+	  dDeltaFreqNLTE = 0.0025d0
           IF ((iChunk_DoNLTE .EQ. 1) .OR. (iChunk_DoNLTE .EQ. 3)) THEN
             CALL NLTEDriver(
      $            iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,

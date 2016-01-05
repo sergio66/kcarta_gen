@@ -842,7 +842,8 @@ c do very top of top layer ie where instrument is!!!
       END DO
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       RETURN
       END
@@ -1384,7 +1385,8 @@ c then loop over the atmosphere, up to the top
       END DO 
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       RETURN
       END
@@ -2212,7 +2214,8 @@ c do very top of top layer ie where instrument is!!!
       END DO
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       RETURN
       END
@@ -2770,7 +2773,8 @@ c then loop over the atmosphere, up to the top
       END DO 
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       RETURN
       END
@@ -3369,7 +3373,8 @@ c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,ra
       END DO
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       RETURN
       END
@@ -3928,7 +3933,8 @@ c then loop over the atmosphere, up to the top
       END DO 
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       RETURN
       END
@@ -3938,7 +3944,7 @@ c subroutine to print flux output
 c this is new, to mimic RRTM (after June 2013)
       SUBROUTINE printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,
-     $                         raDensity0,raThickness,raDeltaPressure)
+     $                         raDensity0,raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       IMPLICIT NONE
 
@@ -3949,7 +3955,8 @@ c input
       REAL raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
       REAL raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
       REAL raDensity0(kProfLayer),raThickness(kProfLayer),raDeltaPressure(kProfLayer)
-      INTEGER iIOUN,iNumLayer,troplayer,iAtm
+      REAL raPressLevels(kProfLayer+1)
+      INTEGER iIOUN,iNumLayer,troplayer,iAtm,iaRadLayer(kProfLayer)
       CHARACTER*80 caFluxFile
 
 c local      
@@ -3960,9 +3967,9 @@ c local
         !!do flux at TOP (1) or BOTTOM (3) of  each layer
         CALL PrintFlux13(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
-      ELSEIF (kFlux .EQ. 2) THEN  !!do heat rates in each layer
+      ELSEIF (kFlux .EQ. 2) THEN  !!do HEAT RATE at each level, plus 0 at TOA for heat rate
         CALL PrintFlux2(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
+     $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raPressLevels,iaRadLayer)
       ELSEIF (kFlux .EQ. 4) THEN  !!do a OLR computation only at TOA
         !do the integral over z axis (2pi)
         DO iLay = iNumLayer+1,iNumLayer+1
@@ -3981,7 +3988,8 @@ c local
       ELSEIF (kFlux .EQ. 5) THEN  !!do OLR only at TOA and ILR at GND, and at trp
         CALL PrintFlux5(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
-      ELSEIF (kFlux .EQ. 6) THEN  !!do UPwell at top of each layer, DNwell at bottom of each layer
+      ELSEIF (kFlux .EQ. 6) THEN  !!do    UPwell at top of each layer, DNwell at bottom of each layer
+                                  !! plus UPwell at GND,               downwell at TOA
         CALL PrintFlux6(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
       ELSE
@@ -3995,7 +4003,7 @@ c local
 c************************************************************************
 c this is heating rates
       SUBROUTINE PrintFlux2(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
+     $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raPressLevels,iaRadLayer)
 
       IMPLICIT NONE
 
@@ -4004,16 +4012,24 @@ c this is heating rates
       !pressures in mb, thicknesses in meters
 c input
       REAL raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
-      REAL raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
-      INTEGER iIOUN,iNumLayer,troplayer,iAtm
+      REAL raFreq(kMaxPts),rDelta,raDensityX(kProfLayer),raPressLevels(kProfLayer+1)
+      INTEGER iIOUN,iNumLayer,troplayer,iAtm,iaRadLayer(kProfLayer)
       CHARACTER*80 caFluxFile
 
 c local      
-      INTEGER iL,iLay,iFr
-      REAL raTemp(kMaxPts)
+      INTEGER iL,iLay,iFr,iWhichHeatRateCalc
+      REAL raTemp(kMaxPts),raDivP(kProfLayer+1),HeatFac
       REAL raaNetFlux(kMaxPts,kProfLayer+1),raaHeatRate(kMaxPts,kProfLayer+1)
+c debug      
+      REAL raSumFluxDiv(kProfLayer),raXup(kProfLayer),raXDn(kProfLayer)
 
-      !do the integral over z axis (2pi) AT THE END!!!
+c      DO iLay = 1,kProfLayer
+c        raSumFluxDiv(iLay) = 0.0
+c	raXup(iLay) = 0.0
+c	raXdn(iLay) = 0.0
+c      END DO
+      
+c      !do the integral over z axis (2pi) AT THE END!!!
 c      DO iLay = 1,iNumLayer+1
 c        DO iFr = 1,kMaxPts
 c          raaUpFlux(iFr,iLay)   = raaUpFlux(iFr,iLay)*2*kPi
@@ -4035,29 +4051,62 @@ c so net loss of energy in layer I = flux density(I+1)-flux density(I)
       DO iLay = 1,iNumLayer
         DO iFr = 1,kMaxPts
           raaHeatRate(iFr,iLay) = raaNetFlux(iFr,iLay+1)-raaNetFlux(iFr,iLay)
+c	  raSumFLuxDiv(iLay) = raSumFLuxDiv(iLay) + raaHeatRate(iFr,iLay)*0.0025/1000.0*2*kPi
+c	  raXup(iLay) = raXup(iLay) + raaUpFlux(iFr,iLay)*0.0025/1000.0*2*kPi
+c	  raXDn(iLay) = raXDn(iLay) + raaDownFlux(iFr,iLay)*0.0025/1000.0*2*kPi	  
         END DO
       END DO
 
-c change units from radiance units to K s-1
-c and then to K day-1
-c and also multiply by 2 pi
-      DO iLay = 1,iNumLayer
-        DO iFr = 1,kMaxPts
-          raaHeatRate(iFr,iLay)  =  raaHeatRate(iFr,iLay)/raDensityX(iLay) * 86400.0 * 2 * kPi
-        END DO
-      END DO
+ 1234 FORMAT(2(' ',I3),4(' ',F10.4))
 
+      iWHichHeatRateCalc = -1    !! use old style of HR = blah/densoty * 86400 * pi. not very good at high altitudes
+      iWHichHeatRateCalc = +1    !! use new style of HR = blah/div(p)  * 8.4438
+      IF (iWHichHeatRateCalc .EQ. +1) THEN
+        !! NEW --- see LBLRTM radsum (or RRTM) for HEATFAC, uses div(p) and sec/day to dirrectly convert to K/day
+        raDivP(kProfLayer+1) = 0.0
+        DO iLay = 1,kProfLayer
+          raDivP(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
+c	  print *,iLay,raPressLevels(iLay),raPressLevels(iLay+1),raDivP(iLay)
+        END DO
+        HeatFac = 8.4338
+        DO iLay = 1,iNumLayer
+          DO iFr = 1,kMaxPts
+            raaHeatRate(iFr,iLay)  =  raaHeatRate(iFr,iLay)/raDivP(iaRadLayer(iLay)) * HeatFac/1000.0 * 2 * kPi
+          END DO
+        END DO
+c debug       
+c      DO iLay = 1,iNumLayer
+cc        write(*,1234) iLay,iaRadLayer(iLay),raaUpFlux(1,iLay),raaDownFlux(1,iLay),raDivP(iaRadLayer(iLay)),
+cc     $                raSumFluxDiv(iaRadLayer(iLay))
+c        write(*,1234) iLay,iaRadLayer(iLay),raXUp(iLay),raXDn(iLay),raDivP(iaRadLayer(iLay)),
+c     $                raSumFluxDiv(iaRadLayer(iLay))
+c      END DO             
+      ELSE
+        !! original code
+        ! change units from radiance units to K s-1 and then to K day-1
+        ! also multiply by pi
+        DO iLay = 1,iNumLayer
+          DO iFr = 1,kMaxPts
+            raaHeatRate(iFr,iLay)  =  -raaHeatRate(iFr,iLay)/raDensityX(iaRadLayer(iLay)) * 86400.0 * kPi
+          END DO
+        END DO
+      END IF
+     
 c now print out the results
       CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),
-     $                 rDelta,iAtm,1,iNumLayer)
+     $                 rDelta,iAtm,1,iNumLayer+1)
       DO iLay = 1,iNumLayer
         DO iFr = 1,kMaxPts
           raTemp(iFr) = raaHeatRate(iFr,iLay)
         END DO
         CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp) 
-c        print *,'kFlux = ',kFlux,iLay,raTemp(1)
       END DO
-
+      !!! do TOA, heat rate = 0
+      DO iFr = 1,kMaxPts
+        raTemp(iFr) = 0.0
+      END DO
+      CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp) 
+      
       RETURN
       END
 
@@ -4079,38 +4128,41 @@ c input
 
 c local      
       INTEGER iL,iLay,iFr,i1,i2
-      REAL raTemp(kMaxPts)
+      REAL raTemp(kMaxPts),raaXFlux(kMaxPts,kProfLayer+1)
 
       !do the integral over z axis (2pi)
       IF (kFlux .EQ. 3) THEN
         !! want to dump UPWELL flux at TOP of each layer, so print levels 2 .. iNumLayer+1
         i1 = 2
+        !! want to dump UPWELL flux at TOP of each layer, and from GND so print levels 1 .. iNumLayer+1	
+	i1 = 1
         i2 = iNumLayer+1
         DO iLay = 1,iNumLayer+1
           DO iFr = 1,kMaxPts
-            raaDownFlux(iFr,iLay) = raaUpFlux(iFr,iLay)*2*kPi
+            raaXFlux(iFr,iLay) = raaUpFlux(iFr,iLay)*2*kPi
           END DO
         END DO
       ELSEIF (kFlux .EQ. 1) THEN
         !! want to dump DOWNWELL flux at BOTTOM of each layer, so print levels 1 .. iNumLayer
         i1 = 1
         i2 = iNumLayer
+        !! want to dump DNWELL flux at BOTTOM of each layer, and from TOA so print levels 1 .. iNumLayer+1		
+	i2 = iNumLayer + 1
         DO iLay = 1,iNumLayer+1
           DO iFr = 1,kMaxPts
-            raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)*2*kPi
+            raaXFlux(iFr,iLay) = raaDownFlux(iFr,iLay)*2*kPi
           END DO
         END DO
       END IF
 
 c now print out the results
       CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),
-     $                 rDelta,iAtm,1,iNumLayer)
+     $                 rDelta,iAtm,1,iNumLayer+1)
       DO iLay = i1,i2
         DO iFr = 1,kMaxPts
-          raTemp(iFr) = raaDownFlux(iFr,iLay)
+          raTemp(iFr) = raaXFlux(iFr,iLay)
           END DO
         CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp) 
-c        print *,'kFlux = ',kFlux,iLay,raTemp(1)
       END DO
 
       RETURN
@@ -4485,8 +4537,9 @@ c to do the local absorptive cloud
       REAL raaAbs(kMaxPts,kMixFilRows),rFracCloudPutIn
       INTEGER iCloudLayerTop,iCloudLayerBot,iiDiv
 
-      iGaussPts = 3  !!! default
-      iGaussPts = 4  !!! default
+      iGaussPts = 1  !!! haha not too bad at all ....
+      iGaussPts = 4  !!! "slightly" better than iGaussPts = 3 (tic)
+      iGaussPts = 3  !!! LBLRTM uses this
 
       IF (iGaussPts .GT. kGauss) THEN
         write(kStdErr,*) 'need iGaussPts < kGauss'
@@ -4494,15 +4547,7 @@ c to do the local absorptive cloud
       END IF
 
 c      CALL FindGauss(iGaussPts,daGaussPt,daGaussWt)
-c      do iT = 1,iGaussPts
-c        print *,daGaussPt(iT),daGaussWt(iT)
-c      end do
-
       CALL FindGauss2(iGaussPts,daGaussPt,daGaussWt)
-c      do iT = 1,iGaussPts
-c        print *,daGaussPt(iT),daGaussWt(iT)
-c      end do
-c      call dostop
 
       iIOUN = kStdFlux
 
@@ -4975,7 +5020,8 @@ c do very top of top layer ie where instrument is!!!
       END DO
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $     raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $     raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $     raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
       RETURN
       END
@@ -5097,28 +5143,43 @@ c for LBLRTM TAPE5/TAPE6
       INTEGER iLBLRTMZero
       REAL raaAbs_LBLRTM_zeroUA(kMaxPts,kMixFilRows)
 
-      iLBLRTMZero = -iNumlayer
-      IF (kLBLRTM_toa .GT. 0) THEN
+      iLBLRTMZero = +2*iNumlayer
+c      kLBLRTM_toa = 0.1
+      IF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .GT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
         iLay = 1
  8888   CONTINUE
-        IF ((iLay .LT. iNumLayer) .AND. (raPressLevels(iaaRadLayer(iAtm,iLay)) .GT. kLBLRTM_toa)) THEN
+        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)),raPressLevels(iaaRadLayer(iAtm,iLay)+1)
+        IF ((iLay .LT. iNumLayer) .AND. (raPressLevels(iaaRadLayer(iAtm,iLay)+1) .GT. kLBLRTM_toa)) THEN
 	  iLay = iLay + 1
 	  GOTO 8888
 	END IF
 	IF (iLay .LT. 1) iLay = 1
 	IF (iLay .GT. iNumLayer) iLay = iNumLayer
-        iLBLRTMZero = iLay
-	write(kStdWarn,*)'input TOA from LBLRTM TAPE5/6 was ',kLBLRTM_toa,' mb'
-	write(kStdWarn,*) '  hmm for flux need to zero ODS from iLay = ',iLBLRTMZero,' which corresponds to '
-	write(kStdWarn,*) '  radiating layer ',iaaRadLayer(iAtm,iLay),'at p = ',raPressLevels(iaaRadLayer(iAtm,iLay)),' mb'
-	write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at p = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
+        iLBLRTMZero = iLay + 1
+	write(kStdWarn,*)'input TOA   from LBLRTM TAPE5/6 is ',kLBLRTM_toa,' mb'
+	write(kStdWarn,*)'raPlevs TOA from LBLRTM TAPE5/6 is ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'	
+	write(kStdWarn,*) '  hmm need to zero ODS from iLay = ',iLBLRTMZero,' which corresponds to '
+	iFr = iaaRadLayer(iAtm,iLBLRTMZero)
+	write(kStdWarn,*) '  radiating layer ',iFr,'at pBot = ',raPressLevels(iFr),' mb'
+	write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at pBot = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
+	write(kStdWarn,*) '                                         at pTop = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
+      ELSEIF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .LT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
+        write(kStdWarn,*) 'looks like kLBLRTM_toa is in uppermost layer'
+	write(kStdWarn,*) 'pbot(iNumL),ptop(iNumL),kLBLRTM_toa = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),
+     $                     raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),kLBLRTM_toa
+	write(kStdWarn,*) 'no need to zero ODs in any layer'
+      ELSEIF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .LE. raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1))) THEN
+        write(kStdWarn,*) 'looks like kLBLRTM_toa is the same as TOA from raPressLevels'
+	write(kStdWarn,*) 'pbot(iNumL),ptop(iNumL),kLBLRTM_toa = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),
+     $                     raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),kLBLRTM_toa
+	write(kStdWarn,*) 'no need to zero ODs in any layer'
       END IF
 
       DO iLay = 1,iNumLayer
         iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
       END DO
       DO iLay = 1,iNumLayer
-        IF (iLay .LE. iLBLRTMZero) THEN
+        IF (iLay .LT. iLBLRTMZero) THEN
           DO iFr = 1,kMaxPts
             raaAbs_LBLRTM_zeroUA(iFr,iaRadLayer(iLay)) = raaAbs0(iFr,iaRadLayer(iLay)) 
           END DO
@@ -5144,8 +5205,8 @@ c for LBLRTM TAPE5/TAPE6
         write(kStdWarn,*)'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
       END IF
 
-      iGaussPts = 4  !!! default, works fine for clr sky
       iGaussPts = 1  !!! haha not too bad at all ....
+      iGaussPts = 4  !!! "slightly" better than iGaussPts = 3 (tic)
       iGaussPts = 3  !!! LBLRTM uses this
 
       IF (iGaussPts .GT. kGauss) THEN
@@ -5157,7 +5218,8 @@ c for LBLRTM TAPE5/TAPE6
       iIOUN = kStdFlux
 
       write(kStdWarn,*) '  '
-      write(kStdWarn,*) 'Computing fluxes ..............'
+      write(kStdWarn,*) 'Computing fluxes .............. '
+      write(kStdWarn,*) '    <<< using ',iGaussPts,' exp Gauss quadrature points/weights >>>'
       write(kStdWarn,*) '  '
 
       rThermalRefl = 1.0/kPi
@@ -5191,6 +5253,8 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal = kThermal
       iDoThermal = 0       !!make sure thermal included, but done quickly
 
+      rCos = -9.99
+      
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng)=1/0,rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
@@ -5627,7 +5691,8 @@ c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,ra
       END DO
 
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+     $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
 c        DO iFr = 1,100
 c          print *,iFr,raVT1(iFr),raPressLevels(iFr),raTPressLevels(iFr),

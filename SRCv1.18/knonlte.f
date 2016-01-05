@@ -273,6 +273,8 @@ c these are for Matlab style kCOmp Corner Weights
 
       INTEGER iL
 
+      iLTEIn = -1
+      
       IF (iNLTE_SlowORFast .EQ. +1) THEN
         write(kStdWarn,*) 'doing slow LBL NLTE ...'
         CALL NLTE_SLOW_LBL(

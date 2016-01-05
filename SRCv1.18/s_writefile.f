@@ -2340,7 +2340,7 @@ c if file error, inform user and stop program
 
 c write general header information
         WRITE(iIOUN_Flux) caComment
-c        IF (kFlux .NE. 6) THEN
+c        IF ((kFlux .NE. 6) .OR. (kFlux .NE. 1,2,3)) THEN
 c          WRITE(iIOUN_Flux) kProfLayer
 c        ELSE
 c          WRITE(iIOUN_Flux) kProfLayer+1
@@ -2361,34 +2361,37 @@ c figure out how many types of fluxes to output (duh!!!!!!!)
 c then figure out, of the atmospheres that have been read in, which actually 
 c have a radiance and hence jacobian calculation associated with them
 c assume all error checking done in section above (when blah.dat is created)
-        iNatmJac=0
+        iNatmJac = 0
         DO iI=1,iNatm
 c now output the list of mixed paths to be printed, for this atmosphere
           DO iJ=1,iOutTypes
             IF ((iaPrinter(iJ) .EQ. 3).AND.(iaAtmPr(iJ).EQ.iI)) THEN
-              iNatmJac=iNatmJac+1
+              iNatmJac = iNatmJac+1
               IF (iaNp(iJ) .NE. 0) THEN   !!ie it is -1 or a positive number
 c               IF (iaNp(iJ) .GT. 0) THEN
 c set the number of layers in this atmosphere
-                iaLayerJac(iNatmJac)=iaNumLayers(iI)
+                iaLayerJac(iNatmJac) = iaNumLayers(iI)
               END IF
             END IF
           END DO
         END DO
 
-        IF (kFLux .LE. 3) THEN   !!! outputting all layers
+        IF (kFLux .LE. 3)  THEN   !!! outputting at all levels
+          DO iI = 1,iNatmJac
+            iaJunkFlux(iI) = 1 * (iaLayerJac(iI)+1)
+          END DO
+
           WRITE(iIOUN_Flux) iNatmJac
-          WRITE(iIOUN_Flux) (iaLayerJac(iI),iI=1,iNatmJac)
+          WRITE(iIOUN_Flux) (iaJunkFlux(iI),iI=1,iNatmJac)
 
           write(kStdWarn,*)'had',iNatmJac,' out of',iNatm,' atm to output'
-          write(kStdWarn,*) (iaLayerJac(iI),iI=1,iNatmJac)
+          write(kStdWarn,*) (iaJunkFlux(iI),iI=1,iNatmJac)
 
-c no need to dump out gas amounts, temperatures; so now tell the reader how 
-c many things to expect : 
+c how many things to expect : 
 c total num kcomp files, total number of output options=iNatm,number of fluxes
-c for each atmosphere, how many layers
+c for each atmosphere, dump OLR AND ILR
           write(iIOUN_Flux) iTotal,iNatmJac,iImportant
-          write(iIOUN_Flux) (iaLayerJac(iI),iI=1,iNatmJac)               
+          write(iIOUN_Flux) (iaJunkFLux(iI),iI=1,iNatmJac)               
 
         ELSEIF (kFLux .EQ. 4) THEN   !!! outputting only OLR at TOA
           DO iI = 1,iNatmJac
@@ -2437,8 +2440,7 @@ c for each atmosphere, dump OLR AND ILR
           write(kStdWarn,*)'had',iNatmJac,' out of',iNatm,' atm to output'
           write(kStdWarn,*) (iaJunkFlux(iI),iI=1,iNatmJac)
 
-c no need to dump out gas amounts, temperatures; so now tell the reader how 
-c many things to expect : 
+c how many things to expect : 
 c total num kcomp files, total number of output options=iNatm,number of fluxes
 c for each atmosphere, dump OLR AND ILR
           write(iIOUN_Flux) iTotal,iNatmJac,iImportant

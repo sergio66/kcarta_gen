@@ -988,7 +988,7 @@ c DO NOT SORT THESE NUMBERS!!!!!!!!
         write(kStdWarn,*) (raExtinct(iL),iL=1,5)
       END IF
 
-c note raVT1 is the array that has the interpolated bottom and top layer temps
+c note raVT1 is the array that has the interpolated bottom and top ** layer **  temps
 c set the vertical temperatures of the atmosphere
 c this has to be the array used for BackGndThermal and Solar
       DO iFr=1,kMixFilRows
@@ -1445,7 +1445,7 @@ c DO NOT SORT THESE NUMBERS!!!!!!!!
         write(kStdWarn,*) (raExtinct(iL),iL=1,5)
       END IF
 
-c note raVT1 is the array that has the interpolated bottom and top layer temps
+c note raVT1 is the array that has the interpolated bottom and top ** layer **  temps
 c set the vertical temperatures of the atmosphere
 c this has to be the array used for BackGndThermal and Solar
       DO iFr=1,kMixFilRows
@@ -1968,7 +1968,7 @@ c INTIALIZE the emission seen at satellite to 0.0
       DO iFr=1,kMaxPts
 c compute the emission from the top of atm == eqn 4.26 of Genln2 manual
 c initialize the cumulative thermal radiation
-        raThermal(iFr) = ttorad(raFreq(iFr),kTSpace)
+        raThermal(iFr) = ttorad(raFreq(iFr),sngl(kTSpace))
       END DO
 
 c now go from top of atmosphere down to the surface to compute the total
@@ -2486,7 +2486,8 @@ c thse next three lines are to debug the function, for iTopBot = +1
         rPp1 = raPressLevels(MP2Lay(iL)+1)
         rPavg=(rP-rPp1)/alog(rP/rPp1)        
 
-      ELSE   !oh boy .. have to intrp!!!!!!!!
+      ELSE   !oh boy .. have to interp!!!!!!!!
+
         iW = iCeil(iL*1.0/(kProfLayer*1.0))    !which set of mxd paths this is
         i0=MP2Lay(iL) !lower pressure level .. rP is within this press layer 
         ip1 = i0+1      !upper pressure leve1 .. this is one press layer above
@@ -2498,19 +2499,19 @@ c have to recompute what the user specified pressure was!!
           rP = raPressLevels(ip1)+rFrac*(raPressLevels(i0)-raPressLevels(ip1))
         ELSE                                !bot frac of layer
           !pressure specified by user
-          rP=-rFrac*(raPressLevels(i0)-raPressLevels(ip1))+raPressLevels(i0)
+          rP = -rFrac*(raPressLevels(i0)-raPressLevels(ip1))+raPressLevels(i0)
         END IF
 
 c compute the average pressure of the fractional layer
         IF (iTopOrBot .EQ. 1) THEN
           IF (abs(rP-raPressLevels(ip1)) .GE. delta) THEN
-            rPavg=(rP-raPressLevels(ip1))/alog(rP/raPressLevels(ip1))
+            rPavg = (rP-raPressLevels(ip1))/alog(rP/raPressLevels(ip1))
           ELSE
             rPavg = rP
           END IF
         ELSE
           IF (abs(rP-raPressLevels(i0)) .GE. delta) THEN
-            rPavg=(raPressLevels(i0)-rP)/alog(raPressLevels(i0)/rP)
+            rPavg = (raPressLevels(i0)-rP)/alog(raPressLevels(i0)/rP)
           ELSE
             rPavg = rP
           END IF
@@ -2519,13 +2520,13 @@ c compute the average pressure of the fractional layer
         IF ((i0 .LE. (kProfLayer-1)) .AND. (i0 .GE. (iLowest+1)))  THEN
 c can safely look at layer i0, and layer above/below it
 c avg press of layer i0+1
-          rPp1=(raPressLevels(ip1)-raPressLevels(ip1+1))/
-     $         alog(raPressLevels(ip1)/raPressLevels(ip1+1)) 
+          rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/
+     $         alog(raPressLevels(ip1)/raPressLevels(ip1+1))
 c avg press of layer i0
-          rP0=(raPressLevels(i0)-raPressLevels(ip1))/
+          rP0 = (raPressLevels(i0)-raPressLevels(ip1))/
      $         alog(raPressLevels(i0)/raPressLevels(ip1))
 c avg press of layer i0-1
-          rPm1=(raPressLevels(im1)-raPressLevels(i0))/
+          rPm1 = (raPressLevels(im1)-raPressLevels(i0))/
      $         alog(raPressLevels(im1)/raPressLevels(i0))
 c temperatures of these levels from raVTemp
           rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
@@ -2538,18 +2539,19 @@ c first redefine i0,ip1,im1
           im1 = i0-1    !                     .. this is one press layer below
 c can now safely look at layer i0, and layer above/below it
 c avg press of layer i0+1
-          rPp1=(raPressLevels(ip1)-raPressLevels(ip1+1))/
-     $         alog(raPressLevels(ip1)/raPressLevels(ip1+1)) 
+          rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/
+     $         alog(raPressLevels(ip1)/raPressLevels(ip1+1))
 c avg press of layer i0
-          rP0=(raPressLevels(i0)-raPressLevels(ip1))/
+          rP0 = (raPressLevels(i0)-raPressLevels(ip1))/
      $        alog(raPressLevels(i0)/raPressLevels(ip1))
 c avg press of layer i0-1
-          rPm1=(raPressLevels(im1)-raPressLevels(i0))/
+          rPm1 = (raPressLevels(im1)-raPressLevels(i0))/
      $         alog(raPressLevels(im1)/raPressLevels(i0))
 c temperatures of these levels from raVTemp
           rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
           rT0 = raVTemp(i0+(iW-1)*kProfLayer)
           rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
+	  
         ELSE IF (i0 .EQ. iLowest) THEN
 c first redefine i0,ip1,im1
           i0 = iLowest+1
@@ -2557,34 +2559,36 @@ c first redefine i0,ip1,im1
           im1 = i0-1    !                     .. this is one press layer below
 c can now safely look at layer i0, and layer above/below it
 c avg press of layer i0+1
-          rPp1=(raPressLevels(ip1)-raPressLevels(ip1+1))/
-     $         alog(raPressLevels(ip1)/raPressLevels(ip1+1)) 
+          rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/
+     $         alog(raPressLevels(ip1)/raPressLevels(ip1+1))
 c avg press of layer i0
-          rP0=(raPressLevels(i0)-raPressLevels(ip1))/
+          rP0 = (raPressLevels(i0)-raPressLevels(ip1))/
      $        alog(raPressLevels(i0)/raPressLevels(ip1))
 c avg press of layer i0-1
-          rPm1=(raPressLevels(im1)-raPressLevels(i0))/
+          rPm1 = (raPressLevels(im1)-raPressLevels(i0))/
      $         alog(raPressLevels(im1)/raPressLevels(i0))
 c temperatures of these levels from raVTemp
           rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
           rT0 = raVTemp(i0+(iW-1)*kProfLayer)
           rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
         END IF      
-
+	
 c now compute the fit for rT(n)=ax(n)^2 + bx(n) + c where x(n)=alog(P(n))
-        rP0=alog(rP0)
-        rPp1=alog(rPp1)
-        rPm1=alog(rPm1)
-       
+        rP0  = alog(rP0)
+        rPp1 = alog(rPp1)
+        rPm1 = alog(rPm1)
+c        print *,rpp1,rp0,rPm1
+c	print *,rTp1,rT0,rTm1
+	
         rDp1 = rTp1-rT0
         rDm1 = rTm1-rT0
 
-        rp1 = rPp1-rP0
-        rp1sqr=(rPp1-rP0)*(rPp1+rP0)
-        rm1 = rPm1-rP0
-        rm1sqr=(rPm1-rP0)*(rPm1+rP0)
+        rp1    = rPp1-rP0
+        rp1sqr = (rPp1-rP0)*(rPp1+rP0)
+        rm1    = rPm1-rP0
+        rm1sqr = (rPm1-rP0)*(rPm1+rP0)
 
-        rA=(rDm1-rDp1*rm1/rp1)/(rm1sqr-rp1sqr*rm1/rp1)
+        rA = (rDm1-rDp1*rm1/rp1)/(rm1sqr-rp1sqr*rm1/rp1)
         rB = rDp1/rp1-rA*(rp1sqr/rp1)
         rC = rT0-rA*rP0*rP0-rB*rP0
 
@@ -2790,7 +2794,7 @@ ccc          END DO
 ccc        END DO
 ccc      END IF
 
-c note raVT1 is the array that has the interpolated bottom and top layer temps
+c note raVT1 is the array that has the interpolated bottom and top ** layer **  temps
 c set the vertical temperatures of the atmosphere
 c this has to be the array used for BackGndThermal and Solar
       DO iFr=1,kMixFilRows
@@ -3271,7 +3275,7 @@ ccc          END DO
 ccc        END DO
 ccc      END IF
 
-c note raVT1 is the array that has the interpolated bottom and top layer temps
+c note raVT1 is the array that has the interpolated bottom and top ** layer **  temps
 c set the vertical temperatures of the atmosphere
 c this has to be the array used for BackGndThermal and Solar
       DO iFr=1,kMixFilRows
@@ -3675,28 +3679,43 @@ c for LBLRTM TAPE5/TAPE6
       INTEGER iLBLRTMZero
       REAL raaAbs_LBLRTM_zeroUA(kMaxPts,kMixFilRows)
 
-      iLBLRTMZero = -iNumlayer
-      IF (kLBLRTM_toa .GT. 0) THEN
+      iLBLRTMZero = +2*iNumlayer
+c      kLBLRTM_toa = 0.1
+      IF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .GT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
         iLay = 1
  8888   CONTINUE
-        IF ((iLay .LT. iNumLayer) .AND. (raPressLevels(iaaRadLayer(iAtm,iLay)) .GT. kLBLRTM_toa)) THEN
+        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)),raPressLevels(iaaRadLayer(iAtm,iLay)+1)
+        IF ((iLay .LT. iNumLayer) .AND. (raPressLevels(iaaRadLayer(iAtm,iLay)+1) .GT. kLBLRTM_toa)) THEN
 	  iLay = iLay + 1
 	  GOTO 8888
 	END IF
 	IF (iLay .LT. 1) iLay = 1
 	IF (iLay .GT. iNumLayer) iLay = iNumLayer
-        iLBLRTMZero = iLay
-	write(kStdWarn,*)'input TOA from LBLRTM TAPE5/6 was ',kLBLRTM_toa,' mb'
+        iLBLRTMZero = iLay + 1
+	write(kStdWarn,*)'input TOA   from LBLRTM TAPE5/6 is ',kLBLRTM_toa,' mb'
+	write(kStdWarn,*)'raPlevs TOA from LBLRTM TAPE5/6 is ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'	
 	write(kStdWarn,*) '  hmm need to zero ODS from iLay = ',iLBLRTMZero,' which corresponds to '
-	write(kStdWarn,*) '  radiating layer ',iaaRadLayer(iAtm,iLay),'at p = ',raPressLevels(iaaRadLayer(iAtm,iLay)),' mb'
-	write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at p = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
+	iFr = iaaRadLayer(iAtm,iLBLRTMZero)
+	write(kStdWarn,*) '  radiating layer ',iFr,'at pBot = ',raPressLevels(iFr),' mb'
+	write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at pBot = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
+	write(kStdWarn,*) '                                         at pTop = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
+      ELSEIF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .LT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
+        write(kStdWarn,*) 'looks like kLBLRTM_toa is in uppermost layer'
+	write(kStdWarn,*) 'pbot(iNumL),ptop(iNumL),kLBLRTM_toa = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),
+     $                     raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),kLBLRTM_toa
+	write(kStdWarn,*) 'no need to zero ODs in any layer'
+      ELSEIF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .LE. raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1))) THEN
+        write(kStdWarn,*) 'looks like kLBLRTM_toa is the same as TOA from raPressLevels'
+	write(kStdWarn,*) 'pbot(iNumL),ptop(iNumL),kLBLRTM_toa = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),
+     $                     raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),kLBLRTM_toa
+	write(kStdWarn,*) 'no need to zero ODs in any layer'
       END IF
 
       DO iLay = 1,iNumLayer
         iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
       END DO
       DO iLay = 1,iNumLayer
-        IF (iLay .LE. iLBLRTMZero) THEN
+        IF (iLay .LT. iLBLRTMZero) THEN
           DO iFr = 1,kMaxPts
             raaAbs_LBLRTM_zeroUA(iFr,iaRadLayer(iLay)) = raaAbs(iFr,iaRadLayer(iLay)) 
           END DO
@@ -3773,12 +3792,13 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
      $         raExtinct,raAbsCloud,raAsym,iCloudLayerTop,iCLoudLayerBot)
       END IF
 
-c note raVT1 is the array that has the interpolated bottom and top layer temps
+c note raVT1 is the array that has the interpolated bottom and top ** layer **  temps
 c set the vertical temperatures of the atmosphere
 c this has to be the array used for BackGndThermal and Solar
       DO iFr=1,kMixFilRows
         raVT1(iFr) = raVTemp(iFr)
       END DO
+      
 c if the bottommost layer is fractional, interpolate!!!!!!
       iL = iaRadLayer(1)
       raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -3789,7 +3809,11 @@ c instead of temp of full layer at 100 km height!!!!!!
       iL = iaRadLayer(iNumLayer)
       raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
       write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL) 
-
+c      do iL = iaRadLayer(1),iaRadLayer(iNumLayer)
+c        print *,iL,iaRadLayer(iL-iaRadLayer(1)+1),raPressLevels(iL),raVTemp(iL),raVTemp(iL),iProfileLayers,rFracBot,rFracTop
+c      end do
+c      call dostopmesg(';klf;lkfs$')
+      
       !!!do default stuff; set temperatures at layers
       DO iLay=1,kProfLayer
         raVT2(iLay) = raVTemp(iLay)
@@ -4066,7 +4090,6 @@ c then do the topmost layer (could be fractional)
                CALL wrtout(iIOUN,caOutName,raFreq,raInten2Junk)
             END DO
            ELSEIF (iDp .EQ. 1) THEN
-             write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileUPWELL_LINEAR_IN_TAU'		   
              IF (iVary .GE. 2) THEN
                CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs_LBLRTM_zeroUA,iL,raTPressLevels,raVT1,
      $                      rCos,+1.0,

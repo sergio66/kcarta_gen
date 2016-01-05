@@ -609,23 +609,17 @@ c so start doing accurate radiative transfer very low in atmosphere (in the
 c bottom few layers)
       iB=WhichLevel(iProfileLayers,raPressLevels,940.0)   !AIRS100 => lev iB=6
 
-      IF ((rF .GE. 605.0).AND.(rF .LE. 630.0))
-     $  THEN
+      IF ((rF .GE. 605.0).AND.(rF .LE. 630.0)) THEN
         iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 =>lev iB=25 
-      ELSE IF((rF .GE. 705.0).AND.(rF .LE. 830.0))
-     $  THEN
+      ELSEIF ((rF .GE. 705.0).AND.(rF .LE. 830.0)) THEN
         iB=WhichLevel(iProfileLayers,raPressLevels,4.8)   !AIRS100 => lev iB=85
-      ELSE IF((rF .GE. 830.0).AND.(rF .LE. 1155.0))
-     $  THEN
+      ELSEIF ((rF .GE. 830.0).AND.(rF .LE. 1155.0)) THEN
         iB=WhichLevel(iProfileLayers,raPressLevels,157.0) !AIRS100 => lev iB=50
-      ELSE IF((rF .GE. 1155.0).AND.(rF .LE. 1505.0))
-     $  THEN
+      ELSEIF ((rF .GE. 1155.0).AND.(rF .LE. 1505.0)) THEN
         iB=WhichLevel(iProfileLayers,raPressLevels,415.0) !AIRS100 => lev iB=30
-      ELSE IF((rF .GE. 1730.0).AND.(rF .LE. 2230.0))
-     $  THEN
+      ELSEIF ((rF .GE. 1730.0).AND.(rF .LE. 2230.0)) THEN
         iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
-      ELSE IF((rF .GE. 2380.0).AND.(rF .LE. 2805.0))
-     $  THEN
+      ELSEIF ((rF .GE. 2380.0).AND.(rF .LE. 2805.0)) THEN
         iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
         !iB=WhichLevel(iProfileLayers,raPressLevels,5.0) !AIRS100 => lev iB=85
       END IF
@@ -669,41 +663,35 @@ c raFreq is the frequency wavenumbers of the current block
       END IF
       iDiv = iDiv - 1
 
-      !iB=WhichLevel(iProfileLayers,raPressLevels,940.0)   !AIRS100 => lev iB=6
+      !iB = WhichLevel(iProfileLayers,raPressLevels,940.0)   !AIRS100 => lev iB = 6
 
       !!! new default !!
-      iB=WhichLevel(iProfileLayers,raPressLevels,500.0)   !AIRS100 => lev iB=25
+      iB = WhichLevel(iProfileLayers,raPressLevels,500.0)   !AIRS100 => lev iB = 25
 
-      IF ((raFreq(1).GE.605.0).AND.(raFreq(kMaxPts).LE.630.0))
-     $  THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
-      ELSE IF((raFreq(1).GE.705.0).AND.(raFreq(kMaxPts).LE.830.0))
-     $  THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,4.8)   !AIRS100 => lev iB=85
-      ELSE IF((raFreq(1).GE.830.0).AND.(raFreq(kMaxPts).LE.1155.0))
-     $  THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,157.0) !AIRS100 => lev iB=50
-      ELSE IF((raFreq(1).GE.1155.0).AND.(raFreq(kMaxPts).LE.1505.0))
-     $  THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,415.0) !AIRS100 => lev iB=30
-      ELSE IF((raFreq(1).GE.1730.0).AND.(raFreq(kMaxPts).LE.2230.0))
-     $  THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
-      ELSE IF((raFreq(1).GE.2380.0).AND.(raFreq(kMaxPts).LE.2830.0))
-     $  THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,500.0)  !AIRS100 =>lev iB=25
+      IF ((raFreq(1).GE.605.0).AND.(raFreq(kMaxPts).LE.630.0)) THEN
+        iB = WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB = 25
+      ELSE IF((raFreq(1).GE.705.0).AND.(raFreq(kMaxPts).LE.830.0)) THEN
+        iB = WhichLevel(iProfileLayers,raPressLevels,4.8)   !AIRS100 => lev iB = 85
+      ELSE IF((raFreq(1).GE.830.0).AND.(raFreq(kMaxPts).LE.1155.0)) THEN
+        iB = WhichLevel(iProfileLayers,raPressLevels,157.0) !AIRS100 => lev iB = 50
+      ELSE IF((raFreq(1).GE.1155.0).AND.(raFreq(kMaxPts).LE.1505.0)) THEN
+        iB = WhichLevel(iProfileLayers,raPressLevels,415.0) !AIRS100 => lev iB = 30
+      ELSE IF((raFreq(1).GE.1730.0).AND.(raFreq(kMaxPts).LE.2230.0)) THEN
+        iB = WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB = 25
+      ELSE IF((raFreq(1).GE.2380.0).AND.(raFreq(kMaxPts).LE.2830.0)) THEN
+        iB = WhichLevel(iProfileLayers,raPressLevels,500.0)  !AIRS100 =>lev iB = 25
       END IF
 
       IF (kWhichScatterCode .NE. 0) THEN
         !assume all clouds below this, so start the boundary at which to become
         !accurate pretty high up in the atm
-        iB=WhichLevel(iProfileLayers,raPressLevels,100.0) 
+        iB = WhichLevel(iProfileLayers,raPressLevels,100.0) 
       END IF
 
       !!! now recall if we say there are 97 layers, from 4 --> 100
       !!! we need to map this correctly 
 
-      iN = 1
+      iN  =  1
  10   CONTINUE
       IF ((iaRadLayer(iN) - kProfLayer*iDiv) .LT. iB) THEN
         iN = iN + 1
@@ -711,7 +699,7 @@ c raFreq is the frequency wavenumbers of the current block
       END IF
       iB = iN
 
-      FindBoundary=iB
+      FindBoundary = iB
 
       RETURN
       END
@@ -744,14 +732,17 @@ c       write (kStdWarn,*) 'in FindBoundary, would like pressure to be between'
 c       write (kStdWarn,*) 'raPressLevels(iLowest),raPressLevels(kProfLayer+1)'
 c       write (kStdWarn,*) 'where highest KCARTA level = ',kProfLayer+1
 c       write (kStdWarn,*) 'resetting input "p" to function WhichLevel from ',p
+        print *,'mmooo',iLowest,iProfileLayers,p,raPressLevels(kProfLayer+1),raPressLevels(kProfLayer)
         p = raPressLevels(kProfLayer)
-c       write (kStdWarn,*) 'to pressure ',p
+        print *,'mmoooNew',iLowest,iProfileLayers,p,raPressLevels(kProfLayer+1)	
+c       write (kStdWarn,*) ' to pressure ',p
       END IF
 
-      iB=iLowest
+      iB = iLowest
  20   CONTINUE
       IF (raPressLevels(iB) .GT. p) THEN
-        iB=iB+1
+c        print *,iB,p,raPressLevels(iB)
+        iB = iB + 1
         GO TO 20
       END IF
 
@@ -762,8 +753,9 @@ c       write (kStdWarn,*) 'to pressure ',p
         iB = kProfLayer
 c        CALL DoStop
       END IF
-
-      WhichLevel=iB
+      
+c      print *,'done ',p,iB
+      WhichLevel = iB
 
       RETURN
       END

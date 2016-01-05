@@ -2402,7 +2402,7 @@ c first check to see if all required gases found in the user supplied profile
           write(kStdWarn,*) 'adding on AFGL profile ',kAFGLProf, ' for remaining gases'
           CALL AddOnAFGLProfile(kAFGLProf,
      $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
         ELSE
           !!this is just debugging, and/or to stop, just like KCARTAv1.12-
           write(kStdErr,*) 'your profile did not have all the gases'

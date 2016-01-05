@@ -394,6 +394,11 @@ computations, even with scattering (introduce a OLR computation) etc]
                                               climatology
                       iCONTN = +5             assume default continuum settings (1.0)
 
+  n_layers_lblrtm.f   iAIRS101_or_LBL_levels = +1  use AIRS101 levels for integration from
+                                                   levels to layers
+
+                      iReplaceZeroProf = +1   add in gases that are not in LBLRTM TAPE5
+		      
   n_pth_mix.f         iAddLBLRTM = +1         user wants to add on missing 
                                               profiles even if they were 
                                               not specified in TAPE5 or TAPE6
@@ -576,6 +581,15 @@ v1.18
 
                 Introduced kLBLRTM_toa so that flux calcs can stop at LBLRTM toa
 		for direct comparison of heating rates and fluxes
+
+                Also when doing internal klayers integration can either use
+		AIRS 011 levels, or the levels that came from LBLRTM TAPE5
+		
+                If kFlux = 2 (heat rate) then nlevs = nlays+1 heat rates are
+		output, with heat rate at TOA == 0 always
+		Ditto if kFlux = 1 or 3 (up or down fluxes only, at EACH level)
+		This way you can more directly compare to up and down fluxes from
+		kFlux = 6, which gives the fluxes at GND and TOA (ie at nlevs)
 
 12/18/15        Moved angle routines (eg find gauss angles, saconv, vaconv)
                 from rad_misc.f to rad_angles.f

@@ -45,9 +45,17 @@ c local
 
       iOffSet = kProfLayer-iProfileLayers
 
+      DO iI = 1,kProfLayer
+        if (raThickness(iI) .LT. 0) THEN
+	  write(kSTdErr,*) iI,raThickness(iI)
+	  call dostopmesg('rathickness < 0 in Get_Temp_Plevs$')
+	end if
+c        raThickness(iI) = abs(raThickness(iI))
+      END DO
+      
       rPmin = +1.0e10
       rPmax = -1.0e10
-      iI = 25   !!! make this really high up
+      iI = 75   !!! make this really high up
       IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND.
      $    (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) THEN
         !! pressures decreasing with index; use CO2 temps and pressures
@@ -138,9 +146,9 @@ c     $             (1-raGeopotentialThick1(iI)/raThickness(iI))*100
 c
 c method 2 : use 10 points including slab ends
 
-      write(kStdWarn,*) 'geopotential heigt vs layer thinckness'
-      write(kStdWarn,*) 'iI   p2h    laythick  GeoHgt1  GeoHgt2   Error1   Error2'
-      write(kStdWarn,*) '---------------------------------------------------------'
+      write(kStdWarn,*) 'geopotential height vs layer thickness'
+      write(kStdWarn,*) ' iI      p2h      laythick    GeoHgt1       GeoHgt2      Error1   Error2'
+      write(kStdWarn,*) '------------------------------------------------------------------------'
 
       DO iI = kProfLayer-iProfileLayers+1,kProfLayer
         raTX(01) = raTPressLevels(iI)
@@ -163,10 +171,10 @@ c        END DO
           rInt = rInt*log(raPX(iJ+1)/raPX(iJ))
           raGeopotentialThick2(iI) = raGeopotentialThick2(iI) + Rd/grav * abs(rInt)
         END DO
-        write(kStdWarn,111) iI,p2h(raPressLevels(iI)),raThickness(iI),
+        write(kStdWarn,111) iI,p2h(raPressLevels(iI)),abs(raThickness(iI)),
      $             raGeopotentialThick1(iI),raGeopotentialThick2(iI),
-     $             (1-raGeopotentialThick1(iI)/raThickness(iI))*100,
-     $             (1-raGeopotentialThick2(iI)/raThickness(iI))*100
+     $             (1-raGeopotentialThick1(iI)/abs(raThickness(iI)))*100,
+     $             (1-raGeopotentialThick2(iI)/abs(raThickness(iI)))*100
       END DO
  111  FORMAT(I3,6('  ',F10.4))
  
@@ -515,7 +523,7 @@ c first check to see if all required gases found in the user supplied profile
           write(kStdWarn,*) 'adding on AFGL profile ',kAFGLProf, ' for remaining gases'
           CALL AddOnAFGLProfile(kAFGLProf,
      $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
         ELSE
           !!this is just debugging, and/or to stop, just like KCARTAv1.12-
           write(kStdErr,*) 'your profile did not have all the gases'
@@ -2025,6 +2033,11 @@ c run bkcarta.x with the profile to be read in being mypref.op.new
 c************************************************************************
 c this subroutine reads in USER SUPPLIED LEVELS profile (in a text file) and
 c outputs the results in terms of what kCARTA wants
+c
+c raaAmt in moles/cm2, raaPress,raaPartPress in atm, raaTemp in K, raPlevs in mb
+c raaAmt in moles/cm2, raaPress,raaPartPress in atm, raaTemp in K, raPlevs in mb
+c raaAmt in moles/cm2, raaPress,raaPartPress in atm, raaTemp in K, raPlevs in mb
+c
       SUBROUTINE UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $                 raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $                 iNPath,caPfName,iRTP,
@@ -2041,28 +2054,30 @@ c input
       INTEGER iNpath,iRTP
       INTEGER iaGases(kMaxGas)
 c output
-      REAL raaTemp(kProfLayer,kMaxGas)         !! in K
-      REAL raaPress(kProfLayer,kMaxGas)         
+      REAL raaTemp(kProfLayer,kMaxGas)        !! in K
+      REAL raaPress(kProfLayer,kMaxGas)       !! in atm
       REAL raaAmt(kProfLayer,kMaxGas)         !! in moles/m2 --> need to go to molecules/cm2
-      REAL raaPartPress(kProfLayer,kMaxGas) !! in N/m2 --> need to go to mb
-      INTEGER iNumLevs
-      REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+      REAL raaPartPress(kProfLayer,kMaxGas)   !! in atm
+      REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer) !! in mb
       INTEGER iProfileLayers,iKnowTP,iAFGLProf
       REAL raLayerHeight(kProfLayer)
-      INTEGER iaWhichGasRead(kMaxGas),iNumGases
+      INTEGER iaWhichGasRead(kMaxGas),iNumGases,iZbndFinal
+      REAL raPbndFinal(kProfLayer+1)
 
 c local var
       INTEGER iLowestLevLVL2LAY,iNumGasesLVL2LAY,iaGasesLVL2LAY(kMaxGas),iaMap(kMaxGas),iaGasIDMap(kMaxGas)
-      INTEGER iL,iG,iNumberofGasesRead,iaInputOrder(kMaxGas),iCnt
-      REAL raPoutLVL2LAY(kProfLayer)                  !! in N/m2 --> need to go to mb
+      INTEGER iL,iG,iNumberofGasesRead,iaInputOrder(kMaxGas),iCnt,iOffSet
+      REAL raPoutLVL2LAY(kProfLayer)                  !! in N/m2 --> so need to go to mb
       REAL raToutLVL2LAY(kProfLayer)  
       REAL raZoutLVL2LAY(kProfLayer+1)                !! in meters, notice this is at LEVELS
       REAL raAmountOutLVL2LAY(kProfLayer)             !! in molecules/cm2
       REAL raaQoutLVL2LAY(kProfLayer,kMaxGas)         !! in moles/m2 --> need to go to molecules/cm2
-      REAL raaPartPressoutLVL2LAY(kProfLayer,kMaxGas) !! in N/m2 --> need to go to mb
+      REAL raaPartPressoutLVL2LAY(kProfLayer,kMaxGas) !! in N/m2 --> so need to go to mb
       REAL raaHeight(kProfLayer,kMaxGas)
       REAL rT,rAmt
-
+      INTEGER iaBnd(kProfLayer+1,2)
+      REAL    raBndFrac(kProfLayer+1,2)      
+      
       iCnt = 0
       DO iL = 1,kMaxGas
         iaMap(iL)      = -1
@@ -2075,12 +2090,21 @@ c local var
       END DO
 
       IF ((kRTP .EQ. -10) .OR. (kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
-        CALL InputMR_profile(caPfName,iNumLevs,iNumGasesLVL2LAY,iaGasesLVL2LAY,iLowestLevLVL2LAY,
+        !! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
+	!! even though pressures in TAPE5, TAPE6, text file are in mb
+	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>
+	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>	
+	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>
+        CALL InputMR_profile(caPfName,iProfileLayers,iNumGasesLVL2LAY,iaGasesLVL2LAY,iLowestLevLVL2LAY,
      $                     raToutLVL2LAY,raAmountOutLVL2LAY,raZoutLVL2LAY,
-     $                     raPoutLVL2LAY,raaQoutLVL2LAY,raaPartPressoutLVL2LAY)
-        write(kStdWarn,*) 'Read ',iNumGasesLVL2LAY,' gases at ',iNumLevs,' layers from the text file'
+     $                     raPoutLVL2LAY,raaQoutLVL2LAY,raaPartPressoutLVL2LAY,
+     $                     raPbndFinal,iZbndFinal)     
+        write(kStdWarn,*) 'Read ',iNumGasesLVL2LAY,' gases at ',iProfileLayers,' output layers from the text file'
+	IF (iZbndFinal .GT. 0) THEN
+	  write(kStdWarn,*) 'hhmmm looks like we have new pressure levels from LBLRTM TAPE5'
+	END IF
       ELSE
-        write(kStdErr,*) 'huh?? using this routine if reading text levels file or text LBLRTM TAPE5,6???',kRTP
+        write(kStdErr,*) 'huh?? only use this routine if reading text levels file or text LBLRTM TAPE5,6???',kRTP
         Call DoStop
       END IF
 
@@ -2093,25 +2117,75 @@ c local var
         iaWhichGasRead(iaGasesLVL2LAY(iG)) = +1
       END DO
 
-      DO iL = 1,kProfLayer+1
-        raPressLevels(iL) = PLEV_KCARTADATABASE_AIRS(iL)
+      !!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>
+      iOffSet = kProfLayer - (iZbndFinal-1)
+      DO iL = 1,iZbndFinal
+        !! routine only called in kRPT = -10,-6,-5 so use New Plevs      
+        !! raPressLevels(iL) = PLEV_KCARTADATABASE_AIRS(iL)
+        raPressLevels(iL+iOffSet) = raPbndFinal(iL)
+c	IF (iL .LT. iZbndFinal) THEN
+c          print *,iL,iL+iOffSet,iZbndfinal,raPoutLVL2LAY(iL+iOffSet),raPbndFinal(iL),'fafafafafa'
+c	ELSE
+c          print *,iL,iL+iOffSet,iZbndfinal,-9999,                    raPbndFinal(iL),'fafafafafa'
+c	END IF
       END DO
+      
+ 345  FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))
+      DO iL = 1,iZbndFinal-1
+        !! find plev_airs which is just ABOVE the top of current layer
+        iG = kProfLayer+1
+ 10     CONTINUE
+c        print *,iL,iG,PLEV_KCARTADATABASE_AIRS(iG),raPbndFinal(iL+1)	 
+	IF ((PLEV_KCARTADATABASE_AIRS(iG) .LE. raPbndFinal(iL+1)) .AND. (iG .GT. 1)) THEN
+	  iG = iG - 1
+	  GOTO 10
+	ELSE
+	  iaBnd(iL,2) = min(iG+1,kMaxLayer+1)   !! top bndry of plevs_database is lower pressure than top bndry of raPbndFinal layer iL
+	END IF
+	raBndFrac(iL,2) = (raPbndFinal(iL+1)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))/
+     $                  (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))
 
-c iProfileLayers = tells how many layers read in from RTP or KLAYERS file
-      iProfileLayers = iNumLevs
-
-      DO iL = 1,kProfLayer
-        raLayerHeight(iL) = 0.5*(raZoutLVL2LAY(iL) + raZoutLVL2LAY(iL+1))
-        raThickness(iL)   = raZoutLVL2LAY(iL) - raZoutLVL2LAY(iL+1)
+        !! find plev_airs which is just BELOW the bottom of current layer
+        iG = 1
+ 20     CONTINUE	
+	IF (PLEV_KCARTADATABASE_AIRS(iG) .GT. raPbndFinal(iL)) THEN
+	  iG = iG + 1
+	  GOTO 20
+	ELSE
+	  iaBnd(iL,1) = max(iG-1,1) !! bot boundary of plevs_database is bigger pressure than top bndry of raPbndFinal layer iL
+	END IF
+	raBndFrac(iL,1) = (raPbndFinal(iL)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))/
+     $                  (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))	
+	
+c      write (*,345) iL,raPbndFinal(iL),raPbndFinal(iL+1),iaBnd(iL,1),raBndFrac(iL,1),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)),
+c     $                                                   iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
+      END DO
+      
+      DO iL = 1,iOffSet
+        raLayerHeight(iL) = 0.0
+        raThickness(iL)   = 0.0
+c	print *, iL,raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL)/101325.5,'******'
         DO iG = 1,iNumGasesLVL2LAY
-          raaPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))     = raPoutLVL2LAY(iL)/101325.5  !! N/m2 --> atm --> 
+          raaPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))     = 0.0
+          raaTemp(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))      = 0.0
+          raaAmt(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))       = 0.0
+          raaPartPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG))) = 0.0
+          raaHeight(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))    = 0.0
+        END DO
+      END DO
+      DO iL = iOffSet+1,kProflayer
+        raLayerHeight(iL) = 0.5*(raZoutLVL2LAY(iL) + raZoutLVL2LAY(iL+1))
+        raThickness(iL)   = raZoutLVL2LAY(iL+1) - raZoutLVL2LAY(iL)
+c	print *, iL,' n pth mix',raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL),raPoutLVL2LAY(iL)/1013.255
+        DO iG = 1,iNumGasesLVL2LAY
+          raaPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))     = raPoutLVL2LAY(iL)/100/1013.255  !! N/m2 --> mb --> atm
           raaTemp(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))      = raToutLVL2LAY(iL)
           raaAmt(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))       = raaQoutLVL2LAY(iL,iG)/kAvog !! change molecules/cm2 to kilomoles/cm2
-          raaPartPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG))) = raaPartPressoutLVL2LAY(iL,iG)/101325.5    !! N/m2 --> atm
+          raaPartPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG))) = raaPartPressoutLVL2LAY(iL,iG)/100/1013.255    !! N/m2 --> mb --> atm
           raaHeight(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))    = raLayerHeight(iL)
         END DO
       END DO
-
+      
       DO iG = 1,kMaxGas
         iaInputOrder(iG) = -1
       END DO
@@ -2123,14 +2197,21 @@ c iProfileLayers = tells how many layers read in from RTP or KLAYERS file
         END IF
       END DO
 
-c now got to add in the missing gases, see READRTP_1B
+c now see if we have to chunk on WaterSelf, WaterFor from water profile
+      !!! no need to worry about finky plevs, as all the hard work is already done
+      !!! in reading in the WaterLayers  Profile from RTP or LBLRTM
       CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead,
      $          iaInputOrder,iNumGases,
      $          raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
-c now see if we have to chunk on WaterSelf, WaterFor from water profile
-      CALL AddOnAFGLProfile(kAFGLProf,
+c now got to add in the missing gases, see READRTP_1B
+c this was the original code
+c      CALL AddOnAFGLProfile(kAFGLProf,
+c     $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
+c     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
+      CALL AddOnAFGLProfile_arblevels(kAFGLProf,
      $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness,
+     $         iaBnd,raBndFrac,raPbndFinal,iZbndFinal)
 
       RETURN
       END
@@ -2139,9 +2220,10 @@ c************************************************************************
 c this subroutine adds on RefProfile 1,2,3,4,5,6 gas amounts for those gases NOT
 c in the RTP profile (using h.ptype = 2 or even 1)
 c the afgl profiles generated by /home/sergio/KCARTA/UTILITY/AFGLprofs.m
-      SUBROUTINE AddOnAFGLProfile(iProfileNum,
+      SUBROUTINE AddOnAFGLProfile_arblevels(iProfileNum,
      $      iNumberofGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness,
+     $      iaBnd,raBndFrac,raPbndFinal,iZbndFinal)
 
       implicit none
 
@@ -2164,7 +2246,202 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
+      REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+c these are new, and tell you how to integrate default AITRS 100 layers onto the arb LBLRTM layers
+      INTEGER iaBnd(kProfLayer+1,2),iZbndFinal
+      REAL    raBndFrac(kProfLayer+1,2)      
+      REAL    raPbndFinal(kProfLayer+1)
+      
+c local variables
+      INTEGER iI,iJ,iaNeed(kMaxGas),iNewRead,iFound,iFoundX,iIDgas,iLay,iG0,iK,iX,iY,iOffset,iMaxL
+      REAL raPPX(kMaxProfLayer),raQX(kMaxProfLayer)   !!US Std layer ppress, amt at 100 layers
+      REAL raPX(kMaxProfLayer), raTX(kMaxProfLayer)   !!US Std layer press, temp at 100 layers
+      REAL raQX2(kMaxProfLayer),raPPX2(kMaxProfLayer) !!need to change to new layers
+      REAL rPP,rPPWgt,rFrac,rMR
+      CHARACTER*1 cY,cN
 
+      iOffSet = kProfLayer - (iZbndFinal-1)
+      
+      cY = 'Y'
+      cN = 'N'
+
+      IF ((iProfileNum .LT. 1) .OR. (iProfileNum .GT. 6)) THEN
+        write(kStdErr,*) 'Can only substitute profs from AFGL '
+        write(kStdErr,*) '1=STD, 2=TRP, 3=MLS, 4=MLW, 5=SAS, 6=SAW'
+        CALL DoStop
+      END IF
+
+      write(kStdWarn,*) '  '
+      write(kStdWarn,*) 'read profiles for ',iNumberOfGasesRead, ' gases ...'
+      write(kStdWarn,*) 'for AFGL profile ',iProfileNum
+
+c this is the list of gases for which we need profiles
+      iK = 0
+      write(kStdWarn,*) '            count gasID  found?'
+      write(kStdWarn,*) '-------------------------------'
+      DO iI = 1,iNumGases
+        IF (iaInputOrder(iI) .LT. 100) THEN
+          IF (iaWhichGasRead(iI) .EQ. +1) THEN
+             iK = iK + 1
+c            write(kStdWarn,200) iI,iaInputOrder(iI),cY
+            write(kStdWarn,200) iK,iI,cY
+          ELSE
+c            write(kStdWarn,200) iI,iaInputOrder(iI),cN
+            write(kStdWarn,200) -1,iI,cN
+          END IF
+        END IF
+      END DO
+
+      !!! now do gasids 101,102,103
+      iI = 1
+      IF (iaInputOrder(iI) .EQ. 1) THEN
+        IF (iaWhichGasRead(iI) .EQ. +1) THEN
+          write(kStdWarn,200) iI,101,cY
+          write(kStdWarn,200) iI,102,cY
+          write(kStdWarn,200) iI,103,cY
+        ELSE  
+          write(kStdWarn,200) iI,101,cN
+          write(kStdWarn,200) iI,102,cN
+          write(kStdWarn,200) iI,103,cN
+        END IF
+      END IF
+      write(kStdWarn,*) ' '
+
+ 200  FORMAT('xi, idgas = ',I5,I5,'  ',A1)
+
+c this is the list of gases for which we have read in the profiles
+c      DO iI = 1,kMaxGas
+c        IF (iaWhichGasRead(iI) .EQ. +1) THEN
+c          write(kStdWarn,*) 'RTP file had profile for gasID ',iI
+c        END IF
+c      END DO
+c      write(kStdWarn,*) ' '
+
+      iFound = -1
+      DO iI = 1,kMaxGas
+        IF (iaWhichGasRead(iI) .EQ. +1) THEN
+          GOTO 10
+        END IF
+      END DO
+ 10   CONTINUE
+ 
+      iG0 = 1
+      
+c thus the difference between the lists is what we need AFGL  profiles for
+      DO iI = 1,kMaxGas
+        iaNeed(iI) = -1
+      END DO
+
+      iNewRead = 0
+      DO iI = 1,iNumGases
+        iFound = -1
+        iIDgas = iaInputOrder(iI)
+        IF (iaWhichGasRead(iIDgas) .EQ. +1) THEN
+          iFound = +1
+        END IF
+        IF (iFound .LT. 0) THEN
+          !! gas not found in rtp file, so need the US Std profile
+          iNewRead = iNewRead + 1
+          iaNeed(iNewRead) = iIDgas
+	  
+          CALL getAFGL(iProfileNum,iIDgas,raPX,raPPX,raTX,raQX)
+
+          !! do the integral from AIRS layers to ARB layers
+	  iMaxL = min(kProfLayer,iZbndFinal) !! so if iZbndFinal = 101, we only do 100 layers ....
+          DO iX = 1,iMaxL
+	    rPP = 0.0
+	    rPPWgt = 0.0
+	    rMR = 0.0
+	    DO iY = iaBnd(iX,1),iaBnd(iX,2)-1
+	      IF (iY .EQ. iaBnd(iX,2)-1) THEN
+	        rFrac = raBndFrac(iX,2)
+	      ELSEIF (iY .EQ. iaBnd(iX,1)) THEN
+	        !! this also takes care of case when iY .EQ. iaBnd(iX,1) .EQ. iaBnd(iX,2)-1
+	        rFrac = raBndFrac(iX,1)
+	      ELSE
+	        rFrac = 1.0
+	      END IF
+	      rPP = rPP + raPPX(iY)*rFrac
+	      rPPWgt = rPPWgt + rFrac
+	      rMR = rMR + raPPX(iY)/raPX(iY)	      
+	      raQX2(iX) = raQX2(iX) + raQX(iY)*rFrac
+	    END DO
+	    raPPX2(iX) = rPP/rPPWgt                      !! one way
+	    rMR = rMR/((iaBnd(iX,2)-1)-(iaBnd(iX,1))+1)	    
+	    raPPX2(iX) = rMR * raPbndFinal(iX)/1013.25   !! another way
+c	    write(*,1234) iIDGas,iX,raPbndFinal(iX)/1013.25,raaPress(iX,1),iaBnd(iX,1),iaBnd(iX,2),raQX2(iX),raPPX2(iX),rPP/rPPWgt
+	  END DO
+ 1234     FORMAT(2(' ',I3),2(' ',F10.3),2(' ',I3),3(' ',E10.3))
+ 
+          Call FindIndexPosition(iIDgas,iNumGases,iaInputOrder,
+     $                           iFoundX,iGasIndex)
+          IF (iFoundX .GT. 0) THEN
+            DO iX = 1,kProfLayer
+	      raaTemp(iX,iGasIndex) = 00.0	      
+	      raaTemp(iX,iGasIndex) = 200.0
+	      raaTemp(iX,iGasIndex) = raaTemp(iX,iG0)	      
+	    END DO
+	  
+            DO iLay = 1,iZbndFinal-1
+              raaAmt(iLay+iOffSet,iGasIndex)       = raQX2(iLay)
+              raaTemp(iLay+iOffSet,iGasIndex)      = raaTemp(iLay+iOffSet,iG0)
+              raaPress(iLay+iOffSet,iGasIndex)     = raaPress(iLay+iOffSet,iG0)
+              raaPartPress(iLay+iOffSet,iGasIndex) = raPPX2(iLay)
+              raaHeight(iLay+iOffSet,iGasIndex)    = raaHeight(iLay+iOffSet,iG0)
+c	      IF (iLay  .EQ. 25) print *,iIDGas,iLay,iLay+iOffSet,raaTemp(iLay+iOffSet,iG0)
+            END DO
+            iaWhichGasRead(iIDgas)    = 1
+          ELSE 
+            write (kStdErr,*) 'huh? FindIndexPosition failed for ',iIDgas
+            CALL DoStop
+          END IF
+        END IF
+      END DO
+      
+      write(kStdWarn,*) 'Before entering "AddOnAFGLProfile" '
+      write(kStdWarn,*) '  had read in profiles for ',iNumberofGasesRead
+      write(kStdWarn,*) '  out of ',iNumGases
+      write(kStdWarn,*) 'Read in ',iNewRead,' more in "AddOnAFGLProfile"'
+ 
+      IF (iNumberofGasesRead + iNewRead .NE. iNumGases) THEN
+        write(kStdErr,*) 'need iNumberofGasesRead + iNewRead = iNumGases'
+        CALL DoStop
+      END IF
+
+      RETURN
+      END
+
+c************************************************************************
+c this subroutine adds on RefProfile 1,2,3,4,5,6 gas amounts for those gases NOT
+c in the RTP profile (using h.ptype = 2 or even 1)
+c the afgl profiles generated by /home/sergio/KCARTA/UTILITY/AFGLprofs.m
+      SUBROUTINE AddOnAFGLProfile(iProfileNum,
+     $      iNumberofGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
+     $      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
+
+      implicit none
+
+      include '../INCLUDE/kcarta.param'
+
+c raaAmt/Temp/Press/PartPress = current gas profile parameters
+c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
+c iaGases   = array that tracks which gasID's should be read in
+c iaWhichGasRead = array that tracks which gases ARE read in
+c iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
+c iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
+c caPfName  = name of file containing user supplied profiles
+c raLayerHeight = heights of layers in km
+c iRTP = which profile to read in
+c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+      INTEGER iNumberofGasesRead,iProfileNum
+      INTEGER igasindex  ! added ESM
+      REAL    raaHeight(kProfLayer,kGasStore)
+      INTEGER iaWhichGasRead(kMaxGas),iNumGases,iaInputOrder(kMaxGas)
+      REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
+      REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
+      REAL raaPartPress(kProfLayer,kGasStore)
+      REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+      
 c local variables
       INTEGER iI,iJ,iaNeed(kMaxGas),iNewRead,iFound,iFoundX,iIDgas,iLay,iG0,iK
       REAL raPPX(kMaxProfLayer),raQX(kMaxProfLayer)  !!US Std layer ppress, amt
@@ -2183,13 +2460,13 @@ c local variables
       IF (iProfileNum .EQ. 1) THEN
         CALL AddOnStandardProfile(
      $      iNumberofGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
         RETURN
       END IF
 
       write(kStdWarn,*) '  '
       write(kStdWarn,*) 'read profiles for ',iNumberOfGasesRead, ' gases ...'
-      write(kStdWarn,*) 'for AFLG profile ',iProfileNum
+      write(kStdWarn,*) 'for AFGL profile ',iProfileNum
 
 c this is the list of gases for which we need profiles
       iK = 0
@@ -2382,36 +2659,45 @@ c output var
 
 c local vars
       INTEGER i1,i2,iLenX,iLen,iLay,iX, iioun, ierr  ! added ESM iioun, ierr
-      CHARACTER*80 caFname0,caFname,cnameX
+      CHARACTER*120 caFname0,caFname,cnameX
       CHARACTER c1,c2
       CHARACTER*2 c12
       CHARACTER*100 caLine
 
-      caFname0 = kOrigRefPath
+      DO iLen = 1,120
+        caFname0(iLen:iLen) = ' '
+      END DO
+      
+      caFname0(1:80) = kOrigRefPath
 
-      iLen = 80
+      iLen = 120
  100  CONTINUE
       IF (caFname0(iLen:iLen) .EQ. ' ') THEN
         iLen = iLen - 1
         GOTO 100
       END IF
+
+      IF (kAFGLProf .NE. 1) THEN
+        caFName0(iLen:iLen) = '/'
+        iLen = iLen+1
+
+        IF (kAFGLProf .EQ. 2) caFName0(iLen:iLen) = '2'
+        IF (kAFGLProf .EQ. 3) caFName0(iLen:iLen) = '3'
+        IF (kAFGLProf .EQ. 4) caFName0(iLen:iLen) = '4'
+        IF (kAFGLProf .EQ. 5) caFName0(iLen:iLen) = '5'      
+        IF (kAFGLProf .EQ. 6) caFName0(iLen:iLen) = '6'
+        iLen = iLen+1
+
+        cnameX = 'afglgas'
+      ELSE
+        ! IF (kAFGLProf .EQ. 1) caFName0(iLen:iLen) = '1'   !! no need to go down a dir for US STD    
+        cnameX = 'us_std_gas_'
+        cnameX = 'refgas'
+      END IF
+      
       caFName0(iLen:iLen) = '/'
-      iLen = iLen+1
 
-      IF (kAFGLProf .EQ. 1) caFName0(iLen:iLen) = '1'
-      IF (kAFGLProf .EQ. 2) caFName0(iLen:iLen) = '2'
-      IF (kAFGLProf .EQ. 3) caFName0(iLen:iLen) = '3'
-      IF (kAFGLProf .EQ. 4) caFName0(iLen:iLen) = '4'
-      IF (kAFGLProf .EQ. 5) caFName0(iLen:iLen) = '5'      
-      IF (kAFGLProf .EQ. 6) caFName0(iLen:iLen) = '6'
-      iLen = iLen+1
-
-      caFName0(iLen:iLen) = '/'
-
-      cnameX = 'us_std_gas_'
-      cnameX = 'refgas'
-      cnameX = 'afglgas'
-      iLenX = 80
+      iLenX = 120
  200  CONTINUE
       IF (cnameX(iLenX:iLenX) .EQ. ' ') THEN
         iLenX = iLenX - 1
@@ -2435,7 +2721,7 @@ c local vars
         c2 = CHAR(i2+48)
         c12 = c2//c1
       END IF
-      DO i1 = 1,80
+      DO i1 = 1,120
         caFname(i1:i1) = ' '
       END DO
       DO i1 = 1,iLen
@@ -2477,9 +2763,12 @@ c this is new code, same as in subr ReadRefProf (in n_pth_mix.f)
 c************************************************************************
 c this subroutine adds on US STandard Profile gas amounts for those gases NOT
 c in the RTP profile (using h.ptype = 2 or even 1)
+
+c note : have to be careful about 101 AIRS levls versus actual raPressLevels
+
       SUBROUTINE AddOnStandardProfile(
      $      iNumberofGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
 
       implicit none
 
@@ -2502,7 +2791,8 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
-
+      REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+      
 c local variables
       INTEGER iI,iJ,iaNeed(kMaxGas),iNewRead,iFound,iFoundX,iIDgas,iLay,iG0,iK
       REAL raPPX(kMaxProfLayer),raQX(kMaxProfLayer)  !!US Std layer ppress, amt
@@ -2567,6 +2857,11 @@ c      write(kStdWarn,*) ' '
       END DO
  10   CONTINUE
       iG0 = iI     !!this gas filled out from RTP file, so use T(z),h(z)
+
+c      DO iI = 1,kProfLayer+1
+c        print *,iI,raPressLevels(iI)
+c      END DO
+c      call dostopmesg('allison$')
       
 c thus the difference between the lists is what we need US Std profiles for
       DO iI = 1,kMaxGas
@@ -2716,9 +3011,9 @@ ccc this was orig code
 c      kTempUnitOpen = 1  
 c      iLay = 0 
 c 1020 CONTINUE 
-c      iLay = iLay + 1 
-c      READ(iIOUN,*,END=1030) iX,raPx(iLay),raPPx(iLay),raTx(iLay),raQx(iLay) 
-c      GOTO 1020 
+c      iLay = Ilay + 1 
+C      READ(iIOUN,*,END=1030) iX,raPx(iLay),raPPx(iLay),raTx(iLay),raQx(iLay) 
+C      Goto 1020 
 c 
 c 1030  CONTINUE 
 c      CLOSE(iIOUN)  

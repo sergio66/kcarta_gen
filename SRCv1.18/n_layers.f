@@ -57,9 +57,11 @@ c or can read TAPE5, modified TAPE6 from LBLRTM
 c
 c
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c      SUBROUTINE InputMR_profile(caPfName)    !! for testing
-      SUBROUTINE InputMR_profile(caPfName,iNumLevs,iNumGases,iaG,iLowestLev,
-     $                           raTout,raAmountOut,raZout,raPout,raaQout,raaPartPressout)
+c for testing just do SUBROUTINE InputMR_profile(caPfName)    !! for testing
+      SUBROUTINE InputMR_profile(caPfName,iNumLays,iNumGases,iaG,iLowestLev,
+     $                           raTout,raAmountOut,raZout,
+     $                           raPout,raaQout,raaPartPressout,
+     $                           raPbndFinal,iZbndFinal)
 
       IMPLICIT NONE
 
@@ -74,28 +76,38 @@ c output
       REAL raTout(kProfLayer)                  !! in K
       REAL raAmountOut(kProfLayer)             !! in molecules/cm2
       REAL raZout(kProfLayer+1)                !! in meters, notice this is at LEVELS
-      REAL raPout(kProfLayer)                  !! in N/m2
+      REAL raPout(kProfLayer)                  !! in N/m2 (even though input TAPE5,TAPE6, kRTP=-10 pressures are in mb)
       REAL raaQout(kProfLayer,kMaxGas)         !! in molecules/cm2
       REAL raaPartPressout(kProfLayer,kMaxGas) !! in N/m2
-      INTEGER iNumLevs,iNumGases,iaG(kMaxGas)
+      INTEGER iNumLays,iNumGases,iaG(kMaxGas)
       INTEGER iLowestLev
-
+      REAL raPbndFinal(kProfLayer+1)           !! final output pressure boundaries, default = 101 AIRS levels
+      INTEGER iZbndFinal                       !! number of output plev bdries,
+                                               !! should be iNumLays+1 if using LBLRTM bdies, else 101
+      
 c local
       INTEGER iG,iL,iJ,iK,iaGasUnits(kMaxGas)
-      INTEGER iFound,iHighestLay,iNumLays
-      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas)
+      INTEGER iFound,iHighestLay,iNumLevs
+      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas),raAlt(2*kProfLayer)
       REAL raX(kMaxGas),rX,rP,rT,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon
       REAL rPminKCarta,rPmaxKCarta,rPmin,rPmax,rHminKCarta,rHmaxKCarta
       INTEGER iKCARTADirectionUPorDOWN,iMid,iFloor,iCnt
       REAL gamma,z,dz,slope,amount,junk
       REAL rFracBot
+      REAL raPBnd(2*kProfLayer)  !! do we want user defined pressure level boundaries??
+      INTEGER iZbnd              !! do we want user defined pressure level boundaries??
 
       REAL raPX(kProfLayer+1),raZX(kProfLayer+1),raTX(kProfLayer+1)
       REAL raaG_MRX(kProfLayer+1,kMaxGas),raLayDensityX(kProfLayer+1)
-      
+
       CALL Init_n_layers(iKCARTADirectionUPorDOWN,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,
      $                    rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta) 
 
+      DO iL = 1,kMaxLayer+1
+        raPbndFinal(iL) = PLEV_KCARTADATABASE_AIRS(iL)
+      END DO
+      iZbndFinal = kMaxLayer+1
+      
 c >>> read in user supplied prof
 c this will be at whatever gas units eg RH g/kg  VMR etc
 c but then CONVERTED to MR (gasunit 12)
@@ -106,64 +118,109 @@ c but then CONVERTED to MR (gasunit 12)
       ELSEIF (kRTP .EQ. -5) THEN
         CALL ReadInput_LBLRTM_ProfileTAPE5(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
      $                          iNumLevs,rPSurf,rTSurf,rHSurf,iNumGases,
-     $                          raP,raT,iaG,iaGasUnits,raaG_MR,rPMin,rPMax,rYear,rLat,rLon)
+     $                          raP,raT,raAlt,iZbnd,raPBnd,
+     $                          iaG,iaGasUnits,raaG_MR,rPMin,rPMax,rYear,rLat,rLon)
       ELSEIF (kRTP .EQ. -6) THEN
         !! edited TAPE6, which contains first few parts of TAPE5, and then just profile info from TAPE6 (mol/cm2)
         CALL ReadInput_LBLRTM_ProfileTAPE6(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
      $                          iNumLays,rPSurf,rTSurf,rHSurf,iNumGases,
      $                          raPX,raTX,raLayDensityX,raZX,iaG,iaGasUnits,raaG_MRX,rPMin,rPMax,rYear,rLat,rLon)
+        iZbnd = -1
       ELSE
         write(kStdErr,*) 'huh?? reading text levels file or text LBLRTM TAPE5/TAPE6 MODIFIED',kRTP
         Call DoStop
       END IF
 
       IF (kRTP .NE. -6) THEN
-        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
-        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
-        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
-
-        ! >>>> tack on Standard Profile to User Profile; 
-        ! >>>> if needed; also add on some more gases if needed, at bottom of profile to TOA
-        ! old and new gases are ALWAYS going be in units = 12 (mixing ratio)
-        ! have to be careful when adding in upper level info to old gases, as this could be a mix of units!!!!!!!!!!
-        ! taper the tacked on profile so that within about 4 sublevels, you are just tacking on US Std (or default ref prof)
-        CALL Tack_on_profile(PLEV_KCARTADATABASE_AIRS,iaG,iaGasUnits,iNumLevs,iNumGases,raP,raT,raaG_MR,
-     $                       rPMin,rPMax,rYear)
-
-        ! now check everything already is in MR (gas unit 12)
-        ! also adjust MR if this is planet Earth
-        CALL adjustVMR_Earth(iaG,iaGasUnits,iNumLevs,iNumGases,raP,raT,raaG_MR)
-
         ! >>> interp onto the kCARTA database profiles
         ! >>> also sort the gasIDs into increasing order
+
+        ! find pseudo temperature at this level
+        ! recall pav = (p2-p1)/log(p2/p1)
+        !        tav = (T2-T1)/log(p2/p1)
+      
+        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
+        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
+        !! have read LEVELS profile, so need to tack on necessary info above this profile, and integrate !!
 	
-        CALL InterpUser2kCARTA(iNumLevs,iNumGases,iaG,raP,raT,raaG_MR,rPMin,rPMax,rPSurf,rTSurf,rPmaxKCarta,
+        IF (iZbnd .LT. 0) THEN
+	  ! >>>>>>>>>> default AIRS 101 levels
+
+          ! >>>> tack on Standard Profile to User Profile; 
+          ! >>>> if needed; also add on some more gases if needed, at bottom of profile to TOA
+          ! old and new gases are ALWAYS going be in units = 12 (mixing ratio)
+          ! have to be careful when adding in upper level info to old gases, as this could be a mix of units!!!!!!!!!!
+          ! taper the tacked on profile so that within about 4 sublevels, you are just tacking on US Std (or default ref prof)
+          CALL Tack_on_profile(PLEV_KCARTADATABASE_AIRS,iaG,iaGasUnits,iNumLevs,iNumGases,raP,raT,raaG_MR,
+     $                       rPMin,rPMax,rYear)
+
+          ! now check everything already is in MR (gas unit 12)
+          ! also adjust MR if this is planet Earth
+          CALL adjustVMR_Earth(iaG,iaGasUnits,iNumLevs,iNumGases,raP,raT,raaG_MR)
+
+          CALL InterpUser2kCARTA(iNumLevs,iNumGases,iaG,raP,raT,raaG_MR,rPMin,rPMax,rPSurf,rTSurf,rPmaxKCarta,
      $                       PLEV_KCARTADATABASE_AIRS,raPX,raTX,raaG_MRX,iLowestLev)
+
+          rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/
+     $         (PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
+          write(kStdWarn,*) ' '
+  	  write(kStdWarn,*) 'iX = iLowestLev ==>'
+          write(kStdWarn,*)' PLEV_KCARTADATABASE_AIRS(iX),rPSurf,PLEV_KCARTADATABASE_AIRS(iX+1) = '
+          write(kStdWarn,*) PLEV_KCARTADATABASE_AIRS(iLowestLev),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev+1)
+          write(kStdWarn,*) 'rfracBot = ',rFracBot
+  
+          ! >>> do the integrals using integrals wrt p!!! closer to klayers
+          CALL DoIntegrateLevels2Layers_wrtP(rHSurf,rPSurf,rTSurf,iLowestLev,iNumGases,iaG,rLat,rLon,
+     $               PAVG_KCARTADATABASE_AIRS,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,rfracBot,
+     $               raPX,raTX,raaG_MRX,raPout,raAmountOut,raTout,raZout,raaQout,raaPartPressOut)
+          iNumLays = kProflayer-iLowestLev+1  !! this is now LAYER number, max == kProfLayer when iLowestLev = 1
+
+          DO iL = 1,101
+            raPbndFinal(iL) = raPbndFinal(iL)/100.0    !! convert N/m2 to mb
+          END DO
+
+        ELSE
+	  ! >>>>>>>>>> user boundaries
+          DO iL = 1,iZbnd
+            raPbndFinal(iL) = raPbnd(iL)/100.0    !! convert N/m2 to mb
+c	    print *,iL,raPbndFinal(iL),'muhahahaha',iZbnd	    
+          END DO
+	  DO iL = iZbnd+1,kProfLayer+1
+	    raPbndFinal(iL) = 0.005
+	    raPbndFinal(iL) = raPbnd(iZbnd)/100.0   !! convert N/m2 to mb
+c	    print *,iL,raPbndFinal(iL),'bwahah'
+	  END DO
+          iZbndFinal = iZbnd
+
+          ! now check everything already is in MR (gas unit 12)
+          ! also adjust MR if this is planet Earth
+          CALL adjustVMR_Earth(iaG,iaGasUnits,iNumLevs,iNumGases,raP,raT,raaG_MR)
+
+          CALL InterpUser2UserBnd(iNumLevs,iNumGases,iaG,raP,raT,raaG_MR,rPMin,rPMax,rPSurf,rTSurf,rPmaxKCarta,
+     $                       PLEV_KCARTADATABASE_AIRS,raPX,raTX,raaG_MRX,iLowestLev,iZbnd,raPBnd)
+
+          rFracBot = (rPSurf-raPBnd(iLowestLev+1))/
+     $         (raPBnd(iLowestLev)-raPBnd(iLowestLev+1))
+          write(kStdWarn,*) ' '
+  	  write(kStdWarn,*) 'iX = iLowestLev ==>'
+          write(kStdWarn,*)' raPBnd(iX),rPSurf,raPBnd(iX+1) = '
+          write(kStdWarn,*) raPBnd(iLowestLev),rPSurf,raPbnd(iLowestLev+1)
+          write(kStdWarn,*) 'rfracBot = ',rFracBot
+
+          ! >>> do the integrals using integrals wrt p!!! closer to klayers
+          CALL DoIntegrateLevels2UserLayers_wrtP(rHSurf,rPSurf,rTSurf,iLowestLev,iNumGases,iaG,rLat,rLon,
+     $               raPBnd,raAlt,iZbnd,rfracBot,
+     $               raPX,raTX,raaG_MRX,raPout,raAmountOut,raTout,raZout,raaQout,raaPartPressOut)
+          iNumLevs = iZbnd-iLowestLev+1
+	  iNumLays = iNumLevs - 1       !! this is now LAYER number, max == iZbnd-1 when iLowestLev = 1
+
+        END IF
      
 c      do iL = 1,iNumlevs
 c        print *,'hmm4',iL,raP(iL),raT(iL),raaG_MR(iL,1),raPX(iL),raTX(iL),raaG_MRX(iL,1)
 c      end do
 c      call dostop
       
-        ! find pseudo temperature at this level
-        ! recall pav = (p2-p1)/log(p2/p1)
-        !        tav = (T2-T1)/log(p2/p1)
-
-        ! see eg line 1108 of n_rad_jac_scat.f
-        rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/
-     $         (PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
-        write(kStdWarn,*) ' '
-	write(kStdWarn,*) 'iX = iLowestLev ==>'
-        write(kStdWarn,*)' PLEV_KCARTADATABASE_AIRS(iX),rPSurf,PLEV_KCARTADATABASE_AIRS(iX+1) = '
-        write(kStdWarn,*) PLEV_KCARTADATABASE_AIRS(iLowestLev),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev+1)
-        write(kStdWarn,*) 'rfracBot = ',rFracBot
-  
-        ! >>> do the integrals using integrals wrt p!!! closer to klayers
-         CALL DoIntegrateLevels2Layers_wrtP(rHSurf,rPSurf,rTSurf,iLowestLev,iNumGases,iaG,rLat,rLon,
-     $               PAVG_KCARTADATABASE_AIRS,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,rfracBot,
-     $               raPX,raTX,raaG_MRX,raPout,raAmountOut,raTout,raZout,raaQout,raaPartPressOut)
-        iNumLevs = kProflayer-iLowestLev+1
-
       ELSEIF (kRTP .EQ. -6) THEN
         CALL DoLBLRTMLayers2KCARTALayers(rHSurf,rPSurf,rTSurf,iNumLays,iNumGases,iaG,rLat,rLon,
      $               PAVG_KCARTADATABASE_AIRS,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,rfracBot,
@@ -172,6 +229,11 @@ c      call dostop
         iNumLevs = iNumLays
       END IF
 
+c      DO iL = 1,100
+c        print *,raPbndFinal(iL)
+c      END DO
+c      call dostopmesg('jiminy$')
+      
       RETURN
       END
 
@@ -277,8 +339,8 @@ c first find pressures that span rPmin < rP < rPmax
       END IF
       i2 = max(1,i2-1)
       write(kStdWarn,*) 'need to peruse ref profiles between levels ',i1,i2,' to span rPmin,rPmax'
-      write(kStdWarn,*) 'Ref Database max press, user max press (in mb) = ',raR100Press(1)/100.0         ,rPmax/100.0
-      write(kStdWarn,*) 'Ref Database min press, user min press (in mb) = ',raR100Press(iRefLevels)/100.0,rPmin/100.0
+      write(kStdWarn,*) 'Ref Database max press, user max press (in mb) = ',raR100Press(1)/100.0         ,rPmax
+      write(kStdWarn,*) 'Ref Database min press, user min press (in mb) = ',raR100Press(iRefLevels)/100.0,rPmin
 
       DO iL = i2,i1
         raTempP(iL-i2+1) = raR100Press(iL)
@@ -591,6 +653,9 @@ C              Possible additional units might be
 C                 inches or centimenters of water vapor
 C                 grams of water vapor
 
+c
+c pIN is in mb
+c 
       SUBROUTINE changeLVLS_2_ppmv(iGasID,iGasUnits,iNumLevs,iG,PIN,TIN,raaG_MR)
 
       IMPLICIT NONE
@@ -771,14 +836,14 @@ c     read in ref profiles (eg for Gas2 since Mars, Earth, Venus all have CO2 in
       END IF
 
 c then find KCARTA levels above which there is NO user supplied info
-      write(kStdWarn,*)' user supplied profile : Pmax(mb),Pmin(mb),numlevs = ',rPMax/100.0,rPMin/100.0,iNumLevs
+      write(kStdWarn,*)' user supplied profile : Pmax(mb),Pmin(mb),numlevs = ',rPMax,rPMin,iNumLevs
       write(kStdWarn,*)' kCARTA Pav Database   : Pmax(mb),Pmin(mb),numlevs = ',
      $     raR100Press(1)/100.0,raR100Press(iRefLevels)/100.0,iRefLevels
       
       iAbove = kMaxLayer
       iAbove = iRefLevels
   10  CONTINUE
-      IF ((raR100Press(iAbove) .LT. rPMin) .AND. (iAbove .GT. 1)) THEN
+      IF ((raR100Press(iAbove)/100.0 .LT. rPMin) .AND. (iAbove .GT. 1)) THEN
         iAbove = iAbove - 1
         GOTO 10
       END IF
@@ -794,7 +859,7 @@ c then find KCARTA levels above which there is NO user supplied info
      $ iNumLevs + (iRefLevels-iAbove+1) 
       
 c now do linear interpolation from iAbove pressure, down to min(raP)
-      Call r_sort_loglinear(raR100Press,raR100Temp,iRefLevels,rPMin,rJunk,1)
+      Call r_sort_loglinear(raR100Press,raR100Temp,iRefLevels,rPMin*100.0,rJunk,1)
       rToffset = raT(iNumLevs) - rJunk 
       write(kStdWarn,*)'tacking on info from kCARTA Pav Dtabase, layers ',iAbove,' to ',iRefLevels
       write(kStdWarn,*)'ToffSet = ',rToffset
@@ -804,7 +869,7 @@ c also need to figure out the gas multiplier offset
         DO iL = 1,iRefLevels
           raJunk(iL) = raaR100MR(iL,iG)
         END DO
-        Call r_sort_loglinear(raR100Press,raJunk,iRefLevels,rPMin,rJunk,1)
+        Call r_sort_loglinear(raR100Press,raJunk,iRefLevels,rPMin*100.0,rJunk,1)
         !! need to do a CHANGE OF UNITS to ppmv!!!!!
         raoffset(iG) = raaG_MR(iNumLevs,iG)/rJunk 
         write(kStdWarn,*) 'Multiplier for gasID = ',iaG(iG),' units = ',iaGasUnits(iG),' = ',raoffset(iG)
@@ -969,6 +1034,8 @@ c local var
       INTEGER iL,iG,iNumUse,iHigh,iX,iaIndex(kMaxGas),iaG2(kMaxGas)
       REAL raTemp(2*kProfLayer),raTempX(kProfLayer),raArr(kMaxGas),raaG_MRX2(kProfLayer+1,kMaxGas)
 
+      write(kStdWarn,*) ' ----->>>> using default AIRS 101 levels for layers integration'
+      
 c see which kCARTA pressure level is equal to or greater than surface pressure
       write(kStdWarn,*) '--------------------------------------------------------------------------'
       write(kStdWarn,*) ' '
@@ -1008,7 +1075,6 @@ c      DO iL = 1,kMaxLayer-iLowestLev+1
 c        write(*,1234) iL,raP(iL),raT(iL),raaG_MR(iL,1),raPX(iL),raTX(iL),raaG_MRX(iL,1)
 c      END DO
 c      call dostop
-
  1234 FORMAT(I3,2(' ',F10.4),' ',E10.4,2(' ',F10.4),' ',E10.4)
  
 c need to be careful with last point; linear maybe better than spline if raP(iNumLevs) > raPX(iNumUse)
@@ -1018,6 +1084,143 @@ c need to be careful with last point; linear maybe better than spline if raP(iNu
         iHigh = iHigh - 1
         GOTO 20
       END IF
+      iHigh = iHigh + 1
+      IF (iHigh .LE. iNumUse) THEN
+        write(kSTdWarn,*) ' '
+        write(kStdWarn,*) 'Tacked on profile ends at LOWER pressure than plev_kcartadatabase_airs'
+        write(kSTdWarn,*) 'ie,  raP(iNumLevs) > raPX(iNumUse) : ',raP(iNumLevs),raPX(iNumUse)
+        write(kSTdWarn,*) 'Replace profile values (done with spline) with linear interp, between',iHigh,' to ',iNumUse
+        DO iL = iHigh,iNumUse
+          rInJunk = raPX(iL)
+          Call r_sort_loglinear(raP,raT,iNumLevs,rInJunk,rOutJunk,1)
+          raTX(iL) = rOutJunk
+
+          DO iG = 1,iNumGases
+            DO iX = 1,iNumLevs
+              raTemp(iX) = raaG_MR(iX,iG)
+            END DO
+          Call r_sort_loglinear(raP,raTemp,iNumLevs,rInJunk,rOutJunk,1)
+          raaG_MRX(iL,iG) = rOutJunk
+          END DO
+        END DO
+      END IF
+
+c now sort the gasIDs into increasing order, and do the same for the mixing ratios
+      DO iL = 1,iNumGases
+        raArr(iL) = iaG(iL) * 1.0
+      END DO
+      CALL NumericalRecipesIndexer(iaIndex,raArr,iNumGases)
+
+c assign temp arrays
+      DO iG = 1,iNumGases
+        iaG2(iG) = iaG(iG)
+      END DO
+      DO iL = 1,iNumUse
+        DO iG = 1,iNumGases
+          raaG_MRX2(iL,iG) = raaG_MRX(iL,iG)
+        END DO
+      END DO
+
+c sort according to iaIndex
+      DO iG = 1,iNumGases
+        iaG(iG) = iaG2(iaIndex(iG))
+      END DO
+      DO iL = 1,iNumUse
+        DO iG = 1,iNumGases
+          raaG_MRX(iL,iG) = raaG_MRX2(iL,iaIndex(iG))
+        END DO
+      END DO
+
+      write(kStdWarn,*) '--------------------------------------------------------------------------'
+      
+      RETURN
+      END
+
+c************************************************************************
+c this subroutine takes in user/tacked on profile, and puts it onto the kCARTA Database levels
+      SUBROUTINE InterpUser2UserBnd(iNumLevs,iNumGases,iaG,raP,raT,raaG_MR,rPMin,rPMax,rPSurf,rTSurf,rPmaxKCarta,
+     $                             PLEV_KCARTADATABASE_AIRS,raPX,raTX,raaG_MRX,iLowestLev,iZbnd,raPbnd)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c input var
+      INTEGER iNumLevs,iNumGases,iaG(kMaxGas)
+      REAL rPmin,rPmax,rPSurf,rTSurf,rPmaxKCarta
+      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas)
+      REAL PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
+      REAL raPbnd(2*kProfLayer)  !! user defined boundaries
+      INTEGER iZbnd              !! user defined boundaries
+c output var
+      INTEGER iLowestLev
+      REAL raPX(kProfLayer+1),raTX(kProfLayer+1),raaG_MRX(kProfLayer+1,kMaxGas),rInJunk,rOutJunk
+
+c local var
+      INTEGER iL,iG,iNumUse,iHigh,iX,iaIndex(kMaxGas),iaG2(kMaxGas)
+      REAL raTemp(2*kProfLayer),raTempX(kProfLayer),raArr(kMaxGas),raaG_MRX2(kProfLayer+1,kMaxGas)
+
+      write(kStdWarn,*) ' ----->>>> using user defined ',iZbnd,' pressure levels for layers integration'
+      
+c see which user defined pressure level is equal to or greater than surface pressure
+      write(kStdWarn,*) '--------------------------------------------------------------------------'
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) ' >>> prep : user defined levels : interp usergrid onto N levels grid >>>'
+
+      rPmaxKCarta = -1.0
+      DO iL = 1,iZbnd
+        IF (raPbnd(iL) .GT. rPmaxKCarta) rPmaxKCarta = raPbnd(iL)
+      END DO
+      write(kStdWarn,*) 'User defined levels for integration : maxP = ',rPmaxKCarta,' Psurf = ',rPSurf,' mb'
+
+      !! assume raPbnd(1) > raPbnd(2) > raPbnd(3) > ... > raPbnd(iZbnd) and look
+      !! for raPbnd greater than raPSurf
+      iLowestLev = iZbnd
+ 10   CONTINUE
+      IF ((raPbnd(iLowestLev) .LT. rPSurf) .AND. (iLowestLev .GT. 1)) THEN
+        iLowestLev = iLowestLev - 1
+        GOTO 10
+      ELSEIF ((raPbnd(iLowestLev) .LT. rPSurf) .AND. (iLowestLev .EQ. 1)) THEN
+        write (kStdErr,*) 'Error!!!  PSurf = ',rPSurf,' and Max UserLev Plev = ',rPmaxKCarta 
+        Call DoStop
+      ELSEIF (raPbnd(iLowestLev) .GE. rPSurf) THEN
+        write(kStdWarn,*)'lowest level = ',iLowestLev
+      END IF
+
+c fill in raPressureJunk, which is the pressure grid onto which we need to interpolate T,MR onto
+c remember this comes from LBLRTM input profile, so lowest layer will probably CLOSELY or EXACTLY match pSurf
+      DO iL = 1,iZbnd
+        raPX(iL) = raPbnd(iL)/100.0  ! input raPbnd press in N/m2, so change plev_kcarta to mb
+      END DO
+      iNumUse = iZbnd
+      
+c now interpolate T and MR onto this grid
+      Call r_sort_loglinear(raP,raT,iNumLevs,raPX,raTX,iNumUse)
+      DO iG = 1,iNumGases
+        DO iL = 1,iNumLevs
+          raTemp(iL) = raaG_MR(iL,iG)
+        END DO
+        Call r_sort_loglinear(raP,raTemp,iNumLevs,raPX,raTempX,iNumUse)
+        DO iL = 1,iNumUse
+          raaG_MRX(iL,iG) = raTempX(iL)
+        END DO
+      END DO
+      
+c      DO iL = 1,iZbnd-iLowestLev+1
+c        write(*,1234) iL,raP(iL),raT(iL),raaG_MR(iL,1),raPX(iL),raTX(iL),raaG_MRX(iL,1)
+c      END DO
+c      call dostop
+ 1234 FORMAT(I3,2(' ',F10.4),' ',E10.4,2(' ',F10.4),' ',E10.4)
+ 
+c need to be careful with last point; linear maybe better than spline if raP(iNumLevs) > raPX(iNumUse)
+      iHigh = iNumUse
+ 20   CONTINUE
+      IF (raP(iNumLevs) .GT. raPX(iHigh)) THEN
+        print *,'wah iHigh',iNumLevs,iHigh,raP(iNumLevs),raPX(iHigh)
+        iHigh = iHigh - 1
+        GOTO 20
+      END IF
+
       iHigh = iHigh + 1
       IF (iHigh .LE. iNumUse) THEN
         write(kSTdWarn,*) ' '
@@ -1488,7 +1691,8 @@ c        print *,iI,raRx110Press(iI),raRx110Temp(iI),raRx110MR(iI)
 c************************************************************************
 c this subroutine does the klayers integrations, integrals over P
 c so this is more similar to kLAYERs, CRTM
-c this is nwer code; it ignores surface as "lowest level and only uses the user level info
+c this is newer code; it ignores surface as "lowest" level and only uses the user level info
+c this is for AIRS 101 levels
 
 c >>>>>>>> raPout comes in mb
 c >>>>>>>> and goes out in N/m2
@@ -1843,7 +2047,7 @@ c testing
       IF (kPlanet .EQ. 3) THEN
         !! show the RH for gas 1
         write(kStdWarn,*) ' '
-        write(kStdWarn,*) 'Checking Relative Humidity'
+        write(kStdWarn,*) 'Checking Relative Humidity (integrate over AIRS 101 levels)'
         write(kStdWarn,113) ' iX   Lay  P(mb)    zav(km)  dz(km)   T(K)     PP(mb)  SVP(mb)    RH      QTot      Q1..Qn'
         write(kStdWarn,113) '------------------------------------------------------------------------------------------'
         DO iL = iLowestLev,kProfLayer
@@ -1860,6 +2064,438 @@ c testing
           ELSE
             write(kStdWarn,112) iL-iLowestLev+1,iL,rP/100.0,z,zWoo,rT,rPP/100.0,rSVP/100,rRH,raAmountOut(iL),
      $ (raaQout(iL,iG),iG=1,6),' ***** '
+          END IF
+        END DO
+      END IF
+ 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '))
+ 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '),A7)
+ 113  FORMAT(A90)
+
+c now find pressure output corresponding to HGT output from LBLRTM
+      IF (kRTP .EQ. -20) THEN
+        IF (raRTP_TxtInput(6) .GT. 0) THEN
+          !!! input level boundaries in km, change to mb
+          DO iL = iLowestLev,kProfLayer
+            raJunk(iL-iLowestLev+1) = raZout(iL)          
+            raJunk2(iL-iLowestLev+1) = raPout(iL)          
+          END DO
+          CALL r_sort_linear(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo,1)
+          write(kStdWarn,*)'LBLRTM output height of ',raRTP_TxtInput(4),' km corresponds to ',zWoo,' N/m2'
+          raRTP_TxtInput(6) = zWoo/100.0  !! mb
+        ELSEIF (raRTP_TxtInput(6) .LT. 0) THEN
+          !!! input level boundaries in mb     
+          raRTP_TxtInput(6) = abs(raRTP_TxtInput(6)) * 100.0
+          write(kStdWarn,*)'LBLRTM output pressure of ',raRTP_TxtInput(6),' N/m2'
+        END IF
+      END IF
+
+      write(kStdWarn,*) '  >>>>>>>>>>>> finished the Levels --> Layers intergation >>>>>>>>>>>>>>>>>>>'
+      
+      RETURN
+      END
+
+c************************************************************************
+c this subroutine does the klayers integrations, integrals over P
+c so this is more similar to kLAYERs, CRTM
+c this is newer code; it ignores surface as "lowest" level and only uses the user level info
+c this is for USER DEFINED levels
+
+c >>>>>>>> raPout comes in mb
+c >>>>>>>> and goes out in N/m2
+
+      SUBROUTINE DoIntegrateLevels2UserLayers_wrtP(rHSurf,rPSurf,rTSurf,iLowestLev,iNumGases,iaG,rLat,rLon,
+     $               raPBnd,raAlt,iZbnd,rfracBot,
+     $               raPX,raTX,raaG_MRX,raPout,raAmountOut,raTout,raZout,raaQout,raaPartPressOut)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c input
+      REAL rHSurf,rPSurf,rTSurf,raPBnd(2*kProfLayer)
+      REAL raAlt(2*kProfLayer),rfracBot,rLat,rLon
+      INTEGER iLowestLev,iNumGases,iaG(kMaxGas),iZbnd
+      REAL raPX(kProfLayer+1),raTX(kProfLayer+1),raaG_MRX(kProfLayer+1,kMaxGas)
+c output
+      REAL raTout(kProfLayer),raAmountOut(kProfLayer),raZout(kProfLayer+1),raPout(kProfLayer)
+      REAL raaQout(kProfLayer,kMaxGas),raaPartPressOut(kProfLayer,kMaxGas)
+
+c local
+      INTEGER iL,iCnt,iJ,iNFine,iSmallLoop,iG,iLoop,iUpperLev
+      REAL z,rP,rPTry,rdPWant,rdP,rT,amount,slope,dz,z0,gravity,gamma,junk,rTsum,rWgt,damount
+      REAL rMolarMass_n,rMolarMass_np1,rMR_water_n,rMR_water_np1,rPP,rSVP,rAmt,rThick
+      REAL dlnp,rP_n,rP_np1,rT_n,rT_np1,rTX,rPX,density_n,density_np1,amount_n,amount_np1,Pav,Tav,SpHeatDryAir
+      REAL raXYZPress(kMaxlayer+1+1)
+      REAL raXYZTemp(kMaxlayer+1+1)
+      REAL raaXYZ_MR(kMaxlayer+1+1,kMaxGas)
+      REAL raXYZ_MRwater(kMaxlayer+1+1)
+      REAL raJunk(kMaxLayer),rMR_n,rMR_np1,q_n,q_np1,raJunk2(kMaxLayer)
+      REAL zWoo,rConvertQ,grav_earth,wexsvp,rRH
+      INTEGER iOffset,iWoo
+
+      rConvertQ = 6.022141e23/1e4     ! multiply by this to change moles/m2 to molecules/cm2
+      rConvertQ = kAvog/1000/1.0e4    ! multiply by this to change moles/m2 to molecules/cm2
+      rConvertQ = rConvertQ * 100.0   !but if input p is in mb, we need to change to N/m2 by this factor
+      
+      DO iL = 1,kProfLayer
+        DO iG = 1,iNumGases
+          raaQout(iL,iG) = 0.0
+        END DO
+      END DO
+
+      IF ((kPlanet .EQ. 3) .AND. (iaG(1) .NE. 1)) THEN
+        write (kStdErr,*) 'Need GasID(1) = 1 (WV) for Planet Earth'
+        Call DoStop
+      END IF
+
+      iNFine = 10
+      iNFine = 200
+      iNFine = 50
+
+      write(kStdWarn,*) '  '
+      write(kStdWarn,*) '  >>>>>>>>>>>> doing the Levels --> Layers intergation >>>>>>>>>>>>>>>>>>>'      
+
+c >>>>>>>>>>
+      !! set up temporary arrays/matrices for interping onto sublevels
+      iUpperLev = iZbnd
+      !! set levels 1 .. iNumLevs
+      DO iL = 1,iUpperLev
+        raXYZPress(iL) = raPX(iL)
+        raXYZTemp(iL) = raTX(iL)
+        DO iG = 1,iNumGases
+          raaXYZ_MR(iL,iG) = raaG_MRX(iL,iG)
+          IF (iG .EQ.  1) raXYZ_MRwater(iL) = raaG_MRX(iL,iG)
+        END DO
+c      print *,iNumGases,iL,raPX(iL),raTX(iL),raaG_MRX(iL,1),raaG_MRX(iL,7),raaG_MRX(iL,22)	
+      END DO
+
+c >>>>>>>>>>
+
+c now start integrating
+c lowest layer is special case
+
+c http://cimss.ssec.wisc.edu/~paulv/
+c http://cimss.ssec.wisc.edu/~paulv/Fortran90/Profile_Utility/profile_units_conversion_2/index.html
+c see /home/sergio/KCARTA/DOC/NotesOnAtmosphericProfilesAndQuantities.pdf
+c     /home/sergio/KCARTA/DOC/sci_klayers.txt
+
+ 1234 FORMAT(I3,' ',F10.4,' ' ,I3,6(' ',F10.4),1(' ',E10.4),3(' ',F10.4))
+ 
+      z = rHSurf !! need to kludge this
+      zWoo = rHSurf
+      iWoo = -1
+
+c      DO iL=1,iZbnd
+c        print *,'sergio1',iL,raPBnd(iL)
+c      end do
+      
+      iOffSet = kProfLayer-(iZbnd-1)
+      DO iL = iLowestLev,iLowestLev
+        raPout(iL+iOffset) = log(raPBnd(iL)/raPBnd(iL+1))
+        raPout(iL+iOffSet) = (raPBnd(iL) - raPBnd(iL+1))/raPout(iL+iOffset)
+        raPout(iL+iOffSet) = raPout(iL+iOffSet)/100.0    !!! change N/m2 to mb
+	
+        z0 = z
+        iJ = iL - iLowestLev + 1
+
+        amount = 0.0
+        rTsum  = 0.0
+        rWgt = 0.0
+
+        !!! >>>>>>  this is starting out at         rP = raPBnd(iL)        rT = rTSurfx  >>>>>>>>
+        rP = raPBnd(iL)
+	rP = rP/100.0    !!! change N/m2 to mb
+        CALL r_sort_loglinear(raXYZPress,raXYZTemp,iUpperLev,rP,rT,1)
+
+        !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = loag(a/c)
+        dlnp = log(raPBnd(iL)) - log(raPBnd(iL+1))  
+        dlnp = dlnp / (iNFine)
+
+        !! information for current (sub)level
+        rP_n = rP                             !! current sublev press
+        rT_n = rT                             !! current sublev temp
+        rMR_water_n = raXYZ_MRwater(1)        !! current water MR
+        CALL r_sort_loglinear(raXYZPress,raXYZ_MRwater,iUpperLev,rP,rMR_water_n,1) !! current water MR
+
+        !! information for next (sub)level
+        rP_np1 = log(rP_n) - dlnp
+        rP_np1 = exp(rP_np1)                                                              !! next sublev pressure
+        CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1,       1)   !! next sublev temp
+        CALL r_sort_loglinear(raXYZPress,raXYZ_MRwater,iUpperLev,rP_np1,rMR_water_np1,1)   !! next sublev MRw
+
+        IF ((rP_n .LE. rPSurf) .AND. (iWoo .LT. 0)) THEN
+          iWoo = +1
+          zWoo   = z
+        END IF
+
+        DO iLoop = 1,iNFine
+
+          rMolarMass_n   = kAtmMolarMass
+          rMolarMass_np1 = kAtmMolarMass
+          !!! if Earth, adjust molecular mass for displacement by water
+          IF (kPlanet .EQ. 03) rMolarMass_n   = kAtmMolarMass - rMR_water_n  *(kAtmMolarMass - 18.0)
+          IF (kPlanet .EQ. 03) rMolarMass_np1 = kAtmMolarMass - rMR_water_np1*(kAtmMolarMass - 18.0)
+          rMolarMass_n   = rMolarMass_n/1000.0      !! change from g/mol to kg/mol
+          rMolarMass_np1 = rMolarMass_np1/1000.0    !! change from g/mol to kg/mol
+
+          density_n   = rP_n   / rT_n   * rMolarMass_n   / kMGC
+          density_np1 = rP_np1 / rT_np1 * rMolarMass_np1 / kMGC
+
+          IF (kPlanet .NE. 3) THEN
+            gravity = kGravity * (1 - 2 * z/(kPlanetRadius * 1000))
+            gravity = kGravity/((1 + z/(kPlanetRadius * 1000))**2)
+          ELSE
+            gravity = grav_earth(z,0.0,0.0,rLat,rLon)
+          END IF
+
+          Tav   = (rT_n * density_n + rT_np1 * density_np1) / (density_n + density_np1)          
+          SpHeatDryAir = kMGC*(1/rMolarMass_n * density_n + 1/rMolarMass_np1 * density_np1) / (density_n + density_np1)  
+          dz = SpHeatDryAir * Tav / gravity * log(rP_n/rP_np1)
+
+          rTsum = rTsum + Tav * (density_n + density_np1)/2
+          rWgt  = rWgt + (density_n + density_np1)/2
+                         
+          Pav = (rP_n-rP_np1)/log(rP_n/rP_np1)
+          damount = Pav/Tav/kMGC * dz 
+c          print *,iLoop,raPBnd(iL),rP,amount*rConvertQ,(amount+damount)*rConvertQ,SpHeatDryAir,kMGC
+          amount = amount + damount
+
+          DO iG = 1,iNumGases
+            DO iCnt = 1,iUpperLev
+              raJunk(iCnt) = raaXYZ_MR(iCnt,iG)
+            END DO
+            CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n,  1) 
+            CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1,1) 
+            raaQout(iL+iOffSet,iG) = raaQout(iL+iOffSet,iG) + damount * (rMR_n + rMR_np1)/2 * rConvertQ
+          END DO
+
+          !!! now update for next iteration
+          z = z + dz
+          rP_n = rP_np1
+          rT_n = rT_np1
+          rMR_water_n = rMR_water_np1
+          rP = rP_n
+
+          rP_np1 = log(rP_n) - dlnp
+          rP_np1 = exp(rP_np1)                                                              !! next sublev pressure
+          CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1,       1)   !! next sublev temp
+          CALL r_sort_loglinear(raXYZPress,raXYZ_MRwater,iUpperLev,rP_np1,rMR_water_np1,1)   !! next sublev MRw
+
+          IF ((rP_n .LE. rPSurf) .AND. (iWoo .LT. 0)) THEN
+            iWoo = +1
+            zWoo   = z
+          END IF
+
+        END DO
+
+        raTout(iL+iOffSet)      = rTsum/rWgt                 ! <<< need TAV
+        raAmountOut(iL+iOffSet) = amount*rConvertQ           ! change moles/m2 to molecules/cm2
+        raZout(iL+1+iOffSet)    = z
+        
+c        write(*,1234) iL,(z-z0),iJ,raTX(iJ),rTSurf,rP,raPBnd(iL+1),rT,raTout(iL+iOffSet),
+c     $        raAmountOut(iL+iOffSet),raZout(iL+1+iOffSet),raPout(iL+iOffSet),z/1000
+      END DO
+
+      ! displace everything  z
+      iL = iL - 1    !! recall on exiting the loop, iL is actually incremented by 1
+      raZout(iL+iOffSet)   = -(zWoo - z0)
+      raZout(iL+1+iOffSet) = +(z-zWoo)
+      write(kStdWarn,*) '  need to displace lowest layer heights'
+      write(kStdWarn,*) '  Lowest Level (m), rHSurf (m) Upper Levl(m) = ',-(zWoo - z0),z0,+(z-zWoo)
+      write(kStdWarn,*) '  plowest,pSurf,pLowest+1 (mb) ',raPBnd(iL),rPSurf,
+     $                                                   raPBnd(iL+1)
+      z = z - zWoo
+
+ccc      !no need to adjust this amount for book-keeping, make consistent with eg n_rad_jac_scat.f since we did FULL layer
+ccc      raAmountOut(iL) = raAmountOut(iL)/rFracBot 
+ccc      DO iG = 1,iNumGases
+ccc        raaQout(iL,iG) = raaQout(iL,iG)/rFracBot
+ccc      END DO
+      
+c go to TOA as defined by user
+
+      DO iL = iLowestLev + 1,iZbnd-1
+        z0 = z
+        !! compute avg pressure of layer
+        raPout(iL+iOffSet) = log(raPBnd(iL)/raPBnd(iL+1))
+        raPout(iL+iOffSet) = (raPBnd(iL) - raPBnd(iL+1))/raPout(iL+iOffset)
+        raPout(iL+iOffSet) = raPout(iL+iOffSet)/100.0    !!! change N/m2 to mb
+	
+        iJ = iL - iLowestLev + 1
+        rP = raPBnd(iL)
+	rP = rP/100.0    !!! change N/m2 to mb	
+        rT = raXYZTemp(iJ)
+        
+        amount = 0.0
+        rTsum  = 0.0
+        rWgt = 0.0
+
+        !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = loag(a/c)
+        dlnp = log(raPBnd(iL)) - log(raPBnd(iL+1))
+        dlnp = dlnp / (iNFine)
+
+        !! information for current (sub)level
+        rP_n = rP                              !! current sublev press
+        rT_n = rT                              !! current sublev temp
+        rMR_water_n = raXYZ_MRwater(iJ)        !! current water MR
+
+        !! information for next (sub)level
+        rP_np1 = log(rP_n) - dlnp
+        rP_np1 = exp(rP_np1)                                                              !! next sublev pressure
+        CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1,       1)   !! next sublev temp
+        CALL r_sort_loglinear(raXYZPress,raXYZ_MRwater,iUpperLev,rP_np1,rMR_water_np1,1)   !! next sublev MRw
+
+        DO iLoop = 1,iNFine
+
+          rMolarMass_n   = kAtmMolarMass
+          rMolarMass_np1 = kAtmMolarMass
+          !!! if Earth, adjust molecular mass for displacement by water
+          IF (kPlanet .EQ. 03) rMolarMass_n   = kAtmMolarMass - rMR_water_n  *(kAtmMolarMass - 18.0)
+          IF (kPlanet .EQ. 03) rMolarMass_np1 = kAtmMolarMass - rMR_water_np1*(kAtmMolarMass - 18.0)
+          rMolarMass_n   = rMolarMass_n/1000.0      !! change from g/mol to kg/mol
+          rMolarMass_np1 = rMolarMass_np1/1000.0    !! change from g/mol to kg/mol
+
+          density_n   = rP_n   / rT_n   * rMolarMass_n   / kMGC
+          density_np1 = rP_np1 / rT_np1 * rMolarMass_np1 / kMGC
+
+          IF (kPlanet .NE. 3) THEN
+            gravity = kGravity * (1 - 2 * z/(kPlanetRadius * 1000))
+            gravity = kGravity/((1 + z/(kPlanetRadius * 1000))**2)
+          ELSE
+            gravity = grav_earth(z,0.0,0.0,rLat,rLon)
+          END IF
+
+          Tav = (rT_n * density_n + rT_np1 * density_np1) / (density_n + density_np1)          
+          SpHeatDryAir = kMGC*(1/rMolarMass_n * density_n + 1/rMolarMass_np1 * density_np1) / (density_n + density_np1)         
+          dz = SpHeatDryAir * Tav / gravity * log(rP_n/rP_np1)
+
+          rTsum = rTsum + Tav * (density_n + density_np1)/2
+          rWgt  = rWgt + (density_n + density_np1)/2
+                         
+          Pav = (rP_n-rP_np1)/log(rP_n/rP_np1)
+          damount = Pav/Tav/kMGC * dz
+          amount = amount + damount
+          
+          DO iG = 1,iNumGases
+            DO iCnt = 1,iUpperLev
+              raJunk(iCnt) = raaXYZ_MR(iCnt,iG)
+            END DO
+            CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n,  1) 
+            CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1,1) 
+            raaQout(iL+iOffSet,iG) = raaQout(iL+iOffSet,iG) + damount * (rMR_n + rMR_np1)/2 * rConvertQ
+c            q_n   = rP_n  /rT_n  /kMGC * dz * rMR_n
+c            q_np1 = rP_np1/rT_np1/kMGC * dz * rMR_np1
+c            raaQout(iL+iOffSet,iG) = raaQout(iL+iOffSet,iG) + (q_n + q_np1)/2 * rConvertQ
+          END DO
+
+          !!! now update for next iteration
+          z = z + dz
+          rP_n = rP_np1
+          rT_n = rT_np1
+          rMR_water_n = rMR_water_np1
+          rP = rP_n
+
+          rP_np1 = log(rP_n) - dlnp
+          rP_np1 = exp(rP_np1)                                                              !! next sublev pressure
+          CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1,       1)   !! next sublev temp
+          CALL r_sort_loglinear(raXYZPress,raXYZ_MRwater,iUpperLev,rP_np1,rMR_water_np1,1)   !! next sublev MRw
+
+        END DO
+
+        raTout(iL+iOffSet)      = rTsum/rWgt             ! <<< need TAV
+        raAmountOut(iL+iOffSet) = amount * rConvertQ     ! change moles/m2 to molecules/cm2
+        raZout(iL+1+iOffSet)    = z
+
+c        write(*,1234) iL,(z-z0),iJ,raTX(iJ),rTSurf,rP,raPBnd(iL+1),rT,raTout(iL),
+c     $        raAmountOut(iL),raZout(iL+1),raPout(iL),z/1000
+      END DO
+
+      write(kStdWarn,*) 'Topmost press level is at z = ',z,' meters'
+      DO iL = 1,iOffSet-1
+        raPout(iL) = 0.0
+	raTout(iL) = 0.0
+	raZout(iL+1) = raZout(iZbnd)
+	raAmountOut(iL) = 0.0
+      END DO
+
+      !! raZout is in meters
+      !! raaQout is in moles/m2
+      DO iL = iLowestLev,iZbnd-1
+        rThick = abs(raZout(iL+iOffSet) - raZout(iL+1+iOffSet)) * 100.0
+        rT = raTout(iL+iOffSet)
+	raPout(iL+iOffSet) = raPout(iL+iOffSet) * 100.0    !! change mb to N/m2
+        DO iG = 1,iNumGases
+          raaPartPressOut(iL+iOffSet,iG) = raaQout(iL+iOffSet,iG) / raAmountOut(iL+iOffSet) * raPout(iL+iOffSet)
+        END DO
+      END DO
+      
+c testing
+c          !!! this automatically puts partial pressure in ATM, assuming
+c          !!! gas amount in kilomoles/cm2, length in cm, T in kelvin
+c          !!!note "j"!!!
+c      DO iL = iLowestLev,kProfLayer
+c        rThick = abs(raZout(iL) - raZout(iL+1)) * 100.0
+c        rT = raTout(iL)  
+c        DO iG = 1,iNumGases
+c          rAmt = raaQout(iL,iG)/kAvog
+c          rPP  = rAmt*1.0e9*kMGC*rT / (rThick*kAtm2mb*100.0)
+c          IF (iG .EQ. 1) THEN
+c            print *,iL,iG,raaPartPressOut(iL,iG)/(kAtm2mb*100).0,rPP,rThick,
+c     $             raaPartPressOut(iL,iG)/rPP/(kAtm2mb*100.0),raAmountOut(iL),raaQout(iL,iG)
+c          END IF
+c        print *,iL,raPout(iL)/100,raTout(iL),raAmountOut(iL),
+c     $        raaQout(iL,1),raaQout(iL,2),raaQout(iL,3),raaQout(iL,4),raaQout(iL,5),
+c     $        raaG_MRX(iL-iLowestLev+1,1),raaG_MRX(iL-iLowestLev+1,2),raaG_MRX(iL-iLowestLev+1,3),
+c     $        raaG_MRX(iL-iLowestLev+1,4),raaG_MRX(iL-iLowestLev+1,5)
+c        END DO
+c      END DO
+c testing
+
+c      IF ((iLowestLev-1) .GE. 1) THEN
+        DO iL = 1,iOffSet-1
+          raPout(iL) = log(raPBnd(iL)/raPBnd(iL+1))
+          raPout(iL) = (raPBnd(iL) - raPBnd(iL+1))/raPout(iL)
+          raTout(iL) = kStempMin
+          DO iG = 1,iNumGases
+            raaPartPressOut(iL,iG) = 0.0
+            raaQout(iL,iG) = 0.0
+            raaG_MRX(iL,iG) = 0.0
+          END DO
+        END DO
+c      END IF
+
+      IF (iZbnd+iOffSet .LE. kProfLayer) THEN
+        DO iL = iZbnd,kProfLayer
+          raPout(iL) = 0.0
+          raTout(iL) = kStempMin
+          DO iG = 1,iNumGases
+            raaPartPressOut(iL,iG) = 0.0
+            raaQout(iL,iG) = 0.0
+            raaG_MRX(iL,iG) = 0.0
+          END DO
+        END DO
+      END IF
+        
+      IF (kPlanet .EQ. 3) THEN
+        !! show the RH for gas 1
+        write(kStdWarn,*) ' '
+        write(kStdWarn,*) 'Checking Relative Humidity (integrate over user levels)'
+        write(kStdWarn,113) ' iX   Lay  P(mb)    zav(km)  dz(km)   T(K)     PP(mb)  SVP(mb)    RH      QTot      Q1..Qn'
+        write(kStdWarn,113) '------------------------------------------------------------------------------------------'
+        DO iL = iLowestLev,iZbnd-1
+          z    = (raZout(iL+iOffset) + raZout(iL+1+iOffset))/2/1000
+          zWoo = (raZout(iL+1+iOffset) - raZout(iL+iOffset))/1000
+          rP   = raPout(iL+iOffset)            !! N/m2
+          rT   = raTout(iL+iOffset)
+          rPP  = raaPartPressOut(iL+iOffset,1) !! N/m2
+          rSVP = wexsvp(rT) * 100      !! mb --> N/m2
+          rRH  = rPP/rSVP*100.0
+          IF (rRH .LE. 100.0) THEN
+            write(kStdWarn,111) iL-iLowestLev+1,iL,rP/100.0,z,zWoo,rT,rPP/100.0,rSVP/100,rRH,raAmountOut(iL+iOffSet),
+     $ (raaQout(iL+iOffSet,iG),iG=1,6)
+          ELSE
+            write(kStdWarn,112) iL-iLowestLev+1,iL,rP/100.0,z,zWoo,rT,rPP/100.0,rSVP/100,rRH,raAmountOut(iL+iOffSet),
+     $ (raaQout(iL+iOffSet,iG),iG=1,6),' BAD RH!'
           END IF
         END DO
       END IF

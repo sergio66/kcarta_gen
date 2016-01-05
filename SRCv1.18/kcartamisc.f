@@ -2540,6 +2540,15 @@ c^^^^^^^^^^^^^ check to see if linear interp will help^^^^^^^^^^^^^^^^^^^
 c^^^^^^^^^^^^^ check to see if linear interp will help^^^^^^^^^^^^^^^^^^^
       END DO
 
+      !!! raaPress in in ATM, raPressLevels is in MB
+c      DO iI = 1,kProfLayer
+c       print *,'xaxaxa',iI,raaPress(iI,1)*1013.25,raPressLevels(iI),raaPress(iI,1)*1013.25/raPressLevels(iI)
+c      END DO
+c      DO iI = 1,kProfLayer
+c       print *,'xaxaxa2',iI,raaPress(iI,1),raR100Press(iI),raPressLevels(iI)/1013.25
+c      END DO
+c      call dostopmesg('xaxaxa$')
+     
 c now just happily spline everything on!!!!!! for the temps
       DO iI = 1,kMaxLayer
         raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
@@ -2589,26 +2598,29 @@ c  **************** this is the orig code ********************************
           ELSE
             CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r)
           END IF
-          IF ((r .LT. 0.0) .AND. (iGasID .EQ. 1)) THEN
+          IF ((rxpt .GT. 0.0) .AND. (r .LT. 0.0) .AND. (iGasID .EQ. 1)) THEN
             write (kStdErr,*) 'In creating water reference profile, negative'
             write (kStdErr,*) 'gas partial pressure found!!!!'
             write (kStdErr,*) 'failure in "orig" test!!!!'
             write (kStdErr,*) 'iSplineType  =',iSplineType
+	    DO iJ = 1,kMaxLayer
+	      print *,iGas,iJ,raXgivenP(iJ),raYgivenP(iJ),rxpt
+	    END DO
+	    call dostop
             r2 = 0.0
             IF (iSplineType .EQ. 1) THEN
               !!try linear
               CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r2)
-              print *,'bad spline for gas .... ',iSplineType,r,r2
+              print *,'bad spline for gas .... ',iSplineType,rxpt,r,' with linear',r2
             END IF
-            write (kStdErr,*) iGas,iI,rxpt,r,r2
-            write (kStdErr,*) 'looping thru makerefprof spline ....'
+            write (kStdErr,*) iGas,'<',iI,'>      <<',rxpt,'>>',r,r2
+            write (kStdErr,*) 'looping thru makerefprof spline .... iJ InPP InRefGasAmt GridPP'
             DO iJ = 1,kMaxLayer
               write(kStdErr,*) iJ,raXgivenP(iJ),raYgivenP(iJ),raaPress(iJ,iGas)
             END DO   
             !!! this is bizarre .. if r2 > 0 and r < 0, just set r = r2 instead
             !!! or CALL DoStop         
-            print *,'hah stopping'
-            CALL DoStop
+            CALL DoStopMesg('wierd problems in water : MakeRefProf$')
           ELSEIF ((r .LT. 0.0) .AND. (iGasID .NE. 1)) THEN
             write (kStdWarn,*) 'Warning!!In creating ref profile,negative'
             write (kStdWarn,*) 'gas partial pressure found!!!! Reset to 0'
@@ -2629,7 +2641,7 @@ c WATER cares about partial pressures, so be careful!
           r = raRPartPress(iI)
           r0 = raRPartPress(iI)
           CALL PPThruLayers(
-     $     iI,iLowerOrUpper,raR100Amt,raR100Temp,raR100PartPress,raR100Press,
+     $     iGasID,iI,iLowerOrUpper,raR100Amt,raR100Temp,raR100PartPress,raR100Press,
      $     raDataBaseThickness,raSortPressLevels,raSortPressHeights,
      $     raPressLevels,raRTemp,r)
 c-->> Howard Motteler does not bother with this, and so he sets r = r0!!!! 
@@ -2666,7 +2678,7 @@ c************************************************************************
 c this subroutine finds the partial pressure of the layer
 c especially useful for GasID = 1
       SUBROUTINE PPThruLayers(
-     $     iI,iLowerOrUpper,raR100Amt,raR100Temp,raR100PartPress,raR100Press,
+     $     iGasID,iI,iLowerOrUpper,raR100Amt,raR100Temp,raR100PartPress,raR100Press,
      $     raDataBaseThickness,raSortPressLevels,raSortPressHeights,
      $     raPressLevels,raRTemp,r)
 
@@ -2677,6 +2689,7 @@ c especially useful for GasID = 1
 c input variables
       INTEGER iLowerOrUpper   !!upper or lower atm
       INTEGER iI              !!layer of current profile we are looking at
+      INTEGER iGasID
 c these are the individual reference profiles, at kMaxLayer layers 
       REAL raR100Amt(kMaxLayer),raR100Temp(kMaxLayer) 
       REAL raR100PartPress(kMaxLayer),raR100Press(kMaxLayer) 
@@ -2719,8 +2732,9 @@ c local vars
           GOTO 10
         END IF
       END IF
+      
       !!check to see if we are OK or if we went one too far; if so, go down one
-      IF (DATABASELEV(iJ) .LT. rP) iJ = iJ - 1
+      IF ((DATABASELEV(iJ) .LT. rP) .AND. (iJ .GT. 1)) iJ = iJ - 1
 
       iJp1 = kMaxLayer + 1
       !!!find databaselev(iJp1) >= rPp1 by looping down from TOA
@@ -2750,6 +2764,11 @@ c     $       raR100PartPress(iJ)*kAtm2mb*100/(r*kBoltzmann*raR100Temp(iJ)*1e6)
         CALL DoStop
       END IF
 
+      IF (iJ .LE. 0) THEN
+        write(kStdErr,*) '>>layer number ',iI,'gas ID ',iGasID
+        Call DoStopMesg(' >>oops iJ <= 0 in PPThruLayers, so will have problems in next line$')
+      END IF
+    
       !!! case 1 : current layer is INSIDE one database layer
       IF ((iJp1 - iJ) .EQ. 1) THEN       
         iCase = 1
@@ -3049,6 +3068,11 @@ c             and so mebbe the pressure levels are not consistent with pProf
 c            print *,'BB',iInt,pprof(iInt),raTPress(iInt)*kAtm2mb,
 c     $              pprof(iInt)/(raTPress(iInt)*kAtm2mb)
 
+c      Do iInt = 1,80
+c        print *,iInt,raaTemp(90,iInt)
+c      end do
+c      call dostopmesg('stop in Set_Ref_Current_Profs$')
+      
       DO iInt=1,kProfLayer
         raTAmt(iInt)          = raaAmt(iInt,iGas)
         raTTemp(iInt)         = raaTemp(iInt,iGas)
@@ -3177,7 +3201,7 @@ c >>>>>>>>>>>>>>>>>>>>>>>>>
       iCount = 0
       DO iI = iLowestLay,kProfLayer
         rF = 1.0
-        IF (i1 .EQ. iLowestLay) rF = max(min(rFracBot,1.0),0.0)
+        IF (iI .EQ. iLowestLay) rF = max(min(rFracBot,1.0),0.0)
         iCount = iCount + 1
         rX = rX + raaAmt(iI,1) * rF
       END DO
@@ -3225,7 +3249,7 @@ c >>>>>>>>>>>>>>>>>>>>>>>>>
       iCount = 0
       DO iI = iLowestLay,kProfLayer
         rF = 1.0
-        IF (i1 .EQ. iLowestLay) rF = rFracBot
+        IF (iI .EQ. iLowestLay) rF = rFracBot
         iCount = iCount + 1
         rX = rX + raaAmt(iI,3) * rF
       END DO

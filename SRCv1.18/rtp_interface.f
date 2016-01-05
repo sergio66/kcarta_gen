@@ -377,14 +377,14 @@ c local variables
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)                                 
+     $      iProfileLayers,raPressLevels,raThickness)
       ELSEIF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
         write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
         write(kStdWarn,5040) caPfname
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)                                 
+     $      iProfileLayers,raPressLevels,raThickness)
       END IF
       
 c this piece of "output" displays the amounts for the first 3 gases
@@ -1602,7 +1602,7 @@ c first check to see if all required gases found in the user supplied profile
         write(kStdErr,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
         CALL AddOnAFGLProfile(kAFGLProf,
      $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
       END IF
 
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3) 
@@ -2076,7 +2076,7 @@ c first check to see if all required gases found in the user supplied profile
         write(kStdErr,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
         CALL AddOnAFGLProfile(kAFGLProf,
      $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
       END IF
 
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3) 

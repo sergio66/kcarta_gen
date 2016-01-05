@@ -62,7 +62,7 @@ flen    = fread(fin, 1, 'integer*4');
 flen   = fread(fin, 1, 'integer*4');
 nlayer = fread(fin, 1, 'integer*4');
 flen   = fread(fin, 1, 'integer*4');
-iNumLayers=nlayer;              %<------------- my modification
+iNumLayers = nlayer;              %<------------- my modification
 
 % start, stop frequency
 flen = fread(fin, 1, 'integer*4');
@@ -96,10 +96,10 @@ flen   = fread(fin, 1, 'integer*4');
 % DATA RECORD SUMMARY
 %%%%%%%%%%%%%%%%%%%%%%
 
-nchunk=highchunk-lowchunk+1;         %number of 10000 pt chunks
+nchunk = highchunk-lowchunk+1;         %number of 10000 pt chunks
 
 flen       = fread(fin, 1, 'integer*4');
-iTotal     = fread(fin, 1, 'integer*4'); % total number of chunks
+iTotal     = fread(fin, 1, 'integer*4'); % total number of slabs
 iNumAtm    = fread(fin, 1, 'integer*4'); % number of atmospheres
 iImportant = fread(fin, 1, 'integer*4'); % number of fluxes (==1)
 flen       = fread(fin, 1, 'integer*4');
@@ -107,7 +107,7 @@ flen       = fread(fin, 1, 'integer*4');
 flen1       = fread(fin, 1, 'integer*4');
 iaNumLayers = fread(fin, iNumAtm, 'integer*4'); % rows in each ODB
 flen2       = fread(fin, 1, 'integer*4');
-nODBrows=iaNumLayers;
+nODBrows    = iaNumLayers;
 
 % sanity checks
 if flen1 ~= flen2

@@ -929,7 +929,7 @@ c ******** also note iLm1 ---> iLp1
       rCosDiff = cos(rDiff)
 
       if (TOA_to_instr .LT. 0) THEN
-	RAD0DN0 = ttorad(WAVENO,kTspace)
+	RAD0DN0 = ttorad(WAVENO,sngl(kTspace))
       else 
         RAD0DN0 = TOA_to_instr
       END IF        
@@ -1054,7 +1054,7 @@ c the layer, not on top of it
 
       DO iFr=1,kMaxPts
         waveno=raFreq(iFr)
-        raExtra(iFr) = ttorad(WAVENO,kTSpace)
+        raExtra(iFr) = ttorad(WAVENO,sngl(kTSpace))
         raExtra(iFr) = 0.0 
       END DO 
  
@@ -1104,7 +1104,7 @@ ccccccccccccc this is new .. where subroutine differs from AddUpperMostLayers
         MUDOWN=3.0/5.0
         DO iFr=1,kMaxPts
           waveno=raFreq(iFr)
-          raExtra(iFr) = ttorad(WAVENO,kTSpace)
+          raExtra(iFr) = ttorad(WAVENO,sngl(kTSpace))
         END DO
         DO iI = iT,iNumLayer+1,-1
           iJ = iaRadLayerTemp(iI)
@@ -6133,7 +6133,7 @@ c this figures out the solar intensity at the ground
       iLay = 1
       iL = iaRadLayer(iLay)
       rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-      rMPTemp = kTSpace
+      rMPTemp = sngl(kTSpace)
       DO iFr=1,kMaxPts
         rT = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
         raInten(iFr) = ttorad(raFreq(iFr),rMPTemp)

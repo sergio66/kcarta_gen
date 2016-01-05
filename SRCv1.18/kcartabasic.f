@@ -838,6 +838,8 @@ c compute the abs coeffs
      $                   iaQ21,iaQ22,raQ21,raQ22)
 
 c see if current gas ID needs nonLTE spectroscopy
+          iLTEIn = -1
+	  dDeltaFreqNLTE = 0.0025d0
           IF ((iChunk_DoNLTE .EQ. 1) .OR. (iChunk_DoNLTE .EQ. 3)) THEN
             CALL NLTEDriver(
      $            iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
@@ -1125,6 +1127,7 @@ c send in the BC variables corresponding to iAtm eg rTSPace=raTSpace(iAtm)
 
 c reset the frequency range for the current file block, if things are screwy
 c due to NLTE test
+              
               IF (dDeltaFreqNLTE .GT. 0.0d0) THEN
                 DO iInt=1,kMaxPts
                   raFreq(iInt)=raBlock(iFileID)+(iInt-1)*dDeltaFreqNLTE
