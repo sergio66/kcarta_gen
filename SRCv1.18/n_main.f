@@ -1465,7 +1465,7 @@ c ******** SPECTRA section
         CALL printstar      
         iaKeyword(12) = 1
       END IF
-
+      
 c ******** NONLTE section
       namecomment = '******* NONLTE section *******'
       IF ((iSetBloat .GT. 0) .AND. (kBloatPts .NE. (kMaxPts*kBoxCarUse))) THEN
@@ -1485,7 +1485,7 @@ c ******** NONLTE section
        END IF
 
       IF (iNumNLTEGases .GT. 0) THEN
-        !! this kinda goes against iNewLBL = 2 set abive if iNumAltComprDirs .GT. 0 ....
+        !! this kinda goes against iNewLBL = 2 set above if iNumAltComprDirs .GT. 0 ....
         iNewLBL = 1   
         iNonlte = +1
         CALL nonlte(

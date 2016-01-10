@@ -629,11 +629,15 @@ c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LIN
       kTemperVary = +2     !!!temperature in layer varies linearly, simple
       kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
       kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
-      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx
-      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau)
+      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
+      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
+      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42
 
       kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
-      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau)
+      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
+      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
+      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015      
+      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42
       
       IF (kTemperVary .EQ. -1) THEN
         write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'
@@ -649,6 +653,8 @@ c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LIN
         write(kStdWarn,*) 'kTemperVary = +41    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 (Pade)'
       ELSEIF (kTemperVary .EQ. +42) THEN
         write(kStdWarn,*) 'kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau)'
+      ELSEIF (kTemperVary .EQ. +43) THEN
+        write(kStdWarn,*) 'kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau) --> tau/6'
       ELSE
         write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
         CALL DoStop
@@ -2140,10 +2146,10 @@ c      END IF
       END IF
 
       IF ((kSurfTemp .GT. 0) .AND. ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))) THEN
-        write(kStdErr,*) 'Cannot read surface temperature info from LBLRTM file'
-        write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
-        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
-        CALL DoSTOP 
+        write(kStdErr,*) 'Will read surface temperature info from LBLRTM file'
+        write(kStdErr,*) 'and ask kCARTA to add on raTSurf offset from nm_radnces!!!'
+c        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
+c        CALL DoSTOP 
       END IF
 
       IF ((kSurfTemp .GT. 0) .AND. (kRTP .EQ. -10)) THEN

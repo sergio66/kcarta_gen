@@ -115,8 +115,26 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
           raTPressLevels(iI) = -9999
         END IF
       END DO
-
  1234 FORMAT(I3,5(' ',F10.4))
+
+c >>>>>>>>>>> this is to FORCE tape5 temperatures into the LevelTemperatures and LayerAvgTemps
+      IF (kRTP .EQ. -5) THEN
+        write(kStdWarn,*) 'kRTP = -5 so resetting raTPressLevels (levelsT)    with what came in from TAPE5'
+        write(kStdWarn,*) 'kRTP = -5 so resetting raVTemp        (layersTavg) with what came in from TAPE5'	
+	write(kStdWarn,*) '     iI          raTPressLevels(iI)            kLBLRTM_levelT(iI)'
+	write(kStdWarn,*) '-----------------------------------------------------------------'	
+	DO iI = 1,kProflayer+1
+	  write(kStdWarn,*) ,iI,raTPressLevels(iI),kLBLRTM_levelT(iI),raTPressLevels(iI)-kLBLRTM_levelT(iI)
+          raTPressLevels(iI) = kLBLRTM_levelT(iI)
+        END DO
+	write(kStdWarn,*) '-----------------------------------------------------------------'
+	DO iI = 1,kProflayer
+	  write(kStdWarn,*) iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),raaTemp(iI,1)-kLBLRTM_layerTavg(iI)
+	  print *, 'popopo',iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),raaTemp(iI,1)-kLBLRTM_layerTavg(iI)	  
+c          raVTemp(iI) = kLBLRTM_layerTavg(iI)
+        END DO	
+      END IF
+      
 c      DO iI = kProfLayer-iProfileLayers+1,kProfLayer
 c        write(*,1234) iI,raPressLevels(iI),raP(kProfLayer-iI+1),raPressLevels(iI+1),
 c     $             raT(kProfLayer-iI+1),raTPressLevels(iI)
@@ -143,7 +161,6 @@ c method 1 : just use slab endpoints
 c        print *,iI,raThickness(iI),raGeopotentialThick1(iI),
 c     $             (1-raGeopotentialThick1(iI)/raThickness(iI))*100
       END DO
-c
 c method 2 : use 10 points including slab ends
 
       write(kStdWarn,*) 'geopotential height vs layer thickness'

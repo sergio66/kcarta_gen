@@ -579,11 +579,26 @@ v1.18
 -----
 12/28/15        Moved LBLRTM TAPE5/6 routines to n_layers_lblrtm.f
 
+                May need to change this in line 180-190 of n_rad_jac_scat.f
+                If angle in TAPE5 > 90 ==> downwell rad (instr at ground)
+                If angle in TAPE5 < 90 ==> upwell   rad (instr at TOA)		
+
+   	If kRTP == 1,   kSurfTemp in *PARAMS can ONLY be -1 so use p.stemp for surf temp
+   	If kRTP == 0,-1, meaning of parameter 7 (kSurfTemp in *PARAMS) was originally
+                -1.0 : use surface temperature set by user in *RADNCE
+                +1.0 : use surface temperature interpolated by pressure 
+                       levels and added to offset set by user in *RADNCE
+                       Note that the interpolation is smooth in AVERAGE
+                       pressure, and not in actual pressure
+   	If kRTP == 0,-1,-5,-6 meaning of parameter 7 (kSurfTemp in *PARAMS) is now
+                -1.0 : use surface temperature set by user in *RADNCE
+	        +1.0 : use raTSurf from nm_radnce stemp set by user LBLRTM TAPE 5
+		
                 Introduced kLBLRTM_toa so that flux calcs can stop at LBLRTM toa
 		for direct comparison of heating rates and fluxes
 
                 Also when doing internal klayers integration can either use
-		AIRS 011 levels, or the levels that came from LBLRTM TAPE5
+		AIRS 101 levels, or the levels that came from LBLRTM TAPE5
 		
                 If kFlux = 2 (heat rate) then nlevs = nlays+1 heat rates are
 		output, with heat rate at TOA == 0 always
@@ -3804,7 +3819,7 @@ from kCO2 to kSurfTemp, and now has 2 different meanings : -1 use the
 specified surface temperature, and +1 use an interpolated temperature 
 PLUS an offset that is set by the surface temperature
 
-11/20/98   	The meaning of parameter 7 (kSurfTemp in *PARAMS) is now
+11/20/98   	If kRTP ~= 1, meaning of parameter 7 (kSurfTemp in *PARAMS) is now
                 -1.0 : use surface temperature set by user in *RADNCE
                 +1.0 : use surface temperature interpolated by pressure 
                        levels and added to offset set by user in *RADNCE

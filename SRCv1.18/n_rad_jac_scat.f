@@ -172,27 +172,36 @@ c read in how many atmospheres
       IF ((kRTP .EQ. -10) .OR. (kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
         write (kStdWarn,*) 'Need to reset some parameters (set in .nml file) which were read from text LVLS/LBLRTM code'
         write(kStdWarn,*) 'raPressStart(1) = ',raPressStart(1),' --> ',raRTP_TxtInput(1)
-        write(kStdWarn,*) 'raTSurf(1)      = ',raTSurf(1),' --> ',raRTP_TxtInput(2)
         raPressStart(1) = raRTP_TxtInput(1)
-        raTSurf(1)      = raRTP_TxtInput(2)
+	IF (kSurfTemp .LE. 0) THEN
+	  write(kStdWarn,*) 'kSurfTemp in nm_params <= 0 so IGNORE raTSurf in nm_radnce'
+          write(kStdWarn,*) 'raTSurf(1)      = ',raTSurf(1),' --> ',raRTP_TxtInput(2)
+          raTSurf(1)      = raRTP_TxtInput(2)	  
+	ELSEIF (kSurfTemp .GT. 0) THEN
+	  write(kStdWarn,*) 'kSurfTemp in nm_params >  0 so USE raTSurf from nm_radnce'
+          write(kStdWarn,*) 'ie ignore info from LBLRTM TAPE 5 and use raTSurf = ',raTSurf(1)
+          raTSurf(1)      = raTSurf(1)
+	END IF
         !!! check the angle dangle bangle
         IF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
+c	  print *, 'wah this is for testing, correct set raRTP_TxtInput(5) .GT. 90 for UPLOOK !!'
+c	  print *, 'wah this is for testing, correct set raRTP_TxtInput(5) .LE. 90 for DNLOOK !!'	  
           IF (raRTP_TxtInput(5) .GT. 90) THEN
             write(kStdWarn,*) 'raSatAngle(1) = ',raSatAngle(1),' --> ',abs(180.0 - raRTP_TxtInput(5)),
-     $          ' upward going rad to satellite H > 0'
+     $          ' UPLOOK INSTR (downward going rad to satellite H == 0)'
             write(kStdWarn,*) 'raSatHeight(1) = ',raSatHeight(1),' --> ',raRTP_TxtInput(4)*1000.0
             raSatAngle(1) = abs(180.0 - raRTP_TxtInput(5))
             raSatHeight(1) = raRTP_TxtInput(4)*1000.0
-            raPressStart(1) = raRTP_TxtInput(1)
-            raPressStop(1)  = raRTP_TxtInput(6)
+            raPressStart(1) = raRTP_TxtInput(6)
+            raPressStop(1)  = raRTP_TxtInput(1)
           ELSEIF (raRTP_TxtInput(5) .LE. 90) THEN
             write(kStdWarn,*) 'raSatAngle(1) = ',raSatAngle(1),' --> ',raRTP_TxtInput(5),
-     $          ' downward going rad to satellite H == 0'
+     $          ' DNLOOK INSTR (upward going rad to satellite H > 0)'	    
             write(kStdWarn,*) 'raSatHeight(1) = ',raSatHeight(1),' --> ',raRTP_TxtInput(4)*1000.0
             raSatAngle(1) = raRTP_TxtInput(5)
             raSatHeight(1) = raRTP_TxtInput(4)*1000.0
-            raPressStart(1) = 0.005
-            raPressStop(1)  = raRTP_TxtInput(1)
+            raPressStart(1) = raRTP_TxtInput(1)
+            raPressStop(1)  = 0.005
           END IF
         END IF
       END IF
@@ -769,19 +778,30 @@ c local variables
 
       rT = rTSurf
 
-      if (kSurfTemp .gt. 0) then 
-        !have to adjust temperature .. do this for down AND up look instr
-        if (rPressStart .gt. rPressStop) then  ! for down looking instr
-          rT = FindBottomTemp(rPressStart,raProfileTemp,
-     $                      raPressLevels,iProfileLayers)
-          rT = rT+rTSurf
-        elseif (rPressStart .lt. rPressStop) then  ! for up looking instr
-          rT = FindBottomTemp(rPressStop,raProfileTemp,
-     $                      raPressLevels,iProfileLayers)
-          rT = rT+rTSurf
-          end if
-        end if
-        
+c this was ORIGINAL code, and allowed user to add in an offset
+c      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -1) .OR. (kRTP .EQ. 0))) THEN
+c        !have to adjust temperature .. do this for down AND up look instr
+c        IF (rPressStart .gt. rPressStop) THEN  ! for down looking instr
+c          rT = FindBottomTemp(rPressStart,raProfileTemp,
+c     $                      raPressLevels,iProfileLayers)
+c          rT = rT+rTSurf
+c        ELSEIF (rPressStart .lt. rPressStop) THEN  ! for up looking instr
+c          rT = FindBottomTemp(rPressStop,raProfileTemp,
+c     $                      raPressLevels,iProfileLayers)
+c          rT = rT+rTSurf
+c      ELSEIF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))) THEN
+c        !just state this has already been taken care of in subr radnce4
+c	write(kStdWarn,*) 'kSurfTemp > 0 and kRTP = -5 or -6'
+c	write(kStdWarn,*) 'so we already added in raTSurf offset to stemp from TAPE5/6'
+c        rT = rT
+c      END IF
+
+
+c why make life complicated, just directly give USER defined STEMP
+      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .GE. -6) .AND. (kRTP .LE. 0))) THEN
+        rT = rTSurf
+      END IF
+
       FindSurfaceTemp = rT
 
       IF (rT .LT. 190.0) THEN

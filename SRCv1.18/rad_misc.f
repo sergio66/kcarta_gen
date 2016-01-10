@@ -380,10 +380,12 @@ c local variables
       r2 = sngl(kPlanck2)
 
       !! 10^10 = e^23.03
+      !! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
+      !! 10^38  = 87.49      
       DO iFr = 1,kMaxPts
         rPlanck = r2*raF(iFr)/rBT
-	IF (rPlanck .GT. 23.0) THEN
-	  rPlanck = 1.0e10
+	IF (rPlanck .GT. 87.49) THEN
+	  rPlanck = 1.0e38
 	ELSE
           rPlanck = exp(rPlanck) - 1.0	
 	END IF
@@ -398,7 +400,15 @@ c this subroutine changes the brightness temperatures to intensities
 c for one point
       REAL function ttorad(rf,rBT)
 c rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
-
+c Constants; values from NIST (CODATA98)
+c   c = 2.99792458e+08;  % speed of light      299 792 458 m s-1
+c   h = 6.62606876e-34;  % Planck constant     6.626 068 76 x 10-34 J s
+c   k = 1.3806503e-23;   % Boltzmann constant  1.380 6503 x 10-23 J K-1
+c   c1 = 2*h*c*c * 1e+11;  % Changed 1e+8 to 1e+11 to convert Watts to milliWatts
+c   c2 = (h*c/k) * 100;
+c
+c at small T, exp(c2 fr/T) >>> 1
+c   rad --> c1 fr^3  exp(-c2 fr/T)
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
@@ -414,9 +424,12 @@ c local variables
       r2 = sngl(kPlanck2)
 
       !! 10^10 = e^23.03
+      !! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
+      !! 10^38  = 87.49
+      
       rPlanck = r2*rf/rBT
-      IF (rPlanck .GT. 23.03) THEN
-        rPlanck = 1.0e10
+      IF (rPlanck .GT. 87.49) THEN
+        rPlanck = 1.0e38
       ELSE
         rPlanck = exp(rPlanck) - 1      
       END IF

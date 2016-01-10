@@ -48,7 +48,7 @@ c input
 c output
       INTEGER iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
       REAL rPmin,rPmax,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon
-      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas),raAlt(2*kProfLayer)
+      REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas),raAlt(2*kProfLayer),raTavg(2*KProfLayer)
       REAL raPBnd(2*kProfLayer)  !! do we want user defined pressure level boundaries??
       INTEGER iZbnd              !! do we want user defined pressure level boundaries??
 
@@ -67,7 +67,7 @@ c local var
       INTEGER XSELF, XFRGN, XCO2C, XO3CN, XO2CN, XN2CN, XRAYL
       REAL rF1,rF2,rSample,rDVset,rALFAL0,rAVMASS,rDPTMIN,rDPTFAC,rDVOUT
       REAL raEmiss(3),raRefl(3),rSecnto
-      INTEGER ILNFLG,iForm,iBmax
+      INTEGER ILNFLG,iForm,iBmax,iOffSet
       REAL raX(KMaxGas),rX,rSatZen
       REAL raZbnd(2*kProfLayer)
       INTEGER iDefault,iAIRS101_or_LBL_levels
@@ -85,6 +85,18 @@ c local var
       rPmax = -1.0e+6
       iNXsec = -1
 
+      IF (kProfLayer .GT. kMaxLayer) THEN
+        write(kStdErr,*) 'oops, want to save LBLRTM temperatures into kLBLRTM_levelT'
+	write(kStdErr,*) 'but kProfLayer .GT. kMaLayer+1'
+        CALL DoStop
+      ELSE
+        DO iG = 1,kMaxLayer
+	  kLBLRTM_levelT(iG) = 0.0
+	  kLBLRTM_layerTavg(iG) = 0.0	  
+	END DO
+        kLBLRTM_levelT(kMaxLayer+1) = 0.0	
+      END IF
+      
       iZbnd = -1   !!! assume we want to use default 101 AIRS levels
       DO iL = 1,kProfLayer+1
         raPbnd(iL) = PLEV_KCARTADATABASE_AIRS(iL)
@@ -137,7 +149,7 @@ c local var
       IF (IATM .EQ. 0) THEN
         !! need to read in profile
 	CALL read_record_2p1(iIOUN2,iForm,iNumLevs,iNumGases,rSecnto,rTopHgt,rHSurf,rViewAngle)
-        CALL read_record_2p1p1(iIOUN2,iNumLevs,raP,raT,raaG_MR,raAlt,rPSurf,rHSurf,rTSurf,rPmin,rPmax,raSumCheck,
+        CALL read_record_2p1p1(iIOUN2,iNumLevs,raP,raT,raTavg,raaG_MR,raAlt,rPSurf,rHSurf,rTSurf,rPmin,rPmax,raSumCheck,
      $                         rHminKCarta,rHmaxKCarta,rPminKCarta,rPmaxKCarta,
      $                         iaG,iaGasUnits,iForm,iNumGases)
         IF (iAIRS101_or_LBL_levels .EQ. +1) THEN
@@ -147,7 +159,10 @@ c local var
         END IF	
         IF (iZbnd .GT. 0) THEN
   	  raPbnd(1) = rPSurf
+          iOffSet = kProfLayer-(iZbnd-1)	  
   	  DO iG = 1,iNumLevs
+	    IF (iG .LT. iNumLevs) kLBLRTM_layerTavg(iG+iOffset) = raTavg(iG)
+	    kLBLRTM_levelT(iG+iOffSet) = raT(iG)
 	    raPbnd(iG) = raP(iG) * 100.0 !! change from mb to N/m2, as Psurf is finally in N/m2
 c	    raPbnd(iG) = raP(iG)         !! keep in mb
       	  END DO
@@ -780,8 +795,8 @@ c      write(kStdWarn,*) 'h.pmax = ',rPmax/100.0,';      %% rPmax in N/m2 -->  m
       write(kStdWarn,*) 'h.gunit = [',(iaGasUnits(iG),iG=1,iNumGases),']'';'
 
       write(kStdWarn,*) 'p.nlevs = ',iNumLevs,';'
-      write(kStdWarn,*) 'p.spres = ',rPsurf/100.0,';     %% in mb'
-      write(kStdWarn,*) 'p.stemp = ',rTSurf,';'
+      write(kStdWarn,*) 'p.spres = ',rPsurf/100.0,';  %% in mb'
+      write(kStdWarn,*) 'p.stemp = ',rTSurf,'; %%%%% if kSurfTemp < 0, o/w use raStemp from nm_radnce'
       write(kStdWarn,*) 'p.salti = ',rHSurf,'; %%%% WOWOWOWOWOW'
 
       write(kStdWarn,*) 'p.satzen = 0.0;'
@@ -790,9 +805,9 @@ c      write(kStdWarn,*) 'h.pmax = ',rPmax/100.0,';      %% rPmax in N/m2 -->  m
       write(kStdWarn,*) 'p.upwell = 1;'
       write(kStdWarn,*) 'p.zobs = 705000.0;'
       write(kStdWarn,*) 'p.nemis = 2;'
-      write(kStdWarn,*) 'p.efreq = [600 3000]'';'
-      write(kStdWarn,*) 'p.emis = [1.0 1.0]'';'
-      write(kStdWarn,*) 'p.rho = [0.0 0.0]'';'      
+      write(kStdWarn,*) 'p.efreq = [600 3000]'';  %% check this with LBLRTM efreq'
+      write(kStdWarn,*) 'p.emis = [1.0 1.0]'';    %% and against nm_radnce EmisFile and raEmiss'
+      write(kStdWarn,*) 'p.rho = [0.0 0.0]'';     %% and against nm_radnce raRho'
       
       ca8 = 'p.plevs'
         !CALL write_stringnice(ca8,raP,0.01,8,iNumLevs,-1)   !! raP in N/m2, convert to mb for rtp 
@@ -1389,7 +1404,7 @@ c      print *,'record 2.1 : ',iForm,iNumLevs,iNumGases,rSecnto,rTopHgt,rHSurf,r
       
 c************************************************************************      
 c this reads record 2.2 of a LBLRTM TAPE5
-      SUBROUTINE read_record_2p1p1(iIOUN2,iNumLevs,raP,raT,raaG_MR,raAlt,rPSurf,rHSurf,rTSurf,rPmin,rPmax,raSumCheck,
+      SUBROUTINE read_record_2p1p1(iIOUN2,iNumLevs,raP,raT,raTavg,raaG_MR,raAlt,rPSurf,rHSurf,rTSurf,rPmin,rPmax,raSumCheck,
      $                         rHminKCarta,rHmaxKCarta,rPminKCarta,rPmaxKCarta,      
      $                         iaG,iaGasUnits,iForm,iNumGases)
 
@@ -1401,7 +1416,7 @@ c input
       REAL rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta
 c output
       REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas),rPSurf,rHSurf,raSumCheck(kMaxGas)
-      REAL rTSurf,rPmin,rPmax,raAlt(2*kProfLayer)
+      REAL rTSurf,rPmin,rPmax,raAlt(2*kProfLayer),raTavg(2*kProfLayer)
       INTEGER iaG(kMaxGas),iaGasUnits(kMaxGas)
       
 c local
@@ -1459,6 +1474,8 @@ c local
           ca80 = caStrY(41:120)
 	END IF
 
+        raTavg(iL) = rT
+	
 	IF (iL. EQ. 1) THEN
           !! now read A(z-1)    P(z-1)  T(z-1) and A(z) P(z) and T(z)
 	  !!                      which are basically

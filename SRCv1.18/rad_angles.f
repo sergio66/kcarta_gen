@@ -460,6 +460,7 @@ c            print *,iI,rSatHeight,raLayHgt(iI)
           END DO
       ELSE  
         !no need to do anything much, the angles are so close to nadir
+	iX = -1
         DO iI=1,kProfLayer
           write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle ',
      $              iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)

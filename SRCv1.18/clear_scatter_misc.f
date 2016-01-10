@@ -3576,8 +3576,9 @@ c      print *,'up RT linear in tau ivary = ',ivary
       CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
       CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                              !! (which is NOT necessarily average of above 2)
-c      print *,'moo',iL,iBeta,TEMPLEV(iBeta),TEMPLEV(iBeta+1)
-      
+      write(*,*) 'up iL iLay* iLp1*',iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+ 1234 FORMAT(I3,3(' ',F10.3))
+ 
 c      IF (iVary .EQ. 4) THEN
 c        ! new option
 c        DO iFr = 1,kMaxPts
@@ -3712,6 +3713,29 @@ c          end if
           raInten(iFr) = raInten(iFr)*rTrans + rFcn
         END DO
 
+      ELSEIF (iVary .EQ. +43) THEN 
+c        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+        !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+        !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
+        DO iFr = 1,kMaxPts
+          rAbs = raaAbs(iFr,iL)/rCos*rFrac
+          rZeta = raIntenP1(iFr) - raIntenAvg(iFr)
+	  IF (rAbs .GE. 0.06) THEN
+            rTrans = exp(-rAbs)
+            rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
+            rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
+	  ELSE
+            rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
+            rZeta2 = rAbs/6.0	    
+            rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)	    
+	  END IF
+c          if (iFr .EQ. 1) THEN
+c            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
+c          end if	  
+          raInten(iFr) = raInten(iFr)*rTrans + rFcn
+        END DO
+
 c  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
 c  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
 c  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
@@ -3834,6 +3858,10 @@ c       print *,'dn RT linear in tau ivary = ',iVary
         CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
+
+        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+ 1234 FORMAT(I3,3(' ',F10.3))
+
 c        !DO iFr = 1,kMaxPts
 c        !  raIntenAvg(iFr) = 0.5 * (raIntenP(iFr) + raIntenP1(iFr))
 c        !END DO
@@ -3965,6 +3993,337 @@ c        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY
 c          if (iFr .EQ. 1) THEN
 c            print *,'down',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
 c          end if
+          raInten(iFr) = raInten(iFr)*rTrans + rFcn
+        END DO
+
+      ELSEIF (iVary .EQ. +43) THEN 
+c        print *,'dn flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+        !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+        !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
+        DO iFr = 1,kMaxPts
+          rAbs = raaAbs(iFr,iL)/rCos*rFrac
+          rZeta = raIntenP(iFr) - raIntenAvg(iFr)
+	  IF (rAbs .GE. 0.06) THEN
+            rTrans = exp(-rAbs)
+            rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
+            rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
+	  ELSE
+            rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)	  
+            rZeta2 = rAbs/6.0	    
+            rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)	    
+	  END IF
+c          if (iFr .EQ. 1) THEN
+c            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
+c          end if	  
+          raInten(iFr) = raInten(iFr)*rTrans + rFcn
+        END DO
+	
+c  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+c  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+c  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+      ELSEIF (iVary .EQ. +4) THEN 
+c        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+        !!! this was done Oct 2015 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+        !!! LINEAR IN TAU, MY style
+        DO iFr = 1,kMaxPts
+          rAbs = raaAbs(iFr,iL)/rCos*rFrac
+          rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
+          IF (rAbs .GT. 0.1) THEN	  
+            rTrans = exp(-rAbs)
+            rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
+	  ELSE
+	    rTrans = 1 - rAbs + 0.5*rAbs**2 
+	    rZeta2 = rZeta*(rAbs/2-(rAbs**2)/3+(rAbs**3)/6)
+	    rFcn   = (1-rTrans)*raIntenP(iFr) + rZeta2
+	  END IF	  
+c          IF (iFr .EQ. 1) THEN
+c            print *,'>>down<<',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
+c          end if
+          raInten(iFr) = raInten(iFr)*rTrans + rFcn
+        END DO
+
+      END IF
+      
+      RETURN
+      END
+
+c************************************************************************
+c this subroutine computes the DNWARD rad transfer thru an atmospheric layer,
+c assuming there is a temperature profile, and NO scattering
+      !!! ref : IEEE TRANSACTIONS ON GEO AND REMOTE SENSING, 
+      !!!   VOL. 44, NO. 5, MAY 2006, Forward Model and Jacobians for Tropospheric
+      !!!   Emission Spectrometer Retrievals
+      !!!   Shepard A. Clough, Mark W. Shephard, John Worden, Patrick D. Brown, 
+      !!!   Helen M. Worden, Mingzhao Luo, Clive D. Rodgers, Curtis P. Rinsland, 
+      !!!   Aaron Goldman, Linda Brown, Susan S. Kulawik, Annmarie Eldering, Michael 
+      !!!   Lampel, Greg Osterman, Reinhard Beer, Kevin Bowman, Karen E. Cady-Pereira, 
+      !!!   and Eli J. Mlawer
+
+      !!! ref : MODTRAN Cloud and Multiple Scattering Upgrades with Application to AVIRIS
+      !!!   A. Berk,* L. S. Bernstein,* G. P. Anderson,† P. K. Acharya,*
+      !!!   D. C. Robertson,* J. H. Chetwynd,† and S. M. Adler-Golden*
+      !!!   REMOTE SENS. ENVIRON. 65:367–375 (1998)
+      !!!   Elsevier Science Inc., 1998 0034-4257/98/$19.00
+      !!!   655 Avenue of the Americas, New York, NY 10010
+
+      !!! or do simplie linear in tau YAY
+
+c this is SAME as RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX EXCEPT very importantly, since the
+c atmosphere was defined for downlook instrument, that means we have to ve VERY CAREFUL with directions
+c so as to ensure
+c CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
+c CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
+c CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+                                                         !! (which is NOT necessarily average of above 2)
+c is changed to
+c CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
+c CALL ttorad_array(raFreq,TEMPLEV(iBeta-1),raIntenP1)   !! ttorad of upper level
+c CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+                                                         !! (which is NOT necessarily average of above 2)
+										       
+      SUBROUTINE RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(
+     $          raFreq,raaAbs,iL,TEMPLEV,TEMPLAY,rCos,rFrac,iVary,raInten)
+      
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c input parameters      
+      REAL raFreq(kMaxPts)             !wavenumbers
+      REAL raaAbs(kMaxPts,kMixFilRows)  !mixing table
+      INTEGER iL                        !which row of mix table
+      REAL tempLEV(maxnz)               !level temperature profile (1+kProfLayer)
+      REAL tempLAY(kMixFilRows)         !layer temperature profile (0+kProfLayer)
+      REAL rCos                         !satellite view angle
+      REAL rFrac                        !fractional (0<f<1) or full (|f| > 1.0)
+      INTEGER iVary                     !should we model temp dependance??? +2,+3,+4
+c output parameters
+      REAL raInten(kMaxPts)             !input  : intensity at top of layer
+                                        !output : intensity at bottom of layer
+
+c local variables
+      INTEGER iFr,iBeta,iBetaP1
+      REAL rBeff,rFcn
+      REAL raIntenP(kMaxPts),raIntenP1(kMaxPts),raIntenP0(kMaxPts)
+      REAL raIntenAvg(kMaxPts)
+      REAL rZeta,rZeta2,rAbs,rTrans
+
+c      DO iFr = 1,kMaxLayer-1
+c        print *,iFr,tempLEV(iFr),tempLAY(iFr),tempLEV(iFr+1)
+c      END DO
+c      print *,'humbug'
+c      call DoStop
+
+      IF (iVary .LT. 2) THEN
+        write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
+        CALL DoStop
+      END IF
+
+      IF (rFrac .LT. 0) THEN
+        write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
+        rFrac = abs(rFrac)
+      END IF
+
+c      IF (iVary .EQ. 41) iVary = 42     !!! have debugged 04, 42 for small tau O(tau)
+      IF (iVary .EQ. 41) iVary = 04     !!! have debugged 04, 42 for small tau O(tau^2)
+c       print *,'dn RT linear in tau ivary = ',iVary
+
+      iBeta = MOD(iL,kProfLayer)
+      IF (iBeta .EQ. 0) THEN
+        iBeta = kProfLayer
+      END IF
+
+      IF (iL .EQ. kProfLayer+1) THEN
+        iBeta = kProfLayer
+      END IF
+
+      IF (iVary .LT. 4) THEN
+        IF (iBeta .GT. 1) THEN
+          CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
+        ELSEIF (iBeta .EQ. 1) THEN
+          CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP1)
+        END IF
+        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
+      END IF
+
+c RT_ProfileUPWELL_LINEAR_IN_TAU
+c     iBeta = MOD(iL,kProfLayer)
+c     IF (iBeta .EQ. 0) THEN
+c       iBeta = kProfLayer
+c     END IF
+c     IF (iL .EQ. kProfLayer+1) THEN
+c      iBeta = kProfLayer
+c    END IF		    
+c    CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
+c    CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
+c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+									       
+      IF (iVary .GE. 4) THEN
+        !! new option
+        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
+        CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level   
+        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
+                                                               !! (which is NOT necessarily average of above 2)
+
+        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+ 1234 FORMAT(I3,3(' ',F10.3))
+	
+c        !DO iFr = 1,kMaxPts
+c        !  raIntenAvg(iFr) = 0.5 * (raIntenP(iFr) + raIntenP1(iFr))
+c        !END DO
+      END IF
+      
+      IF (iVary .EQ. 2) THEN 
+        !!! lim tau --> 0 , rFcn --> 0
+        write(kStdErr,*) 'huh iVary = 2 is a little buggy'
+        CALL DoStop
+        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP0)
+        IF (rFrac .ge. 0.9999) THEN
+          DO iFr = 1,kMaxPts
+            rAbs = raaAbs(iFr,iL)
+            rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
+            raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + 
+     $                    raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
+            IF (rAbs .GE. 0.001)
+     $         raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + 
+     $         rFcn*rCos*exp(-rAbs/rCos)
+          END DO
+        ELSE
+          DO iFr = 1,kMaxPts
+            rAbs = raaAbs(iFr,iL)*rFrac
+            rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
+            raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + 
+     $                     raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
+            IF (rAbs .GE. 0.001)
+     $         raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + 
+     $                        rFcn*rCos*exp(-rAbs/rCos)
+          END DO
+        END IF
+
+      ELSEIF (iVary .EQ. +3) THEN 
+        !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
+        !!! lim tau --> 0 , rFcn --> 1
+        IF (rFrac .ge. 0.9999) THEN
+          DO iFr = 1,kMaxPts
+            rAbs = raaAbs(iFr,iL)
+            rFcn = 1.0            
+            IF (rAbs .GE. 0.001) THEN
+              rFcn = exp(-rAbs/rCos)
+              rFcn = rCos/rAbs - rFcn/(1-rFcn)
+            END IF 
+            rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
+            raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + 
+     $                     rFcn * (1 - exp(-rAbs/rCos))
+          END DO
+        ELSE
+          DO iFr = 1,kMaxPts
+            rAbs = raaAbs(iFr,iL)*rFrac
+            rFcn = 1.0            
+            IF (rAbs .GE. 0.001) THEN
+              rFcn = exp(-rAbs/rCos)
+              rFcn = rCos/rAbs - rFcn/(1-rFcn)
+            END IF 
+            rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
+            raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + 
+     $                     rFcn * (1 - exp(-rAbs/rCos))
+          END DO
+        END IF
+
+      ELSEIF (iVary .EQ. +40) THEN
+        !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
+c        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+        !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
+        !!! lim tau --> 0 , rFcn --> 1
+        IF (rFrac .ge. 0.9999) THEN
+          DO iFr = 1,kMaxPts
+            rAbs = raaAbs(iFr,iL)
+            IF (rAbs .GE. 0.0001) THEN
+              rTrans = exp(-rAbs/rCos)
+              rFcn = rCos/rAbs * (1 - rTrans)
+            ELSE
+              rFcn = 1.0            
+              rTrans = 1.0
+            END IF 
+            rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
+            raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + rZeta
+          END DO
+        ELSE
+          DO iFr = 1,kMaxPts
+            rAbs = raaAbs(iFr,iL)*rFrac
+            IF (rAbs .GE. 0.0001) THEN
+              rTrans = exp(-rAbs/rCos)
+              rFcn = rCos/rAbs * (1 - rTrans)
+            ELSE
+              rFcn = 1.0            
+              rTrans = 1.0
+            END IF 
+            rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
+            raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + rZeta
+          END DO
+        END IF
+
+      ELSEIF (iVary .EQ. +41) THEN 
+c        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+        !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+        !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
+        DO iFr = 1,kMaxPts
+          rAbs = raaAbs(iFr,iL)/rCos*rFrac
+          rTrans = exp(-rAbs)
+          rZeta = 0.2*rAbs    !! pade one
+	  rFcn = (raIntenAvg(iFr) + rZeta*raIntenP(iFr))/(1+rZeta)
+          rZeta = 0.193*rAbs    !! pade two
+          rZeta2 = 0.013*rAbs*rAbs    !! pade two
+	  rFcn = (raIntenAvg(iFr) + (rZeta + rZeta2)*raIntenP(iFr))/(1+rZeta+rZeta2)
+          rFcn = (1-rTrans)*rFcn
+	  raInten(iFr) = raInten(iFr)*rTrans + rFcn
+        END DO
+
+      ELSEIF (iVary .EQ. +42) THEN 
+c        print *,'fluxybuyxy down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta-1)
+        !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+        !!! LINEAR IN TAU, GENLN2 style
+        DO iFr = 1,kMaxPts
+          rAbs = raaAbs(iFr,iL)/rCos*rFrac
+          rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
+	  IF (rAbs .GE. 0.05) THEN
+            rTrans = exp(-rAbs)	  
+            rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
+	  ELSE
+            rTrans = 1 - rAbs	  	  
+	    rFcn = rAbs*raIntenP(iFr) + rZeta*(1-rAbs/2) - rTrans * rZeta
+	  END IF	    
+c          if (iFr .EQ. 1) THEN
+c            print *,'down',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
+c          end if
+          raInten(iFr) = raInten(iFr)*rTrans + rFcn
+        END DO
+
+      ELSEIF (iVary .EQ. +43) THEN 
+c        print *,'dn flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+        !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97 
+        !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+        !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
+        DO iFr = 1,kMaxPts
+          rAbs = raaAbs(iFr,iL)/rCos*rFrac
+          rZeta = raIntenP(iFr) - raIntenAvg(iFr)
+	  IF (rAbs .GE. 0.06) THEN
+            rTrans = exp(-rAbs)
+            rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
+            rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
+	  ELSE
+            rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)	  	  
+            rZeta2 = rAbs/6.0	    
+            rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)	    
+	  END IF
+c          if (iFr .EQ. 1) THEN
+c            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
+c          end if	  
           raInten(iFr) = raInten(iFr)*rTrans + rFcn
         END DO
 

@@ -2,7 +2,9 @@ c Copyright 2001
 c University of Maryland Baltimore County 
 c All Rights Reserved
 
-c raVtemp(kMixFilRows) = layer temperatures (from klayers) raVT1 (probably called raMixVertTemp in other routines)
+c raVtemp(kMixFilRows) = layer temperatures (from klayers), gets duplicated as
+c      raVT1 (probably called raMixVertTemp in other routines)
+c      and then raVT1 has lowest (surface level) temp interpolated from (raPavg,raVtemp) to rPlowestLevel
 c raTPresslevels(kProfLayer+1) set in Get_Temp_Plevs (after reading in klayers profile), using splines
 
 c************************************************************************
@@ -3684,7 +3686,7 @@ c      kLBLRTM_toa = 0.1
       IF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .GT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
         iLay = 1
  8888   CONTINUE
-        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)),raPressLevels(iaaRadLayer(iAtm,iLay)+1)
+c        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)),raPressLevels(iaaRadLayer(iAtm,iLay)+1)
         IF ((iLay .LT. iNumLayer) .AND. (raPressLevels(iaaRadLayer(iAtm,iLay)+1) .GT. kLBLRTM_toa)) THEN
 	  iLay = iLay + 1
 	  GOTO 8888
@@ -3798,7 +3800,7 @@ c this has to be the array used for BackGndThermal and Solar
       DO iFr=1,kMixFilRows
         raVT1(iFr) = raVTemp(iFr)
       END DO
-      
+
 c if the bottommost layer is fractional, interpolate!!!!!!
       iL = iaRadLayer(1)
       raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -3813,9 +3815,9 @@ c      do iL = iaRadLayer(1),iaRadLayer(iNumLayer)
 c        print *,iL,iaRadLayer(iL-iaRadLayer(1)+1),raPressLevels(iL),raVTemp(iL),raVTemp(iL),iProfileLayers,rFracBot,rFracTop
 c      end do
 c      call dostopmesg(';klf;lkfs$')
-      
+
       !!!do default stuff; set temperatures at layers
-      DO iLay=1,kProfLayer
+      DO iLay = 1,kProfLayer
         raVT2(iLay) = raVTemp(iLay)
       END DO
       iL = iaRadLayer(iNumLayer)
@@ -3824,6 +3826,15 @@ c      call dostopmesg(';klf;lkfs$')
       raVt2(iL) = raVT1(iL)    !!!!set fractional top layer tempr correctly
       raVt2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
 
+c NEW NEW NEW NEW NEW NEW
+      IF (kRTP .EQ. -5) THEN
+        DO iFr = 1,kMaxLayer
+          raVT1(iFr) = kLBLRTM_layerTavg(iFr)
+          raVT2(iFr) = kLBLRTM_layerTavg(iFr)	  
+        END DO
+        raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts		
+      END IF
+      
 c set the vertical temperatures of the atmosphere 
 c temp is gonna be the temperature at PRESSURE levels, given raVT2 = temp at layer center
       iDownward = +1
@@ -3833,9 +3844,9 @@ c temp is gonna be the temperature at PRESSURE levels, given raVT2 = temp at lay
      $                iDownWard,rTSurf,iProfileLayers,raPressLevels)
 c      DO iFr = 1,kProflayer+1
 c        !                       SPLINE               LAYER
-c        print *,iFr,temp(iFr),raTPresslevels(iFr),ravt2(iFr)
+c        print *,iFr,raPressLevels(iFr),temp(iFr),raTPresslevels(iFr),kLBLRTM_levelT(iFr)
 c      end do
-c      call dostopmesg('in line 3779 rad_main.f$')
+c      call dostopmesg('in line 3840 rad_main.f$')
 
 c find the highest layer that we need to output radiances for
       iHigh=-1
@@ -4271,27 +4282,6 @@ c but this is what came in using nm_radnce, iAtmLoop = 3, raAtmLoop(1:5)
       write(kStdWarn,*) 'Using LINEAR LAYER TEMPERATURE VARIATION, SCANANG = same thru all layers'
       write(kStdWarn,*) '  scanang (at satellite)                    = ',raLayAngles(MP2Lay(iaRadLayer(1)))
       write(kStdWarn,*) '  use this input const surface satzen angle = ',rUseThisInputAngle
-      
-      !!!do default stuff; set temperatures at layers
-      DO iLay=1,kProfLayer
-        raVT2(iLay) = raVTemp(iLay)
-      END DO
-      iL = iaRadLayer(iNumLayer)
-      raVt2(iL) = raVT1(iL)    !!!!set fractional bot layer tempr correctly
-      iL = iaRadLayer(1)
-      raVt2(iL) = raVT1(iL)    !!!!set fractional top layer tempr correctly
-      raVt2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
-
-      IF (kSolar .GE. 0) THEN
-        rSunAngle = raSunAngles(5)
-        IF (abs(abs(rSatAngle)-abs(rSunAngle)) .GE. 1.0e-2) THEN
-          write(kStdWarn,*) 'Uplook instr : For nonscattering kCARTA code : '
-          write(kStdWarn,*) 'sun angle different from satellite angle'
-          write(kStdWarn,*) 'this is clear sky, raFreq(1) = ',raFreq(1),' so no rayleigh'
-          write(kStdWarn,*) 'so iaKSolar(i) reset to -1 (sun NOT in FOV)'
-          kSolar = -1
-        END IF
-      END IF
 
       rSunTemp = kTSpace 
       iDoSolar = kSolar
@@ -4389,6 +4379,15 @@ c if the top layer is fractional, interpolate!!!!!!
       
  1234 FORMAT(I6,' ',F12.5,' ',E12.5)
 
+c NEW NEW NEW NEW NEW NEW
+      IF (kRTP .EQ. -5) THEN
+        DO iFr = 1,kMaxLayer
+          raVT1(iFr) = kLBLRTM_layerTavg(iFr)
+          raVT2(iFr) = kLBLRTM_layerTavg(iFr)	  
+        END DO
+        raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts		
+      END IF
+
       IF (iDoSolar .EQ. 0) THEN
         DO iFr=1,kMaxPts
           raSun(iFr) = ttorad(raFreq(iFr),rSunTemp)
@@ -4436,6 +4435,13 @@ c         rCos = cos(raLayAngles(MP2Lay(iaRadLayer(1)))*kPi/180.0)
 c always use
       rCos = cos(rUseThisInputAngle*kPi/180.0)
 
+c      iLay = 1
+c      iL = iaRadLayer(iLay)
+c      rMPTemp = raVT1(iL)	     
+c      print *,'cacacaca',kTSpace,rTSpace,raInten(1),iLay,iL
+c      print *,'kjflkjsfljskf',rUseThisInputAngle,raaAbs_LBLRTM_zeroUA(1,iL)
+c      print *,raTPressLevels(iL+1),rMPTemp,raTPressLevels(iL)
+      
       DO iLay=1,iLow
         iL = iaRadLayer(iLay)
 
@@ -4480,7 +4486,9 @@ c now do the radiative transfer thru this ayer
 
 c        rJunk = rJunk * exp(-raaAbs_LBLRTM_zeroUA(1,iL)/rCos) + ttorad(raFreq(1),rMPTemp)*(1-exp(-raaAbs_LBLRTM_zeroUA(1,iL)/rCos))
 c	print *,iLay,raPressLevels(iL),rMPTemp,raaAbs_LBLRTM_zeroUA(1,iL),raInten(1),rJunk,ttorad(raFreq(1),rMPTemp)
-
+c        print *,'whats up',iLay,iL,raaAbs_LBLRTM_zeroUA(1,iL),raInten(1)
+c	call dostop
+	
 c see if we have to add on the solar contribution to do transmission thru atm
         IF (iDoSolar .GE. 0) THEN
 c note that the angle is the solar angle = satellite angle

@@ -235,7 +235,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
      $      raThickness,raPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
-        ELSEIF (((iVary .EQ. +3) .OR. (iVary .EQ. 4) .OR. (iVary .EQ. 41) .OR. (iVary .EQ. 42))
+        ELSEIF (((iVary .EQ. +3) .OR. (iVary .EQ. 4) .OR. (iVary .EQ. 41) .OR. (iVary .EQ. 42) .OR. (iVary .EQ. 43))
      $      	.AND. (iAccOrLoopFlux .EQ. -1)) THEN
           !!!loop over angles
             CALL flux_moment_slowloopLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
@@ -5148,7 +5148,7 @@ c      kLBLRTM_toa = 0.1
       IF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .GT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
         iLay = 1
  8888   CONTINUE
-        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)),raPressLevels(iaaRadLayer(iAtm,iLay)+1)
+c        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)),raPressLevels(iaaRadLayer(iAtm,iLay)+1)
         IF ((iLay .LT. iNumLayer) .AND. (raPressLevels(iaaRadLayer(iAtm,iLay)+1) .GT. kLBLRTM_toa)) THEN
 	  iLay = iLay + 1
 	  GOTO 8888
@@ -5379,6 +5379,15 @@ c instead of temp of full layer at 100 km height!!!!!!
       raVt2(iL) = raVT1(iL)    !!!!set fractional top layer tempr correctly
       raVt2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
 
+c NEW NEW NEW NEW NEW NEW
+      IF (kRTP .EQ. -5) THEN
+        DO iFr = 1,kMaxLayer
+          raVT1(iFr) = kLBLRTM_layerTavg(iFr)
+          raVT2(iFr) = kLBLRTM_layerTavg(iFr)	  
+        END DO
+        raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts	
+      END IF
+      
       CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp,
      $                iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
@@ -5592,7 +5601,7 @@ c then do the bottom of this layer
           DO iLay = iNumLayer,iNumLayer 
             iL = iaRadLayer(iLay) 
 c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
-            CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+            CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracTop,
      $                      iVary,raTemp)
             DO iFr = 1,kMaxPts 
@@ -5604,7 +5613,7 @@ c then continue upto top of ground layer
           DO iLay = iNumLayer-1,2,-1 
             iL = iaRadLayer(iLay)
 c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
-            CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+            CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,1.0,
      $                      iVary,raTemp)
             DO iFr = 1,kMaxPts 
@@ -5616,7 +5625,7 @@ c do very bottom of bottom layer ie ground!!!
           DO iLay = 1,1 
             iL = iaRadLayer(iLay) 
 c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
-             CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1,
+             CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaAbs,iL,raTPressLevels,raVT1,
      $                      rCosAngle,rFracBot,
      $                      iVary,raTemp)
             DO iFr = 1,kMaxPts 
@@ -5690,6 +5699,8 @@ c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,ra
         END DO 
       END DO
 
+c      CALL DoStopMesg('in rad flux$')
+
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
      $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
@@ -5699,7 +5710,6 @@ c          print *,iFr,raVT1(iFr),raPressLevels(iFr),raTPressLevels(iFr),
 c     $                           raPressLevels(iFr+1),raTPressLevels(iFr+1)
 c        END DO
 c        print *,'bobobo'
-c        CALL DoStop
 
       RETURN
       END

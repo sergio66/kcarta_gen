@@ -740,6 +740,10 @@ c local vars
 
       iI = -1
 
+c      print *,iNumNewGases
+c      print *,(iaNewGasID(iI),iI=1,iNumNewGases)
+c      call dostopmesg('subr OutsideSpectra$')
+      
       IF (iNumNewGases .GT. 0) THEN
         iJ = 1
 c search to see if there is new data!     
@@ -752,7 +756,7 @@ c search to see if there is new data!
         END IF       
         IF (iI .GT. 0) THEN
           write(kStdWarn,*) '>>> found alternate monochromatic SPECTRA for gasID ',iGasID
-          IF (iGASID .EQ. 2) write(kStdWarn,*) '  >>> gasID = 2, could be NLTE check ...'
+          IF (iGASID .EQ. 2) write(kStdWarn,*) '  >>> gasID = 2, so could simply be NLTE check ...'
         END IF
 
 c      ELSEIF ((iNumAltComprDirs .GT. 0) .AND. (rFileStartFr+0.05 .GE. rAltMinFr-0.05) 

@@ -23,149 +23,7 @@ c can reset the name in the *OUTPUT section, as this would be a new parameter
       CHARACTER*80 kWarnFile
       COMMON/ComWarnLog/kWarnFile
 
-c When RTP profiles are used, need to keep track of which is the lowest and
-c highest layer, or highest and lowest pressure, that can be used 
-c also kRTP = -10 or -20 gives user specified input such as 
-c   SurfPress/SurfTemp/SurfHgt/ViewHgt/ViewAngle so we need to override user nm_rad
-c with these correct values
-      INTEGER kRTPBot,kRTPTop
-      REAL kRTP_pBot,kRTP_pTop,raRTP_TxtInput(10)
-      COMMON/ComRTP1/kRTPBot,kRTPTop,raRTP_TxtInput
-      COMMON/ComRTP2/kRTP_pBot,kRTP_pTop
-
-c this is the parameter DELTA that tells how close view pressure rP is to a 
-c pressure level
-      REAL delta
-      PARAMETER(delta = 1.0e-9)
-c this are parameters added on to make sure the NLTE code is working
-      REAL rDeltaNLTE
-      PARAMETER(rDeltaNLTE = 1.0e-15)
-      DOUBLE PRECISION dDeltaNLTE
-      PARAMETER(dDeltaNLTE = 1.0d-15)
-
-c this is number of channels to do things for, after reading in the RTP
-      INTEGER kChan
-      PARAMETER (kChan=2400)
-
-c this is to set the number of zenith angles to do angular integration
-c when determining fluxes and/or background thermal
-      INTEGER kGauss 
-      PARAMETER (kGauss=40) 
-      DOUBLE PRECISION daGaussPt(kGauss),daGaussWt(kGauss) 
-
-c these set driver file input,kcarta std output, jacobian file unit numbers
-c that are used at run time; assignements done at beginning of run
-      INTEGER    kStdDriver, kStdkCarta, kStdJacob, kStdJacob2
-c this sets the file error and warning file unit numbers
-c
-ccc
-c NOTE that kstdErr = 0 is a DEFAULT see eg
-c    http://www.amath.unc.edu/sysadmin/DOC4.0/fortran/prog_guide/2_io.doc.html
-c    http://docs.oracle.com/cd/E19957-01/805-4940/z40008ff1d60/index.html
-c DO NOT TRY to assign 5 (input) 6 (output) as these are also PRECONNECTED UNITS
-cccc
-      INTEGER    kStdErr,  kStdWarn
-      PARAMETER (kStdErr=0,kStdWarn=1)
-c if the user wants actual files, instead of STDIN,STDOUT,
-c these set driver file input,kcarta std output, jacobian file unit numbers
-      INTEGER    kStdDriverKK,  kStdkCartaKK,   kStdJacobKK,    
-     $           kStdJacob2KK
-      PARAMETER (kStdDriverKK=9,kStdkCartaKK=10,kStdJacobKK=11,
-     $           kStdJacob2KK=25)
-c this sets the compressed/cross sectional database, profile unit number
-      INTEGER    kCompUnit,   kProfileUnit
-      PARAMETER (kCompUnit=12,kProfileUnit=13)
-c this sets the temp data file unit number
-      INTEGER    kTempUnit
-      PARAMETER (kTempUnit=14)
-c these set the flux unit file
-      INTEGER    kStdFlux
-      PARAMETER (kStdFlux=17)
-c these set the 0.0025 cm-1 NLTE planck unit file, as well as the
-c bloated NLTE files for workspace, and for output
-      INTEGER    kStdPlanck,   kBloatNLTEPlanck,   kBloatNLTEOut 
-      PARAMETER (kStdPlanck=18,kBloatNLTEPlanck=19,kBloatNLTEOut=20)
-c these set the 0.0025 cm-1 upper atm files
-      INTEGER    kStdPlanckUA,   kNLTEOutUA
-      PARAMETER (kStdPlanckUA=21,kNLTEOutUA=22)
-c these set the 0.0005 cm-1 upper atm files
-      INTEGER    kBloatPlanckUA,   kBloatNLTEOutUA
-      PARAMETER (kBloatPlanckUA=23,kBloatNLTEOutUA=24)
-
-c these are common blocked integers that say whether or not the unit is open
-      INTEGER kStdErrOpen,kStdWarnOpen,kStdkCartaOpen
-      INTEGER kStdJacobOpen,kStdJacob2Open
-      INTEGER kStdDriverOpen,kCompUnitOpen,kProfileUnitOpen,
-     $        kTempUnitOpen,kStdFluxOpen,kStdPlanckOpen
-      INTEGER kBloatPlanckOpen,kBloatOutOpen
-      INTEGER kStdPlanckUAOpen,kNLTEOutUAOpen
-      INTEGER kBloatPlanckUAOpen,kBloatNLTEOutUAOpen
-      COMMON/OB0/kStdDriver,kStdkCarta,kStdJacob,kStdJacob2
-      COMMON/OB1/kStdErrOpen,kStdWarnOpen,kStdkCartaOpen,
-     $           kStdJacobOpen,kStdJacob2Open,
-     $           kStdDriverOpen,kStdFluxOpen,kStdPlanckOpen
-      COMMON/OB2/kCompUnitOpen,kProfileUnitOpen,kTempUnitOpen
-      COMMON/OB3/kBloatPlanckOpen,kBloatOutOpen
-      COMMON/OB4/kStdPlanckUAOpen,kNLTEOutUAOpen,kBloatPlanckUAOpen,
-     $           kBloatNLTEOutUAOpen
-
-c kMaxUserSet == number of variables the user can change w/o recompiling
-c set in setparam.param 
-      INTEGER kMaxUserSet
-      PARAMETER (kMaxUserSet=12)
-c these next kMaxUserSet variables are set in setparam.param 
-c note there is space for 12 variables but only 10 are being used right now
-c *** note kPlanckOut set in s_writefile.f  ie right now, it is NOT an option
-      INTEGER kLayer2Sp,kCKD,kGasTemp,kLongOrShort
-      INTEGER kJacobOutput,kFlux,kTempJac
-      INTEGER kActualJacs,kActualJacsT,kActualJacsB !! all from kActualJacs!!
-      INTEGER kSurfTemp,kRTP,kAFGLProf
-      INTEGER kPlanckOut
-      COMMON/ComBlock1/kLayer2Sp,kCKD,kGasTemp,kLongOrShort,kAFGLProf
-      COMMON/ComBlock2/kJacobOutput,kFlux,kPlanckOut,kTempJac,kActualJacs
-      COMMON/ComBlock3/kSurfTemp,kRTP,kActualJacsT,kActualJacsB
-
-c these next few parameters are set in *RADNCE and *JACOBN
-c rtp file azimuths used in Mie Scattering and Ocean Refl
-c rtp file also may give latitude and month (via rtime)
-      INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
-      REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult
-      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
-c this is LBLRTM TPAPE5 toa
-      REAL kLBLRTM_toa
-      PARAMETER (kDefaultColMult = 0.1)
-      COMMON/ComBlock4/kSolar,kThermal,kThermalJacob,kJacobian,
-     $                 kSetThermalAngle,kTemperVary
-      COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
-     $                 kSolAzi,kSatAzi,
-     $                 kWindSpeed,kLatitude,kMonth,kLBLRTM_toa
-      INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
-      COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
-
-c kDis_Nstr,kDis_Pts : make DISORT run faster
-c kTemperVary : check how temp variations in OD affect the radiances
-c kAvgMin     : is there too little scattering in kTWOSTREAM? Then speed up!!
-      DOUBLE PRECISION kAvgMin
-      INTEGER kDis_Nstr,kDis_Pts
-      COMMON/ComDISORT/kDis_Nstr,kDis_Pts
-      COMMON/ComHGPhase/kAvgMin
-c these next few parameters are set in *SCATTR
-c It also tells the RTP code or the general code when it can do scattering 
-c (kcarta.x) and when it cannot (bkcarta.x)
-      INTEGER kScatter,kWhichScatterCode,kAllowScatter
-      COMMON/ComBlock7/kScatter,kWhichScatterCode,kAllowScatter
-
-c these are for overwriting the compressed database dirs (from SPECTRA)
-      INTEGER kAltComprDirs
-      CHARACTER*80 kcaAltComprDirs
-      COMMON/ComBlock8/kAltComprDirs,kcaAltComprDirs
-
-c these are for seeing how cloud params are overwritten
-c raaRTPCloudParams0(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 from rtpfile
-c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 after kcarta resets
-      REAL raaRTPCloudParams0(2,7),raaRTPCloudParamsF(2,7)
-      COMMON/comBlockCloud/raaRTPCloudParams0,raaRTPCloudParamsF
-      
+c************************************************************************
 c 2007
 c NOTE there are 38 main gases in the HITRAN database;  plus about 13
 c cross section gases; we have added on two new gases, 101 and 102 for 
@@ -289,6 +147,153 @@ c store the number of compressed vectors, for runtime stats purposes
       COMMON/kNumV/kOuterLoop,kaaNumVectors
 
 c----------------------------------------------------------------------
+
+c When RTP profiles are used, need to keep track of which is the lowest and
+c highest layer, or highest and lowest pressure, that can be used 
+c also kRTP = -10 or -20 gives user specified input such as 
+c   SurfPress/SurfTemp/SurfHgt/ViewHgt/ViewAngle so we need to override user nm_rad
+c with these correct values
+      INTEGER kRTPBot,kRTPTop
+      REAL kRTP_pBot,kRTP_pTop,raRTP_TxtInput(10)
+      COMMON/ComRTP1/kRTPBot,kRTPTop,raRTP_TxtInput
+      COMMON/ComRTP2/kRTP_pBot,kRTP_pTop
+
+c this is the parameter DELTA that tells how close view pressure rP is to a 
+c pressure level
+      REAL delta
+      PARAMETER(delta = 1.0e-9)
+c this are parameters added on to make sure the NLTE code is working
+      REAL rDeltaNLTE
+      PARAMETER(rDeltaNLTE = 1.0e-15)
+      DOUBLE PRECISION dDeltaNLTE
+      PARAMETER(dDeltaNLTE = 1.0d-15)
+
+c this is number of channels to do things for, after reading in the RTP
+      INTEGER kChan
+      PARAMETER (kChan=2400)
+
+c this is to set the number of zenith angles to do angular integration
+c when determining fluxes and/or background thermal
+      INTEGER kGauss 
+      PARAMETER (kGauss=40) 
+      DOUBLE PRECISION daGaussPt(kGauss),daGaussWt(kGauss) 
+
+c these set driver file input,kcarta std output, jacobian file unit numbers
+c that are used at run time; assignements done at beginning of run
+      INTEGER    kStdDriver, kStdkCarta, kStdJacob, kStdJacob2
+c this sets the file error and warning file unit numbers
+c
+ccc
+c NOTE that kstdErr = 0 is a DEFAULT see eg
+c    http://www.amath.unc.edu/sysadmin/DOC4.0/fortran/prog_guide/2_io.doc.html
+c    http://docs.oracle.com/cd/E19957-01/805-4940/z40008ff1d60/index.html
+c DO NOT TRY to assign 5 (input) 6 (output) as these are also PRECONNECTED UNITS
+cccc
+      INTEGER    kStdErr,  kStdWarn
+      PARAMETER (kStdErr=0,kStdWarn=1)
+c if the user wants actual files, instead of STDIN,STDOUT,
+c these set driver file input,kcarta std output, jacobian file unit numbers
+      INTEGER    kStdDriverKK,  kStdkCartaKK,   kStdJacobKK,    
+     $           kStdJacob2KK
+      PARAMETER (kStdDriverKK=9,kStdkCartaKK=10,kStdJacobKK=11,
+     $           kStdJacob2KK=25)
+c this sets the compressed/cross sectional database, profile unit number
+      INTEGER    kCompUnit,   kProfileUnit
+      PARAMETER (kCompUnit=12,kProfileUnit=13)
+c this sets the temp data file unit number
+      INTEGER    kTempUnit
+      PARAMETER (kTempUnit=14)
+c these set the flux unit file
+      INTEGER    kStdFlux
+      PARAMETER (kStdFlux=17)
+c these set the 0.0025 cm-1 NLTE planck unit file, as well as the
+c bloated NLTE files for workspace, and for output
+      INTEGER    kStdPlanck,   kBloatNLTEPlanck,   kBloatNLTEOut 
+      PARAMETER (kStdPlanck=18,kBloatNLTEPlanck=19,kBloatNLTEOut=20)
+c these set the 0.0025 cm-1 upper atm files
+      INTEGER    kStdPlanckUA,   kNLTEOutUA
+      PARAMETER (kStdPlanckUA=21,kNLTEOutUA=22)
+c these set the 0.0005 cm-1 upper atm files
+      INTEGER    kBloatPlanckUA,   kBloatNLTEOutUA
+      PARAMETER (kBloatPlanckUA=23,kBloatNLTEOutUA=24)
+
+c these are common blocked integers that say whether or not the unit is open
+      INTEGER kStdErrOpen,kStdWarnOpen,kStdkCartaOpen
+      INTEGER kStdJacobOpen,kStdJacob2Open
+      INTEGER kStdDriverOpen,kCompUnitOpen,kProfileUnitOpen,
+     $        kTempUnitOpen,kStdFluxOpen,kStdPlanckOpen
+      INTEGER kBloatPlanckOpen,kBloatOutOpen
+      INTEGER kStdPlanckUAOpen,kNLTEOutUAOpen
+      INTEGER kBloatPlanckUAOpen,kBloatNLTEOutUAOpen
+      COMMON/OB0/kStdDriver,kStdkCarta,kStdJacob,kStdJacob2
+      COMMON/OB1/kStdErrOpen,kStdWarnOpen,kStdkCartaOpen,
+     $           kStdJacobOpen,kStdJacob2Open,
+     $           kStdDriverOpen,kStdFluxOpen,kStdPlanckOpen
+      COMMON/OB2/kCompUnitOpen,kProfileUnitOpen,kTempUnitOpen
+      COMMON/OB3/kBloatPlanckOpen,kBloatOutOpen
+      COMMON/OB4/kStdPlanckUAOpen,kNLTEOutUAOpen,kBloatPlanckUAOpen,
+     $           kBloatNLTEOutUAOpen
+
+c kMaxUserSet == number of variables the user can change w/o recompiling
+c set in setparam.param 
+      INTEGER kMaxUserSet
+      PARAMETER (kMaxUserSet=12)
+c these next kMaxUserSet variables are set in setparam.param 
+c note there is space for 12 variables but only 10 are being used right now
+c *** note kPlanckOut set in s_writefile.f  ie right now, it is NOT an option
+      INTEGER kLayer2Sp,kCKD,kGasTemp,kLongOrShort
+      INTEGER kJacobOutput,kFlux,kTempJac
+      INTEGER kActualJacs,kActualJacsT,kActualJacsB !! all from kActualJacs!!
+      INTEGER kSurfTemp,kRTP,kAFGLProf
+      INTEGER kPlanckOut
+      COMMON/ComBlock1/kLayer2Sp,kCKD,kGasTemp,kLongOrShort,kAFGLProf
+      COMMON/ComBlock2/kJacobOutput,kFlux,kPlanckOut,kTempJac,kActualJacs
+      COMMON/ComBlock3/kSurfTemp,kRTP,kActualJacsT,kActualJacsB
+
+c these next few parameters are set in *RADNCE and *JACOBN
+c rtp file azimuths used in Mie Scattering and Ocean Refl
+c rtp file also may give latitude and month (via rtime)
+      INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
+      REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult
+      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
+c this is LBLRTM TPAPE5 toa, and LBLRTM level temps
+      REAL kLBLRTM_toa,kLBLRTM_levelT(kMaxLayer+1),kLBLRTM_layerTavg(kMaxLayer)
+      PARAMETER (kDefaultColMult = 0.1)
+      COMMON/ComBlock4/kSolar,kThermal,kThermalJacob,kJacobian,
+     $                 kSetThermalAngle,kTemperVary
+      COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
+     $                 kSolAzi,kSatAzi,
+     $                 kWindSpeed,kLatitude,kMonth
+      INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
+      COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
+      COMMON/ComBlock7/kLBLRTM_toa,kLBLRTM_levelT,kLBLRTM_layerTavg
+      
+c kDis_Nstr,kDis_Pts : make DISORT run faster
+c kTemperVary : check how temp variations in OD affect the radiances
+c kAvgMin     : is there too little scattering in kTWOSTREAM? Then speed up!!
+      DOUBLE PRECISION kAvgMin
+      INTEGER kDis_Nstr,kDis_Pts
+      COMMON/ComDISORT/kDis_Nstr,kDis_Pts
+      COMMON/ComHGPhase/kAvgMin
+c these next few parameters are set in *SCATTR
+c It also tells the RTP code or the general code when it can do scattering 
+c (kcarta.x) and when it cannot (bkcarta.x)
+      INTEGER kScatter,kWhichScatterCode,kAllowScatter
+      COMMON/ComBlock8/kScatter,kWhichScatterCode,kAllowScatter
+
+c these are for overwriting the compressed database dirs (from SPECTRA)
+      INTEGER kAltComprDirs
+      CHARACTER*80 kcaAltComprDirs
+      COMMON/ComBlock9/kAltComprDirs,kcaAltComprDirs
+
+c these are for seeing how cloud params are overwritten
+c raaRTPCloudParams0(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 from rtpfile
+c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 after kcarta resets
+      REAL raaRTPCloudParams0(2,7),raaRTPCloudParamsF(2,7)
+      COMMON/comBlockCloud/raaRTPCloudParams0,raaRTPCloudParamsF
+
+c************************************************************************
+
 c this is new for version 0.97 and higher and some parts will change
 c
 c kW              == how many types of wavenumber spacings we have

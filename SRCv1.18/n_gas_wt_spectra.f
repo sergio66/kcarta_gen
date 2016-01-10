@@ -204,9 +204,10 @@ c read how many gases will have new spectroscopy
 
       DO iCount = 1,iNumNewGases
         IF ((iaNewGasID(iCount) .LT. 1) .OR. 
-     $      (iaNewGasID(iCount) .GT. kMaxGas)) THEN 
+     $      (iaNewGasID(iCount) .GT. kMaxGas)) THEN
+          write(kStdErr,*) 'iaNewGasID(',iCount,') = ',iaNewGasID(iCount)
           write(kStdErr,*)'need a valid gas ID in *SPECTRA!!' 
-          write(kStdErr,*)'please check and retry!'
+          write(kStdErr,*)'please check and retry (subr spectra4)!'
           CALL DoSTOP 
           END IF 
         IF ((iaNewData(iCount) .LT. 1) .OR. 
@@ -622,9 +623,10 @@ c read how many gases will have new nonLTE spectroscopy
 
       DO iLTEIn = 1,iNumNLTEGases
         IF ((iaNLTEGasID(iLTEIn) .LT. 1) .OR. 
-     $      (iaNLTEGasID(iLTEIn) .GT. kMaxGas)) THEN 
+     $      (iaNLTEGasID(iLTEIn) .GT. kMaxGas)) THEN
+          write(kStdErr,*)'iaNLTEGasID(',iLTEIn,') = ',iaNLTEGasID(iLTEIn)
           write(kStdErr,*)'need a valid gas ID in *SPECTRA!!' 
-          write(kStdErr,*)'please check and retry!'
+          write(kStdErr,*)'please check and retry (subr nonlteSLOW_LBL)!'
           CALL DoSTOP 
           END IF 
         IF ((iaNLTEChunks(iLTEIn) .LT. 1) .OR. 
@@ -979,9 +981,10 @@ c read how many gases will have new nonLTE spectroscopy
 
       DO iLTEIn=1,iNumNLTEGases
         IF ((iaNLTEGasID(iLTEIn) .LT. 1) .OR. 
-     $      (iaNLTEGasID(iLTEIn) .GT. kMaxGas)) THEN 
+     $      (iaNLTEGasID(iLTEIn) .GT. kMaxGas)) THEN
+          write(kStdErr,*)'iaNLTEGasID(',iLTEIn,') = ',iaNLTEGasID(iLTEIn)          
           write(kStdErr,*)'need a valid gas ID in *SPECTRA!!' 
-          write(kStdErr,*)'please check and retry!'
+          write(kStdErr,*)'please check and retry (subr nonlteFAST_KCOMP)!'
           CALL DoSTOP 
           END IF 
         IF ((iaNLTEChunks(iLTEIn) .LT. 1) .OR. 
