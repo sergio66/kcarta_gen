@@ -46,11 +46,11 @@ c local
       iOffSet = kProfLayer-iProfileLayers
 
       DO iI = 1,kProfLayer
+        print *,'boohoo',iI,raThickness(iI),raPressLevels(iI),raTPressLevels(iI)
         if (raThickness(iI) .LT. 0) THEN
 	  write(kSTdErr,*) iI,raThickness(iI)
 	  call dostopmesg('rathickness < 0 in Get_Temp_Plevs$')
 	end if
-c        raThickness(iI) = abs(raThickness(iI))
       END DO
       
       rPmin = +1.0e10
@@ -118,9 +118,9 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
  1234 FORMAT(I3,5(' ',F10.4))
 
 c >>>>>>>>>>> this is to FORCE tape5 temperatures into the LevelTemperatures and LayerAvgTemps
-      IF (kRTP .EQ. -5) THEN
-        write(kStdWarn,*) 'kRTP = -5 so resetting raTPressLevels (levelsT)    with what came in from TAPE5'
-        write(kStdWarn,*) 'kRTP = -5 so resetting raVTemp        (layersTavg) with what came in from TAPE5'	
+      IF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))THEN
+        write(kStdWarn,*) 'kRTP = -5,-6 so resetting raTPressLevels (levelsT)    with TAPE5 levels info'
+        write(kStdWarn,*) 'kRTP = -5,-6 so resetting raVTemp        (layersTavg) with TAPE5 levels info'
 	write(kStdWarn,*) '     iI          raTPressLevels(iI)            kLBLRTM_levelT(iI)'
 	write(kStdWarn,*) '-----------------------------------------------------------------'	
 	DO iI = 1,kProflayer+1
@@ -2058,7 +2058,7 @@ c
       SUBROUTINE UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $                 raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $                 iNPath,caPfName,iRTP,
-     $                 iProfileLayers,raPressLevels,raThickness)
+     $                 iProfileLayers,raPressLevels,raTPressLevels,raThickness)
 
       IMPLICIT NONE
 
@@ -2075,13 +2075,14 @@ c output
       REAL raaPress(kProfLayer,kMaxGas)       !! in atm
       REAL raaAmt(kProfLayer,kMaxGas)         !! in moles/m2 --> need to go to molecules/cm2
       REAL raaPartPress(kProfLayer,kMaxGas)   !! in atm
-      REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer) !! in mb
+      REAL raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)  !! plevs in mb, temps in K
+      REAL raThickness(kProfLayer) 
       INTEGER iProfileLayers,iKnowTP,iAFGLProf
       REAL raLayerHeight(kProfLayer)
       INTEGER iaWhichGasRead(kMaxGas),iNumGases,iZbndFinal
-      REAL raPbndFinal(kProfLayer+1)
 
 c local var
+      REAL raPbndFinal(kProfLayer+1),raTbndFinal(kProfLayer+1)
       INTEGER iLowestLevLVL2LAY,iNumGasesLVL2LAY,iaGasesLVL2LAY(kMaxGas),iaMap(kMaxGas),iaGasIDMap(kMaxGas)
       INTEGER iL,iG,iNumberofGasesRead,iaInputOrder(kMaxGas),iCnt,iOffSet
       REAL raPoutLVL2LAY(kProfLayer)                  !! in N/m2 --> so need to go to mb
@@ -2115,10 +2116,10 @@ c local var
         CALL InputMR_profile(caPfName,iProfileLayers,iNumGasesLVL2LAY,iaGasesLVL2LAY,iLowestLevLVL2LAY,
      $                     raToutLVL2LAY,raAmountOutLVL2LAY,raZoutLVL2LAY,
      $                     raPoutLVL2LAY,raaQoutLVL2LAY,raaPartPressoutLVL2LAY,
-     $                     raPbndFinal,iZbndFinal)     
+     $                     raPbndFinal,raTBndFinal,iZbndFinal)     
         write(kStdWarn,*) 'Read ',iNumGasesLVL2LAY,' gases at ',iProfileLayers,' output layers from the text file'
 	IF (iZbndFinal .GT. 0) THEN
-	  write(kStdWarn,*) 'hhmmm looks like we have new pressure levels from LBLRTM TAPE5'
+	  write(kStdWarn,*) 'hhmmm looks like we have new pressure levels from LBLRTM TAPE5 and/or TAPE6'
 	END IF
       ELSE
         write(kStdErr,*) 'huh?? only use this routine if reading text levels file or text LBLRTM TAPE5,6???',kRTP
@@ -2140,19 +2141,16 @@ c local var
         !! routine only called in kRPT = -10,-6,-5 so use New Plevs      
         !! raPressLevels(iL) = PLEV_KCARTADATABASE_AIRS(iL)
         raPressLevels(iL+iOffSet) = raPbndFinal(iL)
-c	IF (iL .LT. iZbndFinal) THEN
-c          print *,iL,iL+iOffSet,iZbndfinal,raPoutLVL2LAY(iL+iOffSet),raPbndFinal(iL),'fafafafafa'
-c	ELSE
-c          print *,iL,iL+iOffSet,iZbndfinal,-9999,                    raPbndFinal(iL),'fafafafafa'
-c	END IF
+	!!also set the temps
+        raTPressLevels(iL+iOffSet) = raTBndFinal(iL)
+c	print *,iL,iOffset,raPressLevels(iL+iOffSet),raTPressLevels(iL+iOffSet)
       END DO
-      
+
  345  FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))
       DO iL = 1,iZbndFinal-1
         !! find plev_airs which is just ABOVE the top of current layer
         iG = kProfLayer+1
  10     CONTINUE
-c        print *,iL,iG,PLEV_KCARTADATABASE_AIRS(iG),raPbndFinal(iL+1)	 
 	IF ((PLEV_KCARTADATABASE_AIRS(iG) .LE. raPbndFinal(iL+1)) .AND. (iG .GT. 1)) THEN
 	  iG = iG - 1
 	  GOTO 10
@@ -2177,11 +2175,11 @@ c        print *,iL,iG,PLEV_KCARTADATABASE_AIRS(iG),raPbndFinal(iL+1)
 c      write (*,345) iL,raPbndFinal(iL),raPbndFinal(iL+1),iaBnd(iL,1),raBndFrac(iL,1),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)),
 c     $                                                   iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
       END DO
-      
+
+ 999  FORMAT(I3,' ',A20,4(' ',ES10.3))
       DO iL = 1,iOffSet
         raLayerHeight(iL) = 0.0
         raThickness(iL)   = 0.0
-c	print *, iL,raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL)/101325.5,'******'
         DO iG = 1,iNumGasesLVL2LAY
           raaPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))     = 0.0
           raaTemp(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))      = 0.0
@@ -2193,7 +2191,7 @@ c	print *, iL,raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL)/101325.5,'****
       DO iL = iOffSet+1,kProflayer
         raLayerHeight(iL) = 0.5*(raZoutLVL2LAY(iL) + raZoutLVL2LAY(iL+1))
         raThickness(iL)   = raZoutLVL2LAY(iL+1) - raZoutLVL2LAY(iL)
-c	print *, iL,' n pth mix',raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL),raPoutLVL2LAY(iL)/1013.255
+d	write(*,999) iL,' n pth mix',raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL),raPoutLVL2LAY(iL)/1013.255
         DO iG = 1,iNumGasesLVL2LAY
           raaPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))     = raPoutLVL2LAY(iL)/100/1013.255  !! N/m2 --> mb --> atm
           raaTemp(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))      = raToutLVL2LAY(iL)

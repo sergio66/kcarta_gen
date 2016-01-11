@@ -384,7 +384,7 @@ c local variables
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)
+     $      iProfileLayers,raPressLevels,raTPressLevels,raThickness)
       END IF
       
 c this piece of "output" displays the amounts for the first 3 gases

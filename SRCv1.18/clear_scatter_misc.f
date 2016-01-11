@@ -3576,7 +3576,7 @@ c      print *,'up RT linear in tau ivary = ',ivary
       CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
       CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                              !! (which is NOT necessarily average of above 2)
-      write(*,*) 'up iL iLay* iLp1*',iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+c      write(*,*) 'up iL iLay* iLp1*',iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
  1234 FORMAT(I3,3(' ',F10.3))
  
 c      IF (iVary .EQ. 4) THEN
@@ -3859,7 +3859,7 @@ c       print *,'dn RT linear in tau ivary = ',iVary
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
 
-        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+c        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
  1234 FORMAT(I3,3(' ',F10.3))
 
 c        !DO iFr = 1,kMaxPts
@@ -4167,7 +4167,7 @@ c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
 
-        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+c        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
  1234 FORMAT(I3,3(' ',F10.3))
 	
 c        !DO iFr = 1,kMaxPts

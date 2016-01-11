@@ -61,7 +61,7 @@ c for testing just do SUBROUTINE InputMR_profile(caPfName)    !! for testing
       SUBROUTINE InputMR_profile(caPfName,iNumLays,iNumGases,iaG,iLowestLev,
      $                           raTout,raAmountOut,raZout,
      $                           raPout,raaQout,raaPartPressout,
-     $                           raPbndFinal,iZbndFinal)
+     $                           raPbndFinal,raTbndFinal,iZbndFinal)
 
       IMPLICIT NONE
 
@@ -82,6 +82,7 @@ c output
       INTEGER iNumLays,iNumGases,iaG(kMaxGas)
       INTEGER iLowestLev
       REAL raPbndFinal(kProfLayer+1)           !! final output pressure boundaries, default = 101 AIRS levels
+      REAL raTbndFinal(kProfLayer+1)           !! final output temperatures at boundaries
       INTEGER iZbndFinal                       !! number of output plev bdries,
                                                !! should be iNumLays+1 if using LBLRTM bdies, else 101
       
@@ -91,7 +92,7 @@ c local
       REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_MR(2*kProfLayer,kMaxGas),raAlt(2*kProfLayer)
       REAL raX(kMaxGas),rX,rP,rT,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon
       REAL rPminKCarta,rPmaxKCarta,rPmin,rPmax,rHminKCarta,rHmaxKCarta
-      INTEGER iKCARTADirectionUPorDOWN,iMid,iFloor,iCnt
+      INTEGER iKCARTADirectionUPorDOWN,iMid,iFloor,iCnt,iOffSet
       REAL gamma,z,dz,slope,amount,junk
       REAL rFracBot
       REAL raPBnd(2*kProfLayer)  !! do we want user defined pressure level boundaries??
@@ -99,12 +100,14 @@ c local
 
       REAL raPX(kProfLayer+1),raZX(kProfLayer+1),raTX(kProfLayer+1)
       REAL raaG_MRX(kProfLayer+1,kMaxGas),raLayDensityX(kProfLayer+1)
-
+      REAL raTPressLevelsX(kProfLayer+1),raPressLevelsX(kProfLayer+1),raAltitudesX(kProfLayer+1)
+      
       CALL Init_n_layers(iKCARTADirectionUPorDOWN,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,
      $                    rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta) 
 
       DO iL = 1,kMaxLayer+1
         raPbndFinal(iL) = PLEV_KCARTADATABASE_AIRS(iL)
+        raTbndFinal(iL) = 0.0
       END DO
       iZbndFinal = kMaxLayer+1
       
@@ -123,8 +126,10 @@ c but then CONVERTED to MR (gasunit 12)
       ELSEIF (kRTP .EQ. -6) THEN
         !! edited TAPE6, which contains first few parts of TAPE5, and then just profile info from TAPE6 (mol/cm2)
         CALL ReadInput_LBLRTM_ProfileTAPE6(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
-     $                          iNumLays,rPSurf,rTSurf,rHSurf,iNumGases,
-     $                          raPX,raTX,raLayDensityX,raZX,iaG,iaGasUnits,raaG_MRX,rPMin,rPMax,rYear,rLat,rLon)
+     $                          iNumLays,rPSurf,rTSurf,rHSurf,iNumGases,     
+     $                          raPX,raTX,raLayDensityX,raZX,
+     $                          raPressLevelsX,raTPressLevelsX,raAltitudesX,
+     $                          iaG,iaGasUnits,raaG_MRX,rPMin,rPMax,rYear,rLat,rLon)
         iZbnd = -1
       ELSE
         write(kStdErr,*) 'huh?? reading text levels file or text LBLRTM TAPE5/TAPE6 MODIFIED',kRTP
@@ -183,12 +188,10 @@ c but then CONVERTED to MR (gasunit 12)
 	  ! >>>>>>>>>> user boundaries
           DO iL = 1,iZbnd
             raPbndFinal(iL) = raPbnd(iL)/100.0    !! convert N/m2 to mb
-c	    print *,iL,raPbndFinal(iL),'muhahahaha',iZbnd	    
           END DO
 	  DO iL = iZbnd+1,kProfLayer+1
 	    raPbndFinal(iL) = 0.005
 	    raPbndFinal(iL) = raPbnd(iZbnd)/100.0   !! convert N/m2 to mb
-c	    print *,iL,raPbndFinal(iL),'bwahah'
 	  END DO
           iZbndFinal = iZbnd
 
@@ -215,25 +218,29 @@ c	    print *,iL,raPbndFinal(iL),'bwahah'
 	  iNumLays = iNumLevs - 1       !! this is now LAYER number, max == iZbnd-1 when iLowestLev = 1
 
         END IF
-     
-c      do iL = 1,iNumlevs
-c        print *,'hmm4',iL,raP(iL),raT(iL),raaG_MR(iL,1),raPX(iL),raTX(iL),raaG_MRX(iL,1)
-c      end do
-c      call dostop
-      
+           
       ELSEIF (kRTP .EQ. -6) THEN
         CALL DoLBLRTMLayers2KCARTALayers(rHSurf,rPSurf,rTSurf,iNumLays,iNumGases,iaG,rLat,rLon,
      $               PAVG_KCARTADATABASE_AIRS,PLEV_KCARTADATABASE_AIRS,DATABASELEVHEIGHTS,rfracBot,
      $               raPX,raTX,raLayDensityX,raaG_MRX,
+     $               raPressLevelsX,raTPressLevelsX,raAltitudesX,
      $               raPout,raAmountOut,raTout,raZout,raaQout,raaPartPressOut,iLowestLev)
-        iNumLevs = iNumLays
+        rfracBot = 1.0
+        iNumLevs = iNumLays+1	
+	iZbnd = iNumLevs
+	iOffSet = (kProfLayer+1)-(iNumLays+1)
+        DO iL = 1,iZbnd
+          raPbndFinal(iL)    = raPressLevelsX(iL)         !! in mb
+          raTbndFinal(iL)    = raTPressLevelsX(iL)        !! in K
+	  raZout(iL+iOffSet) = raAltitudesX(iL)*1000.0    !! reset raZout ... and use  m
+        END DO
+	iZbndFinal = iNumLevs
       END IF
 
-c      DO iL = 1,100
-c        print *,raPbndFinal(iL)
-c      END DO
-c      call dostopmesg('jiminy$')
-      
+c      do iL = 1,iNumlevs
+c        print *,'hmm4',iL,raP(iL),raT(iL),raaG_MR(iL,1),raPX(iL),raTX(iL),raaG_MRX(iL,1)
+c      end do
+
       RETURN
       END
 
@@ -2067,8 +2074,8 @@ c testing
           END IF
         END DO
       END IF
- 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '))
- 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '),A7)
+ 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '))
+ 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '),A7)
  113  FORMAT(A90)
 
 c now find pressure output corresponding to HGT output from LBLRTM
