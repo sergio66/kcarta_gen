@@ -1,29 +1,67 @@
-function [fUP,fDN,radsUP,radsDN] = do_flux_630_2805_linear_in_tau_const_angle(w,d,p,iVers);
+function [fUP,fDN,heatRate] = do_flux_630_2805_linear_in_tau_const_angle(w,d,p,iVers,radsum);
 
 % SUBROUTINE flux_moment_slowloopLinearVaryT in rad_flux.f
 % SUBROUTINE FindGauss2(nn,daX,daW)          in rad_misc.f
 
+% everything needs to be ordered so layer 1 = TOA and layerN/levelN+1 = GND
+%
 % input
-%  p = one profile structure
-%  d = ODs
-%  rrtm = rrtm fluxes/heating rates
+%  w = wavenumber
+%  p = one profile structure, contains p.nlevs and
+%      p.plevs ordered from TOA to GND (ie leve1 = TOA, level N is GND)
+%      p.tlevs
+%      p.plays
+%      p.tlays
+%      also spres and stemp
+%  d = matrix of ODs, size (num wavenumbers, numlays), with columns numbered 1(TOA) to N(gnd)
 %  iVers= -1 (constant T),4 (linear tau,O(tau^2)) 41 (Pade) 42 (linear in tau, O(tau))
+%  [radsum] = [optional] radsum fluxes/heating rates, Nlevels x 6 rows [level,p,Fup,Fdn,NetF,Heat]
 %
 % also look at /home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/v3.3/rrtm_lw/MATLAB/flux_rrtm_padeVSkvcarta.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if ~isfield(p,'nlevs')
+  error('need levels info');
+end
+if ~isfield(p,'plevs')
+  error('need plevels info');
+end
+
+nlevs = p.nlevs;
+
 plevsx = p.plevs(1:p.nlevs);
-plevsx = flipud(plevsx);
+if plevsx(1) < plevsx(2)
+  plevsx = flipud(plevsx);
+end
 
-%% see ~/IR_NIR_VIS_UV_RTcodes/RRTM/v3.3/rrtm_lw/MATLAB//driver_rrtm_no_xsec_HP.m
-%% comment = 'LEVEL    PRESSURE   UPWARD FLUX   DOWNWARD FLUX    NET FLUX       HEATING RATE';
-%rrtm_up_flux = sum(squeeze(rrtm_results.heating_rate_info(1,4:16,:,3)));
-%rrtm_dn_flux = sum(squeeze(rrtm_results.heating_rate_info(1,4:16,:,4)));
-
-mn_sergio = 101;    %% ODs are always 100 layers, even if p.nlevs is less than 100
-mn_rrtm = min(101,length(p.ptemp)+1); %% RTM gives exact number of layers
+mn_sergio = p.nlevs;
+if nargin == 5
+  [mn_radsum,rows_radsum] = size(radsum);
+  if mn_radsum ~= p.nlevs
+    error('p.nlevs is different than size of radsum input')
+  end
+end
 mn = mn_sergio;
+
+daX = [0.1397599 0.4164096 0.7231570 0.9428958 1.00000]; %% we really need DOUBLE these since we also need -daX
+daW = [0.0311810 0.1298475 0.2034646 0.1355069 0.00000]; %% or sum(daW) = 0.5, we need 1.0 
+						      
+daX = [0.1397599 0.4164096 0.7231570 0.9428958]; %% we really need DOUBLE these since we also need -daX
+daW = [0.0311810 0.1298475 0.2034646 0.1355069]; %% or sum(daW) = 0.5, we need 1.0 
+
+daX = 1.5; daX = 1./daX;
+daW = 0.5;
+
+daX = [4.70941630 1.69338507 1.09719858]; daX = 1./daX;
+daW = [0.0698269799 0.2292411064 0.2009319137];
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+radsUP = zeros(length(daX),p.nlevs,length(w));
+radsDN = zeros(length(daX),p.nlevs,length(w));
+fUP   = zeros(p.nlevs,length(w));
+fDN = zeros(p.nlevs,length(w));
 
 for ii = 1 : p.nlevs
   %% upwelling flux
@@ -32,74 +70,60 @@ for ii = 1 : p.nlevs
   fUP(ii,:) = 0;
   %fprintf(1,'ii+ laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6f \n',ii,laykc,play,p.ptemp(play),d(300,laykc))  
 end
-%disp('ret'); pause
-pause(1)
 
-daX = [0.1397599 0.4164096 0.7231570 0.9428958 1.00000]; %% we really need DOUBLE these since we also need -daX
-daW = [0.0311810 0.1298475 0.2034646 0.1355069 0.00000]; %% or sum(daW) = 0.5, we need 1.0 
+[p.plevs(p.nlevs-1) p.spres p.plevs(p.nlevs)];
+frac = (p.spres - p.plevs(p.nlevs-1))/(p.plevs(p.nlevs)-p.plevs(p.nlevs-1));
 
-daX = [4.70941630 1.69338507 1.09719858]; daX = 1./daX;
-daW = [0.0698269799 0.2292411064 0.2009319137];
-						      
-daX = [0.1397599 0.4164096 0.7231570 0.9428958]; %% we really need DOUBLE these since we also need -daX
-daW = [0.0311810 0.1298475 0.2034646 0.1355069]; %% or sum(daW) = 0.5, we need 1.0 
-
-woo = find(w >= 630-0.0025/2);
-woo = woo';
-radsUP = zeros(length(daX),p.nlevs,length(woo));
-radsDN = zeros(length(daX),p.nlevs,length(woo));
-fUP   = zeros(p.nlevs,length(woo));
-fDN = zeros(p.nlevs,length(woo));
-
-%[p.plevs(p.nlevs-1) p.spres p.plevs(p.nlevs)]
-frac = (p.spres - p.plevs(p.nlevs-1))/(p.plevs(p.nlevs)-p.plevs(p.nlevs-1))
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% assume surface emiss = 1
-playsN = p.plevs(1:end-1)-p.plevs(2:end);
-playsD = log(p.plevs(1:end-1)./p.plevs(2:end));
-plays = playsN./playsD;
+if ~isfield(p,'plays')
+  playsN = p.plevs(1:end-1)-p.plevs(2:end);
+  playsD = log(p.plevs(1:end-1)./p.plevs(2:end));
+  plays = playsN./playsD;
+else
+  plays = p.plays;
+end
 
-vt1x = interp1(log(1013.25*plays(1:p.nlevs-1)),p.ptemp(1:p.nlevs-1),log(1013.25*p.plevs(1:p.nlevs)),[],'extrap'); %% this is linear
-vt1 = interp1(log(plays(1:p.nlevs-1)),p.ptemp(1:p.nlevs-1),log(p.plevs(1:p.nlevs)),'spline','extrap');  %% Get_Temp_Plevs default is spline
-vt1(1:3) = vt1x(1:3); %% use linear inter for first (TOA), as that if what f77 kcarta does
+if ~isfield(p,'tlevs')
+  vt1x = interp1(log(1013.25*plays(1:p.nlevs-1)),p.ptemp(1:p.nlevs-1),log(1013.25*p.plevs(1:p.nlevs)),[],'extrap'); %% this is linear
+  vt1 = interp1(log(plays(1:p.nlevs-1)),p.ptemp(1:p.nlevs-1),log(p.plevs(1:p.nlevs)),'spline','extrap');  %% Get_Temp_Plevs default is spline
+  vt1(1:3) = vt1x(1:3); %% use linear inter for first (TOA), as that if what f77 kcarta does
+else
+  vt1 = p.tlevs;
+end
 
-%ugh2 = load('ugh2');
-%zaza = ugh2(:,3);
-%zaza = [zaza' [204.2082 190.539]];
-%plot(ugh2(:,3)-flipud(vt1(3:99)))
-%plot(zaza-fliplr((vt1')))
-%keyboard
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for ii = 1 : p.nlevs
   %% upwelling flux
-  laykc = mn-(p.nlevs-1) + (ii-1)-1;
   play  = (p.nlevs-1) - (ii-1)+1;
+  laykc = play;
   fUP(ii,:) = 0;
   if ii == 1
-    fprintf(1,'>> ii+ laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6e \n',ii,laykc,play,p.ptemp(play),d(300,laykc))
+    fprintf(1,'>> ii+ laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6e \n',ii,laykc,play,p.tlays(play),9999)
   else
-    fprintf(1,'ii+ laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6e \n',ii,laykc,play,p.ptemp(play),d(300,laykc))
+    fprintf(1,'ii+ laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6e \n',ii,laykc,play,p.tlays(play),d(1,nlevs-ii+1))
   end
   for jj = 1 : length(daX)
     if ii == 1
       %% surface term
-      radsUP(jj,ii,:) = ttorad(w(woo),p.stemp);
+      radsUP(jj,ii,:) = ttorad(w,p.stemp);
       fUP(ii,:) = fUP(ii,:) + squeeze(radsUP(jj,ii,:))'*daW(jj);
     elseif ii == 2
       %% through first partial layer
       layfrac = frac;
-      od = d(woo,laykc)*layfrac;
+      od = d(:,nlevs-ii+1)*layfrac;
       mu = daX(jj);
-      junk = find_rad_upwell(w(woo),squeeze(radsUP(jj,ii-1,:)),od,mu,play,p.ptemp,vt1,p.nlevs,iVers);
+      junk = find_rad_upwell(w,squeeze(radsUP(jj,ii-1,:)),od,mu,play,p.tlays,vt1,p.nlevs,iVers);
       radsUP(jj,ii,:) = junk;
       fUP(ii,:) = fUP(ii,:) + squeeze(radsUP(jj,ii,:))'*daW(jj);      
     else
       %% all full layers
       layfrac = 1;
-      od = d(woo,laykc)*layfrac;
+      od = d(:,nlevs-ii+1)*layfrac;
       mu = daX(jj);      
-      junk = find_rad_upwell(w(woo),squeeze(radsUP(jj,ii-1,:)),od,mu,play,p.ptemp,vt1,p.nlevs,iVers);      
+      junk = find_rad_upwell(w,squeeze(radsUP(jj,ii-1,:)),od,mu,play,p.tlays,vt1,p.nlevs,iVers);      
       radsUP(jj,ii,:) = junk;
       fUP(ii,:) = fUP(ii,:) + squeeze(radsUP(jj,ii,:))'*daW(jj);      
     end
@@ -108,47 +132,37 @@ end
 
 fUP = fUP * 2 * pi;    %% pi is integral over azimuth, while "2" is because sum(daW) = 0.5 ie need angles on either side of nadir
 
-fDN = zeros(size(fUP));
-
-%{
-figure(1);
-kcUP = flux(woo,1:86);
-sum_kcUP = sum(kcUP,1)*0.0025/1000;
-sum_fUP  = sum(fUP,2)*0.0025/1000*2*pi;
-semilogy(sum_kcUP,plevsx,'b.-',sum_fUP,plevsx,'r.-',rrtm_up_flux,rrtm_results.plevs,'k.-'); grid
-  hl = legend('kCARTA','matlab','RRTM');
-  set(gca,'ydir','reverse')
-%}
-  
 %%%%%%%%%%%%%%%%%%%%%%%%%
 disp(' ')
 
+fDN = zeros(size(fUP));
+
 for ii = p.nlevs : -1 : 1
   %% downwelling flux
-  laykc = mn-(p.nlevs-1) + (ii-1)-1+1;
-  play  = (p.nlevs-1) - (ii-1);  
+  laykc = (nlevs-1) - ii +1;
+  play  = laykc;
   fDN(ii,:) = 0;
   if ii < p.nlevs 
-    fprintf(1,'ii- laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6e \n',ii,laykc,play,p.ptemp(play),d(300,laykc))
+    fprintf(1,'ii- laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6e \n',ii,laykc,play,p.tlays(play),d(1,laykc))
   else
     fprintf(1,'ii- laykc play t(z) od(z) = %3i %3i %3i %8.6f %8.6e \n',ii,101,101,9999,0);
   end
   for jj = 1 : length(daX)
     if ii == p.nlevs
-      radsDN(jj,ii,:) = ttorad(w(woo),2.6);
+      radsDN(jj,ii,:) = ttorad(w,2.6);
       fDN(ii,:) = fDN(ii,:) + squeeze(radsDN(jj,ii,:))'*daW(jj);
     elseif ii == 1
       layfrac = frac;    
-      od = d(woo,laykc)*layfrac;
+      od = d(:,laykc)*layfrac;
       mu = daX(jj);
-      junk = find_rad_dnwell(w(woo),squeeze(radsUP(jj,ii+1,:)),od,mu,play,p.ptemp,vt1,p.nlevs,iVers);      
+      junk = find_rad_dnwell(w,squeeze(radsUP(jj,ii+1,:)),od,mu,play,p.tlays,vt1,p.nlevs,iVers);      
       radsDN(jj,ii,:) = junk;
       fDN(ii,:) = fDN(ii,:) + squeeze(radsDN(jj,ii,:))'*daW(jj);      
     else
       layfrac = 1;
-      od = d(woo,laykc)*layfrac;
+      od = d(:,laykc)*layfrac;
       mu = daX(jj);
-      junk = find_rad_dnwell(w(woo),squeeze(radsDN(jj,ii+1,:)),od,mu,play,p.ptemp,vt1,p.nlevs,iVers);      
+      junk = find_rad_dnwell(w,squeeze(radsDN(jj,ii+1,:)),od,mu,play,p.tlays,vt1,p.nlevs,iVers);      
       radsDN(jj,ii,:) = junk;
       fDN(ii,:) = fDN(ii,:) + squeeze(radsDN(jj,ii,:))'*daW(jj);      
     end
@@ -157,78 +171,48 @@ end
 
 fDN = fDN * 2 * pi;    %% pi is integral over azimuth, while "2" is because sum(daW) = 0.5 ie need angles on either side of nadir
 
-disp('returning here')
-return
-
-figure(2)
-kcDN = flux(woo,86+(1:86));
-sum_kcDN = sum(kcDN,1)*0.0025/1000;
-sum_fDN  = sum(fDN,2)*0.0025/1000*2*pi;
-semilogy(sum_kcDN,plevsx,'b.-',sum_fDN,plevsx,'r.-',rrtm_dn_flux,rrtm_results.plevs,'k.-'); grid
-  hl = legend('kCARTA','matlab','RRTM');
+sum_fDN = sum(fDN,2)*0.0025/1000;
+sum_fUP = sum(fUP,2)*0.0025/1000;
+figure(1); clf
+semilogy(sum_fDN,plevsx,'b.-',sum_fUP,plevsx,'r.-'); grid
+  hl = legend('DN','UP');
   set(gca,'ydir','reverse')
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plevs = p.plevs(1:p.nlevs-1);
-plevs = p.plevs(2:p.nlevs);
-plevs = flipud(plevs);
+if nargin == 5
+  %sum(plevsx-radsum(:,2))
+  %[sum_fDN radsum(:,4)]
+  
+  figure(1); clf
+  semilogy(sum_fDN,plevsx,'b.-',sum_fUP,plevsx,'r.-',radsum(:,4),radsum(:,2),'c.-',radsum(:,3),radsum(:,2),'m.-'); grid
+  hl = legend('OD DN','OD UP','RADSUM DN','RADSUM UP');
+  set(gca,'ydir','reverse')
 
-net_kc = sum_kcUP - sum_kcDN;
+  figure(2); clf
+  semilogy(sum_fDN - flipud(radsum(:,4)),plevsx,'b.-',sum_fUP - flipud(radsum(:,3)),plevsx,'m.-'); grid
+  hl = legend('OD-RADSUM DN','OD-RADSUM UP');
+  set(gca,'ydir','reverse')
+  axis([-0.25 +0.25 0 1000]);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 net_ml = sum_fUP  - sum_fDN;
 
-% rrtm.f
+% radsum.f
 % HEATFAC = 1.0E-7*(GRAV * SECDY)/(CPDAIR)
 GRAV = 9.80665E+02;  CPDAIR = 1.00464; SECDY = 8.64E+04;
 HEATFAC = 8.4391;
 HEATFAC = 1.0E-7*(GRAV * SECDY)/(CPDAIR);
 
-heat_kc = net_kc(1:85); heat_kc = diff(heat_kc) ./ diff(plevs') * HEATFAC; 
-heat_ml = net_ml(1:85); heat_ml = diff(heat_ml') ./ diff(plevs') * HEATFAC;
+heat_ml = diff(net_ml') ./ diff(plevsx') * HEATFAC;
+heatRate = heat_ml;
 
-hgt = p2h(plevs)/1000;
-hgt = 0.5*(hgt(2:end)+hgt(1:end-1));
+hgt = p2h(plevsx)/1000;
+%hgt = 0.5*(hgt(2:end)+hgt(1:end-1));
 figure(3); clf
-plot(heat_kc,hgt,'bx-',...
-    sum(hr(woo,:),1)*0.0025,p2h(plevs)/1000,'c',...
-    heat_ml,hgt,'ro-',...
-    rrtm_results.kc605to2830_hr,p2h(rrtm_results.plevs)/1000,'k',...
-    'linewidth',2);
-hl = legend('kCARTA flux->hr','raw kCARTA HR','matlab flux->hr','RRTM','location','southwest'); grid
 
-quick_rrtm_surf_flux   = ttorad(630:0.0025:3250,p.stemp)*pi/1000*0.0025; 
-quick_kcarta_surf_flux = ttorad(630:0.0025:2830,p.stemp)*pi/1000*0.0025;
-junk = [max(rrtm_up_flux) sum(quick_rrtm_surf_flux) max(sum_kcUP) sum(quick_kcarta_surf_flux)];
-disp('SURFACE UP FLUXES')
-disp('RRTM : 630:3250           KC : 605:2830');
-disp('actual  estimate      actual    estimate')
-fprintf(1,'%8.6f  %8.6f  %8.6f  %8.6f \n',junk);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-hgtx = p2h(plevsx)/1000;
-
-figure(4);
-kcUP = flux(woo,1:86);
-sum_kcUP = sum(kcUP,1)*0.0025/1000;
-sum_fUP  = sum(fUP,2)*0.0025/1000*2*pi;
-junk = interp1(rrtm_results.plevs,rrtm_up_flux,plevsx)';
-%semilogy(sum_kcUP-junk,plevsx,'b.-',sum_fUP-junk',plevsx,'r.-');
-plot(sum_kcUP-junk,hgtx,'b.-',sum_fUP-junk',hgtx,'r.-'); 
-
-hold on
-
-figure(4)
-kcDN = flux(woo,86+(1:86));
-sum_kcDN = sum(kcDN,1)*0.0025/1000;
-sum_fDN  = sum(fDN,2)*0.0025/1000*2*pi;
-junk = interp1(rrtm_results.plevs,rrtm_dn_flux,plevsx)';
-%semilogy(sum_kcDN-junk,plevsx,'c.-',sum_fDN-junk',plevsx,'m.-'); grid;
-plot(sum_kcDN-junk,hgtx,'c.-',sum_fDN-junk',hgtx,'m.-'); grid;
-
-  hl = legend('up kCARTA-RRTM','up matlab-RRTM','dn kCARTA-RRTM','dn matlab-RRTM');
-  %set(gca,'ydir','reverse');
-  grid on
-
-hold off
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
+if nargin == 5
+  plot([heat_ml 0],hgt,'b.-',flipud(radsum(:,6)),hgt,'r.-',[heat_ml 0] - (flipud(radsum(:,6)))',hgt,'k.-','linewidth',2);
+  hl = legend('matlab flux->hr','RADSUM','matlab-RADSUM','location','southwest'); grid
+else
+  plot([heat_ml 0],hgt,'b.-','linewidth',2);
+  hl = legend('matlab flux->hr','location','southwest'); grid
+end

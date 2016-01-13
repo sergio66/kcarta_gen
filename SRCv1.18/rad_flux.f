@@ -16,6 +16,15 @@ c
 c BUT WHAT IS "T"???????? It varies through the profile, so z0 varies as well!!!
 c so LBLRTM and constant-in-tau fluxes are different!
 c
+c      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+c      kTemperVary = +1     !!!temperature in layer varies
+c      kTemperVary = +2     !!!temperature in layer varies linearly, simple
+c      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
+c      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
+c      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
+c      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
+c      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42
+
 c************************************************************************
 c************** This file has the forward model routines  ***************
 c************************************************************************
@@ -149,15 +158,9 @@ c retrievals."
         print *,'clrsky flux iDefault,iAccOrLoopFlux = ',iDefault,iAccOrLoopFlux
       END IF 
 
-      iDefault = +4
-      iVary = +1           !!! exponentially varying T across each layer
-      iVary = +3           !!! linearly varying T across each layer, v1
-      iVary = +4           !!! linearly varying T across each layer, v2  (42 has been debugged for small tau)
-      iVary = -1           !!! constant T in each layer
-      
       iVary = kTemperVary  !!! see "SomeMoreInits" in kcartamisc.f
                              !!! this is a COMPILE time variable
-			     
+      iDefault = +43      			     
       IF (iDefault .NE. iVary) THEN 
         print *,'clrsky flux iDefault,iVary = ',iDefault,iVary
       END IF 
@@ -5144,7 +5147,7 @@ c for LBLRTM TAPE5/TAPE6
       REAL raaAbs_LBLRTM_zeroUA(kMaxPts,kMixFilRows)
 
       iLBLRTMZero = +2*iNumlayer
-c      kLBLRTM_toa = 0.1
+c      kLBLRTM_toa = 0.07
       IF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .GT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
         iLay = 1
  8888   CONTINUE
@@ -5190,24 +5193,23 @@ c        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)
 	END IF
       END DO
 
-      iDefault = -1          !!!temperature in layer constant USE THIS!!!!
-
-      iVary = +2             !!!temperature in layer varies linearly, simple
-      iVary = +1             !!!temperature in layer varies exponentially
-      iVary = +3             !!!temperature in layer varies linearly, ala RRTM, LBLRTM
-      iVary = -1             !!!temperature in layer constant USE THIS!!!! 
-
       iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
                              !!! this is a COMPILE time variable
-
+      iDefault = +43      
       IF (iDefault .NE. iVary) THEN    
         write(kStdErr,*) 'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
         write(kStdWarn,*)'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
       END IF
 
-      iGaussPts = 1  !!! haha not too bad at all ....
       iGaussPts = 4  !!! "slightly" better than iGaussPts = 3 (tic)
+      iGaussPts = 1  !!! haha not too bad at all ....
       iGaussPts = 3  !!! LBLRTM uses this
+
+      iDefault = 3           !!!RRTM,LBLRTM do 3 gauss points
+      IF (iDefault .NE. iGaussPts) THEN    
+        write(kStdErr,*) 'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
+        write(kStdWarn,*)'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
+      END IF
 
       IF (iGaussPts .GT. kGauss) THEN
         write(kStdErr,*) 'need iGaussPts < kGauss'
@@ -5699,17 +5701,9 @@ c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,ra
         END DO 
       END DO
 
-c      CALL DoStopMesg('in rad flux$')
-
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
      $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
-
-c        DO iFr = 1,100
-c          print *,iFr,raVT1(iFr),raPressLevels(iFr),raTPressLevels(iFr),
-c     $                           raPressLevels(iFr+1),raTPressLevels(iFr+1)
-c        END DO
-c        print *,'bobobo'
 
       RETURN
       END

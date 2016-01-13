@@ -46,7 +46,6 @@ c local
       iOffSet = kProfLayer-iProfileLayers
 
       DO iI = 1,kProfLayer
-        print *,'boohoo',iI,raThickness(iI),raPressLevels(iI),raTPressLevels(iI)
         if (raThickness(iI) .LT. 0) THEN
 	  write(kSTdErr,*) iI,raThickness(iI)
 	  call dostopmesg('rathickness < 0 in Get_Temp_Plevs$')
@@ -130,7 +129,7 @@ c >>>>>>>>>>> this is to FORCE tape5 temperatures into the LevelTemperatures and
 	write(kStdWarn,*) '-----------------------------------------------------------------'
 	DO iI = 1,kProflayer
 	  write(kStdWarn,*) iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),raaTemp(iI,1)-kLBLRTM_layerTavg(iI)
-	  print *, 'popopo',iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),raaTemp(iI,1)-kLBLRTM_layerTavg(iI)	  
+	  print *, 'use these T in uncompress',iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),raaTemp(iI,1)-kLBLRTM_layerTavg(iI)	  
 c          raVTemp(iI) = kLBLRTM_layerTavg(iI)
         END DO	
       END IF

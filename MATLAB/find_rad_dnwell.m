@@ -25,7 +25,7 @@ elseif iLayNum == iNlevs
   iBeta = iNlevs-1;
 end
 
-fprintf(1,'%3i %3i %8.6f %8.6f \n',iLayNum,iBeta,plevstemp(iBeta+1),plevstemp(iBeta))
+fprintf(1,'%3i %3i iLay* iLp* %8.6f %8.6f \n',iLayNum,iBeta,playstemp(iBeta),plevstemp(iBeta+1))
 
 if iVers == -1
   planckrad = ttorad(w,playstemp(iLayNum));

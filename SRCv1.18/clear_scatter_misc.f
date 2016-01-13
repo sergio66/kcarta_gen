@@ -3554,9 +3554,7 @@ c local variables
         CALL DoStop
       END IF
 
-c      IF (iVary .EQ. 41) iVary = 42     !!! have debugged 04, 42 for small tau O(tau)
-      IF (iVary .EQ. 41) iVary = 04     !!! have debugged 04, 42 for small tau O(tau^2)
-c      print *,'up RT linear in tau ivary = ',ivary
+      IF (iVary .EQ. 41) iVary = 43     !!! have debugged 04, 42, 43 for small tau O(tau^2)
       
       IF (rFrac .LT. 0) THEN
         write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileUPWELL_LINTAU, reset to > 0'
@@ -3576,7 +3574,10 @@ c      print *,'up RT linear in tau ivary = ',ivary
       CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
       CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                              !! (which is NOT necessarily average of above 2)
-c      write(*,*) 'up iL iLay* iLp1*',iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+      IF (kOuterLoop .EQ. 1) THEN							     
+        write(kStdWarn,*) 'up iL iLay* iLp1*',iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+      END IF
+      
  1234 FORMAT(I3,3(' ',F10.3))
  
 c      IF (iVary .EQ. 4) THEN
@@ -3814,12 +3815,6 @@ c local variables
       REAL raIntenAvg(kMaxPts)
       REAL rZeta,rZeta2,rAbs,rTrans
 
-c      DO iFr = 1,kMaxLayer-1
-c        print *,iFr,tempLEV(iFr),tempLAY(iFr),tempLEV(iFr+1)
-c      END DO
-c      print *,'humbug'
-c      call DoStop
-
       IF (iVary .LT. 2) THEN
         write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
         CALL DoStop
@@ -3830,9 +3825,7 @@ c      call DoStop
         rFrac = abs(rFrac)
       END IF
 
-c      IF (iVary .EQ. 41) iVary = 42     !!! have debugged 04, 42 for small tau O(tau)
-      IF (iVary .EQ. 41) iVary = 04     !!! have debugged 04, 42 for small tau O(tau^2)
-c       print *,'dn RT linear in tau ivary = ',iVary
+      IF (iVary .EQ. 41) iVary = 43     !!! have debugged 04, 42, 43 for small tau O(tau^2)
 
       iBeta = MOD(iL,kProfLayer)
       IF (iBeta .EQ. 0) THEN
@@ -3859,13 +3852,11 @@ c       print *,'dn RT linear in tau ivary = ',iVary
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
 
-c        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
- 1234 FORMAT(I3,3(' ',F10.3))
-
-c        !DO iFr = 1,kMaxPts
-c        !  raIntenAvg(iFr) = 0.5 * (raIntenP(iFr) + raIntenP1(iFr))
-c        !END DO
+        IF (kOuterLoop .EQ. 1) THEN
+          write(kStdWarn,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+	END IF
       END IF
+ 1234 FORMAT(I3,3(' ',F10.3))
       
       IF (iVary .EQ. 2) THEN 
         !!! lim tau --> 0 , rFcn --> 0
@@ -4110,12 +4101,6 @@ c local variables
       REAL raIntenAvg(kMaxPts)
       REAL rZeta,rZeta2,rAbs,rTrans
 
-c      DO iFr = 1,kMaxLayer-1
-c        print *,iFr,tempLEV(iFr),tempLAY(iFr),tempLEV(iFr+1)
-c      END DO
-c      print *,'humbug'
-c      call DoStop
-
       IF (iVary .LT. 2) THEN
         write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
         CALL DoStop
@@ -4126,9 +4111,7 @@ c      call DoStop
         rFrac = abs(rFrac)
       END IF
 
-c      IF (iVary .EQ. 41) iVary = 42     !!! have debugged 04, 42 for small tau O(tau)
-      IF (iVary .EQ. 41) iVary = 04     !!! have debugged 04, 42 for small tau O(tau^2)
-c       print *,'dn RT linear in tau ivary = ',iVary
+      IF (iVary .EQ. 41) iVary = 43     !!! have debugged 04, 42, 43 for small tau O(tau^2)
 
       iBeta = MOD(iL,kProfLayer)
       IF (iBeta .EQ. 0) THEN
@@ -4166,14 +4149,11 @@ c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
         CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level   
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
-
-c        write(*,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
- 1234 FORMAT(I3,3(' ',F10.3))
-	
-c        !DO iFr = 1,kMaxPts
-c        !  raIntenAvg(iFr) = 0.5 * (raIntenP(iFr) + raIntenP1(iFr))
-c        !END DO
+        IF (kOuterLoop .EQ. 1) THEN
+          write(kStdWarn,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+	END IF
       END IF
+ 1234 FORMAT(I3,3(' ',F10.3))
       
       IF (iVary .EQ. 2) THEN 
         !!! lim tau --> 0 , rFcn --> 0

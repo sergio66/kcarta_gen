@@ -7,6 +7,15 @@ c      raVT1 (probably called raMixVertTemp in other routines)
 c      and then raVT1 has lowest (surface level) temp interpolated from (raPavg,raVtemp) to rPlowestLevel
 c raTPresslevels(kProfLayer+1) set in Get_Temp_Plevs (after reading in klayers profile), using splines
 
+c      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+c      kTemperVary = +1     !!!temperature in layer varies
+c      kTemperVary = +2     !!!temperature in layer varies linearly, simple
+c      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
+c      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
+c      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
+c      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
+c      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42
+
 c************************************************************************
 c************** This file has the forward model routines  ***************
 c************************************************************************
@@ -629,20 +638,9 @@ c retrievals."
      $         iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
 
-      iDefault = -1          !!!temperature in layer constant USE THIS!!!!
-
-      iVary = iKnowTP        !!!we know layer temperatures, as well as level temps!
-      iVary = +2             !!!temperature in layer varies linearly, simple
-      iVary = +1             !!!temperature in layer varies exponentially
-      iVary = -1             !!!temperature in layer constant USE THIS!!!!
-
-      iVary = +2             !!!temperature in layer varies linearly, simple
-      iVary = +1             !!!temperature in layer varies exponentially
-      iVary = +3             !!!temperature in layer varies linearly, ala RRTM, LBLRTM
-      iVary = -1             !!!temperature in layer constant USE THIS!!!! 
-
       iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
 
+      iDefault = -1          !!!temperature in layer constant USE THIS FOR RT !!!!
       IF (iDefault .NE. iVary) THEN    
         write(kStdErr,*)'iDefault, iVary in rad_main',iDefault,iVary
         write(kStdWarn,*)'iDefault, iVary in rad_main',iDefault,iVary
@@ -3682,7 +3680,7 @@ c for LBLRTM TAPE5/TAPE6
       REAL raaAbs_LBLRTM_zeroUA(kMaxPts,kMixFilRows)
 
       iLBLRTMZero = +2*iNumlayer
-c      kLBLRTM_toa = 0.1
+c      kLBLRTM_toa = 0.07      
       IF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .GT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
         iLay = 1
  8888   CONTINUE
@@ -3728,10 +3726,6 @@ c        print *,iLay,iNumLayer,kLBLRTM_toa,raPressLevels(iaaRadLayer(iAtm,iLay)
 	END IF
       END DO
 
-      iVary = iVaryIN_0
-      iVary = 41
-      iVary = 42      
-      iVary = 4
       iVary = kTemperVary
       
       iIOUN = iIOUN_IN
@@ -4255,9 +4249,6 @@ c to keep angles constant
 	END IF
       END DO
       
-      iVary = 41
-      iVary = 42      
-      iVary = 4
       iVary = kTemperVary      
 
       IF ((raFreq(1) .GE. 10000) .AND. (kSolarAngle .LE. 90)) THEN

@@ -168,10 +168,6 @@ c this are parameters added on to make sure the NLTE code is working
       DOUBLE PRECISION dDeltaNLTE
       PARAMETER(dDeltaNLTE = 1.0d-15)
 
-c this is number of channels to do things for, after reading in the RTP
-      INTEGER kChan
-      PARAMETER (kChan=2400)
-
 c this is to set the number of zenith angles to do angular integration
 c when determining fluxes and/or background thermal
       INTEGER kGauss 
