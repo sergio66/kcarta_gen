@@ -1383,6 +1383,7 @@ c or just the basic results file (0)
      $      caFluxFile,caPlanckFile,iOutFileName,iNumNLTEGases,
      $      rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,
      $      iNumGases,iaGases,raaAmt,raaTemp,raaPress,raaPartPress,
+     $                        raaRAmt,       raaRPartPress,
      $      raPressLevels,iProfileLayers,
      $      iNpmix,raaMix,caaMixFileLines,iMixFileLines,raMixVT,
      $      iNatm,iNatm2,iaNumLayers,iaaRadLayer,
@@ -1459,6 +1460,7 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       REAL raSatHeight(kMaxAtm),raPressLevels(kProfLayer+1)
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raaPartPress(kProfLayer,kGasStore)
+      REAL raaRAmt(kProfLayer,kGasStore),raaRPartPress(kProfLayer,kGasStore)      
       REAL raaMix(kMixFilRows,kGasStore),rFrLow,rFrHigh
       INTEGER iNatm,iNatm2,iaNumLayers(kMaxAtm),iJacob,iaJacob(kMaxAtm)
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
@@ -1605,14 +1607,23 @@ c        WRITE(iIOUN,*) 'M50mb,M10mb,MThick = ',M50mb,M10mb,MThickLayer
 c then output path ID stuff ------------------------------------------
         WRITE(iIOUN,*) 'PATH ID INFO'
         WRITE(iIOUN,*) 'iNumPaths = ',iNumGases*kProfLayer
-        WRITE(iIOUN,*) 'Path#   GasID  Press     PartPress   Temp   Amnt'
-        WRITE(iIOUN,*) '------------------------------------------------'
+        WRITE(iIOUN,*) 'Num Layers in Profile = ',iProfileLayers
+        WRITE(iIOUN,*) 'So start showing info from layer ',kProfLayer-iProfileLayers+1
+	
+        WRITE(iIOUN,7170) '  Path# GID  Press      PartP        PPMV        Temp         Amnt    ||      RefPP     RefAmt  Amt/RAmt'
+        WRITE(iIOUN,7170) '----------------------------------------------------------------------||--------------------------------'
         DO iI=1,iNumGases
-          DO iJ=1,kProfLayer
+          DO iJ=kProfLayer-iProfileLayers+1,kProfLayer
             iP=(iI-1)*kProfLayer+iJ
-            WRITE(iIOUN,7171)iP,iaGases(iI),raPActualAvg(iJ)/kAtm2mb,
-     $                   raaPartPress(iJ,iI),raaTemp(iJ,iI),raaAmt(iJ,iI)
+            WRITE(iIOUN,7171)iP,iaGases(iI),raPActualAvg(iJ)/kAtm2mb,raaPartPress(iJ,iI),
+     $                   raaPartPress(iJ,iI)/(raPActualAvg(iJ)/kAtm2mb)*1.0e6,raaTemp(iJ,iI),raaAmt(iJ,iI),'||',
+     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaAmt(iJ,iI)/raaRAmt(iJ,iI)
+c earlier code was giving raaRPartPress(iJ,iI)/raaPartPress(iJ,iI) = 385/360 for CO2, tape6 test from eli     
+c            WRITE(iIOUN,7171)iP,iaGases(iI),raPActualAvg(iJ)/kAtm2mb,raaPartPress(iJ,iI),
+c     $                   raaPartPress(iJ,iI)/(raPActualAvg(iJ)/kAtm2mb)*100.0,raaTemp(iJ,iI),raaAmt(iJ,iI),'||',
+c     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaRPartPress(iJ,iI)/raaPartPress(iJ,iI)
           END DO
+	  write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
         END DO
 c then output list of paths to be output
         WRITE(iIOUN,*) 'list of paths to be output ...'
@@ -2545,7 +2556,8 @@ c for each atmosphere, how many layers
 c f77 format specifiers : the 1P is to shift things over by 1 decimal point
 c http://docs.oracle.com/cd/E19957-01/805-4939/z40007437a2e/index.html
 c ../DOC/F77FormatSpecifiers.pdf
- 7171 FORMAT(I4,' ',I4,' ',2(1P E11.5,' '),0PF11.5,'  ',1P E11.5)  
+ 7170 FORMAT(A104)
+ 7171 FORMAT(I4,' ',I4,' ',3(1P E11.5,' '),0PF11.5,'  ',1P E11.5,A2,2(' ',E11.5),1(' ',E11.3))  
 
       RETURN
       END

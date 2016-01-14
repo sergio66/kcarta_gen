@@ -56,7 +56,7 @@ c     raQ11,raQ12    are the weights          for WV    offsets
 
 c local vars
       INTEGER iL,iLr,iGasID,iLowest,iSwap
-      REAL rP,p1,p2,rSumWgt1,rSumWgt2,rSwap
+      REAL rP,p1,p2,rSumWgt1,rSumWgt2,rSwap,p1LEV,p2LEV
       REAL rT,t11,t12,t21,t22,wsum
       REAL rQ,q11,q12,q21,q22,qsum
       INTEGER i1,i2,iFindMaxMin
@@ -96,7 +96,8 @@ c these are to read in the new kProfLayers ref profile for the gas
       raPPoffSet(3) = 3.3
       raPPoffSet(4) = 6.7
       raPPoffSet(5) = 10.0
-
+ 456  FORMAT(I3,6(' ',ES12.5))
+ 
       write(kStdWarn,*) 'Figuring out the kComp Corner Weights ....'
       caStr = 
      $'Layer  P(mb)  span   wgtP1    T(K)  indx    wgtT1    water span   wgtQ1'
@@ -105,25 +106,38 @@ c these are to read in the new kProfLayers ref profile for the gas
      $'              indx1                                  amt   indx1'
       write(kStdWarn,*) caStr
       caStr = 
-     $'----------------------------------------------------------------------------------'
+     $'-----------------------------|------------------------|------------------------'
       write(kStdWarn,*) caStr
       caStr = 
-     $'iL     rP       iaP1    raP1    rT     iaT11   raT11      rQ       iaQ11   raQ11'
+     $'iL     rP       iaP1    raP1 |  rT     iaT11   raT11  |   rQ       iaQ11  raQ11'
       write(kStdWarn,*) caStr
       caStr = 
-     $'----------------------------------------------------------------------------------'
+     $'-----------------------------|------------------------|------------------------'
       write(kStdWarn,*) caStr
 
+c      DO iL = 1,kProfLayer
+c        print *,iL,xPLEV_KCARTADATABASE_AIRS(iL),raOrig100P(iL),xPLEV_KCARTADATABASE_AIRS(iL+1)
+c      END DO
+c	print *,p1LEV,rP,p2LEV,' ',p1,p2
+c	call dostop
+      
       DO iL = iLowest,kProfLayer
         !!!!!!!!!!!!!!!!!!!!!! pressure !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         rP = pProf(iL)/1013.25
         !! get pressure bounding interval [p1 p2]
         !! replaced .... raOrig100P,kMaxLayer) with
         !!          .... xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
-        !! so 
+        !! so
+
+        !! this was code till Dec 2015
         iaP1(iL) = iFindMaxMin(+1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
         iaP2(iL) = iFindMaxMin(-1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
-        !! now switch from LEVELS to average LAY pressure
+
+        !! this is newer code, Jan 2016
+        iaP1(iL) = iFindMaxMin(+1,rP,raOrig100P,kMaxLayer)
+        iaP2(iL) = iFindMaxMin(-1,rP,raOrig100P,kMaxLayer)
+
+        !! >>>>>>>>>>> now switch from LEVELS to average LAY pressure <<<<<<<<<
         IF (iaP1(iL) .GT. kMaxLayer) iaP1(iL) = kMaxLayer
         IF (iaP2(iL) .GT. kMaxLayer) iaP2(iL) = kMaxLayer
         p1 = raOrig100P(iaP1(iL))  !! lower avg press bound (so upper in hgt)
@@ -134,14 +148,22 @@ c these are to read in the new kProfLayers ref profile for the gas
                                    !! if iSplineType ~ 2 weight should be ~ 1
                                    !! as should be one-> one correspondance
                                    !! between iL and iaP2(iL)
+        p1LEV = xPLEV_KCARTADATABASE_AIRS(iaP1(iL))
+        p2LEV = xPLEV_KCARTADATABASE_AIRS(iaP2(iL))	
+	
         !! pressure interp weight
-        IF (abs(p1-p2) .GE. 1.0e-3) THEN
+        !! oops this originally was 1e-3. but the <p> and rp are in atm, so can range from 1013/1013 to 0.005/1013
+	!! or from 1 to 1e-6
+        IF (abs(p1-p2) .GE. 1.0e-6) THEN   
           raP2(iL) = (rP - p1) / (p2 - p1)
           raP1(iL) = 1.0 - raP2(iL)
         ELSE
           raP2(iL) = 1.0
           raP1(iL) = 0.0
         END IF
+	
+c	write(kStdErr,456) ,iL,p1,rp,p2,p1-p2,raP1(iL),raP2(iL)
+
         !! want raP2(iL) > raP1(iL)
         IF (raP1(iL) .LT. raP2(iL)) THEN
           rSwap = raP1(iL)
@@ -172,8 +194,8 @@ c these are to read in the new kProfLayers ref profile for the gas
             iaT11(iL) = iaT11(iL)-1   !!move iaT11(iL) down by one
           ELSE
             iaT12(iL) = iaT12(iL)+1   !!move iaT12(iL) up by one
+          END IF
         END IF
-      END IF
         t11 = raTSpan(iaT11(iL))  ! lower temperature bound at p1
         t12 = raTSpan(iaT12(iL))  ! upper temperature bound at p1
         IF (abs(t11 - t12) .GT. 1.0e-3) THEN
@@ -237,7 +259,8 @@ c these are to read in the new kProfLayers ref profile for the gas
         iaQ12(iL) = iFindMaxMin(-1,rQ,raPPSpan,kMaxWater)
         q11 = raPPSpan(iaQ11(iL))  ! lower partpressure bound at p1
         q12 = raPPSpan(iaQ12(iL))  ! upper partpressure bound at p1
-        IF (abs(q11 - q12) .GT. 1.0e-3) THEN
+	!! this delta(q) was originally 1e-3, but the q of water can get pretty small!!!
+        IF (abs(q11 - q12) .GT. 1.0e-11) THEN
           ! partpressure interpolation weight
           raQ12(iL) = (rQ - q11) / (q12 - q11)
           raQ11(iL) = 1.0 - raQ12(iL)
@@ -254,7 +277,8 @@ c these are to read in the new kProfLayers ref profile for the gas
         iaQ22(iL) = iFindMaxMin(-1,rQ,raPPSpan,kMaxWater)
         q21 = raPPSpan(iaQ21(iL))  ! lower partpressure bound at p2
         q22 = raPPSpan(iaQ22(iL))  ! upper partpressure bound at p2
-        IF (abs(q21 - q22) .GT. 1.0e-3) THEN
+	!! this delta(q) was originally 1e-3, but the q of water can get pretty small!!!	
+        IF (abs(q21 - q22) .GT. 1.0e-11) THEN
           ! partpressure interpolation weight
           raQ22(iL) = (rQ - q21) / (q22 - q21)
           raQ21(iL) = 1.0 - raQ22(iL)
@@ -310,14 +334,13 @@ c        write(kStdWarn,100) iL,rP,iaP1(iL),raP1(iL),rT,iaT11(iL),raT11(iL),rQ,i
         write(kStdErr,*) '     : xWeights      determined ',iE
         write(kStdErr,*) ' ..... run proceeding with SetSplineType = ',iE
         iSplinetype = iE
-c        CALL DoStop
       END IF
       write(kStdWarn,*) ' '
 
  90   FORMAT(F12.5)
-c 100  FORMAT(I3,' ',3(F9.5,' ',I3,' ',F9.5,' '))
- 100  FORMAT(I3,' ',1(E12.4,' ',I3,' ',F9.5,' '),1(F9.5,' ',I3,' ',F9.5,' '),
-     $ 1(E12.4,' ',I3,' ',F9.5,' '))
+ 111  FORMAT(I3,' ',3(F9.5,' ',I3,' ',F9.5,' '))
+ 100  FORMAT(I3,' ',1(ES12.4,' ',I3,' ',F9.5,' '),1(F9.5,' ',I3,' ',F9.5,' '),
+     $ 1(ES12.4,' ',I3,' ',F9.5,' '))
 
       RETURN
       END
@@ -463,8 +486,11 @@ c   iLen     = array length
         Call DoStop
       END IF
 
-c      print *,'x',iAscOrDsc,iWhich,rV,raArray(iOut),raArray(iOut)-rV1
-
+c      DO iJ = 1,iLen
+c        if (rV .LT. raArray(iJ)) print *,iJ,iWhich,rV,raArray(iJ),'---',iOut
+c        if (rV .GE. raArray(iJ)) print *,iJ,iWhich,rV,raArray(iJ),'+++',iOut	
+c      END DO
+      
       iFindMaxMin = iOut
  
       RETURN

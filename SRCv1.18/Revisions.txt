@@ -577,6 +577,14 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+1/14/16         Cleaned up/improved subr MakeRefProf (especially for arbitrary layers)
+                Found/fixed a bug in subr xWeights (for arbitrary pressure layers)
+		-- now use 100 <Pavg> to find the layers to do interpoation onto aritrary p_in
+		    (rather than 101 <Plevels>
+		-- had a bug which set weights = 1 if the delta(p1-p2) was 1e-3 atm; since the
+		   pressure layers can be "quite close in psapce" (in atm), this threshold
+		   is now only used if delta(p1-p2) <= 1e-6
+		
 12/28/15        Moved LBLRTM TAPE5/6 routines to n_layers_lblrtm.f
 
                 May need to change this in line 180-190 of n_rad_jac_scat.f

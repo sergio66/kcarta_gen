@@ -653,3 +653,288 @@ c          END IF
       END
 
 c************************************************************************
+c this subroutine will take in 100 AIRS layering stuff and interpolate to
+c the new arbitrary layering
+c WARNING : this assumes that the user has not mucked up KLAYERS layering
+c           such that highest Z pressure (lowest pressure) is NOT TOA
+c           ie still need lowest pressure (highest z) = 0.005 mb!!!!!
+c do the lower atm (usual -1) or upper atm (NLTE +1)
+
+c kcoeffSPL, kcoeffSPLJAC divide out gas amount from the optical depths,
+c so at arbitrary pressure layering, it deals with abs coeffs
+c so we do not need raRamt
+c but we do need the interpolated temp and partial pressures
+      SUBROUTINE MakeRefProf(raRAmt,raRTemp,raRPress,raRPartPress,
+     $           raR100Amt,raR100Temp,raR100Press,raR100PartPress,
+     $           raaPress,iGas,iGasID,iNumLayers,
+     $           raPressLevels,raThickness,iSplineType,iLowerOrUpper,iError)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c  kCARTA levels include P(1)=0.005, P(101) = 1100, P(38)=300
+c  P(x)=(ax^2+bx+c)7/2 formula, with the above 3 b.c.
+c The above equation and 3 data points define the 101 AIRS levels, which
+c are in airslevels.param
+
+c input
+c do the lower atm (usual -1) or upper atm (NLTE +1)
+      INTEGER iLowerOrUpper
+c these are the individual reference profiles, at kMaxLayer layers
+      REAL raR100Amt(kMaxLayer),raR100Temp(kMaxLayer)
+      REAL raR100PartPress(kMaxLayer),raR100Press(kMaxLayer)
+c these are the arbitrary profiles stored in matrices
+      REAL raaPress(kProfLayer,kGasStore)
+      INTEGER iError,iGas,iGasID,iNumLayers,iSplineType
+c these are the kLAYERS pressure levels, layer thick for the current profile
+      REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+c  output
+c these are the individual reference profiles, at kProfLayer layers
+      REAL raRAmt(kProfLayer),raRTemp(kProfLayer)
+      REAL raRPartPress(kProfLayer),raRPress(kProfLayer)
+      REAL pMax100,pMin100
+
+c local variables
+      INTEGER iI,iNot,kMaxLayer_over_2,iJ
+      REAL raWorkP(kMaxLayer),raXgivenP(kMaxLayer),
+     $     raYgivenP(kMaxLayer),raY2P(kMaxLayer)
+      REAL raWork(kMaxTemp),rYP1,rYPN,rXPT,r,r0,r2
+      REAL raSortPressLevels(kMaxLayer+1)
+      REAL raSortPressHeights(kMaxLayer+1)
+
+      REAL raDataBaseThickness(kMaxLayer)
+      REAL DatabaseHeight(kMaxLayer)
+      REAL DATABASELEVHEIGHTS(kMaxLayer+1)
+      REAL DATABASELEV(kMaxLayer+1)
+
+c pressure variables!!!!! ----------------->
+c raaPress in atm
+
+      CALL databasestuff(iLowerOrUpper,
+     $                   DATABASELEVHEIGHTS,DataBaseLev,DatabaseHeight)
+
+C     Assign values for interpolation
+C     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
+      rYP1 = 1.0E+16
+      rYPN = 1.0E+16
+
+      !!! find the thickness of the pressure layers in centimeters
+      !!! hence we have x 1000 (km -> m) x 100 (m -> cm)
+      DO iI = 1,kMaxLayer
+        raDataBaseThickness(iI) = (DATABASELEVHEIGHTS(iI+1) - 
+     $                            DATABASELEVHEIGHTS(iI))*1000.0 * 100.0
+      END DO
+
+c now store stuff sorted in terms of increasing pressure 
+      kMaxLayer_over_2 = 50
+      DO iI = 1,kMaxLayer+1
+        raSortPressLevels(iI)  = DataBaseLev(101-iI+1)                  !!! mb
+        raSortPressHeights(iI) = DataBaseLevHeights(101-iI+1) * 1000.0  !!! m
+      END DO
+
+      !!!this tells how many layers are NOT dumped out by kLAYERS
+      iNot = kProfLayer-iNumLayers
+c now just happily spline everything on!!!!!! for the amts
+c recall you need raXgivenP to be increasing
+      pMax100 = -1.0e10
+      pMin100 = +1.0e10
+      DO iI = 1,kMaxLayer
+        raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
+        raXgivenP(iI) = raR100Press(kMaxLayer-iI+1)
+        raYgivenP(iI) = raR100Amt(kMaxLayer-iI+1)
+        IF (raXgivenP(iI) .LT. pMin100) THEN
+          pMin100 = raXgivenP(iI)
+        END IF
+        IF (raXgivenP(iI) .GT. pMax100) THEN
+          pMax100 = raXgivenP(iI)
+        END IF
+      END DO
+      CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
+      DO iI = 1,iNot
+        rxpt = log(raaPress(iI,iGas))
+        rxpt = raaPress(iI,iGas)
+        r = 0.0
+        raRAmt(iI) = r
+      END DO
+
+c these are the layers with info
+      DO iI = iNot+1,kProfLayer
+        rxpt = log(raaPress(iI,iGas))
+        rxpt = raaPress(iI,iGas)
+        IF (iSplineType .EQ. +1) THEN
+          CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
+        ELSE
+          CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rXPT,r)
+        END IF
+        raRAmt(iI) = r
+c^^^^^^^^^^^^^ check to see if linear interp will help^^^^^^^^^^^^^^^^^^^
+        IF ((r .LT. 0.0)) THEN
+          write (kStdWarn,*) 'Making reference profile : negative amt found : '
+          write (kStdWarn,*) 'GasID,layer,ref amt,iLorU (-1/+1) : ',iGasID,iI,r,iLowerOrUpper
+          CALL rlinear(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
+          write (kStdWarn,*) '   trying linear interp : ',iI,r
+          raRAmt(iI) = r          
+          IF ( (r .LT. 0.0). AND. 
+     $         ((rxpt .GT. pMin100) .AND. (rxpt .LT. pMax100))) THEN
+              !!!things barfed even though pMin100 < rXpt < pMax100 ... bad
+            write (kStdErr,*) 'gasID,layer,ref amount(linear interp)= ',
+     $ iGasID,iI,r
+            write (kStdErr,*) 'min(pD),rXpt,max(pD) = ',pMin100,rXpt,pMax100
+            CALL DoStop
+          ELSEIF ( (r .LT. 0.0). AND. 
+     $          ((rxpt .LT. pMin100) .OR. (rxpt .GT. pMax100))) THEN
+              !!!things barfed, pMin100 > rXpt or pMax100 < rXpt ... hmmm
+            write (kStdWarn,*) 'gasID,layer,ref amount(linear interp)= ',
+     $ iGasID,iI,r
+            !!!recall raYgiven(iI) is swtiched GND = kMaxLayer,100=TOA
+            IF (rxpt .LT. pMin100) r = raYgivenP(1)          !!TOA amt
+            IF (rxpt .GT. pMax100) r = raYgivenP(kMaxLayer)  !!GND amt
+            write (kStdWarn,*) 'gasID,layer,ref amount (reset to) ',iGasID,iI,r
+            write (kStdErr,*)  'gasID,layer,ref amount (reset to) ',iGasID,iI,r	    
+            raRAmt(iI) = r
+            !do iJ = 1,kMaxLayer
+            !  print *,'moolah',iGas,iJ,raXgivenP(iJ),raYgivenP(iJ),raaPress(iJ,iGas)
+            !end do
+            !call dostop
+
+          END IF
+        END IF
+c^^^^^^^^^^^^^ check to see if linear interp will help^^^^^^^^^^^^^^^^^^^
+      END DO
+
+      !!! raaPress in in ATM, raPressLevels is in MB
+c      DO iI = 1,kProfLayer
+c       print *,'xaxaxa',iI,raaPress(iI,1)*1013.25,raPressLevels(iI),raaPress(iI,1)*1013.25/raPressLevels(iI)
+c      END DO
+c      DO iI = 1,kProfLayer
+c       print *,'xaxaxa2',iI,raaPress(iI,1),raR100Press(iI),raPressLevels(iI)/1013.25
+c      END DO
+c      call dostopmesg('xaxaxa$')
+     
+c now just happily spline everything on!!!!!! for the temps
+      DO iI = 1,kMaxLayer
+        raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
+        raXgivenP(iI) = raR100Press(kMaxLayer-iI+1)
+        raYgivenP(iI) = raR100Temp(kMaxLayer-iI+1)
+      END DO
+      CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
+      DO iI = 1,iNot
+        rxpt = log(raaPress(iI,iGas))
+        rxpt = raaPress(iI,iGas)
+        r = 273.15
+        raRTemp(iI) = r
+      END DO
+      DO iI = iNot+1,kProfLayer
+        rxpt = log(raaPress(iI,iGas))
+        rxpt = raaPress(iI,iGas)
+        IF (iSplineType .EQ. +1) THEN
+          CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
+        ELSE
+          CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r)
+        END IF
+        raRTemp(iI) = r
+      END DO
+
+c now just happily spline everything on!!!!!! for the partial pressures
+c since only WATER cares about partial pressures, simple interpolation is fine 
+c for all gases except gasID = 1
+c  **************** this is the orig code ********************************
+      IF (iGasID .GE. 1) THEN  !!! do for all gases, then redo Water correctly
+        DO iI = 1,kMaxLayer
+          raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
+          raXgivenP(iI) = raR100Press(kMaxLayer-iI+1)
+          raYgivenP(iI) = raR100PartPress(kMaxLayer-iI+1)
+        END DO
+        CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
+        DO iI = 1,iNot
+          rxpt = log(raaPress(iI,iGas))
+          rxpt = raaPress(iI,iGas)
+          r = 0.0
+          raRPartPress(iI) = r
+        END DO
+        DO iI = iNot+1,kProfLayer
+          rxpt = log(raaPress(iI,iGas))
+          rxpt = raaPress(iI,iGas)
+          IF (iSplineType .EQ. +1) THEN
+            CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
+          ELSE
+            CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r)
+          END IF
+          IF ((rxpt .GT. 0.0) .AND. (r .LT. 0.0) .AND. (iGasID .EQ. 1)) THEN
+            write (kStdErr,*) 'In creating water reference profile, negative'
+            write (kStdErr,*) 'gas partial pressure found!!!!'
+            write (kStdErr,*) 'failure in "orig" test!!!!'
+            write (kStdErr,*) 'iSplineType  =',iSplineType
+	    DO iJ = 1,kMaxLayer
+	      print *,iGas,iJ,raXgivenP(iJ),raYgivenP(iJ),rxpt
+	    END DO
+	    call dostop
+            r2 = 0.0
+            IF (iSplineType .EQ. 1) THEN
+              !!try linear
+              CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r2)
+              print *,'bad spline for gas .... ',iSplineType,rxpt,r,' with linear',r2
+            END IF
+            write (kStdErr,*) iGas,'<',iI,'>      <<',rxpt,'>>',r,r2
+            write (kStdErr,*) 'looping thru makerefprof spline .... iJ InPP InRefGasAmt GridPP'
+            DO iJ = 1,kMaxLayer
+              write(kStdErr,*) iJ,raXgivenP(iJ),raYgivenP(iJ),raaPress(iJ,iGas)
+            END DO   
+            !!! this is bizarre .. if r2 > 0 and r < 0, just set r = r2 instead
+            !!! or CALL DoStop         
+            CALL DoStopMesg('wierd problems in water : MakeRefProf$')
+          ELSEIF ((r .LT. 0.0) .AND. (iGasID .NE. 1)) THEN
+            write (kStdWarn,*) 'Warning!!In creating ref profile,negative'
+            write (kStdWarn,*) 'gas partial pressure found!!!! Reset to 0'
+            write (kStdWarn,*) 'Gas ID, layer, PP = ',iGasID,iI,r
+            r = 0.0
+          END IF
+          raRPartPress(iI) = r
+        END DO
+      END IF
+c  **************** this is the new code ********************************
+c WATER cares about partial pressures, so be careful!
+      IF ((iGasID .EQ. 1) .AND. (iSplineType .GT. 0)) THEN 
+        DO iI = 1,iNot
+          r = 0.0
+          raRPartPress(iI) = r
+        END DO
+        DO iI = iNot+1,kProfLayer
+          r = raRPartPress(iI)
+          r0 = raRPartPress(iI)
+          CALL PPThruLayers(
+     $     iGasID,iI,iLowerOrUpper,raR100Amt,raR100Temp,raR100PartPress,raR100Press,
+     $     raDataBaseThickness,raSortPressLevels,raSortPressHeights,
+     $     raPressLevels,raRTemp,r)
+c-->> Howard Motteler does not bother with this, and so he sets r = r0!!!! 
+c-->>        print *,iGasID,iI,r,r0,r-r0
+c-->>        r = r0
+          IF ((r .LT. 0.0) .AND. (iGasID .EQ. 1)) THEN
+            write (kStdErr,*) 'In creating water reference profile, negative'
+            write (kStdErr,*) 'gas partial pressure found!!!!'
+            write (kStdErr,*) 'failure in "new" test!!!!'
+            write (kStdErr,*) 'iSplineType  =',iSplineType
+            CALL DoStop
+          ELSEIF ((r .LT. 0.0) .AND. (iGasID .NE. 1)) THEN
+            write (kStdWarn,*) 'Warning!!In creating ref profile,negative'
+            write (kStdWarn,*) 'gas partial pressure found!!!! Reset to 0'
+            write (kStdWarn,*) 'Gas ID, layer, PP = ',iGasID,iI,r
+            r = 0.0
+          END IF
+          raRPartPress(iI) = r
+        END DO
+      END IF
+
+c simply put in the pressures
+      DO iI = 1,iNot
+        !these are "junk"
+        raRPress(iI) = raaPress(iNot+1,iGas)
+      END DO
+      DO iI = iNot+1,kProfLayer
+        raRPress(iI) = raaPress(iI,iGas)
+      END DO
+
+      RETURN
+      END
+c************************************************************************

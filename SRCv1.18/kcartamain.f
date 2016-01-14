@@ -610,6 +610,7 @@ c set up the output binary file and the output header text file
      $       caFluxFile,caPlanckFile,iOutFileName,iNumNLTEGases,
      $       rFreqStart,rFreqEnd,iFileIDLo,iFileIDHi,caComment,
      $       iNumGases,iaGases,raaAmt,raaTemp,raaPress,raaPartPress,
+     $                         raaRAmt,       raaRPartPress,     
      $       raPressLevels,iProfileLayers,
      $       iNpmix,raaMix,caaMixFileLines,iMixFileLines,raMixVertTemp,
      $       iNatm,iNatm2,iaNumLayer,iaaRadLayer,

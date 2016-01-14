@@ -1141,10 +1141,12 @@ c local
 
       iLowestLev = kProfLayer - iNumLays + 1
 
-      rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/
-     $         (PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
+c d onot need this, as we are using TAPE6 levels
+c      rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/
+c     $         (PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
       ! just readjust the layer info read in, and tack on additional gas profiles from refgas
-      write(kSTdWarn,*) 'iLowestLev = ',iLowestLev,' rfracBot = ',rFracBot
+      rFracBot = 1.0      
+      write(kSTdWarn,*) 'iLowestLev = ',iLowestLev,' rfracBot = ',rFracBot,'( if less than 1, reset to 1)'
       write(kStdWarn,*) 'PLEV_KCARTADATABASE_AIRS(iLowestLev+1),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev) = ',
      $   PLEV_KCARTADATABASE_AIRS(iLowestLev+1),rPSurf,PLEV_KCARTADATABASE_AIRS(iLowestLev)
 
