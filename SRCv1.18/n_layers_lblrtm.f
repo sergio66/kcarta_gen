@@ -331,6 +331,7 @@ c local var
       CHARACTER*30 caStr30
       CHARACTER*1  c1
       CHARACTER*2  c2a,c2b
+      CHARACTER*128 cX
       INTEGER iWriteRTP,iCountGases,iGCnt,iPass,iOffSet
       INTEGER i1,i2,i3,i4,i5,i6
 c for printing to lblrtm2rtp      
@@ -607,19 +608,24 @@ c	print *,iL,'read in xscgas',raaG_MRX(iL,1),raaG_MRX(iL,2),raaG_MRX(iL,3)
       iNumGases = iNumGases + iNXsec
       
  111  FORMAT(A120)
- 112  FORMAT(I3,2(' ',F10.3), 2(' ',F10.3),3(' ',ES12.5),1(' ',F12.5))
- 113  FORMAT(A100)
+ 112  FORMAT(I3,2(' ',F10.3), 2(' ',F10.3),5(' ',ES12.5),1(' ',F12.5))
+ 113  FORMAT(A122)
  
       write(kStdWarn,*) '... finshed reading in TAPE5/TAPE6 combo ....'
       write(kStdWarn,*) ' '
       write(kSTdWarn,*) '     rTSurf,rPSurf,rPTOA = ',rTSurf,rPSurf,rPTOA
-      write(kStdWarn,113) ' Index   Plev      Tlev       Pavg       Tavg     WV(amt)   || q=pdz/RT   totalQ(TAPE6)    Ratio   '
-      write(kStdWarn,113) '------------------------------------------------------------||--------------------------------------'
+      cX =
+     $ ' Index   Plev      Tlev       Pavg       Tavg     WV(amt)       CO2(amt)   O3(amt)    || q=pdz/RT   totalQ(TAPE6)    Ratio'
+      write(kStdWarn,113) cX
+      cX =
+     $ '--------------------------------------------------------------------------------------||-----------------------------------'
+     
+      write(kStdWarn,113) cX
       DO iL = 1,iNumLays+1
-        write(kSTdWarn,112) iL,raPressLevelsX(iL),raTPressLevelsX(iL),raPX(iL),raTX(iL),raaG_MRX(iL,1),
+        write(kSTdWarn,112) iL,raPressLevelsX(iL),raTPressLevelsX(iL),raPX(iL),raTX(iL),(raaG_MRX(iL,iJ),iJ=1,3),
      $                         raNAvgJunk(iL),raSumGasAmtTAPE6(iL),raNAvgJunk(iL)/raSumGasAmtTAPE6(iL)	
       END DO
-      write(kStdWarn,113) '------------------------------------------------------------||--------------------------------------'      
+      write(kStdWarn,113) cX
       
       raRTP_TxtInput(1) = rPSurf
       raRTP_TxtInput(2) = rTSurf

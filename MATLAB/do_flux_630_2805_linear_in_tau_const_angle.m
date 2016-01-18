@@ -171,8 +171,10 @@ end
 
 fDN = fDN * 2 * pi;    %% pi is integral over azimuth, while "2" is because sum(daW) = 0.5 ie need angles on either side of nadir
 
-sum_fDN = sum(fDN,2)*0.0025/1000;
-sum_fUP = sum(fUP,2)*0.0025/1000;
+delta_w = mean(diff(w));
+
+sum_fDN = sum(fDN,2)*delta_w/1000;
+sum_fUP = sum(fUP,2)*delta_w/1000;
 figure(1); clf
 semilogy(sum_fDN,plevsx,'b.-',sum_fUP,plevsx,'r.-'); grid
   hl = legend('DN','UP');
