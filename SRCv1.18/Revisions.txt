@@ -577,6 +577,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+1/19/16         kTempervary is set in "checkparams" ... if you want to reset it from "const" to
+                "linear in tau" when only doing RT, look at that routine
+		If doing fluxes, then kTemperVary always set to +43 == what LBLRTM does
+		
 1/14/16         Cleaned up/improved subr MakeRefProf (especially for arbitrary layers)
                 Found/fixed a bug in subr xWeights (for arbitrary pressure layers)
 		-- now use 100 <Pavg> to find the layers to do interpoation onto aritrary p_in

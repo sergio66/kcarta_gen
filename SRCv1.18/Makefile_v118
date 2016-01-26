@@ -318,8 +318,8 @@ FDOUBLE = -N2 -N113                   #<<<
 # $ module load intel/compiler/64/15.0/full
 FORTRANX = /cm/shared/apps/intel/composer_xe/2015.3.187/bin/intel64/ifort
 #FLAGS_RTP = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -check bounds -assume nounderscore
-FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
+#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
+FLAGS = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
 #UFLAG = 
 LIBS  = -lblas -mkl
 FDOUBLE = -r8

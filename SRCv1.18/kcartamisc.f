@@ -626,41 +626,43 @@ c this gets set in rtp_interface.f
 c this is TEMPERATURE variation in layer
 c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
 c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
-      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
-      kTemperVary = +1     !!!temperature in layer varies
-      kTemperVary = +2     !!!temperature in layer varies linearly, simple
-      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
-      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
-      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
-      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
-      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 *****
-
-      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
-      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
-      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
-      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015      
-      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 ****
-      
-      IF (kTemperVary .EQ. -1) THEN
-        write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'
-      ELSEIF (kTemperVary .EQ. +1) THEN
-        write(kStdWarn,*) 'kTemperVary = +1     !!!temperature in layer varies'
-      ELSEIF (kTemperVary .EQ. +2) THEN
-        write(kStdWarn,*) 'kTemperVary = +2     !!!temperature in layer varies linearly, simple v2'
-      ELSEIF (kTemperVary .EQ. +3) THEN
-        write(kStdWarn,*) 'kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v3'
-      ELSEIF (kTemperVary .EQ. +4) THEN
-        write(kStdWarn,*) 'kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau^2)'
-      ELSEIF (kTemperVary .EQ. +41) THEN
-        write(kStdWarn,*) 'kTemperVary = +41    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 (Pade)'
-      ELSEIF (kTemperVary .EQ. +42) THEN
-        write(kStdWarn,*) 'kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau)'
-      ELSEIF (kTemperVary .EQ. +43) THEN
-        write(kStdWarn,*) 'kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau) --> tau/6'
-      ELSE
-        write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
-        CALL DoStop
-      END IF 
+c      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+c      kTemperVary = +1     !!!temperature in layer varies
+c      kTemperVary = +2     !!!temperature in layer varies linearly, simple
+c      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
+c      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
+c      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
+c      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
+c      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 *****
+c      !! see subr checkparams
+c      !! see subr checkparams 
+c      IF (kFlux .LE. 0) THEN
+c        kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+c      ELSE
+c        kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 ****
+c      END IF
+c      !! see subr checkparams
+c      !! see subr checkparams      
+c      IF (kTemperVary .EQ. -1) THEN
+c        write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'
+c      ELSEIF (kTemperVary .EQ. +1) THEN
+c        write(kStdWarn,*) 'kTemperVary = +1     !!!temperature in layer varies'
+c      ELSEIF (kTemperVary .EQ. +2) THEN
+c        write(kStdWarn,*) 'kTemperVary = +2     !!!temperature in layer varies linearly, simple v2'
+c      ELSEIF (kTemperVary .EQ. +3) THEN
+c        write(kStdWarn,*) 'kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v3'
+c      ELSEIF (kTemperVary .EQ. +4) THEN
+c        write(kStdWarn,*) 'kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau^2)'
+c      ELSEIF (kTemperVary .EQ. +41) THEN
+c        write(kStdWarn,*) 'kTemperVary = +41    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 (Pade)'
+c      ELSEIF (kTemperVary .EQ. +42) THEN
+c        write(kStdWarn,*) 'kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau)'
+c      ELSEIF (kTemperVary .EQ. +43) THEN
+c        write(kStdWarn,*) 'kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau) --> tau/6'
+c      ELSE
+c        write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
+c        CALL DoStop
+c      END IF 
 
 c this is really for Mie scattering and VIS/UV ocean reflectance
       kSolAzi = 0.0
@@ -1922,7 +1924,7 @@ c do not make sense ..
       IMPLICIT NONE
       include '../INCLUDE/kcarta.param'
 
-      INTEGER i0,iT,iB,iJ,iGah 
+      INTEGER i0,iT,iB,iJ,iGah,iConstOrVary
       CHARACTER*9 iIOUN9
 
       write(kStdWarn,*) 'checking parameters (from *PARAMS) .... '
@@ -2168,6 +2170,64 @@ c        CALL DoSTOP
         write(kStdErr,*) 'Please reset and retry'
         CALL DoSTOP 
       END IF
+
+c this is TEMPERATURE variation in layer
+c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
+c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
+      kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+      kTemperVary = +1     !!!temperature in layer varies
+      kTemperVary = +2     !!!temperature in layer varies linearly, simple
+      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
+      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
+      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
+      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
+      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 *****
+
+      !! see subr checkparams
+      !! see subr checkparams 
+      IF (kFlux .LE. 0) THEN
+        kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+      ELSE
+        kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 ****
+      END IF
+      !! see subr checkparams
+      !! see subr checkparams 
+
+      iConstOrVary = -1   !! if only RaDTrans, then do linear vary T with tau
+      iConstOrVary = +1   !! if only RaDTrans, then do constant T in layer, default SARTA/kCARTA for RT only
+      IF (kFlux .LE. 0) THEN
+        IF (iConstOrVary .GT. 0) THEN
+          kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+  	  write(kStdWarn,*) 'kFlux .LE. 0 so set kTemperVary = -1'
+        ELSEIF (iConstOrVary .LT. 0) THEN    
+          kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 ****
+      	  write(kStdWarn,*) 'kFlux .LT. 0 but set kTemperVary = 43'	
+        END IF
+      ELSEIF (kFlux .GT. 0) THEN
+        kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 ****
+	write(kStdWarn,*) 'kFlux .GT. 0 so set kTemperVary = 43'	
+      END IF
+
+      IF (kTemperVary .EQ. -1) THEN
+        write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'
+      ELSEIF (kTemperVary .EQ. +1) THEN
+        write(kStdWarn,*) 'kTemperVary = +1     !!!temperature in layer varies'
+      ELSEIF (kTemperVary .EQ. +2) THEN
+        write(kStdWarn,*) 'kTemperVary = +2     !!!temperature in layer varies linearly, simple v2'
+      ELSEIF (kTemperVary .EQ. +3) THEN
+        write(kStdWarn,*) 'kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v3'
+      ELSEIF (kTemperVary .EQ. +4) THEN
+        write(kStdWarn,*) 'kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau^2)'
+      ELSEIF (kTemperVary .EQ. +41) THEN
+        write(kStdWarn,*) 'kTemperVary = +41    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 (Pade)'
+      ELSEIF (kTemperVary .EQ. +42) THEN
+        write(kStdWarn,*) 'kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau)'
+      ELSEIF (kTemperVary .EQ. +43) THEN
+        write(kStdWarn,*) 'kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM v4 O(tau) --> tau/6'
+      ELSE
+        write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
+        CALL DoStop
+      END IF 
 
       RETURN
       END

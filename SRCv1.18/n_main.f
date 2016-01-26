@@ -1143,6 +1143,7 @@ c ******** PARAMS section
       END IF
       write(kStdWarn,*) 'kActualJacs,kActualJacsB,kActualJacsT = ',
      $ kActualJacs,kActualJacsB,kActualJacsT
+
       CALL printstar      
 
 c ******** FRQNCY section

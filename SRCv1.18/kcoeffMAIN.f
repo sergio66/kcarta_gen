@@ -1347,14 +1347,16 @@ c      END IF
       IF ((kCO2_UMBCorHARTMAN .EQ. +1) .AND. (kAltComprDirs .EQ. -1)) THEN
         iCO2Chi = iCO2Chi   !! ie stick to (+2) option, to turn on CO2 chi when using UMBC linemix
       ELSEIF ((kCO2_UMBCorHARTMAN .EQ. -1) .OR. (kAltComprDirs .EQ. +1)) THEN
-        iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing, pr other databases
+        iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing, or other databases
       END IF
 
       !!!! iCO2Chi = 2   TESTING
 
-      IF (iCO2Chi .NE. iDefault) THEN
-        write(kStdErr,*) ' CO2 chi fudge iCO2Chi,iDefault = ',iCO2Chi,iDefault
-        write(kStdErr,*) ' kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN
+ 10   FORMAT(I2,I2,I2)
+      IF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. -1)) THEN
+        write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,'  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN
+c      ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1)) THEN
+c        write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,' but using other user suppl CO2 dir'
       END IF
 
       IF (iCO2Chi .EQ. 2) THEN

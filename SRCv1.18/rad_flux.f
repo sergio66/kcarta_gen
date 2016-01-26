@@ -4591,7 +4591,7 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(JunkSatAng)=1/0,rFracTop'
-      write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
+      write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,-9999.0,rFracTop
 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
