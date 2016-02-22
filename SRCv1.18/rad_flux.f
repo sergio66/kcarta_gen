@@ -3980,8 +3980,7 @@ c local
             raaUpFlux(iFr,iLay) = raaUpFlux(iFr,iLay)*2*kPi
           END DO
         END DO
-        CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),
-     $                 rDelta,iAtm,1,1)
+        CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,1)
         DO iLay = iNumLayer+1,iNumLayer+1
           DO iFr = 1,kMaxPts
             raTemp(iFr) = raaUpFlux(iFr,iLay)
@@ -4096,8 +4095,7 @@ c      END DO
       END IF
      
 c now print out the results
-      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),
-     $                 rDelta,iAtm,1,iNumLayer+1)
+      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,iNumLayer+1)
       DO iLay = 1,iNumLayer
         DO iFr = 1,kMaxPts
           raTemp(iFr) = raaHeatRate(iFr,iLay)
@@ -4159,8 +4157,7 @@ c local
       END IF
 
 c now print out the results
-      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),
-     $                 rDelta,iAtm,1,iNumLayer+1)
+      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,iNumLayer+1)
       DO iLay = i1,i2
         DO iFr = 1,kMaxPts
           raTemp(iFr) = raaXFlux(iFr,iLay)
@@ -4274,11 +4271,9 @@ c local
 
 c now print out the results
 c this was original, wehere we dumped out all but LOWERST or HIGHEST level
-c      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),
-c     $                 rDelta,iAtm,1,iNumLayer*2)
+c      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,iNumLayer*2)
 c new .. dump out at all levels
-      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),
-     $                 rDelta,iAtm,1,(iNumLayer+1)*2)
+      CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,(iNumLayer+1)*2)
 
       !! want to dump UPWELL flux at TOP of each layer, so print levels 2 .. iNumLayer+1
       i1 = 2

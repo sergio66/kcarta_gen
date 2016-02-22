@@ -47,7 +47,7 @@ c iNumberOut   = number of the relevant spectra to look for
         WRITE(iIOUN) iMainType,iSubMainType,iNumberOut
         WRITE(iIOUN) kMaxPts,rFrLow,rFrHigh,rDelta
       END IF
-
+      
       RETURN
       END
 c************************************************************************

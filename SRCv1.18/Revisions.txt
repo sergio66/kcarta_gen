@@ -276,6 +276,9 @@ v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
           +2 : linear in tau, simple  v2
           +3 : linear in tau, ala RRTM, LBLRTM v3
           +4 : linear in tau, ala RRTM, LBLRTM v4
+          +41 : linear in tau, ala RRTM, LBLRTM v41
+          +42 : linear in tau, ala RRTM, LBLRTM v42
+          +43 : linear in tau, ala RRTM, LBLRTM v43 ***** use this	  
        for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileUPWELL_LINEAR_IN_TAU
        for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LINEAR_IN_TAU
 
@@ -361,7 +364,8 @@ computations, even with scattering (introduce a OLR computation) etc]
       kTemperVary = -1       !temperature in layer constant USE THIS!!!!
       kTemperVary = +1       !temperature in layer varies exponentially
       kTemperVary = +2       !temperature in layer varies linearly, simple
-      kTemperVary = +3       !temperature in layer varies linearly, ala RRTM, LBLRTM
+      kTemperVary = +3       !temperature in layer varies linearly, ala RRTM, LBLRTM, BUGGY
+      kTemperVary = +4,41,42,43 !temperature in layer varies linearly, ala RRTM, LBLRTM, debugged, use 43
   n_pth_mix.f
     need to turn layer temperatures into level temperatures
       iInterpType = +1    ! spline, default
@@ -580,7 +584,12 @@ v1.18
 1/19/16         kTempervary is set in "checkparams" ... if you want to reset it from "const" to
                 "linear in tau" when only doing RT, look at that routine
 		If doing fluxes, then kTemperVary always set to +43 == what LBLRTM does
-		
+
+                To quickly do a kTemperVary = +43 calc for rads (w/o fluxes) go to
+		  SUBROUTINE CheckParams
+		and uncomment the line looking like
+      !kTemperVary = +43     !!! >>>>>>>>>>>>> if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<		
+		  
 1/14/16         Cleaned up/improved subr MakeRefProf (especially for arbitrary layers)
                 Found/fixed a bug in subr xWeights (for arbitrary pressure layers)
 		-- now use 100 <Pavg> to find the layers to do interpoation onto aritrary p_in

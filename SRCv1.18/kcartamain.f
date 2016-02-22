@@ -536,17 +536,24 @@ c******************
 c set the kCmp Interp Wgts
 c set the frequency range for the current file block
       iOuterLoop = 1
-        kOuterLoop = iOuterLoop
+      kOuterLoop = iOuterLoop
 
-        iFileID      = iaList(iOuterLoop)  !current kComp file to process
-        rFileStartFr = raFiles(iFileID)
-        iTag         = iaTagIndex(iFileID)
-        iActualTag   = iaActualTag(iFileID)
+      iFileID      = iaList(iOuterLoop)  !current kComp file to process
+      rFileStartFr = raFiles(iFileID)
+      iTag         = iaTagIndex(iFileID)
+      iActualTag   = iaActualTag(iFileID)
 
+      rDummy = 0.0
       DO iInt=1,kMaxPts
-        raFreq(iInt) = raBlock(iFileID)+(iInt-1)*kaFrStep(iTag)
+        raFreq(iInt) = raBlock(iFileID)+(iInt-1)*real(kaFrStep(iTag))
+c	if (iInt .GT. 1) then
+c	  rDummy = rDummy + (raFreq(iInt)-raFreq(iInt-1))
+c	  print *,iInt,raFreq(iInt),raFreq(iInt-1),raFreq(iInt)-raFreq(iInt-1)
+c	end if
       END DO
-
+c      print *,raBlock(iFileID),kaFrStep(iTag),rDummy/10000.0
+c      print *,'memememe0 ',raFreq(2)-raFreq(1),(raFreq(kMaxPts)-raFreq(1))/10000.0
+      
       iGas = 1
       CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag,
      $                       iDoAdd,iErr)
@@ -853,6 +860,7 @@ c compute the abs coeffs
 c see if current gas ID needs nonLTE spectroscopy
           iLTEIn = -1
 	  dDeltaFreqNLTE = 0.0025d0
+	  dDeltaFreqNLTE = dble(kaFrStep(iTag))
           IF ((iChunk_DoNLTE .EQ. 1) .OR. (iChunk_DoNLTE .EQ. 3)) THEN
             CALL NLTEDriver(
      $            iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
@@ -1166,7 +1174,7 @@ c due to NLTE test
                   raFreq(iInt)=raBlock(iFileID)+(iInt-1)*dDeltaFreqNLTE
                 END DO
               END IF
-
+	      
               IF ((iChunk_DoNLTE .EQ. -1) .AND. (kPlanckOut .EQ. 0)) THEN
                 !!need to dump out 1's as eventually, we will be doing NLTE
                 Call DumpPlanckOne(iAtm,iaNumLayer,iaaRadLayer,caPlanckFile,

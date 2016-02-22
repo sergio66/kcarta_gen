@@ -2207,6 +2207,7 @@ c       for 2,3,4 look at "clear_scatter_misc.f" subroutine RT_ProfileDNWELL_LIN
         kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42 ****
 	write(kStdWarn,*) 'kFlux .GT. 0 so set kTemperVary = 43'	
       END IF
+      !kTemperVary = +43     !!! >>>>>>>>>>>>> if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
 
       IF (kTemperVary .EQ. -1) THEN
         write(kStdWarn,*) 'kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT'

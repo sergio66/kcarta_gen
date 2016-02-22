@@ -123,7 +123,7 @@ c >>>>>>>>>>> this is to FORCE tape5 temperatures into the LevelTemperatures and
 	write(kStdWarn,*) '     iI          raTPressLevels(iI)            kLBLRTM_levelT(iI)'
 	write(kStdWarn,*) '-----------------------------------------------------------------'	
 	DO iI = 1,kProflayer+1
-	  write(kStdWarn,*) ,iI,raTPressLevels(iI),kLBLRTM_levelT(iI),raTPressLevels(iI)-kLBLRTM_levelT(iI)
+	  write(kStdWarn,*) iI,raTPressLevels(iI),kLBLRTM_levelT(iI),raTPressLevels(iI)-kLBLRTM_levelT(iI)
           raTPressLevels(iI) = kLBLRTM_levelT(iI)
         END DO
 	write(kStdWarn,*) '-----------------------------------------------------------------'

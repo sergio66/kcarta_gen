@@ -4347,9 +4347,9 @@ c to keep angles constant
 	IF (iLay .LT. 1) iLay = 1
 	IF (iLay .GT. iNumLayer) iLay = iNumLayer	
         iLBLRTMZero = iLay
-	write(kStdWarn,*),'input TOA from LBLRTM TAPE5/6 was ',kLBLRTM_toa,' mb'
+	write(kStdWarn,*) 'input TOA from LBLRTM TAPE5/6 was ',kLBLRTM_toa,' mb'
 	write(kStdWarn,*) '  hmm need to zero ODS from TOA iLay = 1 to iLay ',iLBLRTMZero,' which corresponds to '
-	write(kStdWarn,*),'  radiating layer ',iaaRadLayer(iAtm,iLay),'at p = ',raPressLevels(iaaRadLayer(iAtm,iLay)),' mb'
+	write(kStdWarn,*) '  radiating layer ',iaaRadLayer(iAtm,iLay),'at p = ',raPressLevels(iaaRadLayer(iAtm,iLay)),' mb'
       END IF
 
       DO iLay = 1,iNumLayer

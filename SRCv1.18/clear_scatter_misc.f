@@ -3714,7 +3714,8 @@ c          end if
           raInten(iFr) = raInten(iFr)*rTrans + rFcn
         END DO
 
-      ELSEIF (iVary .EQ. +43) THEN 
+      ELSEIF (iVary .EQ. +43) THEN
+c         http://www.wolframalpha.com/input/?i=1-2*%281%2Fx-exp%28-x%29%2F%281-exp%28-x%29%29%29
 c        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
         !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97 
         !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
@@ -3728,7 +3729,8 @@ c        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(i
             rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
 	  ELSE
             rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
-            rZeta2 = rAbs/6.0	    
+            rZeta2 = rAbs/6.0 - (rAbs**3)/360.0 + (rAbs**5)/15120.0   !! mathematica
+            rZeta2 = rAbs/6.0
             rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)	    
 	  END IF
 c          if (iFr .EQ. 1) THEN
@@ -4000,7 +4002,8 @@ c        print *,'dn flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(i
             rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
             rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
 	  ELSE
-            rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)	  
+            rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
+            rZeta2 = rAbs/6.0 - (rAbs**3)/360.0 + (rAbs**5)/15120.0  !! mathematica	    
             rZeta2 = rAbs/6.0	    
             rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)	    
 	  END IF
@@ -4297,7 +4300,8 @@ c        print *,'dn flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(i
             rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
             rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
 	  ELSE
-            rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)	  	  
+            rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
+            rZeta2 = rAbs/6.0 - (rAbs**3)/360.0 + (rAbs**5)/15120.0  !! mathematica	    
             rZeta2 = rAbs/6.0	    
             rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)	    
 	  END IF
