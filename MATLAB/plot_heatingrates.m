@@ -8,9 +8,9 @@ if length(strfind(kfile,'_HEAT')) > 0
 
     hr = sum(data)*dw;
     figure(1);
-      plot(hr,hgt,'ro-','linewidth',2); grid
-      title('heating rate')
-      ylabel('hgt (km)')
+    plot(hr,hgt,'ro-','linewidth',2); grid
+    title('heating rate')
+    ylabel('hgt (km)')
   end
 
   ix = input(' subset the wavnumbers and then plot the fluxes and heating rates?? (-1/+1) : ');

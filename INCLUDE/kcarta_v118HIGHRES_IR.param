@@ -98,13 +98,13 @@ c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
-c      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
-c      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
+      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
+      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
 c for testing; this will turn off new part of code and just use usual database
 c for testing; this will turn off new part of code and just use usual database
 c      PARAMETER (kWaterIsotopePath = kWaterPath)
-      PARAMETER (kWaterIsobandStart1 = 2905, kWaterIsobandStop1 = 3355)
-      PARAMETER (kWaterIsobandStart2 = 3905, kWaterIsobandStop2 = 3355)
+c      PARAMETER (kWaterIsobandStart1 = 2905, kWaterIsobandStop1 = 3355)
+c      PARAMETER (kWaterIsobandStart2 = 3905, kWaterIsobandStop2 = 3355)
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<

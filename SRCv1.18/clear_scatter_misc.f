@@ -1402,6 +1402,7 @@ c INTEGER iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
             IF (iCldBotkCarta .GT. iaCldBot(iIn)) THEN
               iCldBotkCarta = iaCldBot(iIn)
             END IF
+	    write(kStdWarn,*) ' '	    
             write(kStdWarn,*)'cloud # ',iIn,' associated with atm # ',iAtm 
             write(kStdWarn,*)'setmie0 : cloud is in KCARTA layers ', 
      $           iiDiv*kProfLayer+iaCldTop(iIn)-1,' to ',

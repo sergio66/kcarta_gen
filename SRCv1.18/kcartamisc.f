@@ -2480,6 +2480,8 @@ c see subr AddOnAFGLProfile_arblevels in n_pth_mix.f
 
       IMPLICIT NONE
 
+      INTEGER iPLEV
+      
       include '../INCLUDE/kcarta.param'
       include '../INCLUDE/KCARTA_database.param'
       include '../INCLUDE/airslevelheights.param'
@@ -2507,7 +2509,7 @@ c these are the individual reference profiles, at kProfLayer layers
       REAL pMax100,pMin100
 
 c local variables
-      INTEGER iI,iJ,iL,iG,iZbndFinal,iNot,iX,iY,IPLEV
+      INTEGER iI,iJ,iL,iG,iZbndFinal,iNot,iX,iY
       REAL raWorkP(kMaxLayer),raXgivenP(kMaxLayer),
      $     raYgivenP(kMaxLayer),raY2P(kMaxLayer)
       REAL raWork(kMaxTemp),rYP1,rYPN,rXPT,r,r0,r2,rPPWgt

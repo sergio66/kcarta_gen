@@ -1362,18 +1362,20 @@ c ******** RADNCE section
           iSetRTPCld  = +1   !!cld stuff set in RTP
           write (kStdWarn,*) 'successfully checked scattr SLAB : usual RTP file'
 
-          IF (kFlux .GT. 0) THEN
-            write(kStdErr,*) 'from RTP, cfrac, cfrac2, cfrac12 = ',cfrac,cfrac2,cfrac12
-            write(kStdErr,*) 'kFlux > 0 so need to set cloudfracs to 1, so as to do ONE run only'
-            write(kStdWarn,*) 'from RTP, cfrac, cfrac2, cfrac12 = ',cfrac,cfrac2,cfrac12
-            write(kStdWarn,*) 'kFlux > 0 so need to set cloudfracs to 1, so as to do ONE run only'
-            cfrac = 1.0
-            IF (cfrac2 .GT. 0) THEN
-              cfrac2 = 1.0
-              cfrac12 = 1.0
-            END IF
-            iResetCldFracs = +1 !only do ONE run, where the cloud slabs completely fill unique layers
-          END IF
+c trying to do fluxes for PCLSAM clouds as well
+c          IF (kFlux .GT. 0) THEN
+c            write(kStdErr,*) 'from RTP, cfrac, cfrac2, cfrac12 = ',cfrac,cfrac2,cfrac12
+c            write(kStdErr,*) 'kFlux > 0 so need to set cloudfracs to 1, so as to do ONE run only'
+c            write(kStdWarn,*) 'from RTP, cfrac, cfrac2, cfrac12 = ',cfrac,cfrac2,cfrac12
+c            write(kStdWarn,*) 'kFlux > 0 so need to set cloudfracs to 1, so as to do ONE run only'
+c            cfrac = 1.0
+c            IF (cfrac2 .GT. 0) THEN
+c              cfrac2 = 1.0
+c              cfrac12 = 1.0
+c            END IF
+c            iResetCldFracs = +1 !only do ONE run, where the cloud slabs completely fill unique layers
+c          END IF
+c trying to do fluxes for PCLSAM clouds as well
 
         ELSEIF ((caCloudPFname(1:5) .EQ. 'dummy') .AND. (k100layerCloud .EQ. +1)) THEN 
           write(kStdErr,*) ' oops k100layerCloud = +1 but caCloudPFname = dummy'

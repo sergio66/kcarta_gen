@@ -239,7 +239,24 @@ if nargin == 3
   fclose (fout);
 end
 
-[mm,nn] = size(data);
+if iNumAtm > 1
+  datax = data;
+  clear data
+  for aa = 1 : iNumAtm
+    len = nrow;
+    inds = (aa-1)*len + (1:len);
+    data (aa,:,:) = datax(:,inds);
+  end
+  clear datax
+  [aa,mm,nn] = size(data);
+else
+  [mm,nn] = size(data);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+dataX = data;
+
 if nargin == 1
   plevs = load('airslevels.dat');  %% from GND to TOA, decreasing p; 101 levels
   if length(strfind(kfile,'_ALL')) > 0    
@@ -283,5 +300,20 @@ else
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plot_fluxes
-plot_heatingrates
+
+for aa = 1 : iNumAtm
+  if iNumAtm > 1
+    data = squeeze(dataX(aa,:,:));
+  else
+    data = dataX;
+  end
+  plot_fluxes
+  plot_heatingrates
+  if iNumAtm > 1
+    fprintf(1,'showing heating rate/fluxes for atmosphere %2i of %2i \n',aa,iNumAtm);
+    disp('ret'); pause
+  end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data = dataX;

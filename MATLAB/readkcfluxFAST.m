@@ -196,7 +196,7 @@ for chunk = 1:nchunk
               type, subtype, nrow);
     end
 
-    ODBrowmax=numlay(atmospheres);
+    ODBrowmax = numlay(atmospheres);
 
     % sanity check 
     if nrow ~= ODBrowmax
@@ -235,11 +235,27 @@ for chunk = 1:nchunk
 
 fclose(fin);
 
+if iNumAtm > 1
+  datax = data;
+  clear data
+  for aa = 1 : iNumAtm
+    len = nrow;
+    inds = (aa-1)*len + (1:len);
+    data (aa,:,:) = datax(:,inds);
+  end
+  clear datax
+  [aa,mm,nn] = size(data);
+else
+  [mm,nn] = size(data);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if nargin == 3 
   fclose (fout);
 end
 
-[mm,nn] = size(data);
+
 if nargin == 1
   plevs = load('airslevels.dat');  %% from GND to TOA, decreasing p; 101 levels
   if length(strfind(kfile,'_ALL')) > 0    

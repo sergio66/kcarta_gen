@@ -1,4 +1,4 @@
-c Copyright 1997 
+c Copyright 2016
 c University of Maryland Baltimore County 
 c All Rights Reserved
 
@@ -24,7 +24,9 @@ c      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, L
 c      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
 c      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
 c      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42
-
+c
+c raTPressLevels,iKnowTP are for temperatures at the LEVELS : LEVEL TEMPERATURES
+c
 c************************************************************************
 c************** This file has the forward model routines  ***************
 c************************************************************************
@@ -3947,7 +3949,8 @@ c subroutine to print flux output
 c this is new, to mimic RRTM (after June 2013)
       SUBROUTINE printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $                         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,
-     $                         raDensity0,raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
+     $                         raDensity0,raThickness,raDeltaPressure,
+     $                         raPressLevels,iaRadLayer)
 
       IMPLICIT NONE
 
@@ -5451,7 +5454,6 @@ c see if we have to add on the solar contribution
 
 c now we have the total upwelling radiation at the surface, indpt of angle!!!!
 c this is the radiation that will go upwards
-
       DO iFr = 1,kMaxPts
         raUp(iFr) = raUp(iFr)*raUseEmissivity(iFr)+
      $          raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+
@@ -5568,6 +5570,11 @@ c change to radians
           raDown(iFr) = raDown(iFr)+raSun(iFr)
         END DO
       END IF
+
+c >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
+c >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
+c >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
+
 
 c^^^^^^^^^ compute downward flux, at bottom of each layer  ^^^^^^^^^^^^^^^^
 c ^^^^^^^^ if we only want OLR, we do not need the downward flux!! ^^^^^^^^
@@ -5696,6 +5703,13 @@ c          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracTop,+1,ra
         END DO 
       END DO
 
+c------------------------------------------------------------------------
+
+      IF (rDelta .NE. kaFrStep(iTag)) THEN
+        write(kStdErr,*) 'oh oh rDelta NE kaFrStep(iTag) flux_moment_slowloopLinearVaryT'
+        CALL DoStop
+      END IF
+      
       CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
      $   raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,
      $   raThickness,raDeltaPressure,raPressLevels,iaRadLayer)

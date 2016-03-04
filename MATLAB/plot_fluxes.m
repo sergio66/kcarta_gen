@@ -13,9 +13,16 @@ if length(strfind(kfile,'_ALL')) > 0
       fprintf(1,'     up/dn flux at TOA = %8.6f   %8.6f W/m2 \n',upflux(end),dnflux(end))      
     netxkc = upflux - dnflux;  %% upwell - downwell flux at each level
 
+    n = -1;
+    if n < 0
+      plevsx = plevs;
+    else
+      plevsx = round(plevs*10^n)/10^n;
+    end
+
     figure(1);
       plot(upflux,hgt,'ro-',dnflux,hgt,'bo-'); hold on; 
-      plot(netxkc,hgt,'k',diff(netxkc)*10,hgt(1:end-1),'g','linewidth',2); hold off; grid
+      plot(netxkc,hgt,'k',diff(netxkc) ./  diff(plevsx') * 8.4391,hgt(1:end-1),'g','linewidth',2); hold off; grid
       title(' (r) upwell flux (b) dnwell flux W/m2 \newline (k) net=up-dn W/m2 (g) 10*flux div=dnet/dz  W/m2/layer',...
             'fontsize',10);
       ylabel('hgt (km)')
@@ -26,7 +33,8 @@ if length(strfind(kfile,'_ALL')) > 0
       ylabel('hgt (km)')
 
     figure(3); 
-      n = input('   enter number of decimal points for HR quickcalc (1,2,3 ... or -1 for all) : ');
+      %n = input('   enter number of decimal points for HR quickcalc (1,2,3 ... or -1 for all) : ');
+      n = -1;
       if n < 0
         plevsx = plevs;
       else

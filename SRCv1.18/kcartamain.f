@@ -300,9 +300,9 @@ c iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4
       INTEGER iProfileLayers
 c this is the output radiance intensity array (measured at instrument)
       REAL raInten(kMaxPts)
-c this is to keep 5 calcs going with SARTA
-      REAL raaRadsX(kMaxPts,kProfLayer)
-      INTEGER iNumOutX
+c this allows us to do c1,c2,c12,clear cloud fracs, plus combo, to do TwoSlab
+      REAL raaRadsX(kMaxPts,kProfLayer),raaFluxX(kMaxPts,2*(kProfLayer+1))
+      INTEGER iNumOutX,iLayPrintFlux
 
 c this is the mixing table
       REAL rCO2Mult   !!! for NLTE
@@ -1300,7 +1300,7 @@ c %%%%%%%%%%%%% CLOUDY SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      $              raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
      $              caJacobFile,caJacobFile2,
      $              raTPressLevels,iKnowTP,
-     $              raaRadsX,iNumOutX)  
+     $              raaRadsX,iNumOutX,raaFluxX,iLayPrintFlux)  
               END IF
             END IF
 
