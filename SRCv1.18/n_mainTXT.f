@@ -28,7 +28,7 @@ c gas and cloud profiles
 c mixpath info
      $   iNpmix1,caaMixFileLines1,
 c atmosphere info
-     $   iNatm1,iaMPSetForRad1,raPressStart1,raPressStop1,
+     $   iNatm1,iTemperVary1,iaMPSetForRad1,raPressStart1,raPressStop1,
      $   raTSpace1,raTSurf1,raSatAngle1,raSatHeight1,
      $   caEmissivity1,raSetEmissivity1,rakSolarRefl1,
      $   cakSolarRefl1,iakSolar1,rakSolarAngle1,
@@ -110,7 +110,9 @@ c raPressStop     = array that gives pressure stop  .. = raaPrBdry(:,2)
 c raSetEmissivity = array that gives constant emissivity value (if set)
 c iaSetEms        = -1 if use emissivities from *RADNCE, > 0 if read in file
 c iaSetSolarRefl  = -1 if use refl/emissivities from *RADNCE, > 0 if read in file
-c raSetEmissivity= array containing the wavenumber dependent emissivities
+c raSetEmissivity = array containing the wavenumber dependent emissivities
+c iTemperVary     = -1 for kCARTA const-in-tau layer variation, +43 for LBLRTM linear in tau
+      INTEGER iTemperVary,iTemperVary1
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
       INTEGER iaSetEms1(kMaxAtm),iaSetSolarRefl1(kMaxAtm)
       INTEGER iNatm,iNatm1,iaMPSetForRad(kMaxAtm),iaMPSetForRad1(kMaxAtm) 
@@ -290,7 +292,7 @@ c local variables
      $      rakThermalAngle,iakThermalJacob,iakThermal,
      $      raSatAzimuth,raSolAzimuth,raWindSpeed,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP,
-     $      iAtmLoop,raAtmLoop
+     $      iAtmLoop,raAtmLoop,iTemperVary
       NAMELIST /nm_jacobn/namecomment,iJacob,iaJacob
       NAMELIST /nm_spectr/namecomment,iNumNewGases,iaNewGasID,iaNewData,
      $                    iaaNewChunks,caaaNewChunks,
@@ -514,8 +516,9 @@ c      END IF
       CALL printstar      
 
       namecomment = '******* RADNCE section *******'
-      iAtmLoop = -1
-
+      iAtmLoop     = -1
+      iTemperVary  = -1
+      
       DO iI = 1,kMaxAtm
         raAtmLoop(iI)    = -9999.0
         raSatAzimuth(iI) = 0.0
@@ -533,8 +536,9 @@ c      END IF
 
       read (iIOUN,nml = nm_radnce)
 
-      iAtmLoop1 = iAtmLoop
-
+      iAtmLoop1    = iAtmLoop
+      iTemperVary1 = iTemperVary
+      
       iNatm1 = iNatm
       DO iI  =  1,kMaxAtm
 
@@ -917,7 +921,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raSatAngle(kMaxAtm),raSatHeight(kMaxAtm)
       REAL raFracTop(kMaxAtm),raFracBot(kMaxAtm),raaPrBdry(kMaxAtm,2)
       INTEGER iNatm,iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
-      INTEGER iSetRTPCld
+      INTEGER iSetRTPCld,iTemperVary
 c this is for absorptive clouds
       CHARACTER*80 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
@@ -1062,7 +1066,7 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
      $    iNGas,iaGasesNL,iNXsec,iaLXsecNL,
      $      caPFName,caCloudPFName,iRTP,iNclouds_RTP,iAFGLProf,
      $    iNpmix,caaMixFileLines,
-     $      iNatm,iaMPSetForRad,raPressStart,raPressStop,
+     $      iNatm,iTemperVary,iaMPSetForRad,raPressStart,raPressStop,
      $      raTSpace,raTSurf,raSatAngle,raSatHeight,
      $      caEmissivity,raSetEmissivity,rakSolarRefl,
      $      cakSolarRefl,iakSolar,rakSolarAngle,
@@ -1253,6 +1257,12 @@ c ******** RADNCE section
         END DO 
       END IF
 
+      IF ((iTemperVary .EQ. -1) .OR. (iTemperVary .EQ. +43)) THEN
+        CALL SetkTemperVary(iTemperVary)      
+      ELSE
+        write(kStdErr,*) 'Can only do kTemperVary = -1 or +43, not ',iTemperVary
+        Call DoStop
+      END IF
       CALL radnceNMLonly(iRTP,caPFname,iMPSetForRadRTP,
      $       iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop,
      $       raPressLevels,iProfileLayers,
