@@ -402,7 +402,11 @@ computations, even with scattering (introduce a OLR computation) etc]
                                                    levels to layers
 
                       iReplaceZeroProf = +1   add in gases that are not in LBLRTM TAPE5
-		      
+
+  n_pth_mix.f         IPLEV = +1              readKLAYERS4 : if iRTP = -1, Scott's v1.07
+                                              did not have full T(z),P(z) at levels, only
+					      Pav(z),tAv(z) at layers
+					      
   n_pth_mix.f         iAddLBLRTM = +1         user wants to add on missing 
                                               profiles even if they were 
                                               not specified in TAPE5 or TAPE6
@@ -582,6 +586,15 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.18
 -----
 
+3/26/16         In nm_radnce, iTemperVary is now a namelist param (default = -1 for kCARTA usual constant
+                in temeprature variation, can set to 43 to LBRTTM emulation)
+		Note this is only for upwell RT (and fluxes) .. jacobians still assume constant in tau
+		
+                To quickly do a kTemperVary = +43 calc for rads (w/o fluxes) go to
+		  SUBROUTINE CheckParams in kcartamisc.f
+		and uncomment the line looking like
+      !kTemperVary = +43     !!! >>>>>>>>>>>>> if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
+		
 3/2/16          PCLSAM twoslab flux calcs now do the same as PCLSAM twoslab radiance calcs
                 namely (1) clouds 1,2 (2) cloud 1 (3) cloud 2 (4) clear (5) weighted sum!!!
 		
@@ -592,11 +605,6 @@ v1.18
 1/19/16         kTempervary is set in "checkparams" ... if you want to reset it from "const" to
                 "linear in tau" when only doing RT, look at that routine
 		If doing fluxes, then kTemperVary always set to +43 == what LBLRTM does
-
-                To quickly do a kTemperVary = +43 calc for rads (w/o fluxes) go to
-		  SUBROUTINE CheckParams
-		and uncomment the line looking like
-      !kTemperVary = +43     !!! >>>>>>>>>>>>> if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<		
 		  
 1/14/16         Cleaned up/improved subr MakeRefProf (especially for arbitrary layers)
                 Found/fixed a bug in subr xWeights (for arbitrary pressure layers)

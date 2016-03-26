@@ -1460,7 +1460,7 @@ C     Only read in scattering tables that are needed for this atm
         ELSE IF (iBinaryFile .EQ. -1) THEN 
           DO I = 1, NSCATTAB  
             IF (iaScatTable_With_Atm(I).GT. 0) THEN 
-              write(kStdWarn,*) 'Reading ascii scatter data for table #',I 
+              write(kStdWarn,*) 'Reading ascii scatter data for table #',I,SCATFILE(I)
               CALL READ_SSCATTAB(SCATFILE(I),  !!!!!!MAXTAB, MAXGRID, 
      $          caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I),  
      $          NWAVETAB(I), WAVETAB(1,I), 

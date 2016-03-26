@@ -196,7 +196,7 @@ c        END DO
       END DO
  111  FORMAT(I3,6('  ',F10.4))
  
-c so GeoHgt1/2 and Error1/2 shows Scotts klayers and my hypersometric equation, are quite consistent
+c GeoHgt1/2 and Error1/2 shows Scotts klayers and my hypersometric equation, are consistent
 
       write(kStdWarn,*) '------------------------------------------------------------'
       write(kStdWarn,*) '  '
@@ -218,7 +218,10 @@ c also added on gas 103 (heavy water isotope 4  HOD = 162)
 
       IMPLICIT NONE
 
+      INTEGER iPLEV
+      
       include '../INCLUDE/kcarta.param'
+      include '../INCLUDE/KCARTA_database.param'
 
 c raaAmt/Temp/Press/PartPress = current gas profile parameters
 c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -249,7 +252,7 @@ c READ (caStr,*) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
 
       INTEGER iFileGasesReadIn,iNeed2Read,iGasesInProfile,iTempFound
 
-      INTEGER iL1,iL2,length130,iI
+      INTEGER iL1,iL2,length130,iI,iDefault,iReadP
       CHARACTER*130 ca1,ca2,caTemp
 
       DO iI = 1,kProfLayer
@@ -562,7 +565,17 @@ c now reread the profile file, so that we can get info about presslevels
 c and layer thicknesses
 c just turn this off to read the real old klayers files 
 c -->>> (eg that Scott uses for his kcartav1.07 runs ....) <<<---
-      CALL GetMoreInfo(raPressLevels,raThickness,caPfName)
+      iReadP = +1    !! assume GENN2 style profile has p info
+      iReadP = -1    !! assume GENN2 style profile does not have p info     
+      iDefault = +1
+      IF (iDefault .EQ. iReadP) THEN
+        CALL GetMoreInfo(raPressLevels,raThickness,caPfName)
+      ELSE
+        write(kStdErr,*) 'have turned off GetMoreInfo to read Scott Hannon profiles'
+	DO iFound = 1,kProfLayer+1
+	  raPressLevels(iFound) = PLEV_KCARTADATABASE_AIRS(iFound)
+	END DO
+      ENDIF
 
       RETURN
       END

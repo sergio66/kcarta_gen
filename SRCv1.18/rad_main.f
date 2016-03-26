@@ -12,9 +12,12 @@ c      kTemperVary = +1     !!!temperature in layer varies
 c      kTemperVary = +2     !!!temperature in layer varies linearly, simple
 c      kTemperVary = +3     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, messes rads (buggy)
 c      kTemperVary = +4     !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau^2)
-c      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM, no O(tau) approx, very similar to kTemperVary=4
-c      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, debugged for small O(tau), used with EliMlawer 12/2015
-c      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has x/6 as x-->0 compared to kTemperVary = +42
+c      kTemperVary = +41    !!!temperature in layer varies linearly, ala PADE GENLN2 RRTM, LBLRTM,
+c                              no O(tau) approx, very similar to kTemperVary=4
+c      kTemperVary = +42    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, 
+c                              debugged for small O(tau), used with EliMlawer 12/2015
+c **   kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has **
+c **                           x/6 as x-->0 compared to kTemperVary = +42                      **
 
 c************************************************************************
 c************** This file has the forward model routines  ***************
