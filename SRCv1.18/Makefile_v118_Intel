@@ -18,94 +18,7 @@
 #    scatter.param, pre_defined.param, gauss.param) while for rtpdefs.f, we 
 #    have a Makefile directive for the include file (see RTP section below)
 
-#  http://web.eecs.umich.edu/~sugih/pointers/summary.html
-# debug with
-#  run run quickuse_flux_4angles_mlawer.nml junky.dat
-
-# ==================================
-# 1) Type "make clean" to clear up everything
-# 2) Set the correct paths, parameters in ../INCLUDE/kcarta.param
-#    (eg see the IEEE_BE vs IEEE_LE note below)
-# 3) Set the correct HDF (HDF_INSTALL,HDFLIB) and RTP (RTPLIB) flags
-#    Also set up the correct path to the RTP include file rtpdefs.f 
-#    (RTPINC and RTPDEFS_FILE)
-# 4) Also correctly set the DISTDIR (this is where the databases are)
-# 5) Set up the options for your compiler (SGI,Linux,Sun,...)
-#    This could include setting up the correct path to the blas library ...
-#    see LIBS for this
-# 6) You might need to set up the RTP library package. Go to where it is
-#    (eg ../../RTP/Src) Check that the Makefile options there are set up for 
-#    your compiler, type "make clean" and then "make"
-# 7) You might need to set up the BLAS library package. Go to where it is
-#    (eg ../LIB/blas.ref) Check that the Makefile options there are set up 
-#    for your compiler, type "make clean" and then "make"
-#          >>>>>> next two are optional <<<<<<<<<<
-# 8) Set up the SCATTER_ALL parameter below, which tells the linker which
-#    scattering routines to use in the complete kcarta package (kcarta.x)
-#         >>>>>> make the executable <<<<<<<
-# 9) if you want basic    kcarta package, type "make" or "make basic"
-#    if you want complete kcarta (jacobs+all scattering), type "make scat"
-#    if you do NOT want link to rtp libs, type "make basicTXT" or "make scatTXT"
-#
-# Other things to do before getting package working
-# ==================================================
-# 1) You need to set up KALAYERS eventually. Go to where it is 
-#    (eg ../../KLAYERS/Src/)  Check that the Makefile options 
-#    there are set up for your compiler. You will also need to set the 
-#    correct HDF (HDF_INSTALL,HDFLIB) and RTP (RTPLIB) flags
-#    Type "make clean" and then "make"
-# 2) Go to ../UTILITY  Check that the Makefile options there are set up for 
-#    your compiler. Note that SGI F77 and LINUX g77 support fseeks, which
-#    make the readers fast. If you are stuck with Absoft F77 then you cannot
-#    use fseeks, and need to go to the ReEADwoFSEEK directory!
-#      If you use SGI F77, simply type "make" and things should be fine
-#      If you use LINUX g77, simply type "make" and things will crap out as
-#        g77 defines fseek as a subroutine, not a function. So you have to go 
-#        edit readkcBasic.f and readbinary.f, turning off the call as a 
-#        function, and turning it on as a subroutine
-#      If you use Absoft F77 or some other compiler that does not support 
-#        fseeks, go to READwoFSEEK and type "make clean", "make" after
-#        appropriately editing the Makefile there
-#    Note that this only compiles the BASIC reader .. if you want the more
-#    advanced reader, and/or the jacobian and flux readers, you need to
-#    type "make execs"
-#    Warning : if you updated the kCARTA distribution, type "make execdist"
-# 3) Go to ../SCRIPTS and type
-#       basic.sc BASIC/USStandardProf_NEW dodo.dat
-#    If this works, looks like everything is cool as the script
-#      changes a point profile to a RTP file (using MATLAB)
-#      sends this profile thru klayers_rtp and outputs a layer averaged 
-#      profile sends this profile, plus appropriate driver namelist file, 
-#      thru kcarta sends the resulting output thru the f77 readkcBasic reader
-#      (the resulting output eg dod.dat and other work files are in ../WORK)
-
-###################### NOTE : IEEE_BE vs IEEE_LE ###########################
-## There are a number of binary files that are supplied with this code.   ##
-## We supply both endian versions (big endian and little endian).         ##
-## However, it is the users responsibility to ensure that the code picks  ##
-## up and reads the correct version of the files. The main ones are the   ##
-## entire kCARTA database. In addition, there are xsecdata, CKD (water    ##
-## continuum) and SOLAR radiance datafiles that need to be used correctly ##
-##                                                                        ##
-## To read the main kCARTA database, ensure that the correct kWaterPath   ##
-## and kCompPath parameters are set in kcarta.param, before compilation   ##
-## For example, we could have                                             ##
-##      PARAMETER (kWaterPath = '/DATA/kcarta/h2o.ieee-be/')              ##
-##      PARAMETER (kCompPath = '/DATA/kcarta/etc.ieee-be/')               ##
-##      PARAMETER (kCKDPath       = '../DATA/General/CKDieee_be/')        ##
-##      PARAMETER (kSolarPath     = '../DATA/General/SOLAR_be/')          ##
-##                                                                        ##
-## To make doubly and triply sure things have worked, do the following    ##
-## To read the correct SOLAR data, CKD data and xsecdata, go to the       ##
-## ../DATA/General subdirectory. If necessary, delete the supplied        ##
-## symbolic links and make the new required ones eg :                     ##
-##   rm SOLAR                                                             ##
-##   ln -s SOLARieee_Xe SOLAR                                             ##
-##   rm CKD                                                               ##
-##   ln -s CKDieee_Xe CKD                                                 ##
-##   rm xsecdata.dat                                                      ##
-##   ln -s xsecdata.dat.XXXXX xsecdata.dat                                ##
-############################################################################
+# see Readme_MakefileCommentsA
 
 ############################################################################
 ##          set up the appropriate RTP and HDF paths and libraries        ##
@@ -117,13 +30,8 @@
 # HDF_INSTALL : set this to point to the HDF location
 # HDFLIB : hdf lib, relative to install path above
 #
-# linux
-# this is on asl.umbc.edu
-# HDF_INSTALL = /usr/local/hdf
-# HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
-
-# this is on taro.umbc.edu
 # set HDFHOME to point to the local HDF installation, pre Aug 2015
+# HDF_INSTALL = /usr/local/hdf
 # HDF_INSTALL = /asl/opt
 # HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
 
@@ -153,14 +61,8 @@ HDFLIB = $(HDFLIB1) $(HDFLIB2)
 # linux
 # these are gases 1 .. 63
 # RTPLIB = -L/asl/packages/rtpV105/lib -lrtp
-#
 # these are gases 1 .. 63 plus clouds 201 - 203
-# this is on asl.umbc.edu
 # RTPLIB = -L/asl/packages/rtpV105_4500/lib -lrtp
-#
-# rtpV105 on taro.umbc.edu
-# RTPHOME = /asl/packages/rtpV105
-# RTPLIB = -L$(RTPHOME)/lib -lrtp
 #
 ### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
 ### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
@@ -168,10 +70,6 @@ HDFLIB = $(HDFLIB1) $(HDFLIB2)
 #RTPLIB = -L$(RTPHOME)/lib -lrtp
 ### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
 ### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
-#
-### rtpV201 on taro.umbc.edu, 16 gases
-#RTPHOME = /asl/packages/rtpV201
-#RTPLIB = -L$(RTPHOME)/lib -lrtp
 #
 ### rtpV201 on compiled with ifort
 RTPHOME = /home/sergio/git/rtp/rtpV201
@@ -188,21 +86,11 @@ RTPLIB = -L$(RTPHOME)/lib -lrtp
 # RTPINC = -I/asl/packages/rtpV105_4500/include
 # RTPDEFS_FILE = /asl/packages/rtpV105_4500/include/rtpdefs.f
 #
-# rtpV105 on taro.umbc.edu
-#RTPINC = -I/asl/packages/rtpV105/include
-#RTPDEFS_FILE = /asl/packages/rtpV105/include/rtpdefs.f
-#
 ### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
 #RTPINC = -I/asl/packages/rtpV201_g80/include
 #RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs.f
 ###RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs_f90.f90
 ### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
-#
-### 16 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<
-#RTPINC = -I/asl/packages/rtpV201/include
-#RTPDEFS_FILE = /asl/packages/rtpV201/include/rtpdefs.f
-#RTPINC = -I/home/sergio/git/rtp/rtpV201/include
-#RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
 #
 ### 16 gases rtpV201 with ifort
 RTPINC = -I/home/sergio/git/rtp/rtpV201/include
@@ -602,7 +490,7 @@ datafix400:
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \
       cd EARTH_database_params; \
-      lner_EARTH_database_params.sc ;\
+      ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.18
 
@@ -613,7 +501,7 @@ datafix385_H2012:
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \
       cd EARTH_database_params; \
-      lner_EARTH_database_params.sc ;\
+      ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.18
 
@@ -625,7 +513,7 @@ datafix385_H2012_IR_ONLY:
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \
       cd EARTH_database_params; \
-      lner_EARTH_database_params.sc ;\
+      ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.18
 
@@ -636,7 +524,7 @@ datafix385_H2012_hartmann_co2:
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \
       cd EARTH_database_params; \
-      lner_EARTH_database_params.sc ;\
+      ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.18
 
@@ -648,7 +536,7 @@ datafix385_H2008_IR_ONLY:
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \
       cd EARTH_database_params; \
-      lner_EARTH_database_params.sc ;\
+      ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.18
 
@@ -659,7 +547,7 @@ datafix385_H2008:
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \
       cd EARTH_database_params; \
-      lner_EARTH_database_params.sc ;\
+      ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.18
 
@@ -670,7 +558,7 @@ datafix370_H2000:
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \
       cd EARTH_database_params; \
-      lner_EARTH_database_params.sc ;\
+      ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.18
 
