@@ -180,6 +180,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
         IF (iVary .EQ. -1) THEN
           IF (iAccOrLoopFlux .EQ. -1) THEN
           !!!loop over angles
+	    write(kStdWarn,*) 'doing flux_slowloopConstT'
             CALL flux_slowloopConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
@@ -187,6 +188,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
           ELSEIF (iAccOrLoopFlux .EQ. 1) THEN
             !!!use expint3; accurate as it uses rad as function of cos(theta)
+	    write(kStdWarn,*) 'doing flux_fastConstT'
             CALL flux_fastConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
@@ -197,12 +199,14 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
           !! EXPONENTIALLY VARYING T in EACH LAYER
           IF (iAccOrLoopFlux .EQ. -1) THEN
           !!!loop over angles
+	    write(kStdWarn,*) 'doing flux_slowloopExpVaryT'
             CALL flux_slowloopExpVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
      $      raThickness,raPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
           ELSEIF (iAccOrLoopFlux .EQ. 1) THEN
+	    write(kStdWarn,*) 'doing flux_fastExpVaryT'	    	  
             !!!use expint3; accurate as it uses rad as function of cos(theta)
             CALL flux_fastExpVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
@@ -214,6 +218,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
           !! LINEARLY VARYING T in EACH LAYER
           IF (iAccOrLoopFlux .EQ. -1) THEN
           !!!loop over angles
+	    write(kStdWarn,*) 'doing flux_slowloopLinearVaryT'	    	  
             CALL flux_slowloopLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
@@ -221,6 +226,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
           ELSEIF (iAccOrLoopFlux .EQ. 1) THEN
             !!!use expint3; accurate as it uses rad as function of cos(theta)
+	    write(kStdWarn,*) 'doing flux_fastLinearVaryT'	    
             CALL flux_fastLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
@@ -235,6 +241,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
       ELSEIF (iMuDMu_or_Moment .EQ. +2) THEN
         IF ((iVary .EQ. -1) .AND. (iAccOrLoopFlux .EQ. -1)) THEN
           !! constant T, loop over angles
+	    write(kStdWarn,*) 'doing flux_moment_slowloopConstT'	  
             CALL flux_moment_slowloopConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
@@ -243,6 +250,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
         ELSEIF (((iVary .EQ. +3) .OR. (iVary .EQ. 4) .OR. (iVary .EQ. 41) .OR. (iVary .EQ. 42) .OR. (iVary .EQ. 43))
      $      	.AND. (iAccOrLoopFlux .EQ. -1)) THEN
           !!!loop over angles
+	    write(kStdWarn,*) 'doing flux_moment_slowloopLinearVaryT'
             CALL flux_moment_slowloopLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,

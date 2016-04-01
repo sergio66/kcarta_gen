@@ -640,7 +640,6 @@ c retrievals."
       write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=',
      $         iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
-
       iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
 
       iDefault = -1          !!!temperature in layer constant USE THIS FOR RT !!!!
@@ -925,7 +924,7 @@ c for specular reflection
       REAL raSpecularRefl(kMaxPts)
       INTEGER iSpecular
 
-      write(kStdErr,*) 'Warning : doing EMISSIVITY runs, not RADIANCE runs'
+      write(kStdErr,*) 'Warning : doing ATM EMISSION runs, not COMPLETE RADIANCE runs'
 
       iIOUN = iIOUN_IN
 
@@ -1174,10 +1173,10 @@ c      END IF
           ENDIF 
       kTempUnitOpen = +1
       DO iFr = 1,kMaxPts
-        write(iIOUN1,4321) iFr,raThermal(iFr),exp(-raG2S(iFr))
+        write(iIOUN1,4321) iFr,raFreq(iFr),raThermal(iFr),exp(-raG2S(iFr))
       END DO
  1010 FORMAT(I5,' ',A80)
- 4321 FORMAT(I5,' ',2(F15.9,' '))
+ 4321 FORMAT(I5,' ',3(F15.9,' '))
       CLOSE(kTempUnit)
       kTempUnitOpen = -1
 

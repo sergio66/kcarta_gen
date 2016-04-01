@@ -629,8 +629,9 @@ c      END IF
 
       kTemperVary = iTemperVary
       
-      iConstOrVary = -1   !! if only RaDTrans, then do linear vary T with tau
+      iConstOrVary = -1   !! if do flux, do linear vary T with tau
       iConstOrVary = +1   !! if only RaDTrans, then do constant T in layer, default SARTA/kCARTA for RT only
+      
       IF (kFlux .LE. 0) THEN
         IF (iConstOrVary .GT. 0) THEN
           kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
@@ -648,11 +649,11 @@ c      END IF
       
       !!! >>>>>>>>>>>>> uncomment this if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
       ! kTemperVary = +43           
-      IF (iTemperVary .NE. kTemperVary) THEN
-        write(kStdWarn,*) 'Looks like you want to override kTemperVary from ',kTemperVary,' to ',iTemperVary
-        write(kStdErr,*) 'Looks like you want to override kTemperVary from ',kTemperVary,' to ',iTemperVary	
-        kTemperVary = iTemperVary      
-      END IF
+      !IF (iTemperVary .NE. kTemperVary) THEN
+      !  write(kStdWarn,*) 'Looks like you want to override kTemperVary from ',kTemperVary,' to ',iTemperVary
+      !  write(kStdErr,*) 'Looks like you want to override kTemperVary from ',kTemperVary,' to ',iTemperVary	
+      !  kTemperVary = iTemperVary      
+      !END IF
       !!! >>>>>>>>>>>>> uncomment this if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
             
       IF (kTemperVary .EQ. -1) THEN
@@ -662,15 +663,15 @@ c      END IF
       ELSEIF (kTemperVary .EQ. +2) THEN
         write(kStdWarn,*) 'kTemperVary = +2     !layer temp varies linearly, simple v2'
       ELSEIF (kTemperVary .EQ. +3) THEN
-        write(kStdWarn,*) 'kTemperVary = +3     !layer temp varies linearly, ala RRTM, LBLRTM v3'
+        write(kStdWarn,*) 'kTemperVary = +3     !layer temp varies linearly, ala LBLRTM v3'
       ELSEIF (kTemperVary .EQ. +4) THEN
-        write(kStdWarn,*) 'kTemperVary = +4     !layer temp varies linearly, ala RRTM, LBLRTM v4 O(tau^2)'
+        write(kStdWarn,*) 'kTemperVary = +4     !layer temp varies linearly, ala LBLRTM v4 O(tau^2)'
       ELSEIF (kTemperVary .EQ. +41) THEN
-        write(kStdWarn,*) 'kTemperVary = +41    !layer temp varies linearly, ala RRTM, LBLRTM v4 (Pade)'
+        write(kStdWarn,*) 'kTemperVary = +41    !layer temp varies linearly, ala LBLRTM v4 (Pade)'
       ELSEIF (kTemperVary .EQ. +42) THEN
-        write(kStdWarn,*) 'kTemperVary = +42    !layer temp varies linearly, ala RRTM, LBLRTM v4 O(tau)'
+        write(kStdWarn,*) 'kTemperVary = +42    !layer temp varies linearly, ala LBLRTM v4 O(tau)'
       ELSEIF (kTemperVary .EQ. +43) THEN
-        write(kStdWarn,*) 'kTemperVary = +43    !layer temp varies linearly, ala RRTM, LBLRTM v4 O(tau) --> tau/6'
+        write(kStdWarn,*) 'kTemperVary = +43    !layer temp varies linearly, ala LBLRTM v4 O(tau) -> tau/6'
       ELSE
         write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
         CALL DoStop
