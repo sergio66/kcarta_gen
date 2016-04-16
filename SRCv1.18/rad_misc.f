@@ -1373,7 +1373,7 @@ c contributions, for use with jacobians
       SUBROUTINE find_surface_backgnd_radiances(raFreq,raaAbsTemp,raVTemp, 
      $              iAtm,iNumLayer,iaaRadLayer,rFracTop,rFracBot,iNpmix,
      $              rTSpace,rTSurface,raUseEmissivity,
-     $              iProfileLayers,raPressLevels, 
+     $              iProfileLayers,raPressLevels,raTPressLevels,
      $              raSurface,raThermal) 
 
       IMPLICIT NONE
@@ -1382,6 +1382,7 @@ c contributions, for use with jacobians
 
       INTEGER iProfileLayers               !number of KLAYERS atmosphere layers
       REAL raPressLevels(kProfLayer+1)     !atmosphere pressure levels
+      REAL raTPressLevels(kProfLayer+1)    !atmosphere temperature levels
       REAL raFreq(kMaxPts)                 !wavenumber array
       REAL raaAbsTemp(kMaxPts,kMixFilRows) !optical depths
       REAL raVTemp(kMixFilRows)            !vertical temperatures
@@ -1451,8 +1452,8 @@ c instead of temp of full layer at 100 km height!!!!!!
         write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL) 
 
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
-     $    iaRadLayer,raaAbsTemp,rFracTop,rFracBot,-1)
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
+     $    iNumLayer,iaRadLayer,raaAbsTemp,rFracTop,rFracBot,-1)
       ELSE
         DO iFr=1,kMaxPts
           raThermal(iFr) = 0.0

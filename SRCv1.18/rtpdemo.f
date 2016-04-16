@@ -496,11 +496,15 @@ c use the solar on/off, thermal on/off etc.
       kThermalJacob = iakThermalJacob(iC)
 
       IF (kThermalAngle  .LT. 0) THEN
-        kSetThermalAngle = -1   !use accurate angles lower down in atm
+        kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
+	IF ((kFlux .GT. 0) .OR. (kTemperVary .GE. 4)) THEN	
+          kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+	END IF
       ELSE
         kSetThermalAngle = +1   !use user specified angle everywhere
       END IF
-
+      write(kStdWarn,*) 'in rtpdemo.f --> kFlux,kTemperVary,kSetThermalAngle = ',kFlux,kTemperVary,kSetThermalAngle
+      
       IF (iDirection .GT. 0) THEN
         !check things make sense for downlook in
         IF ((kSolarAngle .LT. 0.0) .OR. (kSolarAngle .GT. 90.0)) THEN

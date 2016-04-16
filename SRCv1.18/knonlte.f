@@ -3779,7 +3779,7 @@ c if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -4245,7 +4245,7 @@ c if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -4705,7 +4705,7 @@ c if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'

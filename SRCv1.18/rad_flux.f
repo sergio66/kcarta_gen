@@ -184,7 +184,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
             CALL flux_slowloopConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $      raThickness,raPressLevels,iProfileLayers,pProf,
+     $      raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
           ELSEIF (iAccOrLoopFlux .EQ. 1) THEN
             !!!use expint3; accurate as it uses rad as function of cos(theta)
@@ -192,7 +192,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
             CALL flux_fastConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $      raThickness,raPressLevels,iProfileLayers,pProf,
+     $      raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
           END IF
         ELSEIF (iVary .EQ. +1) THEN
@@ -203,7 +203,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
             CALL flux_slowloopExpVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $      raThickness,raPressLevels,iProfileLayers,pProf,
+     $      raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
           ELSEIF (iAccOrLoopFlux .EQ. 1) THEN
 	    write(kStdWarn,*) 'doing flux_fastExpVaryT'	    	  
@@ -211,7 +211,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
             CALL flux_fastExpVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $      raThickness,raPressLevels,iProfileLayers,pProf,
+     $      raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
           END IF
         ELSEIF (iVary .EQ. +3) THEN
@@ -245,7 +245,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
             CALL flux_moment_slowloopConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $      raThickness,raPressLevels,iProfileLayers,pProf,
+     $      raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         ELSEIF (((iVary .EQ. +3) .OR. (iVary .EQ. 4) .OR. (iVary .EQ. 41) .OR. (iVary .EQ. 42) .OR. (iVary .EQ. 43))
      $      	.AND. (iAccOrLoopFlux .EQ. -1)) THEN
@@ -254,7 +254,7 @@ c      print *,'iVary,iAccOrLoopFlux,iMuDMu_or_Moment = ',iVary,iAccOrLoopFlux,i
             CALL flux_moment_slowloopLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress,
      $      raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $      caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $      raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP,
+     $      raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,iKnowTP,
      $      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         ELSE
           write(kStdErr,*) 'not coded up these clear sky flux routines'
@@ -306,7 +306,7 @@ c              thru its bottom level
       SUBROUTINE flux_slowloopConstT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $    raThickness,raPressLevels,iProfileLayers,pProf,
+     $    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
       IMPLICIT NONE
@@ -336,7 +336,7 @@ c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified value if positive
       INTEGER iProfileLayers
       REAL pProf(kProfLayer),raThickness(kProfLayer),
-     $    raPressLevels(kProfLayer+1)
+     $    raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
       REAL raSunRefl(kMaxPts)
       REAL raFreq(kMaxPts),raVTemp(kMixFilRows),rDelta,rSurfPress
       REAL rTSpace,raUseEmissivity(kMaxPts),rTSurf,raaAbs0(kMaxPts,kMixFilRows)
@@ -577,7 +577,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -903,7 +903,7 @@ c              thru its bottom level
       SUBROUTINE flux_fastConstT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSUnRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $    raThickness,raPressLevels,iProfileLayers,pProf,
+     $    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
       IMPLICIT NONE
@@ -933,7 +933,7 @@ c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified value if positive
       INTEGER iProfileLayers
       REAL pProf(kProfLayer),raThickness(kProfLayer),
-     $    raPressLevels(kProfLayer+1)
+     $    raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
       REAL raFreq(kMaxPts),raVTemp(kMixFilRows),rDelta,rSurfPress
       REAL rTSpace,raUseEmissivity(kMaxPts),rTSurf,raaAbs0(kMaxPts,kMixFilRows)
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
@@ -1162,7 +1162,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -1692,7 +1692,7 @@ c              thru its bottom level
       SUBROUTINE flux_slowloopExpVaryT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $    raThickness,raPressLevels,iProfileLayers,pProf,
+     $    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
       IMPLICIT NONE
@@ -1722,7 +1722,7 @@ c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified value if positive
       INTEGER iProfileLayers
       REAL pProf(kProfLayer),raThickness(kProfLayer),
-     $    raPressLevels(kProfLayer+1)
+     $    raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
       REAL raSunRefl(kMaxPts)
       REAL raFreq(kMaxPts),raVTemp(kMixFilRows),rDelta,rSurfPress
       REAL rTSpace,raUseEmissivity(kMaxPts),rTSurf,raaAbs0(kMaxPts,kMixFilRows)
@@ -1984,7 +1984,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -2275,7 +2275,7 @@ c              thru its bottom level
       SUBROUTINE flux_fastExpVaryT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSUnRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $    raThickness,raPressLevels,iProfileLayers,pProf,
+     $    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
       IMPLICIT NONE
@@ -2304,7 +2304,7 @@ c              surface,solar and backgrn thermal at the surface
 c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified value if positive
       INTEGER iProfileLayers
-      REAL pProf(kProfLayer),raThickness(kProfLayer),raPressLevels(kProfLayer+1)
+      REAL pProf(kProfLayer),raThickness(kProfLayer),raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
       REAL raFreq(kMaxPts),raVTemp(kMixFilRows),rDelta,rSurfPress
       REAL rTSpace,raUseEmissivity(kMaxPts),rTSurf,raaAbs0(kMaxPts,kMixFilRows)
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
@@ -2550,7 +2550,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -3125,7 +3125,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -3709,7 +3709,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -4477,7 +4477,7 @@ c              thru its bottom level
       SUBROUTINE flux_moment_slowloopConstT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $    raThickness,raPressLevels,iProfileLayers,pProf,
+     $    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
       IMPLICIT NONE
@@ -4507,7 +4507,7 @@ c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified value if positive
       INTEGER iProfileLayers
       REAL pProf(kProfLayer),raThickness(kProfLayer),
-     $    raPressLevels(kProfLayer+1)
+     $    raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
       REAL raSunRefl(kMaxPts)
       REAL raFreq(kMaxPts),raVTemp(kMixFilRows),rDelta,rSurfPress
       REAL rTSpace,raUseEmissivity(kMaxPts),rTSurf,raaAbs0(kMaxPts,kMixFilRows)
@@ -4751,7 +4751,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
@@ -5077,7 +5077,7 @@ c              thru its bottom level
      $    rTSpace,rTSurf,rSurfPress,
      $    raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID,
      $    caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag,
-     $    raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP,
+     $    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,iKnowTP,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
       IMPLICIT NONE
@@ -5399,11 +5399,6 @@ c NEW NEW NEW NEW NEW NEW
       CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp,
      $                iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
-c       DO iLay = 1,kProfLayer+1
-c         print *,iLay,raPressLevels(iLay),TEMP(iLay)
-c       END DO
-c       CALL DoStop
-
       IF (kFlux .EQ. 5) THEN
         troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       END IF
@@ -5427,18 +5422,6 @@ c compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
         raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
       END DO
 
-c compute the emission of the individual mixed path layers in iaRadLayer
-c NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!! 
-c      DO iLay = 1,iNumLayer
-c        iL = iaRadLayer(iLay)
-c first get the Mixed Path temperature for this radiating layer
-c        rMPTemp = raVT1(iL)
-c        DO iFr = 1,kMaxPts
-c          rPlanck = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-c          rPlanck = r1*((raFreq(iFr)**3))/rPlanck
-c          END DO
-c        END DO
-
 c^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 c now go from top of atmosphere down to the surface to compute the total
 c radiation from top of layer down to the surface
@@ -5446,7 +5429,7 @@ c if rEmsty = 1, then intensity need not be adjusted, as the downwelling radianc
 c from the top of atmosphere is not reflected
       IF (iDoThermal .GE. 0) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $    raUseEmissivity,iProfileLayers,raPressLevels,iNumLayer,
+     $    raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
      $    iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'

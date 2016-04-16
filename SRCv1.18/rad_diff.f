@@ -1,4 +1,4 @@
-c Copyright 1997 
+c Copyright 2016
 c University of Maryland Baltimore County 
 c All Rights Reserved
 
@@ -10,8 +10,8 @@ c this subroutine computes the backgnd thermal contribution
 c FOR BACKGND THERMAL CONTR, ALWAYS START FROM TOP OF ATMOSPHERE (100 km), 
 c even if eg down looking aircraft is flying at 20 km
       SUBROUTINE BackGndThermal(raThermal,raVT1,rTSpace,raFreq,
-     $  raUseEmissivity,iProfileLayers,raPressLevels,
-     $  iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,iDoAcos35)
+     $  raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,
+     $  iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,iDoAcos35)
 
       IMPLICIT NONE
 
@@ -29,7 +29,7 @@ c iNumLayer  = total number of layers in current atmosphere
 c iaRadLayer = this is a list of layers in atm
 c raUseEmissivity = surface emissivity
 c iDoAcos35  = tells to use acos(3/5) at EACH freq, EACH layer
-      REAL raPressLevels(kProfLayer+1)
+      REAL raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
       REAL raFreq(kMaxPts),raVT1(kMixFilRows),rTSpace
       REAL raThermal(kMaxPts),raUseEmissivity(kMaxPts)
       REAL raaAbsCoeff(kMaxPts,kMixFilRows),rFracTop,rFracBot
@@ -67,10 +67,9 @@ c now do the radiative transfer!!!
      $     raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,
      $     rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
         write(kStdWarn,*)'backgnd thermal : slow,accurate angle integration'
-c else we use diffusivity approx
       ELSE IF (iDoThermal .EQ. 0) THEN
         CALL DoDiffusivityApprox(raThermal,raVT1,rTSpace,raFreq,
-     $          raUseEmissivity,iProfileLayers,raPressLevels,
+     $          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
      $          iNumLayer,iaRadLayer,
      $          raaAbsCoeff,rFracTop,rFracBot,iaRadLayerTemp,iT,
      $          iExtraThermal,raExtraThermal,iDoAcos35)
@@ -91,6 +90,7 @@ c factor from the azimuthal integration
       END
 
 c************************************************************************
+
 c this subroutine does downward thermalrad tansfer from iS to iE
 c ASSUMPTION IS THAT THE ANGLE IS acos(3/5) FOR TOPMOST LAYERS, AND
 C THEN DONE ACCURATELY FOR BOTTOM LAYERS!!!!!!!
@@ -104,10 +104,10 @@ c
 c for layers 100..20, it uses acos(3/5)
 c for layers 20 ..1, it does t(i-1->0,x1)-t(i->0,x2) 
 c    where x1 is calculated at layer i-1, x2 is calculated at layer i
-      SUBROUTINE FastBDRYL2GDiffusiveApprox(iNumLayer,
+      SUBROUTINE orig_const_in_tau_FastBDRYL2GDiffusiveApprox(iNumLayer,
      $    iProfileLayers,raPressLevels,
      $    iS0,iE0,iaRadLayer,raVT1,raFreq,raaOrigAbsCoeff,raTemp,
-     $    rFracTop,rFracBot,iDefinedTopLayer)
+     $    rFracTop,rFracBot,iDefinedTopLayer,iTemperVariation)
 
       IMPLICIT NONE
 
@@ -129,14 +129,15 @@ c iS,iE are the start/stop layers between which to do transfer
       REAL raFreq(kMaxPts),raVT1(kMixFilRows),raTemp(kMaxPts)
       REAL raaOrigAbsCoeff(kMaxPts,kMixFilRows),rFracTop,rFracBot
       INTEGER iNumLayer,iaRadLayer(kProfLayer),iProfileLayers
-      INTEGER iS0,iE0,iDefinedTopLayer
+      INTEGER iS0,iE0,iDefinedTopLayer,iTemperVariation
 
 c local variables
       INTEGER iFr,iLay,iL,iLm1,iBdry0,iBdry,iBdryP1,iSecondEnd,iCase
       REAL ttorad,rMPTemp,raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts),rPlanck
 
 c to do the angular integration
-      REAL rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts)
+      REAL rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
+      REAL raL2G(kMaxPts),raL2Gm1(kMaxPts)
       REAL FindDiffusiveAngleExp,rDiff,rCosDiff,rW
       INTEGER FindBoundary,iS,iE,iDiv,iM,iBdryP1_O
 
@@ -176,7 +177,7 @@ c iS~50    iE~1   iB > iS,iE      ==> do iB->iE using accurate diff approx
        END IF
 
       IF (iCase .EQ. -1) THEN
-        write(kStdErr,*)'In FastBDRYL2GDiffusiveApprox, icase = -1'
+        write(kStdErr,*)'In orig_const_in_tau_FastBDRYL2GDiffusiveApprox, icase = -1'
         CALL DoSTOP
       END IF
 
@@ -220,6 +221,9 @@ c for FULL layers!
         raL2G(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
       END DO
 
+      print *,iTemperVariation
+      print *,9999,raFreq(1),raTemp(1)
+      
 c do top part of atmosphere, where we can use acos(3/5)
       IF ((iCase .EQ. 1)  .OR. (iCase. EQ. 2)) THEN
 c go from top of atmosphere to boundary
@@ -238,6 +242,8 @@ c for FULL layers! but have to worry about bottom layer!
 c find the diffusive angles for the layer beneath
             rAngleTr_m1  = exp(-raL2Gm1(iFr)/rCosDiff)
             rAngleTr     = exp(-raL2G(iFr)/rCosDiff)
+	    raAngleTr_m1(iFr) = rAngleTr_m1
+	    raAngleTr(iFr)    = rAngleTr
 c Planckian emissions
             rPlanck      = ttorad(raFreq(iFr),rMPTemp)
             raTemp(iFr)  = raTemp(iFr) + rPlanck*(rAngleTr_m1-rAngleTr)
@@ -245,9 +251,254 @@ c get ready for the layer beneath
             raL2G(iFr)   = raL2Gm1(iFr)
             raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
           END DO
+          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
         END DO
       END IF
 
+      IF ((iCase .EQ. 1) .OR. (iCase .EQ. 3)) THEN
+c go from boundary to ground, or iE
+c do bottom part of atmosphere ACCURATELY
+
+        IF (iE0 .EQ. 1) THEN
+c if iE0 == bottom layer, then go accurately all the way to the 
+c last-from-bottom layer in this loop, and then accurately add on the effects 
+c of the bottommost layer
+          iSecondEnd=2
+        ELSE
+c if iE0 <> bottom layer, then do radiative transfer all the way down to iE0
+          iSecondEnd=iE0
+        END IF
+
+        DO iFr=1,kMaxPts
+          rAngleTr = FindDiffusiveAngleExp(raL2G(iFr))
+          raFreqAngle(iFr) = rAngleTr
+	  IF (iFr .EQ. 1) rCosDiff = raFreqAngle(iFr) 
+        END DO
+
+        DO iLay=iBdry0,iSecondEnd,-1
+          iL      = iaRadLayer(iLay)
+          iLm1    = iaRadLayer(iLay-1)
+          rMPTemp = raVT1(iL)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! but have to worry about bottom layer
+          IF (iLay .EQ. 2) THEN 
+            rW = rFracBot 
+          ELSE 
+            rW = 1.0 
+          END IF
+          DO iFr=1,kMaxPts
+c find the diffusive angles for the layer beneath
+            rAngleTr_m1         = FindDiffusiveAngleExp(raL2Gm1(iFr))
+            raFreqAngle_m1(iFr) = rAngleTr_m1
+            rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1)
+            rAngleTr            = raFreqAngle(iFr)
+            rAngleTr            = exp(-raL2G(iFr)/rAngleTr)
+	    raAngleTr_m1(iFr) = rAngleTr_m1
+	    raAngleTr(iFr)    = rAngleTr	    
+c Planckian emissions
+            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
+            raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+c get ready for the layer beneath
+            raL2G(iFr)       = raL2Gm1(iFr)
+            raL2Gm1(iFr)     = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
+            raFreqAngle(iFr) = raFreqAngle_m1(iFr)
+          END DO
+          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)	  
+        END DO
+
+        IF (iSecondEnd .EQ. 2) THEN
+c now do the bottommost layer, recalling its transmission = 1.0 always
+          iL          = iaRadLayer(1)
+          rMPTemp     = raVT1(iL)
+          rAngleTr_m1 = 1.0
+          DO iFr=1,kMaxPts
+            rAngleTr    = raFreqAngle(iFr)
+            rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
+            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
+            raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+	    raAngleTr_m1(iFr) = rAngleTr_m1
+	    raAngleTr(iFr)    = rAngleTr	    
+          END DO
+          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)	  
+        END IF
+      END IF
+
+      RETURN
+      END  
+c************************************************************************
+c this subroutine does downward thermalrad tansfer from iS to iE
+c ASSUMPTION IS THAT THE ANGLE IS acos(3/5) FOR TOPMOST LAYERS, AND
+C THEN DONE ACCURATELY FOR BOTTOM LAYERS!!!!!!!
+c and that raTemp has already been initialized with kTSpace Planck fcn
+c 
+c this is QUITE ACCURATE!!!!! as it uses diffusive approx in the upper 
+c layers, which do not contribute too much to the thermal, and then is very
+c accurate in the bottom fifth of the atmosphere.
+c Thus it should not be too SLOW :)
+c 
+c for layers 100..20, it uses acos(3/5)
+c for layers 20 ..1, it does t(i-1->0,x1)-t(i->0,x2) 
+c    where x1 is calculated at layer i-1, x2 is calculated at layer i
+c
+c assumes linear in tau variation of layer temperature
+
+      SUBROUTINE new_linear_in_tau_FastBDRYL2GDiffusiveApprox(iNumLayer,
+     $    iProfileLayers,raPressLevels,raTPressLevels,
+     $    iS0,iE0,iaRadLayer,raVT1,raFreq,raaOrigAbsCoeff,raTemp,
+     $    rFracTop,rFracBot,iDefinedTopLayer,iTemperVariation)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c rFracTop is the fractional weight of the "uppermost" layer as defined in 
+c      RADNCE; this need not be 100,200,300 but depends on instrument's height
+c      at the top most layer, defined as iDefinedTopLayer
+c raTemp initially has the radiation at beginning
+c        finally has the radiation at the end
+c raFreqAngle has the angular dependence as fcn of freq
+c raFreq    = frequencies of the current 25 cm-1 block being processed
+c raaOrigAbs = matrix containing the mixed path abs coeffs
+c raVT1(    = vertical temperature profile associated with the mixed paths
+c iAtm       = atmosphere number
+c iNumLayer  = total number of layers in current atmosphere
+c iS,iE are the start/stop layers between which to do transfer
+      REAL raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
+      REAL raFreq(kMaxPts),raVT1(kMixFilRows),raTemp(kMaxPts)
+      REAL raaOrigAbsCoeff(kMaxPts,kMixFilRows),rFracTop,rFracBot
+      INTEGER iNumLayer,iaRadLayer(kProfLayer),iProfileLayers
+      INTEGER iS0,iE0,iDefinedTopLayer,iTemperVariation
+
+c local variables
+      INTEGER iFr,iLay,iL,iLm1,iBdry0,iBdry,iBdryP1,iSecondEnd,iCase,iVary
+      REAL ttorad,rMPTemp,raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts),rPlanck
+
+c to do the angular integration
+      REAL rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
+      REAL raL2G(kMaxPts),raL2Gm1(kMaxPts)
+      REAL FindDiffusiveAngleExp,rDiff,raCosDiff(kMaxPts),rW
+      INTEGER FindBoundary,iS,iE,iDiv,iM,iBdryP1_O
+
+      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
+                             !!! this is a COMPILE time variable
+      iVary = 43
+      
+      iS = iaRadLayer(iS0)
+      iE = iaRadLayer(iE0)
+
+      iCase  = -1
+      iBdry  = FindBoundary(raFreq,iProfileLayers,raPressLevels,iaRadLayer)
+      iBdry0 = iBdry
+      iM     = iDiv(iaRadLayer(1),kProfLayer)   
+      iBdry  = iBdry + iM*kProfLayer
+
+c now we have 3 different cases to consider
+c CASE A1 : easy -- this is do ENTIRE atmnosphere
+c iS=100   iE~1   iS > iB > iE    ==> do iS->iB using acos(3/5)
+c                                     do iB->iE using accurate diff approx
+c CASE A2 : easy -- this is do instr-gnd
+c iS~50    iE~1   iS > iB > iE    ==> do iS->iB using acos(3/5)
+c                                     do iB->iE using accurate diff approx
+       IF ((iS .GE. iBdry) .AND. (iBdry .GE. iE)) THEN
+         iCase     = 1
+         iBdryP1   = iBdry  + 1
+         iBdryP1_O = iBdry0 + 1
+       END IF
+c CASE B : quite easy -- this is do atmosphere -- instr
+c iS=100   iE>iB                  ==> do iS->iE using acos(3/5)
+       IF ((iS .GE. iBdry) .AND. (iBdry .LE. iE)) THEN
+         iCase     = 2
+         iBdryP1   = iE
+         iBdryP1_O = iE
+       END IF
+c CASE C : easy -- this is do instr-gnd
+c iS~50    iE~1   iB > iS,iE      ==> do iB->iE using accurate diff approx
+       IF ((iBdry .GE. iS) .AND. (iBdry .GE. iE)) THEN
+         iCase = 3
+         iBdry = iS
+       END IF
+
+      IF (iCase .EQ. -1) THEN
+        write(kStdErr,*)'In new_linear_in_tau_FastBDRYL2GDiffusiveApprox, icase = -1'
+        CALL DoSTOP
+      END IF
+
+      !! fixed this in Feb 2010
+      IF (iBdryP1_O .GT. kProfLayer) THEN
+        iBdryP1_O = iBdryP1_O - iM*kProfLayer 
+      END IF
+
+      rDiff    = (kThermalAngle*kPi/180.0)
+      DO iFr = 1,kMaxPts
+        raCosDiff(iFr) = cos(rDiff)
+      END DO
+      
+c initalize raL2G,raL2Gm1 
+      DO iFr = 1,kMaxPts
+        raL2G(iFr)   = 0.0
+        raL2Gm1(iFr) = 0.0
+      END DO
+
+c calculate raL2Gm1 which is the L2G optical depth from TOA layer to ground
+      DO iLay = iS0-1,1,-1
+        iL = iaRadLayer(iLay)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! but have to worry about bottom layer!
+        IF (iLay .NE. 1) THEN
+          DO iFr = 1,kMaxPts
+            raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
+          END DO
+        ELSE
+          DO iFr=1,kMaxPts
+            raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)*rFracBot
+          END DO
+        END IF
+      END DO
+
+c calculate raL2G which is the L2G optical depth from TOA layer to ground
+c and initialise the angles
+      iL = iaRadLayer(iS0)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! 
+      DO iFr=1,kMaxPts
+        raL2G(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
+      END DO
+
+      ! see subroutine flux_moment_slowloopLinearVaryT in rad_flux.f
+      print *,iTemperVariation
+      print *,9999,raFreq(1),raTemp(1)
+	
+c do top part of atmosphere, where we can use acos(3/5)
+      IF ((iCase .EQ. 1)  .OR. (iCase. EQ. 2)) THEN
+c go from top of atmosphere to boundary
+        DO iLay=iS0,iBdryp1_O,-1
+          iL = iaRadLayer(iLay)
+          iLm1 = iaRadLayer(iLay-1)
+          rMPTemp = raVT1(iL)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! but have to worry about bottom layer!
+          IF (iLay .EQ. 2) THEN 
+            rW = rFracBot 
+          ELSE 
+            rW = 1.0 
+          END IF
+          DO iFr=1,kMaxPts
+c find the diffusive angles for the layer beneath
+            rAngleTr_m1       = exp(-raL2Gm1(iFr)/raCosDiff(iFr))
+            rAngleTr          = exp(-raL2G(iFr)/raCosDiff(iFr))
+	    raAngleTr_m1(iFr) = rAngleTr_m1
+	    raAngleTr(iFr)    = rAngleTr
+c get ready for the layer beneath
+            raL2G(iFr)   = raL2Gm1(iFr)
+            raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
+          END DO
+          CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1,
+     $                      raCosDiff,rFracTop,
+     $                      iVary,raTemp)	  
+          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
+        END DO
+      END IF
+      
       IF ((iCase .EQ. 1) .OR. (iCase .EQ. 3)) THEN
 c go from boundary to ground, or iE
 c do bottom part of atmosphere ACCURATELY
@@ -285,14 +536,23 @@ c find the diffusive angles for the layer beneath
             rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1)
             rAngleTr            = raFreqAngle(iFr)
             rAngleTr            = exp(-raL2G(iFr)/rAngleTr)
-c Planckian emissions
-            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
-            raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+	    raAngleTr_m1(iFr)   = rAngleTr_m1
+	    raAngleTr(iFr)      = rAngleTr
 c get ready for the layer beneath
             raL2G(iFr)       = raL2Gm1(iFr)
             raL2Gm1(iFr)     = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
             raFreqAngle(iFr) = raFreqAngle_m1(iFr)
+  	    ! raCosDiff(iFr)   = raFreqAngle(iFr)       ! returns cosine BUT THIS ANGLE TOO SMALL in WINDOW
+  	    ! raCosDiff(iFr)   = raFreqAngle(iFr)-0.05  ! returns cosine ADJUST THIS ANGLE, over compensates
+  	    ! raCosDiff(iFr)   = raFreqAngle(iFr)-0.1   ! returns cosine ADJUST THIS ANGLE, over compensates
+  	    ! raCosDiff(iFr)   = raFreqAngle(iFr)+0.1   ! returns cosine ADJUST THIS ANGLE, under compensates
+  	    raCosDiff(iFr)   = raFreqAngle(iFr)+0.05  ! returns cosine ADJUST THIS ANGLE, best ****
+	    raCosDiff(iFr)   = min(max(raCosDiff(iFr),0.0),1.0)
           END DO
+          CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1,
+     $                      raCosDiff,1.0,
+     $                      iVary,raTemp)	  
+          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
         END DO
 
         IF (iSecondEnd .EQ. 2) THEN
@@ -303,14 +563,19 @@ c now do the bottommost layer, recalling its transmission = 1.0 always
           DO iFr=1,kMaxPts
             rAngleTr    = raFreqAngle(iFr)
             rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
-            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
-            raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
-          END DO
+	    raAngleTr_m1(iFr) = rAngleTr_m1	  
+	    raAngleTr(iFr)    = rAngleTr	    
+	  END DO
+          CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1,
+     $                      raCosDiff,rFracBot,
+     $                      iVary,raTemp)	  
+          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
         END IF
       END IF
 
       RETURN
-      END  
+      END
+      
 c************************************************************************
 c this subroutine does the diffusivity approx for ALL angles being acos(3/5)
       SUBROUTINE Diffusivity_AllAnglesEqual(raThermal,raVT1,rTSpace,
@@ -407,10 +672,11 @@ c set the contribution from this DIFFUSE angle to raThermal
 c************************************************************************
 c this subroutine does the diffusivity approx for upper layer angles being
 c acos(3/5), lower angles found accurately
-      SUBROUTINE Diffusivity_LowerAnglesAccurate(raThermal,raVT1,
+c assume layer temperatures CONST in tau
+      SUBROUTINE orig_const_in_tau_Diffusivity_LowerAnglesAccurate(raThermal,raVT1,
      $  rTSpace,raFreq,raUseEmissivity,iProfileLayers,raPressLevels,
      $  iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
-     $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
+     $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,iTemperVariation)
 
       IMPLICIT NONE
 
@@ -438,6 +704,8 @@ c raExtraThermal = thermal radiation above posn of instrument
       INTEGER iaRadLayer(kProfLayer)
       INTEGER iT,iaRadLayerTemp(kMixFilRows)
       INTEGER iNumLayer,iExtraThermal,iProfileLayers
+c iTemperVariation = -1 (const) or -2 (linear in tau)
+      INTEGER iTemperVariation
 
 c local vars
       REAL rThetaEff,raIntenAtmos(kMaxPts),ttorad
@@ -459,37 +727,122 @@ c go from top of atmosphere to gnd
           raThermal(iFr) = raIntenAtmos(iFr)
           raExtraThermal(iFr) = 0.0
         END DO
-        CALL FastBDRYL2GDiffusiveApprox(iNumLayer,
+        CALL orig_const_in_tau_FastBDRYL2GDiffusiveApprox(iNumLayer,
      $        iProfileLayers,raPressLevels,iNumLayer,1,
      $        iaRadLayer,raVT1,raFreq,raaAbsCoeff,
-     $        raThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer))
+     $        raThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer),iTemperVariation)
 
       ELSE IF (iExtraThermal .GT. 0) THEN
 c go from top of atmosphere to instrument
         DO iFr=1,kMaxPts
           raExtraThermal(iFr) = raIntenAtmos(iFr)
         END DO
-        CALL FastBDRYL2GDiffusiveApprox(iT,
+        CALL orig_const_in_tau_FastBDRYL2GDiffusiveApprox(iT,
      $        iProfileLayers,raPressLevels,iT,iNumLayer+1,
      $        iaRadLayerTemp,raVT1,raFreq,raaAbsCoeff,
-     $        raExtraThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer))
+     $        raExtraThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer),iTemperVariation)
 c go from instrument to gnd
         DO iFr=1,kMaxPts
           raThermal(iFr) = raExtraThermal(iFr)
         END DO
-        CALL FastBDRYL2GDiffusiveApprox(iT,
+        CALL orig_const_in_tau_FastBDRYL2GDiffusiveApprox(iT,
      $        iProfileLayers,raPressLevels,iNumLayer,1,
      $        iaRadLayerTemp,raVT1,raFreq,raaAbsCoeff,
-     $        raThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer))
+     $        raThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer),iTemperVariation)
       END IF
-
 
       RETURN
       END 
+
+c************************************************************************
+c this subroutine does the diffusivity approx for upper layer angles being
+c acos(3/5), lower angles found accurately
+c assume layer temperatures LINEAR in tau
+      SUBROUTINE new_linear_in_tau_Diffusivity_LowerAnglesAccurate(raThermal,raVT1,
+     $  rTSpace,raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
+     $  iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
+     $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,iTemperVariation)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c rFracTop is the fractional weight of the "uppermost" layer as defined in 
+c      RADNCE; this need not be 100,200,300 but depends on instrument's height
+c raFreq    = frequencies of the current 25 cm-1 block being processed
+c raThermal  = backgnd thermal intensity at surface
+c raaAbs     = matrix containing the mixed path abs coeffs
+c raVT1    = vertical temperature profile associated with the mixed paths
+c iNumLayer  = total number of layers in current DEFINED atmosphere
+c iaRadLayer = this is a list of layers in DEFINED atm
+c iT         = total number of layers in TEMPORARY FULL atmosphere
+c iaRadLayerTemp = this is a list of layers in TEMPORARY FULL atm
+c raUseEmissivity = surface emissivity
+c iExtraThermal = if the top of atmosphere is ABOVE instrument, need to 
+c             calculate the attenuation due to the extra terms
+c raExtraThermal = thermal radiation above posn of instrument
+      REAL raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
+      REAL raFreq(kMaxPts),raVT1(kMixFilRows),rFracTop,rTSpace
+      REAL raExtraThermal(kMaxPts),rFracBot
+      REAL raThermal(kMaxPts),raUseEmissivity(kMaxPts)
+      REAL raaAbsCoeff(kMaxPts,kMixFilRows)
+      INTEGER iaRadLayer(kProfLayer)
+      INTEGER iT,iaRadLayerTemp(kMixFilRows)
+      INTEGER iNumLayer,iExtraThermal,iProfileLayers
+c iTemperVariation = -1 (const) or -2 (linear in tau)
+      INTEGER iTemperVariation
+
+c local vars
+      REAL rThetaEff,raIntenAtmos(kMaxPts),ttorad
+      INTEGER iFr,iL
+
+c this is the diffusivity approx angle, in radians
+      rThetaEff = kThermalAngle*kPi/180.0
+
+      DO iFr=1,kMaxPts
+        raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
+      END DO
+      
+c select diffusivity angles, depending on frequency and layers
+c (acos(3/5) at top layers, diffusivity parametrization at bottom layers)
+c initialize to space blackbdy radiation
+      IF (iExtraThermal .LT. 0) THEN
+c go from top of atmosphere to gnd
+        DO iFr=1,kMaxPts
+          raThermal(iFr) = raIntenAtmos(iFr)
+          raExtraThermal(iFr) = 0.0
+        END DO
+        CALL new_linear_in_tau_FastBDRYL2GDiffusiveApprox(iNumLayer,
+     $        iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,1,
+     $        iaRadLayer,raVT1,raFreq,raaAbsCoeff,
+     $        raThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer),iTemperVariation)
+
+      ELSE IF (iExtraThermal .GT. 0) THEN
+c go from top of atmosphere to instrument
+        DO iFr=1,kMaxPts
+          raExtraThermal(iFr) = raIntenAtmos(iFr)
+        END DO
+        CALL new_linear_in_tau_FastBDRYL2GDiffusiveApprox(iT,
+     $        iProfileLayers,raPressLevels,raTPresslevels,iT,iNumLayer+1,
+     $        iaRadLayerTemp,raVT1,raFreq,raaAbsCoeff,
+     $        raExtraThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer),iTemperVariation)
+c go from instrument to gnd
+        DO iFr=1,kMaxPts
+          raThermal(iFr) = raExtraThermal(iFr)
+        END DO
+        CALL new_linear_in_tau_FastBDRYL2GDiffusiveApprox(iT,
+     $        iProfileLayers,raPressLevels,raTPressLevels,iNumLayer,1,
+     $        iaRadLayerTemp,raVT1,raFreq,raaAbsCoeff,
+     $        raThermal,rFracTop,rFracBot,iaRadLayer(iNumLayer),iTemperVariation)
+      END IF
+
+      RETURN
+      END 
+
 c************************************************************************
 c this subroutine does the diffusivity approx
       SUBROUTINE DoDiffusivityApprox(raThermal,raVT1,rTSpace,
-     $  raFreq,raUseEmissivity,iProfileLayers,raPressLevels,
+     $  raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
      $  iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
      $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,iDoAcos35)
 
@@ -514,7 +867,7 @@ c raExtraThermal = thermal radiation above posn of instrument
 c rFracTop   = is the highest layer multiplied by a fraction, because
 c              of the instrument posn w/in the layer, instead of top of layer?
 c              this would affect the backgnd thermal calculation
-      REAL raPressLevels(kProfLayer+1)
+      REAL raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
       REAL raFreq(kMaxPts),raVT1(kMixFilRows),rFracTop,rFracBot
       REAL raExtraThermal(kMaxPts),rTSpace
       REAL raThermal(kMaxPts),raUseEmissivity(kMaxPts)
@@ -525,14 +878,6 @@ c              this would affect the backgnd thermal calculation
 
       INTEGER iNotChoose
       REAL rf1,rf2
-
-c iNotChoose = -1  => use choose angles subroutine to get diffusivity angle
-c                        as a fcn of frequency, for the bottommost layers
-c                        quite fast, pretty accurate
-c iNotChoose =  1  => use fixed diffusivity angle = acos(3/5) for all freqs
-c                        fast, not too accurate
-
-      iNotChoose = kSetThermalAngle
 
       !! bugfix 11/08/2010
       IF (kThermalAngle .LT. 0) THEN
@@ -548,8 +893,25 @@ c                        fast, not too accurate
         kThermalAngle = acos(3.0/5.0) * 180/kPi
       END IF
 
+c iNotChoose = -1  => use choose angles subroutine to get diffusivity angle
+c                        as a fcn of frequency, for the bottommost layers
+c                        quite fast, pretty accurate LAY TEMP CONST IN TAU
+c iNotChoose = -2  => use choose angles subroutine to get diffusivity angle
+c                        as a fcn of frequency, for the bottommost layers
+c                        quite fast, pretty accurate LAY TEMP LINEAR IN TAU
+c iNotChoose =  1  => use fixed diffusivity angle = acos(3/5) for all freqs
+c                        fast, not too accurate
+
+      iNotChoose = kSetThermalAngle
+
+c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
+c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 cdebug
 c      iNotChoose = +1     !set this when debugging thermal jacobians!
+c      iNotChoose = -1     !set this when debugging default "sergio" diffusivty approx, const in tau T variation!
+c      iNotChoose = -2     !set this when debugging default "sergio" diffusivty approx, linear in tau T variation!
+c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
+c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 
 c now loop over the layers, for the particular angle
       IF (iNotChoose .EQ. 1) THEN
@@ -559,11 +921,17 @@ c now loop over the layers, for the particular angle
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
      $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
       ELSE IF (iNotChoose .EQ. -1) THEN
-        write(kStdWarn,*)'back gnd thermal  : using fast accurate approx'
-        CALL Diffusivity_LowerAnglesAccurate(raThermal,raVT1,rTSpace,
+        write(kStdWarn,*)'back gnd thermal  : using fast accurate approx, const layer temp'
+        CALL orig_const_in_tau_Diffusivity_LowerAnglesAccurate(raThermal,raVT1,rTSpace,
      $    raFreq,raUseEmissivity,iProfileLayers,raPressLevels,
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
-     $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
+     $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-1)
+      ELSE IF (iNotChoose .EQ. -2) THEN
+        write(kStdWarn,*)'back gnd thermal  : using fast accurate approx, linear in tau layer temp'
+        CALL new_linear_in_tau_Diffusivity_LowerAnglesAccurate(raThermal,raVT1,rTSpace,
+     $    raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
+     $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
+     $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-2)
       END IF
 
 c this is the thermal diffusive approx ==> multiply by 0.5

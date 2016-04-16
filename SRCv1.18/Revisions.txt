@@ -585,7 +585,13 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
-
+4/15/16         kSetThermalAngle = -1 : use CONST in tau temperatiure variation for
+                                        quick fast background thermal(default)
+                kSetThermalAngle = -2 : use LINEAR in tau temperatiure variation for
+                                        quick fast background thermal (set when kFLUX > 0)
+                kSetThermalAngle = +1 : user specified angle for 
+                                        quick fast background thermal (set when kFLUX > 0)
+					
 3/26/16         In nm_radnce, iTemperVary is now a namelist param (default = -1 for kCARTA usual constant
                 in temeprature variation, can set to 43 to LBRTTM emulation)
 		Note this is only for upwell RT (and fluxes) .. jacobians still assume constant in tau
