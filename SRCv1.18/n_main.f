@@ -1266,6 +1266,7 @@ c ******** RADNCE section
         write(kStdErr,*) 'Can only do kTemperVary = -1 or +43, not ',iTemperVary
         Call DoStop
       END IF
+
       CALL radnceRTPorNML(iRTP,caPFname,iMPSetForRadRTP,
      $       iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop,
      $       raPressLevels,iProfileLayers,

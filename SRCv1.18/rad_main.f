@@ -653,8 +653,9 @@ c retrievals."
           IF (iNLTESTart .GT. kProfLayer) THEN
             IF (iChunk_DoNLTE .LT. 0) THEN
               !!normal LTE radtransfer
-              CALL rad_trans_SAT_LOOK_DOWN_EMISS(raFreq,
-c              CALL rad_trans_SAT_LOOK_DOWN(raFreq,
+c you can down ATM EMISSION only or FULL CALCS 	      
+c              CALL rad_trans_SAT_LOOK_DOWN_EMISS(raFreq,    !! atm emission
+              CALL rad_trans_SAT_LOOK_DOWN(raFreq,           !! full calcs
      $          raInten,raVTemp,
      $          raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
      $          rSatAngle,rFracTop,rFracBot,

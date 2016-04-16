@@ -646,6 +646,11 @@ c      END IF
 	                     !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
 	write(kStdWarn,*) 'kFlux .GT. 0 so set kTemperVary = 43'	
       END IF
+
+      !!! new, do what the user wishes!!!
+      IF ((kFlux .LE. 0) .AND. (iTemperVary .GT. 0)) THEN
+        kTemperVary = +43
+      END IF
       
       !!! >>>>>>>>>>>>> uncomment this if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
       ! kTemperVary = +43           

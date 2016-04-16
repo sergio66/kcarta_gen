@@ -221,8 +221,8 @@ c for FULL layers!
         raL2G(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
       END DO
 
-      print *,iTemperVariation
-      print *,9999,raFreq(1),raTemp(1)
+c      print *,iTemperVariation
+c      print *,9999,raFreq(1),raTemp(1)
       
 c do top part of atmosphere, where we can use acos(3/5)
       IF ((iCase .EQ. 1)  .OR. (iCase. EQ. 2)) THEN
@@ -251,7 +251,7 @@ c get ready for the layer beneath
             raL2G(iFr)   = raL2Gm1(iFr)
             raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
           END DO
-          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
+c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
         END DO
       END IF
 
@@ -303,7 +303,7 @@ c get ready for the layer beneath
             raL2Gm1(iFr)     = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
             raFreqAngle(iFr) = raFreqAngle_m1(iFr)
           END DO
-          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)	  
+c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)	  
         END DO
 
         IF (iSecondEnd .EQ. 2) THEN
@@ -319,7 +319,7 @@ c now do the bottommost layer, recalling its transmission = 1.0 always
 	    raAngleTr_m1(iFr) = rAngleTr_m1
 	    raAngleTr(iFr)    = rAngleTr	    
           END DO
-          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)	  
+c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)	  
         END IF
       END IF
 
@@ -465,8 +465,8 @@ c for FULL layers!
       END DO
 
       ! see subroutine flux_moment_slowloopLinearVaryT in rad_flux.f
-      print *,iTemperVariation
-      print *,9999,raFreq(1),raTemp(1)
+c      print *,iTemperVariation
+c      print *,9999,raFreq(1),raTemp(1)
 	
 c do top part of atmosphere, where we can use acos(3/5)
       IF ((iCase .EQ. 1)  .OR. (iCase. EQ. 2)) THEN
@@ -495,7 +495,7 @@ c get ready for the layer beneath
           CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1,
      $                      raCosDiff,rFracTop,
      $                      iVary,raTemp)	  
-          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
+c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
         END DO
       END IF
       
@@ -552,7 +552,7 @@ c get ready for the layer beneath
           CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1,
      $                      raCosDiff,1.0,
      $                      iVary,raTemp)	  
-          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
+c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
         END DO
 
         IF (iSecondEnd .EQ. 2) THEN
@@ -569,7 +569,7 @@ c now do the bottommost layer, recalling its transmission = 1.0 always
           CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1,
      $                      raCosDiff,rFracBot,
      $                      iVary,raTemp)	  
-          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
+c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
         END IF
       END IF
 
