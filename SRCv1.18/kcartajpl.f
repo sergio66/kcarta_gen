@@ -1620,9 +1620,10 @@ c ******** RADNCE section
       kThermalJacob = 1
       IF (kThermalAngle  .LT. 0) THEN
         kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
-	IF ((kFlux .GT. 0) .OR. (kTemperVary .GE. 4)) THEN	
-          kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
-          kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc	  
+	IF ((kFlux .GT. 0) .OR. (kTemperVary .GE. 4)) THEN
+          ! kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+	  kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+          kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
 	END IF
       ELSE
         kSetThermalAngle = +1   !use user specified angle everywhere

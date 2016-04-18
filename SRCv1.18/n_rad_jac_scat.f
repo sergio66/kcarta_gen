@@ -333,8 +333,9 @@ c      print *,'----> instead of varying the diffusivity angle'
         IF (kThermal .EQ. 0) THEN
           IF (kThermalAngle  .LT. 0) THEN
             kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
-	    IF ((kFlux .GT. 0) .OR. (kTemperVary .GE. 4)) THEN	    
-              kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+	    IF ((kFlux .GT. 0) .OR. (kTemperVary .GE. 4)) THEN
+              ! kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+    	      kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
               kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
 	    END IF
           ELSE
@@ -359,15 +360,15 @@ c      print *,'----> instead of varying the diffusivity angle'
             write(kStdErr,*)'need Thermal on/off parameter = -1/0/1'
             CALL DoSTOP 
           END IF
-          IF (abs(kThermalJacob) .NE. 1) THEN
-            write(kStdErr,*)'need ThermalJacob on/off parameter = -1/1'
-            CALL DoSTOP 
+          IF ((abs(kThermal) .GT. 1) .AND. (kThermal .NE. 2)) THEN
+            write(kStdErr,*)'need Thermal on/off parameter = -1/0/1/2'
+          C  ALL DoSTOP 
           END IF
           !set the diffusivity angle in degrees
           IF (kThermal .EQ. 0) THEN
             IF (kThermalAngle .GT. 90.0) THEN
               write(kStdWarn,*)'Warning! Reset Diff Angle to acos(3/5)'
-              kThermalAngle = acos(3.0/5.0)*180.0/kPi
+             kThermalAngle = acos(3.0/5.0)*180.0/kPi
             END IF
           END IF
         END IF

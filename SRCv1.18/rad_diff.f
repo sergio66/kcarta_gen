@@ -62,7 +62,8 @@ c doing the special computation for Jacobians ==> use 0 (diffusive approx)
      $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
 
 c now do the radiative transfer!!!
-      IF (kSetThermalAngle .EQ. 2)  THEN
+      IF ((kSetThermalAngle .EQ. 2) .OR. (iDothermal .EQ. 2)) THEN
+        write(kStdErr,*) 'iDoThermal,kSetThermalAngle = ',iDoThermal,kSetThermalAngle
         write(kStdWarn,*) 'doing background thermal using style LINEAR-in-tau slow/accurate integration over zenith angles'
 	write(kStdWarn,*) 'LBLRTM 3angle style'
         CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq,

@@ -2657,7 +2657,8 @@ c use the solar on/off, thermal on/off etc.
       IF (kThermalAngle  .LT. 0) THEN
         kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
 	IF ((kFlux .GT. 0) .OR. (kTemperVary .GE. 4)) THEN
-          kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+          ! kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+	  kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
           kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
 	END IF
       ELSE
@@ -2677,8 +2678,8 @@ c use the solar on/off, thermal on/off etc.
           write(kStdErr,*)'need Solar on/off parameter = -1,0,+1'
           CALL DoSTOP 
         END IF
-        IF (abs(kThermal) .GT. 1) THEN
-          write(kStdErr,*)'need Thermal on/off parameter = -1/0/1'
+        IF ((abs(kThermal) .GT. 1) .AND. (kThermal .NE. 2)) THEN
+          write(kStdErr,*)'need Thermal on/off parameter = -1/0/1/2'
           CALL DoSTOP 
         END IF
         IF (abs(kThermalJacob) .NE. 1) THEN
