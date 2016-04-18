@@ -591,6 +591,10 @@ v1.18
                                         quick fast background thermal (set when kFLUX > 0)
                 kSetThermalAngle = +1 : user specified angle for 
                                         quick fast background thermal (set when kFLUX > 0)
+	        However, if kTemperVary == 43, then the code does both
+		  (a) downwelling thermal using the three angles/LBLRTM "linear in tau" flux calcs
+		      using new function IntegrateOverAngles_LinearInTau
+		  (b) upwelling radiance also using "linear in tau" calcs
 					
 3/26/16         In nm_radnce, iTemperVary is now a namelist param (default = -1 for kCARTA usual constant
                 in temeprature variation, can set to 43 to LBRTTM emulation)

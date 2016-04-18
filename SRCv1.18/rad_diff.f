@@ -62,12 +62,20 @@ c doing the special computation for Jacobians ==> use 0 (diffusive approx)
      $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
 
 c now do the radiative transfer!!!
-      IF (iDoThermal .EQ. 1) THEN
+      IF (kSetThermalAngle .EQ. 2)  THEN
+        write(kStdWarn,*) 'doing background thermal using style LINEAR-in-tau slow/accurate integration over zenith angles'
+	write(kStdWarn,*) 'LBLRTM 3angle style'
+        CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq,
+     $     raPressLevels,raTPressLevels,	
+     $     raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,
+     $     rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
+      ELSEIF (iDoThermal .EQ. 1) THEN
+        write(kStdWarn,*) 'doing background thermal using CONST-in-tau slow/accurate integration over zenith angles'      
         CALL IntegrateOverAngles(raThermal,raVT1,rTSpace,raFreq,
      $     raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,
      $     rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
-        write(kStdWarn,*)'backgnd thermal : slow,accurate angle integration'
       ELSE IF (iDoThermal .EQ. 0) THEN
+        write(kStdWarn,*) 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
         CALL DoDiffusivityApprox(raThermal,raVT1,rTSpace,raFreq,
      $          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
      $          iNumLayer,iaRadLayer,
@@ -910,9 +918,10 @@ cdebug
 c      iNotChoose = +1     !set this when debugging thermal jacobians!
 c      iNotChoose = -1     !set this when debugging default "sergio" diffusivty approx, const in tau T variation!
 c      iNotChoose = -2     !set this when debugging default "sergio" diffusivty approx, linear in tau T variation!
+c      iNotChoose = +2     !set this when debugging default "sergio" diffusivty approx, linear in tau T variation, 3 angles!
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
-
+      
 c now loop over the layers, for the particular angle
       IF (iNotChoose .EQ. 1) THEN
         write(kStdWarn,*)'back gnd thermal  : using acos(3/5) everywhere'
@@ -932,6 +941,9 @@ c now loop over the layers, for the particular angle
      $    raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
      $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-2)
+      ELSE IF (iNotChoose .EQ. +2) THEN
+        write(kStdErr,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
+	Call DoStop
       END IF
 
 c this is the thermal diffusive approx ==> multiply by 0.5

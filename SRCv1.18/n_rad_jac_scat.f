@@ -335,6 +335,7 @@ c      print *,'----> instead of varying the diffusivity angle'
             kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
 	    IF ((kFlux .GT. 0) .OR. (kTemperVary .GE. 4)) THEN	    
               kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+              kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
 	    END IF
           ELSE
             kSetThermalAngle = +1   !use user specified angle everywhere

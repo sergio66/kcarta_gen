@@ -212,7 +212,7 @@ c     $     .AND. (kMaxLayer .LE. kProfLayer)) THEN
         rMin   = +1000.0
         rMax   = -1000.0
         rMaxAv = -1000.0
-	write(kStdWarn,*) 'computing ifference between default pavg and input layer average'
+	write(kStdWarn,*) 'computing difference between default pavg and input layer average'
         write(kStdWarn,*) 'iJ p(database) p(klayers) frac_delta +++ pav(database) pav(klayers) frac_delta'
 	write(kStdWarn,*) '------------------------------------------------------------------------------'
         DO iJ = (kMaxLayer-iProfileLayers+1),kMaxLayer

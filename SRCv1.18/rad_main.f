@@ -3228,6 +3228,12 @@ c for LBLRTM TAPE5/TAPE6
       INTEGER iLBLRTMZero
       REAL raaAbs_LBLRTM_zeroUA(kMaxPts,kMixFilRows)
 
+c for temporary dump of background thermal
+      CHARACTER*80 caDumpEmiss
+      CHARACTER*4  c4
+      INTEGER iIOUN1,i0,i1,i2,i3,iErr,find_tropopause,troplayer,iPrintBackThermal
+      REAL raG2S(kMaxPts)
+      
       iLBLRTMZero = +2*iNumlayer
 c      kLBLRTM_toa = 0.07      
       IF ((kLBLRTM_toa .GT. 0) .AND. (kLBLRTM_toa .GT. raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
@@ -3488,6 +3494,53 @@ c from the top of atmosphere is not reflected
         write(kStdWarn,*) 'no thermal backgnd to calculate'
       END IF
 
+c TO TEMPORARILY DUMP OUT backgnd thermal
+      iPrintBackThermal = +1
+      iPrintBackThermal = -1
+      IF (iPrintBackThermal .GT. 0) THEN
+        iIOUN1 = INT(raFreq(1))
+        i3 = iIOUN1/1000
+        i2 = (iIOUN1-1000*i3)/100
+        i1 = (iIOUN1-1000*i3-100*i2)/10
+        i0 = iIOUN1-1000*i3-100*i2-10*i1
+        c4 = CHAR(i3+48)//CHAR(i2+48)//CHAR(i1+48)//CHAR(i0+48)
+
+        caDumpEmiss = 'kcartachunk'
+        caDumpEmiss(12:15) = c4(1:4)
+
+        caDumpEmiss = 'kcartachunk'
+        caDumpEmiss(12:15) = c4(1:4)
+
+        DO i1 = 1,80
+          caDumpEmiss(i1:i1) = ' '
+            END DO     
+        DO i1 = 80,1,-1
+          IF (caOutName(i1:i1) .NE. ' ') THEN
+            GOTO 100
+            END IF
+          END DO
+ 100    CONTINUE
+        caDumpEmiss(1:i1) = caOutName(1:i1)
+        caDumpEmiss(i1+1:i1+4) = c4(1:4)
+      
+        iIOUN1 = kTempUnit
+        OPEN(UNIT=iIOUN1,FILE=caDumpEmiss,STATUS='NEW',FORM='FORMATTED',
+     $     IOSTAT=IERR)  
+          IF (IERR .NE. 0) THEN  
+            WRITE(kStdErr,*) 'In subroutine rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE'
+            WRITE(kStdErr,1010) IERR, caDumpEmiss
+            CALL DoSTOP  
+            ENDIF 
+        kTempUnitOpen = +1
+        DO iFr = 1,kMaxPts
+          write(iIOUN1,4321) iFr,raFreq(iFr),raThermal(iFr),exp(-raG2S(iFr))
+        END DO
+ 1010   FORMAT(I5,' ',A80)
+ 4321   FORMAT(I5,' ',3(F15.9,' '))
+        CLOSE(kTempUnit)
+        kTempUnitOpen = -1
+      END IF
+      
 c see if we have to add on the solar contribution
 c this figures out the solar intensity at the ground
       IF (iDoSolar .GE. 0) THEN
