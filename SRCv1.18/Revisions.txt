@@ -585,6 +585,16 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+4/21/16         in MOLGAS and XSCGAS, options for iNgas and iNXsec are now
+		   -5/-6  for the LBLRTM version which allows g1-32,51-63
+		   -1     for all
+		   +n     for select few
+		http://web.gps.caltech.edu/~drf/misc/lblrtm/lblrtm_instructions.html
+		RECORD 1.3.a implies g 1-38, but Table 1 seems to imply gases 32-38 are empty?
+		Table 2 lists the xsec gases (and HNO3 (g12) is included there as well !!??)
+                (have got rid of the -114 switch, which is very similar to the -5/-6 switch,
+		 except it allows gases 1-31)
+		
 4/15/16         kSetThermalAngle = -1 : use CONST in tau temperatiure variation for
                                         quick fast background thermal(default)
                 kSetThermalAngle = -2 : use LINEAR in tau temperatiure variation for
@@ -592,18 +602,20 @@ v1.18
                 kSetThermalAngle = +1 : user specified angle for 
                                         quick fast background thermal (set when kFLUX > 0)
 	        However, if kTemperVary == 43, then the code does both
-		  (a) downwelling thermal using the three angles/LBLRTM "linear in tau" flux calcs
-		      using new function IntegrateOverAngles_LinearInTau
+		  (a) downwelling thermal using the three angles/LBLRTM "linear in tau" flux
+		      calcs using new function IntegrateOverAngles_LinearInTau
 		  (b) upwelling radiance also using "linear in tau" calcs
 					
-3/26/16         In nm_radnce, iTemperVary is now a namelist param (default = -1 for kCARTA usual constant
+3/26/16         In nm_radnce, iTemperVary is now a namelist param (default = -1 for
+                kCARTA usual constant
                 in temeprature variation, can set to 43 to LBRTTM emulation)
-		Note this is only for upwell RT (and fluxes) .. jacobians still assume constant in tau
+		Note this is only for upwell RT (and fluxes) .. jacobians still assume
+		constant in tau
 		
                 To quickly do a kTemperVary = +43 calc for rads (w/o fluxes) go to
 		  SUBROUTINE CheckParams in kcartamisc.f
 		and uncomment the line looking like
-      !kTemperVary = +43     !!! >>>>>>>>>>>>> if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
+      !kTemperVary = +43     !!! >>>>>>>>>>>>> if you want RT to do what LBLRTM does <<<<
 		
 3/2/16          PCLSAM twoslab flux calcs now do the same as PCLSAM twoslab radiance calcs
                 namely (1) clouds 1,2 (2) cloud 1 (3) cloud 2 (4) clear (5) weighted sum!!!
@@ -701,8 +713,7 @@ v1.18
         DO iI=1,7
           write(kStdWarn,*)caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),'<>',
      $raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
-        END DO
-		
+        END DO		
 	
 07/17/15        Regenerated linemix coeffs (using eg HITRAN2012); see
                    SRCv1.18/NONLTE

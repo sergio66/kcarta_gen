@@ -6,7 +6,7 @@ c this file reads *MOLGAS,*XSCGAS,*FREQ (very easy),*MIXFIL
 
 c************************************************************************
 c this subroutine deals with the 'MOLGAS' keyword
-c and basically deals with GasID 1--28
+c and basically deals with GasID 1--40
 c
 c main output parameter is iaMOLgases
 c synopsis IN : iNGas     = number of gasIDs to be read in (if -1, all)
@@ -37,7 +37,6 @@ c local variables
       INTEGER iInt,iaTemp(kMaxGas),iC,iCC,iaInDataBase(kGasComp)
       INTEGER iNgasesCheck
       INTEGER iCheckCompDataBase
-      INTEGER iKC114gases
 
       CHARACTER*7 caWord
 
@@ -48,9 +47,10 @@ c local variables
         iaTemp(iInt) = 0
       END DO
 
-c allow iNgas = -114,-1,or > 0 where
-c -114  means allow LBL gases which were in older kcarta versions (upto v1.14)
+c allow iNgas = -5/-6 ,-1,or > 0 where
+c -114  means allow LBL gases which were in older kcarta versions (upto v1.14) REMOVED
 c       which was 1..32,101,102,103
+c -5/-6 means allow LBLRTM style gases 1-32
 c -1    means allow ALL LBL gases from the new HITRAN208 = 1..42
 c > 0   means you choose the gases (using iaGasesNL)
 
@@ -76,12 +76,13 @@ c use the molecular ID's from the namelist file
       ELSEIF (iNgas .EQ. -1) THEN
         CALL add_molgas(iNgas,iaGasesNL,iaMOLgases)   !! latest version, uses 42 molgas
 
-      ELSE IF (iNgas .EQ. -114) THEN                  !! use only 31 gases for older versions
+      ELSEIF ((iNGas .EQ. -5) .OR. (iNGas .EQ. -6)) THEN  !! use 36 gases for LBLRTM
         CALL add_molgas(iNgas,iaGasesNL,iaMOLgases)
 
-      ELSE 
-        write(kStdErr,*) 'molgas4 can only process iNGas = -114,-1, or > 0'
-      CALL DOSTOP
+      ELSE
+        write(kStdErr,*) 'input user iNXsec = ',iNgas
+        write(kStdErr,*) '  valid iNgas : -5/-6 (lblrtm) -1 (all) +N select few'
+        CALL DoStop
       END IF
         
       RETURN
@@ -118,7 +119,6 @@ c local variables
       INTEGER iInt,iErr,iC,iCC,iCheckXsecDataBase,iNXsecCheck
       INTEGER iaTemp(kMaxGas),iTag
       INTEGER iaInDataBase(kMaxLayer)      
-      INTEGER iKC114gases
       caWord = '*XSCGAS'
 
       DO iInt = 1,kMaxGas
@@ -126,9 +126,10 @@ c local variables
         iaTemp(iInt) = 0
       END DO
 
-c allow iNxsec = -114,-1,or > 0 where
+c allow iNxsec = -5/-6 ,-1,or > 0 where
 c -114  means allow LBL gases which were in older kcarta versions (upto v1.14)
-c       which was 51..63
+c       which was 51..63 REMOVED
+c -5/-6 means allow LBLRTM gases 51..63 
 c -1    means allow ALL XSC gases from the new HITRAN208 = 51..81
 c > 0   means you choose the gases (using iaLXsecNL)
 
@@ -149,8 +150,14 @@ c use the xsec gas ID's from the namelist file
           END IF
         END DO      
         CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! now check the veracity of these gases
-      ELSE 
-        CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! add and check veracity of all xsec gases
+      ELSEIF (iNxsec .EQ. -1) THEN  
+        CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! add all xsec gases
+      ELSEIF ((iNxsec .EQ. -5) .OR. (iNXsec .EQ. -6)) THEN  
+        CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! add LBLRTM xsec gases
+      ELSE
+        write(kStdErr,*) 'input user iNXsec = ',iNXsec
+        write(kStdErr,*) '  valid iNXsec : -5/-6 (lblrtm) -1 (all) +N select few'	
+        CALL DoStop
       END IF
 
       RETURN
@@ -1464,19 +1471,11 @@ c output
 c local
       INTEGER iMax,iC,iCC,iaInDataBase(kGasComp),iTag,iErr,iaTemp(kMaxGas)
       INTEGER iNotMainGas,iNgasesCheck,iInt,iWhichKC,iYesWV,i101,i102,i103
-      INTEGER iCheckCompDataBase,MainGas,iDefault
+      INTEGER iCheckCompDataBase,MainGas,iKLBLRTMgases,iMax_molgas
 
       iWHichKC = iNgas
+      iKLBLRTMgases = 32
       
-      iDefault = iNgas
-
-c      iDefault = -114     !!!! do this if going back to v1.07 for testing Scott SARTA
-
-      iWhichKC = iDefault
-      IF (iDefault .NE. iNgas) THEN
-        write(kStdErr,*) ' >>>>>>>>>>>>>>>>      yayayayayayayayaya molgas -114'
-      END IF
-
       IF (iWhichKC .EQ. -1) THEN
         !! this is kc1.15 or later
 c use ALL gases in the compressed database for v1.15+
@@ -1486,28 +1485,37 @@ c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
         iMax = kGasComp
         write(kStdWarn,*) 'including all lbl gases from 1 to ', kGasComp 
         write(kStdWarn,*) ' plus 101,102,103 for Self,Forn cont, heavy water'
-      ELSEIF (iWhichKC .EQ. -114) THEN
+      ELSEIF ((iWhichKC .EQ. -5) .OR. (iWhichKC .EQ. -6)) THEN
         !! this is kc1.14 or earlier
+	!! also LBLRTM style
 c use ALL gases in the compressed database for c1.14-
 c  check to see the following reference profiles exist : 1,2,3,4,5,6,7,8,9
 c         10,11,12,X,X,15,16,X,18,19,20,21,22,23,X,25,26,27,28,X,X,31
 c         PLUS kSelf,kFor,kHeavyWater (101,102,103)
-        iMax = 31
-        write(kStdWarn,*) 'including v114- lbl gases from 1 to ',iMax
+c        iMax = 31
+c        write(kStdWarn,*) 'including v114- lbl gases from 1 to ',iMax
+        iMax = iKLBLRTMgases		
+        write(kStdWarn,*) 'including LBLRTM gases from 1 to ',iMax	
         write(kStdWarn,*) ' plus 101,102,103 for Self,Forn cont, heavy water'
       ELSEIF (iWHichKC .GT. 0) THEN
         write(kStdWarn,*) 'using user sepcified list'
       ELSE
-        write(kStdErr,*) 'need iWhichKC = -1 or -114 or > 0'
+        write(kStdErr,*) 'need iWhichKC = -1 or -5/-6 or > 0'
         CALL DoStop
       END IF
 
       IF (iWhichKC .LT. 0) THEN
         iNgas = 0
+	iF (iWhichKC .EQ. -1) THEN
+  	  iMax_molgas = kGasComp
+	ELSEIF ((iWhichKC .EQ. -5) .OR. (iWhichKC .EQ. -6)) THEN
+  	  iMax_molgas = iKLBLRTMgases
+	END IF
+
         DO iC = 1,kGasComp
           iaInDataBase(iC) = -1
         END DO
-        DO iC = 1,kGasComp
+        DO iC = 1,iMax_molgas
           iTag = -1
           iCC = iCheckCompDataBase(iC,-100.0,-100.0,iTag,iErr)
           IF (iCC .GT. 0) THEN
@@ -1672,19 +1680,9 @@ c input/output
 c local
       INTEGER iInt,iErr,iC,iCC,iCheckXsecDataBase,iNXsecCheck
       INTEGER iaTemp(kMaxGas),iTag
-      INTEGER iaInDataBase(kMaxLayer)      
-      INTEGER iKC114gases,iWhichXSC,iDefault
+      INTEGER iaInDataBase(kMaxLayer),iWhichXSC,iKLBLRTMgases
 
       iWhichXSC = iNXsec
-
-      iDefault = iNXsec
-
-c      iDefault = -114     !!!! do this if going back to v1.07 for testing Scott SARTA
-
-      iWhichXSC = iDefault
-      IF (iDefault .NE. iNXsec) THEN
-        write(kStdErr,*) ' >>>>>>>>>>>>>>>>      yayayayayayayayaya xscgas -114'
-      END IF
 
       IF (iWhichXSC .EQ. -1) THEN
          write(kStdWarn,*) 'including all xsc gases from ',kGasXsecLo, ' to ', kGasXsecHi
@@ -1712,17 +1710,16 @@ c now based on which gases were found, reset array iaTemp
           END IF
         END DO
 
-      ELSE IF (iWhichXSC .EQ. -114) THEN
-        iKC114gases = 63
-         write(kStdWarn,*) 'including v114- xsc gases from ',kGasXsecLo,' to ',
-     $ iKC114gases
+      ELSE IF ((iWhichXSC .EQ. -5) .OR. (iWhichXSC .EQ. -6))THEN
+        iKLBLRTMgases = 63
+         write(kStdWarn,*) 'including LBLRTM xsc gases from ',kGasXsecLo,' to ',iKLBLRTMgases
 c use all gases in the xsec database
 c  check to see the following reference profiles exist : 51..63
         iNxsec = 0
-        DO iC = kGasXsecLo,iKC114gases
+        DO iC = kGasXsecLo,iKLBLRTMgases
           iaInDataBase(iC) = -1
         END DO
-        DO iC = kGasXsecLo,iKC114gases
+        DO iC = kGasXsecLo,iKLBLRTMgases
           iTag = -1
           iCC = iCheckXsecDataBase(iC,-100.0,-100.0,iTag,iErr)
           IF (iCC .GT. 0) THEN
@@ -1732,7 +1729,7 @@ c  check to see the following reference profiles exist : 51..63
         END DO
 c now based on which gases were found, reset array iaTemp
         iCC = 1
-        DO iC = kGasXsecLo,iKC114gases
+        DO iC = kGasXsecLo,iKLBLRTMgases
           IF (iaInDataBase(iC) .GT. 0) THEN
             write(kStdWarn,*) 'Including gasID ',iC,' in xsec database'
             iaTemp(iCC) = iC
@@ -1745,7 +1742,7 @@ c now based on which gases were found, reset array iaTemp
           iaTemp(iC) = iaLXsecNL(iC)
         END DO
       ELSE 
-        write(kStdErr,*) 'xscgas4 can only process iNXsec = -114,-1, or > 0'
+        write(kStdErr,*) 'xscgas4 can only process iNXsec = -5/-6,-1, or > 0'
         CALL DOSTOP
       END IF
  

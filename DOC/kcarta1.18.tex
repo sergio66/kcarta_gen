@@ -2450,14 +2450,19 @@ This section specifies molecular gas ID's.  The format is
 
 \smallskip
 {\sf
-\ttab{\sf iNgas = -1}
+\ttab{\sf iNgas = -1, -5/-6}
 }
 
 \medskip\noindent 
-{\sf iNgas} specifies how many molecular gas ID's to read in.  If {\sf
-iNgas = -1}, then the program automatically includes all gases that exist
-in the compressed database.  If {\sf iNgas $>$ 0 then the program
-requires a list of {\sf iaGasesNL} valid GasID's (between 1and 28)
+{\sf iNgas} specifies how many molecular gas ID's to read in.
+
+If {\sf iNgas = -1}, then the program automatically includes all gases that exist
+in the compressed database. \newline
+If {\sf iNgas = -5/-6}, then the program automatically includes the first 38 gases, to
+emulate LBLRTM \newline
+
+If {\sf iNgas $>$ 0 then the program requires a list of {\sf iaGasesNL} valid GasID's
+(between 1 and 40)
 
 Note there is a a subtle point here, the water continuum. If $kCKD \ge 0$ then 
 the user wants water vapor plus continuum. Hence gasIDs 101 and 102 will also
@@ -2485,7 +2490,7 @@ above,
 
 \smallskip
 {\sf 
-\ttab iNxsec = -1
+\ttab iNxsec = -1, -5/-6
 }
 
 \smallskip
@@ -2498,10 +2503,16 @@ above,
 
 \medskip\noindent 
 where {\sf iNXsec} specifies how many cross-section gasID's to read in.
+
 If {\sf iNXsec} $ = -1$, then the program automatically includes all gases
-that exist in the cross-section database.  If {\sf iNXsec}$> 0$ then the
-program requires a list of {\sf iaNxsecNL} valid GasID's (between 51 and
-63).  If {\sf iNXsec} = 0 then no cross section gases will be used.
+that exist in the cross-section database (gasIDs 51-81).\newline
+If {\sf iNXsec} $ = -5/-6$, then the program automatically includes gases 51-63 to
+emulate LBLRTM \newline
+
+If {\sf iNXsec}$> 0$ then the program requires a list of {\sf
+iaNxsecNL} valid GasID's (between 51 and 81). \newline
+
+If {\sf iNXsec} = 0 then no cross section gases will be used. \newline
 
 The total number of gases to be used in building up the atmosphere is
 
@@ -2840,6 +2851,29 @@ that no Jacobian or flux calculations will be done for that atmosphere.
 Satellite angles are with respect to the vertical.
 
 \medskip
+For any one given profile/set of mixed paths, the default behaviour of \kc is to only do one set
+of calculations eg radiance, flux, jacobians. However there are instances when one would want
+to use mostly the same parameters, and repeat calculations for one parameter. For example one
+might want to keep all view angles and emissivity the same, but repeat the calculation for
+different surface temperatures. This can be done by using the following parameters \newline
+iAtmLoop = -1,1,2,3,4 : stand for do one calc (default) or vary \newline
+  (1) surface pressure (2) stop pressure (3) satzen/scanang (4) solar zenith
+  (5) emissivity $\rightarrow$ emissivity + $\delta$ \newline
+The user can then use raAtmLoop(1..5) to set upto 5 values (termination is when the array
+value is less than 0).
+
+So for example the following sets three view angles (which are gaussian quadrature for fluxes)
+\newline
+\begin{verbatim}
+  iAtmLoop = 3
+  raAtmLoop(1) = 24.2988
+  raAtmLoop(2) = 53.8051
+  raAtmLoop(3) = 77.7405
+  raAtmLoop(4) = -1.00
+  raAtmLoop(5) = -1.00
+\end{verbatim}
+
+\medskip
 If $kRTP = -2,-1,0$ this means the user will be defining the atmosphere, 
 using the specifications stated below. If $kRTP = +1$ then \kc will use the 
 atmosphere definitions specified in the RTP file that contains the profile; 
@@ -3064,11 +3098,16 @@ using Gaussian quadrature.
 \begin{itemize}
 \item If the user specifies a positive value between 0.0 and +90.0,
   this angle will be used at all layers.
-\item If the user specifies a negative value, a value of acos(3/5)
+\item If the user specifies -1  a value of acos(3/5)
   will be used at the upper layers, while our optimum diffusive angle
   will be used at lower layers, the combination of which is a better
-  approximation than using a single diffusive angle at {\em all}
-  layers.
+  approximation than using a single diffusive angle at {\em all} layers.
+  This uses CONST in $\tau$ layer temperature variation (kcarta default)
+\item If the user specifies -2  a value of acos(3/5)
+  will be used at the upper layers, while our optimum diffusive angle
+  will be used at lower layers, the combination of which is a better
+  approximation than using a single diffusive angle at {\em all} layers.
+  This uses LBLRTM in $\tau$ layer temperature variation (lblrtm style)
 \item If JACOBN is set, then this could lead to some discrepancies. The clear
 sky jacobian assumes all angles are $acos(3/5)$, while the radiative transfer 
 will use whichever angles it needs, as set by rakThermalAngle
@@ -3087,9 +3126,11 @@ reflected thermal. acos(3/5) = 53.1301 degrees
 \begin{longtable}{|l|lp{\colwidth}|}
 \caption{Diffusivity Options.}\\
 \hline
-kThermalAngle& -x  & use parameterized optimum diffusivity angle at \\
-             &     & lower layers, acos(3/5) at higher layers\\
-             & +x  & user specified value (in degrees) at ALL layers\\
+kThermalAngle & -1  & use parameterized optimum diffusivity angle at \\
+              &     & lower layers, acos(3/5) at higher layers CONST In $\tau$\\
+              & -2  & use parameterized optimum diffusivity angle at \\
+              &     & lower layers, acos(3/5) at higher layers LINEAR In $\tau$\\
+              & +x  & user specified value (in degrees) at ALL layers\\
 \hline
 \end{longtable}
 \end{small}
@@ -3225,7 +3266,8 @@ the radiating/emitting/absorbing atmosphere are set as follows.
   to a constant emissivity); two or more points correspond to a spectrally
   varying emissivity
                 g) iaKThermal(iC)   = 0  
-                   raKThermalAngle(iC) = -1.0  
+                   raKThermalAngle(iC) = -1.0  CONST  in $\tau$
+                   raKThermalAngle(iC) = -2.0  LINEAR in $\tau$		   
                    iakThermalJacob(iC) = 1  
                 h) iaSetEms(iC) = prof.nemis  
                    DO i=1,iaSetEms(iC)   

@@ -19,6 +19,29 @@ c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!! compressed files for gases 1,2,3 are currently span 605-1205 cm-1
+c!! at a chunck spacing of 5 cm-1
+c!! /asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!! to run this code first go to SRC, type
+c!!   make clean
+c!!   make datafix385_H2012
+c!!   edit rtp_interface.f and set rf1 = 605, rf2 = 1205
+c!! then come to INCLUDE, and do
+c!!   mv kcarta_v118.param xkcarta_v118.param
+c!!   ln -s kcarta_v118HIGHRES_IR.param kcarta_v118.param
+c!! go back to SRC, type
+c!!   make clean; make; make scat
+c!!
+c!! and then of course come back to INCLUDE
+c!! rm kcarta_v118.param
+c!! mv xkcarta_v118.param kcarta_v118.param
+c!! go back to SRC,
+c!!   edit rtp_interface.f and unset rf1 = 605, rf2 = 1205
+c!!   make clean; make; make scat
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 c note some of the parameters are used by more recent versions of kcarta eg 
 c NLTE and scattering are in v1.11
