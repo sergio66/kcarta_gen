@@ -30,9 +30,9 @@ KCWRAP   = /asl/packages/kcwrap.tar
 KFTP     = /asl/packages/kcarta
 KTARAUX  = /asl/packages/kcarta/kcarta_aux.tar 
 
-PARAMS = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile
+PARAMS = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data Makefile_intel_hdf_rtp
 
-PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile
+PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data Makefile_intel_hdf_rtp
 
 ###### OBJSMAIN_PARALLEL  for all features : jacobians, scatter, flux, but as stand alone JPL exec
 ###### OBJSMAIN_JPL       for all features : jacobians, scatter, flux, but as stand alone JPL exec
@@ -204,6 +204,17 @@ alldist : $(EXECSDIST)
 
 datafix400:
 	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_400.param > \
+      ../INCLUDE/kcarta_v118.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v118.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.18
+
+datafix385_H2012_LBLRTM:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/kcartaV118_385_H2012_LBLRTM.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
