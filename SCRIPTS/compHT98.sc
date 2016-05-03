@@ -11,7 +11,8 @@ shome=`pwd`
 
 #first do the water
 #cd /asl/data/kcarta/v20.ieee-le/h2o.ieee-le                   ##path to kWaterPath
-cd /asl/data/kcarta/H2012.ieee-le/IR605/lblrtm2/h2o.ieee-le/  ##path to kWaterPath
+cd /asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.2/h2o.ieee-le/  ##path to kWaterPath
+cd /asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/h2o.ieee-le/  ##path to kWaterPath
 ls -1  >& $shome/waterdatabase
 cd $shome
 
@@ -34,7 +35,8 @@ fi
 #then do the rest of the gases
 cd $shome
 #cd /asl/data/kcarta/v20.ieee-le/etc.ieee-le                   ##path to kCompPath
-cd /asl/data/kcarta/H2012.ieee-le/IR605/lblrtm2/etc.ieee-le/  ##path to kCompPath
+cd /asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.2/etc.ieee-le/  ##path to kCompPath
+cd /asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/  ##path to kCompPath
 ls -1  >& $shome/othersdatabase1
 cd $shome
 

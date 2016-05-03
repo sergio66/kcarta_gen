@@ -132,24 +132,23 @@ XSEC GASES (* denotes in LBLRTM (see Table II in
 *  61 ClONO2 [also see 35]
 *  62 N2O5
 *  63 HNO4
-   (WAH!!! HNO3 is "included in LBLRTM xsec and in mol gases (gid 12)????
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++      
 %%% 64-74 requested by Evan Fishbein, 28 June 2010
-  64 C2F6          hexafluoroethane
-  65 CHCl2CF3      HCFC-123
-  66 CHClFCF3      HCFC-124
-  67 CH3CCl2F      HCFC-141b
-  68 CH3CClF2      HCFC-142b
-  69 CHCl2CF2CF3   HCFC-225ca
-  70 CClF2CF2CHClF HCFC-225cb
-  71 CH2F2         HFC-32
-  72 CHF2CF3       HFC-134a
-  73 CF3CH3        HFC-143a
-  74 CH3CHF2       HFC-152a
+  64 C2F6            hexafluoroethane
+  65 CHCl2CF3        HCFC-123
+  66 : CHCLFCF3      HCFC 124 ------> CHCl2C2F5
+  67 : CH3CCL2F      HCFC-141b -----> CCl2FCH3
+  68 : CH3CCLF2      HCFC-142b -----> CH3CClF2
+  69 : CHCL2CF2CF3   HCFC-225ca ----> C3HCl2F5
+  70 : CCLF2CF2CHCLF HCFC-225cb ----> C3HCl2F5
+  71 CH2F2           HFC-32
+  72 CFH2CF3         HFC-134a * (I had mistakenly called this CHF2CF3) 
+  73 CF3CH3          HFC-143a
+  74 CH3CHF2         HFC-152a
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++      
 %%% added from new HITRAN gases
-  75 C6F6          benzene
-  76 CHF2CF3       HFC-125
+  75 C6F6          benzene (C6H6???))
+  76 CHF2CF3       HFC-125 * (earlier mistakenly had gid 72/76 as same molecule names)
   77 CHF2CHF2      HFC-134   
   78 SF5CF3
   79 CH3C(O)OONO2  PAN (Peroxy Acetyl Nitrate)

@@ -562,6 +562,12 @@ c find the weight
       rL = raaMix(iIpmix,iGas)
 
 c add on contribution of the iGas th gas to the iIpmix th row of raaSum
+c      DO iL = 1,50
+c        print *,iL,raaMix(50,iL)
+c      END DO
+c      Call DoStop   
+c      print *,iGas,iIpmix,iL,rL
+            
       DO iFreq=1,kMaxPts
          raaSum(iFreq,iIpmix) = raaSum(iFreq,iIpmix)+rL*raaGas(iFreq,iL)
        END DO
