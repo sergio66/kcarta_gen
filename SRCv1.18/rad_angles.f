@@ -452,20 +452,21 @@ c            print *,iI,rSatHeight,raLayHgt(iI)
                 ELSE
                   iX = -1
                 END IF
-              IF (iX .EQ. 1) write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-              write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle ',
-     $              iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+              IF (iX .EQ. 1) THEN
+	        write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+                write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle'
+	      END IF
+              write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
               END IF
             END IF
           END DO
       ELSE  
         !no need to do anything much, the angles are so close to nadir
 	iX = -1
+        write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle '	
         DO iI=1,kProfLayer
-          write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle ',
-     $              iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+          write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
         END DO
-
       END IF
 
         IF (rPrBdry2 .GT. rPrBdry1) THEN !upward looking instr
@@ -485,15 +486,19 @@ c     $               raLayHgt(iaaRadLayer(iAtm,iaNumLayer(iAtm)))/1000
                 ELSE
                    iX = -1
                  END IF
-                IF (iX .EQ. 1) write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle ',
-     $            iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+                IF (iX .EQ. 1) THEN
+		  write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+                  write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
+		END IF
+                write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
               END IF
             END IF
           END DO
         END IF
       END IF
 
+ 999  FORMAT(I3,' ',I3,'  ',4(F10.4,' '))
+ 
       RETURN
       END
 

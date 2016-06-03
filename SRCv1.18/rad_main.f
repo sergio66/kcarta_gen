@@ -1392,6 +1392,10 @@ c for the NLTE which is not used in this routine
 c for specular reflection
       REAL raSpecularRefl(kMaxPts)
       INTEGER iSpecular
+
+c for printing out angle info
+      REAL rJunk1,rJunk2
+      INTEGER iJunk
       
       IF ((raFreq(1) .GE. 10000) .AND. (raSunAngles(50) .LE. 90)) THEN
         write(kStdWarn,*) 'daytime downlook NIR/VIS/UV : Calling rad_trans_SAT_LOOK_DOWN_NIR_VIS_UV'
@@ -1424,9 +1428,14 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       iDoThermal = kThermal
 
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
-      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracBot,rFracTop'
-      write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracBot,rFracTop
-
+      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,rFracBot,rFracTop'
+      write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,rFracBot,rFracTop
+      iJunk = kProfLayer - iNumLayer +1
+      rJunk1 = cos(raLayAngles(kProfLayer)*kPi/180.0)
+      rJunk2 = cos(raLayAngles(iJunk)*kPi/180.0)      
+      write(kStdWarn,999) 1/rCos,1.0/rJunk1,1.0/rJunk2
+ 999  FORMAT('1/cos(angle) : sat(scanang),TOA,GND : ',3(1X,F10.6))
+ 
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
       IF ((iNumLayer .GT. kProfLayer) .OR. (iNumLayer .LT. 0)) THEN
@@ -1507,6 +1516,7 @@ c for the BOTTOMMOST layer!!!!!!!!!!!
        DO iLay = 1,1
          iL   = iaRadLayer(iLay)
          rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+c	 print *,'wawa',iLay,iL,raLayAngles(MP2Lay(iL))
          IF ((iL .GE. iCloudLayerBot) .AND. (iL .LE. iCloudLayerTop)) THEN
 c           print *,'bottom',iLay,iL,iCloudLayerBot,iCloudLayerTop
            DO iFr = 1,kMaxPts
@@ -1527,6 +1537,7 @@ c         print*,iLay,raFreq(1),raVT1(iL),raaAbs(1,iL)
        DO iLay = 2,iNumLayer-1
          iL   = iaRadLayer(iLay)
          rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+c	 print *,'wawa',iLay,iL,raLayAngles(MP2Lay(iL))	 
          IF ((iL .GE. iCloudLayerBot) .AND. (iL .LE. iCloudLayerTop)) THEN
 c           print *,'mid ',iLay,iL,iCloudLayerBot,iCloudLayerTop
            DO iFr = 1,kMaxPts

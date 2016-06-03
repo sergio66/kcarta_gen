@@ -383,7 +383,7 @@ c the alt database
       REAL rAltMinFr,rAltMaxFr
 
 c local variables
-      INTEGER iFr,iLay
+      INTEGER iFr,iLay,strfind
 
       iErr = -1
 
@@ -394,6 +394,17 @@ c local variables
       write(kStdWarn,*) '>>> substituting caCompressedDataPath for gasID ',iGasID
       write(kStdWarn,80) kcaAltComprDirs
 
+      IF (iGasID .EQ. 2) THEN
+        IF ((strfind(kcaAltComprDirs,'lblrtm') .EQ. 1) .OR. (strfind(kcaAltComprDirs,'LBLRTM') .EQ. 1)) THEN
+	  IF (kCO2_UMBCorHARTMAN .GT. 0) THEN
+  	    write(kStdWarn,*) ' kCO2_UMBCorHARTMAN is +1 for UMBC CO2 linemix',kCO2_UMBCorHARTMAN
+	    write(kStdWarn,*) ' ignore so NO chi fcns, since you are using LBLRTM CO2 database'
+	    write(kStdErr,*)  ' ignore kCO2_UMBCorHARTMAN (+1) so NO chi fcns, for LBLRTM CO2 database'
+	    !kCO2_UMBCorHARTMAN = -1
+	  END IF
+	END IF
+      END IF
+        
       IF ( ((1 .LE. iGasID) .AND. (iGasID .LE. kGasComp)) .OR. (iGasID .EQ. kNewGasHi+1)) THEN
         kFrStep = kaFrStep(iTag)
         CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress,

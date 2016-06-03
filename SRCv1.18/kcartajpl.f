@@ -1440,8 +1440,8 @@ c ******** PARAMS section
       namecomment = '******* PARAMS section *******'
       kLayer2Sp    = 1   !! layers
       kGasTemp     = 1   !! use CO2 temp
-      kCKD         = 25  !! CKD version
       kCKD         = 6  !! CKD version
+      kCKD         = 25  !! CKD version
       kLongOrShort = 1   !! warning.msg
       kActualJacs  = -1  !! output all Q(z),T(z) jacs
       kJacobOutput = -1  !! output dr/dq, dr/dT

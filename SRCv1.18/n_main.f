@@ -21,7 +21,7 @@ c gas and cloud profiles
      $   caPFName1,caCloudPFName1,iRTP1,iNclouds_RTP1,iAFGLProf1,
 c mixpath info
      $   iNpmix1,caaMixFileLines1,
-c atmosphere info
+c radiating atmosphere info
      $   iNatm1,iTemperVary1,iaMPSetForRad1,raPressStart1,raPressStop1,
      $   raTSpace1,raTSurf1,raSatAngle1,raSatHeight1,
      $   caEmissivity1,raSetEmissivity1,rakSolarRefl1,
@@ -29,7 +29,7 @@ c atmosphere info
      $   iakThermal1,rakThermalAngle1,iakThermalJacob1,
      $   raSatAzimuth1,raSolAzimuth1,raWindSpeed1,
      $   caaScatter1,raaScatterPressure1,raScatterDME1,raScatterIWP1,
-c loop over atmosphere info
+c loop over radiating atmosphere info
      $   iAtmLoop1,raAtmLoop1,
 c cloud info from RTP file
      $   iMPSetForRadRTP1, iBinORAsc1, caaCloudFile1,iaNML_Ctype1,
@@ -87,8 +87,8 @@ c                   less than 100 of them!!!
       CHARACTER*130 caaMixFileLines(kProfLayer),caaMixFileLines1(kProfLayer)
 
 c this is for RADNCE
-c iNatm           = number of atmospheres
-c raTSpace        = for each atmosphere, the background (space) temperature
+c iNatm           = number of radiating atmospheres
+c raTSpace        = for each radiating atmosphere, the background (space) temperature
 c raTSurf         = for each atmosphere, the surface temperature
 c raSatAngle      = for each atmosphere, the satellite viewing angle
 c raSatHeight     = for each atmosphere, the satellite height
@@ -148,7 +148,7 @@ c iaNp          = for each option, how many paths/MPs/layers to be output
 c iaaOp         = for each option, list of paths/MP/layers to be output
 c raaOp         = for option 3, list fract of layers used for radiance output
 c raaUserPress  = for option 3, list of pressures for output radiances
-c iNatm2        = number of atmospheres that *OUTPUT thinks there is
+c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaPrinter(kMaxPrint),iaPrinter1(kMaxPrint)
       INTEGER iaGPMPAtm(kMaxPrint),iaGPMPAtm1(kMaxPrint)
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint)
@@ -351,7 +351,7 @@ c default mixing table
       caaMixFileLines(1)='1 -1 1.0 0'
 
 c default rads and jacs
-      iNatm        = -1         !assume no atms to be constructed
+      iNatm        = -1         !assume no radiating atms to be constructed
       iJacob       = 0          !assume no jacobians to be done
       
 c default NLTE
@@ -541,7 +541,6 @@ c      END IF
       
       iNatm1 = iNatm
       DO iI  =  1,kMaxAtm
-
         raAtmLoop1(iI)        = raAtmLoop(iI)
 
         iaMPSetForRad1(iI)    = iaMPSetForRad(iI)
@@ -553,8 +552,8 @@ c      END IF
         raSatAngle1(iI)       = raSatAngle(iI)
 
         IF (raSatHeight(iI) .LT. 0) THEN
-          write(kStdWarn,*) 'atm# ',iI,' raSatHeight = ',raSatHeight(iI), 'reset to 705 km'
-          raSatHeight(iI) = 705000
+          write(kStdWarn,*) 'atm# ',iI,' raAtmLoop raSatHeight = ',raSatHeight(iI), 'reset to 705 km'
+          raSatHeight(iI) = 705000.0
         END IF
         raSatHeight1(iI)      = raSatHeight(iI)
 
@@ -875,7 +874,7 @@ c                   less than 100 of them!!!
       CHARACTER*130 caaMixFileLines(kProfLayer)
 
 c this is for RADNCE
-c iNatm           = number of atmospheres
+c iNatm           = number of radiating atmospheres
 c raTSpace        = for each atmosphere, the background (space) temperature
 c raTSurf         = for each atmosphere, the surface temperature
 c raSatAngle      = for each atmosphere, the satellite viewing angle
@@ -940,7 +939,7 @@ c iaNp          = for each option, how many paths/MPs/layers to be output
 c iaaOp         = for each option, list of paths/MP/layers to be output
 c raaOp         = for option 3, list fract of layers used for radiance outout
 c raaUserPress  = for option 3, list of pressures for output radiances
-c iNatm2        = number of atmospheres that *OUTPUT thinks there is
+c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iNatm2
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
       CHARACTER*80 caComment,caLogFile
@@ -1220,6 +1219,8 @@ c ******** PRFILE section
 
 c now set the water continuum according to kCKD
       IF ((kCKD .LT. 0) .AND. (iaGases(1) .EQ. 1)) THEN
+        write(kStdErr,*) 'kCKD < 0 so no continuum calcs (g101,g102)'
+        write(kStdWarn,*) 'kCKD < 0 so no continuum calcs (g101,g102)'      		
         iaCont(1) = -1
       ELSE IF ((kCKD .GE. 0) .AND. (iaGases(1) .EQ. 1)) THEN
         iaCont(1) = 1
@@ -1608,7 +1609,7 @@ c ******** duplicate the atmospheres if needed section
         write(kStdErr,*) 'ie if iAtmLoop .GT. 0 then iNatm = 1 (if driven by nml file),'
         write(kStdErr,*) '                             or 0/-1 (if driven by rtp file)'
         CALL DoStop
-      ELSEIF ((iNatm .EQ. 1) .AND. (iAtmLoop .GT. 0) .AND. (iNclouds .LE. 0)) THEN
+      ELSEIF (((iNatm .EQ. 1)) .AND. (iAtmLoop .GT. 0) .AND. (iNclouds .LE. 0)) THEN
         CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop,
      $            iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels,
      $            iaSetEms,raaaSetEmissivity,raSetEmissivity,

@@ -2573,18 +2573,37 @@ c set the B.C.'s
      $                     raProfileTemp,raPressLevels,iProfileLayers)
 
       raSatAngle(iC)=rAngle
+c this is old and wierd : why should I set satheight = 0 just becuz viewangle == 0?????
+c      IF (abs(rAngle) .LE. 1.0e-4) THEN !nadir view
+c        rHeight = -1.0
+c        raSatHeight(iC) = -1.0
+c      ELSE
+c        IF (rHeight .gt. 0.0) THEN
+c          raSatHeight(iC) = rHeight   !height in m
+c        ELSE
+c          rHeight = -1.0
+c          raSatHeight(iC) = rHeight   !height in m
+c        END IF
+c      END IF
+      IF (rHeight .gt. 0.0) THEN
+        raSatHeight(iC) = rHeight   !height in m
+      ELSE
+	write(kStdErr,*) 'satheight < 0!!!!!',rHeight      
+        rHeight = -1.0
+        raSatHeight(iC) = rHeight   !height in m
+	CALL DoStop
+      END IF
+
       IF (abs(rAngle) .LE. 1.0e-4) THEN !nadir view
         rHeight = -1.0
         raSatHeight(iC) = -1.0
-      ELSE
-        IF (rHeight .gt. 0.0) THEN
-          raSatHeight(iC) = rHeight   !height in m
-        ELSE
-          rHeight = -1.0
-          raSatHeight(iC) = rHeight   !height in m
-        END IF
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'	
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'
+	write(kStdErr,*) 'Living dangerously : angle = 0 so satHeight = 0 for raAtmLoop ==>  no ray trace'
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'	
       END IF
-
+      
       raSatAzimuth(iC) = prof.satazi
       raSolAzimuth(iC) = prof.solazi
       raWindSpeed(iC)  = prof.wspeed

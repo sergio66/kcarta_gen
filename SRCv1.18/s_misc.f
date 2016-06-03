@@ -997,7 +997,6 @@ c         : for iWhichGas=1,2, raMystery is used factorly (so no effect = 1)
       SUBROUTINE FindMysteryFactor(raFreq,raMystery,iWhichGas)
 
       IMPLICIT NONE
-
       include '../INCLUDE/kcarta.param'
 
 c input 
@@ -1060,6 +1059,9 @@ c         and max number of characters = iSizeStr
 c this is pretty much the same idea as f95 lnblank (standard fcn)
       INTEGER FUNCTION iLeftjust_lenstr(caStr,iSizeStr)
 
+      IMPLICIT NONE
+      include '../INCLUDE/kcarta.param'       
+
       INTEGER iL,iSizeStr
       CHARACTER*(*) caStr
 
@@ -1078,6 +1080,9 @@ c************************************************************************
 c this subroutine blanks a string
       SUBROUTINE blankstr(caStr,iSizeStr)
 
+      IMPLICIT NONE
+      include '../INCLUDE/kcarta.param'       
+     
       INTEGER iSizeStr
       CHARACTER*(*) caStr
 
@@ -1090,10 +1095,13 @@ c this subroutine blanks a string
       RETURN
       END
 c************************************************************************
-c this subroutine Adjusts string to the left, removing leading blanks and inserting trailing blanks.
+c this subroutine Adjusts string to the left, removing leading blanks and
+c inserting trailing blanks.
       SUBROUTINE adjustleftstr(caStr,caStrOut)
-      !! call adjustleftstr(caString5,caTemp5) should be equivalent to ABSOFT caTemp5 = adjustl(caString5) 
+      !! call adjustleftstr(caString5,caTemp5) should be equivalent to ABSOFT
+      !!   caTemp5 = adjustl(caString5) 
 
+      IMPLICIT NONE
       include '../INCLUDE/kcarta.param'       
 
       CHARACTER*(*) caStr
@@ -1141,5 +1149,123 @@ c this subroutine Adjusts string to the left, removing leading blanks and insert
       RETURN
       END
 
+c************************************************************************
+c this function takes a string, left justifies it and finds
+c the length (ignoring trailing blanks)
+      SUBROUTINE adjustleftstr_length(caStr,caStrX,lenX)
+
+      IMPLICIT NONE
+      include '../INCLUDE/kcarta.param'
+      
+c input
+      CHARACTER*(*) caStr
+
+c output
+      CHARACTER*(*) caStrX
+      INTEGER lenX
+
+c local
+      INTEGER iFound
+      
+      CALL adjustleftstr(caStr,caStrx)
+
+      iFound = -1
+      lenX = len(caStrx)
+      DO WHILE ((lenX .GT. 1) .AND. (iFound .LT. 0))
+        IF (caStrx(lenX:lenX) .NE. ' ') THEN
+	  iFound = lenX
+	ELSE
+	  lenX = lenX - 1
+	END IF
+      END DO
+      
+      IF (iFound .EQ. -1) THEN
+        write(kStdErr,*) 'huh is this a blank str??? ',caStr,caStrX
+        CALL DoStop
+      END IF
+      
+      RETURN
+      END
+      
+c************************************************************************
+
+c this function compares two strings, and returns "1" if str2 is found within str1
+      INTEGER FUNCTION strfind(caStr1,caStr2)
+
+      IMPLICIT NONE
+      include '../INCLUDE/kcarta.param'       
+
+c input
+      CHARACTER*(*) caStr1,caStr2
+
+c local vars
+      CHARACTER*120 caStr1x,caStr2x,caStr1y,caStr2y,caJunk
+      INTEGER iFind,iSizeStr1,iSizeStr2,i1,i2,iJunk
+      INTEGER iaFound(80)
+      
+      iFind = -1
+
+      IF (len(caStr1) .GT. 120) THEN
+        write(kStdErr,*) 'len(caStr1) > 120'
+        CALL DoStop
+      ELSE
+        DO i1 = 1,120
+          caStr1y(i1:i1) = ' '
+	END DO
+	caStr1y(1:len(caStr1)) = caStr1(1:len(caStr1))
+      END IF
+
+      IF (len(caStr2) .GT. 120) THEN
+        write(kStdErr,*) 'len(caStr2) > 120'
+        CALL DoStop
+      ELSE
+        DO i1 = 1,120
+          caStr2y(i1:i1) = ' '
+	END DO
+	caStr2y(1:len(caStr2)) = caStr2(1:len(caStr2))
+      END IF
+	
+      CALL adjustleftstr_length(caStr1y,caStr1x,iSizeStr1)
+      CALL adjustleftstr_length(caStr2y,caStr2x,iSizeStr2)      
+      
+      IF (iSizeStr2 .GT. iSizeStr1) THEN
+        !! do not bother looking
+        iFind = -1      
+      ELSEIF (iSizeStr2 .EQ. iSizeStr1) THEN
+        iFind = +1   !! assume they are the same
+	i1 = 1
+        DO WHILE ((i1 .LE. iSizeStr2) .AND. (iFind .EQ. 1))
+	  IF (caStr1x(i1:i1) .NE. caStr2x(i1:i1)) THEN
+	    !! they are NOT the same
+	    iFind = -1
+	  ELSE
+	    i1 = i1 + 1
+	  END IF
+        END DO
+      ELSEIF (iSizeStr2 .LT. iSizeStr1) THEN
+        DO i2 = 1,iSizeStr1-iSizeStr2	
+          iFind = +1   !! assume they are the same
+  	  i1 = 1
+	  caJunk(1:iSizeStr2) = caStr1x(i2:i2+iSizeStr2-1)
+          DO WHILE ((i1 .LE. iSizeStr2) .AND. (iFind .EQ. 1))
+	    IF (caJunk(i1:i1) .NE. caStr2x(i1:i1)) THEN
+	      !! they are NOT the same
+  	      iFind = -1
+	    ELSE
+	      i1 = i1 + 1
+	    END IF
+          END DO
+	  iaFound(i2) = iFind
+	END DO
+	iFind = -1
+        DO i2 = 1,iSizeStr1-iSizeStr2
+	  IF (iaFound(i2) .GT. 0) iFind = +1
+	END DO		
+      END IF
+
+      strfind = iFind
+
+      RETURN
+      END
 
 c************************************************************************

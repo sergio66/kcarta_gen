@@ -307,7 +307,7 @@ c these are what is in kCO2ppmvFile
       CHARACTER*80 caFName
       REAL rMeanT,rMeanA,rMeanP,rMeanPP,rDirectPPMV0,rDirectPPMV1
       REAL rCO2ppmv
-      INTEGER iI,iJ,iGasID,iError,iIPMIX
+      INTEGER iI,iJ,iGasID,iError,iIPMIX,strfind
 
 c find the weight 
       iIPMIX = 1
@@ -317,14 +317,20 @@ c find the weight
       write(kStdWarn,*) 'Checking the CO2 ppmv in the database profiles'
 
       IF (kCO2_UMBCorHARTMAN .EQ. -1) THEN
-        write(kStdWarn,*) 'Using HARTMANN/NIRO CO2 linemixing'
+        write(kStdWarn,*) 'Using HARTMANN/NIRO CO2 linemixing, so NO chi fcns'
       ELSEIF (kCO2_UMBCorHARTMAN .EQ. +1) THEN
-        write(kStdWarn,*) 'Using Strow/Tobin/Machado CO2 linemixing'
+        write(kStdWarn,*) 'Using Strow/Tobin/Machado CO2 linemixing, need chi fcns'
       ELSE
         write(kStdErr,*) 'kCO2_UMBCorHARTMAN needs to be +/- 1'
         CALL DoStop
       END IF
-
+      IF ((strfind(kCO2Path,'lblrtm') .EQ. 1) .OR. (strfind(kCO2Path,'LBLRTM') .EQ. 1)) THEN
+        IF (kCO2_UMBCorHARTMAN .EQ. +1) THEN
+	  write(kStdErr,*) 'kCO2Path has LBLRTM/lblrtm in it, but kCO2_UMBCorHARTMAN = -1'
+          CALL DoStop
+	END IF
+      END IF
+      
       IF (iaGases(iGasID) .NE. iGasID) THEN
         write(kStdErr,*) 'assumed iaGases(2) =  2, guess not'
         CALL DoStop
@@ -1790,7 +1796,7 @@ c      2     Layer-to-Space transmittance   t2s(i)=sum(j=i,n)exp(-k(j))
 c kCKD      == -1,00,21,23,24 sets which continuum version calculation to do
 c              -1 : no continuum
 c ----------------------------------------------------------------------------
-c AER-STD      01 : self, foreign   is by CKD and modified by Tobin
+c AER-CKD      01 : self, foreign   is by CKD and modified by Mlawer/Tobin
 c                                 ... this is the MT_CKD version of Dec 2002
 c       AIRS   02 : version 02    ... this is the MT_CKD version of Dec 2002,
 c                                     but CS modified by Scott Hannon Aug 2003
@@ -1812,13 +1818,17 @@ c In asl:/carrot/s1/strow/Tobin/Tobin_radish/NISTdata2/New/, use
 c cs0_tsl0_hr.mat and cf0_tsl0_hr.mat.  makecons.m with flag=7
 c looks like it should load things in correctly.
 c ----------------------------------------------------------------------------
-c AER-STD      25 : self, foreign   is by CKD and modified by Tobin
+c AER-STD      25 : self, foreign   is by CKD and modified by Mlawer/Tobin
 c                                 ... this is the MT_CKD 2.5 version of Sep 2011
 c ----------------------------------------------------------------------------
-c AER-STD      00 : version 00 
-c AER-STD      21 : version 2.1
-c AER-STD      23 : version 2.3
-c AER-STD      24 : version 2.4
+c AER-STD      27 : self, foreign   is by CKD and modified by Mlawer/Tobin
+c                                 ... this is the MT_CKD 2.5 version of Feb 2016
+c ----------------------------------------------------------------------------
+c old versions of AER CKD
+c AER-CKD      00 : version 00 
+c AER-CKD      21 : version 2.1
+c AER-CKD      23 : version 2.3
+c AER-CKD      24 : version 2.4
 c ----------------------------------------------------------------------------
 c ----------------------------------------------------------------------------
 c ----------------------------------------------------------------------------
@@ -1881,7 +1891,7 @@ c MTCKD25 = [ [25]  [] ];
 c allowedCKD = [origCKD MTCKD1 MTCKD25];
 c ----------------------------------------------------------------------------
 
-      kCKD = 1
+      kCKD = 25
 
 c kGasTemp  ==  1 if we use the CO2 profile temperatures (if present)
 c              -1 if we just do the weighted average to find the MixVertTemps
@@ -2020,14 +2030,16 @@ c ----------------------------------------------------------------------------
      $    .AND. (kCKD .NE. 0) .AND. (kCKD .NE. 21) .AND. (kCKD .NE. 23) .AND. (kCKD .NE. 24) 
      !!!! these are MT_CKD1 and research versions from AIRS data
      $    .AND. (kCKD .NE. 1) .AND. (kCKD .NE. 4) .AND. (kCKD .NE. 6)
-     $    .AND. (kCKD .NE. 25))
+     $    .AND. (kCKD .NE. 25) .AND. (kCKD .NE. 27))
      $ THEN 
         write(kStdErr,*) 'In *PARAMS, need kCKD = [-1] for no continuum OR'
         write(kStdErr,*) '                 CKD    versions 0,21,23 or 24'
         write(kStdErr,*) '              MT_CKD    versions 1,  [4,6]'
         write(kStdErr,*) '              MT_CKD    versions 25  [   ]'
+        write(kStdErr,*) '              MT_CKD    versions 27  [   ]'	
         write(kStdErr,*) '       (latest AER versions =  1, released Dec 2002)'
         write(kStdErr,*) '       (latest AER versions = 25, released Dec 2010)'
+        write(kStdErr,*) '       (latest AER versions = 27, released Feb 2016)'	
         write(kStdErr,*) '           [ are our modifications ] '
         write(kStdErr,*) 'kCKD is water continuum calculation version'
         write(kStdErr,*) 'Please reset and retry'
@@ -3333,7 +3345,8 @@ c iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
       INTEGER iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raLayerHeight(kProfLayer)
-
+      REAL rJunk1,rJunk2
+      
 c local var
       INTEGER iX,iY
       REAL rX,SACONV_SUN,ORIG_SACONV_SUN,VACONV
@@ -3433,15 +3446,20 @@ c now set the param you need to set
           write(kStdErr,*) 'Go and reset raStartPress instead'
           CALL DoStop
         ELSE
-          write(kStdWarn,*) '  changing user input SatZen (angle at gnd)  to TOA Instr ScanAng '
+          write(kStdWarn,*) '  changing user input SatZen (angle at gnd)  to       Instr ScanAng '
+	  write(kStdWarn,*) '  WARNING : if raSatHeight == -1 then kCARTA uses SATELLITEsecant!!!!'
+          write(kStdWarn,*) '  raAtmLoop(iX) --> raSatAngle(iX)     GNDsecant  --> SATELLITEsecant'
           DO iX = 1,iNatm
             raSatAngle(iX) = raAtmLoop(iX)
             !!!! positive number so this is genuine input angle that will vary with layer height
-            raSatAngle(iX) = SACONV_SUN(raAtmLoop(iX),0.0,705.0)	    
-	    write(kStdWarn,*) '  ',raAtmLoop(iX),' ---> ',raSatAngle(iX)
+            raSatAngle(iX) = SACONV_SUN(raAtmLoop(iX),0.0,705.0)
+	    rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
+	    rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)	    
+	    write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2	    
           END DO
         END IF
-      
+ 111  FORMAT('   ',F10.5,' ---> ',F10.5,'   +++   ',F10.5,' ---> ',F10.5)
+ 
       ELSEIF (iAtmLoop .EQ. 4) THEN
         write(kStdWarn,*) '  Resetting raSolZen for looping'
         write(kStdErr,*)  '  Resetting raSolZen for looping'

@@ -2857,7 +2857,7 @@ to use mostly the same parameters, and repeat calculations for one parameter. Fo
 might want to keep all view angles and emissivity the same, but repeat the calculation for
 different surface temperatures. This can be done by using the following parameters \newline
 iAtmLoop = -1,1,2,3,4 : stand for do one calc (default) or vary \newline
-  (1) surface pressure (2) stop pressure (3) satzen/scanang (4) solar zenith
+  (1) surface pressure (2) stop pressure (3) satzen (which code internally converts to scanang) (4) solar zenith
   (5) emissivity $\rightarrow$ emissivity + $\delta$ \newline
 The user can then use raAtmLoop(1..5) to set upto 5 values (termination is when the array
 value is less than 0).

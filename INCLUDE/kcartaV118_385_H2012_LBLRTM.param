@@ -186,18 +186,12 @@ c !!! o = 8250-12250 cm-1, at 0.025 cm-1 spacing (= 250 cm-1 chunk span)
 
 c !!! v = 12000-25000 cm-1, at 0.0500 cm-1 spacing (= 500 cm-1 chunk span)
       CHARACTER*80 kWaterPathv,kCompPathv,kCKDPathv
-c      PARAMETER (kWaterPathv = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/h2o.ieee-le/')
-c      PARAMETER (kCompPathv  = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
-c      PARAMETER (kCKDPathv   = '^/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
       PARAMETER (kWaterPathv = '^/H2004_otherbands.ieee-le/VIS12000_25000/h2o.ieee-le/')
       PARAMETER (kCompPathv  = '^/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
       PARAMETER (kCKDPathv   = '^/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
 
 c !!! u = 25000-44000 cm-1, at 0.1000 cm-1 spacing (= 1000 cm-1 chunk span)
       CHARACTER*80 kWaterPathu,kCompPathu,kCKDPathu
-c      PARAMETER (kWaterPathu = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/h2o.ieee-le/')
-c      PARAMETER (kCompPathu  = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
-c      PARAMETER (kCKDPathu   = '^/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
       PARAMETER (kWaterPathu = '^/H2004_otherbands.ieee-le/UV25000_45000/h2o.ieee-le/')
       PARAMETER (kCompPathu  = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
       PARAMETER (kCKDPathu   = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
@@ -234,22 +228,11 @@ c *********** make sure they agree with what set above in kCompParamFile
 
       INTEGER kCO2_UMBCorHARTMAN
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
-c OLD VERSIONS
-c      PARAMETER (kCO2Path = '#/v20.ieee-le/etc.ieee-le/')
-c      PARAMETER (kCO2Path = '#/v23.ieee-le/etc.ieee-le/')
-c      PARAMETER (kCO2Path = '#/UMBC_CO2_H1998.ieee-le/CO2ppmv370.ieee-le/')
-c      PARAMETER (kCO2Path = '#/v24.ieee-le/co2.ieee-le/')
-c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
-
-c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 c NEW versions, first is what was used, tried and tested in SARTA from 2004-2012
       PARAMETER (kCO2Path       = '#/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/')
-c VERY NEW, VERY NEW, VERY NEW trying these new versions
-c      PARAMETER (kCO2Path = '^/H2012.ieee-le/IR605/etc.ieee-le/linemixUMBC/') !! hmm a new try of UMBC linemix
-c      PARAMETER (kCO2Path = '^/H2012.ieee-le/IR605/etc.ieee-le/hartmann/') !! hmm a new try of Hartmann
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 
-      PARAMETER (kCO2_UMBCorHARTMAN = +1)
+      PARAMETER (kCO2_UMBCorHARTMAN = -1)
 c--->
 c kCO2ppmvFile      == file that has the CO2 amounts used in the LTE kCARTA database
 c kCO2ppmvFileBack  == file that has the CO2 amounts used in the weak backgnd 
@@ -292,7 +275,7 @@ c kGasStore == max number of gases we allocate storage for
 c              (from GASFIL + XSCFIL + WaterSelf + WaterFor <= kMaxGas)
 c kMixFilRows== max number of mixfil rows that can be read in
       INTEGER kMaxAtm,kGasStore,kMixFilRows,kMaxPrint
-      PARAMETER (kMaxAtm=5,kGasStore=80,kMixFilRows=kProfLayer*2)
+      PARAMETER (kMaxAtm=6,kGasStore=80,kMixFilRows=kProfLayer*2)
       PARAMETER (kMaxPrint=10)
 
 c kEmsRegions=how many wavenumber dependent regions can be read in from 
