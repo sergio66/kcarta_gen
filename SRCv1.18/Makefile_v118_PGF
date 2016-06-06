@@ -22,7 +22,7 @@
 
 ########################################################################
 ## if this does not work, just delete following line and bring in
-## "Makefile_intel_hdf_rtp" or "Makefile_intel_hdf_rtp"
+## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"
 include Makefile_generic_hdf_rtp
 
 SHELL = /bin/sh
@@ -45,6 +45,7 @@ SHELL = /bin/sh
 ## find exec       module avail
 ## need to do      module load pgi/64/15.7
 FORTRANX = /cm/shared/apps/pgi/15.7/linux86-64/15.7/bin/pgf77
+FORTRANX = /cm/shared/apps/acml/5.3.1/pgi64
 UFLAG = -Mdclchk
 ###FLAGS = -Mextend -Mbounds -Mupcase -O2
 ###FLAGS = -Mextend -Mnoupcase -O3

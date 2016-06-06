@@ -22,7 +22,7 @@
 
 ########################################################################
 ## if this does not work, just delete following line and bring in
-## "Makefile_intel_hdf_rtp" or "Makefile_intel_hdf_rtp"
+## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"
 include Makefile_intel_hdf_rtp
 
 SHELL = /bin/sh
@@ -64,9 +64,9 @@ SHELL = /bin/sh
 FORTRANX = ifort   ## GENERIC< should always work!!!
 #
 # DEBUG TOO MUCH INFO : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp_created -gen-interfaces -warn interfaces 
+#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp_created -gen-interfaces -warn interfaces  -mcmodel=medium
 # DEBUG GOOD : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check 
+#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
 # ALL COOL
 FLAGS = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
 #UFLAG = 

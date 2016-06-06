@@ -518,8 +518,11 @@ c      END IF
       namecomment = '******* RADNCE section *******'
       iAtmLoop     = -1
       iTemperVary  = -1
-      
+
+      rSatHeightCom = -1.0  !!! this is in pre_defined.param, comblockAtmLoop
+      rAtmLoopCom   = -1.0  !!! this is in pre_defined.param, comblockAtmLoop
       DO iI = 1,kMaxAtm
+        raAtmLoopCom(iI) = -9999.0      !!! this is in pre_defined.param, comblockAtmLoop      
         raAtmLoop(iI)    = -9999.0
         raSatAzimuth(iI) = 0.0
         raSolAzimuth(iI) = 0.0
@@ -542,6 +545,7 @@ c      END IF
 
       iNatm1 = iNatm
       DO iI  =  1,kMaxAtm
+        raAtmLoopCom(iI)      = raAtmLoop(iI)      !!! this is part of comBlockAtmLoop      
         raAtmLoop1(iI)        = raAtmLoop(iI)
 
         iaMPSetForRad1(iI)    = iaMPSetForRad(iI)
@@ -586,7 +590,8 @@ c      END IF
         raScatterDME1(iI)         = raScatterDME(iI)
         raScatterIWP1(iI)         = raScatterIWP(iI)
       END DO
-
+      rSatHeightCom = raSatHeight(1)    !!! this is part of comBlockAtmLoop
+      
       IF (iNatm1 .GT. 0) THEN
         kSolAzi                = raSolAzimuth(iNatm)
         kSatAzi                = raSatAzimuth(iNatm)

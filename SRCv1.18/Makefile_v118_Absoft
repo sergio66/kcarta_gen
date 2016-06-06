@@ -22,7 +22,7 @@
 
 ########################################################################
 ## if this does not work, just delete following line and bring in
-## "Makefile_intel_hdf_rtp" or "Makefile_intel_hdf_rtp"
+## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"
 include Makefile_generic_hdf_rtp
 
 SHELL = /bin/sh

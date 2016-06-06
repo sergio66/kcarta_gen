@@ -2593,7 +2593,8 @@ c      END IF
         raSatHeight(iC) = rHeight   !height in m
 	CALL DoStop
       END IF
-
+      rSatHeightCom = raSatHeight(iC)    !!! this is part of comBlockAtmLoop
+      
       IF (abs(rAngle) .LE. 1.0e-4) THEN !nadir view
         rHeight = -1.0
         raSatHeight(iC) = -1.0
@@ -2601,7 +2602,8 @@ c      END IF
 	write(kStdErr,*) '>>>>>>>>>>>>>>>'
 	write(kStdErr,*) 'Living dangerously : angle = 0 so satHeight = 0 for raAtmLoop ==>  no ray trace'
 	write(kStdErr,*) '>>>>>>>>>>>>>>>'
-	write(kStdErr,*) '>>>>>>>>>>>>>>>'	
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'
+        rSatHeightCom = raSatHeight(iC)    !!! this is part of comBlockAtmLoop		
       END IF
       
       raSatAzimuth(iC) = prof.satazi

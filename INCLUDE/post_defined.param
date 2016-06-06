@@ -18,3 +18,8 @@ c just dumb additions to kProfLayer
       INTEGER iaLimb(kMaxAtm)
       COMMON/LM1/iaLimb
       COMMON/LM2/raLimbTangentRad
+
+c these are to do NO raytracing with kcarta satzen option, if rSatHeight < 0
+      REAL raAtmLoopCom(kMaxAtm),rSatHeightCom,rAtmLoopCom
+      COMMON/comBlockAtmLoop/raAtmLoopCom,rSatHeightCom,rAtmLoopCom
+      

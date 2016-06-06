@@ -130,7 +130,7 @@ c        finally has the radiation at the end
 c raFreqAngle has the angular dependence as fcn of freq
 c raFreq    = frequencies of the current 25 cm-1 block being processed
 c raaOrigAbs = matrix containing the mixed path abs coeffs
-c raVT1(    = vertical temperature profile associated with the mixed paths
+c raVT1      = vertical temperature profile associated with the mixed paths
 c iAtm       = atmosphere number
 c iNumLayer  = total number of layers in current atmosphere
 c iS,iE are the start/stop layers between which to do transfer
@@ -155,6 +155,7 @@ c to do the angular integration
 
       iCase  = -1
       iBdry  = FindBoundary(raFreq,iProfileLayers,raPressLevels,iaRadLayer)
+      
       iBdry0 = iBdry
       iM     = iDiv(iaRadLayer(1),kProfLayer)   
       iBdry  = iBdry + iM*kProfLayer
@@ -726,7 +727,7 @@ c this is the diffusivity approx angle, in radians
       DO iFr=1,kMaxPts
         raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
-      
+
 c select diffusivity angles, depending on frequency and layers
 c (acos(3/5) at top layers, diffusivity parametrization at bottom layers)
 c initialize to space blackbdy radiation
@@ -1048,7 +1049,7 @@ c raFreq is the frequency wavenumbers of the current block
 
       !!! new default !!
       iB = WhichLevel(iProfileLayers,raPressLevels,500.0)   !AIRS100 => lev iB = 25
-
+      
       IF ((raFreq(1).GE.605.0).AND.(raFreq(kMaxPts).LE.630.0)) THEN
         iB = WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB = 25
       ELSE IF((raFreq(1).GE.705.0).AND.(raFreq(kMaxPts).LE.830.0)) THEN
@@ -1086,51 +1087,52 @@ c raFreq is the frequency wavenumbers of the current block
       END
 c************************************************************************
 c this function finds the pressure level which corresponds to given pressure
-      INTEGER FUNCTION WhichLevel(iProfileLayers,raPressLevels,p)
+      INTEGER FUNCTION WhichLevel(iProfileLayers,raPressLevels,p0)
            
       IMPLICIT NONE
  
       include '../INCLUDE/kcarta.param'
 
-      REAL raPressLevels(kProfLayer+1),p
+      REAL raPressLevels(kProfLayer+1),p0
       INTEGER iProfileLayers
-     
+
+      REAL p
       INTEGER iB,iLowest
 
+      p = p0
+      
       iLowest = kProfLayer - iProfileLayers + 1
 
+      
       IF (p .GT. raPressLevels(iLowest)) THEN
-c       write (kStdWarn,*) 'in FindBoundary, would like pressure to be between'
-c       write (kStdWarn,*) 'raPressLevels(iLowest),raPressLevels(kProfLayer+1)'
-c       write (kStdWarn,*) 'where lowest kCARTA level = ',iLowest
-c       write (kStdWarn,*) 'resetting input "p" to function WhichLevel from ',p
-        p = raPressLevels(iLowest+1)
-c       write (kStdWarn,*) 'to pressure ',p
+       write (kStdWarn,*) 'in FindBoundary, would like pressure to be between'
+       write (kStdWarn,*) 'raPressLevels(iLowest),raPressLevels(kProfLayer+1)'
+       write (kStdWarn,*) 'where lowest kCARTA level = ',iLowest
+       write (kStdWarn,*) 'resetting input "p" to function WhichLevel from ',p
+       p = raPressLevels(iLowest+1)
+       write (kStdWarn,*) 'to pressure ',p
       END IF
-
+      
       IF (p .LT. raPressLevels(kProfLayer+1)) THEN
 c       write (kStdWarn,*) 'in FindBoundary, would like pressure to be between'
 c       write (kStdWarn,*) 'raPressLevels(iLowest),raPressLevels(kProfLayer+1)'
 c       write (kStdWarn,*) 'where highest KCARTA level = ',kProfLayer+1
 c       write (kStdWarn,*) 'resetting input "p" to function WhichLevel from ',p
-        print *,'mmooo',iLowest,iProfileLayers,p,raPressLevels(kProfLayer+1),raPressLevels(kProfLayer)
         p = raPressLevels(kProfLayer)
-        print *,'mmoooNew',iLowest,iProfileLayers,p,raPressLevels(kProfLayer+1)	
 c       write (kStdWarn,*) ' to pressure ',p
       END IF
 
       iB = iLowest
  20   CONTINUE
-      IF (raPressLevels(iB) .GT. p) THEN
-c        print *,iB,p,raPressLevels(iB)
+      IF ((raPressLevels(iB) .GT. p) .AND. (iB .LT. kProfLayer)) THEN
         iB = iB + 1
         GO TO 20
       END IF
 
       IF (iB .GT. kProfLayer) THEN
-        write (kStdWarn,*) 'in FindBoundary, need iB to lie between'
-        write (kStdWarn,*) 'iLowest and kProfLayer'
-        write (kStdWarn,*) 'iB,iLowest,kProfLayer = ',iB,iLowest,kProfLayer
+c        write (kStdWarn,*) 'in FindBoundary, need iB to lie between'
+c        write (kStdWarn,*) 'iLowest and kProfLayer'
+c        write (kStdWarn,*) 'iB,iLowest,kProfLayer = ',iB,iLowest,kProfLayer
         iB = kProfLayer
 c        CALL DoStop
       END IF
