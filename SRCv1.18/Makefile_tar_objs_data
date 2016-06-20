@@ -202,8 +202,8 @@ EXECSDIST = datafix385 basic
 all : $(EXECS)
 alldist : $(EXECSDIST)
 
-datafix400:
-	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/kcartaV118_400.param > \
+datafix400_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/kcartaV118_400_H2012.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \

@@ -1160,9 +1160,10 @@ c ******** FRQNCY section
       IF (kRTP .LE. 0) THEN
         !no need to check freqs as this is done in kcartamain.f (GetFreq)
       ELSE
-        !print *,rf_low,rf_high
+        !print *,'A',rf_low,rf_high,iRTP,caPFName
         !need to set rf_low, rf_high from the header info
         CALL IdentifyChannelsRTP(rf_low,rf_high,iRTP,caPFName)
+        !print *,'B',rf_low,rf_high,iRTP,caPFName	
       END IF
 
       write (kStdWarn,*) 'successfully checked freqs .....'

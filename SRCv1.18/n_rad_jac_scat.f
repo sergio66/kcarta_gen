@@ -243,6 +243,8 @@ c now loop iNatm times
           CALL DoStop
         END IF
 
+        write(kStdWarn,*) ' '
+        write(kStdWarn,*) 'Processing info for atm # ',iC,' of ',iNatm
         CALL StartStopMP(iW,rPressStart,rPressStop,iC,
      $                   raPressLevels,iProfileLayers,
      $                   raFracTop,raFracBot,raaPrBdry,iStart,iStop)

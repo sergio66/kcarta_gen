@@ -262,10 +262,11 @@ c it assumes the lower atm has CO2 ~ 385 ppmv
 c local vars
       REAL r1,r2,r3,r4,r5,r6,r7,r8,r9
       CHARACTER*120 caStr
-      INTEGER iIOUN,iI,iErr
+      INTEGER iIOUN,iI,iErr,iReason
 
       GOTO 777
 
+      write(kStdWarn,*) 'SUBR GetUS_Std_UA : caUA_US_STD_385ppmv = ',caUA_US_STD_385ppmv
  100  write(kStdErr,*) 'Error reading GetUS_Std_UA info : filename = '
       WRITE(kStdErr,1070) iErr,caUA_US_STD_385ppmv
       CALL DoStop
@@ -285,14 +286,21 @@ c local vars
       iI = 0
 
  555  CONTINUE
-      read(iIOUN,123,ERR = 600) caStr
-c      print *,caStr
+      !! for IOSTAT look at http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap04/iostatus.html
+      !! if iOSTAT = 0, everything fine, if -1 this is EOF, if > 0 this is a problem
+      read(iIOUN,123,IOSTAT=iReason,ERR=600) caStr
+c      print *,caStr,caUA_US_STD_385ppmv
+      IF (iReason .LT. 0) GOTO 600       !!!! end of file
+      IF (iReason .GT. 0) THEN
+        write(kStdErr,*) 'at iT = ',iI,' IOSTAT=iReason for file ',iReason,caUA_US_STD_385ppmv
+	CALL DoStop
+      END IF      
       IF (caStr(1:1) .EQ. '!') THEN
         !!!these are comments at beginning of file, so skip
         GOTO 555
       ELSE
         READ (caStr,*) iUpperStd_Num,r1,r2,r3,r4,r5,r6,r7,r8,r9
-c        print *,iUpperStd_Num,r1,r2,r3,r4,r5
+c        print *,iI+1,iUpperStd_Num,r1,r2,r3,r4,r5
         iI = iI + 1
         raUpperPress_Std(iI)    = r1
         raUpperDZ_Std(iI)       = r2

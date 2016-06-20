@@ -60,8 +60,8 @@ c      write(kStdWarn,*) 'read close status = ', status
 
       IF (head.ngas .GT. MAXGAS) THEN
         !! see /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
-        write(kStdErr,*) ' >>>> number of gases in RTP     file = ',head.ngas
-        write(kStdErr,*) ' >>>> number of gases in RTPDEFS      = ',MAXGAS
+        write(kStdErr,*) ' SUBR  IdentifyChannelsRTP >>>> number of gases in RTP     file = ',head.ngas
+        write(kStdErr,*) '                           >>>> number of gases in RTPDEFS      = ',MAXGAS
 	CallDoStop
       END IF
       

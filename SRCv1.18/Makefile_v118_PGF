@@ -44,8 +44,9 @@ SHELL = /bin/sh
 ##FORTRANX = pgf90
 ## find exec       module avail
 ## need to do      module load pgi/64/15.7
-FORTRANX = /cm/shared/apps/pgi/15.7/linux86-64/15.7/bin/pgf77
-FORTRANX = /cm/shared/apps/acml/5.3.1/pgi64
+#FORTRANX = /cm/shared/apps/pgi/15.7/linux86-64/15.7/bin/pgf77
+#FORTRANX = /cm/shared/apps/acml/5.3.1/pgi64
+FORTRANX = /cm/shared/apps/pgi/15.4/linux86-64/15.4/bin/
 UFLAG = -Mdclchk
 ###FLAGS = -Mextend -Mbounds -Mupcase -O2
 ###FLAGS = -Mextend -Mnoupcase -O3

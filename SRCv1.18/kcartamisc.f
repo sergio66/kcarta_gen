@@ -435,24 +435,30 @@ c -------------------------
 c        CALL DoStop
       END IF
 
+ 100  FORMAT(A25,A80)
+ 101  FORMAT(A65,F12.8) 
       IF ((rMeanA/kMaxLayer .LE. 0.9995) .OR.
      $    (rMeanA/kMaxLayer .GE. 1.0005)) THEN
-        write(kStdErr,*) 'oops check_co2ppmv : rMeanA is bad'
+	write(kStdErr,100) 'v0 : kCO2ppmvFile =   ', kCO2ppmvFile
+        write(kStdErr,101) 'mean rCO2ppmv (raCO2pp/raP) v0 from input TRUErefprof2         = ',rDirectPPMV0
+	write(kStdErr,100) 'v1 : ref CO2 profile = ', caFName
+        write(kStdErr,101) 'mean rCO2ppmv (raCO2PP/raP) v1 from input refprof2             = ',rDirectPPMV1
+        write(kStdErr,*) 'oops check_co2ppmv : rMeanA is bad',rMeanA/kMaxLayer
         CALL DoStop
       END IF
       IF ((rMeanP/kMaxLayer .LE. 0.9995) .OR.
      $    (rMeanP/kMaxLayer .GE. 1.0005)) THEN
-        write(kStdErr,*) 'oops check_co2ppmv : rMeanP is bad'
+        write(kStdErr,*) 'oops check_co2ppmv : rMeanP is bad',rMeanP/kMaxLayer
         CALL DoStop
       END IF
       IF  ((rMeanPP/kMaxLayer .LE. 0.9995) .OR. 
      $    (rMeanPP/kMaxLayer .GE. 1.0005)) THEN
-        write(kStdErr,*) 'oops check_co2ppmv : rMeanPP is bad'
+        write(kStdErr,*) 'oops check_co2ppmv : rMeanPP is bad',rMeanPP/kMaxLayer
         CALL DoStop
       END IF
       IF ((rMeanT/kMaxLayer .LE. -0.0005) .OR.
      $   (rMeanT/kMaxLayer .GE. +0.0005)) THEN
-        write(kStdErr,*) 'oops check_co2ppmv : rMeanT is bad'
+        write(kStdErr,*) 'oops check_co2ppmv : rMean deltaT is bad',rMeanT/kMaxLayer
         CALL DoStop
       END IF
 

@@ -787,6 +787,7 @@ c local variables
 c first read the names of all strong bands for the molecule
       caFName = caStrong
       iIOun = kTempUnit
+      write(kStdWarn,*) 'SUBR read_stronglineLTE_lineparameters : caStrong = ',caStrong
       OPEN(UNIT=iIOun,FILE=caFName,FORM='formatted',STATUS='OLD',
      $     IOSTAT=iErr) 
       IF (iErr .NE. 0) THEN 
@@ -865,6 +866,7 @@ c thus find names in caaCheckNamesIn that are NOT in caaCheckNamesMatch
       write(kStdWarn,*) 'found ',iStrongNLTEFound,' strong bands in NLTE'
 
       IF (iStrongNLTEFound .EQ. 0) THEN
+        write(kstdErr,*) ' '
         write(kStdErr,*) 'in subroutine read_stronglineLTE_lineparameters :'
         write(kStdErr,*) 'did not find ANY Strong NLTE bands!!!'
         write(kStdErr,*) 'code thinks all your strong bands are in LTE'
@@ -874,6 +876,7 @@ c thus find names in caaCheckNamesIn that are NOT in caaCheckNamesMatch
       END IF
 
       IF (iStrongNLTEFound .NE. iaNLTEBands(iLTEin)) THEN
+        write(kstdErr,*) ' '      
         write(kStdErr,*) 'in subroutine read_stronglineLTE_lineparameters :'
         write(kStdErr,*) 'number of Strong NLTE bands <> iaNLTEBands(iGasID)!'
         write(kStdErr,*) 'Check info in caaStrongLines (from nm_nonlte) '
