@@ -1399,7 +1399,7 @@ c or just the basic results file (0)
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
-
+      
 c raPressLevels, iProfileLayers = actual number of pressure layers
 c iOutFileName = does caOutName exist, or is stuff dumped to screen? for fluxes
 c caComment   = comment that the user put into *RADNCE
@@ -1476,12 +1476,19 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       REAL raParams(kMaxUserSet),raPActualAvg(kProfLayer),rP
       CHARACTER*4 caStrJunk(7)
       CHARACTER*80 caFCloudName
+      REAL raSumTotalGasAmt(kMaxGas)
       
       !this is for kLongOrShort = 0
       INTEGER iTag,iTotalStuff      
       INTEGER iCo2,iaCO2path(kProfLayer),iaLayerFlux(kMaxAtm)
       INTEGER iaJunkFlux(2*kProfLayer)
 
+      include '../INCLUDE/gasIDname.param'
+      
+      DO iI = 1, kMaxGas
+        raSumTotalGasAmt(iI) = 0.0
+      END DO
+      
       iDumpAllUASpectra = -1 !!assume no need to dump out CO2 UA spectra
       IF (iDoUpperAtmNLTE .GT. 0) THEN
         !!need to see if we are dumping out CO2 paths
@@ -1615,6 +1622,7 @@ c then output path ID stuff ------------------------------------------
         DO iI=1,iNumGases
           DO iJ=kProfLayer-iProfileLayers+1,kProfLayer
             iP=(iI-1)*kProfLayer+iJ
+	    raSumTotalGasAmt(iaGases(iI)) = raSumTotalGasAmt(iaGases(iI)) + raaAmt(iJ,iI)
             WRITE(iIOUN,7171)iP,iaGases(iI),raPActualAvg(iJ)/kAtm2mb,raaPartPress(iJ,iI),
      $                   raaPartPress(iJ,iI)/(raPActualAvg(iJ)/kAtm2mb)*1.0e6,raaTemp(iJ,iI),raaAmt(iJ,iI),'||',
      $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaAmt(iJ,iI)/raaRAmt(iJ,iI)
@@ -1625,6 +1633,16 @@ c     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaRPartPress(iJ,i
           END DO
 	  write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
         END DO
+
+c write sum
+        write(iIOUN,*) '         iI  iGasID  Name     total molecules/cm2'
+	write(iIOUN,*) '--------------------------------------------------'
+        DO iI = 1,iNumGases
+	  write(iIOUN,123) iI,iaGases(iI),caGID(iaGases(iI)),raSumTotalGasAmt(iaGases(iI))*kAvog
+	END DO
+	write(iIOUN,*) '--------------------------------------------------'
+ 123    FORMAT(i3,' ',I3,' ',A20,' ',E11.5)
+ 
 c then output list of paths to be output
         WRITE(iIOUN,*) 'list of paths to be output ...'
         iP=0

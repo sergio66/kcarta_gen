@@ -42,40 +42,16 @@ c                            eg HT1998 means "built with HITRAN 1998 + Toth"
 c parameter kChiFIle tells the code where to look for necessary files
 c that improve the spectroscopy when multiplied with the kCompressed data
       CHARACTER*80 kXsecParamFile,kCompParamFile
-      PARAMETER (kXsecParamFile = '/asl/data/kcarta_sergio/KCDATA/General/junkHT2012.param')
+c      PARAMETER (kXsecParamFile = '/asl/data/kcarta_sergio/KCDATA/General/junkHT2012.param')
+      PARAMETER (kXsecParamFile = '/asl/data/kcarta_sergio/KCDATA/General/lblrtm_xsec.param')
 
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 
-c NOTE 1
-c if you use Scott's last version of v107 then try
-c      PARAMETER (kCompParamFile = '/asl/data/kcarta/KCARTADATA/General/compHT2007_test.param_andy')
-c      PARAMETER (kXsecParamFile = '/asl/data/kcarta/KCARTADATA/General/compHT2007_test.param_andy')
-c      PARAMETER (kWaterPath = '/asl/data/kcarta/v07.ieee-le/h2o.ieee-le/')
-c      PARAMETER (kCompPath  = '/asl/data/kcarta/v07.ieee-le/etc.ieee-le/')
-c   as it includes info for both /asl/data/kcarta/KCARTADATA/General/xsecHT2007_test.param and
-c                              /asl/data/kcarta/KCARTADATA/General/compHT2007_test.param
-c   looks like this is what he used for 
-c      PARAMETER (kWaterPath  = '/asl/data/kcarta/v07.ieee-le/h2o.ieee-le/')
-c      PARAMETER (kCompPath   = '/asl/data/kcarta/v07.ieee-le/etc.ieee-le/')
-c   when making most recent (2008-2010 version) of SARTA
-c NOTE 1
-
-c this was generic test (ie only had the 605-2830 cm-1 in it)
-c      PARAMETER (kCompParamFile = '/asl/data/kcarta_sergio/KCDATA/General/compHT2012.param')
-c this was generic test (ie only had the 605-2830 cm-1 in it)
-
-c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and latest UMBC CO2 linemixing
-c  same IR CO2 bands for HARTMANN CO2 line mixing, so can use same param file
-c seems to give large BT problems on lines in the 667 cm-1 region (640-700 cm-1) and 2300-2400 cm-1
-c      PARAMETER (kCompParamFile = 
-c     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_newCO2')
-c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and latest CO2 linemixing
-
-c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, TRIED AND TESTED UMBC CO2 linemixing
+c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) using compressed data from LBLRTMv12.2
       PARAMETER (kCompParamFile = 
-     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_oldCO2')
+     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_lblrtm')
 c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, working CO2 linemixing
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -109,8 +85,8 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/')
 c      PARAMETER (kCompPath       = '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/')
-      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2012_IR/h2o/')
-      PARAMETER (kCompPath       = '/asl/data/kcarta/H2012_IR/etc/')
+      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/h2o.ieee-le/')
+      PARAMETER (kCompPath       = '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/')
       PARAMETER (kCKDPath        = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/Compr/')
 
@@ -123,16 +99,16 @@ c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER*80 kWaterIsotopePath
 c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/')
-      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
+c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
-      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
-      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
-c for testing; this will turn off new part of code and just use usual database
-c for testing; this will turn off new part of code and just use usual database
-c      PARAMETER (kWaterIsotopePath = kWaterPath)
-c      PARAMETER (kWaterIsobandStart1 = 2905, kWaterIsobandStop1 = 3355)
-c      PARAMETER (kWaterIsobandStart2 = 3905, kWaterIsobandStop2 = 3355)
+c      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
+c      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
+c NO breakout to HDO :  this will turn off new part of code and just use usual database
+c NO breakout to HDO :  this will turn off new part of code and just use usual database
+      PARAMETER (kWaterIsotopePath = kWaterPath)
+      PARAMETER (kWaterIsobandStart1 = 2905, kWaterIsobandStop1 = 3355)
+      PARAMETER (kWaterIsobandStart2 = 3905, kWaterIsobandStop2 = 3355)
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
@@ -210,18 +186,12 @@ c !!! o = 8250-12250 cm-1, at 0.025 cm-1 spacing (= 250 cm-1 chunk span)
 
 c !!! v = 12000-25000 cm-1, at 0.0500 cm-1 spacing (= 500 cm-1 chunk span)
       CHARACTER*80 kWaterPathv,kCompPathv,kCKDPathv
-c      PARAMETER (kWaterPathv = '/asl/data/kcarta_sergio/H2012.ieee-le/OTHERBANDS/VIS12000_25000/h2o.ieee-le/')
-c      PARAMETER (kCompPathv  = '/asl/data/kcarta_sergio/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
-c      PARAMETER (kCKDPathv   = '/asl/data/kcarta_sergio/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
       PARAMETER (kWaterPathv = '/asl/data/kcarta_sergio/H2004_otherbands.ieee-le/VIS12000_25000/h2o.ieee-le/')
       PARAMETER (kCompPathv  = '/asl/data/kcarta_sergio/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
       PARAMETER (kCKDPathv   = '/asl/data/kcarta_sergio/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
 
 c !!! u = 25000-44000 cm-1, at 0.1000 cm-1 spacing (= 1000 cm-1 chunk span)
       CHARACTER*80 kWaterPathu,kCompPathu,kCKDPathu
-c      PARAMETER (kWaterPathu = '/asl/data/kcarta_sergio/H2012.ieee-le/OTHERBANDS/UV25000_45000/h2o.ieee-le/')
-c      PARAMETER (kCompPathu  = '/asl/data/kcarta_sergio/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
-c      PARAMETER (kCKDPathu   = '/asl/data/kcarta_sergio/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
       PARAMETER (kWaterPathu = '/asl/data/kcarta_sergio/H2004_otherbands.ieee-le/UV25000_45000/h2o.ieee-le/')
       PARAMETER (kCompPathu  = '/asl/data/kcarta_sergio/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
       PARAMETER (kCKDPathu   = '/asl/data/kcarta_sergio/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
@@ -247,30 +217,8 @@ c this is the chifiles
       PARAMETER (kChiFile        = '/asl/data/kcarta_sergio/KCDATA/General/ChiFile/')
 ccccccc >>>>>>>>
 
-c \\\\\\\\\\\\\\\\\\\\ this is the history of CO2 files /////////////////////
 c kCO2Path        == path to main linemix CO2 compressed data files (gasID 2)
       CHARACTER*80 kCO2Path
-c (1) v20 has the CO2 database made up in Summer 2000; HITRAN1998, PR mixing
-c         first all linemix database, where only one parameter for temperature
-c         sounding regions at 4um
-c      PARAMETER (kCO2Path    = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
-c (2) v23 has the CO2 database made in Aug 2002, which uses HITRAN2000, PR 
-c         mixing/blending in 3 different regions near 2380 cm-1 R branchead
-c      PARAMETER (kCO2Path    = '/asl/data/kcarta/v23.ieee-le/etc.ieee-le/')
-c (3) v20-23 blends v20,v23 CO2 database : use v20 everywhere except at 
-c         2355,2380,2405 where we use v23 database. Combining these two, we 
-c         have the v20-23 database, or for general distribution to global users, 
-c         the v24 linemix database
-c      PARAMETER (kCO2Path = '/carrot/s1/sergio/CO2database/v20_23.ieee-le/')
-c      PARAMETER (kCO2Path = '/asl/data/kcarta/v24.ieee-le/co2.ieee-le/')
-c (4) This has been copied over to /asl/data/kcarta/v07.ieee-le/etc.ieee-le ie
-c        /asl/data/kcarta/v24.ieee-le/co2.ieee-le ==== /asl/data/kcarta/v07.ieee-le/etc.ieee-le
-c (5) /carrot/s1/sergio/CO2ppmv385/ contains same files as (4), but CO2 ppmv 
-c     is 385 ppmv produced by scaling the coefficients, see 
-c     /KCARTA/UTILITY/for2mat2for_CO2_370_385.m
-c (6) /asl/s1/sergio/RUN8_NIRDATABASE/IR_605_2830_H08_CO2/fbin/etc.ieee-le/ 
-c     contains the JM Hartmann LineMix files ... needs lots of debugging
-c \\\\\\\\\\\\\\\\\\\\ this is the history of CO2 files /////////////////////
 
 c --------- > (B) these are the CO2 files; 
 c ---------->     kCO2_UMBCorHARTMAN tells us linemixing = +1 for UMBC, -1 for Hartmann
@@ -280,27 +228,12 @@ c *********** make sure they agree with what set above in kCompParamFile
 
       INTEGER kCO2_UMBCorHARTMAN
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
-c OLD VERSIONS
-c      PARAMETER (kCO2Path = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
-c      PARAMETER (kCO2Path = '/asl/data/kcarta/v23.ieee-le/etc.ieee-le/')
-c      PARAMETER (kCO2Path = '/asl/data/kcarta/UMBC_CO2_H1998.ieee-le/CO2ppmv370.ieee-le/')
-c      PARAMETER (kCO2Path = '/asl/data/kcarta/v24.ieee-le/co2.ieee-le/')
-c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
-
-c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 c NEW versions, first is what was used, tried and tested in SARTA from 2004-2012
-      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')  !! default UMBC best
-c VERY NEW, VERY NEW, VERY NEW trying these new versions
-c      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/linemixUMBC/') !! hmm a new try of UMBC linemix
-c      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/hartmann/') !! hmm a new try of Hartmann
+      PARAMETER (kCO2Path       = '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/')
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 
-      PARAMETER (kCO2_UMBCorHARTMAN = +1)
+      PARAMETER (kCO2_UMBCorHARTMAN = -1)
 c--->
-c      Am pretty sure this is 385 ppmv
-c      PARAMETER (kCO2Path  = '/asl/data/kcarta/H2008_IR.v1.ieee-le/co2_hartmann.ieee-le/')
-c      PARAMETER (kCO2_UMBCorHARTMAN = -1)
-
 c kCO2ppmvFile      == file that has the CO2 amounts used in the LTE kCARTA database
 c kCO2ppmvFileBack  == file that has the CO2 amounts used in the weak backgnd 
 c                         LTE kCARTA database, layers 1 .. 100

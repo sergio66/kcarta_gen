@@ -1393,6 +1393,9 @@ c for specular reflection
       REAL raSpecularRefl(kMaxPts)
       INTEGER iSpecular
 
+c if we just want to dump out refl thermal instead of TOA radiance
+      INTEGER iDumpReflThermal
+      
 c for printing out angle info
       REAL rJunk1,rJunk2
       INTEGER iJunk
@@ -1616,6 +1619,14 @@ c from the top of atmosphere is not reflected
         write(kStdWarn,*) 'no thermal backgnd to calculate'
       END IF
 
+      iDumpReflThermal = +1   !! only dump out refl thermal, dangerous
+      iDumpReflThermal = -1   !! default
+      IF (iDumpReflThermal .EQ. +1) THEN
+        write(kStdErr,*) ' .... dumping out refl thermal ....'
+        CALL wrtout(iIOUN,caOutName,raFreq,raThermal)	
+        GOTO 888
+      END IF
+
 c see if we have to add on the solar contribution
 c this figures out the solar intensity at the ground
       IF (iDoSolar .GE. 0) THEN
@@ -1731,7 +1742,7 @@ c now do the radiative transfer thru this complete layer
 c        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
 c       print *,iLay,rMPTemp,raaAbs(1,iL),raInten(1)
       END DO
-      
+
 c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 c then do the topmost layer (could be fractional)
  777  CONTINUE
@@ -1764,6 +1775,8 @@ cc        END DO
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 
+ 888  CONTINUE
+ 
       RETURN
       END
 
