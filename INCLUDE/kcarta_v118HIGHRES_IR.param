@@ -105,8 +105,8 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le using lner.m <<<<<
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
-      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2012_IR/h2o/')
-      PARAMETER (kCompPath       = '/asl/data/kcarta/H2012_IR/etc/')
+      PARAMETER (kWaterPath      = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+      PARAMETER (kCompPath       = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
       PARAMETER (kCKDPath        = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/Compr/')
 
@@ -118,7 +118,8 @@ c >>>>>>> NOTE that ALL the water isotope datafiles are in kWaterIsotopePath
 c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and 
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER*80 kWaterIsotopePath
-      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
+c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
+      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
       PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
@@ -284,13 +285,14 @@ c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ****
 
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 c NEW versions, first is what was used, tried and tested in SARTA from 2004-2012
-      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')  !! default UMBC best
+c      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')  !! default UMBC best
 c VERY NEW, VERY NEW, VERY NEW trying these new versions
 c      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/linemixUMBC/') !! hmm a new try of UMBC linemix
 c      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/hartmann/') !! hmm a new try of Hartmann
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 
-      PARAMETER (kCO2_UMBCorHARTMAN = +1)
+      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+      PARAMETER (kCO2_UMBCorHARTMAN = -1)
 c--->
 c      Am pretty sure this is 385 ppmv
 c      PARAMETER (kCO2Path  = '/asl/data/kcarta/H2008_IR.v1.ieee-le/co2_hartmann.ieee-le/')

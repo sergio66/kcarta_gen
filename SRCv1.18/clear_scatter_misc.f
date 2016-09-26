@@ -3576,10 +3576,11 @@ c local variables
       CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                              !! (which is NOT necessarily average of above 2)
       IF (kOuterLoop .EQ. 1) THEN							     
-        write(kStdWarn,*) 'up iL iLay* iLp1*',iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+        write(kStdWarn,2345) iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
       END IF
       
  1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('up [iLDN=iL iLay iLUP=iLp1]',I3,3(' ',F10.3))
  
 c      IF (iVary .EQ. 4) THEN
 c        ! new option
@@ -3847,20 +3848,22 @@ c local variables
         END IF
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
       END IF
-      
+
       IF (iVary .GE. 4) THEN
         !! new option
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
+        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXX
         CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
 
         IF (kOuterLoop .EQ. 1) THEN
-          write(kStdWarn,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
-	END IF
+          write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)	
+	END IF	
       END IF
- 1234 FORMAT(I3,3(' ',F10.3))
       
+ 1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
+ 
       IF (iVary .EQ. 2) THEN 
         !!! lim tau --> 0 , rFcn --> 0
         write(kStdErr,*) 'huh iVary = 2 is a little buggy'
@@ -4155,10 +4158,12 @@ c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
         IF (kOuterLoop .EQ. 1) THEN
-          write(kStdWarn,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+          write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
 	END IF
       END IF
+      
  1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3)) 
       
       IF (iVary .EQ. 2) THEN 
         !!! lim tau --> 0 , rFcn --> 0
@@ -4456,11 +4461,13 @@ c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
         CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
         IF (kOuterLoop .EQ. 1) THEN
-          write(kStdWarn,*) 'dn iLp1 iLay* iLp*',iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+          write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)	
 	END IF
       END IF
- 1234 FORMAT(I3,3(' ',F10.3))
       
+ 1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
+ 
       IF (iVary .EQ. 2) THEN 
         !!! lim tau --> 0 , rFcn --> 0
         write(kStdErr,*) 'huh iVary = 2 is a little buggy'

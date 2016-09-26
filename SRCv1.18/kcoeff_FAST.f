@@ -337,6 +337,38 @@ c        write(kStdWarn,100) iL,rP,iaP1(iL),raP1(iL),rT,iaT11(iL),raT11(iL),rQ,i
       END IF
       write(kStdWarn,*) ' '
 
+      write(kStdWarn,*) '**********************************************************************'
+      write(kStdWarn,*) ' '      
+      write(kStdWarn,*) 'The following paths hold for kCompressed Database : '
+      write(kStdWarn,*) '  (unless explicitly overridden by nm_spectra)'
+      write(kStdWarn,120) kWaterPath(1:80)
+      write(kStdWarn,121) kWaterIsotopePath(1:80)      
+      write(kStdWarn,122) kCO2Path(1:80)
+      IF (kCO2_UMBCorHARTMAN .EQ. +1) THEN
+        write(kStdWarn,*) '  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN,' ==> UMBC CO2 linemixing ;;; ChiFile = '
+        write(kStdWarn,222) kChiFile(1:80)
+      ELSEIF (kCO2_UMBCorHARTMAN .EQ. -1) THEN
+        write(kStdWarn,*) '  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN,' ==> LBLRTM CO2 linemixing'
+      END IF      
+      write(kStdWarn,123) kCompPath(1:80)
+      write(kStdWarn,124) kCKDPath(1:80)
+      write(kStdWarn,125) kCKD_Compr_Path(1:80)
+      write(kStdWarn,*) ' '
+      write(kStdWarn,126) kOrigRefPath(1:80)
+      
+ 120  FORMAT('Water MolGas  ',A80)
+ 121  FORMAT('Water HDO     ',A80)
+ 122  FORMAT('CO2           ',A80)
+ 222  FORMAT('     ',A80) 
+ 123  FORMAT('Other gases   ',A80)
+ 124  FORMAT('kCKDPath      ',A80)
+ 125  FORMAT('kCKDCompPath  ',A80)
+ 126  FORMAT('RefGas Profs  ',A80)      
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) '**********************************************************************'
+      
+      write(kStdWarn,*) ' '
+      
  90   FORMAT(F12.5)
  111  FORMAT(I3,' ',3(F9.5,' ',I3,' ',F9.5,' '))
  100  FORMAT(I3,' ',1(ES12.4,' ',I3,' ',F9.5,' '),1(F9.5,' ',I3,' ',F9.5,' '),

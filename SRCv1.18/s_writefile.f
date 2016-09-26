@@ -1483,6 +1483,8 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       INTEGER iCo2,iaCO2path(kProfLayer),iaLayerFlux(kMaxAtm)
       INTEGER iaJunkFlux(2*kProfLayer)
 
+      CHARACTER*120 caStr1,caStr2
+      
       include '../INCLUDE/gasIDname.param'
       
       DO iI = 1, kMaxGas
@@ -1616,10 +1618,13 @@ c then output path ID stuff ------------------------------------------
         WRITE(iIOUN,*) 'iNumPaths = ',iNumGases*kProfLayer
         WRITE(iIOUN,*) 'Num Layers in Profile = ',iProfileLayers
         WRITE(iIOUN,*) 'So start showing info from layer ',kProfLayer-iProfileLayers+1
-	
-        WRITE(iIOUN,7170) '  Path# GID  Press      PartP        PPMV        Temp         Amnt    ||      RefPP     RefAmt  Amt/RAmt'
-        WRITE(iIOUN,7170) '----------------------------------------------------------------------||--------------------------------'
+
+        caStr1 = '  Path# GID  Press      PartP        PPMV        Temp         Amnt    ||      RefPP     RefAmt  Amt/RAmt'
+	caStr2 = '----------------------------------------------------------------------||--------------------------------'	  
         DO iI=1,iNumGases
+	  write(iIOUN,234) iI,iaGases(iI),caGID(iaGases(iI))
+          WRITE(iIOUN,7170) caStr1
+          WRITE(iIOUN,7170) caStr2 
           DO iJ=kProfLayer-iProfileLayers+1,kProfLayer
             iP=(iI-1)*kProfLayer+iJ
 	    raSumTotalGasAmt(iaGases(iI)) = raSumTotalGasAmt(iaGases(iI)) + raaAmt(iJ,iI)
@@ -1633,15 +1638,15 @@ c     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaRPartPress(iJ,i
           END DO
 	  write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
         END DO
-
+ 234    FORMAT ('index = ',I3,' gas HITRAN ID = ',I3,' molecule = ',A20)
+ 
 c write sum
-        write(iIOUN,*) '         iI  iGasID  Name     total molecules/cm2'
+        write(iIOUN,*) ' iI  iGasID  Name     total molecules/cm2'
 	write(iIOUN,*) '--------------------------------------------------'
         DO iI = 1,iNumGases
-	  write(iIOUN,123) iI,iaGases(iI),caGID(iaGases(iI)),raSumTotalGasAmt(iaGases(iI))*kAvog
+	  write(iIOUN,7172) iI,iaGases(iI),caGID(iaGases(iI)),raSumTotalGasAmt(iaGases(iI))*kAvog
 	END DO
 	write(iIOUN,*) '--------------------------------------------------'
- 123    FORMAT(i3,' ',I3,' ',A20,' ',E11.5)
  
 c then output list of paths to be output
         WRITE(iIOUN,*) 'list of paths to be output ...'
@@ -2576,6 +2581,7 @@ c http://docs.oracle.com/cd/E19957-01/805-4939/z40007437a2e/index.html
 c ../DOC/F77FormatSpecifiers.pdf
  7170 FORMAT(A104)
  7171 FORMAT(I4,' ',I4,' ',3(1P E11.5,' '),0PF11.5,'  ',1P E11.5,A2,2(' ',E11.5),1(' ',E11.3))  
+ 7172 FORMAT(I3,' ',I3,' ',A20,' ',ES11.5)
 
       RETURN
       END

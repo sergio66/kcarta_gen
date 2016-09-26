@@ -102,6 +102,7 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
 	    !! most of the points
 	    IF (iInterpType .EQ. +1) THEN
               CALL rspl(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+c              CALL rspl_diffyp1n(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)	      
 	    ELSE
               CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
 	    END IF
@@ -114,7 +115,19 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
           raTPressLevels(iI) = -9999
         END IF
       END DO
+
+      write(kStdWarn,*) 'iI    pLower    pLayAvg     pUpper  |  tLower   tLayAvg     tUpper'
+      write(kStdWarn,*) '-----------------------------------------------------------------------'
+      DO iI = kProfLayer-iProfileLayers+1,kProfLayer
+        iJ = iI-iOffSet
+	iJ = iI
+        write(kStdWarn,2345) iI,raPressLevels(iI),raP(kProfLayer-iJ+1),raPressLevels(iI+1),
+     $                          raTPressLevels(iI),raT(kProfLayer-iJ+1),raTPressLevels(iI+1)
+      END DO
+      write(kStdWarn,*) '-----------------------------------------------------------------------'      
+      
  1234 FORMAT(I3,5(' ',F10.4))
+ 2345 FORMAT(I3,6(' ',F10.4)) 
 
 c >>>>>>>>>>> this is to FORCE tape5 temperatures into the LevelTemperatures and LayerAvgTemps
       IF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))THEN

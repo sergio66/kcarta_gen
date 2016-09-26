@@ -84,7 +84,7 @@ c      write(kStdWarn,*) 'read close status = ', status
 
       !!! TEST DEBUG
 c       rf1 = 1255
-c       rf2 = 1305
+c       rf2 = 1205   !!  HIRES kcarta only between 605 and 1205
 c       rf1 = 1780
 c       rf2 = 1805
 c       rf1 = 630

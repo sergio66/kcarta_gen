@@ -741,6 +741,10 @@ c initialize the radiation to that at the top of the atmosphere
             raTemp(iFr) = raDown(iFr) 
           END DO 
 
+        IF (kOuterLoop .EQ. 1) THEN
+	  write(kStdWarn,*)'                          lay(i) TlevUpper(i)     Tav(i)       TlevLower(i)'
+	END IF
+
 c now loop over the layers, for the particular angle 
 
 c first do the pressure level boundary at the very top of atmosphere
@@ -2131,8 +2135,12 @@ c remember the mu's are already defined by the Gaussian pts cosine(theta)
 c initialize the radiation to that at the top of the atmosphere  
           DO iFr = 1,kMaxPts 
             raTemp(iFr) = raDown(iFr) 
-          END DO 
-
+          END DO
+	  
+        IF (kOuterLoop .EQ. 1) THEN
+	  write(kStdWarn,*)'                          lay(i) TlevUpper(i)     Tav(i)       TlevLower(i)'
+	END IF
+	
 c now loop over the layers, for the particular angle 
 
 c first do the pressure level boundary at the very top of atmosphere
@@ -3273,6 +3281,10 @@ c initialize the radiation to that at the top of the atmosphere
           DO iFr = 1,kMaxPts 
             raTemp(iFr) = raDown(iFr) 
           END DO 
+
+        IF (kOuterLoop .EQ. 1) THEN
+	  write(kStdWarn,*)'                          lay(i) TlevUpper(i)     Tav(i)       TlevLower(i)'
+	END IF
 
 c now loop over the layers, for the particular angle 
 
@@ -4915,6 +4927,10 @@ c initialize the radiation to that at the top of the atmosphere
             raTemp(iFr) = raDown(iFr) 
           END DO 
 
+        IF (kOuterLoop .EQ. 1) THEN
+	  write(kStdWarn,*)'                          lay(i) TlevUpper(i)     Tav(i)       TlevLower(i)'
+	END IF
+
 c now loop over the layers, for the particular angle 
 
 c first do the pressure level boundary at the very top of atmosphere
@@ -5581,6 +5597,10 @@ c initialize the radiation to that at the top of the atmosphere
           DO iFr = 1,kMaxPts 
             raTemp(iFr) = raDown(iFr) 
           END DO 
+
+        IF (kOuterLoop .EQ. 1) THEN
+	  write(kStdWarn,*)'                          lay(i) TlevUpper(i)     Tav(i)       TlevLower(i)'
+	END IF
 
 c now loop over the layers, for the particular angle 
 

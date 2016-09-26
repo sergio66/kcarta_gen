@@ -444,6 +444,8 @@ c            print *,iI,rSatHeight,raLayHgt(iI)
      $                                rSatHeight/1000)
               raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),raLayHgt(iI)/1000,
      $                                rSatHeight/1000,raNumberDensity(iI))
+c diff between Snell and noSnell is less than 2e-2     
+c              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAnglesNoSnell(iI)-raLayAnglesSnell(iI)
               raLayAngles(iI) = raLayAnglesSnell(iI)
               IF (rSatAngle .lt. 0.0) raLayAngles(iI) = -raLayAngles(iI)
               IF (kOuterLoop .EQ. 1) THEN
@@ -454,18 +456,19 @@ c            print *,iI,rSatHeight,raLayHgt(iI)
                 END IF
               IF (iX .EQ. 1) THEN
 	        write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle'
+                write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, sat scanang   local satzen angle  sec(satzen)'
 	      END IF
-              write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+              write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),
+     $ 1.0/cos(raLayAngles(iI)*kPi/180.0)	      
               END IF
             END IF
           END DO
       ELSE  
         !no need to do anything much, the angles are so close to nadir
 	iX = -1
-        write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle '	
+        write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle, satzen '	
         DO iI=1,kProfLayer
-          write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+          write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),1.0
         END DO
       END IF
 
@@ -497,7 +500,7 @@ c     $               raLayHgt(iaaRadLayer(iAtm,iaNumLayer(iAtm)))/1000
         END IF
       END IF
 
- 999  FORMAT(I3,' ',I3,'  ',4(F10.4,' '))
+ 999  FORMAT(I3,' ',I3,'  ',5(F10.4,' '))
  
       RETURN
       END
