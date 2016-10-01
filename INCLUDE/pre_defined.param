@@ -251,7 +251,7 @@ c rtp file azimuths used in Mie Scattering and Ocean Refl
 c rtp file also may give latitude and month (via rtime)
       INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
       REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult
-      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
+      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
 c this is LBLRTM TPAPE5 toa, and LBLRTM level temps
       REAL kLBLRTM_toa,kLBLRTM_levelT(kMaxLayer+1),kLBLRTM_layerTavg(kMaxLayer)
       PARAMETER (kDefaultColMult = 0.1)
@@ -259,7 +259,7 @@ c this is LBLRTM TPAPE5 toa, and LBLRTM level temps
      $                 kSetThermalAngle,kTemperVary
       COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
      $                 kSolAzi,kSatAzi,
-     $                 kWindSpeed,kLatitude,kMonth
+     $                 kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
       INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
       COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
       COMMON/ComBlock7/kLBLRTM_toa,kLBLRTM_levelT,kLBLRTM_layerTavg

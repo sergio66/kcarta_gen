@@ -46,7 +46,8 @@ c directly compare to saconv.m
        REAL FUNCTION SACONV_SUN(LSZA, SURFALT, ALT )
                         
        IMPLICIT NONE
-
+       include '../INCLUDE/kcarta.param'       
+       
        ! input param
        REAL LSZA         !! solar/satellite zenith angle at local surface (which is not necessarily 0)
        REAL SURFALT      !! surface altitude ABOVE EARTH surface (km) (eg [6400 Km + ] aircraft at 05 km)
@@ -54,8 +55,12 @@ c directly compare to saconv.m
 
        REAL rX,rPi,rEarth
 
-       rPi = 3.1415927
-       rEarth = 6370.0
+c       rPi = 3.1415927
+c       rEarth = 6370.0
+       
+       rPi = kPi
+       rEarth = kPlanetRadius
+       
      
        !! p = Snell's law = n(i) r(i) sin(theta(i)) = constant => 
        !!     (R+h(i)) sin (theta(i)) = constant (assume n(i) = 1)
@@ -126,7 +131,9 @@ C
 C    The solution uses the law of sines and sin(180 - x) = sin(x)
        REAL FUNCTION ORIG_SACONV_SUN( SZA, ALT )
  
-       implicit none 
+       implicit none
+       include '../INCLUDE/kcarta.param'
+       
        real sza,alt
 
 c local variables
@@ -139,7 +146,8 @@ C      CONV = pi/180 = degrees to radians conversion factor
        CONV=1.7453292E-02
 C
 C      RE = radius of the Earth (in km)
-       RE=6.37E+03
+c       RE=6.37E+03
+       RE = kPlanetRadius
 C
 C      RA = radius of the point to calc the angle at (in km)
 C      Note: layer altitude already in kilometers
@@ -183,7 +191,8 @@ c    REAL      SALT    Satellite altitude          km
        REAL FUNCTION VACONV( SVA, ALT, SALT )
 
       IMPLICIT NONE
-
+       include '../INCLUDE/kcarta.param'
+       
        REAL SVA, ALT, SALT
 
 C      LOCAL VARIABLES
@@ -194,7 +203,8 @@ C      CONV = pi/180 = degrees to radians conversion factor
        theta = sva*conv
 
 C      RE = radius of the Earth (in km)
-       RE=6.37E+03
+c       RE=6.37E+03
+       RE = kPlanetRadius
 
 C      RA = radius of the point to calc the angle at (in km)
        RA = rE + ALT
@@ -446,7 +456,9 @@ c            print *,iI,rSatHeight,raLayHgt(iI)
      $                                rSatHeight/1000,raNumberDensity(iI))
 c diff between Snell and noSnell is less than 2e-2     
 c              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAnglesNoSnell(iI)-raLayAnglesSnell(iI)
-              raLayAngles(iI) = raLayAnglesSnell(iI)
+c but Scott/SARTA uses NoSnell
+              raLayAngles(iI) = raLayAnglesSnell(iI)    !!! sergio
+              raLayAngles(iI) = raLayAnglesNoSnell(iI)	!!! scott
               IF (rSatAngle .lt. 0.0) raLayAngles(iI) = -raLayAngles(iI)
               IF (kOuterLoop .EQ. 1) THEN
                 IF (iI .GE. iMin .AND. iX .LE. iMax) THEN
@@ -456,7 +468,10 @@ c              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAngle
                 END IF
               IF (iX .EQ. 1) THEN
 	        write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, sat scanang   local satzen angle  sec(satzen)'
+		write(kStdWarn,*) 'Downlook Instr'
+		write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
+		write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
+                write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
 	      END IF
               write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),
      $ 1.0/cos(raLayAngles(iI)*kPi/180.0)	      
@@ -466,7 +481,11 @@ c              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAngle
       ELSE  
         !no need to do anything much, the angles are so close to nadir
 	iX = -1
-        write(kStdWarn,*)'dn : lay#/rad# lay/sat hgt, satellite scanang/local satzen angle, satzen '	
+        write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm	
+        write(kStdWarn,*) 'Downlook Instr'
+	write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
+	write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)	
+        write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
         DO iI=1,kProfLayer
           write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),1.0
         END DO

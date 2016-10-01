@@ -527,7 +527,7 @@ c kScaleHgt = Scale Height of atm (how quickly does pressure decrease) in km, fo
 c  eg for Earth we have Ho = R T / g M = 8.31 * 287 / (9.8 * 28.8/1000) in meters = 8.45 km
 c kStempMin,kStempMax = what you would reasonably expect for stemp
       REAL kGravity,kPlanetRadius,kScaleHgt,kAtmMolarMass
-      PARAMETER (kGravity = 9.80665, kPlanetRadius = 6400.00)
+      PARAMETER (kGravity = 9.80665, kPlanetRadius = 6370.00)
       PARAMETER (kScaleHgt = 8.0, kAtmMolarMass = 28.966)
       REAL kStempMin,kStempMax
       PARAMETER (kStempMin = 200.0,kStempMax = 330.0)

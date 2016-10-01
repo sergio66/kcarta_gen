@@ -2272,9 +2272,11 @@ c now get the relevant info from rchan,prof
       pobs = 0.0
      
       rSURFaltitude = prof.salti
-      
       rPressStart = prof.spres
       rPressStop  = 0.000            ! ----------> assume TOA
+
+      kSurfPress = prof.spres  ! mb
+      kSurfAlt   = prof.salti  ! meters
 
       !!!then go ahead and look at variables prof.pobs
       !!!note that variable pobs is reset only if prof.pobs > 0, else it
@@ -2471,8 +2473,9 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
           CALL DoStop
         ENDIF
         write(kStdWarn,*) 'downlook instr : satellite hgt, view angle info : '
-        write(kStdWarn,*) 'scanang, zsurf(km),zobs(km), satzen, saconv(satzen,zobs) = '
-        write(kStdWarn,*) rAngle,rSURFaltitude/1000,rHeight/1000,rAngleX,rAngleY
+        write(kStdWarn,*) 'input satzenGND, input zsurf(km), input zobs(km), input scanangINSTR = '
+        write(kStdWarn,*)  rAngleX,' ',rSURFaltitude/1000,' ',rHeight/1000,' ',rAngle
+        write(kStdWarn,*) '  computed scanangINSTR=saconv(satzenIN,zobsIN) = ',rAngleY
       END IF
 
       IF (prof.upwell .EQ. 2) THEN
@@ -2490,13 +2493,13 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
      $      (iOKzobs .EQ. 1)) THEN
           !! all angles seem reasonable; now check consistency between them
           IF (abs(abs(rAngle)-abs(rAngleY)) .LE. 1.0e-2) THEN
-            write(kStdWarn,*) 'scanang,satzen,zobs present in rtp file'
-            write(kStdWarn,*) 'scanang and saconv(satzen,zobs) agree'
-            rAngle = rAngleY   !!! no need to do anything
+            write(kStdWarn,*) 'scanangIN,satzenIN,zobsIN present in rtp file'
+            write(kStdWarn,*) 'scanangIN and saconv(satzenIN,zobsIN) agree'
+            rAngle = rAngleY   !!! no need to do anything ??????? WHY RESET??????
           ELSEIF (abs(abs(rAngle)-abs(rAngleY)) .GT. 1.0e-2) THEN
-            write(kStdWarn,*) 'scanang,satzen,zobs present in rtp file'
-            write(kStdWarn,*) 'scanang and saconv(satzen,zobs) disagree'
-            write(kSTdWarn,*) 'using satzen (AIRS preference!!!)'
+            write(kStdWarn,*) 'scanangIN,satzenIN,zobsIN present in rtp file'
+            write(kStdWarn,*) 'scanangIN and saconv(satzenIN,zobsIN) disagree'
+            write(kSTdWarn,*) 'using satzenIN (AIRS preference!!!) --> scanang'
             IF (prof.zobs .LT. 2000.0) THEN
               write(kStdErr,*) 'used 705 km as satellite height'
             ELSE
@@ -2508,20 +2511,23 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. -1) .AND. (iOKzobs .EQ. +1))) THEN
           !!rAngle = rAngle   !!! cannot, or do not need, to do anything
-          write(kStdWarn,*) 'satzen wierd, zobs ok',rAngleX,rHeight/1000
+          write(kStdWarn,*) 'satzenIN wierd, zobsIN ok',rAngleX,rHeight/1000
+	  write(kStdWarn,*) 'keeping scanangIN ',rAngle
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. +1) .AND. (iOKzobs .EQ. -1))) THEN
           !!rAngle = rAngle   !!! cannot, or do not need, to do anything
-          write(kStdWarn,*) 'satzen ok, zobs wierd',rAngleX,rHeight/1000
+          write(kStdWarn,*) 'satzenIN ok, zobsIN wierd',rAngleX,rHeight/1000
+	  write(kStdWarn,*) 'keeping scanangIN ',rAngle	  
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. -1) .AND. (iOKzobs .EQ. -1))) THEN
           !!rAngle = rAngle   !!! cannot, or do not need, to do anything
-          write(kStdWarn,*) 'neither satzen or zobs make sense',rAngleX,rHeight/1000
+          write(kStdWarn,*) 'neither satzenIN or zobsIN make sense',rAngleX,rHeight/1000
+	  write(kStdWarn,*) 'keeping scanangIN ',rAngle	  
         ELSEIF ((iOKscanang .EQ. -1) .AND. 
      $          ((iOKsatzen .EQ. +1) .AND. (iOKzobs .EQ. +1))) THEN
           !! satzen and zobs make sense, scanang is wierd
           rAngle = rAngleY   !!! no need to do anything
-          write(kStdWarn,*) 'scanang does not make sense, but satzen,zobs do'
+          write(kStdWarn,*) 'scanangIN does not make sense, but satzenIN,zobsIN do'
           write(kSTdWarn,*) 'using satzen to derive scanang (AIRS preference!!)'
         END IF
       END IF
