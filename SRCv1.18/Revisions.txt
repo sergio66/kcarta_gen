@@ -358,6 +358,8 @@ computations, even with scattering (introduce a OLR computation) etc]
                       iMatlab = +1            use Matlab uncompression ideas
   rad_quad.f          iGaussQuad = 0          fast,accurate gauss quadrature
   rtp_interface.f     iWhichScatterCode = 1   use TwoStream from RTP files
+  rad_angles.f        does ray trace through layers use Snells' law? default=no
+                      to be same as SARTA
 
 (C)                for Radiative Trnsfer (layer temperature variations)
   rad_main.f          iVary = -1              use constant layer T, set by kTemperVary
@@ -589,12 +591,14 @@ v1.18
                 files. This will hopefully ensure that each time a new template is
 		made for kCARTA, and then included at compile time, it will be
 		more straightforward to figure out which kcarta.param was used for
-		the bkcarta.x or kcarta.x executable
+		the bkcarta.x or kcarta.x executable .. and then the .nml file
+		tells you the nm_spectra settings etc
+		WARNING DO NOT MIX eg 400 ppm reference profile with 385 ppm LBLRTM ODs!!!
 
                 The readkcstd*.m files modified so caVersion is the third optional
 		output  [d,w,caVers] = readkcstd(fname)
 
-9/30/16         Turned off SNalle's law during ray trace, so kcarta is more like sarta
+9/30/16         Turned off Snell's law during ray trace, so kcarta is more like sarta
 
 9/30/16         Cleaned up printing of raytracing
 

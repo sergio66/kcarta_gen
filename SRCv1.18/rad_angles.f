@@ -421,7 +421,7 @@ c raLayAngles = layer dependent satellite viewing angle (satzen)
 
       REAL vaconv,vaconv_Snell,saconv_sun
       REAL raLayAnglesSnell(kProfLayer),raLayAnglesNoSnell(kProfLayer)
-      INTEGER iI,iaRadLayer(kProfLayer),iMin,iMax,iX
+      INTEGER iI,iaRadLayer(kProfLayer),iMin,iMax,iX,iDefault,iUseSnell
 
 c as default, set all angles to be the satellite view angle
       DO iI=1,kProfLayer
@@ -429,6 +429,13 @@ c as default, set all angles to be the satellite view angle
         raLayAnglesSnell(iI) = rSatAngle
       END DO
 
+      iDefault = -1   !! no Snell
+      iUseSnell = +1  !! use Snell
+      iUseSnell = -1  !! do not use Snell      
+      if (iDefault .NE. iUseSnell) THEN
+        write(kStdWarn,*) 'using Snell law in FindLayerAngles (raytrace thru layers)'
+      END IF
+      
       iMin = +1000000
       iMax = -1000000
       DO iI = 1,iaNumlayer(iAtm)
@@ -457,8 +464,11 @@ c            print *,iI,rSatHeight,raLayHgt(iI)
 c diff between Snell and noSnell is less than 2e-2     
 c              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAnglesNoSnell(iI)-raLayAnglesSnell(iI)
 c but Scott/SARTA uses NoSnell
-              raLayAngles(iI) = raLayAnglesSnell(iI)    !!! sergio
-              raLayAngles(iI) = raLayAnglesNoSnell(iI)	!!! scott
+              IF (iUseSnell .EQ. 1) THEN
+                raLayAngles(iI) = raLayAnglesSnell(iI)    !!! sergio
+              ELSEIF (iUseSnell .EQ. -1) THEN		
+                raLayAngles(iI) = raLayAnglesNoSnell(iI)	!!! scott
+              END IF
               IF (rSatAngle .lt. 0.0) raLayAngles(iI) = -raLayAngles(iI)
               IF (kOuterLoop .EQ. 1) THEN
                 IF (iI .GE. iMin .AND. iX .LE. iMax) THEN

@@ -678,6 +678,24 @@ c set the frequency range for the current file block
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22)
       END IF
+      
+      IF (iNumNewGases .GE. 1) THEN
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'    
+        write(kStdWarn,*) ' section nm_spectra says following number of new spectra ',iNumNewGases
+        DO iOuterLoop = 1,iNumNewGases
+          write(kStdWarn,*) 'gas ID = ',iaNewGasID(iOuterLoop)
+        END DO
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'      
+      END IF
+      IF (iNumAltComprDirs .GE. 1) THEN
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'    
+        write(kStdWarn,*) ' section nm_spectra says following number of alternate gas directories ',iNumAltComprDirs
+        DO iOuterLoop = 1,iNumAltComprDirs
+          write(kStdWarn,*) 'gas ID = ',iaAltComprDirs(iOuterLoop),caaAltComprDirs(iOuterLoop)
+        END DO
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+      END IF
+    
 c******************
 
 c LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP 
