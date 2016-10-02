@@ -15,7 +15,7 @@ c note that the first four characters HAVE to be vx.xx for readers to work
       !!!PARAMETER (caVersion='v1.12 01-14-06 first version')
       !!!PARAMETER (caVersion='v1.14 01-19-07 first version')
       !!!PARAMETER (caVersion='v1.14 12-10-07 newdatabase version')
-      PARAMETER (caVersion='v1.15+ 08-01-10 newdatabase version')
+      !!PARAMETER caVersion='v1.15+ 08-01-10 newdatabase version')
 
 c this sets the name of the file to which warnings/happy messages are logged to
 c this file is set by default to 'warning.msg' in n_main.f; however the user

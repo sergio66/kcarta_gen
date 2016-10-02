@@ -2,6 +2,7 @@ ccc sed so /asl/data/kcarta/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
 ccc sed so /asl/data/kcarta/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
 ccc sed so /asl/data/kcarta/KCARTADATA/ becomes /asl/data/kcarta/KCARTADATA
 
+c THIS IS kcarta_scottv107.param
 c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 c this include file has a lot of /asl/data/kcarta so that the 

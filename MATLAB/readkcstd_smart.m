@@ -1,4 +1,4 @@
-function [data, wnums] = readkcstd_smart(kfile, dfile)
+function [data, wnums, caVersion] = readkcstd_smart(kfile, dfile)
 
 % function [data, wnums] = readkcstd_smart(kfile, dfile)
 % same as readkcstd, but tries to error out gracefully in kfile is not complete
@@ -16,6 +16,7 @@ function [data, wnums] = readkcstd_smart(kfile, dfile)
 %
 %   data   - a w by n array of data from kcarta
 %   wnums  - a w by 1 vector of data wavenumbers
+%   caVersion - descriptive  string set in kcarta.param at compile time
 %
 % If the input parameter dfile is specified, then the data array
 % is written to file dfile, and the return values [data, wnums]
@@ -59,7 +60,8 @@ fid=fin;                    %<------------- my modification
 % version number
 flen    = fread(fin, 1, 'integer*4');
 version = fread(fin, 80, 'char');
-version = setstr(version');
+caVersion = setstr(version');
+version = caVersion;
 flen    = fread(fin, 1, 'integer*4');
 
 % number of layers

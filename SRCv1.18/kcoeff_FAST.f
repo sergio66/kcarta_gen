@@ -338,6 +338,9 @@ c        write(kStdWarn,100) iL,rP,iaP1(iL),raP1(iL),rT,iaT11(iL),raT11(iL),rQ,i
       write(kStdWarn,*) ' '
 
       write(kStdWarn,*) '**********************************************************************'
+      write(kStdWarn,*) ' '
+      write (kStdWarn,*) 'caVersion (should tell you the template used for kcarta.param) = '
+      write(kStdWarn,222) caVersion(1:80)
       write(kStdWarn,*) ' '      
       write(kStdWarn,*) 'The following paths hold for kCompressed Database : '
       write(kStdWarn,*) '  (unless explicitly overridden by nm_spectra)'
