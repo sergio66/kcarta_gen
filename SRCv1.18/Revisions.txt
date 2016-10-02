@@ -585,6 +585,19 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+10/1/16         Moved caVersion from pre_defined.param to the template_kcarta*.param
+                files. This will hopefully ensure that each time a new template is
+		made for kCARTA, and then included at compile time, it will be
+		more straightforward to figure out which kcarta.param was used for
+		the bkcarta.x or kcarta.x executable
+
+                The readkcstd*.m files modified so caVersion is the third optional
+		output  [d,w,caVers] = readkcstd(fname)
+
+9/30/16         Turned off SNalle's law during ray trace, so kcarta is more like sarta
+
+9/30/16         Cleaned up printing of raytracing
+
 6/2/16          Fixed a bug with raAtmLoop being set for scanang/satzen
 
 6/2/16          If you use an rtp file to set the atmosphere and want to
