@@ -258,7 +258,7 @@ c this is used when calling DISORT
 c iaOutNumbers is how many paths,MP, radiances to output
       INTEGER iaOutNumbers(kMaxPrint)
 c caComment is the comment the user puts into *OUTPUT
-      CHARACTER*80 caComment
+      CHARACTER*120 caComment
 
 c the rest of the variables have to do with reading in the reference profile
 c and the vertical temperature profile
@@ -551,7 +551,6 @@ c kWaterSelf,kWaterFor, no need to do this
 
 c set up the output binary file and the output header text file
       CALL printstar
-
       CALL PrepareOutput(caDriverName,caOutName,caJacobFile,caJacobFile2,
      $       caFluxFile,caPlanckFile,iOutFileName,iNumNLTEGases,
      $       rFreqStart,rFreqEnd,iFileIDLo,iFileIDHi,caComment,

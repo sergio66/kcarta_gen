@@ -153,7 +153,7 @@ c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaGPMPAtm(kMaxPrint),iaGPMPAtm1(kMaxPrint)
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint)
       INTEGER iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint)
-      CHARACTER*80 caComment,caComment1
+      CHARACTER*120 caComment,caComment1
       CHARACTER*80 caLogFile,caLogFile1
       REAL raaOp(kMaxPrint,kProfLayer),raaOp1(kMaxPrint,kProfLayer)
 
@@ -948,7 +948,8 @@ c raaUserPress  = for option 3, list of pressures for output radiances
 c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iNatm2
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
-      CHARACTER*80 caComment,caLogFile
+      CHARACTER*120 caComment
+      CHARACTER*80 caLogFile
       REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
 
 c this is for JACOBN

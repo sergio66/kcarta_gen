@@ -13,7 +13,8 @@ function [data, wnums, caVersion, detail] = readkcstd_detail(kfile, dfile)
 %
 %   data   - a w by n array of data from kcarta
 %   wnums  - a w by 1 vector of data wavenumbers
-%   caVersion - descriptive  string set in kcarta.param at compile time
+%   caVersion - descriptive  string set in kcarta.param at compile time,
+%               CKD vers and nml comment (in nm_outout)
 %   detail - bunch of stuff about the atmopshere/profile
 %
 % If the input parameter dfile is specified, then the data array
@@ -55,8 +56,8 @@ fid=fin;                    %<------------- my modification
 % version number
 flen    = fread(fin, 1, 'integer*4');
 version = fread(fin, 80, 'char');
-caVersion = setstr(version');
-version = caVersion;
+caVersion.include_param = setstr(version');
+version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 
 % number of layers
@@ -73,12 +74,14 @@ flen    = fread(fin, 1, 'integer*4');
 flen    = fread(fin, 1, 'integer*4');
 rparams = fread(fin, nparams, 'real*4');
 flen    = fread(fin, 1, 'integer*4');
+caVersion.ckd = rparams(2);
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-comment = fread(fin, 80, 'char');
+comment = fread(fin, 120, 'char');
 comment = setstr(comment');
 flen    = fread(fin, 1, 'integer*4');
+caVersion.comment = comment;
 
 % start, stop frequency
 flen = fread(fin, 1, 'integer*4');
@@ -100,7 +103,7 @@ flen  = fread(fin, 1, 'integer*4');
 if htype == 0
   fprintf(1,'this reader cannot work for kLongOrShort = 0!! \n');
   error('Use readkcBasic.m instead!!!');
-  end
+end
 
 %%%%
 % This block added by Scott for version 1.03+
@@ -233,7 +236,7 @@ if htype > 0
 
   %read in #of lines that have info in *MIXFIL 
   flen           = fread(fid,1,'integer*4'); 
-  iMixFileLines  = fread(fid,1,'integer*4'); 
+  iMixFileLines  = fread(fid,1,'integer*4');
   flen           =fread(fid,1,'integer*4'); 
  
   if (iNpmix > 0) 
@@ -382,8 +385,10 @@ if nchunk ~= 1+highchunk-lowchunk
   error('readkc: chunk counts do not match!');
 end
 
+%{
 fprintf(2, 'readkc: %d chunks, %d ODBs, %d total rows\n', ...
         nchunk, nODBs, sum(nODBrows));
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % initialize output file or array
@@ -452,8 +457,10 @@ for chunk = 1:nchunk
     flen    = fread(fin, 1, 'integer*4');
   
     if chunk == 1
+      %{
       fprintf(2, 'readkc: ODB type = %d, subtype = %d, rows = %d\n', ...
                 type, subtype, nrow);
+      %}
     end
 
     % sanity check

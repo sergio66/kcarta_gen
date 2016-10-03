@@ -1449,7 +1449,8 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       REAL rakSolarRefl(kMaxAtm)
       INTEGER iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName
       INTEGER iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
-      CHARACTER*80 caDriver,caOutName,caComment
+      CHARACTER*80 caDriver,caOutName
+      CHARACTER*120 caComment
       CHARACTER*130 caaMixFileLines(kProfLayer)
       INTEGER iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
       INTEGER iaaOp(kMaxPrint,kPathsOut),iOutTypes,iMixFileLines

@@ -587,6 +587,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+10/2/16         Made caComment in nm_output character*120 so you can eg type
+                123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+		'lblrtmV12.4 ODs for g2,5,6; UMBC ODs other gas;FWO Mix1 = 1 -1 1.0 2; Mix2 =101 0.0 102 0.0 103 0.0 for SARTA, no cont'
+		
 10/1/16         Moved caVersion from pre_defined.param to the template_kcarta*.param
                 files. This will hopefully ensure that each time a new template is
 		made for kCARTA, and then included at compile time, it will be

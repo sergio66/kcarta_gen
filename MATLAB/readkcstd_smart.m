@@ -16,7 +16,8 @@ function [data, wnums, caVersion] = readkcstd_smart(kfile, dfile)
 %
 %   data   - a w by n array of data from kcarta
 %   wnums  - a w by 1 vector of data wavenumbers
-%   caVersion - descriptive  string set in kcarta.param at compile time
+%   caVersion - descriptive  string set in kcarta.param at compile time,
+%               CKD vers and nml comment (in nm_outout)
 %
 % If the input parameter dfile is specified, then the data array
 % is written to file dfile, and the return values [data, wnums]
@@ -60,8 +61,8 @@ fid=fin;                    %<------------- my modification
 % version number
 flen    = fread(fin, 1, 'integer*4');
 version = fread(fin, 80, 'char');
-caVersion = setstr(version');
-version = caVersion;
+caVersion.include_param = setstr(version');
+version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 
 % number of layers
@@ -78,12 +79,14 @@ flen    = fread(fin, 1, 'integer*4');
 flen    = fread(fin, 1, 'integer*4');
 rparams = fread(fin, nparams, 'real*4');
 flen    = fread(fin, 1, 'integer*4');
+caVersion.ckd = rparams(2);
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-comment = fread(fin, 80, 'char');
+comment = fread(fin, 120, 'char');
 comment = setstr(comment');
 flen    = fread(fin, 1, 'integer*4');
+caVersion.comment = comment;
 
 % start, stop frequency
 flen = fread(fin, 1, 'integer*4');

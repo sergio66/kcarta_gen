@@ -56,7 +56,7 @@ flen    = fread(fin, 1, 'integer*4');
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-comment = fread(fin, 80, 'char');
+comment = fread(fin, 120, 'char');
 comment = setstr(comment');
 flen    = fread(fin, 1, 'integer*4');
 

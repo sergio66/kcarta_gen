@@ -152,7 +152,7 @@ c hence always read in 2 integers
       INTEGER kMaxPrT
       PARAMETER (kMaxPrT=kMaxPrint+1)
 
-c caComment  = 80 character user given comment
+c caComment  = 120 character user given comment
 c iaGases    = array containing info about GAS ID's fouund in MOL/XSCGAS
 c iaPrinter  = array containing the print options (1,2 or 3)
 c iaGPMPAtm    = array containing which atmospheres to be printed (if print
@@ -180,7 +180,7 @@ c raaPrBdry     = pressure boundaries of the atmospheres
       REAL raFracTop(kMaxAtm),raFracBot(kMaxAtm),raaPrBdry(kMaxAtm,2)
       REAL raPressLevels(kProfLayer+1)    !!!!actual pressures of levels
       CHARACTER*7 caWord
-      CHARACTER*80 caComment
+      CHARACTER*120 caComment
 
       INTEGER iPrinter,iAtm,iNp,iaOp(kPathsOut)
       INTEGER iNumLinesRead,iI,iJ,iUpDown,iList,iListType

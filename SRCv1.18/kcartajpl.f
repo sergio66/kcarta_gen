@@ -1294,7 +1294,8 @@ c raaUserPress  = for option 3, list of pressures for output radiances
 c iNatm2        = number of atmospheres that *OUTPUT thinks there is
       INTEGER iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iNatm2
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
-      CHARACTER*80 caComment,caLogFile
+      CHARACTER*120 caComment
+      CHARACTER*80 caLogFile      
       REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
 
 c this is for JACOBN
