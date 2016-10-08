@@ -80,19 +80,19 @@ c for LBLRTM TAPE5/TAPE6
         END DO
       END DO
 
-      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
-                             !!! this is a COMPILE time variable
       iDefault = +43      
+      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
+                             !!! this is a RUN time variable, set in nm_radnce
       IF (iDefault .NE. iVary) THEN    
         write(kStdErr,*) 'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
         write(kStdWarn,*)'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
       END IF
 
+      iDefault = 3           !!!RRTM,LBLRTM do 3 gauss points
       iGaussPts = 4  !!! "slightly" better than iGaussPts = 3 (tic)
       iGaussPts = 1  !!! haha not too bad at all ....
       iGaussPts = 3  !!! LBLRTM uses this
-
-      iDefault = 3           !!!RRTM,LBLRTM do 3 gauss points
+      iGaussPts = iaOverrideDefault(2,1) 
       IF (iDefault .NE. iGaussPts) THEN    
         write(kStdErr,*) 'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
         write(kStdWarn,*)'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
@@ -465,7 +465,11 @@ c iGaussQuad = -1 VERY SLOW, +1 QUITE SLOW
 c iGaussQuad = 0      FAST and very accurate!! (checked on profiles 0,5,6,7)
       iDefault   = 0       !!!!DEFAULT      
       iGaussQuad = 0       !!!!DEFAULT
-
+      iGaussQuad = iaOverrideDefault(2,2)
+      IF (abs(iGaussQuad) .GT. 1) THEN
+        write(kStdErr,*) 'invalid iGaussQuad ',iGaussQuad
+        CALL DoStop
+      END IF		                  
       IF (iGaussQuad .NE. iDefault) THEN
         write(kStdWarn,*) 'iGaussQuad,iDefault = ',iGaussQuad,iDefault
       END IF

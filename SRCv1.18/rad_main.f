@@ -334,13 +334,8 @@ c iaJacob       = list of GasID's to do Jacobian for
       INTEGER iI,iL,iJ,iFr
       REAL raaTemp(kMaxPts,kMixFilRows),raJunk(kMaxPts)
 
-      INTEGER iDefault,iColJac,iIOUN_USE,iJacT,iJacB
+      INTEGER iIOUN_USE,iJacT,iJacB
       REAL rDefaultColMult,raVTemp2(kMixFilRows)
-
-      iDefault  = +1   !! do the (Stemp,col) Jacs
-
-      iColJac = -1     !! skip  the (Stemp,col) Jacs (dump out zeros)
-      iColJac = +1     !! do  the (Stemp,col) Jacs
       
       rDefaultColMult = kDefaultColMult
 
@@ -354,17 +349,6 @@ c iaJacob       = list of GasID's to do Jacobian for
         !! got to swap things
         iJacT = iaNumlayer(iAtm)-kActualJacsB+1
         iJacB = iaNumlayer(iAtm)-kActualJacsT+1
-      END IF
-
-      IF (iDefault .NE. iColJac) THEN 
-        print *,'rad_main : col jacs : calculating numbers (slow) instead of '
-        print *,' dumping out zeros (fast)'
-        print *,'rad_main : col jacs : iDefault,iColJac = ',iDefault,iColJac
-      END IF 
-
-      IF (iColJac .NE. +1) THEN
-        write(kStdErr,*) 'this routine expects iColJac = 0'
-        CALL DoStop
       END IF
     
       !! raaX = raaXO - raaGas + 1.1raaGas = = raaXO + 0.1raaGas
@@ -570,7 +554,7 @@ c this is for absorptive clouds
       REAL raScatterIWP(kMaxAtm)
 
       REAL rMPTemp
-      INTEGER i1,i2,iFloor,iDownWard,iVary,iIOUN_IN,iDefault
+      INTEGER i1,i2,iFloor,iDownWard,iVary,iIOUN_IN,iDefault,iUsualUpwell
 
       DO i1=1,kMaxPts
         raInten(i1)=0.0
@@ -640,22 +624,46 @@ c retrievals."
       write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=',
      $         iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
-      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
-
       iDefault = -1          !!!temperature in layer constant USE THIS FOR RT !!!!
+      iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
       IF (iDefault .NE. iVary) THEN    
         write(kStdErr,*)'iDefault, iVary in rad_main',iDefault,iVary
         write(kStdWarn,*)'iDefault, iVary in rad_main',iDefault,iVary
       END IF
 
+      iDefault = +1
+      iUsualUpwell = -1  !! upwell RTE, only with emission, no surface
+      iUsualUpwell = -2  !! upwell RTE, only dump out backgrnd therma
+      iUsualUpwell = +1  !! usual upwell RTE
+      iUsualUpwell = iaOverrideDefault(2,5)
+      IF ((abs(iUsualUpwell) .NE. 1) .AND. (iUsualUpwell .NE. -2)) THEN
+        write(kStdErr,*) 'invalid iUsualUpwell ',iUsualUpwell
+        CALL DoStop
+      END IF		                        
+      IF (iDefault .NE. iUsualUpwell) THEN    
+        write(kStdErr,*)'iDefault, iUsualUpwell in rad_main',iDefault,iUsualUpwell
+        write(kStdWarn,*)'iDefault, iUsualUpwell in rad_main',iDefault,iUsualUpwell
+      END IF
+      
       IF (iDownward .EQ. 1) THEN
         IF (iVary .EQ. -1) THEN     !!!temperature in layer constant
           IF (iNLTESTart .GT. kProfLayer) THEN
-            IF (iChunk_DoNLTE .LT. 0) THEN
+            IF ((iChunk_DoNLTE .LT. 0) .AND. (iUsualUpwell .EQ. +1)) THEN
               !!normal LTE radtransfer
-c you can down ATM EMISSION only or FULL CALCS 	      
-c              CALL rad_trans_SAT_LOOK_DOWN_EMISS(raFreq,    !! atm emission
               CALL rad_trans_SAT_LOOK_DOWN(raFreq,           !! full calcs
+     $          raInten,raVTemp,
+     $          raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
+     $          rSatAngle,rFracTop,rFracBot,
+     $          iNp,iaOp,raaOp,iNpmix,iFileID,
+     $          caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,
+     $          raSurface,raSun,raThermal,raSunRefl,
+     $          raLayAngles,raSunAngles,iTag,
+     $          raThickness,raPressLevels,iProfileLayers,pProf,
+     $          raTPressLevels,iKnowTP,
+     $          caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
+            ELSEIF ((iChunk_DoNLTE .LT. 0) .AND. (iUsualUpwell .LT. 0)) THEN
+c you can down ATM EMISSION only or FULL CALCS 	      
+              CALL rad_trans_SAT_LOOK_DOWN_EMISS(raFreq,    !! atm emission
      $          raInten,raVTemp,
      $          raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
      $          rSatAngle,rFracTop,rFracBot,
@@ -925,7 +933,11 @@ c for specular reflection
       REAL raSpecularRefl(kMaxPts)
       INTEGER iSpecular
 
-      write(kStdErr,*) 'Warning : doing ATM EMISSION runs, not COMPLETE RADIANCE runs'
+      IF (iaOverrideDefault(2,5) .EQ. -1) THEN
+        write(kStdErr,*) 'Warning : doing ATM EMISSION runs, not COMPLETE RADIANCE runs'
+      ELSEIF (iaOverrideDefault(2,5) .EQ. -2) THEN
+        write(kStdErr,*) 'Warning : doing ONLY BACKGND THERMAL runs, not COMPLETE RADIANCE runs'
+      END IF
 
       iIOUN = iIOUN_IN
 
@@ -1164,23 +1176,32 @@ c      END IF
         raInten(iFr) = 0.0
       END DO
 
-      iIOUN1 = kTempUnit
-      OPEN(UNIT=iIOUN1,FILE=caDumpEmiss,STATUS='NEW',FORM='FORMATTED',
-     $     IOSTAT=IERR)  
-        IF (IERR .NE. 0) THEN  
-          WRITE(kStdErr,*) 'In subroutine RAD_lookdown_emiss'  
-          WRITE(kStdErr,1010) IERR, caDumpEmiss
-          CALL DoSTOP  
-          ENDIF 
-      kTempUnitOpen = +1
-      DO iFr = 1,kMaxPts
-        write(iIOUN1,4321) iFr,raFreq(iFr),raThermal(iFr),exp(-raG2S(iFr))
-      END DO
- 1010 FORMAT(I5,' ',A80)
- 4321 FORMAT(I5,' ',3(F15.9,' '))
-      CLOSE(kTempUnit)
-      kTempUnitOpen = -1
+      IF (iaOverrideDefault(2,5) .EQ. -2) THEN
+        !! only dump out raThermal, no need to do RT!!!
+	!! this already includes all integral (over 2pi azimuth and over zenith
+	!! so do not need factor of pi
+        CALL wrtout(iIOUN,caOutName,raFreq,raThermal)
+        GOTO 999
+	
+c       iIOUN1 = kTempUnit
+c       OPEN(UNIT=iIOUN1,FILE=caDumpEmiss,STATUS='UNKNOWN',FORM='FORMATTED',
+c     $     IOSTAT=IERR)  
+c       IF (IERR .NE. 0) THEN  
+c         WRITE(kStdErr,*) 'In subroutine RAD_lookdown_emiss'  
+c         WRITE(kStdErr,1010) IERR, caDumpEmiss
+c         CALL DoSTOP  
+c       ENDIF 
+c       kTempUnitOpen = +1
+c       DO iFr = 1,kMaxPts
+c         write(iIOUN1,4321) iFr,raFreq(iFr),raThermal(iFr),exp(-raG2S(iFr))
+c       END DO
+c 1010  FORMAT(I5,' ',A80)
+c 4321  FORMAT(I5,' ',3(F15.9,' '))
+c       CLOSE(kTempUnit)
+c       kTempUnitOpen = -1
+      ENDIF
 
+      write(kStdWarn,*) 'only doing atmospheric emission, no surface term'
       r0 = raInten(1)
 c now we can compute the upwelling radiation!!!!!
 c compute the total emission using the fast forward model, only looping 
@@ -1276,7 +1297,8 @@ cc        END DO
         END DO
       END IF
 c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
-
+ 999  CONTINUE
+ 
       RETURN
       END
 

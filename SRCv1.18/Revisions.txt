@@ -342,37 +342,58 @@ computations, even with scattering (introduce a OLR computation) etc]
 
             DEFAULT : 
 
-(A)                 for SARTA tuning multipliers
+(A1)                 for SARTA tuning multipliers and XSEC
   kcartabasic.f       iSARTAChi = -1          for no tuning (default)
   kcartamain.f                  = +1          for AIRS tuning
   kcartachunk.f                 = +2          for IASI tuning
                                 = +3          for CrIS tuning
 
-(B)                 for LTE, clear sky, scatter codes, OD calcs
-  kcartamain.f        iSplinetype = +1        for splines/linear
-  kcartabasic.f       iSplinetype = +1        for splines/linear  
-  kcoeffMAIN.f        iCO2Chi = 2             AIRS analysis for 15 um, 4um
+  kcont_xsec.f        iMethod = 0 (default)   Old style look up tables
+                      iMethod = 1             New continuum compressed tables
+                                              are set in SUBROUTINE AddContinuum
+  n_pth_mix.f         iReadP = +1             readKLAYERS4 : if iRTP = -1, Scott's v1.07
+                                              did not have full T(z),P(z) at levels, only
+					      Pav(z),tAv(z) at layers
+					      
+(A2)                 for LTE, clear sky, scatter codes, OD calcs
+  kcartamain.f         iSplinetype = +1        for splines/linear
+  kcartabasic.f        iSplinetype = +1        for splines/linear  
+  kcoeffMAIN.f         iCO2Chi = 2             AIRS analysis for 15 um, 4um
                                                region of CO2/H2O (by S. Hannon)
-  kcoeffMAIN.f        iLLS = -1               aeri analysis for 2380-2405
-                                                region of CO2/H2O (by LLS)
-                      iMatlab = +1            use Matlab uncompression ideas
+                       iMatlabORf77 = +1        use Matlab uncompression ideas
+  rtp_interface.f      iWhichScatterCode = 5   use PCLSAM from RTP files
+  clear_scatter_misc.f iLogOrLinear = +1       linear interp for w,g; log for e
+		      
+(B)                for Radiative Trnsfer (layer temperature variations)
+  rad_quad.f          iGaussPts = 3           how many flux gauss pts to use
   rad_quad.f          iGaussQuad = 0          fast,accurate gauss quadrature
-  rtp_interface.f     iWhichScatterCode = 1   use TwoStream from RTP files
-  rad_angles.f        does ray trace through layers use Snells' law? default=no
-                      to be same as SARTA
+  rad_angles.f        iUseSnell = -1          ray trace through layers w/o Snells' law (like SARTA)
 
-(C)                for Radiative Trnsfer (layer temperature variations)
   rad_main.f          iVary = -1              use constant layer T, set by kTemperVary
       kTemperVary = -1       !temperature in layer constant USE THIS!!!!
       kTemperVary = +1       !temperature in layer varies exponentially
       kTemperVary = +2       !temperature in layer varies linearly, simple
       kTemperVary = +3       !temperature in layer varies linearly, ala RRTM, LBLRTM, BUGGY
       kTemperVary = +4,41,42,43 !temperature in layer varies linearly, ala RRTM, LBLRTM, debugged, use 43
+
+      iUsualUpwell = 1   default  emission + surface for upwelling rad
+                    -1            only do emission, no surface for upwelling rad
+	            -2            only figure out background thermal
   n_pth_mix.f
     need to turn layer temperatures into level temperatures
       iInterpType = +1    ! spline, default
       iInterpType = -1    ! linear
-	    
+
+(C)                  for LBLRTM TAPE 5/6 input
+  n_layers_lblrtm.f   iAIRS101_or_LBL_levels = +1  use AIRS101 levels for integration from
+                                                   levels to layers
+
+                      iReplaceZeroProf = +1   add in gases that are not in LBLRTM TAPE5
+
+  n_pth_mix.f         iAddLBLRTM = +1         user wants to add on missing 
+                                              profiles even if they were 
+                                              not specified in TAPE5 or TAPE6
+
 (D)                  for NLTE
   kreadVTprofiles.f   iCurrent = +1           use eg 385 ppmv in UA, or rely 
                                               on MR given in caaUpperMixRatio
@@ -389,33 +410,6 @@ computations, even with scattering (introduce a OLR computation) etc]
   kbloat.f            iDoCO2Continuum = -1    Use CO2 continuum or not
   knonlte.f           iDoCO2Continuum = -1    Use CO2 continuum or not
   n_gas_wt_spectra.f  iMethod = 2             Use polynm coeffs to predict NLTE
-
-(E)                  for COLUMN JACS
-  rad_main.f          iColJac = +1            dump out col jacs or not
-  scatter_all_misc.f  iLogOrLinear = +1       linear interp for w,g; log for e
-
-(F)                  for LBLRTM TAPE 5/6 input
-  n_layers.f          iReplaceZeroProf = +1   user wants to replace ZERO 
-                                              everywhere gas profile with 
-                                              climatology
-                      iCONTN = +5             assume default continuum settings (1.0)
-
-  n_layers_lblrtm.f   iAIRS101_or_LBL_levels = +1  use AIRS101 levels for integration from
-                                                   levels to layers
-
-                      iReplaceZeroProf = +1   add in gases that are not in LBLRTM TAPE5
-
-  n_pth_mix.f         IPLEV = +1              readKLAYERS4 : if iRTP = -1, Scott's v1.07
-                                              did not have full T(z),P(z) at levels, only
-					      Pav(z),tAv(z) at layers
-					      
-  n_pth_mix.f         iAddLBLRTM = +1         user wants to add on missing 
-                                              profiles even if they were 
-                                              not specified in TAPE5 or TAPE6
-
-  kcont_xsec.f        iMethod = 0 (default)   Old style look up tables
-                      iMethod = 1             New continuum compressed tables
-                                              are set in SUBROUTINE AddContinuum
 
 03/31/14        kRTP = -10 reads in text based levels input
                 kRTP = -5 reads in LBLRTM based levels input (TAPE 5)
@@ -587,6 +581,9 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+10/8/16         Created iaOverride in nm_params, so you can override lots of defaults params at run time
+                such as iSARTAChi,iSPlinetype,iUsualUpwell
+                
 10/2/16         Made caComment in nm_output character*120 so you can eg type
                 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
 		'lblrtmV12.4 ODs for g2,5,6; UMBC ODs other gas;FWO Mix1 = 1 -1 1.0 2; Mix2 =101 0.0 102 0.0 103 0.0 for SARTA, no cont'

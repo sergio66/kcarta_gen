@@ -653,9 +653,14 @@ c temperature profiles are the same!!!!
         END IF
       END IF
 
+      iDefault = +1
       iMatlabORf77 = -1   !!! use original (pre 2011) f77 uncompression routines
       iMatlabORf77 = +1   !!! use Matlab based (2011)     uncompression routines
-      iDefault = +1
+      iMatlabORf77 = iaOverrideDefault(1,4)
+      IF (abs(iMatlabORf77) .NE. 1) THEN
+        write(kStdErr,*) 'invalid iMatlabORf77 = ',iMatlabORf77
+	CALL DoStop
+      END IF
       IF (iMatlabORf77 .NE. iDefault) THEN
         write(kStdErr,*) 'using iMatlab/f77 = ',iMatlabORf77,' not ',iDefault
       END IF
@@ -987,7 +992,7 @@ c local variables associated with uncompressing the water database files
      $                 daaaKX4(kMaxK,kMaxTemp,kMaxLayer),
      $                 daaaKX5(kMaxK,kMaxTemp,kMaxLayer)
       DOUBLE PRECISION daaUX(kMaxPts,kMaxK)
-      INTEGER iLLS,iDefault,iMultiplyHeavyWater
+      INTEGER iDefault,iMultiplyHeavyWater
 
       IF ((iGasID .NE. 1) .AND. (iGasID .NE. kNewGasHi+1)) THEN
         write(kStdErr,*) 'Expecting to read in water profile/database'
@@ -1335,7 +1340,7 @@ c input/output
       DOUBLE PRECISION daaAbsCoeff(kMaxPts,kProfLayer)
 
 c local vars
-      INTEGER iLLS,iCO2Chi,iDefault
+      INTEGER iCO2Chi,iDefault
       INTEGER iaChiChunks(kMaxGas),iChiChunks,iDoFudge,WhichGasPosn
 
       iCO2Chi = 0  !!no chi fixes applied .. with database being
@@ -1346,9 +1351,13 @@ c local vars
       iCO2Chi = 2 !!default prior to Mar 2004; only fixes 4um; leaves wiggles
 
       iDefault = 2
-
       iCO2Chi = 0
-      iCO2Chi = 2
+      iCO2Chi = 2    !!! DEFAULT
+      iCO2Chi = iaOverrideDefault(1,3)      
+      IF ((iCO2Chi .NE. 0) .AND. (iCO2Chi .NE. 2)) THEN
+        write(kStdErr,*) 'invalid iCO2Chi = ',iCO2Chi
+	CALL DoStop
+      END IF
 
 c      IF (kCO2_UMBCorHARTMAN .EQ. +1) THEN
 c        iCO2Chi = iCO2Chi   !! ie stick to (+2) option, to turn on CO2 chi when using UMBC linemix

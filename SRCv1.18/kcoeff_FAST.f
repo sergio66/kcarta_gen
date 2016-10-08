@@ -598,7 +598,7 @@ c local variables associated with uncompressing the water database files
      $                 daaaKX4(kMaxK,kMaxTemp,kMaxLayer),
      $                 daaaKX5(kMaxK,kMaxTemp,kMaxLayer)
       DOUBLE PRECISION daaUX(kMaxPts,kMaxK)
-      INTEGER iLLS,iDefault,iMultiplyHeavyWater
+      INTEGER iDefault,iMultiplyHeavyWater
 
       IF ((iGasID .NE. 1) .AND. (iGasID .NE. kNewGasHi+1)) THEN
         write(kStdErr,*) 'Expecting to read in water profile/database'
@@ -1171,7 +1171,7 @@ c local variables associated with uncompressing the database
       DOUBLE PRECISION daaaKX(kMaxK,kMaxTemp,kMaxLayer)
       DOUBLE PRECISION daaUX(kMaxPts,kMaxK)
       INTEGER iaChiChunks(kMaxGas),iChiChunks,iDoFudge,WhichGasPosn
-      INTEGER iLLS,iCO2Chi,iDefault,iLowerOrUpper,iJ,iJunk
+      INTEGER iDefault,iLowerOrUpper,iJ,iJunk
       REAL raRXAmt(kProfLayer),raPXAmt(kProfLayer)
         
       DO iJ = 1,kProfLayer

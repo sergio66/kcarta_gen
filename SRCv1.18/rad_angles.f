@@ -61,7 +61,6 @@ c       rEarth = 6370.0
        rPi = kPi
        rEarth = kPlanetRadius
        
-     
        !! p = Snell's law = n(i) r(i) sin(theta(i)) = constant => 
        !!     (R+h(i)) sin (theta(i)) = constant (assume n(i) = 1)
        !! so Re sin(theta_earth) = (Re+h(i))sin (theta(i))
@@ -431,7 +430,12 @@ c as default, set all angles to be the satellite view angle
 
       iDefault = -1   !! no Snell
       iUseSnell = +1  !! use Snell
-      iUseSnell = -1  !! do not use Snell      
+      iUseSnell = -1  !! do not use Snell
+      iUseSnell = iaOverrideDefault(2,3)
+      IF (abs(iUseSnell) .NE. 1) THEN
+        write(kStdErr,*) 'invalid iUseSnell ',iUseSnell
+        CALL DoStop
+      END IF		                        
       if (iDefault .NE. iUseSnell) THEN
         write(kStdWarn,*) 'using Snell law in FindLayerAngles (raytrace thru layers)'
       END IF

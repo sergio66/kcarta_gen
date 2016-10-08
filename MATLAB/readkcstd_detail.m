@@ -136,7 +136,21 @@ elseif ((version_number >= 1.09))
   flen = fread(fin,1,'integer*4');
   raP  = fread(fin,nlayer,'real*4');
   flen = fread(fin,1,'integer*4');
-  end
+
+  flen    = fread(fin, 1, 'integer*4');
+  junk  = fread(fin, 10, 'integer*4');
+  flen    = fread(fin, 1, 'integer*4');
+  iaaParams(1,:) = junk;
+  flen    = fread(fin, 1, 'integer*4');
+  junk  = fread(fin, 10, 'integer*4');
+  flen    = fread(fin, 1, 'integer*4');
+  iaaParams(2,:) = junk;
+  flen    = fread(fin, 1, 'integer*4');
+  junk  = fread(fin, 10, 'integer*4');
+  flen    = fread(fin, 1, 'integer*4');
+  iaaParams(3,:) = junk;
+  caVersion.iaaParams = iaaParams;
+end
 
 %%%%%% GAS PATH HEADER
 

@@ -3231,6 +3231,7 @@ c these are to match iaCtype vs iaNML_Ctype
         CALL DoStop
       END IF    
 
+      iDefault = 5
       iWhichScatterCode = 6         !!RAYLEIGH in CLEAR SKY, nir/vis/uv
       iWhichScatterCode = 5         !!PCLSAM
       iWhichScatterCode = 4         !!r = r0 + r1 = perturb (not yet done)
@@ -3238,12 +3239,11 @@ c these are to match iaCtype vs iaNML_Ctype
       iWhichScatterCode = 2         !!RTSPEC
       iWhichScatterCode = 1         !!TWOSTREAM  DEFAULT
       iWhichScatterCode = 0         !!simple absorb; directly goes to rad_main
-
-      iDefault = 5
-
-      iWhichScatterCode = 6         !!RAYLEIGH in clear sky
-      iWhichScatterCode = 5         !!PCLSAM
-
+      iWhichScatterCode = iaOverrideDefault(1,5)
+      IF ((iWhichScatterCode .LT. 0) .OR. (iWhichScatterCode .GT. 6)) THEN
+        write(kStdErr,*) 'invalid iWhichScatterCode = ',iWhichScatterCode
+        CALL DoStop
+      END IF		       
       IF (iDefault .NE. iWhichScatterCode) THEN
         print *,'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
       END IF

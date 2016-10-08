@@ -79,16 +79,20 @@ c local var
       iDefault = +1   !! use AIRS101 levels for the integration
       iAIRS101_or_LBL_levels = +1 !! use AIRS101 levels for the integration
       iAIRS101_or_LBL_levels = -1 !! use LBLRTM  levels for the integration
+      iAIRS101_or_LBL_levels = iaOverrideDefault(3,1)
+      IF (abs(iAIRS101_or_LBL_levels) .GT. 1) THEN
+        write(kStdErr,*) 'invalid iAIRS101_or_LBL_levels ',iAIRS101_or_LBL_levels
+        CALL DoStop
+      END IF		                        
+      IF (iDefault .NE. iAIRS101_or_LBL_levels) THEN
+        write(kStdErr,*) 'in ReadInput_LBLRTM_ProfileTAPE5 when doing integration from levels to layers'
+	write(kStdErr,*) 'iDefault, iAIRS101_or_LBL_levels = ',iDefault,iAIRS101_or_LBL_levels
+      END IF
 
       DO iL = 1,2*kProfLayer
         raPavg(iL) = -9999.0
         raTavg(iL) = -9999.0
       END DO
-      
-      IF (iDefault .NE. iAIRS101_or_LBL_levels) THEN
-        write(kStdErr,*) 'in ReadInput_LBLRTM_ProfileTAPE5 when doing integration from levels to layers'
-	write(kStdErr,*) 'iDefault, iAIRS101_or_LBL_levels = ',iDefault,iAIRS101_or_LBL_levels
-      END IF
       
       rPmin = +1.0e6
       rPmax = -1.0e+6
@@ -220,13 +224,18 @@ c	    raPbnd(iG) = raP(iG)         !! keep in mb
       iDefault = +1
       iReplaceZeroProf = -1    !! assume user knows why there is a ZERO everywhere gas profile
       iReplaceZeroProf = +1    !! assume user wants to replace ZERO everywhere gas profile with climatology
-
+      iReplaceZeroProf = iaOverrideDefault(3,2)
+      IF (abs(iReplaceZeroProf) .GT. 1) THEN
+        write(kStdErr,*) 'invalid iReplaceZeroProf ',iReplaceZeroProf
+        CALL DoStop
+      END IF		                        
       IF ((iDefault .NE. iReplaceZeroProf) .AND. (iNumGasesBAD .GT. 0)) THEN
         write(kStdErr,*) 'in ReadInput_LBLRTM_ProfileTAPE5 : user wants to replace zero prof with climatology'
         write(kStdErr,*) 'iDefault = ',iDefault,' iReplaceZeroProf = ',iReplaceZeroProf
         write(kStdWarn,*) 'in ReadInput_LBLRTM_ProfileTAPE5 : user wants to replace zero prof with climatology'
         write(kStdWarn,*) 'iDefault = ',iDefault,' iReplaceZeroProf = ',iReplaceZeroProf 
       END IF
+      
       IF ((iNumGasesBAD .GT. 0) .AND. (iReplaceZeroProf .GT. 0)) THEN
         DO iG = 1,iNumGasesBAD
           CALL substitute_tape5_profile_for_climatology(iaBadGasProfile(iG),iNumLevs,raP,raaG_MR)

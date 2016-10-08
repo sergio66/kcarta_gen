@@ -476,7 +476,7 @@ c local variables
       DOUBLE PRECISION daaaKX(kMaxK,kMaxTemp,kMaxLayer) 
       DOUBLE PRECISION daaUX(kMaxPts,kMaxK) 
       INTEGER iaChiChunks(kMaxGas),iChiChunks,iDoFudge,WhichGasPosn 
-      INTEGER iLLS,iType,iDefault,iL
+      INTEGER iType,iDefault,iL
         
       IF (iUnCompressType .NE. -2 .AND. iUnCompressType .NE. -3) THEN
         write(kStdErr,*) 'Code is trying to uncompress weakbackgnd CO2 depths'

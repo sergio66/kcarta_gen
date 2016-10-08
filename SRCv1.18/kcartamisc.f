@@ -184,11 +184,14 @@ c pressure layers, before doing the temperature interpolation
 c note abs coeff = stored optical depth/default gas amount
       iDefault    = +1        !!! Spline  .... DEFAULT
       iSplineType = -1        !!! Linear
-      iSplineType = +1        !!! Spline  .... DEFAULT
       iSplineType = -2        !!! Matlab uncompression (linear weights)
       iSplineType = +2        !!! Matlab uncompression (linear weights)
-
-      iSplineType = 1 
+      iSplineType = +1        !!! Spline  .... DEFAULT
+      iSplineType = iaOverrideDefault(1,2)
+      IF ((abs(iSPlineType) .NE. 1) .AND. (abs(iSPlineType) .NE. 2)) THEN
+        write(kStdErr,*) 'invalid iSplineType = ',iSplineType
+	CALL DoStop
+      END IF      
       IF (iSplineType .NE. iDefault) THEN
         print *,'iSplineType,iDefault = ',iSplineType,iDefault
       END IF
@@ -1781,7 +1784,7 @@ c do a quick check of the important parameters set by the user
 
 c************************************************************************
 c set the default parameter values, for those that are not set in *PARAM
-c read the parameter file to set some parameters that have optional values
+c read the parameter file to set parameters that have optional values
       SUBROUTINE SetDefaultParams
 
 c NOTE !!!! also double check subroutine EXTRAPAR in strings2.f
@@ -1791,6 +1794,8 @@ c NOTE !!!! also double check subroutine SETDEFAULTPARAMS in misc.f
 
       include '../INCLUDE/kcarta.param'
 
+      INTEGER iI,iJ
+      
 c set default values here
 c kLayer2Sp
 c     -2     Layer transmittance            t(i)=exp(-k(i))
@@ -1980,6 +1985,50 @@ c              -1 if we do the standard Genln2 computations w/o Jacobians
       kScatter  = -1        !do not do scattering computations
 
       k100layerCloud = -1   !assume rtp file does NOT have 100 layer cloud
+
+c 2016
+c allow nm_params to define defaults
+c   GENERAL iaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi  iMatlabORf77   iWhichScatterCode iMethod
+c   RT      iaDefaults(2,:) = iGaussPts iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
+c   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
+c                             iLinearOrSpline iDoCO2Continuum iMethod
+c   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iAIRS101_or_LBL_levels IPLEV iAddLBLRTM 
+c      INTEGER iaOverrideDefault(8,10)
+c      COMMON/comBlockDefault/iaOverrideDefault
+      DO iI = 1,8
+        DO iJ = 1,10
+	  iaOverrideDefault(iI,iJ) = -9999
+	END DO
+      END DO
+      
+c GENERAL
+      iaOverrideDefault(1,1) = -1    !!! iSARTAChi = -1  for no tuning, see kcartabasic/kcartamain/kcartajpl
+                                     !!!                 kcartaparallel and finally used in kcoeffMAIN.f
+      iaOverrideDefault(1,2) = +1    !!! iSPlinetype = +1 for SUBR iSetSplineType in kcartamisc.f
+      iaOverrideDefault(1,3) = +2    !!! iCO2Chi = +2     for SUBR multiply_co2_chi_functions in kcoeffMAIN.f
+      iaOverrideDefault(1,4) = +1    !!! iMatlabORf77 = +1  use Maltab style uncompression,  kcoeffMAIN.f
+      iaOverrideDefault(1,5) = +5    !!! iWHichScatterCode = 5 for PCLSAM in rtp_interface.f
+      iaOverrideDefault(1,6) = +1    !!! iReadP = 1 when assuming GENLN2 style profile in n_pth_mix.f
+      iaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
+                                     !!!   in clear_scatter_misc.f
+      
+c RadTrans
+      iaOverrideDefault(2,1) = +3    !!! iGaussPts = 3 for flux and downwell gauss quad,
+                                     !!!   SUBR IntegrateOverAngles_LinearInTau in rad_quad.f
+      iaOverrideDefault(2,2) = 0     !!! iGaussQuad = 0   -1 for integrate, 0 for diffusivity, 1 for gausslegendre
+                                     !!!   SUBR IntegrateOverAngles in rad_quad.f
+      iaOverrideDefault(2,3) = -1    !!! iUseSnell = -1 for No Snell law raytrace, similar to SARTA
+                                     !!!   SUBR FindLayerAngles in rad_angles.f
+      iaOverrideDefault(2,4) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs)
+                                     !!!   SUBR Get_Temp_Plevs in n_pth_mix.f
+      iaOverrideDefault(2,5) = +1    !!! iUsualUpwell = +1 for upwell RT with surface term, -1 with no surface,
+                                     !!!   -2 to only dump downwelling backgnd  SUBR find_radiances in rad_main.f
+
+c iTAPE5/6 n_layers
+      iaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration
+      iaOverrideDefault(3,2) = +1    !!! iReplaceZeroProf = +1 to add in profiles TAPE5 does not have
+      iaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
+                                     !!!   in n_pth_mix.f
 
       RETURN
       END 

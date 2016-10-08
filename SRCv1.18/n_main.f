@@ -59,6 +59,9 @@ c  non LTE
 c this is the driver file name
       CHARACTER*80 caDriverName
 
+c this is for overriding the defaults
+      INTEGER iaOverride(8,10)
+      
 c this is for MOLGAS
       INTEGER iNGas,iaGasesNL(kGasComp)
       INTEGER iNGas1,iaGasesNL1(kGasComp)
@@ -272,7 +275,8 @@ c local variables
       CHARACTER*30 namecomment
 
       NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort,
-     $                   kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs
+     $                   kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,
+     $                   iaOverride
       NAMELIST /nm_frqncy/namecomment,rf1,rf2
       NAMELIST /nm_molgas/namecomment,iNGas,iaGasesNL
       NAMELIST /nm_xscgas/namecomment,iNXsec,iaLXsecNL
@@ -308,7 +312,7 @@ c local variables
       NAMELIST /nm_output/namecomment,caLogFile,caComment,iaPrinter,
      $           iaGPMPAtm,iaNp,iaaOp,raaOp
       NAMELIST /nm_endinp/namecomment
-
+				      
 c presume no Limb calcs
       DO iI = 1,kMaxAtm
         iaLimb(iI) = -1
@@ -429,6 +433,13 @@ c set the default params kCKD etc
       CALL SetDefaultParams 
       CALL CheckParams 
 
+c set default overrides
+      DO iI = 1,8
+        DO iJ = 1,10
+          iaOverride(iI,iJ) = iaOverrideDefault(iI,iJ)
+        END DO
+      END DO
+
 c now do some initializations ... no of gases read in = 0,  
 c assume no of layers to be read in = kProfLayer, no radiance calcs to do 
       iNatm = 0 
@@ -453,6 +464,20 @@ c *************** read input name list file *********************************
       read (iIOUN,nml = nm_params)
       write (kStdWarn,*) 'successfully read in params .....'
       !these are global variables and so need to be checked
+c set overrides
+      write(kStdWarn,*) 'input override params'
+      DO iI = 1,3 
+         write(kStdWarn,*) (iaOverrideDefault(iI,iJ),iJ=1,10)
+      END DO  
+      DO iI = 1,8
+        DO iJ = 1,10
+          iaOverrideDefault(iI,iJ) = iaOverride(iI,iJ)
+        END DO
+      END DO
+      write(kStdWarn,*) 'final override params'
+      DO iI = 1,3 
+         write(kStdWarn,*) (iaOverrideDefault(iI,iJ),iJ=1,10)
+      END DO  
       CALL CheckParams 
       CALL printstar      
 

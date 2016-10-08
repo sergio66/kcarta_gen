@@ -324,10 +324,14 @@ c      SAVE     EXT0,EXT1, ALB0,ALB1, ASYM0,ASYM1
       iw1 = nwave
       olddme = -10.0
 
-      iDefault = +1       !! do linear for w,g and log for e
+      iDefault = -1       !! do linear for w,g and log for e
       iLogOrLinear = +1    !! do linear for w,g and log for e; default RTSPEC
       iLogOrLinear = -1    !! do log for w,g    and log for e; default SARTA
-      
+      iLogOrLinear = iaOverrideDefault(1,7)
+      IF (abs(iLogOrLinear) .NE. 1) THEN
+        write(kStdErr,*) 'invalid iLogOrLinear = ',iLogOrLinear
+        CALL DoStop
+      END IF		       
 c      IF (iDefault .NE. iLogOrLinear) THEN
 c        write (kStdErr,*) 'in INTERP_SCAT_TABLE2'
 c        write (kStdErr,*)  'iDefault,iLogOrLinear = ',iDefault,iLogOrLinear

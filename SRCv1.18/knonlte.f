@@ -5192,7 +5192,7 @@ c local variables associated with uncompressing the database
       DOUBLE PRECISION daaaKX(kMaxK,kMaxTemp,kMaxLayer)
       DOUBLE PRECISION daaUX(kMaxPts,kMaxK)
       INTEGER iaChiChunks(kMaxGas),iChiChunks,iDoFudge,WhichGasPosn
-      INTEGER iLLS,iCO2Chi,iDefault,iLowerOrUpper,iJ
+      INTEGER iDefault,iLowerOrUpper,iJ
 
 c iUAirLA = -1 for usual lower atm (so can do jacs), +1 for extra upper atm (so no jacs)
       IF (i_NLTEFile_TYPE .LT. 300) THEN

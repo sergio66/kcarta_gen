@@ -143,16 +143,6 @@ c these are JPL interfaces
        INTEGER IVCHAN(MXCHAN)        ! Channel numbers for used channels
 c these are JPL interfaces
 
-      iDefault  = -1
-      iSARTAChi = +3     !!        use Scott's tuning coeffs for SARTA CRiS
-      iSARTAChi = +2     !!        use Scott's tuning coeffs for SARTA IASI
-      iSARTAChi = +1     !!        use Scott's tuning coeffs for SARTA AIRS
-      iSARTAChi = -1     !! do NOT use Scott's tuning coeffs for SARTA
-      IF (iDefault .NE. iSARTAChi) THEN
-        write(kSTdWarn,*) 'Deafult SARTA tuning = -1 (turned off), but have tuning = ',iSARTAChi
-        write(kSTdErr,*) 'Deafult SARTA tuning = -1 (turned off), but have tuning = ',iSARTAChi
-      END IF
-
 c allow scattering computations if in .nml or RTP file
       kAllowScatter = +1    
 
@@ -229,6 +219,17 @@ c read in the driver namelist file and profile
      $   iSetBloat,caPlanckBloatFile,caOutBloatFile,caOutUABloatFile,
      $   iDoUpperAtmNLTE,caaUpperMixRatio,caPlanckUAfile,caOutUAFile,
      $       caOutName)
+
+      iDefault  = -1
+      iSARTAChi = +3     !!        use Scott's tuning coeffs for SARTA CRiS
+      iSARTAChi = +2     !!        use Scott's tuning coeffs for SARTA IASI
+      iSARTAChi = +1     !!        use Scott's tuning coeffs for SARTA AIRS
+      iSARTAChi = -1     !! do NOT use Scott's tuning coeffs for SARTA
+      iSARTAChi = iaOverrideDefault(1,1)      
+      IF (iDefault .NE. iSARTAChi) THEN
+        write(kSTdWarn,*) 'Deafult SARTA tuning = -1 (turned off), but have tuning = ',iSARTAChi
+        write(kSTdErr,*) 'Deafult SARTA tuning = -1 (turned off), but have tuning = ',iSARTAChi
+      END IF
 
       IF ((iNumNewGases .GT. 0) .AND. (iNumAltComprDirs .GT. 0)) THEN
         write(kStdErr,*) 'SPECTRA section : confusing : you specifies iNumNewGases > 0, iNumAltComprDirs > 0'

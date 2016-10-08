@@ -88,9 +88,15 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
         CALL DoStop
       END IF
 
+      iDefault = +1       ! spline is default
       iInterpType = -1    ! linear
       iInterpType = +1    ! spline
-      iDefault = +1       ! spline is default
+      iInterpType = iaOverrideDefault(2,4)
+      IF (abs(iInterpType) .NE. 1) THEN
+        write(kStdErr,*) 'invalid iInterpType = ',iInterpType
+        CALL DoStop
+      END IF		       
+      
       IF (iDefault .NE. iInterpType) THEN
         write(kStdErr,*) 'in Get_Temp_Plevs, default is take layer temps and spline interp them to plevs'
         write(kStdErr,*) '                   we are   taking layer temps and linear interp them to plevs'
@@ -578,9 +584,15 @@ c now reread the profile file, so that we can get info about presslevels
 c and layer thicknesses
 c just turn this off to read the real old klayers files 
 c -->>> (eg that Scott uses for his kcartav1.07 runs ....) <<<---
-      iReadP = +1    !! assume GENN2 style profile has p info
-      iReadP = -1    !! assume GENN2 style profile does not have p info     
       iDefault = +1
+      iReadP = +1    !! assume GENN2 style profile has p info
+      iReadP = -1    !! assume GENN2 style profile does not have p info
+      iReadP = iaOverrideDefault(1,6)
+      IF (abs(iReadP) .NE. 1) THEN
+        write(kStdErr,*) 'invalid iReadP = ',iReadP
+        CALL DoStop
+      END IF		       
+      
       IF (iDefault .EQ. iReadP) THEN
         CALL GetMoreInfo(raPressLevels,raThickness,caPfName)
       ELSE
@@ -3031,9 +3043,14 @@ c      caFname0 = '/home/sergio/KCARTADATA/USSTD/us_std_gas_'
       END DO
 
       iDefault = -1
-      iAddLBLRTM = -1   !! if profile missing and kRTP = -5 or -6, do not add
       iAddLBLRTM = +1   !! if profile missing and kRTP = -5 or -6, do     add
-
+      iAddLBLRTM = -1   !! if profile missing and kRTP = -5 or -6, do not add
+      iAddLBLRTM = iaOverrideDefault(3,3)
+      IF (abs(iAddLBLRTM) .NE. 1) THEN
+        write(kStdErr,*) 'invalid iAddLBLRTM = ',iAddLBLRTM
+        CALL DoStop
+      END IF		       
+      
       IF ((kRTP .NE. -5) .AND. (kRTP .NE. -6)) THEN
 c       write(kStdWarn,*) 'need to add on US Std for ',iIDgas, ' from ',caFname
         write(kStdWarn,*) 'need to add on US Std for ',iIDgas
