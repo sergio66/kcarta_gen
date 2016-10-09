@@ -297,8 +297,8 @@ c   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureSh
 c                             iLinearOrSpline iDoCO2Continuum iMethod
 c   COLUMN JACS iaDefaults(4,:) = iColJac iLogOrLinear
 c   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iCONTN iAIRS101_or_LBL_levels IPLEV iAddLBLRTM 
-      INTEGER iaOverrideDefault(8,10)
-      COMMON/comBlockDefault/iaOverrideDefault
+      INTEGER iaaOverrideDefault(4,10)
+      COMMON/comBlockDefault/iaaOverrideDefault
 
 c************************************************************************
 

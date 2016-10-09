@@ -656,7 +656,7 @@ c temperature profiles are the same!!!!
       iDefault = +1
       iMatlabORf77 = -1   !!! use original (pre 2011) f77 uncompression routines
       iMatlabORf77 = +1   !!! use Matlab based (2011)     uncompression routines
-      iMatlabORf77 = iaOverrideDefault(1,4)
+      iMatlabORf77 = iaaOverrideDefault(1,4)
       IF (abs(iMatlabORf77) .NE. 1) THEN
         write(kStdErr,*) 'invalid iMatlabORf77 = ',iMatlabORf77
 	CALL DoStop
@@ -1353,7 +1353,7 @@ c local vars
       iDefault = 2
       iCO2Chi = 0
       iCO2Chi = 2    !!! DEFAULT
-      iCO2Chi = iaOverrideDefault(1,3)      
+      iCO2Chi = iaaOverrideDefault(1,3)      
       IF ((iCO2Chi .NE. 0) .AND. (iCO2Chi .NE. 2)) THEN
         write(kStdErr,*) 'invalid iCO2Chi = ',iCO2Chi
 	CALL DoStop

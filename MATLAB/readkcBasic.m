@@ -53,6 +53,8 @@ caVersion.include_param = setstr(version');
 version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 
+version_number=str2num(version(2:5));
+
 % number of layers
 flen   = fread(fin, 1, 'integer*4');
 nlayer = fread(fin, 1, 'integer*4');
@@ -71,7 +73,11 @@ caVersion.ckd = rparams(2);
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-comment = fread(fin, 120, 'char');
+if  (version_number >= 1.18)
+  comment = fread(fin, 120, 'char');
+else
+  comment = fread(fin, 80, 'char');
+end  
 comment = setstr(comment');
 flen    = fread(fin, 1, 'integer*4');
 caVersion.comment = comment;
@@ -96,7 +102,7 @@ flen  = fread(fin, 1, 'integer*4');
 if htype ~= 0
   fprintf(1,'this reader cannot work for kLongOrShort = -1,+1!! \n');
   error('Use readkcstd.m instead!!!');
-  end
+end
 
 % read freq step size (v(2)-v(1))
 flen  = fread(fin, 1, 'real*4');

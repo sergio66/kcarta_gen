@@ -581,9 +581,13 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
-10/8/16         Created iaOverride in nm_params, so you can override lots of defaults params at run time
+10/8/16         Created iaaOverride in nm_params, so you can override lots of
+                defaults params at run time (most of which are barely ever switched)
                 such as iSARTAChi,iSPlinetype,iUsualUpwell
-                
+                3 main sets : General/RadTrans/LBLRTM Tape5/6
+		The params allow you eg to set kTemperVary (iusing iaaOverride(2,1))
+		in nm_params, instead of iTemperVary in nm_radnce
+		
 10/2/16         Made caComment in nm_output character*120 so you can eg type
                 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
 		'lblrtmV12.4 ODs for g2,5,6; UMBC ODs other gas;FWO Mix1 = 1 -1 1.0 2; Mix2 =101 0.0 102 0.0 103 0.0 for SARTA, no cont'

@@ -92,7 +92,7 @@ c for LBLRTM TAPE5/TAPE6
       iGaussPts = 4  !!! "slightly" better than iGaussPts = 3 (tic)
       iGaussPts = 1  !!! haha not too bad at all ....
       iGaussPts = 3  !!! LBLRTM uses this
-      iGaussPts = iaOverrideDefault(2,1) 
+      iGaussPts = iaaOverrideDefault(2,2) 
       IF (iDefault .NE. iGaussPts) THEN    
         write(kStdErr,*) 'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
         write(kStdWarn,*)'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
@@ -414,7 +414,7 @@ c            CALL RT_ProfileDNWELL(raFreq,raaAbs,iL,ravt2,rCosAngle,rFracBot,+1,
 c this is the downwelling flux at surface !! yay
       iLay = 1
       DO iFr = 1,kMaxPts
-        raThermal(iFr) =  raaDownFlux(iFr,iLay)*0.0
+        raThermal(iFr) =  raaDownFlux(iFr,iLay)
       END DO
       
       RETURN
@@ -465,7 +465,7 @@ c iGaussQuad = -1 VERY SLOW, +1 QUITE SLOW
 c iGaussQuad = 0      FAST and very accurate!! (checked on profiles 0,5,6,7)
       iDefault   = 0       !!!!DEFAULT      
       iGaussQuad = 0       !!!!DEFAULT
-      iGaussQuad = iaOverrideDefault(2,2)
+      iGaussQuad = iaaOverrideDefault(2,3)
       IF (abs(iGaussQuad) .GT. 1) THEN
         write(kStdErr,*) 'invalid iGaussQuad ',iGaussQuad
         CALL DoStop

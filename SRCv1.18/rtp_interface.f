@@ -3239,7 +3239,7 @@ c these are to match iaCtype vs iaNML_Ctype
       iWhichScatterCode = 2         !!RTSPEC
       iWhichScatterCode = 1         !!TWOSTREAM  DEFAULT
       iWhichScatterCode = 0         !!simple absorb; directly goes to rad_main
-      iWhichScatterCode = iaOverrideDefault(1,5)
+      iWhichScatterCode = iaaOverrideDefault(1,5)
       IF ((iWhichScatterCode .LT. 0) .OR. (iWhichScatterCode .GT. 6)) THEN
         write(kStdErr,*) 'invalid iWhichScatterCode = ',iWhichScatterCode
         CALL DoStop

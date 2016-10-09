@@ -60,6 +60,8 @@ caVersion.include_param = setstr(version');
 version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 
+version_number=str2num(version(2:5));
+
 % number of layers
 flen   = fread(fin, 1, 'integer*4');
 nlayer = fread(fin, 1, 'integer*4');
@@ -78,7 +80,11 @@ caVersion.ckd = rparams(2);
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-comment = fread(fin, 120, 'char');
+if  (version_number >= 1.18)
+  comment = fread(fin, 120, 'char');
+else
+  comment = fread(fin, 80, 'char');
+end  
 comment = setstr(comment');
 flen    = fread(fin, 1, 'integer*4');
 caVersion.comment = comment;
@@ -107,7 +113,6 @@ end
 
 %%%%
 % This block added by Scott for version 1.03+
-version_number=str2num(version(2:5));
 if ((version_number >= 1.03) & (version_number <= 1.05)) 
   % read in M1000mb,M100mb,MSubLayer,M50mb,M10mb,MThickLayer
   flen = fread(fin,1,'integer*4');
@@ -137,19 +142,21 @@ elseif ((version_number >= 1.09))
   raP  = fread(fin,nlayer,'real*4');
   flen = fread(fin,1,'integer*4');
 
-  flen    = fread(fin, 1, 'integer*4');
-  junk  = fread(fin, 10, 'integer*4');
-  flen    = fread(fin, 1, 'integer*4');
-  iaaParams(1,:) = junk;
-  flen    = fread(fin, 1, 'integer*4');
-  junk  = fread(fin, 10, 'integer*4');
-  flen    = fread(fin, 1, 'integer*4');
-  iaaParams(2,:) = junk;
-  flen    = fread(fin, 1, 'integer*4');
-  junk  = fread(fin, 10, 'integer*4');
-  flen    = fread(fin, 1, 'integer*4');
-  iaaParams(3,:) = junk;
-  caVersion.iaaParams = iaaParams;
+  if (version_number >= 1.18)
+    flen    = fread(fin, 1, 'integer*4');
+    junk  = fread(fin, 10, 'integer*4');
+    flen    = fread(fin, 1, 'integer*4');
+    iaaParams(1,:) = junk;
+    flen    = fread(fin, 1, 'integer*4');
+    junk  = fread(fin, 10, 'integer*4');
+    flen    = fread(fin, 1, 'integer*4');
+    iaaParams(2,:) = junk;
+    flen    = fread(fin, 1, 'integer*4');
+    junk  = fread(fin, 10, 'integer*4');
+    flen    = fread(fin, 1, 'integer*4');
+    iaaParams(3,:) = junk;
+    caVersion.iaaParams = iaaParams;
+  end
 end
 
 %%%%%% GAS PATH HEADER

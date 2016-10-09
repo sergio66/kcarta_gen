@@ -225,7 +225,7 @@ c read in the driver namelist file and profile
       iSARTAChi = +2     !!        use Scott's tuning coeffs for SARTA IASI
       iSARTAChi = +1     !!        use Scott's tuning coeffs for SARTA AIRS
       iSARTAChi = -1     !! do NOT use Scott's tuning coeffs for SARTA
-      iSARTAChi = iaOverrideDefault(1,1)      
+      iSARTAChi = iaaOverrideDefault(1,1)      
       IF (iDefault .NE. iSARTAChi) THEN
         write(kSTdWarn,*) 'Deafult SARTA tuning = -1 (turned off), but have tuning = ',iSARTAChi
         write(kSTdErr,*) 'Deafult SARTA tuning = -1 (turned off), but have tuning = ',iSARTAChi

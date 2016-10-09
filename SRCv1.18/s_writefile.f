@@ -1612,9 +1612,9 @@ c        WRITE(iIOUN,*) 'M1000mb,M100mb,MSub = ',M1000mb,M100mb,MSubLayer
 c        WRITE(iIOUN,*) 'M50mb,M10mb,MThick = ',M50mb,M10mb,MThickLayer
         WRITE(iIOUN,*) 'average layer pressures ...'
         WRITE(iIOUN,*) (raPActualAvg(iI),iI=1,kProfLayer)
-        WRITE(iIOUN,*) (iaOverrideDefault(1,iI),iI=1,10)    !! general settings
-        WRITE(iIOUN,*) (iaOverrideDefault(2,iI),iI=1,10)    !! radtrans settings
-        WRITE(iIOUN,*) (iaOverrideDefault(3,iI),iI=1,10)    !! iLBLRTM settings	
+        WRITE(iIOUN,*) (iaaOverrideDefault(1,iI),iI=1,10)    !! general settings
+        WRITE(iIOUN,*) (iaaOverrideDefault(2,iI),iI=1,10)    !! radtrans settings
+        WRITE(iIOUN,*) (iaaOverrideDefault(3,iI),iI=1,10)    !! iLBLRTM settings	
         WRITE(iIOUN,*) '***********************************************'
 
 c then output path ID stuff ------------------------------------------
@@ -2001,9 +2001,9 @@ c first output general info -----------------------------------------
 c v1.04 to v1.08 had the next line; now remove it
 c      WRITE(iIOUN1) M1000mb,M100mb,MSubLayer,M50mb,M10mb,MThickLayer
       WRITE(iIOUN1) (raPactualAvg(iI),iI=1,kProfLayer)        
-      WRITE(iIOUN1) (iaOverrideDefault(1,iI),iI=1,10)    !! general settings
-      WRITE(iIOUN1) (iaOverrideDefault(2,iI),iI=1,10)    !! radtrans settings
-      WRITE(iIOUN1) (iaOverrideDefault(3,iI),iI=1,10)    !! iLBLRTM settings
+      WRITE(iIOUN1) (iaaOverrideDefault(1,iI),iI=1,10)    !! general settings
+      WRITE(iIOUN1) (iaaOverrideDefault(2,iI),iI=1,10)    !! radtrans settings
+      WRITE(iIOUN1) (iaaOverrideDefault(3,iI),iI=1,10)    !! iLBLRTM settings
 
 c then output path ID stuff ------------------------------------------
       IF (kLongOrShort .GT. 0) THEN

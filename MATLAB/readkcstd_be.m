@@ -76,7 +76,11 @@ caVersion.ckd = rparams(2);
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-comment = fread(fin, 120, 'char');
+if  (version_number >= 1.18)
+  comment = fread(fin, 120, 'char');
+else
+  comment = fread(fin, 80, 'char');
+end  
 comment = setstr(comment');
 flen    = fread(fin, 1, 'integer*4');
 caVersion.comment = comment;
@@ -134,7 +138,24 @@ elseif ((version_number >= 1.09))
   flen = fread(fin,1,'integer*4');
   raP  = fread(fin,nlayer,'real*4');
   flen = fread(fin,1,'integer*4');
+
+  if (version_number >= 1.18)
+    flen    = fread(fin, 1, 'integer*4');
+    junk  = fread(fin, 10, 'integer*4');
+    flen    = fread(fin, 1, 'integer*4');
+    iaaParams(1,:) = junk;
+    flen    = fread(fin, 1, 'integer*4');
+    junk  = fread(fin, 10, 'integer*4');
+    flen    = fread(fin, 1, 'integer*4');
+    iaaParams(2,:) = junk;
+    flen    = fread(fin, 1, 'integer*4');
+    junk  = fread(fin, 10, 'integer*4');
+    flen    = fread(fin, 1, 'integer*4');
+    iaaParams(3,:) = junk;
+    caVersion.iaaParams = iaaParams;
   end
+
+end
 
 %%%%%% GAS PATH HEADER
 

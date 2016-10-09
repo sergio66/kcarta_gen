@@ -60,7 +60,7 @@ c this is the driver file name
       CHARACTER*80 caDriverName
 
 c this is for overriding the defaults
-      INTEGER iaOverride(8,10)
+      INTEGER iaaOverride(8,10)
       
 c this is for MOLGAS
       INTEGER iNGas,iaGasesNL(kGasComp)
@@ -276,7 +276,7 @@ c local variables
 
       NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort,
      $                   kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,
-     $                   iaOverride
+     $                   iaaOverride
       NAMELIST /nm_frqncy/namecomment,rf1,rf2
       NAMELIST /nm_molgas/namecomment,iNGas,iaGasesNL
       NAMELIST /nm_xscgas/namecomment,iNXsec,iaLXsecNL
@@ -312,7 +312,10 @@ c local variables
       NAMELIST /nm_output/namecomment,caLogFile,caComment,iaPrinter,
      $           iaGPMPAtm,iaNp,iaaOp,raaOp
       NAMELIST /nm_endinp/namecomment
-				      
+
+c variation of layer temp
+      kTemperVary  = -1          !assume const-in-tau temperature variation
+
 c presume no Limb calcs
       DO iI = 1,kMaxAtm
         iaLimb(iI) = -1
@@ -436,7 +439,7 @@ c set the default params kCKD etc
 c set default overrides
       DO iI = 1,8
         DO iJ = 1,10
-          iaOverride(iI,iJ) = iaOverrideDefault(iI,iJ)
+          iaaOverride(iI,iJ) = iaaOverrideDefault(iI,iJ)
         END DO
       END DO
 
@@ -465,19 +468,25 @@ c *************** read input name list file *********************************
       write (kStdWarn,*) 'successfully read in params .....'
       !these are global variables and so need to be checked
 c set overrides
-      write(kStdWarn,*) 'input override params'
+      write(kStdWarn,*) 'default override params'
       DO iI = 1,3 
-         write(kStdWarn,*) (iaOverrideDefault(iI,iJ),iJ=1,10)
-      END DO  
+         write(kStdWarn,*) (iaaOverrideDefault(iI,iJ),iJ=1,10)
+      END DO
+      IF (iaaOverride(2,1) .NE. iaaOverrideDefault(2,1)) THEN
+        write(kStdWarn,*) 'kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
+        write(kStdWarn,*) 'UserSet         iaaOverride(2,1) = ',iaaOverride(2,1)
+	kTemperVary = iaaOverride(2,1)
+      END IF      
       DO iI = 1,8
         DO iJ = 1,10
-          iaOverrideDefault(iI,iJ) = iaOverride(iI,iJ)
+          iaaOverrideDefault(iI,iJ) = iaaOverride(iI,iJ)
         END DO
       END DO
       write(kStdWarn,*) 'final override params'
       DO iI = 1,3 
-         write(kStdWarn,*) (iaOverrideDefault(iI,iJ),iJ=1,10)
-      END DO  
+         write(kStdWarn,*) (iaaOverrideDefault(iI,iJ),iJ=1,10)
+      END DO
+      kTemperVary = iaaOverrideDefault(2,1)
       CALL CheckParams 
       CALL printstar      
 
@@ -542,8 +551,9 @@ c      END IF
 
       namecomment = '******* RADNCE section *******'
       iAtmLoop     = -1
-      iTemperVary  = -1         !assume const-in-tau temperature variation
-
+c      iTemperVary  = -1          !assume const-in-tau temperature variation
+      iTemperVary  = kTemperVary !assume const-in-tau temperature variation      
+      
       rSatHeightCom = -1.0  !!! this is in pre_defined.param, comblockAtmLoop
       rAtmLoopCom   = -1.0  !!! this is in pre_defined.param, comblockAtmLoop
       DO iI = 1,kMaxAtm
@@ -623,15 +633,20 @@ c      END IF
         kWindSpeed             = raWindSpeed(iNatm)
       END IF
 
+      IF ((kTemperVary .NE. -1) .AND. (kTemperVary .NE. iTemperVary)) THEN
+        write(kStdErr,*) 'kTemperVary = ',kTemperVary,' from nm_params iaaOverrideDefaults(2,1)'
+	write(kStdErr,*) 'iTemperVary from nm_radnce = ',iTemperVary,' INCONSISTENT USER ENTRIES'
+	CALL DoSTOP
+      END IF
+      
       IF ((iNatm1 .GT. 0) .AND. (kRTP .EQ. 1)) THEN
         write (kStdErr,*) 'Cannot have nm_radnce section in file if you are'
         write (kStdErr,*) 'driving EVERYTHING from the RTP file. Please set'
         write (kStdErr,*) 'iNatm = -1 (or kRTP = -2,-1,0) and retry'
-        CALL DoStop
+        CALL DoStop	
       ELSE
         write (kStdWarn,*) 'successfully read in radnce .....'
       END IF
-
       CALL printstar      
 
       namecomment = '******* JACOBN section *******'
@@ -1295,7 +1310,7 @@ c ******** RADNCE section
       END IF
 
       IF ((iTemperVary .EQ. -1) .OR. (iTemperVary .EQ. +43)) THEN
-        CALL SetkTemperVary(iTemperVary)            
+        CALL SetkTemperVary(iTemperVary)
       ELSE
         write(kStdErr,*) 'Can only do kTemperVary = -1 or +43, not ',iTemperVary
         Call DoStop

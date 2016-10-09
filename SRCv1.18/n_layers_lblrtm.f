@@ -79,7 +79,7 @@ c local var
       iDefault = +1   !! use AIRS101 levels for the integration
       iAIRS101_or_LBL_levels = +1 !! use AIRS101 levels for the integration
       iAIRS101_or_LBL_levels = -1 !! use LBLRTM  levels for the integration
-      iAIRS101_or_LBL_levels = iaOverrideDefault(3,1)
+      iAIRS101_or_LBL_levels = iaaOverrideDefault(3,1)
       IF (abs(iAIRS101_or_LBL_levels) .GT. 1) THEN
         write(kStdErr,*) 'invalid iAIRS101_or_LBL_levels ',iAIRS101_or_LBL_levels
         CALL DoStop
@@ -224,7 +224,7 @@ c	    raPbnd(iG) = raP(iG)         !! keep in mb
       iDefault = +1
       iReplaceZeroProf = -1    !! assume user knows why there is a ZERO everywhere gas profile
       iReplaceZeroProf = +1    !! assume user wants to replace ZERO everywhere gas profile with climatology
-      iReplaceZeroProf = iaOverrideDefault(3,2)
+      iReplaceZeroProf = iaaOverrideDefault(3,2)
       IF (abs(iReplaceZeroProf) .GT. 1) THEN
         write(kStdErr,*) 'invalid iReplaceZeroProf ',iReplaceZeroProf
         CALL DoStop

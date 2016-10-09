@@ -431,7 +431,7 @@ c as default, set all angles to be the satellite view angle
       iDefault = -1   !! no Snell
       iUseSnell = +1  !! use Snell
       iUseSnell = -1  !! do not use Snell
-      iUseSnell = iaOverrideDefault(2,3)
+      iUseSnell = iaaOverrideDefault(2,4)
       IF (abs(iUseSnell) .NE. 1) THEN
         write(kStdErr,*) 'invalid iUseSnell ',iUseSnell
         CALL DoStop

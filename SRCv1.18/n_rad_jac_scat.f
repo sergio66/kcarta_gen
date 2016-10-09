@@ -358,13 +358,13 @@ c      print *,'----> instead of varying the diffusivity angle'
             write(kStdErr,*)'need Solar on/off parameter = -1,0,+1'
             CALL DoSTOP 
           END IF
-          IF (abs(kThermal) .GT. 1) THEN
-            write(kStdErr,*)'need Thermal on/off parameter = -1/0/1'
-            CALL DoSTOP 
-          END IF
+c          IF (abs(kThermal) .GT. 1) THEN
+c            write(kStdErr,*)'need Thermal on/off parameter = -1/0/1',kThermal
+c            CALL DoSTOP 
+c          END IF
           IF ((abs(kThermal) .GT. 1) .AND. (kThermal .NE. 2)) THEN
-            write(kStdErr,*)'need Thermal on/off parameter = -1/0/1/2'
-          C  ALL DoSTOP 
+            write(kStdErr,*)'need Thermal on/off parameter = -1/0/1/2',kThermal
+            CALL DoSTOP 
           END IF
           !set the diffusivity angle in degrees
           IF (kThermal .EQ. 0) THEN

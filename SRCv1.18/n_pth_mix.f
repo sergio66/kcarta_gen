@@ -91,7 +91,7 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
       iDefault = +1       ! spline is default
       iInterpType = -1    ! linear
       iInterpType = +1    ! spline
-      iInterpType = iaOverrideDefault(2,4)
+      iInterpType = iaaOverrideDefault(2,5)
       IF (abs(iInterpType) .NE. 1) THEN
         write(kStdErr,*) 'invalid iInterpType = ',iInterpType
         CALL DoStop
@@ -587,7 +587,7 @@ c -->>> (eg that Scott uses for his kcartav1.07 runs ....) <<<---
       iDefault = +1
       iReadP = +1    !! assume GENN2 style profile has p info
       iReadP = -1    !! assume GENN2 style profile does not have p info
-      iReadP = iaOverrideDefault(1,6)
+      iReadP = iaaOverrideDefault(1,6)
       IF (abs(iReadP) .NE. 1) THEN
         write(kStdErr,*) 'invalid iReadP = ',iReadP
         CALL DoStop
@@ -3045,7 +3045,7 @@ c      caFname0 = '/home/sergio/KCARTADATA/USSTD/us_std_gas_'
       iDefault = -1
       iAddLBLRTM = +1   !! if profile missing and kRTP = -5 or -6, do     add
       iAddLBLRTM = -1   !! if profile missing and kRTP = -5 or -6, do not add
-      iAddLBLRTM = iaOverrideDefault(3,3)
+      iAddLBLRTM = iaaOverrideDefault(3,3)
       IF (abs(iAddLBLRTM) .NE. 1) THEN
         write(kStdErr,*) 'invalid iAddLBLRTM = ',iAddLBLRTM
         CALL DoStop
