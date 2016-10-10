@@ -15,7 +15,7 @@ c note that the first four characters HAVE to be vx.xx for readers to work
       !!!PARAMETER (caVersion='v1.12 01-14-06 first version')
       !!!PARAMETER (caVersion='v1.14 01-19-07 first version')
       !!!PARAMETER (caVersion='v1.14 12-10-07 newdatabase version')
-      PARAMETER (caVersion='v1.15+ 08-01-10 newdatabase version')
+      !!!PARAMETER (caVersion='v1.15+ 08-01-10 newdatabase version')
 
 c this sets the name of the file to which warnings/happy messages are logged to
 c this file is set by default to 'warning.msg' in n_main.f; however the user
@@ -251,7 +251,7 @@ c rtp file azimuths used in Mie Scattering and Ocean Refl
 c rtp file also may give latitude and month (via rtime)
       INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
       REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult
-      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth
+      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
 c this is LBLRTM TPAPE5 toa, and LBLRTM level temps
       REAL kLBLRTM_toa,kLBLRTM_levelT(kMaxLayer+1),kLBLRTM_layerTavg(kMaxLayer)
       PARAMETER (kDefaultColMult = 0.1)
@@ -259,7 +259,7 @@ c this is LBLRTM TPAPE5 toa, and LBLRTM level temps
      $                 kSetThermalAngle,kTemperVary
       COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
      $                 kSolAzi,kSatAzi,
-     $                 kWindSpeed,kLatitude,kMonth
+     $                 kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
       INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
       COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
       COMMON/ComBlock7/kLBLRTM_toa,kLBLRTM_levelT,kLBLRTM_layerTavg
@@ -288,6 +288,18 @@ c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 aft
       REAL raaRTPCloudParams0(2,7),raaRTPCloudParamsF(2,7)
       COMMON/comBlockCloud/raaRTPCloudParams0,raaRTPCloudParamsF
 
+c 2016
+c allow nm_params to define defaults
+c see SUBR SetDefaultParams in kcartamisc.f
+c   GENERAL iaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi iMatlabORf77   iWhichScatterCode iMethod
+c   RT      iaDefaults(2,:) = iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
+c   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
+c                             iLinearOrSpline iDoCO2Continuum iMethod
+c   COLUMN JACS iaDefaults(4,:) = iColJac iLogOrLinear
+c   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iCONTN iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
+      INTEGER iaaOverrideDefault(4,10)
+      COMMON/comBlockDefault/iaaOverrideDefault
+	    
 c************************************************************************
 
 c this is new for version 0.97 and higher and some parts will change

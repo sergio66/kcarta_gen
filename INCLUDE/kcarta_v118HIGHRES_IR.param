@@ -15,6 +15,10 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
       include '../INCLUDE/pre_definedHIGHRES_IR.param'                !!!
+c template file : template_kcarta_v118HIGHRES_IR.param.param          !!!
+!!!!info : caVersion='vX.XX YY-MM-DD COMMENT')
+!!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
+       PARAMETER(caVersion='v1.18 16-10-01 template_kcartaV118HIGHRES_IR.param')!!	    
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
