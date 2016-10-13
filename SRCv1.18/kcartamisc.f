@@ -192,8 +192,9 @@ c note abs coeff = stored optical depth/default gas amount
         write(kStdErr,*) 'invalid iSplineType = ',iSplineType
 	CALL DoStop
       END IF      
-      IF (iSplineType .NE. iDefault) THEN
-        print *,'iSplineType,iDefault = ',iSplineType,iDefault
+      IF ((iSplineType .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
+        write(kStdErr,*),'iSplineType,iDefault = ',iSplineType,iDefault
+        write(kStdWarn,*),'iSplineType,iDefault = ',iSplineType,iDefault	
       END IF
 
 c recall kMaxLayer = 100 = the kCARTA adtabase
@@ -2005,46 +2006,62 @@ c      COMMON/comBlockDefault/iaaOverrideDefault
       
 c GENERAL
       iaaOverrideDefault(1,1) = -1    !!! iSARTAChi = -1  for no tuning, see kcartabasic/kcartamain/kcartajpl
-                                     !!!                 kcartaparallel and finally used in kcoeffMAIN.f
-      iaaOverrideDefault(1,2) = +1    !!! iSPlinetype = +1 for SUBR iSetSplineType in kcartamisc.f
+                                      !!!                 kcartaparallel and finally used in kcoeffMAIN.f
+      iaaOverrideDefault(1,2) = +1    !!! iSplinetype = +1 for SUBR iSetSplineType in kcartamisc.f
       iaaOverrideDefault(1,3) = +2    !!! iCO2Chi = +2     for SUBR multiply_co2_chi_functions in kcoeffMAIN.f
       iaaOverrideDefault(1,4) = +1    !!! iMatlabORf77 = +1  use Maltab style uncompression,  kcoeffMAIN.f
       iaaOverrideDefault(1,5) = +5    !!! iWHichScatterCode = 5 for PCLSAM in rtp_interface.f
       iaaOverrideDefault(1,6) = +1    !!! iReadP = 1 when assuming GENLN2 style profile in n_pth_mix.f
       iaaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
-                                     !!!   in clear_scatter_misc.f
+                                      !!!   in clear_scatter_misc.f
       
 c RadTrans
-c      iaaOverrideDefault(2,1) = +3    !!! iGaussPts = 3 for flux and downwell gauss quad,
-c                                     !!!   SUBR IntegrateOverAngles_LinearInTau in rad_quad.f
-c      iaaOverrideDefault(2,2) = 0     !!! iGaussQuad = 0   -1 for integrate, 0 for diffusivity, 1 for gausslegendre
-c                                     !!!   SUBR IntegrateOverAngles in rad_quad.f
-c      iaaOverrideDefault(2,3) = -1    !!! iUseSnell = -1 for No Snell law raytrace, similar to SARTA
-c                                     !!!   SUBR FindLayerAngles in rad_angles.f
-c      iaaOverrideDefault(2,4) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs)
-c                                     !!!   SUBR Get_Temp_Plevs in n_pth_mix.f
-c      iaaOverrideDefault(2,5) = +1    !!! iUsualUpwell = +1 for upwell RT with surface term, -1 with no surface,
-c                                     !!!   -2 to only dump downwelling backgnd  SUBR find_radiances in rad_main.f
-c      iaaOverrideDefault(2,6) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
-
       iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
-      iaaOverrideDefault(2,2) = +3    !!! iGaussPts = 3 for flux and downwell gauss quad,
-                                     !!!   SUBR IntegrateOverAngles_LinearInTau in rad_quad.f
-      iaaOverrideDefault(2,3) = 0     !!! iGaussQuad = 0   -1 for integrate, 0 for diffusivity, 1 for gausslegendre
-                                     !!!   SUBR IntegrateOverAngles in rad_quad.f
-      iaaOverrideDefault(2,4) = -1    !!! iUseSnell = -1 for No Snell law raytrace, similar to SARTA
-                                     !!!   SUBR FindLayerAngles in rad_angles.f
-      iaaOverrideDefault(2,5) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs)
-                                     !!!   SUBR Get_Temp_Plevs in n_pth_mix.f
-      iaaOverrideDefault(2,6) = +1    !!! iUsualUpwell = +1 for upwell RT with surface term, -1 with no surface,
-                                     !!!   -2 to only dump downwelling backgnd  SUBR find_radiances in rad_main.f
-				     
+      iaaOverrideDefault(2,2) = +3    !!! THIS IS LBLRTM STYLE iGaussPts = 3 for flux and downwell gauss quad
+                                      !!!   see SUBR IntegrateOverAngles_LinearInTau in rad_quad.f
+      iaaOverrideDefault(2,3) = 0     !!! SUBR BackGndThermal in rad_diff.f
+                                      !!! iDothermal = kThermal; if iDoThermal = -1, no backgnd thermal computed
+      				      !!!                                      =  0, backgndthermal with diffusive approx << DEFAULT >>
+				      !!!                                            control further with iaaOverrideDefault(2,4)
+				      !!!                                      = +1, use integration over angles, const-in-tau  layer T
+				      !!!                                            control further with iaaOverrideDefault(2,5)
+				      !!!                                      = +2, use integration over angles, linear-in-tau layer T
+				      !!!   this is the main routine, called by all downwelling RT routines in rad_main.
+				      !!!   all of them have -1 for iDoAcos35
+				      !!!     calls IntegrateOverAngles_LinearInTau (iDoThermal = 2) 
+				      !!!     calls IntegrateOverAngles             (iDoThermal = 1) -- also can set iaaOverrideDefault(2,5)
+				      !!!     calls DoDiffusivityApprox             (iDoThermal = 0) << DEFAULT >>
+      iaaOverrideDefault(2,4) = -1    !!! SUBR radnce4RTP in rtp_interface.f
+                                      !!!   raKThermalAngle(iC) = iaaOverrideDefault(2,4) in rtp_interface.f
+                                      !!!     = -1, fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
+				      !!!                               = +1 constant acos(3/5) in all layers
+				      !!!   this sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+				      !!!                               = +2 for same as -1, except linear-in-tau T variation
+				      !!!                               = +1 for constant angle (typically acos(3/5)) in all layers
+				      !!! SUBR DoDiffusivityApprox in rad_diff.f uses this info
+				      !!!   iDiffMethod = kSetThermalAngle
+				      !!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
+				      !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
+      iaaOverrideDefault(2,5) = 0     !!! SUBR IntegrateOverAngles in rad_quad.f, called by SUBR BackGndThermal
+                                      !!!   iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
+                                      !!!                    0 for accurate diffusivity                   (FAST << DEFAULT >>)
+				      !!!                   +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
+      iaaOverrideDefault(2,6) = +1    !!! iUsualUpwell = +1 for upwell RT with surface term, << DEFAULT >>
+                                      !!!                -1 with no surface,
+                                      !!!                -2 to only dump downwelling backgnd
+				      !!!   see SUBR find_radiances in rad_main.f
+      iaaOverrideDefault(2,7) = -1    !!! iUseSnell = -1 for No Snell law raytrace, similar to SARTA
+                                      !!!   see SUBR FindLayerAngles in rad_angles.f				     
+      iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
+                                      !!!   see SUBR Get_Temp_Plevs in n_pth_mix.f
 
-c iTAPE5/6 n_layers
+c n_layers_lblrtm.f and n_pth_mix.f  TAPE5/6
       iaaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration
       iaaOverrideDefault(3,2) = +1    !!! iReplaceZeroProf = +1 to add in profiles TAPE5 does not have
       iaaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
-                                     !!!   in n_pth_mix.f
+                                      !!!   in n_pth_mix.f
 
       RETURN
       END 

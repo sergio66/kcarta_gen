@@ -322,6 +322,25 @@ c      print *,'----> instead of varying the diffusivity angle'
         kThermalAngle = raKThermalAngle(iC)
         kThermalJacob = iakThermalJacob(iC)
 
+      !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
+      raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
+      IF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .NE. 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'	
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+      ELSEIF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'	
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+        kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+        kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc	
+      END IF
+        kThermalAngle = raKThermalAngle(iC)
+	
         IF ((kSolar .GE. 0)  .AND. (kWhichScatterCode .EQ. 2)) THEN
           write(kStdErr,*) 'Cannot have sun when using RTSPEC SCATTER'
           CALL DoStop
@@ -332,6 +351,7 @@ c      print *,'----> instead of varying the diffusivity angle'
           CALL DoStop
         END IF
 
+        print *,kThermal,kThermalAngle,kSetThermalAngle
         IF (kThermal .EQ. 0) THEN
           IF (kThermalAngle  .LT. 0) THEN
             kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
@@ -344,7 +364,8 @@ c      print *,'----> instead of varying the diffusivity angle'
             kSetThermalAngle = +1   !use user specified angle everywhere
           END IF
         END IF
-        write(kStdWarn,*) 'in n_rad_jac_scat.f --> kFlux,kTemperVary,kSetThermalAngle = ',kFlux,kTemperVary,kSetThermalAngle
+        write(kStdWarn,*) 'in n_rad_jac_scat.f --> kFlux,kTemperVary,kSetThermalAngle = '
+	write(kStdWarn,*) kFlux,kTemperVary,kSetThermalAngle
       
         IF (iDirection .GT. 0) THEN
           !check things make sense for downlook instr

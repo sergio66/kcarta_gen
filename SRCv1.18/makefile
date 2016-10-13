@@ -15,7 +15,19 @@
 385_highres605_1205:
 	/bin/rm ../INCLUDE/kcarta.param
 	ln -s ../INCLUDE/kcarta_v118HIGHRES_IR.param ../INCLUDE/kcarta.param
+	echo "MAKE SURE rtp_interface.f f1,f2 are 605, 1205 (current limits of HIGHRES database) !!!"
+	read -p "Press [Enter] key to continue ..."
+	make -f Makefile clean	
 	make -f Makefile
 	make -f Makefile scat	
 	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_highres605_1205
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_highres605_1205	
+
+########################################################################
+
+400_default:
+	make -f Makefile datafix400_H2012
+	make -f Makefile
+	make -f Makefile scat		
+	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv
+	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv

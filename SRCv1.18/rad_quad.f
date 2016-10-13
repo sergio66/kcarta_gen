@@ -93,7 +93,7 @@ c for LBLRTM TAPE5/TAPE6
       iGaussPts = 1  !!! haha not too bad at all ....
       iGaussPts = 3  !!! LBLRTM uses this
       iGaussPts = iaaOverrideDefault(2,2) 
-      IF (iDefault .NE. iGaussPts) THEN    
+      IF ((iDefault .NE. iGaussPts) .AND. (kOuterLoop .EQ. 1)) THEN    
         write(kStdErr,*) 'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
         write(kStdWarn,*)'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
       END IF
@@ -341,7 +341,6 @@ c >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
 c >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
 c >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
 
-
 c^^^^^^^^^ compute downward flux, at bottom of each layer  ^^^^^^^^^^^^^^^^
 c ^^^^^^^^ if we only want OLR, we do not need the downward flux!! ^^^^^^^^
 c loop over angles for downward flux
@@ -465,13 +464,14 @@ c iGaussQuad = -1 VERY SLOW, +1 QUITE SLOW
 c iGaussQuad = 0      FAST and very accurate!! (checked on profiles 0,5,6,7)
       iDefault   = 0       !!!!DEFAULT      
       iGaussQuad = 0       !!!!DEFAULT
-      iGaussQuad = iaaOverrideDefault(2,3)
+      iGaussQuad = iaaOverrideDefault(2,5)
       IF (abs(iGaussQuad) .GT. 1) THEN
         write(kStdErr,*) 'invalid iGaussQuad ',iGaussQuad
         CALL DoStop
       END IF		                  
-      IF (iGaussQuad .NE. iDefault) THEN
+      IF ((iGaussQuad .NE. iDefault)  .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdWarn,*) 'iGaussQuad,iDefault = ',iGaussQuad,iDefault
+        write(kStdErr,*) 'iGaussQuad,iDefault = ',iGaussQuad,iDefault	
       END IF
 
       iTp=iaRadLayer(iNumLayer)     !this is the top layer

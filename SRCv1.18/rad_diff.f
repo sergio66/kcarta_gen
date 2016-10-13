@@ -50,22 +50,47 @@ c to do the angular integration
 c if iDoThermal = -1 ==> thermal contribution = 0
 c if iDoThermal = +1 ==> do actual integration over angles
 c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
+c ALMOST ALL, IF NOT ALL, calls to this routine have iDoAcos35 = -1 
       IF (iDoAcos35 .LT. 0) THEN
-c not doing the special computation for Jacobians ==> use 0 or 1
+        ! not doing the special computation for Jacobians ==> use 0 or 1
         iDoThermal = kThermal
       ELSE IF (iDoAcos35 .GT. 0) THEN
-c doing the special computation for Jacobians ==> use 0 (diffusive approx)
+        ! doing the special computation for Jacobians ==> use 0 (diffusive approx)
         iDoThermal = 0
       END IF
 
       CALL AddUppermostLayers(iaRadLayer,iNumLayer,rFracTop,
      $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
 
+      IF (iDoThermal .NE. iaaOverrideDefault(2,3)) THEN
+        IF (kOuterLoop .EQ. 1)  THEN
+          write(kStdErr,*) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+          write(kStdWarn,*) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+	END IF
+	iDoThermal = iaaOverrideDefault(2,3)
+        IF (kOuterLoop .EQ. 1)  THEN	
+  	  IF (iDoThermal == 2 ) THEN
+	    write(kStdErr,*) '  will do LINEAR-in-tau slow/accurate integration over zenith angles for backgnd thermal'
+	  END IF
+ 	  IF (iDoThermal == 1 ) THEN
+	    write(kStdErr,*) '  will do CONST-in-tau slow/accurate integration over zenith angles for backgnd thermal'
+	  END IF
+	  IF (iDoThermal == 0 ) THEN
+	    write(kStdErr,*) '  will do fast diffusivity angle = ',kSetThermalAngle,' for backgnd thermal'
+	    IF (kSetThermalAngle .EQ. -1) THEN
+	      write(kStdErr,*) ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
+	    ELSE
+	      write(kStdErr,*) ' >> will use ',kSetThermalAngle,' in all layers'	  
+  	    END IF
+	  END IF
+	  IF (iDoThermal == -1) write(kStdErr,*) '  will NOT DO backgnd thermal'
+	END IF
+      END IF
+      
 c now do the radiative transfer!!!
       IF ((kSetThermalAngle .EQ. 2) .OR. (iDothermal .EQ. 2)) THEN
-        write(kStdErr,*) 'iDoThermal,kSetThermalAngle = ',iDoThermal,kSetThermalAngle
-        write(kStdWarn,*) 'doing background thermal using style LINEAR-in-tau slow/accurate integration over zenith angles'
-	write(kStdWarn,*) 'LBLRTM 3angle style'
+        write(kStdWarn,*) 'doing background thermal using LINEAR-in-tau slow/accurate integration over zenith angles'
+	write(kStdWarn,*) '  this is the LBLRTM 3angle style'
         CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq,
      $     raPressLevels,raTPressLevels,	
      $     raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,
@@ -886,7 +911,7 @@ c              this would affect the backgnd thermal calculation
       INTEGER iT,iaRadLayerTemp(kMixFilRows),iDoAcos35
       INTEGER iNumLayer,iExtraThermal,iProfileLayers
 
-      INTEGER iNotChoose
+      INTEGER iDiffmethod,iDefault
       REAL rf1,rf2
 
       !! bugfix 11/08/2010
@@ -899,51 +924,65 @@ c              this would affect the backgnd thermal calculation
       IF ((rf2 .LE. 605.00) .OR. (rf1 .GE. 2830.0)) THEN
         write (kStdWarn,*) 'oops f(1),f(kMaxPts) = ',rf1,rf2,' outside 605 < f < 2830'
         write(kStdWarn,*) '      cannot use diffusivity approx, use acos(3/5) instead'
-        iNotChoose = +1
+        iDiffmethod = +1
         kThermalAngle = acos(3.0/5.0) * 180/kPi
       END IF
 
-c iNotChoose = -1  => use choose angles subroutine to get diffusivity angle
+c iDiffmethod = -1  => use choose angles subroutine to get diffusivity angle
 c                        as a fcn of frequency, for the bottommost layers
-c                        quite fast, pretty accurate LAY TEMP CONST IN TAU
-c iNotChoose = -2  => use choose angles subroutine to get diffusivity angle
+c                        quite fast, pretty accurate LAY TEMP CONST IN TAU <<DEFAULT>>
+c iDiffmethod = -2  => use choose angles subroutine to get diffusivity angle
 c                        as a fcn of frequency, for the bottommost layers
 c                        quite fast, pretty accurate LAY TEMP LINEAR IN TAU
-c iNotChoose =  1  => use fixed diffusivity angle = acos(3/5) for all freqs
+c iDiffmethod = +1  => use fixed diffusivity angle = acos(3/5) for all freqs
 c                        fast, not too accurate
-
-      iNotChoose = kSetThermalAngle
-
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 cdebug
-c      iNotChoose = +1     !set this when debugging thermal jacobians!
-c      iNotChoose = -1     !set this when debugging default "sergio" diffusivty approx, const in tau T variation!
-c      iNotChoose = -2     !set this when debugging default "sergio" diffusivty approx, linear in tau T variation!
-c      iNotChoose = +2     !set this when debugging default "sergio" diffusivty approx, linear in tau T variation, 3 angles!
+c      iDiffmethod = +1     !set this when debugging thermal jacobians! const in tau T variation, acos(3/5) everywhere
+c      iDiffmethod = -1     !set this when debugging default "sergio" diffusivty approx, const in tau T variation! << DEFAULT >>
+c      iDiffmethod = -2     !set this when debugging default "sergio" diffusivty approx, linear in tau T variation! 
+c      iDiffmethod = +2     !set this when debugging default "sergio" diffusivty approx, linear in tau T variation, 3 angles!, not coded
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
+
+      iDefault = -1
+      iDiffmethod = kSetThermalAngle
+      IF (kSetThermalAngle .NE. iaaOverrideDefault(2,4)) THEN
+        write(kStdErr,*) 'OOPS kSetThermalAngle,iaaOverrideDefault(2,4) = ',kSetThermalAngle,iaaOverrideDefault(2,4)
+	write(kStdErr,*) 'in sub DoDiffusivityApprox, probably mis-set in radnce4rtp'
+	CALL DoStop
+      END IF
+      iDiffMethod = iaaOverrideDefault(2,4)
+      IF ((abs(iDiffmethod) .NE. 1) .AND. abs(iDiffmethod) .NE. 2) THEN
+        write(kStdErr,*) 'need iDefault = -2,-1,+1,+2 in DoDiffusivityApprox, not ',iDiffMethod
+        CALL DoStop
+      END IF
+      IF ((iDiffMethod .NE. iDefault)  .AND. (kOuterLoop .EQ. 1)) THEN
+        write(kStdErr,*)  'subr DoDiffusivityApprox iDefault,iDiffMethod = ',iDefault,iDiffMethod
+        write(kStdWarn,*) 'subr DoDiffusivityApprox iDefault,iDiffMethod = ',iDefault,iDiffMethod	
+      END IF
       
 c now loop over the layers, for the particular angle
-      IF (iNotChoose .EQ. 1) THEN
+      IF (iDiffmethod .EQ. 1) THEN
         write(kStdWarn,*)'back gnd thermal  : using acos(3/5) everywhere'
         CALL Diffusivity_AllAnglesEqual(raThermal,raVT1,rTSpace,
      $    raFreq,raUseEmissivity,
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
      $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
-      ELSE IF (iNotChoose .EQ. -1) THEN
-        write(kStdWarn,*)'back gnd thermal  : using fast accurate approx, const layer temp'
+      ELSE IF (iDiffmethod .EQ. -1) THEN
+        write(kStdWarn,*)'<DEFAULT> back gnd thermal  : using fast accurate approx, const layer temp'
         CALL orig_const_in_tau_Diffusivity_LowerAnglesAccurate(raThermal,raVT1,rTSpace,
      $    raFreq,raUseEmissivity,iProfileLayers,raPressLevels,
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
      $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-1)
-      ELSE IF (iNotChoose .EQ. -2) THEN
+      ELSE IF (iDiffmethod .EQ. -2) THEN
         write(kStdWarn,*)'back gnd thermal  : using fast accurate approx, linear in tau layer temp'
         CALL new_linear_in_tau_Diffusivity_LowerAnglesAccurate(raThermal,raVT1,rTSpace,
      $    raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
      $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-2)
-      ELSE IF (iNotChoose .EQ. +2) THEN
+      ELSE IF (iDiffmethod .EQ. +2) THEN
         write(kStdErr,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
 	Call DoStop
       END IF

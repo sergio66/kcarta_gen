@@ -2663,11 +2663,24 @@ c sun is only on if 0 < prof.solzen < 90
       iaKThermal(iC)   = 0
       raKThermalAngle(iC) = -1.0
 
-c      print *,'----> warning : set raKthermalangle = 53.3 (acos(3/5))'
-c      raKThermalAngle(iC) = +53.13
-c      print *,'----> so this will be used at all layers '
-c      print *,'----> instead of varying the diffusivity angle'
-
+      !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
+      raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
+      IF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .NE. 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'	
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+      ELSEIF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'	
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+        kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+        kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc	
+      END IF
+      
       iakThermalJacob(iC) = 1
 c use the solar on/off, thermal on/off etc. 
       kSolar        = iaKSolar(iC)

@@ -19,6 +19,28 @@ c                              debugged for small O(tau), used with EliMlawer 12
 c **   kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has **
 c **                           x/6 as x-->0 compared to kTemperVary = +42                      **
 
+c in kcartamisc.f
+c
+c      iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
+c      iaaOverrideDefault(2,4) = -1    !!! SUBR radnce4RTP in rtp_interface.f
+c                                      !!!   raKThermalAngle(iC) = iaaOverrideDefault(2,4) in rtp_interface.f
+c                                      !!!     = -1, fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+c				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.130
+c				      !!!                               = +1 constant acos(3/5) in all layers
+c				      !!!   this sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+c				      !!!                               = +2 for same as -1, except linear-in-tau T variation
+c				      !!!                               = +1 for constant angle (typically acos(3/5)) in all layers
+c				      !!! SUBR DoDiffusivityApprox in rad_diff.f uses this info
+c				      !!!   iDiffMethod = kSetThermalAngle
+c				      !!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+c				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
+c				      !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
+c      iaaOverrideDefault(2,5) = 0     !!! iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
+c                                      !!!                  0 for accurate diffusivity                   (FAST DEFAULT)
+c                                      !!!                 +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
+c                                      !!!   SUBR IntegrateOverAngles in rad_quad.f
+c
+															
 c************************************************************************
 c************** This file has the forward model routines  ***************
 c************************************************************************
@@ -626,9 +648,9 @@ c retrievals."
 
       iDefault = -1          !!!temperature in layer constant USE THIS FOR RT !!!!
       iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
-      IF (iDefault .NE. iVary) THEN    
-        write(kStdErr,*)'iDefault, iVary in rad_main',iDefault,iVary
-        write(kStdWarn,*)'iDefault, iVary in rad_main',iDefault,iVary
+      IF ((iDefault .NE. iVary) .AND. (kOuterLoop .EQ. 1)) THEN    
+        write(kStdErr,*)'iDefault, iVary (kTempervary) in rad_main',iDefault,iVary
+        write(kStdWarn,*)'iDefault, iVary (kTemperVary) in rad_main',iDefault,iVary
       END IF
 
       iDefault = +1
@@ -640,7 +662,7 @@ c retrievals."
         write(kStdErr,*) 'invalid iUsualUpwell ',iUsualUpwell
         CALL DoStop
       END IF		                        
-      IF (iDefault .NE. iUsualUpwell) THEN    
+      IF ((iDefault .NE. iUsualUpwell)  .AND. (kOuterLoop .EQ. 1)) THEN    
         write(kStdErr,*)'iDefault, iUsualUpwell in rad_main',iDefault,iUsualUpwell
         write(kStdWarn,*)'iDefault, iUsualUpwell in rad_main',iDefault,iUsualUpwell
       END IF
@@ -752,7 +774,10 @@ c iVary = 1 : (exp in tau layer temp) LTE radtransfer calcs : surface and refl t
         ELSEIF ((iVary .GE. +2) .AND. (kFlux .LE. 0) .AND. (iUsualUpwell .EQ. +1)) THEN
 c iVary = 2, kFlux < 0 : (linear in tau layer temp) LTE radtransfer calcs :
 c    surface and refl thermal and atmsopheric emission, vary layer angle with height
-	  write(kStdErr,*) 'upwelling radiances, linear in tau, vary local angle with layer'	  
+          IF (kOuterLoop .EQ. 1) THEN
+  	    write(kStdErr,*) 'upwelling radiances, linear in tau, vary local angle with layer'	
+	  END IF
+          write(kStdWarn,*) 'upwelling radiances, linear in tau, vary local angle with layer'	  
           CALL rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE(iVary,raFreq,	  
      $         raInten,raVTemp,
      $         raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
@@ -770,7 +795,7 @@ c    surface and refl thermal and atmsopheric emission, vary layer angle with he
         ELSEIF ((iVary .GE. +2) .AND. (kFlux .LE. 0) .AND. (iUsualUpwell .LT. 0)) THEN
 c iVary = 2, kFlux < 0 : (linear in tau layer temp) LTE radtransfer calcs :
 c you can do REFL THERM + ATM EMISSION only or REFL THERM only
-	  write(kStdErr,*) 'upwelling radiances, linear in tau, vary local angle with layer, no surf term'	  
+	  write(kStdWarn,*) 'upwelling radiances, linear in tau, vary local angle with layer, no surf term'	  
           CALL rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS(iVary,raFreq,	  
      $         raInten,raVTemp,
      $         raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
@@ -789,7 +814,7 @@ c you can do REFL THERM + ATM EMISSION only or REFL THERM only
 c iVary = 2, kFlux > 0 : (linear in tau layer temp) LTE radtransfer calcs :
 c    surface and refl thermal and atmsopheric emission, const layer angle with height (for flux calc)
 	  !! do RT for upwell radiation, angle constant with layer
-	  write(kStdErr,*) 'upwelling radiances, linear in tau, constant angle with layer (for flux)'
+	  write(kStdWarn,*) 'upwelling radiances, linear in tau, constant angle with layer (for flux)'
           CALL rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_CONST_LAYER_ANGLE(iVary,raFreq,	  
      $         raInten,raVTemp,
      $         raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
@@ -958,10 +983,12 @@ c for specular reflection
       REAL raSpecularRefl(kMaxPts)
       INTEGER iSpecular
 
-      IF (iaaOverrideDefault(2,6) .EQ. -1) THEN
+      IF ((iaaOverrideDefault(2,6) .EQ. -1)  .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdErr,*) 'Warning : doing ATM EMISSION runs, not COMPLETE RADIANCE runs'
-      ELSEIF (iaaOverrideDefault(2,6) .EQ. -2) THEN
+        write(kStdWarn,*) 'Warning : doing ATM EMISSION runs, not COMPLETE RADIANCE runs'	
+      ELSEIF ((iaaOverrideDefault(2,6) .EQ. -2)  .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdErr,*) 'Warning : doing ONLY BACKGND THERMAL runs, not COMPLETE RADIANCE runs'
+        write(kStdWarn,*) 'Warning : doing ONLY BACKGND THERMAL runs, not COMPLETE RADIANCE runs'	
       END IF
 
       iIOUN = iIOUN_IN
@@ -1006,7 +1033,7 @@ c if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
       write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
       write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
       write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
-
+      
 c set the mixed path numbers for this particular atmosphere
 c DO NOT SORT THESE NUMBERS!!!!!!!!
       IF ((iNumLayer .GT. kProfLayer) .OR. (iNumLayer .LT. 0)) THEN
@@ -3563,7 +3590,7 @@ c from the top of atmosphere is not reflected
       ELSE
         write(kStdWarn,*) 'no thermal backgnd to calculate'
       END IF
-
+      
 c see if we have to add on the solar contribution
 c this figures out the solar intensity at the ground
       IF (iDoSolar .GE. 0) THEN
@@ -3881,10 +3908,12 @@ c for temporary dump of background thermal
       INTEGER iIOUN1,i0,i1,i2,i3,iErr,find_tropopause,troplayer,iPrintBackThermal
       REAL raG2S(kMaxPts)
 
-      IF (iaaOverrideDefault(2,6) .EQ. -1) THEN
+      IF ((iaaOverrideDefault(2,6) .EQ. -1)  .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdErr,*) 'Warning : doing ATM EMISSION runs, not COMPLETE RADIANCE runs'
-      ELSEIF (iaaOverrideDefault(2,6) .EQ. -2) THEN
+        write(kStdWarn,*) 'Warning : doing ATM EMISSION runs, not COMPLETE RADIANCE runs'	
+      ELSEIF ((iaaOverrideDefault(2,6) .EQ. -2)  .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdErr,*) 'Warning : doing ONLY BACKGND THERMAL runs, not COMPLETE RADIANCE runs'
+        write(kStdWarn,*) 'Warning : doing ONLY BACKGND THERMAL runs, not COMPLETE RADIANCE runs'	
       END IF
 
       iLBLRTMZero = +2*iNumlayer

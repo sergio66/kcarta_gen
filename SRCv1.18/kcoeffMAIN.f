@@ -661,8 +661,9 @@ c temperature profiles are the same!!!!
         write(kStdErr,*) 'invalid iMatlabORf77 = ',iMatlabORf77
 	CALL DoStop
       END IF
-      IF (iMatlabORf77 .NE. iDefault) THEN
+      IF ((iMatlabORf77 .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdErr,*) 'using iMatlab/f77 = ',iMatlabORf77,' not ',iDefault
+        write(kStdWarn,*) 'using iMatlab/f77 = ',iMatlabORf77,' not ',iDefault	
       END IF
 
 c then read in the compressed data ... if water do the uncompression 

@@ -91,15 +91,17 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
       iDefault = +1       ! spline is default
       iInterpType = -1    ! linear
       iInterpType = +1    ! spline
-      iInterpType = iaaOverrideDefault(2,5)
+      iInterpType = iaaOverrideDefault(2,8)
       IF (abs(iInterpType) .NE. 1) THEN
-        write(kStdErr,*) 'invalid iInterpType = ',iInterpType
+        write(kStdErr,*) 'need iInterpType = +1 or -1 not ',iInterpType
         CALL DoStop
       END IF		       
       
-      IF (iDefault .NE. iInterpType) THEN
+      IF ((iDefault .NE. iInterpType) .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdErr,*) 'in Get_Temp_Plevs, default is take layer temps and spline interp them to plevs'
         write(kStdErr,*) '                   we are   taking layer temps and linear interp them to plevs'
+        write(kStdWarn,*) 'in Get_Temp_Plevs, default is take layer temps and spline interp them to plevs'
+        write(kStdWarn,*) '                   we are   taking layer temps and linear interp them to plevs'
       END IF
       
       DO iI = 1,kProfLayer+1

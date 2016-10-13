@@ -587,12 +587,13 @@ v1.18
                 3 main sets : General/RadTrans/LBLRTM Tape5/6
 		The params allow you eg to set kTemperVary (iusing iaaOverride(2,1))
 		in nm_params, instead of iTemperVary in nm_radnce
+		See lines 2000+ in kcartamisc.f
 		
 10/2/16         Made caComment in nm_output character*120 so you can eg type
                 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
 		'lblrtmV12.4 ODs for g2,5,6; UMBC ODs other gas;FWO Mix1 = 1 -1 1.0 2; Mix2 =101 0.0 102 0.0 103 0.0 for SARTA, no cont'
 		
-10/1/16         Moved caVersion from pre_defined.param to the template_kcarta*.param
+                Moved caVersion from pre_defined.param to the template_kcarta*.param
                 files. This will hopefully ensure that each time a new template is
 		made for kCARTA, and then included at compile time, it will be
 		more straightforward to figure out which kcarta.param was used for
@@ -604,8 +605,7 @@ v1.18
 		output  [d,w,caVers] = readkcstd(fname)
 
 9/30/16         Turned off Snell's law during ray trace, so kcarta is more like sarta
-
-9/30/16         Cleaned up printing of raytracing
+                Cleaned up printing of raytracing
 
 6/2/16          Fixed a bug with raAtmLoop being set for scanang/satzen
 

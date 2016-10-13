@@ -2160,8 +2160,15 @@ each of the $nm\_keywords$.
 
 \subsection{$nm\_params$ (optional)}
 
-Here the user can reset values of parameters specific to a
-particular run.  All lines beginning with ``{\tt !}'' are considered
+\textcolor{red}{We note here there are a number of preset
+parameters that kCARTA currently uses, such as kTemperVary = -1 for constant
+layer temeperture during Radiative Transfer, or using splines for uncompressing
+the database. The values can be switched by the user, but at the user's risk.
+For this reason, the "hidden" parameters iaOverride are not mentioned here,
+but can be seen in subroutine SetDefaultParams in kcartamisc.f}.
+
+Below we define and explain how the user can reset values of other "safer" parameters,
+for a particular run. All lines beginning with ``{\tt !}'' are considered
 comment lines and are ignored.  If the value of a parameter is not
 set here, it defaults to the defined value below.  These parameters affect 
 the entire run of the program (including parsing in the

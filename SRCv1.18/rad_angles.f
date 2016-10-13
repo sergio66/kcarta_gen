@@ -431,13 +431,14 @@ c as default, set all angles to be the satellite view angle
       iDefault = -1   !! no Snell
       iUseSnell = +1  !! use Snell
       iUseSnell = -1  !! do not use Snell
-      iUseSnell = iaaOverrideDefault(2,4)
+      iUseSnell = iaaOverrideDefault(2,7)
       IF (abs(iUseSnell) .NE. 1) THEN
         write(kStdErr,*) 'invalid iUseSnell ',iUseSnell
         CALL DoStop
       END IF		                        
-      if (iDefault .NE. iUseSnell) THEN
+      if ((iDefault .NE. iUseSnell) .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdWarn,*) 'using Snell law in FindLayerAngles (raytrace thru layers)'
+        write(kStdErr,*) 'using Snell law in FindLayerAngles (raytrace thru layers)'	
       END IF
       
       iMin = +1000000

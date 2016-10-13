@@ -332,10 +332,10 @@ c      SAVE     EXT0,EXT1, ALB0,ALB1, ASYM0,ASYM1
         write(kStdErr,*) 'invalid iLogOrLinear = ',iLogOrLinear
         CALL DoStop
       END IF		       
-c      IF (iDefault .NE. iLogOrLinear) THEN
-c        write (kStdErr,*) 'in INTERP_SCAT_TABLE2'
-c        write (kStdErr,*)  'iDefault,iLogOrLinear = ',iDefault,iLogOrLinear
-c      END IF
+      IF ((iDefault .NE. iLogOrLinear) .AND. (kOuterLoop .EQ. 1)) THEN
+        write (kStdErr,*) 'in INTERP_SCAT_TABLE2'
+        write (kStdErr,*)  'iDefault,iLogOrLinear = ',iDefault,iLogOrLinear
+      END IF
 
 C         Check that parameter are in range of table
       IF (WAVENO .LT. WAVETAB(1) .OR. WAVENO .GT. WAVETAB(NWAVE)) THEN
