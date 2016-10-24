@@ -66,7 +66,7 @@ c this is the driver file name
       CHARACTER*80 caDriverName
 
 c this is for overriding the defaults
-      INTEGER iaaOverride(8,10)
+      INTEGER iaaOverride(4,10)
 
 c this is for MOLGAS
       INTEGER iNGas,iaGasesNL(kGasComp)
@@ -433,7 +433,7 @@ c set the default params kCKD etc
       CALL CheckParams 
 
 c set default overrides
-      DO iI = 1,8
+      DO iI = 1,4
         DO iJ = 1,10
           iaaOverride(iI,iJ) = iaaOverrideDefault(iI,iJ)
         END DO
@@ -473,7 +473,7 @@ c set overrides
         write(kStdWarn,*) 'UserSet         iaaOverride(2,1) = ',iaaOverride(2,1)
 	kTemperVary = iaaOverride(2,1)	
       END IF
-      DO iI = 1,8
+      DO iI = 1,4
         DO iJ = 1,10
           iaaOverrideDefault(iI,iJ) = iaaOverride(iI,iJ)
         END DO

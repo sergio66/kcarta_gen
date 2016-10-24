@@ -470,8 +470,8 @@ c iGaussQuad = 0      FAST and very accurate!! (checked on profiles 0,5,6,7)
         CALL DoStop
       END IF		                  
       IF ((iGaussQuad .NE. iDefault)  .AND. (kOuterLoop .EQ. 1)) THEN
-        write(kStdWarn,*) 'iGaussQuad,iDefault = ',iGaussQuad,iDefault
-        write(kStdErr,*) 'iGaussQuad,iDefault = ',iGaussQuad,iDefault	
+        write(kStdWarn,*) 'backgnd thermal quad iDefault,iGaussQuad = ',iDefault,iGaussQuad
+        write(kStdErr,*)  'backgnd thermal quad iDefault,iGaussQuad = ',iDefault,iGaussQuad
       END IF
 
       iTp=iaRadLayer(iNumLayer)     !this is the top layer

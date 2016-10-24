@@ -3202,7 +3202,7 @@ c this does the CORRECT thermal and solar radiation calculation
 c for downward looking satellite!! ie kDownward = 1
 
 c****************
-c this is for LAYER TEMPERATURE varying exponentially across layer
+c this is for LAYER TEMPERATURE varying linearly across layer
 c since we read in GENLN4 profile, then we know temperatures at LEVELS as well!
 c this KEEPS CONSTANT the satellite view angle as it goes through the layers
 c   ie does "flux radiative transfer"
@@ -3304,7 +3304,7 @@ c this is for absorptive clouds
       REAL raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 c local variables
-      INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
+      INTEGER iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary,iDefault
       REAL raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
       REAL raaEmission(kMaxPts,kProfLayer),rCos,raInten2Junk(kMaxPts)
       REAL raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
@@ -3330,6 +3330,17 @@ c for temporary dump of background thermal
       CHARACTER*4  c4
       INTEGER iIOUN1,i0,i1,i2,i3,iErr,find_tropopause,troplayer,iPrintBackThermal
       REAL raG2S(kMaxPts)
+
+      iDefault = -1
+      IF (abs(iaaOverrideDefault(2,9)) .NE. 1) THEN
+        write(kStdWarn,*) 'need iaaOverrideDefault(2,9) == -1 or +1'
+        write(kStdErr,*) 'need iaaOverrideDefault(2,9) == -1 or +1'	
+        CALL DoStop
+      END IF
+      IF ((kOuterLoop .EQ. 1) .AND. (iaaOverrideDefault(2,9) .NE. iDefault)) THEN
+        write(kStdWarn,*) ' highres LBLRTM fix : iDefault = ',iDefault, '  iaaOverrideDefault(2,9) = ',iaaOverrideDefault(2,9) 
+        write(kStdErr,*) ' highres LBLRTM fix : iDefault = ',iDefault, '  iaaOverrideDefault(2,9) = ',iaaOverrideDefault(2,9) 
+      END IF
       
       iLBLRTMZero = +2*iNumlayer
 c      kLBLRTM_toa = 0.07      
@@ -3764,7 +3775,12 @@ c then do the topmost layer (could be fractional)
              ELSE
                CALL RT_ProfileUPWELL(raFreq,raaAbs_LBLRTM_zeroUA,iL,ravt2,rCos,+1.0,-1,raInten)
              END IF
-             write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileUPWELL_LINEAR_IN_TAU'	
+             write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileUPWELL_LINEAR_IN_TAU'
+	     IF (iaaOverrideDefault(2,9) .EQ. 1) THEN
+  	       write(kStdWarn,*) ' adding on LBLRTM regression fix, satzen = ',raLayAngles(MP2Lay(iaRadLayer(1)))
+	       CALL lblrtm_highres_regression_fix(cos(raLayAngles(MP2Lay(iaRadLayer(1)))*kPi/180.0),
+     $              rTSurf,raVT1,raaAbs,raUseEmissivity,raFreq,raInten)
+             END IF
              CALL wrtout(iIOUN,caOutName,raFreq,raInten)
           END IF
         END IF
@@ -3775,11 +3791,12 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
       RETURN
       END
 
+c************************************************************************
 c this does the CORRECT thermal and solar radiation calculation
 c for downward looking satellite!! ie kDownward = 1
 
 c****************
-c this is for LAYER TEMPERATURE varying exponentially across layer
+c this is for LAYER TEMPERATURE varying linearly across layer
 c since we read in GENLN4 profile, then we know temperatures at LEVELS as well!
 c this KEEPS CONSTANT the satellite view angle as it goes through the layers
 c   ie does "flux radiative transfer"
@@ -5396,6 +5413,180 @@ c note that the angle is the solar angle = satellite angle
       END IF
       
       RETURN
+      END
+
+c************************************************************************
+c this subroutine reads in the LBLRTM files
+      SUBROUTINE lblrtm_highres_regression_fix(rCos,rTSurf,raVT1,raaAbs,raUseEmissivity,raFreq,raInten)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c input
+      REAL rTSurf,raVT1(kMixFilRows),raaAbs(kMaxPts,kMixFilRows),raUseEmissivity(kMaxPts),rCos
+c input param, and I/O param
+      REAL raFreq(kMaxPts),raInten(kMaxPts)
+      
+      REAL raBT0(kMaxPts),raDBT(kMaxPts),raNewR(kMaxPts)
+      INTEGER iIOUN,iErr,iNumChunk,iFr,iLenD,iLenX,iLeftjust_lenstr,iX,iXmax,iFound,iNumPointsInChunk,iWhichChunk
+      CHARACTER*3 ca3
+      CHARACTER*4 ca4
+      CHARACTER*80 caDir
+      CHARACTER*40 caX
+      CHARACTER*120 caFname
+
+      INTEGER iaWhichChunk(90),iaNumPtsPerChunk(90),iaIndices(kMaxPts)
+      INTEGER iNumT,iNumOD,iaLayT(kProfLayer),iaLayOD(kProfLayer)
+      REAL raWavenumbers(kMaxPts)
+      REAL raaCoeff(kMaxPts,30)         ! Matlab coeffs
+      REAL raaPredData(kMaxPts,30)      ! Actual data : raT,raOD, raBT, emiss, angle
+      REAL maxDBT,minDBT,meanDBT
+      
+      caDir = '/asl/data/kcarta_sergio/KCDATA/General/HiRes_LBLRTM2KCARTA/'
+      iLenD = iLeftjust_lenstr(caDir,80)
+      
+      IF (iaaOverrideDefault(2,1) .NE. 43) THEN
+        write(kStdWarn,*) 'Expect iaaOverrideDefault(2,1)=43 in lblrtm_highres_regression_fix, not ',iaaOverrideDefault(2,1)
+        write(kStdErr,*)  'Expect iaaOverrideDefault(2,1)=43 in lblrtm_highres_regression_fix, not ',iaaOverrideDefault(2,1)	
+	CALL DoStop
+      END IF
+
+      caX     = 'lblrtm_BT_emiss_regression_MAIN.dat'
+      caFname = caDir(1:iLenD)//caX
+      
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120)            
+      iIOUN = kTempUnit
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      OPEN(UNIT = iIoun,FILE = caFname,STATUS='OLD',IOSTAT=iErr,FORM='UNFORMATTED')
+      IF (IERR .NE. 0) THEN
+        WRITE(kStdErr,*) 'In lblrtm_highres_regression_fix'
+        WRITE(kStdErr,1010) IERR, CAFNAME
+        CALL DoSTOP
+      ENDIF
+					       
+      kTempUnitOpen = 1
+      READ(iIOUN) iNumChunk
+      READ(iIOUN) (iaWhichChunk(iFr),iFr=1,iNumChunk)
+      READ(iIOUN) (iaNumPtsPerChunk(iFr),iFr=1,iNumChunk)
+      
+      CLOSE(iIOUN)
+      kTempUnitOpen = -1
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      
+      !! now see if raFreq(1) is inside iaWhichChunk
+      iFound = -1
+      iX = 1
+ 10   CONTINUE
+      IF (abs(raFreq(1) - 1.0*iaWhichChunk(iX)) .LE. 1.0e-4) THEN
+        iFound = iX
+      ELSEIF (iX .LT. iNumChunk) THEN
+        iX = iX + 1
+	GOTO 10
+      END IF
+
+      IF (iFound .LT. 0) THEN
+        !! nothing to do
+        GOTO 20
+      ELSE
+        IF (raFreq(1) .LT. 1000) THEN
+          write(ca3,'(I3)') iaWhichChunk(iFound)
+	  ca4 = '0' // ca3
+        ELSEIF (raFreq(1) .LT. 10000) THEN
+          write(ca4,'(I4)') iaWhichChunk(iFound)
+	END IF
+        caX = 'lblrtm_BT_emiss_regression_'
+	caFname = caDir(1:iLenD)//caX
+	iLenX = iLeftjust_lenstr(caFname,120)
+        caFname = caFname(1:iLenX)//ca4
+	iLenX = iLeftjust_lenstr(caFname,120)
+        caFname = caFname(1:iLenX)//'.dat'
+	END IF
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      OPEN(UNIT = iIoun,FILE = caFname,STATUS='OLD',IOSTAT=iErr,FORM='UNFORMATTED')
+      IF (IERR .NE. 0) THEN
+        WRITE(kStdErr,*) 'In lblrtm_highres_regression_fix'
+        WRITE(kStdErr,1010) IERR, CAFNAME
+        CALL DoSTOP
+      ENDIF
+					       
+      kTempUnitOpen = 1
+      READ(iIOUN) iWhichChunk,iNumPointsInChunk
+      IF (iWhichChunk .NE. iaWhichChunk(iFound)) THEN
+        write(kStdErr,*) ' iWhichChunk .NE. iaWhichChunk(iFound) ',iWhichChunk,iaWhichChunk(iFound)
+        write(kStdWarn,*) ' iWhichChunk .NE. iaWhichChunk(iFound) ',iWhichChunk,iaWhichChunk(iFound)	
+        CALL DoStop
+      END IF
+      IF (iNumPointsInChunk .NE. iaNumPtsPerChunk(iFound)) THEN
+        write(kStdErr,*) ' iNumPointsInChunk .NE. iaNumPtsPerChunk(iFound) ',iNumPointsInChunk,iaNumPtsPerChunk(iFound)
+        write(kStdWarn,*) ' iNumPointsInChunk .NE. iaNumPtsPerChunk(iFound) ',iNumPointsInChunk,iaNumPtsPerChunk(iFound)	
+        CALL DoStop
+      END IF
+      READ(iIOUN) iNumT,iNumOD
+      READ(iIOUN) (iaLayT(iFr),iFr=1,iNumT)                     !! layT indexes
+      READ(iIOUN) (iaLayOD(iFr),iFr=1,iNumOD)                   !! layOD indices
+      READ(iIOUN) (raWavenumbers(iFr),iFr=1,iNumPointsInChunk)  !! wavenumbers we need to fix in this chunk
+      READ(iIOUN) (iaIndices(iFr),iFr=1,iNumPointsInChunk)      !! indices of points we need to fix in this chunk
+      DO iFr = 1,iNumPointsInChunk
+        READ(iIOUN) (raaCoeff(iFr,iX),iX=1,28)                !! fixing coeffs
+      END DO
+      
+      CLOSE(iIOUN)
+      kTempUnitOpen = -1
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      
+      CALL radtot_array(raFreq,raInten,raBT0)
+
+c     data matrix from actual profile
+      DO iFr = 1,kMaxPts
+        DO iX = 1,iNumT
+	  raaPredData(iFr,iX) = raVT1(iaLayT(iX))
+	END DO
+        DO iX = 1,iNumOD
+    	  raaPredData(iFr,iX+iNumT) = exp(-raaAbs(iFr,iaLayOD(iX)))*250.0
+        END DO
+        iX = iNumT + iNumOD
+	raaPredData(iFr,iX+1) = 250*rCos
+	raaPredData(iFr,iX+2) = raBT0(iFr)
+	raaPredData(iFr,iX+3) = raBT0(iFr) !! oops
+	raaPredData(iFr,iX+4) = raBT0(iFr) !! oops	
+	raaPredData(iFr,iX+5) = (1-raUseEmissivity(iFr))/kPi
+      END DO
+
+c multiply them together!!!
+      iXmax = iX+5
+      DO iFr = 1,iNumPointsInChunk
+        raDBT(iaIndices(iFr)) = 0.0
+	DO iX = 1,iXmax
+c	  print *,iFr,iX,iaIndices(iFr),raaCoeff(iFr,iX),raaPredData(iaIndices(iFr),iX)
+          raDBT(iaIndices(iFr)) = raDBT(iaIndices(iFr)) + raaCoeff(iFr,iX) * raaPredData(iaIndices(iFr),iX)
+	END DO
+c       print *,iFr,iaIndices(iFr),raDBT(iaIndices(iFr)) 
+c       call dostop
+      END DO
+
+      maxDBT = -1.0
+      minDBT = +1.0
+      meanDBT = 0.0
+      DO iFr = 1,iNumPointsInChunk
+         IF (raDBT(iaIndices(iFr)) .GT. maxDBT) maxDBT = raDBT(iaIndices(iFr))
+         IF (raDBT(iaIndices(iFr)) .LT. minDBT) minDBT = raDBT(iaIndices(iFr))
+	 meanDBT = meanDBT + raDBT(iaIndices(iFr))
+c        print *,iFr,iaIndices(iFr),raFreq(iaIndices(iFr)),raBT0(iaIndices(iFr)),raDBT(iaIndices(iFr))      
+        raBT0(iaIndices(iFr)) = raBT0(iaIndices(iFr)) - raDBT(iaIndices(iFr))	   !!! I have a minus sign .. need to fix this in Matalb regression code
+      END DO
+      meanDBT = meanDBT/iNumPointsInChunk
+      write(kStdWarn,*) '  numpoints regressed for LBLRTM higres = ',iNumPointsInChunk
+      write(kStdWarn,*) '  maxDBT,minDBT,meanDBT = ',maxDBT,minDBT,meanDBT      
+      
+      CALL ttorad_array(raFreq,raBT0,raNewR)
+      DO iFr = 1,iNumPointsInChunk
+        raInten(iaIndices(iFr)) = raNewR(iaIndices(iFr))
+      END DO
+
+ 20   RETURN
       END
 
 c************************************************************************

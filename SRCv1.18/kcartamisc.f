@@ -1998,7 +1998,7 @@ c                             iLinearOrSpline iDoCO2Continuum iMethod
 c   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iAIRS101_or_LBL_levels IPLEV iAddLBLRTM 
 c      INTEGER iaaOverrideDefault(8,10)
 c      COMMON/comBlockDefault/iaaOverrideDefault
-      DO iI = 1,8
+      DO iI = 1,4
         DO iJ = 1,10
 	  iaaOverrideDefault(iI,iJ) = -9999
 	END DO
@@ -2056,7 +2056,9 @@ c RadTrans
                                       !!!   see SUBR FindLayerAngles in rad_angles.f				     
       iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
                                       !!!   see SUBR Get_Temp_Plevs in n_pth_mix.f
-
+      iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
+                                      !!!   see SUBR rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS in rad_main.f				     
+  
 c n_layers_lblrtm.f and n_pth_mix.f  TAPE5/6
       iaaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration
       iaaOverrideDefault(3,2) = +1    !!! iReplaceZeroProf = +1 to add in profiles TAPE5 does not have

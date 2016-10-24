@@ -70,20 +70,28 @@ c ALMOST ALL, IF NOT ALL, calls to this routine have iDoAcos35 = -1
 	iDoThermal = iaaOverrideDefault(2,3)
         IF (kOuterLoop .EQ. 1)  THEN	
   	  IF (iDoThermal == 2 ) THEN
-	    write(kStdErr,*) '  will do LINEAR-in-tau slow/accurate integration over zenith angles for backgnd thermal'
+	    write(kStdErr,*) '  do LINEAR-in-tau integration over zenith angles for backgnd therm'
+	    write(kStdWarn,*)'  do LINEAR-in-tau integration over zenith angles for backgnd therm'	    
 	  END IF
  	  IF (iDoThermal == 1 ) THEN
-	    write(kStdErr,*) '  will do CONST-in-tau slow/accurate integration over zenith angles for backgnd thermal'
+	    write(kStdErr,*)  '  do CONST-in-tau integration over zenith angles for backgnd therm'
+	    write(kStdWarn,*) '  do CONST-in-tau integration over zenith angles for backgnd therm'	    
 	  END IF
 	  IF (iDoThermal == 0 ) THEN
-	    write(kStdErr,*) '  will do fast diffusivity angle = ',kSetThermalAngle,' for backgnd thermal'
+	    write(kStdErr,*)  '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
+	    write(kStdWarn,*) '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'	    
 	    IF (kSetThermalAngle .EQ. -1) THEN
-	      write(kStdErr,*) ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
+	      write(kStdErr,*)  ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
+	      write(kStdWarn,*) ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'	      
 	    ELSE
-	      write(kStdErr,*) ' >> will use ',kSetThermalAngle,' in all layers'	  
+	      write(kStdErr,*)  ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'
+	      write(kStdWarn,*) ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'	  	      
   	    END IF
 	  END IF
-	  IF (iDoThermal == -1) write(kStdErr,*) '  will NOT DO backgnd thermal'
+	  IF (iDoThermal == -1) THEN
+	    write(kStdErr,*)  '  will NOT DO backgnd thermal'
+	    write(kStdWarn,*) '  will NOT DO backgnd thermal'
+	  END IF
 	END IF
       END IF
       

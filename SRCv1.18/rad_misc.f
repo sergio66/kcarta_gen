@@ -362,7 +362,7 @@ c      END IF
 c************************************************************************
 c this subroutine changes the brightness temperatures to intensities
 c for one array point
-      SUBROUTINE ttorad_array(raF,rBT,raInten)
+      SUBROUTINE ttorad_oneBT2array(raF,rBT,raInten)
 c rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
 
       IMPLICIT NONE
@@ -384,6 +384,41 @@ c local variables
       !! 10^38  = 87.49      
       DO iFr = 1,kMaxPts
         rPlanck = r2*raF(iFr)/rBT
+	IF (rPlanck .GT. 87.49) THEN
+	  rPlanck = 1.0e38
+	ELSE
+          rPlanck = exp(rPlanck) - 1.0	
+	END IF
+        raInten(iFr) = r1*(raF(iFr)**3)/rPlanck
+      END DO
+
+      RETURN
+      END
+
+c************************************************************************
+c this subroutine changes the brightness temperatures to intensities for array
+      SUBROUTINE ttorad_array(raF,raBT,raInten)
+c rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c rf = wavenumber, rI = intensity, rBT = brightness temp
+      REAL raF(kmaxPts),raInten(kMaxPts),raBT(kMaxPts)
+
+c local variables
+      REAL r1,r2,rPlanck
+      INTEGER iFr
+ 
+      r1 = sngl(kPlanck1)
+      r2 = sngl(kPlanck2)
+
+      !! 10^10 = e^23.03
+      !! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
+      !! 10^38  = 87.49      
+      DO iFr = 1,kMaxPts
+        rPlanck = r2*raF(iFr)/raBT(iFr)
 	IF (rPlanck .GT. 87.49) THEN
 	  rPlanck = 1.0e38
 	ELSE
@@ -507,7 +542,7 @@ c local variables
 c************************************************************************
 c this subroutine changes the intensities to brightness temperatures
 c for an array
-      SUBROUTINE ArrayRadtot(raFreq,raInten,raBrightTemp)
+      SUBROUTINE radtot_array(raFreq,raInten,raBrightTemp)
 
       IMPLICIT NONE
 

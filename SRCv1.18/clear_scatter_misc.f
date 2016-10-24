@@ -3575,9 +3575,9 @@ c local variables
         iBeta = kProfLayer
       END IF
 
-      CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
-      CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
-      CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                              !! (which is NOT necessarily average of above 2)
       IF (kOuterLoop .EQ. 1) THEN							     
         write(kStdWarn,2345) iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
@@ -3595,7 +3595,7 @@ c      END IF
 
       IF (iVary .EQ. 2) THEN 
         !!! lim tau --> 0 , rFcn --> 0
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP0)
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
         IF (rFrac .ge. 0.9999) THEN
           DO iFr = 1,kMaxPts
             rAbs = raaAbs(iFr,iL)
@@ -3846,18 +3846,18 @@ c local variables
 
       IF (iVary .LT. 4) THEN
         IF (iBeta .GT. 1) THEN
-          CALL ttorad_array(raFreq,TEMPLEV(iBeta-1),raIntenP1)
+          CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta-1),raIntenP1)
         ELSEIF (iBeta .EQ. 1) THEN
-          CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP1)
+          CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
         END IF
-        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
+        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
       END IF
 
       IF (iVary .GE. 4) THEN
         !! new option
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXX
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
-        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXX
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
+        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
 
         IF (kOuterLoop .EQ. 1) THEN
@@ -3872,7 +3872,7 @@ c local variables
         !!! lim tau --> 0 , rFcn --> 0
         write(kStdErr,*) 'huh iVary = 2 is a little buggy'
         CALL DoStop
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP0)
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
         IF (rFrac .ge. 0.9999) THEN
           DO iFr = 1,kMaxPts
             rAbs = raaAbs(iFr,iL)
@@ -4076,14 +4076,14 @@ c assumes ONE angle for all freq points
 c this is SAME as RT_ProfileDNWELL_CONST_IN_TAU_FORFLUX EXCEPT very importantly, since the
 c atmosphere was defined for downlook instrument, that means we have to be VERY CAREFUL with directions
 c so as to ensure
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
-c CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
+c CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
                                                          !! (which is NOT necessarily average of above 2)
 c is changed to
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta-1),raIntenP1)   !! ttorad of upper level
-c CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta-1),raIntenP1)   !! ttorad of upper level
+c CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
                                                          !! (which is NOT necessarily average of above 2)
 										       
       SUBROUTINE RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(
@@ -4136,11 +4136,11 @@ c local variables
 
       IF (iVary .LT. 4) THEN
         IF (iBeta .GT. 1) THEN
-          CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
+          CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
         ELSEIF (iBeta .EQ. 1) THEN
-          CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP1)
+          CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
         END IF
-        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
+        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
       END IF
 
 c RT_ProfileUPWELL_LINEAR_IN_TAU
@@ -4151,15 +4151,15 @@ c     END IF
 c     IF (iL .EQ. kProfLayer+1) THEN
 c      iBeta = kProfLayer
 c    END IF		    
-c    CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
-c    CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
-c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+c    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
+c    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
+c    CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
 									       
       IF (iVary .GE. 4) THEN
         !! new option
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level   
-        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level   
+        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
         IF (kOuterLoop .EQ. 1) THEN
           write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
@@ -4173,7 +4173,7 @@ c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
         !!! lim tau --> 0 , rFcn --> 0
         write(kStdErr,*) 'huh iVary = 2 is a little buggy'
         CALL DoStop
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP0)
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
         IF (rFrac .ge. 0.9999) THEN
           DO iFr = 1,kMaxPts
             rAbs = raaAbs(iFr,iL)
@@ -4379,14 +4379,14 @@ c assumes DIFFERENT angle for all freq points
 c this is SAME as RT_ProfileDNWELL_CONST_IN_TAU_FORFLUX EXCEPT very importantly, since the
 c atmosphere was defined for downlook instrument, that means we have to be VERY CAREFUL with directions
 c so as to ensure
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
-c CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
+c CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
                                                          !! (which is NOT necessarily average of above 2)
 c is changed to
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
-c CALL ttorad_array(raFreq,TEMPLEV(iBeta-1),raIntenP1)   !! ttorad of upper level
-c CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXXXXX
+c CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta-1),raIntenP1)   !! ttorad of upper level
+c CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
                                                          !! (which is NOT necessarily average of above 2)
 										       
       SUBROUTINE RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(
@@ -4439,11 +4439,11 @@ c local variables
 
       IF (iVary .LT. 4) THEN
         IF (iBeta .GT. 1) THEN
-          CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
+          CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
         ELSEIF (iBeta .EQ. 1) THEN
-          CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP1)
+          CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
         END IF
-        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)
+        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
       END IF
 
 c RT_ProfileUPWELL_LINEAR_IN_TAU
@@ -4454,15 +4454,15 @@ c     END IF
 c     IF (iL .EQ. kProfLayer+1) THEN
 c      iBeta = kProfLayer
 c    END IF		    
-c    CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
-c    CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
-c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+c    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
+c    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
+c    CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
 									       
       IF (iVary .GE. 4) THEN
         !! new option
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level   
-        CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level   
+        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer 
                                                                !! (which is NOT necessarily average of above 2)
         IF (kOuterLoop .EQ. 1) THEN
           write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)	
@@ -4476,7 +4476,7 @@ c    CALL ttorad_array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
         !!! lim tau --> 0 , rFcn --> 0
         write(kStdErr,*) 'huh iVary = 2 is a little buggy'
         CALL DoStop
-        CALL ttorad_array(raFreq,TEMPLEV(iBeta),raIntenP0)
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
         IF (rFrac .ge. 0.9999) THEN
           DO iFr = 1,kMaxPts
             rAbs = raaAbs(iFr,iL)
