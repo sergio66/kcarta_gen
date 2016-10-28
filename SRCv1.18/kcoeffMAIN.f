@@ -1374,9 +1374,9 @@ c      END IF
       !!!! iCO2Chi = 2   TESTING
 
  10   FORMAT(I2,I2,I2)
-      IF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. -1)) THEN
+      IF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. -1) .AND. (kOuterLoop .EQ. 1)) THEN
         write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,'  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN
-c      ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1)) THEN
+c      ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1) .AND. (kOuterLoop .EQ. 1)) THEN
 c        write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,' but using other user suppl CO2 dir'
       END IF
 

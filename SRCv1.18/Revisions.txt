@@ -588,6 +588,8 @@ v1.18
 		The params allow you eg to set kTemperVary (iusing iaaOverride(2,1))
 		in nm_params, instead of iTemperVary in nm_radnce
 		See lines 2000+ in kcartamisc.f
+                If using iaaOveride(2,1) = 43 (LBLRTM style RT) then can also do
+		a regression based correction to BT_TOA, by setting iaaOveride(2,9) = 1
 		
 10/2/16         Made caComment in nm_output character*120 so you can eg type
                 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890

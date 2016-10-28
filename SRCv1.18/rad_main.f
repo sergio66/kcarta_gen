@@ -3778,7 +3778,7 @@ c then do the topmost layer (could be fractional)
              write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileUPWELL_LINEAR_IN_TAU'
 	     IF (iaaOverrideDefault(2,9) .EQ. 1) THEN
   	       write(kStdWarn,*) ' adding on LBLRTM regression fix, satzen = ',raLayAngles(MP2Lay(iaRadLayer(1)))
-	       CALL lblrtm_highres_regression_fix(cos(raLayAngles(MP2Lay(iaRadLayer(1)))*kPi/180.0),
+	       CALL lblrtm_highres_regression_fix(real(cos(raLayAngles(MP2Lay(iaRadLayer(1)))*kPi/180.0)),
      $              rTSurf,raVT1,raaAbs,raUseEmissivity,raFreq,raInten)
              END IF
              CALL wrtout(iIOUN,caOutName,raFreq,raInten)
@@ -5429,21 +5429,30 @@ c input param, and I/O param
       REAL raFreq(kMaxPts),raInten(kMaxPts)
       
       REAL raBT0(kMaxPts),raDBT(kMaxPts),raNewR(kMaxPts)
-      INTEGER iIOUN,iErr,iNumChunk,iFr,iLenD,iLenX,iLeftjust_lenstr,iX,iXmax,iFound,iNumPointsInChunk,iWhichChunk
+      INTEGER iIOUN,iErr,iNumChunk,iFr,iLenD,iLenX,iLeftjust_lenstr,iFound,iNumPointsInChunk,iWhichChunk
+      INTEGER iX,iXmax,iY,iTest
       CHARACTER*3 ca3
       CHARACTER*4 ca4
       CHARACTER*80 caDir
       CHARACTER*40 caX
       CHARACTER*120 caFname
 
-      INTEGER iaWhichChunk(90),iaNumPtsPerChunk(90),iaIndices(kMaxPts)
+      INTEGER iaWhichChunk(90),iaNumPtsPerChunk(90),iaIndices(kMaxPts),iNpred,iNpredX,iUse26or28,iMult
       INTEGER iNumT,iNumOD,iaLayT(kProfLayer),iaLayOD(kProfLayer)
       REAL raWavenumbers(kMaxPts)
       REAL raaCoeff(kMaxPts,30)         ! Matlab coeffs
       REAL raaPredData(kMaxPts,30)      ! Actual data : raT,raOD, raBT, emiss, angle
       REAL maxDBT,minDBT,meanDBT
-      
-      caDir = '/asl/data/kcarta_sergio/KCDATA/General/HiRes_LBLRTM2KCARTA/'
+
+      iUse26or28 = 28  !! first try, not bad
+      iUse26or28 = 26  !! should be better
+      IF (iUse26or28 .EQ. 26) THEN
+        caDir = '/asl/data/kcarta_sergio/KCDATA/General/HiRes_LBLRTM2KCARTA/26pred/'  !! 26 pred
+	iMult = +1
+      ELSEIF (iUse26or28 .EQ. 28) THEN	
+        caDir = '/asl/data/kcarta_sergio/KCDATA/General/HiRes_LBLRTM2KCARTA/28pred/'  !! 28 pred
+	iMult = -1	
+      END IF
       iLenD = iLeftjust_lenstr(caDir,80)
       
       IF (iaaOverrideDefault(2,1) .NE. 43) THEN
@@ -5468,6 +5477,7 @@ c input param, and I/O param
 					       
       kTempUnitOpen = 1
       READ(iIOUN) iNumChunk
+      READ(iIOUN) iNpred      !! should be 26 or 28     
       READ(iIOUN) (iaWhichChunk(iFr),iFr=1,iNumChunk)
       READ(iIOUN) (iaNumPtsPerChunk(iFr),iFr=1,iNumChunk)
       
@@ -5513,7 +5523,12 @@ c input param, and I/O param
       ENDIF
 					       
       kTempUnitOpen = 1
-      READ(iIOUN) iWhichChunk,iNumPointsInChunk
+      READ(iIOUN) iWhichChunk,iNumPointsInChunk,iNpredX
+      IF (iNpred .NE. iNpredX) THEN
+        write(kStdErr,*)  'in  lblrtm_highres_regression_fix, iNpred,iNpredX = ',iNpred,iNpredX
+        write(kStdWarn,*) 'in  lblrtm_highres_regression_fix, iNpred,iNpredX = ',iNpred,iNpredX
+        CALL DoStop
+      END IF      
       IF (iWhichChunk .NE. iaWhichChunk(iFound)) THEN
         write(kStdErr,*) ' iWhichChunk .NE. iaWhichChunk(iFound) ',iWhichChunk,iaWhichChunk(iFound)
         write(kStdWarn,*) ' iWhichChunk .NE. iaWhichChunk(iFound) ',iWhichChunk,iaWhichChunk(iFound)	
@@ -5525,12 +5540,13 @@ c input param, and I/O param
         CALL DoStop
       END IF
       READ(iIOUN) iNumT,iNumOD
+      
       READ(iIOUN) (iaLayT(iFr),iFr=1,iNumT)                     !! layT indexes
       READ(iIOUN) (iaLayOD(iFr),iFr=1,iNumOD)                   !! layOD indices
       READ(iIOUN) (raWavenumbers(iFr),iFr=1,iNumPointsInChunk)  !! wavenumbers we need to fix in this chunk
       READ(iIOUN) (iaIndices(iFr),iFr=1,iNumPointsInChunk)      !! indices of points we need to fix in this chunk
       DO iFr = 1,iNumPointsInChunk
-        READ(iIOUN) (raaCoeff(iFr,iX),iX=1,28)                !! fixing coeffs
+        READ(iIOUN) (raaCoeff(iFr,iX),iX=1,iNpredX)              !! fixing coeffs
       END DO
       
       CLOSE(iIOUN)
@@ -5548,15 +5564,31 @@ c     data matrix from actual profile
     	  raaPredData(iFr,iX+iNumT) = exp(-raaAbs(iFr,iaLayOD(iX)))*250.0
         END DO
         iX = iNumT + iNumOD
-	raaPredData(iFr,iX+1) = 250*rCos
-	raaPredData(iFr,iX+2) = raBT0(iFr)
-	raaPredData(iFr,iX+3) = raBT0(iFr) !! oops
-	raaPredData(iFr,iX+4) = raBT0(iFr) !! oops	
-	raaPredData(iFr,iX+5) = (1-raUseEmissivity(iFr))/kPi
+	IF (iUse26or28 .EQ. 26) THEN
+  	  raaPredData(iFr,iX+1) = 250.0*rCos
+  	  raaPredData(iFr,iX+2) = raBT0(iFr)
+	  raaPredData(iFr,iX+3) = 250.0*raUseEmissivity(iFr)
+	ELSEIF (iUse26or28 .EQ. 28) THEN
+  	  raaPredData(iFr,iX+1) = 250.0*rCos
+  	  raaPredData(iFr,iX+2) = raBT0(iFr)
+	  raaPredData(iFr,iX+3) = raBT0(iFr) !! oops
+	  raaPredData(iFr,iX+4) = raBT0(iFr) !! oops		  
+	  raaPredData(iFr,iX+5) = 250.0*raUseEmissivity(iFr)
+	END IF
       END DO
-
+	
 c multiply them together!!!
-      iXmax = iX+5
+      IF (iUse26or28 .EQ. 26) THEN
+        iXmax = iX+3
+      ELSEIF (iUse26or28 .EQ. 28) THEN
+        iXmax = iX+5
+      END IF
+      IF (iXmax .NE. iNpred) THEN
+        write(kStdErr,*)  'in  lblrtm_highres_regression_fix, iNpred,iXmax = ',iNpred,iXmax
+        write(kStdWarn,*) 'in  lblrtm_highres_regression_fix, iNpred,iXmax = ',iNpred,iXmax
+        CALL DoStop
+      END IF
+
       DO iFr = 1,iNumPointsInChunk
         raDBT(iaIndices(iFr)) = 0.0
 	DO iX = 1,iXmax
@@ -5567,6 +5599,22 @@ c       print *,iFr,iaIndices(iFr),raDBT(iaIndices(iFr))
 c       call dostop
       END DO
 
+      iTest = -1
+      if ((raFreq(1) .LT. 655) .and. (raFreq(kMaxPts) .GT. 630) .and. (iTest .gt. 0)) then
+        print *,(iaLayOD(iFr),iFr=1,iNumOD)
+        iFr = 8774
+	iY = 1
+ 111    continue	
+	do while ((abs(raWavenumbers(iY)-raFreq(iFr)) .GT. 0.0001) .and. (iY .lt. iNumPointsInChunk))
+	  iY = iY + 1
+	  goto 111
+ 	end do
+	print *,iY,iNumPointsInChunk,raWavenumbers(iY),raFreq(iFr),raDBT(iaIndices(iY))
+        do iX = 1,iXmax
+	  print *,iX,raaPredData(iFr,iX),raaCoeff(iY,iX)
+	end do
+      end if
+
       maxDBT = -1.0
       minDBT = +1.0
       meanDBT = 0.0
@@ -5575,10 +5623,11 @@ c       call dostop
          IF (raDBT(iaIndices(iFr)) .LT. minDBT) minDBT = raDBT(iaIndices(iFr))
 	 meanDBT = meanDBT + raDBT(iaIndices(iFr))
 c        print *,iFr,iaIndices(iFr),raFreq(iaIndices(iFr)),raBT0(iaIndices(iFr)),raDBT(iaIndices(iFr))      
-        raBT0(iaIndices(iFr)) = raBT0(iaIndices(iFr)) - raDBT(iaIndices(iFr))	   !!! I have a minus sign .. need to fix this in Matalb regression code
+        raBT0(iaIndices(iFr)) = raBT0(iaIndices(iFr)) + raDBT(iaIndices(iFr)) * iMult  !! for iUse26or28 = 26, correctly  did dBT = lbl-kc
+                                                                                       !! for iUse26or28 = 28, mistakenly did dBT = kc-lbl
       END DO
       meanDBT = meanDBT/iNumPointsInChunk
-      write(kStdWarn,*) '  numpoints regressed for LBLRTM higres = ',iNumPointsInChunk
+      write(kStdWarn,*) '  numpoints regressed for LBLRTM higres = ',iNumPointsInChunk,' npred = ',iNpred
       write(kStdWarn,*) '  maxDBT,minDBT,meanDBT = ',maxDBT,minDBT,meanDBT      
       
       CALL ttorad_array(raFreq,raBT0,raNewR)
@@ -5586,6 +5635,8 @@ c        print *,iFr,iaIndices(iFr),raFreq(iaIndices(iFr)),raBT0(iaIndices(iFr))
         raInten(iaIndices(iFr)) = raNewR(iaIndices(iFr))
       END DO
 
+c     CALL DoStop
+      
  20   RETURN
       END
 
