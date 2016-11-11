@@ -2316,7 +2316,9 @@ c      prof.scanang = -abs(prof.scanang) * 1000
       ELSE
         write(kStdErr,*) 'need prof.upwell = 1 (downlook) or 2 (uplook)'
         write(kStdErr,*) 'prof.upwell = ',prof.upwell
-        CALL DoStop
+        write(kStdErr,*) 'resetting to +1 (downlook)'
+        upwell = 1	
+c        CALL DoStop
       END IF
 
       !now that we have rPressStart,rPressStop (defining pressure boundaries 

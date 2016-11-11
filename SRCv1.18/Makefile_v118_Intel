@@ -57,6 +57,9 @@ SHELL = /bin/sh
 # (http://hpcf.umbc.edu/using-your-hpcf-account/#heading_toc_j_5). To answer your question do the following:
 # $ module unload intel/compiler/64/15.0/full
 # $ module load intel/compiler/64/15.0/full
+# $ module load intel/compiler/64/2017
+# $ module load intel/mkl/64
+# $ module load szip/2.1
 #FORTRANX = /cm/shared/apps/intel/composer_xe/2015.3.187/bin/intel64/ifort  before Apr 2016
 #FORTRANX = /cm/shared/apps/intel/composer_xe/2015.5.223/bin/intel64/ifort  after April 2016
 ## Try using simply ifort instead of the full path. When make looks for 'ifort'
