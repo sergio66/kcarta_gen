@@ -2037,8 +2037,8 @@ c RadTrans
 				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 (acos(3/5))
 				      !!!
 				      !!!   this sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
-				      !!!                               = -2 for same as -1, except linear-in-tau T variation
 				      !!!                               = +1 for constant angle (typically acos(3/5)) in all layers
+				      !!!                               = -2 for same as -1, except linear-in-tau T variation				      
 				      !!! SUBR DoDiffusivityApprox in rad_diff.f uses this info
 				      !!!   iDiffMethod = kSetThermalAngle
 				      !!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
@@ -2046,6 +2046,7 @@ c RadTrans
 				      !!!                                                   while there, use layer-varying accurate acos(rDiffusive)
 				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
 				      !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
+				      !!!     = +2 diffusive background using LBLRTM style 3 exponetial gauss quad, not yet implemented
       iaaOverrideDefault(2,5) = 0     !!! SUBR IntegrateOverAngles in rad_quad.f, called by SUBR BackGndThermal
                                       !!!   iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
                                       !!!                    0 for accurate diffusivity                   (AT ALL LAYERS << DEFAULT >>)

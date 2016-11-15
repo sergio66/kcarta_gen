@@ -180,11 +180,19 @@ c local variables
 c to do the angular integration
       REAL rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
       REAL raL2G(kMaxPts),raL2Gm1(kMaxPts)
-      REAL FindDiffusiveAngleExp,rDiff,rCosDiff,rW,raAvgAnglePerLayer(kMaxLayer)
+      REAL FindDiffusiveAngleExp,rDiff,rCosDiff,rW
+      REAL raAvgAnglePerLayer(kMaxLayer),raMeanOD(kMaxLayer)      
       INTEGER FindBoundary,iS,iE,iDiv,iM,iBdryP1_O
 
-      DO iFr = 1,kMaxLayer
+      DO iFr = 1,kProfLayer
         raAvgAnglePerLayer(iFr) = 0.0
+        raMeanOD(iFr) = 0.0	
+      END DO
+
+      DO iLay = 1,kMaxLayer
+        DO iFr = 1,kMaxPts
+          raMeanOD(iLay) = raMeanOD(iLay) + raaOrigAbsCoeff(iFr,iLay)
+	END DO
       END DO
 
       iS = iaRadLayer(iS0)
@@ -377,12 +385,17 @@ c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(i
         END IF
       END IF
 
-      write(kStdWarn,*) 'Mean diffusive angles per layer for chunk starting at ',raFreq(1)
-      DO iFr = 1,kMaxLayer
-        raAvgAnglePerLayer(iFr) = acos(raAvgAnglePerLayer(iFr)/kMaxPts) * 180/kPi
-        write(kStdWarn,*) ' ',iFr,raAvgAnglePerLayer(iFr)	
+      write(kStdWarn,*) 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
+      rAngleTr = 0.0
+      DO iLay = iS0,1,-1
+        iL = iaRadLayer(iLay)
+        raAvgAnglePerLayer(iL) = acos(raAvgAnglePerLayer(iL)/kMaxPts) * 180/kPi
+        raMeanOD(iL)           = raMeanOD(iL)/kMaxPts
+	rAngleTr               = rAngleTr + raMeanOD(iL)
+        write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),654654
       END DO
-
+ 321  FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
+ 
       RETURN
       END  
 c************************************************************************

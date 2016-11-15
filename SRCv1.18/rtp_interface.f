@@ -2681,6 +2681,14 @@ c sun is only on if 0 < prof.solzen < 90
         raKThermalAngle(iC) = +53.13
         kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
         kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc	
+c      ELSEIF ((abs(raKThermalAngle(iC) - -2.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
+c        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+c        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'	
+c        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+c        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+c        raKThermalAngle(iC) = +53.13
+c        kThermal = -2           !use accurate angles lower down in atm, linear in tau temp variation, one angle calc
+c        kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation, one angle calc	
       END IF
       
       iakThermalJacob(iC) = 1
