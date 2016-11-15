@@ -180,8 +180,12 @@ c local variables
 c to do the angular integration
       REAL rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
       REAL raL2G(kMaxPts),raL2Gm1(kMaxPts)
-      REAL FindDiffusiveAngleExp,rDiff,rCosDiff,rW
+      REAL FindDiffusiveAngleExp,rDiff,rCosDiff,rW,raAvgAnglePerLayer(kMaxLayer)
       INTEGER FindBoundary,iS,iE,iDiv,iM,iBdryP1_O
+
+      DO iFr = 1,kMaxLayer
+        raAvgAnglePerLayer(iFr) = 0.0
+      END DO
 
       iS = iaRadLayer(iS0)
       iE = iaRadLayer(iE0)
@@ -283,6 +287,7 @@ c for FULL layers! but have to worry about bottom layer!
           END IF
           DO iFr=1,kMaxPts
 c find the diffusive angles for the layer beneath
+            raAvgAnglePerLayer(iL) =  raAvgAnglePerLayer(iL) + rCosDiff
             rAngleTr_m1  = exp(-raL2Gm1(iFr)/rCosDiff)
             rAngleTr     = exp(-raL2G(iFr)/rCosDiff)
 	    raAngleTr_m1(iFr) = rAngleTr_m1
@@ -334,8 +339,11 @@ c find the diffusive angles for the layer beneath
             rAngleTr_m1         = FindDiffusiveAngleExp(raL2Gm1(iFr))
             raFreqAngle_m1(iFr) = rAngleTr_m1
             rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1)
-            rAngleTr            = raFreqAngle(iFr)
-            rAngleTr            = exp(-raL2G(iFr)/rAngleTr)
+	    
+            rAngleTr               = raFreqAngle(iFr)
+            raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr	    	    
+            rAngleTr               = exp(-raL2G(iFr)/rAngleTr)
+	    
 	    raAngleTr_m1(iFr) = rAngleTr_m1
 	    raAngleTr(iFr)    = rAngleTr	    
 c Planckian emissions
@@ -355,8 +363,11 @@ c now do the bottommost layer, recalling its transmission = 1.0 always
           rMPTemp     = raVT1(iL)
           rAngleTr_m1 = 1.0
           DO iFr=1,kMaxPts
+	  
             rAngleTr    = raFreqAngle(iFr)
+            raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr	  	  	    
             rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
+	    
             rPlanck     = ttorad(raFreq(iFr),rMPTemp)
             raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
 	    raAngleTr_m1(iFr) = rAngleTr_m1
@@ -365,6 +376,12 @@ c now do the bottommost layer, recalling its transmission = 1.0 always
 c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)	  
         END IF
       END IF
+
+      write(kStdWarn,*) 'Mean diffusive angles per layer for chunk starting at ',raFreq(1)
+      DO iFr = 1,kMaxLayer
+        raAvgAnglePerLayer(iFr) = acos(raAvgAnglePerLayer(iFr)/kMaxPts) * 180/kPi
+        write(kStdWarn,*) ' ',iFr,raAvgAnglePerLayer(iFr)	
+      END DO
 
       RETURN
       END  
@@ -756,7 +773,7 @@ c local vars
 
 c this is the diffusivity approx angle, in radians
       rThetaEff = kThermalAngle*kPi/180.0
-
+      
       DO iFr=1,kMaxPts
         raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)
       END DO
@@ -973,13 +990,14 @@ c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_
       
 c now loop over the layers, for the particular angle
       IF (iDiffmethod .EQ. 1) THEN
-        write(kStdWarn,*)'back gnd thermal  : using acos(3/5) everywhere'
+        write(kStdWarn,*)'back gnd thermal  : using acos(3/5) everywhere, all layers'
         CALL Diffusivity_AllAnglesEqual(raThermal,raVT1,rTSpace,
      $    raFreq,raUseEmissivity,
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,
      $    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
       ELSE IF (iDiffmethod .EQ. -1) THEN
         write(kStdWarn,*)'<DEFAULT> back gnd thermal  : using fast accurate approx, const layer temp'
+        write(kStdWarn,*)'                            : acos(3/5) upper layers, lower angles use accurate angle'
         CALL orig_const_in_tau_Diffusivity_LowerAnglesAccurate(raThermal,raVT1,rTSpace,
      $    raFreq,raUseEmissivity,iProfileLayers,raPressLevels,
      $    iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot,

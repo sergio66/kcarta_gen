@@ -2022,9 +2022,9 @@ c RadTrans
       iaaOverrideDefault(2,3) = 0     !!! SUBR BackGndThermal in rad_diff.f
                                       !!! iDothermal = kThermal; if iDoThermal = -1, no backgnd thermal computed
       				      !!!                                      =  0, backgndthermal with diffusive approx << DEFAULT >>
-				      !!!                                            control further with iaaOverrideDefault(2,4)
+				      !!!                                            --->>> control further with iaaOverrideDefault(2,4) <<<---
 				      !!!                                      = +1, use integration over angles, const-in-tau  layer T
-				      !!!                                            control further with iaaOverrideDefault(2,5)
+				      !!!                                            --->>> control further with iaaOverrideDefault(2,5) <<<---
 				      !!!                                      = +2, use integration over angles, linear-in-tau layer T
 				      !!!   this is the main routine, called by all downwelling RT routines in rad_main.
 				      !!!   all of them have -1 for iDoAcos35
@@ -2034,19 +2034,23 @@ c RadTrans
       iaaOverrideDefault(2,4) = -1    !!! SUBR radnce4RTP in rtp_interface.f
                                       !!!   raKThermalAngle(iC) = iaaOverrideDefault(2,4) in rtp_interface.f
                                       !!!     = -1, fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
-				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
-				      !!!                               = +1 constant acos(3/5) in all layers
+				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 (acos(3/5))
+				      !!!
 				      !!!   this sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
-				      !!!                               = +2 for same as -1, except linear-in-tau T variation
+				      !!!                               = -2 for same as -1, except linear-in-tau T variation
 				      !!!                               = +1 for constant angle (typically acos(3/5)) in all layers
 				      !!! SUBR DoDiffusivityApprox in rad_diff.f uses this info
 				      !!!   iDiffMethod = kSetThermalAngle
 				      !!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+				      !!!          differs from iaaOverrideDefault(2,5) = 0 since here, upper layers use acos(3/5) lower layers are accurate
+				      !!!                                                   while there, use layer-varying accurate acos(rDiffusive)
 				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
 				      !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
       iaaOverrideDefault(2,5) = 0     !!! SUBR IntegrateOverAngles in rad_quad.f, called by SUBR BackGndThermal
                                       !!!   iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
-                                      !!!                    0 for accurate diffusivity                   (FAST << DEFAULT >>)
+                                      !!!                    0 for accurate diffusivity                   (AT ALL LAYERS << DEFAULT >>)
+				      !!!                      so this differs from iaaOverrideDefault(2,3) = 0,iaaOverrideDefault(2,4) = -1
+				      !!!                      where acos(3/5) is used in upper ayers, and accurate diffusive angle in lower layers
 				      !!!                   +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
       iaaOverrideDefault(2,6) = +1    !!! iUsualUpwell = +1 for upwell RT with surface term, << DEFAULT >>
                                       !!!                -1 with no surface,

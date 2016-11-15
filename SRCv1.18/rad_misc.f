@@ -1085,7 +1085,7 @@ c rFracBot = how much of the "bottom most" layer in the defn of atmosphere, is
 c            a fraction due to the positioning of the ground
 c raTemp initially has the radiation at beginning
 c        finally has the radiation at the end
-c raFreqAngle has the angular dependence for the different wavenumbers
+c raFreqAngle has the angular dependence for the different wavenumbers in RADIANS
 c raFreq    = frequencies of the current 25 cm-1 block being processed
 c raaOrigAbs = matrix containing the mixed path abs coeffs
 c raV1       = vertical temperature profile associated with the mixed paths
@@ -1129,7 +1129,7 @@ c to do the angular integration
           rMPTemp = raVT1(iL)
           DO iFr=1,kMaxPts
             rAngleTrans    = raaAbs(iFr,iL)*rFracBot
-            rAngleTrans    = exp(-rAngleTrans/raFreqAngle(iFr))
+            rAngleTrans    = exp(-rAngleTrans/cos(raFreqAngle(iFr)))
             rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
             rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
             rAngleEmission = (1.0-rAngleTrans)*rPlanck
@@ -1140,7 +1140,7 @@ c to do the angular integration
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
           DO iFr=1,kMaxPts
-            rAngleTrans    = exp(-raaAbs(iFr,iL)/raFreqAngle(iFr))
+            rAngleTrans    = exp(-raaAbs(iFr,iL)/cos(raFreqAngle(iFr)))
             rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
             rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
             rAngleEmission = (1.0-rAngleTrans)*rPlanck
@@ -1154,7 +1154,7 @@ c to do the angular integration
           rMPTemp = raVT1(iL)
           DO iFr=1,kMaxPts
             rAngleTrans    = raaAbs(iFr,iL)
-            rAngleTrans    = exp(-rAngleTrans/raFreqAngle(iFr))
+            rAngleTrans    = exp(-rAngleTrans/cos(raFreqAngle(iFr)))
             rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
             rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
             rAngleEmission = (1.0-rAngleTrans)*rPlanck
@@ -1166,14 +1166,13 @@ c to do the angular integration
           rMPTemp = raVT1(iL)
           DO iFr=1,kMaxPts
             rAngleTrans    = raaAbs(iFr,iL)*rFracBot
-            rAngleTrans    = exp(-raaAbs(iFr,iL)/raFreqAngle(iFr))
+            rAngleTrans    = exp(-raaAbs(iFr,iL)/cos(raFreqAngle(iFr)))
             rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
             rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
             rAngleEmission = (1.0-rAngleTrans)*rPlanck
             raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
           END DO
         END DO
-
       END IF
 
 c if weightfactor=1, do nothing
@@ -1183,7 +1182,7 @@ c this is where we are integrating over all azimuth angles  ==> multiply by
 c cos(theta) to find contribution to thermal backgnd
 c used by the d(theta) cos(theta) sin(theta) algorithm 
         DO iFr=1,kMaxPts
-          raTemp(iFr) = raTemp(iFr)*raFreqAngle(iFr)
+          raTemp(iFr) = raTemp(iFr)*cos(raFreqAngle(iFr))
         END DO
 
       ELSE IF (iWeightFactor .EQ. -1) THEN

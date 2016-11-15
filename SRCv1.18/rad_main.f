@@ -21,24 +21,24 @@ c **                           x/6 as x-->0 compared to kTemperVary = +42       
 
 c in kcartamisc.f
 c
-c      iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
-c      iaaOverrideDefault(2,4) = -1    !!! SUBR radnce4RTP in rtp_interface.f
-c                                      !!!   raKThermalAngle(iC) = iaaOverrideDefault(2,4) in rtp_interface.f
-c                                      !!!     = -1, fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
-c				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.130
+c      iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary iaaOverrideDefault(2,4)
+c      iaaOverrideDefault(2,4) = -1   !!! SUBR radnce4RTP in rtp_interface.f
+c                                     !!!   raKThermalAngle(iC) = iaaOverrideDefault(2,4) in rtp_interface.f
+c                                     !!!     = -1, fast accurate diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+c      				      !!!     = +1, fast           diffusive background at acos(x)   in all layers eg 53.130
 c				      !!!                               = +1 constant acos(3/5) in all layers
-c				      !!!   this sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
-c				      !!!                               = +2 for same as -1, except linear-in-tau T variation
-c				      !!!                               = +1 for constant angle (typically acos(3/5)) in all layers
+c				      !!! This sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+c				      !!!                             = +1 for constant angle (typically acos(3/5)) in all layers
+c				      !!!                             = -2 for same as -1, except linear-in-tau T variation (or is it +2??)
 c				      !!! SUBR DoDiffusivityApprox in rad_diff.f uses this info
 c				      !!!   iDiffMethod = kSetThermalAngle
 c				      !!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
 c				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
 c				      !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
-c      iaaOverrideDefault(2,5) = 0     !!! iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
-c                                      !!!                  0 for accurate diffusivity                   (FAST DEFAULT)
-c                                      !!!                 +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
-c                                      !!!   SUBR IntegrateOverAngles in rad_quad.f
+c      iaaOverrideDefault(2,5) = 0    !!! iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
+c                                     !!!                  0 for accurate diffusivity                   (FAST DEFAULT)
+c                                     !!!                 +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
+c                                     !!!   SUBR IntegrateOverAngles in rad_quad.f
 c
 															
 c************************************************************************

@@ -482,7 +482,7 @@ c iGaussQuad = 0      FAST and very accurate!! (checked on profiles 0,5,6,7)
      $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,
      $  rFracTop,rFracBot,iTp)
       ELSE IF (iGaussQuad .EQ. 0) THEN
-        CALL AccurateInteg_Diffusivity(raThermal,raVT1,rTSpace,
+        CALL Accurate_Diffusivity_all_layers(raThermal,raVT1,rTSpace,
      $  raFreq,raUseEmissivity,iNumLayer,iaRadLayer,raaAbs,
      $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,
      $  rFracTop,rFracBot,iTp)
@@ -677,8 +677,8 @@ c the cos(theta) weight due to geometry of viewing the area
 c************************************************************************
 c this subroutine does the integration over azimuth angles by using diffusivity
 c approx (acos 3/5) at higher layers, and accurate estimates at lower layers
-c - by using the diffusvity approx at EACH layer (iGaussQuad = 0)very fast 
-      SUBROUTINE AccurateInteg_Diffusivity(raThermal,raVT1,rTSpace,
+c - by using the diffusvity approx at EACH layer (iGaussQuad = 0) very fast 
+      SUBROUTINE Accurate_Diffusivity_all_layers(raThermal,raVT1,rTSpace,
      $  raFreq,raUseEmissivity,iNumLayer,iaRadLayer,raaAbs,
      $  iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,
      $  rFracTop,rFracBot,iDefinedTopLayer)
@@ -804,7 +804,8 @@ c local variables
       INTEGER iFr,iLay,iL,iLm1,iEnd 
       REAL ttorad,rPlanck,rMPTemp 
       REAL raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts) 
- 
+      REAL raAvgAnglePerLayer(kMaxLayer)
+      
 c to do the angular integration 
       REAL rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts) 
       REAL FindDiffusiveAngleExp
@@ -820,7 +821,11 @@ c initalize raL2G,raL2Gm1
         raL2G(iFr)=0.0 
         raL2Gm1(iFr)=0.0 
       END DO 
- 
+
+      DO iFr = 1,kProfLayer
+        raAvgAnglePerLayer(iFr) = 0.0
+      END DO
+	
 c calculate raL2Gm1 which is the L2G transmission from layer iS-1 to ground 
       DO iLay=iS-1,2,-1 
         iL=iaRadLayer(iLay) 
@@ -859,26 +864,27 @@ c         between B-1 and ground <= 1.0
       END IF 
  
       DO iLay=iS,iEnd,-1 
-        iL=iaRadLayer(iLay) 
-        iLm1=iaRadLayer(iLay-1) 
-        rMPTemp=raVT1(iL) 
+        iL      = iaRadLayer(iLay) 
+        iLm1    = iaRadLayer(iLay-1) 
+        rMPTemp = raVT1(iL) 
         DO iFr=1,kMaxPts 
 c find the diffusive angles for the layer beneath 
-          rAngleTr_m1=FindDiffusiveAngleExp(raL2Gm1(iFr)) 
-          raFreqAngle_m1(iFr)=rAngleTr_m1 
-          rAngleTr_m1=exp(-raL2Gm1(iFr)/rAngleTr_m1) 
+          rAngleTr_m1         = FindDiffusiveAngleExp(raL2Gm1(iFr)) 
+          raFreqAngle_m1(iFr) = rAngleTr_m1 
+          rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1) 
  
-          rAngleTr=raFreqAngle(iFr) 
-          rAngleTr=exp(-raL2G(iFr)/rAngleTr) 
- 
+          rAngleTr               = raFreqAngle(iFr)
+          raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr	  
+          rAngleTr               = exp(-raL2G(iFr)/rAngleTr) 
+	  
 c Planckian emissions 
-          rPlanck=ttorad(raFreq(iFr),rMPTemp) 
-          raTemp(iFr)=raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr) 
+          rPlanck     = ttorad(raFreq(iFr),rMPTemp) 
+          raTemp(iFr) = raTemp(iFr) + rPlanck*(rAngleTr_m1-rAngleTr) 
  
 c get ready for the layer beneath 
-          raL2G(iFr)=raL2Gm1(iFr) 
-          raL2Gm1(iFr)=raL2Gm1(iFr)-raaAbs(iFr,iLm1) 
-          raFreqAngle(iFr)=raFreqAngle_m1(iFr) 
+          raL2G(iFr)       = raL2Gm1(iFr) 
+          raL2Gm1(iFr)     = raL2Gm1(iFr)-raaAbs(iFr,iLm1) 
+          raFreqAngle(iFr) = raFreqAngle_m1(iFr) 
         END DO 
  
       END DO 
@@ -891,14 +897,21 @@ c else it has alreadyy been included in the loop above
         rAngleTr_m1=1.0 
         DO iFr=1,kMaxPts 
  
-          rAngleTr=raFreqAngle(iFr) 
-          rAngleTr=exp(-raL2G(iFr)/rAngleTr) 
+          rAngleTr               = raFreqAngle(iFr)
+          raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr	  	  
+          rAngleTr               = exp(-raL2G(iFr)/rAngleTr) 
   
-          rPlanck=ttorad(raFreq(iFr),rMPTemp)
-          raTemp(iFr)=raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr) 
+          rPlanck     = ttorad(raFreq(iFr),rMPTemp)
+          raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr) 
         END DO 
       END IF 
 
+      write(kStdWarn,*) 'Mean diffusive angles per layer for chunk starting at ',raFreq(1)
+      DO iFr = 1,kMaxLayer
+        raAvgAnglePerLayer(iFr) = acos(raAvgAnglePerLayer(iFr)/kMaxPts) * 180/kPi
+        write(kStdWarn,*) ' ',iFr,raAvgAnglePerLayer(iFr)	
+      END DO
+      
       RETURN 
       END   
  
@@ -1037,8 +1050,8 @@ c              this would affect the backgnd thermal calculation
       END DO
 
 c do actual integration over (0,pi)
-      iPi=20
-      rDelta=(kPi/2.0)/iPi
+      iPi    = 20
+      rDelta = (kPi/2.0)/iPi
 c integrate over all angles
 
 c no need to do the 90 degree contribution since we eventually multiply it 
@@ -1046,8 +1059,8 @@ c by cos(90) == 0.0!!! so do everything upto just below 90 degrees
       IF (iExtraThermal .LT. 0) THEN
 c loop from iNumLayer DOWNTO gnd, for the particular angle
         DO iAngle = 0,iPi-1
-          write(kStdWarn,*) 'angular index = ',iAngle
-          rAngle=iAngle*rDelta
+          rAngle = iAngle*rDelta
+          write(kStdWarn,*) 'angular index, angle in radians = ',iAngle,rAngle
 c initialize the radiation to that at the top of the atmosphere 
           DO iFr=1,kMaxPts
             raTemp(iFr)=raIntenAtmos(iFr)
@@ -1061,7 +1074,7 @@ c the solid angle contribution
 c the cos(theta) weight due to geometry of viewing the area, but has ALREADY
 c been included in the RadTr routine
           DO iFr=1,kMaxPts
-            raThermal(iFr)=raThermal(iFr)+raTemp(iFr)*sin(rAngle)
+            raThermal(iFr)=raThermal(iFr) + raTemp(iFr)*sin(rAngle)
           END DO
         END DO
 c now multiply by rDelta
@@ -1079,8 +1092,8 @@ c note so we do not do any double multiplying of the cos(theta) factor,
 c the call to RadiativeTransfer(iI,...,1) explicitly has "1" as the last 
 c argument, as opposed to having "0" as in the subsection above
         DO iAngle = 0,iPi-1
-          write(kStdWarn,*) 'angular index = ',iAngle
-          rAngle=iAngle*rDelta
+          rAngle = iAngle*rDelta
+          write(kStdWarn,*) 'angular index, angle in radians = ',iAngle,rAngle	  
 c initialize the radiation to that at the top of the atmosphere
           DO iFr=1,kMaxPts
             raTemp(iFr)=raIntenAtmos(iFr)
@@ -1098,7 +1111,6 @@ c add the contribution from this angle to raExtraThermal -- do weigting NOW
           END DO
 
 c do the instrument to GND
-
           CALL RadiativeTransfer(iNumLayer,1,-1,rFracTop,rFracBot,
      $              iaRadLayerTemp,raVT1,raTemp,raFreqAngle,
      $              raFreq,raaAbs,1)

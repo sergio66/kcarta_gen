@@ -581,6 +581,18 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+11/14/16        Found a bug in RadiativeTransfer() which is called only by
+                routines doing reflected thermal.
+                Input was angle (radians) but subr expected cos(angle)		
+		  ie it was expecting angles in radians, but was not doing
+                      exp(-tau/cos(angle)); instead it was doing
+                      exp(-tau/angle).
+		This really impacts the acos(3/5) at all layers calc!!!
+		(ie subr Diffusivity_AllAnglesEqual in rad_diff.f)
+                Others (quadrature routines in rad_quad.f) were minimally affected
+		Now expects input angle (radians) and it does the cos(angle)
+  		grep -in 'call radiativetransfer(' *.f
+                
 10/8/16         Created iaaOverride in nm_params, so you can override lots of
                 defaults params at run time (most of which are barely ever switched)
                 such as iSARTAChi,iSPlinetype,iUsualUpwell
