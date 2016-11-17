@@ -770,7 +770,7 @@ c and that raTemp has already been initialized with eg kTSpace Planck fcn or
 c radiation at the layer above it 
 c  
 c this is ACCURATE!!!!! as it calculates the exact angle needed at each layer 
-c for each frequency. Thus it is also SLOW :( 
+c for each frequency. Thus it is also SLOW  
 c but it does t(i-1->0,x1)-t(i->0,x2) where x1 is calculated at layer i-1 
 c                                     and x2 is calculated at layer i 
       SUBROUTINE ExactL2GDiffusiveApprox(iNumLayer,iS,iE, 
@@ -822,9 +822,9 @@ c initalize raL2G,raL2Gm1
         raL2Gm1(iFr) = 0.0 
       END DO 
 
-      DO iFr = 1,kProfLayer
-        raAvgAnglePerLayer(iFr) = 0.0
-        raMeanOD(iFr) = 0.0	
+      DO iL = 1,kProfLayer
+        raAvgAnglePerLayer(iL) = 0.0
+        raMeanOD(iL) = 0.0	
       END DO
 
       DO iLay = 1,kMaxLayer
@@ -833,7 +833,8 @@ c initalize raL2G,raL2Gm1
 	END DO
       END DO
       
-c calculate raL2Gm1 which is the L2G transmission from layer iS-1 to ground 
+c calculate raL2Gm1 which is the L2G optical depth from layer iS-1 to ground
+c start at TOA
       DO iLay = iS-1,2,-1 
         iL = iaRadLayer(iLay) 
         DO iFr = 1,kMaxPts 
@@ -851,11 +852,10 @@ c calculate raL2G which is the L2G transmission from layer iS to ground
 c and initialise the angles 
       iL = iaRadLayer(iS) 
       DO iFr = 1,kMaxPts 
-        raL2G(iFr) = raL2Gm1(iFr)+raaAbs(iFr,iL) 
+        raL2G(iFr) = raL2Gm1(iFr) + raaAbs(iFr,iL) 
       END DO 
       DO iFr = 1,kMaxPts 
-        rAngleTr = FindDiffusiveAngleExp(raL2G(iFr)) 
-        raFreqAngle(iFr) = rAngleTr 
+        raFreqAngle(iFr) = FindDiffusiveAngleExp(raL2G(iFr)) 
       END DO 
 
 c we now have two cases to consider 
@@ -897,7 +897,7 @@ c get ready for the layer beneath
       END DO 
  
 c now if bottomlayer==gnd, its transmission = 1.0, and do the calculation 
-c else it has alreadyy been included in the loop above 
+c else it has already been included in the loop above 
       IF (iE .EQ. 1) THEN 
         iL = iaRadLayer(iE) 
         rMPTemp = raVT1(iL) 
@@ -914,8 +914,16 @@ c else it has alreadyy been included in the loop above
       END IF 
 
       write(kStdWarn,*) 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
-      rAngleTr = 0.0
-      DO iLay = iS,1,-1
+c      rAngleTr = 0.0    !!! this acts as Gnd2Space OD      
+c      DO iLay = iS,1,-1
+c        iL = iaRadLayer(iLay)
+c        raAvgAnglePerLayer(iL) = acos(raAvgAnglePerLayer(iL)/kMaxPts) * 180/kPi
+c        raMeanOD(iL)           = raMeanOD(iL)/kMaxPts
+c	rAngleTr               = rAngleTr + raMeanOD(iL)
+c        write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),987987
+c      END DO
+      rAngleTr = 0.0    !!! this acts as Space2Gnd OD      
+      DO iLay = 1,iS
         iL = iaRadLayer(iLay)
         raAvgAnglePerLayer(iL) = acos(raAvgAnglePerLayer(iL)/kMaxPts) * 180/kPi
         raMeanOD(iL)           = raMeanOD(iL)/kMaxPts

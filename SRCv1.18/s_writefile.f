@@ -23,10 +23,10 @@ c rDelta     = point spacing
 c iMainType  = 1 for path spectra                   iAtmNumber for Jacobians
 c              2 for MP spectra                     iAtmNumber for fluxes
 c              3 for radiances
-c iSubMainType = kLayer2Sp (-2,-1,1,2) for path     GAS ID (1..63) for GasJac
-c              = kLayer2Sp (-2,-1,1,2) for MP       0           for Temp Jac
-c              = iAtmNumber for radiances           -10         for wgt fcn
-c                                                   -20         for surf Jac
+c iSubMainType = kLayer2Sp (-2,-1,+1,+2,+3,+4) for path     GAS ID (1..63) for GasJac
+c              = kLayer2Sp (-2,-1,+1,+2,+3,+4) for MP       0           for Temp Jac
+c              = iAtmNumber for radiances                 -10         for wgt fcn
+c                                                         -20         for surf Jac
 c              = +1 for upward flux, -1 for downward flux
 c iNumberOut   = number of the relevant spectra to look for
 
@@ -335,10 +335,12 @@ c************************************************************************
 
 c given the profiles, the atmosphere has been reconstructed. now output 
 c the individual GAS PATH spectra, according to what kLayer2Sp is set to
-c kLayer2Sp = 2  : gas transmittances Layer to space sum(j=i,N) exp(-k(j))
-c kLayer2Sp = 1  : gas optical depth Layer to space  sum(j=i,N) (k(j))
-c kLayer2Sp = -1 : gas optical depth                 k(i)
-c kLayer2Sp = -2 : gas transmittances                exp(-k(j))
+c kLayer2Sp = +4 : gas transmittances Layer to ground sum(j=i,1) exp(-k(j))
+c kLayer2Sp = +3 : gas optical depth  Layer to ground sum(j=i,1) k(j)
+c kLayer2Sp = +2 : gas transmittances Layer to space  sum(j=i,N) exp(-k(j))
+c kLayer2Sp = +1 : gas optical depth  Layer to space  sum(j=i,N) (k(j))
+c kLayer2Sp = -1 : gas optical depth                  k(i)
+c kLayer2Sp = -2 : gas transmittances                 exp(-k(j))
 c check to see if we want the raw spectra, or kLayer2Space
       SUBROUTINE out_trans_path(raFreq,rFrLow,rFrHigh,
      $           raaGasAbs,iPrinter,
@@ -408,6 +410,14 @@ c        END IF
             write(kStdWarn,*)'outputting GAS layer2sp trans at iPath = ',iPath
             CALL GasTranLayer2Space(raaGasAbs,raL2S,iLay)
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+          ELSE IF (kLayer2Sp .EQ. 3) THEN
+            write(kStdWarn,*)'outputting GAS layer2gnd OD at iPath = ',iPath
+            CALL GasOptLayer2Ground(raaGasAbs,raL2S,iLay)
+            CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+          ELSE IF (kLayer2Sp .EQ. 4) THEN
+            write(kStdWarn,*)'outputting GAS layer2gnd trans at iPath = ',iPath
+            CALL GasTranLayer2Ground(raaGasAbs,raL2S,iLay)
+            CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
           END IF  
         END IF
       END DO
@@ -446,7 +456,21 @@ c we have a list of mixed paths to output!!!
           write(kStdWarn,*) 'OUTPUTTING ALL MIXED PATHS ... '
         END IF
 
-        IF ((kLayer2Sp .EQ. 2) .AND. (iNp .LT. 0)) THEN
+        IF ((kLayer2Sp .EQ. 4) .AND. (iNp .LT. 0)) THEN
+c this indicates we want L2G transmittances for ALL mixed paths!!!
+          write(kStdWarn,*)'     outputting ALL L2G transmittances'    
+          CALL out_FASTL2Gtrans_MP(raFreq,rFreqStart,rFreqEnd,
+     $                       raaSumAbCoeff,iPrinter,
+     $                       caOutName,
+     $                       iNpmix,iFileID)
+        ELSE IF ((kLayer2Sp .EQ. 3) .AND. (iNp .LT. 0)) THEN
+          write(kStdWarn,*) '     outputting ALL L2G optical depths'    
+c this indicates we want L2G ods for ALL mixed paths!!!
+          CALL out_FASTL2Goptdp_MP(raFreq,rFreqStart,rFreqEnd,
+     $                       raaSumAbCoeff,iPrinter,
+     $                       caOutName,
+     $                       iNpmix,iFileID)
+        ELSEIF ((kLayer2Sp .EQ. 2) .AND. (iNp .LT. 0)) THEN
 c this indicates we want L2S transmittances for ALL mixed paths!!!
           write(kStdWarn,*)'     outputting ALL L2S transmittances'    
           CALL out_FASTL2Strans_MP(raFreq,rFreqStart,rFreqEnd,
@@ -455,7 +479,7 @@ c this indicates we want L2S transmittances for ALL mixed paths!!!
      $                       iNpmix,iFileID)
         ELSE IF ((kLayer2Sp .EQ. 1) .AND. (iNp .LT. 0)) THEN
           write(kStdWarn,*) '     outputting ALL L2S optical depths'    
-c this indicates we want L2S transmittances for ALL mixed paths!!!
+c this indicates we want L2S ods for ALL mixed paths!!!
           CALL out_FASTL2Soptdp_MP(raFreq,rFreqStart,rFreqEnd,
      $                       raaSumAbCoeff,iPrinter,
      $                       caOutName,
@@ -499,9 +523,10 @@ c end if (iFound==1)
       END
 
 c************************************************************************
-
 c given the profiles, the atmosphere has been reconstructed. now output 
 c the MIXED PATH transmittance spectra
+c kLayer2Sp = 4  : MP transmittances Layer to ground sum(j=1,i) exp(-k(j))
+c kLayer2Sp = 3  : MP optical depth Layer to ground  sum(j=1,i) (k(j))
 c kLayer2Sp = 2  : MP transmittances Layer to space sum(j=i,N) exp(-k(j))
 c kLayer2Sp = 1  : MP optical depth Layer to space  sum(j=i,N) (k(j))
 c kLayer2Sp = -1 : MP optical depth                 k(i
@@ -556,11 +581,259 @@ c this is for mixed paths
       ELSE IF (kLayer2Sp .EQ. 2) THEN
         CALL MP2SpaceTrans(raaSumAbs,raL2S,iIpmix,iNpmix)
         CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+      ELSE IF (kLayer2Sp .EQ. 3) THEN
+        CALL MP2GroundOptDp(raaSumAbs,raL2S,iIpmix,iNpmix)
+        CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+      ELSE IF (kLayer2Sp .EQ. 4) THEN
+        CALL MP2GroundTrans(raaSumAbs,raL2S,iIpmix,iNpmix)
+        CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
       END IF  
 
 c      WRITE (6,1001)caOutName
 c 1001 FORMAT('Successfully saved unformatted MP results to ',/,A80)
      
+      RETURN
+      END
+
+c************************************************************************
+c given the profiles, the atmosphere has been reconstructed. now output 
+c the MIXED PATH L2Stransmittance spectra FAST. This assumes each atmos
+c is in layers of 100, and so can do the L2S quickly. if one of "atmospheres"
+c has less than 100 layers (i.e. iNpmix is not a multiple of 100),
+c then the "upper layers" are filled with spectra of 0, so their 
+c transmittance is 1
+
+c this assumes kLayer2Sp = 2, iOp = -1
+c check to see if we want the raw spectra, or kLayer2Space
+      SUBROUTINE out_FASTL2Gtrans_MP(raFreq,rFrLow,rFrHigh,
+     $           raaSumAbs,iPrinter,
+     $           caOutName,
+     $           iNpmix,iFileID)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c raFreq    = array containin all the frequencies in the current 25 cm-1 block
+c rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1, 
+c                  these need not correspond to 1,10000)
+c raaSumAbs  = mixed path sum of the abs coeffs
+c iPrinter   = 1,2 or 3 ... will be 2 if this routine is called
+c iNpmix     = number of mixed paths
+c iFileID       = which of the 25 cm-1 k-comp files is being processed
+c caOutName  = name of binary file that output goes to
+      REAL raFreq(kMaxPts),rFrLow,rFrHigh
+      REAL raaSumAbs(kMaxPts,kMixFilRows)
+      INTEGER iPrinter,iNpmix,iFileID
+      CHARACTER*80 caOutName
+
+c local variables
+      INTEGER iPath,iIOUN,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax,iI
+      REAL raL2S(kMaxPts),raaTempArray(kMaxPts,kProfLayer)
+
+      iIOUN = kStdkCarta
+
+c first figure out how many 100 atmosphere layer blocks there are
+      iAtmBlocks=1
+ 60   CONTINUE
+      IF (kProfLayer*iAtmBlocks .LT. iNpMix) THEN
+        iAtmBlocks=iAtmBlocks+1
+        GO TO 60
+      END IF
+      iAmax=iAtmBlocks
+        
+c make sure that iNpmix can be exactly divided into kProfLayer, else set a flag
+c saying the last "atmosphere" has less than set number of layers
+      iWarn=MOD(iNpmix,kProfLayer)
+      IF (iWarn .NE. 0) THEN
+        iAmax=iAmax-1
+      END IF
+        
+c calculate L2S and write spectra to unformatted file
+      iPath=0
+
+c first do the "complete" atmospheres
+      DO iA=1,iAmax
+c put the current atmosphere into raaTempArray
+        DO iLay=1,kProfLayer
+          iI=iLay+(iA-1)*kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+          END DO
+        END DO
+c compute the L2G optical depths
+        DO iLay = 2,kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+
+     $                             raaTempArray(iFr,iLay+1)
+          END DO
+        END DO
+c print them out
+        DO iLay=1,kProfLayer
+          iPath=iPath+1
+          write(kStdWarn,*) 'output MIXED path spectra at ',iPath
+          DO iFr=1,kMaxPts
+            raL2S(iFr)=exp(-raaTempArray(iFr,iLay))
+          END DO
+          CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+        END DO
+      END DO
+
+c then do the last, "incomplete" atmospheres
+c put the current atmosphere into raaTempArray
+      IF (iWarn .NE. 0) THEN
+        iA=iAmax+1
+        DO iLay=1,iWarn
+          iI=iLay+(iA-1)*kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+          END DO
+        END DO
+        DO iLay=iWarn+1,kProfLayer
+          iI=iLay+(iA-1)*kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=0.0
+          END DO
+        END DO
+c compute the L2G optical depth
+        DO iLay=2,iWarn
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+
+     $                               raaTempArray(iFr,iLay+1)
+          END DO
+        END DO
+c print them out
+        DO iLay=1,iWarn
+          iPath=iPath+1
+          write(kStdWarn,*) 'output MIXED path spectra at ',iPath
+          DO iFr=1,kMaxPts
+            raL2S(iFr)=exp(-raaTempArray(iFr,iLay))
+          END DO
+          CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+        END DO
+      END IF
+
+      RETURN
+      END
+
+c************************************************************************
+c given the profiles, the atmosphere has been reconstructed. now output 
+c the MIXED PATH L2S optical depth FAST. This assumes that in each atmos
+c is in layers of 100, and so can do the L2S quickly. if one of "atmospheres"
+c is found to have less than 100 layers (i.e. iNpmix is not a multiple of 100),
+c then the "upper layers" are filled with spectr of 0, so their transmittance
+c is 1
+
+c this assumes kLayer2Sp = 1, iOp = -1
+c check to see if we want the raw spectra, or kLayer2Space
+      SUBROUTINE out_FASTL2Goptdp_MP(raFreq,rFrLow,rFrHigh,
+     $           raaSumAbs,iPrinter,
+     $           caOutName,
+     $           iNpmix,iFileID)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c raFreq    = array containin all the frequencies in the current 25 cm-1 block
+c rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1, 
+c                  these need not correspond to 1,10000)
+c raaSumAbs  = mixed path sum of the abs coeffs
+c iPrinter   = 1,2 or 3 ... will be 2 if this routine is called
+c iNpmix     = number of mixed paths
+c iFileID       = which of the 25 cm-1 k-comp files is being processed
+c caOutName  = name of binary file that output goes to
+      REAL raFreq(kMaxPts),rFrLow,rFrHigh
+      REAL raaSumAbs(kMaxPts,kMixFilRows)
+      INTEGER iPrinter,iNpmix,iFileID
+      CHARACTER*80 caOutName
+
+c local variables
+      INTEGER iPath,iIOUN,iI,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax
+      REAL raL2S(kMaxPts),raaTempArray(kMaxPts,kProfLayer)
+
+      iIOUN = kStdkCarta
+
+c first figure out how many kProfLayer atmosphere layer blocks there are
+      iAtmBlocks=1
+ 60   CONTINUE
+      IF (kProfLayer*iAtmBlocks .LT. iNpMix) THEN
+        iAtmBlocks=iAtmBlocks+1
+        GO TO 60
+      END IF
+      iAmax=iAtmBlocks
+        
+c make sure that iNpmix can be exactly divided into kProfLayer, else set a flag
+c saying the last "atmosphere" has less than kProfLayer layers
+      iWarn=MOD(iNpmix,kProfLayer)
+      IF (iWarn .NE. 0) THEN
+        iAmax=iAmax-1
+      END IF
+        
+c calculate L2S and write spectra to unformatted file
+      iPath=0
+
+c first do the "complete" atmospheres
+      DO iA=1,iAmax
+c put the current atmosphere into raaTempArray
+        DO iLay=1,kProfLayer
+          iI=iLay+(iA-1)*kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+          END DO
+        END DO
+c compute the L2S optical depths
+        DO iLay = 2,kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+
+     $                             raaTempArray(iFr,iLay+1)
+          END DO
+        END DO
+c print them out
+        DO iLay=1,kProfLayer
+          iPath=iPath+1
+          DO iFr=1,kMaxPts
+            raL2S(iFr)=raaTempArray(iFr,iLay)
+          END DO
+          write(kStdWarn,*) 'output MIXED path spectra  at ',iPath
+          CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+        END DO
+      END DO
+
+c then do the last, "incomplete" atmospheres
+c put the current atmosphere into raaTempArray
+      IF (iWarn .NE. 0) THEN
+        iA=iAmax+1
+        DO iLay=1,iWarn
+          iI=iLay+(iA-1)*kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+          END DO
+        END DO
+        DO iLay=iWarn+1,kProfLayer
+          iI=iLay+(iA-1)*kProfLayer
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=0.0
+          END DO
+        END DO
+c compute the L2S optical depths
+        DO iLay=iWarn-1,1,-1
+          DO iFr=1,kMaxPts
+            raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+
+     $                               raaTempArray(iFr,iLay+1)
+          END DO
+        END DO
+c print them out
+        DO iLay=2,iWarn
+          iPath=iPath+1
+          write(kStdWarn,*) 'output MIXED path spectra at ',iPath
+          DO iFr=1,kMaxPts
+            raL2S(iFr)=raaTempArray(iFr,iLay)
+          END DO
+          CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
+        END DO
+      END IF
+
       RETURN
       END
 
@@ -963,6 +1236,74 @@ c raL2S     = array containing the layer-to-space results
       END 
 
 c************************************************************************
+c this subroutine does the layer to ground optical depths by doing
+c the calculation between frequency indices from layer iLay-->1
+c the result is stored in raL2S
+c this is mainly used by the OpticalLayer2Space printout routines in rdprof.f
+      SUBROUTINE GasOptLayer2Ground(raaGasAbs,raL2S,iLay)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c iLay      = current layer number
+c raaGasAbs = matrix containing the raw abs coeffs
+c raL2S     = array containing the layer-to-space results 
+      INTEGER iLay
+      REAL raL2S(kMaxPts),raaGasAbs(kMaxPts,kProfLayer)
+
+      INTEGER iI,iJ
+
+      DO iI=1,kMaxPts
+        raL2S(iI)=0.0
+      END DO
+
+      DO iJ=1,iLay
+        DO iI=1,kMaxPts
+          raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+        END DO
+      END DO
+
+      RETURN
+      END 
+
+c************************************************************************
+c this subroutine does the layer to ground transmittances for gas iG by doing
+c the calculation between frequency indices from layer 1-->iLay
+c the result is stored in raL2G
+c this is mainly used by the OpticalLayer2Space printout routines in rdprof.f
+      SUBROUTINE GasTranLayer2Ground(raaGasAbs,raL2G,iLay)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c iLay      = current layer number
+c raaGasAbs = matrix containing the raw abs coeffs
+c raL2S     = array containing the layer-to-space results 
+      INTEGER iLay
+      REAL raL2G(kMaxPts),raaGasAbs(kMaxPts,kProfLayer)
+
+      INTEGER iI,iJ
+
+      DO iI=1,kMaxPts
+        raL2G(iI)=0.0
+      END DO
+
+      DO iJ=1,iLay
+        DO iI=1,kMaxPts
+          raL2G(iI)=raL2G(iI)+raaGasAbs(iI,iJ)
+        END DO
+      END DO
+
+      DO iI=1,kMaxPts
+        raL2G(iI)=exp(-raL2G(iI))
+      END DO
+
+      RETURN
+      END 
+
+c************************************************************************
 c this subroutine does the MP to space transmission coeffs by doing
 c the calculation between frequency indices from layer iLay-->iLM
 c where iLm=nearest 100 index above iLay, or iNpmix 
@@ -1078,6 +1419,130 @@ c first find the index where the (space) "upper" limit is at
       END DO
 
       DO iJ=iIpmix,iUpper
+        DO iI=1,kMaxPts
+          raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+        END DO
+      END DO
+
+      RETURN
+      END 
+
+c************************************************************************
+c this subroutine does the MP to space transmission coeffs by doing
+c the calculation between frequency indices from layer iLay-->iLM
+c where iLm=nearest 100 index above iLay, or iNpmix 
+c the result is stored in raL2S
+      SUBROUTINE MP2GroundTrans(raaGasAbs,raL2S,iIpmix,iNpmix)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c iIpMix    = current mixed path number
+c iNpMix    = total number of mixed paths
+c raaGasAbs = matrix containing the raw mixed path abs coeffs
+c raL2S     = array containing the layer-to-space results 
+      INTEGER iIpmix,iNpmix
+      REAL raL2S(kMaxPts),raaGasAbs(kMaxPts,kMixFilRows)
+
+c local variables
+      INTEGER iI,iJ,iMax,iFound,iUpper,idiv
+
+c first find the index where the (space) "upper" limit is at
+      iFound=-1
+      iI=0
+      iJ=1
+      iMax=idiv(iNpmix,kProfLayer)
+      iUpper=MOD(iNpmix,kProfLayer)
+      IF (iUpper .NE. 0) THEN
+        iMax=iMax+1
+      END IF
+
+ 15   CONTINUE
+      IF ((iFound .LT. 0) .AND. (iJ .LE. iMax)) THEN
+        IF ((kProfLayer*iI .LE. iIpmix) .AND. 
+     $      (kProfLayer*iJ .GE. iIpmix)) THEN
+          iFound=1
+          iUpper = kProfLayer*iJ
+          IF (iUpper .GT. iNpmix) THEN
+            iUpper=iNpmix
+          END IF
+        ELSE
+          iI=iI+1
+          iJ=iJ+1
+        END IF
+        GO TO 15
+      END IF
+ 
+      DO iI=1,kMaxPts
+        raL2S(iI)=0.0
+      END DO
+
+      DO iJ=1,iIpmix
+        DO iI=1,kMaxPts
+          raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+        END DO
+      END DO
+
+      DO iI=1,kMaxPts
+        raL2S(iI)=exp(-raL2S(iI))
+      END DO
+
+      RETURN
+      END 
+
+c************************************************************************
+c this subroutine does the MP to space optical depths by doing
+c the calculation between frequency indices from layer iLay-->iLM
+c where iLm=nearest 100 index above iLay, or iNpmix 
+c the result is stored in raL2S
+      SUBROUTINE MP2GroundOptDp(raaGasAbs,raL2S,iIpmix,iNpmix)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c iIpMix    = current mixed path number
+c iNpMix    = total number of mixed paths
+c raaGasAbs = matrix containing the raw mixed path abs coeffs
+c raL2S     = array containing the layer-to-space results 
+      INTEGER iIpmix,iNpmix
+      REAL raL2S(kMaxPts),raaGasAbs(kMaxPts,kMixFilRows)
+
+c local variables
+      INTEGER iI,iJ,iMax,iFound,iUpper,idiv
+
+c first find the index where the (space) "upper" limit is at
+      iFound=-1
+      iI=0
+      iJ=1
+      iMax=idiv(iNpmix,kProfLayer)
+      iUpper=MOD(iNpmix,kProfLayer)
+      IF (iUpper .NE. 0) THEN
+        iMax=iMax+1
+      END IF
+
+ 15   CONTINUE
+      IF ((iFound .LT. 0) .AND. (iJ .LE. iMax)) THEN
+        IF ((kProfLayer*iI .LE. iIpmix) .AND. 
+     $      (kProfLayer*iJ .GE. iIpmix)) THEN
+          iFound=1
+          iUpper = kProfLayer*iJ
+          IF (iUpper .GT. iNpmix) THEN
+            iUpper=iNpmix
+          END IF
+        ELSE
+          iI=iI+1
+          iJ=iJ+1
+        END IF
+        GO TO 15
+      END IF
+ 
+      DO iI=1,kMaxPts
+        raL2S(iI)=0.0
+      END DO
+
+      DO iJ=1,iIpmix
         DO iI=1,kMaxPts
           raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
@@ -2918,10 +3383,10 @@ c rDelta     = point spacing
 c iMainType  = 1 for path spectra                   iAtmNumber for Jacobians
 c              2 for MP spectra                     iAtmNumber for fluxes
 c              3 for radiances
-c iSubMainType = kLayer2Sp (-2,-1,1,2) for path     GAS ID (1..63) for GasJac
-c              = kLayer2Sp (-2,-1,1,2) for MP       0           for Temp Jac
-c              = iAtmNumber for radiances           -10         for wgt fcn
-c                                                   -20         for surf Jac
+c iSubMainType = kLayer2Sp (-2,-1,1,2,3,4) for path     GAS ID (1..63) for GasJac
+c              = kLayer2Sp (-2,-1,1,2,3,4) for MP       0           for Temp Jac
+c              = iAtmNumber for radiances             -10         for wgt fcn
+c                                                     -20         for surf Jac
 c              = +1 for upward flux, -1 for downward flux
 c iNumberOut   = number of the relevant spectra to look for
 c iPathOrRad   = +1 for CO2 ua path, +3 for ua rad

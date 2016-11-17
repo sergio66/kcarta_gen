@@ -581,6 +581,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+11/16/16        Can now control nm_frqncy rf1,rf2 when input file is RTP
+                by setting iaaOveride(1,8) = +1
+
+11/16/16        Can dump out L2G ODS (kLayer2Sp=3) or L2G transmiitance (kLayer2Sp=4)
+
 11/14/16        Found a bug in RadiativeTransfer() which is called only by
                 routines doing reflected thermal.
                 Input was angle (radians) but subr expected cos(angle)		

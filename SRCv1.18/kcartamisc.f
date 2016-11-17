@@ -1805,6 +1805,8 @@ c     -2     Layer transmittance            t(i)=exp(-k(i))
 c     -1     Layer Optical depth            k(i)
 c      1     Layer-to-Space Optical Depth   k2s(i)=sum(j=i,n)(k(j))
 c      2     Layer-to-Space transmittance   t2s(i)=sum(j=i,n)exp(-k(j))
+c      3     Layer-to-Ground Optical Depth  k2s(i)=sum(j=1,i)(k(j))
+c      4     Layer-to-Ground transmittance  t2s(i)=sum(j=1,i)exp(-k(j))
       kLayer2Sp    = -1
 
 c kCKD      == -1,00,21,23,24 sets which continuum version calculation to do
@@ -2014,6 +2016,7 @@ c GENERAL
       iaaOverrideDefault(1,6) = +1    !!! iReadP = 1 when assuming GENLN2 style profile in n_pth_mix.f
       iaaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
                                       !!!   in clear_scatter_misc.f
+      iaaOverrideDefault(1,8) = -1    !!! -1 to keep h.vcmin/h.vcmax as read in from RTPfile, +1 to override with rf1,rf2
       
 c RadTrans
       iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
@@ -2088,8 +2091,8 @@ c do not make sense ..
       write(kStdWarn,*) 'checking parameters (from *PARAMS) .... '
       write(kStdWarn,*) '  '
 
-      IF ((iabs(kLayer2Sp) .NE. 1) .AND. (iabs(kLayer2Sp) .NE. 2)) THEN
-        write(kStdErr,*) 'In *PARAMS, need kLayer2Sp = +/-1,+/-2'
+      IF ((iabs(kLayer2Sp) .NE. 1) .AND. (iabs(kLayer2Sp) .NE. 2) .AND. (kLayer2Sp .NE. 3) .AND. (kLayer2Sp .NE. 4)) THEN
+        write(kStdErr,*) 'In *PARAMS, need kLayer2Sp = +/-1,+/-2,+3,+4'
         write(kStdErr,*) 'kLayer2Sp == do layer-to-space calc or not'
         write(kStdErr,*) 'Please reset and retry'
         CALL DoSTOP 

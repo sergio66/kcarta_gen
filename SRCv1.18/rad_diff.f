@@ -386,8 +386,16 @@ c          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(i
       END IF
 
       write(kStdWarn,*) 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
-      rAngleTr = 0.0
-      DO iLay = iS0,1,-1
+c      rAngleTr = 0.0    !!! this acts as Gnd2Space OD      
+c      DO iLay = iS0,1,-1
+c        iL = iaRadLayer(iLay)
+c        raAvgAnglePerLayer(iL) = acos(raAvgAnglePerLayer(iL)/kMaxPts) * 180/kPi
+c        raMeanOD(iL)           = raMeanOD(iL)/kMaxPts
+c	rAngleTr               = rAngleTr + raMeanOD(iL)
+c        write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),654654
+c      END DO
+      rAngleTr = 0.0    !!! this acts as Space2Gnd OD      
+      DO iLay = 1,iS0
         iL = iaRadLayer(iLay)
         raAvgAnglePerLayer(iL) = acos(raAvgAnglePerLayer(iL)/kMaxPts) * 180/kPi
         raMeanOD(iL)           = raMeanOD(iL)/kMaxPts

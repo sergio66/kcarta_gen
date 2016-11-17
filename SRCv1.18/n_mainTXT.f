@@ -1195,7 +1195,9 @@ c ******** FRQNCY section
       namecomment = '******* FRQNCY section *******'
       IF (kRTP .LE. 0) THEN
         !no need to check freqs as this is done in kcartamain.f (GetFreq)
-      ELSE
+      ELSEIF ((kRTP .GT. 0) .AND. (iaaOverrideDefault(1,8) .EQ. 1)) THEN
+        !no need to check freqs as this is done in kcartamain.f (GetFreq)
+      ELSEIF ((kRTP .GT. 0) .AND. (iaaOverrideDefault(1,8) .EQ. -1)) THEN	
         !print *,rf_low,rf_high
         !need to set rf_low, rf_high from the header info
         write(kStdErr,*) 'this does NOT want RTP setup'
