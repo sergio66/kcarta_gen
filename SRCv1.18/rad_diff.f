@@ -992,6 +992,10 @@ c      iDiffmethod = +2     !set this when debugging default "sergio" diffusivty
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 c **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 
+      IF (kOuterLoop .EQ. 1) THEN
+        write(kStdWarn,*) 'Using diffusivity angle = ',kThermalAngle,cos(kThermalAngle*kPi/180)
+      END IF
+      
       iDefault = -1
       iDiffmethod = kSetThermalAngle
       IF (kSetThermalAngle .NE. iaaOverrideDefault(2,4)) THEN

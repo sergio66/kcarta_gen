@@ -280,7 +280,7 @@ c local variables
 
       NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort,
      $                   kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,
-     $                   iaaOverride     
+     $                   kThermalAngle,iaaOverride
       NAMELIST /nm_frqncy/namecomment,rf1,rf2
       NAMELIST /nm_molgas/namecomment,iNGas,iaGasesNL
       NAMELIST /nm_xscgas/namecomment,iNXsec,iaLXsecNL

@@ -1798,6 +1798,9 @@ c NOTE !!!! also double check subroutine SETDEFAULTPARAMS in misc.f
       include '../INCLUDE/kcarta.param'
 
       INTEGER iI,iJ
+
+c acos(3/5) * 180/kPi      
+      kThermalAngle = 53.1313010235415598
       
 c set default values here
 c kLayer2Sp
@@ -2047,7 +2050,10 @@ c RadTrans
 				      !!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
 				      !!!          differs from iaaOverrideDefault(2,5) = 0 since here, upper layers use acos(3/5) lower layers are accurate
 				      !!!                                                   while there, use layer-varying accurate acos(rDiffusive)
-				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301
+				      !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 = acos(3/5) << DEFAULT >>
+				      !!!           this can be controlled by kThermalAngle, either in nm_params for kRTP = +1
+				      !!!                                                   or rakThermalAngle() for kRTP = 0,-1
+				      !!!           so in nm_params : set iaaOverride(2,4) = 1, kThermalAngle = 50.0 and thay works!!!
 				      !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
 				      !!!     = +2 diffusive background using LBLRTM style 3 exponetial gauss quad, not yet implemented
       iaaOverrideDefault(2,5) = 0     !!! SUBR IntegrateOverAngles in rad_quad.f, called by SUBR BackGndThermal
