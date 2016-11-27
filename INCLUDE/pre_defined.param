@@ -295,10 +295,12 @@ c   GENERAL iaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi iMatlabORf77   iWh
 c   RT      iaDefaults(2,:) = iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
 c   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
 c                             iLinearOrSpline iDoCO2Continuum iMethod
-c   COLUMN JACS iaDefaults(4,:) = iColJac iLogOrLinear
-c   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iCONTN iAIRS101_or_LBL_levels IPLEV iAddLBLRTM 
+cxx not done  COLUMN JACS iaDefaults(4,:) = iColJac iLogOrLinear
+cxx not done  TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iCONTN iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
+c   caaOverrideDefault : can have a secreret text file floating around
       INTEGER iaaOverrideDefault(4,10)
-      COMMON/comBlockDefault/iaaOverrideDefault
+      CHARACTER*80 caaTextOverrideDefault
+      COMMON/comBlockDefault/iaaOverrideDefault,caaTextOverrideDefault
 
 c************************************************************************
 

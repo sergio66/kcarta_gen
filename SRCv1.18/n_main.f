@@ -60,7 +60,9 @@ c this is the driver file name
       CHARACTER*80 caDriverName
 
 c this is for overriding the defaults
-      INTEGER iaaOverride(4,10)
+      INTEGER iaaOverride(4,10),iaaOverrideOrig(4,10)
+c this is a dummy, but could in useful eg when giving the 100 layer cloud fracs for scattering      
+      CHARACTER*80 caaTextOverride,caaTextOverride1
       
 c this is for MOLGAS
       INTEGER iNGas,iaGasesNL(kGasComp)
@@ -276,7 +278,7 @@ c local variables
 
       NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort,
      $                   kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,
-     $                   kThermalAngle,iaaOverride
+     $                   kThermalAngle,iaaOverride,caaTextOverride
       NAMELIST /nm_frqncy/namecomment,rf1,rf2
       NAMELIST /nm_molgas/namecomment,iNGas,iaGasesNL
       NAMELIST /nm_xscgas/namecomment,iNXsec,iaLXsecNL
@@ -437,6 +439,7 @@ c set the default params kCKD etc
       CALL CheckParams 
 
 c set default overrides
+      caaTextOverride    = 'notset'
       DO iI = 1,4
         DO iJ = 1,10
           iaaOverride(iI,iJ) = iaaOverrideDefault(iI,iJ)
@@ -468,9 +471,12 @@ c *************** read input name list file *********************************
       write (kStdWarn,*) 'successfully read in params .....'
       !these are global variables and so need to be checked
 c set overrides
-      write(kStdWarn,*) 'default override params'
-      DO iI = 1,3 
-         write(kStdWarn,*) (iaaOverrideDefault(iI,iJ),iJ=1,10)
+      caaTextOverride1 = caaTextOverride   !! if caaTextOverride was defined here
+      caaTextOverrideDefault = caaTextOverride      
+      DO iJ = 1,10
+        DO iI = 1,4       
+	   iaaOverrideOrig(iI,iJ) = iaaOverrideDefault(iI,iJ)
+	 END DO
       END DO
       IF (iaaOverride(2,1) .NE. iaaOverrideDefault(2,1)) THEN
         write(kStdWarn,*) 'kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
@@ -482,9 +488,13 @@ c set overrides
           iaaOverrideDefault(iI,iJ) = iaaOverride(iI,iJ)
         END DO
       END DO
-      write(kStdWarn,*) 'final override params'
-      DO iI = 1,3 
-         write(kStdWarn,*) (iaaOverrideDefault(iI,iJ),iJ=1,10)
+      write(kStdWarn,*) 'default/final diff override params'
+      write(kStdWarn,*) '---------------------------------------'      
+      DO iI = 1,4      
+        DO iJ = 1,10 
+          write(kStdWarn,*) iaaOverrideOrig(iI,iJ),iaaOverrideDefault(iI,iJ),iaaOverrideOrig(iI,iJ)-iaaOverrideDefault(iI,iJ)
+        END DO
+	write(kStdWarn,*) '---------------------------------------'
       END DO
       kTemperVary = iaaOverrideDefault(2,1)
       CALL CheckParams 
@@ -577,6 +587,12 @@ c      iTemperVary  = -1          !assume const-in-tau temperature variation
       iAtmLoop1   = iAtmLoop
       rAtmLoopCom = iAtmLoop * 1.0    !!! this is part of comBlockAtmLoop
       iTemperVary1 = iTemperVary
+
+      IF (iAtmLoop .LT. 0) THEN
+        DO iI = 1,kMaxAtm
+	  raAtmLoop(iI) = -9999
+	END DO
+      END IF
       
       iNatm1 = iNatm
       DO iI  =  1,kMaxAtm
@@ -1100,7 +1116,11 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
       INTEGER iNpath
       CHARACTER*1 cYorN
       INTEGER iResetCldFracs
-
+c this is is we have 100 layer clouds
+      INTEGER iIOUNX,iErrX,iSigmaIASI,iNumLaysX
+      CHARACTER*80 caJunk80      
+      REAL rTCC,rCfracX1,rCfracX2,rCfracX12
+      
       iResetCldFracs = -1   !! if need to do pclsam flux computation, then reset cldfracs to 1.0
       ctype1 = -9999
       ctype2 = -9999
@@ -1358,9 +1378,40 @@ c ******** RADNCE section
 
       IF (k100layerCloud .EQ. +1) THEN
         write(kStdWarn,*) 'Found 100 layer cloud(s) in rtp profile, set caCloudPFname = caPFname'
+        write(kStdErr,*) 'Found 100 layer cloud(s) in rtp profile, set caCloudPFname = caPFname'	
         caCloudPFname = caPFname
+	write(kStdWarn,*) 'looking for and opening caaTextOverride (from nm_params)'
+        iIOUNX = kTempUnit
+        OPEN(UNIT=iIOUNX,FILE=caaTextOverrideDefault,STATUS='OLD',FORM='FORMATTED',
+     $    IOSTAT=IERRX)
+        IF (IERRX .NE. 0) THEN
+          WRITE(kStdErr,*) 'k100layerCloud : trying top make sure file exists'
+          WRITE(kStdErr,1010) IERRX, caaTextOverrideDefault
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+          CALL DoSTOP
+        ENDIF
+        kTempUnitOpen = 1	
+ 1011   CONTINUE	
+        READ(iIOUNX,1012) caJunk80
+	IF ((caJunk80(1:1) .EQ. '!') .OR. (caJunk80(1:1) .EQ. '%')) GOTO 1011
+	READ (caJunk80,*) iSigmaIASI,iNumLaysX,rTCC,rCfracX1,rCfracX2,rCfracX12
+        CLOSE(iIOUNX)
+        kTempUnitOpen = -1
+	IF (abs(rTCC - (rCfracX1 + rCfracX2 - rCfracX12)) .GE. 1.0e-5) THEN
+	  write(kStdWarn,*)
+	  write(kStdWarn,*) 'WARNING : info in caaTextOverrideDefault = ',caaTextOverrideDefault
+	  write(kSTdWarn,*) '  abs(rTCC - (rCfracX1 + rCfracX2 - rCfracX12)) .GE. 1.0e-5'
+	  write(kSTdWarn,*) rTCC,rCfracX1,rCfracX2,rCfracX12,(rCfracX1 + rCfracX2 - rCfracX12)
+	  write(kStdErr,*) 'WARNING : info in caaTextOverrideDefault = ',caaTextOverrideDefault	  
+	  write(kSTdErr,*) '  abs(rTCC - (rCfracX1 + rCfracX2 - rCfracX12)) .GE. 1.0e-5'
+	  write(kSTdErr,*) rTCC,rCfracX1,rCfracX2,rCfracX12,(rCfracX1 + rCfracX2 - rCfracX12)
+c	  CALL DOStop
+	END IF
+c now based on iSigmaIASI = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
+c                         = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc	
       END IF
-
+ 1012 FORMAT(A80)
+ 
       !!!! see if the RTP file wants to set up a cloudy atmosphere
       IF ((cfrac .le. 0.0) .AND. (iNclouds_RTP .LE. 0)) THEN
         write (kStdWarn,*) 'successfully checked radnce .....'
@@ -1443,7 +1494,7 @@ c trying to do fluxes for PCLSAM clouds as well
           write(kStdErr,*) ' oops k100layerCloud = +1 but caCloudPFname = dummy'
           CALL DoStop
         ELSEIF ((caCloudPFname(1:5) .NE. 'dummy') .AND. (k100layerCloud .EQ. +1)) THEN 
-          write (kStdWarn,*) 'setting some parameters for RTP CLOUD PROFILES .....'
+          write (kStdWarn,*) 'setting some parameters for RTP 100 LAYER CLOUD PROFILES .....'
           !! dummy set = caCloudPFname = 'dummycloudfile_profile'
           !!!cloud stuff is defined in .nml file and not in the .rtp file
 
@@ -1672,29 +1723,87 @@ c ******** duplicate the atmospheres if needed section
 
       IF (iResetCldFracs .LT. 0) THEN
         !! go ahead and set up multiple cloud runs if doing PCLSAM (could also do this with eg DISORT)
-        IF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .LT. 0)) THEN
-          iAtmLoop = 100
+	iAtmLoop = 10
+        IF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .GT. 0) .AND. (iSigmaIASI .EQ. +1))  THEN
+	  write(kStdWarn,*) 'doing 100 layer cloud according to cc info in caaTextOverride'
+	  k100layerCloud = +100
+	  iNatm = 1  !! everything done in one gulp
+        ELSEIF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .GT. 0) .AND. (iSigmaIASI .EQ. -1))  THEN
+  	  iAtmLoop = 100	  
+	  iNatm = 3  !! need one cloudy (=ice/water) and one clear atmosphere, and then final calc weighted using tcc
+	  
+          write(kStdErr,*) 'Duplicate for PCLSAM 100 layer clouds : '
+	  write(kStdErr,*) '  [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12	    
+          write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
+	  
+          write(kStdWarn,*) 'Duplicate for PCLSAM 100 layer clouds : '
+	  write(kStdWarn,*) '  [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12	    
+          write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
+	  
+          IF (kMaxAtm .LT. 3) THEN
+	    write(kStdErr,*) 'trying to duplicate 3 atm but kMaxAtm = ',kMaxAtm
+	    Call DoStop
+	  END IF
+
+          raAtmLoop(1) = 1.0
+          raAtmLoop(2) = 1.0
+          raAtmLoop(3) = 1.0
+
+          CALL duplicate_cloudsky100slabs_atm(iAtmLoop,raAtmLoop,
+     $            iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels,
+     $            iaSetEms,raaaSetEmissivity,raSetEmissivity,
+     $            iaSetSolarRefl,raaaSetSolarRefl,
+     $            iaKSolar,rakSolarAngle,rakSolarRefl,
+     $            iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
+     $            raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop,
+     $            raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers,
+     $              iCldProfile,iaCldTypes,raaKlayersCldAmt,
+     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, 
+     $         raaaCloudParams,raaPCloudTop,raaPCloudBot,iaaScatTable,caaaScatTable,iaPhase,
+     $         iaCloudNumAtm,iaaCloudWhichAtm,
+     $            cngwat1,cngwat2,cfrac12,cfrac1,cfrac2,ctype1,ctype2)
+
+        ELSEIF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .LT. 0)) THEN
+          iAtmLoop = 10
           IF ((cngwat2 .GT. 0) .AND. (cfrac2 .GT. 0) .AND. (iaCloudScatType(2) .GT. 0))  THEN
             iNatm    = 5    !! need rclr, r1,r2,r12 ... and then linear combination of these 4
-            write(kStdErr,*)  'TWO PCLSAM clouds : Cld1 [ctop1 cbot1 cngwat1 cfrac1 cfrac12 ctype1] = ',
+	    
+            write(kStdErr,*) 'Duplicate for TWO PCLSAM clouds : '
+	    write(kStdErr,*) '  Cld1 [ctop1 cbot1 cngwat1 cfrac1 cfrac12 ctype1] = ',
      $        ctop1,cbot1,cngwat1,cfrac1,cfrac12,ctype1
-            write(kStdErr,*)  'TWO PCLSAM clouds : Cld2 [ctop2 cbot2 cngwat2 cfrac2 cfrac12 ctype2] = ',
+	    write(kStdErr,*) '  Cld2 [ctop2 cbot2 cngwat2 cfrac2 cfrac12 ctype2] = ',
      $        ctop2,cbot2,cngwat2,cfrac2,cfrac12,ctype2
-            write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
-            write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=5'
+            write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=5'
+	    
+            write(kStdWarn,*) 'Duplicate for TWO PCLSAM clouds : '
+	    write(kStdWarn,*) '  Cld1 [ctop1 cbot1 cngwat1 cfrac1 cfrac12 ctype1] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,cfrac12,ctype1
+	    write(kStdWarn,*) '  Cld2 [ctop2 cbot2 cngwat2 cfrac2 cfrac12 ctype2] = ',
+     $        ctop2,cbot2,cngwat2,cfrac2,cfrac12,ctype2
+            write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=5'
+	    
 	    IF (kMaxAtm .LT. 5) THEN
 	      write(kStdErr,*) 'trying to duplicate 5 atm but kMaxAtm = ',kMaxAtm
 	      Call DoStop
 	    END IF	    
-	    DO iInt = 1,kMaxAtm
+	    DO iInt = 1,5
               raAtmLoop(iInt) = 1.0
             END DO
           ELSEIF ((cngwat2 .LE. 0) .AND. (cfrac2 .LE. 0) .AND. (iaCloudScatType(2) .LE. 0))  THEN
             iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
-            write(kStdErr,*) 'ONE PCLSAM cloud : [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ',
+	    
+            write(kStdErr,*) 'Duplicate for ONE PCLSAM cloud : '
+	    write(kStdErr,*) '  [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ',
      $        ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12	    
-            write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
-            write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
+            write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=3'
+	    
+            write(kStdWarn,*) 'Duplicate for ONE PCLSAM cloud : '
+	    write(kStdWarn,*)'   [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ',
+     $        ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12	    
+            write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=3'
+	    
 	    IF (kMaxAtm .LT. 3) THEN
 	      write(kStdErr,*) 'trying to duplicate 3 atm but kMaxAtm = ',kMaxAtm
 	      Call DoStop
@@ -1709,7 +1818,8 @@ c ******** duplicate the atmospheres if needed section
             write(kStdErr,*) 'ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2)
             CALL DoStop
           END IF
-          CALL duplicate_cloudsky_atm(iAtmLoop,raAtmLoop,
+	  
+          CALL duplicate_cloudsky2slabs_atm(iAtmLoop,raAtmLoop,
      $            iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels,
      $            iaSetEms,raaaSetEmissivity,raSetEmissivity,
      $            iaSetSolarRefl,raaaSetSolarRefl,
@@ -1722,6 +1832,7 @@ c ******** duplicate the atmospheres if needed section
      $         raaaCloudParams,raaPCloudTop,raaPCloudBot,iaaScatTable,caaaScatTable,iaPhase,
      $         iaCloudNumAtm,iaaCloudWhichAtm,
      $            cngwat1,cngwat2,cfrac12,cfrac1,cfrac2,ctype1,ctype2)
+     
         END IF
       END IF
 

@@ -2400,16 +2400,24 @@ c--------------- OUTPUT BINARY FILE --------------------------------
           CALL DoSTOP
         END IF
 	kTempUnitOpen = 1
-	write(iIOUN_Cloud,*) '% rows 1-7 are ctype(101/201/301=W/I/A),cprtop(mb),cprbot(mb),cngwat(g/m2),cpsize(um),cfrac and cfrac12'
+	IF (k100layerCloud .EQ. +1) THEN
+  	  write(iIOUN_Cloud,*) '% 100 layer cloud, but dumping out what was in rtp file for TWO SLAB CLOUD'
+	ELSE
+  	  write(iIOUN_Cloud,*) '% TWO SLAB CLOUD'
+	END IF
+	write(iIOUN_Cloud,*) '% rows 1-7 are ctype(101/201/301=W/I/A),cprtop(mb),cprbot(mb)'
+	write(iIOUN_Cloud,*) '% cngwat(g/m2),cpsize(um),cfrac and cfrac12'
 	write(iIOUN_Cloud,*) '% cols 1-4 are CLOUD 1 (old/new) and CLOUD 2 (old/new)'
-        DO iI=1,7
+        DO iI = 1, 7
+          write(iIOUN_Cloud,*) '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),
+     $  raaRTPCloudParamsF(2,iI)	
+        END DO	
+        DO iI = 1, 7
           write(iIOUN_Cloud,*) raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
-        END DO
+        END DO	
         CLOSE(iIOUN_Cloud)
 	kTempUnitOpen = -1
       END IF
-c      write(kStdWarn,*) 's_writefile debug jpl clouds sarta vs kcarta'
-c      call dostop	
       
 c next open unformatted file as a fresh file to be written to
       IF (iIOUN1 .NE. 6) THEN

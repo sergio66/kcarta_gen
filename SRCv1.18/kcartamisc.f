@@ -2010,6 +2010,8 @@ c      COMMON/comBlockDefault/iaaOverrideDefault
       END DO
       
 c GENERAL
+      caaTextOverrideDefault  = 'notset'
+      
       iaaOverrideDefault(1,1) = -1    !!! iSARTAChi = -1  for no tuning, see kcartabasic/kcartamain/kcartajpl
                                       !!!                 kcartaparallel and finally used in kcoeffMAIN.f
       iaaOverrideDefault(1,2) = +1    !!! iSplinetype = +1 for SUBR iSetSplineType in kcartamisc.f
@@ -3591,9 +3593,13 @@ c now set the param you need to set
           END DO
         END DO
 
+      ELSEIF (iAtmLoop .EQ. 10) THEN
+        write(kStdWarn,*) '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
+        write(kStdErr,*)  '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
+
       ELSEIF (iAtmLoop .EQ. 100) THEN
-        write(kStdWarn,*) '  Cloudy Atm(s) : nothing special for clear sky duplication'
-        write(kStdErr,*)  '  Cloudy Atm(s) : nothing special for clear sky duplication'
+        write(kStdWarn,*) '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
+        write(kStdErr,*)  '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
 
       ELSE
         write(kStdErr,*) 'Dont know what to do with iAtmLoop = ',iAtmLoop
@@ -3678,8 +3684,8 @@ c raaPrBdry = pressure start/stop
       RETURN
       END
 c ************************************************************************
-c this duplicates cloud sky atmospheres!
-        SUBROUTINE duplicate_cloudsky_atm(iAtmLoop,raAtmLoop,
+c this duplicates cloud sky 2slab atmospheres!
+        SUBROUTINE duplicate_cloudsky2slabs_atm(iAtmLoop,raAtmLoop,
      $            iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels,
      $            iaSetEms,raaaSetEmissivity,raSetEmissivity,
      $            iaSetSolarRefl,raaaSetSolarRefl,
@@ -3906,6 +3912,171 @@ c local var
         END DO
         print *,' '
       END IF
+
+      RETURN
+      END
+
+c************************************************************************
+c this duplicates cloud sky 100slab atmospheres!
+        SUBROUTINE duplicate_cloudsky100slabs_atm(iAtmLoop,raAtmLoop,
+     $            iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels,
+     $            iaSetEms,raaaSetEmissivity,raSetEmissivity,
+     $            iaSetSolarRefl,raaaSetSolarRefl,
+     $            iaKSolar,rakSolarAngle,rakSolarRefl,
+     $            iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
+     $            raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop,
+     $            raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers,
+     $              iCldProfile,iaCldTypes,raaKlayersCldAmt,
+     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, 
+     $         raaaCloudParams,raaPCloudTop,raaPCloudBot,iaaScatTable,caaaScatTable,iaPhase,
+     $         iaCloudNumAtm,iaaCloudWhichAtm,
+     $            cngwat1,cngwat2,cfrac12,cfrac1,cfrac2,ctype1,ctype2)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c these are the "output" variables
+      INTEGER iAtmLoop,iNatm
+      REAL raAtmLoop(kMaxAtm)
+c these are the "input variables"
+      REAL raPressLevels(kProfLayer+1)
+      REAL raFracTop(kMaxAtm),raFracBot(kMaxAtm)
+      INTEGER iaMPSetForRad(kMaxAtm),iProfileLayers
+      INTEGER iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
+      INTEGER iAtm                  !this is the atmosphere number
+      REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
+      REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
+c raSetEmissivity is the wavenumber dependent Emissivity (default all 1.0's)
+c iSetEms tells how many wavenumber dependent regions there are
+c raSunRefl is the wavenumber dependent reflectivity (default all (1-raSetEm)
+c iSetSolarRefl tells how many wavenumber dependent regions there are
+c raFracTop = tells how much the top layers of mixing table raaMix have been 
+c             modified ... needed for backgnd thermal
+c raFracBot = tells how much the bot layers of mixing table raaMix have been 
+c             modified ... NOT needed for backgnd thermal
+c raaPrBdry = pressure start/stop
+      REAL raaPrBdry(kMaxAtm,2)
+      REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
+      REAL raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
+      INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
+      REAL rakSolarRefl(kMaxPts)
+      REAL raSetEmissivity(kMaxAtm)
+      CHARACTER*80 caEmissivity(kMaxAtm)
+c rakSolarAngle = solar angles for the atmospheres
+c rakThermalAngle=thermal diffusive angle
+c iakthermal,iaksolar = turn on/off solar and thermal
+c iakthermaljacob=turn thermal jacobians on/off      
+c iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
+      REAL rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
+      INTEGER iakThermal(kMaxAtm),iaSetThermalAngle(kMaxAtm)
+      INTEGER iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
+      REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
+      REAL raLayerHeight(kProfLayer)
+
+c iNclouds tells us how many clouds there are 
+c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
+c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
+      INTEGER iNClouds,iaCloudNumLayers(kMaxClouds) 
+      INTEGER iaaCloudWhichLayers(kMaxClouds,kCloudLayers) 
+c iaCloudNumAtm stores which cloud is to be used with how many atmosphere 
+c iaaCloudWhichAtm stores which cloud is to be used with which atmospheres 
+      INTEGER iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm) 
+c iaaScatTable associates a file number with each scattering table 
+c caaaScatTable associates a file name with each scattering table 
+      INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
+c raaaCloudParams stores IWP, cloud mean particle size 
+      REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
+      REAL raaPCloudTop(kMaxClouds,kCloudLayers)
+      REAL raaPCloudBot(kMaxClouds,kCloudLayers)
+c iScatBinaryFile tells us if scattering file is binary (+1) or text (-1)
+      INTEGER iScatBinaryFile
+      REAL rAngle
+c this tells if there is phase info associated with the cloud; else use HG
+      INTEGER iaPhase(kMaxClouds)
+c this gives us the cloud profile info
+      INTEGER iCldProfile,iaCldTypes(kMaxClouds)
+      REAL raaKlayersCldAmt(kProfLayer,kMaxClouds)
+c this is info about cloud type, cloud frac
+      INTEGER ctype1,ctype2
+      REAL cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+
+c local var
+      INTEGER iX,iY,iDebug
+      REAL rX
+
+      iDebug = +1
+      iDebug = -1
+      IF (iDebug .GT. 0) THEN
+
+        print *,' ' 
+        print *,'INITIAL Clouds Before duplications'
+        print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+
+        print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+        print *,'ctype1,ctype2 = ',ctype1,ctype2
+        print *,'iNclouds = ',iNclouds
+
+        print *,'showing iaCloudNumAtm(iX) : '
+        print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+        print *,' '
+
+        print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
+        DO iY = 1,iNclouds
+          print *,'Cloud ',iY
+          print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
+          print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
+        END DO
+        print *,' '
+
+        !! iaaScatTable sounds like a waste of space, but it actually associates a cscat filename
+        print *,'showing iaaScatTable'
+        DO iY = 1,iNclouds
+          print *,'Cloud ',iY
+          print *,(iaaScatTable(iY,iX),iX=1,kCloudLayers)
+          print *,' '
+        END DO
+        print *,' '
+
+        print *,'raaaCloudParams (cloud loading, and <dme>) pCldTop,pCldBot'
+        DO iY = 1,iNclouds
+          print *,'Cloud ',iY
+          print *,(raaaCloudParams(iY,iX,1),iX=1,kCloudLayers)
+          print *,(raaaCloudParams(iY,iX,2),iX=1,kCloudLayers)
+          print *,(raaPCloudTop(iY,iX),iX=1,kCloudLayers)
+          print *,(raaPCloudBot(iY,iX),iX=1,kCloudLayers)   !!is this a waste?
+          print *,' '
+        END DO
+
+        print *,' '
+        IF (iCldProfile .GT. 0) THEN
+          print*,'iCldProfile'
+          print *,iCldProfile,(iaCldTypes(iX),iX=1,iNclouds)
+          print *,(raaKlayersCldAmt(iX,1),iX=1,kProfLayer)
+        END IF
+      END IF
+
+      !************************************************************************
+      !!! now have to update things
+      !!! if there are originally 2 clouds then
+      !!!   just do one 100 layer ice/water cloud and one clear calc
+
+      IF (iCldProfile .LT. 0) THEN
+        write(kStdErr,*) 'Ooops can only duplicate 100 layer cloud profiles, not slabs'
+        CALL DoStop
+      END IF
+
+      write(kStdWarn,*) 'iNclouds == 1, so really no need to duplicate cloud fields at all!'
+      !!! just duplicate the clear fields
+      CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop,
+     $            iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels,
+     $            iaSetEms,raaaSetEmissivity,raSetEmissivity,
+     $            iaSetSolarRefl,raaaSetSolarRefl,
+     $            iaKSolar,rakSolarAngle,rakSolarRefl,
+     $            iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
+     $            raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop,
+     $            raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
 
       RETURN
       END

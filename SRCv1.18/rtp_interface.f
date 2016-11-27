@@ -670,6 +670,7 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
       CHARACTER*80 caPfname
+      REAL rCC, raCC(kProfLayer)
 
       REAL raaHeight(kProfLayer,kGasStore),MGC,delta1
       REAL raH1(kProfLayer),raP1(kProfLayer+1)
@@ -1011,6 +1012,7 @@ c to count toward the tally ...
 
         ELSEIF ((iIDGAS. GE. kNewCloudLo) .AND. (iIDGAS. LE. kNewCloudHi)) THEN
           k100layerCloud = +1
+	  write(kStdErr,*) 'found gasID ',iIDGAS,' set k100layerCloud = 1'	  
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) ' Reading Cloud100 Layer Profiles, as gas ',iG ,' of ',iGasInRTPFile
           !!! first fill things out with stuff from the RTP file
@@ -1019,6 +1021,9 @@ c to count toward the tally ...
             j = iFindJ(kProfLayer,I,iDownWard)
             iNpathCounterJunk = iNpathCounterJunk + 1
 
+c            rCC = prof.cc(i)
+c	    print *,i,rCC
+	    
             rAmt = prof.gamnt(i,iG)
             IF (isfinite(rAmt) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
@@ -1514,6 +1519,7 @@ c to count toward the tally ...
 
         ELSEIF ((iIDGAS. GE. kNewCloudLo) .AND. (iIDGAS. LE. kNewCloudHi)) THEN
           k100layerCloud = +1
+	  write(kStdErr,*) 'found gasID ',iIDGAS,' set k100layerCloud = 1'	  	  
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) ' Reading Cloud100 Layer Profiles, as gas ',iG ,' of ',iGasInRTPFile
           !!! first fill things out with stuff from the RTP file
@@ -2824,7 +2830,7 @@ c now read in the emissivity values
         DO i=1,iaSetEms(iC) 
           r1   = prof.efreq(i)
           rEms = prof.emis(i)
-          write(kStdWarn,*) r1,rEms 
+c          write(kStdWarn,*) r1,rEms 
           raaaSetEmissivity(iC,i,1) = r1 
           raaaSetEmissivity(iC,i,2) = rEms 
           IF ((rEms .LT. 0.0) .OR. (rEms .GT. 1.0)) THEN 
@@ -2903,7 +2909,7 @@ c now read in the solar refl values
         rEms = prof.rho(1)
         raaaSetSolarRefl(iC,i,1) = r1 
         raaaSetSolarRefl(iC,i,2) = rEms 
-        write(kStdWarn,*) r1,rEms  
+c        write(kStdWarn,*) r1,rEms  
         i = 2
         r1 = 3600.0
         rEms = prof.rho(1)
@@ -2914,7 +2920,7 @@ c now read in the solar refl values
         DO i=1,iaSetSolarRefl(iC) 
           r1   = prof.efreq(i)   !!new rfreq = efreq
           rEms = prof.rho(i)
-          write(kStdWarn,*) r1,rEms 
+c          write(kStdWarn,*) r1,rEms 
           raaaSetSolarRefl(iC,i,1) = r1 
           raaaSetSolarRefl(iC,i,2) = rEms 
           IF ((rEms .LT. 0.0) .OR. (rEms .GT. 1.0)) THEN 
@@ -3758,18 +3764,24 @@ c input variables, to process
 
 c local vars 
       INTEGER iError
- 
+      REAL rAmt0,rT0,rP0,rPP0
+
+      rP0   = rP
+      rPP0  = rPP
+      rT0   = rT
+      rAmt0 = rAmt
+      
       iError = -1
 
       IF ((rAmt .lt. 0.0) .OR. (rAmt. gt. 1.0e3)) THEN
         WRITE(kStdWarn,1080)
         WRITE(kStdWarn,1111) iIDgas,iCnt,rAmt
-        iError = 1
+        iError = 2
         rAmt = 0.0
         !CALL DoStop
       END IF
 
-      IF ((rT .lt. 0.0) .OR. (rT. gt. 1.0e3)) THEN
+      IF ((rT .lt. 150.0) .OR. (rT. gt. 400.0)) THEN
         WRITE(kStdWarn,1081)
         WRITE(kStdWarn,1111) iIDgas,iCnt,rT
         iError = 1
@@ -3794,19 +3806,20 @@ c local vars
       END IF
 
       IF (iError .EQ. 1) THEN
+        write(kStdWarn,4320) iIDGas,iCnt,rAmt0,rT0,rP0,rPP0      
         rP = 1.0e3
         rPP = 1.0e-3
         rT = 300.0
         rAmt = 0.000000
         write(kStdWarn,4321) iIDGas,iCnt,rAmt,rT,rP,rPP
       END IF
-
         
  1111 FORMAT('gasID, layer = ',I5,I5,F12.5)
  1080 FORMAT('negative or bad gas amount in PRFILE profile file')
  1081 FORMAT('negative or bad gas temp in PRFILE profile file')
  1082 FORMAT('negative or bad layer pressure in PRFILE profile file')
  1083 FORMAT('negative or bad gas partial press in PRFILE profile file')
+ 4320 FORMAT('Orig  RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' ')) 
  4321 FORMAT('Reset RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
 
       RETURN

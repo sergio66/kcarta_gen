@@ -5571,7 +5571,7 @@ c this way we have a fast alternative to kTwoStream
      $               iaaRadLayer,iAtm,iNumlayer,iNclouds,
      $               rFracTop,rFracBot,
      $               ICLDTOPKCARTA, ICLDBOTKCARTA,
-     $               NCLDLAY, ICLDTOP, ICLDBOT, raaIWP, raaDME, iaaSCATTAB,  
+     $               NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB,  
      $               NSCATTAB, MUINC, 
      $               NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, 
      $               TABEXTINCT, TABSSALB, TABASYM, 
@@ -5588,6 +5588,7 @@ c usual variables
       REAL raaScatTemp(kMaxPts,kMixFilRows)   !scattering temporary copy
       REAL raaAsymTemp(kMaxPts,kMixFilRows)   !asymmetry temporary copy
       REAL raFreq(kMaxPts)                    !wavenumber grid
+      REAL raCC(kProfLayer)                   !cloud fraction; default to 1.0
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA    !kcarta cloud top/bottoms
       REAL rFracTop,rFracBot                  !layer fractions at TOA,GND
       INTEGER iNclouds
@@ -5666,7 +5667,7 @@ c --------------------------------->     <----------------------------------
 c          print *,iG,N,L,iI,raaIWP(L,iG),raaDME(L,iG),raE(1),raW(1),raG(1)
           DO iF = 1,kMaxPts
 C  Compute the optical depth of cloud layer, including gas 
-            raaEAll(iG,iF,iI) = raE(iF)*raaIWP(L,iG)
+            raaEAll(iG,iF,iI) = raE(iF)*raaIWP(L,iG)*raCC(iI)
             raaWAll(iG,iF,iI) = raW(iF)
             IF (raaIWP(L,iG) .ge. 1.0e-10) THEN
               raaGAll(iG,iF,iI) = raG(iF)
