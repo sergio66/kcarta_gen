@@ -83,5 +83,7 @@ SRCv1.17
 SRCv1.18WORKS
 
 # special cases
-scatter_*.f
+# allow this, change Readme so that users are aware scatter*.f are experimental
+SRCv1.07/scatter_*.f
+SRCv1.10/scatter_*.f
 

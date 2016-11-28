@@ -1,0 +1,244 @@
+%% this is a summary  of Revsison.txt as it pertains to clouds, and is NOT complete
+
+v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
+           r = c1*r1 + c2*r2 + c12*r12 + clr*rclr
+        PCLSAM clouds can also have NLTE calcs
+
+        Included National Renewable Energy Lab (NREL) SOLAR database to make 
+        2830-50000 cm-1 region self consistent, put SOLAR database at T=5800K
+        between 15-605 cm-1; kept the 605-2830 cm-1 solar database same, for 
+        consistency with SARTA
+
+        Making the PCLSAM scattering mimic the SARTA fast model : 
+                  r = c1' r1 + c2' r2 + c12 r12 + clr rclr
+        where c1' = c1 - c12 = cloud 1 alone
+              c2' = c2 - c12 = cloud 2 alone
+
+        Added on Limb Viewing Geometry (for night time; daytime may have NLTE 
+        problems)
+        RT code uses temperature variation across layers (as the optical paths
+        are long, so need to account for this)
+        Also put in solar occultation capability
+
+        Added on looping over one Atmosphere!!!
+        In nm_radnce if iNatm >= 1 then read in nml atmosphere(s)
+                        iNatm = 1 then read in ONE atmosphere; depending on 
+                          iAtmLoop, for clear sky/cloudy case, can loop over 
+        (1) rPstart (2) rPStop (3) rSatZen (4) rSolarAngle 
+        (5) emissivity --> e0 + delta
+         Right now cannot do looping over cloud stuff; go to SARTA for that
+                 (6) raDme1  (7) raCngWat1 (8) raCprTop1 
+                 (9) raDme2  (10)raCngWat2 (11) raCprTop2 
+          raAtmLoop sets the values of the param we are looping over
+
+11/25/16       Added caaTextOverride to nm_params so you can have a text file
+               with the 100 layer code. This gets set to caaTextOverrideDefault
+	       and goes globally with every chunk, from p.cc, p.ciwc, p.clwc
+	       all interped to the AIRS 100 layers!!!
+
+               Remember  p1.cfrac(1) + p1.cfrac2(1) - p1.cfrac12(1) = p1.tcc
+	       The text file will have following columns (first column is iSigmaIASI)
+	          +1.0/-1.0   nLAYS tcc  cfrac1    cfrac2      cfrac12    0.0 
+		if iSigmaIASI = +1 followed by the following 100 columns
+	          laynum  cc      gas_201(W)  gas_202(I) gas_203(A) ptemp plevs
+		if iSigmaIASI = =1 no need for more info as cc(i) assumed to be 1.0 for all layers
+	          laynum  cc      gas_201(W)  gas_202(I) gas_203(A) ptemp plevs
+		  
+               That way when the code is run, it does RT similar to sigmaIASI	      
+	       namely if iSigmaIASI = +1
+	         Assume you know radiance at boom of layer (ie from prev layer)
+	  	   r(i-1)
+	         Then cloud frac = cc(i)
+	           rClear = r(i-1) exp(-tau(i)/mu) + B(T)(1-exp(-tau(i)/mu))
+		   tauC(i) = tau(i) + (tau_WaterCloud(i) + tau_IceCloud(i))*cc(i)
+	           rCloud = r(i-1) exp(-tauC(i)/mu) + B(T)(1-exp(-tauC(i)/mu))		 
+	         r(i) = rCloud + (1-cc(i)) rClear
+	       while if iSigmaIASI = -1
+	         Do cloudy calc through all layers assuming cc(i) = 1
+	         Do clear  calc through all layers assuming cc(i) = 0
+		 rTOA = tcc rCloudy + (1-tcc) rClear
+		 
+11/25/16       To use 100 layer code, you need to go from ECMWF/ERA/MERRA model
+               91 level fields to 100 layer klayers output. To do this, do
+  fip = 'forITOVS_ECM_100layercloud.ip.rtp';
+  fop = 'forITOVS_ECM_100layercloud.op.rtp';
+  gas_str = 'nwant=10 listg=1,2,3,4,5,6,9,12,201,202 ';
+  h1ALL_ip = h1ALL;
+    h1ALL_ip.ngas = h1ALL.ngas + 2;
+    h1ALL_ip.glist = [h1ALL.glist; [201 202]'];
+    h1ALL_ip.gunit = [h1ALL.gunit; [21  21]'];
+  p1ALL_ip = p1ALL;
+    p1ALL_ip.gas_201 = p1ALL.clwc;  %% 201 = water cloud ~ ctype 101
+    p1ALL_ip.gas_202 = p1ALL.ciwc;  %% 202 = ice cloud   ~ ctype 201
+  rtpwrite(fip,h1ALL_ip,h1aALL,p1ALL_ip,p1aALL);
+  klayers100 = '/home/sergio/klayersV205/BinV201/klayers_airs_x_testmeCLOUDversion';
+  klayerser = ['!' klayers100 ' fin=' fip ' fout=' fop ' ' gas_str];
+  eval(klayerser)	       
+		  
+c 11/25/16        Added the following to /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
+c           real*4     cc(MAXLEV)           ! cloud cover
+c           real*4     ciwc(MAXLEV)         ! cloud ice water content
+c           real*4     clwc(MAXLEV)         ! cloud liq water content
+
+3/2/16          PCLSAM twoslab flux calcs now do the same as PCLSAM twoslab radiance calcs
+                namely (1) clouds 1,2 (2) cloud 1 (3) cloud 2 (4) clear (5) weighted sum!!!
+
+                Type      |    kWhichScatterCode NEW | kWhichScatterCode OLD  
+                ----------+--------------------------+----------------------
+                Clear/Abs |         0                |       0
+                kTWOSTR   |         1                |      -2
+                RTSPEC    |         2                |      -1 
+                DISORT    |         3                |      +1
+                PERTURB   |         4                |
+		PCLSAM    |         5                |
+		RAYLEIGH  |         6                |
+
+                note that really, only PCLSAM (5) is supported/tested recently
+
+11/12/13        If we are doing PCLSAM TwoSlab rad calc, and also ask for flux
+                calc, then the cloud fractions are automatically reset to 1 
+                so that the code need only do ONE rad calc (instead of clear, 
+                first cloud, second cloud, overlapping clouds) and ONE flux 
+                calc.  To turn off slab clouds (for testing) look at n_main.f
+   !!!!! TEST to get rid of clouds !!!!! <<<<<<<<<<<<<<<< >>>>>>>>>>>>>>>>>>>
+                So in order to do FLUX calcs for the complete case,
+                   r = f1r1 + f2r2 + f12r12 + (1-f1-f2)rclr
+                you should do 4 rad runs and therefore 4 flux runs: 
+                one with clear (and cloud fracs == 0, cngwat1,2 = 0),
+                one with only cloud1 (c2 = c12 = 0, c1 = 1, cngwat2 = 0), 
+                one with only cloud2 (c1 = c12 = 0, c2 = 1, cngwat1 = 0), 
+                and one with both clouds completely overlapping (c1=c2=c12=1)
+                Then add the fluxes as above
+
+11/12/13        Set 100 layer clouds so that if read_rtp finds gas_201 
+                and gas_202  while reading in regular gas profiles, it 
+                toggles a golbal var k100layerCloud so that the code knows
+                it needs to call READRTP_CLD100LAYER; also this makes 
+                caCloudPFName redundant in nm_params, as the code automatically
+                equates this to caPFname, so it has been removed from the 
+                namelist
+                
+                Also tweaked the kCARTA package so 100layer cloud fluxes can 
+                be computed, as can the TwoSlab fluxes
+     
+9/18/13         Clarified solar irradiance at TOA, when calling 
+                rad_trans_SAT_LOOK_UP/DOWN_NIR_VIS_UV
+ A) recall all eqns have (spectral flux)/(4 pi) * phasefcn * ssa
+    spectral radiance r = ttorad(w,5600) = W/m2/sr/cm-1
+    multiply this by sun solar angle (pi Rsun^2 /dist^2) == W/m2/cm-1 = 
+    spectral flux F
+ B) From Mobley, Estimation of the Remote-Sensing Reflectance from Above 
+    Surface Measurements, 1999, Appl Opt 38, we see that Eq 5 states
+     When an irradiance Ed falls onto a Lambertian surface, the uniform r
+     adiance Lg leaving the surface is given by  Lg = (R/pi) Ed
+     So                (Lg)(pi) = (R) (Ed) 
+     where R = no units, E = irrad = W/m2/cm-1, Lg = rad = W/m2/sr/cm-1, 
+     pi = angle = sr
+     The downward irradiance we get from sun is 
+          (sun solid angle) x (ttorad(w,5600)
+     So the reflected radiance is indeed (R/pi)(SolarDownWard Irradiance)
+
+9/10/13         Since new klayers100 contains gases201,202 this means code no
+                longer need additional cloud profile file; caCloudPFname has  
+                been simplified to default 'N' if we want slab or no cloud, or 
+                default 'Y' if we do want 100 layer cloud profile; then the 
+                code internally resets to caPFname. 
+                In addition, raCloudDME and iaCloudFile are gone as 
+                namlist variables, as they are irrelevant, being replaced by 
+                cpsize/cpsize2 and ctype/ctype2. 
+                prof.gas_201, prof.gas_202, prof.gas_203 would typically be
+                associate with prof.ctype 101,201,301 respectively (ie water 
+                cloud, ice cloud, aerosol) ie though you can have two different
+                aerosol SLABS, don't try two different aerosol PROFILES.
+                Code also uses KN Liou ice dme temperature variation when 
+                p.ctype or p.ctype2 == 201, instead of constant cpsize/cpsize2
+                rtp_interface.f code needs to recognize this and set k100layerCloud = 1
+		
+9/9/13          Introduced iaNML_Ctype in << nm_prfile >>, to map caaCloudFile to 
+                p.ctype and p.ctype1
+                So for example to map water clouds in RTP file do
+		  iBinOrAsc       = 1		 
+		  iNclouds_RTP    = 1
+                  iaNML_Ctype(1)  = 101
+                  caaCloudFile(1) = '../MIEDATA/WATER250/water_405_2905_250'		  
+                which means now when code finds p.ctype(ix) = 101 or 
+                p.ctype2(iy) = 101, it automatically goes and finds the 
+                water scattering tables
+                And for example to map water/ice clouds
+		  iBinOrAsc       = 1		 		
+		  iNclouds_RTP    = 2
+                  iaNML_Ctype(1)  = 101
+                  caaCloudFile(1) = '../MIEDATA/WATER250/water_405_2905_250'		  
+                  iaNML_Ctype(2)  = 201
+                  caaCloudFile(2) = '../CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'		
+                Typically 101 = water, 201 = ice, 301 = aerosol
+		
+                Code is smart enough to figure out which of these clouds to 
+                use eg if all cloud fracs cfrac=cfrac2=cfrac12 = 0, then it 
+                does a clear cky calc even if you told it to expect a 
+                cloudy sky calc
+               
+9/7/13          If kRTP = 1, the PCLSAM scattering mimics SARTA fast model : 
+                  r = c1' r1 + c2' r2 + c12 r12 + clr  rclr
+                where r1   = radiance with only cloud1
+                      r2   = radiance with only cloud2
+                      r12  = radiance with both overlapping cloud1 cloud2
+                      rclr = clear sky radiance
+                      clr = (1-c1-c2+c12)
+                    c12 <= max(c1,c2)
+                where c1' = c1 - c12 = cloud 1 alone
+                      c2' = c2 - c12 = cloud 2 alone
+
+                    So for example if c1=c2=c12 = 1, clr=0
+                    So for example if c1=c2=c12 = 0, clr=1
+                This (internally) sets iAtmLoop = 100,iNatm = 5 so that five
+                clear sky atms can be duplicated as needed
+                See SUBROUTINE InterfaceScattering in scatter_interface.f 
+
+                If kRTP = -1, the PCLSAM scattering tries to mimic the SARTA
+                fast model, but has cfrac1 = 1.0 always; if there is a second 
+                cloud cfrac2 = cfrac12 = 1 else cfrac2 = cfrac12 = 0; this 
+                way clr frac = 0 always
+
+9/4/13          Cleaned up/added new solar datafiles in NIR - VIS - UV 
+                (freq >= 2830) using data from 
+                      http://rredc.nrel.gov/solar/spectra/am0/
+                National Renewable Energy Lab (NREL) releases 
+                So these replace the files I had originally put together from
+                Jack Kumer (NIR) and SBDART (vis)
+
+                Have kept IR (605-2830 cm-1) solar datafiles the same, 
+                remaining consistent with SARTA. 
+                See Thekaekara, M.P. 1973.  Solar energy outside the 
+                Earth's atmosphere, Solar Energy v.14 p.109-127 as well as 
+                /asl/sarta/code/rdsun.f
+
+                For FIR (freq < 605), simply used ttorad(freq,5800); makes 
+                things a little discontinuous at 605 cm-1 (when we use SARTA 
+                data) but when multiplying by 1e-5, this is tiny compared to
+                terrestrial radiances
+
+8/30/13         Put iRayleigh = +1 in clear sky rad_trans_SAT_LOOK_DOWN
+                so simple rayleigh done if 0 < Solzen < 90 and             
+                raFreq(1) > 5000 cm-1
+
+8/1/13          Found a bug in writing to jac.dat_COL since kStdJacob2 was not
+                being initialized (default unit was 0, which is same as  
+                STDERR), so occasionally junk could get into the file
+
+7/30/13         Removed h20*.f and calxsc*.f from Makefile, moved these
+                to (no longer used) OLD_CONT_BLOCKDATA_AND_XSEC
+
+7/1/13          Clarifying angles in kCARTA, after Larrabee noticed bug vs 
+                SARTA; also now make sure rtp_interface.f and n_rad_jac_scat 
+                both put in rSatHeight in meters
+
+                  for downlook, rSatAngle = scanang (at instr)
+                                rSolarAngle = local solar zenith (at surface)
+          
+                  for uplook,   rSatAngle   = local zenith (at surface)
+                                rSolarAngle = local solar zenith (at surface)
+
+                  for limb,     rSatAngle = scanang (at instr)
+                                rSolarAngle = rSatAngle
+                

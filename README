@@ -25,6 +25,20 @@ b) rtp package, which is our native file format for storing
 c) klayers package, which takes in a LEVELS rtp file and profuces a LAYERS avg rtp
    file, needed for RT calculations
 
+NOTE
+We have included our scattering interface routines with the git
+package. They are completely unsupported at this point (ie purely for
+our research).  The PCLSAM (Parameterization for Cloud Longwave
+Scattering for Use in Atmospheric Models, J. Clim 1999 by Chou et. al,
+DOI: http://dx.doi.org/10.1175/1520-0442-12.1.159) is used in a number
+of fast RTA models (eg SARTA and RTTOVS), and is included here in a
+TwoSlab and 100 layer version. It has been tested as much as
+possible. In addition RTSPEC by F. Evans (http://nit.colorado.edu/
+rtspec/README), as well as kTWOSTREAM (see eg Infrared dust spectral
+signatures from AIRS, GRL 2006, DOI: 10.1029/2005GL024364) have also
+been interfaced and tested. The other codes (DISORT, PERTURB etc) are
+purely experimental and not been tested.
+
 Code was developed jointly by
   L.Larrabee Strow        Principal Investigator
   Sergio DeSouza-Machado  Radiative Transfer, Jacobians, Fluxes, Scattering

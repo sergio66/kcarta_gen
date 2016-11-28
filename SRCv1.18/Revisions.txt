@@ -581,6 +581,56 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+
+11/25/16       Added caaTextOverride to nm_params so you can have a text file
+               with the 100 layer code. This gets set to caaTextOverrideDefault
+	       and goes globally with every chunk, from p.cc, p.ciwc, p.clwc
+	       all interped to the AIRS 100 layers!!!
+	       
+               Remember  p1.cfrac(1) + p1.cfrac2(1) - p1.cfrac12(1) = p1.tcc
+	       The text file will have following columns (first column is iSigmaIASI)
+	          +1.0/-1.0   nLAYS tcc  cfrac1    cfrac2      cfrac12    0.0 
+		if iSigmaIASI = +1 followed by the following 100 columns
+	          laynum  cc      gas_201(W)  gas_202(I) gas_203(A) ptemp plevs
+		if iSigmaIASI = =1 no need for more info as cc(i) assumed to be 1.0 for all layers
+	          laynum  cc      gas_201(W)  gas_202(I) gas_203(A) ptemp plevs
+		  
+               That way when the code is run, it does RT similar to sigmaIASI	      
+	       namely if iSigmaIASI = +1
+	         Assume you know radiance at boom of layer (ie from prev layer)
+	  	   r(i-1)
+	         Then cloud frac = cc(i)
+	           rClear = r(i-1) exp(-tau(i)/mu) + B(T)(1-exp(-tau(i)/mu))
+		   tauC(i) = tau(i) + (tau_WaterCloud(i) + tau_IceCloud(i))*cc(i)
+	           rCloud = r(i-1) exp(-tauC(i)/mu) + B(T)(1-exp(-tauC(i)/mu))		 
+	         r(i) = rCloud + (1-cc(i)) rClear
+	       while if iSigmaIASI = -1
+	         Do cloudy calc through all layers assuming cc(i) = 1
+	         Do clear  calc through all layers assuming cc(i) = 0
+		 rTOA = tcc rCloudy + (1-tcc) rClear
+		 
+11/25/16       To use 100 layer code, you need to go from ECMWF/ERA/MERRA model
+               91 level fields to 100 layer klayers output. To do this, do
+  fip = 'forITOVS_ECM_100layercloud.ip.rtp';
+  fop = 'forITOVS_ECM_100layercloud.op.rtp';
+  gas_str = 'nwant=10 listg=1,2,3,4,5,6,9,12,201,202 ';
+  h1ALL_ip = h1ALL;
+    h1ALL_ip.ngas = h1ALL.ngas + 2;
+    h1ALL_ip.glist = [h1ALL.glist; [201 202]'];
+    h1ALL_ip.gunit = [h1ALL.gunit; [21  21]'];
+  p1ALL_ip = p1ALL;
+    p1ALL_ip.gas_201 = p1ALL.clwc;  %% 201 = water cloud ~ ctype 101
+    p1ALL_ip.gas_202 = p1ALL.ciwc;  %% 202 = ice cloud   ~ ctype 201
+  rtpwrite(fip,h1ALL_ip,h1aALL,p1ALL_ip,p1aALL);
+  klayers100 = '/home/sergio/klayersV205/BinV201/klayers_airs_x_testmeCLOUDversion';
+  klayerser = ['!' klayers100 ' fin=' fip ' fout=' fop ' ' gas_str];
+  eval(klayerser)	       
+		  
+c 11/25/16        Added the following to /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
+c          real*4     cc(MAXLEV)           ! cloud cover
+c          real*4     ciwc(MAXLEV)         ! cloud ice water content
+c          real*4     clwc(MAXLEV)         ! cloud liq water content
+			      
 11/16/16        kThermalAngle is now also in nm_params
                 So you can easily set the constant diffusivity angle
 		even when you are using an rtp file
@@ -604,7 +654,7 @@ v1.18
 		Now expects input angle (radians) and it does the cos(angle)
   		grep -in 'call radiativetransfer(' *.f
                 
-10/8/16         Created iaaOverride in nm_params, so you can override lots of
+10/8/16         Created global var iaaOverride in nm_params, so you can override lots of
                 defaults params at run time (most of which are barely ever switched)
                 such as iSARTAChi,iSPlinetype,iUsualUpwell
                 3 main sets : General/RadTrans/LBLRTM Tape5/6
@@ -613,6 +663,9 @@ v1.18
 		See lines 2000+ in kcartamisc.f
                 If using iaaOveride(2,1) = 43 (LBLRTM style RT) then can also do
 		a regression based correction to BT_TOA, by setting iaaOveride(2,9) = 1
+
+                Also have global var caaTextOverrideDefault so that you can carry a texfile
+		through the various chunks
 		
 10/2/16         Made caComment in nm_output character*120 so you can eg type
                 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -685,7 +738,19 @@ v1.18
 		
 3/2/16          PCLSAM twoslab flux calcs now do the same as PCLSAM twoslab radiance calcs
                 namely (1) clouds 1,2 (2) cloud 1 (3) cloud 2 (4) clear (5) weighted sum!!!
-		
+
+                Type      |    kWhichScatterCode NEW | kWhichScatterCode OLD  
+                ----------+--------------------------+----------------------
+                Clear/Abs |         0                |       0
+                kTWOSTR   |         1                |      -2
+                RTSPEC    |         2                |      -1 
+                DISORT    |         3                |      +1
+                PERTURB   |         4                |
+		PCLSAM    |         5                |
+		RAYLEIGH  |         6                |
+
+                note that really, only PCLSAM (5) is supported/tested recently
+
 2/12/16         added ../INCLUDE/kcarta_v118HIGHRES_IR.param and
                 ../INCLUDE/pre_definedHIGHRES_IR.param to do 0.0005 cm-1 calcs in the
                 605-2830 cm-1 range
@@ -760,7 +825,7 @@ v1.18
 		all cloud parameters, allowing clear calcs to be done
 		
 07/21/15        If kCARTA reads cloud info from RTP (cprtop/cprbot, cngwat etc)
-                and computations are PCLSAM, then they duplicate SARTA cloud.
+                and computations are PCLSAM, then they duplicate SARTA TwoSlab cloud.
 		kCARTA manipulates cloud top/bottom so they occupy complete layers.
 		This means "cprop/cprtop2/cprbot/cprbot2" can change, and so
 		a seven row, four column textfile "fname_CLD" is dumped out
@@ -779,8 +844,20 @@ v1.18
         DO iI=1,7
           write(kStdWarn,*)caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),'<>',
      $raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
-        END DO		
-	
+        END DO
+
+                Type      |    kWhichScatterCode NEW | kWhichScatterCode OLD  
+                ----------+--------------------------+----------------------
+                Clear/Abs |         0                |       0
+                kTWOSTR   |         1                |      -2
+                RTSPEC    |         2                |      -1 
+                DISORT    |         3                |      +1
+                PERTURB   |         4                |
+		PCLSAM    |         5                |
+		RAYLEIGH  |         6                |
+
+                note that really, only PCLSAM (5) is supported/tested recently
+
 07/17/15        Regenerated linemix coeffs (using eg HITRAN2012); see
                    SRCv1.18/NONLTE
 		for details
@@ -1004,15 +1081,25 @@ drwxrwxr-x 3 sergio pi_strow  4096 Jul  4 13:00 M_LopezPuertasF90_code
                 aerosol SLABS, don't try two different aerosol PROFILES.
                 Code also uses KN Liou ice dme temperature variation when 
                 p.ctype or p.ctype2 == 201, instead of constant cpsize/cpsize2
-
-9/9/13          Introduced iaNML_Ctype in nm_prfile, to map caaCloudFile to 
+                rtp_interface.f code needs to recognize this and set k100layerCloud = 1		
+                
+9/9/13          Introduced iaNML_Ctype in << nm_prfile >>, to map caaCloudFile to 
                 p.ctype and p.ctype1
                 So for example to map water clouds in RTP file do
-                  iaNML_Ctype(1)      = 101
-                  caaCloudFile(1) ='../MIEDATA/WATER250/water_405_2905_250'
+		  iBinOrAsc       = 1		 
+		  iNclouds_RTP    = 1
+                  iaNML_Ctype(1)  = 101
+                  caaCloudFile(1) = '../MIEDATA/WATER250/water_405_2905_250'		  
                 which means now when code finds p.ctype(ix) = 101 or 
                 p.ctype2(iy) = 101, it automatically goes and finds the 
                 water scattering tables
+                And for example to map water/ice clouds
+		  iBinOrAsc       = 1		 		
+		  iNclouds_RTP    = 2
+                  iaNML_Ctype(1)  = 101
+                  caaCloudFile(1) = '../MIEDATA/WATER250/water_405_2905_250'		  
+                  iaNML_Ctype(2)  = 201
+                  caaCloudFile(2) = '../CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'		
                 Typically 101 = water, 201 = ice, 301 = aerosol
 
                 Code is smart enough to figure out which of these clouds to 
@@ -3124,12 +3211,17 @@ Two main updates in this version :
                 set at 0 thruout the atmosphere
 
 11/29/01        Reset the three scattering option for kWhichScattering Code
-                Type      |    kWhichScatterCode OLD | kWhichScatterCode OLD  
+                Type      |    kWhichScatterCode NEW | kWhichScatterCode OLD  
                 ----------+--------------------------+----------------------
-                Clear     |         0                |       0
+                Clear/Abs |         0                |       0
                 kTWOSTR   |         1                |      -2
                 RTSPEC    |         2                |      -1 
                 DISORT    |         3                |      +1
+                PERTURB   |         4                |
+		PCLSAM    |         5                |
+		RAYLEIGH  |         6                |
+
+                note that really, only PCLSAM (5) is supported/tested recently
 
 11/29/01        For kTwoStr, need kScatter = 1,2,3 (for number of times we
                 try to rerun the radiance thru cloud, so as to get better

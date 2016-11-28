@@ -1386,7 +1386,7 @@ c ******** RADNCE section
           CALL DoSTOP
         ENDIF
         kTempUnitOpen = 1
-  1011	CONTINUE
+ 1011	CONTINUE
         READ(iIOUNX,1012) caJunk80
 	IF ((caJunk80(1:1) .EQ. '!') .OR. (caJunk80(1:1) .EQ. '%')) GOTO 1011
 	READ (caJunk80,*) iSigmaIASI,iNumLaysX,rTCC,rCfracX1,rCfracX2,rCfracX12	
