@@ -608,6 +608,8 @@ v1.18
 	         Do cloudy calc through all layers assuming cc(i) = 1
 	         Do clear  calc through all layers assuming cc(i) = 0
 		 rTOA = tcc rCloudy + (1-tcc) rClear
+	       Typically 101 = cloudtype for water = gas_201 = clwc
+	       Typically 201 = cloudtype for ice   = gas_202 = ciwc	       
 		 
 11/25/16       To use 100 layer code, you need to go from ECMWF/ERA/MERRA model
                91 level fields to 100 layer klayers output. To do this, do

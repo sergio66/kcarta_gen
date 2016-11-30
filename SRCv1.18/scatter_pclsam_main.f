@@ -624,9 +624,11 @@ c local vars
         write(kStdWarn,*) 'reading in caaTextOverride : iNlaysInFile,iNumLayer = ',iNlaysInFile,iNumLayer	
         CALL DoStop
       END IF
-      IF (iSigmaIASI .NE. 1) THEN
-        write(kStdErr,*) 'huh???? expecting to do stream of cloud (with cc(i) and clear!!!'
-        write(kStdWarn,*) 'huh???? expecting to do stream of cloud (with cc(i) and clear!!!'	
+      IF (abs(iSigmaIASI) .NE. 1) THEN
+        write(kStdErr,*) 'iSigmaIASI expected = +/- 1 , instead got ',iSigmaIASI
+        write(kStdErr,*) 'huh???? expecting to do stream of cloud (with cc(i)) and clear!!!'
+        write(kStdWarn,*) 'iSigmaIASI expected = +/- 1 , instead got ',iSigmaIASI	
+        write(kStdWarn,*) 'huh???? expecting to do stream of cloud (with cc(i)) and clear!!!'	
         CALL DoStop
       END IF
       iCountLay = 0

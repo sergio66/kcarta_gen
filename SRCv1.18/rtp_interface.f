@@ -4317,6 +4317,17 @@ c        iactype_rtp(2) = prof.udef(17)
         iactype_rtp(2) = prof.ctype2
       END IF
 
+      IF ((iNclouds .EQ. 2) .AND. (prof.ctype2 .LT. 100)) THEN
+        write(kStdErr,*)  ' hmmm iNclouds .EQ. 2, prof.ctype2 .LT. 100, reset iNclouds to 1'
+        write(kStdWarn,*) ' hmmm iNclouds .EQ. 2, prof.ctype2 .LT. 100, reset iNclouds to 1'	
+        iNclouds = iNclouds - 1
+      END IF
+      IF ((iNclouds .EQ. 1) .AND. (prof.ctype .LT. 100)) THEN
+        write(kStdErr,*)  ' hmmm iNclouds .EQ. 1, prof.ctype0 .LT. 100, reset iNclouds to 0'
+        write(kStdWarn,*) ' hmmm iNclouds .EQ. 1, prof.ctype0 .LT. 100, reset iNclouds to 0'	
+        iNclouds = iNclouds - 1
+      END IF
+      
       raCloudDME(1) = prof.cpsize
       raCloudDME(2) = prof.cpsize2
 
@@ -4327,16 +4338,21 @@ c        iactype_rtp(2) = prof.udef(17)
         iH = iDiv(iaCloudScatType(j),100)
 
         IF ((iG .LT. 1) .OR. (iH .LT. 1)) THEN
-          write(kStdErr,*) 'kCARTA cannot do "black clouds" here '
-          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',
-     $    j,iaCloudScatType(j),iactype_rtp(j)
+          write(kStdErr,*) 'kCARTA cannot do "black clouds" here : j,iNclouds',j,iNclouds
+          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',j,iaCloudScatType(j),iactype_rtp(j)
+	  IF (j .EQ. 2) THEN
+	    write(kStdErr,*) ' .... showing you j=1'
+            write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',1,iaCloudScatType(1),iactype_rtp(1)	    
+	  ELSEIF (j .EQ. 1) THEN
+	    write(kStdErr,*) ' .... showing you j=2'
+            write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',2,iaCloudScatType(2),iactype_rtp(2)
+	  END IF
           CALL DoStop
         END IF
 
         IF (iG .NE. iH) THEN
           write(kStdErr,*) 'RTP and kCARTA have different cloud types here '
-          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',
-     $    j,iaCloudScatType(j),iactype_rtp(j)
+          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',j,iaCloudScatType(j),iactype_rtp(j)
           CALL DoStop
         ELSE
           write(kStdWarn,*) 'j,iaCloudScatType(j),iactype_rtp(j),p.gas_ID(j) = ', j,iaCloudScatType(j),iactype_rtp(j),iaCldTypes(j)

@@ -349,8 +349,8 @@ C         Check that parameter are in range of table
         !CALL DoStop
       END IF  
       IF (DME .LT. DMETAB(1) .OR. DME .GT. DMETAB(NDME)) THEN
-        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
-        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
+c        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
+c        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
         IF (DME .LT. DMETAB(1)) THEN
           DME = DMETAB(1)
         ELSEIF (DME .GT. DMETAB(NDME)) THEN
@@ -492,8 +492,8 @@ C         Check that parameter are in range of table
         !CALL DoStop
       END IF  
       IF (DME .LT. DMETAB(1) .OR. DME .GT. DMETAB(NDME)) THEN
-        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
-        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
+c        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
+c        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
         IF (DME .LT. DMETAB(1)) THEN
           DME = DMETAB(1)
         ELSEIF (DME .GT. DMETAB(NDME)) THEN
@@ -5666,8 +5666,9 @@ c --------------------------------->     <----------------------------------
           iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
 c          print *,iG,N,L,iI,raaIWP(L,iG),raaDME(L,iG),raE(1),raW(1),raG(1)
           DO iF = 1,kMaxPts
-C  Compute the optical depth of cloud layer, including gas 
-            raaEAll(iG,iF,iI) = raE(iF)*raaIWP(L,iG)*raCC(iI)
+C  Compute the optical depth of cloud layer, including gas
+            raaEAll(iG,iF,iI) = raE(iF)*raaIWP(L,iG)*raCC(iI)  !! include raCC????
+            raaEAll(iG,iF,iI) = raE(iF)*raaIWP(L,iG)           !! ignore  raCC????	    
             raaWAll(iG,iF,iI) = raW(iF)
             IF (raaIWP(L,iG) .ge. 1.0e-10) THEN
               raaGAll(iG,iF,iI) = raG(iF)
