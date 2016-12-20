@@ -420,11 +420,17 @@ C         Radiative transfer variables:
       REAL TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
       INTEGER iaRadLayer(kProfLayer)
 
-      INTEGER iCloudySky,iLayers,iII,iDummy
+      INTEGER iCloudySky,iLayers,iII,iDummy,iMRO
       REAL raLayerTemp(kProfLayer),raTau(kProfLayer),rDummy
       REAL rSolarAngle,ttorad
 
-      REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase),tcc,raCC(kProfLayer)
+      REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
+
+      REAL tcc,raCC(kProfLayer)
+      INTEGER iNumSubPixels          !! number of cloudy subpixels, plus need to add one for clear
+      REAL    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
+      REAL    rCLrFrac               !! clear fraction
+      INTEGER iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
 
       iIOUN = kStdkCarta
 
@@ -501,7 +507,7 @@ C         Radiative transfer variables:
      $      raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag,
      $      raThickness,raPressLevels,iProfileLayers,pProf,
      $      raTPressLevels,iKnowTP,rCO2MixRatio,
-     $         raaRadsX,iNumOutX)
+     $         raaRadsX,iNumOutX,+1)
         ELSE
            CALL quick_clear_radtrans_uplook(
      $       raFreq,raInten,raVTemp,
@@ -537,7 +543,8 @@ c if CloudySky > 0 then go ahead with PCLSAM!
      $                    iaaRadLayer,iAtm,iNumlayer)
 
         IF (k100LayerCloud .GT. 0) THEN
-	  CALL read_textfile_racc(iNumLayer,tcc,raCC)	  
+	  CALL read_textfile_racc(iNumLayer,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel)      	  
 	END IF
 	
         !!! now add on clouds to raaExtTemp, raaSSAlbTemp, raaSSAlbTemp
@@ -553,7 +560,7 @@ c if CloudySky > 0 then go ahead with PCLSAM!
      $               TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
         ELSE
           write(kStdWarn,*) '    --- 100Slab cloud layers ---'      
-          CALL AddCloud_pclsam_SunShine(
+          CALL AddCloud_pclsam_SunShine_100layerclouds(
      $               raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp,
      $               iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot,
      $               ICLDTOPKCARTA, ICLDBOTKCARTA,
@@ -564,8 +571,12 @@ c if CloudySky > 0 then go ahead with PCLSAM!
      $               TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
         END IF
 
-        CALL find_radiances_pclsam(iRadOrColJac,raFreq,raaAbs,tcc,raCC,
-     $       raaExtTemp,raaSSAlbTemp,raaAsymTemp,
+        !! remember raaAbs is the GAS OD only, while raaExtTemp includes CLOUDS
+	!!   (ala PCLASM, which includes effects of w and g)
+	!! so can easily back out raaAbs to do MRO clear sky layers
+        CALL find_radiances_pclsam(iRadOrColJac,raFreq,raaAbs,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel,      	  
+     $       raaExtTemp,raaSSAlbTemp,raaAsymTemp,iKnowTP,
      $       iaPhase(iAtm),raPhasePoints,raComputedPhase,
      $       ICLDTOPKCARTA, ICLDBOTKCARTA,raVTemp, 
      $       caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, 
@@ -590,18 +601,25 @@ c if CloudySky > 0 then go ahead with PCLSAM!
 
 c************************************************************************
 c this subroutune reads in caaTextOverride
-      SUBROUTINE read_textfile_racc(iNumLayer,tcc,raCC)
+      SUBROUTINE read_textfile_racc(iNumLayer,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel)      
 
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
-c inut var
+c input var
       INTEGER iNumLayer
 c output vars
+      INTEGER iMRO
       REAL tcc,raCC(kProfLayer)
-
+c MRO output      
+      INTEGER iNumSubPixels          !! number of cloudy subpixels, plus need to add one for clear
+      REAL    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
+      REAL    rCLrFrac               !! clear fraction
+      INTEGER iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
+      
 c local vars
-      INTEGER iIOUNX,iERRX,iSigmaIASI,iCountLay,iNlaysInFile,iJunkX
+      INTEGER iIOUNX,iERRX,iCountLay,iNlaysInFile,iJunkX,raPCC(kProfLayer),iTest
       CHARACTER*80 caJunk80
 
       write(kStdWarn,*) 'looking for and opening caaTextOverride (from nm_params)'
@@ -609,7 +627,7 @@ c local vars
       OPEN(UNIT=iIOUNX,FILE=caaTextOverrideDefault,STATUS='OLD',FORM='FORMATTED',
      $    IOSTAT=IERRX)
       IF (IERRX .NE. 0) THEN
-        WRITE(kStdErr,*) 'k100layerCloud : trying top make sure file exists'
+        WRITE(kStdErr,*) 'k100layerCloud : make sure file exists'
         WRITE(kStdErr,1020) IERRX, caaTextOverrideDefault
  1020   FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
         CALL DoSTOP
@@ -618,27 +636,30 @@ c local vars
  1021 CONTINUE	
       READ(iIOUNX,1022) caJunk80
       IF ((caJunk80(1:1) .EQ. '!') .OR. (caJunk80(1:1) .EQ. '%')) GOTO 1021
-      READ (caJunk80,*) iSigmaIASI,iNlaysInFile,tcc
+      READ (caJunk80,*) iMRO,iNlaysInFile,tcc
       IF (iNlaysInFile .NE. iNumLayer) THEN
         write(kStdErr,*)  'reading in caaTextOverride : iNlaysInFile,iNumLayer = ',iNlaysInFile,iNumLayer
         write(kStdWarn,*) 'reading in caaTextOverride : iNlaysInFile,iNumLayer = ',iNlaysInFile,iNumLayer	
         CALL DoStop
       END IF
-      IF (abs(iSigmaIASI) .NE. 1) THEN
-        write(kStdErr,*) 'iSigmaIASI expected = +/- 1 , instead got ',iSigmaIASI
+      IF ((iMRO .NE. -1) .AND. (iMRO .NE. +1) .AND. (iMRO .NE. +2)) THEN
+        write(kStdErr,*) 'iMRO expected = -1,+1,+2 , instead got ',iMRO
         write(kStdErr,*) 'huh???? expecting to do stream of cloud (with cc(i)) and clear!!!'
-        write(kStdWarn,*) 'iSigmaIASI expected = +/- 1 , instead got ',iSigmaIASI	
+        write(kStdErr,*) 'iMRO expected = -1,+1,+2 , instead got ',iMRO	
         write(kStdWarn,*) 'huh???? expecting to do stream of cloud (with cc(i)) and clear!!!'	
         CALL DoStop
       END IF
       iCountLay = 0
- 1023 CONTINUE      
+ 1023 CONTINUE
+
+c  str = ['% individual layers : laynum  plays   cc  gas_201(W)  gas_202(I) gas_203(A) ptemp'];
+c  with plays(1) > plays(2) etc etc ie pressures decreasing!!!!!!!
       READ(iIOUNX,1022) caJunk80
       IF ((caJunk80(1:1) .EQ. '!') .OR. (caJunk80(1:1) .EQ. '%')) THEN
         GOTO 1023
       ELSE
         iCountLay = iCountLay + 1
-        READ (caJunk80,*) iJunkX,raCC(iCountLay)
+        READ (caJunk80,*) iJunkX,raPCC(iCountLay),raCC(iCountLay)
 	raCC(iCountLay) = min(max(0.0,raCC(iCountLay)),1.0)
 	IF (iCountLay .EQ. kProfLayer) THEN
 	  GOTO 1024
@@ -649,10 +670,238 @@ c local vars
  1024 CONTINUE      
       CLOSE(iIOUNX)
       kTempUnitOpen = -1
-c now based on iSigmaIASI = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
-c                         = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc	
+      IF (raPCC(50) .LT. raPCC(51)) THEN
+        write(kStdErr,*)  'when reading caaTextOverrideDefault expected pressures decreasing',raPCC(50),raPCC(51)
+        write(kStdWarn,*) 'when reading caaTextOverrideDefault expected pressures decreasing',raPCC(50),raPCC(51)
+	CALL DoStop
+      END IF
+      
+c now based on iMRO = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
+c                   = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc
+c                   = 0  we do multiple runs, adding them together to do MRO (see ECMWF, M. Matricardi 2005, Report 474)
  1022 FORMAT(A80)
 
+c this is testing
+      iTest = -1
+      IF (iTest .GT. 0) THEN
+        write(kStdWarn,*) '>>>>>>>>>> testing MRO'
+        DO iJunkX = 1,kProfLayer
+          raCC(iJunkX) = 0.0	
+        END DO
+        !! marco matricardi pg 25
+        raCC(07) = 0.8
+        raCC(08) = 0.3
+        raCC(10) = 0.5
+        !!! modifications
+        raCC(04) = 1.0    ! cloud at gnd
+        raCC(14) = 1.0    ! cloud at top      
+        write(kStdWarn,*) '>>>>>>>>>> testing MRO'
+      END IF
+      
+      IF (iMRO .EQ. 2) THEN
+        Call doMRO(iNumLayer,tcc,raCC,iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel)
+      END IF
+
+      RETURN
+      END
+      
+c************************************************************************      
+c this does the MRO according to the scheme by M. Matricardi, ECMWF Report 474 2005
+      SUBROUTINE doMRO(iNumLayer,tcc,raCC,iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c input var
+      INTEGER iNumLayer            !! out of 100 layers, only eg 97 are used
+      REAL tcc,raCC(kProfLayer)    !! total cloud cover, and cloud fraction profile
+c MRO output vars
+      INTEGER iNumSubPixels          !! number of cloudy subpixels, plus need to add one for clear
+      REAL    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
+      REAL    rCLrFrac               !! clear fraction
+      INTEGER iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
+
+c local
+      INTEGER iI,iJ,iEstimate,iTopCldLay,iBotCldLay
+      REAL rEps,raCC_start(kProfLayer),raCC_stop(kProfLayer),rMRO,rTot,rTiny
+
+      rEps = 1.0e-4
+      rTiny = 1.0e-12
+      
+      DO iI = 1,2*kProfLayer
+        raCFrac(iI) = 0.0
+      END DO
+
+      DO iI = 1,kProfLayer
+        DO iJ = 1,2*kProfLayer
+          iaaCldLaySubPixel(iI,iJ) = 0
+	END DO
+      END DO
+
+c first estimate how many subpixels == 2 * num layers where raCC(iI) > 0
+c recall that the CC should be coming in kCARTA style ie raCC(1) = GND, raCC(100) = TOA
+      iEstimate = 0
+      iTopCldLay = -999
+      iBotCldLay  = -999
+      DO iI = kProfLayer,kProfLayer-iNumLayer+1,-1
+        raCC_start(iI) = 0.0
+        raCC_stop(iI)  = 0.0	
+        IF (raCC(iI) .GT. rEps) iEstimate = iEstimate + 1
+	IF ((raCC(iI) .GT. rEps) .AND. (iTopCldLay .LE. 0)) iTopCldLay = iI
+	IF (raCC(iI) .GT. rEps) iBotCldLay = iI
+      END DO
+      iEstimate = 2 * iEstimate
+
+      IF (iEstimate .GT. 0) THEN
+        !! there are clouds!!!
+	rMRO = 1.0
+	iI = iTopCldLay	
+	raCC_start(iI) = 0.0
+	raCC_stop(iI)  = raCC(iI)
+	rMRO = rMRO * (1-max(raCC(ii+1),raCC(ii))+rTiny) / (1-raCC(ii+1)+rTiny)
+c	print *,iI,rMRO
+	DO iI = iTopCldLay-1,iBotCldLay,-1
+	  IF ((1.0-raCC(ii+1)) .LT. rTiny) THEN
+	    rMRO = rMRO
+	  ELSE
+    	    rMRO = rMRO * (1-max(raCC(ii+1),raCC(ii))+rTiny) / (1-raCC(ii+1)+rTiny)
+	  END IF
+c	  print *,iI,rMRO
+	  IF (raCC(ii) .GT. rEps) THEN
+	    rTot = 1 - (1-raCC(kProfLayer)) * rMRO
+	    raCC_start(iI) = rTot - raCC(ii)
+	    raCC_stop(iI)  = rTot 
+	  ELSE
+	    raCC_start(iI) = 0.0
+	    raCC_stop(iI)  = 0.0
+	  END IF
+	END DO
+	CALL doMROcfrac(iEstimate,raCC_start,raCC_stop,iTopCldLay,iBotCldLay,raCFrac,rClrfrac,iaaCldLaySubPixel,iNumSubPixels)
+      ELSE
+        !! no clouds
+	write(kStdWarn,*) 'no MRO clouds!!!'
+        rClrfrac = 1.0
+	iNumSubPixels = 0
+      END IF
+      
+      RETURN
+      END
+c************************************************************************      
+c now figure out the subpixels
+      SUBROUTINE doMROcfrac(iEstimate,raCC_start,raCC_stop,iTopCldLay,iBotCldLay,raCFrac,rClrfrac,iaaCldLaySubPixel,iNumSubPixels)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c input var
+      INTEGER iEstimate                                   !! rough guess about how many cloud lays there are ==> double that
+                                                          !! to get estimate of number of individual cloud sub pixels to compute
+      REAL raCC_start(kProfLayer),raCC_stop(kProfLayer)   !! start and stop cloud fractions at each layer
+      INTEGER iTopCldLay,iBotCldLay                       !! out of 100 layers, which have clouds
+                                                          !! 1=GND,100=TOA ==> iTopCldLay > iBotCldLay
+c MRO output vars
+      INTEGER iNumSubPixels          !! number of cloudy subpixels, plus need to add one for clear
+      REAL    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
+      REAL    rCLrFrac               !! clear fraction
+      INTEGER iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
+
+c local
+      INTEGER iI,iJ,iNum,iOffset
+      REAL rEps,raJunk(kProfLayer),raXCFrac(2*kProfLayer)
+
+      rEps = 1.0e-4
+
+      !!! look from raCC_start == min of the cloud fracs
+      DO iI = 1,kProfLayer
+        raJunk(iI) = 9999.0
+      END DO
+      iNum = 0
+      DO iI = iTopCldLay-1,iBotCldLay,-1
+        IF (raCC_start(iI) .GT. rEps) THEN
+	  iNum = iNum + 1
+	  raJunk(iI) = raCC_start(iI)
+	END IF
+      END DO
+      iOffSet = 1
+      raXCFrac(1) = 0.0
+      CALL DoSortReal(raJunk,kProfLayer,+1)
+      DO iI = 1,iNum
+        raXCFrac(iI+iOffSet) = raJunk(iI)
+      END DO
+      iOffSet = 1 + iNum
+      
+      !!! look from raCC_stop == max of the cloud fracs
+      DO iI = 1,kProfLayer
+        raJunk(iI) = 9999.0
+      END DO
+      iNum = 0
+      DO iI = iTopCldLay,iBotCldLay,-1
+        IF (raCC_stop(iI) .GT. rEps) THEN
+	  iNum = iNum + 1
+	  raJunk(iI) = raCC_stop(iI)
+	END IF
+      END DO
+      CALL DoSortReal(raJunk,kProfLayer,+1)
+      DO iI = 1,iNum
+        raXCFrac(iI+iOffSet) = raJunk(iI)
+      END DO
+      iNum = iNum + iOffSet
+      
+      !! check for uniqueness : raXCfrac = unique(raXCfrac), iNum --> iNumNew
+      CALL DoUniqueReal(raXCfrac,iNum,+1,rEps)
+
+      !! the final sub pixel fractions, and clear frac YAY
+      IF (kOuterLoop .EQ. 1) THEN
+        write(kStdWarn,*) '       Subpixel CF(iI+1)      CF(iI)       weight'
+        write(kStdWarn,*) '-------------------------------------------------------'
+        DO iI = 1,iNum-1
+          raCfrac(iI) = raXCFrac(iI+1)-raXCFrac(iI)
+	  write(kStdWarn,*) iI,raXCFrac(iI+1),raXCFrac(iI),raXCFrac(iI+1)-raXCFrac(iI)
+        END DO
+        write(kStdWarn,*) '-------------------------------------------------------'	
+        iNumSubPixels = iNum - 1      
+        write(kStdWarn,*) 'estimated/found subpixels ',iEstimate,iNumSubPixels
+        rCLrFrac = 1 - raXCFrac(iNum)
+        IF (rCLrFrac .LE. rEps) rCLrFrac = 0.0      
+        write(kStdWarn,*) 'last cloud frac, clear frac = ',raXCFrac(iNum),rCLrFrac
+      ELSE
+        DO iI = 1,iNum-1
+          raCfrac(iI) = raXCFrac(iI+1)-raXCFrac(iI)
+        END DO
+        iNumSubPixels = iNum - 1      
+        rCLrFrac = 1 - raXCFrac(iNum)
+        IF (rCLrFrac .LE. rEps) rCLrFrac = 0.0            
+      END IF
+      
+      !! now do the cloud slabs per subpixel
+      DO iI = 1,kProfLayer
+        DO iJ = 1,2*kProfLayer
+          iaaCldLaySubPixel(iI,iJ) = 0
+	END DO
+      END DO
+
+      DO iI = 1,kProfLayer
+        DO iJ = 1,iNum-1
+	IF ((raCC_start(iI) .LE. raXCfrac(iJ)) .AND. (raCC_stop(iI) .GE. raXCfrac(iJ+1))) iaaCldLaySubPixel(iI,iJ) = +1	  
+	END DO
+      END DO
+
+      IF (kOuterLoop .EQ. 1) THEN
+        write(kStdWarn,*) ' the subpixels ..... plus if clear frac > 0, there is clear-only subpixel'
+        IF (iNum-1 .LE. 5) THEN
+          DO iI = 1,kProfLayer
+           write(kStdWarn,*) (iaaCldLaySubPixel(iI,iJ),iJ=1,iNum-1)
+          END DO
+	ELSE
+          DO iI = 1,kProfLayer
+	   write(kStdWarn,*) 'Lay num ',iI
+           write(kStdWarn,*) (iaaCldLaySubPixel(iI,iJ),iJ=1,iNum-1)
+          END DO
+	END IF
+      END IF
+      
       RETURN
       END
 c************************************************************************      

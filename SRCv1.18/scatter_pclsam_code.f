@@ -13,8 +13,9 @@ c iNp is # of layers to be printed (if < 0, print all), iaOp is list of
 c     layers to be printed
 c caOutName gives the file name of the unformatted output
 
-      SUBROUTINE find_radiances_pclsam(iRadOrColJac,raFreq,raaAbs,tcc,raCC,
-     $         raaExt,raaSSAlb,raaAsym,
+      SUBROUTINE find_radiances_pclsam(iRadOrColJac,raFreq,raaAbs,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel,      	  
+     $         raaExt,raaSSAlb,raaAsym,iKnowTP,
      $         iPhase,raPhasePoints,raComputedPhase,
      $         ICLDTOPKCARTA, ICLDBOTKCARTA,raVTemp,
      $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
@@ -74,7 +75,7 @@ c TEMP        = tempertaure profile in terms of pressure levels
       REAL raaMix(kMixFilRows,kGasStore),raInten(kMaxPts)
       INTEGER iNp,iaOp(kPathsOut),iOutNum,ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iRadOrColJac
-      INTEGER iNpmix,iFileID,iTag
+      INTEGER iNpmix,iFileID,iTag,iKnowTP
       REAL raaAbs(kMaxPts,kMixFilRows)
       CHARACTER*80 caOutName
       REAL Temp(MAXNZ)
@@ -103,8 +104,12 @@ c this is to do with jacobians
 c iaJacob       = list of GasID's to do Jacobian for
       INTEGER iJacob,iaJacob(kMaxDQ),iIOUN_USE,iIOUN_IN
 c this is to do with cloud fracs
-      INTEGER iNumOutX
+      INTEGER iNumOutX,iMRO
       REAL raaRadsX(kMaxPts,kProfLayer),tcc,raCC(kProfLayer)
+      INTEGER iNumSubPixels          !! number of cloudy subpixels, plus need to add one for clear
+      REAL    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
+      REAL    rCLrFrac               !! clear fraction
+      INTEGER iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
 
       INTEGER i1,i2,iFloor,iDownWard
 
@@ -227,9 +232,27 @@ c retrievals."
      $              iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
      $              raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
      $         raaRadsX,iNumOutX)
-        ELSEIF ((iDownward .EQ. 1) .AND. (k100layerCloud .EQ. 100)) THEN
-          CALL rad_DOWN_pclsam_solar100(raFreq,+1,
-     $        raInten,raVTemp,raaExt,raaSSAlb,raaAsym,raaAbs,tcc,raCC,
+        ELSEIF ((iDownward .EQ. 1) .AND. (k100layerCloud .EQ. 100) .AND. (abs(iMRO) .EQ. 1)) THEN
+          CALL rad_DOWN_pclsam_solar100_simplemodel(raFreq,+1,
+     $        raInten,raVTemp,raaExt,raaSSAlb,raaAsym,raaAbs,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel,      	  
+     $        iPhase,raPhasePoints,raComputedPhase,
+     $        ICLDTOPKCARTA, ICLDBOTKCARTA,
+     $        rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
+     $        rSatAngle,rFracTop,rFracBot,TEMP,
+     $        iNp,iaOp,raaOp,iNpmix,iFileID,
+     $        caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,
+     $        raSurface,raSun,raThermal,raSunRefl,
+     $        raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag,
+     $        raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
+     $              iNLTEStart,rCO2MixRatio,raaPlanckCoeff,
+     $              iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
+     $              raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
+     $         raaRadsX,iNumOutX)
+        ELSEIF ((iDownward .EQ. 1) .AND. (k100layerCloud .EQ. 100) .AND. (abs(iMRO) .EQ. 2)) THEN
+          CALL rad_DOWN_pclsam_solar100_MRO_driver(raFreq,+1,iKnowTP,
+     $        raInten,raVTemp,raaExt,raaSSAlb,raaAsym,raaAbs,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel,      	  
      $        iPhase,raPhasePoints,raComputedPhase,
      $        ICLDTOPKCARTA, ICLDBOTKCARTA,
      $        rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,
@@ -1952,8 +1975,9 @@ c this is for k100layerCloud == 100
 c so we have to do two simulataneous runs,
 c        one for clouds + gas raaExt
 c        one for gas only     raaAbs
-      SUBROUTINE rad_DOWN_pclsam_solar100(raFreq,iRadOrColJac,
-     $    raInten,raVTemp,raaExt,raaSSAlb,raaAsym,raaAbs,tcc,raCC,
+      SUBROUTINE rad_DOWN_pclsam_solar100_simplemodel(raFreq,iRadOrColJac,
+     $    raInten,raVTemp,raaExt,raaSSAlb,raaAsym,raaAbs,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel,      	  
      $    iPhase,raPhasePoints,raComputedPhase,
      $    ICLDTOPKCARTA, ICLDBOTKCARTA,
      $    rTSpace,rTSurf,rSurfPress,raUseEmissivity,rSatAngle,
@@ -2023,8 +2047,12 @@ c this is local phase info
       INTEGER iPhase
       REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
 c this is to do with cloud fracs
-      INTEGER iNumOutX
+      INTEGER iNumOutX,iMRO
       REAL raaRadsX(kMaxPts,kProfLayer),tcc,raCC(KProfLayer)
+      INTEGER iNumSubPixels          !! number of cloudy subpixels, plus need to add one for clear
+      REAL    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
+      REAL    rCLrFrac               !! clear fraction
+      INTEGER iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
 
 c local variables
       INTEGER iFr,iFrX,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iiDiv,iSolarRadOrJac
@@ -2056,6 +2084,13 @@ c this is for the cloudy/clear streams
       
       rThermalRefl = 1.0/kPi
 
+      IF (abs(iMRO) .EQ. 1) THEN
+        write(kStdWarn,*) 'Simple 100 layer cloud model uses raCC and tcc'
+      ELSE
+        write(kStdErr,*) 'this routine is for simple 100 layer cloud model (iMRO = +/-1) ',iMRO
+        CALL DoStop
+      END IF
+      
 c calculate cos(SatAngle)
       muSat = cos(rSatAngle*kPi/180.0)
 
@@ -2454,4 +2489,207 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
       RETURN
       END
 
+c************************************************************************
+c this is for k100layerCloud == 100
+c so we have to do MANY subpixel simulataneous runs,
+c                       for clouds + gas raaExt
+c        and finally for gas only        raaAbs
+      SUBROUTINE rad_DOWN_pclsam_solar100_MRO_driver(raFreq,iRadOrColJac,iKnowTP,
+     $    raInten,raVTemp,raaExt,raaSSAlb,raaAsym,raaAbs,iMRO,tcc,raCC,
+     $                          iNumSubPixels,raCFrac,rClrfrac,iaaCldLaySubPixel,      	  
+     $    iPhase,raPhasePoints,raComputedPhase,
+     $    ICLDTOPKCARTA, ICLDBOTKCARTA,
+     $    rTSpace,rTSurf,rSurfPress,raUseEmissivity,rSatAngle,
+     $    rFracTop,rFracBot,TEMP,iNp,iaOp,raaOp,iNpmix,iFileID,
+     $    caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,
+     $    raSurface,raSun,raThermal,raSunRefl,
+     $    raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag,
+     $    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
+     $              iNLTEStart,rCO2MixRatio,raaPlanckCoeff,
+     $              iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
+     $              raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
+     $         raaRadsX,iNumOutX)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/scatter.param'
+
+c iTag          = 1,2,3 and tells what the wavenumber spacing is
+c raSunAngles   = layer dependent satellite view angles
+c raLayAngles   = layer dependent sun view angles
+c rFracTop   = tells how much of top layer cut off because of instr posn --
+c              important for backgnd thermal/solar
+c raFreq    = frequencies of the current 25 cm-1 block being processed
+c raInten    = final intensity measured at instrument
+c raaExt     = matrix containing the mixed path abs coeffs
+c raVTemp    = vertical temperature profile associated with the mixed paths
+c caOutName  = name of output binary file
+c iOutNum    = which of the *output printing options this corresponds to
+c iAtm       = atmosphere number
+c iNumLayer  = total number of layers in current atmosphere
+c iaaRadLayer = for ALL atmospheres this is a list of layers in each atm
+c rTSpace,rSurface,rEmsty,rSatAngle = boundary cond for current atmosphere
+c iNpMix     = total number of mixed paths calculated
+c iFileID       = which set of 25cm-1 wavenumbers being computed
+c iNp        = number of layers to be output for current atmosphere
+c iaOp       = list of layers to be output for current atmosphere
+c raaOp      = fractions to be used for the output radiances
+c raSurface,raSun,raThermal are the cumulative contributions from
+c              surface,solar and backgrn thermal at the surface
+c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
+c                   user specified value if positive
+      REAL rSatAzimuth,rSolAzimuth
+      REAL raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
+      REAL raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
+      REAL raFreq(kMaxPts),raVTemp(kMixFilRows),rSatAngle
+      REAL raInten(kMaxPts),rTSpace,raUseEmissivity(kMaxPts),rTSurf
+      REAL raaExt(kMaxPts,kMixFilRows),raaSSAlb(kMaxPts,kMixFilRows)
+      REAL raaAsym(kMaxPts,kMixFilRows),rSurfPress
+      REAL raLayAngles(kProfLayer),raSunAngles(kProfLayer)
+      REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,TEMP(MAXNZ)
+      REAL raaAbs(kMaxPts,kMixFilRows)      
+      INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iKnowTP
+      INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
+      INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
+      CHARACTER*80 caOutName
+      REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
+     $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
+      INTEGER iProfileLayers,iRadorColJac
+c this is to do with NLTE
+      INTEGER iNLTEStart
+      REAL raaPlanckCoeff(kMaxPts,kProfLayer),rCO2MixRatio
+      REAL raUpperPress(kProfLayer),raUpperTemp(kProfLayer)
+      REAL raaUpperNLTEGasAbCoeff(kMaxPts,kProfLayer)
+      REAL raaUpperPlanckCoeff(kMaxPts,kProfLayer)
+      INTEGER iUpper,iDoUpperAtmNLTE
+c this is local phase info
+      INTEGER iPhase
+      REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
+c this is to do with cloud fracs
+      INTEGER iNumOutX,iMRO
+      REAL raaRadsX(kMaxPts,kProfLayer),tcc,raCC(KProfLayer)
+      INTEGER iNumSubPixels          !! number of cloudy subpixels, plus need to add one for clear
+      REAL    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
+      REAL    rCLrFrac               !! clear fraction
+      INTEGER iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
+
+c local variables
+      INTEGER iFr,iFrX,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iiDiv,iSolarRadOrJac
+      REAL raaLayTrans(kMaxPts,kProfLayer),       raaEmission(kMaxPts,kProfLayer)
+      REAL ttorad,rPlanck,rSunTemp,rMPTemp,muSat,raInten2(kMaxPts)
+      REAL raaSolarScatter1Lay(kMaxPts,kProfLayer)
+
+c to do the thermal,solar contribution
+      REAL rThermalRefl,radtot,rLayT,rEmission,rSunAngle
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iBeta,iOutput,iaCldLayer(kProfLayer)
+
+c to do fast NLTE
+      REAL suncos,scos1,vsec1
+
+c general
+      REAL raOutFrac(kProfLayer)
+      REAL raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1)
+      INTEGER iIOUN,N,iI,iLocalCldTop,iLocalCldBot
+      INTEGER i1,i2,iLoop,iDebug
+      INTEGER iSTopNormalRadTransfer
+      REAL rFrac,rL,rU,r0
+c this is for the cloudy/clear streams
+      REAL raaLayTransGasOnly(kMaxPts,kProfLayer),raaEmissionGasOnly(kMaxPts,kProfLayer)
+      REAL raSunGasOnly(kMaxPts),raThermalGasOnly(kMaxPts)
+      REAL raaExtWeighted(kMaxPts,kProfLayer)
+      REAL raIntenGasOnly(kMaxPts),raIntenWeighted(kMaxPts)
+
+c BIG ASSUMPTION : we are only interested in TOA radiances
+      REAL raWeightedRadiance(kMaxPts)
+      REAL rEps
+      REAL raaTempAbs(kMaxPts,kProfLayer)
+      INTEGER iCldSubPixel,iaSwap(kProfLayer),iNumSwap
+
+      IF (iOutNum .GT. 1) THEN
+        write(kStdErr,*) 'rad_DOWN_pclsam_solar100_MRO_driver assumes only radiance at TOA will be dumped out'
+        CALL DoStop
+      END IF
+      
+      DO iFr = 1,kMaxPts
+        raWeightedRadiance(iFr) = 0.0
+      END DO
+
+c clear sky
+      IF (rClrfrac .GE. rEps) THEN
+        IF (kOuterLoop .EQ. 1) write(kStdWarn,*) 'MRO : clrfrac = ',rClrfrac
+	print *,'MRO ClearFrac ',rClrfrac,' for ',raFreq(1),' cm-1'
+        CALL quick_clear_radtrans_downlook(
+     $      raFreq,raInten,raVTemp,
+     $      raaAbs,rTSpace,rTSurf,rSurfPress,raUseEmissivity,rSatAngle,
+     $      rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID,
+     $      caOutName,kStdkCarta,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,
+     $      raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag,
+     $      raThickness,raPressLevels,iProfileLayers,pProf,
+     $      raTPressLevels,iKnowTP,rCO2MixRatio,
+     $         raaRadsX,iNumOutX,-1)
+	DO iFr = 1,kMaxPts
+	  raWeightedRadiance(iFr) = raWeightedRadiance(iFr) + rClrfrac*raInten(iFr)
+        END DO
+      END IF
+
+c loop over cloud subpixels
+      DO iCldSubPixel = 1,iNumSubPixels
+        IF (kOuterLoop .EQ. 1) write(kStdWarn,*) 'MRO : index/cldfrac = ',iCldSubPixel,raCfrac(iCldSubPixel)
+
+	IF (iCldSubPixel .EQ. 1) THEN
+	  ! set the ODs to gas ODS	
+	  DO iLay = 1,kProfLayer
+            DO iFr = 1,kMaxPts
+              raaTempAbs(iFr,iLay) = raaAbs(iFr,iLay)
+            END DO
+	  END DO
+        END IF
+	
+        ! find which lays to swap
+	iNumSwap = 0
+	DO iLay = 1,kProfLayer
+	  IF (iaaCldLaySubPixel(iLay,iCldSubPixel) .EQ. 1) THEN
+	    iNumSwap = iNumSwap + 1
+	    iaSwap(iNumSwap) = iLay
+	  END IF
+	END DO
+
+        !swap in necessary cldlays
+	DO iLay = 1,iNumSwap
+	  iL = iaSwap(iLay)
+          DO iFr = 1,kMaxPts
+            raaTempAbs(iFr,iL) = raaExt(iFr,iL)
+          END DO
+	END DO	
+        CALL quick_clear_radtrans_downlook(
+     $      raFreq,raInten,raVTemp,
+     $      raaTempAbs,rTSpace,rTSurf,rSurfPress,raUseEmissivity,rSatAngle,
+     $      rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID,
+     $      caOutName,kStdkCarta,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,
+     $      raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag,
+     $      raThickness,raPressLevels,iProfileLayers,pProf,
+     $      raTPressLevels,iKnowTP,rCO2MixRatio,
+     $         raaRadsX,iNumOutX,-1)
+	DO iFr = 1,kMaxPts
+	  raWeightedRadiance(iFr) = raWeightedRadiance(iFr) + raCfrac(iCldSubPixel)*raInten(iFr)
+        END DO
+        write(kStdErr,111) raFreq(1),iCldSubPixel,iNumSubPixels,iNumSwap,raWeightedRadiance(1)
+
+	IF (iCldSubPixel .LT. iNumSubPixels) THEN
+          !swap back in original gasODs
+  	  DO iLay = 1,iNumSwap
+ 	    iL = iaSwap(iLay)
+            DO iFr = 1,kMaxPts
+              raaTempAbs(iFr,iL) = raaAbs(iFr,iL)
+            END DO
+	  END DO	
+        END IF
+      END DO
+ 111  FORMAT('MRO CloudFrac for ',F10.2,' cm-1; loop N/Tot',I3,I3,' swap numlays ',I3,' rad = ',F10.6)
+
+      CALL wrtout(iIOUN,caOutName,raFreq,raWeightedRadiance)
+      
+      RETURN
+      END
+      
 c************************************************************************

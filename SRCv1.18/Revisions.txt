@@ -581,6 +581,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+12/20/16       caaTextOverride = +2 is for 100 layer clouds MRO
+               caaTextOverride = +1 is for 100 layer clouds,
+	           doing cloud cal using cc(i) and clear cal using (1-cc(i)) layer by layer
+               caaTextOverride = -1 is for 100 layer clouds,
+	           doing cloud cal, clear cla and the rfinal = tcc rcld + (1-tcc) rclr
 
 11/25/16       Added caaTextOverride to nm_params so you can have a text file
                with the 100 layer code. This gets set to caaTextOverrideDefault
@@ -588,15 +593,15 @@ v1.18
 	       all interped to the AIRS 100 layers!!!
 	       
                Remember  p1.cfrac(1) + p1.cfrac2(1) - p1.cfrac12(1) = p1.tcc
-	       The text file will have following columns (first column is iSigmaIASI)
+	       The text file will have following columns (first column is iMRO)
 	          +1.0/-1.0   nLAYS tcc  cfrac1    cfrac2      cfrac12    0.0 
-		if iSigmaIASI = +1 followed by the following 100 columns
-	          laynum  cc      gas_201(W)  gas_202(I) gas_203(A) ptemp plevs
-		if iSigmaIASI = =1 no need for more info as cc(i) assumed to be 1.0 for all layers
-	          laynum  cc      gas_201(W)  gas_202(I) gas_203(A) ptemp plevs
+		if iMRO = +1 followed by the following 100 columns
+	          laynum  plevs cc      gas_201(W)  gas_202(I) gas_203(A) ptemp
+		if iMRO = =1 no need for more info as cc(i) assumed to be 1.0 for all layers
+	          laynum  plevs cc      gas_201(W)  gas_202(I) gas_203(A) ptemp		
 		  
                That way when the code is run, it does RT similar to sigmaIASI	      
-	       namely if iSigmaIASI = +1
+	       namely if iMRO = +1
 	         Assume you know radiance at boom of layer (ie from prev layer)
 	  	   r(i-1)
 	         Then cloud frac = cc(i)
@@ -604,14 +609,17 @@ v1.18
 		   tauC(i) = tau(i) + (tau_WaterCloud(i) + tau_IceCloud(i))*cc(i)
 	           rCloud = r(i-1) exp(-tauC(i)/mu) + B(T)(1-exp(-tauC(i)/mu))		 
 	         r(i) = rCloud + (1-cc(i)) rClear
-	       while if iSigmaIASI = -1
+	       while if iMRO = -1
 	         Do cloudy calc through all layers assuming cc(i) = 1
 	         Do clear  calc through all layers assuming cc(i) = 0
 		 rTOA = tcc rCloudy + (1-tcc) rClear
+
+               MRO = 2 : use Marco Matricardi ECMWF 2005 Tech Rep. 474
+	       
 	       Typically 101 = cloudtype for water = gas_201 = clwc
-	       Typically 201 = cloudtype for ice   = gas_202 = ciwc	       
-		 
-11/25/16       To use 100 layer code, you need to go from ECMWF/ERA/MERRA model
+	       Typically 201 = cloudtype for ice   = gas_202 = ciwc
+	       
+ 11/25/16       To use 100 layer code, you need to go from ECMWF/ERA/MERRA model
                91 level fields to 100 layer klayers output. To do this, do
   fip = 'forITOVS_ECM_100layercloud.ip.rtp';
   fop = 'forITOVS_ECM_100layercloud.op.rtp';

@@ -1115,7 +1115,7 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
       CHARACTER*1 cYorN
       INTEGER iResetCldFracs
 c this is is we have 100 layer clouds
-      INTEGER iIOUNX,iErrX,iSigmaIASI,iNumLaysX
+      INTEGER iIOUNX,iErrX,iMRO,iNumLaysX
       CHARACTER*80 caJunk80      
       REAL rTCC,rCfracX1,rCfracX2,rCfracX12
 
@@ -1380,7 +1380,7 @@ c ******** RADNCE section
         OPEN(UNIT=iIOUNX,FILE=caaTextOverrideDefault,STATUS='OLD',FORM='FORMATTED',
      $    IOSTAT=IERRX)
         IF (IERRX .NE. 0) THEN
-          WRITE(kStdErr,*) 'k100layerCloud : trying top make sure file exists'
+          WRITE(kStdErr,*) 'k100layerCloud : make sure file exists'
           WRITE(kStdErr,1010) IERRX, caaTextOverrideDefault
  1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
           CALL DoSTOP
@@ -1389,7 +1389,7 @@ c ******** RADNCE section
  1011	CONTINUE
         READ(iIOUNX,1012) caJunk80
 	IF ((caJunk80(1:1) .EQ. '!') .OR. (caJunk80(1:1) .EQ. '%')) GOTO 1011
-	READ (caJunk80,*) iSigmaIASI,iNumLaysX,rTCC,rCfracX1,rCfracX2,rCfracX12	
+	READ (caJunk80,*) iMRO,iNumLaysX,rTCC,rCfracX1,rCfracX2,rCfracX12	
         CLOSE(iIOUNX)
         kTempUnitOpen = -1
 	IF (abs(rTCC - (rCfracX1 + rCfracX2 - rCfracX12)) .GE. 1.0e-5) THEN
@@ -1402,11 +1402,13 @@ c ******** RADNCE section
 	  write(kSTdErr,*) rTCC,rCfracX1,rCfracX2,rCfracX12,(rCfracX1 + rCfracX2 - rCfracX12)
 	  CALL DOStop
 	END IF	
-c now based on iSigmaIASI = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
-c                         = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc
       END IF
  1012 FORMAT(A80)
- 
+
+c now based on iMRO = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
+c                   = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc
+c                   = 2  we do multiple runs, adding them together to do MRO (see ECMWF, M. Matricardi 2005, Report 474)
+
       !!!! see if the RTP file wants to set up a cloudy atmosphere
       IF ((cfrac .le. 0.0) .AND. (iNclouds_RTP .LE. 0)) THEN
         write (kStdWarn,*) 'successfully checked radnce .....'
@@ -1723,7 +1725,15 @@ c ******** duplicate the atmospheres if needed section
       IF (iResetCldFracs .LT. 0) THEN
         !! go ahead and set up multiple cloud runs if doing PCLSAM (could also do this with eg DISORT)
 	iAtmLoop = 10
-        IF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .GT. 0) .AND. (iSigmaIASI .EQ. -1))  THEN
+        IF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .GT. 0) .AND. (iMRO .EQ. +2))  THEN
+	  write(kStdWarn,*) 'doing 100 MRO layer cloud according to cc info in caaTextOverride'
+	  k100layerCloud = +100
+	  iNatm = 1  !! everything done in one gulp
+        ELSEIF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .GT. 0) .AND. (iMRO .EQ. +1))  THEN
+	  write(kStdWarn,*) 'doing 100 layer cloud according to cc info in caaTextOverride'
+	  k100layerCloud = +100
+	  iNatm = 1  !! everything done in one gulp	
+        ELSEIF ((iNclouds .GT. 0) .AND. (kWhichScatterCode .EQ. 5) .AND. (iCldProfile .GT. 0) .AND. (iMRO .EQ. -1))  THEN
   	  iAtmLoop = 100	  
 	  iNatm = 3  !! need one cloudy (=ice/water) and one clear atmosphere, and then final calc weighted using tcc
 	  

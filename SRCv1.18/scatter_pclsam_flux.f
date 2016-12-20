@@ -618,7 +618,7 @@ c      END IF
         DO iLay = 1,kProfLayer
 	  raCC(iLay) = 1.0
 	END DO      
-        CALL AddCloud_pclsam_SunShine(
+        CALL AddCloud_pclsam_SunShine_100layerclouds(
      $               raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp,
      $               iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot,
      $               ICLDTOPKCARTA, ICLDBOTKCARTA,
@@ -1862,7 +1862,7 @@ c if CloudySky > 0 then go ahead with PCLSAM!
         DO iLay = 1,kProfLayer
 	  raCC(iLay) = 1.0
 	END DO      
-        CALL AddCloud_pclsam_SunShine(
+        CALL AddCloud_pclsam_SunShine_100layerclouds(
      $               raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp,
      $               iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot,
      $               ICLDTOPKCARTA, ICLDBOTKCARTA,
@@ -2431,7 +2431,7 @@ c        CALL DoStop
         DO iLay = 1,kProfLayer
 	  raCC(iLay) = 1.0
 	END DO
-        CALL AddCloud_pclsam_SunShine(
+        CALL AddCloud_pclsam_SunShine_100layerclouds(
      $               raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp,
      $               iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot,
      $               ICLDTOPKCARTA, ICLDBOTKCARTA,

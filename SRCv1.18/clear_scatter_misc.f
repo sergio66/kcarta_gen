@@ -5566,7 +5566,7 @@ c this subroutine adds on the absorptive part of cloud extinction
 c basically the same as AddCloud_twostream EXCEPT
 c   *** it also adds on the "backscattered" part for PCLSAM algorithm ***
 c this way we have a fast alternative to kTwoStream
-      SUBROUTINE AddCloud_pclsam_SunShine(raFreq,
+      SUBROUTINE AddCloud_pclsam_SunShine_100layerclouds(raFreq,
      $               raaExtTemp,raaScatTemp,raaAsymTemp,
      $               iaaRadLayer,iAtm,iNumlayer,iNclouds,
      $               rFracTop,rFracBot,
@@ -6271,7 +6271,7 @@ c this is quick clear sky downlook radT, based on rad_main.f : rad_trans_SAT_LOO
      $    raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag,
      $    raThickness,raPressLevels,iProfileLayers,pProf,
      $    raTPressLevels,iKnowTP,rCO2MixRatio,
-     $         raaRadsX,iNumOutX)
+     $         raaRadsX,iNumOutX,iWriteToOutputFile)
 
       IMPLICIT NONE
 
@@ -6301,6 +6301,7 @@ c raSurface,raSun,raThermal are the cumulative contributions from
 c              surface,solar and backgrn thermal at the surface
 c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified value if positive
+      INTEGER iWriteToOutputFile
       REAL raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
       REAL raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
       REAL raFreq(kMaxPts),raVTemp(kMixFilRows),rSatAngle
@@ -6495,7 +6496,7 @@ c         print *,iLay,rMPTemp,raaAbs(8000,iL),raLayAngles(MP2Lay(iL))
 c see if this mixed path layer is in the list iaOp to be output
 c since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp .GT. 0) THEN
+        IF ((iDp .GT. 0) .AND. (iWriteToOutputFile .GT. 0)) THEN
           write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
           DO iFr=1,iDp
             CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq,
@@ -6528,7 +6529,7 @@ c then do the rest of the layers till the last but one(all will be full)
 c see if this mixed path layer is in the list iaOp to be output
 c since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp .GT. 0) THEN
+        IF ((iDp .GT. 0) .AND. (iWriteToOutputFile .GT. 0)) THEN	
           write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer'
           DO iFr=1,iDp
             CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq,
@@ -6566,7 +6567,7 @@ c then do the topmost layer (could be fractional)
           CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
 
           IF (iDoSolar .LT. 0) THEN
-            IF (iDp .GT. 0) THEN
+            IF ((iDp .GT. 0) .AND. (iWriteToOutputFile .GT. 0)) THEN		  
               write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
               DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq,
@@ -6605,8 +6606,10 @@ c then do the topmost layer (could be fractional)
               DO iFrX = 1,kMaxPts
                 raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
               END DO
-c              print *,'abcde',raSunAngles(iaRadLayer(1)),suncos,raFreq(1),raInten(1),raInten2(1)	      
-              CALL wrtout(iIOUN,caOutName,raFreq,raInten2)      
+c              print *,'abcde',raSunAngles(iaRadLayer(1)),suncos,raFreq(1),raInten(1),raInten2(1)
+              IF ((iDp .EQ. 1) .AND. (iWriteToOutputFile .GT. 0)) THEN		  
+                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)      
+	      END IF
 	      
             ELSEIF (iDp .GT. 1) THEN
 	      write(kStdErr,*) 'oops in scatter_pclsam_cpde, at NLTE, dump more than 1 rad at TOA???'

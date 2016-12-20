@@ -398,6 +398,65 @@ c local variables
       END
 
 c************************************************************************
+c this subroutine looks for uniqueness (by first sorting)
+c depending on value of iUD
+c NOTE!!!!!! iUD=-1 ONLY WORKS FOR POSITIVE VALUES in raARR!!!!!!!!!!
+      SUBROUTINE DoUniqueReal(raArr,iCnt,iUD,rEps)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+c raArr = real array to be sorted
+c iCnt  = sort indices 1..iCnt of raArr
+c iUD = 1 .. sort into ascending order, iUD = -1 .. sort into decending order
+c rEps = tolerance
+      REAL raArr(*),rEps
+      INTEGER iCnt,iUD
+
+c local
+      INTEGER iTrack,iI
+      REAL raArrNew(2*kProfLayer)
+
+      IF (iCnt .GT. 2*kProfLayer) THEN
+        write(kStdErr,*)  'Oops, DoUniqueReal only allows iCnt <= 2*kProfLayer ',iCnt,2*kProfLayer
+        write(kStdWarn,*) 'Oops, DoUniqueReal only allows iCnt <= 2*kProfLayer ',iCnt,2*kProfLayer	
+        CALL DoStop
+      END IF
+      
+      CALL DoSortReal(raArr,iCnt,iUD)
+      
+      iTrack = 0
+      DO iI = 2,iCnt
+        IF ((raArr(iI)-raArr(iI-1)) .GT. rEps) THEN
+	  iTrack = iTrack + 1
+	  raArrNew(iTrack) = raArr(iI-1)
+	END IF
+      END DO
+      
+      iI = iCnt
+      !! could be the last few elements were the same, in which case we NEED to add last element
+c      IF ((raArr(iI)-raArr(iI-1)) .GT. rEps) THEN
+c        iTrack = iTrack + 1
+c        raArrNew(iTrack) = raArr(iI)
+c      END IF
+      IF ((raArr(iCnt)-raArrNew(iTrack)) .GT. rEps) THEN
+        iTrack = iTrack + 1
+        raArrNew(iTrack) = raArr(iI)
+      END IF
+      
+      IF (iTrack .LT. iCnt) THEN
+        write(kStdWarn,*) 'sent in array with ',iCnt,' entries of which ',iTrack,' were unique'
+	DO iI = 1,iTrack
+	  raArr(iI) = raArrNew(iI)
+	END DO
+	iCnt = iTrack
+      END IF
+      
+      RETURN
+      END
+      
+c************************************************************************
 c this subroutine sorts a real array into ascending order or descending order
 c depending on value of iUD
 c NOTE!!!!!! iUD=-1 ONLY WORKS FOR POSITIVE VALUES in raARR!!!!!!!!!!
