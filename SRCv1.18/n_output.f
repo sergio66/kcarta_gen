@@ -176,7 +176,7 @@ c raaPrBdry     = pressure boundaries of the atmospheres
       INTEGER iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iaNp(kMaxPrint)
       INTEGER iaaOp(kMaxPrint,kPathsOut),iNumGases,iOutTypes,iNatm2
       INTEGER iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iNpmix
-      REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
+      REAL raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
       REAL raFracTop(kMaxAtm),raFracBot(kMaxAtm),raaPrBdry(kMaxAtm,2)
       REAL raPressLevels(kProfLayer+1)    !!!!actual pressures of levels
       CHARACTER*7 caWord
@@ -190,7 +190,7 @@ c these are temporarily used
       INTEGER iaGasID(kMaxGas),iGS,iMPSets,iErr,iOutTypesMax
       INTEGER iaPrinterT(kMaxPrT),iaGPMPAtmT(kMaxPrT),iaNpT(kMaxPrT)
       INTEGER iaaOpT(kMaxPrT,kPathsOut),iOut2
-      REAL raaOpT(kMaxPrT,kProfLayer),raaUserPressT(kMaxPrT,kProfLayer)
+      REAL raaOpT(kMaxPrT,kPathsOut),raaUserPressT(kMaxPrT,kProfLayer)
 
       INTEGER iaPrinter1(kMaxPrint),iaGPMPAtm1(kMaxPrint)
       INTEGER iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint),iMaxMinLBLRTMOp

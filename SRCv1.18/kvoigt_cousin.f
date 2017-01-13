@@ -251,7 +251,8 @@ c output parameters
                                                   ! found in linemix file (-1 No, +x yes == in(dJLowerQuantumRot))
                                                   ! if larger than 100, high J so weak line, so dont worry
 c local parameters
-      DOUBLE PRECISION daImag(kMaxPtsBox)    !for linemixing calcs
+      DOUBLE PRECISION daImag(kMaxPtsBox)                   !for linemixing calcs
+      DOUBLE PRECISION daHighFreqWavenumbers(kMaxPtsBox)    !for computing lineshape, at high res      
       DOUBLE PRECISION daChi(kMaxPtsBox),dT
       DOUBLE PRECISION df,f0,tau2_birn,tau2
       DOUBLE PRECISION daYmix(kHITRAN),daYmixALL(kHITRAN),dY
@@ -265,8 +266,19 @@ c      iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
       iTooFar = -1
       iN = iFreqPts
 
-      !compute the voigt lineshape at high resolution
-      CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
+      !!! this is NEW Jan 2017
+      !!! this is NEW Jan 2017 !!!!
+      iN = iFreqPts*5
+      DO iFr = 1,kMaxPtsBox
+        daHighFreqWavenumbers(iFr) = dble(daFreq(1)) + (iFr-1)*(daFreq(2)-daFreq(1))/(kBoxCarUse * 1.0d0)
+      END DO
+      !!! compute the voigt lineshape at high resolution, used to be daFreq instead of daHighFreqWavenumbers before Jan 2017
+      !!! CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
+      write(kStdErr,*)  ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
+      write(kStdWarn,*) ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'            
+      CALL DoVoigt(daLineshape,daImag,daHighFreqWavenumbers,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
+      !!! this is NEW Jan 2017
+      !!! this is NEW Jan 2017
 
       IF (iLineMix .EQ. 1) THEN    !this does cousin
         dT = dLTE
@@ -411,7 +423,7 @@ c local variables
 
       CALL vhh2RI(daReal1,daImag1,daFreq1,dLineShift,dLTE,dMass,dBroad,iN)
 
-cc tessa tessa tessa for testing : turn off lineshape +/- 25 cm away!
+cc for testing : turn off lineshape +/- 25 cm away!
 cc this is bad!
 cc      DO iFr = 1,iN
 cc        IF (abs(dLineShift - daFreq1(iFr)) .GT. 25.0d0) THEN
@@ -420,7 +432,7 @@ cc          daImag(iFr) = 0.0d0
 cc        END IF
 cc      END DO
 cc this is bad!
-cc tessa tessa tessa for testing : turn off lineshape +/- 25 cm away!
+cc for testing : turn off lineshape +/- 25 cm away!
 
       RETURN
       END

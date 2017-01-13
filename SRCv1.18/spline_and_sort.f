@@ -789,7 +789,48 @@ C      Parameters
        END
 
 c************************************************************************
+c this subroutine directly calls rsply2 and then rspline
+       SUBROUTINE rspl1(XA,YA,N,XOUT,YOUT,NOUT) 
+ 
+      IMPLICIT NONE
 
+       include '../INCLUDE/kcarta.param' 
+ 
+C real version 
+C      ----------------------------------------------------------------- 
+C      Uses Y2A from SPLY2 to do spline interpolation at X to get Y 
+C      XA  : I  : DOUB arr : x array(N) in increasing order  IN 
+C      YA  : I  : DOUB arr : y array(N)                      IN 
+C      N   : I  : INT      : number of points in arrays 
+C      XOUT   : I  : DOUB ARR     : x points at which to evaluate spline 
+C      YOUT   : O  : DOUB ARR     : y points from spline interpolation 
+C      NOUT   : I  : INT          : number of points at which to spline 
+C      ----------------------------------------------------------------- 
+C 
+C      Parameters 
+       REAL XA(*),YA(*),XOUT,YOUT 
+       INTEGER N,NOUT 
+
+       REAL Y2A(kMaxPtsBox),work(kMaxPtsBox),Yp1,yPn
+       INTEGER I 
+
+       IF (NOUT .NE. 1) THEN
+         write(kStdErr,*) 'rspl1 assumes you only want 1 calc'
+         CALL DoStop
+       END IF
+       
+       yp1=1.0e16
+       ypn=1.0e16
+
+       CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work) 
+       DO I=1,NOUT 
+         CALL rSPLIN(XA,YA,Y2A,N,XOUT,YOUT)  
+       END DO 
+ 
+       RETURN 
+       END 
+ 
+c************************************************************************ 
 c this subroutine directly calls rsply2 and then rspline
        SUBROUTINE rspl(XA,YA,N,XOUT,YOUT,NOUT) 
  
@@ -821,7 +862,7 @@ C      Parameters
        CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work) 
        DO I=1,NOUT 
          CALL rSPLIN(XA,YA,Y2A,N,XOUT(I),YOUT(I))  
-         END DO 
+       END DO 
  
        RETURN 
        END 
@@ -1263,7 +1304,7 @@ c************************************************************************
 c                       linear interps
 c************************************************************************
 c real linear interpolator for ONE "x" point
-       SUBROUTINE RLINEAR_ONE(XA,YA,N,X,Y)
+       SUBROUTINE RLINEAR1(XA,YA,N,X,Y,NOUT)
 
       IMPLICIT NONE
 
@@ -1281,11 +1322,16 @@ C      -----------------------------------------------------------------
 C
 C      Parameters
        REAL XA(*),YA(*),X,Y
-       INTEGER N
+       INTEGER N,NOUT
 C
 C      Local Variables
        INTEGER K,KLO,KHI
        REAL A,B,H
+
+       IF (NOUT .NE. 1) THEN
+         write(kStdErr,*) 'RLINEAR1 only gives one output'
+         CALL DoStop
+       END IF
 C
 C      -----------------------------------------------------------------
 C
@@ -1346,7 +1392,7 @@ C      Parameters
        INTEGER I 
  
        DO I=1,NOUT 
-         CALL RLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I))  
+         CALL RLINEAR1(XA,YA,N,XOUT(I),YOUT(I),1)  
        END DO 
 
        RETURN 
@@ -1615,6 +1661,73 @@ C      Parameters
        END DO
 
        CALL rlinear(XAA,YAA,N,XBB,YOUT,NOUT)  
+
+       RETURN
+       END
+
+c************************************************************************
+c this subroutine first sorts, then interps
+       SUBROUTINE r_sort_linear1(XA,YA,N,XOUT,YOUT,NOUT)  
+
+      IMPLICIT NONE
+
+       include '../INCLUDE/kcarta.param' 
+
+C      Parameters 
+       REAL XA(*),YA(*),XOUT,YOUT
+       INTEGER N,NOUT 
+
+       REAL XAA(kMaxPtsBox),YAA(kMaxPtsBox)
+       INTEGER iI
+
+       IF (NOUT .NE. 1) THEN
+         write(kStdErr,*) 'r_sort_linear1 is only for 1 point'
+         CALL DoStop
+       END IF
+       
+       DO iI = 1,N
+         XAA(iI) = XA(iI)
+         YAA(iI) = YA(iI)
+       END DO
+       CALL DoSort2Real(XAA,YAA,N,1)
+
+       CALL rlinear1(XAA,YAA,N,XOUT,YOUT,NOUT)  
+
+       RETURN
+       END
+
+c************************************************************************
+c this subroutine first sorts, then linearines
+c changes input X, output XOUT, to log(X) and log(XOUT)
+       SUBROUTINE r_sort_loglinear1(XA,YA,N,XOUT,YOUT,NOUT)  
+
+      IMPLICIT NONE
+
+       include '../INCLUDE/kcarta.param' 
+
+C      Parameters 
+       REAL XA(*),YA(*),XOUT,YOUT 
+       INTEGER N,NOUT 
+
+       REAL XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB
+       INTEGER iI
+
+       IF (NOUT .NE. 1) THEN
+         write(kStdErr,*) 'r_sort_loglinear1 is only for 1 point'
+         CALL DoStop
+       END IF
+
+       DO iI = 1,N
+         XAA(iI) = log(XA(iI))
+         YAA(iI) = YA(iI)
+       END DO
+       CALL DoSort2Real(XAA,YAA,N,1)
+
+       DO iI = 1,NOUT
+         XBB = log(XOUT)
+       END DO
+
+       CALL rlinear1(XAA,YAA,N,XBB,YOUT,NOUT)  
 
        RETURN
        END

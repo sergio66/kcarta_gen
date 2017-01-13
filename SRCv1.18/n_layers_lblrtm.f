@@ -1234,7 +1234,7 @@ c now find pressure output corresponding to HGT output from LBLRTM
             raJunk(iL-iLowestLev+1) = raZout(iL)          
             raJunk2(iL-iLowestLev+1) = raPout(iL)          
           END DO
-          CALL r_sort_linear(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo,1)
+          CALL r_sort_linear1(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo,1)
           write(kStdWarn,*)'LBLRTM output height of ',raRTP_TxtInput(4),' km corresponds to ',zWoo,' N/m2'
 c          raRTP_TxtInput(6) = zWoo/100.0  !! mb
           raRTP_TxtInput(6) = zWoo        !! keep in mb

@@ -411,9 +411,9 @@ c (see ~/KCARTA/INCLUDE/airslevels_upper.param)
       IF ((abs(raTPressX(iAIRS_TOA)-rAIRS_TOA)/rAIRS_TOA    .GT. 1e-3) .AND.
      $    (abs(raTPressX(iAIRS_TOA-1)-rAIRS_TOA)/rAIRS_TOA  .GT. 1e-3)) THEN
         iAddNewPt = +1      !!! AIRS TOA is kinda far from both bracket pts
-        CALL rspl(raLog,raTTempX,   iNumVibLevels,log(rAIRS_TOA),rY1,1)
-        CALL rspl(raLog,raQtipsX,   iNumVibLevels,log(rAIRS_TOA),rY2,1)
-        CALL rspl(raLog,raNLTETempX,iNumVibLevels,log(rAIRS_TOA),rY3,1)
+        CALL rspl1(raLog,raTTempX,   iNumVibLevels,log(rAIRS_TOA),rY1,1)
+        CALL rspl1(raLog,raQtipsX,   iNumVibLevels,log(rAIRS_TOA),rY2,1)
+        CALL rspl1(raLog,raNLTETempX,iNumVibLevels,log(rAIRS_TOA),rY3,1)
 
         !! move things over by 1
         DO iI = iNumVibLevels,iAIRS_TOA,-1
@@ -762,7 +762,7 @@ c now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
 c thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
 c thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,
+        CALL rspl1(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,
      $            raUpperPress(iI),rMixRatio,1)
         raUpperPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raUpperPartPress(iI)=raUpperPress(iI)*rMixRatio/(1.0e6+rMixRatio) !atm
@@ -806,7 +806,7 @@ c now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
 c thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
 c thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,
+        CALL rspl1(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,
      $            raUpperPress(iI),rMixRatio,1)
         raUpperPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raUpperPartPress(iI)=raUpperPress(iI)*rMixRatio/(1.0e6+rMixRatio) !!atm
@@ -936,7 +936,7 @@ c now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
 c thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
 c thus p(g) = (p(total)/(1e6+ppmv) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,
+        CALL rspl1(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,
      $            raTPress(iI),rMixRatio,1)
         raUAMixRatio(iI) = rMixRatio
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm

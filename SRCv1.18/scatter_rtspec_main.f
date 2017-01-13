@@ -533,7 +533,7 @@ c the layer where the instrument is
       INTEGER iAtm,j,iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iNpmix
 c     raFreq(j)=waveno
 
-      INTEGER iLay,iaRadLayer(kProfLayer),iaRadLayerTemp(kProfLayer)
+      INTEGER iLay,iaRadLayer(kProfLayer),iaRadLayerTemp(kMixFilRows)
       INTEGER iT,iExtraThermal
       REAL rad,ttorad,rMPTemp,raExtraThermal(kMaxPts),rThetaEff
       REAL rTrans, rEmiss, rAbs

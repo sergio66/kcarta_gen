@@ -377,7 +377,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raVT1(kMixFilRows),InterpTemp,rThermalRefl,r1,r2,rCos,rTsurf
       REAL rMPTemp,rPlanck,raUp(kMaxPts),raDown(kMaxPts),raTemp(kMaxPts)
       REAL rAngleTrans,rAngleEmission,rDelta,rCosAngle
-      INTEGER iLay,iDoSolar,iDoThermal,iHigh,iT,iaRadLayerTemp(kProfLayer)
+      INTEGER iLay,iDoSolar,iDoThermal,iHigh,iT,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iAngle
       REAL raKCUp(kMaxPts),raKCDown(kMaxPts)
 

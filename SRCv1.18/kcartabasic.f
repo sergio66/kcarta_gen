@@ -315,7 +315,7 @@ c   pressures at which things are output
       INTEGER iPrinter,iNp,iaOp(kPathsOut),iAtmPr
       INTEGER iOutTypes,iaPrinter(kMaxPrint),iaNp(kMaxPrint)
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaGPMPAtm(kMaxPrint)
-      REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
+      REAL raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 c iJacob        = number of gas Jacobians to output
 c iaJacob       = list of GasID's to do Jacobian for
@@ -420,7 +420,8 @@ c read in the driver namelist file and profile
      $         raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont,
      $   iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP,
      $   iNatm,raTSpace,raTSurf,raSatAngle,raSatHeight,
-     $   iaNumLayer,iaaRadLayer,raFracTop,raFracBot,raaPrBdry,
+     $   iaNumLayer,iaaRadLayer,
+     $   raFracTop,raFracBot,raaPrBdry,
      $       raaMix,iNpmix,caaMixFileLines,iMixFileLines,
      $   iOutTypes,iaPrinter,iaGPMPAtm,
      $   iaNp,iaaOp,raaOp,raaUserPress,iNatm2,

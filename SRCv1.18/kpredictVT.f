@@ -170,7 +170,7 @@ c first check to see if user SolarAngle == one of the 6 angles we have
             DO iK = 1,MXXTMP    !!!scan over the 6 solar angles
               ra6(iK) = raaaVibPartFcn(iK,iJ,iI)
             END DO
-            CALL rspl(raSolAngles,ra6,6,rSolarAngle,rT,1)
+            CALL rspl1(raSolAngles,ra6,6,rSolarAngle,rT,1)
             raaVibPartFcn(iJ,iI) =  rT
           END DO
         END DO
@@ -180,7 +180,7 @@ c first check to see if user SolarAngle == one of the 6 angles we have
             DO iK = 1,MXXTMP          !!!scan over the 6 solar angles
               ra6(iK) = raaaVibTemp(iK,iJ,iI)
             END DO
-            CALL rspl(raSolAngles,ra6,6,rSolarAngle,rT,1)
+            CALL rspl1(raSolAngles,ra6,6,rSolarAngle,rT,1)
             raaVibTemp(iJ,iI) =  rT
           END DO
         END DO
@@ -434,7 +434,8 @@ c this subroutine prints out the arrays in a nice format
       include '../INCLUDE/kcarta.param' 
    
       INTEGER iIOUN,iNV,iimod,iDiv 
-      REAL raX(kNLTEProfLayer) 
+c      REAL raX(kNLTEProfLayer)
+      REAL raX(*)       
  
 c local vars  
       INTEGER iM,iD,i1,i2,ia(5),iJ,iFive 

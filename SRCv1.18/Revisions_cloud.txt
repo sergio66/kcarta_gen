@@ -108,7 +108,7 @@ c           real*4     clwc(MAXLEV)         ! cloud liq water content
                 RTSPEC    |         2                |      -1 
                 DISORT    |         3                |      +1
                 PERTURB   |         4                |
-		PCLSAM    |         5                |
+	Default	PCLSAM    |         5                |   
 		RAYLEIGH  |         6                |
 
                 note that really, only PCLSAM (5) is supported/tested recently

@@ -160,7 +160,7 @@ c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint)
       CHARACTER*120 caComment,caComment1
       CHARACTER*80 caLogFile,caLogFile1
-      REAL raaOp(kMaxPrint,kProfLayer),raaOp1(kMaxPrint,kProfLayer)
+      REAL raaOp(kMaxPrint,kPathsOut),raaOp1(kMaxPrint,kProfLayer)
 
 c this is for JACOBN
 c iJacob        = number of gas Jacobians to output
@@ -1006,7 +1006,7 @@ c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
       CHARACTER*120 caComment
       CHARACTER*80 caLogFile
-      REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
+      REAL raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 c this is for JACOBN
 c iJacob        = number of gas Jacobians to output
@@ -1052,7 +1052,7 @@ c note we can only have Cfrac = 0.0 or 1.0, for whatever cloud(s) in the atm
       CHARACTER*120 caaCloudFile(kMaxClouds)
 c cloud profile info
       INTEGER iCldProfile,iaCldTypes(kMaxClouds)
-      REAL raaKlayersCldAmt(kProfLayer,kMaxWater)
+      REAL raaKlayersCldAmt(kProfLayer,kMaxClouds)
 c this is a local variable
       INTEGER iaNML_Ctype(kMaxClouds)
 

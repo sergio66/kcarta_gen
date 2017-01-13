@@ -8,7 +8,7 @@ Baltimore MD 21250
 kCARTA is a pseudo-monochromatic radiative transfer code, which uses
 an accurately pre-computed database of optical depths. The code was
 designed to be the Reference ClearSky Forward Model for NASA's AIRS
-instrument, which is a hyperspectral infared nadir sounder. This means
+instrument, which is a hyperspectral infrared nadir sounder. This means
 the infrared (605-2830 cm-1) optical depths and clear sky radiances,
 at 0.0025 cm-1 resolution, have been extensively compared against
 other codes (such as GENLN) and validated during numerous AIRS
@@ -20,7 +20,7 @@ which currently uses the HITRAN 2012 lineshape parameters, with CO2
 linemixing and MT-CKDv2.5 water continuum.
 
 In addition, some scattering and radiative flux routines are packaged
-with the code, and the optical depth databse has been extended to
+with the code, and the optical depth data base has been extended to
 encompass 15 - 44000 cm-1 (FIR to UV), though we only provide limited
 support for these. kCARTA is available both in f77 and Matlab.
 
@@ -29,7 +29,7 @@ a) hdf packages
 b) rtp package, which is our native file format for storing
    atmospheric geophysical variables and instrument view geometry
    parameters, needed for RT calculations
-c) klayers package, which takes in a LEVELS rtp file and profuces a 
+c) klayers package, which takes in a LEVELS rtp file and produces a 
    LAYERS avg rtp file, needed for RT calculations
 
 Code was developed jointly by 
@@ -52,7 +52,7 @@ Differences between rtp versions
 >         parameter ( MAXCHAN   = 4231 )
 
 
-Large difference betwee 105 and 201 (Scott got  rid of mw stuff, p.erho, 
+Large difference between 105 and 201 (Scott got  rid of mw stuff, p.erho, 
 brought in p,.cprtop2,p.cngwat2 etc)
   diff /asl/packages/rtpV105/include/rtpdefs.f /asl/packages/rtpV201/include/rtpdefs.f
 
@@ -108,7 +108,7 @@ campaigns, it seems pretty good.
 Early Summer, 2002
 AIRS data comes out. So we can test the above database with a TOA instrument.
 We find that it is :
-   bloody good in 15 um region 
+   good in 15 um region 
    has errors in 2380-2405 region (which we suspected from CAMEX1,WINTEX) 
    has huge error in the 2280 region (which came from "hole" in 2351 band) 
    was very good everywhere else  
@@ -161,7 +161,7 @@ Also can do NLTE at 0.0025 cm-1 and at 0.0005 cm-1 resolution
 
 So far can only do CO2 NLTE at 4 um
 
-Have separate code for Manuel Lopez-Puertas/Bernd Funke TVib parameterization
+Have separate code for Manuel Lopez-Puertas/Bernd Funke TVib parametrization
 (after Aug 2005) so that the NLTE temps can be computed for arbitrary solar
 angle/kinetic thermal combinations
 See the f90 programs supplied by M. Lopez-Puertas and B. Funke in
@@ -171,7 +171,7 @@ as well as
  ~/KCARTA/SRCv1.12/NONLTE2/sergio/AIRSDATA_NLTE_VIBTEMPS_Puertas/do_makeVT.m
  ~/KCARTA/SRCv1.14/NONLTE/sergio/AIRSDATA_NLTE_VIBTEMPS_Puertas/makeVT.m
 for a script that takes in an input kinetic temp profile and dumps out the
-NLTE temperture profiles
+NLTE temperature profiles
 
 Scattering algorithms
 =====================
@@ -238,8 +238,9 @@ v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
         All this automatically done by eg
           make datafix385_H2012
 
-        Allowing kCARTA to read in textfile with MIX RATIOS, so it does mini 
-        kLayers with same assumptions (kRTP = -10)
+        Allowing kCARTA to read in textfile with MIX RATIOS, so it does
+	    "mini" kLayers (see n_layers.f)
+	with same assumptions as usual klayers (kRTP = -10)
           - wv input is "wet" MR and so is NOT adjusted
           - other gases eg CO2, O3 are "dry" MR and so they are adjusted
           - if gases are missing from user input, then some standard gases are
@@ -250,7 +251,9 @@ v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
         These would be TAPE5 and modified TAPE6
         For these two cases, when "adding on missing gases", the gasamts 
         are set to 0
-
+        See eg KCARTA/IP_PROFILES/levelsRTP_to_levelstext.m
+               KCARTA/IP_PROFILES/levelsprofile_text1.prf	
+	       
         Introduced (BUGGY) NLTE database for CO2 from 2205 - 2430 cm-1 (or 2205
         to 2405 cm-1 chunks). This database covers optical depths and planck
         modifiers for usual AIRS layers (1-100 or 1100 - 0.005 mb) as well
@@ -288,7 +291,7 @@ v1.17 : Doomed attempt to speed up code by using input profile(s) for only
         large BT errors in final radiances, at a very small gain in speed.
         So this is unsupported and will not be updated. Ever. XYZXYZXYZXYZXYZXYZ
 
-v1.16 : Using Howard Mottler's Matlab based ideas to uncompress the database.
+v1.16 : Using Howard Motteler's Matlab based ideas to uncompress the database.
         This makes the code much cleaner, and a little faster.
         Gases 101,102 are now compressed gases (in 605-2830 cm-1 range)
         Also code now allows user to specify iAFGLProf in nm_prfile, so that 
@@ -296,7 +299,7 @@ v1.16 : Using Howard Mottler's Matlab based ideas to uncompress the database.
         AFGL profiles 1 .. 6 (STD,TRP,MLS,MLW,SAS,SAW)
 
 v1.15 : Have added on more HITRAN gases, as well as xsec gases
-        The gasIDS are now 1-42 and 51-81 respectively
+        The gas IDS are now 1-42 and 51-81 respectively
 
 +++++++++++++++++++++
 
@@ -585,12 +588,12 @@ v1.18
                caaTextOverride = +1 is for 100 layer clouds,
 	           doing cloud cal using cc(i) and clear cal using (1-cc(i)) layer by layer
                caaTextOverride = -1 is for 100 layer clouds,
-	           doing cloud cal, clear cla and the rfinal = tcc rcld + (1-tcc) rclr
+	           doing cloud cal+clear calcs and the rfinal = tcc rcld + (1-tcc) rclr
 
 11/25/16       Added caaTextOverride to nm_params so you can have a text file
                with the 100 layer code. This gets set to caaTextOverrideDefault
 	       and goes globally with every chunk, from p.cc, p.ciwc, p.clwc
-	       all interped to the AIRS 100 layers!!!
+	       all interp'd to the AIRS 100 layers!!!
 	       
                Remember  p1.cfrac(1) + p1.cfrac2(1) - p1.cfrac12(1) = p1.tcc
 	       The text file will have following columns (first column is iMRO)
@@ -756,7 +759,7 @@ c          real*4     clwc(MAXLEV)         ! cloud liq water content
                 RTSPEC    |         2                |      -1 
                 DISORT    |         3                |      +1
                 PERTURB   |         4                |
-		PCLSAM    |         5                |
+	Default	PCLSAM    |         5                |
 		RAYLEIGH  |         6                |
 
                 note that really, only PCLSAM (5) is supported/tested recently
@@ -863,7 +866,7 @@ c          real*4     clwc(MAXLEV)         ! cloud liq water content
                 RTSPEC    |         2                |      -1 
                 DISORT    |         3                |      +1
                 PERTURB   |         4                |
-		PCLSAM    |         5                |
+	Default	PCLSAM    |         5                |
 		RAYLEIGH  |         6                |
 
                 note that really, only PCLSAM (5) is supported/tested recently
@@ -3228,7 +3231,7 @@ Two main updates in this version :
                 RTSPEC    |         2                |      -1 
                 DISORT    |         3                |      +1
                 PERTURB   |         4                |
-		PCLSAM    |         5                |
+	Default	PCLSAM    |         5                |
 		RAYLEIGH  |         6                |
 
                 note that really, only PCLSAM (5) is supported/tested recently

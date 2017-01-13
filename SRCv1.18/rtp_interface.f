@@ -377,7 +377,7 @@ c local variables
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)
+     $      iProfileLayers,raPressLevels,raTPressLevels,raThickness)
       ELSEIF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
         write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
         write(kStdWarn,5040) caPfname

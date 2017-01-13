@@ -656,7 +656,7 @@ c the layer, not on top of it
 c current defined atmosphere has all g-100 layers, 100th layer had frac 1.0 
         iExtra=-1 
  
-      ELSE IF ((iI .EQ. 0) .AND. (abs(rFracTop-1.0) .GE. 1.0e-4))THEN 
+      ELSE IF ((iI .EQ. 0) .AND. (abs(rFracTop-1.0) .GE. 1.0e-4)) THEN 
 c even though the current defined atmosphere has all g-100 layers,  
 c 100th layer had frac 0 < f < 1 
         iExtra=1 

@@ -128,7 +128,7 @@ c for specular reflection
 c for Rayleigh
       INTEGER iDoRayleigh,iDoComplicatedRayleigh
       REAL raScatterRayleigh(kMaxPts),raSunXRefl(kMaxPts)
-      REAL raaAbsX(kMaxPts,kProfLayer),muSun,muSat,muX
+      REAL raaAbsX(kMaxPts,kMixFilRows),muSun,muSat,muX
 
       iIOUN = iIOUN_IN
 
@@ -637,7 +637,7 @@ c for Rayleigh
       INTEGER iDoRayleigh,iDoComplicatedRayleigh,iLow
       REAL rPhaseFcnRayleigh,muSun,muSat,muX,rSunAngle,rSunTemp,rAngleTrans,rAngleEmission
       REAL raScatterRayleigh(kMaxPts),raSunXRefl(kMaxPts)
-      REAL raaAbsX(kMaxPts,kProfLayer),raaAbsXL2S(kMaxPts,kMaxLayer)
+      REAL raaAbsX(kMaxPts,kMixFilRows),raaAbsXL2S(kMaxPts,kMaxLayer)
       REAL rFac,raaSSA(kMaxPts,kProfLayer),raAttenuate(kMaxPts)
 
       iIOUN = iIOUN_IN
@@ -1148,7 +1148,7 @@ c input
       REAL raSunAngles(kProfLayer),rSatAngle
 c output
       REAL raaRayleigh(kMaxPts,kProfLayer),raScatterRayleigh(kMaxPts)       
-      REAL muSun,muSat,muX,raSun(kMaxPts),raaAbsX(kMaxPts,kProfLayer)
+      REAL muSun,muSat,muX,raSun(kMaxPts),raaAbsX(kMaxPts,kMixFilRows)
 
 c local var
       REAL raaAbsXL2S(kMaxPts,kMaxLayer)
@@ -1270,7 +1270,7 @@ c input
       REAL raSunAngles(kProfLayer),rSatAngle
 c output
       REAL raaRayleigh(kMaxPts,kProfLayer),raScatterRayleigh(kMaxPts)       
-      REAL muSun,muSat,muX,raSun(kMaxPts),raaAbsX(kMaxPts,kProfLayer)
+      REAL muSun,muSat,muX,raSun(kMaxPts),raaAbsX(kMaxPts,kMixFilRows)
 
 c local var
       REAL raaAbsXL2S(kMaxPts,kMaxLayer)

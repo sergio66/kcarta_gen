@@ -946,7 +946,7 @@ c for each freq point in raFreq, find where nearest low CKD freq grid point is
         END DO
         CALL DSPLY2(daTemprt,daC,kTempCKD,dYP1,dYPN,daY2,daWork) 
         DO iL=iMin,iMax
-          CALL DSPLIN(daTemprt,daC,daY2,kTempCKD,raTemp(iL),daaCon(iFr,iL)) 
+          CALL DSPLIN(daTemprt,daC,daY2,kTempCKD,dble(raTemp(iL)),daaCon(iFr,iL)) 
         END DO
       END DO
 

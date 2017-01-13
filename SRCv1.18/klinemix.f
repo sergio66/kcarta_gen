@@ -494,6 +494,7 @@ c this just figures out "tau" for birnbaum
 
 c local var
       DOUBLE PRECISION tau2,dur(4),pt(4),ps(4),ratio(4),duration_self,pf
+      DOUBLE PRECISION junk1(2),junk2(2)
       INTEGER iFr
 
       tau2 = 5.0d-3
@@ -526,10 +527,20 @@ c copied from SPECTRA/CO2_COMMON/co2_param.m
       END DO
 
       duration_self = dur(1)
-      CALL dspl(ratio,dur,4,(dP-dPP)/dP,tau2,1)
-c      print *,'in tau2_birn : ',dPP,dP,(dP-dPP)/dP,tau2,(ratio(iFr),iFr=1,4)
-      tau2_birn = tau2
 
+c      CALL dspl(ratio,dur,4,(dP-dPP)/dP,tau2,1)
+c      print *,'in tau2_birn : ',dPP,dP,(dP-dPP)/dP,tau2,(ratio(iFr),iFr=1,4)
+c      tau2_birn = tau2
+
+c this is for ifort compiler
+      junk1(1) = (dP-dPP)/dP
+      junk1(2) = (dP-dPP)/dP*1.0001
+      junk2(1) = tau2
+      junk2(2) = tau2
+      CALL dspl(ratio,dur,4,junk1,junk2,2)
+c      print *,'in tau2_birn : ',dPP,dP,(dP-dPP)/dP,tau2,(ratio(iFr),iFr=1,4)
+      tau2_birn = junk2(1)
+      
       RETURN
       END
       

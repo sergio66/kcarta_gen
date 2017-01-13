@@ -1976,7 +1976,7 @@ c these are variables that we have to set
       REAL    TEMP(*)
 
 c local variables
-      INTEGER iL,iLay,iM,idiv,iaRadLayerTemp(kProfLayer)
+      INTEGER iL,iLay,iM,idiv,iaRadLayerTemp(kMixFilRows)
       REAL FindBottomTemp,Temp1(maxnz)
       REAL pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
 
@@ -2062,7 +2062,7 @@ c these are variables that we have to set
       REAL    TEMP(*)
 
 c local variables
-      INTEGER iL,iLay,iM,idiv,iaRadLayerTemp(kProfLayer),iOffSet,iJump,iLowest
+      INTEGER iL,iLay,iM,idiv,iaRadLayerTemp(kMixFilRows),iOffSet,iJump,iLowest
       REAL FindBottomTemp,Temp1(maxnz)
       REAL pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
 
@@ -4996,7 +4996,7 @@ c use rSpl
       ya(2) = rT0
       ya(3) = rTm1
  
-      CALL rspl(xa,ya,3,rPavg,rT,1)
+      CALL rspl1(xa,ya,3,rPavg,rT,1)
 c      print *,'rPavg,rT = ',exp(rPavg),rT
 
       InterpTempSurf=rT

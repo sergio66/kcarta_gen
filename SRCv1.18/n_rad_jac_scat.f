@@ -324,13 +324,13 @@ c      print *,'----> instead of varying the diffusivity angle'
 
       !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
       raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
-      IF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .NE. 43)) THEN
+      IF ((abs(raKThermalAngle(iC) - 1.0) .LE. 0.000001) .AND. (kTemperVary .NE. 43)) THEN
         write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
         write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'	
         write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
         write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
         raKThermalAngle(iC) = +53.13
-      ELSEIF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
+      ELSEIF ((abs(raKThermalAngle(iC) - 1.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
         write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
         write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'	
         write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
@@ -2123,7 +2123,7 @@ c SatHeight is in meters, as is LayerHeight
       include '../INCLUDE/kcarta.param'
 
       INTEGER iA,iaaRadLayer(kMaxAtm,kProfLayer)
-      REAL raPressStart(kProfLayer),raSatHeight(kMaxAtm)
+      REAL raPressStart(kMaxAtm),raSatHeight(kMaxAtm)
       REAL raPressLevels(kProfLayer+1)  !! in mb
       REAL raLayerHeight(kProfLayer)    !! in m
 

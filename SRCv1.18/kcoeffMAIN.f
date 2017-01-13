@@ -49,7 +49,7 @@ c input vars
       INTEGER iGas,iaGases(kMaxGas)
       INTEGER iProfileLayers,iVertTempSet,iError,iDoDQ
       INTEGER iSplineType,iL_low,iL_high,iTag,iActualTag
-      INTEGER iaCONT(kGasStore)
+      INTEGER iaCONT(kMaxGas)
 c these are the individual reference profiles, at kProfLayer layers 
       REAL raRAmt(kProfLayer),raRTemp(kProfLayer) 
       REAL raRPartPress(kProfLayer),raRPress(kProfLayer) 

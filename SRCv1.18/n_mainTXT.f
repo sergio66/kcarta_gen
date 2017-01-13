@@ -164,9 +164,9 @@ c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaGPMPAtm(kMaxPrint),iaGPMPAtm1(kMaxPrint)
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint)
       INTEGER iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint)
-      CHARACTER*80 caComment,caComment1
+      CHARACTER*120 caComment,caComment1
       CHARACTER*80 caLogFile,caLogFile1
-      REAL raaOp(kMaxPrint,kProfLayer),raaOp1(kMaxPrint,kProfLayer)
+      REAL raaOp(kMaxPrint,kPathsOut),raaOp1(kMaxPrint,kPathsOut)
 
 c this is for JACOBN
 c iJacob        = number of gas Jacobians to output
@@ -504,7 +504,7 @@ c set overrides
       read (iIOUN,nml = nm_frqncy)
       rf_low1  = rf1
       rf_high1 = rf2
-      write (kStdWarn,*) 'successfully read in freqs .....'
+      write (kStdWarn,*) 'successfully read in freqs .....',rf1,rf2
       CALL printstar      
 
       namecomment = '******* MOLGAS section *******'
@@ -868,8 +868,8 @@ c scatter info
 c scatter cloudprofile info
      $      iCldProfile,raaKlayersCldAmt,
 c new spectroscopy
-     $      iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
-     $      iNumAltDirs,iaAltDirs,caaaAltDirs,
+     $      iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks,
+     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,     
 c nonLTE
      $      raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
      $      iaNLTEChunks,iaaNLTEChunks,
@@ -1005,8 +1005,9 @@ c raaUserPress  = for option 3, list of pressures for output radiances
 c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iNatm2
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
-      CHARACTER*80 caComment,caLogFile
-      REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
+      CHARACTER*120 caComment
+      CHARACTER*80 caLogFile      
+      REAL raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 c this is for JACOBN
 c iJacob        = number of gas Jacobians to output
@@ -1052,7 +1053,7 @@ c note we can only have Cfrac = 0.0 or 1.0, for whatever cloud(s) in the atm
       CHARACTER*120 caaCloudFile(kMaxClouds)
 c cloud profile info
       INTEGER iCldProfile,iaCldTypes(kMaxClouds)
-      REAL raaKlayersCldAmt(kProfLayer,kMaxWater)
+      REAL raaKlayersCldAmt(kProfLayer,kMaxClouds)
 c this is a local variable
       INTEGER iaNML_Ctype(kMaxClouds)
 
@@ -1064,7 +1065,14 @@ c iaaNewChunks   tells which data chunks to read in
 c caaaNewChunks  tells the name of the files associated with the chunks 
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore) 
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
-      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
+      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT)
+c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
+c iaAltComprDirs      tells which gases we want to use alternate compressed files
+c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
+c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
+      INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
+      CHARACTER*80 caaAltComprDirs(kGasStore)
+      REAL          rAltMinFr,rAltMaxFr      
 c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltDirs      tells which gases we want to use alternate compressed files
 c caaaAltDirs    tells the name of the files associated with the alternate compressed files
@@ -2144,7 +2152,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       INTEGER iRTP
-      CHARACTER*130 caPFName
+      CHARACTER*80 caPFName
 
       INTEGER iI
 
@@ -2340,14 +2348,14 @@ c     $      iProfileLayers,raPressLevels,raThickness)
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)                                 
+     $      iProfileLayers,raPressLevels,raTPressLevels,raThickness) 
       ELSEIF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
         write(kStdWarn,*) 'LBLRTM style TEXT profile to be read is  : '
         write(kStdWarn,5040) caPfname
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)                                 
+     $      iProfileLayers,raPressLevels,raTPressLevels,raThickness)
       END IF
 
 c this piece of "output" displays the amounts for the first 3 gases

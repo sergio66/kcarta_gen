@@ -318,7 +318,7 @@ c   pressures at which things are output
       INTEGER iPrinter,iNp,iaOp(kPathsOut),iAtmPr
       INTEGER iOutTypes,iaPrinter(kMaxPrint),iaNp(kMaxPrint)
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaGPMPAtm(kMaxPrint)
-      REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
+      REAL raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 c iJacob        = number of gas Jacobians to output
 c iaJacob       = list of GasID's to do Jacobian for
@@ -1141,7 +1141,8 @@ c of course, if no mixing table has been set, then no need to loop this
          
 c LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP 
 c LOOP OVER THE ATMOSPHERE B.C. set in *RADFIL
-          IF ((kWhichScatterCode .EQ. 5) .AND. (iAtm .GE. 1)) THEN
+c kWhichScatterCode = 0,2,3,5 for ABS, RTSPEC, DISORT, PCLSAM type clouds
+          IF (((kWhichScatterCode .EQ. 5) .OR. ((kWhichScatterCode .EQ. 3)) .AND. (iAtm .GE. 1)) THEN
             DO iFr = 1,kMaxPts
               DO iAtm = 1,kProfLayer
                 raaRadsX(iFr,iAtm) = 0.0

@@ -109,14 +109,14 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
           IF ((log(raPressLevels(iI)) .GE. rPmin) .AND. (log(raPressLevels(iI)) .LE. rPmax)) THEN
 	    !! most of the points
 	    IF (iInterpType .EQ. +1) THEN
-              CALL rspl(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+              CALL rspl1(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
 c              CALL rspl_diffyp1n(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)	      
 	    ELSE
-              CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
+              CALL rlinear1(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
 	    END IF
           ELSE
 	    !! couple or so points at the top or bottom boundaries
-            CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
+            CALL rlinear1(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
           END IF
           raTPressLevels(iI) = rY
         ELSE
@@ -197,7 +197,7 @@ c method 2 : use 10 points including slab ends
         dx = log(raPressLevels(iI+1)/raPressLevels(iI)) * 1/9  !! pressure spacing in (ln(p)) space
         DO iJ = 2,9
           raPX(iJ) = exp(log(raPX(01)) + (iJ-1)*dx)
-          CALL rspl(logP,raT,iProfileLayers,log(raPX(iJ)),rY,1)
+          CALL rspl1(logP,raT,iProfileLayers,log(raPX(iJ)),rY,1)
           raTX(iJ) = rY
         END DO
 c        DO iJ = 1,10
@@ -2112,10 +2112,10 @@ c input
       INTEGER iNpath,iRTP
       INTEGER iaGases(kMaxGas)
 c output
-      REAL raaTemp(kProfLayer,kMaxGas)        !! in K
-      REAL raaPress(kProfLayer,kMaxGas)       !! in atm
-      REAL raaAmt(kProfLayer,kMaxGas)         !! in moles/m2 --> need to go to molecules/cm2
-      REAL raaPartPress(kProfLayer,kMaxGas)   !! in atm
+      REAL raaTemp(kProfLayer,kGasStore)        !! in K
+      REAL raaPress(kProfLayer,kGasStore)       !! in atm
+      REAL raaAmt(kProfLayer,kGasStore)         !! in moles/m2 --> need to go to molecules/cm2
+      REAL raaPartPress(kProfLayer,kGasStore)   !! in atm
       REAL raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)  !! plevs in mb, temps in K
       REAL raThickness(kProfLayer) 
       INTEGER iProfileLayers,iKnowTP,iAFGLProf
@@ -2154,10 +2154,12 @@ c local var
 	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>
 	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>	
 	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>
+	write(kStdErr,*)  '>>> RUNNING INTERNAL KLAYERS to integrate text levels/layers --> layers'
+	write(kStdWarn,*) '>>> RUNNING INTERNAL KLAYERS to integrate text levels/layers --> layers'	
         CALL InputMR_profile(caPfName,iProfileLayers,iNumGasesLVL2LAY,iaGasesLVL2LAY,iLowestLevLVL2LAY,
      $                     raToutLVL2LAY,raAmountOutLVL2LAY,raZoutLVL2LAY,
      $                     raPoutLVL2LAY,raaQoutLVL2LAY,raaPartPressoutLVL2LAY,
-     $                     raPbndFinal,raTBndFinal,iZbndFinal)     
+     $                     raPbndFinal,raTBndFinal,iZbndFinal)
         write(kStdWarn,*) 'Read ',iNumGasesLVL2LAY,' gases at ',iProfileLayers,' output layers from the text file'
 	IF (iZbndFinal .GT. 0) THEN
 	  write(kStdWarn,*) 'hhmmm looks like we have new pressure levels from LBLRTM TAPE5 and/or TAPE6'

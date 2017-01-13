@@ -361,7 +361,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission
@@ -963,7 +963,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
        
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission
@@ -1751,7 +1751,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission
@@ -2338,7 +2338,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
        
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission
@@ -2897,7 +2897,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission
@@ -3502,7 +3502,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
        
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission
@@ -4544,7 +4544,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission
@@ -5148,7 +5148,7 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 c to do the thermal,solar contribution
-      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kProfLayer)
+      INTEGER iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
       INTEGER iExtraSun,iT
       REAL rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
       REAL rAngleTrans,rAngleEmission

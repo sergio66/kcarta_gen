@@ -1297,7 +1297,7 @@ c iNatm2        = number of atmospheres that *OUTPUT thinks there is
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
       CHARACTER*120 caComment
       CHARACTER*80 caLogFile      
-      REAL raaOp(kMaxPrint,kProfLayer),raaUserPress(kMaxPrint,kProfLayer)
+      REAL raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 c this is for JACOBN
 c iJacob        = number of gas Jacobians to output

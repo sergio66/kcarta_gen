@@ -193,8 +193,8 @@ c note abs coeff = stored optical depth/default gas amount
 	CALL DoStop
       END IF      
       IF ((iSplineType .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
-        write(kStdErr,*),'iSplineType,iDefault = ',iSplineType,iDefault
-        write(kStdWarn,*),'iSplineType,iDefault = ',iSplineType,iDefault	
+        write(kStdErr,*)  'iSplineType,iDefault = ',iSplineType,iDefault
+        write(kStdWarn,*) 'iSplineType,iDefault = ',iSplineType,iDefault	
       END IF
 
 c recall kMaxLayer = 100 = the kCARTA adtabase
@@ -2074,6 +2074,8 @@ c RadTrans
                                       !!!   see SUBR Get_Temp_Plevs in n_pth_mix.f
       iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
                                       !!!   see SUBR rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS in rad_main.f				     
+      iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = 5 for PCLSAM (Default)
+                                      !!!   0 for ABS clouds, 2 for RTPSEC, 3 for DISORT
   
 c n_layers_lblrtm.f and n_pth_mix.f  TAPE5/6
       iaaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration
@@ -2673,7 +2675,7 @@ C     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
         IF (iSplineType .EQ. +1) THEN
           CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)	
         ELSE
-          CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r)
+          CALL rlinear1(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
         END IF
         raRTemp(iI) = r
       END DO
@@ -3082,15 +3084,15 @@ c rP            = pressure at which we want the temperature
         ypn=1.0e30
         IF (iSpline .EQ. +1) THEN
           IF (iLog .EQ. +1) THEN
-            CALL rspl(raLogP,raT,3,log(rP),rT,1) 
+            CALL rspl1(raLogP,raT,3,log(rP),rT,1) 
           ELSE
-            CALL rspl(raP,raT,3,rP,rT,1)
+            CALL rspl1(raP,raT,3,rP,rT,1)
           END IF
         ELSEIF (iSpline .EQ. -1) THEN
           IF (iLog .EQ. +1) THEN
-            CALL rlinear(raP,raT,3,rP,rT,1)
+            CALL rlinear1(raP,raT,3,rP,rT,1)
           ELSE
-            CALL rlinear(raLogP,raT,3,log(rP),rT,1)
+            CALL rlinear1(raLogP,raT,3,log(rP),rT,1)
           END IF
         END IF
       END IF
@@ -3438,7 +3440,7 @@ c raaPrBdry = pressure start/stop
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
       REAL raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
-      REAL rakSolarRefl(kMaxPts)
+      REAL rakSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm)
       CHARACTER*80 caEmissivity(kMaxAtm)
 c rakSolarAngle = solar angles for the atmospheres
@@ -3727,7 +3729,7 @@ c raaPrBdry = pressure start/stop
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
       REAL raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
-      REAL rakSolarRefl(kMaxPts)
+      REAL rakSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm)
       CHARACTER*80 caEmissivity(kMaxAtm)
 c rakSolarAngle = solar angles for the atmospheres
@@ -3960,7 +3962,7 @@ c raaPrBdry = pressure start/stop
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
       REAL raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
-      REAL rakSolarRefl(kMaxPts)
+      REAL rakSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm)
       CHARACTER*80 caEmissivity(kMaxAtm)
 c rakSolarAngle = solar angles for the atmospheres
@@ -4109,8 +4111,8 @@ c      print *,(raHgt(iI),iI=1,kMaxLayer)
       ELSEIF (p .LE. DATABASELEV(kMaxLayer+1)) THEN 
         rH = DatabaseHEIGHT(kMaxLayer)
       ELSE
-        CALL rlinear_one(logpavg,raHgt,kMaxLayer,log(p),rH)
-        CALL rspl(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+        CALL rlinear1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+        CALL rspl1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
       END IF
 
       p2h = rH
