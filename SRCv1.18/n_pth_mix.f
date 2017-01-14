@@ -151,7 +151,8 @@ c >>>>>>>>>>> this is to FORCE tape5 temperatures into the LevelTemperatures and
 	DO iI = 1,kProflayer
 	  write(kStdWarn,*) iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),raaTemp(iI,1)-kLBLRTM_layerTavg(iI)
 	  IF (kRTP .EQ. -5) THEN
-  	    print *, 'kRTP = -5, use these T in uncompress',iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),raaTemp(iI,1)-kLBLRTM_layerTavg(iI)
+  	    write(kStdWarn,*) 'kRTP = -5, use these T in uncompress',iI,raaTemp(iI,1),kLBLRTM_layerTavg(iI),
+     $	    raaTemp(iI,1)-kLBLRTM_layerTavg(iI)
 	  END IF
 c          raVTemp(iI) = kLBLRTM_layerTavg(iI)
         END DO	
@@ -2155,7 +2156,10 @@ c local var
 	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>	
 	!!    <<<< pressures raPoutLVL2LAY,raaPartPressoutLVL2LAY are in N/m2 >>>> <<< raPBndFInal is in mb >>>>
 	write(kStdErr,*)  '>>> RUNNING INTERNAL KLAYERS to integrate text levels/layers --> layers'
-	write(kStdWarn,*) '>>> RUNNING INTERNAL KLAYERS to integrate text levels/layers --> layers'	
+	write(kStdErr,*)  '>>>    this is quick and convenient; highly recommend you use klayers instead!'
+	write(kStdWarn,*) '>>> RUNNING INTERNAL KLAYERS to integrate text levels/layers --> layers'
+	write(kStdWarn,*) '>>>    this is quick and convenient; highly recommend you use klayers instead!'
+	
         CALL InputMR_profile(caPfName,iProfileLayers,iNumGasesLVL2LAY,iaGasesLVL2LAY,iLowestLevLVL2LAY,
      $                     raToutLVL2LAY,raAmountOutLVL2LAY,raZoutLVL2LAY,
      $                     raPoutLVL2LAY,raaQoutLVL2LAY,raaPartPressoutLVL2LAY,
@@ -2164,6 +2168,10 @@ c local var
 	IF (iZbndFinal .GT. 0) THEN
 	  write(kStdWarn,*) 'hhmmm looks like we have new pressure levels from LBLRTM TAPE5 and/or TAPE6'
 	END IF
+
+        write(kStdErr,*)  '>>> FINISHED INTERNAL KLAYERS to integrate text levels/layers --> layers'
+        write(kStdWarn,*) '>>> FINISHED INTERNAL KLAYERS to integrate text levels/layers --> layers'	
+
       ELSE
         write(kStdErr,*) 'huh?? only use this routine if reading text levels file or text LBLRTM TAPE5,6???',kRTP
         Call DoStop
@@ -2261,6 +2269,7 @@ c now see if we have to chunk on WaterSelf, WaterFor from water profile
       CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead,
      $          iaInputOrder,iNumGases,
      $          raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+
 c now got to add in the missing gases, see READRTP_1B
 c this was the original code
 c      CALL AddOnAFGLProfile(kAFGLProf,
@@ -2414,6 +2423,7 @@ c or Qnew = sum(frac(i) Q(i))
           !! do the integral from AIRS layers to ARB layers
 	  iMaxL = min(kProfLayer,iZbndFinal) !! so if iZbndFinal = 101, we only do 100 layers ....
           DO iX = 1,iMaxL
+	    raQX2(iX) = 0.0
 	    rPP = 0.0
 	    rPPWgt = 0.0
 	    rMR = 0.0

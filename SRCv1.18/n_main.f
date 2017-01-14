@@ -275,7 +275,8 @@ c define the namelists!!!!!!!!
 c local variables
       INTEGER iI,iJ,iIOUN,iErr
       CHARACTER*30 namecomment
-
+      CHARACTER*50 FMT
+      
       NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort,
      $                   kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,
      $                   kThermalAngle,iaaOverride,caaTextOverride
@@ -608,7 +609,8 @@ c      iTemperVary  = -1          !assume const-in-tau temperature variation
         raSatAngle1(iI)       = raSatAngle(iI)
 
         IF (raSatHeight(iI) .LT. 0) THEN
-          write(kStdWarn,*) 'atm# ',iI,' raAtmLoop raSatHeight = ',raSatHeight(iI), 'reset to 705 km'
+	  FMT = '(A,I3,A,F10.3,A)'	
+          write(kStdWarn,FMT) 'atm# ',iI,' raAtmLoop raSatHeight = ',raSatHeight(iI), 'reset to 705 km'
           raSatHeight(iI) = 705000.0	  
         END IF
         raSatHeight1(iI)      = raSatHeight(iI)
@@ -1115,6 +1117,7 @@ c local variables
 c this local variable keeps track of the GAS ID's read in by *PRFILE
       INTEGER iNpath
       CHARACTER*1 cYorN
+      CHARACTER*50 FMT
       INTEGER iResetCldFracs
 c this is is we have 100 layer clouds
       INTEGER iIOUNX,iErrX,iMRO,iNumLaysX
@@ -1211,9 +1214,9 @@ c ******** PARAMS section
       IF ((kActualJacs .EQ. 102) .AND. (kActualJacsB .EQ. -1)) THEN
         kActualJacsB = 1
       END IF
-      write(kStdWarn,*) 'kActualJacs,kActualJacsB,kActualJacsT = ',
+      FMT = '(A,I3,I3,I3)'
+      write(kStdWarn,FMT) 'kActualJacs,kActualJacsB,kActualJacsT = ',
      $ kActualJacs,kActualJacsB,kActualJacsT
-
       CALL printstar      
 
 c ******** FRQNCY section

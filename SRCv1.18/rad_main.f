@@ -1737,13 +1737,13 @@ c      END DO
         END DO
       END IF
 
+c 4321 FORMAT(5I,' ',9(F10.4,' '))
 c allison
 c      DO iFr = 1,1
 c        print *,12345678,raFreq(iFr),raUseEmissivity(iFr),raThermal(iFr),
 c     $     rThermalRefl,
 c     $     rTSurf,raSurface(iFr),raSun(iFr),raSunRefl(iFr),raInten(iFr)
 c      END DO
-c 4321 FORMAT(5I,' ',9(F10.4,' '))
 c      DO iFr = 1,1
 c        print *,-2,raFreq(iFr),raSurface(iFr),raUseEmissivity(iFr),
 c     $     raThermal(iFr),rTSurf,raInten(iFr)
@@ -1784,6 +1784,7 @@ c now do the radiative transfer thru this bottom layer
         END DO
 c        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
       END DO
+c      print *,1,raFreq(1),raInten(1)
 c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 c then do the rest of the layers till the last but one(all will be full)
       DO iLay=2,iHigh-1
@@ -1813,6 +1814,7 @@ c now do the radiative transfer thru this complete layer
           raInten(iFr) = raaEmission(iFr,iLay) + 
      $                   raInten(iFr)*raaLayTrans(iFr,iLay)
         END DO
+c      print *,iLay,raFreq(1),raInten(1)	
 c        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
 c       print *,iLay,rMPTemp,raaAbs(1,iL),raInten(1)
       END DO
@@ -1837,6 +1839,7 @@ c then do the topmost layer (could be fractional)
      $            iProfileLayers,raPressLevels,
      $            iNLTEStart,raaPlanckCoeff)
               CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+c	      print *,'final',raFreq(1),raInten2(1)
             END DO
           END IF
 cc no need to do radiative transfer thru this layer

@@ -351,7 +351,6 @@ c      print *,'----> instead of varying the diffusivity angle'
           CALL DoStop
         END IF
 
-        print *,kThermal,kThermalAngle,kSetThermalAngle
         IF (kThermal .EQ. 0) THEN
           IF (kThermalAngle  .LT. 0) THEN
             kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation

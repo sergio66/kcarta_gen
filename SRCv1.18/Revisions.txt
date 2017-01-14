@@ -584,6 +584,19 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+1/14/17        Using ifort with all safety features ON, fixed quite a few bugs
+               relating subroutine number of arguments and size of arrays/matrices
+	       
+               nlayers.f turned out to be quite buggy, when reading/processing
+               text levels profiles
+	       Noticed that after running levels profile through klayers and kcarta,
+	       then doing the OD uncompression and running through RT, and then
+	       gaussian convolving over 0.5 cm-1 res/0.5 cm-1 FWHM
+	       a) integrated T(z) profile is largest at topmost layer (0.005 mb-0.010 mb)
+	          so have about 1 K BTdiffs deep in the 4 and 15 um bands
+	       b) the column water amounts are very similar, but still get about 0.2 K diff in
+	          the window regions; ratio between profiles is about 0.9979 +/- 0.0057
+		  
 12/20/16       caaTextOverride = +2 is for 100 layer clouds MRO
                caaTextOverride = +1 is for 100 layer clouds,
 	           doing cloud cal using cc(i) and clear cal using (1-cc(i)) layer by layer

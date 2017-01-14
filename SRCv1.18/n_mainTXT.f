@@ -279,7 +279,8 @@ c define the namelists!!!!!!!!
 c local variables
       INTEGER iI,iJ,iIOUN,iErr
       CHARACTER*30 namecomment
-
+      CHARACTER*50 FMT
+      
       NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort,
      $                   kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,
      $                   kThermalAngle,iaaOverride,caaTextOverride
@@ -608,7 +609,8 @@ c      iTemperVary  = -1          !assume const-in-tau temperature variation
         raSatAngle1(iI)       = raSatAngle(iI)
 
         IF (raSatHeight(iI) .LT. 0) THEN
-          write(kStdWarn,*) 'atm# ',iI,' raAtmLoop raSatHeight = ',raSatHeight(iI), 'reset to 705 km'
+	  FMT = '(A,I3,A,F10.3,A)'
+          write(kStdWarn,FMT) 'atm# ',iI,' raAtmLoop raSatHeight = ',raSatHeight(iI), 'reset to 705 km'
           raSatHeight(iI) = 705000.0
         END IF
         raSatHeight1(iI)      = raSatHeight(iI)
@@ -1121,6 +1123,7 @@ c local variables
 c this local variable keeps track of the GAS ID's read in by *PRFILE
       INTEGER iNpath
       CHARACTER*1 cYorN
+      CHARACTER*50 FMT
       INTEGER iResetCldFracs
 c this is is we have 100 layer clouds
       INTEGER iIOUNX,iErrX,iMRO,iNumLaysX
@@ -1215,7 +1218,8 @@ c ******** PARAMS section
       IF ((kActualJacs .EQ. 102) .AND. (kActualJacsB .EQ. -1)) THEN
         kActualJacsB = 1
       END IF
-      write(kStdWarn,*) 'kActualJacs,kActualJacsB,kActualJacsT = ',
+      FMT = '(A,I3,I3,I3)'
+      write(kStdWarn,FMT) 'kActualJacs,kActualJacsB,kActualJacsT = ',
      $ kActualJacs,kActualJacsB,kActualJacsT
       CALL printstar      
 
@@ -1290,7 +1294,7 @@ c ******** PRFILE section
      $                      raThickness,raPressLevels,raTPressLevels)
         iKnowTP = +1
       END IF
-
+      
 c now set the water continuum according to kCKD
       IF ((kCKD .LT. 0) .AND. (iaGases(1) .EQ. 1)) THEN
         write(kStdErr,*) 'kCKD < 0 so no continuum calcs (g101,g102)'
@@ -1302,7 +1306,7 @@ c now set the water continuum according to kCKD
       write (kStdWarn,*) 'successfully checked prfile .....'
       iaKeyword(4) = 1
       CALL printstar      
-
+      
 c ******** WEIGHT section
       namecomment = '******* WEIGHT section *******'
       CALL mixfil4(raaMix,iNpmix,iNumGases,iNumLayers,iaGases,
@@ -1310,7 +1314,7 @@ c ******** WEIGHT section
       iaKeyword(7) = 1
       write (kStdWarn,*) 'successfully checked weight .....'
       CALL printstar      
-
+      
 c ******** RADNCE section
       namecomment = '******* RADNCE section *******'
       IF (iaGases(2) .EQ. 1) THEN
@@ -1354,7 +1358,6 @@ c ******** RADNCE section
      $       raSatAzimuth,raSolAzimuth,raWindSpeed,
      $       cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
      $       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
-
       iaKeyword(8) = 1
 
       cfrac = max(cfrac1,cfrac2)
@@ -1563,7 +1566,7 @@ c     $      iaaCloudWhichLayers,iNatm,raaPrBdry,raPressLevels,iProfileLayers)
       END IF
 
       CALL printstar      
-
+      
 c ******** JACOBN section
       namecomment = '******* JACOBN section *******'
       IF (iJacob .NE. 0) THEN
@@ -2155,7 +2158,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       CHARACTER*80 caPFName
 
       INTEGER iI
-
+      
        cfrac12 = -1.0
        cfrac1 = -1.0
        cfrac2 = -1.0
