@@ -1958,9 +1958,14 @@ c   --> ==  0 if we want to output NLTE Planck modifiers
 c kPlanckOut == -1 if we do not want to output Planck modifiers, 1 if we do
       kPlanckOut = -1
 
+c only effective in following cases
+c if kRTP = -1 (text input from nm_radnce, profile input from text file)
+c if kRTP =  0 (text input from nm_radnce, profile input from rtp file)
 c kSurfTemp = -1 == want to use user supplied surface temp in *RADNCE
 c              1 == want to use user supplied surface temp in *RADNCE as 
 c                     an offset to pressure interpolated temperature
+c so in above RTP cases if kSurfTemp < 0 : use raTSurf(iI)
+c                          kSurfTemp > 0 : use raTSurf(iI) + InterpedTemp
       kSurfTemp = -1     
 
 c kRTP = -5  : read LBLRTM style LAYERS profile (edited TAPE 6); set atm from namelist
@@ -2283,15 +2288,16 @@ c         write(kStdErr,*) 'good',iJ,iIOUN9(iJ:iJ),kActualJacs
         CALL DoSTOP 
       END IF
 
-ccccc this has been replaced by kSurfTemp < 0 : use raTSurf(iI)
-ccccc                           kSurfTemp > 0 : use raTSurf(iI) + InterpedTemp
-c      IF ((abs(kSurfTemp)-1.0) .GE. 1e-5) THEN
-c        write(kStdErr,*) 'In *PARAMS, program needs kSurfTemp = +/-1.0'
-c        write(kStdErr,*) 'where kSurfTemp tells the program how to use'
-c        write(kStdErr,*) 'the surftemperatures in *RADNCE'
-c        write(kStdErr,*) 'Please reset and retry'
-c        CALL DoSTOP 
-c      END IF
+c only effective in following cases
+c if kRTP = -1 (text input from nm_radnce, profile input from text file)
+c if kRTP =  0 (text input from nm_radnce, profile input from rtp file)
+      IF ((abs(kSurfTemp)-1.0) .GE. 1e-5) THEN
+        write(kStdErr,*) 'In *PARAMS, program needs kSurfTemp = +/-1.0'
+        write(kStdErr,*) 'where kSurfTemp tells the program how to use'
+        write(kStdErr,*) 'the surftemperatures in *RADNCE'
+        write(kStdErr,*) 'Please reset and retry'
+        CALL DoSTOP 
+      END IF
 
       !!!kRTP = -6 : read LBLRTM       LAYERS profile; set atm from namelist
       !!!kRTP = -5 : read LBLRTM       LEVELS profile; set atm from namelist

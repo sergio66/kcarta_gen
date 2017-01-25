@@ -804,34 +804,43 @@ c local variables
       REAL rT,FindBottomTemp
       INTEGER iI
 
-      rT = rTSurf
-
-c this was ORIGINAL code, and allowed user to add in an offset
-c      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -1) .OR. (kRTP .EQ. 0))) THEN
-c        !have to adjust temperature .. do this for down AND up look instr
-c        IF (rPressStart .gt. rPressStop) THEN  ! for down looking instr
-c          rT = FindBottomTemp(rPressStart,raProfileTemp,
-c     $                      raPressLevels,iProfileLayers)
-c          rT = rT+rTSurf
-c        ELSEIF (rPressStart .lt. rPressStop) THEN  ! for up looking instr
-c          rT = FindBottomTemp(rPressStop,raProfileTemp,
-c     $                      raPressLevels,iProfileLayers)
-c          rT = rT+rTSurf
+      rT = rTSurf   !! this is the temp set in nm_radnce; logic below determines if it is offset or actual stemp
+      
+c this ORIGINAL code, allowed user to add in an offset
+      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -1) .OR. (kRTP .EQ. 0))) THEN
+        !have to adjust temperature .. do this for down AND up look instr
+        IF (rPressStart .gt. rPressStop) THEN  ! for down looking instr
+          rT = FindBottomTemp(rPressStart,raProfileTemp,
+     $                      raPressLevels,iProfileLayers)
+          rT = rT+rTSurf	  
+        ELSEIF (rPressStart .lt. rPressStop) THEN  ! for up looking instr
+          rT = FindBottomTemp(rPressStop,raProfileTemp,
+     $                      raPressLevels,iProfileLayers)
+          rT = rT+rTSurf
+	END IF
+      END IF
 c      ELSEIF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))) THEN
 c        !just state this has already been taken care of in subr radnce4
-c	write(kStdWarn,*) 'kSurfTemp > 0 and kRTP = -5 or -6'
-c	write(kStdWarn,*) 'so we already added in raTSurf offset to stemp from TAPE5/6'
+c	 write(kStdWarn,*) 'kSurfTemp > 0 and kRTP = -5 or -6'
+c	 write(kStdWarn,*) 'so we already added in raTSurf offset to stemp from TAPE5/6'
 c        rT = rT
+c        END IF
 c      END IF
 
-
+c this was the code in Dec 2016, get rid of it
+c this was the code in Dec 2016, get rid of it
+c this was the code in Dec 2016, get rid of it
 c why make life complicated, just directly give USER defined STEMP
-      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .GE. -6) .AND. (kRTP .LE. 0))) THEN
+c      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .GE. -6) .AND. (kRTP .LE. 0))) THEN
+c        rT = rTSurf
+c      END IF
+c replace with this why make life complicated, just directly give USER defined STEMP
+      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .GE. -6) .AND. (kRTP .LE. -5))) THEN
         rT = rTSurf
       END IF
 
       FindSurfaceTemp = rT
-
+	  
       IF (rT .LT. 190.0) THEN
         write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
         write(kStdErr,*)'brrrrrrrrrrrrrrrrrrrrrrrrrr!!!!!!!'

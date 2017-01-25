@@ -394,6 +394,7 @@ c        raMeanOD(iL)           = raMeanOD(iL)/kMaxPts
 c	rAngleTr               = rAngleTr + raMeanOD(iL)
 c        write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),654654
 c      END DO
+
       rAngleTr = 0.0    !!! this acts as Space2Gnd OD      
       DO iLay = 1,iS0
         iL = iaRadLayer(iLay)
@@ -403,6 +404,12 @@ c      END DO
         write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),654654
       END DO
  321  FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
+      
+c after grepping the warning.msg file eg
+c grep 654654  ~sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/warning.msg > diffusive_angles
+c a = load('~sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/diffusive_angles');
+c semilogy(a(:,5),a(:,3),'.'); xlabel('diff angle'); ylabel('LAY OD') %% 
+c semilogy(a(:,5),a(:,4),'.'); xlabel('diff angle'); ylabel('L2G OD') %%  <<< is what you want >>>
  
       RETURN
       END  

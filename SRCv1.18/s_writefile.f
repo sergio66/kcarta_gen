@@ -1949,7 +1949,7 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       INTEGER iCo2,iaCO2path(kProfLayer),iaLayerFlux(kMaxAtm)
       INTEGER iaJunkFlux(2*kProfLayer)
 
-      CHARACTER*120 caStr1,caStr2
+      CHARACTER*120 caStr1,caStr2,caStr3
       
       include '../INCLUDE/gasIDname.param'
       
@@ -2089,21 +2089,25 @@ c then output path ID stuff ------------------------------------------
         WRITE(iIOUN,*) 'So start showing info from layer ',kProfLayer-iProfileLayers+1
 
         caStr1 = '  Path# GID  Press      PartP        PPMV        Temp         Amnt    ||      RefPP     RefAmt  Amt/RAmt'
-	caStr2 = '----------------------------------------------------------------------||--------------------------------'	  
+	caStr2 = '             (atm)      (atm)                     (K)     (kmole/cm2) ||       (atm)  (kmol/cm2)        '
+	caStr2 = '             (mb )      (mb )                     (K)  (molecule/cm2) ||       (mb ) (molecule/cm2)  	  '
+	caStr3 = '----------------------------------------------------------------------||--------------------------------'	  
         DO iI=1,iNumGases
 	  write(iIOUN,234) iI,iaGases(iI),caGID(iaGases(iI))
-          WRITE(iIOUN,7170) caStr1
-          WRITE(iIOUN,7170) caStr2 
+          WRITE(iIOUN,7169) caStr1
+          WRITE(iIOUN,7169) caStr2
+          WRITE(iIOUN,7169) caStr3	  
           DO iJ=kProfLayer-iProfileLayers+1,kProfLayer
             iP=(iI-1)*kProfLayer+iJ
 	    raSumTotalGasAmt(iaGases(iI)) = raSumTotalGasAmt(iaGases(iI)) + raaAmt(iJ,iI)
-            WRITE(iIOUN,7171)iP,iaGases(iI),raPActualAvg(iJ)/kAtm2mb,raaPartPress(iJ,iI),
-     $                   raaPartPress(iJ,iI)/(raPActualAvg(iJ)/kAtm2mb)*1.0e6,raaTemp(iJ,iI),raaAmt(iJ,iI),'||',
-     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaAmt(iJ,iI)/raaRAmt(iJ,iI)
-c earlier code was giving raaRPartPress(iJ,iI)/raaPartPress(iJ,iI) = 385/360 for CO2, tape6 test from eli     
+c this is writing pressures in mb
+            WRITE(iIOUN,7170)iP,iaGases(iI),raPActualAvg(iJ),raaPartPress(iJ,iI)*kAtm2mb,
+     $                   raaPartPress(iJ,iI)*kAtm2mb/raPActualAvg(iJ)*1.0e6,raaTemp(iJ,iI),raaAmt(iJ,iI)*kAvog,'||',
+     $                   raaRPartPress(iJ,iI)*kAtm2mb,raaRAmt(iJ,iI)*kAvog,raaAmt(iJ,iI)/raaRAmt(iJ,iI)
+c this is writing pressures in atm     
 c            WRITE(iIOUN,7171)iP,iaGases(iI),raPActualAvg(iJ)/kAtm2mb,raaPartPress(iJ,iI),
-c     $                   raaPartPress(iJ,iI)/(raPActualAvg(iJ)/kAtm2mb)*100.0,raaTemp(iJ,iI),raaAmt(iJ,iI),'||',
-c     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaRPartPress(iJ,iI)/raaPartPress(iJ,iI)
+c     $                   raaPartPress(iJ,iI)/(raPActualAvg(iJ)/kAtm2mb)*1.0e6,raaTemp(iJ,iI),raaAmt(iJ,iI),'||',
+c     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaAmt(iJ,iI)/raaRAmt(iJ,iI)
           END DO
 	  write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
         END DO
@@ -2750,6 +2754,7 @@ c if file error, inform user and stop program
         write(kStdWarn,*) caJacobFile
 
 c write general header information
+        WRITE(iIOUN2) caVersion
         WRITE(iIOUN2) caComment
         WRITE(iIOUN2) kProfLayer
         WRITE(iIOUN2) rFrLow,rFrHigh
@@ -3057,9 +3062,12 @@ c for each atmosphere, how many layers
       END IF
 
 c f77 format specifiers : the 1P is to shift things over by 1 decimal point
+c                          but unfortunately it moves everything, so have to negate with 0P, SAFER TO use ES instead
 c http://docs.oracle.com/cd/E19957-01/805-4939/z40007437a2e/index.html
 c ../DOC/F77FormatSpecifiers.pdf
- 7170 FORMAT(A104)
+ 7169 FORMAT(A104)
+c 7170 FORMAT(I4,' ',I4,' ',1(F11.5,' '),2(1P E11.4,' '),0PF11.5,'  ',(1P E11.4),A2,2(1P E11.4,' '),0PF11.7)
+ 7170 FORMAT(I4,' ',I4,' ',1(F11.5,' '),2(ES11.4,' '),F11.5,'  ',(ES11.4),A2,2(ES11.4,' '),F11.7)    
  7171 FORMAT(I4,' ',I4,' ',3(1P E11.5,' '),0PF11.5,'  ',1P E11.5,A2,2(' ',E11.5),1(' ',E11.3))  
  7172 FORMAT(I3,' ',I3,' ',A20,' ',ES11.5)
 

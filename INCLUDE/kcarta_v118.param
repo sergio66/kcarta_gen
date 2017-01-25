@@ -345,7 +345,7 @@ c kGasStore == max number of gases we allocate storage for
 c              (from GASFIL + XSCFIL + WaterSelf + WaterFor <= kMaxGas)
 c kMixFilRows== max number of mixfil rows that can be read in
       INTEGER kMaxAtm,kGasStore,kMixFilRows,kMaxPrint
-      PARAMETER (kMaxAtm=6,kGasStore=80,kMixFilRows=kProfLayer*2)
+      PARAMETER (kMaxAtm=6,kGasStore=80,kMixFilRows=kProfLayer*3)
       PARAMETER (kMaxPrint=10)
 
 c kEmsRegions=how many wavenumber dependent regions can be read in from 
@@ -358,7 +358,7 @@ c kMaxDQ = max number of gases we do d/dq for (GasID's 1..6) HUGE MEMORY!!!
 c kProfLayerJac = kProfLayer if Jacobians on, 1 otherwise
 c kMaxPtsJac    = kMaxPts=10000 if Jacobians on, 1 otherwise
       INTEGER kMaxDQ,kProfLayerJac,kMaxPtsJac
-      PARAMETER (kMaxDQ=2,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
+      PARAMETER (kMaxDQ=1,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
 c when kProfLayerJac,kMaxPtsJac are set to 1, this is "space saver" mode
 c      PARAMETER (kMaxDQ=1,kProfLayerJac=1,kMaxPtsJac=1)
 

@@ -542,8 +542,9 @@ cxtest	    IF (iL .LE. 100) print *,iaG(iG),iL,raaR100MR(iL,iG),raMMX(iL),raaR10
       END
 
 c************************************************************************
-c this subroutine changes the input levels profiles to ppmv to VMR (unit code 12) 
-c and if planet Earth, adjusts mix ratios (wet water)
+c this subroutine changes the input levels profiles units from VMR to ppmv
+c    >>>> and if planet Earth, adjusts mix ratios (wet water) <<<< 
+c then convers back to VMR
       SUBROUTINE adjustVMR_Earth(iaG,iaGasUnits,iNumLevs,iNumGases,raP,raT,raaG_VMR)
 
       IMPLICIT NONE
@@ -557,9 +558,10 @@ c input/output
       REAL raaG_VMR(2*kProfLayer,kMaxGas)
 
 c local
-      INTEGER iL,iG,iDry2Wet,iWat,iFound
+      INTEGER iL,iG,iDry2Wet,iWat,iFound,iQuiet
       REAL rJunk1,rJunk2
-
+      CHARACTER*40 FMT
+      
       iFound = -1
       iWat = 1
  10   CONTINUE
@@ -584,10 +586,16 @@ c local
       END IF
 
       !! change to ppmv
+      FMT = '(A,/A,/A,/A)'
+      write(kStdWarn,FMT) 'FINAL PROCESSING : Read in reference gas profiles, text input levels profile etc',
+     $  '     (ref. profiles to augment input prof to 0.005 mb and/or add standard panet gases)',
+     $  '  converting from VMR to ppmv so we can do wet water fix',
+     $  'After this we can do the levels2layers integration'
+      iQuiet = +1
       DO iG = 1,iNumGases
         rJunk1 = raaG_VMR(1,iG)      
         IF (iaGasUnits(iG) .NE. 10) THEN
-          CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_VMR)
+          CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_VMR,iQuiet)
           rJunk2 = raaG_VMR(1,iG)      	  
           write(kStdWarn,800) iG,iaG(iG),iaGasUnits(iG),rJunk1,rJunk2		  
         ELSE
@@ -598,13 +606,14 @@ c local
  801  FORMAT('index=',I3,' gasID=',I3,' InputGasUnits=',I3,' origQ(level1)=',ES12.6,' already in ppmv') 
  
       iDry2Wet = -1 !! do not adjust dry air to wet air MR
-      iDry2Wet = +1 !!        adjust dry air to wet air MR
+      iDry2Wet = +1 !!        adjust dry air to wet air MR  DEFAULT
 
       ! IF (kRTP == -20) iDry2Wet = -1
 
       IF (iDry2Wet .LT. 0) THEN
         !! simple change from ppmv (gas units 10) to VMR (which is gas units 12)
-      
+
+        write(kStdWarn,*) 'converting back to ppmv from VMR, not doing wet water fix'
         DO iG = 1,iNumGases
           DO iL = 1,iNumLevs
             raaG_VMR(iL,iG) =  raaG_VMR(iL,iG) / 1.0e6
@@ -633,6 +642,7 @@ c        END DO
         END DO
 
         !! finally convert ppmv --> VMR
+        write(kStdWarn,*) 'converting back to ppmv from VMR, after doing wet water fix'	
         DO iG = 1,iNumGases
           DO iL = 1,iNumLevs
             raaG_VMR(iL,iG) =  raaG_VMR(iL,iG) / 1.0e6
@@ -708,14 +718,14 @@ C                 grams of water vapor
 c
 c pIN is in mb
 c 
-      SUBROUTINE changeLVLS_2_ppmv(iGasID,iGasUnits,iNumLevs,iG,PIN,TIN,raaG_VMR)
+      SUBROUTINE changeLVLS_2_ppmv(iGasID,iGasUnits,iNumLevs,iG,PIN,TIN,raaG_VMR,iQuiet)
 
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
 
 c input
-      INTEGER iGasID,iGasUnits,iNumLevs,iG
+      INTEGER iGasID,iGasUnits,iNumLevs,iG,iQuiet
       REAL PIN(2*kProfLayer),TIN(2*kProfLayer)
 c input/output
       REAL raaG_VMR(2*kProfLayer,kMaxGas)
@@ -725,23 +735,27 @@ c local
       REAL MRIN(2*kProfLayer,kMaxGas),RJUNK,WEXSVP,MDAIR
       INTEGER iaLocalGasID(kMaxGas)
       REAL MASSF(kMaxGas)
+      CHARACTER*50 FMT
+      CHARACTER*40 caaUnit(50)
+      CHARACTER*20 cID
 
-c   1 H2O, water
-c   2 CO2, carbon dioxide
-c   3 O3, ozone
-c   4 N2O, nitrous oxide
-c   5 CO, carbon monoxide
-c   6 CH4, methane
-c   7 O2, (diatomic) oxygen
-c   8 NO, nitric oxide
-c   9 SO2, sulfur dioxide
-c  10 NO2
-c  11 NH3, ammonia
-c  12 HNO3, nitric acid
-
+      include '../INCLUDE/gasIDname.param'
 c see cbgids.f in klayers
       DATA (iaLocalGasID(iL),iL=1,12) /01,02,03,04,05,06,07,08,09,10,11,12/
       DATA (MASSF(iL),iL=1,12) /18.015,44.010,47.9982,44.013,28.011,16.043,31.999,30.006,64.063,46.006,17.031,63.013/
+
+      DO iL = 1,50
+        caaUnit(iL) = '** Not Known **'
+      END DO
+      caaUnit(01) = 'layer amt molecules/cm2'
+      caaUnit(10) = 'vmr in ppmv'      
+      caaUnit(11) = 'vmr in ppbv'
+      caaUnit(20) = 'mmr in g/kg'
+      caaUnit(21) = 'mmr in g/g'      
+      caaUnit(30) = 'part press in mb (not accepted)'
+      caaUnit(31) = 'part press in atm (not accepted)'      
+      caaUnit(40) = 'RH % (not accepted)'
+      caaUnit(41) = 'RH fraction (not accepted)'                  
 
       IF (iGasID .GT. 12) THEN
         MASSF(iGasID) = kAtmMolarMass
@@ -757,8 +771,19 @@ c convert to ppmv (gas unit 10)
       iCode = iGasUnits
       NLEV  = iNumLevs
 
+      IF ((ICODE .NE. 10) .AND. (iQuiet .LT. 0)) THEN
+        FMT = '(I2,A,I2,A,A,A,I2,A,A,A)'
+	cID = caGID(iGasID)	
+        write(kStdWarn,FMT) iG,' : gID=',iGasID,'(',cID,') units code ',ICODE,'(',caaUnit(ICODE),') convert to ppmv (unit code 10)'
+      END IF
+      
+             IF ((ICODE .EQ. 10) .AND. (iQuiet .LT. 0)) THEN
+               FMT = '(I2,A,I2,A,A,A)'
+  	       cID = caGID(iGasID)
+               write(kStdWarn,FMT) iG,' : gID=',iGasID,'(',cID,') already in ppmv (unit code 10)'
+	     
 C            parts per billion volume mixing ratio
-             IF (ICODE .EQ. 11) THEN
+             ELSEIF (ICODE .EQ. 11) THEN
 C               PPMV = PPBV*1E-3
                 DO IL=1,NLEV
                    MRIN(IL,IG)=MRIN(IL,IG)*1E-3
@@ -820,6 +845,9 @@ C               PPMV = RH*(SVP/PIN)*1E+6
      $                (WEXSVP( TIN(IL) )/(PIN(IL)/100.0))*1E+6
                 ENDDO
 C
+	     ELSE
+	       WRITE(kStdErr,*) 'gasID,icode = ',iGasID,ICODE,' UNKNOWN COMBO to comvert to ppmv!!!'
+	       CALL DoStop
              ENDIF
 
 c save
@@ -1863,10 +1891,10 @@ c local
 
       iNFine = 10
       iNFine = 200
-      iNFine = 50
+      iNFine = 50  !! default
 
       write(kStdWarn,*) '  '
-      write(kStdWarn,*) '  >>>>>>>>>>>> doing the Levels --> Layers intergation >>>>>>>>>>>>>>>>>>>'      
+      write(kStdWarn,*) '  >>>>>>>>>>>> doing the Levels --> Layers integration >>>>>>>>>>>>>>>>>>>'      
 
 c >>>>>>>>>>
       !! set up temporary arrays/matrices for interping onto sublevels
@@ -1913,21 +1941,21 @@ c     /home/sergio/KCARTA/DOC/sci_klayers.txt
 	rP = rP/100.0    !!! change N/m2 to mb
         CALL r_sort_loglinear1(raXYZPress,raXYZTemp,iUpperLev,rP,rT,1)
 
-        !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = loag(a/c)
+        !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = log(a/c)
         dlnp = log(PLEV_KCARTADATABASE_AIRS(iL)) - log(PLEV_KCARTADATABASE_AIRS(iL+1))  
         dlnp = dlnp / (iNFine)
 
         !! information for current (sub)level
         rP_n = rP                             !! current sublev press
         rT_n = rT                             !! current sublev temp
-        rMR_water_n = raXYZ_VMRwater(1)        !! current water MR
+        rMR_water_n = raXYZ_VMRwater(1)       !! current water MR
         CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP,rMR_water_n,1) !! current water MR
 
         !! information for next (sub)level
         rP_np1 = log(rP_n) - dlnp
         rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
         CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1,       1)   !! next sublev temp
-        CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1,1)   !! next sublev MRw
+        CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1,1)  !! next sublev MRw
 
         IF ((rP_n .LE. rPSurf) .AND. (iWoo .LT. 0)) THEN
           iWoo = +1
@@ -2646,6 +2674,8 @@ c now find pressure output corresponding to HGT output from LBLRTM
       END
 
 c************************************************************************
+c >>> read in user supplied prof
+c this will be at whatever gas units eg RH g/kg  VMR etc, but then CONVERTED to VMR (gasunit 12)
       SUBROUTINE  ReadInput_LVL_Profile(caPFname,rHmaxKCarta,rHminKCarta,rPmaxKCarta,rPminKCarta,
      $                          iNumLevs,rPSurf,rTSurf,rHSurf,iNumGases,raP,raT,
      $                          iaG,iaGasUnits,raaG_VMR,rPMin,rPMax,rYear,rLat,rLon)
@@ -2659,14 +2689,27 @@ c input
       REAL rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
 c output
       INTEGER iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
-      REAL rPmin,rPmax,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon
+      REAL rPmin,rPmax,rPSurf,rTSurf,rHSurf,rYear,rLat,rLon,tAugment
       REAL raP(2*kProfLayer),raT(2*kProfLayer),raaG_VMR(2*kProfLayer,kMaxGas)
 
 c local var
-      INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor,iReadInOK
-      REAL raX(kMaxGas),rX,rP,rT,raP_Nm2(2*kProfLayer),rPRefMin,rPRefMax
+      INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor,iReadInOK,iIgnore,iYes
+      REAL raX(kMaxGas),rX,rP,rT,raP_Nm2(2*kProfLayer),rPRefMin,rPRefMax,rPRefMinAugmented
       CHARACTER*80 caStr
+      CHARACTER*40 caaUnit(50)
 
+      DO iL = 1,50
+        caaUnit(iL) = '** Not Known **'
+      END DO
+      caaUnit(01) = 'layer amt molecules/cm2'
+      caaUnit(10) = 'vmr in ppmv'      
+      caaUnit(11) = 'vmr in ppbv'
+      caaUnit(20) = 'mmr in g/kg'
+      caaUnit(21) = 'mmr in g/g'      
+      caaUnit(30) = 'part press in mb (not accepted)'
+      caaUnit(31) = 'part press in atm (not accepted)'      
+      caaUnit(40) = 'RH % (not accepted)'
+      caaUnit(41) = 'RH fraction (not accepted)'                  
 
       rPRefMax = 1100.0 !! 1100  mb is AIRS RefPress LowerBdry      see SUBR ReadRefProf_Levels
       rPRefMin = 3.0e-3 !! 0.005 mb extended to 0.003 mb = 0.3 N/m2 see SUBR ReadRefProf_Levels
@@ -2674,8 +2717,9 @@ c local var
       rPmin = +1.0e6
       rPmax = -1.0e+6
 
-      write(kSTdWarn,*) 'Reading in user supplied TXT LVLS file .....'
+      write(kStdWarn,*) 'Reading in user supplied TXT LVLS file .....'
 
+      iIgnore = -1
       iIOUN2 = kProfileUnit
       OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED',
      $    IOSTAT=iErrIO)
@@ -2727,13 +2771,25 @@ c local var
        
       READ (iIOUN2,*) (iaG(iJ),iJ=1,iNumGases)
       READ (iIOUN2,*) (iaGasUnits(iJ),iJ=1,iNumGases)
-      
+
+      write(kStdWarn,'(A)') '-------------------------------------------------'
+      write(kStdWarn,'(A)') 'Index  GasID  UnitsCode  GasUnit'
+      write(kStdWarn,'(A)') '-------------------------------------------------'      
+      DO iG = 1,iNumGases
+        write(kStdWarn,'(3(I5),A,A)') iG,iaG(iG),iaGasUnits(iG),'      ',caaUnit(iaGasUnits(iG))
+      END DO
+      write(kStdWarn,'(A)') '-------------------------------------------------'      
+
+      !! this works fine if levels entered so thatpres(1) > pres(2) > pres(3) ie from ground up
+      !! may be buggy for reverse (from TOA down)
       write(kStdWarn,*) 'Input levels profile : ',iNumLevs,' levels for ',iNumGases,' gases'
       write(kStdWarn,*) 'PSurf = ',rPSurf,' mb;  TSurf = ',rTSurf,' K '
       iReadInOK = 0
+      iIgnore = -1
       DO iL = 1,iNumLevs
         READ (iIOUN2,*) rP,rT,(raX(iJ),iJ=1,iNumGases)
-	IF ((rP .LE. rPRefMax) .AND. (rP .GE. rPRefMin)) THEN
+	IF ((rP .LE. rPRefMax) .AND. (iIgnore .LT. 0)) THEN
+	  IF ((rP .LT. rPRefMin) .AND. (rP .LT. rPmin)) iIgnore = +1
 	  iReadInOK = iReadInOK + 1
           raP_Nm2(iReadInOK) = rP * 100.0  !! change from mb to N/m2
           raP(iReadInOK) = rP
@@ -2744,15 +2800,21 @@ c local var
             raaG_VMR(iReadInOK,iJ) = raX(iJ)
           END DO
   	  write(kStdWarn,5040) iReadInOK,raP(iReadInOK),raT(iReadInOK),raaG_VMR(iReadInOK,1)
-	ELSE
+	ELSEIF (rP .LE. rPRefMin) THEN
+	  !! things are OK, we are ignoring pressures for levels above 0.005 mb
   	  write(kStdWarn,5041) iL,rP,rT
+	ELSEIF ((rP .GT. rPRefMin) .AND. (iIgnore .GT. 0)) THEN
+	  !! things are BAD, this pressure is for levels below 0.005 mb
+	  !! but we already found a pressre for above 0.005 mb, so pinput is UNSORTED?? 
+  	  write(kStdWarn,5042) iL,rP,rT
+	  CALL DoStop
 	END IF
       END DO
       
  13   CONTINUE
       CLOSE(iIOUN2) 
       kProfileUnitOpen = -11
-
+      
       IF (iNumLevs .NE. iReadInOK) THEN
         WRITE(kStdWarn,*) 'Input textfile had ',iNumLevs,' levels of which ',iReadInOK,' lay between ',rPRefMax,rPRefMin,' mb'
       ELSE
@@ -2762,7 +2824,8 @@ c local var
       
  5030 FORMAT(A80)
  5040 FORMAT('iReadInOK, rP (mb), rT (K), raG1 = ',I3,' ',F14.6,' ',F8.3,' ',ES12.5)
- 5041 FORMAT('Bad (too low or too high P) rP (mb), rT (K), raG1 = ',I3,' ',ES12.5,' ',F8.3) 
+ 5041 FORMAT('Ignore (too low P) rP (mb), rT (K), raG1 = ',I3,' ',ES12.5,' ',F8.3)
+ 5042 FORMAT('Bad (press below 0.005 mb (UNSORTED PinLEVS??)) rP (mb), rT (K), raG1 = ',I3,' ',ES12.5,' ',F8.3) 
  
       write(kStdWarn,*)'   KCARTA Database : max/min press (mb) = ',rPmaxKCarta/100.0,rPminKCarta/100.0
       write(kStdWarn,*)'   kCARTA Database : max/min height (m) = ',rHmaxKCarta,rHminKCarta
@@ -2781,6 +2844,10 @@ c make sure pressures are decreasing with index ie layers going higher and highe
           raP(iJ) = raP(iL)
           raP(iL) = rX
 
+          rX = raP_Nm2(iJ)
+          raP_Nm2(iJ) = raP_Nm2(iL)
+          raP_Nm2(iL) = rX
+
           rX = raT(iJ)
           raT(iJ) = raT(iL)
           raT(iL) = rX
@@ -2796,9 +2863,57 @@ c make sure pressures are decreasing with index ie layers going higher and highe
       write(kStdWarn,*) 'input file : Highest altitude (lowest press) = ',raP(iNumLevs),' mb at level ',iNumLevs
       write(kStdWarn,*) ' '
 
-c now change all units to MR
+      iYes = +1    !!! reset topmost pressure to rPRefMin = 0.005
+      iYes = -1    !!! leave topmost pressure level alone, do not reset to rPRefMin = 0.005
+                   !!! actually we augment the refdatabase to 0.2750000 N/m2 = 0.00275
+      rPRefMinAugmented = 0.00275
+      IF ((rPmin .LT. rPRefMin) .AND. (iYes .GT. 0)) THEN
+        !!! interpolate gas concentrations last point to rPRefMin
+	write(kStdWarn,*) 'highest press point is ',rPmin,' mb higher than ref database point ',rPRefMin,'mb fixing!'
+	write(kStdWarn,*) ' '	
+	DO iG = 1,iNumGases
+	  DO iL = 1,iNumLevs
+            raX(iL) = raaG_VMR(iL,iG)	
+          END DO
+	  CALL r_sort_loglinear(raP,raX,iNumLevs,rPRefMin,rX,1)
+	  raaG_VMR(iNumLevs,iG) = rX
+	END DO
+
+        !!! interpolate T(z) last point to rPRefMin
+        CALL r_sort_loglinear(raP,raT,iNumLevs,rPRefMin,rX,1)
+	raT(iNumLevs) = rX
+	
+        !!! set last point to 0.005 mb
+	rPmin = rPRefMin
+	raP(iNumLevs) = rPRefMin
+	raP_Nm2(iNumLevs) = rPRefMin * 100.0
+
+      ELSEIF (rPmin .LT. rPRefMinAugmented) THEN
+        !!! force interpolate gas concentrations last point to rPRefMinAugmented
+	write(kStdWarn,*) 'highest press point is ',rPmin,' mb higher than augmented ref dbase pt ',rPRefMinAugmented,'mb fixing!'
+	write(kStdWarn,*) ' '
+	DO iG = 1,iNumGases
+	  DO iL = 1,iNumLevs
+            raX(iL) = raaG_VMR(iL,iG)	
+          END DO
+	  CALL r_sort_loglinear(raP,raX,iNumLevs,rPRefMinAugmented,rX,1)
+	  raaG_VMR(iNumLevs,iG) = rX
+	END DO
+
+        !!! interpolate T(z) last point to rPRefMin
+        CALL r_sort_loglinear(raP,raT,iNumLevs,rPRefMinAugmented,rX,1)
+	raT(iNumLevs) = rX
+	
+        !!! set last point to 0.00275 mb
+	rPmin = rPRefMinAugmented
+	raP(iNumLevs) = rPRefMinAugmented
+	raP_Nm2(iNumLevs) = rPRefMin * 100.0  
+      END IF
+        
+      
+c now change all units to PPMV (units 10) and thn to VMR (units 12)
       DO iG = 1,iNumGases
-        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP_Nm2,raT,raaG_VMR)
+        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP_Nm2,raT,raaG_VMR,-1)
         DO iL = 1,iNumLevs
           raaG_VMR(iL,iG) =  raaG_VMR(iL,iG) / 1.0e6
           iaGasUnits(iG) = 12   !! VMR

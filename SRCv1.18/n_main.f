@@ -1896,15 +1896,17 @@ c      END IF
       END IF
 
 c Jacobian computations cannot be asked for if we have new spectroscopy!!! 
-      IF ((kJacobian .GT. 0).AND.(iNewLBL .GT. 0) .AND. (iNonLte .LT. 0)) THEN 
+      IF ((kJacobian .GT. 0).AND.(iNewLBL .EQ. 1) .AND. (iNonLte .LT. 0)) THEN 
         write(kStdErr,*) 'Error : You include your own spectroscopy files'
         write(kStdErr,*) 'and are asking for Jacobians! Not possible!!'
         CALL DOStop 
+      ELSEIF ((kJacobian .GT. 0).AND.(iNewLBL .EQ. 2) .AND. (iNonLte .LT. 0)) THEN 
+        write(kStdErr,*) 'Warning : including "other" compressed files for some gases, jacs should be ok'
       END IF 
 
 c Jacobian computations cannot be asked for if we have new spectroscopy
 c from NLTE .. so we give a warning here
-      IF ((kJacobian .GT. 0).AND.(iNewLBL .GT. 0) .AND. (iNonLte .GT. 0)) THEN 
+      IF ((kJacobian .GT. 0).AND.(iNewLBL .EQ. 2) .AND. (iNonLte .GT. 0)) THEN 
         write(kStdWarn,*) '**********************^^^^^**********************'
         write(kStdWarn,*) 'Warning : You ask for NLTE computations and also'
         write(kStdWarn,*) 'are asking for Jacobians! Not possible!!'
