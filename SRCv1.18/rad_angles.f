@@ -428,17 +428,20 @@ c as default, set all angles to be the satellite view angle
         raLayAnglesSnell(iI) = rSatAngle
       END DO
 
-      iDefault = -1   !! no Snell
-      iUseSnell = +1  !! use Snell
-      iUseSnell = -1  !! do not use Snell
+      iDefault = -1   !! no  Snell, yes layer curvature, similar to SARTA
+      
+      iUseSnell = +1  !! yes Snell, yes layer curvature
+      iUseSnell = -1  !! no  Snell, yes layer curvature, similar to SARTA
+      iUseSnell = 0   !! no  Snell, no  layer curvature
+      
       iUseSnell = iaaOverrideDefault(2,7)
-      IF (abs(iUseSnell) .NE. 1) THEN
+      IF (abs(iUseSnell) .GT. 1) THEN
         write(kStdErr,*) 'invalid iUseSnell ',iUseSnell
         CALL DoStop
       END IF		                        
       if ((iDefault .NE. iUseSnell) .AND. (kOuterLoop .EQ. 1)) THEN
-        write(kStdWarn,*) 'using Snell law in FindLayerAngles (raytrace thru layers)'
-        write(kStdErr,*) 'using Snell law in FindLayerAngles (raytrace thru layers)'	
+        write(kStdWarn,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
+        write(kStdErr,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell	
       END IF
       
       iMin = +1000000
@@ -456,7 +459,29 @@ c orig/traced angle  <<< --------- >>> scanang(at satellite)/satzen(local angle)
 c orig/traced angle  <<< --------- >>> scanang(at satellite)/satzen(local angle)
 c orig/traced angle  <<< --------- >>> scanang(at satellite)/satzen(local angle)
 
-      IF ((rSatHeight .GT. 0.0) .AND. (abs(rSatAngle) .GT. 1.0e-4)) THEN   
+      IF ((rSatHeight .GT. 0.0) .AND. (abs(rSatAngle) .GT. 1.0e-4) .AND. (abs(iUseSnell) .EQ. 0)) THEN
+        DO iI=1,kProfLayer
+	  raLayAnglesNoSnell(iI) = abs(rSatAngle)
+	  raLayAnglesSnell(iI) = abs(rSatAngle)
+              IF (kOuterLoop .EQ. 1) THEN
+                IF (iI .GE. iMin .AND. iX .LE. iMax) THEN
+                  iX = (iI - iMin + 1)
+                ELSE
+                  iX = -1
+                END IF
+                IF (iX .EQ. 1) THEN
+	          write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+		  write(kStdWarn,*) 'Downlook Instr'
+		  write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
+		  write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
+                  write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
+	        END IF
+                write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),
+     $ 1.0/cos(raLayAngles(iI)*kPi/180.0)	      
+              END IF      !! if kOuterLoop .EQ. 1
+	  
+	END DO
+      ELSEIF ((rSatHeight .GT. 0.0) .AND. (abs(rSatAngle) .GT. 1.0e-4) .AND. (abs(iUseSnell) .EQ. 1)) THEN   
         !have to find layer dependent angles
         IF (rPrBdry1 .GT. rPrBdry2) THEN !downward looking instr
           DO iI=1,kProfLayer
@@ -481,16 +506,16 @@ c but Scott/SARTA uses NoSnell
                 ELSE
                   iX = -1
                 END IF
-              IF (iX .EQ. 1) THEN
-	        write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-		write(kStdWarn,*) 'Downlook Instr'
-		write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
-		write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
-                write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
-	      END IF
-              write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),
+                IF (iX .EQ. 1) THEN
+	          write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+		  write(kStdWarn,*) 'Downlook Instr'
+		  write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
+		  write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
+                  write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
+	        END IF
+                write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),
      $ 1.0/cos(raLayAngles(iI)*kPi/180.0)	      
-              END IF
+              END IF      !! if kOuterLoop .EQ. 1
             END IF
           END DO
       ELSE  
@@ -506,7 +531,25 @@ c but Scott/SARTA uses NoSnell
         END DO
       END IF
 
-        IF (rPrBdry2 .GT. rPrBdry1) THEN !upward looking instr
+        IF ((rPrBdry2 .GT. rPrBdry1) .AND. (abs(iUseSnell) .EQ. 0)) THEN !upward looking instr
+          DO iI=1,kProfLayer
+            raLayAnglesNoSnell(iI) = abs(rSatAngle)
+            raLayAngles(iI) = raLayAnglesSnell(iI)
+            IF (kOuterLoop .EQ. 1) THEN
+              IF (iI .GE. iMin .AND. iX .LE. iMax) THEN
+                iX = (iI - iMin + 1)
+              ELSE
+                 iX = -1
+               END IF
+              IF (iX .EQ. 1) THEN
+                write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+                write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
+	      END IF
+              write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+            END IF	    
+	  END DO
+	  
+        ELSEIF ((rPrBdry2 .GT. rPrBdry1) .AND. (abs(iUseSnell) .EQ. 1)) THEN !upward looking instr
 c          print *,'FindLayerAngles',iMin,iMax,iAtm,rSatHeight,iaNumLayer(iAtm),
 c     $               raLayHgt(iaaRadLayer(iAtm,iaNumLayer(iAtm)))/1000
           DO iI=1,kProfLayer
@@ -534,6 +577,7 @@ c     $               raLayHgt(iaaRadLayer(iAtm,iaNumLayer(iAtm)))/1000
         END IF
       END IF
 
+      
  999  FORMAT(I3,' ',I3,'  ',5(F10.4,' '))
  
       RETURN

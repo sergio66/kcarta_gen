@@ -584,6 +584,18 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+1/26/17        Can have background thermal done by 6 methods (all constant T across layer)
+                 integration
+                    exponential gaussian integration (NEW, few quadrature angles)
+                    gaussian-legendre integration (few quadrature angles)
+                    gaussian  integration (very slow, many many angles)
+                    accurate single downwell angle computed at all layers, all points
+		  diffusive angle
+                    accurate single downwell angle computed from L to ground, acos(3/5) from TOA to L DEFAULT
+                    single downwell angle (eg can set acos(3/5)) at all layers
+		  no background thermal
+	       See  ../TEST/REFL_BACKGND_THERMAL/test_iaaOverride.m
+	       
 1/14/17        Using ifort with all safety features ON, fixed quite a few bugs
                relating subroutine number of arguments and size of arrays/matrices
 	       
@@ -740,9 +752,9 @@ c          real*4     clwc(MAXLEV)         ! cloud liq water content
                 (have got rid of the -114 switch, which is very similar to the -5/-6 switch,
 		 except it allows gases 1-31)
 		
-4/15/16         kSetThermalAngle = -1 : use CONST in tau temperatiure variation for
+4/15/16         kSetThermalAngle = -1 : use CONST in tau temperature variation for
                                         quick fast background thermal(default)
-                kSetThermalAngle = -2 : use LINEAR in tau temperatiure variation for
+                kSetThermalAngle = -2 : use LINEAR in tau temperature variation for
                                         quick fast background thermal (set when kFLUX > 0)
                 kSetThermalAngle = +1 : user specified angle for 
                                         quick fast background thermal (set when kFLUX > 0)

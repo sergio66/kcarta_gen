@@ -2073,12 +2073,14 @@ c RadTrans
                                       !!!                -1 with no surface,
                                       !!!                -2 to only dump downwelling backgnd
 				      !!!   see SUBR find_radiances in rad_main.f
-      iaaOverrideDefault(2,7) = -1    !!! iUseSnell = -1 for No Snell law raytrace, similar to SARTA
+      iaaOverrideDefault(2,7) = -1    !!! iUseSnell = -1 for No  Snell law raytrace plus layer curvature effects, similar to SARTA (default)
+                                      !!!           = +1 for Yes Snell law raytrace plus layer curvature effects
+                                      !!!           = 0  for No  Snell law raytrace NO   layer curvature effects
                                       !!!   see SUBR FindLayerAngles in rad_angles.f				     
       iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
                                       !!!   see SUBR Get_Temp_Plevs in n_pth_mix.f
       iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
-                                      !!!   see SUBR rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS in rad_main.f				     
+                                      !!!   see SUBR rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS in rad_main.f
       iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = 5 for PCLSAM (Default)
                                       !!!   0 for ABS clouds, 2 for RTPSEC, 3 for DISORT
   

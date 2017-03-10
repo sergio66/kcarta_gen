@@ -37,7 +37,8 @@ c iDoAcos35  = tells to use acos(3/5) at EACH freq, EACH layer
 
 c local variables
       INTEGER iFr,iDoThermal
-
+      CHARACTER*50 FMT
+      
 c iExtraThermal = if the top of atmosphere is ABOVE instrument, need to 
 c             calculate the attenuation due to the extra terms
 c raExtraThermal = solar radiation incident at posn of instrument
@@ -64,8 +65,9 @@ c ALMOST ALL, IF NOT ALL, calls to this routine have iDoAcos35 = -1
 
       IF (iDoThermal .NE. iaaOverrideDefault(2,3)) THEN
         IF (kOuterLoop .EQ. 1)  THEN
-          write(kStdErr,*) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
-          write(kStdWarn,*) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+	  FMT = '(A,I3,I3)'
+          write(kStdErr,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+          write(kStdWarn,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
 	END IF
 	iDoThermal = iaaOverrideDefault(2,3)
         IF (kOuterLoop .EQ. 1)  THEN	
@@ -78,14 +80,15 @@ c ALMOST ALL, IF NOT ALL, calls to this routine have iDoAcos35 = -1
 	    write(kStdWarn,*) '  do CONST-in-tau integration over zenith angles for backgnd therm'	    
 	  END IF
 	  IF (iDoThermal == 0 ) THEN
-	    write(kStdErr,*)  '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
-	    write(kStdWarn,*) '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'	    
+  	    FMT = '(A,I3,A)'	  
+	    write(kStdErr,FMT)  '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
+	    write(kStdWarn,FMT) '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'	    
 	    IF (kSetThermalAngle .EQ. -1) THEN
 	      write(kStdErr,*)  ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
 	      write(kStdWarn,*) ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'	      
 	    ELSE
-	      write(kStdErr,*)  ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'
-	      write(kStdWarn,*) ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'	  	      
+	      write(kStdErr,FMT)  ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'
+	      write(kStdWarn,FMT) ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'	  	      
   	    END IF
 	  END IF
 	  IF (iDoThermal == -1) THEN

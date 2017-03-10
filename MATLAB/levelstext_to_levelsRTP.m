@@ -46,6 +46,7 @@ S = fgets(fid); %% gunit
 p.satheight = 705000;
 p.upwell = +1;
 p.solzen  = 150;
+
 if nargin == 2
   p.zobs = 705000;
 else
@@ -63,6 +64,7 @@ elseif  satzenORscanang < 0
   p.satzen  = vaconv(p.scanang,p.zobs,0);
 end  
 
+fprintf(1,'satzen = %8.6f scanang = %8.6f \n',p.satzen,p.scanang)
 fprintf(1,'nlevs = %3i ngas = %3i \n',nlevs,ngas);
 
 for ii = 1 : nlevs  

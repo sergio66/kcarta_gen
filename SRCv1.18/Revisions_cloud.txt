@@ -8,18 +8,12 @@ So set iNclouds_RTP = 2 even if you only have one or zero cloud (ie cfrac = 0 fo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
-           r = c1*r1 + c2*r2 + c12*r12 + clr*rclr
+           r = c1' * r1 + c2' * r2 + c12 * r12 + clr*rclr
+        where
+	   tcc = (c1+c2-c12)
+           c1' = c1 - c12 = cloud 1 alone
+           c2' = c2 - c12 = cloud 2 alone
         PCLSAM clouds can also have NLTE calcs
-
-        Included National Renewable Energy Lab (NREL) SOLAR database to make 
-        2830-50000 cm-1 region self consistent, put SOLAR database at T=5800K
-        between 15-605 cm-1; kept the 605-2830 cm-1 solar database same, for 
-        consistency with SARTA
-
-        Making the PCLSAM scattering mimic the SARTA fast model : 
-                  r = c1' r1 + c2' r2 + c12 r12 + clr rclr
-        where c1' = c1 - c12 = cloud 1 alone
-              c2' = c2 - c12 = cloud 2 alone
 
         Added on Limb Viewing Geometry (for night time; daytime may have NLTE 
         problems)
