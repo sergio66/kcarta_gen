@@ -2323,6 +2323,9 @@ c      prof.scanang = -abs(prof.scanang) * 1000
         write(kStdErr,*) 'need prof.upwell = 1 (downlook) or 2 (uplook)'
         write(kStdErr,*) 'prof.upwell = ',prof.upwell
         write(kStdErr,*) 'resetting to +1 (downlook)'
+        write(kStdWarn,*) 'need prof.upwell = 1 (downlook) or 2 (uplook)'
+        write(kStdWarn,*) 'prof.upwell = ',prof.upwell
+        write(kStdWarn,*) 'resetting to +1 (downlook)'
         upwell = 1	
 c        CALL DoStop
       END IF
@@ -2334,7 +2337,7 @@ c        CALL DoStop
         !need rPressStart > rPressStop
         rPressStart = prof.spres
         rPressStop  = pobs
-        write(kStdWarn,*) 'RTP file says obs,upwell = ',prof.pobs,prof.upwell
+        write(kStdWarn,*) 'RTP file says obs,upwell (kcarta may reset to) = ',prof.pobs,prof.upwell,upwell
         write(kStdWarn,*) 'Code reinterprets this (along with surf press)'
         write(kStdWarn,*) 'as that for a downlook instr, with Surf,OBS press'
         write(kStdWarn,*) 'being ',rPressStart,rPressStop
@@ -2346,7 +2349,7 @@ c        CALL DoStop
         !need rPressStart < rPressStop
         rPressStart = 0.0
         rPressStop  = prof.spres
-        write(kStdWarn,*) 'RTP file says obs,upwell = ',prof.pobs,prof.upwell
+        write(kStdWarn,*) 'RTP file says obs,upwell (kcarta may reset to) = ',prof.pobs,prof.upwell,upwell	
         write(kStdWarn,*) 'Code reinterprets this (along with surf press)'
         write(kStdWarn,*) 'as that for a uplook instr, with TOA,Surf press'
         write(kStdWarn,*) 'being ',rPressStart,rPressStop
@@ -2440,7 +2443,7 @@ c assume scanang, satzen, zobs make sense
       END IF
 
       iOKzobs = +1
-      IF ((prof.zobs .lt. 2.00*1000) .AND. (prof.upwell .EQ. 1)) THEN
+      IF ((prof.zobs .lt. 2.00*1000) .AND. (upwell .EQ. 1)) THEN
         write(kStdWarn,*) 'whoops : prof.zobs = ',prof.zobs
         write(kStdWarn,*) '         zobs < 2 km in height!'
         write(kStdWarn,*) '         does not make sense for downlook instr'
@@ -2469,7 +2472,7 @@ c Yes, except use prof.zobs rather than a hardcoded 705000.
 c so the conversion is  p.scanang = orig_saconv_sun( p.satzen,prof.zobs);  %% by Scott
 c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by Sergio
       write(kStdWarn,*) ' '
-      IF (prof.upwell .EQ. 1) THEN
+      IF (upwell .EQ. 1) THEN
         IF ((rHeight .GT. 2.0) .AND. (abs(rAngleX) .LE. 90)) THEN
           rAngleY = ORIG_SACONV_SUN(rAngleX, rHeight)
           rAngleY = SACONV_SUN(rAngleX, rSURFaltitude/1000, rHeight/1000)
@@ -2486,7 +2489,7 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
         write(kStdWarn,*) '  computed scanangINSTR=saconv(satzenIN,zobsIN) = ',rAngleY
       END IF
 
-      IF (prof.upwell .EQ. 2) THEN
+      IF (upwell .EQ. 2) THEN
         !! uplook instrument
         IF (iOKscanang .EQ. 1) THEN 
           write(kStdWarn,*) 'Uplook instr : use prof.scanang'
@@ -2495,7 +2498,7 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
           write(kStdErr,*) 'Uplook instr : incorrect prof.scanang',rAngle
           CALL DoStop
         END IF
-      ELSEIF (prof.upwell .EQ. 1) THEN
+      ELSEIF (upwell .EQ. 1) THEN
         !! downlook instr
         IF ((iOKscanang .EQ. 1) .AND. (iOKsatzen .EQ. 1) .AND. 
      $      (iOKzobs .EQ. 1)) THEN
@@ -2543,6 +2546,11 @@ c so the conversion is  p.scanang = saconv( p.satzen,prof.zobs);           %% by
       write(kStdWarn,*) 'iOKscanang,iOKsatzen,iOKzobs = ',iOKscanang,iOKsatzen,iOKzobs
       write(kStdWarn,*) 'using kCARTA scanang = ',rAngle
       write(kStdWarn,*) ' '
+      IF (abs(rAngle) .GT. 180) THEN
+        write(kStdErr,*) 'Whoa kCARTA scanang = ',rAngle,' instead of between -180 and +180'
+	CALL DoStop
+      END IF
+      
 c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       IF (rTbdy .GT. 3.0) THEN
