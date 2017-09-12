@@ -33,6 +33,11 @@ c************************************************************************
 
       include '../INCLUDE/scatter.param'
 
+C     Include the MPI library definitons:
+c      include 'mpif.h'
+c      integer numtasks, rank, ierr, rc, len, i
+c      character*(MPI_MAX_PROCESSOR_NAME) name
+
       INTEGER iIOUN
 
 c iNumgases=total number of Gases to be include in profile
@@ -370,7 +375,7 @@ c these are for Matlab style kCOmp Corner Weights
 
 c these are actually used
       INTEGER iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
-      INTEGER iFr,ID,OMP_GET_THREAD_NUM,iNumProcessors
+      INTEGER iFr,ID,OMP_GET_THREAD_NUM
       INTEGER DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft
       INTEGER IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
@@ -383,6 +388,38 @@ c      REAL rDummy,rDummy2,rDummy3,rDerivTemp,rDerivAmt,PLKAVG_ORIG, PLKAVG
 c************************************************************************
 c************************************************************************
 c************************************************************************
+
+C     Initialize the MPI library:                                                                                        
+c      call MPI_INIT(ierr)
+c      if (ierr .ne. MPI_SUCCESS) then
+c         print *,'Error starting MPI program. Terminating.'
+c         call MPI_ABORT(MPI_COMM_WORLD, rc, ierr)
+c      end if
+
+C     Get the number of processors this job is using:                                                                    
+c      call MPI_COMM_SIZE(MPI_COMM_WORLD, numtasks, ierr)
+
+C     Get the rank of the processor this thread is running on.  (Each                                                    
+C     processor has a unique rank.)                                                                                      
+c      call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+
+C     Get the name of this processor (usually the hostname)                                                              
+c      call MPI_GET_PROCESSOR_NAME(name, len, ierr)
+c      if (ierr .ne. MPI_SUCCESS) then
+c         print *,'Error getting processor name. Terminating.'
+c         call MPI_ABORT(MPI_COMM_WORLD, rc, ierr)
+c      end if
+
+c      print 30, "hello_parallel.f: Number of",numtasks,rank,name
+c 30      format (A,' tasks=',I3,' My rank=',I3,' My name=',A80,'')
+
+c************************************************************************
+c************************************************************************
+c************************************************************************
+
+c      CALL InputMR_profile('../SRC/levels_prof1.txt')
+c      print *,'yihaa'
+c      Call Dostop
 
 c allow scattering computations if in .nml or RTP file
       kAllowScatter = +1    
@@ -722,13 +759,12 @@ c******************
 
 c LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP 
 c outermost loop over the 10000 pt freq chunks
-      iNumProcessors = 4      
-      print *,'starting parallel loop with ',iNumProcessors,' processors'
-      
-      CALL OMP_SET_NUM_THREADS(iNumProcessors)
-      !$OMP PARALLEL PRIVATE(iOuterLoop)    !! loop indices are always private
+      CALL OMP_SET_NUM_THREADS(8)
+      !$OMP PARALLEL
       !$OMP DO
       DO iOuterLoop=1,iTotal
+        ID = OMP_GET_THREAD_NUM()
+	print *,'hello world OMP_GET_THREAD_NUM() = ',ID
 	
         kOuterLoop = iOuterLoop
         call PrintStar
@@ -745,10 +781,7 @@ c outermost loop over the 10000 pt freq chunks
         write(kStdWarn,*) 'which has StartFreq = ',rFileStartFr
         write(kStdWarn,*) 'File iTagIndex, ActualTag, freqspacing = ',
      $    iTag,iaActualTag(iFileID),kaFrStep(iTag)
-
-        ID = OMP_GET_THREAD_NUM()
-	print *,'iOuterLoop, rF, THREAD_NUM = ',iOuterLoop,rFileStartFr, ID
-
+        
 c first set the cumulative d/dT matrix to zero, if we need Jacobians
         IF (kJacobian .GT. 0. AND. 
      $      ((kActualJacs .EQ. -1) .OR. (kActualJacs. EQ. 30) .OR.
@@ -1359,6 +1392,9 @@ c go to the next wavenumber range
       kStdWarnOpen = -1
       CLOSE(UNIT = kStdErr)
       kStdErrOpen = -1
+
+C     Tell the MPI library to release all resources it is using:                                                         
+c      call MPI_FINALIZE(ierr)
 
       call exit(0)           !!!!happy exit!
 

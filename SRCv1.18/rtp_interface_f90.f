@@ -1,37 +1,38 @@
-! Copyright 2001
-! University of Maryland Baltimore County 
-! All Rights Resered
+c Copyright 2015
+c University of Maryland Baltimore County 
+c All Rights Resered
 
-! this file deals with reading in the RTP file
+c this file deals with reading in the RTP file
+c scientific format ESW.n   http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap05/format.html
 
-!************************************************************************
-! this subroutine deals with figuring out the wavenumbers
-! very bloody simple, as Howard Motteler very nicely specifies these numbers
-! for me in the RTP file!
+c************************************************************************
+c this subroutine deals with figuring out the wavenumbers
+c very bloody simple, as Howard Motteler very nicely specifies these numbers
+c for me in the RTP file!
       SUBROUTINE  IdentifyChannelsRTP(rf1,rf2,iRTP,caPFName)
 
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
 
-! output
+c output
       REAL rf1,rf2           !the low and high end wavenumbers
-! input
-      CHARACTER*130 caPFname !the RTP file to peruse
+c input
+      CHARACTER*80 caPFname !the RTP file to peruse
       INTEGER iRTP           !which profile to read
       INTEGER inpath
-! local variables for RTP file
+c local variables for RTP file
       integer rtpopen, rtpread, rtpwrite, rtpclose
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
-! other local variables
+c other local variables
       integer i
 
       fname(1:80) = caPFName(1:80)
@@ -43,20 +44,27 @@
         Call DoStop
       END IF
       kProfileUnitOpen = +1
-!      write(kStdWarn,*) 'read open status = ', status
+c      write(kStdWarn,*) 'read open status = ', status
 
-!      DO i = 1, iRTP
-!        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
-!        status = rtpread(rchan, prof)
-!      END DO
+c      DO i = 1, iRTP
+c        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
+c        status = rtpread(rchan, prof)
+c      END DO
 
       status = rtpclose(rchan)
-!      write(kStdWarn,*) 'read close status = ', status
+c      write(kStdWarn,*) 'read close status = ', status
       kProfileUnitOpen = -1
 
       rf1 = head%vcmin
       rf2 = head%vcmax
 
+      IF (head.ngas .GT. MAXGAS) THEN
+        !! see /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
+        write(kStdErr,*) ' SUBR  IdentifyChannelsRTP >>>> number of gases in RTP     file = ',head.ngas
+        write(kStdErr,*) '                           >>>> number of gases in RTPDEFS      = ',MAXGAS
+	CallDoStop
+      END IF
+      
       IF ((rf1 .LT. 0) .AND. (rf2 .LT. 0)) THEN
         write(kStdWarn,*) 'resetting head%vcmin from ',rf1,' to 605.0'
         rf1 = 605.0
@@ -75,20 +83,23 @@
       END IF
 
       !!! TEST DEBUG
-!       rf1 = 1255
-!       rf2 = 1305
-!       rf1 = 1780
-!       rf2 = 1805
-!       print *,'*********************************************************'
-!       print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for testing'
-!       print *,'*********************************************************'
-      !!! TEST DEBUG
+c       rf1 = 1255
+c       rf2 = 1205   !!  HIRES kcarta only between 605 and 1205
+c       rf1 = 1780
+c       rf2 = 1805
+c       rf1 = 630
+c       rf2 = 605
+c       rf2 = 1205
+c       print *,'*********************************************************'
+c       print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for testing'
+c       print *,'*********************************************************'
+c      !!! TEST DEBUG
 
       RETURN
       END
 
 c************************************************************************
-! this subroutine deals with the 'RADNCE' keyword
+c this subroutine deals with the 'RADNCE' keyword
       SUBROUTINE radnceRTPorNML(iRTP,caPFName,iMPSetForRadRTP,
      $   iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop,
      $   raPressLevels,iProfileLayers,
@@ -100,49 +111,49 @@ c************************************************************************
      $   iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $   iaNumLayer,iaaRadLayer,raProfileTemp,
      $   raSatAzimuth,raSolAzimuth,raWindSpeed,
-     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP,
      $   raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
 
-! iNpmix     = number of mixed paths read in from mixfile
-! iaMPSetForRad = array telling which MP set to associate with which atm
-! iNatm       = number of atmospheres
-! raPressStart = start pressure for radiating atmos
-! raPressStop  = stop pressure for radiating atmos
-! raTSpace    = array containing background temperature for each atmosphere
-! raTSurf    = array contianing surface temperature for each atmosphere
-! raSatAngle = array containing satellite view angle for each atmosphere
-! raSatHeight= array containing satellite height for each atmosphere
-! iaNumLayer = array containing number of layers in each atmosphere
-! iaaRadLayer= matrix containing list of layers in each atmosphere
-! iaSetEms   = -1 if use emissivities from *RADNCE, > 0 if read in a file
-! raaaSetEmissivity = array containing the wavenumber dependent emissivities
-! raFracTop  = top fraction
-! raFracBot  = bottom fraction
-! raaPrBdry  = matrix that keeps start/stop pressures
-! the next few only work for DOWNWARD LOOK instr
-! caSetEmissivity= array that gives name of emissivity files (if any) 
-! caSetEmissivity= array that gives name of solar refl files (if any) 
-! raSetEmissivity= array that gives constant emissivity value (if set)
-! rakSolarAngle = solar angles for the atmospheres
-! rakThermalAngle=thermal diffusive angle
-! rakSolarRefl   =array that gives constant solar reflectance (if set)
-! iakthermal,iaksolar = turn on/off solar and thermal
-! iakthermaljacob=turn thermal jacobians on/off      
-! raProfileTemp = array containing CO2 gas profile temperature
-! iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
-! iRTP tells us which profile info to read if kRTP == 1
-! raPressLevels gives the actual pressure levels from the KLAYERS file, within
-!               the iProfileLayers defined in the KLAYERS file
-! raS**Azimuth are the azimuth angles for solar beam single scatter
+c iNpmix     = number of mixed paths read in from mixfile
+c iaMPSetForRad = array telling which MP set to associate with which atm
+c iNatm       = number of atmospheres
+c raPressStart = start pressure for radiating atmos
+c raPressStop  = stop pressure for radiating atmos
+c raTSpace    = array containing background temperature for each atmosphere
+c raTSurf    = array contianing surface temperature for each atmosphere
+c raSatAngle = array containing satellite view angle for each atmosphere
+c raSatHeight= array containing satellite height for each atmosphere
+c iaNumLayer = array containing number of layers in each atmosphere
+c iaaRadLayer= matrix containing list of layers in each atmosphere
+c iaSetEms   = -1 if use emissivities from *RADNCE, > 0 if read in a file
+c raaaSetEmissivity = array containing the wavenumber dependent emissivities
+c raFracTop  = top fraction
+c raFracBot  = bottom fraction
+c raaPrBdry  = matrix that keeps start/stop pressures
+c the next few only work for DOWNWARD LOOK instr
+c caSetEmissivity= array that gives name of emissivity files (if any) 
+c caSetEmissivity= array that gives name of solar refl files (if any) 
+c raSetEmissivity= array that gives constant emissivity value (if set)
+c rakSolarAngle = solar angles for the atmospheres
+c rakThermalAngle=thermal diffusive angle
+c rakSolarRefl   =array that gives constant solar reflectance (if set)
+c iakthermal,iaksolar = turn on/off solar and thermal
+c iakthermaljacob=turn thermal jacobians on/off      
+c raProfileTemp = array containing CO2 gas profile temperature
+c iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
+c iRTP tells us which profile info to read if kRTP == 1
+c raPressLevels gives the actual pressure levels from the KLAYERS file, within
+c               the iProfileLayers defined in the KLAYERS file
+c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raLayerHeight(kProfLayer)
       REAL raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
       REAL raPressLevels(kProfLayer+1)
       INTEGER iProfileLayers
-      REAL cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,cngwat,raCemis(kMaxClouds)
+      REAL cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,cngwat,raCemis(kMaxClouds)
       INTEGER ctype1,ctype2
       REAL raCprtop(kMaxClouds), raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds), raCpsize(kMaxClouds)
@@ -163,7 +174,7 @@ c************************************************************************
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       INTEGER iRTP
-      CHARACTER*130 caPFName
+      CHARACTER*80 caPFName
 
       INTEGER iI
 
@@ -174,15 +185,17 @@ c************************************************************************
        ctype2 = -9999
        ctop1 = -100.0
        ctop2 = -100.0
+       cbot1 = -100.0
+       cbot2 = -100.0
 
        DO iI = 1,kMaxClouds
          raCngwat(iI) = 0.0
          raCpsize(iI) = 1.0
        END DO
 
-!       DO iI = 1,kMaxAtm
-!         iaSetSolarRefl(iI) = -1
-!       END DO
+c       DO iI = 1,kMaxAtm
+c         iaSetSolarRefl(iI) = -1
+c       END DO
 
       !!!kRTP = -1 : read old style kLAYERS profile; set atm from namelist
       !!!kRTP =  0 : read RTP style kLAYERS profile; set atm from namelist
@@ -210,7 +223,7 @@ c************************************************************************
      $   raSatAzimuth,raSolAzimuth,raWindSpeed,
      $   iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $   iaNumLayer,iaaRadLayer,raProfileTemp,
-     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP,
      $   raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
       END IF
 
@@ -220,7 +233,7 @@ c************************************************************************
         write(kStdErr,*) 'the TOA pressure level (TOA) is not high enough'
         write(kStdErr,*) '(we would like it to be <= 10 mb)'
         write(kStdErr,*) 'Please correct the levels you ask KLAYERS to use'
-!        CALL DoStop
+c        CALL DoStop
       END IF
 
       DO iI = 1,iNatm
@@ -234,7 +247,7 @@ c************************************************************************
         END IF
       END DO
 
-!     now go through and see if any of these atmospheres are for limb sounding
+c     now go through and see if any of these atmospheres are for limb sounding
       CALL check_limbsounder(iNatm,raPressStart,raPressStop,raFracTop,raFracBot,raTSurf,
      $                       raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle,
      $                       raPressLevels,raLayerHeight,
@@ -244,7 +257,7 @@ c************************************************************************
       END
 
 c************************************************************************
-! this subroutine deals with the 'PTHFIL' keyword 
+c this subroutine deals with the 'PTHFIL' keyword 
       SUBROUTINE pthfil4RTPorNML(raaAmt,raaTemp,raaPress,raaPartPress,
      $      caPFName,iRTP,iAFGLProf,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath,
@@ -254,18 +267,18 @@ c************************************************************************
 
       include '../INCLUDE/kcarta.param'
 
-! iAFGLProf  = which AFGL prof to use? 1 .. 6
-! caPFName = character*80 profile name
-! raaAmt/Temp/Press/PartPress = current gas profile parameters
-! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
-! iaGases   = array that tracks which gas ID's should be read in
-! iaWhichGasRead = array that tracks whch gases ARE read in
-! iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
-! raLayerHeight = heights of layers in KM!!!!!!!
-! iRTP  = if RTP KLAYERS profile, which one of the profiles to read in
-! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
-! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
-! iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4)
+c iAFGLProf  = which AFGL prof to use? 1 .. 6
+c caPFName = character*80 profile name
+c raaAmt/Temp/Press/PartPress = current gas profile parameters
+c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
+c iaGases   = array that tracks which gas ID's should be read in
+c iaWhichGasRead = array that tracks whch gases ARE read in
+c iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
+c raLayerHeight = heights of layers in KM!!!!!!!
+c iRTP  = if RTP KLAYERS profile, which one of the profiles to read in
+c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+c iProfileLayers = tells how many layers read in from RTP or KLAYERS file
+c iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4)
       REAL raTPressLevels(kProfLayer+1)           
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
       INTEGER iProfileLayers,iKnowTP,iAFGLProf
@@ -277,7 +290,7 @@ c************************************************************************
       REAL raaPartPress(kProfLayer,kGasStore)
       CHARACTER*80 caPfname
 
-! local variables
+c local variables
       CHARACTER*7 caWord
       INTEGER iNumLinesRead,iaDispGasID(12),iCount
       INTEGER iGenln4,iL,iLBLDIS
@@ -310,7 +323,11 @@ c************************************************************************
         write(kStdWarn,*) 'KCARTA expecting text GENLN4 style input profile'
       ELSEIF ((kRTP .LT. 0) .AND. (kRTP .GT. -3) .AND. (iGenln4 .LT. 0)) THEN
         write(kStdWarn,*) 'KCARTA expecting text KLAYERS style input profile'
-      ELSEIF (kRTP .LT. -3) THEN
+      ELSEIF (kRTP .EQ. -5) THEN
+        write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE5 style input profile'
+      ELSEIF (kRTP .EQ. -6) THEN
+        write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE6 style input profile'
+      ELSEIF (kRTP .EQ. -10) THEN
         write(kStdWarn,*) 'KCARTA expecting text LEVELS style input profile'
       ELSEIF ((kRTP .EQ. 0) .OR. (kRTP .EQ. 1)) THEN
         write(kStdWarn,*) 'KCARTA expecting RTP hdf style input profile'
@@ -360,20 +377,20 @@ c************************************************************************
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)                                 
+     $      iProfileLayers,raPressLevels,raTPressLevels,raThickness)
       ELSEIF ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6)) THEN
         write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
         write(kStdWarn,5040) caPfname
         CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
-     $      iProfileLayers,raPressLevels,raThickness)                                 
+     $      iProfileLayers,raPressLevels,raTPressLevels,raThickness)
       END IF
-
-! this piece of "output" displays the amounts for the first 3 gases
-! also displays temperature of first stored gas.
-! if less than 3 gases stored it is smart enuff to display <= 3 gas amts
-! notice here that gA == first gas in the MOLGAS, usually water
+      
+c this piece of "output" displays the amounts for the first 3 gases
+c also displays temperature of first stored gas.
+c if less than 3 gases stored it is smart enuff to display <= 3 gas amts
+c notice here that gA == first gas in the MOLGAS, usually water
       DO iL = 1,12
         iaDispGasID(iL) = -1
       END DO
@@ -392,7 +409,8 @@ c************************************************************************
  5000 CONTINUE
 
       iLBLDIS = -1     !!! do not dump out stuff for LBLDIS to use
-      iLBLDIS = +1     !!! do     dump out stuff for LBLDIS to use
+      iLBLDIS = +7     !!! do     dump out stuff for LBLDIS to use (TAPE7)
+      iLBLDIS = +16    !!! do     dump out stuff for RRTM   to use (TAPEX)
       !!!! this is for LBLDIS =======================<<<<<<< >>>>=============
       !!!! pressures in mb, temps in K, heights in km, gas amounts in mol/cm2
       !!!! only dump gases(1:7) for "var" gases, gas 22 (N2) as the broadener
@@ -401,9 +419,31 @@ c************************************************************************
  9877 FORMAT(7(E14.8,' '))
  9876 FORMAT(6(E14.8,' '))
  9872 FORMAT(2(E14.8,' '))
+
       caStr='<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>
      $>>>>>>>>>>>'
-      IF ((iLBLDIS .GT. 0) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+
+      IF ((iLBLDIS .EQ. 16) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+        write(kStdWarn,5040) caStr
+        write(kStdWarn,*) 'RRTM PSEUDO IN (ie incorrect format!!) --- start cut below this line ----'
+        write(kStdWarn,5040) caPFName
+        caStr = '$ start of info'
+        write(kStdWarn,5040) caStr
+        caStr = '                                                 0                   1              4  0 '
+        write(kStdWarn,5040) caStr
+        caStr = 'Stemp 1 0 Emis ' 
+        write(kStdWarn,5040) caStr
+        write(kStdWarn,*) 1,iProfileLayers,7,1.000
+        DO iL = kProfLayer-iProfileLayers+1,kProfLayer
+          write(kStdWarn,*) raaPress(iL,1),raaTemp(iL,1),raPressLevels(iL),raaTemp(iL,1),raPressLevels(iL+1),raaTemp(iL,1)
+          write(kStdWarn,3030) kAvog*raaAmt(iL,1),kAvog*raaAmt(iL,2),kAvog*raaAmt(iL,3),
+     $                         kAvog*raaAmt(iL,4),kAvog*raaAmt(iL,5),kAvog*raaAmt(iL,6),
+     $                         kAvog*raaAmt(iL,7),kAvog*raaAmt(iL,22)
+        END DO
+      END IF
+ 3030 FORMAT(8('   ',E10.4))
+
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
         write(kStdWarn,5040) caStr
         write(kStdWarn,*) 'LBLRTM TAPE7 --- start cut below this line ----'
         write(kStdWarn,5040) caPFName
@@ -442,19 +482,21 @@ c************************************************************************
       END IF
       !!!! this is for LBLDIS =======================<<<<<<< >>>>=============
        
-      write(kStdWarn,*) '  '
-      caStr160=' Lay    P(gA)      PP(gA)       Temp        GasID=       GasID=   
-     $   GasID=       GasID=       GasID=       GasID=       GasID=    
-     $   GasID='
-      write(kStdWarn,5030) caStr160
-      write(kStdWarn,*) '                                           ',
-     $    iaDispGasID(1),'         ',iaDispGasID(2),'         ',iaDispGasID(3),
-     $    iaDispGasID(4),'         ',iaDispGasID(5),'         ',iaDispGasID(6),
-     $    iaDispGasID(9),'         ',iaDispGasID(12)
-      caStr='----------------------------------------------------------------
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+        write(kStdWarn,*) '  '
+        caStr160 = ' Lay    P(gA)      PP(gA)       Temp        GasID=       GasID=    GasID='
+        castr160 = castr160 // '       GasID=       GasID=       GasID=       GasID=       GasID='
+        write(kStdWarn,5030) caStr160
+        write(kStdWarn,*) '                                           ',
+     $      iaDispGasID(1),'         ',iaDispGasID(2),'         ',iaDispGasID(3),
+     $      iaDispGasID(4),'         ',iaDispGasID(5),'         ',iaDispGasID(6),
+     $      iaDispGasID(9),'         ',iaDispGasID(12)
+        caStr='----------------------------------------------------------------
      $-----------'
-      write(kStdWarn,5040) caStr  
-      IF ((iLBLDIS .GT. 0) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+        write(kStdWarn,5040) caStr  
+      END IF
+
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
         write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt -- start cut below this line --'
         DO iL = kProfLayer-iProfileLayers+1,kProfLayer
           rP = raaPress(iL,1)
@@ -464,7 +506,7 @@ c************************************************************************
      $        raaAmt(iL,6),raaAmt(iL,9),raaAmt(iL,12)
         END DO
       END IF
-      IF ((iLBLDIS .GT. 0) .AND. (abs(kLongOrShort) .LE. 1)) THEN
+      IF ((iLBLDIS .EQ. 7) .AND. (abs(kLongOrShort) .LE. 1)) THEN
         write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt --- end cut above this line ---'
       END IF
 
@@ -485,15 +527,15 @@ c************************************************************************
       END
 
 c************************************************************************
-! this subroutine deals with 'PTHFIL' keyword for the RTP format
+c this subroutine deals with 'PTHFIL' keyword for the RTP format
 
-! the kLAYERS format already differs from GENLN2 format in that
-! (1) instead of velocity, we have height, which gets put into raLayerHt
-! (2) no CON,LINSHAPE params
-! also, we have to read in the gasamount for WATER for gases 101,102 so 
-! things have to be done slightly differently
+c the kLAYERS format already differs from GENLN2 format in that
+c (1) instead of velocity, we have height, which gets put into raLayerHt
+c (2) no CON,LINSHAPE params
+c also, we have to read in the gasamount for WATER for gases 101,102 so 
+c things have to be done slightly differently
 
-! now we have an additional format to deal with, which should be MUCH simpler
+c now we have an additional format to deal with, which should be MUCH simpler
       SUBROUTINE READRTP(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
@@ -502,20 +544,20 @@ c************************************************************************
       implicit none
 
       include '../INCLUDE/kcarta.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
       INTEGER iplev
       include '../INCLUDE/KCARTA_database.param'
 
-! raaAmt/Temp/Press/PartPress = current gas profile parameters
-! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
-! iaGases   = array that tracks which gasID's should be read in
-! iaWhichGasRead = array that tracks which gases ARE read in
-! iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
-! iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
-! caPfName  = name of file containing user supplied profiles
-! raLayerHeight = heights of layers in km
-! iRTP = which profile to read in
-! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+c raaAmt/Temp/Press/PartPress = current gas profile parameters
+c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
+c iaGases   = array that tracks which gasID's should be read in
+c iaWhichGasRead = array that tracks which gases ARE read in
+c iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
+c iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
+c caPfName  = name of file containing user supplied profiles
+c raLayerHeight = heights of layers in km
+c iRTP = which profile to read in
+c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
       INTEGER iRTP,iProfileLayers
       INTEGER iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -524,20 +566,20 @@ c************************************************************************
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
       CHARACTER*80 caPfname
-! for 100 layer clouds
+c for 100 layer clouds
       INTEGER iaCld100Read(3)
       REAL raaCld100Amt(kProfLayer,3)
 
-! local variables : all copied from ftest1.f (Howard Motteler's example)
+c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer iPtype
 
       integer rtpopen, rtpread, rtpwrite, rtpclose
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
       fname(1:80) = caPFName(1:80)
@@ -548,9 +590,9 @@ c************************************************************************
 
       mode = 'r'
       status = rtpopen(fname, mode, head, hatt, patt, rchan)
-      iPtype = head%ptype
-      write(kStdWarn,*) 'head%ptype = ',iPtype
-      write(kStdWarn,*) 'head%ngas  = ',head%ngas
+      iPtype = head.ptype
+      write(kStdWarn,*) 'head.ptype = ',iPtype
+      write(kStdWarn,*) 'head.ngas  = ',head.ngas
       status = rtpclose(rchan)
 
       IF (iPtype .EQ. 0) THEN
@@ -560,14 +602,14 @@ c************************************************************************
       ELSEIF (iPtype .EQ. 1) THEN
         !! layers profile
         write(kStdWarn,*) 'Expecting ',iNumGases,' gases in rtp profile'
-        IF (head%ngas .GE. iNumGases) THEN
+        IF (head.ngas .GE. iNumGases) THEN
           !read in rtp profile; hope all gas profiles are there
           CALL READRTP_1A(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iaCld100Read,raaCld100Amt,
      $      iNpath,caPfName,iRTP,
      $      iProfileLayers,raPresslevels,raThickness)
-        ELSEIF (head%ngas .LT. iNumGases) THEN
+        ELSEIF (head.ngas .LT. iNumGases) THEN
           !read in rtp profile; augment profiles using US Std
           CALL READRTP_1B(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
@@ -587,17 +629,17 @@ c************************************************************************
       END
 
 c************************************************************************
-! this subroutine deals with 'PTHFIL' keyword for the RTP format, h.ptype = 1
-! ie these are the AIRS layers
-! EXPECTS to find ALL necessary gases here
+c this subroutine deals with 'PTHFIL' keyword for the RTP format, h.ptype = 1
+c ie these are the AIRS layers
+c EXPECTS to find ALL necessary gases here
 
-! the kLAYERS format already differs from GENLN2 format in that
-! (1) instead of velocity, we have height, which gets put into raLayerHt
-! (2) no CON,LINSHAPE params
-! also, we have to read in the gasamount for WATER for gases 101,102 so 
-! things have to be done slightly differently
+c the kLAYERS format already differs from GENLN2 format in that
+c (1) instead of velocity, we have height, which gets put into raLayerHt
+c (2) no CON,LINSHAPE params
+c also, we have to read in the gasamount for WATER for gases 101,102 so 
+c things have to be done slightly differently
 
-! now we have an additional format to deal with, which should be MUCH simpler
+c now we have an additional format to deal with, which should be MUCH simpler
       SUBROUTINE READRTP_1A(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iaCld100Read,raaCld100Amt,
@@ -607,20 +649,20 @@ c************************************************************************
       implicit none
 
       include '../INCLUDE/kcarta.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
       INTEGER iplev
       include '../INCLUDE/KCARTA_database.param'
 
-! raaAmt/Temp/Press/PartPress = current gas profile parameters
-! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
-! iaGases   = array that tracks which gasID's should be read in
-! iaWhichGasRead = array that tracks which gases ARE read in
-! iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
-! iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
-! caPfName  = name of file containing user supplied profiles
-! raLayerHeight = heights of layers in km
-! iRTP = which profile to read in
-! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+c raaAmt/Temp/Press/PartPress = current gas profile parameters
+c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
+c iaGases   = array that tracks which gasID's should be read in
+c iaWhichGasRead = array that tracks which gases ARE read in
+c iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
+c iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
+c caPfName  = name of file containing user supplied profiles
+c raLayerHeight = heights of layers in km
+c iRTP = which profile to read in
+c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
       INTEGER iRTP,iProfileLayers
       INTEGER iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -628,6 +670,7 @@ c************************************************************************
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
       CHARACTER*80 caPfname
+      REAL rCC, raCC(kProfLayer)
 
       REAL raaHeight(kProfLayer,kGasStore),MGC,delta1
       REAL raH1(kProfLayer),raP1(kProfLayer+1)
@@ -645,7 +688,7 @@ c************************************************************************
       INTEGER iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard,iFindJ
       CHARACTER*130 ca1,ca2,caTemp
 
-! local variables : all copied from ftest1.f (Howard Motteler's example)
+c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer i,j,k,iG,iPtype
       REAL raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer)
 
@@ -653,12 +696,12 @@ c************************************************************************
       REAL raaCld100Amt(kProfLayer,3)
 
       integer rtpopen, rtpread, rtpwrite, rtpclose
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       logical isfinite
 
@@ -676,15 +719,15 @@ c************************************************************************
 
       mode = 'r'
       status = rtpopen(fname, mode, head, hatt, patt, rchan)
-      iPtype = head%ptype
-      write(kStdWarn,*) 'head%ptype = ',iPtype
+      iPtype = head.ptype
+      write(kStdWarn,*) 'head.ptype = ',iPtype
 
       IF (status .eq. -1) THEN
         write(kStdErr,*) 'Abs77 status of rtp open file = -1'
         Call DoStop
       END IF
       kProfileUnitOpen = +1
-!      write(kStdWarn,*) 'read open status = ', status
+c      write(kStdWarn,*) 'read open status = ', status
 
       DO i = 1, iRTP
         status = rtpread(rchan, prof)
@@ -702,33 +745,33 @@ c************************************************************************
 
       write (kStdWarn,*) 'success : read in RTP profile ',iRTP
       status = rtpclose(rchan)
-!      write(kStdWarn,*)  'read close status = ', status
+c      write(kStdWarn,*)  'read close status = ', status
 
       kProfileUnitOpen = -1
 
-      IF (prof%plevs(1) .lt. prof%plevs(prof%nlevs)) THEN
+      IF (prof.plevs(1) .lt. prof.plevs(prof.nlevs)) THEN
         !layers are from TOA to the bottom
         iDownWard = -1
-        kRTP_pBot = prof%plevs(prof%nlevs)
-        kRTP_pTop = prof%plevs(1)
-        kRTPBot   = kProfLayer - (prof%nlevs-1) + 1
+        kRTP_pBot = prof.plevs(prof.nlevs)
+        kRTP_pTop = prof.plevs(1)
+        kRTPBot   = kProfLayer - (prof.nlevs-1) + 1
         kRTPTop   = kProfLayer
       ELSE
         !layers are from GND to the top
         iDownWard = +1
-        kRTP_pTop = prof%plevs(prof%nlevs)
-        kRTP_pBot  = prof%plevs(1)
+        kRTP_pTop = prof.plevs(prof.nlevs)
+        kRTP_pBot  = prof.plevs(1)
         kRTPTop   = 1
-        kRTPBot   = prof%nlevs-1
+        kRTPBot   = prof.nlevs-1
       END IF
 
-      iL1 = prof%nlevs - 1         !!! number of layers = num of levels - 1
+      iL1 = prof.nlevs - 1         !!! number of layers = num of levels - 1
       iProfileLayers = iL1
-      iGasInRTPFile = head%ngas              !!! number of gases
+      iGasInRTPFile = head.ngas              !!! number of gases
 
-      IF (prof%nlevs .GT. kProfLayer+1) THEN
+      IF (prof.nlevs .GT. kProfLayer+1) THEN
         write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
-        write(kStdErr,*) 'RTP file has ',prof%nlevs-1,' layers'
+        write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
         write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
         CALL DoStop
       END IF
@@ -752,27 +795,27 @@ c************************************************************************
         write (kStdWarn,*) 'Will add on dummy info to UPPER layers'
       END IF
 
-      DO i = 1,prof%nlevs
+      DO i = 1,prof.nlevs
         j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
-        raHeight(j) = prof%palts(i)                     !!!!in meters
-        raPressLevels(j) = prof%plevs(i)                !!!!in mb
+        raHeight(j) = prof.palts(i)                     !!!!in meters
+        raPressLevels(j) = prof.plevs(i)                !!!!in mb
       END DO
 
-      DO i = 1,prof%nlevs-1
+      DO i = 1,prof.nlevs-1
         pProf(i) = raPressLevels(i) - raPressLevels(i+1)
         pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
       END DO
 
       !check that spres lies withn plevs(nlevs) and plevs(nlevs-1)
-      IF ((prof%plevs(prof%nlevs) .GT. prof%spres) .AND. 
-     $    (prof%plevs(prof%nlevs-1) .GT. prof%spres)) THEN
+      IF ((prof.plevs(prof.nlevs) .GT. prof.spres) .AND. 
+     $    (prof.plevs(prof.nlevs-1) .GT. prof.spres)) THEN
         write(kStdErr,*) 'p.nlevs | p.plevs(p.nlevs) p.spres p.plevs(p.nlevs-1)'
-        write(kStdErr,*) prof%nlevs,prof%plevs(prof%nlevs),prof%spres,prof%plevs(prof%nlevs-1)
+        write(kStdErr,*) prof.nlevs,prof.plevs(prof.nlevs),prof.spres,prof.plevs(prof.nlevs-1)
         write(kStdErr,*) 'spres not between p.plevs(nlevs) and p.plevs(nlevs-1)'
         print *,'i       raP(i)          raPavg(i)        raP(i+1)    spres'
         print *,'----------------------------------------------------------'
-        DO i = 1,prof%nlevs-1
-          print *,i,raPressLevels(i),pProf(i),raPressLevels(i+1),prof%spres
+        DO i = 1,prof.nlevs-1
+          print *,i,raPressLevels(i),pProf(i),raPressLevels(i+1),prof.spres
         END DO
 
         CALL DoStop
@@ -781,9 +824,9 @@ c************************************************************************
       IF (iDownWard .EQ. -1) THEN
         !!!add on dummy stuff
         !!!assume lowest pressure layer is at -600 meters
-        k = iFindJ(kProfLayer+1,prof%nlevs,iDownWard)
-        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof%nlevs)
-        DO i = prof%nlevs+1, kProfLayer + 1
+        k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+        DO i = prof.nlevs+1, kProfLayer + 1
           j = iFindJ(kProfLayer+1,I,iDownWard)
           raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
         END DO
@@ -791,8 +834,8 @@ c************************************************************************
         !!!add on dummy stuff
         !!!assume  top pressure layer is at 10e5 meters
         k = i
-        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof%nlevs)
-        DO i = prof%nlevs+1, kProfLayer + 1
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+        DO i = prof.nlevs+1, kProfLayer + 1
           j = iFindJ(kProfLayer+1,I,iDownWard)
           raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
         END DO
@@ -808,20 +851,20 @@ c************************************************************************
         END IF
       END DO
 
-! this variable keeps track of how many gases in the file have been read in
+c this variable keeps track of how many gases in the file have been read in
       iFileGasesReadIn = 0
 
-! this variable keeps track of how many gases should be read in
+c this variable keeps track of how many gases should be read in
       iNeed2Read = iNumGases
-! note we use WATER amts for self and for continuum) so be careful
+c note we use WATER amts for self and for continuum) so be careful
       DO iIDGas = kNewGasLo,kNewGasHi+1
         IF (iaGases(iIDGas) .EQ. 1) THEN
           iNeed2Read = iNeed2Read-1
         END IF
       END DO
 
-! this keeps track of the GasID used for the temperature .. hopefully water
-! this keeps track of if we need to read in more gas profiles
+c this keeps track of the GasID used for the temperature .. hopefully water
+c this keeps track of if we need to read in more gas profiles
       iTempFound        = -1
       iNeedMoreProfiles = -1
 
@@ -829,20 +872,20 @@ c************************************************************************
       iErr   = -1
 
       iNumberOfGasesRead = 0
-! set all individual gas paths to zero        
+c set all individual gas paths to zero        
       DO iNpath = 1,kProfLayer
         iaNpathcounter(iNpath) = 0
       END DO
 
-! set this temp varaiable
+c set this temp varaiable
       DO iNpath = 1,kMaxGas
         iaAlreadyIn(iNpath) = -1
       END DO
 
-! set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
-! so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then as
-! iaGases(1) = iaGases(2) = iaGases(22)=iaGases(51)=1
-! so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
+c set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
+c so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then as
+c iaGases(1) = iaGases(2) = iaGases(22)=iaGases(51)=1
+c so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
       DO iNpath = 1,kMaxGas
         iaInputOrder(iNpath) = -1
       END DO
@@ -854,10 +897,10 @@ c************************************************************************
         END IF
       END DO
 
-! now loop iNpath/iNumGases  times for each gas in the user supplied profile
-! make sure you only do things for gases 1- 63
+c now loop iNpath/iNumGases  times for each gas in the user supplied profile
+c make sure you only do things for gases 1- 63
       DO iG = 1, iGasInRTPFile
-        iIDGas = head%glist(iG)
+        iIDGas = head.glist(iG)
         IF ((iIDGas .GT. kGasXsecHi) .AND. (iIDGAS. LT. kNewCloudLo)) THEN
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) 'iIDGas,kGasXsecHi = ',iIDGas,kGasXsecHi
@@ -867,23 +910,23 @@ c************************************************************************
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) ' Reading Gas number ',iG ,' of ',iGasInRTPFile,' : ID = ',iIDGas
           !!! first fill things out with stuff from the RTP file
-          DO i = 1, prof%nlevs - 1
+          DO i = 1, prof.nlevs - 1
             j = iFindJ(kProfLayer,I,iDownWard)
             iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
-            rAmt = prof%gamnt(i,iG) / kAvog
+            rAmt = prof.gamnt(i,iG) / kAvog
             IF (isfinite(rAmt) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF              
-            rT   = prof%ptemp(i)
+            rT   = prof.ptemp(i)
             IF (isfinite(rT) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF              
 
-            plays(i) = (prof%plevs(i)-prof%plevs(i+1))/
-     $                 log(prof%plevs(i)/prof%plevs(i+1))
+            plays(i) = (prof.plevs(i)-prof.plevs(i+1))/
+     $                 log(prof.plevs(i)/prof.plevs(i+1))
             rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
             IF (iDownWard .EQ. -1) THEN
               !!! this automatically puts partial pressure in ATM, assuming 
@@ -896,11 +939,11 @@ c************************************************************************
               !!!note "i"!!!
               rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0) 
             END IF
-            rH   = prof%palts(i)
+            rH   = prof.palts(i)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) .GT. 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                              iFound,iGasIndex)
@@ -914,20 +957,20 @@ c************************************************************************
                 iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
-          END DO              !DO i = 1, prof%nlevs - 1 for klayers info
+          END DO              !DO i = 1, prof.nlevs - 1 for klayers info
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
-          DO i = prof%nlevs, kProfLayer
+          DO i = prof.nlevs, kProfLayer
             j = iFindJ(kProfLayer,I,iDownWard)
-            iIDGas = head%glist(iG)
+            iIDGas = head.glist(iG)
             iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
             IF (iDownWard .EQ. -1) THEN
-              delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
+              delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
             ELSE
-              delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
-              rT   = prof%ptemp(prof%nlevs-1) + delta1*j
+              delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
+              rT   = prof.ptemp(prof.nlevs-1) + delta1*j
               rT   = 300.0
             END IF
             rAmt = 0.0
@@ -936,8 +979,8 @@ c************************************************************************
             rH   = raHeight(j)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) .GT. 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                            iFound,iGasIndex)
@@ -952,14 +995,14 @@ c************************************************************************
                 iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
-          END DO    !DO i = prof%nlevs, kProfLayer for zeros
+          END DO    !DO i = prof.nlevs, kProfLayer for zeros
           CALL ContinuumFlag(iIDGas,iaCont)
     
           iFileGasesReadIn = iFileGasesReadIn+1
           WRITE(kStdWarn,4000) iaNpathCounter(iIDgas),iIDgas
-! this checks to see if we have read the profiles for all iNumGases required
-! note that the gases read in MUST have been entered in GASFIL or XSCFIL 
-! to count toward the tally ...
+c this checks to see if we have read the profiles for all iNumGases required
+c note that the gases read in MUST have been entered in GASFIL or XSCFIL 
+c to count toward the tally ...
           IF (iaGases(iIDgas) .GT. 0) THEN
             iNumberOfGasesRead = iNumberOfGasesRead+1
             iaAlreadyIn(iNumberOfGasesRead) = iIDGas      
@@ -969,27 +1012,31 @@ c************************************************************************
 
         ELSEIF ((iIDGAS. GE. kNewCloudLo) .AND. (iIDGAS. LE. kNewCloudHi)) THEN
           k100layerCloud = +1
+	  write(kStdErr,*) 'found gasID ',iIDGAS,' set k100layerCloud = 1'	  
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) ' Reading Cloud100 Layer Profiles, as gas ',iG ,' of ',iGasInRTPFile
           !!! first fill things out with stuff from the RTP file
           iNpathCounterJunk = 0
-          DO i = 1, prof%nlevs - 1
+          DO i = 1, prof.nlevs - 1
             j = iFindJ(kProfLayer,I,iDownWard)
             iNpathCounterJunk = iNpathCounterJunk + 1
 
-            rAmt = prof%gamnt(i,iG)
+c            rCC = prof.cc(i)
+c	    print *,i,rCC
+	    
+            rAmt = prof.gamnt(i,iG)
             IF (isfinite(rAmt) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF              
-            rT   = prof%ptemp(i)
+            rT   = prof.ptemp(i)
             IF (isfinite(rT) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF              
 
-            plays(i) = (prof%plevs(i)-prof%plevs(i+1))/
-     $                 log(prof%plevs(i)/prof%plevs(i+1))
+            plays(i) = (prof.plevs(i)-prof.plevs(i+1))/
+     $                 log(prof.plevs(i)/prof.plevs(i+1))
             rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
             IF (iDownWard .EQ. -1) THEN
               !!! this automatically puts partial pressure in ATM, assuming 
@@ -1002,29 +1049,29 @@ c************************************************************************
               !!!note "i"!!!
               rPP  = 0
             END IF
-            rH   = prof%palts(i)
+            rH   = prof.palts(i)
 
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iNpathCounterJunk)
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             iGasIndex = iIDgas-kNewCloudLo+1
             raaCld100Amt(j,iGasIndex) = rAmt
             iaCld100Read(iGasIndex)   = 1
-          END DO              !DO i = 1, prof%nlevs - 1 for klayers info
+          END DO              !DO i = 1, prof.nlevs - 1 for klayers info
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
-          DO i = prof%nlevs, kProfLayer
+          DO i = prof.nlevs, kProfLayer
             j = iFindJ(kProfLayer,I,iDownWard)
-            iIDGas = head%glist(iG)
+            iIDGas = head.glist(iG)
             iNpathCounterJunk = iNpathCounterJunk + 1
             IF (iDownWard .EQ. -1) THEN
-              delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
+              delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
             ELSE
-              delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
-              rT   = prof%ptemp(prof%nlevs-1) + delta1*j
+              delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
+              rT   = prof.ptemp(prof.nlevs-1) + delta1*j
               rT   = 300.0
             END IF
             rAmt = 0.0
@@ -1033,17 +1080,17 @@ c************************************************************************
             rH   = raHeight(j)
             raaCld100Amt(j,iGasIndex)       = rAmt
             iaCld100Read(iGasIndex)      = 1
-          END DO    !DO i = prof%nlevs, kProfLayer for zeros
+          END DO    !DO i = prof.nlevs, kProfLayer for zeros
 
         END IF      !if iGasID <= 63
       END DO
 
-! now see if we have to chunk on WaterSelf, WaterFor from water profile
+c now see if we have to chunk on WaterSelf, WaterFor from water profile
       CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead,
      $          iaInputOrder,iNumGases,
      $          raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
-! first check to see if all required gases found in the user supplied profile
+c first check to see if all required gases found in the user supplied profile
       IF (iNumberOfGasesRead .LT. iNumGases) THEN
         iNeedMoreProfiles = 1
         write(kStdErr,*) 'iNumberOfGasesRead iNumGases',iNumberOfGasesRead,iNumGases
@@ -1060,7 +1107,7 @@ c************************************************************************
  5030 FORMAT(A130)
  4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
 
-! now set raLayerHeight
+c now set raLayerHeight
       DO iFound = 1,kProfLayer
         raLayerHeight(iFound) = raaHeight(iFound,1)
       END DO
@@ -1074,7 +1121,7 @@ c************************************************************************
         raP1(i) = raPresslevels(i)
       END DO
 
-      i = prof%nlevs - 1     !!!!!!number of layers in RTP file
+      i = prof.nlevs - 1     !!!!!!number of layers in RTP file
       i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
       write (kStdWarn,*) '      '
       write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'
@@ -1088,9 +1135,9 @@ c************************************************************************
       write (kStdWarn,*) '2 Highest layers thickness (km) = ',
      $  raH1(kProfLayer-1),raH1(kProfLayer)
 
-! finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
-! that he/she is outta luck!!!!!!!
-! see ../INCLUDE/KCARTA_database.param for the kCARTA database definitions
+c finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
+c that he/she is outta luck!!!!!!!
+c see ../INCLUDE/KCARTA_database.param for the kCARTA database definitions
       write (kStdWarn,*) 'Highest database pressure (lowest level) : ',
      $              PLEV_KCARTADATABASE_AIRS(1)
       write (kStdWarn,*) 'Lowest database pressure (highest level) : ',
@@ -1103,18 +1150,18 @@ c************************************************************************
       END
 
 c************************************************************************
-! this subroutine deals with 'PTHFIL' keyword for the RTP format, h.ptype = 1
-! ie these are the AIRS layers
-! EXPECTS to find MOST gases here, but then goes off to augment the 
-! remaining gases from US Std
+c this subroutine deals with 'PTHFIL' keyword for the RTP format, h.ptype = 1
+c ie these are the AIRS layers
+c EXPECTS to find MOST gases here, but then goes off to augment the 
+c remaining gases from US Std
 
-! the kLAYERS format already differs from GENLN2 format in that
-! (1) instead of velocity, we have height, which gets put into raLayerHt
-! (2) no CON,LINSHAPE params
-! also, we have to read in the gasamount for WATER for gases 101,102 so 
-! things have to be done slightly differently
+c the kLAYERS format already differs from GENLN2 format in that
+c (1) instead of velocity, we have height, which gets put into raLayerHt
+c (2) no CON,LINSHAPE params
+c also, we have to read in the gasamount for WATER for gases 101,102 so 
+c things have to be done slightly differently
 
-! now we have an additional format to deal with, which should be MUCH simpler
+c now we have an additional format to deal with, which should be MUCH simpler
       SUBROUTINE READRTP_1B(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iaCld100Read,raaCld100Amt,
@@ -1124,20 +1171,20 @@ c************************************************************************
       implicit none
 
       include '../INCLUDE/kcarta.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
       INTEGER iplev
       include '../INCLUDE/KCARTA_database.param'
 
-! raaAmt/Temp/Press/PartPress = current gas profile parameters
-! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
-! iaGases   = array that tracks which gasID's should be read in
-! iaWhichGasRead = array that tracks which gases ARE read in
-! iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
-! iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
-! caPfName  = name of file containing user supplied profiles
-! raLayerHeight = heights of layers in km
-! iRTP = which profile to read in
-! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+c raaAmt/Temp/Press/PartPress = current gas profile parameters
+c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
+c iaGases   = array that tracks which gasID's should be read in
+c iaWhichGasRead = array that tracks which gases ARE read in
+c iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
+c iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
+c caPfName  = name of file containing user supplied profiles
+c raLayerHeight = heights of layers in km
+c iRTP = which profile to read in
+c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
       INTEGER iRTP,iProfileLayers
       INTEGER iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -1162,7 +1209,7 @@ c************************************************************************
       INTEGER iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard,iFindJ
       CHARACTER*130 ca1,ca2,caTemp
 
-! local variables : all copied from ftest1.f (Howard Motteler's example)
+c local variables : all copied from ftest1.f (Howard Motteler's example)
       INTEGER i,j,k,iG,iPtype
       REAL raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer)
 
@@ -1170,12 +1217,12 @@ c************************************************************************
       REAL raaCld100Amt(kProfLayer,3)
 
       integer rtpopen, rtpread, rtpwrite, rtpclose
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       logical isfinite
 
@@ -1193,15 +1240,15 @@ c************************************************************************
 
       mode = 'r'
       status = rtpopen(fname, mode, head, hatt, patt, rchan)
-      iPtype = head%ptype
-      write(kStdWarn,*) 'head%ptype = ',iPtype
+      iPtype = head.ptype
+      write(kStdWarn,*) 'head.ptype = ',iPtype
 
       IF (status .eq. -1) THEN
         write(kStdErr,*) 'Abs77 status of rtp open file = -1'
         Call DoStop
       END IF
       kProfileUnitOpen = +1
-!      write(kStdWarn,*)  'read open status = ', status
+c      write(kStdWarn,*)  'read open status = ', status
 
       DO i = 1, iRTP
         status = rtpread(rchan, prof)
@@ -1219,33 +1266,33 @@ c************************************************************************
 
       write (kStdWarn,*) 'success : read in RTP profile ',iRTP
       status = rtpclose(rchan)
-!      write(kStdWarn,*)  'read close status = ', status
+c      write(kStdWarn,*)  'read close status = ', status
 
       kProfileUnitOpen = -1
 
-      IF (prof%plevs(1) .lt. prof%plevs(prof%nlevs)) THEN
+      IF (prof.plevs(1) .lt. prof.plevs(prof.nlevs)) THEN
         !layers are from TOA to the bottom
         iDownWard = -1
-        kRTP_pBot = prof%plevs(prof%nlevs)
-        kRTP_pTop = prof%plevs(1)
-        kRTPBot   = kProfLayer - (prof%nlevs-1) + 1
+        kRTP_pBot = prof.plevs(prof.nlevs)
+        kRTP_pTop = prof.plevs(1)
+        kRTPBot   = kProfLayer - (prof.nlevs-1) + 1
         kRTPTop   = kProfLayer
       ELSE
         !layers are from GND to the top
         iDownWard = +1
-        kRTP_pTop = prof%plevs(prof%nlevs)
-        kRTP_pBot  = prof%plevs(1)
+        kRTP_pTop = prof.plevs(prof.nlevs)
+        kRTP_pBot  = prof.plevs(1)
         kRTPTop   = 1
-        kRTPBot   = prof%nlevs-1
+        kRTPBot   = prof.nlevs-1
       END IF
 
-      iL1 = prof%nlevs - 1         !!! number of layers = num of levels - 1
+      iL1 = prof.nlevs - 1         !!! number of layers = num of levels - 1
       iProfileLayers = iL1
-      iGasInRTPFile = head%ngas              !!! number of gases
+      iGasInRTPFile = head.ngas              !!! number of gases
 
-      IF (prof%nlevs .GT. kProfLayer+1) THEN
+      IF (prof.nlevs .GT. kProfLayer+1) THEN
         write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
-        write(kStdErr,*) 'RTP file has ',prof%nlevs-1,' layers'
+        write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
         write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
         CALL DoStop
       END IF
@@ -1269,13 +1316,13 @@ c************************************************************************
         write (kStdWarn,*) 'Will add on dummy info to UPPER layers'
       END IF
 
-      DO i = 1,prof%nlevs
+      DO i = 1,prof.nlevs
         j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
-        raHeight(j) = prof%palts(i)                     !!!!in meters
-        raPressLevels(j) = prof%plevs(i)                !!!!in mb
+        raHeight(j) = prof.palts(i)                     !!!!in meters
+        raPressLevels(j) = prof.plevs(i)                !!!!in mb
       END DO
 
-      DO i = 1,prof%nlevs-1
+      DO i = 1,prof.nlevs-1
         pProf(i) = raPressLevels(i) - raPressLevels(i+1)
         pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
       END DO
@@ -1283,9 +1330,9 @@ c************************************************************************
       IF (iDownWard .EQ. -1) THEN
         !!!add on dummy stuff
         !!!assume lowest pressure layer is at -600 meters
-        k = iFindJ(kProfLayer+1,prof%nlevs,iDownWard)
-        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof%nlevs)
-        DO i = prof%nlevs+1, kProfLayer + 1
+        k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+        DO i = prof.nlevs+1, kProfLayer + 1
           j = iFindJ(kProfLayer+1,I,iDownWard)
           raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
         END DO
@@ -1293,8 +1340,8 @@ c************************************************************************
         !!!add on dummy stuff
         !!!assume  top pressure layer is at 10e5 meters
         k = i
-        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof%nlevs)
-        DO i = prof%nlevs+1, kProfLayer + 1
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+        DO i = prof.nlevs+1, kProfLayer + 1
           j = iFindJ(kProfLayer+1,I,iDownWard)
           raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
         END DO
@@ -1310,20 +1357,20 @@ c************************************************************************
         END IF
       END DO
 
-! this variable keeps track of how many gases in the file have been read in
+c this variable keeps track of how many gases in the file have been read in
       iFileGasesReadIn=0
 
-! this variable keeps track of how many gases should be read in
+c this variable keeps track of how many gases should be read in
       iNeed2Read = iNumGases
-! note we use WATER amts for self and for continuum) so be careful
+c note we use WATER amts for self and for continuum) so be careful
       DO iIDGas = kNewGasLo,kNewGasHi+1
         IF (iaGases(iIDGas) .EQ. 1) THEN
           iNeed2Read = iNeed2Read-1
         END IF
       END DO
 
-! this keeps track of the GasID used for the temperature .. hopefully water
-! this keeps track of if we need to read in more gas profiles
+c this keeps track of the GasID used for the temperature .. hopefully water
+c this keeps track of if we need to read in more gas profiles
       iTempFound        = -1
       iNeedMoreProfiles = -1
 
@@ -1331,20 +1378,20 @@ c************************************************************************
       iErr   = -1
 
       iNumberOfGasesRead = 0
-! set all individual gas paths to zero        
+c set all individual gas paths to zero        
       DO iNpath = 1,kProfLayer
         iaNpathcounter(iNpath) = 0
       END DO
 
-! set this temp varaiable
+c set this temp varaiable
       DO iNpath = 1,kMaxGas
         iaAlreadyIn(iNpath) = -1
       END DO
 
-! set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
-! so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then as
-! iaGases(1) = iaGases(2) = iaGases(22) = iaGases(51) = 1
-! so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
+c set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
+c so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then as
+c iaGases(1) = iaGases(2) = iaGases(22) = iaGases(51) = 1
+c so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
       DO iNpath = 1,kMaxGas
         iaInputOrder(iNpath) = -1
       END DO
@@ -1356,10 +1403,10 @@ c************************************************************************
         END IF
       END DO
 
-! now loop iNpath/iNumGases  times for each gas in the user supplied profile
-! make sure you only do things for gases 1- 63
+c now loop iNpath/iNumGases  times for each gas in the user supplied profile
+c make sure you only do things for gases 1- 63
       DO iG = 1, iGasInRTPFile
-        iIDGas = head%glist(iG)
+        iIDGas = head.glist(iG)
         IF ((iIDGas .GT. kGasXsecHi) .AND. (iIDGAS. LT. kNewCloudLo)) THEN
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) 'iIDGas,kGasXsecHi = ',iIDGas,kGasXsecHi
@@ -1369,23 +1416,23 @@ c************************************************************************
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) ' Reading Gas number ',iG ,' of ',iGasInRTPFile,' : ID = ',iIDGas
           !!! first fill things out with stuff from the RTP file
-          DO i = 1, prof%nlevs - 1
+          DO i = 1, prof.nlevs - 1
             j = iFindJ(kProfLayer,I,iDownWard)
             iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
-            rAmt = prof%gamnt(i,iG) / kAvog
+            rAmt = prof.gamnt(i,iG) / kAvog
             IF (isfinite(rAmt) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF              
-            rT   = prof%ptemp(i)
+            rT   = prof.ptemp(i)
             IF (isfinite(rT) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF              
 
-            plays(i) = (prof%plevs(i)-prof%plevs(i+1))/
-     $                 log(prof%plevs(i)/prof%plevs(i+1))
+            plays(i) = (prof.plevs(i)-prof.plevs(i+1))/
+     $                 log(prof.plevs(i)/prof.plevs(i+1))
             rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
             IF (iDownWard .EQ. -1) THEN
               !!! this automatically puts partial pressure in ATM, assuming 
@@ -1398,12 +1445,12 @@ c************************************************************************
               !!!note "i"!!!
               rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0) 
             END IF
-            rH   = prof%palts(i)
+            rH   = prof.palts(i)
 
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) .GT. 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                              iFound,iGasIndex)
@@ -1417,20 +1464,20 @@ c************************************************************************
                 iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
-          END DO              !DO i = 1, prof%nlevs - 1 for klayers info
+          END DO              !DO i = 1, prof.nlevs - 1 for klayers info
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
-          DO i = prof%nlevs, kProfLayer
+          DO i = prof.nlevs, kProfLayer
             j = iFindJ(kProfLayer,I,iDownWard)
-            iIDGas = head%glist(iG)
+            iIDGas = head.glist(iG)
             iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
             IF (iDownWard .EQ. -1) THEN
-              delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
+              delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
             ELSE
-              delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
-              rT   = prof%ptemp(prof%nlevs-1) + delta1*j
+              delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
+              rT   = prof.ptemp(prof.nlevs-1) + delta1*j
               rT   = 300.0
             END IF
             rAmt = 0.0
@@ -1439,8 +1486,8 @@ c************************************************************************
             rH   = raHeight(j)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) .GT. 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                            iFound,iGasIndex)
@@ -1455,14 +1502,14 @@ c************************************************************************
                 iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
-          END DO    !DO i = prof%nlevs, kProfLayer for zeros
+          END DO    !DO i = prof.nlevs, kProfLayer for zeros
           CALL ContinuumFlag(iIDGas,iaCont)
 
           iFileGasesReadIn = iFileGasesReadIn+1
           WRITE(kStdWarn,4000) iaNpathCounter(iIDgas),iIDgas
-! this checks to see if we have read the profiles for all iNumGases required
-! note that the gases read in MUST have been entered in GASFIL or XSCFIL 
-! to count toward the tally ...
+c this checks to see if we have read the profiles for all iNumGases required
+c note that the gases read in MUST have been entered in GASFIL or XSCFIL 
+c to count toward the tally ...
           IF (iaGases(iIDgas) .GT. 0) THEN
             iNumberOfGasesRead = iNumberOfGasesRead+1
             iaAlreadyIn(iNumberOfGasesRead) = iIDGas      
@@ -1472,27 +1519,28 @@ c************************************************************************
 
         ELSEIF ((iIDGAS. GE. kNewCloudLo) .AND. (iIDGAS. LE. kNewCloudHi)) THEN
           k100layerCloud = +1
+	  write(kStdErr,*) 'found gasID ',iIDGAS,' set k100layerCloud = 1'	  	  
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) ' Reading Cloud100 Layer Profiles, as gas ',iG ,' of ',iGasInRTPFile
           !!! first fill things out with stuff from the RTP file
           iNpathCounterJunk = 0
-          DO i = 1, prof%nlevs - 1
+          DO i = 1, prof.nlevs - 1
             j = iFindJ(kProfLayer,I,iDownWard)
             iNpathCounterJunk = iNpathCounterJunk + 1
 
-            rAmt = prof%gamnt(i,iG)
+            rAmt = prof.gamnt(i,iG)
             IF (isfinite(rAmt) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF              
-            rT   = prof%ptemp(i)
+            rT   = prof.ptemp(i)
             IF (isfinite(rT) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF              
 
-            plays(i) = (prof%plevs(i)-prof%plevs(i+1))/
-     $                 log(prof%plevs(i)/prof%plevs(i+1))
+            plays(i) = (prof.plevs(i)-prof.plevs(i+1))/
+     $                 log(prof.plevs(i)/prof.plevs(i+1))
             rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
             IF (iDownWard .EQ. -1) THEN
               !!! this automatically puts partial pressure in ATM, assuming 
@@ -1505,29 +1553,29 @@ c************************************************************************
               !!!note "i"!!!
               rPP  = 0
             END IF
-            rH   = prof%palts(i)
+            rH   = prof.palts(i)
 
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iNpathCounterJunk)
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             iGasIndex = iIDgas-kNewCloudLo+1
             raaCld100Amt(j,iGasIndex) = rAmt
             iaCld100Read(iGasIndex)   = 1
-          END DO              !DO i = 1, prof%nlevs - 1 for klayers info
+          END DO              !DO i = 1, prof.nlevs - 1 for klayers info
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
-          DO i = prof%nlevs, kProfLayer
+          DO i = prof.nlevs, kProfLayer
             j = iFindJ(kProfLayer,I,iDownWard)
-            iIDGas = head%glist(iG)
+            iIDGas = head.glist(iG)
             iNpathCounterJunk = iNpathCounterJunk + 1
             IF (iDownWard .EQ. -1) THEN
-              delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
+              delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
             ELSE
-              delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
-              rT   = prof%ptemp(prof%nlevs-1) + delta1*j
+              delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
+              rT   = prof.ptemp(prof.nlevs-1) + delta1*j
               rT   = 300.0
             END IF
             rAmt = 0.0
@@ -1536,31 +1584,31 @@ c************************************************************************
             rH   = raHeight(j)
             raaCld100Amt(j,iGasIndex)       = rAmt
             iaCld100Read(iGasIndex)      = 1
-          END DO    !DO i = prof%nlevs, kProfLayer for zeros
+          END DO    !DO i = prof.nlevs, kProfLayer for zeros
 
         END IF      !if iGasID <= 63
       END DO
 
-! now see if we have to chunk on WaterSelf, WaterFor from water profile
+c now see if we have to chunk on WaterSelf, WaterFor from water profile
       CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead,
      $          iaInputOrder,iNumGases,
      $          raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
-! first check to see if all required gases found in the user supplied profile
+c first check to see if all required gases found in the user supplied profile
       IF (iNumberOfGasesRead .LT. iNumGases) THEN
         iNeedMoreProfiles = 1
         write(kStdWarn,*) 'iNumberOfGasesRead(includes WV : 101,102,103) iNumGases needed',iNumberOfGasesRead,iNumGases
-        write(kStdWarn,*) 'head%ptype = 1 profile did not have all the gases'
+        write(kStdWarn,*) 'head.ptype = 1 profile did not have all the gases'
         write(kStdWarn,*) 'that MOLGAS, XSCGAS indicated it should have'
         write(kStdWarn,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
 
         write(kStdErr,*) 'iNumberOfGasesRead(includes WV : 101,102,103) iNumGases needed',iNumberOfGasesRead,iNumGases
-        write(kStdErr,*) 'head%ptype = 1 profile did not have all the gases'
+        write(kStdErr,*) 'head.ptype = 1 profile did not have all the gases'
         write(kStdErr,*) 'that MOLGAS, XSCGAS indicated it should have'
         write(kStdErr,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
         CALL AddOnAFGLProfile(kAFGLProf,
      $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
       END IF
 
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3) 
@@ -1568,7 +1616,7 @@ c************************************************************************
  5030 FORMAT(A130)
  4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
 
-! now set raLayerHeight
+c now set raLayerHeight
       DO iFound = 1,kProfLayer
         raLayerHeight(iFound) = raaHeight(iFound,1)
       END DO
@@ -1582,7 +1630,7 @@ c************************************************************************
         raP1(i) = raPresslevels(i)
       END DO
 
-      i = prof%nlevs - 1     !!!!!!number of layers in RTP file
+      i = prof.nlevs - 1     !!!!!!number of layers in RTP file
       i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
       write (kStdWarn,*) '      '
       write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'
@@ -1596,9 +1644,9 @@ c************************************************************************
       write (kStdWarn,*) '2 Highest layers thickness (km) = ',
      $  raH1(kProfLayer-1),raH1(kProfLayer)
 
-! finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
-! that he/she is outta luck!!!!!!!
-! see ../INCLUDE/KCARTA_database.param for the kCARTA database definitions
+c finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
+c that he/she is outta luck!!!!!!!
+c see ../INCLUDE/KCARTA_database.param for the kCARTA database definitions
       write (kStdWarn,*) 'Highest database pressure (lowest level) : ',
      $              PLEV_KCARTADATABASE_AIRS(1)
       write (kStdWarn,*) 'Lowest database pressure (highest level) : ',
@@ -1611,16 +1659,16 @@ c************************************************************************
       END
 
 c************************************************************************
-! this subroutine deals with 'PTHFIL' keyword for the RTP format, h.ptype = 2
-! ie these are the AIRS pseudolayers
+c this subroutine deals with 'PTHFIL' keyword for the RTP format, h.ptype = 2
+c ie these are the AIRS pseudolayers
 
-! the kLAYERS format already differs from GENLN2 format in that
-! (1) instead of velocity, we have height, which gets put into raLayerHt
-! (2) no CON,LINSHAPE params
-! also, we have to read in the gasamount for WATER for gases 101,102 so 
-! things have to be done slightly differently
+c the kLAYERS format already differs from GENLN2 format in that
+c (1) instead of velocity, we have height, which gets put into raLayerHt
+c (2) no CON,LINSHAPE params
+c also, we have to read in the gasamount for WATER for gases 101,102 so 
+c things have to be done slightly differently
 
-! now we have an additional format to deal with, which should be MUCH simpler
+c now we have an additional format to deal with, which should be MUCH simpler
       SUBROUTINE READRTP_2(raaAmt,raaTemp,raaPress,raaPartPress,
      $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
      $      iNpath,caPfName,iRTP,
@@ -1629,21 +1677,21 @@ c************************************************************************
       implicit none
 
       include '../INCLUDE/kcarta.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
       INTEGER iplev
       include '../INCLUDE/KCARTA_database.param'
       include '../INCLUDE/airslevelheights.param'
 
-! raaAmt/Temp/Press/PartPress = current gas profile parameters
-! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
-! iaGases   = array that tracks which gasID's should be read in
-! iaWhichGasRead = array that tracks which gases ARE read in
-! iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
-! iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
-! caPfName  = name of file containing user supplied profiles
-! raLayerHeight = heights of layers in km
-! iRTP = which profile to read in
-! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+c raaAmt/Temp/Press/PartPress = current gas profile parameters
+c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
+c iaGases   = array that tracks which gasID's should be read in
+c iaWhichGasRead = array that tracks which gases ARE read in
+c iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
+c iProfileLayers= actual number of layers per gas profile (<=kProfLayer)
+c caPfName  = name of file containing user supplied profiles
+c raLayerHeight = heights of layers in km
+c iRTP = which profile to read in
+c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
       INTEGER iRTP,iProfileLayers
       INTEGER iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -1668,18 +1716,18 @@ c************************************************************************
       INTEGER iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard,iFindJ
       CHARACTER*130 ca1,ca2,caTemp
 
-! local variables : all copied from ftest1.f (Howard Motteler's example)
+c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer i,j,k,iG,iPtype,LBOT
       REAL raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer)
       REAL raActualLayTemps(kProfLayer),TSURFA
 
       integer rtpopen, rtpread, rtpwrite, rtpclose
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       logical isfinite
 
@@ -1693,15 +1741,15 @@ c************************************************************************
 
       mode = 'r'
       status = rtpopen(fname, mode, head, hatt, patt, rchan)
-      iPtype = head%ptype
-      write(kStdWarn,*) 'head%ptype = ',iPtype
+      iPtype = head.ptype
+      write(kStdWarn,*) 'head.ptype = ',iPtype
 
       IF (status .eq. -1) THEN
         write(kStdErr,*) 'Abs77 status of rtp open file = -1'
         Call DoStop
       END IF
       kProfileUnitOpen = +1
-!      write(kStdWarn,*)  'read open status = ', status
+c      write(kStdWarn,*)  'read open status = ', status
 
       DO i = 1, iRTP
         status = rtpread(rchan, prof)
@@ -1719,53 +1767,53 @@ c************************************************************************
 
       write (kStdWarn,*) 'success : read in RTP profile ',iRTP
       status = rtpclose(rchan)
-!      write(kStdWarn,*)  'read close status  =  ', status
+c      write(kStdWarn,*)  'read close status  =  ', status
 
       kProfileUnitOpen = -1
 
-      prof%nlevs = prof%nlevs + 1   !!this really was number of LAYERS
+      prof.nlevs = prof.nlevs + 1   !!this really was number of LAYERS
 
-      IF (prof%plevs(1) .lt. prof%plevs(prof%nlevs)) THEN
-        !!reset prof%plevs so it has ALL the AIRS levels(1:101), rather than
+      IF (prof.plevs(1) .lt. prof.plevs(prof.nlevs)) THEN
+        !!reset prof.plevs so it has ALL the AIRS levels(1:101), rather than
         !!AIRS levels (1:100) where p(1)=1100, p(100)= 0.0161, p(101) = 0.0050
         DO i = 1,kProfLayer+1
-          prof%plevs(i) = PLEV_KCARTADATABASE_AIRS(kProfLayer+1-i+1)
-          prof%palts(i) = DATABASELEVHEIGHTS(kProfLayer+1-i+1)*1000
+          prof.plevs(i) = PLEV_KCARTADATABASE_AIRS(kProfLayer+1-i+1)
+          prof.palts(i) = DATABASELEVHEIGHTS(kProfLayer+1-i+1)*1000
         END DO
         DO i = 1,kProfLayer
           plays(i) = PAVG_KCARTADATABASE_AIRS(kProfLayer-i+1)
         END DO
         !layers are from TOA to the bottom
         iDownWard = -1
-        kRTP_pBot = prof%plevs(prof%nlevs)
-        kRTP_pTop = prof%plevs(1)
-        kRTPBot   = kProfLayer - (prof%nlevs-1) + 1
+        kRTP_pBot = prof.plevs(prof.nlevs)
+        kRTP_pTop = prof.plevs(1)
+        kRTPBot   = kProfLayer - (prof.nlevs-1) + 1
         kRTPTop   = kProfLayer
       ELSE
-        !!reset prof%plevs so it has ALL the AIRS levels(1:101), rather than
+        !!reset prof.plevs so it has ALL the AIRS levels(1:101), rather than
         !!AIRS levels (1:100) where p(1)=1100, p(100)= 0.0161, p(101) = 0.0050
         DO i = 1,kProfLayer+1
-          prof%plevs(i) = PLEV_KCARTADATABASE_AIRS(i)
-          prof%palts(i) = DATABASELEVHEIGHTS(i)*1000
+          prof.plevs(i) = PLEV_KCARTADATABASE_AIRS(i)
+          prof.palts(i) = DATABASELEVHEIGHTS(i)*1000
         END DO
         DO i = 1,kProfLayer
           plays(i) = PAVG_KCARTADATABASE_AIRS(i)
         END DO
         !layers are from GND to the top
         iDownWard = +1
-        kRTP_pTop = prof%plevs(prof%nlevs)
-        kRTP_pBot  = prof%plevs(1)
+        kRTP_pTop = prof.plevs(prof.nlevs)
+        kRTP_pBot  = prof.plevs(1)
         kRTPTop   = 1
-        kRTPBot   = prof%nlevs-1
+        kRTPBot   = prof.nlevs-1
       END IF
 
-      iL1 = prof%nlevs - 1         !!! number of layers = num of levels - 1
+      iL1 = prof.nlevs - 1         !!! number of layers = num of levels - 1
       iProfileLayers = iL1
-      iGasInRTPFile = head%ngas              !!! number of gases
+      iGasInRTPFile = head.ngas              !!! number of gases
 
-      IF (prof%nlevs .GT. kProfLayer+1) THEN
+      IF (prof.nlevs .GT. kProfLayer+1) THEN
         write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
-        write(kStdErr,*) 'RTP file has ',prof%nlevs-1,' layers'
+        write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
         write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
         CALL DoStop
       END IF
@@ -1789,13 +1837,13 @@ c************************************************************************
         write (kStdWarn,*) 'Will add on dummy info to UPPER layers'
       END IF
 
-      DO i = 1,prof%nlevs
+      DO i = 1,prof.nlevs
         j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
-        raHeight(j) = prof%palts(i)                     !!!!in meters
-        raPressLevels(j) = prof%plevs(i)                !!!!in mb
+        raHeight(j) = prof.palts(i)                     !!!!in meters
+        raPressLevels(j) = prof.plevs(i)                !!!!in mb
       END DO
 
-      DO i = 1,prof%nlevs-1
+      DO i = 1,prof.nlevs-1
         pProf(i) = raPressLevels(i) - raPressLevels(i+1)
         pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
       END DO
@@ -1803,9 +1851,9 @@ c************************************************************************
       IF (iDownWard .EQ. -1) THEN
         !!!add on dummy stuff
         !!!assume lowest pressure layer is at -600 meters
-        k = iFindJ(kProfLayer+1,prof%nlevs,iDownWard)
-        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof%nlevs)
-        DO i = prof%nlevs+1, kProfLayer + 1
+        k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+        DO i = prof.nlevs+1, kProfLayer + 1
           j = iFindJ(kProfLayer+1,I,iDownWard)
           raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
         END DO
@@ -1813,8 +1861,8 @@ c************************************************************************
         !!!add on dummy stuff
         !!!assume  top pressure layer is at 10e5 meters
         k = i
-        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof%nlevs)
-        DO i = prof%nlevs+1, kProfLayer + 1
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+        DO i = prof.nlevs+1, kProfLayer + 1
           j = iFindJ(kProfLayer+1,I,iDownWard)
           raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
         END DO
@@ -1830,20 +1878,20 @@ c************************************************************************
         END IF
       END DO
      
-! this variable keeps track of how many gases in the file have been read in
+c this variable keeps track of how many gases in the file have been read in
       iFileGasesReadIn = 0
 
-! this variable keeps track of how many gases should be read in
+c this variable keeps track of how many gases should be read in
       iNeed2Read = iNumGases
-! note we use WATER amts for self and for continuum) so be careful
+c note we use WATER amts for self and for continuum) so be careful
       DO iIDGas = kNewGasLo,kNewGasHi+1
         IF (iaGases(iIDGas) .EQ. 1) THEN
           iNeed2Read = iNeed2Read-1
         END IF
       END DO
 
-! this keeps track of the GasID used for the temperature .. hopefully water
-! this keeps track of if we need to read in more gas profiles
+c this keeps track of the GasID used for the temperature .. hopefully water
+c this keeps track of if we need to read in more gas profiles
       iTempFound        = -1
       iNeedMoreProfiles = -1
 
@@ -1851,20 +1899,20 @@ c************************************************************************
       iErr   = -1
 
       iNumberOfGasesRead = 0
-! set all individual gas paths to zero        
+c set all individual gas paths to zero        
       DO iNpath = 1,kProfLayer
         iaNpathcounter(iNpath) = 0
       END DO
 
-! set this temp varaiable
+c set this temp varaiable
       DO iNpath = 1,kMaxGas
         iaAlreadyIn(iNpath) = -1
       END DO
 
-! set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
-! so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then 
-!         iaGases(1) = iaGases(2) = iaGases(22) = iaGases(51) = 1
-! so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
+c set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
+c so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then 
+c         iaGases(1) = iaGases(2) = iaGases(22) = iaGases(51) = 1
+c so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
       DO iNpath = 1,kMaxGas
         iaInputOrder(iNpath) = -1
       END DO
@@ -1880,29 +1928,29 @@ c**********
       !now map the pseudolevel temps to the layer temps
       !see /asl/packages/sartaV105/Src/mean_t.f
       write(kStdWarn,*) 'replacing pseudolevel temps with layer temps'
-      LBOT = prof%nlevs-1
+      LBOT = prof.nlevs-1
       !Do top layer (special case) 
-      raActualLayTemps(1) = prof%ptemp(1) 
+      raActualLayTemps(1) = prof.ptemp(1) 
       !Loop down over the layers 
       DO i = 2,LBOT-1 
-        raActualLayTemps(i) = 0.5*( prof%ptemp(i-1) + prof%ptemp(i) ) 
+        raActualLayTemps(i) = 0.5*( prof.ptemp(i-1) + prof.ptemp(i) ) 
       ENDDO 
       ! Interpolate to get air temperature at the surface 
-      TSURFA = prof%ptemp(LBOT-1) + ( prof%ptemp(LBOT) - prof%ptemp(LBOT-1) )* 
-     $    (prof%spres - plays(LBOT))/(plays(LBOT+1)-plays(LBOT))
+      TSURFA = prof.ptemp(LBOT-1) + ( prof.ptemp(LBOT) - prof.ptemp(LBOT-1) )* 
+     $    (prof.spres - plays(LBOT))/(plays(LBOT+1)-plays(LBOT))
       !Do bottom layer (special case) 
-      raActualLayTemps(LBOT) = 0.5*( prof%ptemp(LBOT-1) + TSURFA) 
+      raActualLayTemps(LBOT) = 0.5*( prof.ptemp(LBOT-1) + TSURFA) 
 c**********
 
-!      DO i = 1, prof%nlevs
-!        print *,i,prof%plevs(i),prof%ptemp(i),raActualLayTemps(i),
-!     $          prof%gamnt(i,1),prof%gamnt(i,3)
-!      END DO
+c      DO i = 1, prof.nlevs
+c        print *,i,prof.plevs(i),prof.ptemp(i),raActualLayTemps(i),
+c     $          prof.gamnt(i,1),prof.gamnt(i,3)
+c      END DO
 
-! now loop iNpath/iNumGases  times for each gas in the user supplied profile
-! make sure you only do things for gases 1- 63
+c now loop iNpath/iNumGases  times for each gas in the user supplied profile
+c make sure you only do things for gases 1- 63
       DO iG = 1, iGasInRTPFile
-        iIDGas = head%glist(iG)
+        iIDGas = head.glist(iG)
         IF (iIDGas .GT. kGasXsecHi) THEN
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) 'iIDGas,kGasXsecHi = ',iIDGas,kGasXsecHi
@@ -1912,25 +1960,25 @@ c**********
           write(kStdWarn,*) ' ---------------------------------------------'
           write(kStdWarn,*) ' Reading Gas number ',iG ,' of ',iGasInRTPFile
           !!! first fill things out with stuff from the RTP file
-          DO i = 1, prof%nlevs - 1
+          DO i = 1, prof.nlevs - 1
             j = iFindJ(kProfLayer,I,iDownWard)
             iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
-            rAmt = prof%gamnt(i,iG) / kAvog
+            rAmt = prof.gamnt(i,iG) / kAvog
             IF (isfinite(rAmt) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF              
 
-            rT   = prof%ptemp(i)
-            rT   = raActualLayTemps(i)         !use this instead of prof%ptemp
+            rT   = prof.ptemp(i)
+            rT   = raActualLayTemps(i)         !use this instead of prof.ptemp
             IF (isfinite(rT) .EQ. .false.) THEN
               write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF              
 
-            plays(i) = (prof%plevs(i)-prof%plevs(i+1))/
-     $                 log(prof%plevs(i)/prof%plevs(i+1))
+            plays(i) = (prof.plevs(i)-prof.plevs(i+1))/
+     $                 log(prof.plevs(i)/prof.plevs(i+1))
             rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
             IF (iDownWard .EQ. -1) THEN
               !!! this automatically puts partial pressure in ATM, assuming 
@@ -1943,11 +1991,11 @@ c**********
               !!!note "i"!!!
               rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0) 
             END IF
-            rH   = prof%palts(i)
+            rH   = prof.palts(i)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) .GT. 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                              iFound,iGasIndex)
@@ -1961,20 +2009,20 @@ c**********
                 iaWhichGasRead(iIDgas)    = 1
               END IF
             END IF
-          END DO              !DO i = 1, prof%nlevs - 1 for klayers info
+          END DO              !DO i = 1, prof.nlevs - 1 for klayers info
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
-          DO i = prof%nlevs, kProfLayer
+          DO i = prof.nlevs, kProfLayer
             j = iFindJ(kProfLayer,I,iDownWard)
-            iIDGas = head%glist(iG)
+            iIDGas = head.glist(iG)
             iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
             IF (iDownWard .EQ. -1) THEN
-              delta1=(300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
+              delta1=(300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
             ELSE
-              delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
-              rT   = prof%ptemp(prof%nlevs-1) + delta1*j
+              delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
+              rT   = prof.ptemp(prof.nlevs-1) + delta1*j
               rT   = 300.0
             END IF
             rAmt = 0.0
@@ -1983,8 +2031,8 @@ c**********
             rH   = raHeight(j)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
-! set the relevant variables, after checking to see that the gas has been
-! allocated in GASFIL or XSCFIL
+c set the relevant variables, after checking to see that the gas has been
+c allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) .GT. 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                            iFound,iGasIndex)
@@ -1999,14 +2047,14 @@ c**********
                 iaWhichGasRead(iIDgas)    = 1
               END IF
             END IF
-          END DO    !DO i = prof%nlevs, kProfLayer for zeros
+          END DO    !DO i = prof.nlevs, kProfLayer for zeros
           CALL ContinuumFlag(iIDGas,iaCont)
     
           iFileGasesReadIn = iFileGasesReadIn+1
           WRITE(kStdWarn,4000) iaNpathCounter(iIDgas),iIDgas
-! this checks to see if we have read the profiles for all iNumGases required
-! note that the gases read in MUST have been entered in GASFIL or XSCFIL 
-! to count toward the tally ...
+c this checks to see if we have read the profiles for all iNumGases required
+c note that the gases read in MUST have been entered in GASFIL or XSCFIL 
+c to count toward the tally ...
           IF (iaGases(iIDgas) .GT. 0) THEN
             iNumberOfGasesRead = iNumberOfGasesRead+1
             iaAlreadyIn(iNumberOfGasesRead) = iIDGas      
@@ -2016,25 +2064,25 @@ c**********
         END IF      !if iGasID <= 63
       END DO
 
-! now see if we have to chunk on WaterSelf, WaterFor from water profile
+c now see if we have to chunk on WaterSelf, WaterFor from water profile
       CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead,
      $          iaInputOrder,iNumGases,
      $          raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
-! first check to see if all required gases found in the user supplied profile
+c first check to see if all required gases found in the user supplied profile
       IF (iNumberOfGasesRead .LT. iNumGases) THEN
         iNeedMoreProfiles = 1
         write(kStdWarn,*) 'iNumberOfGasesRead iNumGases',iNumberOfGasesRead,iNumGases
-        write(kStdWarn,*) 'head%ptype = 2 profile did not have all the gases'
+        write(kStdWarn,*) 'head.ptype = 2 profile did not have all the gases'
         write(kStdWarn,*) 'that MOLGAS, XSCGAS indicated it should have'
         write(kStdWarn,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
         write(kStdErr,*) 'iNumberOfGasesRead iNumGases',iNumberOfGasesRead,iNumGases
-        write(kStdErr,*) 'head%ptype = 2 profile did not have all the gases'
+        write(kStdErr,*) 'head.ptype = 2 profile did not have all the gases'
         write(kStdErr,*) 'that MOLGAS, XSCGAS indicated it should have'
         write(kStdErr,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
         CALL AddOnAFGLProfile(kAFGLProf,
      $         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
-     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+     $         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
       END IF
 
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3) 
@@ -2042,7 +2090,7 @@ c**********
  5030 FORMAT(A130)
  4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
 
-! now set raLayerHeight
+c now set raLayerHeight
       DO iFound = 1,kProfLayer
         raLayerHeight(iFound) = raaHeight(iFound,1)
       END DO
@@ -2056,7 +2104,7 @@ c**********
         raP1(i) = raPresslevels(i)
       END DO
 
-      i = prof%nlevs - 1     !!!!!!number of layers in RTP file
+      i = prof.nlevs - 1     !!!!!!number of layers in RTP file
       i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
       write (kStdWarn,*) '      '
       write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'
@@ -2070,9 +2118,9 @@ c**********
       write (kStdWarn,*) '2 Highest layers thickness (km) = ',
      $  raH1(kProfLayer-1),raH1(kProfLayer)
 
-! finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
-! that he/she is outta luck!!!!!!!
-! see ../INCLUDE/KCARTA_database.param for the kCARTA database definitions
+c finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
+c that he/she is outta luck!!!!!!!
+c see ../INCLUDE/KCARTA_database.param for the kCARTA database definitions
       write (kStdWarn,*) 'Highest database pressure (lowest level) : ',
      $              PLEV_KCARTADATABASE_AIRS(1)
       write (kStdWarn,*) 'Lowest database pressure (highest level) : ',
@@ -2085,7 +2133,7 @@ c**********
       END
 
 c************************************************************************
-! this subroutine deals with the 'RADNCE' keyword, but for new .rtp files
+c this subroutine deals with the 'RADNCE' keyword, but for new .rtp files
       SUBROUTINE radnce4RTP(iRTP,caPFName,iMPSetForRadRTP,
      $   iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop,
      $   raPressLevels,iProfileLayers,
@@ -2097,46 +2145,46 @@ c************************************************************************
      $   raSatAzimuth,raSolAzimuth,raWindSpeed,
      $   iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
      $   iaNumLayer,iaaRadLayer,raProfileTemp,
-     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP,
      $   raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
 
-! caSetEmissivity= array that gives name of emissivity files (if any) 
-! raSetEmissivity= array that gives constant emissivity value (if set)
-! iNpmix     = number of mixed paths read in from mixfile
-! iaMPSetForRad = array telling which MP set to associate with which atm
-! iNatm       = number of atmospheres
-! raPressStart = start pressure for radiating atmos
-! raPressStop  = stop pressure for radiating atmos
-! raTSpace    = array containing background temperature for each atmosphere
-! raTSurf    = array contianing surface temperature for each atmosphere
-! raSatAngle = array containing satellite view angle for each atmosphere
-! raSatHeight= array containing satellite height for each atmosphere
-! iaNumLayer = array containing number of layers in each atmosphere
-! iaaRadLayer= matrix containing list of layers in each atmosphere
-! iaSetEms   = -1 if use emissivities from *RADNCE, > 0 if read in a file
-! raaaSetEmissivity = array containing the wavenumber dependent emissivities
-! raFracTop  = top fraction
-! raFracBot  = bottom fraction
-! raaPrBdry  = matrix that keeps start/stop pressures
-! the next few only work for DOWNWARD LOOK instr
-! rakSolarAngle = solar angles for the atmospheres
-! rakThermalAngle=thermal diffusive angle
-! rakSolarRefl   =solar reflectance
-! iakthermal,iaksolar = turn on/off solar and thermal
-! iakthermaljacob=turn thermal jacobians on/off      
-! raProfileTemp = array containing CO2 gas profile temperature
-! iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
-! this is for the cloud, if any, that is associated with the atmosphere
-! raPressLevels are the actual pressure levels from the KLAYERS file
+c caSetEmissivity= array that gives name of emissivity files (if any) 
+c raSetEmissivity= array that gives constant emissivity value (if set)
+c iNpmix     = number of mixed paths read in from mixfile
+c iaMPSetForRad = array telling which MP set to associate with which atm
+c iNatm       = number of atmospheres
+c raPressStart = start pressure for radiating atmos
+c raPressStop  = stop pressure for radiating atmos
+c raTSpace    = array containing background temperature for each atmosphere
+c raTSurf    = array contianing surface temperature for each atmosphere
+c raSatAngle = array containing satellite view angle for each atmosphere
+c raSatHeight= array containing satellite height for each atmosphere
+c iaNumLayer = array containing number of layers in each atmosphere
+c iaaRadLayer= matrix containing list of layers in each atmosphere
+c iaSetEms   = -1 if use emissivities from *RADNCE, > 0 if read in a file
+c raaaSetEmissivity = array containing the wavenumber dependent emissivities
+c raFracTop  = top fraction
+c raFracBot  = bottom fraction
+c raaPrBdry  = matrix that keeps start/stop pressures
+c the next few only work for DOWNWARD LOOK instr
+c rakSolarAngle = solar angles for the atmospheres
+c rakThermalAngle=thermal diffusive angle
+c rakSolarRefl   =solar reflectance
+c iakthermal,iaksolar = turn on/off solar and thermal
+c iakthermaljacob=turn thermal jacobians on/off      
+c raProfileTemp = array containing CO2 gas profile temperature
+c iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
+c this is for the cloud, if any, that is associated with the atmosphere
+c raPressLevels are the actual pressure levels from the KLAYERS file
       INTEGER iProfileLayers,ctype1,ctype2
       REAL raPressLevels(kProfLayer+1)
 
-      REAL cfrac12,cFrac1,cFrac2,cngwat1,cngwat2,ctop1,ctop2,raCemis(kMaxClouds)
+      REAL cfrac12,cFrac1,cFrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,raCemis(kMaxClouds)
       REAL raCprtop(kMaxClouds), raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds), raCpsize(kMaxClouds)
       INTEGER iaCtype(kMaxClouds),iMPSetForRadRTP
@@ -2160,33 +2208,34 @@ c************************************************************************
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       REAL raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
       INTEGER iRTP     !!!tells which profile info, radiance info, to read
-      CHARACTER*130  caPFName !!!tells which profile 
+      CHARACTER*80  caPFName !!!tells which profile 
 
-! local variables
+c local variables
       CHARACTER*7 caWord
       INTEGER iNlay,iStart,iStop,iErr
       REAL rTbdy,rTSurf,rAngle,rPressStart,rPressStop,rHeight,rT
       INTEGER iDirection,iW,iInt
       INTEGER iC,iNumLinesRead
       REAL FindSurfaceTemp,rSize1,rSize2
-      INTEGER iInstrType
+      INTEGER iInstrType,iTop1,iTop2,iBot1,iBot2
 
-! local variables : all copied from ftest1.f (Howard Motteler's example)
+c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer i,j,k,iG,upwell,iOKscanang,iOKzobs,iOKsatzen
       REAL raHeight(kProfLayer+1),raThickness(kProfLayer),pobs,pobs1,pTemp,rSURFaltitude
       REAL r1,rEms,rAngleX,rAngleY,saconv_sun,orig_saconv_sun
-      INTEGER*4 i4CTYPE1,i4CTYPE2
+      INTEGER*4 i4CTYPE1,i4CTYPE2,iNclouds_RTP_black
  
       integer rtpopen, rtpread, rtpwrite, rtpclose
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
       real rf1,rf2
-
+      integer iI
+      
       fname(1:80) = caPFName(1:80)
 
       write(kStdWarn,*) 'Using RTP file to set atm info ....'
@@ -2220,8 +2269,8 @@ c************************************************************************
 
       iNatm = 1        !can only read ONE atmosphere per RTP profile
 
-! now get the relevant info from rchan,prof
-      ic = 1
+c now get the relevant info from rchan,prof
+      iC = 1
       iW = iMPSetForRadRTP
       iaMPSetForRad(1) = iMPSetForRadRTP
 
@@ -2229,9 +2278,11 @@ c************************************************************************
       pobs = 0.0
      
       rSURFaltitude = prof%salti
-      
       rPressStart = prof%spres
       rPressStop  = 0.000            ! ----------> assume TOA
+
+      kSurfPress = prof%spres  ! mb
+      kSurfAlt   = prof%salti  ! meters
 
       !!!then go ahead and look at variables prof%pobs
       !!!note that variable pobs is reset only if prof%pobs > 0, else it
@@ -2244,20 +2295,20 @@ c************************************************************************
           pobs1 = raPressLevels(iProfileLayers+1)
           pobs = pobs1
         END IF
-        upwell = ((kProfLayer + 1) - prof%nlevs) + 1
-        IF (pobs1  .gt. raPressLevels(upwell)) THEN
+        iI = ((kProfLayer + 1) - prof%nlevs) + 1
+        IF (pobs1  .gt. raPressLevels(iI)) THEN
           write(kStdWarn,*) 'From reading info in RTP file, reset prof%pobs'
-          write(kStdWarn,*) 'from ',pobs1,' to ',raPressLevels(upwell)
-          pobs1 = raPressLevels(upwell)
+          write(kStdWarn,*) 'from ',pobs1,' to ',raPressLevels(iI)
+          pobs1 = raPressLevels(iI)
           pobs = pobs1
         END IF
       END IF
       pobs = pobs1
 
-! testing
-!      prof%satzen = -abs(prof%satzen)
-!      prof%zobs   = -1000
-!       prof%scanang = -abs(prof%scanang) * 1000
+c testing
+c      prof%satzen = -abs(prof%satzen)
+c      prof%zobs   = -1000
+c      prof%scanang = -abs(prof%scanang) * 1000
 
       !!!assume the instrument is downlooking, from TOA
       upwell = 1
@@ -2271,7 +2322,12 @@ c************************************************************************
       ELSE
         write(kStdErr,*) 'need prof%upwell = 1 (downlook) or 2 (uplook)'
         write(kStdErr,*) 'prof%upwell = ',prof%upwell
-        CALL DoStop
+        write(kStdErr,*) 'resetting to +1 (downlook)'
+        write(kStdWarn,*) 'need prof%upwell = 1 (downlook) or 2 (uplook)'
+        write(kStdWarn,*) 'prof%upwell = ',prof%upwell
+        write(kStdWarn,*) 'resetting to +1 (downlook)'
+        upwell = 1	
+c        CALL DoStop
       END IF
 
       !now that we have rPressStart,rPressStop (defining pressure boundaries 
@@ -2281,7 +2337,7 @@ c************************************************************************
         !need rPressStart > rPressStop
         rPressStart = prof%spres
         rPressStop  = pobs
-        write(kStdWarn,*) 'RTP file says obs,upwell = ',prof%pobs,prof%upwell
+        write(kStdWarn,*) 'RTP file says obs,upwell (kcarta may reset to) = ',prof%pobs,prof%upwell,upwell
         write(kStdWarn,*) 'Code reinterprets this (along with surf press)'
         write(kStdWarn,*) 'as that for a downlook instr, with Surf,OBS press'
         write(kStdWarn,*) 'being ',rPressStart,rPressStop
@@ -2293,7 +2349,7 @@ c************************************************************************
         !need rPressStart < rPressStop
         rPressStart = 0.0
         rPressStop  = prof%spres
-        write(kStdWarn,*) 'RTP file says obs,upwell = ',prof%pobs,prof%upwell
+        write(kStdWarn,*) 'RTP file says obs,upwell (kcarta may reset to) = ',prof%pobs,prof%upwell,upwell	
         write(kStdWarn,*) 'Code reinterprets this (along with surf press)'
         write(kStdWarn,*) 'as that for a uplook instr, with TOA,Surf press'
         write(kStdWarn,*) 'being ',rPressStart,rPressStop
@@ -2309,67 +2365,67 @@ c************************************************************************
       rTbdy       = kTSpace          ! -------> assume deep space
       rTSurf      = prof%stemp
 
-!      DO i = 1, prof%nlevs - 1
-!        rT   = prof%ptemp(i)
-!      END DO 
-!      print *,rTSurf,rT,rT+1
-!      rTSurf      = rT+1   
+c      DO i = 1, prof%nlevs - 1
+c        rT   = prof%ptemp(i)
+c      END DO 
+c      print *,rTSurf,rT,rT+1
+c      rTSurf      = rT+1   
 
 c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! scott has this in sarta.f (for AIRS!!)
-!      Convert SATZEN or SATANG to viewing angle
-!       IF (SATZEN .GE. 0 .AND. SATZEN .LT. 63) THEN
-!         Convert zenith angle at surface to view angle at satellite
-!          SVA=SACONV( SATZEN, SALT*1000 )/CONV
-!       ELSE
-!         Check if scan angle is valid
-!          IF (SATANG .GT. -49.6 .AND. SATANG .LT. 49.6) THEN
-!            View angle should be within a few degrees of scan angle
-!             SVA=ABS( SATANG )
-!          ELSE
-!             WRITE(IOERR,1030) IPROF, SATZEN, SATANG
-! 1030        FORMAT('Error! Profile',I5,
-!     $          ': invalid angles for SATZEN ',1PE11.4,
-!     $          ' and SATANG ',E11.4)
-!             STOP
-!        ENDIF
-!     ENDIF
-!       ANGMAX=53  ! max satellite view angle (49.5 scan + 3.5 spacecraft)
-!       IF (SVA .GT. ANGMAX) THEN
-!         Truncate angle if too big
-!          WRITE(IOINFO,1040) IPROF, SVA
-! 1040     FORMAT('Warning! Profile',I5,': truncating view angle ',
-!     $       1PE11.4,' to 53 degrees')
-!          SVA=ANGMAX
-!     ENDIF
-!      Convert SATZEN or SATANG to viewing angle
-!       IF (SATZEN .GE. 0 .AND. SATZEN .LT. 63) THEN
-!         Convert zenith angle at surface to view angle at satellite
-!          SVA=SACONV( SATZEN, SALT*1000 )/CONV
-!       ELSE
-c!         Check if scan angle is valid
-!          IF (SATANG .GT. -49.6 .AND. SATANG .LT. 49.6) THEN
-!            View angle should be within a few degrees of scan angle
-!             SVA=ABS( SATANG )
-!          ELSE
-!             WRITE(IOERR,1030) IPROF, SATZEN, SATANG
-! 1030        FORMAT('Error! Profile',I5,
-!     $          ': invalid angles for SATZEN ',1PE11.4,
-!     $          ' and SATANG ',E11.4)
-!             STOP
-!        ENDIF
-!     ENDIF
+c scott has this in sarta.f (for AIRS!!)
+C      Convert SATZEN or SATANG to viewing angle
+c       IF (SATZEN .GE. 0 .AND. SATZEN .LT. 63) THEN
+C         Convert zenith angle at surface to view angle at satellite
+c          SVA=SACONV( SATZEN, SALT*1000 )/CONV
+c       ELSE
+C         Check if scan angle is valid
+c          IF (SATANG .GT. -49.6 .AND. SATANG .LT. 49.6) THEN
+C            View angle should be within a few degrees of scan angle
+c             SVA=ABS( SATANG )
+c          ELSE
+c             WRITE(IOERR,1030) IPROF, SATZEN, SATANG
+c 1030        FORMAT('Error! Profile',I5,
+c     $          ': invalid angles for SATZEN ',1PE11.4,
+c     $          ' and SATANG ',E11.4)
+c             STOP
+c        ENDIF
+c     ENDIF
+c       ANGMAX=53  ! max satellite view angle (49.5 scan + 3.5 spacecraft)
+c       IF (SVA .GT. ANGMAX) THEN
+C         Truncate angle if too big
+c          WRITE(IOINFO,1040) IPROF, SVA
+c 1040     FORMAT('Warning! Profile',I5,': truncating view angle ',
+c     $       1PE11.4,' to 53 degrees')
+c          SVA=ANGMAX
+c     ENDIF
+C      Convert SATZEN or SATANG to viewing angle
+c       IF (SATZEN .GE. 0 .AND. SATZEN .LT. 63) THEN
+C         Convert zenith angle at surface to view angle at satellite
+c          SVA=SACONV( SATZEN, SALT*1000 )/CONV
+c       ELSE
+cC         Check if scan angle is valid
+c          IF (SATANG .GT. -49.6 .AND. SATANG .LT. 49.6) THEN
+C            View angle should be within a few degrees of scan angle
+c             SVA=ABS( SATANG )
+c          ELSE
+c             WRITE(IOERR,1030) IPROF, SATZEN, SATANG
+c 1030        FORMAT('Error! Profile',I5,
+c     $          ': invalid angles for SATZEN ',1PE11.4,
+c     $          ' and SATANG ',E11.4)
+c             STOP
+c        ENDIF
+c     ENDIF
 c
-!       ANGMAX=53  ! max satellite view angle (49.5 scan + 3.5 spacecraft)
-!       IF (SVA .GT. ANGMAX) THEN
-!         Truncate angle if too big
-!          WRITE(IOINFO,1040) IPROF, SVA
-! 1040     FORMAT('Warning! Profile',I5,': truncating view angle ',
-!     $       1PE11.4,' to 53 degrees')
-!          SVA=ANGMAX
-!     ENDIF
+c       ANGMAX=53  ! max satellite view angle (49.5 scan + 3.5 spacecraft)
+c       IF (SVA .GT. ANGMAX) THEN
+C         Truncate angle if too big
+c          WRITE(IOINFO,1040) IPROF, SVA
+c 1040     FORMAT('Warning! Profile',I5,': truncating view angle ',
+c     $       1PE11.4,' to 53 degrees')
+c          SVA=ANGMAX
+c     ENDIF
 
-! assume scanang, satzen, zobs make sense
+c assume scanang, satzen, zobs make sense
       write(kStdWarn,*) ' '
 
       iOKscanang = +1
@@ -2387,7 +2443,7 @@ c
       END IF
 
       iOKzobs = +1
-      IF ((prof%zobs .lt. 2.00*1000) .AND. (prof%upwell .EQ. 1)) THEN
+      IF ((prof%zobs .lt. 2.00*1000) .AND. (upwell .EQ. 1)) THEN
         write(kStdWarn,*) 'whoops : prof%zobs = ',prof%zobs
         write(kStdWarn,*) '         zobs < 2 km in height!'
         write(kStdWarn,*) '         does not make sense for downlook instr'
@@ -2405,32 +2461,35 @@ c
       END IF
 
       !! Larrabee prefers to use satzen, so if it exists, use that!!!!!
-! > Secondly, I was looking into Larrabee's request to get kCARTA to handle
-! > p.satzen rather than p.scanang. It'll take some doing, but in Matlab,
-! > suppose I have p.satzen. Do I use
-! >     [zang]=saconv( p.satzen,705000);
-! > to convert that into scanang, for kCARTA to use?
-! Yes, except use prof%zobs rather than a hardcoded 705000.
+c > Secondly, I was looking into Larrabee's request to get kCARTA to handle
+c > p.satzen rather than p.scanang. It'll take some doing, but in Matlab,
+c > suppose I have p.satzen. Do I use
+c >     [zang]=saconv( p.satzen,705000);
+c > to convert that into scanang, for kCARTA to use?
+c Yes, except use prof%zobs rather than a hardcoded 705000.
       rAngleX     = prof%satzen      ! -------> rtp_interface originally
                                      !          ignored satzen,satazi
-! so the conversion is  p.scanang = orig_saconv_sun( p.satzen,prof%zobs);  %% by Scott
-! so the conversion is  p.scanang = saconv( p.satzen,prof%zobs);           %% by Sergio
+c so the conversion is  p.scanang = orig_saconv_sun( p.satzen,prof%zobs);  %% by Scott
+c so the conversion is  p.scanang = saconv( p.satzen,prof%zobs);           %% by Sergio
       write(kStdWarn,*) ' '
-      IF (prof%upwell .EQ. 1) THEN
-        IF (rHeight .GT. 2.0) THEN
+      IF (upwell .EQ. 1) THEN
+        IF ((rHeight .GT. 2.0) .AND. (abs(rAngleX) .LE. 90)) THEN
           rAngleY = ORIG_SACONV_SUN(rAngleX, rHeight)
           rAngleY = SACONV_SUN(rAngleX, rSURFaltitude/1000, rHeight/1000)
         ELSE
           rAngleY = ORIG_SACONV_SUN(rAngleX, 705.00)                !! default AIRS hgt, dangerous
           rAngleY = SACONV_SUN(rAngleX, rSURFaltitude/1000, 705.00) !! default AIRS hgt, dangerous
           rAngleY = -9999
+          write(kStdErr,*) 'trying to figure out scanang, but not enough satzen,zobs info'
+          CALL DoStop
         ENDIF
         write(kStdWarn,*) 'downlook instr : satellite hgt, view angle info : '
-        write(kStdWarn,*) 'scanang, zobs(km), satzen, saconv(satzen,zobs) = ',
-     $    rAngle,rHeight/1000,rAngleX,rAngleY
+        write(kStdWarn,*) 'input satzenGND, input zsurf(km), input zobs(km), input scanangINSTR = '
+        write(kStdWarn,*)  rAngleX,' ',rSURFaltitude/1000,' ',rHeight/1000,' ',rAngle
+        write(kStdWarn,*) '  computed scanangINSTR=saconv(satzenIN,zobsIN) = ',rAngleY
       END IF
 
-      IF (prof%upwell .EQ. 2) THEN
+      IF (upwell .EQ. 2) THEN
         !! uplook instrument
         IF (iOKscanang .EQ. 1) THEN 
           write(kStdWarn,*) 'Uplook instr : use prof%scanang'
@@ -2439,19 +2498,19 @@ c
           write(kStdErr,*) 'Uplook instr : incorrect prof%scanang',rAngle
           CALL DoStop
         END IF
-      ELSEIF (prof%upwell .EQ. 1) THEN
+      ELSEIF (upwell .EQ. 1) THEN
         !! downlook instr
         IF ((iOKscanang .EQ. 1) .AND. (iOKsatzen .EQ. 1) .AND. 
      $      (iOKzobs .EQ. 1)) THEN
           !! all angles seem reasonable; now check consistency between them
           IF (abs(abs(rAngle)-abs(rAngleY)) .LE. 1.0e-2) THEN
-            write(kStdWarn,*) 'scanang,satzen,zobs present in rtp file'
-            write(kStdWarn,*) 'scanang and saconv(satzen,zobs) agree'
-            rAngle = rAngleY   !!! no need to do anything
+            write(kStdWarn,*) 'scanangIN,satzenIN,zobsIN present in rtp file'
+            write(kStdWarn,*) 'scanangIN and saconv(satzenIN,zobsIN) agree'
+            rAngle = rAngleY   !!! no need to do anything ??????? WHY RESET??????
           ELSEIF (abs(abs(rAngle)-abs(rAngleY)) .GT. 1.0e-2) THEN
-            write(kStdWarn,*) 'scanang,satzen,zobs present in rtp file'
-            write(kStdWarn,*) 'scanang and saconv(satzen,zobs) disagree'
-            write(kSTdWarn,*) 'using satzen (AIRS preference!!!)'
+            write(kStdWarn,*) 'scanangIN,satzenIN,zobsIN present in rtp file'
+            write(kStdWarn,*) 'scanangIN and saconv(satzenIN,zobsIN) disagree'
+            write(kSTdWarn,*) 'using satzenIN (AIRS preference!!!) --> scanang'
             IF (prof%zobs .LT. 2000.0) THEN
               write(kStdErr,*) 'used 705 km as satellite height'
             ELSE
@@ -2462,27 +2521,36 @@ c
           END IF
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. -1) .AND. (iOKzobs .EQ. +1))) THEN
-          write(kStdWarn,*) 'satzen or zobs or both do not make sense',rAngleX,rHeight*1000
-          rAngle = rAngle   !!! no need to do anything
+          !!rAngle = rAngle   !!! cannot, or do not need, to do anything
+          write(kStdWarn,*) 'satzenIN wierd, zobsIN ok',rAngleX,rHeight/1000
+	  write(kStdWarn,*) 'keeping scanangIN ',rAngle
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. +1) .AND. (iOKzobs .EQ. -1))) THEN
-          write(kStdWarn,*) 'satzen or zobs or both do not make sense',rAngleX,rHeight*1000
-          rAngle = rAngle   !!! no need to do anything
+          !!rAngle = rAngle   !!! cannot, or do not need, to do anything
+          write(kStdWarn,*) 'satzenIN ok, zobsIN wierd',rAngleX,rHeight/1000
+	  write(kStdWarn,*) 'keeping scanangIN ',rAngle	  
         ELSEIF ((iOKscanang .EQ. 1) .AND. 
      $          ((iOKsatzen .EQ. -1) .AND. (iOKzobs .EQ. -1))) THEN
-          write(kStdWarn,*) 'satzen or zobs or both do not make sense',rAngleX,rHeight*1000
-          rAngle = rAngle   !!! no need to do anything
+          !!rAngle = rAngle   !!! cannot, or do not need, to do anything
+          write(kStdWarn,*) 'neither satzenIN or zobsIN make sense',rAngleX,rHeight/1000
+	  write(kStdWarn,*) 'keeping scanangIN ',rAngle	  
         ELSEIF ((iOKscanang .EQ. -1) .AND. 
      $          ((iOKsatzen .EQ. +1) .AND. (iOKzobs .EQ. +1))) THEN
-          !! satzen or zobs or both make sense, scanang is incorrect
+          !! satzen and zobs make sense, scanang is wierd
           rAngle = rAngleY   !!! no need to do anything
-          write(kStdWarn,*) 'scanang does not make sense, but satzen,zobs do'
+          write(kStdWarn,*) 'scanangIN does not make sense, but satzenIN,zobsIN do'
           write(kSTdWarn,*) 'using satzen to derive scanang (AIRS preference!!)'
         END IF
       END IF
 
+      write(kStdWarn,*) 'iOKscanang,iOKsatzen,iOKzobs = ',iOKscanang,iOKsatzen,iOKzobs
       write(kStdWarn,*) 'using kCARTA scanang = ',rAngle
       write(kStdWarn,*) ' '
+      IF (abs(rAngle) .GT. 180) THEN
+        write(kStdErr,*) 'Whoa kCARTA scanang = ',rAngle,' instead of between -180 and +180'
+	CALL DoStop
+      END IF
+      
 c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       IF (rTbdy .GT. 3.0) THEN
@@ -2496,7 +2564,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       raPressStart(1) = raaPrBdry(1,1)
       raPressStop(1)  = raaPrBdry(1,2)
 
-! figure out if the start/stop MixedPath numbers are legitimate
+c figure out if the start/stop MixedPath numbers are legitimate
       IF ((iStart .GT. iNpmix).OR.(iStart .LT. 1) .OR.
      $    (iStop .GT. iNpmix).OR.(iStop.LT. 1)) THEN
           write(kStdErr,*)'Error while setting Start/Stop Mixed Path '
@@ -2506,8 +2574,8 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
           CALL DoSTOP
         END IF
 
-! figure out how many radiating layers (or MPs) in this atmosphere, and check 
-! that that it is less than or equal to kProfLayer
+c figure out how many radiating layers (or MPs) in this atmosphere, and check 
+c that that it is less than or equal to kProfLayer
       IF (iStop .GE. iStart) THEN
         iNlay = (iStop-iStart+1)
         iDirection = +1                           !down look instr
@@ -2521,24 +2589,45 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         CALL DoSTOP
       END IF
 
-! set the B.C.'s
+c set the B.C.'s
       raTSpace(iC) = rTbdy
       raTSurf(iC)  = FindSurfaceTemp(rPressStart,rPressStop,rTSurf,
      $                     raProfileTemp,raPressLevels,iProfileLayers)
 
       raSatAngle(iC)=rAngle
+c this is old and wierd : why should I set satheight = 0 just becuz viewangle == 0?????
+c      IF (abs(rAngle) .LE. 1.0e-4) THEN !nadir view
+c        rHeight = -1.0
+c        raSatHeight(iC) = -1.0
+c      ELSE
+c        IF (rHeight .gt. 0.0) THEN
+c          raSatHeight(iC) = rHeight   !height in m
+c        ELSE
+c          rHeight = -1.0
+c          raSatHeight(iC) = rHeight   !height in m
+c        END IF
+c      END IF
+      IF (rHeight .gt. 0.0) THEN
+        raSatHeight(iC) = rHeight   !height in m
+      ELSE
+	write(kStdErr,*) 'satheight < 0!!!!!',rHeight      
+        rHeight = -1.0
+        raSatHeight(iC) = rHeight   !height in m
+	CALL DoStop
+      END IF
+      rSatHeightCom = raSatHeight(iC)    !!! this is part of comBlockAtmLoop
+      
       IF (abs(rAngle) .LE. 1.0e-4) THEN !nadir view
         rHeight = -1.0
         raSatHeight(iC) = -1.0
-      ELSE
-        IF (rHeight .gt. 0.0) THEN
-          raSatHeight(iC) = rHeight   !height in m
-        ELSE
-          rHeight = -1.0
-          raSatHeight(iC) = rHeight   !height in m
-        END IF
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'	
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'
+	write(kStdErr,*) 'Living dangerously : angle = 0 so satHeight = 0 for raAtmLoop ==>  no ray trace'
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'
+	write(kStdErr,*) '>>>>>>>>>>>>>>>'
+        rSatHeightCom = raSatHeight(iC)    !!! this is part of comBlockAtmLoop		
       END IF
-
+      
       raSatAzimuth(iC) = prof%satazi
       raSolAzimuth(iC) = prof%solazi
       raWindSpeed(iC)  = prof%wspeed
@@ -2547,6 +2636,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       kWindSpeed = prof%wspeed
 
       kMonth = prof%rtime/(60*60*24*365.25)   !!! tai2utc1993 would say this is years since Jan 1,1993
+      kMonth = prof%rtime/(60*60*24*365.25)   !!! tai2utc1958 would say this is years since Jan 1,1958      
       IF ((kMonth - anint(kMonth)) .GT. 0) THEN
         kMonth = kMonth - anint(kMonth) !! kMonth was between x and (x+0.5) eg 14.3 --> 14.3-14.0 = 0.3
       ELSE
@@ -2562,18 +2652,18 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       iaNumLayer(iC) = iNlay
 
       write(kStdWarn,*)'Atmosphere has ',iNlay,' layers'
-      write(kStdWarn,*)'B! : Tspace,Sat angle = ',rTbdy,rAngle
-      write(kStdWarn,*)'B! : Tsurface_Readin,TsurfaceAdjusted= ',
+      write(kStdWarn,*)'BC : Tspace,Sat angle = ',rTbdy,rAngle
+      write(kStdWarn,*)'BC : Tsurface_Readin,TsurfaceAdjusted= ',
      $                         rTsurf,raTSurf(iC)
 
-! set the mixed path numbers for the current atmosphere, in direction of
-! radiation travel
+c set the mixed path numbers for the current atmosphere, in direction of
+c radiation travel
       DO iInt = 1,iNlay
         iaaRadLayer(iC,iInt) = iStart+iDirection*(iInt-1)
       END DO
 
-! use the solar on/off, thermal on/off etc. 
-! sun is only on if 0 < prof%solzen < 90
+c use the solar on/off, thermal on/off etc. 
+c sun is only on if 0 < prof%solzen < 90
       !!rakSolarAngle(iC) = abs(prof%sunang)   !!!RTP v 097-
       rakSolarAngle(iC) = prof%solzen          !!!RTP v 098+
       IF ((prof%solzen .GE. 0.0) .AND. (prof%solzen .LE. 90.0)) THEN
@@ -2589,13 +2679,46 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       iaKThermal(iC)   = 0
       raKThermalAngle(iC) = -1.0
 
-!      print *,'----> warning : set raKthermalangle = 53.3 (acos(3/5))'
-!      raKThermalAngle(iC) = +53.13
-!      print *,'----> so this will be used at all layers '
-!      print *,'----> instead of varying the diffusivity angle'
+c      print *,'kSetThermalAngle = ',kSetThermalAngle,iaaOverrideDefault(2,4),kThermalAngle
+      
+      !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
+      raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
+      IF (iaaOverrideDefault(2,4) . EQ. 1) THEN
+        kThermalAngle = abs(kThermalAngle)
+      END IF
+      
+      IF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .NE. 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'	
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+	raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)
+        kSetThermalAngle = +1   !use acos(3/5)
+      ELSEIF ((abs(raKThermalAngle(iC) - +1.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'	
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+	raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)	
+        kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+        kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc	
+c      ELSEIF ((abs(raKThermalAngle(iC) - -2.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
+c        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+c        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'	
+c        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+c        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+c        raKThermalAngle(iC) = +53.13
+c	 raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)	
+c        kThermal = -2           !use accurate angles lower down in atm, linear in tau temp variation, one angle calc
+c        kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation, one angle calc	
+      END IF
+
+c      print *,'kSetThermalAngle = ',kSetThermalAngle            
 
       iakThermalJacob(iC) = 1
-! use the solar on/off, thermal on/off etc. 
+c use the solar on/off, thermal on/off etc. 
       kSolar        = iaKSolar(iC)
       IF (abs(raKSolarAngle(iC) - 90.0) .le. 1.0e-5) then
         write(kStdWarn,*) 'resetting solar angle = 90 to 89.9, iAtm = ',iC
@@ -2617,8 +2740,8 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ELSE
         kSetThermalAngle = +1   !use user specified angle everywhere
       END IF
-      write(kStdWarn,*) 'in rtp_interface_f90.f --> kFlux,kTemperVary,kSetThermalAngle = ',kFlux,kTemperVary,kSetThermalAngle
-      
+      write(kStdWarn,*) 'in rtp_interface.f --> kFlux,kTemperVary,kSetThermalAngle = ',kFlux,kTemperVary,kSetThermalAngle
+
       IF (iDirection .GT. 0) THEN
         !check things make sense for downlook in
         IF ((kSolarAngle .LT. 0.0) .OR. (kSolarAngle .GT. 90.0)) THEN
@@ -2649,7 +2772,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       IF (iDirection .LT. 0) THEN
         IF ((kWhichScatterCode .EQ. 2) .OR. (kWhichScatterCode .EQ. 4)) THEN
-          !set to nonsense values for uplooking instrument RTSPE! SCAT
+          !set to nonsense values for uplooking instrument RTSPEC SCAT
           !as these CANNOT handle solar
           kSolar = -1          !!!RTPSEC, FIRST ORDER PERTURB cannot handle sun
           IF (kSolar .NE. iaKSolar(iC)) THEN
@@ -2676,20 +2799,20 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         END IF
       END IF
 
-! So if {\sf iakThermal(iI) = 0}, then {\sf rakThermalAngle(iI)} should be used
-! with care.  If it is set at a negative value $x$, then for the upper
-! layers the diffusive angle $acos(3/5)$ is used for the reflected
-! thermal, while for the lower layers, a parameterized optimum
-! diffusivity angle is used.  If it is set at a positive value, then for
-! all layers, the diffusive angle $acos(x)$ is used for the
-! reflected thermal. acos(3/5) = 53.1301 degrees
+c So if {\sf iakThermal(iI) = 0}, then {\sf rakThermalAngle(iI)} should be used
+c with care.  If it is set at a negative value $x$, then for the upper
+c layers the diffusive angle $acos(3/5)$ is used for the reflected
+c thermal, while for the lower layers, a parameterized optimum
+c diffusivity angle is used.  If it is set at a positive value, then for
+c all layers, the diffusive angle $acos(x)$ is used for the
+c reflected thermal. acos(3/5) = 53.1301 degrees
 
-!      print *,'**************************************************'
-!      kThermal = -1
-!      kSolar = -1
-!      print *,'*******  in rtp_interface,  kThermal = -1 ********'
-!      print *,'*******  in rtp_interface,  kSolar   = -1 ********'
-!      print *,'**************************************************'
+c      print *,'**************************************************'
+c      kThermal = -1
+c      kSolar = -1
+c      print *,'*******  in rtp_interface,  kThermal = -1 ********'
+c      print *,'*******  in rtp_interface,  kSolar   = -1 ********'
+c      print *,'**************************************************'
       iakSolar(iC)          = kSolar
       rakSolarAngle(iC)     = kSolarAngle
       rakSolarRefl(iC)      = kSolarRefl
@@ -2703,7 +2826,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       write(kStdWarn,*)'Thermal on/off,Thermal angle,Thermal Jacob =',
      $              kThermal,kThermalAngle,kThermalJacob
 
-! now read in the emissivity values 
+c now read in the emissivity values 
       iaSetEms(iC) = prof%nemis
       IF (iaSetEms(iC) .GT. kEmsRegions) THEN 
         write(kStdErr,*)'Cannot set so many emiss regions. Change' 
@@ -2715,7 +2838,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         DO i=1,iaSetEms(iC) 
           r1   = prof%efreq(i)
           rEms = prof%emis(i)
-          write(kStdWarn,*) r1,rEms 
+c          write(kStdWarn,*) r1,rEms 
           raaaSetEmissivity(iC,i,1) = r1 
           raaaSetEmissivity(iC,i,2) = rEms 
           IF ((rEms .LT. 0.0) .OR. (rEms .GT. 1.0)) THEN 
@@ -2768,7 +2891,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         write(kStdWarn,*) r1,rEms  
       END IF
  
-! now read in the solar refl values 
+c now read in the solar refl values 
       iaSetSolarRefl(iC) = prof%nemis !! new, before it was nrho
       IF (iaSetSolarRefl(iC) .GT. kEmsRegions) THEN 
         write(kStdErr,*)'Cannot set so many solar refl regions. Change' 
@@ -2794,7 +2917,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         rEms = prof%rho(1)
         raaaSetSolarRefl(iC,i,1) = r1 
         raaaSetSolarRefl(iC,i,2) = rEms 
-        write(kStdWarn,*) r1,rEms  
+c        write(kStdWarn,*) r1,rEms  
         i = 2
         r1 = 3600.0
         rEms = prof%rho(1)
@@ -2805,7 +2928,7 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         DO i=1,iaSetSolarRefl(iC) 
           r1   = prof%efreq(i)   !!new rfreq = efreq
           rEms = prof%rho(i)
-          write(kStdWarn,*) r1,rEms 
+c          write(kStdWarn,*) r1,rEms 
           raaaSetSolarRefl(iC,i,1) = r1 
           raaaSetSolarRefl(iC,i,2) = rEms 
           IF ((rEms .LT. 0.0) .OR. (rEms .GT. 1.0)) THEN 
@@ -2822,16 +2945,16 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ctype2 = 100
 
       !!! TEST DEBUG
-!      print *,'*********************************************************'      
-!      prof%cfrac = 0.0
-!      prof%cfrac2 = 0.0
-!      prof%cfrac12 = 0.0
-!      prof%ctype = 50
-!      prof%ctype2 = 50
-!      prof%cngwat = 0.0
-!      prof%cngwat2 = 0.0
-!      print *, 'Set cfra! = 0, ctpye = 50 for testing'
-!      print *,'*********************************************************'      
+c      print *,'*********************************************************'      
+c      prof%cfrac = 0.0
+c      prof%cfrac2 = 0.0
+c      prof%cfrac12 = 0.0
+c      prof%ctype = 50
+c      prof%ctype2 = 50
+c      prof%cngwat = 0.0
+c      prof%cngwat2 = 0.0
+c      print *, 'Set cfrac = 0, ctpye = 50 for testing'
+c      print *,'*********************************************************'      
       !!! TEST DEBUG
   
       cfrac12 = prof%cfrac12 
@@ -2840,25 +2963,51 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       cfrac1  = prof%cfrac
       cngwat1 = prof%cngwat
       ctop1   = prof%cprtop
+      cbot1   = prof%cprbot      
       rSize1  = prof%cpsize
-
+      
       ctype2  = int(prof%ctype2)
       cfrac2  = prof%cfrac2
       cngwat2 = prof%cngwat2
       ctop2   = prof%cprtop2
+      cbot2   = prof%cprbot2      
       rSize2  = prof%cpsize2
       
       i4ctype1 = prof%ctype
       i4ctype2 = prof%ctype2
-    
-      iNclouds_RTP = 0
+
+c raaRTPCloudParams0(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
+      raaRTPCloudParams0(1,1) = ctype1
+      raaRTPCloudParams0(1,2) = ctop1
+      raaRTPCloudParams0(1,3) = cbot1
+      raaRTPCloudParams0(1,4) = cngwat1
+      raaRTPCloudParams0(1,5) = rSize1
+      raaRTPCloudParams0(1,6) = cfrac1
+      raaRTPCloudParams0(1,7) = cfrac12
+c raaRTPCloudParams0(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile      
+      raaRTPCloudParams0(2,1) = ctype2
+      raaRTPCloudParams0(2,2) = ctop2
+      raaRTPCloudParams0(2,3) = cbot2
+      raaRTPCloudParams0(2,4) = cngwat2
+      raaRTPCloudParams0(2,5) = rSize2
+      raaRTPCloudParams0(2,6) = cfrac2
+      raaRTPCloudParams0(2,7) = cfrac12
+c raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
+c raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
+      
+      !!! look for black clouds
+      iNclouds_RTP_black = 0
       IF ((prof%ctype .GE.0) .AND. (prof%ctype .LT. 100)) THEN
         raCemis(1) =  prof%cemis(1)
-        iNclouds_RTP = iNclouds_RTP + 1
+        iNclouds_RTP_black = iNclouds_RTP_black + 1
       END IF
       IF ((prof%ctype2 .GE.0) .AND. (prof%ctype2 .LT. 100)) THEN
         raCemis(2) =  prof%cemis2(1)
-        iNclouds_RTP = iNclouds_RTP + 1
+        iNclouds_RTP_black = iNclouds_RTP_black + 1
+      END IF
+      IF (iNclouds_RTP_black .GT. 0) THEN
+        write(kStdWarn,*) 'hmm, iNclouds_RTP_black > 0 so resetting iNclouds_RTP'
+	iNclouds_RTP = iNclouds_RTP_black
       END IF
 
       IF (((ctype1 .LT. 100) .OR. (ctype1 .GE. 400)) .AND. (cfrac1 .GT. 0)) THEN
@@ -2876,16 +3025,84 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         write(kStdErr,*) '  kCARTA assumes if cfrac1 = 0 then cfrac2  = 0'
         write(kStdErr,*) '  cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
         write(kStdErr,*) '  ctype1,ctype2 = ',ctype1,ctype2
-        write(kStdErr,*) '  setting cfrac1 = cfrac12 = cfrac2'
-         ctop1  = ctop2
-        cfrac1  = cfrac2
-        cfrac12 = cfrac2
-        iNclouds_RTP = 2
-        prof%cfrac   = cfrac1
-        prof%cfrac12 = cfrac12
-        prof%cprtop  = ctop1 
+	IF (prof%cngwat .GT. 0) THEN
+          write(kStdErr,*) '  since cngwat1 > 0, now resetting cfrac1 = cfrac12 = cfrac2'
+          ctop1  = ctop2
+          cbot1  = cbot2	
+          cfrac1  = cfrac2
+          cfrac12 = cfrac2
+          iNclouds_RTP = 2
+          prof%cfrac   = cfrac1
+          prof%cfrac12 = cfrac12
+          prof%cprtop  = ctop1
+          prof%cprbot  = ctop2
+	ELSE
+          write(kStdErr,*) '  since cngwat1 <= 0, cfrac1 <=0, reset CLD2 -> CLD1'
+	  !! set cld2 --> cld1
+          cngwat1  = cngwat2	  
+          ctop1  = ctop2
+          cbot1  = cbot2	
+          cfrac1  = cfrac2
+          ctype1  = ctype2
+          iaCtype(1) = ctype1
+	  !! set cld2 --> 0	  
+          cfrac12 = 0.0
+	  cfrac2  = 0.0
+	  cngwat2 = 0.0
+	  ctype2 = -1
+          iNclouds_RTP = 1
+          iaCtype(2) = -1
+	  !! update prof struct	  
+          prof%cfrac   = cfrac1
+          prof%cprtop  = ctop1
+          prof%cprbot  = ctop2
+	  prof%cngwat  = prof%cngwat2
+	  prof%cpsize  = prof%cpsize2
+	  prof%ctype   = prof%ctype2
+	  prof%cfrac2  = 0.0
+	  prof%cngwat2 = 0.0	  
+          prof%cfrac12 = 0.0
+	  prof%ctype2 = -1
+	END IF
       END IF
 
+      IF ((cfrac1 .GT. 0) .AND. (cfrac2 .GT. 0)) THEN
+        iTop1 = -1
+        iTop2 = -1
+        iBot1 = -1
+        iBot2 = -1	
+        !! need to check separation of pressures
+	DO i = 1,kProfLayer+1
+	  IF ((raPressLevels(i) .GT. cbot1) .AND. (raPressLevels(i) .GT. 0))  iBot1 = i
+	  IF ((raPressLevels(i) .GT. cbot2) .AND. (raPressLevels(i) .GT. 0))  iBot2 = i	  
+	END DO
+	DO i = kProfLayer+1,1,-1
+	  IF ((raPressLevels(i) .LT. ctop1) .AND. (raPressLevels(i) .GT. 0))  iTop1 = i
+	  IF ((raPressLevels(i) .LT. ctop2) .AND. (raPressLevels(i) .GT. 0))  iTop2 = i	  	  	  
+	END DO
+        IF ((iTop2-iTop1) .LT. 2) THEN
+          write(kStdWarn,*) 'orig cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+          write(kStdWarn,*) 'orig cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+          write(kStdWarn,*) 'ctop2,cbot1 maybe too close, need to try to adjust the BOTTOM layer of cloud1'
+	  IF ((iTop1-iBot1) .GE. 2) THEN
+	    prof%cprbot = raPressLevels(iBot1+1)-10
+            cbot1 = prof%cprbot
+  	    iBot1 = iBot1 + 1
+	    write(kStdWarn,*) 'readjusted cbot1,iBot1 = ',cBot1,iBot1
+	  ELSEIF ((iTop2-iBot2) .GE. 2) THEN
+	    write(kStdWarn,*) 'ooooops : top cloud too thin, try lower cloud ugh??!'	  
+	    prof%cprtop2 = raPressLevels(iTop2-1)+10
+            ctop2 = prof%cprtop2
+  	    iTop2 = iTop2 -1 1
+	    write(kStdWarn,*) 'readjusted ctop2,iTop2 = ',cTop2,iTop2
+	  ELSE
+	    write(kStdWarn,*) 'ooooops : top AND Bot cloud too thin!!!'
+	  END IF
+          write(kStdWarn,*) 'final cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+          write(kStdWarn,*) 'final cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+	END IF
+      END IF
+      
       IF (cfrac12 .GT. max(cfrac1,cfrac2)) THEN
         write(kStdErr,*) 'kCARTA assumes cfac12 <= max(cfrac1,cfrac2)'
         write(kStdErr,*) 'cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
@@ -2902,11 +3119,16 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ELSE
           raCemis(i) = 1.0               !assume cloud totally emissive
         END IF
+        IF ((prof%ctype .GE. 201) .AND. (prof%ctype .LT. 300) .AND. (prof%cpsize .GT. 120)) THEN
+	  write(kStdErr,*) '201 <= prof%ctype <= 300, ice particles too large; reset to 120 um from',prof%cpsize
+	  write(kStdWarn,*) '201 <= prof%ctype <= 300, ice particles too large; reset to 120 um from',prof%cpsize
+	  prof%cpsize = 119.999
+	END IF
         raCngwat(i) = prof%cngwat*1.00 !IWP
         raCpsize(i) = prof%cpsize*1.00 !in microns
         raCprtop(i) = prof%cprtop
         raCprbot(i) = prof%cprbot
-
+	
         i = 2
         iaCtype(i) =  prof%ctype2        !cloud type 1=cirrus 2=water etc
         IF ((prof%ctype2 .GE.0) .AND. (prof%ctype2 .LT. 100)) THEN
@@ -2915,6 +3137,11 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ELSE
           raCemis(i) = 1.0               !assume cloud totally emissive
         END IF
+        IF ((prof%ctype2 .GE. 201) .AND. (prof%ctype2 .LT. 300) .AND. (prof%cpsize2 .GT. 120)) THEN
+	  write(kStdErr,*) '201 <= prof%ctype2 <= 300, ice particles too large; reset to 120 um from ',prof%cpsize2
+	  write(kStdWarn,*) '201 <= prof%ctype2 <= 300, ice particles too large; reset to 120 um from ',prof%cpsize2
+	  prof%cpsize2 = 119.999
+	END IF	
         raCngwat(i) = prof%cngwat2*1.00  !IWP
         raCpsize(i) = prof%cpsize2*1.00  !in microns
         raCprtop(i) = prof%cprtop2
@@ -2935,14 +3162,41 @@ c!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
         END DO
       END IF
 
+c raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   first reset
+      raaRTPCloudParamsF(1,1) = iaCtype(1)
+      raaRTPCloudParamsF(1,2) = prof%cprtop
+      raaRTPCloudParamsF(1,3) = prof%cprbot
+      raaRTPCloudParamsF(1,4) = prof%cngwat
+      raaRTPCloudParamsF(1,5) = prof%cpsize
+      raaRTPCloudParamsF(1,6) = prof%cfrac
+      raaRTPCloudParamsF(1,7) = prof%cfrac12
+c raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   first reset
+      raaRTPCloudParamsF(2,1) = iaCtype(2)
+      raaRTPCloudParamsF(2,2) = prof%cprtop2
+      raaRTPCloudParamsF(2,3) = prof%cprbot2
+      raaRTPCloudParamsF(2,4) = prof%cngwat2
+      raaRTPCloudParamsF(2,5) = prof%cpsize2
+      raaRTPCloudParamsF(2,6) = prof%cfrac2
+      raaRTPCloudParamsF(2,7) = prof%cfrac12
+
+c      print *,' '
+c      print *,'initial readjusts (if needed) after reading in rtp file'
+c      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
+c      print *,'-------------------------------------------------------'      
+c      DO I=1,7
+c        print *,I,raaRTPCloudParams0(1,i),raaRTPCloudParamsF(1,i),'X0',raaRTPCloudParams0(2,i),raaRTPCloudParamsF(2,i)
+c      END DO
+c      call dostop
+      
       RETURN
       END
 
 c************************************************************************
-! this subroutine quickly sets up stuff for ONE atmosphere
-! there could be more than one cloud
+c this subroutine quickly sets up stuff for ONE atmosphere
+c there could be more than one cloud
       SUBROUTINE SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop,
-     $    cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,iNclouds_RTP,iaKsolar,
+     $    cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,
+     $    ctop1,ctop2,cbot1,cbot2,iNclouds_RTP,iaKsolar,
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP,
      $    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,
      $    iBinORasc,caaCloudFile,iaNML_Ctype,
@@ -2955,75 +3209,78 @@ c************************************************************************
 
       include '../INCLUDE/scatter.param'
 
-! input params
+c input params
       INTEGER iakSolar(kMaxAtm),ctype1,ctype2
       REAL raFracTop(kMaxAtm),raFracBot(kMaxAtm)
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
       !these are the cloud parameters read in from the RTP file
       REAL Cfrac,cfrac1,cfrac2,cfrac12,raCemis(kMaxClouds),cngwat1,cngwat2
+      REAL ctop1,ctop2,cbot1,cbot2
       REAL raCprtop(kMaxClouds),  raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds),  raCpsize(kMaxClouds)
       INTEGER iaCtype(kMaxClouds),iBinORasc,iNclouds_RTP
-      CHARACTER*80 caaCloudFile(kMaxClouds)
+      CHARACTER*120 caaCloudFile(kMaxClouds)
       INTEGER iaNML_Ctype(kMaxClouds)
-! output params, 
-!     above set into the cloud parameters .....
-! iScatBinaryFile tells us if the scattering files are binary (+1) or text (-1)
+c output params, 
+c     above set into the cloud parameters .....
+c iScatBinaryFile tells us if the scattering files are binary (+1) or text (-1)
       INTEGER iScatBinaryFile
-! iNclouds tells us how many clouds there are 
-! iaCloudNumLayers tells how many neighboring layers each cloud occupies 
-! iaaCloudWhichLayers tells which layers each cloud occupies 
+c iNclouds tells us how many clouds there are 
+c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
+c iaaCloudWhichLayers tells which layers each cloud occupies 
       INTEGER iNClouds,iaCloudNumLayers(kMaxClouds) 
       INTEGER iaaCloudWhichLayers(kMaxClouds,kCloudLayers) 
-! iaCloudNumAtm stores which cloud is to be used with how many atmosphere 
-! iaCloudWhichAtm stores which cloud is to be used with which atmospheres 
+c iaCloudNumAtm stores which cloud is to be used with how many atmosphere 
+c iaCloudWhichAtm stores which cloud is to be used with which atmospheres 
       INTEGER iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm) 
-! iaaScatTable associates a file number with each scattering table 
-! caaaScatTable associates a file name with each scattering table 
+c iaaScatTable associates a file number with each scattering table 
+c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaCloudName(kMaxClouds)
-! raaaCloudParams stores IWP, cloud mean particle size 
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaCloudName(kMaxClouds)
+c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
-! raPCloudTop,raPCloudBot define cloud top and bottom pressures 
+c raPCloudTop,raPCloudBot define cloud top and bottom pressures 
       REAL raaPCloudTop(kMaxClouds,kCloudLayers)
       REAL raaPCloudBot(kMaxClouds,kCloudLayers)
-! raaPrBdry is the pressure boundaries for the atms
+c raaPrBdry is the pressure boundaries for the atms
       REAL raaPrBdry(kMaxAtm,2)      
-! raPresslevls are the KLAYERS pressure levels
-! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
+c raPresslevls are the KLAYERS pressure levels
+c iProfileLayers = tells how many layers read in from RTP or KLAYERS file
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
       INTEGER iProfileLayers
-! this tells if the cloud, when "expanded", has same IWP or exponentially
-! decreasing IWP
+c this tells if the cloud, when "expanded", has same IWP or exponentially
+c decreasing IWP
       REAL raExp(kMaxClouds)
-! this tells if there is phase info associated with the cloud; else use HG
+c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       INTEGER iNatm
-! this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+c this is for absorptive clouds
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
-! local variables
+c local variables
       INTEGER iJ1,iI,iIn,iJ,iScat,iaTemp(kMixFilRows),iTop,iBot,iNum,iErr
-      REAL rPT,rPB,rP1,rP2,rSwap,r1,r2
-      CHARACTER*80 caName
+      REAL rPT,rPB,rP1,rP2,rSwap,r1,r2,raaJunkCloudTB(2,2)
+      CHARACTER*120 caName
       INTEGER FindCloudLayer
-! these are to check that the scattering table names are unique
+c these are to check that the scattering table names are unique
       INTEGER iaTable(kCloudLayers*kMaxClouds),iWhichScatterCode,iDefault
-      CHARACTER*80 caaTable(kCloudLayers*kMaxClouds)
-! these are to match iaCtype vs iaNML_Ctype
+      CHARACTER*120 caaTable(kCloudLayers*kMaxClouds)
+c these are to match iaCtype vs iaNML_Ctype
       INTEGER iFound1,iFound2,iNclouds_RTPX
+      CHARACTER*4 caStrJunk(7)
 
       IF (kAllowScatter .EQ. -1) THEN
         write(kStdErr,*) 'bkcarta.x (basic) version does not allow scattering'
         write(kStdErr,*) 'Please either use Makefile to compile/run kcarta.x'
         write(kStdErr,*) 'which allows scattering, or modify our .nml and/or'
-        write(kStdErr,*) '.rtp files, so that only basi! kCARTA is used'
+        write(kStdErr,*) '.rtp files, so that only basic kCARTA is used'
         CALL DoStop
       END IF    
 
+      iDefault = 5
       iWhichScatterCode = 6         !!RAYLEIGH in CLEAR SKY, nir/vis/uv
       iWhichScatterCode = 5         !!PCLSAM
       iWhichScatterCode = 4         !!r = r0 + r1 = perturb (not yet done)
@@ -3031,12 +3288,11 @@ c************************************************************************
       iWhichScatterCode = 2         !!RTSPEC
       iWhichScatterCode = 1         !!TWOSTREAM  DEFAULT
       iWhichScatterCode = 0         !!simple absorb; directly goes to rad_main
-
-      iDefault = 5
-
-      iWhichScatterCode = 6         !!RAYLEIGH in clear sky
-      iWhichScatterCode = 5         !!PCLSAM
-
+      iWhichScatterCode = iaaOverrideDefault(1,5)
+      IF ((iWhichScatterCode .LT. 0) .OR. (iWhichScatterCode .GT. 6)) THEN
+        write(kStdErr,*) 'invalid iWhichScatterCode = ',iWhichScatterCode
+        CALL DoStop
+      END IF		       
       IF (iDefault .NE. iWhichScatterCode) THEN
         print *,'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
       END IF
@@ -3059,7 +3315,7 @@ c************************************************************************
         kScatter          = 1        !use this setting  SingleScatter
         kScatter          = 3        !use this setting  Hybrid
         IF (kScatter .NE. 3) THEN
-          write (kStdErr,*) 'doing RTSPE! with kScatter = ',kScatter,' not 3'
+          write (kStdErr,*) 'doing RTSPEC with kScatter = ',kScatter,' not 3'
         END IF
       ELSEIF (iWhichScatterCode .EQ. 1) THEN
         kWhichScatterCode = 1        !use TwoStream
@@ -3070,7 +3326,7 @@ c************************************************************************
       END IF
 
       IF ((iakSolar(1) .GE. 0)  .AND. (kWhichScatterCode .EQ. 2)) THEN
-        write(kStdErr,*) 'Cannot have sun when using RTSPE! scattering'
+        write(kStdErr,*) 'Cannot have sun when using RTSPEC scattering'
         CALL DoStop
       END IF
 
@@ -3089,7 +3345,7 @@ c************************************************************************
       END IF
 
       iNclouds_RTPX = iNclouds_RTP
-
+      
       IF ((ctype1 .LE. 0) .AND. (ctype2 .LE. 0)) THEN
         write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 0'
         iNclouds_RTP = 0
@@ -3201,30 +3457,30 @@ c************************************************************************
         GOTO 333
       END IF
 
-! from /asl/packages/sartaV105/yukyung_readme.txt
-!      prof%udef(11,:) = cngwat
-!      prof%udef(12,:) = cpsize
-!      prof%udef(13,:) = cprtop
-!      prof%udef(14,:) = cprbot
-!      prof%udef(15,:) = cfrac
-!      prof%udef(16,:) = "cfrac12", fraction of FOV containing both clouds
-!      prof%udef(17,:) = ctype {currently not used}
-!      prof%udef(18,:) = cemis for cloud 2
+c from /asl/packages/sartaV105/yukyung_readme.txt
+c      prof%udef(11,:) = cngwat
+c      prof%udef(12,:) = cpsize
+c      prof%udef(13,:) = cprtop
+c      prof%udef(14,:) = cprbot
+c      prof%udef(15,:) = cfrac
+c      prof%udef(16,:) = "cfrac12", fraction of FOV containing both clouds
+c      prof%udef(17,:) = ctype {currently not used}
+c      prof%udef(18,:) = cemis for cloud 2
 
-!      raExp(1)               = 0.0      !same amount in all layers
-!      iScatBinaryFile        = iBinORasc
-!      iNClouds               = 1
-!      iaCloudNumLayers(1)    = 1
-!      iaaScatTable(1,1)      = 1
-!      caaCloudName(1)        = 'RTP cloud'
-!      caaaScatTable(1,1)     = cfile xxxx caaCloudFile(iI)
-!      raaaCloudParams(1,1,1) = cngwat
-!      raaaCloudParams(1,1,2) = cpsize
-!      raaPCloudTop(1,1)      = cprtop
-!      raaPCloudBot(1,1)      = cprbot
-!      iaCloudNumAtm(1)       = 1
-!      iaaCloudWhichAtm(1,1)  = 1
-!      iaPhase(1)             = -1       !default to HG phase function
+c      raExp(1)               = 0.0      !same amount in all layers
+c      iScatBinaryFile        = iBinORasc
+c      iNClouds               = 1
+c      iaCloudNumLayers(1)    = 1
+c      iaaScatTable(1,1)      = 1
+c      caaCloudName(1)        = 'RTP cloud'
+c      caaaScatTable(1,1)     = cfile xxxx caaCloudFile(iI)
+c      raaaCloudParams(1,1,1) = cngwat
+c      raaaCloudParams(1,1,2) = cpsize
+c      raaPCloudTop(1,1)      = cprtop
+c      raaPCloudBot(1,1)      = cprbot
+c      iaCloudNumAtm(1)       = 1
+c      iaaCloudWhichAtm(1,1)  = 1
+c      iaPhase(1)             = -1       !default to HG phase function
 
       write(kStdWarn,*) ' '
       iScatBinaryFile        = iBinORasc
@@ -3249,35 +3505,35 @@ c************************************************************************
         iaPhase(iI)             = -1       !default to HG phase function
 
         write(kStdWarn,*)    'cloud info for RTP cloud # ',iI
-        write (KStdWarn,222) 'cloud file    = ',caaCloudFile(iI)
-        write (kStdWarn,*)   'cloud top     = ',raCprtop(iI),' mb'
-        write (kStdWarn,*)   'cloud bot     = ',raCprbot(iI),' mb'
-        write (kStdWarn,*)   'cloud IWP     = ',raCngwat(iI),' gm m-2'
-        write (kStdWarn,*)   'particle size = ',raCpsize(iI),' um'
+        write (KStdWarn,223) caaCloudFile(iI)
+        write (kStdWarn,*)   '  cloud top     = ',raCprtop(iI),' mb'
+        write (kStdWarn,*)   '  cloud bot     = ',raCprbot(iI),' mb'
+        write (kStdWarn,*)   '  cloud IWP     = ',raCngwat(iI),' gm m-2'
+        write (kStdWarn,*)   '  particle size = ',raCpsize(iI),' um'
         IF (iI .EQ. 1) THEN
-          write (kStdWarn,*)   'cloud fra!    = ',cfrac1
+          write (kStdWarn,*)   '  cloud frac    = ',cfrac1
         ELSEIF (iI .EQ. 2) THEN
-          write (kStdWarn,*)   'cloud fra!    = ',cfrac2
+          write (kStdWarn,*)   '  cloud frac    = ',cfrac2
         END IF
       END DO
 
       !!now have to stretch out the cloud if necessary
-      CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,
+      CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB,
      $     caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable,
      $     iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp,
      $     raPressLevels,iProfileLayers,
      $     raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
 
-! now start checking the info
+c now start checking the info
       DO iIn=1,iNclouds
         caName = caaCloudName(iIn)
         iJ     = iaCloudNumLayers(iIn)
         iaCloudNumLayers(iIn) = iJ
         write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
 
-! set individual cloud layer parameters but STRETCH the cloud out as necessary
-! from pressure level rPT to pressure level rPB
-! note it will occupy the entire layer
+c set individual cloud layer parameters but STRETCH the cloud out as necessary
+c from pressure level rPT to pressure level rPB
+c note it will occupy the entire layer
         DO iJ1=1,iJ
           !top and bottom pressures CloudName/Type  IWP/LWP DME          
           rPT = raaPCloudTop(iIn,iJ1)
@@ -3287,7 +3543,7 @@ c************************************************************************
             rSwap = rPT
             rPT   = rPB
             rPB   = rSwap
-            write (kStdWarn,*) 'Swapped cloud top & bottom pressures'
+            write (kStdWarn,*) 'Swapped cloud top & bottom pressures',iJ1,iJ,rPT,rPB
           END IF
 
           iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
@@ -3305,13 +3561,52 @@ c************************************************************************
           iScat=iaaScatTable(iIn,iJ1)
           caName=caaaScatTable(iIn,iJ1)
           write(kStdWarn,*) '   layer #',iJ1,' = kLAYERS pressure layer ',iNum
-          write(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
-          write(kStdWarn,*) '   mean particle size (um)  = ',rP2
-          write(kStdWarn,*) '   scatter table number = ',iScat
+          write(kStdWarn,*) '     avg layer press = ',rPT,' mb'
+c          write(kStdWarn,*) '     layer top/bot press = ',rPT,rPB,' mb'	  
+          write(kStdWarn,*) '     IWP (or LWP) (gm-2)      = ',rP1
+          write(kStdWarn,*) '     mean particle size (um)  = ',rP2
+          write(kStdWarn,*) '     scatter table number = ',iScat
           write(kStdWarn,222) caName
         END DO 
 
-! set how many, and which atmospheres to use with this cloud
+c raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+c      raaRTPCloudParamsF(1,1) = iaCtype(1)
+      raaRTPCloudParamsF(1,2) = raaJunkCloudTB(1,1)
+      raaRTPCloudParamsF(1,3) = raaJunkCloudTB(1,2)
+c      raaRTPCloudParamsF(1,4) = prof%cngwat
+c      raaRTPCloudParamsF(1,5) = prof%cpsize
+c      raaRTPCloudParamsF(1,6) = prof%cfrac
+c      raaRTPCloudParamsF(1,7) = prof%cfrac12
+c raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+c      raaRTPCloudParamsF(2,1) = iaCtype(2)
+      raaRTPCloudParamsF(2,2) = raaJunkCloudTB(2,1)
+      raaRTPCloudParamsF(2,3) = raaJunkCloudTB(2,2)
+c      raaRTPCloudParamsF(2,4) = prof%cngwat2
+c      raaRTPCloudParamsF(2,5) = prof%cpsize2
+c      raaRTPCloudParamsF(2,6) = prof%cfrac2
+c      raaRTPCloudParamsF(2,7) = prof%cfrac12
+
+      caStrJunk(1) = 'typ '
+      caStrJunk(2) = 'ctop'
+      caStrJunk(3) = 'cbot'
+      caStrJunk(4) = 'cng '
+      caStrJunk(5) = 'csz '
+      caStrJunk(6) = 'frac'
+      caStrJunk(7) = 'fr12'            
+c      print *,' '
+c      print *,'  after expandscatter'
+c      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
+c      print *,'-------------------------------------------------------'            
+c      DO iJ1=1,7
+c        print *,iJ1,caStrJunk(iJ1),raaRTPCloudParams0(1,iJ1),raaRTPCloudParamsF(1,iJ1),'XF',
+c     $raaRTPCloudParams0(2,iJ1),raaRTPCloudParamsF(2,iJ1)
+c      END DO
+      ctop1 = raaRTPCloudParamsF(1,2)
+      cbot1 = raaRTPCloudParamsF(1,3)      
+      ctop2 = raaRTPCloudParamsF(2,2)
+      cbot2 = raaRTPCloudParamsF(2,3)      
+      
+c set how many, and which atmospheres to use with this cloud
         iNum=iaCloudNumAtm(iIn)
         IF (iNum .GT. iNatm) THEN
           write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!' 
@@ -3338,7 +3633,7 @@ c************************************************************************
         write(kStdWarn,*) '  '
 
       END DO
-ccccccccccccccccccccc! now check the info
+cccccccccccccccccccccc now check the info
  
       write(kStdWarn,*) 'finished preprocessing *SCATTR .. checking info ...'
 
@@ -3405,7 +3700,7 @@ ccccccccccccccccccccc! now check the info
         END IF
       END DO
 
-! check that the scattering tables are unique within a cloud
+c check that the scattering tables are unique within a cloud
       write(kStdWarn,*) 'checking scattering tables unique within a cloud ...'
       DO iIn = 1,iNclouds
         DO iJ = 1,iaCloudNumLayers(iIn)
@@ -3428,10 +3723,10 @@ ccccccccccccccccccccc! now check the info
         END DO
       END DO 
 
-! if this test is successfully passed, then do the next check!!!
-! check across all clouds that the scattering tables are unique
-! map this code to rtspec.f
-! these are to check that the scattering table names are unique
+c if this test is successfully passed, then do the next check!!!
+c check across all clouds that the scattering tables are unique
+c map this code to rtspec.f
+c these are to check that the scattering table names are unique
       DO iIn = 1,kMaxClouds*kCloudLayers
         iaTable(iIn) = -1
         caaTable(iIn) = '                                                     '
@@ -3456,38 +3751,45 @@ ccccccccccccccccccccc! now check the info
         END DO
       END DO 
 
- 222  FORMAT(A80) 
+ 222  FORMAT(A120)
+ 223  FORMAT('   cloud file    = ',A120)
  333  CONTINUE
 
       RETURN
       END
 
 c************************************************************************
-! this subroutine prints out error messages
+c this subroutine prints out error messages
       SUBROUTINE FindError(rAmt,rT,rP,rPP,iIDgas,iCnt)
 
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
 
-! input variables, to process
+c input variables, to process
       REAL rAmt,rT,rP,rPP
       INTEGER iIDGas,iCnt
 
-! local vars 
+c local vars 
       INTEGER iError
- 
+      REAL rAmt0,rT0,rP0,rPP0
+
+      rP0   = rP
+      rPP0  = rPP
+      rT0   = rT
+      rAmt0 = rAmt
+      
       iError = -1
 
       IF ((rAmt .lt. 0.0) .OR. (rAmt. gt. 1.0e3)) THEN
         WRITE(kStdWarn,1080)
         WRITE(kStdWarn,1111) iIDgas,iCnt,rAmt
-        iError = 1
+        iError = 2
         rAmt = 0.0
         !CALL DoStop
       END IF
 
-      IF ((rT .lt. 0.0) .OR. (rT. gt. 1.0e3)) THEN
+      IF ((rT .lt. 150.0) .OR. (rT. gt. 400.0)) THEN
         WRITE(kStdWarn,1081)
         WRITE(kStdWarn,1111) iIDgas,iCnt,rT
         iError = 1
@@ -3512,48 +3814,49 @@ c************************************************************************
       END IF
 
       IF (iError .EQ. 1) THEN
+        write(kStdWarn,4320) iIDGas,iCnt,rAmt0,rT0,rP0,rPP0      
         rP = 1.0e3
         rPP = 1.0e-3
         rT = 300.0
         rAmt = 0.000000
         write(kStdWarn,4321) iIDGas,iCnt,rAmt,rT,rP,rPP
       END IF
-
         
  1111 FORMAT('gasID, layer = ',I5,I5,F12.5)
  1080 FORMAT('negative or bad gas amount in PRFILE profile file')
  1081 FORMAT('negative or bad gas temp in PRFILE profile file')
  1082 FORMAT('negative or bad layer pressure in PRFILE profile file')
  1083 FORMAT('negative or bad gas partial press in PRFILE profile file')
+ 4320 FORMAT('Orig  RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' ')) 
  4321 FORMAT('Reset RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
 
       RETURN
       END
 
 c************************************************************************
-!           these functions deal with reading CLOUD PROFILES             
+c           these functions deal with reading CLOUD PROFILES             
 c************************************************************************
-! this subroutine deals with 'PTHFIL' keyword for the RTP format
-! same as READRTP except now it looks for 
-!   h.ngas > 4 : for 4 gases + (1,2 or 3) cloud types
-!   h.glist = cobinations of (201,202,203)
-!     water drop           : ctype=101     in prof%gas_201
-!     Baran ice aggragates : ctype=201     in prof%gas_202
-!     andesite dust        : ctype=301     in prof%gas_203
-!   h.gunit = 1            : molecules/cm2 for gases  01:63
-!           = 5            : g/cm2         for clouds 201+
+c this subroutine deals with 'PTHFIL' keyword for the RTP format
+c same as READRTP except now it looks for 
+c   h.ngas > 4 : for 4 gases + (1,2 or 3) cloud types
+c   h.glist = cobinations of (201,202,203)
+c     water drop           : ctype=101     in prof%gas_201
+c     Baran ice aggragates : ctype=201     in prof%gas_202
+c     andesite dust        : ctype=301     in prof%gas_203
+c   h.gunit = 1            : molecules/cm2 for gases  01:63
+c           = 5            : g/cm2         for clouds 201+
 c
-! ---------------> no units conversion required <---------------
+c ---------------> no units conversion required <---------------
       SUBROUTINE READRTP_CLD100LAYER(iRTP,iProfileLayers,
      $    caPFName,caCloudPfName,iNclouds_RTP,
      $    caaCloudFile,iaNML_Ctype,iaCloudScatType,
      $    raPresslevels,iBinOrAsc,
      $    iaaRadLayer,iNumLayer,iaKsolar,
-! these are the outputs, just relevant for the 100 profile layers clouds
+c these are the outputs, just relevant for the 100 profile layers clouds
      $    iNclouds2,   ! added ESM
      $    iaCldTypes,raaKlayersCldAmt,
      $    ctype1,ctype2,cfrac1,cfrac2,
-! these are the outputs, as also set from SetRTPCloud
+c these are the outputs, as also set from SetRTPCloud
      $    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP,
      $    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,
      $    iScatBinaryFile,iNclouds3, ! added ESM
@@ -3566,7 +3869,7 @@ c
       IMPLICIT NONE
 
       include '../INCLUDE/scatter.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
       INTEGER iplev
       INTEGER inatm   ! Added ESM 
       INTEGER iProfilelayers2   ! Added ESM 
@@ -3574,15 +3877,15 @@ c
       REAL raaPrBdry(kMaxAtm,2)    ! Added ESM 
       include '../INCLUDE/KCARTA_database.param'
 
-! input params ---------------------------------------------------->
-!   raaTemp/Press  = current gas profile parameters
-!   iNpathClds     = total number of paths to be read in 
-!                    (iNclouds*kProfLayers)
-!   iProfileLayers = actual number of layers per gas profile (<=kProfLayer)
-!   caCloudfPfName = name of file containing user supplied profiles
-!   raLayerHeight  = heights of layers in km
-!   iRTP           = which profile to read in
-!   iNclouds_RTP   = how many clouds are claimed to be in the new .rtp file
+c input params ---------------------------------------------------->
+c   raaTemp/Press  = current gas profile parameters
+c   iNpathClds     = total number of paths to be read in 
+c                    (iNclouds*kProfLayers)
+c   iProfileLayers = actual number of layers per gas profile (<=kProfLayer)
+c   caCloudfPfName = name of file containing user supplied profiles
+c   raLayerHeight  = heights of layers in km
+c   iRTP           = which profile to read in
+c   iNclouds_RTP   = how many clouds are claimed to be in the new .rtp file
       REAL raPressLevels(kProfLayer+1)
       REAL raPressLevels2(kProfLayer+1)
       INTEGER ctype1,ctype2,iaNML_Ctype(kMaxClouds)
@@ -3590,50 +3893,51 @@ c
       INTEGER iRTP,iProfileLayers,iNclouds_RTP,iBinOrAsc
       INTEGER iNclouds2, iNclouds3  ! added ESM
       INTEGER iaCloudScatType(kMaxCLouds)
-      CHARACTER*80 caPFname,caCloudPfname,caaCloudFile(kMaxClouds)
-! output params  -------------------------------------------------->
-!   kMaxClouds == 5
-!   raaKlayersCldAmt = cloud profiles(s) in g/m2
-!   iNumCLds       = number of clouds
-!   iaCldTypes     = type(s) of cloud
+      CHARACTER*80 caPFname,caCloudPfname
+      CHARACTER*120 caaCloudFile(kMaxClouds)
+c output params  -------------------------------------------------->
+c   kMaxClouds == 5
+c   raaKlayersCldAmt = cloud profiles(s) in g/m2
+c   iNumCLds       = number of clouds
+c   iaCldTypes     = type(s) of cloud
       REAL raaKlayersCldAmt(kProfLayer,kMaxClouds)
       INTEGER iNclouds,iaCldTypes(kMaxClouds)
-! output params, above set into the cloud parameters ---------------->
-! iScatBinaryFile tells us if the scattering files are binary (+1) or text (-1)
+c output params, above set into the cloud parameters ---------------->
+c iScatBinaryFile tells us if the scattering files are binary (+1) or text (-1)
       INTEGER iScatBinaryFile
-! iNclouds tells us how many clouds there are 
-! iaCloudNumLayers tells how many neighboring layers each cloud occupies 
-! iaaCloudWhichLayers tells which layers each cloud occupies 
+c iNclouds tells us how many clouds there are 
+c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
+c iaaCloudWhichLayers tells which layers each cloud occupies 
       INTEGER iaCloudNumLayers(kMaxClouds) 
       INTEGER iaaCloudWhichLayers(kMaxClouds,kCloudLayers) 
-! iaCloudNumAtm stores which cloud is to be used with how many atmosphere 
-! iaCloudWhichAtm stores which cloud is to be used with which atmospheres 
+c iaCloudNumAtm stores which cloud is to be used with how many atmosphere 
+c iaCloudWhichAtm stores which cloud is to be used with which atmospheres 
       INTEGER iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm) 
-! iaaScatTable associates a file number with each scattering table 
-! caaaScatTable associates a file name with each scattering table 
+c iaaScatTable associates a file number with each scattering table 
+c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaCloudName(kMaxClouds)
-! raaaCloudParams stores IWP, cloud mean particle size 
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaCloudName(kMaxClouds)
+c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
-! raPCloudTop,raPCloudBot define cloud top and bottom pressures 
+c raPCloudTop,raPCloudBot define cloud top and bottom pressures 
       REAL raaPCloudTop(kMaxClouds,kCloudLayers)
       REAL raaPCloudBot(kMaxClouds,kCloudLayers)
-! this tells if the cloud, when "expanded", has same IWP or exponentially
-! decreasing IWP
+c this tells if the cloud, when "expanded", has same IWP or exponentially
+c decreasing IWP
       REAL raExp(kMaxClouds)
-! this tells if there is phase info associated with the cloud; else use HG
+c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       REAL cfrac1,cfrac2
-! this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+c this is for absorptive clouds
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
       INTEGER iaCtype(kMaxClouds)
       REAL    raCemis(kMaxClouds),raCngwat(kMaxCLouds),raCpsize(kMaxClouds)
       REAL    raCprtop(kMaxClouds),raCprbot(kMaxClouds)
  
-! local variables : all copied from ftest1.f (Howard Motteler's example)
+c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer   i,j,k,iG,iH,iGX,iDownward,iGasIndex,iCldIndex,iMapIndex,iDiv
       REAL      raHeight(kProfLayer+1),pProf(kProfLayer)
       REAL      kcraPressLevels(kProfLayer+1)
@@ -3647,16 +3951,16 @@ c
       INTEGER   iactype_rtp(kMaxClouds)
  
       INTEGER iaNML_CtypeX(kMaxClouds),iaMatchX(kMaxClouds)
-      CHARACTER*80 caaCloudFileX(kMaxClouds)
+      CHARACTER*120 caaCloudFileX(kMaxClouds)
 
       integer   ii,ij,ik      ! added ESM
       integer rtpopen, rtpread, rtpwrite, rtpclose, ifindj ! added ESM
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
       DO iI = 1,kMaxClouds
@@ -3730,7 +4034,7 @@ c
         kScatter          = 1        !use this setting  SingleScatter
         kScatter          = 3        !use this setting  Hybrid
         IF (kScatter .NE. 3) THEN
-          write (kStdErr,*) 'doing RTSPE! with kScatter = ',kScatter,' not 3'
+          write (kStdErr,*) 'doing RTSPEC with kScatter = ',kScatter,' not 3'
         END IF
       ELSEIF (iWhichScatterCode .EQ. 1) THEN
         kWhichScatterCode = 1        !use TwoStream
@@ -3741,7 +4045,7 @@ c
       END IF
 
       IF ((iakSolar(1) .GE. 0)  .AND. (kWhichScatterCode .EQ. 2)) THEN
-        write(kStdErr,*) 'Cannot have sun when using RTSPE! scattering'
+        write(kStdErr,*) 'Cannot have sun when using RTSPEC scattering'
         CALL DoStop
       END IF
 
@@ -3768,7 +4072,7 @@ c
 
       iScatBinaryFile         = iBinORasc
 
-! <----------------------------------------------------------------------->
+c <----------------------------------------------------------------------->
       ! now read the cloud parameters  --------------------------->
 
       fname(1:80) = caPFName(1:80)
@@ -3780,7 +4084,7 @@ c
         Call DoStop
       END IF
       kProfileUnitOpen=+1
-!      write(kStdWarn,*)  'read open status = ', status
+c      write(kStdWarn,*)  'read open status = ', status
 
       DO i = 1, iRTP
         status = rtpread(rchan, prof)
@@ -3794,7 +4098,7 @@ c
 
       write (kStdWarn,*) 'success : read in RTP gas profiles from record number ',iRTP
       status = rtpclose(rchan)
-!      write(kStdWarn,*)  'read close status = ', status
+c      write(kStdWarn,*)  'read close status = ', status
 
       kProfileUnitOpen = -1
 
@@ -3835,7 +4139,7 @@ c
             raCemis(i) = 1.0               !assume cloud totally emissive
           END IF
           raCngwat(i) = -9999            !IWP set by cloud profile
-!          raCpsize(i) = prof%udef(12)    !in microns
+c          raCpsize(i) = prof%udef(12)    !in microns
           raCpsize(i) = prof%cpsize2     !in microns
           raCprtop(i) = min(prof%plevs(1),prof%plevs(prof%nlevs))
           raCprbot(i) = prof%spres
@@ -3856,7 +4160,7 @@ c
         END DO
       END IF
 
-! <----------------------------------------------------------------------->
+c <----------------------------------------------------------------------->
       !now read the actual cloud profile ------------------->
 
       fname(1:80) = caCloudPFName(1:80)
@@ -3868,7 +4172,7 @@ c
         Call DoStop
       END IF
       kProfileUnitOpen = +1
-!      write(kStdWarn,*)  'read open status  =  ', status
+c      write(kStdWarn,*)  'read open status  =  ', status
 
       DO i = 1, iRTP
         status = rtpread(rchan, prof)
@@ -3881,10 +4185,10 @@ c
       END DO
       write (kStdWarn,*) 'success : read in RTP cloud profiles from record number ',iRTP
       status = rtpclose(rchan)
-!      write(kStdWarn,*)  'read close status = ', status
+c      write(kStdWarn,*)  'read close status = ', status
 
       kProfileUnitOpen = -1
-! <----------------------------------------------------------------------->
+c <----------------------------------------------------------------------->
 
       IF (prof%plevs(1) .lt. prof%plevs(prof%nlevs)) THEN
         !layers are from TOA to the bottom
@@ -3909,7 +4213,7 @@ c
         CALL DoStop
       END IF
 
-      iGasInRTPFile = head%ngas              !!! number of gases >=5, <= 7
+      iGasInRTPFile = head.ngas              !!! number of gases >=5, <= 7
   
       IF (prof%nlevs .GT. kProfLayer+1) THEN
         write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
@@ -3967,8 +4271,8 @@ c
       write(kStdWarn,*) 'checked input gas   profile pressure levels vs'
       write(kStdWarn,*) '        input cloud profile pressure levels ...'
 
-! this variable keeps track of how many gases should be read in
-! check that the gases are indeed 201,202,203
+c this variable keeps track of how many gases should be read in
+c check that the gases are indeed 201,202,203
 
       iaCldGasID(1) = 201
       iaCldGasID(2) = 202
@@ -3978,9 +4282,9 @@ c
       iNclouds = 0
       DO j = 1,3
         iaLoopGasIndex(j) = -1
-        DO i = 1,head%ngas
-          IF (head%glist(i) .eq. iaCldGasID(j)) THEN
-            write(kStdWarn,*) 'in the rtp file, found cloudID = ',head%glist(i)
+        DO i = 1,head.ngas
+          IF (head.glist(i) .eq. iaCldGasID(j)) THEN
+            write(kStdWarn,*) 'in the rtp file, found cloudID = ',head.glist(i)
             iNclouds                 = iNclouds + 1
             iaCldTypes(iNclouds)     = iaCldGasID(j)
             iaLoopGasIndex(iNclouds) = i
@@ -3996,31 +4300,42 @@ c
         CALL DoStop
       END IF
 
-!      prof%udef(11,:) = cngwat
-!      prof%udef(12,:) = cpsize
-!      prof%udef(13,:) = cprtop
-!      prof%udef(14,:) = cprbot
-!      prof%udef(15,:) = cfrac
-!      prof%udef(16,:) = "cfrac12", fraction of FOV containing both clouds
-!      prof%udef(17,:) = ctype {currently not used}
-! SARTA has
-!   000 - 099 = black   clouds
-!   100 - 199 = water   clouds
-!   200 - 299 = ice     clouds
-!   300 - 399 = mineral clouds
-!   400 - 499 = seasalt clouds
-!   500 - 599 = soot/smoke         clouds
-!   600 - 699 = sulphate/pollution clouds
-! right now all kCARTA worries about is water, ice or mineral = (300-699) clds
+c      prof%udef(11,:) = cngwat
+c      prof%udef(12,:) = cpsize
+c      prof%udef(13,:) = cprtop
+c      prof%udef(14,:) = cprbot
+c      prof%udef(15,:) = cfrac
+c      prof%udef(16,:) = "cfrac12", fraction of FOV containing both clouds
+c      prof%udef(17,:) = ctype {currently not used}
+c SARTA has
+c   000 - 099 = black   clouds
+c   100 - 199 = water   clouds
+c   200 - 299 = ice     clouds
+c   300 - 399 = mineral clouds
+c   400 - 499 = seasalt clouds
+c   500 - 599 = soot/smoke         clouds
+c   600 - 699 = sulphate/pollution clouds
+c right now all kCARTA worries about is water, ice or mineral = (300-699) clds
 
       !! check that ctype and cpsizes match between nml and rtp info
       !! can only check upto 2 clouds from RTP file
       iactype_rtp(1) = prof%ctype
       IF (iNclouds .GE. 2) THEN
-!        iactype_rtp(2) = prof%udef(17)
+c        iactype_rtp(2) = prof%udef(17)
         iactype_rtp(2) = prof%ctype2
       END IF
 
+      IF ((iNclouds .EQ. 2) .AND. (prof%ctype2 .LT. 100)) THEN
+        write(kStdErr,*)  ' hmmm iNclouds .EQ. 2, prof%ctype2 .LT. 100, reset iNclouds to 1'
+        write(kStdWarn,*) ' hmmm iNclouds .EQ. 2, prof%ctype2 .LT. 100, reset iNclouds to 1'	
+        iNclouds = iNclouds - 1
+      END IF
+      IF ((iNclouds .EQ. 1) .AND. (prof%ctype .LT. 100)) THEN
+        write(kStdErr,*)  ' hmmm iNclouds .EQ. 1, prof%ctype0 .LT. 100, reset iNclouds to 0'
+        write(kStdWarn,*) ' hmmm iNclouds .EQ. 1, prof%ctype0 .LT. 100, reset iNclouds to 0'	
+        iNclouds = iNclouds - 1
+      END IF
+      
       raCloudDME(1) = prof%cpsize
       raCloudDME(2) = prof%cpsize2
 
@@ -4031,31 +4346,36 @@ c
         iH = iDiv(iaCloudScatType(j),100)
 
         IF ((iG .LT. 1) .OR. (iH .LT. 1)) THEN
-          write(kStdErr,*) 'kCARTA cannot do "black clouds" here '
-          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',
-     $    j,iaCloudScatType(j),iactype_rtp(j)
+          write(kStdErr,*) 'kCARTA cannot do "black clouds" here : j,iNclouds',j,iNclouds
+          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',j,iaCloudScatType(j),iactype_rtp(j)
+	  IF (j .EQ. 2) THEN
+	    write(kStdErr,*) ' .... showing you j=1'
+            write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',1,iaCloudScatType(1),iactype_rtp(1)	    
+	  ELSEIF (j .EQ. 1) THEN
+	    write(kStdErr,*) ' .... showing you j=2'
+            write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',2,iaCloudScatType(2),iactype_rtp(2)
+	  END IF
           CALL DoStop
         END IF
 
         IF (iG .NE. iH) THEN
           write(kStdErr,*) 'RTP and kCARTA have different cloud types here '
-          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',
-     $    j,iaCloudScatType(j),iactype_rtp(j)
+          write(kStdErr,*) ' j,iaCloudScatType(j),iactype_rtp(j) ',j,iaCloudScatType(j),iactype_rtp(j)
           CALL DoStop
         ELSE
           write(kStdWarn,*) 'j,iaCloudScatType(j),iactype_rtp(j),p.gas_ID(j) = ', j,iaCloudScatType(j),iactype_rtp(j),iaCldTypes(j)
         END IF
         
-!        IF ((j .EQ. 1) .AND. (iG .NE. 1)) THEN
-!          write(kStdErr,*) 'oh oh kCARTA assumes gas201 == water'
-!          CALL DOStop
-!        ELSEIF ((j .EQ. 2) .AND. (iG .NE. 2)) THEN
-!          write(kStdErr,*) 'oh oh kCARTA assumes gas202 == ice'
-!          CALL DOStop
-!        ELSEIF ((j .EQ. 3) .AND. (iG .NE. 3)) THEN
-!          write(kStdErr,*) 'oh oh kCARTA assumes gas203 == dust'
-!          CALL DOStop
-!        END IF
+c        IF ((j .EQ. 1) .AND. (iG .NE. 1)) THEN
+c          write(kStdErr,*) 'oh oh kCARTA assumes gas201 == water'
+c          CALL DOStop
+c        ELSEIF ((j .EQ. 2) .AND. (iG .NE. 2)) THEN
+c          write(kStdErr,*) 'oh oh kCARTA assumes gas202 == ice'
+c          CALL DOStop
+c        ELSEIF ((j .EQ. 3) .AND. (iG .NE. 3)) THEN
+c          write(kStdErr,*) 'oh oh kCARTA assumes gas203 == dust'
+c          CALL DOStop
+c        END IF
 
       END DO
 
@@ -4156,7 +4476,7 @@ c
       write(kStdWarn,*) ' CLD | TYPE | KLAYERSID | CTYPE | ISCATTAB |         datafile'
       write(kStdWarn,*) ' ------------------------------------------------------------'
 
-! now set the auxiliary info as in SetRTPCloud      
+c now set the auxiliary info as in SetRTPCloud      
       DO iG = 1,iNclouds
         iGasIndex = iG
         iCldIndex = iaCldTypes(iGasIndex) - iaCldGasID(1) + 1
@@ -4203,17 +4523,17 @@ c! added ESM
       END
 
 c************************************************************************
-! OLD NLTE routines, need to clean these up
-! this subroutine reads 48 regression profiles to see which is closest to the
-! current profile, so that kCARTA can figure out which NLTE temps to use!!!
+c OLD NLTE routines, need to clean these up
+c this subroutine reads 48 regression profiles to see which is closest to the
+c current profile, so that kCARTA can figure out which NLTE temps to use!!!
       SUBROUTINE NLTE_RegrTemp(raa48Temp,raa48Press,ia48layers)
 
       implicit none
 
       include '../INCLUDE/kcarta.param'
-      include 'rtpdefs_f90.f90'
+      include 'rtpdefs.f'
 
-! the 48 regression profile kineti! temperatures
+c the 48 regression profile kinetic temperatures
       REAL raa48Temp(kMaxLayer,kRegrProf)
       REAL raa48Press(kMaxLayer,kRegrProf)
       INTEGER ia48layers(kRegrProf)
@@ -4221,17 +4541,17 @@ c************************************************************************
       REAL rAmt,rT,rP,rPP,rH,rdP,rdT,raPressLevels(kMaxLayer+1)
       INTEGER iDownWard
 
-! local variables : all copied from ftest1.f (Howard Motteler's example)
+c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer i,j,k,iG,iK,iJ,iI,iRTP,iL1,iProfileLayers,iGasInRTPFile,iFindJ
       REAL pProf(kMaxLayer),pTemp(kMaxLayer),MGC,plays(kMaxLayer)
       
       integer rtpopen, rtpread, rtpwrite, rtpclose
-      type(RTPHEAD) head
-      type(RTPPROF) prof
-      type(RTPATTR) hatt(MAXNATTR), patt(MAXNATTR)
+      record /RTPHEAD/ head
+      record /RTPPROF/ prof
+      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
       integer status
       integer rchan
-      character*32 mode
+      character*1 mode
       character*80 fname
 
       MGC = kMGC
@@ -4253,11 +4573,11 @@ c************************************************************************
         Call DoStop
       END IF
       kProfileUnitOpen = +1
-!      write(kStdWarn,*)  'read open status = ', status
+c      write(kStdWarn,*)  'read open status = ', status
 
       iRTP = 48
       DO iJ = 1, iRTP      
-!        write(kStdWarn,*) 'Reading temperature regression profile ',iJ
+c        write(kStdWarn,*) 'Reading temperature regression profile ',iJ
 
         status = rtpread(rchan, prof)
         IF (prof%plevs(1) .lt. prof%plevs(prof%nlevs)) THEN
@@ -4271,7 +4591,7 @@ c************************************************************************
         iL1 = prof%nlevs - 1         !!! number of layers = num of levels - 1
         iProfileLayers = iL1
         ia48layers(iJ) = iL1
-        iGasInRTPFile = head%ngas              !!! number of gases
+        iGasInRTPFile = head.ngas              !!! number of gases
 
         IF (prof%nlevs .GT. kMaxLayer+1) THEN
           write(kStdErr,*) 'this routine compiled for ',kMaxLayer,' layers'
@@ -4290,7 +4610,7 @@ c************************************************************************
           pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
         END DO
 
-! now loop (for water only) in the supplied profile
+c now loop (for water only) in the supplied profile
         DO i = 1, prof%nlevs - 1
           j = iFindJ(kMaxLayer,I,iDownWard)
           rT   = prof%ptemp(i)
@@ -4313,23 +4633,23 @@ c************************************************************************
 
       write (kStdWarn,*) 'success : read in 48 regression profiles ',iRTP
       status = rtpclose(rchan)
-!      write(kStdWarn,*)  'read close status = ', status
+c      write(kStdWarn,*)  'read close status = ', status
       kProfileUnitOpen = -1
 
-!      DO iI = 1,kRegrProf
-c!        DO iJ = kMaxLayer-ia48layers(iI)+1,kMaxLayer
-!        DO iJ = 1,kMaxLayer
-!          print *,iI,ia48layers(iI),iJ,raa48Press(iJ,iI),raa48Temp(iJ,iI)
-!        END DO
-!        print *,' '
-!      END DO
+c      DO iI = 1,kRegrProf
+cc        DO iJ = kMaxLayer-ia48layers(iI)+1,kMaxLayer
+c        DO iJ = 1,kMaxLayer
+c          print *,iI,ia48layers(iI),iJ,raa48Press(iJ,iI),raa48Temp(iJ,iI)
+c        END DO
+c        print *,' '
+c      END DO
 
       RETURN
       END
 
 c************************************************************************
 
-! this subroutine finds the closest regression profile
+c this subroutine finds the closest regression profile
       SUBROUTINE closest_regr_lowertrop(raTempIn,
      $                                raPressLevels,iNumLayers,iRegr)
 
@@ -4337,14 +4657,14 @@ c************************************************************************
 
       include '../INCLUDE/kcarta.param'
 
-! input
-      REAL raTempIn(kProfLayer)         !!!input kineti! temp profile
+c input
+      REAL raTempIn(kProfLayer)         !!!input kinetic temp profile
       REAL raPressLevels(kProfLayer+1)  !!!pressure levels
       INTEGER iNumLayers                !!!number of layers
-! output
+c output
       INTEGER iRegr               !!!which regr profile this is closest to
 
-! local vars
+c local vars
       REAL raa48Temp(kMaxLayer,kRegrProf)
       REAL raa48Press(kMaxLayer,kRegrProf)
       INTEGER ia48layers(kRegrProf),iN,i800,i25
@@ -4408,7 +4728,7 @@ c************************************************************************
         DO iJ = i800,i25
           rChi = rChi + (raT(iJ)-raa48Temp(iJ,iI))**2
         END DO
-!        print *,iI,rChi
+c        print *,iI,rChi
         IF (rChi .LT. rMin) THEN
           iRegr = iI
           rMin = rChi
@@ -4416,8 +4736,8 @@ c************************************************************************
       END DO
 
       write(kStdWarn,*) 'Closest lower-atm regr profile = ',iRegr
-!      print *, 'Closest regr = ',iRegr
-!      CALL DoStop
+c      print *, 'Closest regr = ',iRegr
+c      CALL DoStop
 
       RETURN
       END

@@ -31,3 +31,13 @@
 	make -f Makefile scat		
 	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv
+
+400_default_f90:
+	make -f Makefile_v118_Intelf90 datafix400_H2012
+	make -f Makefile_v118_Intelf90
+	make -f Makefile_v118_Intelf90 scat
+	make -f Makefile_v118_Intelf90 parallel	
+	mv ../BIN/bkcarta.x        ../BIN/bkcarta.x_f90_400ppmv
+	mv ../BIN/bkcartaTXT.x     ../BIN/bkcartaTXT.x_f90_400ppmv
+	mv ../BIN/kcarta.x         ../BIN/kcarta.x_f90_400ppmv
+	mv ../BIN/kcartaparallel.x ../BIN/kcartaparallel.x_f90_400ppmv	
