@@ -968,7 +968,7 @@ c actually, this is technically done above)
         CALL SetMieTables_RTSPEC_100layer(raFreq,
      $        !!!!!!!!!!!!!!!!!these are the input variables 
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
-     $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
+     $        raaaCloudParams,iaaScatTable,caaaScatTable,
      $        iaPhase,raPhasePoints,raComputedPhase,
      $        iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer,
      $        -1,             !!!!iSergio = -1 to make things ok
@@ -1347,7 +1347,7 @@ c now these are the first few lines of interface_simple
         CALL SetMieTables_RTSPEC_100layer(raFreq,
      $        !!!!!!!!!!!!!!!!!these are the input variables 
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
-     $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
+     $        raaaCloudParams,iaaScatTable,caaaScatTable,
      $        iaPhase,raPhasePoints,raComputedPhase,
      $        iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer,
      $        -1,             !!!!iSergio = -1 as this is MY code 

@@ -2012,7 +2012,7 @@ c ra(P/R)Amt  = reference/actual gas amounts
       INTEGER iKtype
       REAL raPAmt(kProfLayer)
       DOUBLE PRECISION daaAbsCoeff(kMaxPts,kProfLayer)
-      DOUBLE PRECISION daaDA(kMaxPts,kProfLayer)
+      DOUBLE PRECISION daaDA(kMaxPtsJac,kProfLayerJac)
 
 c local variables
       INTEGER iFr,iLay
@@ -2058,7 +2058,7 @@ c ra(P/R)Amt  = reference/actual gas amounts
       INTEGER iKtype
       REAL raPAmt(kProfLayer)
       DOUBLE PRECISION daaAbsCoeff(kMaxPts,kProfLayer)
-      DOUBLE PRECISION daaDA(kMaxPts,kProfLayer)
+      DOUBLE PRECISION daaDA(kMaxPtsJac,kProfLayerJac)
 
 c local variables
       INTEGER iFr,iLay

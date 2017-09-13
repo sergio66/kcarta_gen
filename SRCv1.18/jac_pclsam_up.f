@@ -347,8 +347,9 @@ c have to do all the iNumLayer radiances
               CALL DataBaseCheck(iaGases(iG),raFreq,iTag,iActualTag,
      $          iDoAdd,iErr)
               IF (iDoAdd .GT. 0) THEN             
-                CALL JacobGasAmtFM1UP(raFreq,raaRad,iGasJacList,iLay, 
-     $            iNumGases,iaaRadLayer,iAtm,iNumLayer, 
+                CALL JacobGasAmtFM1UP(raFreq,raSun,raaRad,iGasJacList,iLay, 
+     $            iNumGases,
+     $            iaaRadLayer,iAtm,iNumLayer, 
      $            raaOneMinusTau,raaTau,raaaAllDQ,raResults, 
      $            raaLay2Gnd,rSatAngle,raLayAngles,raaGeneral,rWeight) 
                 IF (kSolar .GE. 0) THEN
@@ -487,7 +488,7 @@ c then do the temperatures d/dT
 c for each of the iNumLayer radiances, cumulatively add on all  
 c iNumGases contributions (this loop is done in JacobTemp) 
           write(kStdWarn,*)'temp d/dT layer# = ',iLay,iaaRadLayer(iAtm,iLay) 
-          CALL JacobTempFM1UP(raFreq,raaRad,raaRadDT,iLay, 
+          CALL JacobTempFM1UP(raFreq,raSun,raaRad,raaRadDT,iLay, 
      $            iaaRadLayer,iAtm,iNumLayer, 
      $            raaOneMinusTau,raaTau,raaAllDT,raResults, 
      $            raaLay2Gnd,rSatAngle,raLayAngles,raaGeneral,rWeight) 
@@ -590,7 +591,7 @@ c input vars
       REAL raaSSAlbJacobDME(kMaxPts,kProfLayerJac)   !scattering d/d(DME) 
       REAL raaAsymJacobDME(kMaxPts,kProfLayerJac)   !asymmetry  d/d(DME) 
 c output vars
-      REAL raResults(kMaxPts)
+      REAL raResults(kMaxPtsJac)
 
 c local vars 
       INTEGER iL,iFr,iDoSolar
@@ -712,7 +713,7 @@ c input vars
       REAL raaSolarScatterCumul(kMaxPts,kProfLayer) 
       INTEGER iNumLayer
 c output vars
-      REAL raResults(kMaxPts)
+      REAL raResults(kMaxPtsJac)
 
 c local vars 
       INTEGER iL,iFr,iDoSolar
@@ -791,7 +792,7 @@ c input vars
       REAL raaSolarScatterCumul(kMaxPts,kProfLayer) 
       INTEGER iNumLayer
 c output vars
-      REAL raResults(kMaxPts)
+      REAL raResults(kMaxPtsJac)
 
 c local vars 
       INTEGER iL,iFr,iDoSolar

@@ -49,7 +49,7 @@ c rFileStartFr is the (real) ID of the relevant k-comp file
       REAL rFileStartFr
       INTEGER iNumGases,iError,iGas
       INTEGER iaGases(kMaxGas)
-      INTEGER iaCONT(kGasStore)
+      INTEGER iaCONT(kMaxGas)
 c raFreq has the frequencies (in wavenumbers)
 c rFReqStart,rFreqEnd are the endpts
       REAL raFreq(kMaxPts),rFreqStart,rFreqEnd

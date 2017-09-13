@@ -892,7 +892,7 @@ c iaGases       = integer array with list of gasID's in order they were read in
 c iErr          = error count (mainly associated with file I/O)
 c iNumGases     = total number of gases read in from *MOLGAS + *XSCGAS
 c iaCont        = array indicating whther or not to do continuum/no continuum 
-      INTEGER iErr,iaCONT(kGasStore)
+      INTEGER iErr,iaCONT(kMaxGas)
 c caFfileName   = name of input file
       CHARACTER*80 caDriverName
 c this is for MOLGAS

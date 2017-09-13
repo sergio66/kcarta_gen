@@ -299,7 +299,7 @@ c make sure pressures are decreasing with index ie layers going higher and highe
 c now change all units first to PPMV (unit 10) and then to Volume Mix Ratio (unit 12)
 c actually this is a waste of time as we go from VMR (units 12) to PPMV (units 10) back to VMR (unit 12)
       DO iG = 1,iNumGases
-        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR)
+        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR,+1)
         iaGasUnits(iG) = 12
         DO iL = 1,iNumLevs
           raaG_MR(iL,iG) =  raaG_MR(iL,iG) / 1.0e6	  
@@ -695,7 +695,7 @@ c make sure pressures are decreasing with index ie layers going higher and highe
 
 c now change all units to MR
 c      DO iG = 1,iNumGases
-c        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR)
+c        CALL changeLVLS_2_ppmv(iaG(iG),iaGasUnits(iG),iNumLevs,iG,raP,raT,raaG_MR,+1)
 c        DO iL = 1,iNumLevs
 c          raaG_MR(iL,iG) =  raaG_MR(iL,iG) / 1.0e6
 c          iaGasUnits(iG) = 12

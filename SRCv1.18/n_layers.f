@@ -2875,12 +2875,12 @@ c make sure pressures are decreasing with index ie layers going higher and highe
 	  DO iL = 1,iNumLevs
             raX(iL) = raaG_VMR(iL,iG)	
           END DO
-	  CALL r_sort_loglinear(raP,raX,iNumLevs,rPRefMin,rX,1)
+	  CALL r_sort_loglinear1(raP,raX,iNumLevs,rPRefMin,rX,1)
 	  raaG_VMR(iNumLevs,iG) = rX
 	END DO
 
         !!! interpolate T(z) last point to rPRefMin
-        CALL r_sort_loglinear(raP,raT,iNumLevs,rPRefMin,rX,1)
+        CALL r_sort_loglinear1(raP,raT,iNumLevs,rPRefMin,rX,1)
 	raT(iNumLevs) = rX
 	
         !!! set last point to 0.005 mb
@@ -2896,12 +2896,12 @@ c make sure pressures are decreasing with index ie layers going higher and highe
 	  DO iL = 1,iNumLevs
             raX(iL) = raaG_VMR(iL,iG)	
           END DO
-	  CALL r_sort_loglinear(raP,raX,iNumLevs,rPRefMinAugmented,rX,1)
+	  CALL r_sort_loglinear1(raP,raX,iNumLevs,rPRefMinAugmented,rX,1)
 	  raaG_VMR(iNumLevs,iG) = rX
 	END DO
 
         !!! interpolate T(z) last point to rPRefMin
-        CALL r_sort_loglinear(raP,raT,iNumLevs,rPRefMinAugmented,rX,1)
+        CALL r_sort_loglinear1(raP,raT,iNumLevs,rPRefMinAugmented,rX,1)
 	raT(iNumLevs) = rX
 	
         !!! set last point to 0.00275 mb

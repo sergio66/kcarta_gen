@@ -365,8 +365,8 @@ parallel: kcartaparallel.x
 kcartaparallel.x : $(OBJSPARALLEL) $(OBJSRTP)
 	$(FORTRANX) -o kcartaparallel.x $(FLAGS) $(OBJSPARALLEL) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
 
-kcartaparallel.o : kcartaparallel.f $(PARAMS)
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartaparallel.f
+kcartaparallel.o : kcartaparallel.f90
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartaparallel.f90
 
 ################ OPTICAL DEPTHS (LTE and NLTE) ###########################
 ###### lte routines

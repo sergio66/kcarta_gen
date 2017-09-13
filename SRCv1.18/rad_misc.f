@@ -1535,7 +1535,7 @@ c raaPrBdry = pressure start/stop
 c raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 c                   user specified values if positive
 c raUseEmissivity is the emissivity vector for the current 25 cm-1 chunk
-      REAL raUseEmissivity(kMaxPts),raSunRefl(kMaxPts),rakSolarRefl(kMaxPts)
+      REAL raUseEmissivity(kMaxPts),raSunRefl(kMaxPts),rakSolarRefl(kMaxAtm)
 c rakSolarAngle = solar angles for the atmospheres
 c rakThermalAngle=thermal diffusive angle
 c iakthermal,iaksolar = turn on/off solar and thermal

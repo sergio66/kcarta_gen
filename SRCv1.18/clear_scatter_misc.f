@@ -5159,8 +5159,9 @@ c this is just to set everything about clouds relative to TOA layer
 c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
-      REAL raaKlayersCldAmt(kProfLayer,kMaxWater)
-      INTEGER iaCldTypes(kMaxWater)
+      !! for some reason I had used kMaxWater instead of kMaxClouds here??????
+      REAL raaKlayersCldAmt(kProfLayer,kMaxClouds)
+      INTEGER iaCldTypes(kMaxClouds)
 
 c ---------------- outputs from the scattering tables ------------------- 
 c --------------------- produced by Evans Mie code ---------------------- 

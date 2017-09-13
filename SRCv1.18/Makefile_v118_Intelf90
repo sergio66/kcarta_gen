@@ -60,6 +60,7 @@ SHELL = /bin/sh
 # $ module load intel/compiler/64/2017
 # $ module load intel/mkl/64
 # $ module load szip/2.1
+
 #FORTRANX = /cm/shared/apps/intel/composer_xe/2015.3.187/bin/intel64/ifort  before Apr 2016
 #FORTRANX = /cm/shared/apps/intel/composer_xe/2015.5.223/bin/intel64/ifort  after April 2016
 #FORTRANX = /cm/shared/apps/intel/composer_xe/current/bin/intel64/ifort     after April 2016
@@ -68,12 +69,12 @@ SHELL = /bin/sh
 FORTRANX = ifort   ## GENERIC< should always work!!!
 #
 # DEBUG TOO MUCH INFO BUT EXCELLENT: see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp#_created -gen-interfaces -warn interfaces  -mcmodel=medium
+FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp_created -gen-interfaces -warn interfaces  -mcmodel=medium
 # DEBUG GOOD : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
+#FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
 #
 # ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT
-FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
+#FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
 # ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT
 #
 #UFLAG = 

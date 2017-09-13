@@ -627,7 +627,7 @@ c input vars
       REAL raaSSAlbJacobDME(kMaxPts,kProfLayerJac)   !scattering d/d(DME) 
       REAL raaAsymJacobDME(kMaxPts,kProfLayerJac)   !asymmetry  d/d(DME) 
 c output vars
-      REAL raResults(kMaxPts)
+      REAL raResults(kMaxPtsJac)
 
 c local vars 
       INTEGER iL,iLay,iFr,iDoSolar
@@ -744,7 +744,7 @@ c input vars
       REAL raaAllDT(kMaxPtsJac,kProfLayerJac)
       REAL raaSolarScatter1Lay(kMaxPts,kProfLayer) 
 c output vars
-      REAL raResults(kMaxPts)
+      REAL raResults(kMaxPtsJac)
 
 c local vars 
       INTEGER iL,iLay,iFr,iDoSolar
@@ -821,7 +821,7 @@ c input vars
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaSolarScatter1Lay(kMaxPts,kProfLayer) 
 c output vars
-      REAL raResults(kMaxPts)
+      REAL raResults(kMaxPtsJac)
 
 c local vars 
       INTEGER iL,iLay,iFr,iDoSolar

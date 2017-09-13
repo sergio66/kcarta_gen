@@ -761,7 +761,7 @@ c >>>>>>>>>>
      $               TABEXTINCT, TABSSALB, TABASYM,
      $               TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN,
      $               RADOBS, 
-     $               IBDRY, TOA_to_instr(iFr))    !these are 2 new parameters
+     $               IBDRY, TOA_to_instr(iFr),1)    !these are 3 new parameters
 
             raaDownFlux(iFr,iLay)=raaDownFlux(iFr,iLay)+ 
      $                          radobs*SNGL(daGaussWt(iAngle))
@@ -784,7 +784,7 @@ c >>>>>>>>>>
      $               TABEXTINCT, TABSSALB, TABASYM,
      $               TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN,
      $               RADOBS, 
-     $               IBDRY, TOA_to_instr(iFr))    !these are 2 new parameters
+     $               IBDRY, TOA_to_instr(iFr),1)    !these are 3 new parameters
 
             raaDownFlux(iFr,iLay)=raaDownFlux(iFr,iLay)+ 
      $                          radobs*SNGL(daGaussWt(iAngle))
@@ -894,7 +894,7 @@ c >>>>>>>>>>
      $               TABEXTINCT, TABSSALB, TABASYM,
      $               TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN,
      $               RADOBS, 
-     $               IBDRY, TOA_to_instr(iFr))    !these are 2 new parameters
+     $               IBDRY, TOA_to_instr(iFr),1)    !these are 3 new parameters
 
             raaUpFlux(iFr,iLay)=raaUpFlux(iFr,iLay)+ 
      $                          radobs*SNGL(daGaussWt(iAngle))
@@ -917,7 +917,7 @@ c >>>>>>>>>>
      $               TABEXTINCT, TABSSALB, TABASYM,
      $               TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN,
      $               RADOBS, 
-     $               IBDRY, TOA_to_instr(iFr))    !these are 2 new parameters
+     $               IBDRY, TOA_to_instr(iFr),1)    !these are 3 new parameters
 
             raaUpFlux(iFr,iLay)=raaUpFlux(iFr,iLay)+ 
      $                          radobs*SNGL(daGaussWt(iAngle))
