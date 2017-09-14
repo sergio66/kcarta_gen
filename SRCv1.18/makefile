@@ -23,6 +23,9 @@
 	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_highres605_1205
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_highres605_1205	
 
+clean: 
+	rm *.o *~ 2> /dev/null || true
+
 ########################################################################
 
 400_default:

@@ -1928,7 +1928,7 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       REAL raaPress(kProfLayer,kGasStore),raaPartPress(kProfLayer,kGasStore)
       REAL raaRAmt(kProfLayer,kGasStore),raaRPartPress(kProfLayer,kGasStore)      
       REAL raaMix(kMixFilRows,kGasStore),rFrLow,rFrHigh
-      INTEGER iNatm,iNatm2,iaNumLayers(kMaxAtm),iJacob,iaJacob(kMaxAtm)
+      INTEGER iNatm,iNatm2,iaNumLayers(kMaxAtm),iJacob,iaJacob(kMaxDQ)
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
       INTEGER iaSetEms(kMaxAtm),iProfileLayers
       INTEGER iDoUpperAtmNLTE,iNumNLTEGases,iDumpAllUARads,iDumpAllUASpectra

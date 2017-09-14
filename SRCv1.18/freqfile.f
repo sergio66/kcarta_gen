@@ -137,6 +137,7 @@ c assume GASID , freqs are wrong
 
       caFName = kCompParamFile
       iIOUN = kTempUnit
+c      print *,iIOUN,caFName
       OPEN(UNIT=iIOUN,FILE=caFname,STATUS='old',
      $    FORM='FORMATTED',IOSTAT=iFileErr)
 

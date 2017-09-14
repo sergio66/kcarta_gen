@@ -489,9 +489,10 @@ c set overrides
           iaaOverrideDefault(iI,iJ) = iaaOverride(iI,iJ)
         END DO
       END DO
-      write(kStdWarn,*) 'default/final diff override params'
+      write(kStdWarn,*) 'default | final | diff override params'
       write(kStdWarn,*) '---------------------------------------'      
-      DO iI = 1,4      
+      DO iI = 1,4
+        write(kStdWarn,'(A,I2)') 'iI = ',iI
         DO iJ = 1,10 
           write(kStdWarn,*) iaaOverrideOrig(iI,iJ),iaaOverrideDefault(iI,iJ),iaaOverrideOrig(iI,iJ)-iaaOverrideDefault(iI,iJ)
         END DO

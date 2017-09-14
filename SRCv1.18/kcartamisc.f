@@ -1172,6 +1172,7 @@ c this subroutine close units
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
+      
       INTEGER iNumGases,iaGases(kMaxGas),iaList(kNumkCompT)
       REAL raFiles(kNumkCompT)
       INTEGER iI,iJ,iG,iaSum(kMaxGas),iaCount(kMaxGas),iSum,iaJunk(kMaxGas)
@@ -1184,8 +1185,10 @@ c this subroutine close units
 
       write(kStdWarn,*) 'Stats of compressed vecs per gas per chunk'
       DO iI = 1,kMaxGas
-        iaSum(kMaxGas) = 0
+        iaSum(iI) = 0
+	iaCount(iI) = 0
       END DO
+      
       DO iI = 1,iNumGases
         iG = iaGases(iI)
         write(kStdWarn,*) 'num compressed vector stats for gas #, gasID ',iI,iG
