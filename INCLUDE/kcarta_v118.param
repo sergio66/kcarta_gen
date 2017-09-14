@@ -15,9 +15,9 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
       include '../INCLUDE/pre_defined.param'                          !!!
-c template file : template_kcartaV118_385_H2012.param                 !!!
+c template file : template_kcartaV118_400_H2012.param                 !!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-      PARAMETER(caVersion='v1.18 16-10-01 template_kcartaV118_385_H2012.param')      !!!
+      PARAMETER(caVersion='v1.18 16-10-01 template_kcartaV118_400_H2012.param')      !!!      
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -35,7 +35,7 @@ c kOrigRefPath == path to original 100 layers reference profiles
 c              == these profiles were used in making the kCARTA database
       CHARACTER*80 kOrigRefPath
       PARAMETER (kOrigRefPath = 
-     $          '/asl/data/kcarta_sergio/KCDATA/RefProf_July2010.For.v115up_CO2ppmv385/')
+     $          '/asl/data/kcarta_sergio/KCDATA/RefProf_July2010.For.v115up_CO2ppmv400/')
 
 c need paths to comp.param and xsec.param == files that detail what gasID's
 c and frequency combinations are in the compressed/crosssection databases
@@ -312,10 +312,10 @@ c                         UA LTE kCARTA database, alyers 101 - 120
 c kCO2ppmv       == CO2 ppmv used in the kCARTA database, for LTE 1 .. 100 layers
       CHARACTER*80 kCO2ppmvFile,kCO2ppmvFileBack,kCO2ppmvFileBackUA
       INTEGER      kCO2ppmv
-      PARAMETER (kCO2ppmv           = 385)
-      PARAMETER (kCO2ppmvFile       = '/asl/data/kcarta_sergio/KCDATA/General/refgas2_385ppmv')
-      PARAMETER (kCO2ppmvFileBack   = '/asl/data/kcarta_sergio/KCDATA/General/refgas2Back_385ppmv')
-      PARAMETER (kCO2ppmvFileBackUA = '/asl/data/kcarta_sergio/KCDATA/General/refgas2BackUA_385ppmv')
+      PARAMETER (kCO2ppmv           = 400)
+      PARAMETER (kCO2ppmvFile       = '/asl/data/kcarta_sergio/KCDATA/General/refgas2_400ppmv')
+      PARAMETER (kCO2ppmvFileBack   = '/asl/data/kcarta_sergio/KCDATA/General/refgas2Back_400ppmv')
+      PARAMETER (kCO2ppmvFileBackUA = '/asl/data/kcarta_sergio/KCDATA/General/refgas2BackUA_400ppmv')
 
 c --------- > (C) these are the extra needed files
 c also need paths to where the xsec, CKD and Solar Radiance Files are
@@ -345,7 +345,7 @@ c kGasStore == max number of gases we allocate storage for
 c              (from GASFIL + XSCFIL + WaterSelf + WaterFor <= kMaxGas)
 c kMixFilRows== max number of mixfil rows that can be read in
       INTEGER kMaxAtm,kGasStore,kMixFilRows,kMaxPrint
-      PARAMETER (kMaxAtm=6,kGasStore=80,kMixFilRows=kProfLayer*3)
+      PARAMETER (kMaxAtm=6,kGasStore=80,kMixFilRows=kProfLayer*2)
       PARAMETER (kMaxPrint=10)
 
 c kEmsRegions=how many wavenumber dependent regions can be read in from 
@@ -358,7 +358,7 @@ c kMaxDQ = max number of gases we do d/dq for (GasID's 1..6) HUGE MEMORY!!!
 c kProfLayerJac = kProfLayer if Jacobians on, 1 otherwise
 c kMaxPtsJac    = kMaxPts=10000 if Jacobians on, 1 otherwise
       INTEGER kMaxDQ,kProfLayerJac,kMaxPtsJac
-      PARAMETER (kMaxDQ=1,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
+      PARAMETER (kMaxDQ=2,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
 c when kProfLayerJac,kMaxPtsJac are set to 1, this is "space saver" mode
 c      PARAMETER (kMaxDQ=1,kProfLayerJac=1,kMaxPtsJac=1)
 
@@ -428,16 +428,16 @@ c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/,
 c they have been copied to /asl/data/kcarta; these files have removed 19 NLTE bands
 c this is where we have lower atm weakline database
       CHARACTER*80 caWeakCO2Path
-      PARAMETER (caWeakCO2Path = '/asl/data/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/385ppmv/')
+      PARAMETER (caWeakCO2Path = '/asl/data/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/400ppmv/')
 c this is where the upper atm weakline database lies
       CHARACTER*80 caWeakUpperAtmCO2Path
       PARAMETER (caWeakUpperAtmCO2Path =
-     $   '/asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/')
+     $   '/asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/400ppmv/')
 
 c this is where the strong band linemix strengths arel files mmade by SPECTRA/CO2_COMMON/y1s.m
 c see /home/sergio/KCARTA/SRC/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/ReadmeBlog
       CHARACTER*120 caLineMixDir
-      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H12_385/')
+      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H12_400/')
 c*********************
 
 c the NLTE vib temp profiles
@@ -475,7 +475,7 @@ c /asl/packages/sartaV108/Src_rtpV201
      $     '/asl/data/kcarta_sergio/KCDATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat')
 
 c*************************
-c caUA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for UA CO2
+c caUA_US_STD_400ppmv has the US STD profile (for 400 ppmv) for UA CO2
 c caLA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for LA CO2
 c this is useful when doing LBL NLTE calcs
       CHARACTER*80 caUA_US_STD_385ppmv,caLA_US_STD_385ppmv

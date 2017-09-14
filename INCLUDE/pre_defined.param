@@ -101,7 +101,7 @@ c note kPlanck1=1.1911E-5 ==> units in mW; kPlanck1=1.1911E-8 ==> units in W
       DOUBLE PRECISION kPi,kSunTemp,kTSpace,kAvog,kBoltzmann,kMGC
       DOUBLE PRECISION kPlanck1,kPlanck2,kAtm2mb
       PARAMETER (kPi=3.1415926535898d0,kSunTemp=5800.0d0,
-     $    kTSpace=2.7d0,kAvog=6.022045d26,kBoltzmann=1.380658d-23)
+     c    kTSpace=2.7d0,kAvog=6.022045d26,kBoltzmann=1.380658d-23)
       PARAMETER (kPlanck1=1.1911D-5,kPlanck2=1.4387863d0)
       PARAMETER (kAtm2mb=1013.25,kMGC=8.314674269981136)
 
@@ -190,9 +190,9 @@ cccc
 c if the user wants actual files, instead of STDIN,STDOUT,
 c these set driver file input,kcarta std output, jacobian file unit numbers
       INTEGER    kStdDriverKK,  kStdkCartaKK,   kStdJacobKK,    
-     $           kStdJacob2KK
+     c           kStdJacob2KK
       PARAMETER (kStdDriverKK=9,kStdkCartaKK=10,kStdJacobKK=11,
-     $           kStdJacob2KK=25)
+     c           kStdJacob2KK=25)
 c this sets the compressed/cross sectional database, profile unit number
       INTEGER    kCompUnit,   kProfileUnit
       PARAMETER (kCompUnit=12,kProfileUnit=13)
@@ -217,18 +217,18 @@ c these are common blocked integers that say whether or not the unit is open
       INTEGER kStdErrOpen,kStdWarnOpen,kStdkCartaOpen
       INTEGER kStdJacobOpen,kStdJacob2Open
       INTEGER kStdDriverOpen,kCompUnitOpen,kProfileUnitOpen,
-     $        kTempUnitOpen,kStdFluxOpen,kStdPlanckOpen
+     c        kTempUnitOpen,kStdFluxOpen,kStdPlanckOpen
       INTEGER kBloatPlanckOpen,kBloatOutOpen
       INTEGER kStdPlanckUAOpen,kNLTEOutUAOpen
       INTEGER kBloatPlanckUAOpen,kBloatNLTEOutUAOpen
       COMMON/OB0/kStdDriver,kStdkCarta,kStdJacob,kStdJacob2
       COMMON/OB1/kStdErrOpen,kStdWarnOpen,kStdkCartaOpen,
-     $           kStdJacobOpen,kStdJacob2Open,
-     $           kStdDriverOpen,kStdFluxOpen,kStdPlanckOpen
+     c           kStdJacobOpen,kStdJacob2Open,
+     c           kStdDriverOpen,kStdFluxOpen,kStdPlanckOpen
       COMMON/OB2/kCompUnitOpen,kProfileUnitOpen,kTempUnitOpen
       COMMON/OB3/kBloatPlanckOpen,kBloatOutOpen
       COMMON/OB4/kStdPlanckUAOpen,kNLTEOutUAOpen,kBloatPlanckUAOpen,
-     $           kBloatNLTEOutUAOpen
+     c           kBloatNLTEOutUAOpen
 
 c kMaxUserSet == number of variables the user can change w/o recompiling
 c set in setparam.param 
@@ -256,10 +256,10 @@ c this is LBLRTM TPAPE5 toa, and LBLRTM level temps
       REAL kLBLRTM_toa,kLBLRTM_levelT(kMaxLayer+1),kLBLRTM_layerTavg(kMaxLayer)
       PARAMETER (kDefaultColMult = 0.1)
       COMMON/ComBlock4/kSolar,kThermal,kThermalJacob,kJacobian,
-     $                 kSetThermalAngle,kTemperVary
+     c                 kSetThermalAngle,kTemperVary
       COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
-     $                 kSolAzi,kSatAzi,
-     $                 kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
+     c                 kSolAzi,kSatAzi,
+     c                 kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
       INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
       COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
       COMMON/ComBlock7/kLBLRTM_toa,kLBLRTM_levelT,kLBLRTM_layerTavg
@@ -286,7 +286,7 @@ c these are for seeing how cloud params are overwritten
 c raaRTPCloudParams0(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 from rtpfile
 c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 after kcarta resets
       REAL raaRTPCloudParams0(2,7),raaRTPCloudParamsF(2,7)
-      COMMON/comBlockCloud/raaRTPCloudParams0,raaRTPCloudParamsF
+      COMMON/ComBlockCloud/raaRTPCloudParams0,raaRTPCloudParamsF
 
 c 2016
 c allow nm_params to define defaults
@@ -302,6 +302,14 @@ c   caaOverrideDefault : can have a secreret text file floating around
       CHARACTER*80 caaTextOverrideDefault
       COMMON/comBlockDefault/iaaOverrideDefault,caaTextOverrideDefault
 
+c************************************************************************
+c !https://stackoverflow.com/questions/32446564/issue-with-common-block-in-openmp-parallel-programming/32454705#32454705
+c !http://iprc.soest.hawaii.edu/users/furue/improve-fortran.html
+c !$OMP threadprivate (/ComWarnLog/,/kNumV/,/ComRTP1/,/ComRTP2/,/OB0/,/OB1/,/OB2/,/OB3/,/OB4/)
+c !$OMP threadprivate (/ComBlock1/,/ComBlock2/,/ComBlock3/,/ComBlock4/)
+c !$OMP threadprivate (/ComBlock5/,/ComBlock6/,/ComBlock7/,/ComBlock8/,/ComBlock9/)
+c !$OMP threadprivate (/ComDISORT/,/ComHGPhase/,/ComBlockCloud/,/comBlockDefault/)
+		     
 c************************************************************************
 
 c this is new for version 0.97 and higher and some parts will change
@@ -351,33 +359,33 @@ cccc <<<<<<<<<<<<<<< ----------- cut here and replace with dump_kaTag_for_predef
       DATA kaNumkComp   /  30,  20,  20,  28,  34,  21,  07,  89,  30,  21,  19,  16,  26,  19  / 
       DATA kaCTag       / 'f', 'g', 'h', 'j', 'k', 'p', 'q', 'r', 's', 'm', 'n', 'o', 'v', 'u'  / 
       DATA kaMinFr        /   15.0000,   30.0000,   50.0000,   80.0000,
-     $                    140.0000,  300.0000,  500.0000,  605.0000,
-     $                    2830.0000,  3550.0000,  5550.0000,  8250.0000,
-     $                    12000.0000,  25000.0000  / 
+     c                    140.0000,  300.0000,  500.0000,  605.0000,
+     c                    2830.0000,  3550.0000,  5550.0000,  8250.0000,
+     c                    12000.0000,  25000.0000  / 
       DATA kaMaxFr        /   30.0000,   50.0000,   80.0000,  150.0000,
-     $                    310.0000,  510.0000,  605.0000,  2830.0000,
-     $                    3580.0000,  5650.0000,  8400.0000,  12250.0000,
-     $                    25000.0000,  44000.0000  / 
+     c                    310.0000,  510.0000,  605.0000,  2830.0000,
+     c                    3580.0000,  5650.0000,  8400.0000,  12250.0000,
+     c                    25000.0000,  44000.0000  / 
       DATA kaFrStep       /  5.0000e-05,  1.0000e-04,  1.5000e-04,  2.5000e-04,
-     $                    5.0000e-04,  1.0000e-03,  1.5000e-03,  2.5000e-03,
-     $                    2.5000e-03,  1.0000e-02,  1.5000e-02,  2.5000e-02,
-     $                    5.0000e-02,  1.0000e-01  / 
+     c                    5.0000e-04,  1.0000e-03,  1.5000e-03,  2.5000e-03,
+     c                    2.5000e-03,  1.0000e-02,  1.5000e-02,  2.5000e-02,
+     c                    5.0000e-02,  1.0000e-01  / 
       DATA kaBlSize       /    0.5000,    1.0000,    1.5000,    2.5000,
-     $                      5.0000,   10.0000,   15.0000,   25.0000,
-     $                     25.0000,  100.0000,  150.0000,  250.0000,
-     $                    500.0000,  1000.0000  / 
+     c                      5.0000,   10.0000,   15.0000,   25.0000,
+     c                     25.0000,  100.0000,  150.0000,  250.0000,
+     c                    500.0000,  1000.0000  / 
       DATA kaFineFrStep   /  1.0000e-05,  2.0000e-05,  3.0000e-05,  5.0000e-05,
-     $                    1.0000e-04,  2.0000e-04,  3.0000e-04,  5.0000e-04,
-     $                    5.0000e-04,  2.0000e-03,  3.0000e-03,  5.0000e-03,
-     $                    1.0000e-02,  2.0000e-02  / 
+     c                    1.0000e-04,  2.0000e-04,  3.0000e-04,  5.0000e-04,
+     c                    5.0000e-04,  2.0000e-03,  3.0000e-03,  5.0000e-03,
+     c                    1.0000e-02,  2.0000e-02  / 
       DATA kaMediumFrStep /  2.0000e-03,  4.0000e-03,  6.0000e-03,  1.0000e-02,
-     $                    2.0000e-02,  4.0000e-02,  6.0000e-02,  1.0000e-01,
-     $                    1.0000e-01,  4.0000e-01,  6.0000e-01,  1.0000e+00,
-     $                    2.0000e+00,  4.0000e+00  / 
+     c                    2.0000e-02,  4.0000e-02,  6.0000e-02,  1.0000e-01,
+     c                    1.0000e-01,  4.0000e-01,  6.0000e-01,  1.0000e+00,
+     c                    2.0000e+00,  4.0000e+00  / 
       DATA kaCoarseFrStep /  1.0000e-02,  2.0000e-02,  3.0000e-02,  5.0000e-02,
-     $                    1.0000e-01,  2.0000e-01,  3.0000e-01,  5.0000e-01,
-     $                    5.0000e-01,  2.0000e+00,  3.0000e+00,  5.0000e+00,
-     $                    1.0000e+01,  2.0000e+01  / 
+     c                    1.0000e-01,  2.0000e-01,  3.0000e-01,  5.0000e-01,
+     c                    5.0000e-01,  2.0000e+00,  3.0000e+00,  5.0000e+00,
+     c                    1.0000e+01,  2.0000e+01  / 
 
 cccc <<<<<<<<<<<<<<< ----------- cut here and replace with dump_kaTag_for_predefined.param ---------->>>>>>
 c thus last possible file in q series =  q795_gX.dat has data from  795-805
