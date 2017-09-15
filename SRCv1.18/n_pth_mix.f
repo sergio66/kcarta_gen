@@ -2242,7 +2242,7 @@ c     $                                                   iaBnd(iL,2),raBndFrac(
       DO iL = iOffSet+1,kProflayer
         raLayerHeight(iL) = 0.5*(raZoutLVL2LAY(iL) + raZoutLVL2LAY(iL+1))
         raThickness(iL)   = raZoutLVL2LAY(iL+1) - raZoutLVL2LAY(iL)
-d	write(*,999) iL,' n pth mix',raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL),raPoutLVL2LAY(iL)/1013.255
+c	write(*,999) iL,' n pth mix',raLayerHeight(iL),raThickness(iL),raPoutLVL2LAY(iL),raPoutLVL2LAY(iL)/1013.255
         DO iG = 1,iNumGasesLVL2LAY
           raaPress(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))     = raPoutLVL2LAY(iL)/100/1013.255  !! N/m2 --> mb --> atm
           raaTemp(iL,iaGasIDMap(iaGasesLVL2LAY(iG)))      = raToutLVL2LAY(iL)

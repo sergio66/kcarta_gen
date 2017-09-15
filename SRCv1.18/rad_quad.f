@@ -660,7 +660,7 @@ c now loop over the layers, for the particular angle
               raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
             END DO
           END DO
-do bottom most layer
+c do bottom most layer
           DO iLay = 1,1
             iL = iaRadLayerTemp(iLay)
             rMPTemp = raVT1(iL)
@@ -853,7 +853,7 @@ c now loop over the layers, for the particular angle
               raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
             END DO
           END DO
-do bottom most layer
+c do bottom most layer
           DO iLay = 1,1
             iL = iaRadLayerTemp(iLay)
             rMPTemp = raVT1(iL)
