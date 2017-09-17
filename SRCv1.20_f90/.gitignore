@@ -1,0 +1,5 @@
+WORKS_*
+SRCv118_f77tof90code/*.f
+SRCv118_f77tof90code/TEMPF90/*
+OpenMP
+ugh
