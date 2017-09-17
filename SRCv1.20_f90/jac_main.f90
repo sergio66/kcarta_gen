@@ -1,8 +1,4 @@
 ! Copyright 1997
- 
-! Code converted using TO_F90 by Alan Miller
-! Date: 2017-09-16  Time: 06:24:39
- 
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
@@ -34,58 +30,20 @@
 ! this is the main driver subroutine for clear sky Jacobians
 ! for the current frequency block, this subroutine calculates ALL the
 ! jacobians and then outputs them
+    SUBROUTINE find_jacobians(raFreq,iTag,iActualTag, &
+    iFileID,caJacobFile,rTSpace,rTSurface, &
+    raUseEmissivity,rSatAngle,raVTemp, &
+    iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
+    raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten, &
+    raSurface,raSun,raThermal,rFracTop,rFracBot, &
+    iaJacob,iJacob,raaMix,raSunRefl, &
+    raLayAngles,raSunAngles,rDelta, &
+    raThickness,raPressLevels,iProfileLayers,pProf, &
+    iNLTEStart,raaPlanckCoeff)
 
-SUBROUTINE find_jacobians(raFreq,iTag,iActualTag,  &
-    iFileID,caJacobFile,rTSpace,rTSurface, raUseEmissivity,rSatAngle,raVTemp,  &
-    iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer,  &
-    raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten,  &
-    raSurface,raSun,raThermal,rFracTop,rFracBot,  &
-    iaJacob,iJacob,raaMix,raSunRefl, raLayAngles,raSunAngles,rDelta,  &
-    raThickness,raPressLevels,iProfileLayers,pProf, iNLTEStart,raaPlanckCoeff)
+    IMPLICIT NONE
 
-
-REAL, INTENT(IN OUT)                     :: raFreq(kMaxPts)
-INTEGER, INTENT(IN OUT)                  :: iTag
-INTEGER, INTENT(IN OUT)                  :: iActualTag
-INTEGER, INTENT(IN OUT)                  :: iFileID
-NO TYPE, INTENT(IN OUT)                  :: caJacobFil
-REAL, INTENT(IN OUT)                     :: rTSpace
-REAL, INTENT(IN OUT)                     :: rTSurface
-NO TYPE, INTENT(IN OUT)                  :: raUseEmiss
-REAL, INTENT(IN OUT)                     :: rSatAngle
-REAL, INTENT(IN OUT)                     :: raVTemp(kMixFilRows)
-INTEGER, INTENT(IN OUT)                  :: iNumGases
-INTEGER, INTENT(IN OUT)                  :: iaGases(kMaxGas)
-INTEGER, INTENT(IN OUT)                  :: iAtm
-INTEGER, INTENT(IN OUT)                  :: iNatm
-INTEGER, INTENT(IN OUT)                  :: iNumLayer
-NO TYPE, INTENT(IN OUT)                  :: iaaRadLaye
-REAL, INTENT(IN OUT)                     :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProf
-REAL, INTENT(IN OUT)                     :: raaAllDT(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(IN OUT)                     :: raaAbs(kMaxPts,kMixFilRows)
-REAL, INTENT(IN OUT)                     :: raaAmt(kProfLayerJac,kGasStore
-REAL, INTENT(IN OUT)                     :: raInten(kMaxPts)
-NO TYPE, INTENT(IN OUT)                  :: raSurface
-REAL, INTENT(IN OUT)                     :: raSun(kMaxPts)
-REAL, INTENT(IN OUT)                     :: raThermal(kMaxPts)
-REAL, INTENT(IN OUT)                     :: rFracTop
-REAL, INTENT(IN OUT)                     :: rFracBot
-INTEGER, INTENT(IN OUT)                  :: iaJacob(kMaxDQ)
-INTEGER, INTENT(IN OUT)                  :: iJacob
-REAL, INTENT(IN OUT)                     :: raaMix(kMixFilRows,kGasStore)
-REAL, INTENT(IN OUT)                     :: raSunRefl(kMaxPts)
-NO TYPE, INTENT(IN OUT)                  :: raLayAngle
-NO TYPE, INTENT(IN OUT)                  :: raSunAngle
-REAL, INTENT(IN OUT)                     :: rDelta
-NO TYPE, INTENT(IN OUT)                  :: raThicknes
-NO TYPE, INTENT(IN OUT)                  :: raPressLev
-NO TYPE, INTENT(IN OUT)                  :: iProfileLa
-REAL, INTENT(IN OUT)                     :: pProf(kProfLayer)
-INTEGER, INTENT(IN OUT)                  :: iNLTEStart
-NO TYPE, INTENT(IN OUT)                  :: raaPlanckC
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! rDelta is the kComp file Step
 ! raLayAngles are the layer dependent satellite view angles
@@ -114,162 +72,155 @@ INCLUDE '../INCLUDE/kcartaparam.f90'
 ! raaMix is the mixing table
 
 ! these are to do with the arbitrary pressure layers
-REAL :: raPresslevels(kProfLayer+1),raThickness(kProfLayer)
-
-INTEGER :: iProfileLayers
+    REAL :: raPresslevels(kProfLayer+1),raThickness(kProfLayer)
+    REAL :: pProf(kProfLayer)
+    INTEGER :: iProfileLayers
 ! FracTop,rFracBot are the upper layer/lower layer fractions
-
-REAL :: raSurFace(kMaxPts)
-
-
-REAL :: raUseEmissivity(kMaxPts),
-
-
-REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
-
-
-INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
-
-CHARACTER (LEN=80) :: caJacobFile
+    REAL :: raaMix(kMixFilRows,kGasStore),raSunRefl(kMaxPts)
+    REAL :: raSurFace(kMaxPts),raSun(kMaxPts)
+    REAL :: raThermal(kMaxPts),rDelta
+    REAL :: raaAbs(kMaxPts,kMixFilRows),rFracTop,rFracBot
+    REAL :: rTSpace,rTSurface,raUseEmissivity(kMaxPts), &
+    raVTemp(kMixFilRows),rSatAngle,raFreq(kMaxPts)
+    REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
+    REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
+    REAL :: raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
+    INTEGER :: iJacob,iaJacob(kMaxDQ),iTag,iActualTag
+    INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
+    INTEGER :: iNumGases,iAtm,iNatm,iaGases(kMaxGas)
+    CHARACTER(80) :: caJacobFile
 ! this is for NLTE weight fcns
-
-REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
+    INTEGER :: iNLTEStart
+    REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
 
 ! local variables
-INTEGER :: iDownWard,iI
+    INTEGER :: iDownWard,iI
 
 ! set the direction of radiation travel --- the checks of iUpper.iLower have
 ! already been done in radiance.f
 ! radiation travelling upwards to instrument ==> sat looking down iDownWard = 1
 ! radiation travelling down to instrument ==> sat looking up iDownWard =-1
-IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
-  iDownWard = 1
-ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
-  iDownWard = -1
-END IF
-IF (ABS(iDownWard) /= 1) THEN
-  WRITE(kStdErr,*) 'hmm : jacobian code cannot decide up/down look!'
-  WRITE(kStdErr,*) (iaaRadLayer(iAtm,iI),iI=1,iNumLayer)
-  WRITE(kStdErr,*) iAtm,iNumLayer,iaaRadLayer(iAtm,1),  &
-      iaaRadLayer(iAtm,iNumLayer)
-  CALL DoStop
-END IF
+    IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
+        iDownWard = 1
+    ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
+        iDownWard = -1
+    END IF
+    IF (abs(iDownWard) /= 1) THEN
+        write(kStdErr,*) 'hmm : jacobian code cannot decide up/down look!'
+        write(kStdErr,*) (iaaRadLayer(iAtm,iI),iI=1,iNumLayer)
+        write(kStdErr,*) iAtm,iNumLayer,iaaRadLayer(iAtm,1), &
+        iaaRadLayer(iAtm,iNumLayer)
+        CALL DoStop
+    END IF
 
-IF (((ABS(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR.  &
-      (ABS(kLongOrShort) <= 1)) THEN
-  WRITE(kStdWarn,*) 'in Jacobian, have set set iDownWard = ',iDownWard
-END IF
+    IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+    (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,*) 'in Jacobian, have set set iDownWard = ',iDownWard
+    END IF
 
-IF (iDownWard == 1) THEN
-  CALL DownWardJacobian(raFreq,iTag,iActualTag,  &
-      iProfileLayers,raPressLevels,  &
-      iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity,  &
-      rSatAngle,raLayAngles,raSunAngles,raVTemp,  &
-      iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer,  &
-      raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten,  &
-      raSurface,raSun,raThermal,rFracTop,rFracBot,  &
-      iaJacob,iJacob,raaMix,raSunRefl,rDelta, iNLTEStart,raaPlanckCoeff)
-ELSE IF (iDownWard == -1) THEN
-  CALL UpWardJacobian(raFreq,iTag,iActualTag, iProfileLayers,raPressLevels,  &
-      iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity,  &
-      rSatAngle,raLayAngles,raSunAngles,raVTemp,  &
-      iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer,  &
-      raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten,  &
-      raSurface,raSun,raThermal,rFracTop,rFracBot, iaJacob,iJacob,raaMix,rDelta)
-END IF
+    IF (iDownWard == 1) THEN
+        CALL DownWardJacobian(raFreq,iTag,iActualTag, &
+        iProfileLayers,raPressLevels, &
+        iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
+        rSatAngle,raLayAngles,raSunAngles,raVTemp, &
+        iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
+        raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten, &
+        raSurface,raSun,raThermal,rFracTop,rFracBot, &
+        iaJacob,iJacob,raaMix,raSunRefl,rDelta, &
+        iNLTEStart,raaPlanckCoeff)
+    ELSE IF (iDownWard == -1) THEN
+        CALL UpWardJacobian(raFreq,iTag,iActualTag, &
+        iProfileLayers,raPressLevels, &
+        iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
+        rSatAngle,raLayAngles,raSunAngles,raVTemp, &
+        iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
+        raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten, &
+        raSurface,raSun,raThermal,rFracTop,rFracBot, &
+        iaJacob,iJacob,raaMix,rDelta)
+    END IF
 
-RETURN
-END SUBROUTINE find_jacobians
+    RETURN
+    end SUBROUTINE find_jacobians
 
 !************************************************************************
 ! this subroutine multiplies the array by -1.0*constant where constant
 ! depends on whether we are doing d/dT or d/dq
+    SUBROUTINE MinusOne(raTorQ,raResults)
 
-SUBROUTINE MinusOne(raTorQ,raResults)
+    IMPLICIT NONE
 
-
-REAL, INTENT(IN)                         :: raTorQ(kMaxPtsJac)
-REAL, INTENT(OUT)                        :: raResults(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! raResults is the array
 ! raTorQ === relevant element of raaaDq or raaDt
+    REAL :: raTorQ(kMaxPtsJac)
+    REAL :: raResults(kMaxPtsJac)
 
-
-
-INTEGER :: iFr
-
-DO iFr = 1,kMaxPts
-  raResults(iFr) = -raResults(iFr) * raTorQ(iFr)
-END DO
-
-RETURN
-END SUBROUTINE MinusOne
+    INTEGER :: iFr
+     
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = -raResults(iFr) * raTorQ(iFr)
+    END DO
+     
+    RETURN
+    end SUBROUTINE MinusOne
 
 !************************************************************************
 ! cumulatively, using contributions from each gas, find d/dT jacobian
 ! for each layer
+    SUBROUTINE cumulativeDT(daaDT,raaAllDT,raaMix,iG,iNatm, &
+    iaaRadLayer)
 
-SUBROUTINE cumulativeDT(daaDT,raaAllDT,raaMix,iG,iNatm, iaaRadLayer)
+    IMPLICIT NONE
 
-
-DOUBLE PRECISION, INTENT(IN)             :: daaDT(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(OUT)                        :: raaAllDT(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(IN)                         :: raaMix(kMixFilRows,kGasStore)
-INTEGER, INTENT(OUT)                     :: iG
-INTEGER, INTENT(IN OUT)                  :: iNatm
-NO TYPE, INTENT(IN OUT)                  :: iaaRadLaye
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! daaDT has the current gas d/dT coeffs for current freq block
 ! raaAllDT has the cumulative d/dT coeffs for current freq block
 ! iNatm is the number of atmospheres to do radiance calcs for
 ! iG is the current gas
 ! raaMix is the mixing table
+    DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
+    INTEGER :: iG,iNatm,iaaRadLayer(kMaxAtm,kProfLayer)
+    REAL :: raaMix(kMixFilRows,kGasStore)
 
+    INTEGER :: iL,iFr
+    REAL :: rW
 
-INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
+    IF (iNatm > 1) THEN
+    ! cannot correctly weight the d/dT, so just use unit weight here and then try
+    ! an average weight when JacobTemp is actually called
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+        (abs(kLongOrShort) <= 1)) THEN
+            write(kStdWarn,*)'Gas iG, weight rW = ',iG,1.0
+        END IF
 
-
-INTEGER :: iL,iFr
-REAL :: rW
-
-IF (iNatm > 1) THEN
-! cannot correctly weight the d/dT, so just use unit weight here and then try
-! an average weight when JacobTemp is actually called
-  IF (((ABS(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR.  &
-        (ABS(kLongOrShort) <= 1)) THEN
-    WRITE(kStdWarn,*)'Gas iG, weight rW = ',iG,1.0
-  END IF
-  
-  DO iL = 1,kProfLayerJac
-    DO iFr = 1,kMaxPtsJac
-      raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + daaDT(iFr,iL)
-    END DO
-  END DO
-ELSE IF (iNatm == 1) THEN
-! have only one atmosphere and so correctly weight this gas's contribution to
-! d/dT matrix ... then use weight of 1.0 when calling JacobTemp
-  iL = iaaRadLayer(1,2)  !for atm#1, find which is the second mixed path
-!as the first,last could have fractional weights
-  rW = raaMix(iL,iG)   !find the gas weight in the second radiating layer
-  IF (((ABS(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR.  &
-        (ABS(kLongOrShort) <= 1)) THEN
-    WRITE(kStdWarn,*)'jacobian d/dT Gas iG, weight rW = ',iG,rW
-  END IF
-  DO iL = 1,kProfLayerJac
-    DO iFr = 1,kMaxPtsJac
-      raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + rW*daaDT(iFr,iL)
-    END DO
-  END DO
-END IF
-
-RETURN
-END SUBROUTINE cumulativeDT
+        DO iL = 1,kProfLayerJac
+            DO iFr = 1,kMaxPtsJac
+                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + daaDT(iFr,iL)
+            END DO
+        END DO
+    ELSE IF (iNatm == 1) THEN
+    ! have only one atmosphere and so correctly weight this gas's contribution to
+    ! d/dT matrix ... then use weight of 1.0 when calling JacobTemp
+        iL = iaaRadLayer(1,2)  !for atm#1, find which is the second mixed path
+    ! s the first,last could have fractional weights
+        rW = raaMix(iL,iG)   !find the gas weight in the second radiating layer
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+        (abs(kLongOrShort) <= 1)) THEN
+            write(kStdWarn,*)'jacobian d/dT Gas iG, weight rW = ',iG,rW
+        END IF
+        DO iL = 1,kProfLayerJac
+            DO iFr = 1,kMaxPtsJac
+                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + rW*daaDT(iFr,iL)
+            END DO
+        END DO
+    END IF
+       
+    RETURN
+    end SUBROUTINE cumulativeDT
 
 !************************************************************************
 ! this subroutine does d/dr(tau_layer2space) for gas iG
@@ -277,41 +228,35 @@ END SUBROUTINE cumulativeDT
 ! and  iL is the relevant layer we want tau_layer2space differentiated
 ! HENCE IF iL > iM, derivative == 0
 ! i.e. this does d(tau(l--> inf)/dr_m
+    SUBROUTINE JacobTerm(iL,iM,raaLay2Sp,raTemp)
 
-SUBROUTINE JacobTerm(iL,iM,raaLay2Sp,raTemp)
+    IMPLICIT NONE
 
-
-INTEGER, INTENT(IN OUT)                  :: iL
-INTEGER, INTENT(IN OUT)                  :: iM
-REAL, INTENT(IN)                         :: raaLay2Sp(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(OUT)                        :: raTemp(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! raaLay2Sp is the transmission frm layer to space
 ! iM has the layer that we differentiate wrt to
 ! iL has the radiating layer number (1..kProfLayerJac)
 ! raTemp has the results, apart from the multiplicative constants
 !   which are corrected in MinusOne
-
-
+    INTEGER :: iL,iM
+    REAL :: raTemp(kMaxPtsJac),raaLay2Sp(kMaxPtsJac,kProfLayerJac)
 
 ! local variables
-INTEGER :: iFr
+    INTEGER :: iFr
 
-IF (iL > iM) THEN
-  DO iFr = 1,kMaxPts
-    raTemp(iFr) = 0.0
-  END DO
-ELSE
-  DO iFr = 1,kMaxPts
-    raTemp(iFr) = raaLay2Sp(iFr,iL)
-  END DO
-END IF
+    IF (iL > iM) THEN
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = raaLay2Sp(iFr,iL)
+        END DO
+    END IF
 
-RETURN
-END SUBROUTINE JacobTerm
+    RETURN
+    end SUBROUTINE JacobTerm
 
 !************************************************************************
 ! this subroutine does d/dr(tau_layer2gnd) for gas iG
@@ -319,123 +264,100 @@ END SUBROUTINE JacobTerm
 ! and  iL is the relevant layer we want tau_layer2space differentiated
 ! HENCE IF iL < iM, derivative == 0
 ! i.e. this does d(tau(l--> 0)/dr_m
+    SUBROUTINE JacobTermGnd(iL,iM,raaLay2Gnd,raTemp)
 
-SUBROUTINE JacobTermGnd(iL,iM,raaLay2Gnd,raTemp)
+    IMPLICIT NONE
 
-
-INTEGER, INTENT(IN OUT)                  :: iL
-INTEGER, INTENT(IN OUT)                  :: iM
-REAL, INTENT(IN)                         :: raaLay2Gnd(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(OUT)                        :: raTemp(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! raaLay2Gnd is the transmission frm layer to ground at diffusion angle
 ! iM has the layer that we differentiate wrt to
 ! iL has the radiating layer number (1..kProfLayerJac)
 ! raTemp has the results, apart from the multiplicative constants
 !   which are corrected in MinusOne
-
-
+    INTEGER :: iL,iM
+    REAL :: raTemp(kMaxPtsJac),raaLay2Gnd(kMaxPtsJac,kProfLayerJac)
 
 ! local variables
-INTEGER :: iFr
+    INTEGER :: iFr
 
-IF (iL < iM) THEN
-  DO iFr = 1,kMaxPts
-    raTemp(iFr) = 0.0
-  END DO
-ELSE
-  DO iFr = 1,kMaxPts
-    raTemp(iFr) = raaLay2Gnd(iFr,iL)
-  END DO
-END IF
+    IF (iL < iM) THEN
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = raaLay2Gnd(iFr,iL)
+        END DO
+    END IF
 
-RETURN
-END SUBROUTINE JacobTermGnd
+    RETURN
+    end SUBROUTINE JacobTermGnd
 
 
 !************************************************************************
 !************** THESE HAVE TO DO WITH THE OUTPUT STYLE ******************
 !************************************************************************
 ! this subroutine computes d(Brightness Temp)/d(Rad)
+    SUBROUTINE Find_BT_rad(raInten,radBTdr,raFreq, &
+    radBackgndThermdT,radSolardT)
 
-SUBROUTINE Find_BT_rad(raInten,radBTdr,raFreq, radBackgndThermdT,radSolardT)
+    IMPLICIT NONE
 
-
-REAL, INTENT(IN)                         :: raInten(kMaxPts)
-REAL, INTENT(OUT)                        :: radBTdr(kMaxPtsJac)
-REAL, INTENT(IN OUT)                     :: raFreq(kMaxPts)
-NO TYPE, INTENT(IN OUT)                  :: radBackgnd
-REAL, INTENT(OUT)                        :: radSolardT(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 ! raInten is the radiance intensity at the instrument
 ! raFreq are the frequencies
 ! radBTdr is the derivative result
-
-REAL :: radBackgndThermdT(kMaxPtsJac)
-
-INTEGER :: iFr
-REAL :: r1,r2,r3,r4
+    REAL :: raFreq(kMaxPts),raInten(kMaxPts),radBTdr(kMaxPtsJac)
+    REAL :: radBackgndThermdT(kMaxPtsJac),radSolardT(kMaxPtsJac)
+          
+    INTEGER :: iFr
+    REAL :: r1,r2,r3,r4
 
 !! need these for derivatives of Planck
-r1 = SNGL(kPlanck1)
-r2 = SNGL(kPlanck2)
+    r1 = sngl(kPlanck1)
+    r2 = sngl(kPlanck2)
 
-DO iFr = 1,kMaxPts
-  r3 = r1*r2 * (raFreq(iFr)**4)/(raInten(iFr)**2)
-  r4 = 1.0+r1 * (raFreq(iFr)**3)/raInten(iFr)
-  radBTdr(iFr) = r3/r4/(ALOG(r4)**2)
-END DO
+    DO iFr = 1,kMaxPts
+        r3 = r1*r2 * (raFreq(iFr)**4)/(raInten(iFr)**2)
+        r4 = 1.0+r1 * (raFreq(iFr)**3)/raInten(iFr)
+        radBTdr(iFr) = r3/r4/(alog(r4)**2)
+    END DO
 
-IF (kThermal < 0) THEN
-  DO iFr = 1,kMaxPts
-    radBackgndThermdT(iFr) = 0.0
-  END DO
-ELSE
-  DO iFr = 1,kMaxPts
-    r3 = r1*r2 * (raFreq(iFr)**4)/(radBackgndThermdT(iFr)**2)
-    r4 = 1.0+r1 * (raFreq(iFr)**3)/radBackGndThermdT(iFr)
-    radBackgndThermdT(iFr) = r3/r4/(ALOG(r4)**2)
-  END DO
-END IF
+    IF (kThermal < 0) THEN
+        DO iFr = 1,kMaxPts
+            radBackgndThermdT(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            r3 = r1*r2 * (raFreq(iFr)**4)/(radBackgndThermdT(iFr)**2)
+            r4 = 1.0+r1 * (raFreq(iFr)**3)/radBackGndThermdT(iFr)
+            radBackgndThermdT(iFr) = r3/r4/(alog(r4)**2)
+        END DO
+    END IF
 
-IF (kSolar < 0) THEN
-  DO iFr = 1,kMaxPts
-    radSolardT(iFr) = 0.0
-  END DO
-ELSE
-  DO iFr = 1,kMaxPts
-    r3 = r1*r2 * (raFreq(iFr)**4)/(radSolardT(iFr)**2)
-    r4 = 1.0+r1 * (raFreq(iFr)**3)/radSolardT(iFr)
-    radSolardT(iFr) = r3/r4/(ALOG(r4)**2)
-  END DO
-END IF
+    IF (kSolar < 0) THEN
+        DO iFr = 1,kMaxPts
+            radSolardT(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            r3 = r1*r2 * (raFreq(iFr)**4)/(radSolardT(iFr)**2)
+            r4 = 1.0+r1 * (raFreq(iFr)**3)/radSolardT(iFr)
+            radSolardT(iFr) = r3/r4/(alog(r4)**2)
+        END DO
+    END IF
 
-RETURN
-END SUBROUTINE Find_BT_rad
+    RETURN
+    end SUBROUTINE Find_BT_rad
 !************************************************************************
 ! this subroutine prepares the output Jacobians according to kJacobOutput
-
-SUBROUTINE doJacobOutput(iLowest,raFreq,raResults,  &
+    SUBROUTINE doJacobOutput(iLowest,raFreq,raResults, &
     radBTdr,raaAmt,raInten,iGasID,iM,iGasPosn)
 
+    IMPLICIT NONE
 
-INTEGER, INTENT(IN OUT)                  :: iLowest
-REAL, INTENT(IN OUT)                     :: raFreq(kMaxPts)
-REAL, INTENT(OUT)                        :: raResults(kMaxPtsJac)
-REAL, INTENT(IN)                         :: radBTdr(kMaxPtsJac)
-REAL, INTENT(IN)                         :: raaAmt(kProfLayerJac,kGasStore
-REAL, INTENT(IN OUT)                     :: raInten(kMaxPts)
-INTEGER, INTENT(IN OUT)                  :: iGasID
-INTEGER, INTENT(IN)                      :: iM
-INTEGER, INTENT(OUT)                     :: iGasPosn
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! iLowest is the lowest layer in the atmosphere (modulo kProfLayer)
 ! raFreq are the frequency wavenumbers
@@ -446,220 +368,197 @@ INCLUDE '../INCLUDE/kcartaparam.f90'
 ! iM is the layer number (1..100)
 ! iGasPosn is the position of gasID in the gaslist
 ! radBTdr is the d(brightness temp)/d(Radiance) array
+    INTEGER :: iGasID,iM,iLowest,iGasPosn
+    REAL :: raFreq(kMaxPts),raResults(kMaxPtsJac)
+    REAL :: raInten(kMaxPts)
+    REAL :: raaAmt(kProfLayerJac,kGasStore),radBTdr(kMaxPtsJac)
 
+    INTEGER :: iFr,iM1
 
+    IF ((iGasID == 101) .OR. (iGasID == 102)) THEN
+        iGasPosn  = 1   !!!! corresponds to water
+    END IF
 
-
-
-INTEGER :: iFr,iM1
-
-IF ((iGasID == 101) .OR. (iGasID == 102)) THEN
-  iGasPosn  = 1   !!!! corresponds to water
-END IF
-
-iM1=(iLowest-1) + iM
+    iM1=(iLowest-1) + iM
 
 !      IF (kJacobOutPut .EQ. -1) THEN
 ! basically do nothing! user wants d(rad)/dq
 !        END IF
 
-IF (kJacobOutput /= -1) THEN !oh well, do this
-  IF ((iGasID > 0) .AND. (iGasID <= 200)) THEN
-! we are doing d/dq  for a normal gas
-    IF (kJacobOutPut == 0) THEN
-! user wants d(rad)/dq * q for a normal gas
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = raResults(iFr) * raaAmt(iM1,iGasPosn)
-      END DO
-    ELSE IF (kJacobOutPut == 1) THEN
-! user wants d(BT)/dq * q for a normal gas; this is the default option
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = raResults(iFr) * raaAmt(iM1,iGasPosn) * radBTdr(iFr)
-      END DO
-    ELSE IF (kJacobOutPut == 2) THEN
-! user wants d(BT)/dq for a normal gas
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = raResults(iFr) * radBTdr(iFr)
-      END DO
-    END IF
-    
-  ELSE IF (iGasID > 200) THEN
-! we are doing d/dq  for IWP or DME
-    IF (kJacobOutPut == 0) THEN
-! user wants d(rad)/dq * q for IWP or DME
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = raResults(iFr)
-      END DO
-    ELSE IF (kJacobOutPut == 1) THEN
-! user wants d(BT)/dq * q for IWP or DME for a normal gas
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = raResults(iFr) * radBTdr(iFr)
-      END DO
-    END IF
-    
-  ELSE IF (iGasID <= 0) THEN
-! we are doing d/dT or cloud amt, size jacobians
-    IF (kJacobOutPut == 0) THEN
-      iFr = 1
-! user wants d(rad)/dT so do nothing
-    ELSE IF (kJacobOutPut == 1) THEN
-! user wants d(BT)/dT
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = raResults(iFr) * radBTdr(iFr)
-      END DO
-    END IF
-  END IF
-  
-END IF   !IF (kJacobOutput .NE. -1) THEN !oh well, do this
+    IF (kJacobOutput /= -1) THEN !oh well, do this
+        IF ((iGasID > 0) .AND. (iGasID <= 200)) THEN
+        ! we are doing d/dq  for a normal gas
+            IF (kJacobOutPut == 0) THEN
+            ! user wants d(rad)/dq * q for a normal gas
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * raaAmt(iM1,iGasPosn)
+                END DO
+            ELSE IF (kJacobOutPut == 1) THEN
+            ! user wants d(BT)/dq * q for a normal gas; this is the default option
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = &
+                    raResults(iFr) * raaAmt(iM1,iGasPosn) * radBTdr(iFr)
+                END DO
+            ELSE IF (kJacobOutPut == 2) THEN
+            ! user wants d(BT)/dq for a normal gas
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * radBTdr(iFr)
+                END DO
+            END IF
 
-RETURN
-END SUBROUTINE doJacobOutput
+        ELSEIF (iGasID > 200) THEN
+        ! we are doing d/dq  for IWP or DME
+            IF (kJacobOutPut == 0) THEN
+            ! user wants d(rad)/dq * q for IWP or DME
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr)
+                END DO
+            ELSE IF (kJacobOutPut == 1) THEN
+            ! user wants d(BT)/dq * q for IWP or DME for a normal gas
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * radBTdr(iFr)
+                END DO
+            END IF
+
+        ELSE IF (iGasID <= 0) THEN
+        ! we are doing d/dT or cloud amt, size jacobians
+            IF (kJacobOutPut == 0) THEN
+                iFr = 1
+            ! user wants d(rad)/dT so do nothing
+            ELSE IF (kJacobOutPut == 1) THEN
+            ! user wants d(BT)/dT
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * radBTdr(iFr)
+                END DO
+            END IF
+        END IF
+
+    END IF   !IF (kJacobOutput /= -1) THEN !oh well, do this
+
+    RETURN
+    end SUBROUTINE doJacobOutput
 
 !************************************************************************
 !************ THESE HAVE TO DO WITH THE SURFACE PARAMETERS **************
 !************************************************************************
 ! this subroutine does Jacobian wrt Surface Temperature
-
-SUBROUTINE JacobSurfaceTemp(raFreq,iM,  &
+    SUBROUTINE JacobSurfaceTemp(raFreq,iM, &
     rTSurface,raUseEmissivity,raaLay2Sp,raResults)
 
+    IMPLICIT NONE
 
-REAL, INTENT(IN)                         :: raFreq(kMaxPts)
-INTEGER, INTENT(IN OUT)                  :: iM
-REAL, INTENT(IN)                         :: rTSurface
-NO TYPE, INTENT(IN OUT)                  :: raUseEmiss
-REAL, INTENT(IN)                         :: raaLay2Sp(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(OUT)                        :: raResults(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! raaLay2Sp   is the layer-to-space abs coeff matrix
 ! raFreq has the frequencies
 ! raResults has the results
 ! iM are the layer <-> mixed path associations
-
-REAL :: raUseEmissivity(kMaxPts)
-
-
+    INTEGER :: iM
+    REAL :: rTSurface,raUseEmissivity(kMaxPts)
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac)
+    REAL :: raResults(kMaxPtsJac),raFreq(kMaxPts)
 
 ! local variables
-REAL :: r1,r2,r3,r4,r5,rad,dradDT
-INTEGER :: iFr
+    REAL :: r1,r2,r3,r4,r5,rad,dradDT
+    INTEGER :: iFr
 
 !! need these for derivatives of Planck
-r1 = SNGL(kPlanck1)
-r2 = SNGL(kPlanck2)
+    r1 = sngl(kPlanck1)
+    r2 = sngl(kPlanck2)
 
-DO iFr = 1,kMaxPts
-  r3 = r1 * (raFreq(iFr)**3)
-  r4 = r2 * raFreq(iFr)/rTSurface
-  r5 = EXP(r4)
-  rad = r3/(r5-1.0)
-  dRadDT = rad * r4 * r5/(r5-1.0)/rTSurface
-  raResults(iFr) = dRadDT*raUseEmissivity(iFr) * raaLay2Sp(iFr,iM)
-END DO
+    DO iFr = 1,kMaxPts
+        r3 = r1 * (raFreq(iFr)**3)
+        r4 = r2 * raFreq(iFr)/rTSurface
+        r5 = exp(r4)
+        rad = r3/(r5-1.0)
+        dRadDT = rad * r4 * r5/(r5-1.0)/rTSurface
+        raResults(iFr) = dRadDT*raUseEmissivity(iFr) * raaLay2Sp(iFr,iM)
+    END DO
 
-RETURN
-END SUBROUTINE JacobSurfaceTemp
+    RETURN
+    end SUBROUTINE JacobSurfaceTemp
 
 !************************************************************************
 ! this subroutine does Jacobian wrt Surface Emissivity
+    SUBROUTINE JacobSurfaceEmis(iM,raSurface,raThermal,raaLay2Sp, &
+    raResults)
 
-SUBROUTINE JacobSurfaceEmis(iM,raSurface,raThermal,raaLay2Sp, raResults)
+    IMPLICIT NONE
 
-
-INTEGER, INTENT(IN OUT)                  :: iM
-REAL, INTENT(IN OUT)                     :: raSurface(kMaxPts)
-REAL, INTENT(IN OUT)                     :: raThermal(kMaxPts)
-REAL, INTENT(IN)                         :: raaLay2Sp(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(OUT)                        :: raResults(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! raSurface is the surface emission
 ! raaLay2Sp   is the layer-to-space abs coeff matrix
 ! raResults has the results
 ! raThermal has the downwelling thermal contribs
 ! iM,rSatAngle are the layer <-> mixed path associations and satellite angle
-
-
-
+    INTEGER :: iM
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac),raSurface(kMaxPts)
+    REAL :: raResults(kMaxPtsJac),raThermal(kMaxPts)
 
 ! local variables
-INTEGER :: iFr
+    INTEGER :: iFr
 
-DO iFr = 1,kMaxPts
-  raResults(iFr) = raaLay2Sp(iFr,iM) * (raSurface(iFr)-raThermal(iFr)/kPi)
-END DO
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = raaLay2Sp(iFr,iM) * &
+        (raSurface(iFr)-raThermal(iFr)/kPi)
+    END DO
 
-RETURN
-END SUBROUTINE JacobSurfaceEmis
+    RETURN
+    end SUBROUTINE JacobSurfaceEmis
 
 !************************************************************************
 ! this subroutine does Jacobian of Backgnd Thermal wrt Surface Emissivity
+    SUBROUTINE JacobBackgndThermal(iM,raaLay2Sp,raThermal,raResults)
 
-SUBROUTINE JacobBackgndThermal(iM,raaLay2Sp,raThermal,raResults)
+    IMPLICIT NONE
 
-
-INTEGER, INTENT(IN OUT)                  :: iM
-REAL, INTENT(IN)                         :: raaLay2Sp(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(IN)                         :: raThermal(kMaxPts)
-REAL, INTENT(OUT)                        :: raResults(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! raaLay2Sp is the layer-to-space abscoeff matrix
 ! raResults has the results
 ! iM,rSatAngle are the layer <-> mixed path associations and satellite angle
-
-
-
+    INTEGER :: iM
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac)
+    REAL :: raResults(kMaxPtsJac),raThermal(kMaxPts)
 
 ! local variables
-INTEGER :: iFr
+    INTEGER :: iFr
 
-DO iFr = 1,kMaxPts
-  raResults(iFr) = -raaLay2Sp(iFr,iM)/kPi*raThermal(iFr)
-END DO
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = -raaLay2Sp(iFr,iM)/kPi*raThermal(iFr)
+    END DO
 
-RETURN
-END SUBROUTINE JacobBackgndThermal
+    RETURN
+    end SUBROUTINE JacobBackgndThermal
 
 !************************************************************************
 ! this subroutine does Jacobian of Solar wrt Sun Surface Emissivit
+    SUBROUTINE JacobSolar(iM,raaLay2Sp,raSun,raResults)
 
-SUBROUTINE JacobSolar(iM,raaLay2Sp,raSun,raResults)
+    IMPLICIT NONE
 
-
-INTEGER, INTENT(IN OUT)                  :: iM
-REAL, INTENT(IN)                         :: raaLay2Sp(kMaxPtsJac,kProfLayerJa
-REAL, INTENT(IN)                         :: raSun(kMaxPts)
-REAL, INTENT(OUT)                        :: raResults(kMaxPtsJac)
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
 ! raaLay2Sp is the layer-to-space abscoeff matrix
 ! raResults has the results
 ! raSun,raThermal has the downwelling solar,thermal contribs
 ! iM,rSatAngle are the layer <-> mixed path associations and satellite angle
-
-
+    INTEGER :: iM
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac),raResults(kMaxPtsJac), &
+    raSun(kMaxPts)
 
 ! local variables
-INTEGER :: iFr
+    INTEGER :: iFr
 
 ! remember that raSun is that at the bottom of the atmosphere ==> have to
 ! propagate to top of atmosphere
-DO iFr = 1,kMaxPts
-  raResults(iFr) = raSun(iFr) * raaLay2Sp(iFr,iM)
-END DO
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = raSun(iFr) * raaLay2Sp(iFr,iM)
+    END DO
 
-RETURN
-END SUBROUTINE JacobSolar
+    RETURN
+    end SUBROUTINE JacobSolar
 
 !************************************************************************
 

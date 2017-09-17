@@ -1,8 +1,4 @@
 ! Copyright 1997
- 
-! Code converted using TO_F90 by Alan Miller
-! Date: 2017-09-16  Time: 06:24:46
- 
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
@@ -23,65 +19,21 @@
 ! iNp is # of layers to be printed (if < 0, print all), iaOp is list of
 !     layers to be printed
 ! caOutName gives the file name of the unformatted output
-
-SUBROUTINE doscatter_rtspec(raFreq,raaAbs,raVTemp,  &
-    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,  &
-    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,rSatAngle,  &
-    rFracTop,rFracBot, iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,  &
-    raSurface,raSun,raThermal,raSunRefl, raLayAngles,raSunAngles,  &
-    raThickness,raPressLevels,iProfileLayers,pProf,  &
-    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,  &
+    SUBROUTINE doscatter_rtspec(raFreq,raaAbs,raVTemp, &
+    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
+    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,rSatAngle, &
+    rFracTop,rFracBot, &
+    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
+    raSurface,raSun,raThermal,raSunRefl, &
+    raLayAngles,raSunAngles, &
+    raThickness,raPressLevels,iProfileLayers,pProf, &
+    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag)
 
+    IMPLICIT NONE
 
-REAL, INTENT(IN OUT)                     :: raFreq(kMaxPts)
-REAL, INTENT(IN OUT)                     :: raaAbs(kMaxPts,kMixFilRows)
-REAL, INTENT(IN OUT)                     :: raVTemp(kMixFilRows)
-CHARACTER (LEN=80), INTENT(IN OUT)       :: caOutName
-INTEGER, INTENT(IN OUT)                  :: iOutNum
-INTEGER, INTENT(OUT)                     :: iAtm
-INTEGER, INTENT(IN OUT)                  :: iNumLayer
-NO TYPE, INTENT(IN OUT)                  :: iaaRadLaye
-REAL, INTENT(IN OUT)                     :: rTSpace
-NO TYPE, INTENT(IN OUT)                  :: rSurfaceTe
-NO TYPE, INTENT(IN OUT)                  :: rSurfPress
-NO TYPE, INTENT(IN OUT)                  :: raUseEmiss
-REAL, INTENT(IN)                         :: rSatAngle
-REAL, INTENT(IN)                         :: rFracTop
-REAL, INTENT(OUT)                        :: rFracBot
-INTEGER, INTENT(IN OUT)                  :: iNpmix
-INTEGER, INTENT(IN OUT)                  :: iFileID
-INTEGER, INTENT(IN OUT)                  :: iNp
-INTEGER, INTENT(IN OUT)                  :: iaOp(kPathsOut)
-REAL, INTENT(IN OUT)                     :: raaOp(kMaxPrint,kProfLayer)
-REAL, INTENT(IN OUT)                     :: raaMix(kMixFilRows,kGasStore)
-REAL, INTENT(OUT)                        :: raInten(kMaxPts)
-NO TYPE, INTENT(IN OUT)                  :: raSurface
-REAL, INTENT(IN OUT)                     :: raSun(kMaxPts)
-REAL, INTENT(IN OUT)                     :: raThermal(kMaxPts)
-REAL, INTENT(IN OUT)                     :: raSunRefl(kMaxPts)
-NO TYPE, INTENT(IN OUT)                  :: raLayAngle
-NO TYPE, INTENT(IN OUT)                  :: raSunAngle
-NO TYPE, INTENT(IN OUT)                  :: raThicknes
-NO TYPE, INTENT(IN OUT)                  :: raPressLev
-NO TYPE, INTENT(IN OUT)                  :: iProfileLa
-REAL, INTENT(IN OUT)                     :: pProf(kProfLayer)
-NO TYPE, INTENT(IN OUT)                  :: iBinaryFil
-NO TYPE, INTENT(IN OUT)                  :: iNclouds
-NO TYPE, INTENT(IN OUT)                  :: iaCloudNum
-NO TYPE, INTENT(IN OUT)                  :: iaaCloudWh
-NO TYPE, INTENT(IN OUT)                  :: raaaCloudP
-NO TYPE, INTENT(IN OUT)                  :: iaaScatTab
-NO TYPE, INTENT(IN OUT)                  :: caaaScatTa
-INTEGER, INTENT(IN OUT)                  :: iaCldTypes(kmaxclouds)
-INTEGER, INTENT(IN OUT)                  :: iaPhase(kMaxClouds)
-NO TYPE, INTENT(IN OUT)                  :: iaCloudNum
-NO TYPE, INTENT(IN OUT)                  :: iaaCloudWh
-INTEGER, INTENT(IN OUT)                  :: iTag
-IMPLICIT NONE
-
-INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
 ! raLayAngles   = array containing layer dependent sun angles
@@ -107,111 +59,115 @@ INCLUDE '../INCLUDE/kcartaparam.f90'
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
-REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1),
-INTEGER :: iProfileLayers
-REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
-REAL :: raSurFace(kMaxPts)
-
-REAL :: rSUrfPress
-REAL :: raUseEmissivity(kMaxPts),rSurfaceTemp
-
-
-INTEGER :: iBinaryFile
-INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
-
-
+    REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
+    pProf(kProfLayer)
+    INTEGER :: iProfileLayers,iaCldTypes(kmaxclouds)
+    REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
+    REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
+    REAL :: raSunRefl(kMaxPts),raaAbs(kMaxPts,kMixFilRows)
+    REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSUrfPress
+    REAL :: rTSpace,raUseEmissivity(kMaxPts),rSurfaceTemp,rSatAngle
+    REAL :: raaOp(kMaxPrint,kProfLayer),rFracTop,rFracBot
+    REAL :: raaMix(kMixFilRows,kGasStore),raInten(kMaxPts)
+    INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
+    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
+    INTEGER :: iNpmix,iFileID,iTag
+    CHARACTER(80) :: caOutName
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
-INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
-INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
+    INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
+    INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
 ! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
 ! iaCloudWhichAtm stores which cloud is to be used with which atmospheres
-INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
+    INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-CHARACTER (LEN=120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
-REAL :: rAngle
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: rAngle
 ! this tells if there is phase info associated with the cloud; else use HG
+    INTEGER :: iaPhase(kMaxClouds)
 
+    INTEGER :: i1,i2,iFloor,iDownWard
 
-INTEGER :: i1,i2,iFloor,iDownWard
-
-DO i1=1,kMaxPts
-  raInten(i1)=0.0
-  ENDDO
-    
+    DO i1=1,kMaxPts
+        raInten(i1)=0.0
+    ENDDO
+         
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
-! radiation travelling upwards to instrument ==> sat looking down
-! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-! set down to 99,199, ... and so the FLOOR routine will not be too confused
-      iDownWard = 1
-      i1=iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
-      i2=iaaRadLayer(iAtm,iNumLayer)-1
-      i2=iFloor(i2*1.0/kProfLayer)
-      IF (rTSpace > 5.0) THEN
-        WRITE(kStdErr,*) 'you want satellite to be downward looking'
-        WRITE(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
-        WRITE(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
-        WRITE(kStdErr,*) 'Please retry'
-        CALL DoSTOP
-      END IF
+    ! radiation travelling upwards to instrument ==> sat looking down
+    ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+        iDownWard = 1
+        i1=iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
+        i2=iaaRadLayer(iAtm,iNumLayer)-1
+        i2=iFloor(i2*1.0/kProfLayer)
+        IF (rTSpace > 5.0) THEN
+            write(kStdErr,*) 'you want satellite to be downward looking'
+            write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
+            write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
+            write(kStdErr,*) 'Please retry'
+            CALL DoSTOP
+        END IF
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
-! radiation travelling downwards to instrument ==> sat looking up
-! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-! set down to 99,199, ... and so the FLOOR routine will not be too confused
-      iDownWard = -1
-      i1=iaaRadLayer(iAtm,1)-1
-      i1=iFloor(i1*1.0/(1.0*kProfLayer))
-      i2=iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
+    ! radiation travelling downwards to instrument ==> sat looking up
+    ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+        iDownWard = -1
+        i1=iaaRadLayer(iAtm,1)-1
+        i1=iFloor(i1*1.0/(1.0*kProfLayer))
+        i2=iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
     END IF
-    WRITE(kStdWarn,*) 'have set iDownWard = ',iDownWard
-    
+    write(kStdWarn,*) 'have set iDownWard = ',iDownWard
+
 ! check to see that lower/upper layers are from the same 100 mixed path bunch
 ! eg iUpper=90,iLower=1 is acceptable
 ! eg iUpper=140,iLower=90 is NOT acceptable
     IF (i1 /= i2) THEN
-      WRITE(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
-      WRITE(kStdErr,*) 'to have come from same set of 100 mixed paths'
-      WRITE(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer), i1,i2
-      CALL DoSTOP
+        write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
+        write(kStdErr,*) 'to have come from same set of 100 mixed paths'
+        write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer), &
+        i1,i2
+        CALL DoSTOP
     END IF
-    
+
 ! check to see that the radiating atmosphere has <= 100 layers
 ! actually, this is technically done above)
-    i1=ABS(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer))+1
+    i1=abs(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer))+1
     IF (i1 > kProfLayer) THEN
-      WRITE(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
-      CALL DoSTOP
+        write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
+        CALL DoSTOP
     END IF
-    
-    WRITE(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
-    WRITE(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=',  &
-        iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
-    
+
+    write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
+    write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=', &
+    iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
+
     IF (iDownward == 1) THEN
-      rAngle=rSatAngle
+        rAngle=rSatAngle
     ELSE
-      rAngle=-rSatAngle
+        rAngle=-rSatAngle
     END IF
-    
-    CALL interface_rtspec(raFreq,raInten,raVTemp,  &
-        raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,  &
-        rAngle,rFracTop,rFracBot, iNp,iaOp,raaOp,iNpmix,iFileID,  &
-        caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,  &
-        raSurface,raSun,raThermal,raSunRefl, raLayAngles,raSunAngles,  &
-        raThickness,raPressLevels,iProfileLayers,pProf,  &
-        iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,  &
-        iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag)
-    
+
+    CALL interface_rtspec(raFreq,raInten,raVTemp, &
+    raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
+    rAngle,rFracTop,rFracBot, &
+    iNp,iaOp,raaOp,iNpmix,iFileID, &
+    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
+    raSurface,raSun,raThermal,raSunRefl, &
+    raLayAngles,raSunAngles, &
+    raThickness,raPressLevels,iProfileLayers,pProf, &
+    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
+    iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag)
+     
     RETURN
-  END SUBROUTINE doscatter_rtspec
-  
+    end SUBROUTINE doscatter_rtspec
+
 !************************************************************************
 ! the interface call to RTSPEC
 ! the main difference here is if the cloud layers for 2 different clouds are
@@ -219,24 +175,26 @@ DO i1=1,kMaxPts
 ! artificial cloud of IWP=0.0g/m2 is set for layers 3-40
 ! kinda based on the interface to DISORT, except that it sets up this
 ! intermediate "empty" cloud
-  
-  SUBROUTINE interface_rtspec(
-!first the usual kCARTA variables  &
-  raFreq,raInten,raVTemp,  &
-      raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,  &
-      rSatAngle,rFracTop,rFracBot, iNp,iaOp,raaOp,iNpmix,iFileID,  &
-      caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix,  &
-      raSurface,raSun,raThermal,raSunRefl, raLayAngles,raSunAngles,  &
-      raThickness,raPressLevels,iProfileLayers,pProf,
-!then the necessary scattering variables  &
-  iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  &
-      raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,  &
-      iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag)
-  
-  IMPLICIT NONE
-  
-  INCLUDE '../INCLUDE/scatterparam.f90'
-  
+
+    SUBROUTINE interface_rtspec( &
+! irst the usual kCARTA variables
+    raFreq,raInten,raVTemp, &
+    raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
+    rSatAngle,rFracTop,rFracBot, &
+    iNp,iaOp,raaOp,iNpmix,iFileID, &
+    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
+    raSurface,raSun,raThermal,raSunRefl, &
+    raLayAngles,raSunAngles, &
+    raThickness,raPressLevels,iProfileLayers,pProf, &
+! hen the necessary scattering variables
+    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
+    iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
 ! raLayAngles   = array containing layer dependent sun angles
@@ -264,42 +222,42 @@ DO i1=1,kMaxPts
 !                   user specified value if positive
 ! iDownward = +1 ==> downward looking instrument
 !             -1 ==> upward looking instrument
-  
-  INTEGER :: iaCldTypes(kMaxClouds)
-  REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
-  REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
-  REAL :: raSunRefl(kMaxPts),raaAbs(kMaxPts,kMixFilRows)
-  REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSurfPress
-  REAL :: rTSpace,raUseEmissivity(kMaxPts),rSurfaceTemp,rSatAngle
-  REAL :: raaOp(kMaxPrint,kProfLayer),rFracTop,rFracBot
-  REAL :: raaMix(kMixFilRows,kGasStore),raInten(kMaxPts)
-  INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iTag
-  INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
-  INTEGER :: iNpmix,iFileID,iDownWard,iBinaryFile
-  CHARACTER (LEN=80) :: caOutName
-  REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1),  &
-      pProf(kProfLayer)
-  INTEGER :: iProfileLayers
-  
+        
+    INTEGER :: iaCldTypes(kMaxClouds)
+    REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
+    REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
+    REAL :: raSunRefl(kMaxPts),raaAbs(kMaxPts,kMixFilRows)
+    REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSurfPress
+    REAL :: rTSpace,raUseEmissivity(kMaxPts),rSurfaceTemp,rSatAngle
+    REAL :: raaOp(kMaxPrint,kProfLayer),rFracTop,rFracBot
+    REAL :: raaMix(kMixFilRows,kGasStore),raInten(kMaxPts)
+    INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iTag
+    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
+    INTEGER :: iNpmix,iFileID,iDownWard,iBinaryFile
+    CHARACTER(80) :: caOutName
+    REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
+    pProf(kProfLayer)
+    INTEGER :: iProfileLayers
+
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
-  INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
-  INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
+    INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
+    INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
 ! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
 ! iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
-  INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
+    INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-  INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-  CHARACTER (LEN=120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-  REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
 ! this tells if there is phase info associated with the cloud; else use HG
-  INTEGER :: iaPhase(kMaxClouds)
-  
+    INTEGER :: iaPhase(kMaxClouds)
+
 ! local variables
-!cc      IMPLICIT NONE
+! c      IMPLICIT NONE
 !     The scattering tables are read in with READ_SSCATTAB.  The scattering
 !     table is 3D: wavenumber, particle size, and viewing angle.
 !         Scattering table variables:
@@ -310,90 +268,90 @@ DO i1=1,kMaxPts
 !       TABEXTINCT is extinction, TABSSALB is single scattering albedo,
 !       TABASYM is the asymmetry parameter
 !       TABPHI??? are phase function info for incident directions
-  
-  
-!cc      INTEGER  MAXTAB, MAXGRID, MAXSCAT
-!cc      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5)
-  INTEGER :: NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
-  REAL :: MUTAB(MAXGRID,MAXSCAT)
-  REAL :: DMETAB(MAXGRID,MAXSCAT), WAVETAB(MAXGRID,MAXSCAT)
-  REAL :: MUINC(2)
-  REAL :: TABEXTINCT(MAXTAB,MAXSCAT), TABSSALB(MAXTAB,MAXSCAT)
-  REAL :: TABASYM(MAXTAB,MAXSCAT)
-  REAL :: TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
-  REAL :: TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
-  
+         
+
+! c      INTEGER  MAXTAB, MAXGRID, MAXSCAT
+! c      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5)
+    INTEGER ::  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
+    REAL ::     MUTAB(MAXGRID,MAXSCAT)
+    REAL ::     DMETAB(MAXGRID,MAXSCAT), WAVETAB(MAXGRID,MAXSCAT)
+    REAL ::     MUINC(2)
+    REAL ::     TABEXTINCT(MAXTAB,MAXSCAT), TABSSALB(MAXTAB,MAXSCAT)
+    REAL ::     TABASYM(MAXTAB,MAXSCAT)
+    REAL ::     TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
+    REAL ::     TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
+
 !         Radiative transfer variables:
-  INTEGER :: NSCATTAB, NCLDLAY, NABSNU, NLEV
-  INTEGER :: ICLDTOP, ICLDBOT, IOBS, ISCATTAB(MAXNZ)
-  INTEGER :: I, JNU1, JNU2
-  REAL :: MUOBS, IWP(MAXNZ), DME(MAXNZ)         !ztop, zobs not needed
-  REAL :: SFCTEMP, SFCEMIS
-  REAL :: RADOBS
-  REAL :: TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
-  REAL :: ABSNU1, ABSNU2, ABSDELNU
-  REAL :: WAVENO
-  CHARACTER (LEN=80) :: SCATFILE(MAXSCAT)
-  CHARACTER (LEN=1) :: RTMODEL
-  CHARACTER (LEN=1) :: caScale(MAXSCAT)
+    INTEGER :: NSCATTAB, NCLDLAY, NABSNU, NLEV
+    INTEGER :: ICLDTOP, ICLDBOT, IOBS, ISCATTAB(MAXNZ)
+    INTEGER :: I, JNU1, JNU2
+    REAL ::    MUOBS, IWP(MAXNZ), DME(MAXNZ)         !ztop, zobs not needed
+    REAL ::    SFCTEMP, SFCEMIS
+    REAL ::    RADOBS
+    REAL ::    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
+    REAL ::  ABSNU1, ABSNU2, ABSDELNU
+    REAL ::  WAVENO
+    CHARACTER(80) :: SCATFILE(MAXSCAT)
+    CHARACTER(1) ::   RTMODEL
+    CHARACTER(1) :: caScale(MAXSCAT)
 !      CHARACTER*24  OUTUNITS, OUTAVERAGING
-  
+
 ! new local variables
-  INTEGER :: iaCloudWithThisAtm(kMaxClouds),iaScatTable_With_Atm(kMaxClouds)
-  INTEGER :: iReadTable,iStep
-  INTEGER :: IACLDTOP(kMaxClouds), IACLDBOT(kMaxClouds)
-  INTEGER :: iCldTopkCarta,iCldBotKcarta
-  
-  INTEGER :: iaTable(kMaxClouds*kCloudLayers)
-  CHARACTER (LEN=80) :: caName
-  INTEGER :: iIn,iJ,iI,iCloud,iScat,iIOUN,IF,iL
-  REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
-  INTEGER :: iBdry,FindBoundary,iaRadLayer(kProfLayer)
-  
-  INTEGER :: iCloudySky,iLayers,iII,iiDiv
-  REAL :: raLayerTemp(kProfLayer),raTau(kProfLayer),rSolarAngle,ttorad
-  
+    INTEGER :: iaCloudWithThisAtm(kMaxClouds),iaScatTable_With_Atm(kMaxClouds)
+    INTEGER :: iReadTable,iStep
+    INTEGER :: IACLDTOP(kMaxClouds), IACLDBOT(kMaxClouds)
+    INTEGER :: iCldTopkCarta,iCldBotKcarta
+
+    INTEGER :: iaTable(kMaxClouds*kCloudLayers)
+    CHARACTER(80) :: caName
+    INTEGER :: iIn,iJ,iI,iCloud,iScat,iIOUN,iF,iL
+    REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
+    INTEGER :: iBdry,FindBoundary,iaRadLayer(kProfLayer)
+
+    INTEGER :: iCloudySky,iLayers,iII,iiDiv
+    REAL :: raLayerTemp(kProfLayer),raTau(kProfLayer),rSolarAngle,ttorad
+
 ! from original v2 rtspec code, to show differences :
 !      INTEGER  MAXABSNU, MAXNZ, MAXSPEC
 !      PARAMETER (MAXABSNU=100000, MAXNZ=100, MAXSPEC=10)
 !      INTEGER NUMSPEC, NSCATTAB, NCLDLAY, NABSNU, NLEV
 !      INTEGER ICLDTOP, ICLDBOT, IOBS, ISCATTAB(MAXNZ)
 !      INTEGER I, J, L, M, JNU1, JNU2
-!INTEGER J0, NBAND, IBAND, NWAVENO(MAXSPEC), NOUTNU
-!LOGICAL TWOSIDEBAND ********* not using outtb(maxspec),outtriang(maxspec)
+! NTEGER J0, NBAND, IBAND, NWAVENO(MAXSPEC), NOUTNU
+! OGICAL TWOSIDEBAND ********* not using outtb(maxspec),outtriang(maxspec)
 !      LOGICAL BINARYABSFILE
 !      REAL    ZOBS, MUOBS(MAXSPEC), ZTOP, IWP(MAXNZ), DME(MAXNZ)
 !      REAL    SFCTEMP, SFCEMIS
-!REAL SFCEMIS1(MAXSPEC), SFCEMIS2(MAXSPEC)
-!REAL RADOBS(2,MAXSPEC,MAXABSNU), OUTRAD(MAXABSNU) (real radobs,outrad,onu)
+! EAL SFCEMIS1(MAXSPEC), SFCEMIS2(MAXSPEC)
+! EAL RADOBS(2,MAXSPEC,MAXABSNU), OUTRAD(MAXABSNU) (real radobs,outrad,onu)
 !      REAL    HEIGHT(MAXNZ), TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)
 !      REAL*8  ABSNU1, ABSNU2, ABSDELNU
 !      REAL*8  OUTNU1(MAXSPEC), OUTNU2(MAXSPEC), OUTDELNU(MAXSPEC)
-!REAL*8  BANDCENTER(MAXSPEC), BANDOFFSET(MAXSPEC)
+! EAL*8  BANDCENTER(MAXSPEC), BANDOFFSET(MAXSPEC)
 !****** used to have REAL*8  WAVENO, ONU1, ONU2, WT1, WT2, INVOUTDELNU
 !****** used to have REAL*8 sumwt1, sumwt2, sumrad1, sumrad2
 !      REAL*8  OUTNU(MAXABSNU), WAVENO(2,MAXSPEC,MAXABSNU), XO
 !      CHARACTER*100 SCATFILE(MAXSCAT), ABSFILE(MAXSPEC), OUTPUTFILE
 !      CHARACTER*1   RTMODEL, ABSTYPE
-!CHARACTER*24  OUTUNITS(MAXSPEC), OUTAVERAGE(MAXSPEC) (was outunits,outavging)
-  REAL :: RAD0UPOBS(MAXNZ), RAD0DNOBS(MAXNZ)
-  
-  REAL :: raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
-  
-  iIOUN = kStdkCarta
-  
+! HARACTER*24  OUTUNITS(MAXSPEC), OUTAVERAGE(MAXSPEC) (was outunits,outavging)
+    REAL ::    RAD0UPOBS(MAXNZ), RAD0DNOBS(MAXNZ)
+
+    REAL :: raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
+           
+    iIOUN = kStdkCarta
+
 !      WRITE (*,*) 'Singlescat, Eddington or hybrid RT model (S, E or H)'
-  IF (kScatter == 1) THEN
-    RTMODEL='S'
-    WRITE (kStdWarn,*) 'RTSPEC radiative transfer code, SingleScat'
-  ELSE IF (kScatter == 2) THEN
-    RTMODEL='E'
-    WRITE (kStdWarn,*) 'RTSPEC radiative transfer code, Eddington'
-  ELSE IF (kScatter == 3) THEN
-    RTMODEL='H'
-    WRITE (kStdWarn,*) 'RTSPEC radiative transfer code, Hybrid'
-  END IF
-  
+    IF (kScatter == 1) THEN
+        RTMODEL='S'
+        WRITE (kStdWarn,*) 'RTSPEC radiative transfer code, SingleScat'
+    ELSE IF (kScatter == 2) THEN
+        RTMODEL='E'
+        WRITE (kStdWarn,*) 'RTSPEC radiative transfer code, Eddington'
+    ELSE IF (kScatter == 3) THEN
+        RTMODEL='H'
+        WRITE (kStdWarn,*) 'RTSPEC radiative transfer code, Hybrid'
+    END IF
+
 !      WRITE(*,*) 'Number of scattering tables'
 !      NSCATTAB=iNclouds
 !      IF (NSCATTAB .GT. MAXSCAT) THEN
@@ -404,7 +362,7 @@ DO i1=1,kMaxPts
 !      DO I = 1, NSCATTAB
 !        READ (*,'(A100)') SCATFILE(I)
 !      ENDDO
-  
+
 !      WRITE (*,*) 'Absorption file type (A-ascii text, B-binary)'
 !      READ (*,'(A1)') ABSTYPE
 !      BINARYABSFILE = ABSTYPE .EQ. 'B' .OR. ABSTYPE .EQ. 'b'
@@ -421,239 +379,231 @@ DO i1=1,kMaxPts
 !     $                ' in absorption file'
 !        CAll DoSTOP
 !      ENDIF
-  
-  CALL SetMieTables_RTSPEC(raFreq,  &
-!!!!!!!!!!!!!!!!!these are the input variables  &
-  iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  &
-      raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,  &
-      iaPhase,raPhasePoints,raComputedPhase,  &
-      iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer,  &
-      -1,             !!!!iSergio = -1 as this is ORIG RTSPEC code  &
-!!!!!!!!!!!!!!!!!!these are the output variables  &
-  NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC,  &
-      TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN,  &
-      TABPHI2UP, TABPHI2DN,  &
-      NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB,  &
-      IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm,  &
-      iCloudySky, IACLDTOP, IACLDBOT,  iCldTopKcarta,iCldBotkCarta)
-  
-  CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer,  &
-      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress,  &
-      ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF,  &
-      ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp,  &
-      iProfileLayers,raPressLevels)
-  
-  IF (iDownWard > 0) THEN
-!down look instr, in kCARTA layering style
-    IOBS   = iNumLayer
-  ELSE IF (iDownWard < 0) THEN    !up look instr
-!up look instr, in KCARTA layering style
-    IOBS   = 1
-  END IF
-!change to RTSPEC layering
-  iobs=(iNumLayer+1)-iobs+1
-  
+
+    CALL SetMieTables_RTSPEC(raFreq, & &
+!!!!!!!!!!!!!!!!!these are the input variables
+    iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+    iaPhase,raPhasePoints,raComputedPhase, &
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
+    -1,              &  & !!!!iSergio = -1 as this is ORIG RTSPEC code
+!!!!!!!!!!!!!!!!!!these are the output variables
+    NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
+    TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
+    TABPHI2UP, TABPHI2DN, &
+    NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
+    IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
+    iCloudySky, IACLDTOP, IACLDBOT,  iCldTopKcarta,iCldBotkCarta)
+
+    CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
+    iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
+    ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
+    ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
+    iProfileLayers,raPressLevels)
+
+    IF (iDownWard > 0) THEN
+    ! own look instr, in kCARTA layering style
+        IOBS   = iNumLayer
+    ELSE IF (iDownWard < 0) THEN    !up look instr
+    ! p look instr, in KCARTA layering style
+        IOBS   = 1
+    END IF
+! hange to RTSPEC layering
+    iobs=(iNumLayer+1)-iobs+1
+
 !!!!!!! if iCloudSky .LT. 0 do clear sky rad transfer easily !!!!!!!
-  IF (iCloudySky < 0) THEN
-    rSolarAngle = kSolarAngle
-!!!!note that we do not care about background thermal accurately here
-    WRITE (kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
-    DO iii = 1,iNp
-      DO IF = 1,kMaxPts
-        DO iL = 1,NLEV-1
-          raTau(iL)  = absprof(iL,IF)
+    IF (iCloudySky < 0) THEN
+        rSolarAngle = kSolarAngle
+    !!!!note that we do not care about background thermal accurately here
+        write (kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
+        DO iii = 1,iNp
+            DO iF = 1,kMaxPts
+                DO iL = 1,NLEV-1
+                    raTau(iL)  = absprof(iL,iF)
+                END DO
+                CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
+                rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
+                raUseEmissivity(iF),raFreq(iF),raInten(iF),iaOp(iii), &
+                iProfileLayers,raPressLevels)
+            END DO
+            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
         END DO
-        CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev,  &
-            rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress,  &
-            raUseEmissivity(IF),raFreq(IF),raInten(IF),iaOp(iii),  &
-            iProfileLayers,raPressLevels)
-      END DO
-      CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-    END DO
-    GO TO 9876
-  END IF
-  
+        GOTO 9876
+    END IF
+
 !     Get spectral range in absorption file for this spectral segment
-  JNU1=1
-  JNU2 = kMaxPts
-  
-  MUOBS=COS(rSatAngle*kPi/180.0)  !viewing angle cosine
-  IF (iDownWard == -1) THEN
-    MUOBS=-MUOBS
-  END IF
-  SFCTEMP = rSurfaceTemp
-  WRITE (kStdWarn,*) 'cos(rSatAngle),sfctemp = ',muobs,sfctemp
-  
+    JNU1=1
+    JNU2 = kMaxPts
+
+    MUOBS=cos(rSatAngle*kPi/180.0)  !viewing angle cosine
+    IF (iDownWard == -1) THEN
+        MUOBS=-MUOBS
+    END IF
+    SFCTEMP = rSurfaceTemp
+    WRITE (kStdWarn,*) 'cos(rSatAngle),sfctemp = ',muobs,sfctemp
+
 ! see if there are any layers between TOA and instr; if there are, set
 ! TOA_to_instr to the cumulative radiative transfer of the necessary k, else
 ! set it to -10.0
-  DO iL=1,kProfLayer
-    iaRadLayer(iL)=iaaRadLayer(iAtm,iL)
-  END DO
-  iiDiv = 0
-  555  CONTINUE
-  IF (iiDiv*kProfLayer < iaRadLayer(1)) THEN
-    iiDiv = iiDiv + 1
-    GO TO 555
-  END IF
-  iiDiv = iiDiv - 1
-  
-  iBdry=-1
-!find the layer where you quit doing background thermal using only
-!acos(3/5) and start using more accurate approx
-  IF (kThermal >= 0) THEN
-    iBdry=FindBoundary(raFreq,iProfileLayers,raPresslevels,iaRadLayer)
-  END IF
-  
-  CALL Find_Radiance_TOA_to_instr(iaRadLayer,iNumLayer,raVTemp,  &
-      rFracTop,raFreq,raaAbs,TOA_to_instr)
-  
-  DO iii = 1,iNp                     !!!!!!loop over outputs iii=1,iNp
-    IF (iDownWard == +1)  THEN
-      iobs = iaOp(iii)+1
-      iobs = (iNumLayer+1) - iobs + 1
-    ELSE
-      iobs = iaOp(iii)
+    DO iL=1,kProfLayer
+        iaRadLayer(iL)=iaaRadLayer(iAtm,iL)
+    END DO
+    iiDiv = 0
+    555 CONTINUE
+    IF (iiDiv*kProfLayer < iaRadLayer(1)) THEN
+        iiDiv = iiDiv + 1
+        GOTO 555
     END IF
-    iObs = iObs + (iiDiv*kProfLayer)
-    
-    IF (ICLDTOP == 0 .OR. ICLDBOT == 0 .OR. IOBS == 0) THEN
-      WRITE (kStdErr,*) 'RTSPEC: Observer or cloud top height does',  &
-          ' not match absorption file levels'
-      STOP
+    iiDiv = iiDiv - 1
+
+    iBdry=-1
+! ind the layer where you quit doing background thermal using only
+! cos(3/5) and start using more accurate approx
+    IF (kThermal >= 0) THEN
+        iBdry=FindBoundary(raFreq,iProfileLayers,raPresslevels,iaRadLayer)
     END IF
-    
-!        print *,rtmodel,muobs,iobs,nlev,sfctemp,ncldlay,icldtop,icldbot
-!        DO iF = JNU1, JNU2            !!!!loop over frequencies
-!          raInten(iF) = 0.0
-!          END DO
-!        jnu1 = 3080
-!        jnu2 = 3080
-    
-    DO IF = JNU1, JNU2            !!!!loop over frequencies
-      IF ((iObs == 1) .AND. (iDownWard < 0)) THEN
-        raInten(IF) = ttorad(raFreq(IF),SNGL(kTSpace))
-      ELSE
-        DO iL = 1,NLEV-1
-          taugas(iL) = absprof(iL,IF)
-        END DO
-        
-        SFCEMIS=raUseEmissivity(IF)
-        WAVENO = raFreq(IF)
-        CALL COMPUTE_RADIATIVE_TRANSFER (RTMODEL, MUOBS, IOBS, WAVENO,  &
-            NLEV, TEMP, TAUGAS, SFCTEMP, SFCEMIS,  &
-            NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB,  &
-!!!!!!!!!!!!!!!!!!!MAXTAB, MAXGRID,  &
-        NSCATTAB, MUINC, NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB,  &
-            TABEXTINCT, TABSSALB, TABASYM,  &
-            TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN, RADOBS,  &
-            IBDRY, TOA_to_instr(IF),iiDiv) !these are 3 new parameters
-        raInten(IF)=radobs
-        
-      END IF                  !!!!end actually computing rad if things ok
-      ENDDO                     !!!!loop over frequencies
+
+    CALL Find_Radiance_TOA_to_instr(iaRadLayer,iNumLayer,raVTemp, &
+    rFracTop,raFreq,raaAbs,TOA_to_instr)
+
+    DO iii = 1,iNp                     !!!!!!loop over outputs iii=1,iNp
+        IF (iDownWard == +1)  THEN
+            iobs = iaOp(iii)+1
+            iobs = (iNumLayer+1) - iobs + 1
+        ELSE
+            iobs = iaOp(iii)
+        END IF
+        iObs = iObs + (iiDiv*kProfLayer)
+
+        IF (ICLDTOP == 0 .OR. ICLDBOT == 0 .OR. IOBS == 0) THEN
+            WRITE (kStdErr,*) 'RTSPEC: Observer or cloud top height does', &
+            ' not match absorption file levels'
+            STOP
+        END IF
+
+    !        print *,rtmodel,muobs,iobs,nlev,sfctemp,ncldlay,icldtop,icldbot
+    !        DO iF = JNU1, JNU2            !!!!loop over frequencies
+    !          raInten(iF) = 0.0
+    !          END DO
+    !        jnu1 = 3080
+    !        jnu2 = 3080
+
+        DO iF = JNU1, JNU2            !!!!loop over frequencies
+            IF ((iObs == 1) .AND. (iDownWard < 0)) THEN
+                raInten(iF) = ttorad(raFreq(iF),sngl(kTSpace))
+            ELSE
+                DO iL = 1,NLEV-1
+                    taugas(iL) = absprof(iL,iF)
+                END DO
+
+                SFCEMIS=raUseEmissivity(iF)
+                WAVENO = raFreq(iF)
+                CALL COMPUTE_RADIATIVE_TRANSFER (RTMODEL, &
+                MUOBS, IOBS, WAVENO, &
+                NLEV, TEMP, TAUGAS, SFCTEMP, SFCEMIS, &
+                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & &
+            !!!!!!!!!!!!!!!!!!!MAXTAB, MAXGRID,
+                NSCATTAB, MUINC, &
+                NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
+                TABEXTINCT, TABSSALB, TABASYM, &
+                TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN, &
+                RADOBS, &
+                IBDRY, TOA_to_instr(iF),iiDiv) !these are 3 new parameters
+                raInten(iF)=radobs
+
+            END IF                  !!!!end actually computing rad if things ok
+        ENDDO                     !!!!loop over frequencies
         CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-      END DO
-      
-      9876 CONTINUE       !!!!we could have skipped here direct if NO clouds in atm
-      
-      RETURN
-    END SUBROUTINE interface_rtspec
-    
+    END DO
+
+    9876 CONTINUE       !!!!we could have skipped here direct if NO clouds in atm
+
+    RETURN
+    end SUBROUTINE interface_rtspec
+
 !************************************************************************
 ! this function quickly computes the background thermal contribution downto
 ! the layer where the instrument is
-    
-    REAL FUNCTION backgnd(raaAbs,waveno,raVTemp,iaaRadLayer,iNumLayer,  &
-        iNpmix,iAtm,rFracTop,j)
-    
-    INCLUDE '../INCLUDE/scatterparam.f90'
-    
-    
-    REAL, INTENT(IN)                         :: raaAbs(kMaxPts,kMixFilRows)
-    REAL, INTENT(IN OUT)                     :: waveno
-    REAL, INTENT(IN)                         :: raVTemp(kMixFilRows)
-    INTEGER, INTENT(IN OUT)                  :: iaaRadLaye
-    INTEGER, INTENT(IN)                      :: iNumLayer
-    INTEGER, INTENT(OUT)                     :: iNpmix
-    INTEGER, INTENT(IN OUT)                  :: iAtm
-    REAL, INTENT(IN OUT)                     :: rFracTop
-    INTEGER, INTENT(IN OUT)                  :: j
-    
-    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
+    REAL FUNCTION backgnd(raaAbs,waveno,raVTemp,iaaRadLayer,iNumLayer, &
+    iNpmix,iAtm,rFracTop,j)
+
+    include '../INCLUDE/scatterparam.f90'
+
+    REAL :: raaAbs(kMaxPts,kMixFilRows),rFracTop,raVTemp(kMixFilRows),waveno
+    INTEGER :: iAtm,j,iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iNpmix
 !     raFreq(j)=waveno
-    
+
     INTEGER :: iLay,iaRadLayer(kProfLayer),iaRadLayerTemp(kMixFilRows)
     INTEGER :: iT,iExtraThermal
     REAL :: rad,ttorad,rMPTemp,raExtraThermal(kMaxPts),rThetaEff
     REAL :: rTrans, rEmiss, rAbs
-    
+
     DO iLay=1,iNumLayer
-      iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-      IF (iaRadLayer(iLay) > iNpmix) THEN
-        WRITE(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-        WRITE(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-        WRITE(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-        CALL DoSTOP
-      END IF
-      IF (iaRadLayer(iLay) < 1) THEN
-        WRITE(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-        WRITE(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-        CALL DoSTOP
-      END IF
+        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iLay) > iNpmix) THEN
+            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+            CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iLay) < 1) THEN
+            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+            CALL DoSTOP
+        END IF
     END DO
-    
-    CALL AddUppermostLayersQ(iaRadLayer,iNumLayer,rFracTop,  &
-        iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
-    
+
+    CALL AddUppermostLayersQ(iaRadLayer,iNumLayer,rFracTop, &
+    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
+
     rThetaEff=3/5.0
-    
+
 ! see  SUBROUTINE Diffusivity_AllAnglesEqual(raThermal,raVT1,rTSpace,
-    
+
 ! do radiation at space temp
-    rMPTemp = SNGL(kTSpace)
+    rMPTemp = sngl(kTSpace)
     rad = ttorad(waveno,rMPTemp)
-    
+
 ! go from top of atmosphere to instrument
     IF (iExtraThermal < 0) THEN
-! just have to worry about top layer being fractional
-      rAbs=raaAbs(j,iaRadLayer(iNumLayer))*(1-rFracTop)
-      rTrans=EXP(-rAbs/rThetaEff)
-      
-      rMPTemp=raVTemp(iaRadLayer(iNumLayer))
-      rEmiss=ttorad(waveno,rMPTemp)
-      rEmiss=(1.0-rTrans)*rEmiss
-      
-      rad=rad*rTrans + rEmiss
+    ! just have to worry about top layer being fractional
+        rAbs=raaAbs(j,iaRadLayer(iNumLayer))*(1-rFracTop)
+        rTrans=exp(-rAbs/rThetaEff)
+
+        rMPTemp=raVTemp(iaRadLayer(iNumLayer))
+        rEmiss=ttorad(waveno,rMPTemp)
+        rEmiss=(1.0-rTrans)*rEmiss
+
+        rad=rad*rTrans + rEmiss
     ELSE
-! go from top of atmosphere to layer above instrument
-      DO iLay=iT,iNumLayer+1
-        rAbs=raaAbs(j,iaRadLayerTemp(iLay))
-        rTrans=EXP(-rAbs/rThetaEff)
-        rMPTemp=raVTemp(iaRadLayerTemp(iNumLayer))
-        rEmiss=ttorad(waveno,rMPTemp)
-        rEmiss=(1.0-rTrans)*rEmiss
-        rad=rad*rTrans + rEmiss
-      END DO
-! do layer where instrument is .. don't worry about interpolating temp
-      DO iLay=iNumLayer,iNumLayer
-        rAbs=raaAbs(j,iaRadLayerTemp(iLay))*(1-rFracTop)
-        rTrans=EXP(-rAbs/rThetaEff)
-        rMPTemp=raVTemp(iaRadLayerTemp(iNumLayer))
-        rEmiss=ttorad(waveno,rMPTemp)
-        rEmiss=(1.0-rTrans)*rEmiss
-        rad=rad*rTrans + rEmiss
-      END DO
+    ! go from top of atmosphere to layer above instrument
+        DO iLay=iT,iNumLayer+1
+            rAbs=raaAbs(j,iaRadLayerTemp(iLay))
+            rTrans=exp(-rAbs/rThetaEff)
+            rMPTemp=raVTemp(iaRadLayerTemp(iNumLayer))
+            rEmiss=ttorad(waveno,rMPTemp)
+            rEmiss=(1.0-rTrans)*rEmiss
+            rad=rad*rTrans + rEmiss
+        END DO
+    ! do layer where instrument is .. don't worry about interpolating temp
+        DO iLay=iNumLayer,iNumLayer
+            rAbs=raaAbs(j,iaRadLayerTemp(iLay))*(1-rFracTop)
+            rTrans=exp(-rAbs/rThetaEff)
+            rMPTemp=raVTemp(iaRadLayerTemp(iNumLayer))
+            rEmiss=ttorad(waveno,rMPTemp)
+            rEmiss=(1.0-rTrans)*rEmiss
+            rad=rad*rTrans + rEmiss
+        END DO
     END IF
-    
+     
     backgnd=rad*2.0*kPi
-    
+
     RETURN
-  END FUNCTION backgnd
+    end FUNCTION backgnd
 !************************************************************************
 ! include Evans code here
-!ccccc      include '../INCLUDE/scatter_rtspec.f'   this is compiled separately
-  
+! cccc      include '../INCLUDE/scatter_rtspec.f'   this is compiled separately
+
 !      PROGRAM RTSPEC   NEW!!!!!!!!!!!!!!! for up and down look!!!!!!
 !       Program for computing thermal atmospheric radiative transfer with
 !     a multiple layer cloud in an atmosphere.  Outputs a radiance spectrum,
@@ -712,7 +662,7 @@ DO i1=1,kMaxPts
 !     monochromatic radiative transfer is done.  A double sideband receiver
 !     may be emulated, in which case two rectangular bandpasses equally
 !     spaced from the receiver center frequency are simulated.
-  
+
 !       The input ascii absorption file has the following format:
 !     1) header line
 !     2) starting, ending, delta, and number of wavenumbers in file
@@ -724,15 +674,15 @@ DO i1=1,kMaxPts
 !     A binary format absorption file may be input for faster loading
 !     (the BINARYABSFILE logical is set from user input; see
 !     READ_ABS_PROFILE subroutine).
-  
+
 !       The input scattering tables are in the format produced by
 !     sscatmie.f.  This format also accomodates single scattering
 !     information for randomly nonspherical oriented particles.
-  
+
 !     Author: Frank Evans  University of Colorado   May 1999
 !     Co-authors:
 !       Aaron Evans    (multilayer code, spectral segments, double sidebands,
 !                       upward looking geometry, output convolution)
 !       Merritt Deeter (single scattering layer routines)
-  
+
 !************************************************************************
