@@ -6,6 +6,23 @@
 ! this file also has the namelist writer subroutine
 
 ! also has the MatchKeyWord routines
+
+MODULE n_main
+
+USE s_misc
+USE s_writefile
+USE n_gas_wt_spectra
+USE n_layers
+USE n_rad_jac_scat
+USE n_pth_mix
+USE n_output
+USE n_layers_lblrtm
+USE rtp_interface_f90
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this subroutine reads in the namelists
 
@@ -2073,3 +2090,4 @@
     end SUBROUTINE DoCheckEntry3
       
 !************************************************************************
+END MODULE n_main

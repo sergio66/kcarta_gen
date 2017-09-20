@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE s_writefile
+
+IMPLICIT NONE
+
+CONTAINS
+
 !***********************************************************************
 !**************** MAIN BINARY OUTPUT SUBROUTINES ARE HERE **************
 !***********************************************************************
@@ -3442,3 +3448,4 @@
     RETURN
     end SUBROUTINE wrtout_head_uafile
 !************************************************************************
+END MODULE s_writefile

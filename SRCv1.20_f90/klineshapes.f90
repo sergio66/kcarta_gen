@@ -6,6 +6,12 @@
 ! these include : qfcns, line broadening, lte strenghts, population ratios
 ! it also reads in HITRAN parameters and US standard Optical Depths
 
+MODULE klineshapes
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !                     these are the lineshape subroutines
 !************************************************************************
@@ -2167,3 +2173,4 @@
 
 
 !************************************************************************
+END MODULE klineshapes

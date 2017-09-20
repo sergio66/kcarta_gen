@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE n_pth_mix
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this file deals with reading in the user file
 ! main routines for PTHFIL are here
 ! also, the REFERENCE profile reading subroutine is here
@@ -3170,3 +3176,4 @@
     end FUNCTION iFindJ
 
 !************************************************************************
+END MODULE n_pth_mix

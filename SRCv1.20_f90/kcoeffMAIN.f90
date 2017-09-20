@@ -2,6 +2,20 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kcoeffMAIN
+
+use kcoeffSPL
+use kcoeffSPLJAC
+use kcoeff_FAST
+use kcoeff_FAST_details
+use kcoeff_FAST_details2
+use kcont_xsec
+
+IMPLICIT NONE
+
+CONTAINS
+
+
 !************************************************************************
 !********* this file has the main k-compressed routines *****************
 !** which include reading in the data, doing the spline interpolations **
@@ -2444,3 +2458,4 @@
     END SUBROUTINE RDCOMP
 
 !************************************************************************
+END MODULE kcoeffMAIN

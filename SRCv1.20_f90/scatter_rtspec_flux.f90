@@ -385,12 +385,12 @@
 
 ! ------------ first see if the sky is clear; if so, call clear sky flux --
 
-    CALL SetMieTables_RTSPEC(raFreq, & &
+    CALL SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, & &
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, & 
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -673,12 +673,12 @@
 
     iDownWard = -1
     write(kStdWarn,*) 'starting to compute downward flux'
-    CALL SetMieTables_RTSPEC(raFreq, & &
+    CALL SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, & &
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, & 
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -754,7 +754,7 @@
                 CALL COMPUTE_RADIATIVE_TRANSFER (RTMODEL, &
                 MUOBS, IOBS, WAVENO, &
                 NLEV, TEMP, TAUGAS, SFCTEMP, SFCEMIS, &
-                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & &
+                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & 
             !!!!!!!!!!!!!!!!!!!MAXTAB, MAXGRID,
                 NSCATTAB, MUINC, &
                 NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
@@ -777,7 +777,7 @@
                 CALL COMPUTE_RADIATIVE_TRANSFER (RTMODEL, &
                 MUOBS, IOBS, WAVENO, &
                 NLEV, TEMP, TAUGAS, SFCTEMP, SFCEMIS, &
-                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & &
+                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & 
             !!!!!!!!!!!!!!!!!!!MAXTAB, MAXGRID,
                 NSCATTAB, MUINC, &
                 NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
@@ -805,12 +805,12 @@
     iDownWard = +1
     write(kStdWarn,*) 'starting to compute upward flux'
 
-    CALL SetMieTables_RTSPEC(raFreq, & &
+    CALL SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, & &
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -887,7 +887,7 @@
                 CALL COMPUTE_RADIATIVE_TRANSFER (RTMODEL, &
                 MUOBS, IOBS, WAVENO, &
                 NLEV, TEMP, TAUGAS, SFCTEMP, SFCEMIS, &
-                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & &
+                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
             !!!!!!!!!!!!!!!!!!!MAXTAB, MAXGRID,
                 NSCATTAB, MUINC, &
                 NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
@@ -910,7 +910,7 @@
                 CALL COMPUTE_RADIATIVE_TRANSFER (RTMODEL, &
                 MUOBS, IOBS, WAVENO, &
                 NLEV, TEMP, TAUGAS, SFCTEMP, SFCEMIS, &
-                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & &
+                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
             !!!!!!!!!!!!!!!!!!!MAXTAB, MAXGRID,
                 NSCATTAB, MUINC, &
                 NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &

@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE n_mainTXT
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this file has main driver for reading in user file
 ! this file also has the namelist writer subroutine
 
@@ -2478,3 +2484,4 @@
     end SUBROUTINE pthfil4NMLonly
 
 !************************************************************************
+END MODULE n_mainTXT

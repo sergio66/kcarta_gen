@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE rad_flux
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! see http://www.ecmwf.int/research/ifsdocs/PHYSICS/Chap2_Radiation4.html
 ! where dT/dt = g/cp d(Flux)/dp
 
@@ -5729,3 +5735,4 @@
     end SUBROUTINE flux_moment_slowloopLinearVaryT
 
 !************************************************************************
+END MODULE rad_flux

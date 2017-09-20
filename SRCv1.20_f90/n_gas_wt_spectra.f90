@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE n_gas_wt_spectra
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this file reads *MOLGAS,*XSCGAS,*FREQ (very easy),*MIXFIL
 
 !************************************************************************
@@ -1796,3 +1802,5 @@
     RETURN
     end SUBROUTINE add_xsecgas
 !************************************************************************
+
+END MODULE n_gas_wt_spectra

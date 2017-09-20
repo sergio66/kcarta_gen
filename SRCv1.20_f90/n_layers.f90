@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE n_layers
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this file deals with a simple layers
 ! does everything in terms of LINEAR interps, not SPLINE
 ! DO NOT USE        Call r_sort_logspl(raTempP,raTempMR,i1-i2+1,raP,raTempMRX,iNumLevs)
@@ -3126,3 +3132,4 @@
     RETURN
     end SUBROUTINE ReadRefProf_Levels2
 !************************************************************************
+END MODULE n_layers

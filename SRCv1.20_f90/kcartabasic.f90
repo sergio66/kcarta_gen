@@ -2,6 +2,18 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+! use must precede IMPLICIT and INCLUDE statements
+
+    PROGRAM kcartabasic
+    use omp_lib          ! Fortran 90; omp_get_thread_num, omp_get_num_threads
+    use ifport           ! for getenv
+    
+    use kcartamisc       ! misc routines
+    use jac_main         ! jacobians
+    use rad_main         ! main rad routines
+    use n_main           ! main reader for namelist
+    use kcoeffmain       ! uncompression routines
+    
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
 !   kcartaparam.f90  : parameter declarations (for the array sizes)
@@ -324,7 +336,7 @@
           
 ! iJacob        = number of gas Jacobians to output
 ! iaJacob       = list of GasID's to do Jacobian for
-    INTEGER :: iJacob,iaJacob(kMaxDQ),DoGasJacob
+    INTEGER :: iJacob,iaJacob(kMaxDQ)
 
 ! (max of kNumkComp blocks, from 605 to 2805)
     INTEGER :: iFileIDLo,iFileIDHi,iInt,iFileID
@@ -370,19 +382,22 @@
 
 ! these are actually used
     INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
-    INTEGER :: DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft
+    INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 ! these are temporary dumy variables
     REAL :: raX(kMaxPts),raY2(kMaxPts),raY3(kMaxPts) !used for splines
 !      REAL rDummy,rDummy2,rDummy3,rDerivTemp,rDerivAmt,PLKAVG_ORIG, PLKAVG
-    REAL :: rDummy,rDerivTemp,rDerivAmt,p2h
+    REAL :: rDummy,rDerivTemp,rDerivAmt
     DOUBLE PRECISION :: daDumbAbs(kMaxPts)
 
 !************************************************************************
 !************************************************************************
 !************************************************************************
 
+    double precision :: wtime
+    wtime = omp_get_wtime ( )
+    
 !      CALL InputMR_profile('../SRC/levels_prof1.txt')
 !      print *,'yihaa'
 !      Call Dostop
@@ -1289,6 +1304,10 @@
 
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
+    CALL DateTime('kcartabasic.x')
+    wtime = omp_get_wtime ( ) - wtime
+    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
+    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
 
     write(kStdWarn,*) 'end of run!!!!!!!!!!!'
     CLOSE(UNIT = kStdWarn)

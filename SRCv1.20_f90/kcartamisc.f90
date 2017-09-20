@@ -2,11 +2,25 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+!! use must precede IMPLICIT and INCLUDE statements
+
+MODULE kcartamisc
+
+USE freqfile
+USE spline_and_sort
+
+IMPLICIT NONE
+
 !************************************************************************
 !******** THIS FILE CONTAINS VARIOUS USEFUL SUBROUTINES/FUNCTIONS *******
 !** such as sorting, setting vertical temperature profiles, checking ****
 !** kcartaparam.f90, checking comp.param and xsec.param, splines etc *******
 !************************************************************************
+
+CONTAINS
+
+!************************************************************************
+
 ! check for isnan
     LOGICAL FUNCTION isnan_real(x)
 
@@ -2083,7 +2097,7 @@
     iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
 !!!   see SUBR Get_Temp_Plevs in n_pth_mix.f
     iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
-!!!   see SUBR rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS in rad_main.f
+!!!   see SUBR rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS in rad_main.f
     iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = 5 for PCLSAM (Default)
 !!!   0 for ABS clouds, 2 for RTPSEC, 3 for DISORT
       
@@ -4132,3 +4146,72 @@
     end FUNCTION p2h
 
 !************************************************************************
+! ----------------------------------------------------------------
+!https://pages.mtu.edu/~shene/COURSES/cs201/NOTES/chap02/datetime.f90
+!  This program uses DATE_AND_TIME() to retrieve the system date
+!  and the system time.  Then, it converts the date and time
+!  information to a readable format.  This program demonstrates
+!  the use of concatenation operator // and substring
+! ----------------------------------------------------------------
+
+   SUBROUTINE DateTime(callname)
+   IMPLICIT   NONE
+   INCLUDE '../INCLUDE/kcartaparam.f90'
+   
+   CHARACTER*(*) :: callname
+   CHARACTER(LEN = 8)  :: DateINFO                 ! ccyymmdd
+   CHARACTER(LEN = 4)  :: Year, Month*2, Day*2
+   CHARACTER(LEN = 10) :: TimeINFO, PrettyTime*12  ! hhmmss.sss
+   CHARACTER(LEN = 2)  :: Hour, Minute, Second*6
+
+   CALL  DATE_AND_TIME(DateINFO, TimeINFO)
+
+!  decompose DateINFO into year, month and day.
+!  DateINFO has a form of ccyymmdd, where cc = century, yy = year
+!  mm = month and dd = day
+
+   Year  = DateINFO(1:4)
+   Month = DateINFO(5:6)
+   Day   = DateINFO(7:8)
+
+!   WRITE(*,*)  'Date information -> ', DateINFO
+!   WRITE(*,*)  '            Year -> ', Year
+!   WRITE(*,*)  '           Month -> ', Month
+!   WRITE(*,*)  '             Day -> ', Day
+
+!  decompose TimeINFO into hour, minute and second.
+!  TimeINFO has a form of hhmmss.sss, where h = hour, m = minute
+!  and s = second
+
+   Hour   = TimeINFO(1:2)
+   Minute = TimeINFO(3:4)
+   Second = TimeINFO(5:10)
+
+   PrettyTime = Hour // ':' // Minute // ':' // Second
+
+   WRITE(*,*)
+!   WRITE(*,*)  'Time Information -> ', TimeINFO
+!   WRITE(*,*)  '            Hour -> ', Hour
+!   WRITE(*,*)  '          Minite -> ', Minute
+!   WRITE(*,*)  '          Second -> ', Second
+!   WRITE(*,*)  '     Pretty Time -> ', PrettyTime
+
+!  the substring operator can be used on the left-hand side.
+ 
+   PrettyTime = ' '
+   PrettyTime( :2) = Hour
+   PrettyTime(3:3) = ':'
+   PrettyTime(4:5) = Minute
+   PrettyTime(6:6) = ':'
+   PrettyTime(7: ) = Second
+
+!  WRITE(*,*)
+!  WRITE(*,*)  '     Pretty Time -> ', PrettyTime 
+   WRITE (kStdWarn,*) callname,' run ended ',Year,'/',Month,'/',Day,' at ',PrettyTime
+   WRITE (kStdErr,*) callname,' run ended ',Year,'/',Month,'/',Day,' at ',PrettyTime   
+   
+   RETURN
+   END SUBROUTINE DateTime
+!************************************************************************
+
+END MODULE kcartamisc

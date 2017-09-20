@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE rad_angles
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the misc angle  routines    ***************
 !************************************************************************
@@ -1379,3 +1385,4 @@
     end SUBROUTINE expintsuperfast3matrix
 
 !************************************************************************
+END MODULE rad_angles

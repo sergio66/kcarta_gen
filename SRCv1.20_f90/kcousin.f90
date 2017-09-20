@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kcousin
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !     has the cousin and GENLN2 co2 continuum here
 !************************************************************************
@@ -2236,3 +2242,4 @@
     END SUBROUTINE CO2FT2
 
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+END MODULE kCOUSIN

@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kcont_xsec
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !********* this file has the continuum/old xsec routines ****************
 !************************************************************************
@@ -1262,3 +1268,4 @@
     end SUBROUTINE GetCKD1Mult
      
 !************************************************************************
+END MODULE kcont_xsec

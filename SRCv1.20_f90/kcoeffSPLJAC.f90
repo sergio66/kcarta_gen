@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kcoeffSPLJAC
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !*******************   this is for the JACOBIANS ************************
 !************************************************************************
@@ -644,3 +650,4 @@
     END FUNCTION FirstDeriv
 
 !************************************************************************
+END MODULE kcoeffSPLJAC

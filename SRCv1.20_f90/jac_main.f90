@@ -2,6 +2,16 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE jac_main
+
+use jac_up
+use jac_down
+use jac_limb
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! (1)JacobGasAmtFM1,JacobTempFM1 : jacobians from the forward model
 !    (includes solar contribution and thermal diffusive contribution)
 ! (2)Surface Reflectivity = 1/pi for thermal
@@ -561,11 +571,4 @@
     end SUBROUTINE JacobSolar
 
 !************************************************************************
-
-
-
-
-
-
-
-
+END MODULE jac_main

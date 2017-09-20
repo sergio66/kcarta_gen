@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE rad_misc
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the misc radiance routines  ***************
 !************************************************************************
@@ -1967,3 +1973,4 @@
     end SUBROUTINE INTERP_SCAT_TABLE2_modified
 
 !************************************************************************
+END MODULE rad_misc

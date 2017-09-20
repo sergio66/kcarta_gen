@@ -2469,7 +2469,7 @@ c input params
 c output params
       DOUBLE PRECISION daFreq(kMaxPts),daK(kMaxPts),daPlanck(kMaxPts)
       DOUBLE PRECISION dXNear,dXMedium,dXCoarse,dfFine,f0,df
-      DOUBLE PRECISION daFreqFineMesh(kMaxPts),daFreqOutMesh(kMaxPts)
+      DOUBLE PRECISION daFreqFineMesh(kMaxPtsBox),daFreqOutMesh(kMaxPts)
       DOUBLE PRECISION daKBloat(kBloatPts),daPBloat(kBloatPts)
       INTEGER iaClose(kHITRAN),iNWide
       INTEGER iOneCmFine,iOneCmMedium,iOneCmCoarse
@@ -2571,7 +2571,7 @@ c output params
       DOUBLE PRECISION d1,d2,d3,d4,d5,d6,dX1,dX2
       DOUBLE PRECISION daTempClose(kMaxPtsBox)
       DOUBLE PRECISION daTempMedium(kMaxPtsBox),daTempCoarse(kMaxPtsBox)
-      DOUBLE PRECISION daFreqFineMesh(kMaxPts),daFreqOutMesh(kMaxPts)
+      DOUBLE PRECISION daFreqFineMesh(kMaxPtsBox),daFreqOutMesh(kMaxPts)
       DOUBLE PRECISION daMedium(kMaxPtsBox),daCoarse(kMaxPtsBox)
 c fudge factors, if necessary
       DOUBLE PRECISION daFudgeF(kMaxPtsBox)
@@ -2756,7 +2756,7 @@ c this is to spline on the far off lines!!!!
       DOUBLE PRECISION daPlanckClose(kMaxPtsBox),daPlanckClose1(kMaxPtsBox)
       DOUBLE PRECISION daPlanckMedium(kMaxPtsBox),daPlanckCoarse(kMaxPtsBox)
       DOUBLE PRECISION dXNear,dXMedium,dXCoarse,dfFine,f0,df
-      DOUBLE PRECISION daFreqFineMesh(kMaxPts),daFreqOutMesh(kMaxPts)
+      DOUBLE PRECISION daFreqFineMesh(kMaxPtsBox),daFreqOutMesh(kMaxPts)
       INTEGER iCount,iaClose(kHITRAN),iNWide,iWideMeshLoop,i1,i2
       INTEGER iOneCmFine,iOneCmMedium,iOneCmCoarse
       INTEGER iFineMeshBoxPts,iMediumMeshBoxPts,iCoarseMeshBoxPts
@@ -3209,7 +3209,7 @@ c this is to spline on the far off lines!!!!
       DOUBLE PRECISION daTempClose(kMaxPtsBox),daTempClose1(kMaxPtsBox)
       DOUBLE PRECISION daTempMedium(kMaxPtsBox),daTempCoarse(kMaxPtsBox)
       DOUBLE PRECISION dXNear,dXMedium,dXCoarse,dfFine,f0,df
-      DOUBLE PRECISION daFreqFineMesh(kMaxPts),daFreqOutMesh(kMaxPts)
+      DOUBLE PRECISION daFreqFineMesh(kMaxPtsBox),daFreqOutMesh(kMaxPts)
       INTEGER iCount,iaClose(kHITRAN),iNWide,iWideMeshLoop,i1,i2
       INTEGER iOneCmFine,iOneCmMedium,iOneCmCoarse
       INTEGER iFineMeshBoxPts,iMediumMeshBoxPts,iCoarseMeshBoxPts

@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kbloat
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! bloated output routines for high res NLTE
 !************************************************************************
 ! this subroutine adds on current LTE gas optical depths to cumulative mixed
@@ -1732,3 +1738,4 @@
 !************************************************************************
 !************************************************************************
 !************************************************************************
+END MODULE kbloat

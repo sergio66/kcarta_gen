@@ -24,6 +24,12 @@
 ! so          -1      ==> only use d/dT(1-tau)(tauL2S)
 ! so           0      ==> use d/dT(planck (1-tau)(tauL2S) )
 
+MODULE jac_up
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !*************** THESE ARE JACOBIANS FOR UP LOOKING INSTR ***************
 !************************************************************************
@@ -765,3 +771,4 @@
     end SUBROUTINE wgtfcnup
 
 !************************************************************************
+ END MODULE jac_up

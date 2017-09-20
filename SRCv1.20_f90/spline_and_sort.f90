@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE spline_and_sort
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !******** THIS FILE CONTAINS VARIOUS USEFUL SUBROUTINES/FUNCTIONS *******
 !******** such as linear interp and sorting routines                 ****
@@ -1733,3 +1739,4 @@
     end SUBROUTINE r_sort_loglinear1
 
 !************************************************************************
+END MODULE spline_and_sort

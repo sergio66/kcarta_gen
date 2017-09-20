@@ -5,6 +5,13 @@
 !************************************************************************
 !******** THIS FILE CONTAINS ROUTINES THAT FIND FREQ CHUNKS ***** *******
 !************************************************************************
+
+MODULE freqfile
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this function checks to see if the cross section data base exists for
 ! gasID, between freqs rL,rH
 ! if rL,rH < 0 then checking basic presence of gas in data base
@@ -1152,3 +1159,5 @@
     RETURN
     end SUBROUTINE UpperFileID
 !************************************************************************
+
+END MODULE FreqFile

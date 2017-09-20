@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kreadVTprofiles
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this routine reads in Reference Amts for CO2 LA compressed database
     SUBROUTINE LowerAtmNLTERefs(raRPressX,raRPPressX,raRTempx,raRAmtx)
@@ -1665,3 +1671,4 @@
     RETURN
     end FUNCTION match_band_energy2
 !************************************************************************
+END MODULE kreadVTprofiles

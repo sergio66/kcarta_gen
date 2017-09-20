@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kcoeff_FAST_details2
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this subroutine determines the weights for temp and pressure interpolation
 ! duplicating the Matlab 2011 version
@@ -1765,3 +1771,4 @@
     end SUBROUTINE x2SplineTempInterpolateJAC_CKD
 
 !************************************************************************
+END MODULE kcoeff_FAST_details2

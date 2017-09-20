@@ -5,6 +5,12 @@
 ! this file deals with reading in the RTP file
 ! scientific format ESW.n   http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap05/format.html
 
+MODULE rtp_interface_f90
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this subroutine deals with figuring out the wavenumbers
 ! very bloody simple, as Howard Motteler very nicely specifies these numbers
@@ -4743,3 +4749,4 @@
     end SUBROUTINE closest_regr_lowertrop
 
 !************************************************************************
+END MODULE rtp_interface_f90

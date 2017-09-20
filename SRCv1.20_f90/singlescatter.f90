@@ -1,3 +1,12 @@
+MODULE singlescatter
+
+USE jac_pclsam_up
+USE jac_pclsam_down
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this subroutine calculates the scattered solar intensity at the bottom of
 ! each layer for a downlook instr
@@ -871,3 +880,4 @@
     end SUBROUTINE xSolarScatterIntensity_DownlookXWORKS
       
 !************************************************************************
+END MODULE singlescatter

@@ -2,6 +2,19 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE rad_main
+
+use rad_diff
+use rad_quad
+use rad_misc
+use rad_flux
+use rad_limb
+use rad_angles
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! raVtemp(kMixFilRows) = layer temperatures (from klayers), gets duplicated as
 !      raVT1 (probably called raMixVertTemp in other routines)
 !      and then raVT1 has lowest (surface level) temp interpolated from (raPavg,raVtemp) to rPlowestLevel
@@ -797,7 +810,7 @@
         ! iVary = 2, kFlux < 0 : (linear in tau layer temp) LTE radtransfer calcs :
         ! you can do REFL THERM + ATM EMISSION only or REFL THERM only
             write(kStdWarn,*) 'upwelling radiances, linear in tau, vary local angle with layer, no surf term'
-            CALL rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS(iVary,raFreq, &
+            CALL rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMIS(iVary,raFreq, &
             raInten,raVTemp, &
             raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
             rSatAngle,rFracTop,rFracBot, &
@@ -3831,7 +3844,7 @@
 ! 1) there is NO integration over solid angle, but we still have to account
 !    for the solid angle subtended by the sun as seen from the earth
 
-    SUBROUTINE rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS( &
+    SUBROUTINE rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS( &
     iVaryIN_0,raFreq,raInten,raVTemp, &
     raaAbs,rTSpace,rTSurf,rPSurf,raUseEmissivity,rSatAngle, &
     rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
@@ -4230,7 +4243,7 @@
         OPEN(UNIT=iIOUN1,FILE=caDumpEmiss,STATUS='NEW',FORM='FORMATTED', &
         IOSTAT=IERR)
         IF (IERR /= 0) THEN
-            WRITE(kStdErr,*) 'In subroutine rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS'
+            WRITE(kStdErr,*) 'In subroutine rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS'
             WRITE(kStdErr,1010) IERR, caDumpEmiss
             CALL DoSTOP
         ENDIF
@@ -4436,7 +4449,7 @@
 
     999 CONTINUE
     RETURN
-    end SUBROUTINE rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE_EMISS
+    end SUBROUTINE rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS
 
 !************************************************************************
 ! this does the CORRECT thermal and solar radiation calculation
@@ -5645,3 +5658,4 @@
     end SUBROUTINE lblrtm_highres_regression_fix
 
 !************************************************************************
+END MODULE rad_main

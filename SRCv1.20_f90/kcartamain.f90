@@ -2,6 +2,10 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+    PROGRAM kcartamain
+    use omp_lib          ! Fortran 90; omp_get_thread_num, omp_get_num_threads
+    use ifport           ! for getenv
+
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
 !   kcartaparam.f90  : parameter declarations (for the array sizes)
@@ -370,7 +374,7 @@
 
 ! these are actually used
     INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
-    INTEGER :: iFr,ID,OMP_GET_THREAD_NUM
+    INTEGER :: iFr,ID
     INTEGER :: DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
@@ -383,6 +387,8 @@
 !************************************************************************
 !************************************************************************
 !************************************************************************
+    double precision :: wtime
+    wtime = omp_get_wtime ( )
 
 ! allow scattering computations if in .nml or RTP file
     kAllowScatter = +1
@@ -1342,6 +1348,10 @@
           
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
+    CALL DateTime('kcartamain.x')
+    wtime = omp_get_wtime ( ) - wtime
+    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
+    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
 
     write(kStdWarn,*) 'end of run!!!!!!!!!!!'
     CLOSE(UNIT = kStdWarn)

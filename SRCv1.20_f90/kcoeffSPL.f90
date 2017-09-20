@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kcoeffSPL
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this subroutine sets the UA reference pressures
     SUBROUTINE ua_avg_databasepressures(raP2,raPP2,raT2,raA2)
@@ -720,3 +726,4 @@
     end SUBROUTINE WaterAmountInterpolateNOJAC
 
 !************************************************************************
+END MODULE kcoeffSPL

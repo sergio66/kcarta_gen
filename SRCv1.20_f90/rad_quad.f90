@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE rad_quad
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !******** This file has the backgnd thermal routines ********************
 !**************** QUADRATURE ROUTINES ***********************************
@@ -1358,3 +1364,4 @@
     end SUBROUTINE AccurateInteg_Quadrature
 
 !************************************************************************
+END MODULE rad_quad

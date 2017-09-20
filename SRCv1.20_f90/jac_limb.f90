@@ -24,6 +24,12 @@
 ! so          -1      ==> only use d/dT(1-tau)(tauL2S)
 ! so           0      ==> use d/dT(planck (1-tau)(tauL2S) )
 
+MODULE jac_limb
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************* THESE ARE THE JACOBIANS FOR THE LIMB VIEW INSTR***********
 !************************************************************************
@@ -1132,3 +1138,4 @@
     end SUBROUTINE LimbJacobianHardX
 
 !************************************************************************
+END MODULE jac_limb

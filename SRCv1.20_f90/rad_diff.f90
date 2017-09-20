@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE rad_diff
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !******** This file has the backgnd thermal routines ********************
 !**************    DIFFUSIVITY APPROX  **********************************
@@ -1243,3 +1249,4 @@
     RETURN
     end FUNCTION WhichLevel
 !************************************************************************
+END MODULE rad_diff

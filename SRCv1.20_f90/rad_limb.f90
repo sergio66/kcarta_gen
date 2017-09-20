@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE rad_limb
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************************************************************************
@@ -1640,3 +1646,4 @@
     end SUBROUTINE rad_trans_LIMB
 
 !************************************************************************
+END MODULE rad_limb

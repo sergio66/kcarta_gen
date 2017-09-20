@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE n_layers_lblrtm
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this file does the LBLRTM TAPE5/TAPE6
 
 ! see eg http://shadow.eas.gatech.edu/~vvt/lblrtm/lblrtm_inst.html
@@ -2197,3 +2203,4 @@
     RETURN
     end SUBROUTINE read_record_3p4_and_3p5_and_3p7
 !************************************************************************
+END MODULE n_layers_lblrtm

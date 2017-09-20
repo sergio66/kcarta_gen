@@ -2,7 +2,7 @@
 sed -e "s/.param/param.f90/g" ../INCLUDE/xscatterparam.f90 > ../INCLUDE/scatterparam.f90; rm ../INCLUDE/xscatterparam.f90
 
 /bin/cp ../INCLUDE/kcarta.param  ../INCLUDE/xkcartaparam.f;   fixcon ../INCLUDE/xkcartaparam.f ../INCLUDE/xkcartaparam.f90
-sed -e "s/.param/param.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartaparam.f90; rm ../INCLUDE/xkcartaparam.f90	
+sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/post_definedparam.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartaparam.f90; rm ../INCLUDE/xkcartaparam.f90	
 
 /bin/cp ../INCLUDE/pre_defined.param  ../INCLUDE/pre_definedparam.f;   fixcon ../INCLUDE/pre_definedparam.f  ../INCLUDE/pre_definedparam.f90; rm ../INCLUDE/pre_definedparam.f
 
@@ -25,6 +25,8 @@ sed -e "s/.param/param.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartapar
 /bin/cp ../INCLUDE/KCARTA_database.param  ../INCLUDE/KCARTA_databaseparam.f; fixcon ../INCLUDE/KCARTA_databaseparam.f ../INCLUDE/KCARTA_databaseparam.f90; rm ../INCLUDE/KCARTA_databaseparam.f
 
 /bin/cp ../INCLUDE/gasIDname.param  ../INCLUDE/gasIDnameparam.f; fixcon ../INCLUDE/gasIDnameparam.f ../INCLUDE/gasIDnameparam.f90; rm ../INCLUDE/gasIDnameparam.f
+
+/bin/cp ../INCLUDE/gauss.param  ../INCLUDE/gaussparam.f; fixcon ../INCLUDE/gaussparam.f ../INCLUDE/gaussparam.f90; rm ../INCLUDE/gaussparam.f
 
 
 

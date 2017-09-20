@@ -35,7 +35,7 @@
 ! ************************************************************************
     IMPLICIT NONE
 
-    include '../INCLUDE/scatter.f90'
+    include '../INCLUDE/scatterparam.f90'
 
     INTEGER :: iIOUN
 
@@ -346,6 +346,9 @@
 ! raFileStep tells you the current wavenumber step size*10000
 ! iaList   has the final list of iTotal files that should be uncompressed
 ! iTotalStuff is the number of outputs per chunk
+
+!!! private copies of variables are uninitialised on entry to the parallel region, unless declared firstprivate!
+
     INTEGER :: iaList(kNumkCompT),iTotal,iTotalStuff,iOuterLoop
     INTEGER :: iTag,iActualTag,iDoAdd
     REAL :: raFiles(kNumkCompT),raFileStep(kNumkCompT)
@@ -389,11 +392,11 @@
 ! Serial Region  (master thread)
 ! Parameters of the Application
     CHARACTER(20)      :: name     ! Fortran 90
-    CHARACTER(255) ::      :: name255  ! Fortran 90
-    CHARACTER(32) :: homedir
+    CHARACTER(255)     :: name255  ! Fortran 90
+    CHARACTER(32)      :: homedir
 
 ! OpenMP Parameters
-    INTEGER :: ID,iNumProcessors,nthreads
+    INTEGER :: iNumProcessors,nthreads,TID
     double precision :: wtime
 
     wtime = omp_get_wtime ( )
@@ -417,7 +420,7 @@
 
 ! Master thread obtains information about itself and its environment.
     nthreads = omp_get_num_threads()       ! get number of threads
-    id = omp_get_thread_num()              ! get thread
+    tid = omp_get_thread_num()             ! get thread
 
 ! ************************************************************************
 ! allow scattering computations if in .nml or RTP file
@@ -538,7 +541,7 @@
     END IF
 
 !      IF ((iakSolar(1) .GE. 0) .AND. (rFreqStart .GE. 5000.0) .AND.
-!     $     (raKsolarAngle(1) .LE. 90) .AND. (raKsolarAngle(1) .GE. 0)) THEN
+!     c     (raKsolarAngle(1) .LE. 90) .AND. (raKsolarAngle(1) .GE. 0)) THEN
 !        kWhichScatterCode = 6
 !        iNclouds_RTP = 1
 !        iNclouds     = 1
@@ -552,7 +555,7 @@
 !        iL_low = iaaRadlayer(1,1)
 ! 765    CONTINUE
 !        IF (raPressLevels(iL_low) .GE. rDummy1 .AND.
-!     $      raPressLevels(iL_low) .LE. rDummy2) THEN
+!     c      raPressLevels(iL_low) .LE. rDummy2) THEN
 !          iaCloudNumLayers(1)    =  iaCloudNumLayers(1) + 1
 !        END IF
 !        IF (iL_low .LT.  iaaRadlayer(1,iaNumLayer(1))) THEN
@@ -655,6 +658,7 @@
     (iCldProfile < 0)) THEN
         write(kStdWarn,*) 'you claim cloudprofile has iNumlayers'
         write(kStdWarn,*) 'but iCldProfile < 0'
+	write(kStdWarn,*) 'iaCloudNumLayers(1) = ',iaCloudNumLayers(1)
         CALL DoStop
     END IF
     IF ((iaCloudNumLayers(1) < iaNumLayer(1)) .AND. &
@@ -754,29 +758,37 @@
 ! LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
 ! outermost loop over the 10000 pt freq chunks
     iNumProcessors = 2
-! ttp://whoochee.blogspot.com/2009/11/segmentation-fault-while-using-openmp.html
+! http://whoochee.blogspot.com/2009/11/segmentation-fault-while-using-openmp.html
     write(kStdErr,'(A,I3,A)') 'starting parallel loop with ',iNumProcessors,' processors'
     write(kStdWarn,'(A,I3,A)') 'starting parallel loop with ',iNumProcessors,' processors'
-          
+    print *,'total number of freq chunks to process (iTotal) = ',iTotal
+    
     CALL OMP_SET_NUM_THREADS(iNumProcessors)
     print *,'WAH0 about to start parallel'
-! OMP PARALLEL   !! loop indices are always private
-    print *,'WAH1 called omp parallel'
-! OMP DO
-    DO iOuterLoop=1,iTotal
+ !$OMP PARALLEL DEFAULT(FIRSTPRIVATE) PRIVATE(iOuterLoop,iTotal)   !! loop indices are always private
+    print *,'WAH1 called omp parallel',iOuterLoop,iTotal
+    TID = OMP_GET_THREAD_NUM()
+    IF (TID == 0) THEN
+      nthreads = OMP_GET_NUM_THREADS()
+      print *,'Number of threads = ',nthreads
+    END IF
+    print *,'Thread ',TID,'starting ....'
 
+ !$OMP DO
+    DO iOuterLoop=1,iTotal
+    
         print *,'parallel A',iOuterLoop
         kOuterLoop = iOuterLoop
         call PrintStar
         write (kStdwarn,*) 'Processing new kCompressed Block ....'
 
-        print *,'parallel B',iOuterLoop
+!        print *,'parallel B',iOuterLoop
         iFileID      = iaList(iOuterLoop)  !current kComp file to process
         rFileStartFr = raFiles(iFileID)
         iTag         = iaTagIndex(iFileID)
         iActualTag   = iaActualTag(iFileID)
 
-        print *,'parallel C',iOuterLoop
+!        print *,'parallel C',iOuterLoop
         write(kStdWarn,*) '  '
         write(kStdWarn,*) 'iOuterLoop = ',iOuterLoop,' out of ',iTotal
         write(kStdWarn,*) 'Currently processing k-comp block# ',iFileID
@@ -784,12 +796,12 @@
         write(kStdWarn,*) 'File iTagIndex, ActualTag, freqspacing = ', &
         iTag,iaActualTag(iFileID),kaFrStep(iTag)
 
-        print *,'parallel D',iOuterLoop
-        ID = OMP_GET_THREAD_NUM()
-        write(kStdErr,'(A,I3,F10.2,I3)') 'iOuterLoop, rF, THREAD_NUM = ',iOuterLoop,rFileStartFr,ID
-        write(kStdWarn,'(A,I3,F10.2,I3)') 'iOuterLoop, rF, THREAD_NUM = ',iOuterLoop,rFileStartFr,ID
+!        print *,'parallel D',iOuterLoop
+        TID = OMP_GET_THREAD_NUM()
+        write(kStdErr,'(A,I3,F10.2,I3)') 'iOuterLoop, rF, THREAD_NUM = ',iOuterLoop,rFileStartFr,TID
+        write(kStdWarn,'(A,I3,F10.2,I3)') 'iOuterLoop, rF, THREAD_NUM = ',iOuterLoop,rFileStartFr,TID
 
-        print *,'parallel E',iOuterLoop
+!        print *,'parallel E',iOuterLoop
     ! first set the cumulative d/dT matrix to zero, if we need Jacobians
         IF ((kJacobian > 0.) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
         (kActualJacs == 100) .OR. (kActualJacs == 102)) ) THEN
@@ -811,7 +823,7 @@
         iFunnyCousin  = -1  !!assume we don't wanna do Cousin LTE comps
         iChunk_DoNLTE = -1  !!assume that even if NLTE gas, this is LTE chunk
 
-        print *,'parallel F zeroplanckcoeff',iOuterLoop
+!        print *,'parallel F zeroplanckcoeff',iOuterLoop
         IF (iNumNLTEGases > 0) THEN
             CALL ZeroPlanckCoeff(iaNumlayer(1),                        &
             raBlock(iFileID),iTag,iDoUpperAtmNLTE,                   &
@@ -869,7 +881,7 @@
     ! middle loop : over the gases
     ! un k-compress the absorption coefficients, gas by gas,
     ! for present frequency block
-        print *,'parallel G do gases',iOuterLoop
+!        print *,'parallel G do gases',iOuterLoop
         DO iGas=1,iNumGases
             write(kStdWarn,*) ' //////////// new gas ////////////////////'
             CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag,iDoAdd,iErr)
@@ -911,7 +923,7 @@
             ! iDoDQ > 0  if need to do gas jacobian, do temp jacobian
 
             ! compute the abs coeffs
-                print *,'parallel H usualLTEuncompress',iOuterLoop
+!                print *,'parallel H usualLTEuncompress',iOuterLoop
                 CALL UsualLTEUncompress(iGas,iaGases,                                        &
                 raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high,                   &
                 raTAmt,raTTemp,raTPress,raTPartPress,iaCont,                           &
@@ -928,7 +940,7 @@
                 iaQ21,iaQ22,raQ21,raQ22)
 
             ! see if current gas ID needs nonLTE spectroscopy
-                print *,'parallel Hx',iOuterLoop
+!                print *,'parallel Hx',iOuterLoop
                 iLTEIn = -1
                 dDeltaFreqNLTE = 0.0025d0
                 dDeltaFreqNLTE = dble(kaFrStep(iTag))
@@ -973,7 +985,7 @@
 
             ! change the absorption matrix for iGas th gas from Double to real
             ! set daaAb ---> raaAb
-                print *,'parallel I DoDtoR',iOuterLoop
+!                print *,'parallel I DoDtoR',iOuterLoop
                 CALL DoDtoR(daaGasAbCoeff,raaTempAbCoeff)
                 IF ((iaGases(iGas) == 2) .AND. &
                 (raFreq(1) >= 500) .AND. (raFreq(kMaxPts) <= 605)) THEN
@@ -1027,7 +1039,7 @@
         ! if iNpmix <= 0 (no mixed paths set) then this loop is never executed
         ! Add on the iGas th gas contribution, weighed by the appropriate
         ! elements of the iIpmix th row of raaMix
-            print *,'parallel J Accumulate',iOuterLoop
+!            print *,'parallel J Accumulate',iOuterLoop
             IF (iDoAdd > 0) THEN
                 DO iIpmix=1,iNpmix
                     CALL Accumulate(raaSumAbCoeff,raaTempAbCoeff,raaMix,iGas,iIpmix)
@@ -1196,7 +1208,7 @@
         ! LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
         ! LOOP OVER THE ATMOSPHERE B.C. set in *RADFIL
         ! kWhichScatterCode = 0,2,3,5 for ABS, RTSPEC, DISORT, PCLSAM type clouds
-            print *,'parallel J startRT',iOuterLoop
+!            print *,'parallel J startRT',iOuterLoop
             IF (((kWhichScatterCode == 5) .OR. (kWhichScatterCode == 3)) .AND. (iAtm >= 1)) THEN
                 DO iFr = 1,kMaxPts
                     DO iAtm = 1,kProfLayer
@@ -1393,12 +1405,18 @@
             iActualTag   = iaActualTag(iFileID)
         END IF
 
-        print *,'parallel F',iOuterLoop
+        print *,'parallel K',iOuterLoop
+	
     END DO               !!!!!!iOuterLoop=1,iTotal
-! OMP END PARALLEL
+ !$OMP END DO    
+ !$OMP END PARALLEL
 
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
+    CALL DateTime('kcartaparallel.x')
+    wtime = omp_get_wtime ( ) - wtime
+    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
+    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
 
     write(kStdWarn,*) 'end of run!!!!!!!!!!!'
     CLOSE(UNIT = kStdWarn)
@@ -1406,9 +1424,7 @@
     CLOSE(UNIT = kStdErr)
     kStdErrOpen = -1
 
-    wtime = omp_get_wtime ( ) - wtime
-    write ( *, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
-          
+
     call exit(0)           !!!!happy exit!
 
     END PROGRAM

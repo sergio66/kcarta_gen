@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE klinemix
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this has the linemixing code
 !************************************************************************
 ! this  subroutine finds the linemix files corresponding to dLTE, dJU
@@ -1038,3 +1044,4 @@
     end subroutine birnbaum_interp
 
 !************************************************************************
+END MODULE klinemix

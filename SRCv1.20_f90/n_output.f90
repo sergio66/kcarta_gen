@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE n_output
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this is the OUTPUT section
 !************************************************************************
 ! note if SCATTER is on (use RTSPEC or DISORT), then the user can only output
@@ -1792,3 +1798,4 @@
     end SUBROUTINE PressTOLayers
 
 !************************************************************************
+END MODULE n_output

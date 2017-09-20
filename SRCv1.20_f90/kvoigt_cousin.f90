@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kvoigt_cousin
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this has the voigt and cousin stuff
 !************************************************************************
 ! this simple routine does a simple boxcar ala the Matlab/GENLN2 code ...
@@ -701,3 +707,4 @@
     end subroutine vhh2RI
 
 !************************************************************************
+END MODULE kvoigt_cousin

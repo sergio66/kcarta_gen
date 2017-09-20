@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kcoeff_FAST_details
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this subroutine determines the weights for temp and pressure interpolation
 ! duplicating the Matlab 2011 version
@@ -1221,3 +1227,4 @@
     end SUBROUTINE xGetAbsCoeffWaterJAC_old
 
 !************************************************************************
+END MODULE kcoeff_FAST_details

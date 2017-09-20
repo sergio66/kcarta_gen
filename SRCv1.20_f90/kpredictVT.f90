@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE kpredictVT
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this subroutine interpolates the SolarAngle for iRegr, and dumps output
 ! into a vt file for kCARTA to read
@@ -1434,3 +1440,4 @@
 !************************************************************************
 !                          PREDICTOR ROUTINES
 !************************************************************************
+END MODULE kpredictVT

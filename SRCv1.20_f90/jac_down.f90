@@ -24,6 +24,12 @@
 ! so          -1      ==> only use d/dT(1-tau)(tauL2S)
 ! so           0      ==> use d/dT(planck (1-tau)(tauL2S) )
 
+MODULE jac_down
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************* THESE ARE THE JACOBIANS FOR THE DOWN LOOK INSTR***********
 !************************************************************************
@@ -1411,3 +1417,4 @@
     end SUBROUTINE wgtfcndown
 
 !************************************************************************
+END MODULE jac_down

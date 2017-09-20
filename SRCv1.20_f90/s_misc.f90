@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE s_misc
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! note : adjustl is a f77 standard function .. that does not seem to be
 !        implemented on all compilers! (eg it does not work on g77)
 ! so can instead do call adjustleftstr(caIn,caOut)
@@ -1269,3 +1275,4 @@
     end FUNCTION strfind
 
 !************************************************************************
+END MODULE s_misc

@@ -4,10 +4,10 @@
 	make -f Makefile_v120_Intelf90
 	make -f Makefile_v120_Intelf90 scat
 	make -f Makefile_v120_Intelf90 parallel	
-	mv ../BIN/bkcarta.x        ../BIN/bkcarta.x_f90_400ppmv
-	mv ../BIN/bkcartaTXT.x     ../BIN/bkcartaTXT.x_f90_400ppmv
-	mv ../BIN/kcarta.x         ../BIN/kcarta.x_f90_400ppmv
-	mv ../BIN/kcartaparallel.x ../BIN/kcartaparallel.x_f90_400ppmv	
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv
+	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv	
 
 385_default:
 	make -f Makefile datafix385_H2012
@@ -42,7 +42,7 @@
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv
 
 clean: 
-	rm *.o *~ 2> /dev/null || true
+	rm *.optrpt *genmod.* *.o *.mod *~ 2> /dev/null || true
 	
 ########################################################################
 

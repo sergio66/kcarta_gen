@@ -2,6 +2,12 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE n_rad_jac_scat
+
+IMPLICIT NONE
+
+CONTAINS
+
 ! this file is mainly for *RADNCE,*JACOBN
 !************************************************************************
 ! this subroutine checks to see if any of the atmospheres are for a limb sounder
@@ -2175,3 +2181,4 @@
     RETURN
     end FUNCTION LimbViewScanAng
 !************************************************************************
+END MODULE n_rad_jac_scat
