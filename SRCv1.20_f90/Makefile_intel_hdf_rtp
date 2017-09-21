@@ -72,5 +72,5 @@ RTPLIB = -L$(RTPHOME)/lib -lrtp
 #
 ### 16 gases rtpV201 with ifort
 RTPINC = -I/home/sergio/git/rtp/rtpV201/include
-RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
+RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f90
 #

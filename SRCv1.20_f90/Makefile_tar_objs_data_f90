@@ -39,41 +39,43 @@ PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makef
 ###### OBJSMAIN           for all features : jacobians, scatter, flux
 ###### OBJSMAIN_BASIC     for none of kCARTA features
 
-OBJSMAIN          = kcartamain.o        kcartamisc.o    spline_and_sort.o  freqfile.o
-OBJSMAIN_JPL      = kcartajpl.o         kcartamisc.o    spline_and_sort.o  freqfile.o
-OBJSMAIN_BASIC    = kcartabasic.o       kcartamisc.o    spline_and_sort.o  freqfile.o
-OBJSMAIN_PARALLEL = kcartaparallel.o    kcartamisc.o    spline_and_sort.o  freqfile.o
+OBS_BASIC_COMMON = basic_common.o spline_and_sort.o  freqfile.o s_misc.o            s_writefile.o
 
-OBJSRTP        = rtp_interface_f90.o n_main.o
+OBJSRTP        = rtp_interface_f90.o
 
-OBJSSTRING     = s_misc.o            s_writefile.o                      \
-                 n_gas_wt_spectra.o  n_pth_mix.o      n_rad_jac_scat.o  \
-                 n_output.o          n_layers.o       n_layers_lblrtm.o
+OBJSSTRING     = n_gas_wt_spectra.o  n_pth_mix.o      n_rad_jac_scat.o  \
+                 n_output.o          n_layers.o       n_layers_lblrtm.o n_main.o
  
-OBS_LTE_OPTDPH  = kcoeffSPL.o        kcoeffSPLJAC.o kcont_xsec.o       kcoeff_FAST.o \
-                  kcoeff_FAST_details.o      kcoeff_FAST_details2.o    kcoeffMAIN.o
+OBS_LTE_OPTDPH  = kcoeffSPL.o              kcoeffSPLJAC.o            kcont_xsec.o       kcoeff_FAST.o \
+                  kcoeff_FAST_details.o    kcoeff_FAST_details2.o    kcoeffMAIN.o
 
 OBS_NLTE_OPTDPH = klineshapes.o      kvoigt_cousin.o\
                   klinemix.o         kreadVTprofiles.o  kbloat.o\
                   kcousin.o          kpredictVT.o       knonlte.o
 
-MOBJSMAIN          = freqfile.o          spline_and_sort.o   kcartamisc.o    kcartamain.o
-MOBJSMAIN_JPL      = freqfile.o          spline_and_sort.o   kcartamisc.o    kcartajpl.o
-MOBJSMAIN_BASIC    = freqfile.o          spline_and_sort.o   kcartamisc.o    kcartabasic.o
-MOBJSMAIN_PARALLEL = freqfile.o          spline_and_sort.o   kcartamisc.o    kcartaparallel.o
+OBJSMAIN          = kcartamisc.o kcartamain.o        
+OBJSMAIN_JPL      = kcartamisc.o kcartajpl.o
+OBJSMAIN_BASIC    = kcartamisc.o kcartabasic.o
+OBJSMAIN_PARALLEL = kcartamisc.o kcartaparallel.o
 
-MOBJSRTP        = rtp_interface_f90.mod n_main.mod
+MOBS_BASIC_COMMON = basic_common.mod     spline_and_sort.mod   freqfile.mod s_misc.mod  s_writefile.mod
 
-MOBJSSTRING     = s_misc.mod        s_writefile.mod     \
-                  n_gas_wt_spectra.mod  n_pth_mix.mod      n_rad_jac_scat.mod  \
-                  n_output.mod          n_layers.mod       n_layers_lblrtm.mod
+MOBJSRTP        = rtp_interface_f90.mod
+
+MOBJSSTRING     = n_gas_wt_spectra.mod  n_pth_mix.mod      n_rad_jac_scat.mod  \
+                  n_output.mod          n_layers.mod       n_layers_lblrtm.mod  n_main.mod
  
-MOBS_LTE_OPTDPH  = kcoeffSPL.mod        kcoeffSPLJAC.mod         kcont_xsec.mod       kcoeff_FAST.mod \
-                   kcoeff_FAST_details.mod      kcoeff_FAST_details2.mod   kcoeffMAIN.mod       
+MOBS_LTE_OPTDPH  = kcoeffSPL.mod              kcoeffSPLJAC.mod           kcont_xsec.mod       kcoeff_FAST.mod \
+                   kcoeff_FAST_details.mod    kcoeff_FAST_details2.mod   kcoeffMAIN.mod       
 
 MOBS_NLTE_OPTDPH = klineshapes.mod      kvoigt_cousin.mod\
                    klinemix.mod         kreadVTprofiles.mod  kbloat.mod\
                    kcousin.mod          kpredictVT.mod       knonlte.mod
+
+MOBJSMAIN          = kcartamisc.mod kcartamain.mod
+MOBJSMAIN_JPL      = kcartamisc.mod kcartajpl.mod
+MOBJSMAIN_BASIC    = kcartamisc.mod kcartabasic.mod
+MOBJSMAIN_PARALLEL = kcartamisc.mod kcartaparallel.mod
 
 #######################################################################
 
@@ -132,7 +134,6 @@ OBSSCAT5 = $(OBSSCAT_RTSPEC)    \
            $(OBSSCAT_PCLSAM)    $(OBSSCAT_COMMON) \
            $(OBSSCAT_GRAYCLD)    scatter_interface.o
 
-#
 MOBSSCAT_COMMON    = clear_scatter_misc.mod
 
 MOBSSCAT_RTSPEC = scatter_rtspec_main.mod scatter_rtspec_code.mod \
@@ -164,36 +165,37 @@ MOBSSCAT5 = $(MOBSSCAT_RTSPEC)    \
 SCATTER_ALL = $(OBSSCAT5)
 
 ### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJSBASIC 
-OBJS = $(SCATTER_ALL) $(OBJSMAIN) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+OBJS = $(OBS_BASIC_COMMON) $(SCATTER_ALL) $(OBJSMAIN) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
        $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
 
 ### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJSBASIC 
-OBJSPARALLEL = $(SCATTER_ALL) $(OBJSMAIN_PARALLEL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+OBJSPARALLEL = $(OBS_BASIC_COMMON) $(SCATTER_ALL) $(OBJSMAIN_PARALLEL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
        $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
 
 ### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJSBASIC 
-OBJSJPL = $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+OBJSJPL = $(OBS_BASIC_COMMON) $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
           $(OBSRAD) $(OBSSCAT_COMMON) $(OBSJAC_CLD) $(OBJSSTRING) 
 
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
-OBJSBASIC = $(OBJSMAIN_BASIC) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
-             $(OBSRAD) $(OBSSCAT_COMMON) $(OBSJAC_CLR) $(OBJSSTRING) \
+OBJSBASIC = $(OBS_BASIC_COMMON) $(OBJSMAIN_BASIC) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+            $(OBSRAD) $(OBSSCAT_COMMON) $(OBSJAC_CLR) $(OBJSSTRING) \
 
 ### have removed $(OBJSCON) and $(OBJSXSEC) from OBJS,OBJSBASIC 
-MOBJS = $(MSCATTER_ALL) $(MOBJSMAIN) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
+MOBJS = $(MOBS_BASIC_COMMON) $(MSCATTER_ALL) $(MOBJSMAIN) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
        $(MOBSRAD) $(MOBSJAC_CLD) $(MOBJSSTRING) 
 
 ### have removed $(MOBJSCON) and $(MOBJSXSEC) from OBJS,OBJSBASIC 
-MOBJSPARALLEL = $(MSCATTER_ALL) $(MOBJSMAIN_PARALLEL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
+MOBJSPARALLEL = $(MOBS_BASIC_COMMON) $(MSCATTER_ALL) $(MOBJSMAIN_PARALLEL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
        $(MOBSRAD) $(MOBSJAC_CLD) $(MOBJSSTRING) 
 
 ### have removed $(MOBJSCON) and $(MOBJSXSEC) from OBJS,OBJSBASIC 
-MOBJSJPL = $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
-          $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLD) $(MOBJSSTRING) 
+MOBJSJPL = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
+           $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLD) $(MOBJSSTRING) 
 
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
-MOBJSBASIC = $(MOBJSMAIN_BASIC) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
+MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
              $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLR) $(MOBJSSTRING) \
+	     $(MOBJSMAIN_BASIC) 
 
 OBJS_TXT = n_mainTXT.o
 MOBJS_TXT = n_mainTXT.mod
@@ -222,29 +224,29 @@ scat: kcarta.x90
 kcarta.x90 : $(OBJS) $(OBJSRTP)
 	$(FORTRANX) -o kcarta.x90 $(FLAGS) $(OBJS) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
 
-kcartamain.o : kcartamain.f90 $(PARAMS)
+kcartamain.mod kcartamain.o : kcartamain.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamain.f90
 
 ALLBASICMOD = $(MOBJSBASIC) $(MOBJSRTP)
 
 ##### (2) basic kcarta (easy on memory) with no jacobs, fluxes or scattering
-basic: $(ALLBASICMOD) bkcarta.x90 
+basic: bkcarta.x90 
 	mv bkcarta.x90 ../BIN/bkcarta.x90
 
 bkcarta.x90 : $(ALLBASICMOD) $(OBJSBASIC) $(OBJSRTP)
 	$(FORTRANX) -o bkcarta.x90 $(FLAGS) $(OBJSBASIC) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB) 
 
-kcartabasic.o : $(ALLBASICMOD) kcartabasic.f90 $(PARAMS) 
+kcartabasic.mod kcartabasic.o : kcartabasic.f90 $(PARAMS) $(ALLBASICMOD)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f90
 
 ##### (3) complete kcarta (memory hog) with jacobians, all scattering codes, TEXT levels/layers input
 scatTXT: kcartaTXT.x90
 	mv kcartaTXT.x90 ../BIN/kcartaTXT.x90
 
-kcartaTXT.x90 : $(OBJS) $(OBJS_TXT)
+kcartaTXT.mod kcartaTXT.x90 : $(OBJS) $(OBJS_TXT)
 	$(FORTRANX) -o kcartaTXT.x90 $(FLAGS) $(OBJS) $(OBJS_TXT) $(LIBS)
 
-kcartamainTXT.o : kcartamain.f90 $(PARAMS)
+kcartamainTXT.mod kcartamainTXT.o : kcartamain.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamain.f90
 
 ##### (4) basic kcarta (easy on memory) with no jacobs, fluxes or scattering, TEXT levels/layers input
@@ -254,7 +256,7 @@ basicTXT: bkcartaTXT.x90
 bkcartaTXT.x90 : $(OBJSBASIC) $(OBJS_TXT) $(MOBJSBASIC) $(MOBJS_TXT)
 	$(FORTRANX) -o bkcartaTXT.x90 $(FLAGS) $(OBJSBASIC) $(OBJS_TXT) $(LIBS)
 
-kcartabasicTXT.o : kcartabasic.f90 $(PARAMS)
+kcartabasicTXT.mod kcartabasicTXT.o : kcartabasic.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f90
 
 #### kcartachunk.x90 no longer supported
@@ -268,7 +270,7 @@ jpl: jpl.x90
 jpl.x90 : $(OBJSJPL) $(OBJSRTP)
 	$(FORTRANX) -o jpl.x90 $(FLAGS) $(OBJSJPL) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
 
-kcartajpl.o : kcartajpl.f90 $(PARAMS)
+kcartajpl.mod kcartajpl.o : kcartajpl.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f90
 
 ##### (6) complete kcarta (memory hog) with jacobians, a[ll scattering codes], but as standalone
@@ -279,7 +281,7 @@ jplTXT: jplTXT.x90
 jplTXT.x90 : $(OBJSJPL) $(OBJS_TXT)
 	$(FORTRANX) -o jplTXT.x90 $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJS_TXT)
 
-kcartajplTXT.o : kcartajpl.f90 $(PARAMS)
+kcartajplTXT.o kcartajplTXT.o : kcartajpl.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f90
 
 ##### (7) complete kcarta (memory hog) with jacobians, all scattering codes
@@ -289,11 +291,14 @@ parallel: kcartaparallel.x90
 kcartaparallel.x90 : $(OBJSPARALLEL) $(OBJSRTP)
 	$(FORTRANX) -o kcartaparallel.x90 $(FLAGS) $(OBJSPARALLEL) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
 
-kcartaparallel.o : kcartaparallel.f90
+kcartaparallel.mod kcartaparallel.o : kcartaparallel.f90
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartaparallel.f90
 
 ################ OPTICAL DEPTHS (LTE and NLTE) ###########################
 ###### lte routines
+basic_common.mod basic_common.o : basic_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) basic_common.f90
+
 kcartamisc.mod kcartamisc.o : kcartamisc.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamisc.f90
 
