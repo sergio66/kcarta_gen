@@ -7,12 +7,14 @@
     PROGRAM kcartabasic
     use omp_lib          ! Fortran 90; omp_get_thread_num, omp_get_num_threads
     use ifport           ! for getenv
-    
-    use kcartamisc       ! misc routines
+
+    use basic_common     ! misc routines
+    use kcartamisc       ! more misc routines
     use jac_main         ! jacobians
     use rad_main         ! main rad routines
     use n_main           ! main reader for namelist
     use kcoeffmain       ! uncompression routines
+    use knonlte          ! nonlte routines
     
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
@@ -381,7 +383,7 @@
     REAL ::    raQ21(kProfLayer),raQ22(kProfLayer)
 
 ! these are actually used
-    INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
+    INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
     INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 

@@ -1,8 +1,13 @@
 WORKS_*
 SRCv118_f77tof90code/*.f
 SRCv118_f77tof90code/TEMPF90/*
+CMake
+MAKEdepf90
+PYTHON_make
+MAKEJunk
 OpenMP
 ugh
 *.optrpt
 *genmod.*
 *.mod
+

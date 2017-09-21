@@ -7,6 +7,10 @@
 
 MODULE rtp_interface_f90
 
+USE basic_common
+USE spline_and_sort
+USE n_pth_mix
+
 IMPLICIT NONE
 
 CONTAINS
@@ -3262,7 +3266,7 @@ CONTAINS
     INTEGER :: iaPhase(kMaxClouds)
     INTEGER :: iNatm
 ! this is for absorptive clouds
-    CHARACTER(120) :: caaScatter(kMaxAtm)
+    CHARACTER(80) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -3936,7 +3940,7 @@ CONTAINS
     INTEGER :: iaPhase(kMaxClouds)
     REAL :: cfrac1,cfrac2
 ! this is for absorptive clouds
-    CHARACTER(120) :: caaScatter(kMaxAtm)
+    CHARACTER(80) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     INTEGER :: iaCtype(kMaxClouds)

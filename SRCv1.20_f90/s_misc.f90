@@ -4,6 +4,9 @@
 
 MODULE s_misc
 
+USE basic_common
+USE spline_and_sort
+
 IMPLICIT NONE
 
 CONTAINS
@@ -100,7 +103,7 @@ CONTAINS
     INTEGER :: iGasID
 
 ! local variables
-    INTEGER :: iI,i1,i2,iJ,iLeftjust_lenstr
+    INTEGER :: iI,i1,i2,iJ
     CHARACTER(80) :: caSum
 
 ! ccc user supplied info
@@ -146,7 +149,7 @@ CONTAINS
     CHARACTER(2) :: caString,caTemp
     CHARACTER(4) :: caTemp4
     CHARACTER(120) :: caDir
-    INTEGER :: iInt,iLenDir,iL,iLeftjust_lenstr
+    INTEGER :: iInt,iLenDir,iL
 !      CHARACTER*(*) adjustl
 
 ! ccc user supplied info
@@ -267,7 +270,7 @@ CONTAINS
 ! local variables
     CHARACTER(2) :: caString,caTemp
     CHARACTER(80) :: caDir
-    INTEGER :: iInt,iLenDir,iLeftjust_lenstr
+    INTEGER :: iInt,iLenDir
 !      CHARACTER*(*) adjustl
 
 ! ccc user supplied info
@@ -393,7 +396,7 @@ CONTAINS
     CHARACTER(9) :: caTemp9
     CHARACTER(16) :: caTemp16
     CHARACTER(2) ::  ca2
-    INTEGER :: iInt,iLen2,iLen3,iLen5,iLen16,iLenDir,iLenX,iLeftjust_lenstr
+    INTEGER :: iInt,iLen2,iLen3,iLen5,iLen16,iLenDir,iLenX
 !      CHARACTER*(*) adjustl  !not implemented in g77!!!
           
 ! ccc user supplied info
@@ -727,7 +730,7 @@ CONTAINS
     CHARACTER(5) :: caString5,caTemp5
     CHARACTER(9) :: caTemp9
     CHARACTER(16) :: caTemp16
-    INTEGER :: iInt,iLen2,iLen3,iLen5,iLen16,iLenDir,iLenX,iLeftjust_lenstr
+    INTEGER :: iInt,iLen2,iLen3,iLen5,iLen16,iLenDir,iLenX
 !      CHARACTER*(*) adjustl  !not implemented in g77!!!
           
 ! ccc user supplied info
@@ -847,7 +850,7 @@ CONTAINS
     CHARACTER(120) :: caFile    !!!input and output parameter
 
     CHARACTER(120) :: caTemp,caDir
-    INTEGER :: iI,iJ,iLeftjust_lenstr
+    INTEGER :: iI,iJ
 
     CALL BlankStr(caTemp,len(caTemp))
 
@@ -881,7 +884,7 @@ CONTAINS
     REAL :: rFileStartFr
 
     CHARACTER(5) :: caString5,caTemp5
-    INTEGER :: iInt,iLen5,iLenDir,iLeftjust_lenstr
+    INTEGER :: iInt,iLen5,iLenDir
 !      CHARACTER*(*) adjustl
 
     CALL blankstr(fname,len(fname))
@@ -935,7 +938,7 @@ CONTAINS
     INTEGER :: iGasID
 
 ! local variables
-    INTEGER :: iFloor,iLeftjust_lenstr
+    INTEGER :: iFloor
     REAL :: rFileStartFr
     CHARACTER(2) :: caString2,caTemp2
     CHARACTER(5) :: caString5,caTemp5
@@ -1275,4 +1278,5 @@ CONTAINS
     end FUNCTION strfind
 
 !************************************************************************
+
 END MODULE s_misc

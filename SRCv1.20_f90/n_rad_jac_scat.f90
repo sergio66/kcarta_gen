@@ -4,6 +4,8 @@
 
 MODULE n_rad_jac_scat
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS

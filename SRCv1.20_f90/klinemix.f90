@@ -4,6 +4,9 @@
 
 MODULE klinemix
 
+USE basic_common
+USE spline_and_sort
+
 IMPLICIT NONE
 
 CONTAINS

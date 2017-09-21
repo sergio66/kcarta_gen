@@ -4,6 +4,8 @@
 
 MODULE kcousin
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS

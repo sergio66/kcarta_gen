@@ -4,6 +4,13 @@
 
 MODULE kcoeff_FAST
 
+USE basic_common
+USE kcoeffSPL
+USE kcoeffSPLJAC
+use kcoeff_basic
+use kcoeff_FAST_details
+use kcoeff_FAST_details2
+
 IMPLICIT NONE
 
 CONTAINS
@@ -65,7 +72,7 @@ CONTAINS
     REAL :: rP,p1,p2,rSumWgt1,rSumWgt2,rSwap,p1LEV,p2LEV
     REAL :: rT,t11,t12,t21,t22,wsum
     REAL :: rQ,q11,q12,q21,q22,qsum
-    INTEGER :: i1,i2,iFindMaxMin
+    INTEGER :: i1,i2
     INTEGER :: ix1,ix2,ix3
     REAL ::    rx1,rx2,rx3
 

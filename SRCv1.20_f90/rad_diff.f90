@@ -4,6 +4,13 @@
 
 MODULE rad_diff
 
+USE basic_common
+USE spline_and_sort
+USE rad_quad
+USE rad_misc
+USE rad_angles
+USE rad_quad
+
 IMPLICIT NONE
 
 CONTAINS
@@ -184,14 +191,14 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iLm1,iBdry0,iBdry,iBdryP1,iSecondEnd,iCase
-    REAL :: ttorad,rMPTemp,raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts),rPlanck
+    REAL :: rMPTemp,raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts),rPlanck
 
 ! to do the angular integration
     REAL :: rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
     REAL :: raL2G(kMaxPts),raL2Gm1(kMaxPts)
     REAL :: FindDiffusiveAngleExp,rDiff,rCosDiff,rW
     REAL :: raAvgAnglePerLayer(kMaxLayer),raMeanOD(kMaxLayer)
-    INTEGER :: FindBoundary,iS,iE,iDiv,iM,iBdryP1_O
+    INTEGER :: iS,iE,iM,iBdryP1_O
 
     DO iFr = 1,kProfLayer
         raAvgAnglePerLayer(iFr) = 0.0
@@ -468,13 +475,13 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iLm1,iBdry0,iBdry,iBdryP1,iSecondEnd,iCase,iVary
-    REAL :: ttorad,rMPTemp,raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts),rPlanck
+    REAL :: rMPTemp,raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts),rPlanck
 
 ! to do the angular integration
     REAL :: rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
     REAL :: raL2G(kMaxPts),raL2Gm1(kMaxPts)
     REAL :: FindDiffusiveAngleExp,rDiff,raCosDiff(kMaxPts),rW
-    INTEGER :: FindBoundary,iS,iE,iDiv,iM,iBdryP1_O
+    INTEGER :: iS,iE,iM,iBdryP1_O
 
     iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
 !!! this is a COMPILE time variable
@@ -706,7 +713,7 @@ CONTAINS
     INTEGER :: iaRadLayer(kProfLayer),iT,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iNumLayer,iExtraThermal
 
-    REAL :: rThetaEff,raIntenAtmos(kMaxPts),ttorad
+    REAL :: rThetaEff,raIntenAtmos(kMaxPts)
     REAL :: raTemp(kMaxPts),raFreqAngle(kMaxPts)
     INTEGER :: iFr
 
@@ -805,7 +812,7 @@ CONTAINS
     INTEGER :: iTemperVariation
 
 ! local vars
-    REAL :: rThetaEff,raIntenAtmos(kMaxPts),ttorad
+    REAL :: rThetaEff,raIntenAtmos(kMaxPts)
     INTEGER :: iFr,iL
 
 ! this is the diffusivity approx angle, in radians
@@ -890,7 +897,7 @@ CONTAINS
     INTEGER :: iTemperVariation
 
 ! local vars
-    REAL :: rThetaEff,raIntenAtmos(kMaxPts),ttorad
+    REAL :: rThetaEff,raIntenAtmos(kMaxPts)
     INTEGER :: iFr,iL
 
 ! this is the diffusivity approx angle, in radians
@@ -1090,32 +1097,32 @@ CONTAINS
     INTEGER :: iProfileLayers
     REAL :: rF,raPressLevels(kProfLayer+1)
 
-    INTEGER :: iB,WhichLevel
+    INTEGER :: iB
      
 ! default is to assume atm is so thick that reflected thermal is not important
 ! so start doing accurate radiative transfer very low in atmosphere (in the
 ! bottom few layers)
-    iB=WhichLevel(iProfileLayers,raPressLevels,940.0)   !AIRS100 => lev iB=6
+    iB = WhichLevel(iProfileLayers,raPressLevels,940.0)   !AIRS100 => lev iB=6
 
     IF ((rF >= 605.0) .AND. (rF <= 630.0)) THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 =>lev iB=25
+        iB = WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 =>lev iB=25
     ELSEIF ((rF >= 705.0) .AND. (rF <= 830.0)) THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,4.8)   !AIRS100 => lev iB=85
+        iB = WhichLevel(iProfileLayers,raPressLevels,4.8)   !AIRS100 => lev iB=85
     ELSEIF ((rF >= 830.0) .AND. (rF <= 1155.0)) THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,157.0) !AIRS100 => lev iB=50
+        iB = WhichLevel(iProfileLayers,raPressLevels,157.0) !AIRS100 => lev iB=50
     ELSEIF ((rF >= 1155.0) .AND. (rF <= 1505.0)) THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,415.0) !AIRS100 => lev iB=30
+        iB = WhichLevel(iProfileLayers,raPressLevels,415.0) !AIRS100 => lev iB=30
     ELSEIF ((rF >= 1730.0) .AND. (rF <= 2230.0)) THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
+        iB = WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
     ELSEIF ((rF >= 2380.0) .AND. (rF <= 2805.0)) THEN
-        iB=WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
+        iB = WhichLevel(iProfileLayers,raPressLevels,500.0) !AIRS100 => lev iB=25
     ! B=WhichLevel(iProfileLayers,raPressLevels,5.0) !AIRS100 => lev iB=85
     END IF
 
     IF (kWhichScatterCode /= 0) THEN
     ! ssume all clouds below this, so start the boundary at which to become
     ! ccurate pretty high up in the atm
-        iB=WhichLevel(iProfileLayers,raPressLevels,100.0)
+        iB = WhichLevel(iProfileLayers,raPressLevels,100.0)
     END IF
 
     FindBoundary_Individual=iB
@@ -1141,15 +1148,15 @@ CONTAINS
     REAL :: raFreq(kMaxPts),raPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers,iaRadLayer(kProfLayer)
 
-    INTEGER :: iB,WhichLevel,iN,iDiv,iX
+    INTEGER :: iB,iN,iX,iDivX
 
-    iDiv = 0
+    iDivX = 0
     5 CONTINUE
-    IF (iDiv*kProfLayer < iaRadLayer(1)) THEN
-        iDiv = iDiv + 1
+    IF (iDivX*kProfLayer < iaRadLayer(1)) THEN
+        iDivX = iDivX + 1
         GOTO 5
     END IF
-    iDiv = iDiv - 1
+    iDivX = iDivX - 1
 
 ! B = WhichLevel(iProfileLayers,raPressLevels,940.0)   !AIRS100 => lev iB = 6
 
@@ -1181,7 +1188,7 @@ CONTAINS
 
     iN  =  1
     10 CONTINUE
-    IF ((iaRadLayer(iN) - kProfLayer*iDiv) < iB) THEN
+    IF ((iaRadLayer(iN) - kProfLayer*iDivX) < iB) THEN
         iN = iN + 1
         GOTO 10
     END IF

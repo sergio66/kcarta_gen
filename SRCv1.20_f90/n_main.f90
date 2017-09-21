@@ -9,6 +9,7 @@
 
 MODULE n_main
 
+USE basic_common
 USE s_misc
 USE s_writefile
 USE n_gas_wt_spectra
@@ -17,7 +18,6 @@ USE n_rad_jac_scat
 USE n_pth_mix
 USE n_output
 USE n_layers_lblrtm
-USE rtp_interface_f90
 
 IMPLICIT NONE
 
@@ -1481,7 +1481,7 @@ CONTAINS
         write(kStdWarn,*) ' '
         IF (caCloudPFname(1:5) == 'dummy') THEN
             write (kStdWarn,*) 'setting some parameters for RTP CLOUD SLABS .....'
-        ! n this subroutine, iNclouds is set equal to Nclouds_RTP
+        !in this subroutine, iNclouds is set equal to Nclouds_RTP
             CALL SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop, &
             cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2, &
             ctop1,ctop2,cbot1,cbot2, &

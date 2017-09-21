@@ -4,6 +4,8 @@
 
 MODULE knonlte
 
+USE basic_common
+USE spline_and_sort
 use klineshapes
 use kvoigt_cousin
 use klinemix
@@ -11,6 +13,8 @@ use kreadVTprofiles
 use kbloat
 use kcousin
 use kpredictVT
+use kcoeffMAIN
+USE kcoeff_basic
 
 IMPLICIT NONE
 
@@ -507,7 +511,7 @@ CONTAINS
 
     INTEGER :: iDoDQ,iZeroPlanck
 
-    INTEGER :: iErr,iCount,iDoNLTE,OutsideSpectra,NewDataChunk
+    INTEGER :: iErr,iCount,iDoNLTE
     INTEGER :: i_NLTEFile_TYPE,iL,iFr
     REAL :: kFrStep,rSolzenX,rSolzenY,rJunk
 
@@ -697,8 +701,7 @@ CONTAINS
         raTPress,raTPartPress,raTTemp,raTAmt,daJL,daJU, &
         iaJ_UorL,raLTETemp,raNLTETemp,raVibQFT,iAllLayersLTE,dVibCenter)
 
-        iWhichChunk = &
-        NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
+        iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
 
         IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2)) THEN
         ! uncompress lower atm ODs
@@ -954,7 +957,7 @@ CONTAINS
 !                      !! necesary things will be done by calling
 !                      !! Co2_4um_fudge_nlte_fast
 !     iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
-    INTEGER :: OutsideSpectra,NewDataChunk,iDoVoigtChi
+    INTEGER :: iDoVoigtChi
     INTEGER :: iL,iFr,iDoNLTE
 
     INTEGER :: iJunkNum,iaJunk(kGasStore)
@@ -970,8 +973,7 @@ CONTAINS
 
     iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,raFreq(1),605.0,2830.0,20)
     IF (iLTEIn > 0) THEN
-        iWhichChunk = &
-        NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
+        iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
 
         IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) &
          .AND. (abs(raNLTEstrength(iLTEIn)-1.0) <= 0.01))  THEN
@@ -1244,8 +1246,8 @@ CONTAINS
     INTEGER :: iChunk_DoNLTE,iUsualLTEGas
           
 ! local variables
-    INTEGER :: iLTEIn,iWhichChunk,iFr,iL,iGas,iFloor,iJump,iType,iTypeUA
-    INTEGER :: OutsideSPectra,NewDataChunk,iIOUN,iFileErr
+    INTEGER :: iLTEIn,iWhichChunk,iFr,iL,iGas,iJump,iType,iTypeUA
+    INTEGER :: iIOUN,iFileErr
     DOUBLE PRECISION :: dTemp1,dfFine
     INTEGER :: iJunkNum,iaJunk(kGasStore)
 
@@ -1257,8 +1259,7 @@ CONTAINS
         iWhichChunk = -1
         iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,2205.0,605.0,2830.0,20)
         IF ((iLTEIn > 0) .AND. (kSolarAngle >= 0 .AND. kSolarAngle <= 90)) THEN
-            iWhichChunk = &
-            NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
+            iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
             IF ((iWhichChunk > 0) .AND. (iNLTE_SlowORFast == +1)) THEN
                 iChunk_DoNLTE = +1           !!!need to do NLTE slowly
                 GOTO 10
@@ -2490,7 +2491,7 @@ CONTAINS
     INTEGER :: iFineMeshBoxPts,iMediumMeshBoxPts,iCoarseMeshBoxPts
 
 ! local vars
-    INTEGER :: iFr,iFloor,iJump
+    INTEGER :: iFr,iJump
 
 !!!!see run7.m for defn of xnear,xmed,xfar ... these are bins
     dXNear = 1.0d0
@@ -2784,7 +2785,7 @@ CONTAINS
     CHARACTER cCousOrBirn
 
 ! for birnbaum
-    DOUBLE PRECISION :: chiBirn(kMaxPts),xBirn(kMaxPts),tau2_birn
+    DOUBLE PRECISION :: chiBirn(kMaxPts),xBirn(kMaxPts)
     INTEGER :: iNptsBirn
 
 ! if we want to dump out line parameters !!!! ugh!!! makes warning.msg LONG!!!!
@@ -3231,7 +3232,7 @@ CONTAINS
     DOUBLE PRECISION :: daFudgeM(kMaxPtsBox),daFudgeC(kMaxPtsBox)
 
 ! for birnbaum
-    DOUBLE PRECISION :: chiBirn(kMaxPts),xBirn(kMaxPts),tau2_birn
+    DOUBLE PRECISION :: chiBirn(kMaxPts),xBirn(kMaxPts)
     INTEGER :: iNptsBirn,iDefault,iNoPressureShiftCO2,iOneLine
 
     iZZZBloat = -1
@@ -3571,13 +3572,13 @@ CONTAINS
     REAL :: rDum1,rDum2,rOmegaSun
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     INTEGER :: iCloudLayerTop,iCloudLayerBot
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,find_tropopause,troplayer
-    REAL :: bt2rad,t2s,ttorad
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,troplayer
+    REAL :: bt2rad,t2s
     INTEGER :: iFr1
 
     iIOUN = iIOUN_IN
@@ -4054,15 +4055,15 @@ CONTAINS
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
-    REAL :: rDum1,rDum2,ttorad,rOmegaSun
+    REAL :: rDum1,rDum2,rOmegaSun
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     INTEGER :: iCloudLayerTop,iCloudLayerBot
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,find_tropopause,troplayer
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,troplayer
     REAL :: bt2rad,t2s
     INTEGER :: iFr1
 
@@ -4142,14 +4143,14 @@ CONTAINS
     END DO
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
     write(kStdWarn,*) 'fast nlte radmodel ...'
     write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL)
 ! if the topmost layer is fractional, interpolate!!!!!!
 ! this is hardly going to affect thermal/solar contributions (using this temp
 ! instead of temp of full layer at 100 km height!!!!!!
     iL=iaRadLayer(iNumLayer)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
     troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
@@ -4494,15 +4495,15 @@ CONTAINS
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
-    REAL :: rDum1,rDum2,ttorad,rOmegaSun
+    REAL :: rDum1,rDum2,rOmegaSun
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     INTEGER :: iCloudLayerTop,iCloudLayerBot
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,find_tropopause,troplayer
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,troplayer
     REAL :: bt2rad,t2s
     INTEGER :: iFr1
 
@@ -4576,14 +4577,14 @@ CONTAINS
 
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
     write(kStdWarn,*) 'slow nlte radmodel ...'
     write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL)
 ! if the topmost layer is fractional, interpolate!!!!!!
 ! this is hardly going to affect thermal/solar contributions (using this temp
 ! instead of temp of full layer at 100 km height!!!!!!
     iL=iaRadLayer(iNumLayer)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
     troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
@@ -4881,149 +4882,6 @@ CONTAINS
     end SUBROUTINE rad_trans_SAT_LOOK_DOWN_NLTE_FASTCOMPR
 
 !************************************************************************
-! this subroutine mimics the SARTA NLTE model
-! see /asl/packages/sartaV106/Src/calnte.f
-    SUBROUTINE Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
-    iaRadLayer,iNumLayer,raInten,rCO2MixRatio)
-
-    IMPLICIT NONE
-     
-    include '../INCLUDE/kcartaparam.f90'
-
-! input
-    REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows)
-    REAL :: SUNCOS ! solar zenith angle cosine at surface
-    REAL ::  SCOS1 ! solar zenith angle cosine at layer1
-    REAL ::  VSEC1 ! satellite view zenith angle secant at layer1
-    INTEGER :: iNumLayer,iaRadLayer(kProfLayer)
-    REAL :: rCO2MixRatio !!! CO2 mixing ratio
-
-! input/output
-    REAL :: raInten(kMaxPts)
-
-! local vars
-    INTEGER :: iI,iJ,iC
-    INTEGER :: NCHNTE,iERR,iIOUN,ICHAN
-
-!      !!/asl/packages/sartaV106/Src/incFTC_apr05_nte.f
-!      INTEGER MXCHNN,NNCOEF
-!      !MXCHNN = 201
-!      !NNCOEF = 6     !/asl/packages/sartaV106/Src/incFTC_apr05_nte.f
-!      PARAMETER(MXCHNN = 201,NNCOEF = 6)
-!      REAL COEFN(NNCOEF,MXCHNN)
-
-!     !!/asl/packages/sartaV108/Src/incFTC_airs_apr08_m130_m150_template_cal.f
-    INTEGER :: MXCNTE ! max # of channels for non-LTE (203)
-    INTEGER :: NNCOEF ! # of coefs for non-LTE
-    INTEGER :: NTEBOT ! bottom layer for CO2TOP calc
-    REAL :: CO2NTE ! ref CO2 mixing ratio for non-LTE coefs (ppmv)
-    PARAMETER(MXCNTE = 203)
-    PARAMETER(NNCOEF = 7)
-    PARAMETER(NTEBOT = 10)
-    PARAMETER(CO2NTE = 370.0)
-    REAL :: COEFN(NNCOEF,MXCNTE)
-         
-    CHARACTER(120) :: FNCOFN
-
-    REAL :: tHigh,pred1,pred2,pred3,pred4,pred5,pred6,FRQCHN
-    REAL :: raDrad(kMaxPts),raFrad(kMaxPts),raDkcarta(kMaxPts)
-    REAL :: CO2TOP
-
-    tHigh = 0.0
-    DO iI = iNumLayer-4,iNumLayer
-        tHigh = tHigh + raVTemp(iaRadLayer(iI))
-    END DO
-    tHigh = tHigh/5
-
-    PRED1 = 1.0
-    PRED2 = SCOS1
-    PRED3 = SCOS1*SCOS1
-    PRED4 = SCOS1*VSEC1
-    PRED5 = SCOS1*THIGH
-    PRED6 = SUNCOS
-
-!      !/asl/packages/sartaV106/Src/incFTC_apr05_nte.f
-!      FNCOFN= '/asl/data/sarta_database/Data_jan04untun/Coef/setnte_oct05.dat'
-!      need to process this : from be to le
-!      !matlab cd : /home/sergio/KCARTADATA/NLTE/SARTA_COEFS/
-!      !fname='/asl/data/sarta_database/Data_jan04untun/Coef/setnte_oct05.dat';
-!      ![idchan, freq, coef] = rd_nte_be(fname);
-!      !/wrt_nte_le.m
-!      FNCOFN= '/home/sergio/KCARTADATA/NLTE/SARTA_COEFS/setnte_oct05.le.dat'
-!      FNCOFN= '/asl/data/kcarta/KCARTADATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat'
-
-! /asl/packages/sartaV108/Src_rtpV201/incFTC_iasi_sep08_wcon_nte.f :
-!       PARAMETER(FNCOFN=
-!            $ '/asl/data/sarta_database/Data_IASI_sep08/Coef/nte_7term.dat')
-
-    FNCOFN = kSartaNLTE
-    iIOUN = kTempUnit
-
-    OPEN(UNIT=iIOUN,FILE=FNCOFN,FORM='UNFORMATTED',STATUS='OLD', &
-    IOSTAT=IERR)
-    IF (IERR /= 0) THEN
-        WRITE(kStdErr,*) 'error reading SARTA NLTE coeffs file',IERR, FNCOFN
-        CALL DoStop
-    ENDIF
-
-    kTempUnitOpen = +1
-    iJ=1
-    DO iI=1,MXCNTE
-    !       Read data for this frequency/channel
-        READ(iIOUN) ICHAN, FRQCHN, (COEFN(IC,iJ),IC=1,NNCOEF)
-        raFrad(iI) = FRQCHN
-        iJ = iJ + 1
-    ENDDO
-    NCHNTE = iJ - 1
-    CLOSE(iIOUN)
-    kTempUnitOpen = -1
-
-!      print *,kSartaNLTE
-!      print *,MXCNTE,NCHNTE,NNCOEF
-!      call dostop
-
-    CO2TOP = kCO2ppmv      !! this is the expected CO2 at TOA
-    CO2TOP = rCO2MixRatio  !! better to use this, as it comes from profile
-
-! asl/packages/sartaV106or8/Src/calnte.f
-! ote we assume the freqs raFrad are SORTED so we don't have problems
-! oing the spline interpolation onto kCARTA freqs
-    DO iI = 1,NCHNTE
-        raDrad(iI)=( COEFN(1,iI)*PRED1 ) + &
-        ( COEFN(2,iI)*PRED2 ) + &
-        ( COEFN(3,iI)*PRED3 ) + &
-        ( COEFN(4,iI)*PRED4 ) + &
-        ( COEFN(5,iI)*PRED5 ) + &
-        ( COEFN(6,iI)*PRED6 )
-
-    ! this is new; see calnte.f in eg sartaV108/Src_rtpV201
-    ! this accounts for changing concentration of CO2
-    !       Adjust DRAD for CO2 mixing ratio
-    !       DRAD=DRAD*(COEFN(7,I)*(CO2TOP - CO2NTE) + 1.0)
-                
-        raDrad(iI) = raDrad(iI)*(COEFN(7,iI)*(CO2TOP - CO2NTE) + 1.0)
-    !       print *,iI,raFrad(iI),raDrad(iI)
-    END DO
-
-!      print *,'sarta nlte oops'
-!      print *,'sartanlte pred : ',PRED1,PRED2,PRED3,PRED4,PRED5,PRED6,COEFN(7,iI-1),rCO2MixRatio,CO2TOP,CO2NTE
-!      CALL DoStop
-
-    CALL rspl(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts)    !! too dangerous,   small 4 um lte rads, wiggly NLTE correction
-    CALL rlinear(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts) !! hopefully safer, small 4 um lte rads, straightline NLTE correction
-    DO iI = 1,kMaxPts
-        IF ((raFreq(iI) < raFrad(1)) .OR. (raFreq(iI) > raFrad(NCHNTE))) THEN
-            raDkcarta(iI) = 0.0
-        END IF
-    !       print *,iI,raFreq(iI),raDkcarta(iI),raInten(iI)
-    !! LTE rad is raInten(iI); NLTE correction raDkcarta(iI) should be positive; if negative then just stick to the LTE rad
-        raInten(iI) = max(raInten(iI) + raDkcarta(iI),raInten(iI))
-    END DO
-
-    RETURN
-    end SUBROUTINE Sarta_NLTE
-          
-!************************************************************************
 ! this subroutine very quickly does the radiative transfer
 ! since the optical depths are soooooooooo small, use double precision
     SUBROUTINE UpperAtmRadTrans(raInten,raFreq,rSatAngle, &
@@ -5054,7 +4912,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iL,iIOUN
-    REAL :: rEmission,rTrans,rMu,ttorad,raInten0(kMaxPts)
+    REAL :: rEmission,rTrans,rMu,raInten0(kMaxPts)
     DOUBLE PRECISION :: daInten(kMaxPts),dTrans,dEmission
     CHARACTER(80) :: caOutName
 

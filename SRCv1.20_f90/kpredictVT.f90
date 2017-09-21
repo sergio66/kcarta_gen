@@ -4,6 +4,10 @@
 
 MODULE kpredictVT
 
+USE basic_common
+USE spline_and_sort
+USE s_writefile
+
 IMPLICIT NONE
 
 CONTAINS
@@ -439,7 +443,7 @@ CONTAINS
      
     include '../INCLUDE/kcartaparam.f90'
        
-    INTEGER :: iIOUN,iNV,iimod,iDiv
+    INTEGER :: iIOUN,iNV
 !      REAL raX(kNLTEProfLayer)
     REAL :: raX(*)
      

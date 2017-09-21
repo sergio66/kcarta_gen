@@ -4,6 +4,13 @@
 
 MODULE rad_flux
 
+USE basic_common
+USE spline_and_sort
+USE kcoeff_basic
+USE clear_scatter_basic
+USE rad_angles
+USE rad_misc
+
 IMPLICIT NONE
 
 CONTAINS
@@ -102,7 +109,7 @@ CONTAINS
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
     INTEGER :: iAccOrLoopFlux,iDefault,iVary,iMuDMu_or_Moment
 
 ! set the direction of radiation travel
@@ -357,7 +364,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,rPlanck,rMPTemp
+    REAL :: rCos,rPlanck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -367,14 +374,14 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,find_tropopause,troplayer
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -957,7 +964,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,rPlanck,rMPTemp
+    REAL :: rCos,rPlanck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -969,7 +976,7 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
            
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
@@ -977,8 +984,8 @@ CONTAINS
     INTEGER :: iDefault,iComputeAll
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer,find_tropopause
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -1747,7 +1754,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,rPlanck,rMPTemp
+    REAL :: rCos,rPlanck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -1757,14 +1764,14 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,find_tropopause,troplayer
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -2332,7 +2339,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,rPlanck,rMPTemp
+    REAL :: rCos,rPlanck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -2344,7 +2351,7 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
            
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
@@ -2352,8 +2359,8 @@ CONTAINS
     INTEGER :: iDefault,iComputeAll
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer,find_tropopause
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -2893,7 +2900,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,rPlanck,rMPTemp
+    REAL :: rCos,rPlanck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -2903,14 +2910,14 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,find_tropopause,troplayer
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -3496,7 +3503,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,rPlanck,rMPTemp
+    REAL :: rCos,rPlanck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -3508,7 +3515,7 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
            
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
@@ -3516,8 +3523,8 @@ CONTAINS
     INTEGER :: iDefault,iComputeAll
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer,find_tropopause
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -4540,7 +4547,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,rPlanck,rMPTemp
+    REAL :: rCos,rPlanck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -4550,14 +4557,14 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,find_tropopause,troplayer
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -5144,7 +5151,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: rCos,ttorad,Planck,rMPTemp
+    REAL :: rCos,Planck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raThermal(kMaxPts),raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -5154,14 +5161,14 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
 
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iaRadLayerTemp(kMixFilRows)
+    INTEGER :: iDoThermal,iDoSolar,iaRadLayerTemp(kMixFilRows)
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,raSun(kMaxPts),rSunTemp,rOmegaSun,rSunAngle
     REAL :: rAngleTrans,rAngleEmission
 
     REAL :: rCosAngle,raTemp(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,find_tropopause,troplayer,iVary,iDefault
+    REAL :: raVT1(kMixFilRows)
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer,iVary,iDefault
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)

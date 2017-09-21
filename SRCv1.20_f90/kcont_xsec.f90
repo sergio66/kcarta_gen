@@ -4,6 +4,11 @@
 
 MODULE kcont_xsec
 
+USE basic_common
+USE spline_and_sort
+USE kcoeff_FAST
+USE s_misc
+
 IMPLICIT NONE
 
 CONTAINS
@@ -459,7 +464,7 @@ CONTAINS
     DOUBLE PRECISION :: d1,d2,df,daaCKD(kTempCKD,kFreqCKD),daTemprt(kTempCKD)
 
 ! local variables
-    INTEGER :: iLay,iFr,iL,iF,iFloor
+    INTEGER :: iLay,iFr,iL,iF
     INTEGER :: iaFrIndex(kMaxPts),iaTempIndex(kProfLayer)
     DOUBLE PRECISION :: daFrDelta(kMaxPts),dTemp
     DOUBLE PRECISION :: a,b,c,x1,x2,x3,y1,y2,y3,t1,t2,t3,t4,x,z1,z2
@@ -639,7 +644,7 @@ CONTAINS
     DOUBLE PRECISION :: d1,d2,df,daaCKD(kTempCKD,kFreqCKD),daTemprt(kTempCKD)
 
 ! local variables
-    INTEGER :: iLay,iFr,iL,iF,iFloor
+    INTEGER :: iLay,iFr,iL,iF
     INTEGER :: iaFrIndex(kMaxPts),iaTempIndex(kProfLayer)
     DOUBLE PRECISION :: daFrDelta(kMaxPts),dTemp
     DOUBLE PRECISION :: a,b,c,x1,x2,x3,y1,y2,y3,t1,t2,t3,t4,x,z1,z2
@@ -773,7 +778,7 @@ CONTAINS
     DOUBLE PRECISION :: d1,d2,df,daaCKD(kTempCKD,kFreqCKD),daTemprt(kTempCKD)
 
 ! local variables
-    INTEGER :: iLay,iFr,iL,iF,iFloor
+    INTEGER :: iLay,iFr,iL,iF
     INTEGER :: iaFrIndex(kMaxPts),iaTempIndex(kProfLayer)
     DOUBLE PRECISION :: daFrDelta(kMaxPts),dTemp
     DOUBLE PRECISION :: a,b,c,x1,x2,x3,y1,y2,y3,t1,t2,t3,t4,x,z1,z2
@@ -926,7 +931,7 @@ CONTAINS
     DOUBLE PRECISION :: d1,d2,df,daaCKD(kTempCKD,kFreqCKD),daTemprt(kTempCKD)
 
 ! local variables
-    INTEGER :: iFr,iL,iF,iFloor
+    INTEGER :: iFr,iL,iF
     INTEGER :: iaFrIndex(kMaxPts)
     DOUBLE PRECISION :: daFrDelta(kMaxPts),dTemp,daC(kTempCKD)
     DOUBLE PRECISION :: dyp1,dypn,daY2(kTempCKD),daWork(kTempCKD)

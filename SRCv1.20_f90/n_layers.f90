@@ -4,6 +4,8 @@
 
 MODULE n_layers
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS

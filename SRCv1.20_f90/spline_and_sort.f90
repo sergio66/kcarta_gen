@@ -4,6 +4,8 @@
 
 MODULE spline_and_sort
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS
@@ -659,7 +661,7 @@ CONTAINS
     INTEGER :: iLay,iNp,iaOp(*)
 
 ! local variables
-    INTEGER :: iAns,iFound,iMp,iF,iL,iLocation,IDIV
+    INTEGER :: iAns,iFound,iMp,iF,iL,iLocation
 
     iAns=-1
     iFound=-1
@@ -1739,4 +1741,32 @@ CONTAINS
     end SUBROUTINE r_sort_loglinear1
 
 !************************************************************************
+!************************************************************************
+!************************************************************************
+! this function, depending on iNp, calls a binary or a sequential search
+! to find iLay in iaOp
+! originally in kcartamisc.f90
+
+    INTEGER FUNCTION DoOutputLayer(iLay,iNp,iaOp)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! iLay  = layer number to be looked for
+! iaOp  = array containing list of layers
+! iNp   = search indices 1..iNp of iaOp, to look for iLay
+    INTEGER :: iLay,iNp,iaOp(*)
+
+    IF (iNp < 16) THEN
+        DoOutputLayer = SequentialSearch(iLay,iNp,iaOp)
+    ELSE
+        DoOutputLayer = BinarySearch(iLay,iNp,iaOp)
+    END IF
+
+    RETURN
+    end FUNCTION DoOutputLayer
+
+!************************************************************************
+
 END MODULE spline_and_sort

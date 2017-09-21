@@ -4,6 +4,12 @@
 
 MODULE rad_misc
 
+USE basic_common
+USE rad_angles
+USE spline_and_sort
+USE clear_scatter_basic
+USE kcoeff_basic
+
 IMPLICIT NONE
 
 CONTAINS
@@ -11,73 +17,6 @@ CONTAINS
 !************************************************************************
 !************** This file has the misc radiance routines  ***************
 !************************************************************************
-!************************************************************************
-! this function loads in the specular reflection file
-    SUBROUTINE loadspecular(raFreq,raSpecularRefl)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! input var
-    REAL :: raFreq(kMaxPts)
-! output var
-    REAL :: raSpecularRefl(kMaxPts)
-
-! local vars
-    INTEGER :: iIOUN,iL,iFlip,iI
-    CHARACTER(80) :: fname,caLine
-    REAL :: raW(kMaxPts),raR(kMaxPts),r1,r2,r3,r4,r5,raTemp(kMaxPts)
-
-! name = sun view d(phi) windspeed
-    fname = '/home/sergio/SBDART/V2.4/rho_22.12_23.86_212.97_7.3'
-    iIOUN = kTempUnit
-    OPEN(UNIT = iIOUN,FILE=fname,STATUS='OLD',FORM='FORMATTED',IOSTAT = iL)
-    IF (IL /= 0) THEN
-        WRITE(kStdErr,1010) IL, FNAME
-        1010 FORMAT('ERROR! number ',I5,' openning data file:',/,A80)
-        CALL DoSTOP
-    ENDIF
-
-    iL = 0
-    kTempUnitOpen = +1
-    20 READ(iIOUN,5020,END=777) caLine
-    iL = iL + 1
-    READ(caLine,*) r1,r2,r3,r4,r5   !!wavenumber sun satellite d(phi) rho
-    raW(iL) = r1
-    raR(iL) = r5
-    GOTO 20
-
-    777 CONTINUE
-    CLOSE(iIOUN)
-    kTempUnitOpen = -1
-
-    iFlip = -1    !!assume everything ordered correctly
-    IF ((raW(iL-1) > raW(iL)) .OR. (raW(iL-2) > raW(iL-1))) THEN
-        iFlip = +1
-        DO iI = 1,iL
-            raTemp(iL-iI+1) = raW(iI)
-        END DO
-        DO iI = 1,iL
-            raW(iI) = raTemp(iI)
-        END DO
-        DO iI = 1,iL
-            raTemp(iL-iI+1) = raR(iI)
-        END DO
-        DO iI = 1,iL
-            raR(iI) = raTemp(iI)
-        END DO
-    END IF
-
-    CALL rspl(raW,raR,iL, raFreq,raSpecularRefl,kMaxPts)
-    write(kStdWarn,*) 'specular refl (1) = ',raFreq(1),raSpecularRefl(1)
-    write(kStdWarn,*) 'for mu_angles ',r2*180/kPi,r3*180/kPi,r4*180/kPi
-
-    5020 FORMAT(A80)
-
-    RETURN
-    end SUBROUTINE loadspecular
-
 !************************************************************************
 ! this function sets the thermal and solar params for atm # iAtm
     SUBROUTINE SetSolarThermal(iaKSolar,rakSolarAngle,rakSolarRefl, &
@@ -111,29 +50,6 @@ CONTAINS
     RETURN
     end SUBROUTINE SetSolarThermal
 
-!************************************************************************
-! this function converts the Mixed Path number to a layer number
-    INTEGER FUNCTION MP2Lay(iNum)
-     
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! iNum === mixed path that we want to convert to a layer
-! eg 110 --> 10       200 --> 100
-    INTEGER :: iNum
-     
-    INTEGER :: iT
-
-    iT = MOD(iNum,kProfLayer)
-    IF (iT == 0) THEN
-        iT = kProfLayer
-    END IF
-     
-    MP2Lay = iT
-     
-    RETURN
-    end FUNCTION MP2Lay
 !************************************************************************
 ! this function sets the solar refl
 ! the default refl is set to 0.0
@@ -366,215 +282,6 @@ CONTAINS
     RETURN
     end SUBROUTINE SetSurfaceEmissivity
 !************************************************************************
-! this subroutine changes the brightness temperatures to intensities
-! for one array point
-    SUBROUTINE ttorad_oneBT2array(raF,rBT,raInten)
-! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! rf = wavenumber, rI = intensity, rBT = brightness temp
-    REAL :: raF(kmaxPts),raInten(kMaxPts),rBT
-
-! local variables
-    REAL :: r1,r2,rPlanck
-    INTEGER :: iFr
-     
-    r1 = sngl(kPlanck1)
-    r2 = sngl(kPlanck2)
-
-!! 10^10 = e^23.03
-!! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
-!! 10^38  = 87.49
-    DO iFr = 1,kMaxPts
-        rPlanck = r2*raF(iFr)/rBT
-        IF (rPlanck > 87.49) THEN
-            rPlanck = 1.0e38
-        ELSE
-            rPlanck = exp(rPlanck) - 1.0
-        END IF
-        raInten(iFr) = r1*(raF(iFr)**3)/rPlanck
-    END DO
-
-    RETURN
-    end SUBROUTINE ttorad_oneBT2array
-
-!************************************************************************
-! this subroutine changes the brightness temperatures to intensities for array
-    SUBROUTINE ttorad_array(raF,raBT,raInten)
-! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! rf = wavenumber, rI = intensity, rBT = brightness temp
-    REAL :: raF(kmaxPts),raInten(kMaxPts),raBT(kMaxPts)
-
-! local variables
-    REAL :: r1,r2,rPlanck
-    INTEGER :: iFr
-     
-    r1 = sngl(kPlanck1)
-    r2 = sngl(kPlanck2)
-
-!! 10^10 = e^23.03
-!! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
-!! 10^38  = 87.49
-    DO iFr = 1,kMaxPts
-        rPlanck = r2*raF(iFr)/raBT(iFr)
-        IF (rPlanck > 87.49) THEN
-            rPlanck = 1.0e38
-        ELSE
-            rPlanck = exp(rPlanck) - 1.0
-        END IF
-        raInten(iFr) = r1*(raF(iFr)**3)/rPlanck
-    END DO
-
-    RETURN
-    end SUBROUTINE ttorad_array
-
-!************************************************************************
-! this subroutine changes the brightness temperatures to intensities
-! for one point
-    REAL function ttorad(rf,rBT)
-! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
-! Constants; values from NIST (CODATA98)
-!   c = 2.99792458e+08;  % speed of light      299 792 458 m s-1
-!   h = 6.62606876e-34;  % Planck constant     6.626 068 76 x 10-34 J s
-!   k = 1.3806503e-23;   % Boltzmann constant  1.380 6503 x 10-23 J K-1
-!   c1 = 2*h*c*c * 1e+11;  % Changed 1e+8 to 1e+11 to convert Watts to milliWatts
-!   c2 = (h*c/k) * 100;
-
-! at small T, exp(c2 fr/T) >>> 1
-!   rad --> c1 fr^3  exp(-c2 fr/T)
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! rf = wavenumber, rI = intensity, rBT = brightness temp
-    REAL :: rf,rI,rBT
-
-! local variables
-    REAL :: r1,r2,rPlanck
-    INTEGER :: iInt
-     
-    r1 = sngl(kPlanck1)
-    r2 = sngl(kPlanck2)
-
-!! 10^10 = e^23.03
-!! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
-!! 10^38  = 87.49
-          
-    rPlanck = r2*rf/rBT
-    IF (rPlanck > 87.49) THEN
-        rPlanck = 1.0e38
-    ELSE
-        rPlanck = exp(rPlanck) - 1
-    END IF
-
-    rI = r1*(rf**3)/rPlanck
-
-    ttorad = rI
-
-    RETURN
-    end function ttorad
-
-!************************************************************************
-! this subroutine changes the brightness temperatures to intensities
-! for one point
-    DOUBLE PRECISION FUNCTION dttorad(df,dBT)
-! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! rf = wavenumber, rI = intensity, rBT = brightness temp
-    DOUBLE PRECISION :: dI
-    DOUBLE PRECISION :: dF,dBT
-          
-! local variables
-    DOUBLE PRECISION :: d1,d2,dPlanck,dexp
-    INTEGER :: iInt
-     
-    d1 = (kPlanck1)
-    d2 = (kPlanck2)
-
-!! 10^10 = e^23.03
-    dPlanck = d2*df/dBT
-    IF (dPlanck > 23.03) THEN
-        dPlanck = 1.0e10
-    ELSE
-        dPlanck = dexp(dPlanck) - 1
-    END IF
-
-    dI = d1*(df**3)/dPlanck
-
-    dttorad = dI
-
-    RETURN
-    END FUNCTION dttorad
-
-!************************************************************************
-! this subroutine changes the intensities to brightness temperatures
-! for one point
-    REAL function radtot(rf,rI)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! rf = wavenumber, rI = intensity, rBT = brightness temp
-    REAL :: rf,rI,rBT
-
-! local variables
-    REAL :: r1,r2,rPlanck
-    INTEGER :: iInt
-     
-    r1 = sngl(kPlanck1)
-    r2 = sngl(kPlanck2)
-
-    rPlanck = alog(1.0+(r1*(rf**3))/rI)
-    rBT     = r2*rf/rPlanck
-
-    radtot = rBT
-
-    RETURN
-    end function radtot
-
-!************************************************************************
-! this subroutine changes the intensities to brightness temperatures
-! for an array
-    SUBROUTINE radtot_array(raFreq,raInten,raBrightTemp)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! raFreq        = array containing wavenumbers
-! raInten        = intensity from forward model
-! raBrightTemp   = brightness temperatures associated with raInten
-    REAL :: raFreq(kMaxPts),raInten(kMaxPts),raBrightTemp(kMaxPts)
-
-! local variables
-    REAL :: r1,r2,rPlanck
-    INTEGER :: iInt
-     
-    r1 = sngl(kPlanck1)
-    r2 = sngl(kPlanck2)
-
-    DO iInt=1,kMaxPts
-        rPlanck = alog(1.0+(r1*(raFreq(iInt)**3))/raInten(iInt))
-        raBrightTemp(iInt) = r2*raFreq(iInt)/rPlanck
-    END DO
-
-    RETURN
-    end SUBROUTINE radtot_array
-
-!************************************************************************
 ! this subroutine accumulates the current gas abs using the mixing table
 ! for row iIpmix of the mixing table, for gas iGas
     SUBROUTINE Accumulate(raaSum,raaGas,raaMix,iGas,iIpmix)
@@ -593,7 +300,7 @@ CONTAINS
     REAL :: raaSum(kMaxPts,kMixFilRows)
     REAL :: raaGas(kMaxPts,kProfLayer)
 
-    INTEGER :: iFreq,iL,MP2Lay
+    INTEGER :: iFreq,iL
     REAL :: rL
 
 ! find out which of the 100 layers is associated with this mixed path
@@ -615,176 +322,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE Accumulate
-
-!************************************************************************
-! this subroutine checks to see if there are any layers above the instrument
-! as they have to be added on to do the solar/backgnd thermal correctly!!
-    SUBROUTINE AddUppermostLayers(iaRadLayer,iNumLayer,rFracTop, &
-    iaRadLayerTemp,iT,iExtra,raExtra)
-     
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-     
-! input params
-! rFracTop tells how much of the upper layer has been used, due to instr posn
-! iaRadLayer = current radiating atmosphere defn : gnd to instrument
-! iNumLayers = number of mixed paths in the defined radiating atmosphere
-!                  temporarily define atm from GND to TOP of atmosphere
-    INTEGER :: iNumLayer,iaRadLayer(kProfLayer)
-    REAL :: rFracTop
-! output params
-! raExtra = array initialized to all zeros
-! iExtra = -1 if no layeres added on, +1 if layers added on
-! iaRadLayerTemp = if physical TOP of atmosphere is higher than instrument,
-! iT             = number of layers in this temporary atmosphere
-    INTEGER :: iaRadLayerTemp(kMixFilRows),iExtra,iT
-    REAL :: raExtra(kMaxPts)
-     
-    INTEGER :: iI,iFr
-     
-    iExtra = -1
-     
-! check to see the posn of the instrument (defined by layers i1,i2,..iN),
-! relative to physical top of atmosphere, as defined by 100 layers
-    iI=MOD(iaRadLayer(iNumLayer),kProfLayer)
-! if eg iaRadLayer(iNumLayer) = 100,200,... then the mod is 0, and so we know
-! that ALL upper layers have been used in the atmosphere defn.
-! e DO have to check that even if topmaost layer=100, it could still be
-! fractionally weighted due to the posn of instr at top layer being within
-! the layer, not on top of it
-
-    DO iFr=1,kMaxPts
-        raExtra(iFr) = 0.0
-    END DO
-     
-    IF ((iI == 0) .AND. (abs(rFracTop-1.0) <= 1.0e-4))THEN
-    ! current defined atmosphere has all g-100 layers, 100th layer had frac 1.0
-        iExtra=-1
-         
-    ELSE IF ((iI == 0) .AND. (abs(rFracTop-1.0) >= 1.0e-4)) THEN
-    ! even though the current defined atmosphere has all g-100 layers,
-    ! 100th layer had frac 0 < f < 1
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-        write(kStdWarn,*) 'top most layer is fractional layer. Some'
-        write(kStdWarn,*) 'portion needed above instrument to calculate'
-        write(kStdWarn,*) ' thermal/solar'
-         
-    ELSE IF ((iI /= 0)) THEN
-    ! current defined atmosphere does not have all g-100 layers
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-    ! now add on upper layers till we get MOD(iaRadLayerTemp(iT),kProfLayer) = 0
-        15 CONTINUE
-        IF (MOD(iaRadLayerTemp(iT),kProfLayer) /= 0) THEN
-            iT = iT+1
-            iaRadLayerTemp(iT) = iaRadLayerTemp(iT-1)+1
-            write(kStdWarn,*) 'added on layer',iT,iaRadLayerTemp(iT)
-            GO TO 15
-        END IF
-        write(kStdWarn,*)'added ',iT-iNumLayer,' layers'
-        write(kStdWarn,*)'above instrument to calculate th/solar/flux'
-    END IF
-     
-    RETURN
-    end SUBROUTINE AddUppermostLayers
-
-!************************************************************************
-! this subroutine checks to see if there are any layers above the instrument
-! as they have to be added on to do the solar/backgnd thermal correctly!!
-! same as above routine, except that it is quiet!!!!!!!! (for scatttering code)
-    SUBROUTINE  AddUppermostLayersQ(iaRadLayer,iNumLayer,rFracTop, &
-    iaRadLayerTemp,iT,iExtra,raExtra)
-     
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-     
-! rFracTop tells how much of the upper layer has been used, due to instr posn
-! iaRadLayer = current radiating atmosphere defn : gnd to instrument
-! iNumLayers = number of mixed paths in the defined radiating atmosphere
-! iaRadLayerTemp = if physical TOP of atmosphere is higher than instrument,
-!                  temporarily define atm from GND to TOP of atmosphere
-! iT             = number of layers in this temporary atmosphere
-! iExtra = -1 if no layeres added on, +1 if layers added on
-! raExtra = array initialized to all zeros
-    INTEGER :: iNumLayer,iaRadLayer(kProfLayer)
-    INTEGER :: iT,iaRadLayerTemp(kMixFilRows),iExtra
-    REAL :: raExtra(kMaxPts),rFracTop
-     
-    INTEGER :: iI,iFr
-     
-    iExtra=-1
-     
-! check to see the posn of the instrument (defined by layers i1,i2,..iN),
-! relative to physical top of atmosphere, as defined by 100 layers
-    iI=MOD(iaRadLayer(iNumLayer),kProfLayer)
-! if eg iaRadLayer(iNumLayer) = 100,200,... then the mod is 0, and so we know
-! that ALL upper layers have been used in the atmosphere defn.
-! e DO have to check that even if topmaost layer=100, it could still be
-! fractionally weighted due to the posn of instr at top layer being within
-! the layer, not on top of it
-
-    DO iFr=1,kMaxPts
-        raExtra(iFr) = 0.0
-    END DO
-     
-    IF ((iI == 0) .AND. (abs(rFracTop-1.0) <= 1.0e-4))THEN
-    ! current defined atmosphere has all g-100 layers, 100th layer had frac 1.0
-        iExtra=-1
-         
-    ELSE IF ((iI == 0) .AND. (abs(rFracTop-1.0) >= 1.0e-4))THEN
-    ! even though the current defined atmosphere has all g-100 layers,
-    ! 100th layer had frac 0 < f < 1
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-    !        write(kStdWarn,*) 'top most layer is fractional layer. Some'
-    !        write(kStdWarn,*) 'portion needed above instrument to calculate'
-    !        write(kStdWarn,*) ' thermal/solar'
-         
-    ELSE IF ((iI /= 0)) THEN
-    ! current defined atmosphere does not have all g-100 layers
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-    ! now add on upper layers till we get MOD(iaRadLayerTemp(iT),kProfLayer) = 0
-        15 CONTINUE
-        IF (MOD(iaRadLayerTemp(iT),kProfLayer) /= 0) THEN
-            iT = iT+1
-            iaRadLayerTemp(iT) = iaRadLayerTemp(iT-1)+1
-        !          write(kStdWarn,*) 'added on layer',iT,iaRadLayerTemp(iT)
-            GO TO 15
-        END IF
-    !        write(kStdWarn,*)'added ',iT-iNumLayer,' layers'
-    !        write(kStdWarn,*)'above instrument to calculate th/solar/flux'
-    END IF
-     
-    RETURN
-    END SUBROUTINE 
 
 !************************************************************************
 ! this subroutine calculates the solar contribution AT TOA
@@ -823,7 +360,7 @@ CONTAINS
     REAL :: raExtraSun(kMaxPts)
     REAL :: rSunTemp,rOmegaSun,rSunAngle
     REAL :: r1,r2,rPlanck,rCos,raKabs(kMaxPts)
-    INTEGER :: iDoSolar,iL,iI,iFr,iExtraSun,MP2Lay
+    INTEGER :: iDoSolar,iL,iI,iFr,iExtraSun
     INTEGER :: iaRadLayerTemp(kMixFilRows),iT,iLay
      
     r1 = sngl(kPlanck1)
@@ -872,194 +409,6 @@ CONTAINS
     RETURN
     end SUBROUTINE SolarTOA
 
-!************************************************************************
-! this subroutine calculates the solar contribution AT GND
-! ie take solar radiance incident from space at TOA, and then propagate down to surface
-! then adjst by cos(SunAngle) * Earth-Sun solid angle
-    SUBROUTINE Solar(iDoSolar,raSun,raFreq,raSunAngles, &
-    iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
-     
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! iTag          = 1,2,3 and tells what the wavenumber spacing is
-! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile
-! rFracTop = how much of topmost layer is fractional, due to instr posn
-! raSun    = final solar contr
-! raFreq  = frequency array
-! raSunAngles = array containing layer dependent sun angles
-! iNumLayer,iaRadLayer = number of layers, list of mixed paths in atm
-! raaAbs   = cumulative abs coeffs
-    REAL :: raSunAngles(kProfLayer),raSun(kMaxPts),raFreq(kMaxPts)
-    INTEGER :: iNumLayer,iaRadLayer(kProfLayer),iTag
-    REAL :: raaAbs(kMaxPts,kMixFilRows),rFracTop,rFracBot
-! obviously, if atm is defined by mixed path 1..50 (instrument at layer 50)
-!                physical atmosphere is defined by mixed paths 1..100
-! thus solar radiation at earth's surface ==
-! (solar radiation at layer 100)*(trans 100-->51)*trans(50->1) ==
-! (sun at 100)*exp(-k(100->51/cos(sun))*exp(-k(50-->1)/cos(sun)) ==
-! raExtraSun*exp(-k(50-->1)/cos(sun))
-     
-! local variables
-! iExtraSun = if the top of atmosphere is ABOVE instrument, need to
-!             calculate the attenuation due to the extra terms
-! raExtraSun = solar radiation incident at posn of instrument NOT USED!
-    REAL :: raExtraSun(kMaxPts)
-    REAL :: rSunTemp,rOmegaSun,rSunAngle
-    REAL :: r1,r2,rPlanck,rCos,raKabs(kMaxPts)
-    INTEGER :: iDoSolar,iL,iI,iFr,iExtraSun,MP2Lay
-    INTEGER :: iaRadLayerTemp(kMixFilRows),iT,iLay
-     
-    r1 = sngl(kPlanck1)
-    r2 = sngl(kPlanck2)
-
-!!! raSun will be in units of mW/m2/sr/cm-1 with NO sun solidangle correction
-    IF (iDoSolar == 0) THEN
-        write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
-        rSunTemp = kSunTemp
-        DO iFr=1,kMaxPts
-        ! ompute the Plank radiation from the sun
-            rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0
-            raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-        END DO
-    ELSEIF (iDoSolar == 1) THEN
-        IF (raFreq(1) >= 605) THEN
-            write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
-        ! ead in data from file
-            CALL ReadSolarData(raFreq,raSun,iTag)
-        ELSEIF (raFreq(1) < 605) THEN
-        !! who cares, solar contribution is so small
-            write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
-            rSunTemp = kSunTemp
-            DO iFr=1,kMaxPts
-            ! compute the Plank radiation from the sun
-                rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0
-                raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-            END DO
-        END IF
-    END IF
-
-!! now do the solid angle correction
-! angle the sun subtends at the earth = area of sun/(dist to sun)^2
-    rOmegaSun = kOmegaSun
-    rSunAngle = raSunAngles(MP2Lay(iaRadLayer(1)))
-! change to radians
-    rSunAngle = rSunAngle*kPi/180.0
-    rCos      = cos(rSunAngle)
-           
-! now adjust raSun by cos(rSunAngle) * rSolidAngle
-    DO iFr=1,kMaxPts
-        raSun(iFr) = raSun(iFr)*rCos*rOmegaSun      !!!!this is correct
-        raKAbs(iFr) = 0.0
-    END DO
-
-    CALL AddUppermostLayers(iaRadLayer,iNumLayer,rFracTop, &
-    iaRadLayerTemp,iT,iExtraSun,raExtraSun)
-      
-! now bring down to surface, using layer_to_space
-    IF (iExtraSun < 0) THEN
-    ! the current defined atmosphere used all Gnd-100 layers
-        DO iLay = iNumLayer,2,-1
-            iL = iaRadLayer(iLay)
-            rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-            DO iFr=1,kMaxPts
-            !!!!this is wrong!! raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)
-                raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-            END DO
-        END DO
-        DO iLay=1,1
-            iL = iaRadLayer(iLay)
-            rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-            DO iFr=1,kMaxPts
-                raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)*rFracBot/rCos
-                raSun(iFr) = raSun(iFr)*exp(-raKAbs(iFr))
-            END DO
-        END DO
-        DO iFr=1,kMaxPts
-            raExtraSun(iFr) = 0.0
-        END DO
-
-    ELSE IF (iExtraSun > 0) THEN
-    ! all upper layers not used eg instrument could be on a low flying aircraft
-        IF ((iT == iNumLayer) .AND. rFracTop <= (1.0-0.001)) THEN
-            write(kStdWarn,*)'In solar, uppermost layer = kProfLayer '
-            write(kStdWarn,*)'but posn of instrument is at middle of '
-            write(kStdWarn,*)'layer ==> need to add extra term'
-
-        ! irst do the highest layer .. make it "full"
-            iI = iNumLayer
-            write(kStdWarn,*)'iI,rFracTop=',iI,rFracTop
-            DO iLay = iNumLayer,iNumLayer
-                iL = iaRadLayer(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                    raExtraSun(iFr) = raSun(iFr)*exp(-rakAbs(iFr))
-                END DO
-            END DO
-        ! ow do remaining layers, all the way to the ground-1
-            DO iLay = iNumLayer-1,2,-1
-                iL = iaRadLayer(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                END DO
-            END DO
-            DO iLay=1,1
-                iL = iaRadLayer(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)*rFracBot/rCos
-                    raSun(iFr) = raSun(iFr)*exp(-raKAbs(iFr))
-                END DO
-            END DO
-
-        END IF
-         
-        IF (iT > iNumLayer) THEN
-            write(kStdWarn,*)'need to do the upper layers as well!!'
-        ! ow do top layers, all the way to the instrument
-            DO iLay = iT,iNumLayer+1,-1
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                END DO
-            END DO
-        ! ow do the layer instrument is in
-            DO iLay = iNumLayer,iNumLayer
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                    raExtraSun(iFr) = raSun(iFr)*(exp(-raKabs(iFr)))
-                END DO
-            END DO
-        ! ow do all the way to the ground-1
-            DO iLay = iNumLayer-1,2,-1
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                END DO
-            END DO
-        ! ow do ground
-            DO iLay=1,1
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)*rFracBot/rCos
-                    raSun(iFr) = raSun(iFr)*exp(-raKAbs(iFr))
-                END DO
-            END DO
-        END IF
-         
-    END IF
-
-    RETURN
-    end SUBROUTINE Solar
-      
 !************************************************************************
 ! this subroutine does rad tansfer from iS to iE, either increasing (1)
 ! or decreasing (-1) according to iUpDown
@@ -1204,81 +553,6 @@ CONTAINS
     end SUBROUTINE RadiativeTransfer
 
 !************************************************************************
-! this subroutine reads in the solar data files
-!!!! KCARTA solar datafiles are in W/m2/sr/cm-1;
-!!!! then kCARTA  internally multiplies by 1000
-!!!!  eventually also multiples by solidangle
-
-    SUBROUTINE ReadSolarData(raFreq,raSun,iTag)
-     
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-     
-! raSun    = final solar contr in mW/m2/sr/cm-1
-! raFreq  = frequency array
-! iTag     = 1,2,3 and tells what the wavenumber spacing is
-    INTEGER :: iTag
-    REAL :: raSun(kMaxPts),raFreq(kMaxPts)
-     
-    CHARACTER(80) :: fname
-    INTEGER :: iIOUN,iL,iU,iFr
-    DOUBLE PRECISION :: fs,fe,df,daSun(kMaxPts)
-
-    iIOUN = kTempUnit
-    CALL GetSolarFileName(fname,raFreq(1))
-    write(kStdWarn,*) 'solar data file = ',fname
-    OPEN(UNIT = iIOUN,FILE=fname,STATUS='OLD',FORM='UNFORMATTED',IOSTAT = iL)
-    IF (IL /= 0) THEN
-        WRITE(kStdErr,1010) IL, FNAME
-        1010 FORMAT('ERROR! number ',I5,' openning data file:',/,A80)
-        CALL DoSTOP
-    ENDIF
-
-    READ(iIOUN) fs,fe,df
-
-    IF (abs(fs - raFreq(1)) >= kaFrStep(iTag)/10) THEN
-        WRITE(kStdErr,1011) fs,raFreq(1)
-        1011 FORMAT('ERROR! solar data file has start freq ',f10.5,' while the &
-        start wavenumber of current kCompressed chunk is ',f10.5)
-        CALL DoStop
-    END IF
-
-    IF (abs(fe - raFreq(kMaxPts)) >= kaFrStep(iTag)/10) THEN
-        WRITE(kStdErr,1012) fe,raFreq(kMaxPts)
-        1012 FORMAT('ERROR! solar data file has stop freq ',f10.5,' while the &
-        stop wavenumber of current kCompressed chunk is ',f10.5)
-        CALL DoStop
-    END IF
-
-    IF (abs(df - kaFrStep(iTag)) >= kaFrStep(iTag)/10) THEN
-        WRITE(kStdErr,1013) df,kaFrStep(iTag)
-        1013 FORMAT('ERROR! solar data file has delta freq ',f10.5,' while the &
-        wavenumber spacing of current kCompressed chunk is ',f10.5)
-        CALL DoStop
-    END IF
-
-! now map the data
-    iL = iNT((fs-raFreq(1))/kaFrStep(iTag))
-    iU = iL+kMaxPts
-
-!!!! KCARTA solar datafiles are in W/m2/sr/cm-1;
-    READ(iIOUN) (daSun(iFr),iFr=1,kMaxPts)
-    CLOSE(iIOUN)
-!!!! KCARTA solar datafiles are in W/m2/sr/cm-1;
-
-!!! data files units of W cm-2 sr-1
-!!! so need to multiply by 1000 to change to mW/m2/sr/cm-1
-    DO iFr=1,kMaxPts
-        raSun(iFr) = daSun(iFr)*1000.0
-    !        write (6,2000) iFr,raFreq(iFr),raSun(iFr)
-    END DO
-
-    2000 FORMAT(I6,' ',f10.5,' ',e10.5)
-    RETURN
-    end SUBROUTINE ReadSolarData
-
-!************************************************************************
 ! this subroutine quickkly computes the rad transfer for a nonscatter atm
 ! note that it pretty much uses the accurate diffusive approx for backgnd
 ! thermal, for a downlook instr
@@ -1304,7 +578,7 @@ CONTAINS
     REAL :: rF,rI                       !wavenumber and intensity
 
     INTEGER :: iI,iStop
-    REAL :: r1,r2,rEmission,rCos,ttorad
+    REAL :: r1,r2,rEmission,rCos
     REAL :: rSun,rThermal,rSurface,rToa_to_Gnd
 
     INTEGER :: iBdry,FindBoundary_Individual
@@ -1374,8 +648,8 @@ CONTAINS
             iStop = (nlev - 1) - iWhereTo + 1
         END IF
         DO iI=nlev-1,iStop,-1
-            r1=exp(-raTau(iI)/rCos)      !transmission thru layer
-            r2=ttorad(rF,raTemp(iI))    !emission from layer
+            r1 = exp(-raTau(iI)/rCos)      !transmission thru layer
+            r2 = ttorad(rF,raTemp(iI))    !emission from layer
             rI = (1-r1)*r2 + rI*r1
         END DO
     END IF
@@ -1439,7 +713,7 @@ CONTAINS
 ! local variables
     INTEGER :: iFr,iL,iLL,iDoThermal,iLay,iaRadLayer(kProfLayer)
     REAL :: r1,r2,rPlanck,rCos,rT,rEmiss,rTrans
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
        
     r1 = sngl(kPlanck1)
     r2 = sngl(kPlanck2)

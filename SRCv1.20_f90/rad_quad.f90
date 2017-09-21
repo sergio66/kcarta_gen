@@ -4,6 +4,12 @@
 
 MODULE rad_quad
 
+USE basic_common
+USE spline_and_sort
+USE rad_angles
+USE clear_scatter_basic
+USE rad_misc
+
 IMPLICIT NONE
 
 CONTAINS
@@ -49,7 +55,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iHigh,iJunkFlux
-    REAL :: rCos,ttorad,Planck,rMPTemp
+    REAL :: rCos,Planck,rMPTemp
     REAL :: raDown(kMaxPts),raUp(kMaxPts)
     REAL :: raSunAngles(kMaxPts)
 ! we need to compute upward and downward flux at all boundaries ==>
@@ -564,7 +570,7 @@ CONTAINS
     INTEGER :: iFr,iAngle,iGaussPts
 
     REAL :: raTemp(kMaxPts),rCosAngle
-    REAL :: rPlanck,raIntenAtmos(kMaxPts),ttorad
+    REAL :: rPlanck,raIntenAtmos(kMaxPts)
 
     REAL :: rMPTemp,rAngleTrans,rAngleEmission
     INTEGER :: iL,iLay
@@ -742,7 +748,7 @@ CONTAINS
     INTEGER :: iFr,iAngle,iGaussPts
 
     REAL :: raTemp(kMaxPts),rCosAngle
-    REAL :: rPlanck,raIntenAtmos(kMaxPts),ttorad
+    REAL :: rPlanck,raIntenAtmos(kMaxPts)
 
     REAL :: rMPTemp,rAngleTrans,rAngleEmission
     INTEGER :: iL,iLay,iDefault
@@ -924,7 +930,7 @@ CONTAINS
 
     INTEGER :: iFr
 
-    REAL :: ttorad,rPlanck,raIntenAtmos(kMaxPts)
+    REAL :: rPlanck,raIntenAtmos(kMaxPts)
 
 ! compute the emission from the top of atm == eqn 4.26 of Genln2 manual
 
@@ -1012,13 +1018,12 @@ CONTAINS
      
 ! local variables
     INTEGER :: iFr,iLay,iL,iLm1,iEnd
-    REAL :: ttorad,rPlanck,rMPTemp
+    REAL :: rPlanck,rMPTemp
     REAL :: raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts)
     REAL :: raAvgAnglePerLayer(kMaxLayer),raMeanOD(kMaxLayer)
           
 ! to do the angular integration
     REAL :: rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts)
-    REAL :: FindDiffusiveAngleExp
      
 ! need iS > iE
     IF (iS < iE) THEN
@@ -1273,7 +1278,7 @@ CONTAINS
     INTEGER :: iPi,iFr,iAngle
 
     REAL :: raTemp(kMaxPts),raTemp2(kMaxPts),raFreqAngle(kMaxPts),rAngle
-    REAL :: rPlanck,raIntenAtmos(kMaxPts),rDelta,r1,r2,ttorad
+    REAL :: rPlanck,raIntenAtmos(kMaxPts),rDelta,r1,r2
 
     DO iFr = 1,kMaxPts
         raIntenAtmos(iFr) = ttorad(raFreq(iFr),rTSpace)

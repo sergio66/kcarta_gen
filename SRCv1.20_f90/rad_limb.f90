@@ -4,6 +4,15 @@
 
 MODULE rad_limb
 
+USE basic_common
+USE spline_and_sort
+USE s_writefile
+USE kbloat
+USE s_misc
+USE rad_flux
+USE kcoeff_basic
+USE clear_scatter_basic
+
 IMPLICIT NONE
 
 CONTAINS
@@ -575,7 +584,7 @@ CONTAINS
     REAL :: raScatterIWP(kMaxAtm)
 
     REAL :: rMPTemp
-    INTEGER :: i1,i2,iFloor,iDownWard,iVary,iIOUN_IN
+    INTEGER :: i1,i2,iDownWard,iVary,iIOUN_IN
 
     DO i1=1,kMaxPts
         raInten(i1)=0.0
@@ -846,10 +855,10 @@ CONTAINS
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN,iDownWard
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
@@ -1306,14 +1315,14 @@ CONTAINS
     REAL :: rDum1,rDum2
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
 ! for the NLTE which is not used in this routine
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iNLTEStart,iSTopNormalRadTransfer,iUpper
              
     REAL :: raOutFrac(kProfLayer),r0
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN
     REAL :: bt2rad,t2s
     INTEGER :: iFr1,find_tropopause,troplayer

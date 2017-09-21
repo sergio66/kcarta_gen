@@ -4,6 +4,12 @@
 
 MODULE kbloat
 
+USE basic_common
+USE spline_and_sort
+USE rad_misc
+USE rad_main
+USE s_writefile
+
 IMPLICIT NONE
 
 CONTAINS
@@ -29,7 +35,7 @@ CONTAINS
     REAL :: raaSum(kMaxPts,kProfLayer)
     REAL :: raaGas(kMaxPts,kProfLayer)
      
-    INTEGER :: iFreq,iL,MP2Lay
+    INTEGER :: iFreq,iL
     REAL :: rL
 
     IF (iIPMIX > kProfLayer) THEN
@@ -38,10 +44,10 @@ CONTAINS
     END IF
 
 ! find out which of the 100 layers is associated with this mixed path
-    iL=MP2Lay(iIpmix)
+    iL = MP2Lay(iIpmix)
      
 ! find the weight
-    rL=raaMix(iIpmix,iGas)
+    rL = raaMix(iIpmix,iGas)
      
 ! add on contribution of the iGas th gas to the iIpmix th row of raaSum
     DO iFreq=1,kMaxPts
@@ -690,7 +696,7 @@ CONTAINS
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
 
 ! local vars
-    INTEGER :: iIOUN1,iFileErr,i1,i2,iI,iJ,iNLTEChunks,iFloor
+    INTEGER :: iIOUN1,iFileErr,i1,i2,iI,iJ,iNLTEChunks
     REAL ::    r1,r2,r3
 
     iNLTEChunks = -1
@@ -826,7 +832,7 @@ CONTAINS
     INTEGER :: iTag,iType
 
 ! local vars
-    INTEGER :: iIOUN1,iI,iJump,ifloor,i10000
+    INTEGER :: iIOUN1,iI,iJump,i10000
     CHARACTER(80) :: caOut
     DOUBLE PRECISION :: daStart(kBoxCarUse),daEnd(kBoxCarUse)
     DOUBLE PRECISION :: daStartBox(kBoxCarUse),daEndBox(kBoxCarUse)
@@ -934,7 +940,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iIntOffset,iStart
-    INTEGER :: iInt,iDiv,iDp,iPath,iLay,DoOutputLayer,iIOUN,iLoop,iL
+    INTEGER :: iInt,iDp,iPath,iLay,iIOUN,iLoop,iL
     REAL :: raL2S(kMaxPts),raF(kMaxPts)
     CHARACTER(80) :: caOut
 
@@ -947,7 +953,7 @@ CONTAINS
     END IF
 
 ! thius certainly works for gas paths; might be wierd for mixed paths
-    iStart=iDiv(iaPath(1),kProfLayer)
+    iStart = iDiv(iaPath(1),kProfLayer)
 
 ! write spectra to unformatted file
 ! if iPrinter=1 then have to check for valid paths
@@ -1059,7 +1065,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iIntOffset,iaRadLayer(kProfLayer)
-    INTEGER :: iInt,iDiv,iDp,iPath,iLay,DoOutputLayer,iIOUN,iLoop,iL
+    INTEGER :: iInt,iDp,iPath,iLay,iIOUN,iLoop,iL
     REAL :: raL2S(kMaxPts),raF(kMaxPts)
     CHARACTER(80) :: caOut
 
@@ -1184,7 +1190,7 @@ CONTAINS
     REAL :: raSumLayEmission(kBloatPts),raSurfaceEmissionToSpace(kBloatPts)
     DOUBLE PRECISION :: daSumLayEmission(kBloatPts), &
     daSurfaceEmissionToSpace(kBloatPts)
-    REAL :: rDum1,rDum2,ttorad,rOmegaSun,rCO2
+    REAL :: rDum1,rDum2,rOmegaSun,rCO2
 ! to do the thermal,solar contribution
     REAL ::             raIntenBloat(kBloatPts)
     DOUBLE PRECISION :: daIntenBloat(kBloatPts)
@@ -1195,18 +1201,18 @@ CONTAINS
     REAL ::             raThermalBloat(kBloatPts),raSunReflBloat(kBloatPts)
     DOUBLE PRECISION :: daThermalBloat(kBloatPts),daSunReflBloat(kBloatPts)
     REAL ::             rThermalRefl,rCos,rPlanck,rMPTemp
-    DOUBLE PRECISION :: dThermalRefl,dCos,dPlanck,dMPTemp,dttorad
+    DOUBLE PRECISION :: dThermalRefl,dCos,dPlanck,dMPTemp
     REAL ::             raVT1(kMixFilRows),rXYZ
     DOUBLE PRECISION :: daVT1(kMixFilRows),dXYZ
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     DOUBLE PRECISION :: dEmission, dTrans
-    REAL :: raOutFrac(kProfLayer),raFreqBloat(kBloatPts),InterpTemp
+    REAL :: raOutFrac(kProfLayer),raFreqBloat(kBloatPts)
     INTEGER :: iIOUN
     REAL :: bt2rad,t2s
     INTEGER :: iFr1
 
-    INTEGER :: i1,i2,iFloor,iDownWard,iSTopNormalRadTransfer
+    INTEGER :: i1,i2,iDownWard,iSTopNormalRadTransfer
          
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
@@ -1214,9 +1220,9 @@ CONTAINS
     ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
     ! set down to 99,199, ... and so the FLOOR routine will not be too confused
         iDownWard = 1
-        i1=iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
-        i2=iaaRadLayer(iAtm,iNumLayer)-1
-        i2=iFloor(i2*1.0/kProfLayer)
+        i1 = iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
+        i2 = iaaRadLayer(iAtm,iNumLayer)-1
+        i2 = iFloor(i2*1.0/kProfLayer)
         IF (rTSpace > 5.0) THEN
             write(kStdErr,*) 'you want satellite to be downward looking'
             write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
@@ -1229,9 +1235,9 @@ CONTAINS
     ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
     ! set down to 99,199, ... and so the FLOOR routine will not be too confused
         iDownWard = -1
-        i1=iaaRadLayer(iAtm,1)-1
-        i1=iFloor(i1*1.0/(1.0*kProfLayer))
-        i2=iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
+        i1 = iaaRadLayer(iAtm,1)-1
+        i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+        i2 = iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
         write(kStdErr,*) 'Huh ? NLTE for UPLOOK instrument?????'
         CALL DoStop
     END IF
@@ -1329,28 +1335,28 @@ CONTAINS
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
+    DO iFr = 1,kMixFilRows
         raVT1(iFr) = raVTemp(iFr)
         daVT1(iFr) = dble(raVTemp(iFr))
     END DO
 ! if the bottommost layer is fractional, interpolate!!!!!!
-    iL=iaRadLayer(1)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
-    daVT1(iL)=dble(raVT1(iL))
+    iL = iaRadLayer(1)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    daVT1(iL) = dble(raVT1(iL))
     write(kStdWarn,*) 'bottom temp : orig, interp',raVTemp(iL),raVT1(iL)
 ! if the topmost layer is fractional, interpolate!!!!!!
 ! this is hardly going to affect thermal/solar contributions (using this temp
 ! instead of temp of full layer at 100 km height!!!!!!
     iL=iaRadLayer(iNumLayer)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
-    daVT1(iL)=dble(raVT1(iL))
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    daVT1(iL) = dble(raVT1(iL))
     write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
 ! find the highest layer that we need to output radiances for
-    iHigh=-1
-    DO iLay=1,iNp
+    iHigh = -1
+    DO iLay = 1,iNp
         IF (iaOp(iLay) > iHigh) THEN
-            iHigh=iaOp(iLay)
+            iHigh = iaOp(iLay)
         END IF
     END DO
     write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
@@ -1359,11 +1365,11 @@ CONTAINS
 
 ! note while computing downward solar/ thermal radiation, have to be careful
 ! for the BOTTOMMOST layer!!!!!!!!!!!
-    DO iLay=1,1
+    DO iLay = 1,1
         iL   = iaRadLayer(iLay)
         rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
         dCos = DBLE(rCos)
-        DO iFr=1,kBloatPts
+        DO iFr = 1,kBloatPts
             dXYZ = daaSumNLTEOptDepthBloat(iFr,iL)*dble(rFracBot)/dCos
             daaLayTrans(iFr,iLay) = dexp(-dXYZ)
             daaEmission(iFr,iLay) = 0.0d0
@@ -1661,7 +1667,7 @@ CONTAINS
 ! local variables
     INTEGER :: iFr,iL,iIOUN
     DOUBLE PRECISION :: dEmission,dTrans,rMu,daInten0(kBloatPts)
-    REAL :: raIntenBloat(kBloatPts),ttorad
+    REAL :: raIntenBloat(kBloatPts)
     CHARACTER(80) :: caOutName
 
     caOutName = 'DumDum'
@@ -1698,7 +1704,6 @@ CONTAINS
             dble(ttorad(raFreqBloat(iFr),raUpperTemp(iL))*1.0d0)* &
             (1.0d0 - dTrans)
             daIntenBloat(iFr) = dEmission + daIntenBloat(iFr)*dTrans
-
             raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
         END DO
 

@@ -4,6 +4,8 @@
 
 MODULE n_pth_mix
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS
@@ -918,67 +920,6 @@ CONTAINS
 
     RETURN
     end FUNCTION SubString
-!************************************************************************
-! this subroutine reads the profile files (for the references)
-! for either the lower or the upper atm
-! it flags an error if kProfLayers layers are not read in
-! ProX === A=amount,T=temperature,P=pressure,PP=partial pressure
-    SUBROUTINE ReadRefProf(caFname,iNlayIn,raProA,raProT, &
-    raProP,raProPP,iErrOut)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! caFName   = name of file that has the profile
-! iNlay     = number of layers that are read in
-! raProA/T/P/PP = profile amout, temperature,pressure,partial pressure
-! iErrOut   = error count (usually associated with file I/O)
-    CHARACTER(80) :: caFname
-    INTEGER :: iNlayIn,iErrOut
-    REAL :: raProA(*),raProT(*)
-    REAL :: raProP(*),raProPP(*)
-
-! local variables
-    INTEGER :: iErr,iJ,iNlay,iIOUN
-    CHARACTER(100) :: caLine
-
-    iIOUN = kProfileUnit
-
-    OPEN(UNIT=iIOUN,FILE=caFname,STATUS='OLD',FORM='FORMATTED', &
-    IOSTAT=iErr)
-    IF (iErr /= 0) THEN
-        WRITE(kStdErr,1080) iErr, caFname
-        1080 FORMAT('ERROR! number ',I5,' opening profile file:',/,A82)
-        CALL DoSTOP
-    ENDIF
-    kProfileUnitOpen=1
-           
-!      Read the file (skip comment lines)
-    iNlay=0
-    20 READ(iIOUN,5020,END=199) caLine
-    5020 FORMAT(A100)
-    IF (caLine(1:1) /= '!') THEN
-        iNlay=iNlay+1
-        READ(caLine,*) iJ,raProP(iNlay),raProPP(iNlay), &
-        raProT(iNlay),raProA(iNlay)
-    ENDIF
-    GOTO 20
-!      Close the file
-    199 CLOSE(iIOUN)
-    kProfileUnitOpen=-1
-
-! check to see that ALL layers have been read in (could be greater than 100)
-    IF (iNlay /= iNlayIN) THEN
-        iErrOUt=1
-        WRITE(kStdErr,500) caFName,iNLay,iNLayIN
-        500 FORMAT ('Profile File',/,A82,/,' has ',I4,' layers (need ',I4,')')
-        CALL DoSTOP
-    END IF
-
-    RETURN
-    end SUBROUTINE ReadRefProf
-
 !************************************************************************
     SUBROUTINE rightpad130(caName)
 

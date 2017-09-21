@@ -4,6 +4,8 @@
 
 MODULE n_output
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS

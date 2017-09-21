@@ -8,6 +8,11 @@
 
 MODULE klineshapes
 
+USE basic_common
+USE s_misc
+USE kcoeff_basic
+USE kcoeffSPL
+
 IMPLICIT NONE
 
 CONTAINS

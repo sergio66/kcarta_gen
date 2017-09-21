@@ -282,7 +282,7 @@ c      iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
 
       IF (iLineMix .EQ. 1) THEN    !this does cousin
         dT = dLTE
-        CALL Cousin(daChi,daFreq,dLineShift,dBroad,dT,dP,dPP,1,iN)
+        CALL Cousin(daChi,daHighFreqWavenumbers,dLineShift,dBroad,dT,dP,dPP,1,iN)
         DO iFr = 1,iN
           daLineshape(iFr) = daLineshape(iFr) * daChi(iFr)
         END DO
@@ -302,7 +302,7 @@ c	call dostop
 ccc        tau2 = tau2_birn(dP,dPP)
 ccc        CALL birnbaum(daChi,daFreq,dLineShift,dBroad,dT,tau2,iN)
 c	print *,'doing birnbaum_interp ',dJL,dJU,iISO,daFreq(1)	
-        CALL birnbaum_interp(daChi,daFreq,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
+        CALL birnbaum_interp(daChi,daHighFreqWavenumbers,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
 	
         dY = daYmix(iLine)*dP
         DO iFr = 1,iN
@@ -340,7 +340,7 @@ c input/output parameters
 c local variables
       INTEGER iFileStartFr  !!its ok to keep this as integer
       INTEGER iIOUN,iERR,iChi,iFr,iChunk
-      CHARACTER*80 fname
+      CHARACTER*120 fname
       DOUBLE PRECISION daF(kMaxPts),daChi(kMaxPts)
 
       iChi = -1

@@ -4,6 +4,8 @@
 
 MODULE rad_angles
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS
@@ -335,7 +337,7 @@ CONTAINS
     REAL :: raLayHgt(kProfLayer),raSunAngles(kProfLayer)
     INTEGER :: iAtm,iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
 
-    REAL :: salt,saconv_sun,rSunHeight
+    REAL :: salt,rSunHeight
     INTEGER :: iI,iX,iMin,iMax,iaRadLayer(kProfLayer)
 
     rSunHeight = 150.0e9  !! in km
@@ -424,7 +426,6 @@ CONTAINS
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iAtm
     REAL :: raNumberDensity(kProfLayer)
 
-    REAL :: vaconv,vaconv_Snell,saconv_sun
     REAL :: raLayAnglesSnell(kProfLayer),raLayAnglesNoSnell(kProfLayer)
     INTEGER :: iI,iaRadLayer(kProfLayer),iMin,iMax,iX,iDefault,iUseSnell
 
@@ -1025,7 +1026,6 @@ CONTAINS
 
 ! local vars
     INTEGER :: iI
-    REAL :: fastExpint
 
     DO iI = 1,kMaxPts
         IF (raX(iI) < 0.0) THEN
@@ -1135,7 +1135,7 @@ CONTAINS
 
 ! local vars
     INTEGER :: iI,i,j,iWhich
-    REAL :: fastExpint,raaPout(5,6)
+    REAL :: raaPout(5,6)
 
 ! this is for x > 0.00 and x <= 0.10
     DATA ((raaPout(i,j),j=1,6),i=1,1)/ &
@@ -1220,7 +1220,7 @@ CONTAINS
 
 ! local vars
     INTEGER :: iI,i,j,iWhich,iaMax(5),iCnt
-    REAL :: fastExpint,raaPout(5,6)
+    REAL :: raaPout(5,6)
 
     DATA (iaMax(i),i=1,5) /3, 6, 6, 3, 3/
 
@@ -1310,7 +1310,7 @@ CONTAINS
 
 ! local vars
     INTEGER :: iI,i,j,iWhich,iaMax(5),iCnt
-    REAL :: fastExpint,raaPout(5,6)
+    REAL :: raaPout(5,6)
 
     DATA (iaMax(i),i=1,5) /3, 6, 6, 3, 3/
 

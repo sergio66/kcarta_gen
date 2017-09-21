@@ -4,12 +4,15 @@
 
 MODULE rad_main
 
+USE basic_common
+USE spline_and_sort
 use rad_diff
 use rad_quad
 use rad_misc
 use rad_flux
 use rad_limb
 use rad_angles
+use kcoeff_basic  ! just for interptemp ugh
 
 IMPLICIT NONE
 
@@ -987,7 +990,7 @@ CONTAINS
     INTEGER :: iNLTEStart,iSTopNormalRadTransfer,iUpper
              
     REAL :: raOutFrac(kProfLayer),r0
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN
     REAL :: bt2rad,t2s
     INTEGER :: iFr1
@@ -1470,7 +1473,7 @@ CONTAINS
     INTEGER :: iNLTEStart,iSTopNormalRadTransfer,iUpper
              
     REAL :: raOutFrac(kProfLayer),r0
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN
     REAL :: bt2rad,t2s
     INTEGER :: iFr1,find_tropopause,troplayer
@@ -1573,13 +1576,13 @@ CONTAINS
     END DO
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
-    raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
     write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL)
 ! if the topmost layer is fractional, interpolate!!!!!!
 ! this is hardly going to affect thermal/solar contributions (using this temp
 ! instead of temp of full layer at 100 km height!!!!!!
     iL = iaRadLayer(iNumLayer)
-    raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
 !      DO iFr = 1,100
@@ -1959,7 +1962,7 @@ CONTAINS
     REAL :: rSunAngle,rSunTemp,raSurface(kMaxPts),raSunRefl(kMaxPts)
 
     INTEGER :: iDoSolar,MP2Lay
-    REAL :: rCos,raInten2(kMaxPts),InterpTemp
+    REAL :: rCos,raInten2(kMaxPts)
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
     INTEGER :: iIOUN,iI
@@ -2068,11 +2071,11 @@ CONTAINS
     END DO
 ! if the bottom layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(iNumLayer)
-    raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
     write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL)
 ! if the top layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
-    raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
     1234 FORMAT(I6,' ',F12.5,' ',E12.5)
@@ -2217,525 +2220,6 @@ CONTAINS
     end SUBROUTINE rad_trans_SAT_LOOK_UP
 
 !************************************************************************
-! this subroutine checks to see how many radiances are to be output at this
-! pressure layer
-    SUBROUTINE DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp, &
-    iOutNum)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! iLay       = which of the radiating layers in atmosphere we are processing
-! iNp        = number of layers to be output for current atmosphere
-! iaOp       = list of layers to be output for current atmosphere
-! raaOp      = list of fractions used for output for current atmosphere
-! iOutNum    = of all options found in *OUTPUT, this pertains to current atmos
-! raOutFrac  = list of fractions used if this layer has radiances to be output
-! iDp        = number of fractional radiances to output
-    REAL :: raOutFrac(kProfLayer),raaOp(kMaxPrint,kProfLayer)
-    INTEGER :: iNp,iaOp(kPathsOut),iDp,iOutNum,iLay
-
-! local variables
-    INTEGER :: iDpC
-
-    iDp=-1                   !assume nothing to be output
-
-    IF (iNp < 0) THEN
-    ! easy ! print the radiance at the end of this layer
-        iDp=1
-        raOutFrac(iDp)=1.0
-    END IF
-
-    IF (iNp > 0) THEN
-        iDp=0
-    ! actually have to go thru list to see if this layer is to be output
-        iDpC=1
-        101 CONTINUE
-        IF (iaOp(iDpC) == iLay) THEN
-            iDp = iDp+1
-            raOutFrac(iDp) = raaOp(iOutNum,iDpc)
-        END IF
-        IF (iDpc < iNp) THEN
-            iDpc = iDpc+1
-            GO TO 101
-        END IF
-        IF (iDp == 0) THEN   !to make things oki doki, set no output to -1
-            iDp = -1
-        END IF
-    END IF
-
-    RETURN
-    end SUBROUTINE DoOutPutRadiance
-
-!************************************************************************
-! this subroutine does the radiantive transfer between the start of this
-! layer and the pressure required
-! note : remember raaOp is the list of fractions with respect to FULL layers
-! also note all temperature interpolations are done wrt ORIG temps raVTemp
-    SUBROUTINE RadianceInterPolate(iDir,rFrac,raFreq,raVTemp,rCos, &
-    iLay,iaRadLayer,raaAbs,raInten,raInten2,raSun,iSun, &
-    iNumLayer,rFracTop,rFracBot,iProfileLayers,raPressLevels, &
-    iNLTEStart,raaPlanckCoeff)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! iSun     = for uplooking instr, should we include sun in FOV?
-! raSun    = for uplooking instr, should we include sun in FOV?
-! raFreq  = wavenumbers
-! iLay     = which layer in the list
-! iaRadLayer = list of layers in atmosphere
-! iDir     = direction of radiation travel (+1=downward look,-1=upward look)
-! rFrac    = fraction of layer to use
-! raVTemp  = mixed vertical temps
-! rCos     = cos(satellite angle)
-! raInten  = radiation intensity at START of current layer (ie from end of
-!            previous layer)
-! raInten2 = interpolated radiation intensity at pressure level specified
-! iNumLayer, rFractop signal a warning as the *WEIGHT already assigns a
-!            fractional weight here
-    INTEGER :: iDir,iLay,iaRadLayer(KProfLayer),iSun
-    INTEGER :: iNumLayer,iProfileLayers
-    REAL :: rFrac,raVTemp(kMixFilRows),raFreq(kMaxPts),rCos
-    REAL :: raInten(kMaxPts),raInten2(kMaxPts),raSun(kMaxPts)
-    REAL :: raaAbs(kMaxPts,kMixFilRows),rFracTop,rFracBot
-    REAL :: raPressLevels(kProfLayer+1)
-    INTEGER :: iNLTEStart
-    REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
-
-    IF (iDir < 0) THEN            !radiance going down to instr on gnd
-        CALL UpLookInstrInterp(raInten2,iDir,rFrac,raFreq,raVTemp,rCos, &
-        iLay,iaRadLayer,raaAbs,raInten,raSun,iSun, &
-        iNumLayer,rFracTop,rFracBot,iProfileLayers,raPressLevels)
-    ELSE                             !radiance going up to instr in space
-        CALL DownLookInstrInterp(raInten2,iDir,rFrac,raFreq,raVTemp,rCos, &
-        iLay,iaRadLayer,raaAbs,raInten,raSun,iSun, &
-        iNumLayer,rFracTop,rFracBot,iProfileLayers,raPressLevels, &
-        iNLTEStart,raaPlanckCoeff)
-    END IF
-
-    RETURN
-    end SUBROUTINE RadianceInterPolate
-
-!************************************************************************
-! this subroutine does the radiantive transfer between the start of this
-! layer and the pressure required
-! note : remember raaOp is the list of fractions with respect to FULL layers
-! also note all temperature interpolations are done wrt ORIG temps raVTemp
-    SUBROUTINE UpLookInstrInterp(raInten2, &
-    iDir,rFrac,raFreq,raVTemp,rCos, &
-    iLay,iaRadLayer,raaAbs,raInten,raSun,iSun, &
-    iNumLayer,rFracTop,rFracBot,iProfileLayers,raPressLevels)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! input parameters
-!   iSun     = for uplooking instr, should we include sun in FOV?
-!   raSun    = for uplooking instr, should we include sun in FOV?
-!   raFreq  = wavenumbers
-!   iLay     = which layer in the list
-!   iaRadLayer = list of layers in atmosphere
-!   iDir     = direction of radiation travel (+1=downward look,-1=upward look)
-!   rFrac    = fraction of layer to use
-!   raVTemp  = mixed vertical temps
-!   rCos     = cos(satellite angle)
-!   raInten  = radiation intensity at START of current layer (ie from end of
-!            previous layer)
-!   iNumLayer, rFractop signal a warning as the *WEIGHT already assigns a
-!            fractional weight here
-
-! output parameters
-!   raInten2 = interpolated radiation intensity at pressure level specified
-
-    INTEGER :: iDir,iLay,iaRadLayer(KProfLayer),iSun
-    INTEGER :: iNumLayer,iProfileLayers
-    REAL :: rFrac,raVTemp(kMixFilRows),raFreq(kMaxPts),rCos
-    REAL :: raInten(kMaxPts),raInten2(kMaxPts),raSun(kMaxPts)
-    REAL :: raaAbs(kMaxPts,kMixFilRows),rFracTop,rFracBot
-    REAL :: raPressLevels(kProfLayer+1)
-          
-    INTEGER :: iFr,iL
-    REAL :: rPlanck,rTrans,rEmis,ttorad,InterpTemp,rT,rFrac_k,rFrac_T
-     
-! iDir < 0  !radiance going down to instr on earth surface
-
-! n all layers except bottommost layer, rFrac_k == rFrac_T
-    rFrac_k=0.0            !use this much in k interpolation
-    rFrac_T=0.0            !use this much in T interpolation
-
-    iL = iaRadLayer(iLay)
-    IF ((iLay > 1) .AND. (iLay < iNumLayer)) THEN
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-    ELSE IF (iLay == 1) THEN !!!topmost layer
-    
-    !====================== presslev(i1+1)
-
-    ! --------------------- TopOfAtm
-    ! XXXXXXXXXXXXXXXXXXXXX                         fraction rFracTop of full layer
-    ! ---------------------  up look instr posn
-    ! /////////////////////
-    ! /////////////////////                        fraction rFrac of full layer
-    !====================== presslev(i1)
-        write(kStdWarn,*) 'recomputing fraction for top layer ...'
-        rFrac_k = rFracTop-rFrac
-    !!!!!!!see diagram above - thus if rFacTop = rFrac ie instrument is
-    !!!!!!!at surface, then we don't have to interpolate anything
-        rFrac_T=(rFrac+rFracTop)/2.0  !!sort of do an average
-        IF (rFrac/rFracTop > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracTop
-            write(kStdErr,*)'Cannot output radiance at such low'
-            write(kStdErr,*)'pressure (topmost layer)'
-            CALL DoStop
-        END IF
-    ELSE IF (iLay == iNumLayer) THEN !problem!!bottommost layer
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-        IF (rFrac/rFracBot > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracBot
-            write(kStdErr,*)'Cannot output radiance at such high'
-            write(kStdErr,*)'pressure (bottommost layer)'
-            CALL DoStop
-        END IF
-    ELSE
-        write(kStdErr,*)'Cannot output radiance at this layer; not'
-        write(kStdErr,*)'within atmosphere defined by user!!'
-        CALL DoSTOP
-    END IF
-
-    IF (rFrac_k < 100*delta) THEN
-        rFrac_k=0.00
-    END IF
-            
-    write(kStdWarn,*) 'need to interpolate ',rFrac_k,' for radiance'
-
-    IF (rFrac_k <= delta) THEN     !no need to interpolate
-        DO iFr=1,kMaxPts
-            raInten2(iFr) = raInten(iFr)
-        END DO
-    ELSE                           !interpolate
-        IF (iLay /= 1) THEN
-        ! op part of most layers
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,1,iL)
-        ELSE
-        ! ottom  part of top layer
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,-1,iL)
-        END IF
-        write(kStdWarn,*)'MixTemp, Interp Temp=',raVTemp(iL),rT
-        DO iFr=1,kMaxPts
-            rPlanck = ttorad(raFreq(iFr),rT)
-            rTrans=exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-            rEmis=(1.0-rTrans)*rPlanck
-            raInten2(iFr) = rEmis+raInten(iFr)*rTrans
-        END DO
-        IF (iSun >= 0) THEN
-            DO iFr=1,kMaxPts
-                rTrans=exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-                raInten2(iFr) = raInten2(iFr)+raSun(iFr)*rTrans
-            END DO
-        END IF
-    END IF
-
-    RETURN
-    end SUBROUTINE UpLookInstrInterp
-
-!************************************************************************
-! this subroutine does the radiative transfer between the start of this
-! layer and the pressure required
-! note : remember raaOp is the list of fractions with respect to FULL layers
-! also note all temperature interpolations are done wrt ORIG temps raVTemp
-    SUBROUTINE DownLookInstrInterp(raInten2, &
-    iDir,rFrac,raFreq,raVTemp,rCos, &
-    iLay,iaRadLayer,raaAbs,raInten,raSun,iSun, &
-    iNumLayer,rFracTop,rFracBot,iProfileLayers,raPressLevels, &
-    iNLTEStart,raaPlanckCoeff)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! input parameters
-!   raFreq  = wavenumbers
-!   iLay     = which layer in the list
-!   iaRadLayer = list of layers in atmosphere
-!   iDir     = direction of radiation travel (+1=downward look,-1=upward look)
-!   rFrac    = fraction of layer to use
-!   raVTemp  = mixed vertical temps
-!   rCos     = cos(satellite angle)
-!   raInten  = radiation intensity at START of current layer (ie from end of
-!            previous layer)
-!   iNumLayer, rFractop signal a warning as the *WEIGHT already assigns a
-!            fractional weight here
-! output parameters
-!   raInten2 = interpolated radiation intensity at pressure level specified
-
-    INTEGER :: iDir,iLay,iaRadLayer(KProfLayer),iSun
-    INTEGER :: iNumLayer,iProfileLayers
-    REAL :: rFrac,raVTemp(kMixFilRows),raFreq(kMaxPts),rCos
-    REAL :: raInten(kMaxPts),raInten2(kMaxPts),raSun(kMaxPts)
-    REAL :: raaAbs(kMaxPts,kMixFilRows),rFracTop,rFracBot
-    REAL :: raPressLevels(kProfLayer+1)
-    INTEGER :: iNLTEStart
-    REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
-
-    INTEGER :: iFr,iL
-    REAL :: rPlanck,rTrans,rEmis,ttorad,InterpTemp,rT,rFrac_k,rFrac_T
-
-! iDir > 0  !radiance going up to instr in space
-     
-! n all layers except bottommost layer, rFrac_k == rFrac_T
-    rFrac_k = 0.0            !use this much in k interpolation
-    rFrac_T = 0.0            !use this much in T interpolation
-
-    iL = iaRadLayer(iLay)
-
-    IF ((iLay > 1) .AND. (iLay < iNumLayer)) THEN
-    ! o problem; full layer in mixtable
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-    ELSE IF (iLay == 1) THEN !!!bottommost layer
-    
-    !====================== presslev(i1+1)
-    ! XXXXXXXXXXXXXXXXXXXXX                         fraction rFrac of full layer
-    ! ---------------------  down look instr posn
-    ! /////////////////////
-    ! /////////////////////                        fraction rFracBot of full layer
-    ! --------------------- surface
-    
-    
-    !====================== presslev(i1)
-        write(kStdWarn,*)'recomputing fraction for bottom layer ...'
-    ! ->> this is old
-    ! ->>        rFrac_k = rFracBot-rFrac
-    !!!!!!!see diagram above - thus if rFacTop = rFrac ie instrument is
-    !!!!!!!at surface, then we don't have to interpolate anything
-    ! ->>        rFrac_T = (rFrac+rFracBot)/2.0  !!sort of do an average
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-        IF (rFrac/rFracBot > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracBot
-            write(kStdErr,*)'Cannot output radiance at such high'
-            write(kStdErr,*)'pressure (bottommost layer)'
-            CALL DoStop
-        END IF
-    ELSE IF (iLay == iNumLayer) THEN !problem!!top most layer
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-        IF (rFrac/rFracTop > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracTop
-            write(kStdErr,*)'Cannot output radiance at such low'
-            write(kStdErr,*)'pressure (topmost layer)'
-            CALL DoStop
-        END IF
-    ELSE
-        write(kStdErr,*)'Cannot output radiance at this layer; not'
-        write(kStdErr,*)'within atmosphere defined by user!!'
-        CALL DoSTOP
-    END IF
-
-    IF (rFrac_k < 100*delta) THEN
-        rFrac_k = 0.00
-    END IF
-            
-    write(kStdWarn,*) 'need to interpolate ',rFrac_k,' for radiance'
-
-    IF (rFrac_k <= delta) THEN     !no need to interpolate
-        DO iFr=1,kMaxPts
-            raInten2(iFr) = raInten(iFr)
-        END DO
-    ELSE                           !interpolate
-        IF (iLay /= 1) THEN
-        ! ottom part of most layers
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,-1,iL)
-        ELSE
-        ! op part of bottom layer
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,1,iL)
-        END IF
-        write(kStdWarn,*)'MixTemp, Interp Temp=',raVTemp(iL),rT
-    ! note iNLTEStart = kProfLayer + 1, unless NLTE computations done!
-    ! so usually only the usual LTE computations are done!!
-        IF (iNLTEStart > kProfLayer) THEN    !!!normal, no emission stuff
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rT)
-                rTrans = exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-                rEmis  = (1.0-rTrans)*rPlanck
-                raInten2(iFr) = rEmis+raInten(iFr)*rTrans
-            END DO
-        ELSE IF (iNLTEStart <= kProfLayer) THEN
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rT)
-                rTrans=exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-                rEmis=(1.0-rTrans)*rPlanck*raaPlanckCoeff(iFr,iL)
-                raInten2(iFr) = rEmis+raInten(iFr)*rTrans
-            END DO
-        END IF
-    END IF
-
-    RETURN
-    end SUBROUTINE DownLookInstrInterp
-
-!************************************************************************
-! this function does a temperature interpolation on a fractional layer
-! this uses modified Scott Hannon's method of doing a quad fit to the layer,
-! layer above, layer below  of the form
-!     T = a (ln P(avg))^2 + b (ln P(avg)) + c
-    REAL FUNCTION InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac, &
-    iTopORBot,iL)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! raVTemp  = array containing the original 1.0 fraction temps
-! rFrac    = frac of layer that we need
-! iTopORBot= do we need top or bottom of layer (+1/-1)
-! iL       = which of the mixed paths
-
-! for a down looking instrument, we need bottom frac
-! for a   up looking instrument, we need top frac
-! for bottommost layer, we need top frac
-    REAL :: raPressLevels(kProfLayer+1)
-    REAL :: raVTemp(kMixFilRows),rFrac
-    INTEGER :: iTopORBot,iL,iProfileLayers
-
-    REAL :: rT,rP         !user spedfd pressure, temp calculated at this press
-    REAL :: rPavg         !given rP,rP1, need to compute rPavg
-    REAL :: rT0,rTm1,rTp1 !avg temps of 3 adjacent layers
-    REAL :: rP0,rPm1,rPp1 !avg pressures of 3 adjacent layers
-    REAL :: rA,rB,rC      !need to find eqn of quadratic
-    REAL :: rDp1,rDm1,rp1,rp1sqr,rm1,rm1sqr  !temporary variables
-    INTEGER :: i0,im1,ip1,iW
-    INTEGER :: iCeil,MP2Lay   !externally defined functions
-    INTEGER :: iLowest
-
-    iLowest = kProfLayer - iProfileLayers + 1
-
-    IF (abs(rFrac-1.00) <= delta) THEN
-        rT = raVTemp(iL)       !use the original temp .. no need to intrp
-    ! thse next three lines are to debug the function, for iTopBot = +1
-        rP = raPressLevels(MP2Lay(iL))
-        rPp1 = raPressLevels(MP2Lay(iL)+1)
-        rPavg=(rP-rPp1)/alog(rP/rPp1)
-
-    ELSE   !oh boy .. have to interp!!!!!!!!
-
-        iW = iCeil(iL*1.0/(kProfLayer*1.0))    !which set of mxd paths this is
-        i0=MP2Lay(iL) !lower pressure level .. rP is within this press layer
-        ip1 = i0+1      !upper pressure leve1 .. this is one press layer above
-        im1 = i0-1      !                     .. this is one press layer below
-
-    ! have to recompute what the user specified pressure was!!
-        IF (iTopORBot == 1) THEN          !top frac of layer
-        ! ressure specified by user
-            rP = raPressLevels(ip1)+rFrac*(raPressLevels(i0)-raPressLevels(ip1))
-        ELSE                                !bot frac of layer
-        ! ressure specified by user
-            rP = -rFrac*(raPressLevels(i0)-raPressLevels(ip1))+raPressLevels(i0)
-        END IF
-
-    ! compute the average pressure of the fractional layer
-        IF (iTopOrBot == 1) THEN
-            IF (abs(rP-raPressLevels(ip1)) >= delta) THEN
-                rPavg = (rP-raPressLevels(ip1))/alog(rP/raPressLevels(ip1))
-            ELSE
-                rPavg = rP
-            END IF
-        ELSE
-            IF (abs(rP-raPressLevels(i0)) >= delta) THEN
-                rPavg = (raPressLevels(i0)-rP)/alog(raPressLevels(i0)/rP)
-            ELSE
-                rPavg = rP
-            END IF
-        END IF
-
-        IF ((i0 <= (kProfLayer-1)) .AND. (i0 >= (iLowest+1)))  THEN
-        ! can safely look at layer i0, and layer above/below it
-        ! avg press of layer i0+1
-            rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/ &
-            alog(raPressLevels(ip1)/raPressLevels(ip1+1))
-        ! avg press of layer i0
-            rP0 = (raPressLevels(i0)-raPressLevels(ip1))/ &
-            alog(raPressLevels(i0)/raPressLevels(ip1))
-        ! avg press of layer i0-1
-            rPm1 = (raPressLevels(im1)-raPressLevels(i0))/ &
-            alog(raPressLevels(im1)/raPressLevels(i0))
-        ! temperatures of these levels from raVTemp
-            rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
-            rT0 = raVTemp(i0+(iW-1)*kProfLayer)
-            rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
-        ELSE IF (i0 == kProfLayer) THEN
-        ! first redefine i0,ip1,im1
-            i0 = kProfLayer-1
-            ip1 = i0+1    !upper pressure leve1 .. this is one press layer above
-            im1 = i0-1    !                     .. this is one press layer below
-        ! can now safely look at layer i0, and layer above/below it
-        ! avg press of layer i0+1
-            rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/ &
-            alog(raPressLevels(ip1)/raPressLevels(ip1+1))
-        ! avg press of layer i0
-            rP0 = (raPressLevels(i0)-raPressLevels(ip1))/ &
-            alog(raPressLevels(i0)/raPressLevels(ip1))
-        ! avg press of layer i0-1
-            rPm1 = (raPressLevels(im1)-raPressLevels(i0))/ &
-            alog(raPressLevels(im1)/raPressLevels(i0))
-        ! temperatures of these levels from raVTemp
-            rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
-            rT0 = raVTemp(i0+(iW-1)*kProfLayer)
-            rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
-                    
-        ELSE IF (i0 == iLowest) THEN
-        ! first redefine i0,ip1,im1
-            i0 = iLowest+1
-            ip1 = i0+1    !upper pressure leve1 .. this is one press layer above
-            im1 = i0-1    !                     .. this is one press layer below
-        ! can now safely look at layer i0, and layer above/below it
-        ! avg press of layer i0+1
-            rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/ &
-            alog(raPressLevels(ip1)/raPressLevels(ip1+1))
-        ! avg press of layer i0
-            rP0 = (raPressLevels(i0)-raPressLevels(ip1))/ &
-            alog(raPressLevels(i0)/raPressLevels(ip1))
-        ! avg press of layer i0-1
-            rPm1 = (raPressLevels(im1)-raPressLevels(i0))/ &
-            alog(raPressLevels(im1)/raPressLevels(i0))
-        ! temperatures of these levels from raVTemp
-            rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
-            rT0 = raVTemp(i0+(iW-1)*kProfLayer)
-            rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
-        END IF
-              
-    ! now compute the fit for rT(n)=ax(n)^2 + bx(n) + c where x(n)=alog(P(n))
-        rP0  = alog(rP0)
-        rPp1 = alog(rPp1)
-        rPm1 = alog(rPm1)
-    !        print *,rpp1,rp0,rPm1
-    !      print *,rTp1,rT0,rTm1
-              
-        rDp1 = rTp1-rT0
-        rDm1 = rTm1-rT0
-
-        rp1    = rPp1-rP0
-        rp1sqr = (rPp1-rP0)*(rPp1+rP0)
-        rm1    = rPm1-rP0
-        rm1sqr = (rPm1-rP0)*(rPm1+rP0)
-
-        rA = (rDm1-rDp1*rm1/rp1)/(rm1sqr-rp1sqr*rm1/rp1)
-        rB = rDp1/rp1-rA*(rp1sqr/rp1)
-        rC = rT0-rA*rP0*rP0-rB*rP0
-
-    ! finally compute rT
-        rT = rA*alog(rPavg)*alog(rPavg)+rB*alog(rPavg)+rC
-    END IF
-
-    InterpTemp = rT
-
-    RETURN
-    end FUNCTION InterpTemp
-!************************************************************************
 ! this does the CORRECT thermal and solar radiation calculation
 ! for downward looking satellite!! ie kDownward = 1
 
@@ -2844,7 +2328,7 @@ CONTAINS
     INTEGER :: iDoThermal,iDoSolar,MP2Lay
 
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN,iDownWard
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
@@ -2937,13 +2421,13 @@ CONTAINS
     END DO
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
-    raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
     write(kStdWarn,*) 'bot layer temp : orig, interp',raVTemp(iL),raVT1(iL)
 ! if the topmost layer is fractional, interpolate!!!!!!
 ! this is hardly going to affect thermal/solar contributions (using this temp
 ! instead of temp of full layer at 100 km height!!!!!!
     iL = iaRadLayer(iNumLayer)
-    raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
     iVary = +1
@@ -3331,7 +2815,7 @@ CONTAINS
     INTEGER :: iDoThermal,iDoSolar,MP2Lay
 
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN,iDownWard
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
@@ -3925,7 +3409,7 @@ CONTAINS
     INTEGER :: iDoThermal,iDoSolar,MP2Lay
 
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN,iDownWard
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
@@ -4568,7 +4052,7 @@ CONTAINS
     INTEGER :: iDoThermal,iDoSolar,MP2Lay
 
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN,iDownWard
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
@@ -5104,7 +4588,7 @@ CONTAINS
     REAL :: rSunAngle,rSunTemp,raSurface(kMaxPts),raSunRefl(kMaxPts)
 
     INTEGER :: iDoSolar,MP2Lay
-    REAL :: rCos,raInten2(kMaxPts),InterpTemp
+    REAL :: rCos,raInten2(kMaxPts)
     INTEGER :: iCloudLayerTop,iCloudLayerBot
     INTEGER :: iIOUN,iI
 

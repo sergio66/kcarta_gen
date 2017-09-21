@@ -6,8 +6,14 @@
 
 MODULE kcartamisc
 
+USE basic_common
 USE freqfile
 USE spline_and_sort
+USE n_main
+USE s_misc
+USE rad_misc
+USE rad_angles
+USE n_rad_jac_scat
 
 IMPLICIT NONE
 
@@ -63,111 +69,6 @@ CONTAINS
     isnan_double = isnan
     RETURN
     end FUNCTION isnan_double
-
-!************************************************************************
-! this subroutine finds the tropopause by looking for the first cold point
-! modelled on Scott Hannon's code tropopause_rtp.m which looks for the
-! layer within the 50-400 mb range which has the lowest temp
-    INTEGER FUNCTION find_tropopause(raTemp,raPress,iaRadLayer,iNumLayer)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! input params
-    REAL :: raTemp(kMixFilRows)         !! temperature structure
-    REAL :: raPress(kProfLayer+1) !! pressure levels
-    INTEGER :: iaRadLayer(kProfLayer)   !! which are the radiating layers
-    INTEGER :: iNumLayer
-
-! local vars
-    REAL :: raT(kMixFilRows),rX,rJunk
-    INTEGER :: iI,iL,i400mb,i50mb,iJL,iJ
-
-! if        iaRadLayer = 001..100, everything ok
-! but if eg iaRadLayer = 201..300, everything not ok with raPress
-    iI  = 1
-    iL  = iaRadLayer(iI)
-    iI  = iNumLayer
-    iJL = iaRadLayer(iI)
-    iL = max(iL,iJL)
-    iJ = 0
-    IF (iL > kProfLayer) THEN
-        iJ = 1
-        4 CONTINUE
-        IF ((iJ+1)*kProfLayer >= iL) THEN
-            GOTO 5
-        ELSE
-            iJ = iJ + 1
-            GOTO 4
-        END IF
-    END IF
-
-    5 CONTINUE
-    iJ = iJ*kProfLayer
-
-    DO iI = 1,kProfLayer
-        raT(iI) = 0.0
-    END DO
-
-    DO iI = 1,iNumLayer
-        iL = iaRadLayer(iI)
-        raT(iL) = raTemp(iL)   !!note storing into raT(iL) instead of raT(iI)
-    !        print *,iI,iL,raPress(iL),raT(iL)
-    END DO
-
-!! find i400mb
-    rJunk = 1.0e10
-    DO iI = 1,iNumLayer
-        iL = iaRadLayer(iI)
-        iJL = iL - iJ
-        rX = abs(400.0 - raPress(iJL))
-        IF (rX <= rJunk) THEN
-            i400mb = iL
-            rJunk = rX
-        END IF
-    END DO
-
-!! find i50mb
-    rJunk = 1.0e10
-    DO iI = 1,iNumLayer
-        iL = iaRadLayer(iI)
-        iJL = iL - iJ
-        rX = abs(50.0 - raPress(iJL))
-        IF (rX <= rJunk) THEN
-            i50mb = iL
-            rJunk = rX
-        END IF
-    END DO
-          
-!! now look for bottom layer within [i400mb,i50mb] with lowest cold point
-    iL = i50mb+1
-    rJunk = raT(iL)
-    DO iI = i50mb,i400mb,-1
-        IF (raT(iI) <= rJunk) THEN
-            rJunk = raT(iI)
-            iL = iI
-        END IF
-    END DO
-
-    write(kStdWarn,*) ' '
-    write(kStdWarn,*) 'Look for tropopause within AIRS preslays',i50mb,i400mb
-    write(kStdWarn,*) 'Found it at AIRS presslayer ',iL
-!      find_tropopause = iL
-
-!! may need to map this back to iaRadLayer
-    DO iI = 1,iNumLayer
-        IF (iaRadLayer(iI) == iL) THEN
-            GOTO 10
-        END IF
-    END DO
-
-    10 CONTINUE
-    write(kStdWarn,*) 'this is in atmosphere layer (iaRadLayer) ',iI
-    find_tropopause = iI
-          
-    RETURN
-    end FUNCTION find_tropopause
 
 !************************************************************************
 ! this subroutine sets the kCompressed database uncompression type
@@ -325,7 +226,7 @@ CONTAINS
     CHARACTER(80) :: caFName
     REAL :: rMeanT,rMeanA,rMeanP,rMeanPP,rDirectPPMV0,rDirectPPMV1
     REAL :: rCO2ppmv
-    INTEGER :: iI,iJ,iGasID,iError,iIPMIX,strfind
+    INTEGER :: iI,iJ,iGasID,iError,iIPMIX
 
 ! find the weight
     iIPMIX = 1
@@ -1338,263 +1239,6 @@ CONTAINS
     end SUBROUTINE TheEnd
 
 !***********************************************************************
-! this subroutine closes all files in case of an emergency stop
-! assumes the message ends with '$'
-    SUBROUTINE DoSTOPMesg(caMessage)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-    INTEGER :: iI,iFound
-    CHARACTER     caMessage*(*)
-    CHARACTER(120) :: caMessage2
-
-    DO iI = 1,80
-        caMessage2(iI:iI) = ' '
-    END DO
-
-    iI = 80
-    iI = len(caMessage)
-    IF (iI > 120) THEN
-        write(kStdErr,*) 'lengthh of error message is over 120 characters!'
-        write(kStdErr,*) caMessage
-        CALL DoStop
-    END IF
-
-    5 CONTINUE
-    IF ((caMessage(iI:iI) /= '$') .AND. (iI > 1)) THEN
-        iI = iI - 1
-        GOTO 5
-    END IF
-     
-    IF (iI <= 1) THEN
-        write(kStdErr,*) 'caMessage needs "$" to end '
-        CALL DoStop
-    END IF
-
-!      write(kStdErr,*) 'length of caMessage = ',iI
-    caMessage2(1:iI-1) = caMessage(1:iI-1)
-
-    write(kStdErr,10) caMessage2
-    CALL DoStop
-
-    10 FORMAT(A120)
-
-    RETURN
-    end SUBROUTINE DoSTOPMesg
-
-!***********************************************************************
-! this subroutine closes all files in case of an emergency stop
-    SUBROUTINE DoSTOP
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-    write(kStdWarn,*)'Fatal Error found : closing all units ..'
-
-    IF ((kStdDriverOpen == 1) .AND. (kStdDriver /= 5)) THEN
-        write(kStdWarn,*)'closing driver file'
-        CLOSE(UNIT = kStdDriver)          !close driver file
-    END IF
-
-    IF ((kStdkCartaOpen == 1) .AND. (kStdkCarta /= 6)) THEN
-        write(kStdWarn,*)'closing binary output file'
-        CLOSE(UNIT = kStdkCarta)        !close file where kCARTA binary goes to
-    END IF
-
-    IF (kCompUnitOpen == 1) THEN
-        write(kStdWarn,*)'closing kcomp/xsec file'
-        CLOSE(UNIT = kCompUnit)         !close kCompressed file/xsec data file
-    END IF
-
-    IF (kJacobian > 0) THEN
-        IF ((kStdJacobOpen == 1)  .AND. (kStdJacob /= 6)) THEN
-            write(kStdWarn,*)'closing jacobian binary file'
-            CLOSE(UNIT = kStdJacob)       !close file where Jacob binary goes to
-        END IF
-        IF (kStdJacob2Open == 1) THEN
-            write(kStdWarn,*)'closing jacobian2 (column) binary file'
-            CLOSE(UNIT = kStdJacob2)       !close file where Jacob binary goes to
-        END IF
-    END IF
-
-    IF (kFlux > 0) THEN
-        write(kStdWarn,*)'closing flux binary file'
-        CLOSE(UNIT = kStdFlux)         !close file where flux binary goes to
-    END IF
-
-    IF (kStdPlanckOpen > 0) THEN
-        write(kStdWarn,*)'closing planck binary file'
-        CLOSE(UNIT = kStdPlanck)        !close file where planck binary goes to
-    END IF
-
-    IF (kProfileUnitOpen == 1) THEN
-        write(kStdWarn,*)'closing profile file '
-        CLOSE(UNIT = kProfileUnit)       !close profile file
-    END IF
-
-    IF (kTempUnitOpen == 1) THEN
-        write(kStdWarn,*)'closing temporary param file'
-        CLOSE(UNIT = kTempUnit)          !close temporary file eg comp.param
-    END IF
-
-    IF (kBloatPlanckOpen == 1) THEN
-        write(kStdWarn,*)'closing bloated planck binary file'
-        CLOSE(UNIT = kBloatNLTEPlanck)      !close file
-        kBloatOutOpen = -1
-    END IF
-
-    IF (kBloatOutOpen == 1) THEN
-        write(kStdWarn,*)'closing bloated binary file'
-        CLOSE(UNIT = kBloatNLTEOut)      !close file
-        kBloatOutOpen = -1
-    END IF
-
-    IF (kStdPlanckUAOpen == 1) THEN
-        write(kStdWarn,*)'closing UA planck binary file'
-        CLOSE(UNIT = kStdPlanckUA)      !close file
-        kStdPlanckUAOpen = -1
-    END IF
-
-    IF (kNLTEOutUAOpen == 1) THEN
-        write(kStdWarn,*)'closing UA binary file'
-        CLOSE(UNIT = kNLTEOutUA)      !close file
-        kNLTEOutUAOpen = -1
-    END IF
-      
-    IF (kBloatPlanckUAOpen == 1) THEN
-        write(kStdWarn,*)'closing bloat UA planck binary file'
-        CLOSE(UNIT = kBloatPlanckUAOpen)      !close file
-        kBloatPlanckUAOpen = -1
-    END IF
-
-    IF (kBloatNLTEOutUAOpen == 1) THEN
-        write(kStdWarn,*)'closing bloat UA binary file'
-        CLOSE(UNIT = kBloatNLTEOutUAOpen)      !close file
-        kBloatNLTEOutUAOpen = -1
-    END IF
-
-    write(kStdErr,*) 'bad luck ... emergency exit!'
-    write(kStdWarn,*) 'bad luck ... emergency exit!'
-
-    CLOSE(UNIT = kStdErr)             !close error log
-    CLOSE(UNIT = kStdWarn)            !close warning log
-     
-    call exit(1)                    !sad exit so return +1
-
-    STOP
-
-    RETURN
-    end SUBROUTINE DoSTOP
-
-!************************************************************************
-! this function, depending on iNp, calls a binary or a sequential search
-! to find iLay in iaOp
-    INTEGER FUNCTION DoOutputLayer(iLay,iNp,iaOp)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! iLay  = layer number to be looked for
-! iaOp  = array containing list of layers
-! iNp   = search indices 1..iNp of iaOp, to look for iLay
-    INTEGER :: iLay,iNp,iaOp(*)
-
-! integer functions that do the search
-    INTEGER :: BinarySearch,SequentialSearch
-
-    IF (iNp < 16) THEN
-        DoOutputLayer = SequentialSearch(iLay,iNp,iaOp)
-    ELSE
-        DoOutputLayer = BinarySearch(iLay,iNp,iaOp)
-    END IF
-
-    RETURN
-    end FUNCTION DoOutputLayer
-
-!************************************************************************
-! this function checks to see if current GasID should have its d/dq saved
-! if it does, the function result is WHICH gas it is in the *JACOBN wishlist
-! else the function result = -1
-    INTEGER FUNCTION DoGasJacob(iGasID,iaJacob,iJacob)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! iGasID   = current gasID
-! iaJacob  = list of GasID's whose d/dq we want to output
-! iJacob   = number of GasID's whose d/dq we want to output
-    INTEGER :: iGasID,iJacob,iaJacob(kMaxDQ)
-
-    INTEGER :: iI,iFound,iAns
-
-    iFound = -1
-    iAns = -1
-    iI = 1
-
-    15 CONTINUE
-    IF ((iFound < 0) .AND. (iI <= iJacob)) THEN
-    ! check to see if iGasID is in iaJacob
-        IF (iGasID == iaJacob(iI)) THEN
-            iFound = 1
-            iAns = iI
-        ELSE
-            iI = iI+1
-            GO TO 15
-        END IF
-    END IF
-                
-    DoGasJacob = iAns
-
-    RETURN
-    end FUNCTION DoGasJacob
-
-!************************************************************************
-! this function checks to which posn GasID is in, in iaGases
-! it mimics the "ismember" function in Matlab
-    INTEGER FUNCTION WhichGasPosn(iGasID,iaGases,iNumGases)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! iGasID   = current gasID
-! iaGases  = list of GasID's that are being used
-! iJacob   = number of GasID's that are being used
-    INTEGER :: iGasID,iNumGases,iaGases(kMaxGas)
-
-    INTEGER :: iI,iFound,iAns
-
-    iFound = -1
-    iAns = -1
-    iI = 1
-
-    15 CONTINUE
-    IF ((iFound < 0) .AND. (iI <= iNumGases)) THEN
-    ! check to see if iGasID is in iaGases
-        IF (iGasID == iaGases(iI)) THEN
-            iFound = 1
-            iAns = iI
-        ELSE
-            iI = iI+1
-            GO TO 15
-        END IF
-    END IF
-                
-    IF ((iGasID == 101) .OR. (iGasID == 102)) THEN
-        iAns  =  1
-    END IF
-
-    WhichGasPosn = iAns
-
-    RETURN
-    end FUNCTION WhichGasPosn
-
-!************************************************************************
 ! this subroutine initializes all the rows of the
 ! (REAL) array of absorption coeffs
     SUBROUTINE InitializeReal(raaAb)
@@ -2395,7 +2039,7 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore)
 
 ! local variables
-    INTEGER :: iI,iJ,iL,MP2Lay,iBad
+    INTEGER :: iI,iJ,iL,iBad
     REAL :: rT,rW
 
     iBad = 0
@@ -2597,213 +2241,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE databasestuff_upper
-
-!************************************************************************
-! this subroutine will take in 100 AIRS layering stuff and interpolate to
-! the new arbitrary layering
-! WARNING : this assumes that the user has not mucked up KLAYERS layering
-!           such that highest Z pressure (lowest pressure) is NOT TOA
-!           ie still need lowest pressure (highest z) = 0.005 mb!!!!!
-! do the lower atm (usual -1) or upper atm (NLTE +1)
-
-! kcoeffSPL, kcoeffSPLJAC divide out gas amount from the optical depths,
-! so at arbitrary pressure layering, it deals with abs coeffs
-! so we do not need raRamt
-! but we do need the interpolated temp and partial pressures
-
-! see subr AddOnAFGLProfile_arblevels in n_pth_mix.f
-    SUBROUTINE MakeRefProf(raRAmt,raRTemp,raRPress,raRPartPress, &
-    raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
-    raaPress,iGas,iGasID,iNumLayers, &
-    raPressLevels,raThickness,iSplineType,iLowerOrUpper,iError)
-
-    IMPLICIT NONE
-
-    INTEGER :: iPLEV
-          
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/KCARTA_databaseparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
-          
-!  kCARTA levels include P(1)=0.005, P(101) = 1100, P(38)=300
-!  P(x)=(ax^2+bx+c)7/2 formula, with the above 3 b.c.
-! The above equation and 3 data points define the 101 AIRS levels, which
-! are in airslevelsparam.f90
-
-! input
-! do the lower atm (usual -1) or upper atm (NLTE +1)
-    INTEGER :: iLowerOrUpper
-! these are the individual reference profiles, at kMaxLayer layers
-    REAL :: raR100Amt(kMaxLayer),raR100Temp(kMaxLayer)
-    REAL :: raR100PartPress(kMaxLayer),raR100Press(kMaxLayer)
-! these are the arbitrary profiles stored in matrices
-    REAL :: raaPress(kProfLayer,kGasStore)
-    INTEGER :: iError,iGas,iGasID,iNumLayers,iSplineType
-! these are the kLAYERS pressure levels, layer thick for the current profile
-    REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
-!  output
-! these are the individual reference profiles, at kProfLayer layers
-    REAL :: raRAmt(kProfLayer),raRTemp(kProfLayer)
-    REAL :: raRPartPress(kProfLayer),raRPress(kProfLayer)
-    REAL :: pMax100,pMin100
-
-! local variables
-    INTEGER :: iI,iJ,iL,iG,iZbndFinal,iNot,iX,iY
-    REAL :: raWorkP(kMaxLayer),raXgivenP(kMaxLayer), &
-    raYgivenP(kMaxLayer),raY2P(kMaxLayer)
-    REAL :: raWork(kMaxTemp),rYP1,rYPN,rXPT,r,r0,r2,rPPWgt
-    REAL :: raSortPressLevels(kMaxLayer+1)
-    REAL :: raSortPressHeights(kMaxLayer+1)
-    REAL :: raPPX2(kProfLayer),raQX2(kProfLayer)
-
-    REAL :: raDataBaseThickness(kMaxLayer)
-!      REAL DatabaseHeight(kMaxLayer)
-!      REAL DATABASELEVHEIGHTS(kMaxLayer+1)
-!      REAL DATABASELEV(kMaxLayer+1)
-
-    INTEGER :: iaBnd(kProfLayer+1,2)
-    REAL ::    raBndFrac(kProfLayer+1,2)
-    REAL :: rPP,rWgt,rMR,rFrac,rMolecules,rHeight,rQtot
-
-! pressure variables!!!!! ----------------->
-! raaPress in atm
-
-!!!this tells how many layers are NOT dumped out by kLAYERS, iNot is reset below
-    iNot = kProfLayer-iNumLayers
-
-! simply put in the pressures
-    DO iI = 1,iNot
-    ! hese are "junk"
-        raRPress(iI) = raaPress(iNot+1,iGas)
-    END DO
-    DO iI = iNot+1,kProfLayer
-        raRPress(iI) = raaPress(iI,iGas)
-    END DO
-
-! now just happily spline everything on!!!!!! for the temps
-!     Assign values for interpolation
-!     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
-    rYP1 = 1.0E+16
-    rYPN = 1.0E+16
-    DO iI = 1,kMaxLayer
-        raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
-        raXgivenP(iI) = raR100Press(kMaxLayer-iI+1)
-        raYgivenP(iI) = raR100Temp(kMaxLayer-iI+1)
-    END DO
-    CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
-    DO iI = 1,iNot
-        raRTemp(iI) = +999.999
-    END DO
-    DO iI = iNot+1,kProfLayer
-        rxpt = log(raaPress(iI,iGas))
-        rxpt = raaPress(iI,iGas)
-        IF (iSplineType == +1) THEN
-            CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
-        ELSE
-            CALL rlinear1(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
-        END IF
-        raRTemp(iI) = r
-    END DO
-          
-    DO iL = 1,kProfLayer
-        raRAmt(iL) = 0.0
-        raRPartPress(iL) = 0.0
-    END DO
-          
-!!!this tells how many layers are NOT dumped out by kLAYERS
-    iZbndFinal = kProfLayer-iNumLayers
-
-    345 FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))
-!! look at the LAYERS and figure out which PLEV_KCARTADATABASE_AIRS bracket them
-    iNot = (kProfLayer) - (iNumLayers)+1
-    DO iL = iNot,kProfLayer
-    !! find plev_airs which is just ABOVE the top of current layer
-        iG = kProfLayer+1
-        10 CONTINUE
-        IF ((PLEV_KCARTADATABASE_AIRS(iG) <= raPressLevels(iL+1)) .AND. (iG > 1)) THEN
-            iG = iG - 1
-            GOTO 10
-        ELSE
-            iaBnd(iL,2) = min(iG+1,kMaxLayer+1)   !! top bndry of plevs_database is lower pressure than top bndry of raPressLevels layer iL
-        END IF
-        raBndFrac(iL,2) = (raPressLevels(iL+1)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))/ &
-        (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))
-
-    !! find plev_airs which is just BELOW the bottom of current layer
-        iG = 1
-        20 CONTINUE
-        IF (PLEV_KCARTADATABASE_AIRS(iG) > raPressLevels(iL)) THEN
-            iG = iG + 1
-            GOTO 20
-        ELSE
-            iaBnd(iL,1) = max(iG-1,1) !! bot boundary of plevs_database is bigger pressure than top bndry of raPressLevels layer iL
-        END IF
-        raBndFrac(iL,1) = (raPressLevels(iL)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))/ &
-        (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))
-              
-    !      write (*,345) iL,raPressLevels(iL),raPressLevels(iL+1),iaBnd(iL,1),raBndFrac(iL,1),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)),
-    !     $                                                       iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
-    END DO
-!      stop 'ooooo'
-          
-! now that we know the weights and boundaries, off we go!!!
-! remember pV = nRT ==> p(z) dz/ r T(z) = dn(z)/V = dq(z) ==> Q = sum(p Z / R T)
-! so for these fractional combined layers (i), Qnew = sum(p(i) zfrac(i) / R T(i)) = sum(p(i) zfrac(i)/Z(i) Z(i) / RT(i))
-!                                                   = sum(p(i)Z(i)/RT(i) zfrac(i)/Z(i))
-! or Qnew = sum(frac(i) Q(i))
-
-    DO iX = iNot,kProfLayer
-        raRAmt(iX) = 0.0
-        rPP = 0.0
-        rPPWgt = 0.0
-        rMR = 0.0
-        rMolecules = 0.0
-        rHeight = 0.0
-        DO iY = iaBnd(iX,1),iaBnd(iX,2)-1
-            IF (iY == iaBnd(iX,2)-1) THEN
-                rFrac = raBndFrac(iX,2)
-            ELSEIF (iY == iaBnd(iX,1)) THEN
-            !! this also takes care of case when iY .EQ. iaBnd(iX,1) .EQ. iaBnd(iX,2)-1
-                rFrac = raBndFrac(iX,1)
-            ELSE
-                rFrac = 1.0
-            END IF
-            rHeight = rHeight + rFrac*DATABASELEVHEIGHTS(iY)
-            rMolecules = rMolecules + raR100Amt(iY)*rFrac*DATABASELEVHEIGHTS(iY)
-            rPP = rPP + raR100PartPress(iY)*rFrac
-            rPPWgt = rPPWgt + rFrac
-            rMR = rMR + raR100PartPress(iY)/raRPress(iY)
-            raRAmt(iX) = raRAmt(iX) + raR100Amt(iY)*rFrac
-        END DO
-    !! method 1
-        raRPartPress(iX) = rPP/rPPWgt
-
-    !        !! method 2
-    !      rMR = rMR/((iaBnd(iX,2)-1)-(iaBnd(iX,1))+1)
-    !            raRPartPress(iX) = rMR * raPressLevels(iX)/1013.25
-    !      raRAmt(iX) = rMolecules/rHeight
-
-    ! bumping raRAmt and raRPartPressup n down
-    ! proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amout
-    ! though WV may be a little more complicated as it depends on pp
-    !        raRAmt(iX) = raRAmt(iX) * 100.0
-    !        raRPartPress(iX) = raRPartPress(iX) * 20.0
-    ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amout
-    ! though WV may be a little more complicated as it depends on pp
-    !      write(*,1234) iGasID,iX,raPressLevels(iX),raaPress(iX,1)*1013.25,raPressLevels(iX+1),iaBnd(iX,1),iaBnd(iX,2),
-    !     $           raRTemp(iX),raRPartPress(iX),raRAmt(iX)
-
-    END DO
-    1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
-
-!      IF (iGasID .EQ. 2) THEN
-!        DO iL = 1, 100
-!        print *,iL,raR100Amt(iL),raRAmt(iL)
-!      END DO
-!      END IF
-          
-    RETURN
-    end SUBROUTINE MakeRefProf
 
 !************************************************************************
 ! this subroutine finds the partial pressure of the layer
@@ -3482,7 +2919,7 @@ CONTAINS
           
 ! local var
     INTEGER :: iX,iY
-    REAL :: rX,SACONV_SUN,ORIG_SACONV_SUN,VACONV
+    REAL :: rX
 
 ! first find out how many raAtmLoop the user did set
     iX = 1
@@ -3666,7 +3103,6 @@ CONTAINS
     REAL :: raaPrBdry(kMaxAtm,2),raPressLevels(kProfLayer+1)
 
     INTEGER :: iC,iX,iStart,iStop,iNlay,iDirection,iInt
-    REAL :: LimbViewScanAng
 
     DO iC = 1,iNAtm
         CALL StartStopMP(iaMPSetForRad(iC),raPressStart(iC),raPressStop(iC),iC, &

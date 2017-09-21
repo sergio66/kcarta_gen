@@ -8,6 +8,8 @@
 
 MODULE freqfile
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS
@@ -204,8 +206,6 @@ CONTAINS
 ! iDoAdd   = -1,+1 tells us if we add on current gas to current 10000 pts
     INTEGER :: iGasID,iErr,iTag,iActualTag,iDoAdd
     REAL :: raFreq(kMaxPts)
-
-    INTEGER :: iCheckCompDataBase,iCheckXsecDataBase
 
     iDoAdd = -1
 

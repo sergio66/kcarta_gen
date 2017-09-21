@@ -4,12 +4,70 @@
 
 MODULE kcoeffSPLJAC
 
+USE basic_common
+USE spline_and_sort
+USE s_misc
+USE kcoeffSPL
+
 IMPLICIT NONE
 
 CONTAINS
 
 !************************************************************************
 !*******************   this is for the JACOBIANS ************************
+!************************************************************************
+
+! this subroutine calculates the analytic approximation to the first
+! derivative, using spline approximations
+    DOUBLE PRECISION FUNCTION FirstDeriv(x,daXgiven,daYgiven,daY2,iKm)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! daXgiven   == x ordinates (known)
+! daYgiven   == y(x)        (known)
+! daY2       == d2y/dx2     (known)
+! x          == value where we need to find dy/dx at
+! iKm        == number of set data points daXgiven(1..iKm)
+    DOUBLE PRECISION :: daXgiven(kMaxTemp),daYgiven(kMaxTemp), &
+    daY2(kMaxTemp),x
+    INTEGER :: iKm
+
+! local variables
+    INTEGER :: iK
+    DOUBLE PRECISION :: a,b,dAns
+    INTEGER :: KLO,KHI
+
+!     Determine between which pair of points X falls (bisect loop)
+    KLO=1
+    KHI=iKm
+    20 IF ( (KHI - KLO) > 1) THEN
+        iK=(KHI + KLO)/2
+        IF (daXgiven(iK) > X) THEN
+            KHI=iK
+        ELSE
+            KLO=iK
+        ENDIF
+        GOTO 20
+    ENDIF
+
+    dAns=0.0
+
+    IF (iK < iKm) THEN
+        a=(daXgiven(iK+1)-x)/(daXgiven(iK+1)-daXgiven(iK))
+        b=1-a
+
+        dAns=(daYgiven(iK+1)-daYgiven(iK))/(daXgiven(iK+1)-daXgiven(iK)) &
+        -(3.0*a*a-1.0)/6.0*(daXgiven(iK+1)-daXgiven(iK))*daY2(iK) &
+        +(3.0*b*b-1.0)/6.0*(daXgiven(iK+1)-daXgiven(iK))*daY2(iK+1)
+    END IF
+
+    FirstDeriv = dAns
+
+    RETURN
+    END FUNCTION FirstDeriv
+
 !************************************************************************
 ! this subroutine interpolates a compressed matrix, in temperature
 ! note we only worry about ABS COEFFS and not OPTICAL DEPTHS here
@@ -51,7 +109,6 @@ CONTAINS
     daToffset(kMaxTemp),daaaKx(kMaxK,kMaxTemp,kMaxLayer)
 ! for the jacobian
     DOUBLE PRECISION :: daaT(kMaxK,kProfLayer)
-    DOUBLE PRECISION :: FirstDeriv
     INTEGER :: iActuallyDoDT,iProfileLayers,iSplineType
 
     INTEGER :: iaTsort(kMaxTemp),iNk,iKm,iKn,iUm,iUn,iGasID_0
@@ -476,7 +533,6 @@ CONTAINS
 !     for interpolating
     DOUBLE PRECISION :: daWork(kMaxWater),dYP1,dYPN,dXPT, &
     daXgiven(kMaxWater),daYgiven(kMaxWater),daY2(kMaxWater)
-    DOUBLE PRECISION :: FirstDeriv
     INTEGER :: iI,iL,iLowest
 
 !     Assign some values for interpolation of K vectors
@@ -553,7 +609,7 @@ CONTAINS
 !     for interpolating KX
     DOUBLE PRECISION :: daWork(kMaxTemp),dYP1,dYPN,dXPT, &
     daXgiven(kMaxTemp),daYgiven(kMaxTemp),daY2(kMaxTemp)
-    DOUBLE PRECISION :: d,FirstDeriv
+    DOUBLE PRECISION :: d
     INTEGER :: iI,iJ,iL,iM,iLowest
 
 !     Assign some values for interpolation of K vectors
@@ -596,58 +652,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE WaterTempJAC
-
-!************************************************************************
-! this subroutine calculates the analytic approximation to the first
-! derivative, using spline approximations
-    DOUBLE PRECISION FUNCTION FirstDeriv(x,daXgiven,daYgiven,daY2,iKm)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! daXgiven   == x ordinates (known)
-! daYgiven   == y(x)        (known)
-! daY2       == d2y/dx2     (known)
-! x          == value where we need to find dy/dx at
-! iKm        == number of set data points daXgiven(1..iKm)
-    DOUBLE PRECISION :: daXgiven(kMaxTemp),daYgiven(kMaxTemp), &
-    daY2(kMaxTemp),x
-    INTEGER :: iKm
-
-! local variables
-    INTEGER :: iK
-    DOUBLE PRECISION :: a,b,dAns
-    INTEGER :: KLO,KHI
-
-!     Determine between which pair of points X falls (bisect loop)
-    KLO=1
-    KHI=iKm
-    20 IF ( (KHI - KLO) > 1) THEN
-        iK=(KHI + KLO)/2
-        IF (daXgiven(iK) > X) THEN
-            KHI=iK
-        ELSE
-            KLO=iK
-        ENDIF
-        GOTO 20
-    ENDIF
-
-    dAns=0.0
-
-    IF (iK < iKm) THEN
-        a=(daXgiven(iK+1)-x)/(daXgiven(iK+1)-daXgiven(iK))
-        b=1-a
-
-        dAns=(daYgiven(iK+1)-daYgiven(iK))/(daXgiven(iK+1)-daXgiven(iK)) &
-        -(3.0*a*a-1.0)/6.0*(daXgiven(iK+1)-daXgiven(iK))*daY2(iK) &
-        +(3.0*b*b-1.0)/6.0*(daXgiven(iK+1)-daXgiven(iK))*daY2(iK+1)
-    END IF
-
-    FirstDeriv=dAns
-
-    RETURN
-    END FUNCTION FirstDeriv
 
 !************************************************************************
 END MODULE kcoeffSPLJAC

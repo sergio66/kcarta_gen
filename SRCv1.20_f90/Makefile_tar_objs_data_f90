@@ -46,12 +46,11 @@ OBJSRTP        = rtp_interface_f90.o
 OBJSSTRING     = n_gas_wt_spectra.o  n_pth_mix.o      n_rad_jac_scat.o  \
                  n_output.o          n_layers.o       n_layers_lblrtm.o n_main.o
  
-OBS_LTE_OPTDPH  = kcoeffSPL.o              kcoeffSPLJAC.o            kcont_xsec.o       kcoeff_FAST.o \
-                  kcoeff_FAST_details.o    kcoeff_FAST_details2.o    kcoeffMAIN.o
+OBS_LTE_OPTDPH  = kcoeff_basic.o           kcoeffSPL.o               kcoeffSPLJAC.o         kcoeff_FAST_details.o \
+                  kcoeff_FAST_details2.o    kcoeff_FAST.o            kcont_xsec.o           kcoeffMAIN.o
 
-OBS_NLTE_OPTDPH = klineshapes.o      kvoigt_cousin.o\
-                  klinemix.o         kreadVTprofiles.o  kbloat.o\
-                  kcousin.o          kpredictVT.o       knonlte.o
+OBS_NLTE_OPTDPH = klineshapes.o      kcousin.o          klinemix.o    kvoigt_cousin.o\
+                  kreadVTprofiles.o  kbloat.o           kpredictVT.o       knonlte.o
 
 OBJSMAIN          = kcartamisc.o kcartamain.o        
 OBJSMAIN_JPL      = kcartamisc.o kcartajpl.o
@@ -65,12 +64,11 @@ MOBJSRTP        = rtp_interface_f90.mod
 MOBJSSTRING     = n_gas_wt_spectra.mod  n_pth_mix.mod      n_rad_jac_scat.mod  \
                   n_output.mod          n_layers.mod       n_layers_lblrtm.mod  n_main.mod
  
-MOBS_LTE_OPTDPH  = kcoeffSPL.mod              kcoeffSPLJAC.mod           kcont_xsec.mod       kcoeff_FAST.mod \
-                   kcoeff_FAST_details.mod    kcoeff_FAST_details2.mod   kcoeffMAIN.mod       
+MOBS_LTE_OPTDPH  = kcoeff_basic.mod           kcoeffSPL.mod         kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
+                   kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
 
-MOBS_NLTE_OPTDPH = klineshapes.mod      kvoigt_cousin.mod\
-                   klinemix.mod         kreadVTprofiles.mod  kbloat.mod\
-                   kcousin.mod          kpredictVT.mod       knonlte.mod
+MOBS_NLTE_OPTDPH = klineshapes.mod      kcousin.mod          klinemix.mod         kvoigt_cousin.mod\
+                   kreadVTprofiles.mod  kbloat.mod           kpredictVT.mod       knonlte.mod
 
 MOBJSMAIN          = kcartamisc.mod kcartamain.mod
 MOBJSMAIN_JPL      = kcartamisc.mod kcartajpl.mod
@@ -79,16 +77,16 @@ MOBJSMAIN_PARALLEL = kcartamisc.mod kcartaparallel.mod
 
 #######################################################################
 
-OBSRAD       = rad_diff.o  rad_quad.o rad_misc.o rad_flux.o \
-               rad_limb.o rad_angles.o rad_main.o 
+OBSRAD       = clear_scatter_basic.o rad_angles.o rad_misc.o rad_quad.o rad_diff.o rad_flux.o \
+               rad_limb.o   rad_main.o 
 
 OBSJAC_CLR   = jac_up.o jac_down.o jac_limb.o jac_main.o 
 
 OBSJAC_CLD   = jac_main.o jac_up.o jac_down.o jac_limb.o \
                jac_pclsam_up.o jac_pclsam_down.o singlescatter.o
 
-MOBSRAD       = rad_diff.mod  rad_quad.mod rad_misc.mod rad_flux.mod \
-                rad_limb.mod rad_angles.mod rad_main.mod
+MOBSRAD       = clear_scatter_basic.mod rad_angles.mod rad_misc.mod rad_quad.mod rad_diff.mod rad_flux.mod \
+                rad_limb.mod   rad_main.mod
 
 MOBSJAC_CLR   = jac_up.mod jac_down.mod jac_limb.mod jac_main.mod 
 
@@ -193,10 +191,9 @@ MOBJSJPL = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_
            $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLD) $(MOBJSSTRING) 
 
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
-MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
+MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_BASIC) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
              $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLR) $(MOBJSSTRING) \
-	     $(MOBJSMAIN_BASIC) 
-
+	     
 OBJS_TXT = n_mainTXT.o
 MOBJS_TXT = n_mainTXT.mod
 
@@ -322,6 +319,9 @@ kcoeffSPL.mod kcoeffSPL.o : kcoeffSPL.f90 $(PARAMS)
 kcoeffSPLJAC.mod kcoeffSPLJAC.o : kcoeffSPLJAC.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffSPLJAC.f90
 
+kcoeff_basic.mod kcoeff_basic.o : kcoeff_basic.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_basic.f90
+
 kcoeff_FAST.mod kcoeff_FAST.o : kcoeff_FAST.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST.f90
 
@@ -380,6 +380,9 @@ rad_flux.mod rad_flux.o : rad_flux.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
 
 ###########  SCATTERING RADIATIVE TRANSFER CODE ###########################
 #### many of the routines in here are common to all scattering codes 
+clear_scatter_basic.mod clear_scatter_basic.o : clear_scatter_basic.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) clear_scatter_basic.f90 
+
 clear_scatter_misc.mod clear_scatter_misc.o : clear_scatter_misc.f90  $(PARAMS_SCAT)  
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) clear_scatter_misc.f90 
 

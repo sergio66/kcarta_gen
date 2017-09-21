@@ -4,6 +4,8 @@
 
 MODULE n_layers_lblrtm
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS

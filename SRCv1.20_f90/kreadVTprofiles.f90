@@ -4,81 +4,14 @@
 
 MODULE kreadVTprofiles
 
+USE basic_common
+USE spline_and_sort
+USE kcoeffSPL
+USE n_gas_wt_spectra
+
 IMPLICIT NONE
 
 CONTAINS
-
-!************************************************************************
-! this routine reads in Reference Amts for CO2 LA compressed database
-    SUBROUTINE LowerAtmNLTERefs(raRPressX,raRPPressX,raRTempx,raRAmtx)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! output
-    REAL :: raRPressX(kMaxLayer),raRAmtx(kMaxLayer),raRTempx(kMaxLayer)
-    REAL :: raRPPressX(kMaxLayer)
-
-! local
-    CHARACTER(80) :: caFname,caStr
-    INTEGER :: iIOUN,iI,iErr,iX
-    REAL :: r1,r2,r3,r4
-
-    caFname = caLA_US_STD_385ppmv
-
-    GOTO 777
-
-    100 write(kStdErr,*) 'Error reading UpperMixRatio info : filename = '
-    WRITE(kStdErr,1070) iErr, caFName
-    CALL DoStop
-
-    777 CONTINUE
-    iIOun = kTempUnit
-    OPEN(UNIT=iIOun,FILE=caFName,FORM='formatted',STATUS='OLD',IOSTAT=iErr, &
-    ERR = 100)
-    IF (iErr /= 0) THEN
-        write (kStdErr,*) 'in subroutine LowerAtmNLTERefs, error reading file  ... '
-        WRITE(kStdErr,1070) iErr, caFName
-        CALL DoSTOP
-    END IF
-    kTempUnitOpen = +1
-
-    iI = 0
-
-    555 CONTINUE
-    read(iIOUN,123) caStr
-    IF (caStr(1:1) == '!') THEN
-    !!!these are comments at beginning of file, so skip
-        GOTO 555
-    ELSE
-        READ (caStr,*) iX,r1,r2,r3,r4
-        iI = iI + 1
-        raRPressX(iI)  = r1
-        raRPPressX(iI) = r2
-        raRTempX(iI)   = r3
-        raRAmtX(iI)    = r4
-    END IF
-
-    20 CONTINUE
-    READ(iIOUN,123,END=199) caStr
-    READ (caStr,*) iX,r1,r2,r3,r4
-    iI = iI + 1
-    raRPressX(iI)  = r1
-    raRPPressX(iI) = r2
-    raRTempX(iI)   = r3
-    raRAmtX(iI)    = r4
-    GOTO 20
-
-    199 CONTINUE
-    close (iIOUN)
-    kTempUnitOpen = -1
-
-    123 FORMAT(A80)
-    1070 FORMAT('ERROR! number ',I5,' opening loweAtmNLTE profile:',/,A80)
-
-    RETURN
-    end SUBROUTINE LowerAtmNLTERefs
 
 !************************************************************************
 !        these subroutines read in the upper atm profiles
@@ -248,85 +181,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE MixRatio
-
-!************************************************************************
-! this subroutine gets the UA US STD Ref Profile
-    SUBROUTINE GetUS_Std_UA(raUpperPress_Std,raUpperMixRatio_Std, &
-    raUpperDZ_Std,raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! this is if we want to see what a std US profile looks like about 0.005 mb
-! it assumes the lower atm has CO2 ~ 385 ppmv
-    REAL :: raUpperPress_Std(kProfLayer),raUpperMixRatio_Std(kProfLayer)
-    REAL :: raUpperDZ_Std(kProfLayer),raUpperCO2Amt_Std(kProfLayer)
-    REAL :: raUpperTemp_Std(kProfLayer)
-    INTEGER :: iUpperStd_Num
-
-! local vars
-    REAL :: r1,r2,r3,r4,r5,r6,r7,r8,r9
-    CHARACTER(120) :: caStr
-    INTEGER :: iIOUN,iI,iErr,iReason
-
-    GOTO 777
-
-    write(kStdWarn,*) 'SUBR GetUS_Std_UA : caUA_US_STD_385ppmv = ',caUA_US_STD_385ppmv
-    100 write(kStdErr,*) 'Error reading GetUS_Std_UA info : filename = '
-    WRITE(kStdErr,1070) iErr,caUA_US_STD_385ppmv
-    CALL DoStop
-
-    777 CONTINUE
-    iIOun = kTempUnit
-    OPEN(UNIT=iIOun,FILE=caUA_US_STD_385ppmv,FORM='formatted',STATUS='OLD',IOSTAT=iErr, &
-    ERR = 100)
-    IF (iErr /= 0) THEN
-        write (kStdErr,*) 'in subroutine GetUS_Std_UA, error reading file  ... '
-        WRITE(kStdErr,1070) iErr, caUA_US_STD_385ppmv
-        CALL DoSTOP
-    END IF
-
-    kTempUnitOpen = +1
-
-    iI = 0
-
-    555 CONTINUE
-!! for IOSTAT look at http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap04/iostatus.html
-!! if iOSTAT = 0, everything fine, if -1 this is EOF, if > 0 this is a problem
-    read(iIOUN,123,IOSTAT=iReason,ERR=600) caStr
-!      print *,caStr,caUA_US_STD_385ppmv
-    IF (iReason < 0) GOTO 600       !!!! end of file
-    IF (iReason > 0) THEN
-        write(kStdErr,*) 'at iT = ',iI,' IOSTAT=iReason for file ',iReason,caUA_US_STD_385ppmv
-        CALL DoStop
-    END IF
-    IF (caStr(1:1) == '!') THEN
-    !!!these are comments at beginning of file, so skip
-        GOTO 555
-    ELSE
-        READ (caStr,*) iUpperStd_Num,r1,r2,r3,r4,r5,r6,r7,r8,r9
-    !        print *,iI+1,iUpperStd_Num,r1,r2,r3,r4,r5
-        iI = iI + 1
-        raUpperPress_Std(iI)    = r1
-        raUpperDZ_Std(iI)       = r2
-        raUpperCO2Amt_Std(iI)   = r3
-        raUpperTemp_Std(iI)     = r4
-        raUpperMixRatio_Std(iI) = r9
-        GOTO 555
-    END IF
-
-    600 CONTINUE
-    close (iIOUN)
-    kTempUnitOpen = -1
-
-    iUpperStd_Num = iI
-
-    123 FORMAT(A120)
-    1070 FORMAT('ERROR! number ',I5,' opening US Std UA profile:',/,A80)
-
-    RETURN
-    end SUBROUTINE GetUS_Std_UA
 
 !************************************************************************
 
@@ -1324,7 +1178,7 @@ CONTAINS
     DOUBLE PRECISION :: dVibCenter
 
 ! local variables
-    REAL :: p,pp,q,t,match_band_energy2
+    REAL :: p,pp,q,t
     CHARACTER(80) :: caStr
     CHARACTER(3) ::  ca3
     REAL :: raQtipsXVT(kNLTEProfLayer),rDummyVibEnergy

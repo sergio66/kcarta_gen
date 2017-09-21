@@ -1,8 +1,8 @@
 /bin/cp ../INCLUDE/scatter.param  ../INCLUDE/xscatterparam.f; fixcon ../INCLUDE/xscatterparam.f ../INCLUDE/xscatterparam.f90
-sed -e "s/.param/param.f90/g" ../INCLUDE/xscatterparam.f90 > ../INCLUDE/scatterparam.f90; rm ../INCLUDE/xscatterparam.f90
+sed -e "s/.param/param.f90/g" ../INCLUDE/xscatterparam.f90 > ../INCLUDE/scatterparam.f90; rm ../INCLUDE/xscatterparam.f90 ../INCLUDE/xscatterparam.f
 
 /bin/cp ../INCLUDE/kcarta.param  ../INCLUDE/xkcartaparam.f;   fixcon ../INCLUDE/xkcartaparam.f ../INCLUDE/xkcartaparam.f90
-sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/post_definedparam.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartaparam.f90; rm ../INCLUDE/xkcartaparam.f90	
+sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/post_definedparam.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartaparam.f90; rm ../INCLUDE/xkcartaparam.f90	../INCLUDE/xkcartaparam.f
 
 /bin/cp ../INCLUDE/pre_defined.param  ../INCLUDE/pre_definedparam.f;   fixcon ../INCLUDE/pre_definedparam.f  ../INCLUDE/pre_definedparam.f90; rm ../INCLUDE/pre_definedparam.f
 

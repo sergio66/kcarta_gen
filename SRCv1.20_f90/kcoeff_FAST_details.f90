@@ -4,6 +4,10 @@
 
 MODULE kcoeff_FAST_details
 
+USE basic_common
+USE kcoeffSPL
+USE kcoeffSPLJAC
+
 IMPLICIT NONE
 
 CONTAINS

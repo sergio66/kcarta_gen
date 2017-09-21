@@ -4,6 +4,8 @@
 
 MODULE n_gas_wt_spectra
 
+USE basic_common
+
 IMPLICIT NONE
 
 CONTAINS

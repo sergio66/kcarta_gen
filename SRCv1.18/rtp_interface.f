@@ -3256,7 +3256,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       INTEGER iNatm
 c this is for absorptive clouds
-      CHARACTER*120 caaScatter(kMaxAtm)
+      CHARACTER*80 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -3930,7 +3930,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       REAL cfrac1,cfrac2
 c this is for absorptive clouds
-      CHARACTER*120 caaScatter(kMaxAtm)
+      CHARACTER*80 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
       INTEGER iaCtype(kMaxClouds)

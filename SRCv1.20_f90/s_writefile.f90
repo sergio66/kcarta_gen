@@ -4,6 +4,9 @@
 
 MODULE s_writefile
 
+USE basic_common
+USE spline_and_sort
+
 IMPLICIT NONE
 
 CONTAINS
@@ -68,7 +71,7 @@ CONTAINS
 
 ! iIOUN      = unit file number
 ! raInten    = array containing computed data (radiances,spectra,jacobians ..)
-! raFreq    = array containing wavenumbers
+! raFreq     = array containing wavenumbers
 ! caOutName  = binary output file name
 
     INTEGER :: iIOUN
@@ -264,20 +267,20 @@ CONTAINS
     INTEGER :: iAns,iJ
 
 ! assume everything OK
-    iAns=1
+    iAns = 1
 
 ! remember the entries in the row have already been sorted in ascending order,
 ! and so all that has to be done is to check that adjacent elements are
 ! different from each other
-    DO iJ=1,iNumLay-1
+    DO iJ = 1,iNumLay-1
         IF (iaaOp(iRow,iJ) == iaaOp(iRow,iJ+1)) THEN
             write(kStdErr,*)'Outtype',iRow,' has',iaaOp(iRow,iJ)
             write(kStdErr,*)'entered more than once'
-            iAns=-1
+            iAns = -1
         END IF
     END DO
 
-    CheckDoubleEntry=iAns
+    CheckDoubleEntry = iAns
           
     RETURN
     end FUNCTION CheckDoubleEntry
@@ -306,25 +309,24 @@ CONTAINS
 ! local variables
     INTEGER :: iaTempRad(kMixFilRows)
     INTEGER :: iOK,iK
-    INTEGER :: DoOutputLayer
 
 ! naively assume everything OK
-    iOK=1
+    iOK = 1
 
 ! now actually check that iaaOp(iJ,:) is in iaaRadLayer(iI,1..NL)
 ! first store the relevant iI'th atmosphere of iaaRadLayer(iI,1..NL)
-    DO iK=1,iNL
-        iaTempRad(iK)=iaaRadLayer(iI,iK)
+    DO iK = 1,iNL
+        iaTempRad(iK) = iaaRadLayer(iI,iK)
     END DO
 ! and then sort it
     CALL DoSort(iaTempRad,iNL)
 
 ! now check that the elements of iaaOp to be output, iaaOp(iJ,1..iEnd) are
 ! all in iaTempRad
-    iK=0
-    20 iK=iK+1
+    iK = 0
+    20 iK = iK+1
     IF ((iK <= iEnd) .AND. (iOk > 0)) THEN
-        iOk=DoOutputLayer(iaaOp(iJ,iK),iNL,iaTempRad)
+        iOk = DoOutputLayer(iaaOp(iJ,iK),iNL,iaTempRad)
         IF (iOK < 0) THEN
             write(kStdErr,*) 'output layer#',iaaOp(iJ,iK),' not found &
             in atm#',iI
@@ -332,7 +334,7 @@ CONTAINS
         GO TO 20
     END IF
 
-    OutputLayerInProfile=iOK
+    OutputLayerInProfile = iOK
 
     RETURN
     end FUNCTION OutputLayerInProfile
@@ -377,35 +379,35 @@ CONTAINS
     REAL :: raTAmt(kProfLayer),raTTemp(kProfLayer),raTPress(kProfLayer),raTPartPress(kProfLayer)
 
 ! local variables
-    INTEGER :: iInt,iDiv,iDp,iStart,iPath,iLay,DoOutputLayer,iIOUN
+    INTEGER :: iInt,iDp,iStart,iPath,iLay,iIOUN
     REAL :: raL2S(kMaxPts)
 
     iIOUN = kStdkCarta
 
-    iStart=iDiv(iaPath(1),kProfLayer)
+    iStart = iDiv(iaPath(1),kProfLayer)
 
 ! write spectra to unformatted file
-! if iPrinter=1 then have to check for valid paths
-    DO iLay=1,kProfLayer
+! if iPrinter = 1 then have to check for valid paths
+    DO iLay = 1,kProfLayer
     ! check to see if this path should be output
-        iPath=iStart*kProfLayer + iLay
+        iPath = iStart*kProfLayer + iLay
     !        IF (iPath .NE. iaPath(iLay)) THEN
     !          write(kStdErr,*) 'iPath .NE. iaPath(iLay)'
     !          Call DoSTOP
     !        END IF
-        iDp=DoOutputLayer(iPath,iNp,iaOp)
+        iDp = DoOutputLayer(iPath,iNp,iaOp)
         IF (iDp > 0) THEN
             IF (kLayer2Sp == -1) THEN
                 write(kStdWarn,*)'output GAS OD : iPath,P,T,A,OD = ', &
                 iPath,raTPress(iLay)*kAtm2mb,raTTemp(iLay),raTAmt(iLay),raaGasAbs(1,iLay)
-                DO iInt=1,kMaxPts
-                    raL2S(iInt)=raaGasAbs(iInt,iLay)
+                DO iInt = 1,kMaxPts
+                    raL2S(iInt) = raaGasAbs(iInt,iLay)
                 END DO
                 CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
             ELSE IF (kLayer2Sp == -2) THEN
                 write(kStdWarn,*)'outputting GAS layer trans at iPath = ',iPath
-                DO iInt=1,kMaxPts
-                    raL2S(iInt)=exp(-raaGasAbs(iInt,iLay))
+                DO iInt = 1,kMaxPts
+                    raL2S(iInt) = exp(-raaGasAbs(iInt,iLay))
                 END DO
                 CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
             ELSE IF (kLayer2Sp == 1) THEN
@@ -453,7 +455,7 @@ CONTAINS
     CHARACTER(80) :: caOutName
 
 ! local vars
-    INTEGER :: iDummy,iIpmix,DoOutputLayer
+    INTEGER :: iDummy,iIpmix
 
     IF ((iFound > 0) .AND. (iPrinter == 2)) THEN
 
@@ -522,7 +524,7 @@ CONTAINS
             ! go to next MIXED PATH set by incrementing iIpmix
             END DO
         END IF
-    ! end if (iFound==1)
+    ! end if (iFound == 1)
     END IF
 
     RETURN
@@ -569,16 +571,16 @@ CONTAINS
 
 ! write spectra to unformatted file
 ! this is for mixed paths
-    iPath=iIpmix
+    iPath = iIpmix
     write(kStdWarn,*)'output MIXED path optical depths at iIpmix = ',iIpmix
     IF (kLayer2Sp == -1) THEN
-        DO iInt=1,kMaxPts
-            raL2S(iInt)=raaSumAbs(iInt,iIpmix)
+        DO iInt = 1,kMaxPts
+            raL2S(iInt) = raaSumAbs(iInt,iIpmix)
         END DO
         CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
     ELSE IF (kLayer2Sp == -2) THEN
-        DO iInt=1,kMaxPts
-            raL2S(iInt)=exp(-raaSumAbs(iInt,iIpmix))
+        DO iInt = 1,kMaxPts
+            raL2S(iInt) = exp(-raaSumAbs(iInt,iIpmix))
         END DO
         CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
     ELSE IF (kLayer2Sp == 1) THEN
@@ -640,46 +642,46 @@ CONTAINS
     iIOUN = kStdkCarta
 
 ! first figure out how many 100 atmosphere layer blocks there are
-    iAtmBlocks=1
+    iAtmBlocks = 1
     60 CONTINUE
     IF (kProfLayer*iAtmBlocks < iNpMix) THEN
-        iAtmBlocks=iAtmBlocks+1
+        iAtmBlocks = iAtmBlocks+1
         GO TO 60
     END IF
-    iAmax=iAtmBlocks
+    iAmax = iAtmBlocks
             
 ! make sure that iNpmix can be exactly divided into kProfLayer, else set a flag
 ! saying the last "atmosphere" has less than set number of layers
-    iWarn=MOD(iNpmix,kProfLayer)
+    iWarn = MOD(iNpmix,kProfLayer)
     IF (iWarn /= 0) THEN
-        iAmax=iAmax-1
+        iAmax = iAmax-1
     END IF
             
 ! calculate L2S and write spectra to unformatted file
-    iPath=0
+    iPath = 0
 
 ! first do the "complete" atmospheres
-    DO iA=1,iAmax
+    DO iA = 1,iAmax
     ! put the current atmosphere into raaTempArray
-        DO iLay=1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+        DO iLay = 1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
     ! compute the L2G optical depths
         DO iLay = 2,kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=1,kProfLayer
-            iPath=iPath+1
+        DO iLay = 1,kProfLayer
+            iPath = iPath+1
             write(kStdWarn,*) 'output MIXED path spectra at ',iPath
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=exp(-raaTempArray(iFr,iLay))
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = exp(-raaTempArray(iFr,iLay))
             END DO
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
         END DO
@@ -688,32 +690,32 @@ CONTAINS
 ! then do the last, "incomplete" atmospheres
 ! put the current atmosphere into raaTempArray
     IF (iWarn /= 0) THEN
-        iA=iAmax+1
-        DO iLay=1,iWarn
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+        iA = iAmax+1
+        DO iLay = 1,iWarn
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
-        DO iLay=iWarn+1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=0.0
+        DO iLay = iWarn+1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = 0.0
             END DO
         END DO
     ! compute the L2G optical depth
-        DO iLay=2,iWarn
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+        DO iLay = 2,iWarn
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=1,iWarn
-            iPath=iPath+1
+        DO iLay = 1,iWarn
+            iPath = iPath+1
             write(kStdWarn,*) 'output MIXED path spectra at ',iPath
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=exp(-raaTempArray(iFr,iLay))
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = exp(-raaTempArray(iFr,iLay))
             END DO
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
         END DO
@@ -761,45 +763,45 @@ CONTAINS
     iIOUN = kStdkCarta
 
 ! first figure out how many kProfLayer atmosphere layer blocks there are
-    iAtmBlocks=1
+    iAtmBlocks = 1
     60 CONTINUE
     IF (kProfLayer*iAtmBlocks < iNpMix) THEN
-        iAtmBlocks=iAtmBlocks+1
+        iAtmBlocks = iAtmBlocks+1
         GO TO 60
     END IF
-    iAmax=iAtmBlocks
+    iAmax = iAtmBlocks
             
 ! make sure that iNpmix can be exactly divided into kProfLayer, else set a flag
 ! saying the last "atmosphere" has less than kProfLayer layers
-    iWarn=MOD(iNpmix,kProfLayer)
+    iWarn = MOD(iNpmix,kProfLayer)
     IF (iWarn /= 0) THEN
-        iAmax=iAmax-1
+        iAmax = iAmax-1
     END IF
             
 ! calculate L2S and write spectra to unformatted file
-    iPath=0
+    iPath = 0
 
 ! first do the "complete" atmospheres
-    DO iA=1,iAmax
+    DO iA = 1,iAmax
     ! put the current atmosphere into raaTempArray
-        DO iLay=1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+        DO iLay = 1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
     ! compute the L2S optical depths
         DO iLay = 2,kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=1,kProfLayer
-            iPath=iPath+1
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=raaTempArray(iFr,iLay)
+        DO iLay = 1,kProfLayer
+            iPath = iPath+1
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = raaTempArray(iFr,iLay)
             END DO
             write(kStdWarn,*) 'output MIXED path spectra  at ',iPath
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
@@ -809,32 +811,32 @@ CONTAINS
 ! then do the last, "incomplete" atmospheres
 ! put the current atmosphere into raaTempArray
     IF (iWarn /= 0) THEN
-        iA=iAmax+1
-        DO iLay=1,iWarn
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+        iA = iAmax+1
+        DO iLay = 1,iWarn
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
-        DO iLay=iWarn+1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=0.0
+        DO iLay = iWarn+1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = 0.0
             END DO
         END DO
     ! compute the L2S optical depths
-        DO iLay=iWarn-1,1,-1
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+        DO iLay = iWarn-1,1,-1
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=2,iWarn
-            iPath=iPath+1
+        DO iLay = 2,iWarn
+            iPath = iPath+1
             write(kStdWarn,*) 'output MIXED path spectra at ',iPath
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=raaTempArray(iFr,iLay)
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = raaTempArray(iFr,iLay)
             END DO
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
         END DO
@@ -882,46 +884,46 @@ CONTAINS
     iIOUN = kStdkCarta
 
 ! first figure out how many 100 atmosphere layer blocks there are
-    iAtmBlocks=1
+    iAtmBlocks = 1
     60 CONTINUE
     IF (kProfLayer*iAtmBlocks < iNpMix) THEN
-        iAtmBlocks=iAtmBlocks+1
+        iAtmBlocks = iAtmBlocks+1
         GO TO 60
     END IF
-    iAmax=iAtmBlocks
+    iAmax = iAtmBlocks
             
 ! make sure that iNpmix can be exactly divided into kProfLayer, else set a flag
 ! saying the last "atmosphere" has less than set number of layers
-    iWarn=MOD(iNpmix,kProfLayer)
+    iWarn = MOD(iNpmix,kProfLayer)
     IF (iWarn /= 0) THEN
-        iAmax=iAmax-1
+        iAmax = iAmax-1
     END IF
             
 ! calculate L2S and write spectra to unformatted file
-    iPath=0
+    iPath = 0
 
 ! first do the "complete" atmospheres
-    DO iA=1,iAmax
+    DO iA = 1,iAmax
     ! put the current atmosphere into raaTempArray
-        DO iLay=1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+        DO iLay = 1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
     ! compute the L2S optical depths
-        DO iLay = kProfLayer-1,1,-1
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+        DO iLay  =  kProfLayer-1,1,-1
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=1,kProfLayer
-            iPath=iPath+1
+        DO iLay = 1,kProfLayer
+            iPath = iPath+1
             write(kStdWarn,*) 'output MIXED path spectra at ',iPath
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=exp(-raaTempArray(iFr,iLay))
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = exp(-raaTempArray(iFr,iLay))
             END DO
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
         END DO
@@ -930,32 +932,32 @@ CONTAINS
 ! then do the last, "incomplete" atmospheres
 ! put the current atmosphere into raaTempArray
     IF (iWarn /= 0) THEN
-        iA=iAmax+1
-        DO iLay=1,iWarn
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+        iA = iAmax+1
+        DO iLay = 1,iWarn
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
-        DO iLay=iWarn+1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=0.0
+        DO iLay = iWarn+1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = 0.0
             END DO
         END DO
     ! compute the L2S optical depth
-        DO iLay=iWarn-1,1,-1
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+        DO iLay = iWarn-1,1,-1
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=1,iWarn
-            iPath=iPath+1
+        DO iLay = 1,iWarn
+            iPath = iPath+1
             write(kStdWarn,*) 'output MIXED path spectra at ',iPath
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=exp(-raaTempArray(iFr,iLay))
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = exp(-raaTempArray(iFr,iLay))
             END DO
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
         END DO
@@ -1003,45 +1005,45 @@ CONTAINS
     iIOUN = kStdkCarta
 
 ! first figure out how many kProfLayer atmosphere layer blocks there are
-    iAtmBlocks=1
+    iAtmBlocks = 1
     60 CONTINUE
     IF (kProfLayer*iAtmBlocks < iNpMix) THEN
-        iAtmBlocks=iAtmBlocks+1
+        iAtmBlocks = iAtmBlocks+1
         GO TO 60
     END IF
-    iAmax=iAtmBlocks
+    iAmax = iAtmBlocks
             
 ! make sure that iNpmix can be exactly divided into kProfLayer, else set a flag
 ! saying the last "atmosphere" has less than kProfLayer layers
-    iWarn=MOD(iNpmix,kProfLayer)
+    iWarn = MOD(iNpmix,kProfLayer)
     IF (iWarn /= 0) THEN
-        iAmax=iAmax-1
+        iAmax = iAmax-1
     END IF
             
 ! calculate L2S and write spectra to unformatted file
-    iPath=0
+    iPath = 0
 
 ! first do the "complete" atmospheres
-    DO iA=1,iAmax
+    DO iA = 1,iAmax
     ! put the current atmosphere into raaTempArray
-        DO iLay=1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+        DO iLay = 1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
     ! compute the L2S optical depths
         DO iLay = kProfLayer-1,1,-1
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=1,kProfLayer
-            iPath=iPath+1
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=raaTempArray(iFr,iLay)
+        DO iLay = 1,kProfLayer
+            iPath = iPath+1
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = raaTempArray(iFr,iLay)
             END DO
             write(kStdWarn,*) 'output MIXED path spectra  at ',iPath
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
@@ -1050,33 +1052,33 @@ CONTAINS
 
 ! then do the last, "incomplete" atmospheres
 ! put the current atmosphere into raaTempArray
-    IF (iWarn /= 0) THEN
-        iA=iAmax+1
-        DO iLay=1,iWarn
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaSumAbs(iFr,iI)
+    IF (iWarn /=  0) THEN
+        iA = iAmax+1
+        DO iLay = 1,iWarn
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaSumAbs(iFr,iI)
             END DO
         END DO
-        DO iLay=iWarn+1,kProfLayer
-            iI=iLay+(iA-1)*kProfLayer
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=0.0
+        DO iLay = iWarn+1,kProfLayer
+            iI = iLay+(iA-1)*kProfLayer
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = 0.0
             END DO
         END DO
     ! compute the L2S optical depths
-        DO iLay=iWarn-1,1,-1
-            DO iFr=1,kMaxPts
-                raaTempArray(iFr,iLay)=raaTempArray(iFr,iLay)+ &
+        DO iLay = iWarn-1,1,-1
+            DO iFr = 1,kMaxPts
+                raaTempArray(iFr,iLay) = raaTempArray(iFr,iLay)+ &
                 raaTempArray(iFr,iLay+1)
             END DO
         END DO
     ! print them out
-        DO iLay=1,iWarn
-            iPath=iPath+1
+        DO iLay = 1,iWarn
+            iPath = iPath+1
             write(kStdWarn,*) 'output MIXED path spectra at ',iPath
-            DO iFr=1,kMaxPts
-                raL2S(iFr)=raaTempArray(iFr,iLay)
+            DO iFr = 1,kMaxPts
+                raL2S(iFr) = raaTempArray(iFr,iLay)
             END DO
             CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
         END DO
@@ -1119,9 +1121,9 @@ CONTAINS
 
     iIOUN = kStdkCarta
 
-    DO iI=1,iNpMix
-        DO iFr=1,kMaxPts
-            raL2S(iFr)=raaSumAbs(iFr,iI)
+    DO iI = 1,iNpMix
+        DO iFr = 1,kMaxPts
+            raL2S(iFr) = raaSumAbs(iFr,iI)
         END DO
         CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
     END DO
@@ -1163,9 +1165,9 @@ CONTAINS
 
     iIOUN = kStdkCarta
 
-    DO iI=1,iNpMix
-        DO iFr=1,kMaxPts
-            raL2S(iFr)=exp(-raaSumAbs(iFr,iI))
+    DO iI = 1,iNpMix
+        DO iFr = 1,kMaxPts
+            raL2S(iFr) = exp(-raaSumAbs(iFr,iI))
         END DO
         CALL wrtout(iIOUN,caOutName,raFreq,raL2S)
     END DO
@@ -1192,13 +1194,13 @@ CONTAINS
 
     INTEGER :: iI,iJ
 
-    DO iI=1,kMaxPts
-        raL2S(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2S(iI) = 0.0
     END DO
 
-    DO iJ=iLay,kProfLayer
-        DO iI=1,kMaxPts
-            raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+    DO iJ = iLay,kProfLayer
+        DO iI = 1,kMaxPts
+            raL2S(iI) = raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
@@ -1224,18 +1226,18 @@ CONTAINS
 
     INTEGER :: iI,iJ
 
-    DO iI=1,kMaxPts
-        raL2S(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2S(iI) = 0.0
     END DO
 
-    DO iJ=iLay,kProfLayer
-        DO iI=1,kMaxPts
-            raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+    DO iJ = iLay,kProfLayer
+        DO iI = 1,kMaxPts
+            raL2S(iI) = raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
-    DO iI=1,kMaxPts
-        raL2S(iI)=exp(-raL2S(iI))
+    DO iI = 1,kMaxPts
+        raL2S(iI) = exp(-raL2S(iI))
     END DO
 
     RETURN
@@ -1260,13 +1262,13 @@ CONTAINS
 
     INTEGER :: iI,iJ
 
-    DO iI=1,kMaxPts
-        raL2S(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2S(iI) = 0.0
     END DO
 
-    DO iJ=1,iLay
-        DO iI=1,kMaxPts
-            raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+    DO iJ = 1,iLay
+        DO iI = 1,kMaxPts
+            raL2S(iI) = raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
@@ -1292,18 +1294,18 @@ CONTAINS
 
     INTEGER :: iI,iJ
 
-    DO iI=1,kMaxPts
-        raL2G(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2G(iI) = 0.0
     END DO
 
-    DO iJ=1,iLay
-        DO iI=1,kMaxPts
-            raL2G(iI)=raL2G(iI)+raaGasAbs(iI,iJ)
+    DO iJ = 1,iLay
+        DO iI = 1,kMaxPts
+            raL2G(iI) = raL2G(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
-    DO iI=1,kMaxPts
-        raL2G(iI)=exp(-raL2G(iI))
+    DO iI = 1,kMaxPts
+        raL2G(iI) = exp(-raL2G(iI))
     END DO
 
     RETURN
@@ -1328,46 +1330,46 @@ CONTAINS
     REAL :: raL2S(kMaxPts),raaGasAbs(kMaxPts,kMixFilRows)
 
 ! local variables
-    INTEGER :: iI,iJ,iMax,iFound,iUpper,idiv
+    INTEGER :: iI,iJ,iMax,iFound,iUpper
 
 ! first find the index where the (space) "upper" limit is at
-    iFound=-1
-    iI=0
-    iJ=1
-    iMax=idiv(iNpmix,kProfLayer)
-    iUpper=MOD(iNpmix,kProfLayer)
+    iFound = -1
+    iI = 0
+    iJ = 1
+    iMax = idiv(iNpmix,kProfLayer)
+    iUpper = MOD(iNpmix,kProfLayer)
     IF (iUpper /= 0) THEN
-        iMax=iMax+1
+        iMax = iMax+1
     END IF
 
     15 CONTINUE
-    IF ((iFound < 0) .AND. (iJ <= iMax)) THEN
+    IF ((iFound < 0) .AND. (iJ <=  iMax)) THEN
         IF ((kProfLayer*iI <= iIpmix) .AND. &
         (kProfLayer*iJ >= iIpmix)) THEN
-            iFound=1
+            iFound = 1
             iUpper = kProfLayer*iJ
             IF (iUpper > iNpmix) THEN
-                iUpper=iNpmix
+                iUpper = iNpmix
             END IF
         ELSE
-            iI=iI+1
-            iJ=iJ+1
+            iI = iI+1
+            iJ = iJ+1
         END IF
         GO TO 15
     END IF
      
-    DO iI=1,kMaxPts
-        raL2S(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2S(iI) = 0.0
     END DO
 
-    DO iJ=iIpmix,iUpper
-        DO iI=1,kMaxPts
-            raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+    DO iJ = iIpmix,iUpper
+        DO iI = 1,kMaxPts
+            raL2S(iI) = raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
-    DO iI=1,kMaxPts
-        raL2S(iI)=exp(-raL2S(iI))
+    DO iI = 1,kMaxPts
+        raL2S(iI) = exp(-raL2S(iI))
     END DO
 
     RETURN
@@ -1392,41 +1394,41 @@ CONTAINS
     REAL :: raL2S(kMaxPts),raaGasAbs(kMaxPts,kMixFilRows)
 
 ! local variables
-    INTEGER :: iI,iJ,iMax,iFound,iUpper,idiv
+    INTEGER :: iI,iJ,iMax,iFound,iUpper
 
 ! first find the index where the (space) "upper" limit is at
-    iFound=-1
-    iI=0
-    iJ=1
-    iMax=idiv(iNpmix,kProfLayer)
-    iUpper=MOD(iNpmix,kProfLayer)
+    iFound = -1
+    iI = 0
+    iJ = 1
+    iMax = idiv(iNpmix,kProfLayer)
+    iUpper = MOD(iNpmix,kProfLayer)
     IF (iUpper /= 0) THEN
-        iMax=iMax+1
+        iMax = iMax+1
     END IF
 
     15 CONTINUE
     IF ((iFound < 0) .AND. (iJ <= iMax)) THEN
         IF ((kProfLayer*iI <= iIpmix) .AND. &
         (kProfLayer*iJ >= iIpmix)) THEN
-            iFound=1
-            iUpper = kProfLayer*iJ
+            iFound = 1
+            iUpper  =  kProfLayer*iJ
             IF (iUpper > iNpmix) THEN
-                iUpper=iNpmix
+                iUpper = iNpmix
             END IF
         ELSE
-            iI=iI+1
-            iJ=iJ+1
+            iI = iI+1
+            iJ = iJ+1
         END IF
         GO TO 15
     END IF
      
-    DO iI=1,kMaxPts
-        raL2S(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2S(iI) = 0.0
     END DO
 
-    DO iJ=iIpmix,iUpper
-        DO iI=1,kMaxPts
-            raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+    DO iJ = iIpmix,iUpper
+        DO iI = 1,kMaxPts
+            raL2S(iI) = raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
@@ -1452,46 +1454,46 @@ CONTAINS
     REAL :: raL2S(kMaxPts),raaGasAbs(kMaxPts,kMixFilRows)
 
 ! local variables
-    INTEGER :: iI,iJ,iMax,iFound,iUpper,idiv
+    INTEGER :: iI,iJ,iMax,iFound,iUpper
 
 ! first find the index where the (space) "upper" limit is at
-    iFound=-1
-    iI=0
-    iJ=1
-    iMax=idiv(iNpmix,kProfLayer)
-    iUpper=MOD(iNpmix,kProfLayer)
+    iFound = -1
+    iI = 0
+    iJ = 1
+    iMax = idiv(iNpmix,kProfLayer)
+    iUpper = MOD(iNpmix,kProfLayer)
     IF (iUpper /= 0) THEN
-        iMax=iMax+1
+        iMax = iMax+1
     END IF
 
     15 CONTINUE
     IF ((iFound < 0) .AND. (iJ <= iMax)) THEN
         IF ((kProfLayer*iI <= iIpmix) .AND. &
         (kProfLayer*iJ >= iIpmix)) THEN
-            iFound=1
-            iUpper = kProfLayer*iJ
+            iFound = 1
+            iUpper  =  kProfLayer*iJ
             IF (iUpper > iNpmix) THEN
-                iUpper=iNpmix
+                iUpper = iNpmix
             END IF
         ELSE
-            iI=iI+1
-            iJ=iJ+1
+            iI = iI+1
+            iJ = iJ+1
         END IF
         GO TO 15
     END IF
      
-    DO iI=1,kMaxPts
-        raL2S(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2S(iI) = 0.0
     END DO
 
-    DO iJ=1,iIpmix
-        DO iI=1,kMaxPts
-            raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+    DO iJ = 1,iIpmix
+        DO iI = 1,kMaxPts
+            raL2S(iI) = raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
-    DO iI=1,kMaxPts
-        raL2S(iI)=exp(-raL2S(iI))
+    DO iI = 1,kMaxPts
+        raL2S(iI) = exp(-raL2S(iI))
     END DO
 
     RETURN
@@ -1500,7 +1502,7 @@ CONTAINS
 !************************************************************************
 ! this subroutine does the MP to space optical depths by doing
 ! the calculation between frequency indices from layer iLay-->iLM
-! where iLm=nearest 100 index above iLay, or iNpmix
+! where iLm = nearest 100 index above iLay, or iNpmix
 ! the result is stored in raL2S
     SUBROUTINE MP2GroundOptDp(raaGasAbs,raL2S,iIpmix,iNpmix)
 
@@ -1508,7 +1510,7 @@ CONTAINS
 
     include '../INCLUDE/kcartaparam.f90'
 
-! iIpMix    = current mixed path number
+! iIpMix    =  current mixed path number
 ! iNpMix    = total number of mixed paths
 ! raaGasAbs = matrix containing the raw mixed path abs coeffs
 ! raL2S     = array containing the layer-to-space results
@@ -1516,41 +1518,41 @@ CONTAINS
     REAL :: raL2S(kMaxPts),raaGasAbs(kMaxPts,kMixFilRows)
 
 ! local variables
-    INTEGER :: iI,iJ,iMax,iFound,iUpper,idiv
+    INTEGER :: iI,iJ,iMax,iFound,iUpper
 
 ! first find the index where the (space) "upper" limit is at
-    iFound=-1
-    iI=0
-    iJ=1
+    iFound = -1
+    iI = 0
+    iJ = 1
     iMax=idiv(iNpmix,kProfLayer)
     iUpper=MOD(iNpmix,kProfLayer)
     IF (iUpper /= 0) THEN
-        iMax=iMax+1
+        iMax = iMax+1
     END IF
 
     15 CONTINUE
     IF ((iFound < 0) .AND. (iJ <= iMax)) THEN
         IF ((kProfLayer*iI <= iIpmix) .AND. &
         (kProfLayer*iJ >= iIpmix)) THEN
-            iFound=1
-            iUpper = kProfLayer*iJ
+            iFound = 1
+            iUpper  =  kProfLayer*iJ
             IF (iUpper > iNpmix) THEN
-                iUpper=iNpmix
+                iUpper = iNpmix
             END IF
         ELSE
-            iI=iI+1
-            iJ=iJ+1
+            iI = iI+1
+            iJ = iJ+1
         END IF
         GO TO 15
     END IF
      
-    DO iI=1,kMaxPts
-        raL2S(iI)=0.0
+    DO iI = 1,kMaxPts
+        raL2S(iI) = 0.0
     END DO
 
-    DO iJ=1,iIpmix
-        DO iI=1,kMaxPts
-            raL2S(iI)=raL2S(iI)+raaGasAbs(iI,iJ)
+    DO iJ = 1,iIpmix
+        DO iI = 1,kMaxPts
+            raL2S(iI) = raL2S(iI)+raaGasAbs(iI,iJ)
         END DO
     END DO
 
@@ -1570,29 +1572,29 @@ CONTAINS
     CHARACTER(2) :: caString
     INTEGER :: iInt,iInt1
 
-    DO iInt=1,80
-        caVTFile(iInt:iInt)=' '
+    DO iInt = 1,80
+        caVTFile(iInt:iInt) = ' '
     END DO
 
-    iInt=80
+    iInt = 80
     11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
-        iInt=iInt-1
+        iInt = iInt-1
         GO TO 11
     END IF
 
-    caVTFile(1:iInt)=caOutName(1:iInt)
-    caVTFile(iInt+1:iInt+3)='_VT'
+    caVTFile(1:iInt) = caOutName(1:iInt)
+    caVTFile(iInt+1:iInt+3) = '_VT'
 
 ! now process iRegr so that we end up with a right padded string
 ! eg 2 ---> '2 ', 12 ---> '12' etc
     WRITE(caString,15) iRegr
     15 FORMAT(I2)
 ! this is right justified ... change to left justified
-    iInt=1
+    iInt = 1
     16 continue
     IF (caString(iInt:iInt) == ' ') THEN
-        iInt=iInt+1
+        iInt = iInt+1
         GO TO 16
     END IF
 
@@ -1604,7 +1606,7 @@ CONTAINS
     END IF
     iInt1 = iInt1 + 1
 
-    caVTFile(iInt1:iInt1+(2-iInt))=caString(iInt:2)
+    caVTFile(iInt1:iInt1+(2-iInt)) = caString(iInt:2)
           
     RETURN
     end SUBROUTINE VTName_regr
@@ -1621,29 +1623,29 @@ CONTAINS
     CHARACTER(5) :: caString
     INTEGER :: iInt,iInt1
 
-    DO iInt=1,80
-        caVTFile(iInt:iInt)=' '
+    DO iInt = 1,80
+        caVTFile(iInt:iInt) = ' '
     END DO
 
-    iInt=80
+    iInt = 80
     11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
-        iInt=iInt-1
+        iInt = iInt-1
         GO TO 11
     END IF
 
-    caVTFile(1:iInt)=caOutName(1:iInt)
-    caVTFile(iInt+1:iInt+5)='_RTP_'
+    caVTFile(1:iInt) = caOutName(1:iInt)
+    caVTFile(iInt+1:iInt+5) = '_RTP_'
 
 ! now process iRtp so that we end up with a right padded string
 ! eg 2 ---> '2 ', 12 ---> '12' etc
     WRITE(caString,15) iRtp
     15 FORMAT(I5)
 ! this is right justified ... change to left justified
-    iInt=1
+    iInt = 1
     16 continue
-    IF (caString(iInt:iInt) == ' ') THEN
-        iInt=iInt+1
+    IF (caString(iInt:iInt)  == ' ') THEN
+        iInt = iInt+1
         GO TO 16
     END IF
 
@@ -1655,7 +1657,7 @@ CONTAINS
     END IF
     iInt1 = iInt1 + 1
 
-    caVTFile(iInt1:iInt1+(5-iInt))=caString(iInt:5)
+    caVTFile(iInt1:iInt1+(5-iInt)) = caString(iInt:5)
           
     RETURN
     end SUBROUTINE VTName_rtp
@@ -1680,14 +1682,14 @@ CONTAINS
     CHARACTER(5) :: caString
     INTEGER :: iInt,iInt1,iI,iJ
 
-    DO iInt=1,80
-        caVTFile(iInt:iInt)=' '
+    DO iInt = 1,80
+        caVTFile(iInt:iInt) = ' '
     END DO
 
-    iInt=80
+    iInt = 80
     11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
-        iInt=iInt-1
+        iInt = iInt-1
         GO TO 11
     END IF
 
@@ -1701,10 +1703,10 @@ CONTAINS
     WRITE(caString,15) iRTP
     15 FORMAT(I5)
 ! this is right justified ... change to left justified
-    iInt=1
+    iInt = 1
     16 continue
     IF (caString(iInt:iInt) == ' ') THEN
-        iInt=iInt+1
+        iInt = iInt+1
         GO TO 16
     END IF
 
@@ -1738,14 +1740,14 @@ CONTAINS
      
     INTEGER :: iInt
 
-    DO iInt=1,80
-        caJacobFile2(iInt:iInt)=' '
+    DO iInt = 1,80
+        caJacobFile2(iInt:iInt) = ' '
     END DO
 
-    iInt=80
+    iInt = 80
     11 CONTINUE
     IF ((caJacobFile(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
-        iInt=iInt-1
+        iInt = iInt-1
         GO TO 11
     END IF
 
@@ -1767,24 +1769,24 @@ CONTAINS
      
     INTEGER :: iInt
 
-    DO iInt=1,80
-        caFluxFile(iInt:iInt)=' '
+    DO iInt = 1,80
+        caFluxFile(iInt:iInt) = ' '
     END DO
 
-    iInt=80
+    iInt = 80
     11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
-        iInt=iInt-1
+        iInt = iInt-1
         GO TO 11
     END IF
 
-    caFluxFile(1:iInt)=caOutName(1:iInt)
+    caFluxFile(1:iInt) = caOutName(1:iInt)
 
 ! before Jun 2013
 !      IF (kFLux .LE. 2) THEN
-!        caFluxFile(iInt+1:iInt+5)='_FLUX'
+!        caFluxFile(iInt+1:iInt+5) = '_FLUX'
 !      ELSEIF (kFLux .LE. 5) THEN
-!        caFluxFile(iInt+1:iInt+4)='_OLR'
+!        caFluxFile(iInt+1:iInt+4) = '_OLR'
 !      ELSE
 !        write(kStdErr,*) 'Unknown option for kFlux = ',kFlux
 !        Call DoStop
@@ -1793,17 +1795,17 @@ CONTAINS
 ! after Jun 2013
     write(kStdWarn,*) 'kFlux = ',kFlux
     IF (kFLux == 1) THEN
-        caFluxFile(iInt+1:iInt+5)='_DOWN'   !! down welling flux at bottom of 100 layers
+        caFluxFile(iInt+1:iInt+5) = '_DOWN'   !! down welling flux at bottom of 100 layers
     ELSEIF (kFLux == 2) THEN
-        caFluxFile(iInt+1:iInt+5)='_HEAT'   !! up-down heating rate at all 100 layers
+        caFluxFile(iInt+1:iInt+5) = '_HEAT'   !! up-down heating rate at all 100 layers
     ELSEIF (kFLux == 3) THEN
-        caFluxFile(iInt+1:iInt+3)='_UP'     !! up welling flux at to[ of 100 layers
+        caFluxFile(iInt+1:iInt+3) = '_UP'     !! up welling flux at to[ of 100 layers
     ELSEIF (kFLux == 4) THEN
-        caFluxFile(iInt+1:iInt+4)='_OLR'    !! upwelling flux at TOA
+        caFluxFile(iInt+1:iInt+4) = '_OLR'    !! upwelling flux at TOA
     ELSEIF (kFLux == 5) THEN
-        caFluxFile(iInt+1:iInt+5)='_OLR3'   !! upwelling flux at TOA, tropopause,dnwell at gnd
+        caFluxFile(iInt+1:iInt+5) = '_OLR3'   !! upwelling flux at TOA, tropopause,dnwell at gnd
     ELSEIF (kFLux == 6) THEN
-        caFluxFile(iInt+1:iInt+4)='_ALL'    !! up,down welling flux at all tops/bottoms of each layer
+        caFluxFile(iInt+1:iInt+4) = '_ALL'    !! up,down welling flux at all tops/bottoms of each layer
     ELSE
         write(kStdErr,*) 'Unknown option for kFlux = ',kFlux
         Call DoStop
@@ -1822,19 +1824,19 @@ CONTAINS
      
     INTEGER :: iInt
 
-    DO iInt=1,80
-        caPlanckFile(iInt:iInt)=' '
+    DO iInt = 1,80
+        caPlanckFile(iInt:iInt) = ' '
     END DO
 
-    iInt=80
+    iInt = 80
     11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
-        iInt=iInt-1
+        iInt = iInt-1
         GO TO 11
     END IF
 
-    caPlanckFile(1:iInt)=caOutName(1:iInt)
-    caPlanckFile(iInt+1:iInt+7)='_PLANCK'
+    caPlanckFile(1:iInt) = caOutName(1:iInt)
+    caPlanckFile(iInt+1:iInt+7) = '_PLANCK'
           
     RETURN
     end SUBROUTINE PlanckName
@@ -1940,10 +1942,10 @@ CONTAINS
     INTEGER :: iDoUpperAtmNLTE,iNumNLTEGases,iDumpAllUARads,iDumpAllUASpectra
 
     INTEGER :: iIOUN,iIOUN1,iIOUN2,iIOUN_JAC2,iI,iJ,iK,iFileErr,iEnd,iP,iOk
-    INTEGER :: iOutputOptionNum,iNumLay,DoGasJacob
+    INTEGER :: iOutputOptionNum,iNumLay
     CHARACTER(80) :: caJacobFile,caJacobFile2,caFluxFile,caPlanckFile
 
-    INTEGER :: CheckDoubleEntry,iImportant
+    INTEGER :: iImportant
     INTEGER :: iNatmJac,iaLayerJac(kMaxAtm),iIOUN_Flux,iIOUN_Planck,iIOUN_Cloud
     REAL :: raParams(kMaxUserSet),raPActualAvg(kProfLayer),rP
     CHARACTER(4) :: caStrJunk(7)
@@ -2166,7 +2168,7 @@ CONTAINS
             WRITE(iIOUN,*) iP
         END IF
         IF (iP == 1) THEN
-            iOK=CheckDoubleEntry(iaaOp,iOutputOptionNum,iNumLay)
+            iOK = CheckDoubleEntry(iaaOp,iOutputOptionNum,iNumLay)
             IF (iOK < 0) THEN
                 write(kStdErr,*)'On checking list of paths to output, have found '
                 write(kStdErr,*)'some to be output more than once. messing up'
@@ -2227,7 +2229,7 @@ CONTAINS
                 WRITE(iIOUN,*) iP
             END IF
             IF (iP == 1) THEN
-                iOK=CheckDoubleEntry(iaaOp,iOutputOptionNum,iNumLay)
+                iOK = CheckDoubleEntry(iaaOp,iOutputOptionNum,iNumLay)
                 IF (iOK < 0) THEN
                     write(kStdErr,*)'On checking list of MIXED paths to output,found'
                     write(kStdErr,*)'some that will be output more than once'
@@ -2798,8 +2800,8 @@ CONTAINS
         write(kStdWarn,*) (iaLayerJac(iI),iI=1,iNatmJac)
 
         iI=1
-        205 CONTINUE
-        iP=DoGasJacob(iaGases(iI),iaJacob,iJacob)
+    205 CONTINUE
+        iP = DoGasJacob(iaGases(iI),iaJacob,iJacob)
         IF ((iI <= iNumGases) .AND. (iP > 0)) THEN
             DO iJ=1,kProfLayer
                 WRITE(iIOUN2)iaGases(iI),raaTemp(iJ,iI),raaAmt(iJ,iI)
@@ -3116,7 +3118,7 @@ CONTAINS
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
 
 ! local vars
-    INTEGER :: iIOUN1,iFileErr,i1,i2,iI,iJ,iNLTEChunks,iFloor,iTotalStuff
+    INTEGER :: iIOUN1,iFileErr,i1,i2,iI,iJ,iNLTEChunks,iTotalStuff
     REAL ::    r1,r2,r3
 
     iTotalStuff = 0
@@ -3267,7 +3269,7 @@ CONTAINS
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
 
 ! local vars
-    INTEGER :: iIOUN1,iFileErr,i1,i2,iI,iJ,iNLTEChunks,iFloor,iTotalStuff
+    INTEGER :: iIOUN1,iFileErr,i1,i2,iI,iJ,iNLTEChunks,iTotalStuff
     REAL ::    r1,r2,r3
 
     iTotalStuff = 2         !!! default = rads at 0.005 mb and at 0.000025 mb
