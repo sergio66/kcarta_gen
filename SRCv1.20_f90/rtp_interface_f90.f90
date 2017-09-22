@@ -10,6 +10,11 @@ MODULE rtp_interface_f90
 USE basic_common
 USE spline_and_sort
 USE n_pth_mix
+USE s_misc
+USE freqfile
+USE rad_angles
+USE n_rad_jac_scat
+USE n_pth_mix
 
 IMPLICIT NONE
 
@@ -695,7 +700,7 @@ CONTAINS
 
     INTEGER :: iFileGasesReadIn,iNeed2Read,iGasesInProfile,iTempFound
            
-    INTEGER :: iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard,iFindJ
+    INTEGER :: iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard
     CHARACTER(130) :: ca1,ca2,caTemp
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
@@ -1216,7 +1221,7 @@ CONTAINS
 
     INTEGER :: iFileGasesReadIn,iNeed2Read,iGasesInProfile,iTempFound
            
-    INTEGER :: iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard,iFindJ
+    INTEGER :: iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard
     CHARACTER(130) :: ca1,ca2,caTemp
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
@@ -1723,7 +1728,7 @@ CONTAINS
 
     INTEGER :: iFileGasesReadIn,iNeed2Read,iGasesInProfile,iTempFound
            
-    INTEGER :: iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard,iFindJ
+    INTEGER :: iL1,iGasInRTPFile,length130,iSaveLayer,iDownWard
     CHARACTER(130) :: ca1,ca2,caTemp
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
@@ -2226,13 +2231,13 @@ CONTAINS
     REAL :: rTbdy,rTSurf,rAngle,rPressStart,rPressStop,rHeight,rT
     INTEGER :: iDirection,iW,iInt
     INTEGER :: iC,iNumLinesRead
-    REAL :: FindSurfaceTemp,rSize1,rSize2
+    REAL :: rSize1,rSize2
     INTEGER :: iInstrType,iTop1,iTop2,iBot1,iBot2
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
     integer :: i,j,k,iG,upwell,iOKscanang,iOKzobs,iOKsatzen
     REAL :: raHeight(kProfLayer+1),raThickness(kProfLayer),pobs,pobs1,pTemp,rSURFaltitude
-    REAL :: r1,rEms,rAngleX,rAngleY,saconv_sun,orig_saconv_sun
+    REAL :: r1,rEms,rAngleX,rAngleY
     INTEGER*4 :: i4CTYPE1,i4CTYPE2,iNclouds_RTP_black
      
     integer :: rtpopen, rtpread, rtpwrite, rtpclose
@@ -3274,7 +3279,6 @@ CONTAINS
     INTEGER :: iJ1,iI,iIn,iJ,iScat,iaTemp(kMixFilRows),iTop,iBot,iNum,iErr
     REAL :: rPT,rPB,rP1,rP2,rSwap,r1,r2,raaJunkCloudTB(2,2)
     CHARACTER(120) :: caName
-    INTEGER :: FindCloudLayer
 ! these are to check that the scattering table names are unique
     INTEGER :: iaTable(kCloudLayers*kMaxClouds),iWhichScatterCode,iDefault
     CHARACTER(120) :: caaTable(kCloudLayers*kMaxClouds)
@@ -3948,7 +3952,7 @@ CONTAINS
     REAL ::    raCprtop(kMaxClouds),raCprbot(kMaxClouds)
      
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
-    integer ::   i,j,k,iG,iH,iGX,iDownward,iGasIndex,iCldIndex,iMapIndex,iDiv
+    integer ::   i,j,k,iG,iH,iGX,iDownward,iGasIndex,iCldIndex,iMapIndex
     REAL ::      raHeight(kProfLayer+1),pProf(kProfLayer)
     REAL ::      kcraPressLevels(kProfLayer+1)
     REAL ::      kcRTP_pTop,kcRTP_pBot, deltaP
@@ -3964,7 +3968,7 @@ CONTAINS
     CHARACTER(120) :: caaCloudFileX(kMaxClouds)
 
     integer ::   ii,ij,ik      ! added ESM
-    integer :: rtpopen, rtpread, rtpwrite, rtpclose, ifindj ! added ESM
+    integer :: rtpopen, rtpread, rtpwrite, rtpclose ! added ESM
     record /RTPHEAD/ head
     record /RTPPROF/ prof
     record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
@@ -4552,7 +4556,7 @@ CONTAINS
     INTEGER :: iDownWard
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
-    integer :: i,j,k,iG,iK,iJ,iI,iRTP,iL1,iProfileLayers,iGasInRTPFile,iFindJ
+    integer :: i,j,k,iG,iK,iJ,iI,iRTP,iL1,iProfileLayers,iGasInRTPFile
     REAL :: pProf(kMaxLayer),pTemp(kMaxLayer),MGC,plays(kMaxLayer)
           
     integer :: rtpopen, rtpread, rtpwrite, rtpclose

@@ -27,6 +27,11 @@
 MODULE jac_limb
 
 USE basic_common
+USE s_writefile
+USE freqfile
+USE kcoeff_basic
+USE jac_down
+USE jac_up
 
 IMPLICIT NONE
 
@@ -229,8 +234,7 @@ CONTAINS
     REAL :: radBTdr(kMaxPtsJac),radBackgndThermdT(kMaxPtsJac)
     REAL :: radSolardT(kMaxPtsJac),rWeight
     INTEGER :: iG,iLay,iIOUN,iLowest
-    INTEGER :: DoGasJacob,iGasJacList
-    INTEGER :: WhichGasPosn,iGasPosn
+    INTEGER :: iGasJacList,iGasPosn
 
     INTEGER :: iDefault,iWhichJac,iFr
     INTEGER :: iDoAdd,iErr
@@ -248,6 +252,11 @@ CONTAINS
     iWhichJac = +32    !! only T jacs
 
     iWhichJac = kActualJacs
+
+    IF (kMaxPtsJac /= kMaxPts) THEN
+      write(kStdWarn,*) 'need kMaxPts == kMaxPtsJac for kacobian calcs in jac_limb'
+      CALL DoStop
+    END IF
 
     IF (iDefault /= iWhichJac) THEN
         print *,'iDefault,iWhichJac = ',iDefault,iWhichJac
@@ -546,8 +555,7 @@ CONTAINS
     REAL :: radBTdr(kMaxPtsJac),radBackgndThermdT(kMaxPtsJac)
     REAL :: radSolardT(kMaxPtsJac),rWeight
     INTEGER :: iG,iLay,iIOUN,iLowest
-    INTEGER :: DoGasJacob,iGasJacList
-    INTEGER :: WhichGasPosn,iGasPosn
+    INTEGER :: iGasJacList,iGasPosn
 
     INTEGER :: iDefault,iWhichJac,iFr
     INTEGER :: iDoAdd,iErr
@@ -871,8 +879,7 @@ CONTAINS
     REAL :: radBTdr(kMaxPtsJac),radBackgndThermdT(kMaxPtsJac)
     REAL :: radSolardT(kMaxPtsJac),rWeight
     INTEGER :: iG,iLay,iIOUN,iLowest
-    INTEGER :: DoGasJacob,iGasJacList
-    INTEGER :: WhichGasPosn,iGasPosn
+    INTEGER :: iGasJacList,iGasPosn
 
     INTEGER :: iDefault,iWhichJac,iFr
     INTEGER :: iDoAdd,iErr

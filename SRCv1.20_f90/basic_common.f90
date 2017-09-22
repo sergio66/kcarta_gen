@@ -9,6 +9,43 @@ IMPLICIT NONE
 CONTAINS
 
 !************************************************************************
+! funtion to estimate height (in m), given pressure (in mb)
+!  based on US STD atm
+    REAL FUNCTION p2h(p)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/airsheightsparam.f90'
+    include '../INCLUDE/airslevelsparam.f90'
+
+    INTEGER :: iI
+    REAL :: pavg,rH,raY2P(kMaxLayer),p,logpavg(kMaxLayer),raHgt(kMaxLayer)
+         
+    DO iI = 1,100
+        pavg = (DATABASELEV(iI+1)-DATABASELEV(iI))/log(DATABASELEV(iI+1)/DATABASELEV(iI))
+        logpavg(kMaxLayer-iI+1) = log(pavg)      !! need this to be smallest to largest
+        raHgt(kMaxLayer-iI+1)   = DatabaseHEIGHT(iI)
+    END DO
+
+!      print *,(logpavg(iI),iI=1,kMaxLayer)
+!      print *,(raHgt(iI),iI=1,kMaxLayer)
+
+    IF (p >= DATABASELEV(1)) THEN
+        rH = DatabaseHEIGHT(1)
+    ELSEIF (p <= DATABASELEV(kMaxLayer+1)) THEN
+        rH = DatabaseHEIGHT(kMaxLayer)
+    ELSE
+        CALL rlinear1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+        CALL rspl1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+    END IF
+
+    p2h = rH
+
+    RETURN
+    end FUNCTION p2h
+
+!************************************************************************
 ! this subroutine closes all files in case of an emergency stop
 ! assumes the message ends with '$'
     SUBROUTINE DoSTOPMesg(caMessage)
@@ -640,6 +677,120 @@ CONTAINS
           
     RETURN
     end FUNCTION find_tropopause
+
+!************************************************************************
+! this subroutine computes d(Brightness Temp)/d(Rad) for jacobian output
+    SUBROUTINE Find_BT_rad(raInten,radBTdr,raFreq, &
+    radBackgndThermdT,radSolardT)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+! raInten is the radiance intensity at the instrument
+! raFreq are the frequencies
+! radBTdr is the derivative result
+    REAL :: raFreq(kMaxPts),raInten(kMaxPts),radBTdr(kMaxPtsJac)
+    REAL :: radBackgndThermdT(kMaxPtsJac),radSolardT(kMaxPtsJac)
+          
+    INTEGER :: iFr
+    REAL :: r1,r2,r3,r4
+
+!! need these for derivatives of Planck
+    r1 = sngl(kPlanck1)
+    r2 = sngl(kPlanck2)
+
+    DO iFr = 1,kMaxPts
+        r3 = r1*r2 * (raFreq(iFr)**4)/(raInten(iFr)**2)
+        r4 = 1.0+r1 * (raFreq(iFr)**3)/raInten(iFr)
+        radBTdr(iFr) = r3/r4/(alog(r4)**2)
+    END DO
+
+    IF (kThermal < 0) THEN
+        DO iFr = 1,kMaxPts
+            radBackgndThermdT(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            r3 = r1*r2 * (raFreq(iFr)**4)/(radBackgndThermdT(iFr)**2)
+            r4 = 1.0+r1 * (raFreq(iFr)**3)/radBackGndThermdT(iFr)
+            radBackgndThermdT(iFr) = r3/r4/(alog(r4)**2)
+        END DO
+    END IF
+
+    IF (kSolar < 0) THEN
+        DO iFr = 1,kMaxPts
+            radSolardT(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            r3 = r1*r2 * (raFreq(iFr)**4)/(radSolardT(iFr)**2)
+            r4 = 1.0+r1 * (raFreq(iFr)**3)/radSolardT(iFr)
+            radSolardT(iFr) = r3/r4/(alog(r4)**2)
+        END DO
+    END IF
+
+    RETURN
+    end SUBROUTINE Find_BT_rad
+!************************************************************************
+! **********************  generic jacobian stuff ************************
+!************************************************************************
+! this subroutine does d/dr(tau_layer2space) for gas iG
+! where r == gas amount q or temperature T at layer iM
+! and  iL is the relevant layer we want tau_layer2space differentiated
+! HENCE IF iL > iM, derivative == 0
+! i.e. this does d(tau(l--> inf)/dr_m
+    SUBROUTINE JacobTerm(iL,iM,raaLay2Sp,raTemp)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raaLay2Sp is the transmission frm layer to space
+! iM has the layer that we differentiate wrt to
+! iL has the radiating layer number (1..kProfLayerJac)
+! raTemp has the results, apart from the multiplicative constants
+!   which are corrected in MinusOne
+    INTEGER :: iL,iM
+    REAL :: raTemp(kMaxPtsJac),raaLay2Sp(kMaxPtsJac,kProfLayerJac)
+
+! local variables
+    INTEGER :: iFr
+
+    IF (iL > iM) THEN
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = raaLay2Sp(iFr,iL)
+        END DO
+    END IF
+
+    RETURN
+    end SUBROUTINE JacobTerm
+
+!************************************************************************
+! this subroutine multiplies the array by -1.0*constant where constant
+! depends on whether we are doing d/dT or d/dq
+    SUBROUTINE MinusOne(raTorQ,raResults)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raResults is the array
+! raTorQ === relevant element of raaaDq or raaDt
+    REAL :: raTorQ(kMaxPtsJac)
+    REAL :: raResults(kMaxPtsJac)
+
+    INTEGER :: iFr
+     
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = -raResults(iFr) * raTorQ(iFr)
+    END DO
+     
+    RETURN
+    end SUBROUTINE MinusOne
 
 !************************************************************************
 

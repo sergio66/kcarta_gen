@@ -59,6 +59,7 @@ CONTAINS
           
     RETURN
     end SUBROUTINE wrtout_head
+    
 !************************************************************************
 ! this subroutine writes out the results
 ! this is a major change from before
@@ -85,6 +86,94 @@ CONTAINS
 
     RETURN
     end SUBROUTINE wrtout
+
+!************************************************************************
+! this subroutine prepares the output Jacobians according to kJacobOutput
+    SUBROUTINE doJacobOutput(iLowest,raFreq,raResults, &
+    radBTdr,raaAmt,raInten,iGasID,iM,iGasPosn)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! iLowest is the lowest layer in the atmosphere (modulo kProfLayer)
+! raFreq are the frequency wavenumbers
+! raResults are the raw d(rad)/d(gas amt)
+! raaAmt are the gas profiles
+! raInten is the radiant intensity at instrument
+! iGasID is well duh... actually if iGasID = -1, then we are doing d/dT
+! iM is the layer number (1..100)
+! iGasPosn is the position of gasID in the gaslist
+! radBTdr is the d(brightness temp)/d(Radiance) array
+    INTEGER :: iGasID,iM,iLowest,iGasPosn
+    REAL :: raFreq(kMaxPts),raResults(kMaxPtsJac)
+    REAL :: raInten(kMaxPts)
+    REAL :: raaAmt(kProfLayerJac,kGasStore),radBTdr(kMaxPtsJac)
+
+    INTEGER :: iFr,iM1
+
+    IF ((iGasID == 101) .OR. (iGasID == 102)) THEN
+        iGasPosn  = 1   !!!! corresponds to water
+    END IF
+
+    iM1=(iLowest-1) + iM
+
+!      IF (kJacobOutPut .EQ. -1) THEN
+! basically do nothing! user wants d(rad)/dq
+!        END IF
+
+    IF (kJacobOutput /= -1) THEN !oh well, do this
+        IF ((iGasID > 0) .AND. (iGasID <= 200)) THEN
+        ! we are doing d/dq  for a normal gas
+            IF (kJacobOutPut == 0) THEN
+            ! user wants d(rad)/dq * q for a normal gas
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * raaAmt(iM1,iGasPosn)
+                END DO
+            ELSE IF (kJacobOutPut == 1) THEN
+            ! user wants d(BT)/dq * q for a normal gas; this is the default option
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = &
+                    raResults(iFr) * raaAmt(iM1,iGasPosn) * radBTdr(iFr)
+                END DO
+            ELSE IF (kJacobOutPut == 2) THEN
+            ! user wants d(BT)/dq for a normal gas
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * radBTdr(iFr)
+                END DO
+            END IF
+
+        ELSEIF (iGasID > 200) THEN
+        ! we are doing d/dq  for IWP or DME
+            IF (kJacobOutPut == 0) THEN
+            ! user wants d(rad)/dq * q for IWP or DME
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr)
+                END DO
+            ELSE IF (kJacobOutPut == 1) THEN
+            ! user wants d(BT)/dq * q for IWP or DME for a normal gas
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * radBTdr(iFr)
+                END DO
+            END IF
+
+        ELSE IF (iGasID <= 0) THEN
+        ! we are doing d/dT or cloud amt, size jacobians
+            IF (kJacobOutPut == 0) THEN
+                iFr = 1
+            ! user wants d(rad)/dT so do nothing
+            ELSE IF (kJacobOutPut == 1) THEN
+            ! user wants d(BT)/dT
+                DO iFr = 1,kMaxPts
+                    raResults(iFr) = raResults(iFr) * radBTdr(iFr)
+                END DO
+            END IF
+        END IF
+
+    END IF   !IF (kJacobOutput /= -1) THEN !oh well, do this
+
+    RETURN
+    end SUBROUTINE doJacobOutput
 
 !************************************************************************
 !     these are to dump out Planck multipliers (for NLTE)

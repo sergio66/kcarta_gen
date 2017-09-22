@@ -5,6 +5,9 @@
 MODULE n_output
 
 USE basic_common
+USE spline_and_sort
+USE s_misc
+USE freqfile
 
 IMPLICIT NONE
 
@@ -1069,7 +1072,7 @@ CONTAINS
     REAL :: raaOpT(kMaxPrT,kProfLayer),raaUserPressT(kMaxPrT,kProfLayer)
     REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm),raaPrBdry(kMaxAtm,2)
 
-    INTEGER :: iUpDown,iI,iLay,MP2Lay
+    INTEGER :: iUpDown,iI,iLay
 
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN
         iUpDown = 1        !radiation going up
@@ -1571,8 +1574,8 @@ CONTAINS
     REAL :: raPress(kProfLayer),raaUserPressT(kMaxPrT,kProfLayer)
 
     REAL :: rP,rF,raPressDiff(kProfLayer+1),rPressDiffMin,rPScatter,rPScatter1
-    INTEGER :: iI,i1,i2,iOne,iFound,iDirection,iFloor,iW,iOffSet
-    INTEGER :: iStartLay,MP2Lay,iSilly,iSillySave
+    INTEGER :: iI,i1,i2,iOne,iFound,iDirection,iW,iOffSet
+    INTEGER :: iStartLay,iSilly,iSillySave
 
 ! check the radiation direction
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN

@@ -13,6 +13,7 @@ use rad_flux
 use rad_limb
 use rad_angles
 use kcoeff_basic  ! just for interptemp ugh
+use s_misc
 
 IMPLICIT NONE
 
@@ -593,7 +594,7 @@ CONTAINS
     REAL :: raScatterIWP(kMaxAtm)
 
     REAL :: rMPTemp
-    INTEGER :: i1,i2,iFloor,iDownWard,iVary,iIOUN_IN,iDefault,iUsualUpwell
+    INTEGER :: i1,i2,iDownWard,iVary,iIOUN_IN,iDefault,iUsualUpwell
 
     DO i1=1,kMaxPts
         raInten(i1)=0.0
@@ -970,7 +971,7 @@ CONTAINS
 ! local variables
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
@@ -978,12 +979,12 @@ CONTAINS
 
     CHARACTER(80) :: caDumpEmiss
     CHARACTER(4) ::  c4
-    INTEGER :: iIOUN1,i0,i1,i2,i3,iErr,find_tropopause,troplayer
+    INTEGER :: iIOUN1,i0,i1,i2,i3,iErr,troplayer
     REAL :: raG2S(kMaxPts)
      
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
 ! for the NLTE which is not used in this routine
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
@@ -1459,14 +1460,14 @@ CONTAINS
 ! local variables
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
     REAL :: rDum1,rDum2
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
 ! for the NLTE which is not used in this routine
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
@@ -1476,7 +1477,7 @@ CONTAINS
     REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN
     REAL :: bt2rad,t2s
-    INTEGER :: iFr1,find_tropopause,troplayer
+    INTEGER :: iFr1,troplayer
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
 ! for specular reflection
@@ -1951,7 +1952,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iLow
-    REAL :: ttorad,rPlanck,rMPTemp,raOutFrac(kProfLayer)
+    REAL :: rPlanck,rMPTemp,raOutFrac(kProfLayer)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer)
            
 ! to do the angular integration
@@ -1961,7 +1962,7 @@ CONTAINS
 ! for the sun contribution
     REAL :: rSunAngle,rSunTemp,raSurface(kMaxPts),raSunRefl(kMaxPts)
 
-    INTEGER :: iDoSolar,MP2Lay
+    INTEGER :: iDoSolar
     REAL :: rCos,raInten2(kMaxPts)
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
@@ -2319,13 +2320,13 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     REAL :: raOutFrac(kProfLayer)
     REAL :: raVT1(kMixFilRows)
@@ -2806,13 +2807,13 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary,iDefault
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2Junk(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     REAL :: raOutFrac(kProfLayer)
     REAL :: raVT1(kMixFilRows)
@@ -2820,7 +2821,7 @@ CONTAINS
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
     REAL :: TEMP(MAXNZ),ravt2(maxnz),rJunk
-    REAL :: rUseThisInputAngle,saconv_sun,vaconv
+    REAL :: rUseThisInputAngle,saconv_sun
 
 ! for LBLRTM TAPE5/TAPE6
     INTEGER :: iLBLRTMZero
@@ -2829,7 +2830,7 @@ CONTAINS
 ! for temporary dump of background thermal
     CHARACTER(80) :: caDumpEmiss
     CHARACTER(4) ::  c4
-    INTEGER :: iIOUN1,i0,i1,i2,i3,iErr,find_tropopause,troplayer,iPrintBackThermal
+    INTEGER :: iIOUN1,i0,i1,i2,i3,iErr,troplayer,iPrintBackThermal
     REAL :: raG2S(kMaxPts)
 
     iDefault = -1
@@ -3400,13 +3401,13 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2Junk(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     REAL :: raOutFrac(kProfLayer)
     REAL :: raVT1(kMixFilRows)
@@ -3414,7 +3415,7 @@ CONTAINS
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
     REAL :: TEMP(MAXNZ),ravt2(maxnz),rJunk
-    REAL :: rUseThisInputAngle,saconv_sun,vaconv
+    REAL :: rUseThisInputAngle,saconv_sun
 
 ! for LBLRTM TAPE5/TAPE6
     INTEGER :: iLBLRTMZero
@@ -3423,7 +3424,7 @@ CONTAINS
 ! for temporary dump of background thermal
     CHARACTER(80) :: caDumpEmiss
     CHARACTER(4) ::  c4
-    INTEGER :: iIOUN1,i0,i1,i2,i3,iErr,find_tropopause,troplayer,iPrintBackThermal
+    INTEGER :: iIOUN1,i0,i1,i2,i3,iErr,troplayer,iPrintBackThermal
     REAL :: raG2S(kMaxPts)
 
     IF ((iaaOverrideDefault(2,6) == -1)  .AND. (kOuterLoop == 1)) THEN
@@ -4043,13 +4044,13 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2Junk(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 
     REAL :: raOutFrac(kProfLayer)
     REAL :: raVT1(kMixFilRows)
@@ -4057,7 +4058,7 @@ CONTAINS
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
     REAL :: TEMP(MAXNZ),ravt2(maxnz),rJunk
-    REAL :: rUseThisInputAngle,saconv_sun,vaconv
+    REAL :: rUseThisInputAngle,saconv_sun
 
 ! for LBLRTM TAPE5/TAPE6
     INTEGER :: iLBLRTMZero
@@ -4577,7 +4578,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iLow
-    REAL :: ttorad,rPlanck,rMPTemp,raOutFrac(kProfLayer)
+    REAL :: rPlanck,rMPTemp,raOutFrac(kProfLayer)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer)
            
 ! to do the angular integration
@@ -4587,7 +4588,7 @@ CONTAINS
 ! for the sun contribution
     REAL :: rSunAngle,rSunTemp,raSurface(kMaxPts),raSunRefl(kMaxPts)
 
-    INTEGER :: iDoSolar,MP2Lay
+    INTEGER :: iDoSolar
     REAL :: rCos,raInten2(kMaxPts)
     INTEGER :: iCloudLayerTop,iCloudLayerBot
     INTEGER :: iIOUN,iI
@@ -4598,7 +4599,7 @@ CONTAINS
 
 ! to keep angles constant
     REAL :: TEMP(MAXNZ),ravt2(maxnz),rJunk,rFracX
-    REAL :: rUseThisInputAngle,saconv_sun,vaconv
+    REAL :: rUseThisInputAngle,saconv_sun
     INTEGER :: iVary
 
     iLBLRTMZero = -1

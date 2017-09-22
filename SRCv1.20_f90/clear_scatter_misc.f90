@@ -7,6 +7,8 @@ MODULE clear_scatter_misc
 USE basic_common
 USE kcoeff_basic   !! for interptemp
 USE spline_and_sort
+USE rad_quad
+USE clear_scatter_basic
 
 IMPLICIT NONE
 
@@ -893,7 +895,7 @@ CONTAINS
 
 ! to do the angular integration
     REAL :: rAngleTr_m1,rAngleTr,rL2G,rL2Gm1
-    REAL :: FindDiffusiveAngleExp,rDiff,rCosDiff
+    REAL :: rDiff,rCosDiff
 
     iBdryP1 = NLev
     iCase   = -1
@@ -1987,7 +1989,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iL,iLay,iM,iaRadLayerTemp(kMixFilRows)
-    REAL :: FindBottomTemp,Temp1(maxnz)
+    REAL :: Temp1(maxnz)
     REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
 
     DO iLay=1,MAXNZ
@@ -2073,7 +2075,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iL,iLay,iM,iaRadLayerTemp(kMixFilRows),iOffSet,iJump,iLowest
-    REAL :: FindBottomTemp,Temp1(maxnz)
+    REAL :: Temp1(maxnz)
     REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
 
     iLowest = kProfLayer - iProfileLayers + 1
@@ -2639,7 +2641,7 @@ CONTAINS
     REAL ::     TABPHI2UP(MAXTAB,NSCATTAB), TABPHI2DN(MAXTAB,NSCATTAB)
 
 ! local variables
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iF,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
@@ -2772,7 +2774,7 @@ CONTAINS
     REAL ::     TABPHI2UP(MAXTAB,NSCATTAB), TABPHI2DN(MAXTAB,NSCATTAB)
 
 ! local variables
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iF,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
@@ -2927,7 +2929,7 @@ CONTAINS
 
 ! local variables
     REAL :: mu_sun,mu_sat
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iF,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
@@ -3115,7 +3117,7 @@ CONTAINS
 
 ! local variables
     REAL :: mu_sun,mu_sat
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iF,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
@@ -3305,7 +3307,7 @@ CONTAINS
     REAL ::     TABPHI2UP(MAXTAB,NSCATTAB), TABPHI2DN(MAXTAB,NSCATTAB)
 
 ! local variables
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm
+    INTEGER :: iL,iF,iI,N,L,I
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ),rScat
 
@@ -4101,7 +4103,7 @@ CONTAINS
     REAL ::     TABPHI2UP(MAXTAB,NSCATTAB), TABPHI2DN(MAXTAB,NSCATTAB)
 
 ! local variables
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iF,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere,iG
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
@@ -4343,7 +4345,7 @@ CONTAINS
 
 ! local variables
     REAL :: mu_sun,mu_sat
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iF,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere,iDMEVary
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
@@ -4599,7 +4601,7 @@ CONTAINS
 
 ! local variables
     REAL :: mu_sun,mu_sat
-    INTEGER :: iL,iF,iI,N,L,I,IFindWhereInAtm,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iF,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
@@ -4755,4 +4757,159 @@ CONTAINS
     end SUBROUTINE AddCloud_pclsam_Jacob_uplook_sunshine
 
 !************************************************************************
+! this function finds the pressure layer at which rPressStart is within,
+! as well as the fraction of the layer that it occupies
+    REAL FUNCTION FindBottomTemp(rP,raProfileTemp, &
+    raPressLevels,iProfileLayers)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raPressLevels = actual pressure levels that come out of kLAYERS
+! raProfileTemp = actual profile temp
+! rP            = pressure at which we want the temperature
+    real :: rP,raProfileTemp(kProfLayer),raPressLevels(kProfLayer+1)
+    integer :: iProfileLayers
+
+    integer :: iFound,i1,i2,i3,iLowest,iJ
+    real :: rP1,rP2,T1,T2
+    real :: raP(3),raT(3),Y2A(3),rT,raLogP(3)
+    real :: yp1,ypn,work(3)
+    INTEGER :: iLog,iSpline
+
+    iLog = +1       !!!do log(P) for the x-points
+    iLog = -1       !!!do   P    for the x-points
+
+    iSpline = -1    !!!use linear interpolations
+    iSpline = +1    !!!use spline interpolations
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    iLog = +1       !!!do log(P) for the x-points
+    iSpline = -1    !!!use linear interpolations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    rT=0.0
+
+    iLowest = kProfLayer-iProfileLayers+1
+
+    IF (rP >= raPressLevels(iLowest)) THEN
+    ! his is WHOLE of the bottom layer
+        i1=iLowest
+    ELSE IF (rP <= raPressLevels(kProfLayer+1)) THEN
+    ! his is ludicrous
+        write(kStdErr,*) rP,raPressLevels(kProfLayer+1)
+        write(kStdErr,*) 'Pressure of lower boundary is TOO LOW!!!'
+        CALL DoStop
+
+    ELSE
+    ! irst find the AIRS layer within which it lies
+        iFound=-1
+        i1 = iLowest
+        i2 = iLowest+1
+        10 CONTINUE
+        IF ((rP <= raPressLevels(i1)) .AND. (rP > raPressLevels(i2))) THEN
+            iFound=1
+        END IF
+        IF ((iFound < 0) .AND. (i1 < kProfLayer)) THEN
+            i1=i1+1
+            i2=i2+1
+            GO TO 10
+        END IF
+        IF ((iFound < 0)) THEN
+            IF (abs(rP-raPressLevels(kProfLayer+1)) <= delta) THEN
+                i1=kProfLayer
+                iFound=1
+            ELSE
+                write(kStdErr,*) 'could not find pressure ',rP
+                write(kStdErr,*) 'within AIRS pressure levels. Please check'
+                write(kStdErr,*) '*RADNCE and *OUTPUT sections'
+                CALL DoSTOP
+            END IF
+        END IF
+    END IF
+
+    IF ((i1 > kProfLayer) .OR. (i1 < iLowest)) THEN
+        write(kStdErr,*) 'sorry : cannot find surface temp for '
+        write(kStdErr,*) 'layers outside ',iLowest,' and ',kProfLayer
+        write(kStdErr,*) 'Allowed Pressure ranges are from : ', &
+        raPressLevels(iLowest),' to  ',raPressLevels(kProfLayer+1),' mb'
+        write(kStdErr,*) 'Surface Pressure is ',rP,' mb'
+        call DoStop
+    END IF
+              
+! ow find the temperature
+    IF (i1 == iLowest) THEN          !do linear interp
+        i1 = iLowest
+        i2 = iLowest+1
+        i3 = iLowest+2
+        rP1 = (raPressLevels(i2)-raPressLevels(i1))/ &
+        log(raPressLevels(i2)/raPressLevels(i1))
+        rP2 = (raPressLevels(i3)-raPressLevels(i2))/ &
+        log(raPressLevels(i3)/raPressLevels(i2))
+        T1 = raProfileTemp(i1)
+        T2 = raProfileTemp(i2)
+        IF (iLog == -1) THEN
+            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)           !!linear in P
+        ELSE
+            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1)) !!log(P)
+        END IF
+
+    ELSEIF (i1 >= (kProfLayer-1)) THEN          !do linear interp
+        rP1 = (raPressLevels(kProfLayer)-raPressLevels(kProfLayer-1))/ &
+        log(raPressLevels(kProfLayer)/raPressLevels(kProfLayer-1))
+        rP2 = (raPressLevels(kProfLayer+1)-raPressLevels(kProfLayer))/ &
+        log(raPressLevels(kProfLayer+1)/raPressLevels(kProfLayer))
+        T1 = raProfileTemp(kProfLayer-1)
+        T2 = raProfileTemp(kProfLayer)
+        IF (iLog == -1) THEN
+            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)            !!linear in P
+        ELSE
+            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1))  !!log(P)
+        END IF
+    ELSE          !do spline ... note that the pressures have to
+    ! e in ascENDing order for good interpolation
+        rP1 = (raPressLevels(i1)-raPressLevels(i1-1))/ &
+        log(raPressLevels(i1)/raPressLevels(i1-1))
+        raP(3) = rP1
+        rP1 = (raPressLevels(i1+1)-raPressLevels(i1))/ &
+        log(raPressLevels(i1+1)/raPressLevels(i1))
+        raP(2) = rP1
+        rP1 = (raPressLevels(i1+2)-raPressLevels(i1+1))/ &
+        log(raPressLevels(i1+2)/raPressLevels(i1+1))
+        raP(1) = rP1
+        IF (iLog == +1) THEN
+            DO iJ = 1,3
+                raLogP(iJ) = log(raP(iJ))
+            END DO
+        END IF
+
+        raT(3) = raProfileTemp(i1-1)
+        raT(2) = raProfileTemp(i1)
+        raT(1) = raProfileTemp(i1+1)
+
+        yp1=1.0e30
+        ypn=1.0e30
+        IF (iSpline == +1) THEN
+            IF (iLog == +1) THEN
+                CALL rspl1(raLogP,raT,3,log(rP),rT,1)
+            ELSE
+                CALL rspl1(raP,raT,3,rP,rT,1)
+            END IF
+        ELSEIF (iSpline == -1) THEN
+            IF (iLog == +1) THEN
+                CALL rlinear1(raP,raT,3,rP,rT,1)
+            ELSE
+                CALL rlinear1(raLogP,raT,3,log(rP),rT,1)
+            END IF
+        END IF
+    END IF
+
+    FindBottomTemp = rT
+
+    RETURN
+    end FUNCTION FindBottomTemp
+
+!************************************************************************
+
 END MODULE clear_scatter_misc

@@ -27,6 +27,9 @@
 MODULE jac_up
 
 USE basic_common
+USE s_writefile
+USE freqfile
+USE kcoeff_basic
 
 IMPLICIT NONE
 
@@ -98,10 +101,10 @@ CONTAINS
     REAL :: raaGeneral(kMaxPtsJac,kProfLayerJac)
     REAL :: radBTdr(kMaxPtsJac),rWeight
     REAL :: radBackgndThermdT(kMaxPtsJac),radSolardT(kMaxPtsJac)
-
+    
     INTEGER :: iG,iLay,iIOUN,iLowest,iWhichLayer
-    INTEGER :: DoGasJacob,iGasJacList
-    INTEGER :: WhichGasPosn,iGasPosn
+    INTEGER :: iGasJacList
+    INTEGER :: iGasPosn
 
     INTEGER :: iDefault,iWhichJac,iFr
     INTEGER :: iDoAdd,iErr
@@ -127,7 +130,12 @@ CONTAINS
     iLowest = iaaRadLayer(iAtm,1)            !!! this is for DOWN LOOk instr
     iLowest = iaaRadLayer(iAtm,iNumLayer)    !!!modify for UPLOOK instr
     iLowest = MOD(iLowest,kProfLayer)
-          
+
+    IF (kMaxPtsJac /= kMaxPts) THEN
+      write(kStdWarn,*) 'need kMaxPts == kMaxPtsJac for kacobian calcs in jac_up'
+      CALL DoStop
+    END IF
+    
     iIOUN = kStdJacob
 
     IF (kJacobOutPut >= 1) THEN
@@ -179,7 +187,7 @@ CONTAINS
                     (abs(kLongOrShort) <= 1)) THEN
                         write(kStdWarn,*)'gas d/dq gas# layer#',iG,iLay,iaaRadLayer(iAtm,iLay)
                     END IF
-                !! see if this gas does exist for this chunk
+                    !! see if this gas does exist for this chunk
                     CALL DataBaseCheck(iaGases(iG),raFreq,iTag,iActualJac, &
                     iDoAdd,iErr)
                     IF (iDoAdd > 0) THEN
@@ -191,9 +199,9 @@ CONTAINS
                         CALL doJacobOutput(iLowest,raFreq,raResults, &
                         radBTdr,raaAmt,raInten,iaGases(iG),iWhichLayer,iGasPosn)
                     ELSE
-                        DO iFr = 1,kMaxPts
-                            raResults(iFr) = 0.0
-                        END DO
+                      DO iFr = 1,kMaxPts
+                          raResults(iFr) = 0.0
+                      END DO
                     END IF
                     CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
                 END DO
@@ -247,9 +255,6 @@ CONTAINS
             CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
         END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-        DO iFr = 1,kMaxPts
-            raResults(iFr) = 0.0
-        END DO
         DO iLay = iNumLayer,1,-1
             CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
         END DO
@@ -272,7 +277,7 @@ CONTAINS
         !      CALL doJacobOutput(raFreq,raResults,radBTdr,raaAmt,raInten,0,
         !     $                               iWhichLayer)
         ! so just output the weighting functions
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
         END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
         DO iFr = 1,kMaxPts
@@ -340,8 +345,8 @@ CONTAINS
 
 ! local variables
     REAL :: r1,r2,rCos
-    REAL :: r3,r4,r5,raVT1(kMixFilRows),InterpTemp
-    INTEGER :: iLay,iFr,iL,iLay2,iMM,iMM2,MP2Lay
+    REAL :: r3,r4,r5,raVT1(kMixFilRows)
+    INTEGER :: iLay,iFr,iL,iLay2,iMM,iMM2
 
     r1 = sngl(kPlanck1)
     r2 = sngl(kPlanck2)
@@ -549,7 +554,7 @@ CONTAINS
     INTEGER :: iG,iMMM,iNumLayer
 
 ! local variables
-    INTEGER :: iFr,iJ1,iM,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iM,iM1
     REAL :: raTemp(kMaxPtsJac),rCos
 
     iM = iMMM
@@ -637,7 +642,7 @@ CONTAINS
     INTEGER :: iMMM,iNumLayer
 
 ! local variables
-    INTEGER :: iFr,iJ1,iJp1,iM,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iJp1,iM,iM1
     REAL :: raTemp(kMaxPtsJac),rCos
 
     iM = iMMM
@@ -725,7 +730,7 @@ CONTAINS
     REAL :: raaAbs(kMaxPts,kMixFilRows)
      
     REAL :: rCos
-    INTEGER :: iFr,iM,iM1,MP2Lay
+    INTEGER :: iFr,iM,iM1
      
     rCos = cos(raLayAngles(1)*kPi/180.0)
     rCos = cos(rSatAngle*kPi/180.0)

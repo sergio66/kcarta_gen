@@ -5,6 +5,11 @@
 MODULE n_gas_wt_spectra
 
 USE basic_common
+!USE kpredictVT
+!USE kcoeff_basic
+USE spline_and_sort
+USE s_misc
+USE freqfile
 
 IMPLICIT NONE
 
@@ -124,7 +129,7 @@ CONTAINS
 
 ! local variables
     CHARACTER(7) :: caWord
-    INTEGER :: iInt,iErr,iC,iCC,iCheckXsecDataBase,iNXsecCheck
+    INTEGER :: iInt,iErr,iC,iCC,iNXsecCheck
     INTEGER :: iaTemp(kMaxGas),iTag
     INTEGER :: iaInDataBase(kMaxLayer)
     caWord = '*XSCGAS'
@@ -1686,7 +1691,7 @@ CONTAINS
     INTEGER :: iaLXsecNL(kGasXSecHi-kGasXSecLo+1),iaXSCgases(kMaxGas)
 
 ! local
-    INTEGER :: iInt,iErr,iC,iCC,iCheckXsecDataBase,iNXsecCheck
+    INTEGER :: iInt,iErr,iC,iCC,iNXsecCheck
     INTEGER :: iaTemp(kMaxGas),iTag
     INTEGER :: iaInDataBase(kMaxLayer),iWhichXSC,iKLBLRTMgases
 

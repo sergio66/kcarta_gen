@@ -5,6 +5,9 @@
 MODULE n_layers
 
 USE basic_common
+USE spline_and_sort
+USE s_misc
+USE freqfile
 
 IMPLICIT NONE
 

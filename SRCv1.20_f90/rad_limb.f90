@@ -7,7 +7,6 @@ MODULE rad_limb
 USE basic_common
 USE spline_and_sort
 USE s_writefile
-USE kbloat
 USE s_misc
 USE rad_flux
 USE kcoeff_basic
@@ -849,7 +848,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
 
@@ -1308,7 +1307,7 @@ CONTAINS
 ! local variables
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)

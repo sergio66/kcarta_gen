@@ -5,6 +5,9 @@
 MODULE n_pth_mix
 
 USE basic_common
+USE spline_and_sort
+USE s_misc
+USE freqfile
 
 IMPLICIT NONE
 
@@ -632,7 +635,7 @@ CONTAINS
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
 
 ! local variables
-    INTEGER :: iIOUN2,iErrIO,iErr,SubString,iS
+    INTEGER :: iIOUN2,iErrIO,iErr,iS
     CHARACTER(130) :: caTemp,caTemp2,caStr
     CHARACTER c1a,c1b,cDumb
     CHARACTER(10) :: ca10a,ca10b,ca10c,ca10d,ca10e,ca10f
@@ -887,111 +890,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE GetMoreInfo
-
-!************************************************************************
-! this function checks to see if substring ca10 is in string caX(i1:i2)
-! if found, it returns +1, else returns -1
-    INTEGER FUNCTION SubString(caX,ca10,i1,i2)
-
-    CHARACTER(130) :: caX
-    CHARACTER(10) ::  ca10
-    INTEGER :: i1,i2
-
-    INTEGER :: K,iI,iJ,iLen
-
-    K = -1           !!!asuume ca10 is in caX not at specified locations
-
-    iLen = i2-i1 + 1
-    iI = 1
-    IJ = i1
-    10 CONTINUE
-    IF (caX(iJ:iJ) == ca10(iI:iI)) THEN
-        K = 1
-        iI = iI + 1
-        iJ = iJ + 1
-        IF (iJ < iLen) THEN
-            GOTO 10
-        END IF
-    ELSE
-        K = -1
-    END IF
-
-    SubString = K
-
-    RETURN
-    end FUNCTION SubString
-!************************************************************************
-    SUBROUTINE rightpad130(caName)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-    CHARACTER(130) :: caName
-
-    CHARACTER(130) :: caTempName
-    INTEGER :: iR,iL,iInt
-
-! find the "right" length of the input root name
-    iR=len(caName)
-    11 continue
-    IF (caName(iR:iR) == ' ') THEN
-        iR=iR-1
-        GO TO 11
-    END IF
-
-! find the "left" length of the input root name
-    iL=1
-    12 continue
-    IF (caName(iL:iL) == ' ') THEN
-        iL=iL+1
-        GO TO 12
-    END IF
-! thus the entered word exists between iL:iR
-
-    IF (iL > iR) THEN
-        write(kStdErr,*) 'Fatal Error! Invalid (blank) string in file !'
-        CALL DoSTOP
-    END IF
-
-! now rearrange the string, so that it is right padded with blanks
-! this is basically equivalent to  ADJUSTR(caName)
-    DO iInt=1,130
-        caTempName(iInt:iInt)=' '
-    END DO
-    caTempName(1:iR-iL+1)=caName(iL:iR)
-    caName(1:130)=caTempName(1:130)
-
-    RETURN
-    end SUBROUTINE rightpad130
-
-!************************************************************************
-! this finds the length of a string
-    INTEGER FUNCTION length130(caName)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-    CHARACTER(130) :: caName
-
-    CHARACTER(130) :: caTempName
-    INTEGER :: iR,iL,iInt
-
-    CALL rightpad130(caName)
-
-! find the "right" length of the input root name
-    iR=len(caName)
-    11 continue
-    IF (caName(iR:iR) == ' ') THEN
-        iR=iR-1
-        GO TO 11
-    END IF
-
-    length130 = iR
-
-    RETURN
-    end FUNCTION length130
 
 !************************************************************************
 ! this subroutine deals with the 'WEIGHT' keyword == mixed path settings
@@ -1779,7 +1677,7 @@ CONTAINS
     INTEGER :: iPathOffSet
 
 ! local variables
-    INTEGER :: iIOUN2,iErrIO,iErr,SubString,iS
+    INTEGER :: iIOUN2,iErrIO,iErr,iS
     CHARACTER(130) :: caTemp,caTemp2,caStr
     CHARACTER c1a,c1b,cDumb
     CHARACTER(10) :: ca10a,ca10b,ca10c,ca10d,ca10e,ca10f

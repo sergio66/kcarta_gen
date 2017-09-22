@@ -27,6 +27,9 @@
 MODULE jac_down
 
 USE basic_common
+USE s_writefile
+USE freqfile
+USE kcoeff_basic
 
 IMPLICIT NONE
 
@@ -107,8 +110,8 @@ CONTAINS
     REAL :: radBTdr(kMaxPtsJac),radBackgndThermdT(kMaxPtsJac)
     REAL :: radSolardT(kMaxPtsJac),rWeight
     INTEGER :: iG,iLay,iIOUN,iLowest
-    INTEGER :: DoGasJacob,iGasJacList
-    INTEGER :: WhichGasPosn,iGasPosn
+    INTEGER :: iGasJacList
+    INTEGER :: iGasPosn
 
     INTEGER :: iDefault,iWhichJac,iFr
     INTEGER :: iDoAdd,iErr
@@ -126,6 +129,11 @@ CONTAINS
     iWhichJac = +32    !! only T jacs
 
     iWhichJac = kActualJacs
+
+    IF (kMaxPtsJac /= kMaxPts) THEN
+      write(kStdWarn,*) 'need kMaxPts == kMaxPtsJac for kacobian calcs in jac_down'
+      CALL DoStop
+    END IF
 
     IF (iDefault /= iWhichJac) THEN
         print *,'iDefault,iWhichJac = ',iDefault,iWhichJac
@@ -396,7 +404,7 @@ CONTAINS
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
 
 ! local variables
-    INTEGER :: iFr,iLay,iL1,iLtemp,iaRadLayer(kProfLayerJac),MP2Lay
+    INTEGER :: iFr,iLay,iL1,iLtemp,iaRadLayer(kProfLayerJac)
     REAL :: rN,rCos
 
     rCos = cos(rSatAngle*kPi/180.0)
@@ -491,8 +499,8 @@ CONTAINS
     INTEGER :: iAtm,iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iProfileLayers
 
 ! local variables
-    REAL :: r1,r2,r3,r4,r5,rAngle,rCos,raVT1(kMixFilRows),InterpTemp,ttorad
-    INTEGER :: iLay,iFr,iL,iM2,iMM2,MP2Lay
+    REAL :: r1,r2,r3,r4,r5,rAngle,rCos,raVT1(kMixFilRows)
+    INTEGER :: iLay,iFr,iL,iM2,iMM2
 
 ! need these for derivative of Planck
     r1 = sngl(kPlanck1)
@@ -663,7 +671,7 @@ CONTAINS
     INTEGER :: iNumLayer
 
 ! local variables
-    INTEGER :: iFr,iJ,iJ1,iLyr,iLay,MP2Lay
+    INTEGER :: iFr,iJ,iJ1,iLyr,iLay
     REAL :: raTemp(kMaxPtsJac),raTemp1(kMaxPtsJac),rCos,rWsun
 
     rCos = cos(rSatAngle*kPi/180.0)
@@ -905,7 +913,7 @@ CONTAINS
     INTEGER :: iG,iLay,iNumLayer
 
 ! local variables
-    INTEGER :: iFr,iJ1,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iM1
     REAL :: raTemp(kMaxPtsJac),rSec
     REAL :: raResultsTh(kMaxPtsJac)
 
@@ -1028,7 +1036,7 @@ CONTAINS
     REAL :: raaRadDT(kMaxPtsJac,kProfLayerJac)
 
 ! local variables
-    INTEGER :: iFr,iJ1,iJp1,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iJp1,iM1
     REAL :: raTemp(kMaxPtsJac),rSec,rEmittance
     REAL :: raResultsTh(kMaxPtsJac)
 
@@ -1176,7 +1184,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),raaRad(kMaxPtsJac,kProfLayerJac)
 
 ! local variables
-    INTEGER :: iFr,iJ1,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iM1
     REAL :: rEmittance,rTempTh,rXYZ
 
 ! figure out which of 1..100 this current radiating layer corresponds to
@@ -1267,7 +1275,7 @@ CONTAINS
     REAL :: raaRadDT(kMaxPtsJac,kProfLayerJac)
 
 ! local variables
-    INTEGER :: iFr,iJ1,iJm1,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iJm1,iM1
     REAL :: rEmittance,rTempTh,rW
 
 ! figure out which of 1..100 this current radiating layer corresponds to
@@ -1346,7 +1354,7 @@ CONTAINS
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
      
     REAL :: rCos
-    INTEGER :: iFr,iM,iM1,MP2Lay
+    INTEGER :: iFr,iM,iM1
     INTEGER :: iModKprofLayer,mod
      
     rCos = cos(raLayAngles(1)*kPi/180.0)
