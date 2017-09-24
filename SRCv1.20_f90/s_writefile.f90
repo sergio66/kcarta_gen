@@ -5,7 +5,7 @@
 MODULE s_writefile
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 
 IMPLICIT NONE
 
@@ -61,6 +61,76 @@ CONTAINS
     end SUBROUTINE wrtout_head
     
 !************************************************************************
+! this subroutine writes out the data header at each standard 10000 pt chunk
+    SUBROUTINE HeaderBloatFile(caOutFile,rFrLow,rFrHigh,daFreqBloat, &
+    iTag,iType)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raFreq    = array containin all the frequencies in the current 25 cm-1 block
+! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
+!                  these need not correspond to 1,10000)
+! iWHich         = +1 for optical depths, -1 for planck modifiers
+! raaGasAbs  = single gas abs coeffs
+! iPrinter   = 1,2 or 3 ... will be 1 if this routine is called
+! iFileID       = which of the 25 cm-1 k-comp files is being processed
+! caOutName  = name of binary file that output goes to
+! iaPath     = list of the paths corresponding to the current gas
+! iNp        = total number of paths to be output
+! iaOp       = list of the paths to be output
+    REAL ::             rFrLow,rFrHigh
+    DOUBLE PRECISION :: daFreqBloat(kBloatPts)
+    CHARACTER(80) :: caOutFile
+    INTEGER :: iTag,iType
+
+! local vars
+    INTEGER :: iIOUN1,iI,iJump,i10000
+    CHARACTER(80) :: caOut
+    DOUBLE PRECISION :: daStart(kBoxCarUse),daEnd(kBoxCarUse)
+    DOUBLE PRECISION :: daStartBox(kBoxCarUse),daEndBox(kBoxCarUse)
+
+    iJump = ifloor(kBoxCarUse*1.0/2.0)
+
+    caOut = caOutFile
+
+    IF (iType == +2) THEN
+        iIoun1 = kBloatNLTEOutUA
+    ELSEIF (iType == +1) THEN
+        iIoun1 = kBloatNLTEOut
+    ELSEIF (iType == -1) THEN
+        iIoun1 = kBloatNLTEPlanck
+    !      ELSEIF (iType .EQ. -2) THEN
+    !        iIoun1 = kBloatNLTEUAPlanck
+    ELSE
+        write(kStdErr,*) 'Unknown print option for bloated files'
+        CALL DoStop
+    END IF
+
+    write(kStdWarn,*) 'These are the chunks for high resolution file ',iIOUN1
+    DO iI = 1,kBoxCarUse
+        i10000 = kMaxPts*(iI-1)
+    !!!these are the high resolution start/stop points for the chunk
+        daStart(iI) = daFreqBloat(i10000 + 1)
+        daEnd(iI)   = daFreqBloat(i10000 + kMaxPts)
+    !!!after boxcar avg, these are the kCARTA resolution start/stop points
+        daStartBox(iI) = daFreqBloat(i10000 + 1 + iJump)
+        daEndBox(iI)   = daFreqBloat(i10000 + kMaxPts - iJump)
+        write(kStdWarn,*) iI,daStart(iI),daEnd(iI),daStartBox(iI),daEndBox(iI)
+    END DO
+
+    WRITE(iIOUN1) kMaxPts,rFrLow,rFrHigh,kaFrStep(iTag)   !usual kCARTA stuff
+    WRITE(iIOUN1) kBloatPts,kaFineFrStep(iTag),kBoxCarUse !high res stuff
+    WRITE(iIOUN1) (daStart(iI),iI=1,kBoxCarUse)
+    WRITE(iIOUN1) (daEnd(iI),iI=1,kBoxCarUse)
+    WRITE(iIOUN1) (daStartBox(iI),iI=1,kBoxCarUse)
+    WRITE(iIOUN1) (daEndBox(iI),iI=1,kBoxCarUse)
+
+    RETURN
+    end SUBROUTINE HeaderBloatFile
+
+!************************************************************************
 ! this subroutine writes out the results
 ! this is a major change from before
 ! note the program does not keep on opening and closing the file
@@ -86,6 +156,36 @@ CONTAINS
 
     RETURN
     end SUBROUTINE wrtout
+
+!************************************************************************
+! this subroutine just dumps out kBoxCarUse worth of chunks of data
+    SUBROUTINE wrtout_bloated_rad(iIOUN,caOutBloatFile, &
+    raFreqBloat,raIntenBloat)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! input vars
+    REAL ::         raFreqBloat(kBloatPts),raIntenBloat(kBloatPts)
+    INTEGER ::      iIOUN
+    CHARACTER(80) :: caOutBloatFile
+
+! local vars
+    INTEGER :: iLoop,iInt,iIntOffSet
+    REAL :: raF(kMaxPts),raInten(kMaxPts)
+
+    DO iLoop = 1,kBoxCarUse
+        DO iInt=1,kMaxPts
+            iIntOffSet    = iInt + (iLoop-1)*kMaxPts
+            raF(iInt)     = raFreqBloat(iIntOffSet)
+            raInten(iInt) = raIntenBloat(iIntOffset)
+        END DO
+        CALL wrtout(iIOUN,caOutBloatFile,raF,raInten)
+    END DO
+
+    RETURN
+    end SUBROUTINE wrtout_bloated_rad
 
 !************************************************************************
 ! this subroutine prepares the output Jacobians according to kJacobOutput

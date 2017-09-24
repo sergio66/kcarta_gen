@@ -18,6 +18,7 @@ USE n_rad_jac_scat
 USE n_pth_mix
 USE n_output
 USE n_layers_lblrtm
+USE n_misc
 
 IMPLICIT NONE
 

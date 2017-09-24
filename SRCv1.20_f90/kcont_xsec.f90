@@ -5,7 +5,7 @@
 MODULE kcont_xsec
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE kcoeff_FAST
 USE s_misc
 

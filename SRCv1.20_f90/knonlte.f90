@@ -5,7 +5,7 @@
 MODULE knonlte
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 use klineshapes
 use kvoigt_cousin
 use klinemix
@@ -14,7 +14,7 @@ use kbloat
 use kcousin
 use kpredictVT
 use kcoeffMAIN
-USE kcoeff_basic
+USE kcoeff_common
 
 IMPLICIT NONE
 
@@ -3954,124 +3954,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE rad_trans_SAT_LOOK_DOWN_NLTE_FASTCOMPR
-
-!************************************************************************
-! this subroutine very quickly does the radiative transfer
-! since the optical depths are soooooooooo small, use double precision
-    SUBROUTINE UpperAtmRadTrans(raInten,raFreq,rSatAngle, &
-    iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-    raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iDumpAllUARads)
-
-    IMPLICIT NONE
-     
-    include '../INCLUDE/kcartaparam.f90'
-
-! input parameters
-!   upper atm P,PP,T(LTE),Q   (really only need T(LTE))
-    REAL :: raUpperPress(kProfLayer),raUpperTemp(kProfLayer)
-!   upper atm abs coeff and planck coeff
-    REAL :: raaUpperSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
-    REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
-!   input wavevector and integer stating which layer to stop rad transfer at
-    REAL :: raFreq(kMaxPts),rSatAngle
-    INTEGER :: iUpper
-! do we want to do upper atm NLTE computations?
-    INTEGER :: iDoUpperAtmNLTE
-! do we dump all or some rads?
-    INTEGER :: iDumpAllUARads
-! input/output pararameter
-!   this contains the radiance incident at kCARTA TOA (0.005 mb)
-!   it will finally contain the radiance exiting from TOP of UPPER ATM
-    REAL :: raInten(kMaxPts)
-
-! local variables
-    INTEGER :: iFr,iL,iIOUN
-    REAL :: rEmission,rTrans,rMu,raInten0(kMaxPts)
-    DOUBLE PRECISION :: daInten(kMaxPts),dTrans,dEmission
-    CHARACTER(80) :: caOutName
-
-    caOutName = 'DumDum'
-    iIOUN = kNLTEOutUA
-      
-    IF (iDoUpperAtmNLTE <= 0) THEN
-        write (kStdErr,*) 'huh? why doing the UA nlte radiance?????'
-        CALL DoStop
-    ELSE
-        write(kStdWarn,*) 'Doing UA (NLTE) radtransfer at 0.0025 cm-1 '
-    END IF
-
-! compute radiance intensity thru NEW uppermost layers of atm
-    DO iFr = 1,kMaxPts
-        raInten0(iFr) = raInten(iFr)
-        daInten(iFr)  = dble(raInten(iFr))
-    END DO
-
-    iL = 0
-    IF (kNLTEOutUAOpen > 0) THEN
-        write(kStdWarn,*) 'dumping out 0.005 mb UA rads iL = ',0
-    ! always dump out the 0.005 mb TOA radiance if the UA file is open
-        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-    END IF
-
-    rMu = cos(rSatAngle*kPi/180.0)
-
-    DO iL = 1,iUpper - 1
-
-        DO iFr = 1,kMaxPts
-            rTrans = raaUpperSumNLTEGasAbCoeff(iFr,iL)/rMu
-            rTrans = exp(-rTrans)
-            rEmission = (1.0 - rTrans) * raaUpperPlanckCoeff(iFr,iL) * &
-            ttorad(raFreq(iFr),raUpperTemp(iL))
-            raInten(iFr) = rEmission + raInten(iFr)*rTrans
-
-            dTrans = (raaUpperSumNLTEGasAbCoeff(iFr,iL)*1.0d0/(rMu*1.0d0))
-            dTrans = exp(-dTrans)
-            dEmission = (raaUpperPlanckCoeff(iFr,iL)*1.0d0) * &
-            (ttorad(raFreq(iFr),raUpperTemp(iL))*1.0d0)* &
-            (1.0d0 - dTrans)
-            daInten(iFr) = dEmission + daInten(iFr)*dTrans
-
-            raInten(iFr) = sngl(daInten(iFr))
-        END DO
-
-        IF ((iDumpAllUARads > 0) .AND. (kNLTEOutUAOpen > 0)) THEN
-            write(kStdWarn,*) 'dumping out UA rads at iL = ',iL
-        ! dump out the radiance at this HIGH pressure level
-            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-        END IF
-
-    END DO
-
-    DO iL = iUpper,iUpper
-        DO iFr = 1,kMaxPts
-            rTrans = raaUpperSumNLTEGasAbCoeff(iFr,iL)/rMu
-            rTrans = exp(-rTrans)
-            rEmission = (1.0 - rTrans) * raaUpperPlanckCoeff(iFr,iL) * &
-            ttorad(raFreq(iFr),raUpperTemp(iL))
-            raInten(iFr) = rEmission + raInten(iFr)*rTrans
-
-            dTrans = dble(raaUpperSumNLTEGasAbCoeff(iFr,iL)*1.0d0/(rMu*1.0d0))
-            dTrans = exp(-dTrans)
-            dEmission = dble(raaUpperPlanckCoeff(iFr,iL)*1.0d0) * &
-            dble(ttorad(raFreq(iFr),raUpperTemp(iL))*1.0d0)* &
-            (1.0d0 - dTrans)
-            daInten(iFr) = dEmission + daInten(iFr)*dTrans
-            raInten(iFr) = sngl(daInten(iFr))
-
-        END DO
-
-        IF (kNLTEOutUAOpen > 0) THEN
-        ! always dump out the 0.000025 mb TOA radiance if the UA file is open
-            write(kStdWarn,*) 'dumping out 0.000025 mb UA rads iL = ',iL
-            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-        END IF
-
-    END DO
-
-    3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
-
-    RETURN
-    end SUBROUTINE UpperAtmRadTrans
 
 !************************************************************************
 ! this is based on subroutine "othergases"

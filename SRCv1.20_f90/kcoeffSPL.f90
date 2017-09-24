@@ -5,7 +5,7 @@
 MODULE kcoeffSPL
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE s_misc
 
 IMPLICIT NONE

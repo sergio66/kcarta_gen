@@ -29,7 +29,7 @@ MODULE jac_up
 USE basic_common
 USE s_writefile
 USE freqfile
-USE kcoeff_basic
+USE kcoeff_common
 
 IMPLICIT NONE
 

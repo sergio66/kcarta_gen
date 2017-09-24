@@ -5,9 +5,9 @@
 MODULE clear_scatter_misc
 
 USE basic_common
-USE kcoeff_basic   !! for interptemp
-USE spline_and_sort
-USE rad_quad
+USE kcoeff_common
+USE spline_and_sort_and_common
+USE rad_diff_and_quad
 USE clear_scatter_basic
 
 IMPLICIT NONE
@@ -1970,273 +1970,7 @@ CONTAINS
 
     RETURN
     end SUBROUTINE GetAbsProfileRTSPEC
-!************************************************************************
-! set the vertical temperatures of the atmosphere
-! this sets the temperatures at the pressure level boundaries, using the
-! temperatures of the pressure layers that have been supplied by kLayers
-    SUBROUTINE SetRTSPECTemp(TEMP,iaRadLayer,raVTemp,iNumLayer,iDownWard, &
-    iProfileLayers,raPressLevels)
 
-    IMPLICIT NONE
-
-    include '../INCLUDE/scatterparam.f90'
-
-! these are variables that come in from kcartamain.f
-    REAL :: raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)
-    INTEGER :: iaRadLayer(kProfLayer),iNumLayer,iDownWard,iProfileLayers
-! these are variables that we have to set
-    REAL ::    TEMP(*)
-
-! local variables
-    INTEGER :: iL,iLay,iM,iaRadLayerTemp(kMixFilRows)
-    REAL :: Temp1(maxnz)
-    REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
-
-    DO iLay=1,MAXNZ
-        Temp1(iLay) = 0.0
-        Temp(iLay) = 0.0
-    END DO
-
-    DO iLay=1,kProfLayer
-        pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
-        pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
-    END DO
-
-! now set iaRadLayerTemp the same as  iaRadLayer if downlook instr
-!     set iaRadLayerTemp flipped from iaRadLayer if uplook   instr
-    IF (iDownWard == 1) THEN      !!!!keep everything the same
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iLay)
-        END DO
-    ELSE            !!!gotta do a bit of reverse logic for uplook instr
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
-        END DO
-    END IF
-
-! see which set of Mixed Paths the current atmosphere occupies eg
-! set 1 = 1..100, set2= 101..200 etc
-! eg if current atmosphere is from MixfilPath 110 to 190, and kProfLayer = 100,
-! then we set iMod as 2      idiv(150,100) = 1  === 2nd set of mixed paths
-! assume each atmosphere has at least 25 layers in it!!!
-    iM = idiv(iaRadLayerTemp(25),kProfLayer)+1
-    DO iLay=1,kProfLayer
-        raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
-    END DO
-
-    DO iLay=1,iNumLayer
-        iL = iaRadLayerTemp(iLay)
-    ! ap this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
-        iL = iL-idiv(iL,kProfLayer)*kProfLayer
-        IF (iL == 0) THEN
-            iL = kProfLayer
-        END IF
-        rP=raPressLevels(iL+1)-10000*delta
-        if (rp < raPressLevels(kProfLayer+1)) then
-            rp = raPressLevels(kProfLayer+1)+10000*delta
-        end if
-        TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
-        raPressLevels,iProfileLayers)
-    END DO
-
-    rP = DISORTsurfPress
-    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp, &
-    raPressLevels,iProfileLayers)
-
-    IF (iDownWard == 1) THEN
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1(iLay)
-        END DO
-    ELSE
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1((iNumLayer+1)-iLay+1)
-        END DO
-    END IF
-
-    RETURN
-    end SUBROUTINE SetRTSPECTemp
-
-!************************************************************************
-! set the vertical temperatures of the atmosphere for TWOSTREAM
-! this sets the temperatures at the pressure level boundaries, using the
-! temperatures of the pressure layers that have been supplied by kLayers
-    SUBROUTINE SetTWOSTRTemp(TEMP,iaRadLayer,raVTemp,iNumLayer, &
-    iDownWard,iProfileLayers,raPressLevels)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/scatterparam.f90'
-
-! these are variables that come in from kcartamain.f
-    REAL :: raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)
-    INTEGER :: iaRadLayer(kProfLayer),iNumLayer,iDownWard,iProfileLayers
-! these are variables that we have to set
-    REAL ::    TEMP(*)
-
-! local variables
-    INTEGER :: iL,iLay,iM,iaRadLayerTemp(kMixFilRows),iOffSet,iJump,iLowest
-    REAL :: Temp1(maxnz)
-    REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
-
-    iLowest = kProfLayer - iProfileLayers + 1
-
-    DO iLay=1,MAXNZ
-        Temp1(iLay) = -10.0
-        Temp(iLay)  = -10.0
-    END DO
-
-    DO iLay = iLowest,kProfLayer
-        pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
-        pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
-    END DO
-
-! now set iaRadLayerTemp the same as  iaRadLayer if downlook instr
-!     set iaRadLayerTemp flipped from iaRadLayer if uplook   instr
-    IF (iDownWard == 1) THEN      !!!!keep everything the same
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iLay)
-        END DO
-    ELSE            !!!gotta do a bit of reverse logic for uplook instr
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
-        END DO
-    END IF
-
-! see which set of Mixed Paths the current atmosphere occupies eg
-! set 1 = 1..100, set2= 101..200 etc
-! eg if current atmosphere is from MixfilPath 110 to 190, and kProfLayer = 100,
-! then we set iMod as 2      idiv(150,100) = 1  === 2nd set of mixed paths
-! assume each atmosphere has at least 25 layers in it!!!
-    iM = idiv(iaRadLayerTemp(25),kProfLayer)+1
-    DO iLay=1,kProfLayer
-        raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
-    END DO
-
-    DO iLay=1,iNumLayer
-        iL = iaRadLayerTemp(iLay)
-    ! ap this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
-        iL = iL-idiv(iL,kProfLayer)*kProfLayer
-        IF (iL == 0) THEN
-            iL = kProfLayer
-        END IF
-        rP=raPressLevels(iL+1)-10000*delta
-        if (rp < raPressLevels(kProfLayer+1)) then
-            rp = raPressLevels(kProfLayer+1)+10000*delta
-        end if
-        TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
-        raPressLevels,iProfileLayers)
-    END DO
-
-    rP = raPressLevels(iLowest)
-    rP = DISORTsurfPress          !!!from scatterparam.f90
-    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp, &
-    raPressLevels,iProfileLayers)
-
-    IF (iDownWard == 1) THEN
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1(iLay)
-        END DO
-    ELSE
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1((iNumLayer+1)-iLay+1)
-        END DO
-    END IF
-
-    IF (iDownWard == -1) THEN
-    !!!suppose atm is in kCARTA layers 5 -- 100 (96 layers ==> 97 levels)
-    !!!this is same as RTSPEC levels 1 -- 97 ...
-    !!!   so temp(iI) is filled from levels 1 ..97
-    !!!so push it up so that it occupies KLAYERS levels 5 ... 101
-
-    !!!set up the temp1 array
-        DO iLay=1,kProfLayer+1
-            temp1(iLay) = temp(iLay)
-            temp(iLay)  = -10.0
-        END DO
-
-    !!!push up the stuff so it occupies kLAYERS levels 5 .. 80
-        iOffSet = (iaRadLayer(iNumLayer) - 1) - (iM-1)*kProfLayer
-        DO iLay = 1,iNumLayer+1
-            temp(iLay+iOffSet) = temp1(iLay)
-        END DO
-    END IF
-
-    IF (iDownWard == 1) THEN
-    !!!suppose atm is in kCARTA layers 5 -- 79 (75 layers ==> 76 levels)
-    !!!this is same as RTSPEC levels 1 -- 76 ...
-    !!!   so temp(iI) is filled from levels 1 ..76
-    !!!so now push this down so it fills RTSPEC levels 26 .. 101
-    !!!then flip it so it occupies KLAYERS levels 1 ... 76
-    !!!and then push it up so it occupies KLAYERS levels 5 -- 80
-    !!!   (which is same as KLAYERS layers  5-79!!!!)
-
-    !!!set up the temp1 array
-        DO iLay=1,kProfLayer+1
-            temp1(iLay) = temp(iLay)
-            temp(iLay)  = -10.0
-        END DO
-
-    !!!push it down so it occupies RTSPEC levels 26 .. 101
-        iOffSet = kProfLayer-iNumLayer
-        DO iLay=1,iNumLayer+1
-            temp(iLay+iOffSet) = temp1(iLay)
-        END DO
-
-    !!!now flip it so it occupies KLAYERS levels 1 ..76
-        DO iLay = 1,kProfLayer + 1
-            TEMP1(iLay) = TEMP(iLay)
-        END DO
-        DO iLay = 1,kProfLayer + 1
-            TEMP(iLay) = TEMP1((kProfLayer+1)-iLay+1)
-        END DO
-        DO iLay=1,kProfLayer+1
-            temp1(iLay) = temp(iLay)
-            temp(iLay)  = -10.0
-        END DO
-
-    !!!push up the stuff sp it occupies kLAYERS levels 5 .. 80
-        iOffSet = iaRadLayer(1) - 1 - (iM-1)*kProfLayer
-        DO iLay = 1,iNumLayer+1
-            temp(iLay+iOffSet) = temp1(iLay)
-        END DO
-    END IF
-
-    RETURN
-    end SUBROUTINE SetTWOSTRTemp
-
-!************************************************************************
-! this subroutine resets the TEMPerature array that comes out of
-! GetAbsProfileRTSPEC : so that it is same as raVertTemp
-! this is because
-! RTSPEC will want stuff from RTSPEC layerM --> layerN and ignore N+1 to 100
-! so this code is a little bit smart and reset temps so they are ok
-    SUBROUTINE ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
-    iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/scatterparam.f90'
-
-! output variable
-    REAL :: TEMP(MAXNZ)     !temperature of layers, in kCARTA layering style
-!1 = GND, 100 = TOA
-! input variables
-    REAL :: raVTemp(kMixFilRows),rSurfaceTemp,raPressLevels(kProfLayer+1)
-    INTEGER :: iDownWard,iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
-    INTEGER :: iProfileLayers
-
-    INTEGER :: iii,iaRadLayer(kProfLayer)
-    REAL :: TEMP1(MAXNZ)
-
-    DO iii = 1,iNumLayer
-        iaRadLayer(iii) = iaaRadLayer(iAtm,iii)
-    END DO
-
-    CALL SetTWOSTRTemp(TEMP,iaRadLayer,raVTemp,iNumLayer, &
-    iDownWard,iProfileLayers,raPressLevels)
-
-    RETURN
-    end SUBROUTINE ResetTemp_Twostream
 !************************************************************************
 !       this is for scatter_disort
 !************************************************************************
@@ -2938,7 +2672,7 @@ CONTAINS
 
     REAL :: dEXTINCT_dr, dSSALB_dr, dASYM_dr
     REAL :: rW,x1,x2,x3,x4,x5
-    REAL :: hg2_real,hg2_real_deriv_wrt_g
+    REAL :: hg2_real
 
     rScat = 0.0
     do i1 = 1,maxnz
@@ -3126,7 +2860,7 @@ CONTAINS
 
     REAL :: dEXTINCT_dr, dSSALB_dr, dASYM_dr
     REAL :: rW,x1,x2,x3,x4,x5
-    REAL :: hg2_real,hg2_real_deriv_wrt_g
+    REAL :: hg2_real
 
     rScat = 0.0
     do i1 = 1,maxnz
@@ -4354,7 +4088,7 @@ CONTAINS
 
     REAL :: dEXTINCT_dr, dSSALB_dr, dASYM_dr
     REAL :: rW,x1,x2,x3,x4,x5
-    REAL :: hg2_real,hg2_real_deriv_wrt_g
+    REAL :: hg2_real
 
     INTEGER ::  ISCATTABX(MAXNZ)
     REAL ::     IWPX(MAXNZ), DMEX(MAXNZ)
@@ -4610,7 +4344,7 @@ CONTAINS
 
     REAL :: dEXTINCT_dr, dSSALB_dr, dASYM_dr
     REAL :: rW,x1,x2,x3,x4,x5
-    REAL :: hg2_real,hg2_real_deriv_wrt_g
+    REAL :: hg2_real
 
     REAL :: raaGasAbs(kMaxPts,kProfLayer),rX,rY
 
@@ -4755,160 +4489,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE AddCloud_pclsam_Jacob_uplook_sunshine
-
-!************************************************************************
-! this function finds the pressure layer at which rPressStart is within,
-! as well as the fraction of the layer that it occupies
-    REAL FUNCTION FindBottomTemp(rP,raProfileTemp, &
-    raPressLevels,iProfileLayers)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! raPressLevels = actual pressure levels that come out of kLAYERS
-! raProfileTemp = actual profile temp
-! rP            = pressure at which we want the temperature
-    real :: rP,raProfileTemp(kProfLayer),raPressLevels(kProfLayer+1)
-    integer :: iProfileLayers
-
-    integer :: iFound,i1,i2,i3,iLowest,iJ
-    real :: rP1,rP2,T1,T2
-    real :: raP(3),raT(3),Y2A(3),rT,raLogP(3)
-    real :: yp1,ypn,work(3)
-    INTEGER :: iLog,iSpline
-
-    iLog = +1       !!!do log(P) for the x-points
-    iLog = -1       !!!do   P    for the x-points
-
-    iSpline = -1    !!!use linear interpolations
-    iSpline = +1    !!!use spline interpolations
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    iLog = +1       !!!do log(P) for the x-points
-    iSpline = -1    !!!use linear interpolations
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    rT=0.0
-
-    iLowest = kProfLayer-iProfileLayers+1
-
-    IF (rP >= raPressLevels(iLowest)) THEN
-    ! his is WHOLE of the bottom layer
-        i1=iLowest
-    ELSE IF (rP <= raPressLevels(kProfLayer+1)) THEN
-    ! his is ludicrous
-        write(kStdErr,*) rP,raPressLevels(kProfLayer+1)
-        write(kStdErr,*) 'Pressure of lower boundary is TOO LOW!!!'
-        CALL DoStop
-
-    ELSE
-    ! irst find the AIRS layer within which it lies
-        iFound=-1
-        i1 = iLowest
-        i2 = iLowest+1
-        10 CONTINUE
-        IF ((rP <= raPressLevels(i1)) .AND. (rP > raPressLevels(i2))) THEN
-            iFound=1
-        END IF
-        IF ((iFound < 0) .AND. (i1 < kProfLayer)) THEN
-            i1=i1+1
-            i2=i2+1
-            GO TO 10
-        END IF
-        IF ((iFound < 0)) THEN
-            IF (abs(rP-raPressLevels(kProfLayer+1)) <= delta) THEN
-                i1=kProfLayer
-                iFound=1
-            ELSE
-                write(kStdErr,*) 'could not find pressure ',rP
-                write(kStdErr,*) 'within AIRS pressure levels. Please check'
-                write(kStdErr,*) '*RADNCE and *OUTPUT sections'
-                CALL DoSTOP
-            END IF
-        END IF
-    END IF
-
-    IF ((i1 > kProfLayer) .OR. (i1 < iLowest)) THEN
-        write(kStdErr,*) 'sorry : cannot find surface temp for '
-        write(kStdErr,*) 'layers outside ',iLowest,' and ',kProfLayer
-        write(kStdErr,*) 'Allowed Pressure ranges are from : ', &
-        raPressLevels(iLowest),' to  ',raPressLevels(kProfLayer+1),' mb'
-        write(kStdErr,*) 'Surface Pressure is ',rP,' mb'
-        call DoStop
-    END IF
-              
-! ow find the temperature
-    IF (i1 == iLowest) THEN          !do linear interp
-        i1 = iLowest
-        i2 = iLowest+1
-        i3 = iLowest+2
-        rP1 = (raPressLevels(i2)-raPressLevels(i1))/ &
-        log(raPressLevels(i2)/raPressLevels(i1))
-        rP2 = (raPressLevels(i3)-raPressLevels(i2))/ &
-        log(raPressLevels(i3)/raPressLevels(i2))
-        T1 = raProfileTemp(i1)
-        T2 = raProfileTemp(i2)
-        IF (iLog == -1) THEN
-            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)           !!linear in P
-        ELSE
-            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1)) !!log(P)
-        END IF
-
-    ELSEIF (i1 >= (kProfLayer-1)) THEN          !do linear interp
-        rP1 = (raPressLevels(kProfLayer)-raPressLevels(kProfLayer-1))/ &
-        log(raPressLevels(kProfLayer)/raPressLevels(kProfLayer-1))
-        rP2 = (raPressLevels(kProfLayer+1)-raPressLevels(kProfLayer))/ &
-        log(raPressLevels(kProfLayer+1)/raPressLevels(kProfLayer))
-        T1 = raProfileTemp(kProfLayer-1)
-        T2 = raProfileTemp(kProfLayer)
-        IF (iLog == -1) THEN
-            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)            !!linear in P
-        ELSE
-            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1))  !!log(P)
-        END IF
-    ELSE          !do spline ... note that the pressures have to
-    ! e in ascENDing order for good interpolation
-        rP1 = (raPressLevels(i1)-raPressLevels(i1-1))/ &
-        log(raPressLevels(i1)/raPressLevels(i1-1))
-        raP(3) = rP1
-        rP1 = (raPressLevels(i1+1)-raPressLevels(i1))/ &
-        log(raPressLevels(i1+1)/raPressLevels(i1))
-        raP(2) = rP1
-        rP1 = (raPressLevels(i1+2)-raPressLevels(i1+1))/ &
-        log(raPressLevels(i1+2)/raPressLevels(i1+1))
-        raP(1) = rP1
-        IF (iLog == +1) THEN
-            DO iJ = 1,3
-                raLogP(iJ) = log(raP(iJ))
-            END DO
-        END IF
-
-        raT(3) = raProfileTemp(i1-1)
-        raT(2) = raProfileTemp(i1)
-        raT(1) = raProfileTemp(i1+1)
-
-        yp1=1.0e30
-        ypn=1.0e30
-        IF (iSpline == +1) THEN
-            IF (iLog == +1) THEN
-                CALL rspl1(raLogP,raT,3,log(rP),rT,1)
-            ELSE
-                CALL rspl1(raP,raT,3,rP,rT,1)
-            END IF
-        ELSEIF (iSpline == -1) THEN
-            IF (iLog == +1) THEN
-                CALL rlinear1(raP,raT,3,rP,rT,1)
-            ELSE
-                CALL rlinear1(raLogP,raT,3,log(rP),rT,1)
-            END IF
-        END IF
-    END IF
-
-    FindBottomTemp = rT
-
-    RETURN
-    end FUNCTION FindBottomTemp
 
 !************************************************************************
 

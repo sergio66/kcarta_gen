@@ -8,7 +8,7 @@
 MODULE rtp_interface_f90
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE n_pth_mix
 USE s_misc
 USE freqfile

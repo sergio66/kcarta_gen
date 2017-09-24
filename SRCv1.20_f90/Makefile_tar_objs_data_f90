@@ -39,32 +39,34 @@ PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makef
 ###### OBJSMAIN           for all features : jacobians, scatter, flux
 ###### OBJSMAIN_BASIC     for none of kCARTA features
 
-OBS_BASIC_COMMON = basic_common.o spline_and_sort.o  freqfile.o s_misc.o            s_writefile.o
+OBS_BASIC_COMMON = basic_common.o spline_and_sort_and_common.o  freqfile.o s_misc.o            s_writefile.o
 
 OBJSRTP        = rtp_interface_f90.o
 
-OBJSSTRING     = n_gas_wt_spectra.o  n_pth_mix.o      n_rad_jac_scat.o  \
-                 n_output.o          n_layers.o       n_layers_lblrtm.o n_main.o
+OBJSSTRING     = kcoeff_common.o         clear_scatter_basic.o   n_nonlte_common.o   n_mr_common.o \
+                   n_gas_wt_spectra.o    n_pth_mix.o             n_rad_jac_scat.o    n_output.o \
+                 n_layers.o              n_layers_lblrtm.o       n_misc.o            n_main.o
  
-OBS_LTE_OPTDPH  = kcoeff_basic.o           kcoeffSPL.o               kcoeffSPLJAC.o         kcoeff_FAST_details.o \
-                  kcoeff_FAST_details2.o    kcoeff_FAST.o            kcont_xsec.o           kcoeffMAIN.o
+OBS_LTE_OPTDPH  = kcoeffSPL.o               kcoeffSPLJAC.o        kcoeff_FAST_details.o \
+                  kcoeff_FAST_details2.o    kcoeff_FAST.o             kcont_xsec.o           kcoeffMAIN.o
 
-OBS_NLTE_OPTDPH = klineshapes.o      kcousin.o          klinemix.o    kvoigt_cousin.o\
-                  kreadVTprofiles.o  kbloat.o           kpredictVT.o       knonlte.o
+OBS_NLTE_OPTDPH = klineshapes.o      kcousin.o          klinemix.o      kvoigt_cousin.o\
+                  kreadVTprofiles.o  kbloat.o           kpredictVT.o    knonlte.o
 
 OBJSMAIN          = kcartamisc.o kcartamain.o        
 OBJSMAIN_JPL      = kcartamisc.o kcartajpl.o
 OBJSMAIN_BASIC    = kcartamisc.o kcartabasic.o
 OBJSMAIN_PARALLEL = kcartamisc.o kcartaparallel.o
 
-MOBS_BASIC_COMMON = basic_common.mod     spline_and_sort.mod   freqfile.mod s_misc.mod  s_writefile.mod
+MOBS_BASIC_COMMON = basic_common.mod     spline_and_sort_and_common.mod   freqfile.mod s_misc.mod  s_writefile.mod
 
 MOBJSRTP        = rtp_interface_f90.mod
 
-MOBJSSTRING     = n_gas_wt_spectra.mod  n_pth_mix.mod      n_rad_jac_scat.mod  \
-                  n_output.mod          n_layers.mod       n_layers_lblrtm.mod  n_main.mod
+MOBJSSTRING     = kcoeff_common.mod       clear_scatter_basic.mod  n_nonlte_common.mod      n_mr_common.mod \
+                  n_gas_wt_spectra.mod    n_pth_mix.mod            n_rad_jac_scat.mod       n_output.mod \
+                  n_layers.mod            n_layers_lblrtm.mod      n_misc.mod               n_main.mod
  
-MOBS_LTE_OPTDPH  = kcoeff_basic.mod           kcoeffSPL.mod         kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
+MOBS_LTE_OPTDPH  = kcoeffSPL.mod         kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
                    kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
 
 MOBS_NLTE_OPTDPH = klineshapes.mod      kcousin.mod          klinemix.mod         kvoigt_cousin.mod\
@@ -77,20 +79,18 @@ MOBJSMAIN_PARALLEL = kcartamisc.mod kcartaparallel.mod
 
 #######################################################################
 
-OBSRAD       = clear_scatter_basic.o rad_angles.o rad_misc.o rad_quad.o rad_diff.o rad_flux.o \
-               rad_limb.o   rad_main.o 
+OBSRAD       = rad_angles.o rad_misc.o rad_diff_and_quad.o rad_flux.o rad_main.o 
 
-OBSJAC_CLR   = jac_up.o jac_down.o jac_limb.o jac_main.o 
+OBSJAC_CLR   = jac_up.o jac_down.o jac_main.o 
 
-OBSJAC_CLD   = jac_main.o jac_up.o jac_down.o jac_limb.o \
+OBSJAC_CLD   = jac_main.o jac_up.o jac_down.o \
                jac_pclsam_up.o jac_pclsam_down.o singlescatter.o
 
-MOBSRAD       = clear_scatter_basic.mod rad_angles.mod rad_misc.mod rad_quad.mod rad_diff.mod rad_flux.mod \
-                rad_limb.mod   rad_main.mod
+MOBSRAD       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_flux.mod rad_main.mod
 
-MOBSJAC_CLR   = jac_up.mod jac_down.mod jac_limb.mod jac_main.mod 
+MOBSJAC_CLR   = jac_up.mod jac_down.mod jac_main.mod 
 
-MOBSJAC_CLD   = jac_main.mod jac_up.mod jac_down.mod jac_limb.mod \
+MOBSJAC_CLD   = jac_main.mod jac_up.mod jac_down.mod \
                 jac_pclsam_up.mod jac_pclsam_down.mod singlescatter.mod
 
 ##########################################################################
@@ -191,10 +191,17 @@ MOBJSJPL = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_
            $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLD) $(MOBJSSTRING)
 
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
-MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
+YESWORKSMOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
              $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLR) $(MOBS_NLTE_OPTDPH) \
+             $(MOBJSMAIN_BASIC)
+
+XMOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
+             $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLR) \
 	     $(MOBJSMAIN_BASIC)
-	     
+
+MOBJSBASIC = $(YESWORKSMOBJSBASIC)
+!MOBJSBASIC = $(XMOBJSBASIC)
+
 OBJS_TXT = n_mainTXT.o
 MOBJS_TXT = n_mainTXT.mod
 
@@ -300,8 +307,8 @@ basic_common.mod basic_common.o : basic_common.f90 $(PARAMS)
 kcartamisc.mod kcartamisc.o : kcartamisc.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamisc.f90
 
-spline_and_sort.mod spline_and_sort.o : spline_and_sort.f90 $(PARAMS)
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) spline_and_sort.f90
+spline_and_sort_and_common.mod spline_and_sort_and_common.o : spline_and_sort_and_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) spline_and_sort_and_common.f90
 
 freqfile.mod freqfile.o : freqfile.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) freqfile.f90
@@ -320,8 +327,8 @@ kcoeffSPL.mod kcoeffSPL.o : kcoeffSPL.f90 $(PARAMS)
 kcoeffSPLJAC.mod kcoeffSPLJAC.o : kcoeffSPLJAC.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffSPLJAC.f90
 
-kcoeff_basic.mod kcoeff_basic.o : kcoeff_basic.f90 $(PARAMS)
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_basic.f90
+kcoeff_common.mod kcoeff_common.o : kcoeff_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_common.f90
 
 kcoeff_FAST.mod kcoeff_FAST.o : kcoeff_FAST.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST.f90
@@ -361,20 +368,14 @@ klinemix.mod klinemix.o : klinemix.f90 $(PARAMS)
 rad_main.mod rad_main.o : rad_main.f90 $(PARAMS) 
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_main.f90
 
-rad_limb.mod rad_limb.o : rad_limb.f90 $(PARAMS) 
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_limb.f90
-
 rad_misc.mod rad_misc.o : rad_misc.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_misc.f90
 
 rad_angles.mod rad_angles.o : rad_angles.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_angles.f90
 
-rad_diff.mod rad_diff.o : rad_diff.f90 $(PARAMS)
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_diff.f90
-
-rad_quad.mod rad_quad.o : rad_quad.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_quad.f90
+rad_diff_and_quad.mod rad_diff_and_quad.o : rad_diff_and_quad.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_diff_and_quad.f90
 
 rad_flux.mod rad_flux.o : rad_flux.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_flux.f90
@@ -444,9 +445,6 @@ jac_up.mod jac_up.o : jac_up.f90 $(PARAMS)
 jac_down.mod jac_down.o : jac_down.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_down.f90
 
-jac_limb.mod jac_limb.o : jac_limb.f90 $(PARAMS)
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_limb.f90
-
 jac_pclsam_up.mod jac_pclsam_up.o : jac_pclsam_up.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_pclsam_up.f90
 
@@ -459,6 +457,9 @@ s_writefile.mod s_writefile.o : s_writefile.f90 $(PARAMS)
 
 s_misc.mod s_misc.o : s_misc.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) s_misc.f90
+
+n_misc.mod n_misc.o : n_misc.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_misc.f90
 
 n_main.mod n_main.o : n_main.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_main.f90
@@ -474,6 +475,12 @@ n_layers.mod n_layers.o : n_layers.f90 $(PARAMS)
 
 n_layers_lblrtm.mod n_layers_lblrtm.o : n_layers_lblrtm.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_layers_lblrtm.f90
+
+n_nonlte_common.mod n_nonlte_common.o : n_nonlte_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_nonlte_common.f90
+
+n_mr_common.mod n_mr_common.o : n_mr_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_mr_common.f90
 
 n_gas_wt_spectra.mod n_gas_wt_spectra.o : n_gas_wt_spectra.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_gas_wt_spectra.f90

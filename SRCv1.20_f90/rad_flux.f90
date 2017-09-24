@@ -5,11 +5,11 @@
 MODULE rad_flux
 
 USE basic_common
-USE spline_and_sort
-USE kcoeff_basic
+USE spline_and_sort_and_common
 USE clear_scatter_basic
 USE rad_angles
 USE rad_misc
+USE rad_diff_and_quad
 
 IMPLICIT NONE
 
@@ -4362,7 +4362,6 @@ CONTAINS
 ! local
     INTEGER :: iJ,iL,iLay
     REAL :: rMPTemp,kb,cp,mass,avog,grav,grav0,Re
-    REAL :: p2h
     REAL :: heatfc
 
 !     HEATFC is the factor one must multiply DELTA-FLUX/DELTA-PRESSURE,

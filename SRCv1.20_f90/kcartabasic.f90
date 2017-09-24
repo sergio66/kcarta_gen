@@ -1258,33 +1258,6 @@
                         iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
                         iaJacob,iJacob)
 
-                    ELSEIF ((kWhichScatterCode == 0) .AND. (iaLimb(iAtm) > 0)) THEN
-                    ! %%%%%%%%%%%%% CLEAR SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                        write(kStdWarn,*) ' ---> Clear Sky LIMB Computations ...'
-                        CALL InterfaceClearSkyLimb( &
-                        raFreq, &
-                        raaSumAbCoeff,raMixVertTemp,caOutName, &
-                        iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
-                        raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
-                        raSatAngle,raFracTop,raFracBot, &
-                        iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-                        raSurface,raSun,raThermal,raSunRefl, &
-                        raLayAngles,raSunAngles,iTag,iActualTag, &
-                        raThickness,raPressLevels,iProfileLayers,pProf, &
-                        raTPressLevels,iKnowTP, &
-                        rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-                        iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-                        raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-                        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-                        iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
-                        daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
-                        daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
-                        daaUpperNLTEGasAbCoeffBloat, &
-                        caOutUAFile,caOutBloatFile, &
-                        caFLuxFile, &
-                        caJacobFile,caJacobFile2, &
-                        iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
-                        iaJacob,iJacob)
                     END IF      !!kWhichScatterCode == 0
                 END IF
 

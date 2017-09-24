@@ -5,6 +5,8 @@
 MODULE n_rad_jac_scat
 
 USE basic_common
+USE clear_scatter_basic
+USE s_misc
 
 IMPLICIT NONE
 
@@ -35,7 +37,6 @@ CONTAINS
 ! local variables
     INTEGER :: iL,iA,iaTemp(kMaxLayer),iX,iFound
     REAL :: rSwap
-    REAL :: LimbViewScanAng
 
     DO iA = 1,iNatm
         IF (iaLimb(iA) > 0) THEN
@@ -153,7 +154,7 @@ CONTAINS
     REAL :: rTbdy,rTSurf,rAngle,rPressStart,rPressStop,rHeight
     INTEGER :: iDirection,iW,iInt
     INTEGER :: iC,iaStory(kProfLayer),iNumLinesRead
-    REAL :: FindSurfaceTemp,rJunk
+    REAL :: rJunk
     INTEGER :: iFake
           
     caWord = '*RADNCE'
@@ -792,81 +793,6 @@ CONTAINS
     end SUBROUTINE ReadEmissivity
 
 !************************************************************************
-! if param kSurfTemp = +1, this computes surface temp by interpolating across
-! pressure layers, and adds on offet given by rTSurf (which is the usual
-! parameter normally used for surface temp in *RADNCE)
-! else if kSurfTemp = -1, it just returns the user specified temperature
-    REAL FUNCTION FindSurfaceTemp(rPressStart,rPressStop, &
-    rTSurf,raProfileTemp, &
-    raPresslevels,iProfileLayers)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-    REAL :: rPressStart,rPressStop,rTSurf,raProfileTemp(kProfLayer)
-    REAL :: raPressLevels(kProfLayer+1)
-    INTEGER :: iProfileLayers
-
-! local variables
-    REAL :: rT,FindBottomTemp
-    INTEGER :: iI
-
-    rT = rTSurf   !! this is the temp set in nm_radnce; logic below determines if it is offset or actual stemp
-          
-! this ORIGINAL code, allowed user to add in an offset
-    IF ((kSurfTemp > 0) .AND. ((kRTP == -1) .OR. (kRTP == 0))) THEN
-    ! ave to adjust temperature .. do this for down AND up look instr
-        IF (rPressStart > rPressStop) THEN  ! for down looking instr
-            rT = FindBottomTemp(rPressStart,raProfileTemp, &
-            raPressLevels,iProfileLayers)
-            rT = rT+rTSurf
-        ELSEIF (rPressStart < rPressStop) THEN  ! for up looking instr
-            rT = FindBottomTemp(rPressStop,raProfileTemp, &
-            raPressLevels,iProfileLayers)
-            rT = rT+rTSurf
-        END IF
-    END IF
-!      ELSEIF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))) THEN
-!        !just state this has already been taken care of in subr radnce4
-!       write(kStdWarn,*) 'kSurfTemp > 0 and kRTP = -5 or -6'
-!       write(kStdWarn,*) 'so we already added in raTSurf offset to stemp from TAPE5/6'
-!        rT = rT
-!        END IF
-!      END IF
-
-! this was the code in Dec 2016, get rid of it
-! this was the code in Dec 2016, get rid of it
-! this was the code in Dec 2016, get rid of it
-! why make life complicated, just directly give USER defined STEMP
-!      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .GE. -6) .AND. (kRTP .LE. 0))) THEN
-!        rT = rTSurf
-!      END IF
-! replace with this why make life complicated, just directly give USER defined STEMP
-    IF ((kSurfTemp > 0) .AND. ((kRTP >= -6) .AND. (kRTP <= -5))) THEN
-        rT = rTSurf
-    END IF
-
-    FindSurfaceTemp = rT
-            
-    IF (rT < 190.0) THEN
-        write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
-        write(kStdErr,*)'brrrrrrrrrrrrrrrrrrrrrrrrrr!!!!!!!'
-        write(kStdErr,*)'kCARTA allows surface temps between 190 and 350K'
-        CALL DoSTOP
-    END IF
-
-    IF (rT > 350.0) THEN
-        write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
-        write(kStdErr,*)'whew!!!!! bloody hot!!!!!!!'
-        write(kStdErr,*)'kCARTA allows temps between 210 and 350K'
-        CALL DoSTOP
-    END IF
-            
-    RETURN
-    end FUNCTION FindSurfaceTemp
-
-!************************************************************************
 ! this subroutine sees if the user has put in "fractional" start/stop
 ! mixed paths --- then modify the mixing table accordingly
 ! also keeps track of the fraction used for the top layer
@@ -1271,7 +1197,7 @@ CONTAINS
     CHARACTER(7) :: caWord
     CHARACTER(120) :: caName
     INTEGER :: iNumLinesRead,iIn,iNum,iaTemp(kMixFilRows)
-    INTEGER :: FindCloudLayer,iJ,iScat,iI,iJ1,iErr,iTop,iBot
+    INTEGER :: iJ,iScat,iI,iJ1,iErr,iTop,iBot
     REAL :: rPT,rPB,rP1,rP2,r1,r2,rSwap,raaJunkCloudTB(2,2)
     REAL :: raCprtop(kMaxClouds),raCprbot(kMaxClouds)
 ! these are to check that the scattering table names are unique
@@ -1824,7 +1750,7 @@ CONTAINS
 ! local variables
     INTEGER :: iI,iJ,iK
     INTEGER :: iIn,iJ1,iScat,iJ2,iIndex,iSkipper
-    INTEGER :: iTop,iBot,FindCloudLayer,iNum
+    INTEGER :: iTop,iBot,iNum
     REAL :: rPT,rPB,rSwap,rP1,rP2,rIWP,rIWP0,rPBot,rPTop,rIWPSum,rIWP_mod
     CHARACTER(120) :: caName
     REAL :: rCld,rXCld,rCldFull,rCldPart,rFrac1,rFrac2,rPtopX,rPbotX

@@ -5,9 +5,10 @@
 MODULE n_pth_mix
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE s_misc
 USE freqfile
+USE n_mr_common
 
 IMPLICIT NONE
 
@@ -41,7 +42,7 @@ CONTAINS
     INTEGER :: iI,iJ,iOffSet,iCO2_ind,iDefault,iInterpType
     REAL :: raT(kProfLayer),raP(kProfLayer),rX,rY,logP(kProfLayer),rPmin,rPmax,dx
     REAL :: grav0,grav,Re,Rd,raGeopotentialThick1(kProfLayer),raGeopotentialThick2(kProfLayer)
-    REAL :: rInt,raTX(10),raPX(10),p2h
+    REAL :: rInt,raTX(10),raPX(10)
 
     iCO2_ind = 2                 !! assume we have CO2 in profile
 
@@ -285,7 +286,7 @@ CONTAINS
 
     INTEGER :: iFileGasesReadIn,iNeed2Read,iGasesInProfile,iTempFound
 
-    INTEGER :: iL1,iL2,length130,iI,iDefault,iReadP
+    INTEGER :: iL1,iL2,iI,iDefault,iReadP
     CHARACTER(130) :: ca1,ca2,caTemp
 
     DO iI = 1,kProfLayer
@@ -1268,7 +1269,7 @@ CONTAINS
 
     INTEGER :: iFileGasesReadIn,iNeed2Read,iGasesInProfile,iTempFound
 
-    INTEGER :: iL1,iL2,iL3,iL4,iL5,iL6,iL7,length130,iIinFile,iI
+    INTEGER :: iL1,iL2,iL3,iL4,iL5,iL6,iL7,iIinFile,iI
     CHARACTER(130) :: ca1,ca2,ca3,ca4,ca5,ca6,ca7,caTemp
     INTEGER :: iNumPathsPerSet,iNumSet
 

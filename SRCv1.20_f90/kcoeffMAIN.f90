@@ -6,7 +6,7 @@ MODULE kcoeffMAIN
 
 use basic_common
 use s_misc
-use kcoeff_basic
+use kcoeff_common
 use kcoeffSPL
 use kcoeffSPLJAC
 use kcoeff_FAST

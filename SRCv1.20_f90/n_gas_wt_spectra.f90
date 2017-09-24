@@ -6,10 +6,12 @@ MODULE n_gas_wt_spectra
 
 USE basic_common
 !USE kpredictVT
-!USE kcoeff_basic
-USE spline_and_sort
+USE kcoeff_common
+USE spline_and_sort_and_common
 USE s_misc
 USE freqfile
+USE s_writefile
+USE n_nonlte_common
 
 IMPLICIT NONE
 
@@ -46,10 +48,9 @@ CONTAINS
     INTEGER :: iNGas,iaGasesNL(kGasComp),iaMOLgases(kMaxGas)
 
 ! local variables
-    INTEGER :: iTag,iErr,iNotMainGas,MainGas
+    INTEGER :: iTag,iErr,iNotMainGas
     INTEGER :: iInt,iaTemp(kMaxGas),iC,iCC,iaInDataBase(kGasComp)
     INTEGER :: iNgasesCheck
-    INTEGER :: iCheckCompDataBase
 
     CHARACTER(7) :: caWord
 
@@ -506,7 +507,7 @@ CONTAINS
     CHARACTER(7) :: caWord
     INTEGER :: iNumLinesRead,iErr,iI,iaDumb(kMaxGas),iaGases(kMaxGas)
     REAL :: rH,rHN
-    INTEGER :: iStrongISO,iStrongJL,iStrongJU,iStrongGASID,iLTEIn,OutsideSpectra
+    INTEGER :: iStrongISO,iStrongJL,iStrongJU,iStrongGASID,iLTEIn
     INTEGER :: iNLTEStart2350,iJ,iG
 
     INTEGER :: iBand,iGasID,iNum,iISO,iLineMixBand,iInt,iType,iGas,iDoVoigtChi
@@ -1484,7 +1485,7 @@ CONTAINS
 ! local
     INTEGER :: iMax,iC,iCC,iaInDataBase(kGasComp),iTag,iErr,iaTemp(kMaxGas)
     INTEGER :: iNotMainGas,iNgasesCheck,iInt,iWhichKC,iYesWV,i101,i102,i103
-    INTEGER :: iCheckCompDataBase,MainGas,iKLBLRTMgases,iMax_molgas
+    INTEGER :: iKLBLRTMgases,iMax_molgas
 
     iWHichKC = iNgas
     iKLBLRTMgases = 32
@@ -1810,4 +1811,44 @@ CONTAINS
     end SUBROUTINE add_xsecgas
 !************************************************************************
 
+! this subroutine checks to see if the gasID is 1-36 or 101-102 or 103
+    INTEGER FUNCTION MainGas(iGasID)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+    INTEGER :: iGasID
+
+    INTEGER :: iI,i1,i2
+           
+    iI = -1        !assume this is a main gas (1-36, or 101-102)
+
+    i1 = -1
+    i2 = -1
+
+    IF ((iGasID >= 1) .AND. (iGasID <= kGasComp)) THEN
+        i1 = 1          !! main gas
+    ELSEIF (iGasID == kNewGasHi+1) THEN
+        i1 = 1          !! heavy water
+    ELSEIF ((iGasID >= kNewGasLo) .AND. (iGasID <= kNewGasHi)) THEN
+        i2 = 1          !! water continuum
+    END IF
+          
+    IF ((i1 == 1) .OR. (i2 == 1)) THEN
+        iI = 1
+    END IF
+
+    IF ((i2 == 1) .AND. kCKD < 0) THEN
+        write(kStdWarn,*) 'Cannot have gases 101,102 with CKD turned off'
+        write(kStdErr,*) 'Cannot have gases 101,102 with CKD turned off'
+        Call DoSTOP
+    END IF
+
+    MainGas = iI
+
+    RETURN
+    end FUNCTION MainGas
+
+!************************************************************************
 END MODULE n_gas_wt_spectra

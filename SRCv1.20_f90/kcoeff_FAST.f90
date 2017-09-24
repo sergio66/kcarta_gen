@@ -7,7 +7,7 @@ MODULE kcoeff_FAST
 USE basic_common
 USE kcoeffSPL
 USE kcoeffSPLJAC
-use kcoeff_basic
+use kcoeff_common
 use kcoeff_FAST_details
 use kcoeff_FAST_details2
 

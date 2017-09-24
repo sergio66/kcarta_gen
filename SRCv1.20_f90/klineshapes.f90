@@ -10,8 +10,9 @@ MODULE klineshapes
 
 USE basic_common
 USE s_misc
-USE kcoeff_basic
+USE kcoeff_common
 USE kcoeffSPL
+USE n_gas_wt_spectra
 
 IMPLICIT NONE
 
@@ -1050,147 +1051,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE read_stronglineLTE_lineparameters
-
-!************************************************************************
-! this subroutine reads in the line parameters for the band in question
-    SUBROUTINE read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
-    iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift, &
-    daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR, &
-    iLineMixBand,iDoVoigtChi)
-
-    IMPLICIT NONE
-     
-    include '../INCLUDE/kcartaparam.f90'
-
-! input params, read from caaNLTETemp(iLTEin)
-! caaaNONLTETemp  tells the name of the files containing the nonLTE temps
-    INTEGER :: iLTEIn,iBand,iDOVoigtChi
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-! output params
-    INTEGER :: iGasID,iNum,iISO,iLineMixBand
-    DOUBLE PRECISION :: daElower(kHITRAN),daLineCenter(kHITRAN)
-    DOUBLE PRECISION :: daJL(kHITRAN),daJU(kHITRAN)
-    DOUBLE PRECISION :: daPshift(kHITRAN),daStren296(kHITRAN),daW_for(kHITRAN)
-    DOUBLE PRECISION :: daW_self(kHITRAN),daW_temp(kHITRAN)
-    DOUBLE PRECISION :: daJLowerQuantumRot(kHITRAN)
-    CHARACTER(1) ::      caJPQR(kHITRAN)
-
-    INTEGER :: iI,iErr,iIOUN,iJU,iJL
-    CHARACTER(80) :: caFname
-    DOUBLE PRECISION :: dMax,dL,dR,dC
-
-    caFName = caaaNLTEBands(iLTEin,iBand)
-
-    iIOun = kTempUnit
-    OPEN(UNIT=iIOun,FILE=caFName,FORM='unformatted',STATUS='OLD', &
-    IOSTAT=iErr)
-    IF (iErr /= 0) THEN
-        write (kStdErr,*) 'in subroutine read_lineparameters, error reading'
-        write (kStdErr,*) 'file that has HITRAN lineparameters'
-        WRITE(kStdErr,1070) iErr, caFName
-        CALL DoSTOP
-    END IF
-    kTempUnitOpen = 1
-
-    read(iIOUN) iGasID,iNum,iISO
-    write(kstdWarn,*) ' '
-    write(kStdWarn,*) '----> Opening HITRAN parameter file : '
-    write(kStdWarn,1080) caFName
-    write(kStdWarn,*) 'File has ',iNum,' line parameters for gas ',iGasID
-
-    IF (iNum > kHITRAN) THEN
-        write(kStdErr,*) 'File has ',iNum,' line parameters for gas ',iGasID
-        write(kStdErr,*) 'Code can only handle ',kHITRAN,' line parameters '
-        write(kStdErr,*) 'Please check kHITRAN in kcartaparam.f90 and fix'
-        CALL DoStop
-    END IF
-
-    read(iIOUN) (daElower(iI),iI = 1,iNum)     !lower state energy
-    read(iIOUN) (daLineCenter(iI),iI = 1,iNum) !line center
-    read(iIOUN) (daJL(iI),iI = 1,iNum)         !lower vib quantum number .. basically SAME for all iI=1,iNum
-    read(iIOUN) (daJU(iI),iI = 1,iNum)         !upper vib quantum number .. basically SAME for all iI=1,iNum
-    read(iIOUN) (daPshift(iI),iI = 1,iNum)     !pressure shift of linecenter
-    read(iIOUN) (daStren296(iI),iI = 1,iNum)   !line strenght
-    read(iIOUN) (daW_for(iI),iI = 1,iNum)      !foreign broadening/atm
-    read(iIOUN) (daW_self(iI),iI = 1,iNum)     !self broadening/atm
-    read(iIOUN) (daW_temp(iI),iI = 1,iNum)     !broadening tempr dependance
-!! new since July 2015, comes from line.bslq (see lineparameters.m in
-!! SRCv1.18/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/USUALLAYERS/
-    read(iIOUN) (daJLowerQuantumRot(iI),iI = 1,iNum)  !J lower quantum rotation state number
-!      print *,'here',caFName
-!      read(iIOUN) (caJPQR(iI),iI = 1,iNum)       !P Q or R
-!      print *,'here2'
-
-    close (iIOUN)
-    kTempUnitOpen = -1
-          
-! 10   FORMAT(A1)
-!      print *,(caJPQR(iI),iI = 1,iNum)
-          
-    iJU = nint(daJU(1))
-    iJL = nint(daJL(1))
-
-    1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A80)
-    1080 FORMAT(A80)
-
-! outside of the weaklines, do linemixing for all the bands the user specifies!
-! but be careful about Cousin vs linemix, else code becomes VERY slow
-    IF (iGasID == 2) THEN
-        IF ((iJL == 4) .AND. (iJU == 24) .AND. (iISO == 1)) THEN
-            iLineMixBand = +2
-            write(kStdWarn,*) 'very strong CO2 band : deldel (2310) iLineMixBand = +2'
-        ELSEIF ((iJL == 2) .AND. (iJU == 16) .AND. (iISO == 1)) THEN
-            iLineMixBand = +2
-            write(kStdWarn,*) 'very strong CO2 band : pi pi  (2320) iLineMixBand = +2'
-        ELSEIF ((iJL == 1) .AND. (iJU == 9) .AND. (iISO == 1)) THEN
-            iLineMixBand = +2
-            write(kStdWarn,*) 'very strong CO2 band : sigsig (2350) iLineMixBand = +2'
-        ELSEIF ((iJL == 1) .AND. (iJU == 9) .AND. (iISO == 2)) THEN
-            iLineMixBand = +2
-            write(kStdWarn,*) 'very strong CO2 band : sigsig (2351) iLineMixBand = +2'
-        ELSE
-            write(kStdWarn,*) 'strong CO2 bands : iLineMixBand = +1 (cousin)'
-            iLineMixBand = +1
-        END IF
-    ELSE
-        iLineMixBand = -1
-        write(kStdWarn,*) 'not a CO2  band : no linemixing (voigt) : iLineMixBand = -1'
-    END IF
-
-    IF ((iLineMixBand == 2) .AND. (iJU /= 9)) THEN
-    !!!only do linemix for 2350, 2351 lines; else do Cousin
-        iLineMixBand = +1
-        write(kStdWarn,*) 'iJL, iJU,iSO = ',iJL,iJU,iISO
-        write(kStdWarn,*) '   reset iLineMixBand = from +2 to +1 (cousin)'
-    ELSEIF ((iLineMixBand == 2) .AND. (iJU == 9)) THEN
-        IF (iISO <= 2) THEN
-            write(kStdWarn,*) 'iJL, iJU,iSO = ',iJL,iJU,iISO
-            write(kStdWarn,*) '   iLineMixBand = +2 (linemix)'
-        ELSEIF (iISO > 2) THEN
-            write(kStdWarn,*) 'iJL, iJU,iSO = ',iJL,iJU,iISO
-            write(kStdWarn,*) '   iLineMixBand = +1 (cousin)'
-        END IF
-    END IF
-            
-! this always makes cousin the happening one!
-!       IF (iLineMixBand .GT. 0) THEN
-!         iLineMixBand = +1
-!         write(kStdWarn,*) 'doing cousin everywhere; reset iLineMixBand = +1'
-!         print *,' ***** reset iLineMixBand = 1   ie linemix --> cousin ****'
-!       END IF
-
-!      IF (iLineMixBand .GT. 0) THEN
-!        IF (iDoVoigtChi .GT. 0) THEN
-!          write(kStdErr,*) 'Cannot have idoVoigtChi > 0 '
-!          write(kStdErr,*) 'AND try to use Cousin everywhere!'
-!          CALL DoStop
-!        END IF
-!        print *,' ***** reset iLineMixBand = 1   ie linemix --> cousin ****'
-!        iLineMixBand = 1
-!        END IF
-
-    RETURN
-    end SUBROUTINE read_lineparameters
 
 !************************************************************************
 !               these are the PARTITION FUNCTIONS

@@ -5,15 +5,15 @@
 MODULE rad_main
 
 USE basic_common
-USE spline_and_sort
-use rad_diff
-use rad_quad
+USE spline_and_sort_and_common
+use rad_diff_and_quad
 use rad_misc
 use rad_flux
-use rad_limb
+!use rad_limb
 use rad_angles
-use kcoeff_basic  ! just for interptemp ugh
 use s_misc
+!use knonlte
+!use kbloat
 
 IMPLICIT NONE
 
@@ -752,20 +752,23 @@ CONTAINS
                     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
                 ELSEIF (iChunk_DoNLTE == 3) THEN
                 ! normal (cont layer temp) LTE radtransfer plus the fast (and so far incorrect) compressed NLTE calc
-                    CALL rad_trans_SAT_LOOK_DOWN_NLTE_FASTCOMPR(raFreq, &
-                    raInten,raVTemp, &
-                    raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
-                    rSatAngle,rFracTop,rFracBot, &
-                    iNp,iaOp,raaOp,iNpmix,iFileID, &
-                    caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
-                    raSurface,raSun,raThermal,raSunRefl, &
-                    raLayAngles,raSunAngles,iTag, &
-                    raThickness,raPressLevels,iProfileLayers,pProf, &
-                    raTPressLevels,iKnowTP, &
-                    rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-                    iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
-                    raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-                    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
+		  write(kStdWarn,*) 'iChunk_DoNLTE = 3 not allowed ... turned off'
+		  write(kStdErr,*) 'iChunk_DoNLTE = 3 not allowed ... turned off'		  
+		  CALL DoStop
+                    !CALL rad_trans_SAT_LOOK_DOWN_NLTE_FASTCOMPR(raFreq, &
+                    !raInten,raVTemp, &
+                    !raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
+                    !rSatAngle,rFracTop,rFracBot, &
+                    !iNp,iaOp,raaOp,iNpmix,iFileID, &
+                    !caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
+                    !raSurface,raSun,raThermal,raSunRefl, &
+                    !raLayAngles,raSunAngles,iTag, &
+                    !raThickness,raPressLevels,iProfileLayers,pProf, &
+                    !raTPressLevels,iKnowTP, &
+                    !rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
+                    !iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
+                    !raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
+                    !caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
                 ELSEIF (iChunk_DoNLTE == +2) THEN
                     write (kStdErr,*) 'huh iNLTESTart <= kProfLayer means only LBL'
                     write (kStdErr,*) 'calcs possible for NLTE, not fast SARTA model'
@@ -1491,19 +1494,6 @@ CONTAINS
     REAL :: rJunk1,rJunk2
     INTEGER :: iJunk
           
-    IF ((raFreq(1) >= 10000) .AND. (raSunAngles(50) <= 90)) THEN
-        write(kStdWarn,*) 'daytime downlook NIR/VIS/UV : Calling rad_trans_SAT_LOOK_DOWN_NIR_VIS_UV'
-        CALL rad_trans_SAT_LOOK_DOWN_NIR_VIS_UV(raFreq,raInten,raVTemp, &
-        raaAbs,rTSpace,rTSurf,rPSurf,raUseEmissivity,rSatAngle, &
-        rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
-        caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
-        raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf, &
-        raTPressLevels,iKnowTP, &
-        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
-        RETURN
-    END IF
-
     iIOUN = iIOUN_IN
 
     rThermalRefl=1.0/kPi
@@ -1967,19 +1957,6 @@ CONTAINS
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
     INTEGER :: iIOUN,iI
-
-    IF ((raFreq(1) >= 10000) .AND. (kSolarAngle <= 90)) THEN
-        write(kStdWarn,*) 'daytime uplook NIR/VIS/UV : Calling rad_trans_SAT_LOOK_UP_NIR_VIS_UV'
-        CALL rad_trans_SAT_LOOK_UP_NIR_VIS_UV(raFreq,raInten,raVTemp, &
-        raaAbs,rTSpace,rTSurf,rPSurf,raUseEmissivity,rSatAngle, &
-        rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
-        caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
-        raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf, &
-        raTPressLevels,iKnowTP, &
-        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
-        RETURN
-    END IF
 
     iIOUN = iIOUN_IN
 
@@ -3329,7 +3306,7 @@ CONTAINS
 ! 1) there is NO integration over solid angle, but we still have to account
 !    for the solid angle subtended by the sun as seen from the earth
 
-    SUBROUTINE rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS( &
+    SUBROUTINE rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMIS( &
     iVaryIN_0,raFreq,raInten,raVTemp, &
     raaAbs,rTSpace,rTSurf,rPSurf,raUseEmissivity,rSatAngle, &
     rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
@@ -3728,7 +3705,7 @@ CONTAINS
         OPEN(UNIT=iIOUN1,FILE=caDumpEmiss,STATUS='NEW',FORM='FORMATTED', &
         IOSTAT=IERR)
         IF (IERR /= 0) THEN
-            WRITE(kStdErr,*) 'In subroutine rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS'
+            WRITE(kStdErr,*) 'In subroutine rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMIS'
             WRITE(kStdErr,1010) IERR, caDumpEmiss
             CALL DoSTOP
         ENDIF
@@ -3934,7 +3911,7 @@ CONTAINS
 
     999 CONTINUE
     RETURN
-    end SUBROUTINE rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS
+    end SUBROUTINE rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMIS
 
 !************************************************************************
 ! this does the CORRECT thermal and solar radiation calculation
@@ -4636,19 +4613,6 @@ CONTAINS
           
     iVary = kTemperVary
 
-    IF ((raFreq(1) >= 10000) .AND. (kSolarAngle <= 90)) THEN
-        write(kStdWarn,*) 'daytime uplook NIR/VIS/UV : Calling rad_trans_SAT_LOOK_UP_NIR_VIS_UV'
-        CALL rad_trans_SAT_LOOK_UP_NIR_VIS_UV(raFreq,raInten,raVTemp, &
-        raaAbs_LBLRTM_zeroUA,rTSpace,rTSurf,rPSurf,raUseEmissivity,rSatAngle, &
-        rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
-        caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
-        raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf, &
-        raTPressLevels,iKnowTP, &
-        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
-        RETURN
-    END IF
-
     iIOUN = iIOUN_IN
 
     write(kStdWarn,*) 'rSatAngle = ',rSatAngle
@@ -4931,7 +4895,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),raInten(kMaxPts)
           
     REAL :: raBT0(kMaxPts),raDBT(kMaxPts),raNewR(kMaxPts)
-    INTEGER :: iIOUN,iErr,iNumChunk,iFr,iLenD,iLenX,iLeftjust_lenstr,iFound,iNumPointsInChunk,iWhichChunk
+    INTEGER :: iIOUN,iErr,iNumChunk,iFr,iLenD,iLenX,iFound,iNumPointsInChunk,iWhichChunk
     INTEGER :: iX,iXmax,iY,iTest
     CHARACTER(3) :: ca3
     CHARACTER(4) :: ca4
@@ -5143,4 +5107,777 @@ CONTAINS
     end SUBROUTINE lblrtm_highres_regression_fix
 
 !************************************************************************
+! this subroutine quickkly computes the rad transfer for a nonscatter atm
+! note that it pretty much uses the accurate diffusive approx for backgnd
+! thermal, for a downlook instr
+! Check out subroutine "FastBDRYL2GDiffusiveApprox" in rad_diff.f
+    SUBROUTINE NoScatterRadTransfer(iDownWard,raTau,raTemp,nlev, &
+    rSatAngle,rSolarAngle,rTSurface,rSurfPress,ems,rF,rI,iWhereTo, &
+    iProfileLayers,raPressLevels)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+          
+    INTEGER :: iProfileLayers           !number of layers in KLAYERS file
+    REAL :: raPressLevels(kProfLayer+1) !pressure levels of atmosphere
+    INTEGER :: iWhereTo                 !rad transfer thru all layers????
+    INTEGER :: iDownWard                !is instr up(-1) or down(+1) looking
+    REAL :: raTau(maxcly)               !the abs coeffs
+    REAL :: raTemp(maxcly)              !temperature of the levels (0=TOA)
+    INTEGER :: nlev                     !number of levels to use
+    REAL :: rSatAngle,rSolarAngle       !sun and satellite angles
+    REAL :: ems                         !emissivity of surface
+    REAL :: rTSurface,rSurfPress        !surface temperature, pressure
+    REAL :: rF,rI                       !wavenumber and intensity
+
+    INTEGER :: iI,iStop
+    REAL :: r1,r2,rEmission,rCos
+    REAL :: rSun,rThermal,rSurface,rToa_to_Gnd
+
+    INTEGER :: iBdry
+    REAL :: rAngle,rLay2Gnd
+
+    rI = 0.0
+    rSun = 0.0
+    rToa_to_Gnd = 0.0
+
+! ++++++++++++++++++++++++++++++=
+
+    IF (iDownWard == 1) THEN        !this is down look instr
+
+        iBdry = FindBoundary_Individual(rF,iProfileLayers,raPressLevels)
+        if (ibdry > nlev-1) ibdry = nlev-1
+
+        rLay2Gnd = 0.0
+        DO iI = iBdry+1,nlev-1
+            rLay2Gnd = rLay2Gnd + raTau(iI)
+        END DO
+
+    ! o radiance at TOA
+        rThermal = ttorad(rF,sngl(kTSpace))
+    ! ring this down to the surface using 3/5 cosine all the way to iB
+        DO iI = 1,iBdry-1
+            r1 = exp(-raTau(iI)/0.6)      !transmission thru layer
+            r2 = ttorad(rF,raTemp(iI))    !emission from layer
+            rThermal = (1-r1)*r2 + rThermal*r1
+        END DO
+
+        DO iI = iBdry,nlev-1
+            rAngle = FindDiffusiveAngleExp(rLay2Gnd)
+            r1     = exp(-raTau(iI)/rAngle)      !transmission thru layer
+            r2     = ttorad(rF,raTemp(iI))            !emission from layer
+            rThermal = (1-r1)*r2 + rThermal*r1
+            IF (iI > nlev-1) THEN
+                rLay2Gnd = rLay2Gnd - raTau(iI+1)
+            ELSE
+                rLay2Gnd = 0.0
+            END IF
+        END DO
+
+        rThermal = rThermal*(1-ems)     !need a factor of 1/pi, but have done
+    ! ntegration over solid angle to get
+    ! actor of 2*pi * 0.5
+        IF (kSolar >= 0) THEN
+            DO iI=1,nlev-1
+                rToa_to_Gnd = rToa_to_Gnd + raTau(iI)
+            END DO
+            r1   = ttorad(rF,sngl(kSunTemp))        !sun radiation
+            r2   = kOmegaSun                        !solid angle
+            rCos = cos(rSolarAngle*kPi/180.0)
+            rSun = r1*r2*rCos*exp(-rToa_to_Gnd/rCos)
+        END IF
+        rSun = rSun*(1-ems)/kPi
+
+        rSurface = ttorad(rF,rTSurface)       !surface radiation from gnd
+        rSurface = rSurface*ems
+
+        rI = rSurface + rSun + rThermal        !upward radiaion at gnd
+
+    ! ring this up to instr using instr cosine all the way
+        rCos = cos(rSatAngle*kPi/180.0)
+        IF (iWhereTo == -1) THEN
+            iStop = 1
+        ELSE
+            iStop = (nlev - 1) - iWhereTo + 1
+        END IF
+        DO iI=nlev-1,iStop,-1
+            r1 = exp(-raTau(iI)/rCos)      !transmission thru layer
+            r2 = ttorad(rF,raTemp(iI))    !emission from layer
+            rI = (1-r1)*r2 + rI*r1
+        END DO
+    END IF
+
+! ++++++++++++++++++++++++++++++=
+    IF (iDownWard == -1) THEN        !this is up look instr
+    ! o radiance at TOA
+        rI   = ttorad(rF,sngl(kTSpace))
+        rCos = cos(rSatAngle*kPi/180.0)
+    ! ring this down to the surface using satellite cosine all the way
+        IF (iWhereTo == -1) THEN
+            iStop = nlev - 1
+        ELSE
+            iStop = iWhereTo
+        END IF
+        DO iI=1,iStop
+            r1 = exp(-raTau(iI)/rCos)     !transmission thru layer
+            r2 = ttorad(rF,raTemp(iI))    !emission from layer
+            rI = (1-r1)*r2 + rI*r1
+        END DO
+
+        IF (kSolar >= 0) THEN
+            DO iI=1,iStop
+                rToa_to_Gnd = rToa_to_Gnd+raTau(iI)
+            END DO
+            r1   = ttorad(rF,sngl(kSunTemp))          !sun radiation
+            rSun = r1*exp(-rToa_to_Gnd)
+        END IF
+
+        IF (abs(rSatAngle-rSolarAngle) < 1.0e-4) THEN
+        !!!sun in FOV of instr
+            rI = rI + rSun
+        END IF
+    END IF
+
+    RETURN
+    end SUBROUTINE NoScatterRadTransfer
+!************************************************************************
+! the main dog! radiative transfer! DOUBLE precision
+! BIG Assumption, is that we only dump out radiances at TOP of layers
+! compared to rad_main, where we could dump radiances in midlayer
+    SUBROUTINE radiances_bloat( &
+    raFreq,raVTemp,caOutBloatFile, &
+    iOutNum,iAtm,iNumLayer,iaaRadLayer, &
+    rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
+    rSatAngle,rFracTop,rFracBot, &
+    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix, &
+    raSurface,raSun,raThermal,raSunRefl, &
+    raLayAngles,raSunAngles,iTag, &
+    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raTPressLevels,iKnowTP, &
+    rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
+    iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
+    raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
+    daFreqBloat,daaSumNLTEOptDepthBloat,daaPlanckCoeffBloat, &
+    daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+    daaUpperNLTEGasAbCoeffBloat)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! iNLTEStart  = which layer NONLTE calcs start
+! raaPlanckCoeff = how to affect the Planck computation
+! iTag          = 1,2,3 and tells what the wavenumber spacing is
+! raLayAngles   = array containijng layer dependent sun angles
+! raLayAngles   = array containijng layer dependent satellite view angles
+! raFreq    = frequencies of the current 25 cm-1 block being processed
+! raVTemp    = vertical temperature profile associated with the mixed paths
+! caOutBloatFile  = name of output binary file
+! iOutNum    = which of the *output printing options this corresponds to
+! iAtm       = atmosphere number
+! iNumLayer  = total number of layers in current atmosphere
+! iaaRadLayer = for ALL atmospheres this is a list of layers in each atm
+! rTSpace,rSurfaceTemp,rEmsty,rSatAngle = bndy cond for current atmosphere
+! iNpMix     = total number of mixed paths calculated
+! iFileID       = which set of 25cm-1 wavenumbers being computed
+! iNp        = number of layers to be output for current atmosphere
+! iaOp       = list of layers to be output for current atmosphere
+! raaOp      = fractions to be used for computing radiances
+! rFracTop   = how much of the top most layer exists, because of instrument
+!              posn ... 0 rFracTop < 1
+! raSurface,raSun,raThermal are the cumulative contributions from
+!              surface,solar and backgrn thermal at the surface
+! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
+!                   user specified value if positive
+    REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
+    REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
+    REAL :: raSunRefl(kMaxPts)
+    REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSurfPress
+    REAL :: rTSpace,raUseEmissivity(kMaxPts),rTSurf,rSatAngle
+    REAL :: raaOp(kMaxPrint,kProfLayer),rFracTop,rFracBot
+    REAL :: raaMix(kMixFilRows,kGasStore)
+    INTEGER :: iNp,iaOp(kPathsOut),iOutNum
+    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
+    INTEGER :: iNpmix,iFileID,iTag,iDumpAllUARads
+    CHARACTER(80) :: caOutBloatFile
+! these are to do with the arbitrary pressure layering
+    REAL :: raThickNess(kProfLayer),pProf(kProfLayer), &
+    raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
+    INTEGER :: iProfileLayers,iKnowTP
+! this is to do with NLTE
+    INTEGER :: iNLTEStart
+    REAL :: raaPlanckCoeff(kMaxPts,kProfLayer),rCO2MixRatio
+    REAL :: raUpperPress(kProfLayer),raUpperTemp(kProfLayer)
+    REAL :: raaUpperSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
+    REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
+    INTEGER :: iUpper,iDoUpperAtmNLTE
+! these are the bloated lower atmosphere matrices
+    DOUBLE PRECISION :: daaSumNLTEOptDepthBloat(kBloatPts,kProfLayer)
+    DOUBLE PRECISION :: daaPlanckCoeffBloat(kBloatPts,kProfLayer)
+    DOUBLE PRECISION :: daFreqBloat(kBloatPts)
+    DOUBLE PRECISION :: daaUpperPlanckCoeffBloat(kBloatPts,kProfLayer)
+    DOUBLE PRECISION :: daaUpperSumNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
+    DOUBLE PRECISION :: daaUpperNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
+
+! local variables
+    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
+    DOUBLE PRECISION :: daaLayTrans(kBloatPts,kProfLayer)
+    DOUBLE PRECISION :: daaEmission(kBloatPts,kProfLayer)
+    DOUBLE PRECISION :: daaLay2Sp(kBloatPts,kProfLayer)
+    REAL :: raSumLayEmission(kBloatPts),raSurfaceEmissionToSpace(kBloatPts)
+    DOUBLE PRECISION :: daSumLayEmission(kBloatPts), &
+    daSurfaceEmissionToSpace(kBloatPts)
+    REAL :: rDum1,rDum2,rOmegaSun,rCO2
+! to do the thermal,solar contribution
+    REAL ::             raIntenBloat(kBloatPts)
+    DOUBLE PRECISION :: daIntenBloat(kBloatPts)
+    REAL ::             raSurfaceBloat(kBloatPts),raEmissivityBloat(kBloatPts)
+    DOUBLE PRECISION :: daSurfaceBloat(kBloatPts),daEmissivityBloat(kBloatPts)
+    REAL ::             raSunBloat(kBloatPts)
+    DOUBLE PRECISION :: daSunBloat(kBloatPts)
+    REAL ::             raThermalBloat(kBloatPts),raSunReflBloat(kBloatPts)
+    DOUBLE PRECISION :: daThermalBloat(kBloatPts),daSunReflBloat(kBloatPts)
+    REAL ::             rThermalRefl,rCos,rPlanck,rMPTemp
+    DOUBLE PRECISION :: dThermalRefl,dCos,dPlanck,dMPTemp
+    REAL ::             raVT1(kMixFilRows),rXYZ
+    DOUBLE PRECISION :: daVT1(kMixFilRows),dXYZ
+    INTEGER :: iDoThermal,iDoSolar
+
+    DOUBLE PRECISION :: dEmission, dTrans
+    REAL :: raOutFrac(kProfLayer),raFreqBloat(kBloatPts)
+    INTEGER :: iIOUN
+    REAL :: bt2rad,t2s
+    INTEGER :: iFr1
+
+    INTEGER :: i1,i2,iDownWard,iSTopNormalRadTransfer
+         
+! set the direction of radiation travel
+    IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
+    ! radiation travelling upwards to instrument ==> sat looking down
+    ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+        iDownWard = 1
+        i1 = iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
+        i2 = iaaRadLayer(iAtm,iNumLayer)-1
+        i2 = iFloor(i2*1.0/kProfLayer)
+        IF (rTSpace > 5.0) THEN
+            write(kStdErr,*) 'you want satellite to be downward looking'
+            write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
+            write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
+            write(kStdErr,*) 'Please retry'
+            CALL DoSTOP
+        END IF
+    ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
+    ! radiation travelling downwards to instrument ==> sat looking up
+    ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+        iDownWard = -1
+        i1 = iaaRadLayer(iAtm,1)-1
+        i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+        i2 = iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
+        write(kStdErr,*) 'Huh ? NLTE for UPLOOK instrument?????'
+        CALL DoStop
+    END IF
+    write(kStdWarn,*) ' ------------------> <----------------------'
+    write(kStdWarn,*) 'Doing BLOATED nlte rad transfer ...'
+    write(kStdWarn,*) 'have set iDownWard = ',iDownWard
+
+! check to see that lower/upper layers are from the same 100 mixed path bunch
+! eg iUp=90, iLow=1 is acceptable
+! eg iUp=140,iLow=90 is NOT acceptable
+    IF (i1 /= i2) THEN
+        write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
+        write(kStdErr,*) 'to have come from same set of 100 mixed paths'
+        write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer), &
+        i1,i2
+        CALL DoSTOP
+    END IF
+
+! check to see that the radiating atmosphere has <= 100 layers
+! actually, this is technically done above)
+    i1=abs(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer))+1
+    IF (i1 > kProfLayer) THEN
+        write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
+        CALL DoSTOP
+    END IF
+
+! using the fast forward model, compute the radiances emanating upto satellite
+! Refer J. Kornfield and J. Susskind, Monthly Weather Review, Vol 105,
+! pgs 1605-1608 "On the effect of surface emissivity on temperature
+! retrievals."
+    write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
+    write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=', &
+    iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
+
+! here we go .....
+
+    iIOUN = kBloatNLTEOut
+
+    rThermalRefl=1.0/kPi
+    dThermalRefl=1.0/kPi
+          
+    DO iFr = 1,kBloatPts
+        raFreqBloat(iFr) = sngl(daFreqBloat(iFr))
+    END DO
+
+! calculate cos(SatAngle)
+    rCos = cos(rSatAngle*kPi/180.0)
+    dCos = dble(rCos)
+
+! if iDoSolar = 1, then include solar contribution from file
+! if iDoSolar = 0 then include solar contribution from T=5700K
+! if iDoSolar = -1, then solar contribution = 0
+    iDoSolar = kSolar
+
+! if iDoThermal = -1 ==> thermal contribution = 0
+! if iDoThermal = +1 ==> do actual integration over angles
+! if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
+    iDoThermal = kThermal
+
+    write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
+    write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
+    write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/rCos,rFracTop
+
+
+! set the mixed path numbers for this particular atmosphere
+! DO NOT SORT THESE NUMBERS!!!!!!!!
+    IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
+        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+        CALL DoSTOP
+    END IF
+    DO iLay=1,iNumLayer
+        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+        iL = iaRadLayer(iLay)
+        IF (iaRadLayer(iLay) > iNpmix) THEN
+            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+            CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iLay) < 1) THEN
+            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+            CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iLay) > kProfLayer) THEN
+            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+            write(kStdErr,*) 'Err, assume only 1 .. kProfLayer mixedpaths'
+            write(kStdErr,*) '  in the high res matrices'
+            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+            CALL DoSTOP
+        END IF
+    END DO
+
+! note raVT1 is the array that has the interpolated bottom and top temps
+! set the vertical temperatures of the atmosphere
+! this has to be the array used for BackGndThermal and Solar
+    DO iFr = 1,kMixFilRows
+        raVT1(iFr) = raVTemp(iFr)
+        daVT1(iFr) = dble(raVTemp(iFr))
+    END DO
+! if the bottommost layer is fractional, interpolate!!!!!!
+    iL = iaRadLayer(1)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    daVT1(iL) = dble(raVT1(iL))
+    write(kStdWarn,*) 'bottom temp : orig, interp',raVTemp(iL),raVT1(iL)
+! if the topmost layer is fractional, interpolate!!!!!!
+! this is hardly going to affect thermal/solar contributions (using this temp
+! instead of temp of full layer at 100 km height!!!!!!
+    iL=iaRadLayer(iNumLayer)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    daVT1(iL) = dble(raVT1(iL))
+    write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
+
+! find the highest layer that we need to output radiances for
+    iHigh = -1
+    DO iLay = 1,iNp
+        IF (iaOp(iLay) > iHigh) THEN
+            iHigh = iaOp(iLay)
+        END IF
+    END DO
+    write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
+    write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
+    write(kStdWarn,*) 'topindex in atmlist where rad required =',iHigh
+
+! note while computing downward solar/ thermal radiation, have to be careful
+! for the BOTTOMMOST layer!!!!!!!!!!!
+    DO iLay = 1,1
+        iL   = iaRadLayer(iLay)
+        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        dCos = DBLE(rCos)
+        DO iFr = 1,kBloatPts
+            dXYZ = daaSumNLTEOptDepthBloat(iFr,iL)*dble(rFracBot)/dCos
+            daaLayTrans(iFr,iLay) = dexp(-dXYZ)
+            daaEmission(iFr,iLay) = 0.0d0
+        END DO
+    END DO
+
+    DO iLay=2,iNumLayer-1
+        iL   = iaRadLayer(iLay)
+        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        dCos = dble(rCos)
+        DO iFr=1,kBloatPts
+            dXYZ = daaSumNLTEOptDepthBloat(iFr,iL)/dCos
+            daaLayTrans(iFr,iLay) = dexp(-dXYZ)
+            daaEmission(iFr,iLay) = 0.0d0
+        END DO
+    END DO
+    DO iLay=iNumLayer,iNumLayer
+        iL   = iaRadLayer(iLay)
+        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        dCos = dble(rCos)
+        DO iFr=1,kBloatPts
+            dXYZ = daaSumNLTEOptDepthBloat(iFr,iL)*dble(rFracTop)/dCos
+            daaLayTrans(iFr,iLay) = dexp(-dXYZ)
+            daaEmission(iFr,iLay) = 0.0d0
+        END DO
+    END DO
+
+! compute the emission of the individual mixed path layers in iaRadLayer
+! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
+! note iNLTEStart = kProfLayer + 1, unless NONLTE computations done!
+! so usually only the usual LTE computations are done!!
+    IF (iNLTEStart > kProfLayer) THEN
+        iSTopNormalRadTransfer = iNumLayer  !!!normal rad transfer everywhere
+        write (kStdWarn,*) 'Normal rad transfer .... no NLTE'
+        write (kStdWarn,*) 'stop normal radtransfer at',iSTopNormalRadTransfer
+    ELSE
+        iLay = 1
+        987 CONTINUE
+        iL=iaRadLayer(iLay)
+        iLModKprofLayer = mod(iL,kProfLayer)
+        IF (iLModKprofLayer == 0) THEN
+            iLModKprofLayer = kProfLayer
+        END IF
+        IF ((iLModKprofLayer < iNLTEStart) .AND. (iLay < iNumLayer)) THEN
+            iLay = iLay + 1
+            GOTO 987
+        END IF
+        iSTopNormalRadTransfer = iLay
+        write (kStdWarn,*) 'normal rad transfer only in lower atm.. then NLTE'
+        write (kStdWarn,*) 'stop normal radtransfer at ',iStopNormalRadTransfer
+    END IF
+
+    DO iLay = 1,iNumLayer
+        iL      = iaRadLayer(iLay)
+    ! first get the Mixed Path temperature for this radiating layer
+        dMPTemp = raVT1(iL)
+        iLModKprofLayer = mod(iL,kProfLayer)
+        IF (iLModKprofLayer == 0) THEN
+            iLModKprofLayer = kProfLayer
+            iL = kProfLayer
+        END IF
+        IF (iLModKprofLayer < iNLTEStart) THEN
+        ! ormal, no LTE emission stuff
+            DO iFr=1,kBloatPts
+                dPlanck = dttorad(daFreqBloat(iFr),dMPTemp)
+                daaEmission(iFr,iLay) = (1.0-daaLayTrans(iFr,iLay))*dPlanck
+            END DO
+        ELSEIF (iLModKprofLayer >= iNLTEStart) THEN
+        ! ew; LTE emission stuff
+            DO iFr=1,kBloatPts
+                dPlanck = dttorad(daFreqBloat(iFr),dMPTemp)
+                dPlanck = dPlanck*daaPlanckCoeffBloat(iFr,iL)
+                daaEmission(iFr,iLay) = (1.0-daaLayTrans(iFr,iLay))*dPlanck
+            END DO
+        END IF
+    END DO
+
+! now go from top of atmosphere down to the surface to compute the total
+! radiation from top of layer down to the surface
+! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
+! from the top of atmosphere is not reflected
+    IF (iDoThermal >= 0) THEN
+        CALL rspl(raFreq,raThermal,kMaxPts,raFreqBloat, &
+        raThermalBloat,kBloatPts)
+    ELSE
+        DO iFr = 1,kBloatPts
+            raThermalBloat(iFr) = 0.0
+        END DO
+        write(kStdWarn,*) 'no thermal backgnd to calculate'
+    END IF
+
+! see if we have to add on the solar contribution
+! this figures out the solar intensity at the ground
+    IF (iDoSolar >= 0) THEN
+        CALL rspl(raFreq,raSun,kMaxPts,raFreqBloat,raSunBloat,kBloatPts)
+        CALL rspl(raFreq,raSunRefl,kMaxPts,raFreqBloat, &
+        raSunReflBloat,kBloatPts)
+    ELSE
+        DO iFr = 1,kBloatPts
+            raSunBloat(iFr) = 0.0
+        END DO
+        write(kStdWarn,*) 'no solar backgnd to calculate'
+    END IF
+
+    CALL rlinear(raFreq,raSurface,kMaxPts, &
+    raFreqBloat,raSurfaceBloat,kBloatPts)
+    CALL rlinear(raFreq,raUseEmissivity,kMaxPts, &
+    raFreqBloat,raEmissivityBloat,kBloatPts)
+
+    DO iFr=1,kBloatPts
+        raIntenBloat(iFr)=raSurfaceBloat(iFr)*raEmissivityBloat(iFr)+ &
+        raThermalBloat(iFr)*(1.0-raEmissivityBloat(iFr))*rThermalRefl+ &
+        raSunBloat(iFr)*raSunReflBloat(iFr)
+        daIntenBloat(iFr) = dble(raIntenBloat(iFr))
+    END DO
+
+! now we can compute the upwelling radiation!!!!!
+! compute the total emission using the fast forward model, only looping
+! upto iHigh ccccc      DO iLay=1,NumLayer -->  DO iLay=1,1 + DO ILay=2,iHigh
+
+!^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
+! first do the bottommost layer (could be fractional)
+    DO iLay=1,1
+        iL      = iaRadLayer(iLay)
+        rCos    = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        dCos    = dble(rCos)
+        rMPTemp = raVT1(iL)
+        dMPTemp = dble(raVT1(iL))
+
+    ! see if this mixed path layer is in the list iaOp to be output
+    ! since we might have to do fractions!
+    ! do the radiative transfer thru this bottom layer
+        DO iFr=1,kBloatPts
+            daIntenBloat(iFr) = daaEmission(iFr,iLay) + &
+            daIntenBloat(iFr)*daaLayTrans(iFr,iLay)
+            raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+        END DO
+
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+        IF (iDp == 1) THEN
+            write(kStdWarn,*) 'output',iDp,' highres RAD at',iLay,' th rad layer'
+            CALL wrtout_bloated_rad(iIOUN, &
+            caOutBloatFile,raFreqBloat,raIntenBloat)
+        ELSEIF (iDp >= 2) THEN
+            write(kStdErr,*) 'oops, bloated rad transfer too dumb to dump out'
+            write(kStdErr,*) 'more than one radiance per layer'
+            CALL DoStop
+        END IF
+    END DO
+
+!^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
+! then do the rest of the layers till the last but one(all will be full)
+    DO iLay=2,iHigh-1
+        iL      = iaRadLayer(iLay)
+        rCos    = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        dCos    = dble(rCos)
+        rMPTemp = raVT1(iL)
+        dMPTemp = dble(raVT1(iL))
+
+    ! see if this mixed path layer is in the list iaOp to be output
+    ! since we might have to do fractions!
+    ! now do the radiative transfer thru this complete layer
+        DO iFr=1,kBloatPts
+            daIntenBloat(iFr) = daaEmission(iFr,iLay) + &
+            daIntenBloat(iFr)*daaLayTrans(iFr,iLay)
+            raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+        END DO
+
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+        IF (iDp == 1) THEN
+            write(kStdWarn,*) 'output',iDp,' highres RAD at',iLay,' th rad layer'
+            CALL wrtout_bloated_rad(iIOUN, &
+            caOutBloatFile,raFreqBloat,raIntenBloat)
+        ELSEIF (iDp >= 2) THEN
+            write(kStdErr,*) 'oops, bloated rad transfer too dumb to dump out'
+            write(kStdErr,*) 'more than one radiance per layer'
+            CALL DoStop
+        END IF
+
+    END DO
+
+!^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
+! then do the topmost layer (could be fractional)
+    777 CONTINUE
+    DO iLay=iHigh,iHigh
+        iL      = iaRadLayer(iLay)
+        rCos    = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        dCos    = dble(rCos)
+        rMPTemp = raVT1(iL)
+        dMPTemp = dble(raVT1(iL))
+
+        IF (iUpper >= 1) THEN
+        !!! need to compute stuff at extra layers (100-200 km)
+            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+            IF (iDp >= 1) THEN
+
+                write(kStdWarn,*) 'Should output',iDp,' rad at',iLay,' rad layer'
+                write(kStdWarn,*) 'This is the top of the usual AIRS atmosphere'
+                write(kStdWarn,*) '   you have iDoUpperATM > 0'
+                write(kStdWarn,*) 'kCARTA will compute rad thru stratosphere'
+                write(kStdWarn,*) 'and output stuff into the blah_UA file'
+                write(kStdWarn,*) 'Finally kCARTA will output stuff at the TOP of'
+                write(kStdWarn,*) 'stratosphere into both this and the UA file'
+                 
+            ! o radiative transfer thru this layer
+                DO iFr=1,kBloatPts
+                    daIntenBloat(iFr) = &
+                    daaEmission(iFr,iLay)+daIntenBloat(iFr)*daaLayTrans(iFr,iLay)
+                    raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+                END DO
+
+            ! ow do complete rad transfer thru upper part of atmosphere
+                CALL UpperAtmRadTransBloatDouble(raFreqBloat, &
+                daIntenBloat,daFreqBloat,raLayAngles(MP2Lay(iL)), &
+                iUpper,daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+                raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iDumpAllUARads)
+            !!! forget about interpolation thru the layers, just dump out the
+            !!! radiance at the top of stratosphere (120-200 km)
+
+                write(kStdWarn,*) 'outputting bloated stuff at TOTAL Complete TOA into'
+                write(kStdWarn,*) 'usual BLOATED binary file (iLay = ',iLay,')'
+
+                DO iFr=1,kBloatPts
+                    raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+                END DO
+                DO iFr=1,iDp
+                    CALL wrtout_bloated_rad(iIOUN, &
+                    caOutBloatFile,raFreqBloat,raIntenBloat)
+                END DO
+            END IF
+        END IF
+
+        IF (iUpper < 1) THEN
+        !!! no need to compute stuff at extra layers (100-200 km)
+        !!! so just do usual stuff
+        !!! see if this mixed path layer is in the list iaOp to be output
+        !!! since we might have to do fractions!
+            DO iFr = 1,kBloatPts
+                daIntenBloat(iFr) = daaEmission(iFr,iLay) + &
+                daIntenBloat(iFr)*daaLayTrans(iFr,iLay)
+                raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+            END DO
+            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+            IF (iDp == 1) THEN
+                write(kStdWarn,*) 'output',iDp,' highres RAD at',iLay,' rad layer'
+                CALL wrtout_bloated_rad(iIOUN, &
+                caOutBloatFile,raFreqBloat,raIntenBloat)
+            ELSEIF (iDp >= 2) THEN
+                write(kStdErr,*) 'oops, bloated rad transfer too dumb to dump out'
+                write(kStdErr,*) 'more than one radiance per layer'
+                CALL DoStop
+            END IF
+        END IF
+
+    END DO
+!^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
+
+    3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
+
+    RETURN
+    end SUBROUTINE radiances_bloat
+
+!************************************************************************
+! this subroutine very quickly does the radiative transfer (DOUBLE PREC)
+! since the optical depths are soooooooooo small, use double precision
+    SUBROUTINE UpperAtmRadTransBloatDouble( &
+    raFreqBloat, &
+    daIntenBloat,daFreqBloat,rSatAngle, &
+    iUpper,daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+    raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iDumpAllUARads)
+
+    IMPLICIT NONE
+     
+    include '../INCLUDE/kcartaparam.f90'
+
+! input parameters
+!   upper atm P,PP,T(LTE),Q   (really only need T(LTE))
+    REAL :: raUpperPress(kProfLayer),raUpperTemp(kProfLayer)
+!   upper atm abs coeff and planck coeff
+    DOUBLE PRECISION :: daaUpperSumNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
+    DOUBLE PRECISION :: daaUpperPlanckCoeffBloat(kBloatPts,kProfLayer)
+!   input wavevector and integer stating which layer to stop rad transfer at
+    DOUBLE PRECISION :: daFreqBloat(kBloatPts)
+    REAL :: raFreqBloat(kBloatPts),rSatAngle
+    INTEGER :: iUpper
+! do we want to do upper atm NLTE computations?
+    INTEGER :: iDoUpperAtmNLTE
+! do we dump all or some rads?
+    INTEGER :: iDumpAllUARads
+! input/output pararameter
+!   this contains the radiance incident at kCARTA TOA (0.005 mb)
+!   it will finally contain the radiance exiting from TOP of UPPER ATM
+    DOUBLE PRECISION :: daIntenBloat(kBloatPts)
+
+! local variables
+    INTEGER :: iFr,iL,iIOUN
+    DOUBLE PRECISION :: dEmission,dTrans,rMu,daInten0(kBloatPts)
+    REAL :: raIntenBloat(kBloatPts)
+    CHARACTER(80) :: caOutName
+
+    caOutName = 'DumDum'
+    iIOUN = kBloatNLTEOutUA
+      
+    IF (iDoUpperAtmNLTE <= 0) THEN
+        write (kStdErr,*) 'huh? why doing the UA nlte radiance?????'
+        CALL DoStop
+    ELSE
+        write(kStdWarn,*) 'Doing UA (NLTE) radtransfer at highres 0.0005 cm-1 '
+    END IF
+
+! compute radiance intensity thru NEW uppermost layers of atm
+    DO iFr = 1,kBloatPts
+        daInten0(iFr) = daIntenBloat(iFr)
+        raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+    END DO
+
+    iL = 0
+    IF (kNLTEOutUAOpen > 0) THEN
+        write(kStdWarn,*) 'dumping out 0.005 mb UA rads iL = ',0
+    ! always dump out the 0.005 mb TOA radiance if the UA file is open
+        CALL wrtout_bloated_rad(iIOUN,caOutName,raFreqBloat,raIntenBloat)
+    END IF
+
+    rMu = cos(rSatAngle*kPi/180.0)
+
+    DO iL = 1,iUpper-1
+
+        DO iFr = 1,kBloatPts
+            dTrans = daaUpperSumNLTEGasAbCoeffBloat(iFr,iL)/(rMu*1.0d0)
+            dTrans = exp(-dTrans)
+            dEmission = daaUpperPlanckCoeffBloat(iFr,iL) * &
+            dble(ttorad(raFreqBloat(iFr),raUpperTemp(iL))*1.0d0)* &
+            (1.0d0 - dTrans)
+            daIntenBloat(iFr) = dEmission + daIntenBloat(iFr)*dTrans
+            raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+        END DO
+
+        IF ((iDumpAllUARads > 0) .AND. (kNLTEOutUAOpen > 0)) THEN
+            write(kStdWarn,*) 'dumping out UA highres rads at iL = ',iL
+        ! dump out the 0.000025 mb TOA radiance
+            CALL wrtout_bloated_rad(iIOUN,caOutName,raFreqBloat,raIntenBloat)
+        END IF
+    END DO
+
+    DO iL = iUpper,iUpper
+        DO iFr = 1,kBloatPts
+            dTrans = daaUpperSumNLTEGasAbCoeffBloat(iFr,iL)/(rMu*1.0d0)
+            dTrans = exp(-dTrans)
+            dEmission = daaUpperPlanckCoeffBloat(iFr,iL) * &
+            dble(ttorad(raFreqBloat(iFr),raUpperTemp(iL))*1.0d0)* &
+            (1.0d0 - dTrans)
+            daIntenBloat(iFr) = dEmission + daIntenBloat(iFr)*dTrans
+            raIntenBloat(iFr) = sngl(daIntenBloat(iFr))
+        END DO
+
+        IF (kNLTEOutUAOpen > 0) THEN
+        ! always dump out 0.000025 mb TOA radiance if the UA file is open
+            write(kStdWarn,*) 'dumping out 0.000025 mb highres UA rads iL = ',iL
+        ! dump out the 0.000025 mb TOA radiance
+            CALL wrtout_bloated_rad(iIOUN,caOutName,raFreqBloat,raIntenBloat)
+        END IF
+
+    END DO
+
+    11 FORMAT(I3,' ',9(E15.8,' '))
+    3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
+
+    RETURN
+    end SUBROUTINE UpperAtmRadTransBloatDouble
+
+!************************************************************************
+
 END MODULE rad_main

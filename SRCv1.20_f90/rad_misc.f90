@@ -6,9 +6,9 @@ MODULE rad_misc
 
 USE basic_common
 USE rad_angles
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE clear_scatter_basic
-USE kcoeff_basic
+USE n_rad_jac_scat
 
 IMPLICIT NONE
 
@@ -553,236 +553,6 @@ CONTAINS
     end SUBROUTINE RadiativeTransfer
 
 !************************************************************************
-! this subroutine quickkly computes the rad transfer for a nonscatter atm
-! note that it pretty much uses the accurate diffusive approx for backgnd
-! thermal, for a downlook instr
-! Check out subroutine "FastBDRYL2GDiffusiveApprox" in rad_diff.f
-    SUBROUTINE NoScatterRadTransfer(iDownWard,raTau,raTemp,nlev, &
-    rSatAngle,rSolarAngle,rTSurface,rSurfPress,ems,rF,rI,iWhereTo, &
-    iProfileLayers,raPressLevels)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/scatterparam.f90'
-          
-    INTEGER :: iProfileLayers           !number of layers in KLAYERS file
-    REAL :: raPressLevels(kProfLayer+1) !pressure levels of atmosphere
-    INTEGER :: iWhereTo                 !rad transfer thru all layers????
-    INTEGER :: iDownWard                !is instr up(-1) or down(+1) looking
-    REAL :: raTau(maxcly)               !the abs coeffs
-    REAL :: raTemp(maxcly)              !temperature of the levels (0=TOA)
-    INTEGER :: nlev                     !number of levels to use
-    REAL :: rSatAngle,rSolarAngle       !sun and satellite angles
-    REAL :: ems                         !emissivity of surface
-    REAL :: rTSurface,rSurfPress        !surface temperature, pressure
-    REAL :: rF,rI                       !wavenumber and intensity
-
-    INTEGER :: iI,iStop
-    REAL :: r1,r2,rEmission,rCos
-    REAL :: rSun,rThermal,rSurface,rToa_to_Gnd
-
-    INTEGER :: iBdry,FindBoundary_Individual
-    REAL :: rAngle,FindDiffusiveAngleExp,rLay2Gnd
-
-    rI = 0.0
-    rSun = 0.0
-    rToa_to_Gnd = 0.0
-
-! ++++++++++++++++++++++++++++++=
-
-    IF (iDownWard == 1) THEN        !this is down look instr
-
-        iBdry = FindBoundary_Individual(rF,iProfileLayers,raPressLevels)
-        if (ibdry > nlev-1) ibdry = nlev-1
-
-        rLay2Gnd = 0.0
-        DO iI = iBdry+1,nlev-1
-            rLay2Gnd = rLay2Gnd + raTau(iI)
-        END DO
-
-    ! o radiance at TOA
-        rThermal = ttorad(rF,sngl(kTSpace))
-    ! ring this down to the surface using 3/5 cosine all the way to iB
-        DO iI = 1,iBdry-1
-            r1 = exp(-raTau(iI)/0.6)      !transmission thru layer
-            r2 = ttorad(rF,raTemp(iI))    !emission from layer
-            rThermal = (1-r1)*r2 + rThermal*r1
-        END DO
-
-        DO iI = iBdry,nlev-1
-            rAngle = FindDiffusiveAngleExp(rLay2Gnd)
-            r1     = exp(-raTau(iI)/rAngle)      !transmission thru layer
-            r2     = ttorad(rF,raTemp(iI))            !emission from layer
-            rThermal = (1-r1)*r2 + rThermal*r1
-            IF (iI > nlev-1) THEN
-                rLay2Gnd = rLay2Gnd - raTau(iI+1)
-            ELSE
-                rLay2Gnd = 0.0
-            END IF
-        END DO
-
-        rThermal = rThermal*(1-ems)     !need a factor of 1/pi, but have done
-    ! ntegration over solid angle to get
-    ! actor of 2*pi * 0.5
-        IF (kSolar >= 0) THEN
-            DO iI=1,nlev-1
-                rToa_to_Gnd = rToa_to_Gnd + raTau(iI)
-            END DO
-            r1   = ttorad(rF,sngl(kSunTemp))        !sun radiation
-            r2   = kOmegaSun                        !solid angle
-            rCos = cos(rSolarAngle*kPi/180.0)
-            rSun = r1*r2*rCos*exp(-rToa_to_Gnd/rCos)
-        END IF
-        rSun = rSun*(1-ems)/kPi
-
-        rSurface = ttorad(rF,rTSurface)       !surface radiation from gnd
-        rSurface = rSurface*ems
-
-        rI = rSurface + rSun + rThermal        !upward radiaion at gnd
-
-    ! ring this up to instr using instr cosine all the way
-        rCos = cos(rSatAngle*kPi/180.0)
-        IF (iWhereTo == -1) THEN
-            iStop = 1
-        ELSE
-            iStop = (nlev - 1) - iWhereTo + 1
-        END IF
-        DO iI=nlev-1,iStop,-1
-            r1 = exp(-raTau(iI)/rCos)      !transmission thru layer
-            r2 = ttorad(rF,raTemp(iI))    !emission from layer
-            rI = (1-r1)*r2 + rI*r1
-        END DO
-    END IF
-
-! ++++++++++++++++++++++++++++++=
-    IF (iDownWard == -1) THEN        !this is up look instr
-    ! o radiance at TOA
-        rI   = ttorad(rF,sngl(kTSpace))
-        rCos = cos(rSatAngle*kPi/180.0)
-    ! ring this down to the surface using satellite cosine all the way
-        IF (iWhereTo == -1) THEN
-            iStop = nlev - 1
-        ELSE
-            iStop = iWhereTo
-        END IF
-        DO iI=1,iStop
-            r1 = exp(-raTau(iI)/rCos)     !transmission thru layer
-            r2 = ttorad(rF,raTemp(iI))    !emission from layer
-            rI = (1-r1)*r2 + rI*r1
-        END DO
-
-        IF (kSolar >= 0) THEN
-            DO iI=1,iStop
-                rToa_to_Gnd = rToa_to_Gnd+raTau(iI)
-            END DO
-            r1   = ttorad(rF,sngl(kSunTemp))          !sun radiation
-            rSun = r1*exp(-rToa_to_Gnd)
-        END IF
-
-        IF (abs(rSatAngle-rSolarAngle) < 1.0e-4) THEN
-        !!!sun in FOV of instr
-            rI = rI + rSun
-        END IF
-    END IF
-
-    RETURN
-    end SUBROUTINE NoScatterRadTransfer
-!************************************************************************
-! this quickly estimates the surface contribution, and backgnd thermal
-! contributions, for use with jacobians
-    SUBROUTINE find_surface_backgnd_radiances(raFreq,raaAbsTemp,raVTemp, &
-    iAtm,iNumLayer,iaaRadLayer,rFracTop,rFracBot,iNpmix, &
-    rTSpace,rTSurface,raUseEmissivity, &
-    iProfileLayers,raPressLevels,raTPressLevels, &
-    raSurface,raThermal)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-    INTEGER :: iProfileLayers               !number of KLAYERS atmosphere layers
-    REAL :: raPressLevels(kProfLayer+1)     !atmosphere pressure levels
-    REAL :: raTPressLevels(kProfLayer+1)    !atmosphere temperature levels
-    REAL :: raFreq(kMaxPts)                 !wavenumber array
-    REAL :: raaAbsTemp(kMaxPts,kMixFilRows) !optical depths
-    REAL :: raVTemp(kMixFilRows)            !vertical temperatures
-    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iNpmix
-    REAL :: rTSpace,rTSurface,rFracTop,rFracBot
-    REAL :: raSurface(kMaxPts),raThermal(kMaxPts),raUseEmissivity(kMaxPts)
-
-! local variables
-    INTEGER :: iFr,iL,iLL,iDoThermal,iLay,iaRadLayer(kProfLayer)
-    REAL :: r1,r2,rPlanck,rCos,rT,rEmiss,rTrans
-    REAL :: raVT1(kMixFilRows)
-       
-    r1 = sngl(kPlanck1)
-    r2 = sngl(kPlanck2)
-
-    DO iFr=1,kMaxPts
-    ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        rPlanck=exp(r2*raFreq(iFr)/rTSurface)-1.0
-        raSurface(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-    END DO
-
-! if iDoThermal = -1 ==> thermal contribution = 0
-! if iDoThermal = +1 ==> do actual integration over angles
-! if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
-    iDoThermal = kThermal
-
-    IF (iDoThermal >= 0) THEN
-    ! set the mixed path numbers for this particular atmosphere
-    ! DO NOT SORT THESE NUMBERS!!!!!!!!
-        IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-            write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-            write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-            CALL DoSTOP
-        END IF
-        DO iLay=1,iNumLayer
-            iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iLay) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iLay) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-        END DO
-
-    ! note raVT1 is the array that has the interpolated bottom and top temps
-    ! set the vertical temperatures of the atmosphere
-    ! this has to be the array used for BackGndThermal and Solar
-        DO iFr=1,kMixFilRows
-            raVT1(iFr) = raVTemp(iFr)
-        END DO
-    ! if the bottommost layer is fractional, interpolate!!!!!!
-        iL = iaRadLayer(1)
-        raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp, &
-        rFracBot,1,iL)
-        write(kStdWarn,*) 'bottom temp : orig, interp',raVTemp(iL),raVT1(iL)
-    ! if the topmost layer is fractional, interpolate!!!!!!
-    ! this is hardly going to affect thermal/solar contributions (using this temp
-    ! instead of temp of full layer at 100 km height!!!!!!
-        iL = iaRadLayer(iNumLayer)
-        raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp, &
-        rFracTop,-1,iL)
-        write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
-
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
-        raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
-        iNumLayer,iaRadLayer,raaAbsTemp,rFracTop,rFracBot,-1)
-    ELSE
-        DO iFr=1,kMaxPts
-            raThermal(iFr) = 0.0
-        END DO
-    END IF
-
-    RETURN
-    end SUBROUTINE find_surface_backgnd_radiances
-!************************************************************************
 ! this subroutine sets up the BCs for the atmosphere
     SUBROUTINE SetRadianceStuff(iAtm,raFreq, &
     iaSetEms,raaaSetEmissivity,raUseEmissivity, &
@@ -892,359 +662,890 @@ CONTAINS
     end SUBROUTINE SetRadianceStuff
 
 !************************************************************************
-! this file reads a binary made from the ASCII sscatmie.x file
-! and returns the extinction, absm asymmetry coeffs
-! this is a combination of subroutines
-!      INTERP_SCAT_TABLE2 and READ_SSCATTAB_BINARY
-    SUBROUTINE FIND_ABS_ASY_EXT(SCATFILE,DME,IWP,pT,pB,raPLevels,RAFREQ, &
-    iaRadLayer,iNumLayer,EXTINCT,ABSC,ASYM,ILT,ILB)
+! this duplicates clear sky atmospheres!
+    SUBROUTINE duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
+    iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
+    iaSetEms,raaaSetEmissivity,raSetEmissivity, &
+    iaSetSolarRefl,raaaSetSolarRefl, &
+    iaKSolar,rakSolarAngle,rakSolarRefl, &
+    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+    raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
+    raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
 
     IMPLICIT NONE
 
     include '../INCLUDE/scatterparam.f90'
 
-!       Input parameters:
-!     SCATFILE   file name of scattering file
-!     DME        particle size to interpolate for
-!     IWP        iwp normalization
-!     WAVES      wavenumbers
-!     pT,pB      pressure (top + bottom) where the cloud layer is
-!     raPLevels        AIRS pressure levels
-!     iaRadLayer current atmosphere layers
-!       Output parameters:
-!     EXTINCT, ABS, ASYM  : the particle scattering coefficients for each layer
-
-    INTEGER :: iaRadlayer(kProfLayer),iNumLayer
-    CHARACTER*(*) SCATFILE
-    REAL :: raFreq(kMaxPts), DME, IWP, pT, pB, raPLevels(kProfLayer+1)
-    REAL :: extinct(kMaxPts),absc(kMaxPts),asym(kMaxPts)
-
-! output layer
-!     IL                  : which AIRS layer the cloud is in
-    INTEGER :: iLT,iLB
-
-! local variables
-    CHARACTER(1) :: caScale(MAXSCAT)
-    INTEGER ::  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
-    REAL ::     MUTAB(MAXGRID,MAXSCAT)
-    REAL ::     DMETAB(MAXGRID,MAXSCAT), WAVETAB(MAXGRID,MAXSCAT)
-    REAL ::     MUINC(2)
-    REAL ::     TABEXTINCT(MAXTAB,MAXSCAT), TABSSALB(MAXTAB,MAXSCAT)
-    REAL ::     TABASYM(MAXTAB,MAXSCAT)
-    REAL ::     TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
-    REAL ::     TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
+! these are the "output" variables
+    INTEGER :: iAtmLoop,iNatm
+    REAL :: raAtmLoop(kMaxAtm)
+! these are the "input variables"
+    REAL :: raPressLevels(kProfLayer+1)
+    REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm)
+    INTEGER :: iaMPSetForRad(kMaxAtm),iProfileLayers
+    INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
+    INTEGER :: iAtm                  !this is the atmosphere number
+    REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
+    REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
+! raSetEmissivity is the wavenumber dependent Emissivity (default all 1.0's)
+! iSetEms tells how many wavenumber dependent regions there are
+! raSunRefl is the wavenumber dependent reflectivity (default all (1-raSetEm)
+! iSetSolarRefl tells how many wavenumber dependent regions there are
+! raFracTop = tells how much the top layers of mixing table raaMix have been
+!             modified ... needed for backgnd thermal
+! raFracBot = tells how much the bot layers of mixing table raaMix have been
+!             modified ... NOT needed for backgnd thermal
+! raaPrBdry = pressure start/stop
+    REAL :: raaPrBdry(kMaxAtm,2)
+    REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
+    REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
+    INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
+    REAL :: rakSolarRefl(kMaxAtm)
+    REAL :: raSetEmissivity(kMaxAtm)
+    CHARACTER(80) :: caEmissivity(kMaxAtm)
+! rakSolarAngle = solar angles for the atmospheres
+! rakThermalAngle=thermal diffusive angle
+! iakthermal,iaksolar = turn on/off solar and thermal
+! iakthermaljacob=turn thermal jacobians on/off
+! iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
+    REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
+    INTEGER :: iakThermal(kMaxAtm),iaSetThermalAngle(kMaxAtm)
+    INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
+    REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
+    REAL :: raLayerHeight(kProfLayer)
+    REAL :: rJunk1,rJunk2
           
-    INTEGER :: I,IF,iMod,iS,iL
-    REAL :: ee,aa,gg, waveno
+! local var
+    INTEGER :: iX,iY
+    REAL :: rX
 
-    I = 1
+! first find out how many raAtmLoop the user did set
+    iX = 1
+    DO WHILE ((iX <= kMaxAtm) .AND. (raAtmLoop(iX) >= 0.0))
+        iX = iX + 1
+        IF (iX > kMaxAtm) GOTO 10
+    END DO
+    10 CONTINUE
+    iX = iX - 1
+          
+    write(kStdWarn,*) ' >>>> Duplicate Clear Sky Params from Atm # 1 for ',iX,' atmospheres'
+    iNatm = iX
+    DO iX = 2,iNatm
+        iaMPSetForRad(iX)      = iaMPSetForRad(1)
 
-    CALL READ_SSCATTAB_BINARY(SCATFILE,   & !!!!!!MAXTAB, MAXGRID,
-    caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-    NWAVETAB(I), WAVETAB(1,I), &
-    MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-    TABPHI1UP(1,I), TABPHI1DN(1,I), &
-    TABPHI2UP(1,I), TABPHI2DN(1,I))
+        iaSetEms(iX)           = iaSetEms(1)
+        iaSetSolarRefl(iX)     = iaSetSolarRefl(1)
+        caEmissivity(iX)       = caEmissivity(1)
+        raSetEmissivity(iX)    = raSetEmissivity(1)
+        DO iY = 1,kEmsRegions
+            raaaSetEmissivity(ix,iY,1) = raaaSetEmissivity(1,iY,1)
+            raaaSetEmissivity(ix,iY,2) = raaaSetEmissivity(1,iY,2)
+            raaaSetSolarRefl(ix,iY,1)  = raaaSetSolarRefl(1,iY,1)
+            raaaSetSolarRefl(ix,iY,2)  = raaaSetSolarRefl(1,iY,2)
+        END DO
+        iaKSolar(iX)           = iaKSolar(1)
+        rakSolarAngle(iX)      = rakSolarAngle(1)
+        rakSolarRefl(iX)       = rakSolarRefl(1)
+        iaKThermal(iX)         = iaKThermal(1)
+        rakThermalAngle(iX)    = rakThermalAngle(1)
+        iakThermalJacob(iX)    = iakThermalJacob(1)
+        iaSetThermalAngle(iX)  = iaSetThermalAngle(1)
+        raSatHeight(iX)        = raSatHeight(1)
+        raSatAngle(iX)         = raSatAngle(1)
 
-!       !!!get rid of delta scaling
-!      CALL UnScaleMie(
-!     $        caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I),
-!     $        ndme(i)*nwavetab(i))
-                 
-    DO iF = 1,kMaxPts
-        waveno = raFreq(iF)
-    !  here we only need the simpler first choice as we are not messing
-    !  around with the phase functions
-        CALL INTERP_SCAT_TABLE2 (WAVENO, DME, ee, aa, gg, &
-        NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
-        TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
-        EXTINCT(iF) = ee * iwp/1000.0
-        ABSC(iF)    = ee * iwp/1000.0 * (1.0 - aa)
-        ASYM(iF)    = gg
+        DO iY = 1,2
+            raaPrBdry(iX,iY)        = raaPrBdry(1,iY)
+        END DO
+        raPressStart(iX)       = raPressStart(1)
+        raPressStop(iX)        = raPressStop(1)
+
+        raTspace(iX)           = raTSpace(1)
+        raTSurf(iX)            = raTSurf(1)
+
+        iaNumLayer(iX)         = iaNumLayer(1)
+        DO iY = 1,kProfLayer
+            iaaRadLayer(iX,iY)     = iaaRadLayer(1,iY)
+        END DO
+
+        iaLimb(iX)     = iaLimb(1)
+        raFracTop(iX)  = raFracTop(1)
+        raFracBot(iX)  = raFracBot(1)
     END DO
 
-!     figure out what AIRS layers the cloud is in between
+! now set the param you need to set
+    IF (iAtmLoop == 1) THEN
+        write(kStdWarn,*) '  Resetting raPressStart for looping'
+        write(kStdErr,*)  '  Resetting raPressStart for looping'
+        IF ((raaPrBdry(1,1) > raaPrBdry(1,2)) .AND. (iaLimb(1) <= 0)) THEN
+            write(kStdWarn,*) '  ---> warning : reset Psurf for downlook instr w/o code resetting Tsurf is odd'
+            write(kStdErr,*)  '  ---> warning : reset Psurf for downlook instr w/o code resetting Tsurf is odd'
+        ELSEIF ((raaPrBdry(1,1) > raaPrBdry(1,2)) .AND. (iaLimb(1) > 0)) THEN
+            write(kStdWarn,*) '  ---> warning : reset Psurf for downlook instr for LIMB view is ok'
+            write(kStdErr,*)  '  ---> warning : reset Psurf for downlook instr for LIMB view is ok'
+        END IF
+        IF (raaPrBdry(1,1) < raaPrBdry(1,2)) THEN
+            write(kStdWarn,*) '  ---> warning : reset TOA press for uplook instr is odd'
+            write(kStdErr,*)  '  ---> warning : reset TOA press for uplook instr is odd'
+            CALL DoStop
+        END IF
+        DO iX = 1,iNatm
+            raPressStart(iX) = raAtmLoop(iX)
+            raaPrBdry(iX,1)  = raAtmLoop(iX)
+        END DO
 
-! do the top layer --------------------------------->
-    iL = 1
-    10 CONTINUE
-    IF (raPLevels(iL) <= 1.0e-3) THEN
-        iL = iL + 1
-        GOTO 10
-    END IF
+    ELSEIF (iAtmLoop == 2) THEN
+        write(kStdWarn,*) '  Resetting raPressStop for looping'
+        write(kStdErr,*)  '  Resetting raPressStop for looping'
+        IF (raaPrBdry(1,1) < raaPrBdry(1,2)) THEN
+            write(kStdWarn,*) '  ---> reset Psurf for uplook instr w/o code resetting Tsurf is OK, for clear sky'
+            write(kStdErr,*) '  ---> reset Psurf for uplook instr w/o code resetting Tsurf is OK, for clear sky'
+        END IF
+        DO iX = 1,iNatm
+            raPressStop(iX) = raAtmLoop(iX)
+            raaPrBdry(iX,2)  = raAtmLoop(iX)
+        END DO
 
-    IF (pT > raPLevels(iL)) THEN
-        write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too large!!!'
-        CALL DoStop
-    END IF
-    IF (pT < raPLevels(kProfLayer+1)) THEN
-        write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too small!!!'
-        CALL DoStop
-    END IF
+    ELSEIF (iAtmLoop == 3) THEN
+        write(kStdWarn,*) '  Resetting raSatZen for looping (so need to compute scanang)'
+        write(kStdErr,*)  '  Resetting raSatZen for looping (so need to compute scanang)'
+        IF (iaLimb(1) > 0) THEN
+            write(kStdErr,*) 'Atm 1 set up for Limb sounding'
+            write(kStdErr,*) '  so cannot willy nilly reset scanang'
+            write(kStdErr,*) 'Go and reset raStartPress instead'
+            CALL DoStop
+        ELSE
+            write(kStdWarn,*) '  changing user input SatZen (angle at gnd)  to       Instr ScanAng '
+            write(kStdWarn,*) '  raAtmLoop(iX) --> raSatAngle(iX)     GNDsecant  --> SATELLITEsecant'
 
-    iL = 1
-    20 CONTINUE
-    IF ((pT <= raPLevels(iL)) .AND. (pT >= raPLevels(iL+1))) THEN
-        GOTO 30
+            IF (rSatHeightCom < 0) THEN
+                write(kStdWarn,*) '  WARNING : raSatHeight == -1 so kCARTA uses SATELLITEsecant!!!!'
+                DO iX = 1,iNatm
+                    raSatAngle(iX) = raAtmLoop(iX)
+                    rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
+                    rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
+                    write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
+                END DO
+            ELSE
+                DO iX = 1,iNatm
+                    raSatAngle(iX) = raAtmLoop(iX)
+                !!!! positive number so this is genuine input angle that will vary with layer height
+                    raSatAngle(iX) = SACONV_SUN(raAtmLoop(iX),0.0,705.0)
+                    rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
+                    rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
+                    write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
+                END DO
+            END IF
+        END IF
+        111 FORMAT('   ',F10.5,' ---> ',F10.5,'   +++   ',F10.5,' ---> ',F10.5)
+              
+    ELSEIF (iAtmLoop == 4) THEN
+        write(kStdWarn,*) '  Resetting raSolZen for looping'
+        write(kStdErr,*)  '  Resetting raSolZen for looping'
+        DO iX = 1,iNatm
+            rakSolarAngle(iX) = raAtmLoop(iX)
+        END DO
+
+    ELSEIF (iAtmLoop == 5) THEN
+        write(kStdWarn,*) '  Offsetting Emissivity for looping, refl -> (1-emis)/pi'
+        write(kStdErr,*)  '  Offsetting Emissivity for looping, refl -> (1-emis)/pi'
+        DO iX = 1,iNatm
+            DO iY = 1,kEmsRegions
+                raaaSetEmissivity(iX,iY,2) = raaaSetEmissivity(iX,iY,2) + raAtmLoop(iX)
+                raaaSetSolarRefl(iX,iY,2)  = (1-raaaSetEmissivity(iX,iY,2))/kPi
+            END DO
+        END DO
+
+    ELSEIF (iAtmLoop == 10) THEN
+        write(kStdWarn,*) '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
+        write(kStdErr,*)  '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
+
+    ELSEIF (iAtmLoop == 100) THEN
+        write(kStdWarn,*) '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
+        write(kStdErr,*)  '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
+
     ELSE
-        iL = iL + 1
-        GOTO 20
+        write(kStdErr,*) 'Dont know what to do with iAtmLoop = ',iAtmLoop
+        Call DoStop
     END IF
-          
-    30 CONTINUE
 
-    IF ((iL < 1) .OR. (iL > kProfLayer)) THEN
-        write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
+    IF (iAtmLoop <= 2) THEN
+        CALL Reset_IaaRadLayer(iNatm,raaPrBdry,iaNumLayer,iaaRadLayer, &
+        iProfileLayers,iaMPSetForRad, &
+        raSatHeight,raSatAngle,raPressStart,raPressStop, &
+        raFracTop,raFracBot,raPressLevels,raLayerHeight, &
+        iakSolar,rakSolarAngle)
+    END IF
+
+    RETURN
+    end SUBROUTINE duplicate_clearsky_atm
+
+! ************************************************************************
+! this duplicates cloud sky 2slab atmospheres!
+    SUBROUTINE duplicate_cloudsky2slabs_atm(iAtmLoop,raAtmLoop, &
+    iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
+    iaSetEms,raaaSetEmissivity,raSetEmissivity, &
+    iaSetSolarRefl,raaaSetSolarRefl, &
+    iaKSolar,rakSolarAngle,rakSolarRefl, &
+    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+    raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
+    raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers, &
+    iCldProfile,iaCldTypes,raaKlayersCldAmt, &
+    iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+    raaaCloudParams,raaPCloudTop,raaPCloudBot,iaaScatTable,caaaScatTable,iaPhase, &
+    iaCloudNumAtm,iaaCloudWhichAtm, &
+    cngwat1,cngwat2,cfrac12,cfrac1,cfrac2,ctype1,ctype2)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
+! these are the "output" variables
+    INTEGER :: iAtmLoop,iNatm
+    REAL :: raAtmLoop(kMaxAtm)
+! these are the "input variables"
+    REAL :: raPressLevels(kProfLayer+1)
+    REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm)
+    INTEGER :: iaMPSetForRad(kMaxAtm),iProfileLayers
+    INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
+    INTEGER :: iAtm                  !this is the atmosphere number
+    REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
+    REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
+! raSetEmissivity is the wavenumber dependent Emissivity (default all 1.0's)
+! iSetEms tells how many wavenumber dependent regions there are
+! raSunRefl is the wavenumber dependent reflectivity (default all (1-raSetEm)
+! iSetSolarRefl tells how many wavenumber dependent regions there are
+! raFracTop = tells how much the top layers of mixing table raaMix have been
+!             modified ... needed for backgnd thermal
+! raFracBot = tells how much the bot layers of mixing table raaMix have been
+!             modified ... NOT needed for backgnd thermal
+! raaPrBdry = pressure start/stop
+    REAL :: raaPrBdry(kMaxAtm,2)
+    REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
+    REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
+    INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
+    REAL :: rakSolarRefl(kMaxAtm)
+    REAL :: raSetEmissivity(kMaxAtm)
+    CHARACTER(80) :: caEmissivity(kMaxAtm)
+! rakSolarAngle = solar angles for the atmospheres
+! rakThermalAngle=thermal diffusive angle
+! iakthermal,iaksolar = turn on/off solar and thermal
+! iakthermaljacob=turn thermal jacobians on/off
+! iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
+    REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
+    INTEGER :: iakThermal(kMaxAtm),iaSetThermalAngle(kMaxAtm)
+    INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
+    REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
+    REAL :: raLayerHeight(kProfLayer)
+
+! iNclouds tells us how many clouds there are
+! iaCloudNumLayers tells how many neighboring layers each cloud occupies
+! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
+    INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
+    INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
+! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
+! iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
+    INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
+! iaaScatTable associates a file number with each scattering table
+! caaaScatTable associates a file name with each scattering table
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+! raaaCloudParams stores IWP, cloud mean particle size
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
+    REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)
+! iScatBinaryFile tells us if scattering file is binary (+1) or text (-1)
+    INTEGER :: iScatBinaryFile
+    REAL :: rAngle
+! this tells if there is phase info associated with the cloud; else use HG
+    INTEGER :: iaPhase(kMaxClouds)
+! this gives us the cloud profile info
+    INTEGER :: iCldProfile,iaCldTypes(kMaxClouds)
+    REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
+! this is info about cloud type, cloud frac
+    INTEGER :: ctype1,ctype2
+    REAL :: cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+
+! local var
+    INTEGER :: iX,iY,iDebug
+    REAL :: rX
+
+    iDebug = +1
+    iDebug = -1
+    IF (iDebug > 0) THEN
+
+        print *,' '
+        print *,'INITIAL Clouds Before duplications'
+        print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+
+        print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+        print *,'ctype1,ctype2 = ',ctype1,ctype2
+        print *,'iNclouds = ',iNclouds
+
+        print *,'showing iaCloudNumAtm(iX) : '
+        print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+        print *,' '
+
+        print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
+        DO iY = 1,iNclouds
+            print *,'Cloud ',iY
+            print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
+            print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
+        END DO
+        print *,' '
+
+    !! iaaScatTable sounds like a waste of space, but it actually associates a cscat filename
+        print *,'showing iaaScatTable'
+        DO iY = 1,iNclouds
+            print *,'Cloud ',iY
+            print *,(iaaScatTable(iY,iX),iX=1,kCloudLayers)
+            print *,' '
+        END DO
+        print *,' '
+
+        print *,'raaaCloudParams (cloud loading, and <dme>) pCldTop,pCldBot'
+        DO iY = 1,iNclouds
+            print *,'Cloud ',iY
+            print *,(raaaCloudParams(iY,iX,1),iX=1,kCloudLayers)
+            print *,(raaaCloudParams(iY,iX,2),iX=1,kCloudLayers)
+            print *,(raaPCloudTop(iY,iX),iX=1,kCloudLayers)
+            print *,(raaPCloudBot(iY,iX),iX=1,kCloudLayers)   !!is this a waste?
+            print *,' '
+        END DO
+
+        print *,' '
+        IF (iCldProfile > 0) THEN
+            print*,'iCldProfile'
+            print *,iCldProfile,(iaCldTypes(iX),iX=1,iNclouds)
+            print *,(raaKlayersCldAmt(iX,1),iX=1,kProfLayer)
+        END IF
+    END IF
+
+!************************************************************************
+!!! now have to update things
+!!! if there are originally 2 clouds then
+!!!   we are going from 2 clouds in atmosphere #1 to adding on
+!!!                       cloud1 in atmosphere #2
+!!!                       cloud2 in atmosphere #3
+!!!                    NO clouds in atmosphere #4
+!!!                    r5 = clr r4 + c1 r2 + c2 r3 + c12 c1 where clr = 1-c1-c2+c12
+!!! if there are originally 1 clouds then
+!!!   we are going from 1 clouds in atmosphere #1 to adding on
+!!!                     0  cloud1 in atmosphere #2
+!!!                     0  cloud2 in atmosphere #3
+!!!                     O  clouds in atmosphere #4
+!!!                    r5 = clr r4 + c1 r1                  where clr = 1-c1
+!!!  IN OTHER WORDS no need to sweat anything if iNclouds ===== 1 YAYAYAYAYAYAYAYAYAYAYAYA
+
+    IF (iCldProfile > 0) THEN
+        write(kStdErr,*) 'Ooops can only duplicate clouds slabs, not profiles'
         CALL DoStop
     END IF
 
-!!!now see how this can be put into iaRadLayer
-! figure out maximum Mixed Path Layer in the atmosphere
-    IF (iaRadlayer(1) > iaRadLAyer(iNumLayer)) THEN
-        iS = iaRadlayer(1)
+    IF (iNclouds == 1) THEN
+        write(kStdWarn,*) 'iNclouds == 1, so really no need to duplicate cloud fields at all!'
+    !!! just duplicate the clear fields
+        CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
+        iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
+        iaSetEms,raaaSetEmissivity,raSetEmissivity, &
+        iaSetSolarRefl,raaaSetSolarRefl, &
+        iaKSolar,rakSolarAngle,rakSolarRefl, &
+        iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+        raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
+        raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
+
+    ELSEIF ((iNclouds > 2) .OR. (iNclouds <= 0)) THEN
+        write(kStdErr,*) 'iNclouds = ',iNclouds ,' huh?? cant duplicate this !!!'
+        CALL DoStop
+    ELSEIF (iNclouds == 2) THEN
+        DO iX = 1,iNclouds
+            iaCloudNumAtm(iX) = 2
+        END DO
+
+    ! no need to upgrade iaaCloudWhichLayers
+    ! no need to upgrade iaaScatTable
+
+    ! need to upgrade iaaCloudWhichAtm
+        iY = 1
+        iaaCloudWhichAtm(iY,2) = 2   !! this means cloud #1 is also going to be used in atm #2
+                
+        iY = 2
+        iaaCloudWhichAtm(iY,2) = 3   !! this means cloud #1 is also going to be used in atm #3
+
+    ! no need to upgrade raaPCloudTop,raaPCloudbot
+    ! no need to upgrade raaaCloudParams (cloud loading and <dme>)
+              
+    !!! finally duplicate the clear fields
+        CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
+        iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
+        iaSetEms,raaaSetEmissivity,raSetEmissivity, &
+        iaSetSolarRefl,raaaSetSolarRefl, &
+        iaKSolar,rakSolarAngle,rakSolarRefl, &
+        iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+        raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
+        raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
+    END IF
+
+    iDebug = -1
+    IF (iDebug > 0) THEN
+        print *,' '
+        print *,'FINAL CLOUD after duplications'
+
+        print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+
+        print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+        print *,'ctype1,ctype2 = ',ctype1,ctype2
+        print *,'iNclouds = ',iNclouds
+
+        print *,'showing iaCloudNumAtm(iX) : '
+        print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+        print *,' '
+
+        print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
+        DO iY = 1,iNclouds
+            print *,'Cloud ',iY
+            print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
+            print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
+        END DO
+        print *,' '
+    END IF
+
+    RETURN
+    end SUBROUTINE duplicate_cloudsky2slabs_atm
+
+!************************************************************************
+! this duplicates cloud sky 100slab atmospheres!
+    SUBROUTINE duplicate_cloudsky100slabs_atm(iAtmLoop,raAtmLoop, &
+    iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
+    iaSetEms,raaaSetEmissivity,raSetEmissivity, &
+    iaSetSolarRefl,raaaSetSolarRefl, &
+    iaKSolar,rakSolarAngle,rakSolarRefl, &
+    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+    raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
+    raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers, &
+    iCldProfile,iaCldTypes,raaKlayersCldAmt, &
+    iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+    raaaCloudParams,raaPCloudTop,raaPCloudBot,iaaScatTable,caaaScatTable,iaPhase, &
+    iaCloudNumAtm,iaaCloudWhichAtm, &
+    cngwat1,cngwat2,cfrac12,cfrac1,cfrac2,ctype1,ctype2)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
+! these are the "output" variables
+    INTEGER :: iAtmLoop,iNatm
+    REAL :: raAtmLoop(kMaxAtm)
+! these are the "input variables"
+    REAL :: raPressLevels(kProfLayer+1)
+    REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm)
+    INTEGER :: iaMPSetForRad(kMaxAtm),iProfileLayers
+    INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
+    INTEGER :: iAtm                  !this is the atmosphere number
+    REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
+    REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
+! raSetEmissivity is the wavenumber dependent Emissivity (default all 1.0's)
+! iSetEms tells how many wavenumber dependent regions there are
+! raSunRefl is the wavenumber dependent reflectivity (default all (1-raSetEm)
+! iSetSolarRefl tells how many wavenumber dependent regions there are
+! raFracTop = tells how much the top layers of mixing table raaMix have been
+!             modified ... needed for backgnd thermal
+! raFracBot = tells how much the bot layers of mixing table raaMix have been
+!             modified ... NOT needed for backgnd thermal
+! raaPrBdry = pressure start/stop
+    REAL :: raaPrBdry(kMaxAtm,2)
+    REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
+    REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
+    INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
+    REAL :: rakSolarRefl(kMaxAtm)
+    REAL :: raSetEmissivity(kMaxAtm)
+    CHARACTER(80) :: caEmissivity(kMaxAtm)
+! rakSolarAngle = solar angles for the atmospheres
+! rakThermalAngle=thermal diffusive angle
+! iakthermal,iaksolar = turn on/off solar and thermal
+! iakthermaljacob=turn thermal jacobians on/off
+! iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
+    REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
+    INTEGER :: iakThermal(kMaxAtm),iaSetThermalAngle(kMaxAtm)
+    INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
+    REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
+    REAL :: raLayerHeight(kProfLayer)
+
+! iNclouds tells us how many clouds there are
+! iaCloudNumLayers tells how many neighboring layers each cloud occupies
+! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
+    INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
+    INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
+! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
+! iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
+    INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
+! iaaScatTable associates a file number with each scattering table
+! caaaScatTable associates a file name with each scattering table
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+! raaaCloudParams stores IWP, cloud mean particle size
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
+    REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)
+! iScatBinaryFile tells us if scattering file is binary (+1) or text (-1)
+    INTEGER :: iScatBinaryFile
+    REAL :: rAngle
+! this tells if there is phase info associated with the cloud; else use HG
+    INTEGER :: iaPhase(kMaxClouds)
+! this gives us the cloud profile info
+    INTEGER :: iCldProfile,iaCldTypes(kMaxClouds)
+    REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
+! this is info about cloud type, cloud frac
+    INTEGER :: ctype1,ctype2
+    REAL :: cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+
+! local var
+    INTEGER :: iX,iY,iDebug
+    REAL :: rX
+
+    iDebug = +1
+    iDebug = -1
+    IF (iDebug > 0) THEN
+
+        print *,' '
+        print *,'INITIAL Clouds Before duplications'
+        print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+
+        print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+        print *,'ctype1,ctype2 = ',ctype1,ctype2
+        print *,'iNclouds = ',iNclouds
+
+        print *,'showing iaCloudNumAtm(iX) : '
+        print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+        print *,' '
+
+        print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
+        DO iY = 1,iNclouds
+            print *,'Cloud ',iY
+            print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
+            print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
+        END DO
+        print *,' '
+
+    !! iaaScatTable sounds like a waste of space, but it actually associates a cscat filename
+        print *,'showing iaaScatTable'
+        DO iY = 1,iNclouds
+            print *,'Cloud ',iY
+            print *,(iaaScatTable(iY,iX),iX=1,kCloudLayers)
+            print *,' '
+        END DO
+        print *,' '
+
+        print *,'raaaCloudParams (cloud loading, and <dme>) pCldTop,pCldBot'
+        DO iY = 1,iNclouds
+            print *,'Cloud ',iY
+            print *,(raaaCloudParams(iY,iX,1),iX=1,kCloudLayers)
+            print *,(raaaCloudParams(iY,iX,2),iX=1,kCloudLayers)
+            print *,(raaPCloudTop(iY,iX),iX=1,kCloudLayers)
+            print *,(raaPCloudBot(iY,iX),iX=1,kCloudLayers)   !!is this a waste?
+            print *,' '
+        END DO
+
+        print *,' '
+        IF (iCldProfile > 0) THEN
+            print*,'iCldProfile'
+            print *,iCldProfile,(iaCldTypes(iX),iX=1,iNclouds)
+            print *,(raaKlayersCldAmt(iX,1),iX=1,kProfLayer)
+        END IF
+    END IF
+
+!************************************************************************
+!!! now have to update things
+!!! if there are originally 2 clouds then
+!!!   just do one 100 layer ice/water cloud and one clear calc
+
+    IF (iCldProfile < 0) THEN
+        write(kStdErr,*) 'Ooops can only duplicate 100 layer cloud profiles, not slabs'
+        CALL DoStop
+    END IF
+
+    write(kStdWarn,*) 'iNclouds == 1, so really no need to duplicate cloud fields at all!'
+!!! just duplicate the clear fields
+    CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
+    iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
+    iaSetEms,raaaSetEmissivity,raSetEmissivity, &
+    iaSetSolarRefl,raaaSetSolarRefl, &
+    iaKSolar,rakSolarAngle,rakSolarRefl, &
+    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+    raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
+    raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
+
+    RETURN
+    end SUBROUTINE duplicate_cloudsky100slabs_atm
+
+!************************************************************************
+! set the vertical temperatures of the atmosphere
+! this sets the temperatures at the pressure level boundaries, using the
+! temperatures of the pressure layers that have been supplied by kLayers
+    SUBROUTINE SetRTSPECTemp(TEMP,iaRadLayer,raVTemp,iNumLayer,iDownWard, &
+    iProfileLayers,raPressLevels)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
+! these are variables that come in from kcartamain.f
+    REAL :: raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)
+    INTEGER :: iaRadLayer(kProfLayer),iNumLayer,iDownWard,iProfileLayers
+! these are variables that we have to set
+    REAL ::    TEMP(*)
+
+! local variables
+    INTEGER :: iL,iLay,iM,iaRadLayerTemp(kMixFilRows)
+    REAL :: Temp1(maxnz)
+    REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
+
+    DO iLay=1,MAXNZ
+        Temp1(iLay) = 0.0
+        Temp(iLay) = 0.0
+    END DO
+
+    DO iLay=1,kProfLayer
+        pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
+        pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
+    END DO
+
+! now set iaRadLayerTemp the same as  iaRadLayer if downlook instr
+!     set iaRadLayerTemp flipped from iaRadLayer if uplook   instr
+    IF (iDownWard == 1) THEN      !!!!keep everything the same
+        DO iLay = 1,iNumLayer
+            iaRadLayerTemp(iLay) = iaRadLayer(iLay)
+        END DO
+    ELSE            !!!gotta do a bit of reverse logic for uplook instr
+        DO iLay = 1,iNumLayer
+            iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
+        END DO
+    END IF
+
+! see which set of Mixed Paths the current atmosphere occupies eg
+! set 1 = 1..100, set2= 101..200 etc
+! eg if current atmosphere is from MixfilPath 110 to 190, and kProfLayer = 100,
+! then we set iMod as 2      idiv(150,100) = 1  === 2nd set of mixed paths
+! assume each atmosphere has at least 25 layers in it!!!
+    iM = idiv(iaRadLayerTemp(25),kProfLayer)+1
+    DO iLay=1,kProfLayer
+        raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
+    END DO
+
+    DO iLay=1,iNumLayer
+        iL = iaRadLayerTemp(iLay)
+    ! ap this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
+        iL = iL-idiv(iL,kProfLayer)*kProfLayer
+        IF (iL == 0) THEN
+            iL = kProfLayer
+        END IF
+        rP=raPressLevels(iL+1)-10000*delta
+        if (rp < raPressLevels(kProfLayer+1)) then
+            rp = raPressLevels(kProfLayer+1)+10000*delta
+        end if
+        TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
+        raPressLevels,iProfileLayers)
+    END DO
+
+    rP = DISORTsurfPress
+    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp, &
+    raPressLevels,iProfileLayers)
+
+    IF (iDownWard == 1) THEN
+        DO iLay=1,iNumLayer+1
+            temp(iLay) = temp1(iLay)
+        END DO
     ELSE
-        iS = iaRadLAyer(iNumLayer)
-    END IF
-    iMod = 1
-    40 CONTINUE
-    IF ((iMod * kProfLayer) < iS) THEN
-        iMod = iMod + 1
-        GOTO 40
-    END IF
-!!!so, this is the Mixed Path Layer with Cloud in it
-    iL = (iMod-1)*kProfLayer + iL
-!!!now see which iaRadLayer this corresponds to
-    iS = 1
-    50 CONTINUE
-    IF ((iaRadLayer(iS) /= iL) .AND. (iS <= iNumLayer)) THEN
-        iS = iS + 1
-        GOTO 50
-    END IF
-
-    iL = iS
-    write(kStdWarn,*) '  Putting top of abs cloud into iaRadLayer(',iL,')'
-
-    iL = iaRadLayer(1) + iL - 1
-    write(kStdWarn,*) '    which is MP radiating layer ',iL
-
-    write(kStdWarn,*) '  This is for cloud pressure = ',pT
-    write(kStdWarn,*) '  Corresponding AIRS levels are : ',raPLevels(iL), &
-    raPLevels(iL+1)
-
-    iLT = iL
-
-! do the bottom layer --------------------------------->
-    iL = 1
-    15 CONTINUE
-    IF (raPLevels(iL) <= 1.0e-3) THEN
-        iL = iL + 1
-        GOTO 15
-    END IF
-
-    IF (pB > raPLevels(iL)) THEN
-        write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too large!!!'
-        CALL DoStop
-    END IF
-    IF (pB < raPLevels(kProfLayer+1)) THEN
-        write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too small!!!'
-        CALL DoStop
-    END IF
-
-    iL = 1
-    25 CONTINUE
-    IF ((pB <= raPLevels(iL)) .AND. (pB >= raPLevels(iL+1))) THEN
-        GOTO 35
-    ELSE
-        iL = iL + 1
-        GOTO 25
-    END IF
-          
-    35 CONTINUE
-
-    IF ((iL < 1) .OR. (iL > kProfLayer)) THEN
-        write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
-        CALL DoStop
-    END IF
-
-!!!now see how this can be put into iaRadLayer
-! figure out maximum Mixed Path Layer in the atmosphere
-    IF (iaRadlayer(1) > iaRadLAyer(iNumLayer)) THEN
-        iS = iaRadlayer(1)
-    ELSE
-        iS = iaRadLAyer(iNumLayer)
-    END IF
-    iMod = 1
-    45 CONTINUE
-    IF ((iMod * kProfLayer) < iS) THEN
-        iMod = iMod + 1
-        GOTO 45
-    END IF
-!!!so, this is the Mixed Path Layer with Cloud in it
-    iL = (iMod-1)*kProfLayer + iL
-!!!now see which iaRadLayer this corresponds to
-    iS = 1
-    55 CONTINUE
-    IF ((iaRadLayer(iS) /= iL) .AND. (iS <= iNumLayer)) THEN
-        iS = iS + 1
-        GOTO 55
-    END IF
-
-    iL = iS
-    write(kStdWarn,*) '  Putting bot of abs cloud into iaRadLayer(',iL,')'
-
-    iL = iaRadLayer(1) + iL - 1
-    write(kStdWarn,*) '    which is MP radiating layer ',iL
-
-    write(kStdWarn,*) '  This is for cloud pressure = ',pB
-    write(kStdWarn,*) '  Corresponding AIRS levels are : ',raPLevels(iL), &
-    raPLevels(iL+1)
-
-    iLB = iL
-
-! see if the layers make sense
-    IF (iLB > iLT) THEN
-        write(kStdErr,*) 'oops in FIND_ABS_ASY_EXT iLB > iLT',iLB,iLT
-        CALL DOStop
-    END IF
-
-! see if we need to adjust the individual cloud opt depths
-    IF (iLB /= iLT) THEN
-        write(kStdWarn,*) 'adjusting the cld abs depths for each layer'
-        DO iF = 1,kMaxPts
-            EXTINCT(iF) = EXTINCT(iF)/(iLT-iLB+1)
-            ABSC(iF)    = ABSC(iF)/(iLT-iLB+1)
-            ASYM(iF)    = ASYM(iF)
+        DO iLay=1,iNumLayer+1
+            temp(iLay) = temp1((iNumLayer+1)-iLay+1)
         END DO
     END IF
 
     RETURN
-    END SUBROUTINE FIND_ABS_ASY_EXT
+    end SUBROUTINE SetRTSPECTemp
 
 !************************************************************************
-    SUBROUTINE INTERP_SCAT_TABLE2_modified (WAVENO, DME, &
-    EXTINCT, SSALB, ASYM, &
-    NDME, DMETAB, NWAVE, WAVETAB, &
-    TABEXTINCT, TABSSALB, TABASYM)
-!       Interpolates the scattering properties from the table for
-!     a particular wavenumber and particle size.  Does a bilinear
-!     interpolation, but optimized for fixed particle size and slowly
-!     varying wavenumber.  If the DME is the same as last time then we
-!     can just linearly interpolate in wavenumber between stored
-!     scattering values.  If the DME has changed then we linearly
-!     interpolate between the DMETAB grid lines for each of the two
-!     wavenumber grid lines.
+! this subroutine resets iaaRadLayer and/or raSatAngle, if the Start or Stop
+! Pressures have changed
+    SUBROUTINE Reset_IaaRadLayer(iNatm,raaPrBdry,iaNumLayer,iaaRadLayer, &
+    iProfileLayers,iaMPSetForRad, &
+    raSatHeight,raSatAngle,raPressStart,raPressStop, &
+    raFracTop,raFracBot,raPressLevels,raLayerHeight, &
+    iakSolar,rakSolarAngle)
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/kcartaparam.f90'
 
-    REAL ::     WAVENO, DME
-    REAL ::     EXTINCT, SSALB, ASYM
-    INTEGER ::  NDME, NWAVE
-    REAL ::     DMETAB(NDME), WAVETAB(NWAVE)
-    REAL ::     TABEXTINCT(NWAVE,NDME), TABSSALB(NWAVE,NDME)
-    REAL ::     TABASYM(NWAVE,NDME)
-    INTEGER ::  IW0, IW1, ID, IL, IU, IM
-    LOGICAL ::  NEWIW
-    REAL ::     FWAV, FDME, FLDME, F
-    REAL ::     OLDDME, EXT0, EXT1, ALB0, ALB1, ASYM0, ASYM1
-! sergio do not save iw0,iw1, olddme
-!      SAVE     IW0, IW1, ID, OLDDME, FDME, FLDME
-!      SAVE     ID, FDME, FLDME
-!      SAVE     EXT0,EXT1, ALB0,ALB1, ASYM0,ASYM1
-    DATA     IW0/1/, IW1/2/
+    INTEGER :: iNatm,iProfileLayers,iaMPSetForRad(kMaxAtm),iakSolar(kMaxAtm)
+    INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
+    REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm),raLayerHeight(kProfLayer)
+    REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm),rakSolarAngle(kMaxAtm)
+    REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm)
+! raaPrBdry = pressure start/stop
+    REAL :: raaPrBdry(kMaxAtm,2),raPressLevels(kProfLayer+1)
 
-    iw0 = 1
-    iw1 = 2
-    olddme = 0.0
+    INTEGER :: iC,iX,iStart,iStop,iNlay,iDirection,iInt
 
-    iw0 = 1
-    iw1 = nwave
-    olddme = -10.0
+    DO iC = 1,iNAtm
+        CALL StartStopMP(iaMPSetForRad(iC),raPressStart(iC),raPressStop(iC),iC, &
+        raPressLevels,iProfileLayers, &
+        raFracTop,raFracBot,raaPrBdry,iStart,iStop)
+
+        IF (iStop >= iStart) THEN
+            iNlay = (iStop-iStart+1)
+            iDirection = +1                           !down look instr
+        ELSE IF (iStop <= iStart) THEN
+            iNlay = (iStart-iStop+1)
+            iDirection = -1                           !up look instr
+        END IF
+        IF (iNLay > kProfLayer) THEN
+            write(kStdErr,*)'Error for atm # ',iC
+            write(kStdErr,*)'number of layers/atm must be <= ',kProfLayer
+            CALL DoSTOP
+        END IF
+        iaNumlayer(iC) = iNlay
+
+        DO iInt = 1,iNlay
+            iaaRadLayer(iC,iInt) = iStart+iDirection*(iInt-1)
+        END DO
+
+        write(kStdWarn,*) ' Atm#, Press Start/Stop, iStart,iStop, Nlay = ', &
+        iC,raPressStart(iC),raPressStop(iC),iStart,iStop,iNlay
+
+    END DO
+
+    IF (iaLimb(1) > 0) THEN
+    !! this is limb sounder, do the angle etc
+        DO iC = 1,iNatm
+            raSatAngle(iC) = LimbViewScanAng(iC,raPressStart,raSatHeight, &
+            iaaRadLayer,raPressLevels,raLayerHeight)
+            IF (iaKsolar(iC) >= 0) THEN
+                rakSolarAngle(iC) = raSatAngle(iC)  !! this is scanang at TOA instr
+                rakSolarAngle(iC) = 89.9            !! this is sol zenith at "surface"
+            END IF
+        END DO
+    END IF
           
-!         Check that parameter are in range of table
-    IF (WAVENO < WAVETAB(1) .OR. WAVENO > WAVETAB(NWAVE)) THEN
-        write(kStdErr,*) WAVENO,' outside ',WAVETAB(1),':',WAVETAB(NWAVE)
-        write(kStdErr,*) 'INTERP_SCAT_TABLE: wavenumber out of range ... RESET'
-        IF (WAVENO < WAVETAB(1)) THEN
-            WAVENO = WAVETAB(1)
-        ELSEIF (WAVENO > WAVETAB(NWAVE)) THEN
-            WAVENO = WAVETAB(NWAVE)
-        END IF
-    ! ALL DoStop
+    RETURN
+    end SUBROUTINE Reset_IaaRadLayer
+! ************************************************************************
+
+! this subroutine very quickly does the radiative transfer
+! since the optical depths are soooooooooo small, use double precision
+    SUBROUTINE UpperAtmRadTrans(raInten,raFreq,rSatAngle, &
+    iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
+    raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iDumpAllUARads)
+
+    IMPLICIT NONE
+     
+    include '../INCLUDE/kcartaparam.f90'
+
+! input parameters
+!   upper atm P,PP,T(LTE),Q   (really only need T(LTE))
+    REAL :: raUpperPress(kProfLayer),raUpperTemp(kProfLayer)
+!   upper atm abs coeff and planck coeff
+    REAL :: raaUpperSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
+    REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
+!   input wavevector and integer stating which layer to stop rad transfer at
+    REAL :: raFreq(kMaxPts),rSatAngle
+    INTEGER :: iUpper
+! do we want to do upper atm NLTE computations?
+    INTEGER :: iDoUpperAtmNLTE
+! do we dump all or some rads?
+    INTEGER :: iDumpAllUARads
+! input/output pararameter
+!   this contains the radiance incident at kCARTA TOA (0.005 mb)
+!   it will finally contain the radiance exiting from TOP of UPPER ATM
+    REAL :: raInten(kMaxPts)
+
+! local variables
+    INTEGER :: iFr,iL,iIOUN
+    REAL :: rEmission,rTrans,rMu,raInten0(kMaxPts)
+    DOUBLE PRECISION :: daInten(kMaxPts),dTrans,dEmission
+    CHARACTER(80) :: caOutName
+
+    caOutName = 'DumDum'
+    iIOUN = kNLTEOutUA
+      
+    IF (iDoUpperAtmNLTE <= 0) THEN
+        write (kStdErr,*) 'huh? why doing the UA nlte radiance?????'
+        CALL DoStop
+    ELSE
+        write(kStdWarn,*) 'Doing UA (NLTE) radtransfer at 0.0025 cm-1 '
     END IF
-    IF (DME < DMETAB(1) .OR. DME > DMETAB(NDME)) THEN
-        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
-        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
-        IF (DME < DMETAB(1)) THEN
-            DME = DMETAB(1)
-        ELSEIF (DME > DMETAB(NDME)) THEN
-            DME = DMETAB(NDME)
-        END IF
-    ! ALL DoStop
+
+! compute radiance intensity thru NEW uppermost layers of atm
+    DO iFr = 1,kMaxPts
+        raInten0(iFr) = raInten(iFr)
+        daInten(iFr)  = dble(raInten(iFr))
+    END DO
+
+    iL = 0
+    IF (kNLTEOutUAOpen > 0) THEN
+        write(kStdWarn,*) 'dumping out 0.005 mb UA rads iL = ',0
+    ! always dump out the 0.005 mb TOA radiance if the UA file is open
+        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
     END IF
 
-!         See if wavenumber is within last wavenumber grid, otherwise
-!           find the grid location and interpolation factor for WAVENO
-    NEWIW = .FALSE. 
-!      IF (WAVENO .LT. WAVETAB(IW0) .OR. WAVENO .GT. WAVETAB(IW1)) THEN
-    IF (WAVENO >= WAVETAB(IW0) .AND. WAVENO <= WAVETAB(IW1)) THEN
-        IL=1
-        IU=NWAVE
-        DO WHILE (IU-IL > 1)
-            IM = (IU+IL)/2
-            IF (WAVENO >= WAVETAB(IM)) THEN
-                IL = IM
-            ELSE
-                IU = IM
-            ENDIF
-        ENDDO
-        IW0 = MAX(IL,1)
-        IW1 = IW0+1
-        NEWIW = .TRUE. 
-    ENDIF
+    rMu = cos(rSatAngle*kPi/180.0)
 
-    IF (DME /= OLDDME) THEN
-    !         Find the grid location and interpolation factor for DME
-        IL=1
-        IU=NDME
-        DO WHILE (IU-IL > 1)
-            IM = (IU+IL)/2
-            IF (DME >= DMETAB(IM)) THEN
-                IL = IM
-            ELSE
-                IU = IM
-            ENDIF
-        ENDDO
-        ID = MAX(IL,1)
-        FDME = (DME-DMETAB(ID))/(DMETAB(ID+1)-DMETAB(ID))
-        FLDME = LOG(DME/DMETAB(ID))/LOG(DMETAB(ID+1)/DMETAB(ID))
-    ENDIF
+    DO iL = 1,iUpper - 1
 
-    IF (DME /= OLDDME .OR. NEWIW) THEN
-    !         If not the same Dme or a new wavenumber grid, then
-    !           linearly interpolate omega and g and log interpolate extinction
-        EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
-        EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
-        ALB0 = (1-FDME)*TABSSALB(IW0,ID) + FDME*TABSSALB(IW0,ID+1)
-        ALB1 = (1-FDME)*TABSSALB(IW1,ID) + FDME*TABSSALB(IW1,ID+1)
-        ASYM0 = (1-FDME)*TABASYM(IW0,ID) + FDME*TABASYM(IW0,ID+1)
-        ASYM1 = (1-FDME)*TABASYM(IW1,ID) + FDME*TABASYM(IW1,ID+1)
-    ENDIF
+        DO iFr = 1,kMaxPts
+            rTrans = raaUpperSumNLTEGasAbCoeff(iFr,iL)/rMu
+            rTrans = exp(-rTrans)
+            rEmission = (1.0 - rTrans) * raaUpperPlanckCoeff(iFr,iL) * &
+            ttorad(raFreq(iFr),raUpperTemp(iL))
+            raInten(iFr) = rEmission + raInten(iFr)*rTrans
 
-!         Linearly interpolate the scattering properties in wavenumber
-    FWAV    = (WAVENO-WAVETAB(IW0))/(WAVETAB(IW1)-WAVETAB(IW0))
-    F       = 1-FWAV
-    EXTINCT = F*EXT0 + FWAV*EXT1
-    SSALB   = F*ALB0 + FWAV*ALB1
-    ASYM    = F*ASYM0 + FWAV*ASYM1
+            dTrans = (raaUpperSumNLTEGasAbCoeff(iFr,iL)*1.0d0/(rMu*1.0d0))
+            dTrans = exp(-dTrans)
+            dEmission = (raaUpperPlanckCoeff(iFr,iL)*1.0d0) * &
+            (ttorad(raFreq(iFr),raUpperTemp(iL))*1.0d0)* &
+            (1.0d0 - dTrans)
+            daInten(iFr) = dEmission + daInten(iFr)*dTrans
 
-    OLDDME = DME
+            raInten(iFr) = sngl(daInten(iFr))
+        END DO
+
+        IF ((iDumpAllUARads > 0) .AND. (kNLTEOutUAOpen > 0)) THEN
+            write(kStdWarn,*) 'dumping out UA rads at iL = ',iL
+        ! dump out the radiance at this HIGH pressure level
+            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+        END IF
+
+    END DO
+
+    DO iL = iUpper,iUpper
+        DO iFr = 1,kMaxPts
+            rTrans = raaUpperSumNLTEGasAbCoeff(iFr,iL)/rMu
+            rTrans = exp(-rTrans)
+            rEmission = (1.0 - rTrans) * raaUpperPlanckCoeff(iFr,iL) * &
+            ttorad(raFreq(iFr),raUpperTemp(iL))
+            raInten(iFr) = rEmission + raInten(iFr)*rTrans
+
+            dTrans = dble(raaUpperSumNLTEGasAbCoeff(iFr,iL)*1.0d0/(rMu*1.0d0))
+            dTrans = exp(-dTrans)
+            dEmission = dble(raaUpperPlanckCoeff(iFr,iL)*1.0d0) * &
+            dble(ttorad(raFreq(iFr),raUpperTemp(iL))*1.0d0)* &
+            (1.0d0 - dTrans)
+            daInten(iFr) = dEmission + daInten(iFr)*dTrans
+            raInten(iFr) = sngl(daInten(iFr))
+
+        END DO
+
+        IF (kNLTEOutUAOpen > 0) THEN
+        ! always dump out the 0.000025 mb TOA radiance if the UA file is open
+            write(kStdWarn,*) 'dumping out 0.000025 mb UA rads iL = ',iL
+            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+        END IF
+
+    END DO
+
+    3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
 
     RETURN
-    end SUBROUTINE INTERP_SCAT_TABLE2_modified
+    end SUBROUTINE UpperAtmRadTrans
 
 !************************************************************************
 END MODULE rad_misc

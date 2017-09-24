@@ -5,9 +5,12 @@
 MODULE clear_scatter_basic
 
 USE basic_common
-USE kcoeff_basic   !! for interptemp
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE s_writefile
+USE s_misc
+!USE rad_misc
+!USE kbloat
+!USE knonlte
 
 IMPLICIT NONE
 
@@ -4109,6 +4112,771 @@ CONTAINS
 
     RETURN
     end SUBROUTINE rad_trans_SAT_LOOK_DOWN_NLTE_FAST
+
+!************************************************************************
+! this file reads a binary made from the ASCII sscatmie.x file
+! and returns the extinction, absm asymmetry coeffs
+! this is a combination of subroutines
+!      INTERP_SCAT_TABLE2 and READ_SSCATTAB_BINARY
+    SUBROUTINE FIND_ABS_ASY_EXT(SCATFILE,DME,IWP,pT,pB,raPLevels,RAFREQ, &
+    iaRadLayer,iNumLayer,EXTINCT,ABSC,ASYM,ILT,ILB)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
+!       Input parameters:
+!     SCATFILE   file name of scattering file
+!     DME        particle size to interpolate for
+!     IWP        iwp normalization
+!     WAVES      wavenumbers
+!     pT,pB      pressure (top + bottom) where the cloud layer is
+!     raPLevels        AIRS pressure levels
+!     iaRadLayer current atmosphere layers
+!       Output parameters:
+!     EXTINCT, ABS, ASYM  : the particle scattering coefficients for each layer
+
+    INTEGER :: iaRadlayer(kProfLayer),iNumLayer
+    CHARACTER*(*) SCATFILE
+    REAL :: raFreq(kMaxPts), DME, IWP, pT, pB, raPLevels(kProfLayer+1)
+    REAL :: extinct(kMaxPts),absc(kMaxPts),asym(kMaxPts)
+
+! output layer
+!     IL                  : which AIRS layer the cloud is in
+    INTEGER :: iLT,iLB
+
+! local variables
+    CHARACTER(1) :: caScale(MAXSCAT)
+    INTEGER ::  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
+    REAL ::     MUTAB(MAXGRID,MAXSCAT)
+    REAL ::     DMETAB(MAXGRID,MAXSCAT), WAVETAB(MAXGRID,MAXSCAT)
+    REAL ::     MUINC(2)
+    REAL ::     TABEXTINCT(MAXTAB,MAXSCAT), TABSSALB(MAXTAB,MAXSCAT)
+    REAL ::     TABASYM(MAXTAB,MAXSCAT)
+    REAL ::     TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
+    REAL ::     TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
+          
+    INTEGER :: I,IF,iMod,iS,iL
+    REAL :: ee,aa,gg, waveno
+
+    I = 1
+
+    CALL READ_SSCATTAB_BINARY(SCATFILE,   & !!!!!!MAXTAB, MAXGRID,
+    caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
+    NWAVETAB(I), WAVETAB(1,I), &
+    MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
+    TABPHI1UP(1,I), TABPHI1DN(1,I), &
+    TABPHI2UP(1,I), TABPHI2DN(1,I))
+
+!       !!!get rid of delta scaling
+!      CALL UnScaleMie(
+!     $        caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I),
+!     $        ndme(i)*nwavetab(i))
+                 
+    DO iF = 1,kMaxPts
+        waveno = raFreq(iF)
+    !  here we only need the simpler first choice as we are not messing
+    !  around with the phase functions
+        CALL INTERP_SCAT_TABLE2 (WAVENO, DME, ee, aa, gg, &
+        NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
+        TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
+        EXTINCT(iF) = ee * iwp/1000.0
+        ABSC(iF)    = ee * iwp/1000.0 * (1.0 - aa)
+        ASYM(iF)    = gg
+    END DO
+
+!     figure out what AIRS layers the cloud is in between
+
+! do the top layer --------------------------------->
+    iL = 1
+    10 CONTINUE
+    IF (raPLevels(iL) <= 1.0e-3) THEN
+        iL = iL + 1
+        GOTO 10
+    END IF
+
+    IF (pT > raPLevels(iL)) THEN
+        write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too large!!!'
+        CALL DoStop
+    END IF
+    IF (pT < raPLevels(kProfLayer+1)) THEN
+        write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too small!!!'
+        CALL DoStop
+    END IF
+
+    iL = 1
+    20 CONTINUE
+    IF ((pT <= raPLevels(iL)) .AND. (pT >= raPLevels(iL+1))) THEN
+        GOTO 30
+    ELSE
+        iL = iL + 1
+        GOTO 20
+    END IF
+          
+    30 CONTINUE
+
+    IF ((iL < 1) .OR. (iL > kProfLayer)) THEN
+        write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
+        CALL DoStop
+    END IF
+
+!!!now see how this can be put into iaRadLayer
+! figure out maximum Mixed Path Layer in the atmosphere
+    IF (iaRadlayer(1) > iaRadLAyer(iNumLayer)) THEN
+        iS = iaRadlayer(1)
+    ELSE
+        iS = iaRadLAyer(iNumLayer)
+    END IF
+    iMod = 1
+    40 CONTINUE
+    IF ((iMod * kProfLayer) < iS) THEN
+        iMod = iMod + 1
+        GOTO 40
+    END IF
+!!!so, this is the Mixed Path Layer with Cloud in it
+    iL = (iMod-1)*kProfLayer + iL
+!!!now see which iaRadLayer this corresponds to
+    iS = 1
+    50 CONTINUE
+    IF ((iaRadLayer(iS) /= iL) .AND. (iS <= iNumLayer)) THEN
+        iS = iS + 1
+        GOTO 50
+    END IF
+
+    iL = iS
+    write(kStdWarn,*) '  Putting top of abs cloud into iaRadLayer(',iL,')'
+
+    iL = iaRadLayer(1) + iL - 1
+    write(kStdWarn,*) '    which is MP radiating layer ',iL
+
+    write(kStdWarn,*) '  This is for cloud pressure = ',pT
+    write(kStdWarn,*) '  Corresponding AIRS levels are : ',raPLevels(iL), &
+    raPLevels(iL+1)
+
+    iLT = iL
+
+! do the bottom layer --------------------------------->
+    iL = 1
+    15 CONTINUE
+    IF (raPLevels(iL) <= 1.0e-3) THEN
+        iL = iL + 1
+        GOTO 15
+    END IF
+
+    IF (pB > raPLevels(iL)) THEN
+        write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too large!!!'
+        CALL DoStop
+    END IF
+    IF (pB < raPLevels(kProfLayer+1)) THEN
+        write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too small!!!'
+        CALL DoStop
+    END IF
+
+    iL = 1
+    25 CONTINUE
+    IF ((pB <= raPLevels(iL)) .AND. (pB >= raPLevels(iL+1))) THEN
+        GOTO 35
+    ELSE
+        iL = iL + 1
+        GOTO 25
+    END IF
+          
+    35 CONTINUE
+
+    IF ((iL < 1) .OR. (iL > kProfLayer)) THEN
+        write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
+        CALL DoStop
+    END IF
+
+!!!now see how this can be put into iaRadLayer
+! figure out maximum Mixed Path Layer in the atmosphere
+    IF (iaRadlayer(1) > iaRadLAyer(iNumLayer)) THEN
+        iS = iaRadlayer(1)
+    ELSE
+        iS = iaRadLAyer(iNumLayer)
+    END IF
+    iMod = 1
+    45 CONTINUE
+    IF ((iMod * kProfLayer) < iS) THEN
+        iMod = iMod + 1
+        GOTO 45
+    END IF
+!!!so, this is the Mixed Path Layer with Cloud in it
+    iL = (iMod-1)*kProfLayer + iL
+!!!now see which iaRadLayer this corresponds to
+    iS = 1
+    55 CONTINUE
+    IF ((iaRadLayer(iS) /= iL) .AND. (iS <= iNumLayer)) THEN
+        iS = iS + 1
+        GOTO 55
+    END IF
+
+    iL = iS
+    write(kStdWarn,*) '  Putting bot of abs cloud into iaRadLayer(',iL,')'
+
+    iL = iaRadLayer(1) + iL - 1
+    write(kStdWarn,*) '    which is MP radiating layer ',iL
+
+    write(kStdWarn,*) '  This is for cloud pressure = ',pB
+    write(kStdWarn,*) '  Corresponding AIRS levels are : ',raPLevels(iL), &
+    raPLevels(iL+1)
+
+    iLB = iL
+
+! see if the layers make sense
+    IF (iLB > iLT) THEN
+        write(kStdErr,*) 'oops in FIND_ABS_ASY_EXT iLB > iLT',iLB,iLT
+        CALL DOStop
+    END IF
+
+! see if we need to adjust the individual cloud opt depths
+    IF (iLB /= iLT) THEN
+        write(kStdWarn,*) 'adjusting the cld abs depths for each layer'
+        DO iF = 1,kMaxPts
+            EXTINCT(iF) = EXTINCT(iF)/(iLT-iLB+1)
+            ABSC(iF)    = ABSC(iF)/(iLT-iLB+1)
+            ASYM(iF)    = ASYM(iF)
+        END DO
+    END IF
+
+    RETURN
+    END SUBROUTINE FIND_ABS_ASY_EXT
+
+!************************************************************************
+    SUBROUTINE INTERP_SCAT_TABLE2_modified (WAVENO, DME, &
+    EXTINCT, SSALB, ASYM, &
+    NDME, DMETAB, NWAVE, WAVETAB, &
+    TABEXTINCT, TABSSALB, TABASYM)
+!       Interpolates the scattering properties from the table for
+!     a particular wavenumber and particle size.  Does a bilinear
+!     interpolation, but optimized for fixed particle size and slowly
+!     varying wavenumber.  If the DME is the same as last time then we
+!     can just linearly interpolate in wavenumber between stored
+!     scattering values.  If the DME has changed then we linearly
+!     interpolate between the DMETAB grid lines for each of the two
+!     wavenumber grid lines.
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
+    REAL ::     WAVENO, DME
+    REAL ::     EXTINCT, SSALB, ASYM
+    INTEGER ::  NDME, NWAVE
+    REAL ::     DMETAB(NDME), WAVETAB(NWAVE)
+    REAL ::     TABEXTINCT(NWAVE,NDME), TABSSALB(NWAVE,NDME)
+    REAL ::     TABASYM(NWAVE,NDME)
+    INTEGER ::  IW0, IW1, ID, IL, IU, IM
+    LOGICAL ::  NEWIW
+    REAL ::     FWAV, FDME, FLDME, F
+    REAL ::     OLDDME, EXT0, EXT1, ALB0, ALB1, ASYM0, ASYM1
+! sergio do not save iw0,iw1, olddme
+!      SAVE     IW0, IW1, ID, OLDDME, FDME, FLDME
+!      SAVE     ID, FDME, FLDME
+!      SAVE     EXT0,EXT1, ALB0,ALB1, ASYM0,ASYM1
+    DATA     IW0/1/, IW1/2/
+
+    iw0 = 1
+    iw1 = 2
+    olddme = 0.0
+
+    iw0 = 1
+    iw1 = nwave
+    olddme = -10.0
+          
+!         Check that parameter are in range of table
+    IF (WAVENO < WAVETAB(1) .OR. WAVENO > WAVETAB(NWAVE)) THEN
+        write(kStdErr,*) WAVENO,' outside ',WAVETAB(1),':',WAVETAB(NWAVE)
+        write(kStdErr,*) 'INTERP_SCAT_TABLE: wavenumber out of range ... RESET'
+        IF (WAVENO < WAVETAB(1)) THEN
+            WAVENO = WAVETAB(1)
+        ELSEIF (WAVENO > WAVETAB(NWAVE)) THEN
+            WAVENO = WAVETAB(NWAVE)
+        END IF
+    ! ALL DoStop
+    END IF
+    IF (DME < DMETAB(1) .OR. DME > DMETAB(NDME)) THEN
+        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
+        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
+        IF (DME < DMETAB(1)) THEN
+            DME = DMETAB(1)
+        ELSEIF (DME > DMETAB(NDME)) THEN
+            DME = DMETAB(NDME)
+        END IF
+    ! ALL DoStop
+    END IF
+
+!         See if wavenumber is within last wavenumber grid, otherwise
+!           find the grid location and interpolation factor for WAVENO
+    NEWIW = .FALSE. 
+!      IF (WAVENO .LT. WAVETAB(IW0) .OR. WAVENO .GT. WAVETAB(IW1)) THEN
+    IF (WAVENO >= WAVETAB(IW0) .AND. WAVENO <= WAVETAB(IW1)) THEN
+        IL=1
+        IU=NWAVE
+        DO WHILE (IU-IL > 1)
+            IM = (IU+IL)/2
+            IF (WAVENO >= WAVETAB(IM)) THEN
+                IL = IM
+            ELSE
+                IU = IM
+            ENDIF
+        ENDDO
+        IW0 = MAX(IL,1)
+        IW1 = IW0+1
+        NEWIW = .TRUE. 
+    ENDIF
+
+    IF (DME /= OLDDME) THEN
+    !         Find the grid location and interpolation factor for DME
+        IL=1
+        IU=NDME
+        DO WHILE (IU-IL > 1)
+            IM = (IU+IL)/2
+            IF (DME >= DMETAB(IM)) THEN
+                IL = IM
+            ELSE
+                IU = IM
+            ENDIF
+        ENDDO
+        ID = MAX(IL,1)
+        FDME = (DME-DMETAB(ID))/(DMETAB(ID+1)-DMETAB(ID))
+        FLDME = LOG(DME/DMETAB(ID))/LOG(DMETAB(ID+1)/DMETAB(ID))
+    ENDIF
+
+    IF (DME /= OLDDME .OR. NEWIW) THEN
+    !         If not the same Dme or a new wavenumber grid, then
+    !           linearly interpolate omega and g and log interpolate extinction
+        EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) &
+        + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
+        EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) &
+        + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
+        ALB0 = (1-FDME)*TABSSALB(IW0,ID) + FDME*TABSSALB(IW0,ID+1)
+        ALB1 = (1-FDME)*TABSSALB(IW1,ID) + FDME*TABSSALB(IW1,ID+1)
+        ASYM0 = (1-FDME)*TABASYM(IW0,ID) + FDME*TABASYM(IW0,ID+1)
+        ASYM1 = (1-FDME)*TABASYM(IW1,ID) + FDME*TABASYM(IW1,ID+1)
+    ENDIF
+
+!         Linearly interpolate the scattering properties in wavenumber
+    FWAV    = (WAVENO-WAVETAB(IW0))/(WAVETAB(IW1)-WAVETAB(IW0))
+    F       = 1-FWAV
+    EXTINCT = F*EXT0 + FWAV*EXT1
+    SSALB   = F*ALB0 + FWAV*ALB1
+    ASYM    = F*ASYM0 + FWAV*ASYM1
+
+    OLDDME = DME
+
+    RETURN
+    end SUBROUTINE INTERP_SCAT_TABLE2_modified
+
+!************************************************************************
+! set the vertical temperatures of the atmosphere for TWOSTREAM
+! this sets the temperatures at the pressure level boundaries, using the
+! temperatures of the pressure layers that have been supplied by kLayers
+    SUBROUTINE SetTWOSTRTemp(TEMP,iaRadLayer,raVTemp,iNumLayer, &
+    iDownWard,iProfileLayers,raPressLevels)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
+! these are variables that come in from kcartamain.f
+    REAL :: raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)
+    INTEGER :: iaRadLayer(kProfLayer),iNumLayer,iDownWard,iProfileLayers
+! these are variables that we have to set
+    REAL ::    TEMP(*)
+
+! local variables
+    INTEGER :: iL,iLay,iM,iaRadLayerTemp(kMixFilRows),iOffSet,iJump,iLowest
+    REAL :: Temp1(maxnz)
+    REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
+
+    iLowest = kProfLayer - iProfileLayers + 1
+
+    DO iLay=1,MAXNZ
+        Temp1(iLay) = -10.0
+        Temp(iLay)  = -10.0
+    END DO
+
+    DO iLay = iLowest,kProfLayer
+        pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
+        pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
+    END DO
+
+! now set iaRadLayerTemp the same as  iaRadLayer if downlook instr
+!     set iaRadLayerTemp flipped from iaRadLayer if uplook   instr
+    IF (iDownWard == 1) THEN      !!!!keep everything the same
+        DO iLay = 1,iNumLayer
+            iaRadLayerTemp(iLay) = iaRadLayer(iLay)
+        END DO
+    ELSE            !!!gotta do a bit of reverse logic for uplook instr
+        DO iLay = 1,iNumLayer
+            iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
+        END DO
+    END IF
+
+! see which set of Mixed Paths the current atmosphere occupies eg
+! set 1 = 1..100, set2= 101..200 etc
+! eg if current atmosphere is from MixfilPath 110 to 190, and kProfLayer = 100,
+! then we set iMod as 2      idiv(150,100) = 1  === 2nd set of mixed paths
+! assume each atmosphere has at least 25 layers in it!!!
+    iM = idiv(iaRadLayerTemp(25),kProfLayer)+1
+    DO iLay=1,kProfLayer
+        raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
+    END DO
+
+    DO iLay=1,iNumLayer
+        iL = iaRadLayerTemp(iLay)
+    ! ap this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
+        iL = iL-idiv(iL,kProfLayer)*kProfLayer
+        IF (iL == 0) THEN
+            iL = kProfLayer
+        END IF
+        rP=raPressLevels(iL+1)-10000*delta
+        if (rp < raPressLevels(kProfLayer+1)) then
+            rp = raPressLevels(kProfLayer+1)+10000*delta
+        end if
+        TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
+        raPressLevels,iProfileLayers)
+    END DO
+
+    rP = raPressLevels(iLowest)
+    rP = DISORTsurfPress          !!!from scatterparam.f90
+    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp, &
+    raPressLevels,iProfileLayers)
+
+    IF (iDownWard == 1) THEN
+        DO iLay=1,iNumLayer+1
+            temp(iLay) = temp1(iLay)
+        END DO
+    ELSE
+        DO iLay=1,iNumLayer+1
+            temp(iLay) = temp1((iNumLayer+1)-iLay+1)
+        END DO
+    END IF
+
+    IF (iDownWard == -1) THEN
+    !!!suppose atm is in kCARTA layers 5 -- 100 (96 layers ==> 97 levels)
+    !!!this is same as RTSPEC levels 1 -- 97 ...
+    !!!   so temp(iI) is filled from levels 1 ..97
+    !!!so push it up so that it occupies KLAYERS levels 5 ... 101
+
+    !!!set up the temp1 array
+        DO iLay=1,kProfLayer+1
+            temp1(iLay) = temp(iLay)
+            temp(iLay)  = -10.0
+        END DO
+
+    !!!push up the stuff so it occupies kLAYERS levels 5 .. 80
+        iOffSet = (iaRadLayer(iNumLayer) - 1) - (iM-1)*kProfLayer
+        DO iLay = 1,iNumLayer+1
+            temp(iLay+iOffSet) = temp1(iLay)
+        END DO
+    END IF
+
+    IF (iDownWard == 1) THEN
+    !!!suppose atm is in kCARTA layers 5 -- 79 (75 layers ==> 76 levels)
+    !!!this is same as RTSPEC levels 1 -- 76 ...
+    !!!   so temp(iI) is filled from levels 1 ..76
+    !!!so now push this down so it fills RTSPEC levels 26 .. 101
+    !!!then flip it so it occupies KLAYERS levels 1 ... 76
+    !!!and then push it up so it occupies KLAYERS levels 5 -- 80
+    !!!   (which is same as KLAYERS layers  5-79!!!!)
+
+    !!!set up the temp1 array
+        DO iLay=1,kProfLayer+1
+            temp1(iLay) = temp(iLay)
+            temp(iLay)  = -10.0
+        END DO
+
+    !!!push it down so it occupies RTSPEC levels 26 .. 101
+        iOffSet = kProfLayer-iNumLayer
+        DO iLay=1,iNumLayer+1
+            temp(iLay+iOffSet) = temp1(iLay)
+        END DO
+
+    !!!now flip it so it occupies KLAYERS levels 1 ..76
+        DO iLay = 1,kProfLayer + 1
+            TEMP1(iLay) = TEMP(iLay)
+        END DO
+        DO iLay = 1,kProfLayer + 1
+            TEMP(iLay) = TEMP1((kProfLayer+1)-iLay+1)
+        END DO
+        DO iLay=1,kProfLayer+1
+            temp1(iLay) = temp(iLay)
+            temp(iLay)  = -10.0
+        END DO
+
+    !!!push up the stuff sp it occupies kLAYERS levels 5 .. 80
+        iOffSet = iaRadLayer(1) - 1 - (iM-1)*kProfLayer
+        DO iLay = 1,iNumLayer+1
+            temp(iLay+iOffSet) = temp1(iLay)
+        END DO
+    END IF
+
+    RETURN
+    end SUBROUTINE SetTWOSTRTemp
+
+!************************************************************************
+! this subroutine resets the TEMPerature array that comes out of
+! GetAbsProfileRTSPEC : so that it is same as raVertTemp
+! this is because
+! RTSPEC will want stuff from RTSPEC layerM --> layerN and ignore N+1 to 100
+! so this code is a little bit smart and reset temps so they are ok
+    SUBROUTINE ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
+    iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+
+! output variable
+    REAL :: TEMP(MAXNZ)     !temperature of layers, in kCARTA layering style
+!1 = GND, 100 = TOA
+! input variables
+    REAL :: raVTemp(kMixFilRows),rSurfaceTemp,raPressLevels(kProfLayer+1)
+    INTEGER :: iDownWard,iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
+    INTEGER :: iProfileLayers
+
+    INTEGER :: iii,iaRadLayer(kProfLayer)
+    REAL :: TEMP1(MAXNZ)
+
+    DO iii = 1,iNumLayer
+        iaRadLayer(iii) = iaaRadLayer(iAtm,iii)
+    END DO
+
+    CALL SetTWOSTRTemp(TEMP,iaRadLayer,raVTemp,iNumLayer, &
+    iDownWard,iProfileLayers,raPressLevels)
+
+    RETURN
+    end SUBROUTINE ResetTemp_Twostream
+!************************************************************************
+! this function finds the pressure layer at which rPressStart is within,
+! as well as the fraction of the layer that it occupies
+    REAL FUNCTION FindBottomTemp(rP,raProfileTemp, &
+    raPressLevels,iProfileLayers)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raPressLevels = actual pressure levels that come out of kLAYERS
+! raProfileTemp = actual profile temp
+! rP            = pressure at which we want the temperature
+    real :: rP,raProfileTemp(kProfLayer),raPressLevels(kProfLayer+1)
+    integer :: iProfileLayers
+
+    integer :: iFound,i1,i2,i3,iLowest,iJ
+    real :: rP1,rP2,T1,T2
+    real :: raP(3),raT(3),Y2A(3),rT,raLogP(3)
+    real :: yp1,ypn,work(3)
+    INTEGER :: iLog,iSpline
+
+    iLog = +1       !!!do log(P) for the x-points
+    iLog = -1       !!!do   P    for the x-points
+
+    iSpline = -1    !!!use linear interpolations
+    iSpline = +1    !!!use spline interpolations
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    iLog = +1       !!!do log(P) for the x-points
+    iSpline = -1    !!!use linear interpolations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    rT=0.0
+
+    iLowest = kProfLayer-iProfileLayers+1
+
+    IF (rP >= raPressLevels(iLowest)) THEN
+    ! his is WHOLE of the bottom layer
+        i1=iLowest
+    ELSE IF (rP <= raPressLevels(kProfLayer+1)) THEN
+    ! his is ludicrous
+        write(kStdErr,*) rP,raPressLevels(kProfLayer+1)
+        write(kStdErr,*) 'Pressure of lower boundary is TOO LOW!!!'
+        CALL DoStop
+
+    ELSE
+    ! irst find the AIRS layer within which it lies
+        iFound=-1
+        i1 = iLowest
+        i2 = iLowest+1
+        10 CONTINUE
+        IF ((rP <= raPressLevels(i1)) .AND. (rP > raPressLevels(i2))) THEN
+            iFound=1
+        END IF
+        IF ((iFound < 0) .AND. (i1 < kProfLayer)) THEN
+            i1=i1+1
+            i2=i2+1
+            GO TO 10
+        END IF
+        IF ((iFound < 0)) THEN
+            IF (abs(rP-raPressLevels(kProfLayer+1)) <= delta) THEN
+                i1=kProfLayer
+                iFound=1
+            ELSE
+                write(kStdErr,*) 'could not find pressure ',rP
+                write(kStdErr,*) 'within AIRS pressure levels. Please check'
+                write(kStdErr,*) '*RADNCE and *OUTPUT sections'
+                CALL DoSTOP
+            END IF
+        END IF
+    END IF
+
+    IF ((i1 > kProfLayer) .OR. (i1 < iLowest)) THEN
+        write(kStdErr,*) 'sorry : cannot find surface temp for '
+        write(kStdErr,*) 'layers outside ',iLowest,' and ',kProfLayer
+        write(kStdErr,*) 'Allowed Pressure ranges are from : ', &
+        raPressLevels(iLowest),' to  ',raPressLevels(kProfLayer+1),' mb'
+        write(kStdErr,*) 'Surface Pressure is ',rP,' mb'
+        call DoStop
+    END IF
+              
+! ow find the temperature
+    IF (i1 == iLowest) THEN          !do linear interp
+        i1 = iLowest
+        i2 = iLowest+1
+        i3 = iLowest+2
+        rP1 = (raPressLevels(i2)-raPressLevels(i1))/ &
+        log(raPressLevels(i2)/raPressLevels(i1))
+        rP2 = (raPressLevels(i3)-raPressLevels(i2))/ &
+        log(raPressLevels(i3)/raPressLevels(i2))
+        T1 = raProfileTemp(i1)
+        T2 = raProfileTemp(i2)
+        IF (iLog == -1) THEN
+            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)           !!linear in P
+        ELSE
+            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1)) !!log(P)
+        END IF
+
+    ELSEIF (i1 >= (kProfLayer-1)) THEN          !do linear interp
+        rP1 = (raPressLevels(kProfLayer)-raPressLevels(kProfLayer-1))/ &
+        log(raPressLevels(kProfLayer)/raPressLevels(kProfLayer-1))
+        rP2 = (raPressLevels(kProfLayer+1)-raPressLevels(kProfLayer))/ &
+        log(raPressLevels(kProfLayer+1)/raPressLevels(kProfLayer))
+        T1 = raProfileTemp(kProfLayer-1)
+        T2 = raProfileTemp(kProfLayer)
+        IF (iLog == -1) THEN
+            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)            !!linear in P
+        ELSE
+            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1))  !!log(P)
+        END IF
+    ELSE          !do spline ... note that the pressures have to
+    ! e in ascENDing order for good interpolation
+        rP1 = (raPressLevels(i1)-raPressLevels(i1-1))/ &
+        log(raPressLevels(i1)/raPressLevels(i1-1))
+        raP(3) = rP1
+        rP1 = (raPressLevels(i1+1)-raPressLevels(i1))/ &
+        log(raPressLevels(i1+1)/raPressLevels(i1))
+        raP(2) = rP1
+        rP1 = (raPressLevels(i1+2)-raPressLevels(i1+1))/ &
+        log(raPressLevels(i1+2)/raPressLevels(i1+1))
+        raP(1) = rP1
+        IF (iLog == +1) THEN
+            DO iJ = 1,3
+                raLogP(iJ) = log(raP(iJ))
+            END DO
+        END IF
+
+        raT(3) = raProfileTemp(i1-1)
+        raT(2) = raProfileTemp(i1)
+        raT(1) = raProfileTemp(i1+1)
+
+        yp1=1.0e30
+        ypn=1.0e30
+        IF (iSpline == +1) THEN
+            IF (iLog == +1) THEN
+                CALL rspl1(raLogP,raT,3,log(rP),rT,1)
+            ELSE
+                CALL rspl1(raP,raT,3,rP,rT,1)
+            END IF
+        ELSEIF (iSpline == -1) THEN
+            IF (iLog == +1) THEN
+                CALL rlinear1(raP,raT,3,rP,rT,1)
+            ELSE
+                CALL rlinear1(raLogP,raT,3,log(rP),rT,1)
+            END IF
+        END IF
+    END IF
+
+    FindBottomTemp = rT
+
+    RETURN
+    end FUNCTION FindBottomTemp
+
+!************************************************************************
+! if param kSurfTemp = +1, this computes surface temp by interpolating across
+! pressure layers, and adds on offet given by rTSurf (which is the usual
+! parameter normally used for surface temp in *RADNCE)
+! else if kSurfTemp = -1, it just returns the user specified temperature
+    REAL FUNCTION FindSurfaceTemp(rPressStart,rPressStop, &
+    rTSurf,raProfileTemp, &
+    raPresslevels,iProfileLayers)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+    REAL :: rPressStart,rPressStop,rTSurf,raProfileTemp(kProfLayer)
+    REAL :: raPressLevels(kProfLayer+1)
+    INTEGER :: iProfileLayers
+
+! local variables
+    REAL :: rT
+    INTEGER :: iI
+
+    rT = rTSurf   !! this is the temp set in nm_radnce; logic below determines if it is offset or actual stemp
+          
+! this ORIGINAL code, allowed user to add in an offset
+    IF ((kSurfTemp > 0) .AND. ((kRTP == -1) .OR. (kRTP == 0))) THEN
+    ! ave to adjust temperature .. do this for down AND up look instr
+        IF (rPressStart > rPressStop) THEN  ! for down looking instr
+            rT = FindBottomTemp(rPressStart,raProfileTemp, &
+            raPressLevels,iProfileLayers)
+            rT = rT+rTSurf
+        ELSEIF (rPressStart < rPressStop) THEN  ! for up looking instr
+            rT = FindBottomTemp(rPressStop,raProfileTemp, &
+            raPressLevels,iProfileLayers)
+            rT = rT+rTSurf
+        END IF
+    END IF
+!      ELSEIF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))) THEN
+!        !just state this has already been taken care of in subr radnce4
+!       write(kStdWarn,*) 'kSurfTemp > 0 and kRTP = -5 or -6'
+!       write(kStdWarn,*) 'so we already added in raTSurf offset to stemp from TAPE5/6'
+!        rT = rT
+!        END IF
+!      END IF
+
+! this was the code in Dec 2016, get rid of it
+! this was the code in Dec 2016, get rid of it
+! this was the code in Dec 2016, get rid of it
+! why make life complicated, just directly give USER defined STEMP
+!      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .GE. -6) .AND. (kRTP .LE. 0))) THEN
+!        rT = rTSurf
+!      END IF
+! replace with this why make life complicated, just directly give USER defined STEMP
+    IF ((kSurfTemp > 0) .AND. ((kRTP >= -6) .AND. (kRTP <= -5))) THEN
+        rT = rTSurf
+    END IF
+
+    FindSurfaceTemp = rT
+            
+    IF (rT < 190.0) THEN
+        write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
+        write(kStdErr,*)'brrrrrrrrrrrrrrrrrrrrrrrrrr!!!!!!!'
+        write(kStdErr,*)'kCARTA allows surface temps between 190 and 350K'
+        CALL DoSTOP
+    END IF
+
+    IF (rT > 350.0) THEN
+        write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
+        write(kStdErr,*)'whew!!!!! bloody hot!!!!!!!'
+        write(kStdErr,*)'kCARTA allows temps between 210 and 350K'
+        CALL DoSTOP
+    END IF
+            
+    RETURN
+    end FUNCTION FindSurfaceTemp
 
 !************************************************************************
 

@@ -5,7 +5,7 @@
 MODULE n_output
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE s_misc
 USE freqfile
 
@@ -881,7 +881,7 @@ CONTAINS
     INTEGER :: iOutTypes,iNpmix,iListType,iList,iPrinter,iNp,iNumGases
 
     CHARACTER(7) :: caWord
-    INTEGER :: iNumLinesRead,iFloor
+    INTEGER :: iNumLinesRead
 
     caWord='*OUTPUT'
 
@@ -898,7 +898,7 @@ CONTAINS
         write(kStdErr,*)'make sure *WEIGHT is set before *OUTPUT'
         CALL DoSTOP
     END IF
-    iMPSets=iFloor(iNpmix*1.0/(kProfLayer))
+    iMPSets = iFloor(iNpmix*1.0/(kProfLayer))
 
     IF (iGS == 0) THEN
         write(kStdErr,*)'Cannot output spectra for mixed path set # 0 !'
@@ -950,7 +950,7 @@ CONTAINS
     INTEGER :: iNumgases,iaGasID(kMaxGas)
 
     CHARACTER(7) :: caWord
-    INTEGER :: iNumLinesRead,iI,DoOutputLayer
+    INTEGER :: iNumLinesRead,iI
 
     caWord='*OUTPUT'
 
@@ -1400,7 +1400,7 @@ CONTAINS
 
     INTEGER :: iaOp1(kPathsOut),iaOp2(kPathsOut),i1,i2,iSum
 
-    INTEGER :: iI,iaRes(kPathsOut),DoOutputLayer,iOK
+    INTEGER :: iI,iaRes(kPathsOut),iOK
 
 ! irst put in elements of iaOp1 into iaRes
     DO iI=1,i1
@@ -1591,7 +1591,7 @@ CONTAINS
 !         iW == iFloor((iaaRadLayer(iAtm,1)*1.0)/(kProfLayer*1.0))+1
 !            == iFloor(100.0/100.0)+1=2  instead of 1
 
-    iW=iFloor((iaaRadLayer(iAtm,2)*1.0)/(kProfLayer*1.0))+1
+    iW = iFloor((iaaRadLayer(iAtm,2)*1.0)/(kProfLayer*1.0))+1
     iOffSet=(iW-1)*kProfLayer
           
 ! set which radiating pressure layer atmosphere starts at, to compare to iI

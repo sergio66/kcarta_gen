@@ -9,41 +9,238 @@ IMPLICIT NONE
 CONTAINS
 
 !************************************************************************
-! funtion to estimate height (in m), given pressure (in mb)
-!  based on US STD atm
-    REAL FUNCTION p2h(p)
+! this integer function is "floor" -- assume rX > 0
+    INTEGER FUNCTION iFloor(rX)
+     
+    IMPLICIT NONE
+
+    REAL :: rX
+     
+    INTEGER :: iI,iIm1,iIp1,iIm2,iIp2,iF
+           
+    iF=nint(rX)
+
+    iI=nint(rX)
+    iIm1=iI-1
+    iIm2=iI-2
+    iIp1=iI+1
+    iIp2=iI+2
+     
+    IF (rX >= iIm2*1.0) THEN
+        iF=iIm2
+    END IF
+    IF (rX >= iIm1*1.0) THEN
+        iF=iIm1
+    END IF
+    IF (rX >= iI*1.0) THEN
+        iF=iI
+    END IF
+    IF (rX >= iIp1*1.0) THEN
+        iF=iIp1
+    END IF
+    IF (rX >= iIp2*1.0) THEN
+        iF=iIp2
+    END IF
+     
+    iFloor = iF
+
+    RETURN
+    end FUNCTION iFloor
+!************************************************************************
+! this integer function is "ceil" -- assume rX > 0
+    INTEGER FUNCTION iCeil(rX)
+     
+    IMPLICIT NONE
+
+    REAL :: rX
+     
+    INTEGER :: iI,iIm1,iIp1,iIm2,iIp2,iC
+           
+    iC=nint(rX)
+
+    iI=nint(rX)
+    iIm1=iI-1
+    iIm2=iI-2
+    iIp1=iI+1
+    iIp2=iI+2
+     
+    IF (rX <= iIp2*1.0) THEN
+        iC=iIp2
+    END IF
+    IF (rX <= iIp1*1.0) THEN
+        iC=iIp1
+    END IF
+    IF (rX <= iI*1.0) THEN
+        iC=iI
+    END IF
+    IF (rX <= iIm1*1.0) THEN
+        iC=iIm1
+    END IF
+    IF (rX <= iIm2*1.0) THEN
+        iC=iIm2
+    END IF
+
+    iCeil = iC
+     
+    RETURN
+    end FUNCTION iCeil
+
+!************************************************************************
+! this function does a temperature interpolation on a fractional layer
+! this uses modified Scott Hannon's method of doing a quad fit to the layer,
+! layer above, layer below  of the form
+!     T = a (ln P(avg))^2 + b (ln P(avg)) + c
+    REAL FUNCTION InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac, &
+    iTopORBot,iL)
 
     IMPLICIT NONE
 
     include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airsheightsparam.f90'
-    include '../INCLUDE/airslevelsparam.f90'
 
-    INTEGER :: iI
-    REAL :: pavg,rH,raY2P(kMaxLayer),p,logpavg(kMaxLayer),raHgt(kMaxLayer)
-         
-    DO iI = 1,100
-        pavg = (DATABASELEV(iI+1)-DATABASELEV(iI))/log(DATABASELEV(iI+1)/DATABASELEV(iI))
-        logpavg(kMaxLayer-iI+1) = log(pavg)      !! need this to be smallest to largest
-        raHgt(kMaxLayer-iI+1)   = DatabaseHEIGHT(iI)
-    END DO
+! raVTemp  = array containing the original 1.0 fraction temps
+! rFrac    = frac of layer that we need
+! iTopORBot= do we need top or bottom of layer (+1/-1)
+! iL       = which of the mixed paths
 
-!      print *,(logpavg(iI),iI=1,kMaxLayer)
-!      print *,(raHgt(iI),iI=1,kMaxLayer)
+! for a down looking instrument, we need bottom frac
+! for a   up looking instrument, we need top frac
+! for bottommost layer, we need top frac
+    REAL :: raPressLevels(kProfLayer+1)
+    REAL :: raVTemp(kMixFilRows),rFrac
+    INTEGER :: iTopORBot,iL,iProfileLayers
 
-    IF (p >= DATABASELEV(1)) THEN
-        rH = DatabaseHEIGHT(1)
-    ELSEIF (p <= DATABASELEV(kMaxLayer+1)) THEN
-        rH = DatabaseHEIGHT(kMaxLayer)
-    ELSE
-        CALL rlinear1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
-        CALL rspl1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+    REAL :: rT,rP         !user spedfd pressure, temp calculated at this press
+    REAL :: rPavg         !given rP,rP1, need to compute rPavg
+    REAL :: rT0,rTm1,rTp1 !avg temps of 3 adjacent layers
+    REAL :: rP0,rPm1,rPp1 !avg pressures of 3 adjacent layers
+    REAL :: rA,rB,rC      !need to find eqn of quadratic
+    REAL :: rDp1,rDm1,rp1,rp1sqr,rm1,rm1sqr  !temporary variables
+    INTEGER :: i0,im1,ip1,iW
+    INTEGER :: iLowest
+
+    iLowest = kProfLayer - iProfileLayers + 1
+
+    IF (abs(rFrac-1.00) <= delta) THEN
+        rT = raVTemp(iL)       !use the original temp .. no need to intrp
+    ! thse next three lines are to debug the function, for iTopBot = +1
+        rP = raPressLevels(MP2Lay(iL))
+        rPp1 = raPressLevels(MP2Lay(iL)+1)
+        rPavg=(rP-rPp1)/alog(rP/rPp1)
+
+    ELSE   !oh boy .. have to interp!!!!!!!!
+
+        iW = iCeil(iL*1.0/(kProfLayer*1.0))    !which set of mxd paths this is
+        i0 = MP2Lay(iL) !lower pressure level .. rP is within this press layer
+        ip1 = i0+1      !upper pressure leve1 .. this is one press layer above
+        im1 = i0-1      !                     .. this is one press layer below
+
+    ! have to recompute what the user specified pressure was!!
+        IF (iTopORBot == 1) THEN          !top frac of layer
+        ! ressure specified by user
+            rP = raPressLevels(ip1)+rFrac*(raPressLevels(i0)-raPressLevels(ip1))
+        ELSE                                !bot frac of layer
+        ! ressure specified by user
+            rP = -rFrac*(raPressLevels(i0)-raPressLevels(ip1))+raPressLevels(i0)
+        END IF
+
+    ! compute the average pressure of the fractional layer
+        IF (iTopOrBot == 1) THEN
+            IF (abs(rP-raPressLevels(ip1)) >= delta) THEN
+                rPavg = (rP-raPressLevels(ip1))/alog(rP/raPressLevels(ip1))
+            ELSE
+                rPavg = rP
+            END IF
+        ELSE
+            IF (abs(rP-raPressLevels(i0)) >= delta) THEN
+                rPavg = (raPressLevels(i0)-rP)/alog(raPressLevels(i0)/rP)
+            ELSE
+                rPavg = rP
+            END IF
+        END IF
+
+        IF ((i0 <= (kProfLayer-1)) .AND. (i0 >= (iLowest+1)))  THEN
+        ! can safely look at layer i0, and layer above/below it
+        ! avg press of layer i0+1
+            rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/ &
+            alog(raPressLevels(ip1)/raPressLevels(ip1+1))
+        ! avg press of layer i0
+            rP0 = (raPressLevels(i0)-raPressLevels(ip1))/ &
+            alog(raPressLevels(i0)/raPressLevels(ip1))
+        ! avg press of layer i0-1
+            rPm1 = (raPressLevels(im1)-raPressLevels(i0))/ &
+            alog(raPressLevels(im1)/raPressLevels(i0))
+        ! temperatures of these levels from raVTemp
+            rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
+            rT0 = raVTemp(i0+(iW-1)*kProfLayer)
+            rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
+        ELSE IF (i0 == kProfLayer) THEN
+        ! first redefine i0,ip1,im1
+            i0 = kProfLayer-1
+            ip1 = i0+1    !upper pressure leve1 .. this is one press layer above
+            im1 = i0-1    !                     .. this is one press layer below
+        ! can now safely look at layer i0, and layer above/below it
+        ! avg press of layer i0+1
+            rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/ &
+            alog(raPressLevels(ip1)/raPressLevels(ip1+1))
+        ! avg press of layer i0
+            rP0 = (raPressLevels(i0)-raPressLevels(ip1))/ &
+            alog(raPressLevels(i0)/raPressLevels(ip1))
+        ! avg press of layer i0-1
+            rPm1 = (raPressLevels(im1)-raPressLevels(i0))/ &
+            alog(raPressLevels(im1)/raPressLevels(i0))
+        ! temperatures of these levels from raVTemp
+            rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
+            rT0 = raVTemp(i0+(iW-1)*kProfLayer)
+            rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
+                    
+        ELSE IF (i0 == iLowest) THEN
+        ! first redefine i0,ip1,im1
+            i0 = iLowest+1
+            ip1 = i0+1    !upper pressure leve1 .. this is one press layer above
+            im1 = i0-1    !                     .. this is one press layer below
+        ! can now safely look at layer i0, and layer above/below it
+        ! avg press of layer i0+1
+            rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/ &
+            alog(raPressLevels(ip1)/raPressLevels(ip1+1))
+        ! avg press of layer i0
+            rP0 = (raPressLevels(i0)-raPressLevels(ip1))/ &
+            alog(raPressLevels(i0)/raPressLevels(ip1))
+        ! avg press of layer i0-1
+            rPm1 = (raPressLevels(im1)-raPressLevels(i0))/ &
+            alog(raPressLevels(im1)/raPressLevels(i0))
+        ! temperatures of these levels from raVTemp
+            rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
+            rT0 = raVTemp(i0+(iW-1)*kProfLayer)
+            rTm1 = raVTemp(im1+(iW-1)*kProfLayer)
+        END IF
+              
+    ! now compute the fit for rT(n)=ax(n)^2 + bx(n) + c where x(n)=alog(P(n))
+        rP0  = alog(rP0)
+        rPp1 = alog(rPp1)
+        rPm1 = alog(rPm1)
+    !        print *,rpp1,rp0,rPm1
+    !      print *,rTp1,rT0,rTm1
+              
+        rDp1 = rTp1-rT0
+        rDm1 = rTm1-rT0
+
+        rp1    = rPp1-rP0
+        rp1sqr = (rPp1-rP0)*(rPp1+rP0)
+        rm1    = rPm1-rP0
+        rm1sqr = (rPm1-rP0)*(rPm1+rP0)
+
+        rA = (rDm1-rDp1*rm1/rp1)/(rm1sqr-rp1sqr*rm1/rp1)
+        rB = rDp1/rp1-rA*(rp1sqr/rp1)
+        rC = rT0-rA*rP0*rP0-rB*rP0
+
+    ! finally compute rT
+        rT = rA*alog(rPavg)*alog(rPavg)+rB*alog(rPavg)+rC
     END IF
 
-    p2h = rH
+    InterpTemp = rT
 
     RETURN
-    end FUNCTION p2h
+    end FUNCTION InterpTemp
 
 !************************************************************************
 ! this subroutine closes all files in case of an emergency stop
