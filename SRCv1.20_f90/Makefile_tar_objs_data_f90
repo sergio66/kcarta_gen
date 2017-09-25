@@ -30,7 +30,7 @@ KCWRAP   = /asl/packages/kcwrap.tar
 KFTP     = /asl/packages/kcarta
 KTARAUX  = /asl/packages/kcarta/kcarta_aux.tar 
 
-PARAMS = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data Makefile_intel_hdf_rtp
+PARAMS     = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data Makefile_intel_hdf_rtp
 
 PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data Makefile_intel_hdf_rtp
 
@@ -44,8 +44,9 @@ OBS_BASIC_COMMON = basic_common.o spline_and_sort_and_common.o  freqfile.o s_mis
 OBJSRTP        = rtp_interface_f90.o
 
 OBJSSTRING     = kcoeff_common.o         clear_scatter_basic.o   n_nonlte_common.o   n_mr_common.o \
-                   n_gas_wt_spectra.o    n_pth_mix.o             n_rad_jac_scat.o    n_output.o \
-                 n_layers.o              n_layers_lblrtm.o       n_misc.o            n_main.o
+                 n_gas_wt_spectra.o      n_pth_mix.o             n_rad_jac_scat.o    n_output.o \
+                 n_layers.o              n_layers_lblrtm.o       n_misc.o            n_rtp.o    \
+		 n_duplicate_sky.o       n_main.o\
  
 OBS_LTE_OPTDPH  = kcoeffSPL.o               kcoeffSPLJAC.o        kcoeff_FAST_details.o \
                   kcoeff_FAST_details2.o    kcoeff_FAST.o             kcont_xsec.o           kcoeffMAIN.o
@@ -64,7 +65,8 @@ MOBJSRTP        = rtp_interface_f90.mod
 
 MOBJSSTRING     = kcoeff_common.mod       clear_scatter_basic.mod  n_nonlte_common.mod      n_mr_common.mod \
                   n_gas_wt_spectra.mod    n_pth_mix.mod            n_rad_jac_scat.mod       n_output.mod \
-                  n_layers.mod            n_layers_lblrtm.mod      n_misc.mod               n_main.mod
+                  n_layers.mod            n_layers_lblrtm.mod      n_misc.mod               n_rtp.mod    \
+		  n_duplicate_sky.mod     n_main.mod
  
 MOBS_LTE_OPTDPH  = kcoeffSPL.mod         kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
                    kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
@@ -461,6 +463,9 @@ s_misc.mod s_misc.o : s_misc.f90 $(PARAMS)
 n_misc.mod n_misc.o : n_misc.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_misc.f90
 
+n_duplicate_sky.mod n_duplicate_sky.o : n_duplicate_sky.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_duplicate_sky.f90
+
 n_main.mod n_main.o : n_main.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_main.f90
 
@@ -490,6 +495,9 @@ n_rad_jac_scat.mod n_rad_jac_scat.o : n_rad_jac_scat.f90 $(PARAMS)
 
 n_output.mod n_output.o : n_output.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_output.f90
+
+n_rtp.mod n_rtp.o : n_rtp.f90 $(PARAMS_RTP) $(RTPDEFS_FILE)
+	$(FORTRANX) -c $(RTPINC) $(FLAGS) $(UFLAG) n_rtp.f90
 
 rtp_interface_f90.mod rtp_interface_f90.o : rtp_interface_f90.f90 $(PARAMS_RTP) $(RTPDEFS_FILE)
 	$(FORTRANX) -c $(RTPINC) $(FLAGS) $(UFLAG) rtp_interface_f90.f90

@@ -5,7 +5,7 @@
 MODULE rad_diff
 
 USE basic_common
-USE spline_and_sort
+USE spline_and_sort_and_common
 USE rad_quad
 USE rad_misc
 USE rad_angles
@@ -196,7 +196,7 @@ CONTAINS
 ! to do the angular integration
     REAL :: rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
     REAL :: raL2G(kMaxPts),raL2Gm1(kMaxPts)
-    REAL :: FindDiffusiveAngleExp,rDiff,rCosDiff,rW
+    REAL :: rDiff,rCosDiff,rW
     REAL :: raAvgAnglePerLayer(kMaxLayer),raMeanOD(kMaxLayer)
     INTEGER :: iS,iE,iM,iBdryP1_O
 
@@ -480,7 +480,7 @@ CONTAINS
 ! to do the angular integration
     REAL :: rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
     REAL :: raL2G(kMaxPts),raL2Gm1(kMaxPts)
-    REAL :: FindDiffusiveAngleExp,rDiff,raCosDiff(kMaxPts),rW
+    REAL :: rDiff,raCosDiff(kMaxPts),rW
     INTEGER :: iS,iE,iM,iBdryP1_O
 
     iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f

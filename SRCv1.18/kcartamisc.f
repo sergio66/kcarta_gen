@@ -3070,6 +3070,7 @@ c rP            = pressure at which we want the temperature
         ELSE 
           rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1))  !!log(P)
         END IF
+	
       ELSE          !do spline ... note that the pressures have to 
                     !be in ascENDing order for good interpolation
         rP1 = (raPressLevels(i1)-raPressLevels(i1-1))/

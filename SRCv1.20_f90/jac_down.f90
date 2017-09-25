@@ -30,6 +30,7 @@ USE basic_common
 USE s_writefile
 USE freqfile
 USE kcoeff_common
+USE rad_diff_and_quad
 
 IMPLICIT NONE
 
@@ -799,7 +800,7 @@ CONTAINS
     INTEGER :: iFr,iJ,iLay,iL,iLyr,iaRadLayer(kProfLayer)
     REAL :: raTemp(kMaxPtsJac),rTh
 
-    INTEGER :: FindBoundary,iB
+    INTEGER :: iB
 
     DO iL = 1,iNumLayer
         iaRadLayer(iL) = iaaRadLayer(iAtm,iL)
@@ -1425,6 +1426,166 @@ CONTAINS
      
     RETURN
     end SUBROUTINE wgtfcndown
+
+!************************************************************************
+
+! this subroutine does d/dr(tau_layer2gnd) for gas iG
+! where r == gas amount q or temperature T at layer iM
+! and  iL is the relevant layer we want tau_layer2space differentiated
+! HENCE IF iL < iM, derivative == 0
+! i.e. this does d(tau(l--> 0)/dr_m
+    SUBROUTINE JacobTermGnd(iL,iM,raaLay2Gnd,raTemp)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raaLay2Gnd is the transmission frm layer to ground at diffusion angle
+! iM has the layer that we differentiate wrt to
+! iL has the radiating layer number (1..kProfLayerJac)
+! raTemp has the results, apart from the multiplicative constants
+!   which are corrected in MinusOne
+    INTEGER :: iL,iM
+    REAL :: raTemp(kMaxPtsJac),raaLay2Gnd(kMaxPtsJac,kProfLayerJac)
+
+! local variables
+    INTEGER :: iFr
+
+    IF (iL < iM) THEN
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = 0.0
+        END DO
+    ELSE
+        DO iFr = 1,kMaxPts
+            raTemp(iFr) = raaLay2Gnd(iFr,iL)
+        END DO
+    END IF
+
+    RETURN
+    end SUBROUTINE JacobTermGnd
+
+!************************************************************************
+!************************************************************************
+!************ THESE HAVE TO DO WITH THE SURFACE PARAMETERS **************
+!************************************************************************
+! this subroutine does Jacobian wrt Surface Temperature
+    SUBROUTINE JacobSurfaceTemp(raFreq,iM, &
+    rTSurface,raUseEmissivity,raaLay2Sp,raResults)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raaLay2Sp   is the layer-to-space abs coeff matrix
+! raFreq has the frequencies
+! raResults has the results
+! iM are the layer <-> mixed path associations
+    INTEGER :: iM
+    REAL :: rTSurface,raUseEmissivity(kMaxPts)
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac)
+    REAL :: raResults(kMaxPtsJac),raFreq(kMaxPts)
+
+! local variables
+    REAL :: r1,r2,r3,r4,r5,rad,dradDT
+    INTEGER :: iFr
+
+!! need these for derivatives of Planck
+    r1 = sngl(kPlanck1)
+    r2 = sngl(kPlanck2)
+
+    DO iFr = 1,kMaxPts
+        r3 = r1 * (raFreq(iFr)**3)
+        r4 = r2 * raFreq(iFr)/rTSurface
+        r5 = exp(r4)
+        rad = r3/(r5-1.0)
+        dRadDT = rad * r4 * r5/(r5-1.0)/rTSurface
+        raResults(iFr) = dRadDT*raUseEmissivity(iFr) * raaLay2Sp(iFr,iM)
+    END DO
+
+    RETURN
+    end SUBROUTINE JacobSurfaceTemp
+
+!************************************************************************
+! this subroutine does Jacobian wrt Surface Emissivity
+    SUBROUTINE JacobSurfaceEmis(iM,raSurface,raThermal,raaLay2Sp, &
+    raResults)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raSurface is the surface emission
+! raaLay2Sp   is the layer-to-space abs coeff matrix
+! raResults has the results
+! raThermal has the downwelling thermal contribs
+! iM,rSatAngle are the layer <-> mixed path associations and satellite angle
+    INTEGER :: iM
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac),raSurface(kMaxPts)
+    REAL :: raResults(kMaxPtsJac),raThermal(kMaxPts)
+
+! local variables
+    INTEGER :: iFr
+
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = raaLay2Sp(iFr,iM) * &
+        (raSurface(iFr)-raThermal(iFr)/kPi)
+    END DO
+
+    RETURN
+    end SUBROUTINE JacobSurfaceEmis
+
+!************************************************************************
+! this subroutine does Jacobian of Backgnd Thermal wrt Surface Emissivity
+    SUBROUTINE JacobBackgndThermal(iM,raaLay2Sp,raThermal,raResults)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raaLay2Sp is the layer-to-space abscoeff matrix
+! raResults has the results
+! iM,rSatAngle are the layer <-> mixed path associations and satellite angle
+    INTEGER :: iM
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac)
+    REAL :: raResults(kMaxPtsJac),raThermal(kMaxPts)
+
+! local variables
+    INTEGER :: iFr
+
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = -raaLay2Sp(iFr,iM)/kPi*raThermal(iFr)
+    END DO
+
+    RETURN
+    end SUBROUTINE JacobBackgndThermal
+
+!************************************************************************
+! this subroutine does Jacobian of Solar wrt Sun Surface Emissivit
+    SUBROUTINE JacobSolar(iM,raaLay2Sp,raSun,raResults)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raaLay2Sp is the layer-to-space abscoeff matrix
+! raResults has the results
+! raSun,raThermal has the downwelling solar,thermal contribs
+! iM,rSatAngle are the layer <-> mixed path associations and satellite angle
+    INTEGER :: iM
+    REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac),raResults(kMaxPtsJac), &
+    raSun(kMaxPts)
+
+! local variables
+    INTEGER :: iFr
+
+! remember that raSun is that at the bottom of the atmosphere ==> have to
+! propagate to top of atmosphere
+    DO iFr = 1,kMaxPts
+        raResults(iFr) = raSun(iFr) * raaLay2Sp(iFr,iM)
+    END DO
+
+    RETURN
+    end SUBROUTINE JacobSolar
 
 !************************************************************************
 END MODULE jac_down

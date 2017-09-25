@@ -5,8 +5,6 @@
 ! this file has main driver for reading in user file
 ! this file also has the namelist writer subroutine
 
-! also has the MatchKeyWord routines
-
 MODULE n_main
 
 USE basic_common
@@ -19,6 +17,8 @@ USE n_pth_mix
 USE n_output
 USE n_layers_lblrtm
 USE n_misc
+USE n_duplicate_sky
+USE n_rtp
 
 IMPLICIT NONE
 
@@ -2089,6 +2089,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE DoCheckEntry3
-      
-!************************************************************************
+
+!************************************************************************      
 END MODULE n_main
