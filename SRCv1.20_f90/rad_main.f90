@@ -9,11 +9,15 @@ USE spline_and_sort_and_common
 use rad_diff_and_quad
 use rad_misc
 use rad_flux
+use rad_common
 !use rad_limb
 use rad_angles
 use s_misc
 !use knonlte
 !use kbloat
+use jac_main
+use jac_up
+use jac_down
 
 IMPLICIT NONE
 
@@ -253,9 +257,9 @@ CONTAINS
         CALL PrintPound
     END IF
 
-! f the radiance computations were successfully done, then do not need
-! o check the wavenumber spacing (using iTag), as all solar data has
-! lready been read in
+! if the radiance computations were successfully done, then do not need
+! to check the wavenumber spacing (using iTag), as all solar data has
+! already been read in
     IF (kJacobian > 0 .AND. kActualJacs < 100) THEN
         write(kStdWarn,*) ' ---> Doing Jacobian Computations ...'
     !        DO iL = 1,kProfLayer

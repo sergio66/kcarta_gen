@@ -38,6 +38,63 @@ CONTAINS
 !************************************************************************
 !**************************** GENERIC ROUTINES **************************
 !************************************************************************
+! cumulatively, using contributions from each gas, find d/dT jacobian
+! for each layer
+    SUBROUTINE cumulativeDT(daaDT,raaAllDT,raaMix,iG,iNatm, &
+    iaaRadLayer)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! daaDT has the current gas d/dT coeffs for current freq block
+! raaAllDT has the cumulative d/dT coeffs for current freq block
+! iNatm is the number of atmospheres to do radiance calcs for
+! iG is the current gas
+! raaMix is the mixing table
+    DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
+    INTEGER :: iG,iNatm,iaaRadLayer(kMaxAtm,kProfLayer)
+    REAL :: raaMix(kMixFilRows,kGasStore)
+
+    INTEGER :: iL,iFr
+    REAL :: rW
+
+    IF (iNatm > 1) THEN
+    ! cannot correctly weight the d/dT, so just use unit weight here and then try
+    ! an average weight when JacobTemp is actually called
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+        (abs(kLongOrShort) <= 1)) THEN
+            write(kStdWarn,*)'Gas iG, weight rW = ',iG,1.0
+        END IF
+
+        DO iL = 1,kProfLayerJac
+            DO iFr = 1,kMaxPtsJac
+                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + daaDT(iFr,iL)
+            END DO
+        END DO
+    ELSE IF (iNatm == 1) THEN
+    ! have only one atmosphere and so correctly weight this gas's contribution to
+    ! d/dT matrix ... then use weight of 1.0 when calling JacobTemp
+        iL = iaaRadLayer(1,2)  !for atm#1, find which is the second mixed path
+    ! s the first,last could have fractional weights
+        rW = raaMix(iL,iG)   !find the gas weight in the second radiating layer
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+        (abs(kLongOrShort) <= 1)) THEN
+            write(kStdWarn,*)'jacobian d/dT Gas iG, weight rW = ',iG,rW
+        END IF
+        DO iL = 1,kProfLayerJac
+            DO iFr = 1,kMaxPtsJac
+                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + rW*daaDT(iFr,iL)
+            END DO
+        END DO
+    END IF
+       
+    RETURN
+    end SUBROUTINE cumulativeDT
+
+!************************************************************************
+
 ! this is the main driver subroutine for clear sky Jacobians
 ! for the current frequency block, this subroutine calculates ALL the
 ! jacobians and then outputs them
@@ -153,62 +210,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE find_jacobians
-
-!************************************************************************
-! cumulatively, using contributions from each gas, find d/dT jacobian
-! for each layer
-    SUBROUTINE cumulativeDT(daaDT,raaAllDT,raaMix,iG,iNatm, &
-    iaaRadLayer)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! daaDT has the current gas d/dT coeffs for current freq block
-! raaAllDT has the cumulative d/dT coeffs for current freq block
-! iNatm is the number of atmospheres to do radiance calcs for
-! iG is the current gas
-! raaMix is the mixing table
-    DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
-    REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
-    INTEGER :: iG,iNatm,iaaRadLayer(kMaxAtm,kProfLayer)
-    REAL :: raaMix(kMixFilRows,kGasStore)
-
-    INTEGER :: iL,iFr
-    REAL :: rW
-
-    IF (iNatm > 1) THEN
-    ! cannot correctly weight the d/dT, so just use unit weight here and then try
-    ! an average weight when JacobTemp is actually called
-        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-        (abs(kLongOrShort) <= 1)) THEN
-            write(kStdWarn,*)'Gas iG, weight rW = ',iG,1.0
-        END IF
-
-        DO iL = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + daaDT(iFr,iL)
-            END DO
-        END DO
-    ELSE IF (iNatm == 1) THEN
-    ! have only one atmosphere and so correctly weight this gas's contribution to
-    ! d/dT matrix ... then use weight of 1.0 when calling JacobTemp
-        iL = iaaRadLayer(1,2)  !for atm#1, find which is the second mixed path
-    ! s the first,last could have fractional weights
-        rW = raaMix(iL,iG)   !find the gas weight in the second radiating layer
-        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-        (abs(kLongOrShort) <= 1)) THEN
-            write(kStdWarn,*)'jacobian d/dT Gas iG, weight rW = ',iG,rW
-        END IF
-        DO iL = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + rW*daaDT(iFr,iL)
-            END DO
-        END DO
-    END IF
-       
-    RETURN
-    end SUBROUTINE cumulativeDT
 
 !************************************************************************
 END MODULE jac_main

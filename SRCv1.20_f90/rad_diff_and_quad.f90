@@ -17,6 +17,7 @@ CONTAINS
 !******** This file has the backgnd thermal routines ********************
 !**************    DIFFUSIVITY APPROX  **********************************
 !************************************************************************
+
 ! this subroutine computes the backgnd thermal contribution
 ! FOR BACKGND THERMAL CONTR, ALWAYS START FROM TOP OF ATMOSPHERE (100 km),
 ! even if eg down looking aircraft is flying at 20 km

@@ -51,7 +51,7 @@ HDFLIB = $(HDFLIB1) $(HDFLIB2)
 #
 ### rtpV201 on compiled with ifort
 RTPHOME = /home/sergio/git/rtp/rtpV201
-RTPLIB = -L$(RTPHOME)/lib -lrtp
+RTPLIB = -L$(RTPHOME)/lib -lrtp90
 #
 
 # ---------------

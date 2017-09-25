@@ -81,16 +81,21 @@ MOBJSMAIN_PARALLEL = kcartamisc.mod kcartaparallel.mod
 
 #######################################################################
 
-OBSRAD       = rad_angles.o rad_misc.o rad_diff_and_quad.o rad_flux.o rad_main.o 
+OBSRAD       = rad_angles.o rad_misc.o rad_diff_and_quad.o rad_common.o rad_flux.o rad_main.o 
 
 OBSJAC_CLR   = jac_up.o jac_down.o jac_main.o 
 
 OBSJAC_CLD   = jac_main.o jac_up.o jac_down.o \
                jac_pclsam_up.o jac_pclsam_down.o singlescatter.o
 
-MOBSRAD       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_flux.mod rad_main.mod
+MOBSRADWORKS       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_common.mod rad_flux.mod rad_main.mod
 
-MOBSJAC_CLR   = jac_up.mod jac_down.mod jac_main.mod 
+MOBSRAD       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_common.mod\
+                jac_up.mod jac_down.mod jac_main.mod rad_flux.mod rad_main.mod
+
+MOBSJAC_CLRWORKS   = jac_up.mod jac_down.mod jac_main.mod
+
+MOBSJAC_CLR   = 
 
 MOBSJAC_CLD   = jac_main.mod jac_up.mod jac_down.mod \
                 jac_pclsam_up.mod jac_pclsam_down.mod singlescatter.mod
@@ -197,12 +202,12 @@ YESWORKSMOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
              $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLR) $(MOBS_NLTE_OPTDPH) \
              $(MOBJSMAIN_BASIC)
 
-XMOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
-             $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLR) \
-	     $(MOBJSMAIN_BASIC)
+XMOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
+             $(MOBSJAC_CLR) $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) \
+             $(MOBJSMAIN_BASIC)
 
 MOBJSBASIC = $(YESWORKSMOBJSBASIC)
-!MOBJSBASIC = $(XMOBJSBASIC)
+MOBJSBASIC = $(XMOBJSBASIC)
 
 OBJS_TXT = n_mainTXT.o
 MOBJS_TXT = n_mainTXT.mod
@@ -381,6 +386,9 @@ rad_diff_and_quad.mod rad_diff_and_quad.o : rad_diff_and_quad.f90 $(PARAMS)
 
 rad_flux.mod rad_flux.o : rad_flux.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_flux.f90
+
+rad_common.mod rad_common.o : rad_common.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_common.f90
 
 ###########  SCATTERING RADIATIVE TRANSFER CODE ###########################
 #### many of the routines in here are common to all scattering codes 
