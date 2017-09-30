@@ -48,11 +48,6 @@ OBJSSTRING     = kcoeff_common.o         clear_scatter_basic.o   n_nonlte_common
                  n_layers.o              n_layers_lblrtm.o       n_misc.o            n_rtp.o    \
 		 n_duplicate_sky.o       n_main.o\
  
-OBJSSTRINGTXT   = kcoeff_common.o         clear_scatter_basic.o   n_nonlte_common.o   n_mr_common.o \
-                  n_gas_wt_spectra.o      n_pth_mix.o             n_rad_jac_scat.o    n_output.o \
-                  n_layers.o              n_layers_lblrtm.o       n_misc.o            n_rtp.o    \
-		  n_duplicate_sky.o       n_main.o                #n_mainTXT.o\
- 
 OBS_LTE_OPTDPH  = kcoeffSPL.o               kcoeffSPLJAC.o        kcoeff_FAST_details.o \
                   kcoeff_FAST_details2.o    kcoeff_FAST.o             kcont_xsec.o           kcoeffMAIN.o
 
@@ -72,11 +67,6 @@ MOBJSSTRING     = kcoeff_common.mod       clear_scatter_basic.mod  n_nonlte_comm
                   n_gas_wt_spectra.mod    n_pth_mix.mod            n_rad_jac_scat.mod       n_output.mod \
                   n_layers.mod            n_layers_lblrtm.mod      n_misc.mod               n_rtp.mod    \
 		  n_duplicate_sky.mod     n_main.mod
-
-MOBJSSTRINGTXT   = kcoeff_common.mod         clear_scatter_basic.mod   n_nonlte_common.mod   n_mr_common.mod \
-                   n_gas_wt_spectra.mod      n_pth_mix.mod             n_rad_jac_scat.mod    n_output.mod \
-                   n_layers.mod              n_layers_lblrtm.mod       n_misc.mod            n_rtp.mod\
-                   n_duplicate_sky.mod       n_main.mod                #n_mainTXT.mod\
 
 MOBS_LTE_OPTDPH  = kcoeffSPL.mod         kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
                    kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
@@ -191,12 +181,11 @@ OBJSJPL = $(OBS_BASIC_COMMON) $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDP
           $(OBSRAD) $(OBSSCAT_COMMON) $(OBSJAC_CLD) $(OBJSSTRING) 
 
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
-OBJSBASIC = $(OBS_BASIC_COMMON) $(OBJSMAIN_BASIC) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
-            $(OBSRAD) $(OBSSCAT_COMMON) $(OBSJAC_CLR) $(OBJSSTRING) \
+OBJSBASIC = $(OBS_BASIC_COMMON) $(OBJSSTRING) $(OBS_LTE_OPTDPH) \
+            $(OBSJAC_CLR) $(OBSRAD) $(OBSSCAT_COMMON) $(OBS_NLTE_OPTDPH) $(OBJSMAIN_BASIC) 
 
 ### for TXT clear sky package (bkcartaTXT.x), here we are!!!!!!!!
-OBJSBASICTXT = $(OBS_BASIC_COMMON) $(OBJSMAIN_BASIC) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
-            $(OBSRAD) $(OBSSCAT_COMMON) $(OBSJAC_CLR) $(OBJSSTRINGTXT) \
+OBJSBASICTXT = $(OBJSBASIC)
 
 ### this is for the whole kit and caboodle
 MOBJS = $(MOBS_BASIC_COMMON) $(MSCATTER_ALL) $(MOBJSMAIN) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
@@ -214,26 +203,22 @@ MOBJSJPL = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_
 MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
              $(MOBSJAC_CLR) $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) $(MOBJSMAIN_BASIC)
 
-### for TXT clear sky package (bkcartaTXT.x), here we are!!!!!!!!
-OBJS_TXT = n_mainTXT.o
-MOBJS_TXT = n_mainTXT.mod
-
-### for TXT clear sky package (bkcartaTXT.x), here we are!!!!!!!!
-MOBJSBASICTXT = $(MOBS_BASIC_COMMON) $(MOBJSSTRINGTXT) $(MOBS_LTE_OPTDPH) \
-                $(MOBSJAC_CLR) $(MOBSRAD) $(MOBSSCAT_COMMON)  $(MOBS_NLTE_OPTDPH) $(MOBJSMAIN_BASIC)
 MOBJSBASICTXT = $(MOBJSBASIC)		
 ########################################################################
 ################## MAIN PART OF MAKEFILE ###############################
 ########################################################################
 ## this just updates the cource code
+##https://genomeek.wordpress.com/2012/02/16/using-fortran-preprocessor-1/
+
 #EXECS = basic scat basicTXT scatTXT
-EXECS = basic basicTXT
+
+## uncomment this for regular RTP stuff
 TXTRTPFLAG=
 EXECS = basic
 
-##https://genomeek.wordpress.com/2012/02/16/using-fortran-preprocessor-1/
-TXTRTPFLAG=-DTXTsetting
-EXECS = basicTXT
+## uncomment this for special TXT stuff
+#TXTRTPFLAG=-DTXTsetting
+#EXECS = basicTXT
 
 ## this updates the source code AND the distribution
 ## for now, default to 385 ppmv CO2
@@ -242,6 +227,10 @@ EXECSDIST = datafix400_H2012 basic
 all : $(EXECS)
 alldist : $(EXECSDIST)
 
+## use this for example to print out EXECS above as
+##   make -f Makefile_tar_objs_data_f90 print-EXECS
+## use this for example to print out MOBJSBASICTXT above as
+##   make -f Makefile_tar_objs_data_f90 print-MOBJSBASICTXT
 print-%  : ; @echo $* = $($*)
 
 ############## the five executables ##################################
@@ -258,7 +247,7 @@ kcartabasic.mod kcartabasic.o : kcartabasic.f90 $(PARAMS) $(ALLBASICMOD)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f90
 
 ##### (2) basic kcarta (easy on memory) with no jacobs, fluxes or scattering, TEXT levels/layers input
-ALLBASICMODTXT = $(MOBJSBASICTXT)
+ALLBASICMODTXT = $(MOBJSBASICTXT) $(MOBJSRTP)
 
 basicTXT: bkcartaTXT.x90
 	mv bkcartaTXT.x90 ../BIN/bkcartaTXT.x90
@@ -267,7 +256,7 @@ bkcartaTXT.x90 : $(ALLBASICMODTXT) $(OBJSBASICTXT)
 	echo $(TXTRTPFLAG)
 	$(FORTRANX) -o bkcartaTXT.x90 $(FLAGS) $(OBJSBASICTXT) $(LIBS) $(RTPLIB) $(HDFLIB) 
 
-kcartabasicTXT.mod kcartabasicTXT.o : kcartabasic.f90 $(PARAMS)
+kcartabasicTXT.mod kcartabasicTXT.o : kcartabasic.f90 $(PARAMS) $(ALLBASICMODTXT)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f90
 
 ##### (3) complete kcarta (memory hog) with jacobians, all scattering codes
@@ -285,6 +274,7 @@ scatTXT: kcartaTXT.x90
 	mv kcartaTXT.x90 ../BIN/kcartaTXT.x90
 
 kcartaTXT.mod kcartaTXT.x90 : $(OBJS) $(OBJSBASICTXT)
+	echo $(TXTRTPFLAG)
 	$(FORTRANX) -o kcartaTXT.x90 $(FLAGS) $(OBJS) $(OBJSBASICTXT) $(LIBS)
 
 kcartamainTXT.mod kcartamainTXT.o : kcartamain.f90 $(PARAMS)
@@ -306,9 +296,10 @@ jplTXT: jplTXT.x90
 	mv jplTXT.x90 ../BIN/jplTXT.x90
 
 jplTXT.x90 : $(OBJSJPL) $(OBJSBASICTXT)
+	echo $(TXTRTPFLAG)
 	$(FORTRANX) -o jplTXT.x90 $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSBASICTXT)
 
-kcartajplTXT.o kcartajplTXT.o : kcartajpl.f90 $(PARAMS)
+kcartajplTXT.mod kcartajplTXT.o : kcartajpl.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f90
 
 ##### (7) complete kcarta (memory hog) with jacobians, all scattering codes

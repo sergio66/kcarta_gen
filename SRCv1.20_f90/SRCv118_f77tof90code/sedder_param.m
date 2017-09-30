@@ -13,8 +13,9 @@ for ii = 1 : length(thedir)
 end
 disp('ret to continue'); pause
 
-iiX = 11;
+
 iiX = 1 : length(thedir);
+iiX = 35;
 for iii = 1 : length(iiX)
   ii = iiX(iii);
   fnameIN  =  thedir(ii).name;

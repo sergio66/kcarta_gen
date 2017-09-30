@@ -590,6 +590,20 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.20
 -----
 
+9/29/17        Makefile_tar_objs_data_f90 now requires you to comment/uncomment which
+               executable you are making, so that the fpp string "TXTRTPFLAG" can be
+	       set (when doing TXT execs) or left empty (regular rtp)
+
+               The .o and .mod were rearranged so that the basic version compiles
+	       This also means compared to SRCv1.18/*.f many of the subroutines/functions
+	       have been moved around within the files
+
+               rayleigh, nir_vis_uv routines have been removed since we have interface to LBLDIS
+	       limb viewing routines have been removed for now
+
+               n_mainTXT has been removed, by being absorbed into n_main via the
+	       fpp "TXTRTPFLAG"
+	       
 September 2017 f90 version. Made modules, so rearranged subroutines/functions
                within the files and/or made new files
 	       Removed limb viewwing routines for now

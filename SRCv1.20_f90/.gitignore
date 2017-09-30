@@ -1,3 +1,5 @@
+../F77toF90/*
+../INCLUDE/BACKUP*/*
 WORKS_*
 SRCv118_f77tof90code/*.f
 SRCv118_f77tof90code/TEMPF90/*
@@ -6,7 +8,7 @@ MAKEdepf90
 PYTHON_make
 MAKEJunk
 OpenMP
-ugh
+ugh*
 *.optrpt
 *genmod.*
 *.mod
