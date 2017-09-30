@@ -2,6 +2,21 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_rtspec_code
+
+USE basic_common
+USE jac_main
+!USE jac_pclsam_up
+!USE jac_pclsam_down
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_diff_and_quad
+USE spline_and_sort_and_common
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the rtspec routines  **********************
 ! ***********   this is the LATEST rtspec version  **********************
@@ -449,7 +464,6 @@
     REAL ::    MU, DMUUP, DMUDN, EXPMU
     REAL ::    S0UP, S1UP, IUP(2), IDN(2)
     REAL ::    TERM1, TERM2, TERM3
-    REAL ::    ttorad
           
     EXPMAX = 1.E08
 
@@ -551,8 +565,6 @@
     REAL ::    F1UP, F0DN, FP1UP, FP0DN, FH1UP, FH0DN
     REAL ::    PARTFAC, PARTP, PARTM
     REAL ::    CFAC, CP, CM, DB, D1, D2, DP, DM, SB, SP, SM
-
-    REAL :: ttorad
 
     EXPMAX = 1.E08
 
@@ -704,8 +716,6 @@
     REAL ::    FACDENOM, DENOM1, DENOM2, FACNUM1, FACNUM2
     REAL ::    SEDTERM1, SEDTERM2, FACMUBET, FACNUM3, SEDTERM3, S1EDD
          
-    REAL ::  ttorad
-
     IF (TAUTOT < 1.0E-6) THEN
         IUPOBS = I0UPOBS
         RETURN
@@ -916,7 +926,6 @@
     REAL ::      FLUXTOP, FLUXBOT
     PARAMETER (PI=3.1415926535)
      
-    REAL :: ttorad
 !               Compute the reflection, transmission, and source
 !               coefficients for each layer for the diffuse Eddington
 !               two stream problem.
@@ -1110,7 +1119,7 @@
     REAL ::    PLANCK0, PLANCK1, PLANCKSFC, TAUO, TRANS, DELPLANCK
 
     REAL :: r1,r2
-    REAL :: r35,mu35,rZ,rBooga,rBeta,rTT,rZeta,ttorad
+    REAL :: r35,mu35,rZ,rBooga,rBeta,rTT,rZeta
 
     INTEGER :: iCldTopA,iCldBotA
 
@@ -1271,7 +1280,7 @@
     INTEGER :: NLEV, ICLD, IOBS, iiDiv
     REAL ::    WAVENO, TEMP(KPROFLAYER+1), TAU(KPROFLAYER), MU, RAD
     INTEGER :: I
-    REAL ::    PLANCK0, PLANCK1, TAUO, TRANS, DELPLANCK,ttorad
+    REAL ::    PLANCK0, PLANCK1, TAUO, TRANS, DELPLANCK
 
     REAL :: r35,mu35,rZ,rBooga,rBeta,rTT,rZeta,radrad
 
@@ -1364,7 +1373,7 @@
     INTEGER :: I, L
     REAL ::    PLANCK0, PLANCK1, PLANCKSFC, TAUO, TRANS, DELPLANCK
 
-    REAL :: raPlanck(kProfLayer+1),ttorad
+    REAL :: raPlanck(kProfLayer+1)
 
     INTEGER :: iCldTopA,iCldBotA
 
@@ -1437,3 +1446,4 @@
     end SUBROUTINE GASRT1_nocloud
 
 !************************************************************************
+END MODULE scatter_rtspec_code

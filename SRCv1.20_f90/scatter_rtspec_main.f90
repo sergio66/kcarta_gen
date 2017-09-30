@@ -2,6 +2,23 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_rtspec_main
+
+USE basic_common
+USE jac_main
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_diff_and_quad
+USE spline_and_sort_and_common
+USE s_writefile
+USE scatter_rtspec_code
+USE rad_main
+USE rad_diff_and_quad
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************** that interface with K.F. Evan's rtspec code *************
@@ -91,7 +108,7 @@
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
 
     DO i1=1,kMaxPts
         raInten(i1)=0.0
@@ -306,10 +323,10 @@
     CHARACTER(80) :: caName
     INTEGER :: iIn,iJ,iI,iCloud,iScat,iIOUN,iF,iL
     REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
-    INTEGER :: iBdry,FindBoundary,iaRadLayer(kProfLayer)
+    INTEGER :: iBdry,iaRadLayer(kProfLayer)
 
     INTEGER :: iCloudySky,iLayers,iII,iiDiv
-    REAL :: raLayerTemp(kProfLayer),raTau(kProfLayer),rSolarAngle,ttorad
+    REAL :: raLayerTemp(kProfLayer),raTau(kProfLayer),rSolarAngle
 
 ! from original v2 rtspec code, to show differences :
 !      INTEGER  MAXABSNU, MAXNZ, MAXSPEC
@@ -535,7 +552,7 @@
 
     INTEGER :: iLay,iaRadLayer(kProfLayer),iaRadLayerTemp(kMixFilRows)
     INTEGER :: iT,iExtraThermal
-    REAL :: rad,ttorad,rMPTemp,raExtraThermal(kMaxPts),rThetaEff
+    REAL :: rad,rMPTemp,raExtraThermal(kMaxPts),rThetaEff
     REAL :: rTrans, rEmiss, rAbs
 
     DO iLay=1,iNumLayer
@@ -686,3 +703,4 @@
 !       Merritt Deeter (single scattering layer routines)
 
 !************************************************************************
+END MODULE scatter_rtspec_main

@@ -30,9 +30,9 @@ KCWRAP   = /asl/packages/kcwrap.tar
 KFTP     = /asl/packages/kcarta
 KTARAUX  = /asl/packages/kcarta/kcarta_aux.tar 
 
-PARAMS     = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data Makefile_intel_hdf_rtp
+PARAMS     = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data_f90 Makefile_intel_hdf_rtp
 
-PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data Makefile_intel_hdf_rtp
+PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data_f90 Makefile_intel_hdf_rtp
 
 ###### OBJSMAIN_PARALLEL  for all features : jacobians, scatter, flux, but as stand alone JPL exec
 ###### OBJSMAIN_JPL       for all features : jacobians, scatter, flux, but as stand alone JPL exec
@@ -68,7 +68,7 @@ MOBJSSTRING     = kcoeff_common.mod       clear_scatter_basic.mod  n_nonlte_comm
                   n_layers.mod            n_layers_lblrtm.mod      n_misc.mod               n_rtp.mod    \
 		  n_duplicate_sky.mod     n_main.mod
 
-MOBS_LTE_OPTDPH  = kcoeffSPL.mod         kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
+MOBS_LTE_OPTDPH  = kcoeffSPL.mod              kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
                    kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
 
 MOBS_NLTE_OPTDPH = klineshapes.mod      kcousin.mod          klinemix.mod         kvoigt_cousin.mod\
@@ -86,18 +86,14 @@ OBSRAD       = rad_angles.o rad_misc.o rad_diff_and_quad.o rad_common.o\
 
 OBSJAC_CLR   = 
 
-OBSJAC_CLD   = jac_main.o jac_up.o jac_down.o \
-               jac_pclsam_up.o jac_pclsam_down.o singlescatter.o
+OBSJAC_CLD   = singlescatter.o jac_pclsam_up.o jac_pclsam_down.o
 
 MOBSRAD       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_common.mod\
                 jac_up.mod jac_down.mod jac_main.mod rad_flux.mod rad_main.mod
 
-MOBSJAC_CLRWORKS   = jac_up.mod jac_down.mod jac_main.mod
-
 MOBSJAC_CLR   = 
 
-MOBSJAC_CLD   = jac_main.mod jac_up.mod jac_down.mod \
-                jac_pclsam_up.mod jac_pclsam_down.mod singlescatter.mod
+MOBSJAC_CLD   = singlescatter.mod jac_pclsam_up.mod jac_pclsam_down.mod
 
 ##########################################################################
 ###   this is to set up your favorite scattering routine package       ###
@@ -118,47 +114,30 @@ PARAMS_SCAT = ../INCLUDE/kcartaparam.f90 ../INCLUDE/scatterparam.f90 \
 
 OBSSCAT_COMMON    = clear_scatter_misc.o
 
-OBSSCAT_RTSPEC = scatter_rtspec_main.o scatter_rtspec_code.o \
-                 scatter_rtspec_flux.o
+OBSSCAT_RTSPEC = scatter_rtspec_code.o scatter_rtspec_main.o scatter_rtspec_flux.o
 
 OBSSCAT_DISORT = scatter_disort_main.o scatter_disort_code.o \
                  scatter_disort_flux.o scatter_disort_misc.o
 
-OBSSCAT_GRAYCLD = scatter_graycld_main.o scatter_graycld_code.o
+OBSSCAT_GRAYCLD = scatter_graycld_code.o scatter_graycld_main.o
 
-OBSSCAT_PCLSAM  = scatter_pclsam_main.o \
-		 scatter_pclsam_code.o scatter_pclsam_flux.o 
+OBSSCAT_PCLSAM  = scatter_pclsam_code.o scatter_pclsam_main.o scatter_pclsam_flux.o 
 
-OBSSCAT_RTS  = $(OBSSCAT_RTSPEC)   $(OBSSCAT_COMMON) scatter_interface.o
-OBSSCAT_DIS  = $(OBSSCAT_DISORT)   $(OBSSCAT_COMMON) scatter_interface.o
-OBSSCAT_GRAY = $(OBSSCAT_GRAYCLD)  $(OBSSCAT_COMMON) scatter_interface.o
-OBSSCAT_PCL  = $(OBSSCAT_PCLSAM)   $(OBSSCAT_COMMON) scatter_interface.o
+OBSSCAT5 = $(OBSSCAT_RTSPEC)    $(OBSSCAT_PCLSAM) $(OBSSCAT_GRAYCLD)    scatter_interface.o
 
-OBSSCAT5 = $(OBSSCAT_RTSPEC)    \
-           $(OBSSCAT_PCLSAM)    $(OBSSCAT_COMMON) \
-           $(OBSSCAT_GRAYCLD)    scatter_interface.o
 
 MOBSSCAT_COMMON    = clear_scatter_misc.mod
 
-MOBSSCAT_RTSPEC = scatter_rtspec_main.mod scatter_rtspec_code.mod \
-                 scatter_rtspec_flux.mod
+MOBSSCAT_RTSPEC = scatter_rtspec_code.mod scatter_rtspec_main.mod scatter_rtspec_flux.mod
 
 MOBSSCAT_DISORT = scatter_disort_main.mod scatter_disort_code.mod \
                  scatter_disort_flux.mod scatter_disort_misc.mod
 
-MOBSSCAT_GRAYCLD = scatter_graycld_main.mod scatter_graycld_code.mod
+MOBSSCAT_GRAYCLD = scatter_graycld_code.mod scatter_graycld_main.mod
 
-MOBSSCAT_PCLSAM  = scatter_pclsam_main.mod \
-		 scatter_pclsam_code.mod scatter_pclsam_flux.mod 
+MOBSSCAT_PCLSAM  = scatter_pclsam_code.mod scatter_pclsam_main.mod scatter_pclsam_flux.mod 
 
-MOBSSCAT_RTS  = $(MOBSSCAT_RTSPEC)   $(MOBSSCAT_COMMON) scatter_interface.mod
-MOBSSCAT_DIS  = $(MOBSSCAT_DISORT)   $(MOBSSCAT_COMMON) scatter_interface.mod
-MOBSSCAT_GRAY = $(MOBSSCAT_GRAYCLD)  $(MOBSSCAT_COMMON) scatter_interface.mod
-MOBSSCAT_PCL  = $(MOBSSCAT_PCLSAM)   $(MOBSSCAT_COMMON) scatter_interface.mod
-
-MOBSSCAT5 = $(MOBSSCAT_RTSPEC)    \
-           $(MOBSSCAT_PCLSAM)    $(MOBSSCAT_COMMON) \
-           $(MOBSSCAT_GRAYCLD)    scatter_interface.mod
+MOBSSCAT5 = $(MOBSSCAT_RTSPEC)  $(MOBSSCAT_PCLSAM) $(MOBSSCAT_GRAYCLD)    scatter_interface.mod
 
 ########################################################################
 ### for COMPLETE kcarta package (kcarta.x) choose one of the above 5 options
@@ -167,14 +146,18 @@ MOBSSCAT5 = $(MOBSSCAT_RTSPEC)    \
 ### default is to turn on ALL scattering packages (DISORT,RTSPEC,TWOSTREAM)
 ### in addition, you get clear sky radiance, jacobian, flux code compiled
 SCATTER_ALL = $(OBSSCAT5)
+MSCATTER_ALL = $(MOBSSCAT5)
 
 ### this is for the whole kit and caboodle
-OBJS = $(OBS_BASIC_COMMON) $(SCATTER_ALL) $(OBJSMAIN) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
-       $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
+OBJS = $(OBS_BASIC_COMMON) $(OBJSSTRING) $(OBS_LTE_OPTDPH) \
+       $(OBSRAD) $(OBSSCAT_COMMON) $(OBS_NLTE_OPTDPH) $(OBSJAC_CLD) $(SCATTER_ALL) $(OBJSMAIN) 
+
+MOBJS = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
+        $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) $(MOBSJAC_CLD) $(MSCATTER_ALL) $(MOBJSMAIN) 
 
 ### this is for the parallel version
 OBJSPARALLEL = $(OBS_BASIC_COMMON) $(SCATTER_ALL) $(OBJSMAIN_PARALLEL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
-       $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
+               $(OBSRAD) $(OBSJAC_CLD) $(OBJSSTRING) 
 
 ### this is for the JPL stand alone version
 OBJSJPL = $(OBS_BASIC_COMMON) $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
@@ -182,14 +165,15 @@ OBJSJPL = $(OBS_BASIC_COMMON) $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDP
 
 ### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
 OBJSBASIC = $(OBS_BASIC_COMMON) $(OBJSSTRING) $(OBS_LTE_OPTDPH) \
-            $(OBSJAC_CLR) $(OBSRAD) $(OBSSCAT_COMMON) $(OBS_NLTE_OPTDPH) $(OBJSMAIN_BASIC) 
+            $(OBSRAD) $(OBSJAC_CLR) $(OBSSCAT_COMMON) $(OBS_NLTE_OPTDPH) $(OBJSMAIN_BASIC) 
+
+MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
+             $(MOBSRAD) $(MOBSJAC_CLR) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) $(MOBJSMAIN_BASIC)
 
 ### for TXT clear sky package (bkcartaTXT.x), here we are!!!!!!!!
 OBJSBASICTXT = $(OBJSBASIC)
 
-### this is for the whole kit and caboodle
-MOBJS = $(MOBS_BASIC_COMMON) $(MSCATTER_ALL) $(MOBJSMAIN) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
-       $(MOBSRAD) $(MOBSJAC_CLD) $(MOBJSSTRING) 
+MOBJSBASICTXT = $(MOBJSBASIC)		
 
 ### this is for the parallel version
 MOBJSPARALLEL = $(MOBS_BASIC_COMMON) $(MSCATTER_ALL) $(MOBJSMAIN_PARALLEL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
@@ -199,11 +183,6 @@ MOBJSPARALLEL = $(MOBS_BASIC_COMMON) $(MSCATTER_ALL) $(MOBJSMAIN_PARALLEL) $(MOB
 MOBJSJPL = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
            $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLD) $(MOBJSSTRING)
 
-### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
-MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
-             $(MOBSJAC_CLR) $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) $(MOBJSMAIN_BASIC)
-
-MOBJSBASICTXT = $(MOBJSBASIC)		
 ########################################################################
 ################## MAIN PART OF MAKEFILE ###############################
 ########################################################################
@@ -212,20 +191,22 @@ MOBJSBASICTXT = $(MOBJSBASIC)
 
 #EXECS = basic scat basicTXT scatTXT
 
-## uncomment this for regular RTP stuff
-TXTRTPFLAG=
-EXECS = basic
+## uncomment this for basic (rad+jac) RTP stuff
+#TXTRTPFLAG=
+#EXECS = basic
 
-## uncomment this for special TXT stuff
+## uncomment this basic (rad+jac) TXT stuff
 #TXTRTPFLAG=-DTXTsetting
 #EXECS = basicTXT
 
-## this updates the source code AND the distribution
-## for now, default to 385 ppmv CO2
-EXECSDIST = datafix400_H2012 basic 
+## uncomment this for all (rad+jac+scat+flux) RTP stuff
+TXTRTPFLAG=
+EXECS = scat
 
 all : $(EXECS)
-alldist : $(EXECSDIST)
+
+## to check hidden characters and tabs https://stackoverflow.com/questions/16931770/makefile4-missing-separator-stop
+## cat -e -t -v  Makefile_tar_objs_data_f90 | more
 
 ## use this for example to print out EXECS above as
 ##   make -f Makefile_tar_objs_data_f90 print-EXECS
@@ -260,10 +241,12 @@ kcartabasicTXT.mod kcartabasicTXT.o : kcartabasic.f90 $(PARAMS) $(ALLBASICMODTXT
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f90
 
 ##### (3) complete kcarta (memory hog) with jacobians, all scattering codes
+ALLMOD = $(MOBJS) $(MOBJSRTP)
+
 scat: kcarta.x90
 	mv kcarta.x90 ../BIN/kcarta.x90
 
-kcarta.x90 : $(OBJS) $(OBJSRTP)
+kcarta.x90 : $(ALLMOD) $(OBJS) $(OBJSRTP)
 	$(FORTRANX) -o kcarta.x90 $(FLAGS) $(OBJS) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
 
 kcartamain.mod kcartamain.o : kcartamain.f90 $(PARAMS)

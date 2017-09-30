@@ -2077,7 +2077,7 @@ c general
 c this is for the cloudy/clear streams
       REAL raaLayTransGasOnly(kMaxPts,kProfLayer),raaEmissionGasOnly(kMaxPts,kProfLayer)
       REAL raSunGasOnly(kMaxPts),raThermalGasOnly(kMaxPts)
-      REAL raaExtWeighted(kMaxPts,kProfLayer)
+      REAL raaExtWeighted(kMaxPts,kMixFilRows)
       REAL raIntenGasOnly(kMaxPts),raIntenWeighted(kMaxPts)
 
       iNumOutX = 0
@@ -2596,13 +2596,12 @@ c general
 c this is for the cloudy/clear streams
       REAL raaLayTransGasOnly(kMaxPts,kProfLayer),raaEmissionGasOnly(kMaxPts,kProfLayer)
       REAL raSunGasOnly(kMaxPts),raThermalGasOnly(kMaxPts)
-      REAL raaExtWeighted(kMaxPts,kProfLayer)
       REAL raIntenGasOnly(kMaxPts),raIntenWeighted(kMaxPts)
 
 c BIG ASSUMPTION : we are only interested in TOA radiances
       REAL raWeightedRadiance(kMaxPts)
       REAL rEps
-      REAL raaTempAbs(kMaxPts,kProfLayer)
+      REAL raaTempAbs(kMaxPts,kMixFilRows)
       INTEGER iCldSubPixel,iaSwap(kProfLayer),iNumSwap
 
       IF (iOutNum .GT. 1) THEN

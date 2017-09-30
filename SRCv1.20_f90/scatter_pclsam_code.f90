@@ -2,6 +2,22 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_pclsam_code
+
+USE basic_common
+USE jac_main
+USE jac_pclsam_up
+USE jac_pclsam_down
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_diff_and_quad
+USE spline_and_sort_and_common
+USE rad_common
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************************************************************************
@@ -111,7 +127,7 @@
     REAL ::    rCLrFrac               !! clear fraction
     INTEGER :: iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
 
 !! --------- kAvgMin is a global variable in kcartaparam.f90 -------- !!
 ! kAvgMin is a global variable in kcartaparam.f90 .. set as required
@@ -679,13 +695,13 @@
     REAL :: raaRadsX(kMaxPts,kProfLayer)
 
 ! local vars
-    INTEGER :: iaRadLayer(kProfLayer),iFr,iFrX,iLay,iDp,iDoSolar,MP2Lay
+    INTEGER :: iaRadLayer(kProfLayer),iFr,iFrX,iLay,iDp,iDoSolar
     INTEGER :: iaCldLayer(kProfLayer),iIOUN,iSimple,iiDiv,iL,iLow
     INTEGER :: iCloudLayerTop,iCloudLayerBot,iLocalCldTop,iLocalCldBot
-    REAL :: ttorad,raVT1(kMixFilRows),raOutfrac(kProfLayer),muSat,muSun
+    REAL :: raVT1(kMixFilRows),raOutfrac(kProfLayer),muSat,muSun
     REAL :: raInten2(kMaxPts),rAngleTrans,rAngleEmission,rPlanck,rMPTemp
     REAL :: rSolarScatter,raTau(kMaxPts),rSunAngle,rSunTemp,rOmegaSun
-    REAL :: hg2_real,InterpTemp,rNoScale,rThermalRefl
+    REAL :: rNoScale,rThermalRefl
     INTEGER :: iDefault,iDebugScatterJacobian
 
 ! these are from twostream code, so we know the reflection from surface!!!!!!
@@ -1245,8 +1261,8 @@
     REAL :: raaEmission(kMaxPts,kProfLayer)
 
 ! local vars
-    INTEGER :: iLay,iL,iFr,iLModKprofLayer,MP2Lay
-    REAL :: ttorad,rPlanck,rSunTemp,rMPTemp,muSat
+    INTEGER :: iLay,iL,iFr,iLModKprofLayer
+    REAL :: rPlanck,rSunTemp,rMPTemp,muSat
     REAL :: bup,rdn,bdn,rup,rL,rU,rFrac,r0,db
     INTEGER :: iDefault,iDebugScatterJacobian
 
@@ -1346,9 +1362,9 @@
     REAL :: raThermal(kMaxPts)
 
 ! local vars
-    INTEGER :: iL,iFr,iLModKprofLayer,MP2Lay
+    INTEGER :: iL,iFr,iLModKprofLayer
     REAL :: rAngleEmission,rAngleTrans
-    REAL :: ttorad,rPlanck,rSunTemp,rMPTemp,muSat
+    REAL :: rPlanck,rSunTemp,rMPTemp,muSat
     REAL :: bup,rdn,bdn,rup,rL,rU,rFrac,r0,db
 
     iL = iaRadLayer(iLay)
@@ -1596,20 +1612,20 @@
 
 ! local variables
     INTEGER :: iFr,iFrX,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iiDiv,iSolarRadOrJac
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rSunTemp,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rSunTemp,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),muSat,raInten2(kMaxPts)
     REAL :: raaSolarScatter1Lay(kMaxPts,kProfLayer)
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl,radtot,rLayT,rEmission,rSunAngle
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iBeta,iOutput,iaCldLayer(kProfLayer)
+    INTEGER :: iDoThermal,iDoSolar,iBeta,iOutput,iaCldLayer(kProfLayer)
 
 ! to do fast NLTE
     REAL :: suncos,scos1,vsec1
 
 ! general
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1)
+    REAL :: raVT1(kMixFilRows),raVT2(kProfLayer+1)
     INTEGER :: iIOUN,N,iI,iLocalCldTop,iLocalCldBot
     INTEGER :: i1,i2,iLoop,iDebug
     INTEGER :: iSTopNormalRadTransfer
@@ -2057,19 +2073,19 @@
 ! local variables
     INTEGER :: iFr,iFrX,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iiDiv,iSolarRadOrJac
     REAL :: raaLayTrans(kMaxPts,kProfLayer),       raaEmission(kMaxPts,kProfLayer)
-    REAL :: ttorad,rPlanck,rSunTemp,rMPTemp,muSat,raInten2(kMaxPts)
+    REAL :: rPlanck,rSunTemp,rMPTemp,muSat,raInten2(kMaxPts)
     REAL :: raaSolarScatter1Lay(kMaxPts,kProfLayer)
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl,radtot,rLayT,rEmission,rSunAngle
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iBeta,iOutput,iaCldLayer(kProfLayer)
+    INTEGER :: iDoThermal,iDoSolar,iBeta,iOutput,iaCldLayer(kProfLayer)
 
 ! to do fast NLTE
     REAL :: suncos,scos1,vsec1
 
 ! general
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1)
+    REAL :: raVT1(kMixFilRows),raVT2(kProfLayer+1)
     INTEGER :: iIOUN,N,iI,iLocalCldTop,iLocalCldBot
     INTEGER :: i1,i2,iLoop,iDebug
     INTEGER :: iSTopNormalRadTransfer
@@ -2077,7 +2093,7 @@
 ! this is for the cloudy/clear streams
     REAL :: raaLayTransGasOnly(kMaxPts,kProfLayer),raaEmissionGasOnly(kMaxPts,kProfLayer)
     REAL :: raSunGasOnly(kMaxPts),raThermalGasOnly(kMaxPts)
-    REAL :: raaExtWeighted(kMaxPts,kProfLayer)
+    REAL :: raaExtWeighted(kMaxPts,kMixFilRows)
     REAL :: raIntenGasOnly(kMaxPts),raIntenWeighted(kMaxPts)
 
     iNumOutX = 0
@@ -2576,19 +2592,19 @@
 ! local variables
     INTEGER :: iFr,iFrX,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iiDiv,iSolarRadOrJac
     REAL :: raaLayTrans(kMaxPts,kProfLayer),       raaEmission(kMaxPts,kProfLayer)
-    REAL :: ttorad,rPlanck,rSunTemp,rMPTemp,muSat,raInten2(kMaxPts)
+    REAL :: rPlanck,rSunTemp,rMPTemp,muSat,raInten2(kMaxPts)
     REAL :: raaSolarScatter1Lay(kMaxPts,kProfLayer)
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl,radtot,rLayT,rEmission,rSunAngle
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iBeta,iOutput,iaCldLayer(kProfLayer)
+    INTEGER :: iDoThermal,iDoSolar,iBeta,iOutput,iaCldLayer(kProfLayer)
 
 ! to do fast NLTE
     REAL :: suncos,scos1,vsec1
 
 ! general
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1)
+    REAL :: raVT1(kMixFilRows),raVT2(kProfLayer+1)
     INTEGER :: iIOUN,N,iI,iLocalCldTop,iLocalCldBot
     INTEGER :: i1,i2,iLoop,iDebug
     INTEGER :: iSTopNormalRadTransfer
@@ -2596,13 +2612,12 @@
 ! this is for the cloudy/clear streams
     REAL :: raaLayTransGasOnly(kMaxPts,kProfLayer),raaEmissionGasOnly(kMaxPts,kProfLayer)
     REAL :: raSunGasOnly(kMaxPts),raThermalGasOnly(kMaxPts)
-    REAL :: raaExtWeighted(kMaxPts,kProfLayer)
     REAL :: raIntenGasOnly(kMaxPts),raIntenWeighted(kMaxPts)
 
 ! BIG ASSUMPTION : we are only interested in TOA radiances
     REAL :: raWeightedRadiance(kMaxPts)
     REAL :: rEps
-    REAL :: raaTempAbs(kMaxPts,kProfLayer)
+    REAL :: raaTempAbs(kMaxPts,kMixFilRows)
     INTEGER :: iCldSubPixel,iaSwap(kProfLayer),iNumSwap
 
     IF (iOutNum > 1) THEN
@@ -2693,3 +2708,4 @@
     end SUBROUTINE rad_DOWN_pclsam_solar100_MRO_driver
           
 !************************************************************************
+END MODULE scatter_pclsam_code

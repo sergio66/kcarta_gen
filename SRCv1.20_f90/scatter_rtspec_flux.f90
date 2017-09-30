@@ -2,6 +2,24 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_rtspec_flux
+
+USE basic_common
+USE jac_main
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_diff_and_quad
+USE spline_and_sort_and_common
+USE s_writefile
+USE scatter_rtspec_code
+USE rad_main
+USE rad_diff_and_quad
+USE rad_flux
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************** that interface with Stamnes DISORT  code    *************
@@ -91,7 +109,7 @@
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
 
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
@@ -334,7 +352,7 @@
     CHARACTER(80) :: caName
     INTEGER :: iIn,iJ,iI,iCloud,iScat,iIOUN,iFr,iL
     REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
-    INTEGER :: iBdry,FindBoundary,iaRadLayer(kProfLayer)
+    INTEGER :: iBdry,iaRadLayer(kProfLayer)
 
     INTEGER :: iCloudySky,iLayers
     REAL :: raLayerTemp(kProfLayer),raTau(kProfLayer),rSolarAngle
@@ -366,8 +384,9 @@
 ! we need to compute upward and downward flux at all boundaries ==>
 ! maximum of kProfLayer+1 pressulre level boundaries
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
-    REAL :: raDensity(kProfLayer),kb,cp,mass,avog
-    REAL :: raVT1(kMixFilRows),InterpTemp,rThermalReflttorad,rCos,rTsurf
+    REAL :: raDensityX(kProfLayer),kb,cp,mass,avog
+    REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)    
+    REAL :: raVT1(kMixFilRows),rThermalReflttorad,rCos,rTsurf
     REAL :: rMPTemp,rPlanck,raUp(kMaxPts),raDown(kMaxPts),raTemp(kMaxPts)
     REAL :: rAngleTrans,rAngleEmission,rDelta,rCosAngle
     INTEGER :: iLay,iDoSolar,iDoThermal,iHigh,iT,iaRadLayerTemp(kMixFilRows)
@@ -375,22 +394,24 @@
     REAL :: raKCUp(kMaxPts),raKCDown(kMaxPts)
 
     REAL :: raPhasePoints(MaxPhase),raComputedPhase(MaxPhase),rThermalRefl
-    REAL :: ttorad
           
-    INTEGER :: iGaussPts,iDoneClearSky,iLP,iDownWardOrig,istep,nstr,iDiv
-    INTEGER :: troplayer,find_tropopause
+    INTEGER :: iGaussPts,iDoneClearSky,iLP,iDownWardOrig,istep,nstr
+    INTEGER :: troplayer,iSergio
 
     iDownWardOrig = iDownWard
     rTSurf = rSurfaceTemp
 
 ! ------------ first see if the sky is clear; if so, call clear sky flux --
 
+    iSergio = +1   !! hopefully this is correct
+    
     CALL SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, & 
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
+    iSergio, &
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -545,17 +566,17 @@
         ! Prof is in mb remember 1013 mb = 1 atm = 101325 Nm-2
         ! ultiply mb by 100 to change to Nm-2
         ! ultiply atm by 101325 to change to Nm-2
-            raDensity(iFr) = pProf(iL)*100/kb/rMPTemp  !change to molecules m-3
-            raDensity(iFr) = raDensity(iFr)*mass       !change to kg m-3
-            raDensity(iFr) = raDensity(iFr)*cp         !eqn 4.67 of Liou pg107
+            raDensity0(iFr) = pProf(iL)*100/kb/rMPTemp  !change to molecules m-3
+            raDensity0(iFr) = raDensity0(iFr)*mass       !change to kg m-3
+            raDensity0(iFr) = raDensity0(iFr)*cp         !eqn 4.67 of Liou pg107
              
         ! ow multiply by layer thickness
             IF (iFr == 1) THEN
-                raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracBot
+                raDensity0(iFr) = -raDensity0(iFr)*raThickness(iL)*rFracBot
             ELSE IF (iFr == iNumLayer) THEN
-                raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracTop
+                raDensity0(iFr) = -raDensity0(iFr)*raThickness(iL)*rFracTop
             ELSE
-                raDensity(iFr) = -raDensity(iFr)*raThickness(iL)
+                raDensity0(iFr) = -raDensity0(iFr)*raThickness(iL)
             END IF
              
         END DO
@@ -678,7 +699,8 @@
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, & 
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
+    iSergio, &
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -811,6 +833,7 @@
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
+    iSergio, &
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -938,12 +961,20 @@
     IF (kFlux == 5) THEN
         troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
     END IF
+
+    IF (kFlux == 2) THEN
+        CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer,rSurfPress,raPressLevels, &
+        raThickness,raDensityX,raDensity0,raDeltaPressure,rFracTop,rFracBot)
+    END IF
+
     CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
-    raFreq,kaFrStep(iTag),raaUpFlux,raaDownFlux,raDensity)
-     
+    raFreq,kaFrStep(iTag),raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
+    raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
+    
     9876 CONTINUE       !!!!skip here direct if NO clouds in atm
 
     RETURN
     end SUBROUTINE flux_rtspec
 
 !************************************************************************
+END MODULE scatter_rtspec_flux

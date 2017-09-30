@@ -97,6 +97,6 @@ LIBS  = -lblas -mkl
 FDOUBLE = -r8
 
 ########################################################################
-## if this does not work, just delete following line and bring in "Makefile_tar_objs_data"
+## if this does not work, just delete following line and bring in "Makefile_tar_objs_data_f90"
 include Makefile_tar_objs_data_f90
 

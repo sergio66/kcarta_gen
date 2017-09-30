@@ -17,7 +17,7 @@ CONTAINS
 ! simple function to see if integer iI is a member of a list iaSet (that
 ! has iElements in it)
 ! output : index into set if in set, -1 if not
-    INTEGER FUNCTION  InSet(iI,iaSet,iNumElements)
+    INTEGER FUNCTION InSet(iI,iaSet,iNumElements)
 
     IMPLICIT NONE
 
@@ -720,8 +720,39 @@ CONTAINS
     end SUBROUTINE r_sort_logspl
 
 !************************************************************************
+! this subroutine first sorts, then splines
+! changes input X, output XOUT, to log(X) and log(XOUT)
+    SUBROUTINE r_sort_logspl_one(XA,YA,N,XOUT,YOUT)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+!      Parameters
+    REAL :: XA(*),YA(*),XOUT,YOUT
+    INTEGER :: N
+
+    REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB
+    INTEGER :: iI,NOUT
+
+    NOUT = 1
+    
+    DO iI = 1,N
+        XAA(iI) = log(XA(iI))
+        YAA(iI) = YA(iI)
+    END DO
+    CALL DoSort2Real(XAA,YAA,N,1)
+
+    XBB = log(XOUT)
+
+    CALL rspl_one(XAA,YAA,N,XBB,YOUT,NOUT)
+
+    RETURN
+    end SUBROUTINE r_sort_logspl_one
+
+!************************************************************************
 ! this subroutine directly calls rsply2 and then rspline
-    SUBROUTINE rspl1(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE rspl_one(XA,YA,N,XOUT,YOUT,NOUT)
      
     IMPLICIT NONE
 
@@ -746,7 +777,7 @@ CONTAINS
     INTEGER :: I
 
     IF (NOUT /= 1) THEN
-        write(kStdErr,*) 'rspl1 assumes you only want 1 calc'
+        write(kStdErr,*) 'rspl_one assumes you only want 1 calc'
         CALL DoStop
     END IF
            
@@ -759,7 +790,7 @@ CONTAINS
     END DO
      
     RETURN
-    end SUBROUTINE rspl1
+    end SUBROUTINE rspl_one
      
 !************************************************************************
 ! this subroutine directly calls rsply2 and then rspline
@@ -1235,7 +1266,7 @@ CONTAINS
 !                       linear interps
 !************************************************************************
 ! real linear interpolator for ONE "x" point
-    SUBROUTINE RLINEAR1(XA,YA,N,X,Y,NOUT)
+    SUBROUTINE RLINEAR_ONE(XA,YA,N,X,Y,NOUT)
 
     IMPLICIT NONE
 
@@ -1260,7 +1291,7 @@ CONTAINS
     REAL :: A,B,H
 
     IF (NOUT /= 1) THEN
-        write(kStdErr,*) 'RLINEAR1 only gives one output'
+        write(kStdErr,*) 'RLINEAR_ONE only gives one output'
         CALL DoStop
     END IF
 
@@ -1295,7 +1326,7 @@ CONTAINS
     Y=YA(KHI)-A*B
 
     RETURN
-    END SUBROUTINE RLINEAR1
+    END SUBROUTINE RLINEAR_ONE
 
 !************************************************************************
 ! this subroutine directly calls rlinear, for MANY "x" points
@@ -1323,7 +1354,7 @@ CONTAINS
     INTEGER :: I
      
     DO I=1,NOUT
-        CALL RLINEAR1(XA,YA,N,XOUT(I),YOUT(I),1)
+        CALL RLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I),1)
     END DO
 
     RETURN
@@ -1622,7 +1653,7 @@ CONTAINS
     END DO
     CALL DoSort2Real(XAA,YAA,N,1)
 
-    CALL rlinear1(XAA,YAA,N,XOUT,YOUT,NOUT)
+    CALL rlinear_one(XAA,YAA,N,XOUT,YOUT,NOUT)
 
     RETURN
     end SUBROUTINE r_sort_linear1
@@ -1658,7 +1689,7 @@ CONTAINS
         XBB = log(XOUT)
     END DO
 
-    CALL rlinear1(XAA,YAA,N,XBB,YOUT,NOUT)
+    CALL rlinear_one(XAA,YAA,N,XBB,YOUT,NOUT)
 
     RETURN
     end SUBROUTINE r_sort_loglinear1
@@ -1718,8 +1749,8 @@ CONTAINS
     ELSEIF (p <= DATABASELEV(kMaxLayer+1)) THEN
         rH = DatabaseHEIGHT(kMaxLayer)
     ELSE
-        CALL rlinear1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
-        CALL rspl1(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+        CALL rlinear_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+        CALL rspl_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
     END IF
 
     p2h = rH

@@ -469,7 +469,7 @@ CONTAINS
     ! thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
     ! thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl1(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
+        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
         raUpperPress(iI),rMixRatio,1)
         raUpperPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raUpperPartPress(iI)=raUpperPress(iI)*rMixRatio/(1.0e6+rMixRatio) !atm
@@ -513,7 +513,7 @@ CONTAINS
     ! thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
     ! thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl1(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
+        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
         raUpperPress(iI),rMixRatio,1)
         raUpperPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raUpperPartPress(iI)=raUpperPress(iI)*rMixRatio/(1.0e6+rMixRatio) !!atm
@@ -643,7 +643,7 @@ CONTAINS
     ! thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
     ! thus p(g) = (p(total)/(1e6+ppmv) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl1(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
+        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
         raTPress(iI),rMixRatio,1)
         raUAMixRatio(iI) = rMixRatio
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm

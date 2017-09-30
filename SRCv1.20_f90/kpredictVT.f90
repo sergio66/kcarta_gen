@@ -181,7 +181,7 @@ CONTAINS
                 DO iK = 1,MXXTMP    !!!scan over the 6 solar angles
                     ra6(iK) = raaaVibPartFcn(iK,iJ,iI)
                 END DO
-                CALL rspl1(raSolAngles,ra6,6,rSolarAngle,rT,1)
+                CALL rspl_one(raSolAngles,ra6,6,rSolarAngle,rT,1)
                 raaVibPartFcn(iJ,iI) =  rT
             END DO
         END DO
@@ -191,7 +191,7 @@ CONTAINS
                 DO iK = 1,MXXTMP          !!!scan over the 6 solar angles
                     ra6(iK) = raaaVibTemp(iK,iJ,iI)
                 END DO
-                CALL rspl1(raSolAngles,ra6,6,rSolarAngle,rT,1)
+                CALL rspl_one(raSolAngles,ra6,6,rSolarAngle,rT,1)
                 raaVibTemp(iJ,iI) =  rT
             END DO
         END DO

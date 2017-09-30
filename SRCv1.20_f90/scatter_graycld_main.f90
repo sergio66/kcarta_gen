@@ -2,6 +2,23 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_graycld_main
+
+USE basic_common
+USE jac_main
+USE jac_pclsam_up
+USE jac_pclsam_down
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_diff_and_quad
+USE spline_and_sort_and_common
+USE s_writefile
+USE scatter_graycld_code
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************** that interface with S.Machado's Rayleigh code **********
@@ -116,7 +133,7 @@
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iUpper,iDoUpperAtmNLTE
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
 
     DO i1=1,kMaxPts
         raInten(i1)=0.0
@@ -319,7 +336,7 @@
     INTEGER :: iaaRadLayerX(kMaxAtm,kProfLayer),iNumLayerX,iAtmX,iaOpX(kPathsOut)
     REAL :: raaCloud1_Inten(kMaxPts,kProfLayer),raaCloud2_Inten(kMaxPts,kProfLayer)
     REAL :: raaClr_Inten(kMaxPts,kProfLayer),fracClr
-    REAL :: rStempX,rSpresX,rT,rP,raVTemp(kProfLayer),raEmissX(kMaxPts),rFracBotX
+    REAL :: rStempX,rSpresX,rT,rP,raVTemp(kMixFilRows),raEmissX(kMaxPts),rFracBotX
     REAL :: raXlays(kProfLayer),raXTemp(kProfLayer)
 
     iIOUN = kStdkCarta
@@ -373,7 +390,7 @@
         write(kStdWarn,*) ' '
         write(kStdWarn,*) ' >>> Gray CLD RTA : doing CLD1'
         rSpresX = ctop1
-        CALL r_sort_logspl(raXlays,raXtemp,iNumLayer,rSpresX,rStempX,1)
+        CALL r_sort_logspl_one(raXlays,raXtemp,iNumLayer,rSpresX,rStempX)
         DO iFr = 1,kMaxPts
             raEmissX(iFr) = raCemis(1)
         END DO
@@ -420,7 +437,7 @@
         write(kStdWarn,*) ' '
         write(kStdWarn,*) ' >>> Gray CLD RTA : doing CLD2'
         rSpresX = ctop2
-        CALL r_sort_logspl(raXlays,raXtemp,iNumLayer,rSpresX,rStempX,1)
+        CALL r_sort_logspl_one(raXlays,raXtemp,iNumLayer,rSpresX,rStempX)
         DO iFr = 1,kMaxPts
             raEmissX(iFr) = raCemis(2)
         END DO
@@ -504,3 +521,4 @@
     end SUBROUTINE dograyclouds
 
 !************************************************************************
+END MODULE scatter_graycld_main

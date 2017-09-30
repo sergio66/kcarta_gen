@@ -4343,7 +4343,7 @@ CONTAINS
     end SUBROUTINE PrintFlux6
 
 !************************************************************************
-    SUBROUTINE  Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
+    SUBROUTINE Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
     rSurfPress,raPressLevels,raThickness,raDensityX,raDensity0,raDeltaPressure, &
     rFracTop,rFracBot)
 

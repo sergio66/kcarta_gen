@@ -1527,7 +1527,7 @@ CONTAINS
     ya(2) = rT0
     ya(3) = rTm1
      
-    CALL rspl1(xa,ya,3,rPavg,rT,1)
+    CALL rspl_one(xa,ya,3,rPavg,rT,1)
 !      print *,'rPavg,rT = ',exp(rPavg),rT
 
     InterpTempSurf=rT
@@ -3214,15 +3214,15 @@ CONTAINS
         ypn=1.0e30
         IF (iSpline == +1) THEN
             IF (iLog == +1) THEN
-                CALL rspl1(raLogP,raT,3,log(rP),rT,1)
+                CALL rspl_one(raLogP,raT,3,log(rP),rT,1)
             ELSE
-                CALL rspl1(raP,raT,3,rP,rT,1)
+                CALL rspl_one(raP,raT,3,rP,rT,1)
             END IF
         ELSEIF (iSpline == -1) THEN
             IF (iLog == +1) THEN
-                CALL rlinear1(raP,raT,3,rP,rT,1)
+                CALL rlinear_one(raP,raT,3,rP,rT,1)
             ELSE
-                CALL rlinear1(raLogP,raT,3,log(rP),rT,1)
+                CALL rlinear_one(raLogP,raT,3,log(rP),rT,1)
             END IF
         END IF
     END IF

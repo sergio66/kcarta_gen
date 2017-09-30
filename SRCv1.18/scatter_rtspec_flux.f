@@ -366,7 +366,8 @@ cCHARACTER*24  OUTUNITS(MAXSPEC), OUTAVERAGE(MAXSPEC) (was outunits,outavging)
 c we need to compute upward and downward flux at all boundaries ==> 
 c maximum of kProfLayer+1 pressulre level boundaries 
       REAL raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1) 
-      REAL raDensity(kProfLayer),kb,cp,mass,avog 
+      REAL raDensityX(kProfLayer),kb,cp,mass,avog
+      REAL raDensity0(kProfLayer),raDeltaPressure(kProfLayer)    
       REAL raVT1(kMixFilRows),InterpTemp,rThermalReflttorad,rCos,rTsurf
       REAL rMPTemp,rPlanck,raUp(kMaxPts),raDown(kMaxPts),raTemp(kMaxPts)
       REAL rAngleTrans,rAngleEmission,rDelta,rCosAngle
@@ -378,7 +379,9 @@ c maximum of kProfLayer+1 pressulre level boundaries
       REAL ttorad
       
       INTEGER iGaussPts,iDoneClearSky,iLP,iDownWardOrig,istep,nstr,iDiv
-      INTEGER troplayer,find_tropopause
+      INTEGER troplayer,find_tropopause,iSergio
+
+      iSergio = 1
 
       iDownWardOrig = iDownWard
       rTSurf = rSurfaceTemp
@@ -390,7 +393,8 @@ c ------------ first see if the sky is clear; if so, call clear sky flux --
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
      $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
      $        iaPhase,raPhasePoints,raComputedPhase,
-     $ iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, 
+     $ iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer,
+     $        iSergio,
      $        !!!!!!!!!!!!!!!!!!these are the output variables 
      $        NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, 
      $        TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, 
@@ -545,17 +549,17 @@ c instead of temp of full layer at 100 km height!!!!!!
           !pProf is in mb remember 1013 mb = 1 atm = 101325 Nm-2 
           !multiply mb by 100 to change to Nm-2 
           !multiply atm by 101325 to change to Nm-2 
-          raDensity(iFr) = pProf(iL)*100/kb/rMPTemp  !change to molecules m-3 
-          raDensity(iFr) = raDensity(iFr)*mass       !change to kg m-3 
-          raDensity(iFr) = raDensity(iFr)*cp         !eqn 4.67 of Liou pg107 
+          raDensity0(iFr) = pProf(iL)*100/kb/rMPTemp  !change to molecules m-3 
+          raDensity0(iFr) = raDensity0(iFr)*mass       !change to kg m-3 
+          raDensity0(iFr) = raDensity0(iFr)*cp         !eqn 4.67 of Liou pg107 
  
           !now multiply by layer thickness 
           IF (iFr .EQ. 1) THEN 
-            raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracBot 
+            raDensity0(iFr) = -raDensity0(iFr)*raThickness(iL)*rFracBot 
           ELSE IF (iFr .EQ. iNumLayer) THEN 
-            raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracTop 
+            raDensity0(iFr) = -raDensity0(iFr)*raThickness(iL)*rFracTop 
           ELSE 
-            raDensity(iFr) = -raDensity(iFr)*raThickness(iL) 
+            raDensity0(iFr) = -raDensity0(iFr)*raThickness(iL) 
           END IF 
  
         END DO 
@@ -678,7 +682,8 @@ c loop over angles for downward flux which means this is for UPLOOK instr
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
      $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
      $        iaPhase,raPhasePoints,raComputedPhase,
-     $ iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, 
+     $ iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer,
+     $ iSergio,
      $        !!!!!!!!!!!!!!!!!!these are the output variables 
      $        NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, 
      $        TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, 
@@ -810,7 +815,8 @@ c loop over angles for upward flux, which means this is for DOWNLOOK instr
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
      $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
      $        iaPhase,raPhasePoints,raComputedPhase,
-     $  iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, 
+     $  iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer,
+     $  iSergio,
      $        !!!!!!!!!!!!!!!!!!these are the output variables 
      $        NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, 
      $        TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, 
@@ -938,9 +944,16 @@ c  ---------------------------------------------------------------------
       IF (kFlux .EQ. 5) THEN
         troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
 	END IF
-      CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm,
-     $                   raFreq,kaFrStep(iTag),raaUpFlux,raaDownFlux,raDensity)
- 
+
+      IF (kFlux == 2) THEN
+        CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer,rSurfPress,raPressLevels,
+     c       raThickness,raDensityX,raDensity0,raDeltaPressure,rFracTop,rFracBot)
+      END IF
+
+      CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, 
+     c      raFreq,kaFrStep(iTag),raaUpFlux,raaDownFlux,raDensityX,raDensity0,
+     c      raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
+	    
  9876 CONTINUE       !!!!skip here direct if NO clouds in atm
 
       RETURN

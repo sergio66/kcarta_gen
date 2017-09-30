@@ -1,4 +1,4 @@
-! Copyright 2006
+! Copyright 2017
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
@@ -26,6 +26,19 @@
 
 ! put in a lot of rEps in the SUBROUTINE solarscatter/gas/temp/iwpdme as things
 ! could go nuts if raaIWP = 0 in between cloud layers
+
+MODULE jac_pclsam_down
+
+USE basic_common
+use jac_up
+use jac_down
+use jac_main
+use singlescatter
+use clear_scatter_misc
+
+IMPLICIT NONE
+
+CONTAINS
 
 !************************************************************************
 !****** THESE ARE THE SCATTERING JACOBIANS FOR THE DOWN LOOK INSTR ******
@@ -119,8 +132,7 @@
     REAL :: radBTdr(kMaxPtsJac),radBackgndThermdT(kMaxPtsJac)
     REAL :: radSolardT(kMaxPtsJac),rWeight
     INTEGER :: iG,iM,iIOUN,iLowest
-    INTEGER :: DoGasJacob,iGasJacList
-    INTEGER :: WhichGasPosn,iGasPosn
+    INTEGER :: iGasJacList,iGasPosn
 ! for cloud stuff!
     REAL :: raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1)
     INTEGER :: iaCldLayer(kProfLayer),iLocalCldTop,iLocalCldBot
@@ -129,7 +141,7 @@
     INTEGER :: iiDiv,iaRadLayer(kProfLayer),iLay,iIWPorDME,iL
     INTEGER :: iaCldLayerIWPDME(kProfLayer),iOffSet,iDoSolar
     REAL :: r1,r2,rSunTemp,rOmegaSun,raSunTOA(kMaxPts),rPlanck,muSun,rSunAngle
-    INTEGER :: iSolarRadOrJac,MP2Lay
+    INTEGER :: iSolarRadOrJac
     REAL :: raaSolarScatter1Lay(kMaxPts,kProfLayer)
 
     INTEGER :: iDefault,iWhichJac,iFr
@@ -258,7 +270,7 @@
         iSolarRadOrJac = +1
         CALL SolarScatterIntensity_Downlook( &
         iDoSolar,raFreq,iaCldLayer, &
-        raSunAngles,raLayAngles,0,0, &
+        raSunAngles,raLayAngles,0.0,0.0, &
         iNumLayer,iaRadLayer, &
         raaExtTemp,raaSSAlbTemp,raaAsymTemp,rFracTop,rFracBot, &
         iTag,iSolarRadOrJac,raaSolarScatter1Lay)
@@ -633,7 +645,6 @@
     INTEGER :: iL,iLay,iFr,iDoSolar
     REAL :: muSun,muSat,muSunSat,raTemp(kMaxPts),raTemp1(kMaxPts)
     REAL :: rFac,rX,rY,rZ,rT,raLMp1_toSpace(kMaxPts)
-    REAL :: hg2_real,hg2_real_deriv_wrt_g
     REAL :: rEps   !! so that if w == 0, rz is finite
 
     rEps = 1.0e-10
@@ -1011,7 +1022,7 @@
     INTEGER :: iIWPorDME
 
 ! local variables
-    INTEGER :: iFr,iJ1,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iM1
     REAL :: raTemp(kMaxPtsJac),rCos
     REAL :: raResultsTh(kMaxPtsJac)
 
@@ -1083,3 +1094,4 @@
     end SUBROUTINE JacobCloudAmtFM1
 
 !************************************************************************
+END MODULE jac_pclsam_down

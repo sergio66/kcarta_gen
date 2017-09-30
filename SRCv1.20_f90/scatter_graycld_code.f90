@@ -2,6 +2,21 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_graycld_code
+
+USE basic_common
+USE jac_main
+USE jac_pclsam_up
+USE jac_pclsam_down
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_diff_and_quad
+USE spline_and_sort_and_common
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************************************************************************
@@ -95,14 +110,14 @@
 ! local variables
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rPlanck,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
     REAL :: rDum1,rDum2
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
 ! need this
     REAL :: raInten(kMaxPts)
 
@@ -111,10 +126,10 @@
     INTEGER :: iNLTEStart,iSTopNormalRadTransfer,iUpper
              
     REAL :: raOutFrac(kProfLayer),r0
-    REAL :: raVT1(kMixFilRows),InterpTemp
+    REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN
     REAL :: bt2rad,t2s
-    INTEGER :: iFr1,find_tropopause,troplayer
+    INTEGER :: iFr1,troplayer
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
 ! for specular reflection
@@ -122,7 +137,7 @@
     INTEGER :: iSpecular
 
 ! for printing
-    INTEGER :: InSet,iPrintX,iMax
+    INTEGER :: iPrintX,iMax
           
     IF ((raFreq(1) >= 10000) .AND. (raSunAngles(50) <= 90)) THEN
         write(kStdWarn,*) 'daytime downlook NIR/VIS/UV : Calling rad_trans_SAT_LOOK_DOWN_NIR_VIS_UV'
@@ -469,3 +484,4 @@
     end SUBROUTINE rad_trans_SAT_LOOK_DOWN_GRAY
 
 !************************************************************************
+END MODULE scatter_graycld_code

@@ -1,4 +1,4 @@
-! Copyright 2006
+! Copyright 2017
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
@@ -23,6 +23,19 @@
 ! so kTempJac=-2      ==> only use d/dT(planck)
 ! so          -1      ==> only use d/dT(1-tau)(tauL2S)
 ! so           0      ==> use d/dT(planck (1-tau)(tauL2S) )
+
+MODULE jac_pclsam_up
+
+USE basic_common
+use jac_up
+use jac_down
+use jac_main
+use singlescatter
+use clear_scatter_misc
+
+IMPLICIT NONE
+
+CONTAINS
 
 !************************************************************************
 !****** THESE ARE THE SCATTERING JACOBIANS FOR THE UP LOOK INSTR ******
@@ -113,8 +126,7 @@
     REAL :: radBTdr(kMaxPtsJac),radBackgndThermdT(kMaxPtsJac)
     REAL :: radSolardT(kMaxPtsJac),rWeight
     INTEGER :: iG,iLay,iIOUN,iLowest
-    INTEGER :: DoGasJacob,iGasJacList
-    INTEGER :: WhichGasPosn,iGasPosn
+    INTEGER :: iGasJacList,iGasPosn
 ! for cloud stuff!
     REAL :: raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1)
     INTEGER :: iaCldLayer(kProfLayer),iLocalCldTop,iLocalCldBot
@@ -125,7 +137,7 @@
     INTEGER :: iaCldLayerIWPDME(kProfLayer),iOffSet,iDoSolar
     REAL :: r1,r2,rSunTemp,rOmegaSun,raSunTOA(kMaxPts),rPlanck
     REAL :: muSun,muSat,rSunAngle
-    INTEGER :: iSolarRadOrJac,MP2Lay
+    INTEGER :: iSolarRadOrJac
     REAL :: raaSolarScatter1Lay(kMaxPts,kProfLayer)
     REAL :: raaSolarScatterCumul(kMaxPts,kProfLayer),raLMm1_toGnd(kMaxPts)
     INTEGER :: iWhichLayer
@@ -597,7 +609,6 @@
     INTEGER :: iL,iFr,iDoSolar
     REAL :: muSun,muSat,raTemp(kMaxPts),raTemp1(kMaxPts)
     REAL :: rW,rX,rY,rZ,rT,raLMm1_toGnd(kMaxPts)
-    REAL :: hg2_real,hg2_real_deriv_wrt_g
 
     CALL InitSomeSunScatUp( &
     iNumLayer,iLay,iLM,raLayAngles,raSunAngles,raaLay2Gnd,iaCldLayer, &
@@ -984,7 +995,7 @@
     INTEGER :: iIWPorDME
 
 ! local variables
-    INTEGER :: iFr,iJ1,iM1,MP2Lay
+    INTEGER :: iFr,iJ1,iM1
     REAL :: raTemp(kMaxPtsJac),muSat
     REAL :: raResultsTh(kMaxPtsJac)
 
@@ -1058,3 +1069,4 @@
     end SUBROUTINE JacobCloudAmtUp
 
 !************************************************************************
+END MODULE jac_pclsam_up

@@ -564,7 +564,7 @@ c instead of temp of full layer at 100 km height!!!!!!
         CALL SetMieTables_RTSPEC_100layer(raFreq, 
      $   !!!!!!!!!!!!!!!!!these are the input variables 
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
-     $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
+     $        raaaCloudParams,iaaScatTable,caaaScatTable,
      $        iaPhase,raPhasePoints,raComputedPhase,
      $        iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer,
      $        -1,             !!!!iSergio = -1 to make things OK
@@ -1117,7 +1117,7 @@ c see if we have to add on the solar contribution
      $      iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,iTag)  
         !this figures backscattered solar intensity 
         CALL SolarScatterIntensity_Downlook( 
-     $      iDoSolar,raFreq,raSunAngles,raLayAngles,iaCldLayer, 
+     $      iDoSolar,raFreq,iaCldLayer,raSunAngles,raLayAngles,0.0,0.0,
      $      iNumLayer,iaRadLayer,raaExt,raaSSAlb,raaAsym,rFracTop,rFracBot, 
      $      iTag,+1,raaSolarScatter1Lay) 
       ELSE  
@@ -1814,7 +1814,7 @@ c instead of temp of full layer at 100 km height!!!!!!
         CALL SetMieTables_RTSPEC_100layer(raFreq, 
      $   !!!!!!!!!!!!!!!!!these are the input variables 
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
-     $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
+     $        raaaCloudParams,iaaScatTable,caaaScatTable,
      $        iaPhase,raPhasePoints,raComputedPhase,
      $        iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer,
      $        -1,             !!!!iSergio = -1 to make things OK
@@ -2382,7 +2382,7 @@ c instead of temp of full layer at 100 km height!!!!!!
         CALL SetMieTables_RTSPEC_100layer(raFreq, 
      $   !!!!!!!!!!!!!!!!!these are the input variables 
      $        iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,  
-     $        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,
+     $        raaaCloudParams,iaaScatTable,caaaScatTable,
      $        iaPhase,raPhasePoints,raComputedPhase,
      $        iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer,
      $        -1,             !!!!iSergio = -1 to make things OK

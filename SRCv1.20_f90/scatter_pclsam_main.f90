@@ -2,6 +2,23 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_pclsam_main
+
+USE basic_common
+USE jac_main
+USE jac_pclsam_up
+USE jac_pclsam_down
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_diff_and_quad
+USE rad_common
+USE spline_and_sort_and_common
+USE scatter_pclsam_code
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************** that interface with Chou et al PCLSAM     code **********
@@ -141,7 +158,7 @@
 ! iaJacob       = list of GasID's to do Jacobian for
     INTEGER :: iJacob,iaJacob(kMaxDQ)
     REAL :: raaSumAbCoeff(kMaxPts,kMixFilRows)
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
     REAL ::    rSatAzimuth,rSolAzimuth
 
 ! raaRadsX,iNumOutX are to keep up with cloud fracs
@@ -905,3 +922,4 @@
     RETURN
     end SUBROUTINE doMROcfrac
 !************************************************************************
+END MODULE scatter_pclsam_main

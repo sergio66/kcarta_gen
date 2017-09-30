@@ -1,7 +1,7 @@
 MODULE singlescatter
 
-USE jac_pclsam_up
-USE jac_pclsam_down
+USE clear_scatter_misc
+USE basic_common
 
 IMPLICIT NONE
 
@@ -56,8 +56,8 @@ CONTAINS
 ! raExtraSun = solar radiation incident at posn of instrument NOT USED!
     REAL :: raExtraSun(kMaxPts),raSun(kMaxPts),rU,muSun
     REAL :: rSunTemp,rOmegaSun,rSunAngle
-    REAL :: ttorad,muSat,raKabs(kMaxPts),hg2_azimuth_real,rSilly
-    INTEGER :: iL,iI,iFr,iExtraSun,MP2Lay
+    REAL :: muSat,raKabs(kMaxPts),rSilly
+    INTEGER :: iL,iI,iFr,iExtraSun
     INTEGER :: iaRadLayerTemp(kMixFilRows),iT,iLay
     REAL :: rNoScale
 
@@ -365,8 +365,8 @@ CONTAINS
 ! raExtraSun = solar radiation incident at posn of instrument NOT USED!
     REAL :: raTau(kMaxPts),raSun(kMaxPts),rU,muSun,raTauSum(kMaxPts)
     REAL :: rSunTemp,rOmegaSun,rSunAngle,rFrac
-    REAL :: ttorad,muSat,raKabs(kMaxPts),hg2_real,rSilly
-    INTEGER :: iL,iI,iFr,iExtraSun,MP2Lay
+    REAL :: muSat,raKabs(kMaxPts),rSilly
+    INTEGER :: iL,iI,iFr,iExtraSun
     INTEGER :: iaRadLayerTemp(kMixFilRows),iT,iLay,iLow
     REAL :: rSolarScatter,rNoScale
 
@@ -490,8 +490,8 @@ CONTAINS
 ! raExtraSun = solar radiation incident at posn of instrument NOT USED!
     REAL :: raExtraSun(kMaxPts),raSun(kMaxPts),rU,muSun
     REAL :: rSunTemp,rOmegaSun,rSunAngle
-    REAL :: ttorad,muSat,raKabs(kMaxPts),hg2_real,rSilly
-    INTEGER :: iL,iI,iFr,iExtraSun,MP2Lay
+    REAL :: muSat,raKabs(kMaxPts),rSilly
+    INTEGER :: iL,iI,iFr,iExtraSun
     INTEGER :: iaRadLayerTemp(kMixFilRows),iT,iLay
     REAL :: rNoScale
 
@@ -646,8 +646,8 @@ CONTAINS
 ! raExtraSun = solar radiation incident at posn of instrument NOT USED!
     REAL :: raExtraSun(kMaxPts),raSun(kMaxPts),rU,muSun
     REAL :: rSunTemp,rOmegaSun,rSunAngle
-    REAL :: ttorad,muSat,raKabs(kMaxPts),hg2_real,rSilly
-    INTEGER :: iL,iI,iFr,iExtraSun,MP2Lay
+    REAL :: muSat,raKabs(kMaxPts),rSilly
+    INTEGER :: iL,iI,iFr,iExtraSun
     INTEGER :: iaRadLayerTemp(kMixFilRows),iT,iLay
     REAL :: rNoScale
 

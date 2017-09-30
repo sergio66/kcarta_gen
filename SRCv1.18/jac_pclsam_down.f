@@ -258,7 +258,7 @@ c      DO iLay = iCldBotkCarta-1,iCldTopkCarta-1
         iSolarRadOrJac = +1
         CALL SolarScatterIntensity_Downlook(
      $      iDoSolar,raFreq,iaCldLayer,
-     $      raSunAngles,raLayAngles,0,0,
+     $      raSunAngles,raLayAngles,0.0,0.0,
      $      iNumLayer,iaRadLayer,
      $      raaExtTemp,raaSSAlbTemp,raaAsymTemp,rFracTop,rFracBot,
      $      iTag,iSolarRadOrJac,raaSolarScatter1Lay)

@@ -3,9 +3,18 @@
 ! All Rights Reserved
 
     PROGRAM kcartamain
-    use omp_lib          ! Fortran 90; omp_get_thread_num, omp_get_num_threads
-    use ifport           ! for getenv
+    use omp_lib            ! Fortran 90; omp_get_thread_num, omp_get_num_threads
+    use ifport             ! for getenv
 
+    use basic_common       ! misc routines
+    use kcartamisc         ! more misc routines
+    use jac_main           ! jacobians
+    use rad_main           ! main rad routines
+    use n_main             ! main reader for namelist
+    use kcoeffmain         ! uncompression routines
+    use knonlte            ! nonlte routines
+    use scatter_interface  ! scattering
+    
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
 !   kcartaparam.f90  : parameter declarations (for the array sizes)
@@ -328,7 +337,7 @@
 
 ! iJacob        = number of gas Jacobians to output
 ! iaJacob       = list of GasID's to do Jacobian for
-    INTEGER :: iJacob,iaJacob(kMaxDQ),DoGasJacob
+    INTEGER :: iJacob,iaJacob(kMaxDQ)
 
 ! (max of kNumkComp blocks, from 605 to 2805)
     INTEGER :: iFileIDLo,iFileIDHi,iInt,iFileID
@@ -373,15 +382,15 @@
     REAL ::    raQ21(kProfLayer),raQ22(kProfLayer)
 
 ! these are actually used
-    INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
+    INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
     INTEGER :: iFr,ID
-    INTEGER :: DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft
+    INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 ! these are temporary dumy variables
     REAL :: raX(kMaxPts),raY2(kMaxPts),raY3(kMaxPts),raY4(kMaxPts)
 !      REAL rDummy,rDummy2,rDummy3,rDerivTemp,rDerivAmt,PLKAVG_ORIG, PLKAVG
-    REAL :: rDummy,rDerivTemp,rDerivAmt,p2h
+    REAL :: rDummy,rDerivTemp,rDerivAmt
     DOUBLE PRECISION :: dDummy
 
 !************************************************************************
@@ -1276,30 +1285,34 @@
                     ELSEIF ((kWhichScatterCode == 0) .AND. (iaLimb(iAtm) > 0)) THEN
                     ! %%%%%%%%%%%%% CLEAR SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         write(kStdWarn,*) ' ---> Clear Sky LIMB Computations ...'
-                        CALL InterfaceClearSkyLimb( &
-                        raFreq, &
-                        raaSumAbCoeff,raMixVertTemp,caOutName, &
-                        iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
-                        raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
-                        raSatAngle,raFracTop,raFracBot, &
-                        iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-                        raSurface,raSun,raThermal,raSunRefl, &
-                        raLayAngles,raSunAngles,iTag,iActualTag, &
-                        raThickness,raPressLevels,iProfileLayers,pProf, &
-                        raTPressLevels,iKnowTP, &
-                        rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-                        iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-                        raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-                        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-                        iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
-                        daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
-                        daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
-                        daaUpperNLTEGasAbCoeffBloat, &
-                        caOutUAFile,caOutBloatFile, &
-                        caFLuxFile, &
-                        caJacobFile,caJacobFile2, &
-                        iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
-                        iaJacob,iJacob)
+			write(kStdWarn,*) ' oops turned this off!!!'
+                        write(kStdErr,*) ' ---> Clear Sky LIMB Computations ...'
+			write(kStdErr,*) ' oops turned this off!!!'
+			CALL DoStop
+!                        CALL InterfaceClearSkyLimb( &
+!                        raFreq, &
+!                        raaSumAbCoeff,raMixVertTemp,caOutName, &
+!                        iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
+!                        raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
+!                        raSatAngle,raFracTop,raFracBot, &
+!                        iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
+!                        raSurface,raSun,raThermal,raSunRefl, &
+!                        raLayAngles,raSunAngles,iTag,iActualTag, &
+!                        raThickness,raPressLevels,iProfileLayers,pProf, &
+!                        raTPressLevels,iKnowTP, &
+!                        rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
+!                        iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
+!                        raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
+!                        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
+!                        iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
+!                        daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
+!                        daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+!                        daaUpperNLTEGasAbCoeffBloat, &
+!                        caOutUAFile,caOutBloatFile, &
+!                        caFLuxFile, &
+!                        caJacobFile,caJacobFile2, &
+!                        iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
+!                        iaJacob,iJacob)
 
                     ELSE IF ((abs(kWhichScatterCode) /= 0) .AND. (iaLimb(iAtm) < 0)) THEN
                     ! %%%%%%%%%%%%% CLOUDY SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -2,6 +2,23 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+MODULE scatter_pclsam_flux
+
+USE basic_common
+USE spline_and_sort_and_common
+USE clear_scatter_basic
+USE rad_angles
+USE rad_misc
+USE rad_diff_and_quad
+USE rad_common
+USE spline_and_sort_and_common
+USE scatter_pclsam_code
+USE rad_flux
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************** that interface with Chou et al PCLSAM     code **********
@@ -134,7 +151,7 @@
 
     REAL :: rAngle
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
     INTEGER :: iDefault,iAccOrLoopFlux
 
 ! set the direction of radiation travel
@@ -386,7 +403,7 @@
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: muSat,ttorad,rMPTemp
+    REAL :: muSat,rMPTemp
 ! we need to compute upward and downward flux at all boundaries ==>
 ! maximum of kProfLayer+1 pressure level boundaries
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
@@ -395,11 +412,11 @@
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
      
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,rSunTemp,rOmegaSun,rSunAngle
      
-    REAL :: raTemp(kMaxPts),raVT1(kMixFilRows),InterpTemp
+    REAL :: raTemp(kMaxPts),raVT1(kMixFilRows)
     INTEGER :: iIOUN
      
     REAL :: raaExtTemp(kMaxPts,kMixFilRows)
@@ -444,7 +461,7 @@
     INTEGER :: iGaussPts,iCloudySky,iAngle
     REAL :: rSurfaceTemp,rDelta,raLayerTemp(kProfLayer),rAngle,rGaussWeight,raCC(kProfLayer)
 
-    INTEGER :: find_tropopause,troplayer
+    INTEGER :: troplayer
 
     WRITE (kStdWarn,*) 'PCLSAM radiative transfer code'
     WRITE (kStdWarn,*) 'Includes layer temperature profile effects in clds'
@@ -564,7 +581,7 @@
         CALL SetMieTables_RTSPEC_100layer(raFreq, & &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              &  & !!!!iSergio = -1 to make things OK
@@ -769,7 +786,7 @@
     INTEGER :: iDirection
 
 ! local vars
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
 
 !! --------- kAvgMin is a global variable in kcartaparam.f90 -------- !!
 ! kAvgMin is a global variable in kcartaparam.f90 .. set as required
@@ -950,11 +967,11 @@
     REAL :: raaSolarScatter1Lay(kMaxPts,kProfLayer)
      
 ! to do the thermal,solar contribution
-    REAL :: rThermalRefl,ttorad,radtot,rLayT,rEmission,rSunAngle
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iBeta,iOutput,iaCldLayer(kProfLayer)
+    REAL :: rThermalRefl,radtot,rLayT,rEmission,rSunAngle
+    INTEGER :: iDoThermal,iDoSolar,iBeta,iOutput,iaCldLayer(kProfLayer)
      
     REAL :: raOutFrac(kProfLayer)
-    REAL :: raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1)
+    REAL :: raVT1(kMixFilRows),raVT2(kProfLayer+1)
     INTEGER :: iIOUN,N,iI,iLocalCldTop,iLocalCldBot
     INTEGER :: i1,i2,iLoop,iDebug,iPutLay
     INTEGER :: iSTopNormalRadTransfer
@@ -1117,7 +1134,8 @@
         iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,iTag)
     ! his figures backscattered solar intensity
         CALL SolarScatterIntensity_Downlook( &
-        iDoSolar,raFreq,raSunAngles,raLayAngles,iaCldLayer, &
+        iDoSolar,raFreq,iaCldLayer, &
+	raSunAngles,raLayAngles,0.0,0.0, &
         iNumLayer,iaRadLayer,raaExt,raaSSAlb,raaAsym,rFracTop,rFracBot, &
         iTag,+1,raaSolarScatter1Lay)
     ELSE
@@ -1271,20 +1289,20 @@
 
 ! local variables
     INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),ttorad,rSunTemp,rMPTemp
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),rSunTemp,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),muSat
 
 ! to do the thermal,solar contribution
     REAL :: rThermalRefl,radtot,rLayT,rEmission,rSunAngle,muSun
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay,iBeta,iOutput
+    INTEGER :: iDoThermal,iDoSolar,iBeta,iOutput
     REAL :: raaAbsOnly(kMaxPts,kMixFilRows)
 
     REAL :: raOutFrac(kProfLayer),raTau(kMaxPts)
-    REAL :: raVT1(kMixFilRows),InterpTemp,raVT2(kProfLayer+1),rOmegaSun
+    REAL :: raVT1(kMixFilRows),raVT2(kProfLayer+1),rOmegaSun
     INTEGER :: N,iI,iLocalCldTop,iLocalCldBot,iRepeat
     INTEGER :: iaCldLayer(kProfLayer),iSimple
     INTEGER :: iCloudLayerTop,iCloudLayerBot,iiDiv,iLow,iPutLay
-    REAL :: rAngleTrans,rSolarScatter,hg2_real,rNoScale
+    REAL :: rAngleTrans,rSolarScatter,rNoScale
 
 ! calculate cos(SatAngle)
     muSat=cos(rSatAngle*kPi/180.0)
@@ -1621,7 +1639,7 @@
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh
-    REAL :: muSat,ttorad,rMPTemp
+    REAL :: muSat,rMPTemp
 ! we need to compute upward and downward flux at all boundaries ==>
 ! maximum of kProfLayer+1 pressure level boundaries
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
@@ -1630,11 +1648,11 @@
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
      
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,rSunTemp,rOmegaSun,rSunAngle
      
-    REAL :: raTemp(kMaxPts),raVT1(kMixFilRows),InterpTemp
+    REAL :: raTemp(kMaxPts),raVT1(kMixFilRows)
     INTEGER :: iIOUN
      
     REAL :: raaExtTemp(kMaxPts,kMixFilRows)
@@ -1685,7 +1703,7 @@
     REAL :: raaCumSum(kMaxPts,kProfLayer),raY(kMaxPts),raCC(kProfLayer)
 
     INTEGER :: iComputeAll,iDefault
-    INTEGER :: find_tropopause,troplayer
+    INTEGER :: troplayer
 
     WRITE (kStdWarn,*) 'PCLSAM radiative transfer code'
     WRITE (kStdWarn,*) 'Includes layer temperature profile effects in clds'
@@ -1814,7 +1832,7 @@
         CALL SetMieTables_RTSPEC_100layer(raFreq, & &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              &  & !!!!iSergio = -1 to make things OK
@@ -2160,7 +2178,7 @@
 
 ! local variables
     INTEGER :: iFr,iLay,iL,iaRadLayer(kProfLayer),iHigh,iVary
-    REAL :: muSat,ttorad,rMPTemp
+    REAL :: muSat,rMPTemp
 ! we need to compute upward and downward flux at all boundaries ==>
 ! maximum of kProfLayer+1 pressure level boundaries
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
@@ -2169,11 +2187,11 @@
     REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
           
 ! to do the thermal,solar contribution
-    INTEGER :: iDoThermal,iDoSolar,MP2Lay
+    INTEGER :: iDoThermal,iDoSolar
     INTEGER :: iExtraSun,iT
     REAL :: rThermalRefl,rSunTemp,rOmegaSun,rSunAngle
      
-    REAL :: raTemp(kMaxPts),raVT1(kMixFilRows),InterpTemp
+    REAL :: raTemp(kMaxPts),raVT1(kMixFilRows)
     INTEGER :: iIOUN
      
     REAL :: raaExtTemp(kMaxPts,kMixFilRows)
@@ -2225,7 +2243,7 @@
     REAL :: ravt2(maxnz),raCC(kProfLayer)
           
     INTEGER :: iComputeAll,iDefault
-    INTEGER :: find_tropopause,troplayer
+    INTEGER :: troplayer
 
     WRITE (kStdWarn,*) 'PCLSAM radiative transfer code'
     WRITE (kStdWarn,*) 'Includes layer temperature profile effects in clds'
@@ -2382,7 +2400,7 @@
         CALL SetMieTables_RTSPEC_100layer(raFreq, & &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              &  & !!!!iSergio = -1 to make things OK
@@ -2762,3 +2780,4 @@
     end SUBROUTINE fill_raaFluxOut
           
 !************************************************************************
+END MODULE scatter_pclsam_flux

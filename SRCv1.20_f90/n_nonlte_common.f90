@@ -1467,9 +1467,9 @@ CONTAINS
     IF ((abs(raTPressX(iAIRS_TOA)-rAIRS_TOA)/rAIRS_TOA    > 1e-3) .AND. &
     (abs(raTPressX(iAIRS_TOA-1)-rAIRS_TOA)/rAIRS_TOA  > 1e-3)) THEN
         iAddNewPt = +1      !!! AIRS TOA is kinda far from both bracket pts
-        CALL rspl1(raLog,raTTempX,   iNumVibLevels,log(rAIRS_TOA),rY1,1)
-        CALL rspl1(raLog,raQtipsX,   iNumVibLevels,log(rAIRS_TOA),rY2,1)
-        CALL rspl1(raLog,raNLTETempX,iNumVibLevels,log(rAIRS_TOA),rY3,1)
+        CALL rspl_one(raLog,raTTempX,   iNumVibLevels,log(rAIRS_TOA),rY1,1)
+        CALL rspl_one(raLog,raQtipsX,   iNumVibLevels,log(rAIRS_TOA),rY2,1)
+        CALL rspl_one(raLog,raNLTETempX,iNumVibLevels,log(rAIRS_TOA),rY3,1)
 
     !! move things over by 1
         DO iI = iNumVibLevels,iAIRS_TOA,-1

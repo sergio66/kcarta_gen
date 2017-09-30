@@ -1150,7 +1150,7 @@ c jacobians and then outputs them
      $            raThickness,raPressLevels,raTPresslevels,iProfileLayers,pProf,
      $   iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, 
      $   raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
-     $   iaCloudNumAtm,iaaCloudWhichAtm,iTag,iNpmix,
+     $   iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag,iNpmix,
      $            iNLTEStart,raaPlanckCoeff)
 
       IMPLICIT NONE
@@ -1219,7 +1219,7 @@ c raaaCloudParams stores IWP, cloud mean particle size
 c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       REAL rAngle
-      INTEGER iTag,iBinaryFile,iNpmix
+      INTEGER iTag,iActualTag,iBinaryFile,iNpmix
 c this is for NLTE weight fcns
       INTEGER iNLTEStart
       REAL raaPlanckCoeff(kMaxPts,kProfLayer)
@@ -1378,7 +1378,7 @@ c now these are the first few lines of interface_simple
      $         iProfileLayers,raPressLevels,raTPresslevels,
      $         raSurface,raThermal) 
 
-      CALL find_jacobians(raFreq,
+      CALL find_jacobians(raFreq,iTag,iActualTag,
      $            iFileID,caJacobFile,rTSpace,rTSurface,
      $            raUseEmissivity,rSatAngle,raVTemp,
      $            iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer,

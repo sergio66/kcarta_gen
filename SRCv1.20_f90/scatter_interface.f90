@@ -5,6 +5,25 @@
 ! this is the one called by eg kcartamain.f so it is the main one
 ! this is the one in Makefile_tar_objs_data
 
+MODULE scatter_interface
+
+USE basic_common
+USE jac_main
+USE jac_pclsam_up
+USE jac_pclsam_down
+USE clear_scatter_misc
+USE rad_diff_and_quad
+
+USE scatter_graycld_main
+USE scatter_pclsam_main
+USE scatter_rtspec_main
+USE scatter_pclsam_flux
+USE scatter_rtspec_flux
+
+IMPLICIT NONE
+
+CONTAINS
+
 !************************************************************************
 ! this is the interface call to the scattering routines
     SUBROUTINE InterfaceScattering( &
@@ -860,7 +879,7 @@
     REAL :: raaAsymTemp(kMaxPts,kMixFilRows)   !asymmetry temporary copy
     REAL :: raaPhaseJacobASYM(kMaxPts,kProfLayerJac) !phase fcn jacobians wrt g
 
-    INTEGER :: iDownWard,i1,i2,iFloor
+    INTEGER :: iDownWard,i1,i2
     INTEGER :: iaCloudWithThisAtm(kMaxClouds),iaScatTable_With_Atm(kMaxClouds)
     INTEGER :: iReadTable,iStep
     INTEGER :: IACLDTOP(kMaxClouds), IACLDBOT(kMaxClouds)
@@ -878,7 +897,7 @@
 
     REAL :: raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
            
-    INTEGER :: NSCATTAB, NCLDLAY, NABSNU, NLEV, N,L,iFindWhereInAtm,iSwap
+    INTEGER :: NSCATTAB, NCLDLAY, NABSNU, NLEV, N,L,iSwap
     INTEGER :: ICLDTOP, ICLDBOT, IOBS, ISCATTAB(MAXNZ)
     REAL ::    MUOBS, IWP(MAXNZ), DME(MAXNZ)         !ztop, zobs not needed
 
@@ -1150,7 +1169,7 @@
     raThickness,raPressLevels,raTPresslevels,iProfileLayers,pProf, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iTag,iNpmix, &
+    iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag,iNpmix, &
     iNLTEStart,raaPlanckCoeff)
 
     IMPLICIT NONE
@@ -1219,7 +1238,7 @@
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
     REAL :: rAngle
-    INTEGER :: iTag,iBinaryFile,iNpmix
+    INTEGER :: iTag,iActualTag,iBinaryFile,iNpmix
 ! this is for NLTE weight fcns
     INTEGER :: iNLTEStart
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
@@ -1241,7 +1260,7 @@
     REAL ::     TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
     REAL ::     TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
 
-    INTEGER :: iDownWard,i1,i2,iFloor
+    INTEGER :: iDownWard,i1,i2
     INTEGER :: iaCloudWithThisAtm(kMaxClouds),iaScatTable_With_Atm(kMaxClouds)
     INTEGER :: iReadTable,iStep
     INTEGER :: IACLDTOP(kMaxClouds), IACLDBOT(kMaxClouds)
@@ -1378,7 +1397,7 @@
     iProfileLayers,raPressLevels,raTPresslevels, &
     raSurface,raThermal)
 
-    CALL find_jacobians(raFreq, &
+    CALL find_jacobians(raFreq, iTag, iActualTag, &
     iFileID,caJacobFile,rTSpace,rTSurface, &
     raUseEmissivity,rSatAngle,raVTemp, &
     iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
@@ -1393,3 +1412,4 @@
     end SUBROUTINE find_jacobians_scat
 
 !************************************************************************
+END MODULE scatter_interface

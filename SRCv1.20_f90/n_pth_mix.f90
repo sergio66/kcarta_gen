@@ -121,14 +121,14 @@ CONTAINS
             IF ((log(raPressLevels(iI)) >= rPmin) .AND. (log(raPressLevels(iI)) <= rPmax)) THEN
             !! most of the points
                 IF (iInterpType == +1) THEN
-                    CALL rspl1(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+                    CALL rspl_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
                 !              CALL rspl_diffyp1n(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
                 ELSE
-                    CALL rlinear1(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+                    CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
                 END IF
             ELSE
             !! couple or so points at the top or bottom boundaries
-                CALL rlinear1(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+                CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
             END IF
             raTPressLevels(iI) = rY
         ELSE
@@ -210,7 +210,7 @@ CONTAINS
         dx = log(raPressLevels(iI+1)/raPressLevels(iI)) * 1/9  !! pressure spacing in (ln(p)) space
         DO iJ = 2,9
             raPX(iJ) = exp(log(raPX(01)) + (iJ-1)*dx)
-            CALL rspl1(logP,raT,iProfileLayers,log(raPX(iJ)),rY,1)
+            CALL rspl_one(logP,raT,iProfileLayers,log(raPX(iJ)),rY,1)
             raTX(iJ) = rY
         END DO
     !        DO iJ = 1,10

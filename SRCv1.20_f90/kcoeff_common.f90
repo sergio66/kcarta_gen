@@ -969,7 +969,7 @@ CONTAINS
         IF (iSplineType == +1) THEN
             CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
         ELSE
-            CALL rlinear1(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
+            CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
         END IF
         raRTemp(iI) = r
     END DO
