@@ -5,7 +5,7 @@
 MODULE rad_angles
 
 USE basic_common
-USE n_rtp
+USE n_misc
 
 IMPLICIT NONE
 

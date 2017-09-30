@@ -5,6 +5,12 @@
 ! this file has main driver for reading in user file
 ! this file also has the namelist writer subroutine
 
+! this is SAME as n_main.f except it calls
+! n_mainTXT was basically the same except
+!     radnceNMLonly  instead of radnceRTPorNML
+!     pthfil4NMLonly instead of pthfil4RTPorNML
+! and does away with identifychannelsrtp, readrtp_cld100layer, setrtpcloud
+
 MODULE n_main
 
 USE basic_common
@@ -1216,7 +1222,14 @@ CONTAINS
     END DO
 
 ! *************** check input name list file *********************************
-
+#IF (TXTsetting) & (kRTP >= 0)
+      write(kStdWarn,*) 'kRTP >= 0 & TXTsetting == 1'
+      write(kStdWarn,*) '  so you have set Makefile TXTsetting > 0 but still want to read RTP file??' 
+      write(kStdErr,*) 'kRTP >= 0 & TXTsetting == 1'
+      write(kStdErr,*) '  so you have set Makefile TXTsetting > 0 but still want to read RTP file??' 
+      CALL DOSTOP
+#ENDIF
+    
 ! ******** PARAMS section
     namecomment = '******* PARAMS section *******'
     call CheckParams
@@ -1241,14 +1254,16 @@ CONTAINS
 ! ******** FRQNCY section
     namecomment = '******* FRQNCY section *******'
     IF (kRTP <= 0) THEN
-    ! o need to check freqs as this is done in kcartamain.f (GetFreq)
+      ! no need to check freqs as this is done in kcartamain.f (GetFreq)
     ELSEIF ((kRTP > 0) .AND. (iaaOverrideDefault(1,8) == 1)) THEN
-    ! o need to check freqs as this is done in kcartamain.f (GetFreq)
+      ! no need to check freqs as this is done in kcartamain.f (GetFreq)
     ELSEIF ((kRTP > 0) .AND. (iaaOverrideDefault(1,8) == -1)) THEN
-    ! rint *,'A',rf_low,rf_high,iRTP,caPFName
-    ! eed to set rf_low, rf_high from the header info
-        CALL IdentifyChannelsRTP(rf_low,rf_high,iRTP,caPFName)
-    ! rint *,'B',rf_low,rf_high,iRTP,caPFName
+#IF (TXTsetting)
+      write(kStdErr,*) 'this does NOT want RTP setup'
+      CALL DoStop
+#ELSE      
+      CALL IdentifyChannelsRTP(rf_low,rf_high,iRTP,caPFName)
+#ENDIF      
     END IF
 
     write (kStdWarn,*) 'successfully checked freqs .....'
@@ -1261,7 +1276,7 @@ CONTAINS
         call molgas4(iNGas,iaGasesNL,iaMOLgases)
     END IF
     iNumGases = iNGas
-! et the GasIDs that have been checked
+! get the GasIDs that have been checked
     DO iInt = 1,kMaxGas
         IF (iaMOLgases(iInt) > 0) THEN
             iaGases(iInt) = iaMOLgases(iInt)
@@ -1299,10 +1314,16 @@ CONTAINS
 
 ! ******** PRFILE section
     namecomment = '******* PRFILE section *******'
+#IF (TXTsetting)
+    CALL pthfil4NMLonly(raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
+    raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
+    iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
+#ELSE
     CALL pthfil4RTPorNML(raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
     iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
-          
+#ENDIF
+
     IF (iKnowTP < 0) THEN
         CALL Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress, &
         raThickness,raPressLevels,raTPressLevels)
@@ -1360,6 +1381,21 @@ CONTAINS
         Call DoStop
     END IF
 
+#IF (TXTsetting)
+    CALL radnceNMLonly(iRTP,caPFname,iMPSetForRadRTP, &
+    iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
+    raPressLevels,iProfileLayers, &
+    raFracTop,raFracBot,raaPrBdry, &
+    raTSpace,raTSurf,raSatAngle,raSatHeight,raLayerHeight, &
+    raaaSetEmissivity,iaSetEms,caEmissivity,raSetEmissivity, &
+    raaaSetSolarRefl,iaSetSolarRefl,cakSolarRefl, &
+    iakSolar,rakSolarAngle,rakSolarRefl, &
+    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+    iaNumLayer,iaaRadLayer,raProfileTemp, &
+    raSatAzimuth,raSolAzimuth,raWindSpeed, &
+    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
+    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+#ELSE
     CALL radnceRTPorNML(iRTP,caPFname,iMPSetForRadRTP, &
     iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
     raPressLevels,iProfileLayers, &
@@ -1373,6 +1409,7 @@ CONTAINS
     raSatAzimuth,raSolAzimuth,raWindSpeed, &
     cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
     raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+#ENDIF
 
     iaKeyword(8) = 1
 
@@ -1482,6 +1519,11 @@ CONTAINS
         write(kStdWarn,*) ' '
         IF (caCloudPFname(1:5) == 'dummy') THEN
             write (kStdWarn,*) 'setting some parameters for RTP CLOUD SLABS .....'
+
+#IF (TXTsetting)
+            write(kStdErr,*) 'this does NOT want RTP setup'
+            CALL DoStop
+#ELSE
         !in this subroutine, iNclouds is set equal to Nclouds_RTP
             CALL SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop, &
             cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2, &
@@ -1494,6 +1536,7 @@ CONTAINS
             raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
             iaaScatTable,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm, &
             iaaCloudWhichLayers,iNatm,raaPrBdry,raPressLevels,iProfileLayers)
+#ENDIF	    
             iaCloudScatType(1) = iaCtype(1)
             iaCloudScatType(2) = iaCtype(2)
             iSetRTPCld  = +1   !!cld stuff set in RTP
@@ -1544,6 +1587,10 @@ CONTAINS
             iaCloudScatType(2) = ctype2
             iaCloudScatType(3) = -9999
 
+#IF (TXTsetting)
+            write(kStdErr,*) 'this does NOT want RTP setup'
+            CALL DoStop
+#ELSE
             CALL READRTP_CLD100LAYER(iRTP,iProfileLayers, &
             caPFname,caCloudPfName,iNclouds_RTP, &
             caaCloudFile,iaNML_Ctype,iaCloudScatType, &
@@ -1557,6 +1604,7 @@ CONTAINS
             raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
             iaaScatTable,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm, &
             iaaCloudWhichLayers,iNatm,raaPrBdry,raPressLevels,iProfileLayers)
+#ENDIF	    
             iNclouds_RTP = iNclouds
             iCldProfile  = +1   !!this has 100 layer cloud profile(s)
             iSetRTPCld   = +1   !!cld stuff set in RTP
@@ -2091,4 +2139,401 @@ CONTAINS
     end SUBROUTINE DoCheckEntry3
 
 !************************************************************************      
+! these next two are from rtp_interface.f but they dispense with the calls to rtp routines
+! this subroutine deals with the 'RADNCE' keyword
+    SUBROUTINE radnceNMLonly(iRTP,caPFName,iMPSetForRadRTP, &
+    iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
+    raPressLevels,iProfileLayers, &
+    raFracTop,raFracBot,raaPrBdry, &
+    raTSpace,raTSurf,raSatAngle,raSatHeight,raLayerHeight, &
+    raaaSetEmissivity,iaSetEms,caEmissivity,raSetEmissivity, &
+    raaaSetSolarRefl,iaSetSolarRefl,caSetSolarRefl, &
+    iakSolar,rakSolarAngle,rakSolarRefl, &
+    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+    iaNumLayer,iaaRadLayer,raProfileTemp, &
+    raSatAzimuth,raSolAzimuth,raWindSpeed, &
+    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
+    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! iNpmix     = number of mixed paths read in from mixfile
+! iaMPSetForRad = array telling which MP set to associate with which atm
+! iNatm       = number of atmospheres
+! raPressStart = start pressure for radiating atmos
+! raPressStop  = stop pressure for radiating atmos
+! raTSpace    = array containing background temperature for each atmosphere
+! raTSurf    = array contianing surface temperature for each atmosphere
+! raSatAngle = array containing satellite view angle for each atmosphere
+! raSatHeight= array containing satellite height for each atmosphere
+! iaNumLayer = array containing number of layers in each atmosphere
+! iaaRadLayer= matrix containing list of layers in each atmosphere
+! iaSetEms   = -1 if use emissivities from *RADNCE, > 0 if read in a file
+! raaaSetEmissivity = array containing the wavenumber dependent emissivities
+! raFracTop  = top fraction
+! raFracBot  = bottom fraction
+! raaPrBdry  = matrix that keeps start/stop pressures
+! the next few only work for DOWNWARD LOOK instr
+! caSetEmissivity= array that gives name of emissivity files (if any)
+! caSetEmissivity= array that gives name of solar refl files (if any)
+! raSetEmissivity= array that gives constant emissivity value (if set)
+! rakSolarAngle = solar angles for the atmospheres
+! rakThermalAngle=thermal diffusive angle
+! rakSolarRefl   =array that gives constant solar reflectance (if set)
+! iakthermal,iaksolar = turn on/off solar and thermal
+! iakthermaljacob=turn thermal jacobians on/off
+! raProfileTemp = array containing CO2 gas profile temperature
+! iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
+! iRTP tells us which profile info to read if kRTP == 1
+! raPressLevels gives the actual pressure levels from the KLAYERS file, within
+!               the iProfileLayers defined in the KLAYERS file
+! raS**Azimuth are the azimuth angles for solar beam single scatter
+    REAL :: raLayerHeight(kProfLayer)
+    REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
+    REAL :: raPressLevels(kProfLayer+1)
+    INTEGER :: iProfileLayers
+    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,cngwat,raCemis(kMaxClouds)
+    INTEGER :: ctype1,ctype2
+    REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
+    REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
+    INTEGER :: iaCtype(kMaxClouds),iNclouds_RTP,iaNML_Ctype(kMaxClouds)
+    CHARACTER(80) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+    REAL :: raSetEmissivity(kMaxAtm)
+    INTEGER :: iaMPSetForRad(kMaxAtm),iMPSetForRadRTP
+    REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
+    REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
+    REAL :: rakSolarRefl(kMaxAtm),raProfileTemp(kProfLayer)
+    INTEGER :: iakThermal(kMaxAtm),iaSetThermalAngle(kMaxAtm)
+    INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
+    REAL :: raaPrBdry(kMaxAtm,2),raFracTop(kMaxAtm),raFracBot(kMaxAtm)
+    REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
+    REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
+    INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm),iNpmix
+    INTEGER :: iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iNatm
+    REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
+    REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
+    INTEGER :: iRTP
+    CHARACTER(80) :: caPFName
+
+    INTEGER :: iI
+          
+    cfrac12 = -1.0
+    cfrac1 = -1.0
+    cfrac2 = -1.0
+    ctype1 = -9999
+    ctype2 = -9999
+    ctop1 = -100.0
+    ctop2 = -100.0
+
+    DO iI = 1,kMaxClouds
+        raCngwat(iI) = 0.0
+        raCpsize(iI) = 1.0
+    END DO
+
+!       DO iI = 1,kMaxAtm
+!         iaSetSolarRefl(iI) = -1
+!       END DO
+
+!!!kRTP = -1 : read old style kLAYERS profile; set atm from namelist
+!!!kRTP =  0 : read RTP style kLAYERS profile; set atm from namelist
+!!!kRTP = +1 : read RTP style kLAYERS profile; set atm from RTP file
+    IF (kRTP <= 0) THEN       !!!read info from usual .nml file
+        CALL radnce4( &
+        iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
+        raPressLevels,iProfileLayers, &
+        raFracTop,raFracBot,raaPrBdry, &
+        raTSpace,raTSurf,raSatAngle,raSatHeight, &
+        raaaSetEmissivity,iaSetEms,caEmissivity,raSetEmissivity, &
+        raaaSetSolarRefl,iaSetSolarRefl,caSetSolarRefl, &
+        iakSolar,rakSolarAngle,rakSolarRefl, &
+        iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+        iaNumLayer,iaaRadLayer,raProfileTemp)
+    ELSE
+        write(kStdErr,*) 'this does NOT want RTP setup'
+        CALL DoStop
+    !        CALL radnce4RTP(iRTP,caPFName,iMPSetForRadRTP,
+    !     $   iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop,
+    !     $   raPressLevels,iProfileLayers,
+    !     $   raFracTop,raFracBot,raaPrBdry,
+    !     $   raTSpace,raTSurf,raSatAngle,raSatHeight,
+    !     $   raaaSetEmissivity,iaSetEms,caEmissivity,raSetEmissivity,
+    !     $   raaaSetSolarRefl,iaSetSolarRefl,caSetSolarRefl,
+    !     $   iakSolar,rakSolarAngle,rakSolarRefl,
+    !     $   raSatAzimuth,raSolAzimuth,raWindSpeed,
+    !     $   iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle,
+    !     $   iaNumLayer,iaaRadLayer,raProfileTemp,
+    !     $   cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP,
+    !     $   raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+    END IF
+
+    IF ((raPresslevels(kProfLayer+1) > 10.00) .AND. (iNatm >= 1)) THEN
+        write(kStdErr,*) 'WARNING : '
+        write(kStdErr,*) 'Radiative transfer computations might be wrong as'
+        write(kStdErr,*) 'the TOA pressure level (TOA) is not high enough'
+        write(kStdErr,*) '(we would like it to be <= 10 mb)'
+        write(kStdErr,*) 'Please correct the levels you ask KLAYERS to use'
+    !        CALL DoStop
+    END IF
+
+    DO iI = 1,iNatm
+        IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. &
+        (rakSolarAngle(iI) <= 90.0))) THEN
+            write(kStdWarn,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+            iI,iaKsolar(iI),rakSolarAngle(iI)
+            write(kStdErr,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+            iI,iaKsolar(iI),rakSolarAngle(iI)
+            CALL DoStop
+        END IF
+    END DO
+
+!     now go through and see if any of these atmospheres are for limb sounding
+    CALL check_limbsounder(iNatm,raPressStart,raPressStop,raFracTop,raFracBot,raTSurf, &
+    raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
+    raPressLevels,raLayerHeight, &
+    iaKsolar,rakSolarAngle)
+
+    RETURN
+    end SUBROUTINE radnceNMLonly
+
+!************************************************************************
+! this subroutine deals with the 'PTHFIL' keyword
+    SUBROUTINE pthfil4NMLonly(raaAmt,raaTemp,raaPress,raaPartPress, &
+    caPFName,iRTP,iAFGLProf, &
+    raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
+    iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! iAFGLProf  = which AFGL prof to use? 1 .. 6
+! caPFName = character*80 profile name
+! raaAmt/Temp/Press/PartPress = current gas profile parameters
+! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
+! iaGases   = array that tracks which gas ID's should be read in
+! iaWhichGasRead = array that tracks whch gases ARE read in
+! iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
+! raLayerHeight = heights of layers in KM!!!!!!!
+! iRTP  = if RTP KLAYERS profile, which one of the profiles to read in
+! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
+! iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4)
+    REAL :: raTPressLevels(kProfLayer+1)
+    REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+    INTEGER :: iProfileLayers,iKnowTP,iAFGLProf
+    REAL :: raLayerHeight(kProfLayer)
+    INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
+    INTEGER :: iNpath,iRTP
+    REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
+    REAL :: raaPress(kProfLayer,kGasStore)
+    REAL :: raaPartPress(kProfLayer,kGasStore)
+    CHARACTER(80) :: caPfname
+
+! local variables
+    CHARACTER(7) :: caWord
+    INTEGER :: iNumLinesRead,iaDispGasID(12),iCount
+    INTEGER :: iGenln4,iL,iLBLDIS
+    REAL :: rP,rPP
+    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr160
+
+    iKnowTP = -1
+
+    iGenln4 = +1        !!!use Dave Edwards's "layers" output
+    iGenln4 = -1        !!!use Scott Hannon's "klayers" output
+    IF (kRTP == -2) THEN
+        iGenln4 = +1
+    ELSE
+        iGenln4 = -1
+    END IF
+
+    caWord='*PTHFIL'
+
+!!!kRTP = -6 : read LBLRTM       LAYERS profile; set atm from namelist
+!!!kRTP = -5 : read LBLRTM       LEVELS profile; set atm from namelist
+!!!kRTP = -10 : read              LEVELS profile; set atm from namelist
+!!!kRTP = -2  : read GENLN4 style LAYERS profile; set atm from namelist
+!!!kRTP = -1  : read old style   kLAYERS profile; set atm from namelist
+!!!kRTP =  0  : read RTP style   kLAYERS profile; set atm from namelist
+!!!kRTP = +1  : read RTP style   kLAYERS profile; set atm from RTP file
+
+    iNumLinesRead=0
+    IF ((kRTP < 0) .AND. (kRTP > -3) .AND. (iGenln4 > 0)) THEN
+        write(kStdWarn,*) 'KCARTA expecting text GENLN4 style input profile'
+    ELSEIF ((kRTP < 0) .AND. (kRTP > -3) .AND. (iGenln4 < 0)) THEN
+        write(kStdWarn,*) 'KCARTA expecting text KLAYERS style input profile'
+    ELSEIF (kRTP < -3) THEN
+        write(kStdWarn,*) 'KCARTA expecting text LEVELS style input profile'
+    ELSEIF (kRTP >= 0) THEN
+        write(kStdWarn,*) 'KCARTA expecting RTP hdf style input profile'
+    ENDIF
+
+    IF ((iAFGLProf < 1) .OR. (iAFGLProf > 6)) THEN
+        write(kStdErr,*) 'in nm_prfile, iAFGLProf must be between 1 .. 6'
+        CALL DoStop
+    ELSE
+        kAFGLProf = iAFGLProf
+    END IF
+
+    IF ((kRTP < 0) .AND. (kRTP >= -2)) THEN
+        IF (iGenln4 < 0) THEN
+            write(kStdWarn,*) 'Scott Hannon "Klayers" Profile to be read is  : '
+            write(kStdWarn,*) caPfname
+            CALL readKLAYERS4(raaAmt,raaTemp,raaPress,raaPartPress, &
+            raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
+            iNpath,caPfName,raPressLevels,raThickness)
+            iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
+        ELSEIF (iGenln4 > 0) THEN
+            write(kStdWarn,*) 'Dave Edwards "Layers" Profile to be read is  : '
+            write(kStdWarn,*) caPfname
+            iKnowTP = +1
+            CALL readGENLN4LAYERS(raaAmt,raaTemp,raaPress,raaPartPress, &
+            raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
+            iNpath,caPfName,raPressLevels,raThickness,raTPressLevels, &
+            iProfileLayers)
+        END IF
+    ! cc NOPE NO MORE iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
+    ELSEIF (kRTP >= 0) THEN
+        write(kStdErr,*) 'this does NOT want RTP setup'
+        CALL DoStop
+        write(kStdWarn,*) 'new style RTP profile to be read is  : '
+        write(kStdWarn,5040) caPfname
+        write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
+    !        CALL readRTP(raaAmt,raaTemp,raaPress,raaPartPress,
+    !     $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
+    !     $      iNpath,caPfName,iRTP,
+    !     $      iProfileLayers,raPressLevels,raThickness)
+    ELSEIF (kRTP == -10) THEN
+        write(kStdWarn,*) 'LEVELS style TEXT profile to be read is  : '
+        write(kStdWarn,5040) caPfname
+        CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+        raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
+        iNpath,caPfName,iRTP, &
+        iProfileLayers,raPressLevels,raTPressLevels,raThickness)
+    ELSEIF ((kRTP == -5) .OR. (kRTP == -6)) THEN
+        write(kStdWarn,*) 'LBLRTM style TEXT profile to be read is  : '
+        write(kStdWarn,5040) caPfname
+        CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+        raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
+        iNpath,caPfName,iRTP, &
+        iProfileLayers,raPressLevels,raTPressLevels,raThickness)
+    END IF
+
+! this piece of "output" displays the amounts for the first 3 gases
+! also displays temperature of first stored gas.
+! if less than 3 gases stored it is smart enuff to display <= 3 gas amts
+! notice here that gA == first gas in the MOLGAS, usually water
+    DO iL = 1,12
+        iaDispGasID(iL) = -1
+    END DO
+
+    iCount = 0
+    DO iL = 1,kMaxGas
+        IF (iaWhichGasRead(iL) > 0) THEN
+            iCount = iCount + 1
+            iaDispGasID(iCount) = iL
+        END IF
+        IF ((iCount == iNumGases) .OR. (iCount == 12)) THEN
+            GOTO 5000
+        END IF
+    END DO
+
+    5000 CONTINUE
+
+    iLBLDIS = -1     !!! do not dump out stuff for LBLDIS to use
+    iLBLDIS = +1     !!! do     dump out stuff for LBLDIS to use
+!!!! this is for LBLDIS =======================<<<<<<< >>>>=============
+!!!! pressures in mb, temps in K, heights in km, gas amounts in mol/cm2
+!!!! only dump gases(1:7) for "var" gases, gas 22 (N2) as the broadener
+    9879 FORMAT(9(E14.8,' '))
+    9878 FORMAT(8(E14.8,' '))
+    9877 FORMAT(7(E14.8,' '))
+    9876 FORMAT(6(E14.8,' '))
+    9872 FORMAT(2(E14.8,' '))
+    caStr='<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>> &
+    >>>>>>>>>>>'
+    IF ((iLBLDIS > 0) .AND. (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,5040) caStr
+        write(kStdWarn,*) 'LBLRTM TAPE7 --- start cut below this line ----'
+        write(kStdWarn,5040) caPFName
+        iL = 7
+        write(kStdWarn,*) iL*2,iProfileLayers,iL   !!! "junk",number of layers
+    !!! and number of gases dumping amts for
+        iL = kProfLayer-iProfileLayers+1
+        rP = raaPress(iL,1)
+        IF (iL > 1) THEN
+            rPP = (raaTemp(iL,1)-raaTemp(iL-1,1))/2.0   !! delta(T) across layer
+        ELSE
+        !! we really need surface temp
+        ! PP = (raaTemp(iL,1)-rSurfTemp)/2.0   !! delta(T) across layer
+            rPP = 0.0
+        END IF
+        write(kStdWarn,9879) rP*kAtm2mb,raaTemp(iL,1),-1.0, &
+        raLayerHeight(iL)/1000,raPressLevels(iL),raaTemp(iL,1)-rPP, &
+        (raLayerHeight(iL)+raThickness(iL))/1000, &
+        raPressLevels(iL+1),raaTemp(iL,1)+rPP
+    ! N2 = gas22 is stored at index 20
+        write(kStdWarn,9878) raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3), &
+        raaAmt(iL,4),raaAmt(iL,5),raaAmt(iL,6),raaAmt(iL,7),raaAmt(iL,20)
+        DO iL = kProfLayer-iProfileLayers+1+1,kProfLayer
+            rP = raaPress(iL,1)
+        !! this is delta(T) across the layer
+            rPP = (raaTemp(iL,1)-raaTemp(iL-1,1))/2.0
+            write(kStdWarn,9876) rP*kAtm2mb,raaTemp(iL,1),-1.0, &
+            (raLayerHeight(iL)+raThickness(iL))/1000, &
+            raPressLevels(iL+1),raaTemp(iL,1)+rPP
+        ! N2 = gas22 is stored at index 20
+            write(kStdWarn,9878) raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3), &
+            raaAmt(iL,4),raaAmt(iL,5),raaAmt(iL,6),raaAmt(iL,7),raaAmt(iL,20)
+        END DO
+        write(kStdWarn,*) 'LBLRTM TAPE7 --- end cut above this line ----'
+        write(kStdWarn,5040) caStr
+    END IF
+!!!! this is for LBLDIS =======================<<<<<<< >>>>=============
+           
+    write(kStdWarn,*) '  '
+    caStr160=' Lay    P(gA)      PP(gA)       Temp        GasID=       GasID= &
+    GasID=       GasID=       GasID=       GasID=       GasID= &
+    GasID='
+    write(kStdWarn,5030) caStr160
+    write(kStdWarn,*) '                                           ', &
+    iaDispGasID(1),'         ',iaDispGasID(2),'         ',iaDispGasID(3), &
+    iaDispGasID(4),'         ',iaDispGasID(5),'         ',iaDispGasID(6), &
+    iaDispGasID(9),'         ',iaDispGasID(12)
+    caStr='---------------------------------------------------------------- &
+    -----------'
+    write(kStdWarn,5040) caStr
+    IF ((iLBLDIS > 0) .AND. (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt -- start cut below this line --'
+        DO iL = kProfLayer-iProfileLayers+1,kProfLayer
+            rP = raaPress(iL,1)
+            rPP = raaPartPress(iL,1)
+            write(kStdWarn,5050) iL,rP*kAtm2mb,rPP*kAtm2mb,raaTemp(iL,1), &
+            raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3),raaAmt(iL,4),raaAmt(iL,5), &
+            raaAmt(iL,6),raaAmt(iL,9),raaAmt(iL,12)
+        END DO
+    END IF
+    IF ((iLBLDIS > 0) .AND. (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt --- end cut above this line ---'
+    END IF
+
+    write(kStdWarn,*) '  '
+    caStr = ' Pressure LEVELS '
+    write(kStdWarn,5040) caStr
+    DO iL = kProfLayer-iProfileLayers+1,kProfLayer+1
+        rP = raPressLevels(iL)
+        write(kStdWarn,*) iL,rP
+    END DO
+
+    5030 FORMAT(A160)
+    5040 FORMAT(A80)
+    5050 FORMAT(I3,' ',6(E11.5,' '))
+    5060 FORMAT(I3,' ',11(E11.5,' '))
+
+    RETURN
+    end SUBROUTINE pthfil4NMLonly
+
+!************************************************************************
 END MODULE n_main

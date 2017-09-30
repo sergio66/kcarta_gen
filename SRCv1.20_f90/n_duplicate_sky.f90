@@ -17,7 +17,6 @@ USE n_pth_mix
 USE n_output
 USE n_layers_lblrtm
 USE n_misc
-USE n_rtp
 
 IMPLICIT NONE
 
