@@ -202,6 +202,17 @@ EXECSDIST = datafix385 basic
 all : $(EXECS)
 alldist : $(EXECSDIST)
 
+datafix400_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_400_H2016.param > \
+      ../INCLUDE/kcarta_v118.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v118.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.18
+
 datafix400_H2012:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_400_H2012.param > \
       ../INCLUDE/kcarta_v118.param; \

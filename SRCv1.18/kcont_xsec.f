@@ -251,7 +251,7 @@ c&&&&&&&&
         write(kStdErr,*) 'Always need ',kFreqCKD, ' points in the file'
         CALL DoStop
       END IF
-
+      
       READ(iIOUN) (daTemprt(iLay),iLay=1,iM)   !read the temps
 
       DO iLay=1,iM
@@ -262,7 +262,7 @@ c&&&&&&&&
       CLOSE(iIOUN)
       kTempUnitOpen=-1
 c&&&&&&&&
-    
+      
       iMethod = +1       !!! quadratic
       iMethod = +2       !!! linear, T dependance in Cs,Cf
       iMethod = +3       !!! linear, T dependance in Cs only

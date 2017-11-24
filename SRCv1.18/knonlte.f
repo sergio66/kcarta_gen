@@ -4938,6 +4938,11 @@ c      !/wrt_nte_le.m
 c      FNCOFN= '/home/sergio/KCARTADATA/NLTE/SARTA_COEFS/setnte_oct05.le.dat'
 c      FNCOFN= '/asl/data/kcarta/KCARTADATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat'
 c
+c also look at /asl/data/kcarta_sergio/KCDATA/NLTE/SARTA_COEFS
+c /umbc/xfs3/strow/asl/data/kcarta_sergio/KCDATA/NLTE/SARTA_COEFS
+c >> x='/asl/data/kcarta_sergio/KCDATA/NLTE/SARTA_COEFS/nonLTE7_m150.be.dat';
+c >> [idchan, freq, coef] = rd_nte_be(x);
+
 c /asl/packages/sartaV108/Src_rtpV201/incFTC_iasi_sep08_wcon_nte.f :
 c       PARAMETER(FNCOFN=
 c            $ '/asl/data/sarta_database/Data_IASI_sep08/Coef/nte_7term.dat')

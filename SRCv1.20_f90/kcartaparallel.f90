@@ -365,7 +365,7 @@
     INTEGER :: iaActualTag(kNumkCompT),iaTagIndex(kNumkCompT)
     REAL :: raBlock(kNumkCompT)
 
-! this tells user the kLAYERS atmospheri! particle density, using N/V = P/RT
+! this tells user the kLAYERS atmospheric particle density, using N/V = P/RT
 ! when multiplied by the layer height, gives units of /cm^2
 ! so when multiplied by Rayleigh scattering cross section, this gives units
 ! of optical depth (no units)
@@ -408,6 +408,20 @@
 ! OpenMP Parameters
     INTEGER :: iNumProcessors,nthreads,TID
     double precision :: wtime
+
+  CHARACTER(LEN=10000) :: caAllPrivateList
+  CHARACTER(LEN=*), PARAMETER :: &
+    caPrivateList1 = 'iaP1,iaP2,raP1,raP2,&
+                     iaT11,iaT12,iaT21,iaT22,raT11,raT21,raT21,raT22,raJT11,raJT12,raJT21,raJT22,    &
+                     iaQ11,iaQ12,iaQ21,iaQ22,raQ11,raQ12,raQ21.raQ22,',                              &
+    caPrivateList2 = 'iaList,raFiles,daFileSTep,iaActualTag,iaTagIndex,raBlock,',                    &
+    caPrivateList3 = 'raNumberDensity,',                                                             &
+    caPrivateListN = 'raRefProf'
+
+!************************************************************************
+    caAllPrivateList = caPrivateList1//caPrivateList2//caPrivateList3//caPrivateListN
+    
+    print *,trim(caAllPrivateList)
 
     wtime = omp_get_wtime ( )
           
@@ -772,10 +786,16 @@
     write(kStdErr,'(A,I3,A)') 'starting parallel loop with ',iNumProcessors,' processors'
     write(kStdWarn,'(A,I3,A)') 'starting parallel loop with ',iNumProcessors,' processors'
     print *,'total number of freq chunks to process (iTotal) = ',iTotal
-    
+    print *,'kMaxDQ,kProfLayerJac,kMaxPtsJac = ',kMaxDQ,kProfLayerJac,kMaxPtsJac
+
     CALL OMP_SET_NUM_THREADS(iNumProcessors)
+
+!! see http://www.radford.edu/~thompson/vodef90web/OpenMP_dvode_f90_m.f90 on
+!! how to pass looooong lists
+ !$OMP PARALLEL PRIVATE(iOuterLoop,TID,iNumProcessors,iTotal)
+ ! loop indices are always private
+    
     print *,'WAH0 about to start parallel'
- !$OMP PARALLEL DEFAULT(FIRSTPRIVATE) PRIVATE(iOuterLoop,iTotal)   !! loop indices are always private
     print *,'WAH1 called omp parallel',iOuterLoop,iTotal
     TID = OMP_GET_THREAD_NUM()
     IF (TID == 0) THEN
@@ -784,8 +804,7 @@
     END IF
     print *,'Thread ',TID,'starting ....'
 
- !$OMP DO
-    DO iOuterLoop=1,iTotal
+    DO iOuterLoop=TID,iTotal,iNumProcessors
     
         print *,'parallel A',iOuterLoop
         kOuterLoop = iOuterLoop
@@ -1422,7 +1441,6 @@
         print *,'parallel K',iOuterLoop
 	
     END DO               !!!!!!iOuterLoop=1,iTotal
- !$OMP END DO    
  !$OMP END PARALLEL
 
 !!!!!!!close all units

@@ -55,7 +55,7 @@ fid=fin;                    %<------------- my modification
 % version number
 flen    = fread(fin, 1, 'integer*4');
 version = fread(fin, 80, 'char');
-caVersion.include_param = setstr(version');
+caVersion.include_param = char(version');
 version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 

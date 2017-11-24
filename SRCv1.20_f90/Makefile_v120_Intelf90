@@ -81,16 +81,20 @@ FORTRANX = ifort   ## GENERIC< should always work!!!
 #FLAGS = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291
 
 ### happy and you know it, use the preprocessor
+### happy and you know it, use the preprocessor
 FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291
+### happy and you know it, use the preprocessor
+### happy and you know it, use the preprocessor
 
 # ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT Intel parrallelization
 #Option -openmp enables OpenMP processing.
 #Option -parallel enables automatic parallelization.
 #Option -par-report3 is useful to see what it does.
-#FLAGS = -parallel -par_report3 -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
+#FLAGS = -fpp -parallel -par_report3 -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
 # ALL COOL  >>>>>>>>>>>>>>>>>>> SERGIO parallelization
 #https://software.intel.com/en-us/node/532813
-#FLAGS = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
+#FLAGS = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291
+#FLAGS = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291  -check bounds
 #
 #UFLAG = 
 LIBS  = -lblas -mkl

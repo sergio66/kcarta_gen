@@ -52,14 +52,25 @@ fid=fin;                    %<------------- my modification
 
 % MAIN HEADER
 
-% comment
+% this was the hope
+%flen    = fread(fin, 1, 'integer*4');
+%version = fread(fin, 120, 'char');
+%version = char(version');
+%version_number=str2num(version(2:5))
+%if  (version_number >= 1.18)
+%  comment = fread(fin, 120, 'char');
+%else
+%  comment = fread(fin, 80, 'char');
+%end  
+%comment = char(comment');
+%flen    = fread(fin, 1, 'integer*4');
+
+%this is the reality .. see lines 2860 - 2870 of v1.18/s_writefile.f
 flen    = fread(fin, 1, 'integer*4');
-if  (version_number >= 1.18)
-  comment = fread(fin, 120, 'char');
-else
-  comment = fread(fin, 80, 'char');
-end  
-comment = setstr(comment');
+version = fread(fin, 120, 'char');
+version = char(version');
+%caVersion.include_param = char(version')
+%version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 
 % number of layers
