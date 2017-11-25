@@ -684,7 +684,7 @@ c set the frequency range for the current file block
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22)
       END IF
-
+      
       IF (iNumNewGases .GE. 1) THEN
         write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'    
         write(kStdWarn,*) ' section nm_spectra says following number of new spectra ',iNumNewGases

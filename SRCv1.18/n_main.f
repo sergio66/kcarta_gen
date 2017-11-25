@@ -1284,7 +1284,7 @@ c ******** PRFILE section
       CALL pthfil4RTPorNML(raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf,
      $     raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath,
      $      iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
-      
+
       IF (iKnowTP .LT. 0) THEN
         CALL Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress,
      $                      raThickness,raPressLevels,raTPressLevels)

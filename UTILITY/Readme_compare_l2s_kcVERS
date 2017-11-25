@@ -1,0 +1,6 @@
+ 1139  time ../BIN/kcarta.x_f90_400ppmv quickuse_l2s_kcVERS.nml l2s_kc120_H12.dat
+ 1140  time ../BIN/kcarta.x_f90_400ppmv_H16 quickuse_l2s_kcVERS.nml l2s_kc120_H16.dat
+ 1141  mv quickuse_l2s_kcVERS.nml l2s_kc120_H12.dat l2s_kc120_H16.dat ../UTILITY
+ 1142  ln -s ../UTILITY/quickuse_l2s_kcVERS.nml quickuse_l2s_kcVERS.nml
+
+explicity using US Std profile

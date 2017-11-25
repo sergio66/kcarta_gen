@@ -589,6 +589,9 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
+11/25/17       n_rtp.f90 : Subroutine FindError
+               IF ((rT .lt. 150.0) .OR. (rT. gt. 400.0)) THEN      changed to
+               IF ((rT .lt. 140.0) .OR. (rT. gt. 400.0)) THEN      
 
 9/29/17        Makefile_tar_objs_data_f90 now requires you to comment/uncomment which
                executable you are making, so that the fpp string "TXTRTPFLAG" can be
@@ -611,6 +614,10 @@ September 2017 f90 version. Made modules, so rearranged subroutines/functions
 	       
 v1.18
 -----
+11/25/17       rtp_interface.f : Subroutine FindError
+               IF ((rT .lt. 150.0) .OR. (rT. gt. 400.0)) THEN      changed to
+               IF ((rT .lt. 140.0) .OR. (rT. gt. 400.0)) THEN      
+
 1/26/17        Can have background thermal done by 6 methods (all constant T across layer)
                  integration
                     exponential gaussian integration (NEW, few quadrature angles)

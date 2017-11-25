@@ -54,7 +54,10 @@ c local
       
       rPmin = +1.0e10
       rPmax = -1.0e10
-      iI = 75   !!! make this really high up
+c      DO iI = 1,100
+c        print *,iI,iCO2_ind,iProfileLayers,raaPress(iI,iCO2_ind)*kAtm2mb,raaTemp(iI,iCO2_ind)
+c      END DO      
+      iI = 75   !!! make this really high up      
       IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND.
      $    (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) THEN
         !! pressures decreasing with index; use CO2 temps and pressures
@@ -65,7 +68,7 @@ c local
           raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
           IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
           IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
-c           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
+ccc           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
         END DO
       ELSEIF 
      $((raaPress(iI,iCO2_ind) .LT. raaPress(iI+1,iCO2_ind)) .AND.
@@ -78,7 +81,7 @@ c           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
           raT(iJ) = raaTemp(iJ,iCO2_ind)
           IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
           IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
-c          print *,'b',iJ,raP(iJ),raT(iJ)
+ccc          print *,'b',iJ,raP(iJ),raT(iJ)
         END DO
       ELSE
         DO iJ = iI-2,iI+2
@@ -105,6 +108,7 @@ c          print *,'b',iJ,raP(iJ),raT(iJ)
       END IF
       
       DO iI = 1,kProfLayer+1
+c        print *,iI,raPressLevels(iI),raP(iI),raT(iI)
         IF (raPressLevels(iI) .GT. 0) THEN
           IF ((log(raPressLevels(iI)) .GE. rPmin) .AND. (log(raPressLevels(iI)) .LE. rPmax)) THEN
 	    !! most of the points

@@ -4484,7 +4484,7 @@ CONTAINS
     ! ALL DoStop
     END IF
 
-    IF ((rT < 150.0) .OR. (rT > 400.0)) THEN
+    IF ((rT < 140.0) .OR. (rT > 400.0)) THEN
         WRITE(kStdWarn,1081)
         WRITE(kStdWarn,1111) iIDgas,iCnt,rT
         iError = 1
