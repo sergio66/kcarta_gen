@@ -202,11 +202,11 @@ c to do the angular integration
       iE = iaRadLayer(iE0)
 
       iCase  = -1
-      iBdry  = FindBoundary(raFreq,iProfileLayers,raPressLevels,iaRadLayer)
-      
+      iBdry  = FindBoundary(raFreq,iProfileLayers,raPressLevels,iaRadLayer)      
       iBdry0 = iBdry
       iM     = iDiv(iaRadLayer(1),kProfLayer)   
       iBdry  = iBdry + iM*kProfLayer
+      iBdryP1_O = iBdry 
 
 c now we have 3 different cases to consider
 c CASE A1 : easy -- this is do ENTIRE atmnosphere
@@ -482,6 +482,7 @@ c to do the angular integration
       iBdry0 = iBdry
       iM     = iDiv(iaRadLayer(1),kProfLayer)   
       iBdry  = iBdry + iM*kProfLayer
+      iBdryP1_O = iBdry 
 
 c now we have 3 different cases to consider
 c CASE A1 : easy -- this is do ENTIRE atmnosphere

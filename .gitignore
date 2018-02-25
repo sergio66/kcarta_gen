@@ -81,6 +81,7 @@ SRCv1.16
 SRCv1.17
 # SRCv1.18
 SRCv1.18WORKS
+SRC_PLAYSANDBOX
 
 # special cases
 # allow this, change Readme so that users are aware scatter*.f are experimental

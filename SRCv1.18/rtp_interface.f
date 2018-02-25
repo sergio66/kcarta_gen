@@ -844,10 +844,17 @@ c      write(kStdWarn,*)  'read close status = ', status
       DO i = 1,kProfLayer
         raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
         write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100
-        IF (raThickness(i) .LE. 100.00) THEN
-          write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
-          write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        IF ((raThickness(i) .LE. 100.00) .AND. (iDownward .EQ. +1)) THEN
+          write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm, iDownward ',i,raThickness(i),iDownward
+          write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm, iDownward ',i,raThickness(i),iDownward
           CALL DoStop
+        ELSEIF ((raThickness(i) .LE. 100.00) .AND. (iDownward .EQ. -1)) THEN
+	  raThickness(i) = abs(raThickness(i))
+	  IF (raThickness(i) .LE. 100.00) THEN
+            write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm, iDownward  ',i,raThickness(i),iDownward
+            write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm, iDownward  ',i,raThickness(i),iDownward
+            CALL DoStop
+	  END IF
         END IF
       END DO
 
@@ -1350,10 +1357,17 @@ c      write(kStdWarn,*)  'read close status = ', status
       DO i = 1,kProfLayer
         raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
         write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100
-        IF (raThickness(i) .LE. 100.00) THEN
-          write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
-          write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        IF ((raThickness(i) .LE. 100.00) .AND. (iDownward .EQ. +1)) THEN
+          write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm, iDownward ',i,raThickness(i),iDownward
+          write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm, iDownward ',i,raThickness(i),iDownward
           CALL DoStop
+        ELSEIF ((raThickness(i) .LE. 100.00) .AND. (iDownward .EQ. -1)) THEN
+	  raThickness(i) = abs(raThickness(i))
+	  IF (raThickness(i) .LE. 100.00) THEN
+            write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm, iDownward  ',i,raThickness(i),iDownward
+            write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm, iDownward  ',i,raThickness(i),iDownward
+            CALL DoStop
+	  END IF
         END IF
       END DO
 

@@ -51,7 +51,8 @@ wnums = [];
 if fin == -1
   error(['error opening input file\n', msg]);
   end
-fid=fin;                    %<------------- my modification
+fid = fin;                    %<------------- my modification
+%disp('here 1')
 %%%%%%%%%%%%%%%%%%%%%%
 % READ HEADER RECORDS
 %%%%%%%%%%%%%%%%%%%%%%
@@ -87,6 +88,7 @@ caVersion.ckd = rparams(2);
 flen    = fread(fin, 1, 'integer*4');
 if  (version_number >= 1.18)
   comment = fread(fin, 120, 'char');
+  %%% comment = fread(fin, 80, 'char');  %% for testing SRCv1.18/WORKS_Apr15_2016/
 else
   comment = fread(fin, 80, 'char');
 end  
@@ -114,7 +116,7 @@ flen  = fread(fin, 1, 'integer*4');
 if htype == 0
   fprintf(1,'this reader cannot work for kLongOrShort = 0!! \n');
   error('Use readkcBasic.m instead!!!');
-  end
+end
 
 %%%%
 % This block added by Scott for version 1.03+
@@ -159,6 +161,8 @@ elseif ((version_number >= 1.09))
   end
 end
 
+%disp('here 2')
+
 %%%%%% GAS PATH HEADER
 
 if htype < 0                 %%%%%%%%%%%%%%%%%%% short version 
@@ -171,15 +175,17 @@ if htype < 0                 %%%%%%%%%%%%%%%%%%% short version
     flen     = fread(fin, 1, 'integer*4');
     gaspaths = fread(fin, ngasout, 'integer*4');
     flen     = fread(fin, 1, 'integer*4');
-    end
   end
+end
+
+%disp('here 2a')
 
 if htype > 0     
   %%%%%%%% long version ..... copied direct from readgaspaths.m
 
   %read iNumPaths=iNumGases*iNumLayers 
   flen       = fread(fid,1,'integer*4'); 
-  iNumPaths  = fread(fid,1,'integer*4'); 
+  iNumPaths  = fread(fid,1,'integer*4');
   flen       = fread(fid,1,'integer*4'); 
   ngasout    = iNumPaths;        %<---------------------- my modification
    
@@ -224,6 +230,8 @@ if htype > 0
     end 
   end        %if htype > 0 
 
+%disp('here 2b')
+
 % MIXED PATH HEADER
 if htype < 0                    %%%%%%%%%%%%%%%%%%%%short version
   flen      = fread(fin, 1, 'integer*4');
@@ -243,6 +251,8 @@ if htype < 0                    %%%%%%%%%%%%%%%%%%%%short version
       end
     end
   end
+
+%disp('here 2c')
 
 if htype > 0     
   %%%% long version ... copied direct from readmixedpaths.m
@@ -299,6 +309,8 @@ if htype > 0
     end 
   end                %if LS > 0 
 
+%disp('here 2d')
+
 % ATMOSPHERE HEADER
 
 % number of atmospheres in *RADFIL
@@ -310,6 +322,8 @@ flen   = fread(fin, 1, 'integer*4');
 flen  = fread(fin, 1, 'integer*4');
 nemis = fread(fin, 1, 'integer*4');
 flen  = fread(fin, 1, 'integer*4');
+
+%disp('here 2d2')
 
 if (natmos > 0)
 
@@ -378,6 +392,8 @@ if (natmos > 0)
     end
   end
 
+%disp('here 2e')
+
 %%%%%%%%%%%%%%%%%%%%%%
 % DATA RECORD SUMMARY
 %%%%%%%%%%%%%%%%%%%%%%
@@ -399,6 +415,8 @@ end
 if nchunk ~= 1+highchunk-lowchunk
   error('readkc: chunk counts do not match!');
 end
+
+%disp('here 3')
 
 fprintf(2, 'readkc: %d chunks, %d ODBs, %d total rows\n', ...
         nchunk, nODBs, sum(nODBrows));
