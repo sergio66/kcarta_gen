@@ -1,0 +1,48 @@
+Sergio,
+
+You would have to have a conversation with Antonia about the
+Pgood/Pbest thing -- but I will see if I can dig it out of my stuff
+over the next couple of days.  I never use that because I find it
+absurd to try to use a partial profile.  We constrained TOA and if we
+are influenced by clouds it has affected all layers of our product.
+
+Attached is lsurface.f which you call as
+
+  Nobs = 100
+  Pobs() = the 100 LEVELS of SARTA
+  Psurf = surface pressure
+  Plow = 100.0
+  Phgh = 1100.0
+
+numlev  = lsurface(Nobs, Pobs, Psurf, Plow, Phgh)
+
+Then we get the layer temperature as follows:
+
+  Tlevel(L) = temperature at Pobs(L), L=1,100
+  (I usually make T(numlev+1,100) = T(numlev)
+  call meantemp(numlev, Pobs, Psurf, Tlevel, Tlayer)
+  Tlayer(L) = mean temperature for SARTA call
+
+The bottom layer of layer column density (molecules/cm^2/layer) for
+all constituent's must be multiplied by when doing validation but in
+our call's to SARTA it is done internally, so we compute optical depth
+of full layers and then use BLMULT prior to computing transmittance.
+
+So when looking at constituent profiles you compute BLMULT as
+ BLMULT = (Psurfret-Pobs(numlev-1))/
+           (Pobs(numlev)-Pobs(numlev-1))
+
+By the way, CO2 is in ppmv and is NOT adjusted at surface since it is
+a ratio of two layer column densities.  But CO, CH4, etc. requires
+this correction.
+
+Dr. Christopher Barnet
+NASA Sounder Discipline Lead, NOAA Subject Matter Expert on Sounding
+Senior Research Scientist, Science and Technology Corp. (STC)
+10015 Old Columbia Road, Suite E-250
+Columbia, MD 21046 (Off) 410-309-0818 x109  (Cell) 301-789-6934
+
+Quote of the month:
+"Your manuscript is both good and original. But the part that is good
+is not original, and the part that is original is not good."
+often attributed to Samuel Johnson, via Joe Romm, Think Progress, 2010
