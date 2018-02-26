@@ -1347,7 +1347,7 @@ c local vars
       iCO2Chi = 0  !!no chi fixes applied .. with database being
         !!PARAMETER (kCO2Path = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/') 
         !!this would be the original linemix from RAL, before AIRS was
-        !!launced in April 2002
+        !!launched in April 2002
       iCO2Chi = 3 !!new after March 2004; fixes 4 + 15 um;
       iCO2Chi = 2 !!default prior to Mar 2004; only fixes 4um; leaves wiggles
 
@@ -1374,8 +1374,10 @@ c      END IF
       !!!! iCO2Chi = 2   TESTING
 
  10   FORMAT(I2,I2,I2)
-      IF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. -1) .AND. (kOuterLoop .EQ. 1)) THEN
-        write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,'  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN
+ 999  FORMAT('CO2 chi fudge iDefault = ',I2,' iCO2Chi = ',I2,' kCO2_UMBCorHARTMAN = ',I2)
+      IF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. -1) .AND. (kOuterLoop .EQ. 1)) THEN      
+        write(kStdWarn,999) iDefault,iCO2Chi,kCO2_UMBCorHARTMAN
+        write(kStdErr,999)  iDefault,iCO2Chi,kCO2_UMBCorHARTMAN	
 c      ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1) .AND. (kOuterLoop .EQ. 1)) THEN
 c        write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,' but using other user suppl CO2 dir'
       END IF
@@ -1416,6 +1418,8 @@ c notice we fix 15 um and 4 um here
         iDoFudge = WhichGasPosn(int(rFileStartFr),iaChiChunks,iChiChunks)
 c        print *,int(rFileStartFr),iCO2Chi,iDoFudge
         IF (iDoFudge .GT. 0) THEN
+          write(kStdWarn,*) ' doing CO2 chi fudge for ',int(rFileStartFr),iCO2Chi,iDoFudge
+          write(kStdErr,*) ' doing CO2 chi fudge for ',int(rFileStartFr),iCO2Chi,iDoFudge
           CALL co2_4um_fudge(daaAbsCoeff,rFileStartFr,
      $                         iCO2Chi,iaChiChunks,iChiChunks)
         END IF 
@@ -1629,15 +1633,20 @@ C    following 9 columns:
 C       1    2   3    4     5    6   7   8    9
 C       ID RJUNK XF XH2OL XH2OC XO3 XCO XCH4 XNTE
 
+c      write(kStdWarn,*) 'inside generic_sarta_tunmult for GasID = ',iGasID,' raFreq(1) = ',raFreq(1),' iSARTAChi = ',iSARTAChi
+c      write(kStdErr,*)  'inside generic_sarta_tunmult for GasID = ',iGasID,' raFreq(1) = ',raFreq(1),' iSARTAChi = ',iSARTAChi      
+      
       Fname = '/home/sergio/SPECTRA/CKDLINUX/tunmlt_jan04deliv.txt'
+      Fname = '/home/sergio/SPECTRA/CKDLINUX/tunmlt_ones.txt'
       IF (iSARTAChi .EQ. +1) THEN
         !! /asl/packages/sartaV108_PGEv6/Src_AIRS_PGEv6/tunmlt_df.f
-        Fname = '/asl/data/sarta_database/Data_AIRS_apr08/Coef/tunmlt_PGEv6.txt'  
+        Fname = '/asl/data/sarta_database/Data_AIRS_apr08/Coef/tunmlt_PGEv6.txt'
+        Fname = '/asl/data/sarta_database/Data_AIRS_apr08/Coef/tunmlt_wcon_nte.txt'
       ELSEIF (iSARTAChi .EQ. +2) THEN
         !! /asl/packages/sartaV108/Src_rtpV201_pclsam_slabcloud_hg3/incFTC_iasi_may09_wcon_nte_swch4.f
         Fname = '/asl/data/sarta_database/Data_IASI_may09/Coef/tunmlt_wcon_nte.txt'
       ELSE
-        write(kStdErr,*) 'only doing SARTA AIRS tunings'
+        write(kStdErr,*) 'only doing SARTA AIRS/IASI tunings'
         CALL DoStop
       END IF
 
@@ -1659,10 +1668,10 @@ C       ID RJUNK XF XH2OL XH2OC XO3 XCO XCH4 XNTE
         iNpts = 0
         kTempUnitOpen=1
  10     CONTINUE
-        READ(iIOUN,80,ERR=20) caStr
-        IF (caStr(1:1) .EQ. '%') THEN
+        READ(iIOUN,80,ERR=20,IOSTAT=IERR) caStr
+        IF ((caStr(1:1) .EQ. '%') .AND. (IERR .EQ. 0)) THEN
           GOTO 10
-        ELSE 
+        ELSEIF (IERR .EQ. 0) THEN
           iNpts = iNpts + 1
           read(caStr,*) iFr,rF,fixed,water,watercon,o3,co,ch4,nte
           raF(iNpts)   = rF
@@ -1680,6 +1689,8 @@ c            raChi(iNpts) = co2
           ELSEIF (iGasID .LE. 100) THEN
             raChi(iNpts) = fixed
           END IF
+	ELSEIF (iERR .NE. 0) THEN
+	  GOTO 20	  
         END IF
         GOTO 10
 

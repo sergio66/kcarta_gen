@@ -576,11 +576,14 @@ CONTAINS
 
 !!!! iCO2Chi = 2   TESTING
 
-    10 FORMAT(I2,I2,I2)
+ 10   FORMAT(I2,I2,I2)
+ 999  FORMAT('CO2 chi fudge iDefault = ',I2,' iCO2Chi = ',I2,' kCO2_UMBCorHARTMAN = ',I2)
+ 
     IF ((iCO2Chi /= iDefault) .AND. (kAltComprDirs == -1) .AND. (kOuterLoop == 1)) THEN
-        write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,'  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN
-    !      ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1) .AND. (kOuterLoop .EQ. 1)) THEN
-    !        write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,' but using other user suppl CO2 dir'
+      write(kStdWarn,999) iDefault,iCO2Chi,kCO2_UMBCorHARTMAN
+      write(kStdErr,999)  iDefault,iCO2Chi,kCO2_UMBCorHARTMAN
+    !ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1) .AND. (kOuterLoop .EQ. 1)) THEN
+    !  write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,' but using other user suppl CO2 dir'
     END IF
 
     IF (iCO2Chi == 2) THEN

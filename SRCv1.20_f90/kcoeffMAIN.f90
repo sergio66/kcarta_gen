@@ -1311,15 +1311,17 @@ CONTAINS
 !       ID RJUNK XF XH2OL XH2OC XO3 XCO XCH4 XNTE
 
     Fname = '/home/sergio/SPECTRA/CKDLINUX/tunmlt_jan04deliv.txt'
+    Fname = '/home/sergio/SPECTRA/CKDLINUX/tunmlt_ones.txt'
     IF (iSARTAChi == +1) THEN
-    !! /asl/packages/sartaV108_PGEv6/Src_AIRS_PGEv6/tunmlt_df.f
-        Fname = '/asl/data/sarta_database/Data_AIRS_apr08/Coef/tunmlt_PGEv6.txt'
+      !! /asl/packages/sartaV108_PGEv6/Src_AIRS_PGEv6/tunmlt_df.f    
+      Fname = '/asl/data/sarta_database/Data_AIRS_apr08/Coef/tunmlt_PGEv6.txt'
+      Fname = '/asl/data/sarta_database/Data_AIRS_apr08/Coef/tunmlt_wcon_nte.txt' 
     ELSEIF (iSARTAChi == +2) THEN
-    !! /asl/packages/sartaV108/Src_rtpV201_pclsam_slabcloud_hg3/incFTC_iasi_may09_wcon_nte_swch4.f
-        Fname = '/asl/data/sarta_database/Data_IASI_may09/Coef/tunmlt_wcon_nte.txt'
+      !! /asl/packages/sartaV108/Src_rtpV201_pclsam_slabcloud_hg3/incFTC_iasi_may09_wcon_nte_swch4.f
+      Fname = '/asl/data/sarta_database/Data_IASI_may09/Coef/tunmlt_wcon_nte.txt'
     ELSE
-        write(kStdErr,*) 'only doing SARTA AIRS tunings'
-        CALL DoStop
+      write(kStdErr,*) 'only doing SARTA AIRS tunings'
+      CALL DoStop
     END IF
 
     iIOUN = kTempUnit
@@ -1340,31 +1342,33 @@ CONTAINS
         iNpts = 0
         kTempUnitOpen=1
         10 CONTINUE
-        READ(iIOUN,80,ERR=20) caStr
-        IF (caStr(1:1) == '%') THEN
-            GOTO 10
-        ELSE
-            iNpts = iNpts + 1
-            read(caStr,*) iFr,rF,fixed,water,watercon,o3,co,ch4,nte
-            raF(iNpts)   = rF
-            raChi(iNpts) = 1.0
-            IF ((iGasID == 1) .OR. (iGasID == 103)) THEN
-                raChi(iNpts) = water
-            !          ELSEIF (iGasID .EQ. 2) THEN
-            !            raChi(iNpts) = co2
-            ELSEIF (iGasID == 3) THEN
-                raChi(iNpts) = o3
-            ELSEIF (iGasID == 5) THEN
-                raChi(iNpts) = co
-            ELSEIF (iGasID == 6) THEN
-                raChi(iNpts) = ch4
-            ELSEIF (iGasID <= 100) THEN
-                raChi(iNpts) = fixed
-            END IF
+        READ(iIOUN,80,ERR=20,IOSTAT=IERR) caStr
+        IF ((caStr(1:1) == '%') .AND. (IERR == 0)) THEN
+          GOTO 10
+        ELSEIF (IERR == 0) THEN
+          iNpts = iNpts + 1
+          read(caStr,*) iFr,rF,fixed,water,watercon,o3,co,ch4,nte
+          raF(iNpts)   = rF
+          raChi(iNpts) = 1.0
+          IF ((iGasID == 1) .OR. (iGasID == 103)) THEN
+            raChi(iNpts) = water
+          !ELSEIF (iGasID .EQ. 2) THEN
+          !            raChi(iNpts) = co2
+          ELSEIF (iGasID == 3) THEN
+            raChi(iNpts) = o3
+          ELSEIF (iGasID == 5) THEN
+            raChi(iNpts) = co
+          ELSEIF (iGasID == 6) THEN
+            raChi(iNpts) = ch4
+          ELSEIF (iGasID <= 100) THEN
+            raChi(iNpts) = fixed
+          END IF
+	ELSEIF (iERR /= 0) THEN
+	  GOTO 20
         END IF
         GOTO 10
 
-        20 CONTINUE
+20      CONTINUE
         CLOSE(iIOUN)
         kTempUnitOpen = -1
 

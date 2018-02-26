@@ -1,10 +1,3 @@
-400_H12_default_test:
-	make -f Makefile datafix400_H2012
-	make -f Makefile
-	make -f Makefile scat		
-	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv_test
-	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv_test
-
 400_H16_default:
 	make -f Makefile_tar_objs_data datafix400_H2016
 	make -f Makefile
@@ -18,6 +11,13 @@
 	make -f Makefile scat		
 	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv
+
+400_H12_default_test:
+	make -f Makefile datafix400_H2012
+	make -f Makefile
+	make -f Makefile scat		
+	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv_test
+	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv_test
 
 ########################################################################
 ## this is nothing special, it basically is SRCv1.18 with the strutures dot
