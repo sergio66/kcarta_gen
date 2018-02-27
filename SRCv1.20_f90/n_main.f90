@@ -68,7 +68,7 @@ CONTAINS
     iaCloudNumAtm1,iaaCloudWhichAtm1,raCloudFrac1, &
 ! new spectroscopy
     iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1, &
-    iNumAltComprDirs1,iaAltComprDirs1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1, &
+    iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1, &
 !  non LTE
     raNLTEstrength1,iNumNLTEGases1,iNLTE_SlowORFast1, &
     iaNLTEGasID1,iaNLTEChunks1,iaaNLTEChunks1,caaStrongLines1, &
@@ -249,8 +249,11 @@ CONTAINS
     CHARACTER(80) :: caaaNewChunks1(kGasStore,kNumkCompT)
 ! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
+! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
+!                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
 ! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
 ! rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
+    REAL :: raAltComprDirsScale(kGasStore),raAltComprDirsScale1(kGasStore)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     INTEGER :: iaAltComprDirs1(kGasStore),iNumAltComprDirs1
     CHARACTER(80) :: caaAltComprDirs(kGasStore)
@@ -323,7 +326,7 @@ CONTAINS
     NAMELIST /nm_jacobn/namecomment,iJacob,iaJacob
     NAMELIST /nm_spectr/namecomment,iNumNewGases,iaNewGasID,iaNewData, &
     iaaNewChunks,caaaNewChunks, &
-    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs, &
+    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs, &
     rAltMinFr,rAltMaxFr
     NAMELIST /nm_nonlte/namecomment,iNumNLTEGases,iaNLTEGasID,iaNLTEChunks, &
     iaaNLTEChunks,caaStrongLines,iNLTE_SlowORFast, &
@@ -387,7 +390,12 @@ CONTAINS
 ! default rads and jacs
     iNatm        = -1         !assume no radiating atms to be constructed
     iJacob       = 0          !assume no jacobians to be done
-          
+
+! default scaling from new to default database
+    DO iI = 1,kGasStore
+      raAltComprDirsScale(iI) = 1.0
+    END DO
+		    
 ! default NLTE
     iNumAltComprDirs      = -1      !assume no alternate compressed dirs
     iNumNewGases     = -1      !assume no new spectroscopy
@@ -717,6 +725,7 @@ CONTAINS
     iNumAltComprDirs1 = iNumAltComprDirs
     DO iI = 1,kGasStore
         iaAltComprDirs1(iI) = iaAltComprDirs(iI)
+	raAltComprDirsScale1(iI) = raAltComprDirsScale(iI)
     END DO
     DO iI = 1,kGasStore
         caaAltComprDirs1(iI) = caaAltComprDirs(iI)
@@ -895,7 +904,7 @@ CONTAINS
     iCldProfile,raaKlayersCldAmt, &
 ! new spectroscopy
     iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, &
-    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
+    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
 ! nonLTE
     raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
     iaNLTEChunks,iaaNLTEChunks, &
@@ -1096,9 +1105,11 @@ CONTAINS
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
 ! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
 ! rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
+! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
+!                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     CHARACTER(80) :: caaAltComprDirs(kGasStore)
-    REAL ::          rAltMinFr,rAltMaxFr
+    REAL ::          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! this is for nonLTE
 ! raNLTEstrength   tells how strongly to add on the new files (default 1.0)
@@ -1179,7 +1190,7 @@ CONTAINS
     raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
     iaaScatTable,iaCloudScatType,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm,raCloudFrac, &
     iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, &
-    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
+    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
     raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast, &
     iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks, &
     caaStrongLines,iaNLTEBands,raNLTEstart,caaaNLTEBands, &

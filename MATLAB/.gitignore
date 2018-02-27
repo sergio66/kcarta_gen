@@ -6,6 +6,7 @@
 # File types can be added back in subdirectory .gitignore files as
 # needed
 
+readkcstdx_v118_oldcode.m
 *.dat
 CLUSTER
 CLUSTER/*

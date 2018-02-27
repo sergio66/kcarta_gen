@@ -143,11 +143,13 @@ c iNewIn         is just a variable that tells us if new gas to be used
       CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT)
 c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
+c raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
+c                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
 c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
 c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
       CHARACTER*80 caaAltComprDirs(kGasStore)
-      REAL          rAltMinFr,rAltMaxFr
+      REAL          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 c this is for nonLTE
 c iNLTE_SlowORFast tells whether to use slow accurate (+1) fast SARTA (-1) 
@@ -443,7 +445,7 @@ c read in the driver namelist file and profile
      $   cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,
      $   iCldProfile,raaKlayersCldAmt,
      $       iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks,
-     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
+     $      iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $   raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $   iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $   caaStrongLines,iaNLTEBands,

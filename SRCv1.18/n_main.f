@@ -44,7 +44,7 @@ c scatter info from .nml file
      $   iaCloudNumAtm1,iaaCloudWhichAtm1,raCloudFrac1, 
 c new spectroscopy
      $   iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1,
-     $   iNumAltComprDirs1,iaAltComprDirs1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1,
+     $   iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1,
 c  non LTE
      $   raNLTEstrength1,iNumNLTEGases1,iNLTE_SlowORFast1,
      $   iaNLTEGasID1,iaNLTEChunks1,iaaNLTEChunks1,caaStrongLines1,
@@ -225,8 +225,11 @@ c caaaNewChunks  tells the name of the files associated with the chunks
       CHARACTER*80 caaaNewChunks1(kGasStore,kNumkCompT) 
 c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
+c raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
+c                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used) 
 c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
 c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
+      REAL    raAltComprDirsScale(kGasStore),raAltComprDirsScale1(kGasStore)   
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
       INTEGER iaAltComprDirs1(kGasStore),iNumAltComprDirs1
       CHARACTER*80 caaAltComprDirs(kGasStore)
@@ -299,7 +302,7 @@ c local variables
       NAMELIST /nm_jacobn/namecomment,iJacob,iaJacob
       NAMELIST /nm_spectr/namecomment,iNumNewGases,iaNewGasID,iaNewData,
      $                    iaaNewChunks,caaaNewChunks,
-     $                    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,
+     $                    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,
      $                    rAltMinFr,rAltMaxFr
       NAMELIST /nm_nonlte/namecomment,iNumNLTEGases,iaNLTEGasID,iaNLTEChunks,
      $          iaaNLTEChunks,caaStrongLines,iNLTE_SlowORFast,
@@ -363,6 +366,11 @@ c default mixing table
 c default rads and jacs
       iNatm        = -1         !assume no radiating atms to be constructed
       iJacob       = 0          !assume no jacobians to be done
+
+c default scaling from new to default database
+      DO iI = 1,kGasStore
+        raAltComprDirsScale(iI) = 1.0
+      END DO
       
 c default NLTE
       iNumAltComprDirs      = -1      !assume no alternate compressed dirs
@@ -693,6 +701,7 @@ c      iTemperVary  = -1          !assume const-in-tau temperature variation
       iNumAltComprDirs1 = iNumAltComprDirs
       DO iI = 1,kGasStore
         iaAltComprDirs1(iI) = iaAltComprDirs(iI)
+        raAltComprDirsScale1(iI) = raAltComprDirsScale(iI)	
       END DO
       DO iI = 1,kGasStore
         caaAltComprDirs1(iI) = caaAltComprDirs(iI)
@@ -871,7 +880,7 @@ c scatter cloudprofile info
      $      iCldProfile,raaKlayersCldAmt,
 c new spectroscopy
      $      iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
-     $      iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
+     $      iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr,
 c nonLTE
      $      raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
      $      iaNLTEChunks,iaaNLTEChunks,
@@ -1072,9 +1081,11 @@ c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to u
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
 c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
 c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
+c raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
+c                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
       CHARACTER*80 caaAltComprDirs(kGasStore)
-      REAL          rAltMinFr,rAltMaxFr
+      REAL          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 c this is for nonLTE
 c raNLTEstrength   tells how strongly to add on the new files (default 1.0)
@@ -1155,7 +1166,7 @@ c this is is we have 100 layer clouds
      $      raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase,
      $      iaaScatTable,iaCloudScatType,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm,raCloudFrac,
      $    iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, 
-     $    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
+     $    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $    raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast,
      $    iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks,
      $    caaStrongLines,iaNLTEBands,raNLTEstart,caaaNLTEBands,
