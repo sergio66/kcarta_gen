@@ -609,7 +609,7 @@ c compute the abs coeffs
      $          raVertTemp,iVertTempSet,rFileStartFr,iTag,iActualTag,
      $          raFreq,iError,iDoDQ,iSplineType,
      $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
-     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
+     $          iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,

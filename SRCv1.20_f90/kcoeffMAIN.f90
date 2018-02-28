@@ -45,7 +45,7 @@ CONTAINS
     raVertTemp,iVertTempSet, &
     rFileStartFr,iTag,iActualTag,raFreq,iError,iDoDQ,iSplineType, &
     iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks, &
-    iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
+    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
     daaDQ,daaDT,daaGasAbCoeff, &
     iaP1,iaP2,raP1,raP2, &
     iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
@@ -75,7 +75,7 @@ CONTAINS
     REAL :: raTPartPress(kProfLayer),raTPress(kProfLayer)
     REAL :: pProf(kProfLayer),raVertTemp(kProfLayer),raFreq(kMaxPts)
     REAL :: rFileStartFr
-    REAL :: rAltMinFr,rAltMaxFr
+    REAL :: rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 ! the Matlab weights
     INTEGER :: iaP1(kProfLayer),iaP2(kProfLayer)
     REAL ::    raP1(kProfLayer),raP2(kProfLayer)
@@ -107,7 +107,7 @@ CONTAINS
     iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs, &
     rFileStartFr,rAltMinFr,rAltMaxFr,iTag)
     IF (iNewIn < 0) THEN
-    ! se kCompressed Database w/o worrying
+    ! use kCompressed Database w/o worrying
         kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
         CALL GasContribution(iGas,iaGases(iGas),kProfLayer, &
         raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
@@ -128,14 +128,14 @@ CONTAINS
         iWhichChunk = NewDataChunk(iNewIn,iaNewData,iaaNewChunks, &
         rFileStartFr)
         IF (iWhichChunk > 0) THEN
-        ! ead in new spectra
+        ! read in new spectra
             CALL ReadNewData(iGas,iaGases(iGas),kProfLayer, &
             iL_low,iL_high,raTAmt,raTTemp,raTPress,raTPartPress, &
             iaCont,iTag,iActualTag,raFreq,daaDQ,daaDT,iDoDQ, &
             daaGasAbCoeff,iNewIn,iWhichChunk,caaaNewChunks, &
             kaFrStep(iTag),rFileStartFr*1.00000)
         ELSE
-        ! se kCompressed Database w/o worrying
+        ! use kCompressed Database w/o worrying
             kAltComprDirs = -1  !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
             CALL GasContribution(iGas,iaGases(iGas),kProfLayer, &
             raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
@@ -167,7 +167,7 @@ CONTAINS
         iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
         iaQ11,iaQ12,raQ11,raQ12, &
         iaQ21,iaQ22,raQ21,raQ22, &
-        iNewIN-1000,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr)
+        iNewIN-1000,iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr)
     END IF
 
 !      if (iGas .EQ. 1) then
@@ -346,7 +346,7 @@ CONTAINS
     iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
     iaQ11,iaQ12,raQ11,raQ12, &
     iaQ21,iaQ22,raQ21,raQ22, &
-    iNewIN,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr)
+    iNewIN,iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr)
 
     IMPLICIT NONE
 
@@ -397,7 +397,7 @@ CONTAINS
 ! the alt database
     INTEGER :: iNewIN,iNumAltComprDirs,iaAltComprDirs(kGasStore)
     CHARACTER(80) :: caaAltComprDirs(kGasStore)
-    REAL :: rAltMinFr,rAltMaxFr
+    REAL :: rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! local variables
     INTEGER :: iFr,iLay
@@ -423,8 +423,8 @@ CONTAINS
     END IF
             
     IF ( ((1 <= iGasID) .AND. (iGasID <= kGasComp)) .OR. (iGasID == kNewGasHi+1)) THEN
-        kFrStep = kaFrStep(iTag)
-        CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
+      kFrStep = kaFrStep(iTag)
+      CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
         raRPartPress,iL,iU,raVTemp,iVTSet,rFileStartFr,iTag,iActualTag, &
         raFreq,iErr,raAmt,raTemp,raPress,raPartPress,iaCont, &
         pProf,iProfileLayers,iDoDQ, &
@@ -434,6 +434,15 @@ CONTAINS
         iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
         iaQ11,iaQ12,raQ11,raQ12, &
         iaQ21,iaQ22,raQ21,raQ22)
+
+      IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
+        write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+        DO iLay = 1,kProfLayer
+          DO iFr = 1,kMaxPts
+            daaTemp(iFr,iLay) = daaTemp(iFr,iLay) * raAltComprDirsScale(iNewIN)
+          END DO
+        END DO
+      END IF												    
     END IF
 
     IF ((kGasXsecLo <= iGasID) .AND. (iGasID <= kGasXsecHi)) THEN
@@ -450,6 +459,16 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
+
+            IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
+              write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+              DO iLay = 1,kProfLayer
+                DO iFr = 1,kMaxPts
+                  daaTemp(iFr,iLay) = daaTemp(iFr,iLay) * raAltComprDirsScale(iNewIN)
+                END DO
+              END DO
+            END IF												    
+
         ELSE
             write(kStdWarn,*) ' xsec gas : using old style binary file format'
             write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'

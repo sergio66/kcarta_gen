@@ -28,7 +28,7 @@ c this is the MAIN routine
      $          raVertTemp,iVertTempSet,
      $          rFileStartFr,iTag,iActualTag,raFreq,iError,iDoDQ,iSplineType,
      $          iNumNewGases,iaNewGasID,caaaNewChunks,iaNewData,iaaNewChunks,
-     $          iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr,
+     $          iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr,
      $          daaDQ,daaDT,daaGasAbCoeff,
      $                   iaP1,iaP2,raP1,raP2,
      $                   iaT11,iaT12,raT11,raT12,raJT11,raJT12,
@@ -58,7 +58,7 @@ c these are the user specified layer profiles
       REAL raTPartPress(kProfLayer),raTPress(kProfLayer) 
       REAL pProf(kProfLayer),raVertTemp(kProfLayer),raFreq(kMaxPts)
       REAL rFileStartFr
-      REAL rAltMinFr,rAltMaxFr
+      REAL rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 c the Matlab weights
       INTEGER iaP1(kProfLayer),iaP2(kProfLayer)
       REAL    raP1(kProfLayer),raP2(kProfLayer)
@@ -150,7 +150,7 @@ c local vars
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22,
-     $          iNewIN-1000,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr)
+     $          iNewIN-1000,iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr)
       END IF
 
 c      if (iGas .EQ. 1) then
@@ -329,7 +329,8 @@ c same as GasContribution except it substitudes COMPRESSED DATABASE
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22,
-     $          iNewIN,iNumAltComprDirs,iaAltComprDirs,caaAltComprDirs,rAltMinFr,rAltMaxFr)
+     $          iNewIN,iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,
+     $          caaAltComprDirs,rAltMinFr,rAltMaxFr)
 
       IMPLICIT NONE
 
@@ -380,7 +381,7 @@ c the Matlab weights
 c the alt database
       INTEGER iNewIN,iNumAltComprDirs,iaAltComprDirs(kGasStore)
       CHARACTER*80 caaAltComprDirs(kGasStore)
-      REAL rAltMinFr,rAltMaxFr
+      REAL rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 c local variables
       INTEGER iFr,iLay,strfind
@@ -417,6 +418,14 @@ c local variables
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22)
+        IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
+	  write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+	  DO iLay = 1,kProfLayer
+	    DO iFr = 1,kMaxPts
+              daaTemp(iFr,iLay) = daaTemp(iFr,iLay) * raAltComprDirsScale(iNewIN)
+	    END DO
+	  END DO
+	END IF
       END IF
 
       IF ((kGasXsecLo .LE. iGasID) .AND. (iGasID .LE. kGasXsecHi)) THEN
@@ -433,6 +442,14 @@ c local variables
      $                   iaT21,iaT22,raT21,raT22,raJT21,raJT22,
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22)
+          IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
+  	    write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+	    DO iLay = 1,kProfLayer
+	      DO iFr = 1,kMaxPts
+                daaTemp(iFr,iLay) = daaTemp(iFr,iLay) * raAltComprDirsScale(iNewIN)
+	      END DO
+	    END DO
+	  END IF     
         ELSE
           write(kStdWarn,*) ' xsec gas : using old style binary file format'
           write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'
