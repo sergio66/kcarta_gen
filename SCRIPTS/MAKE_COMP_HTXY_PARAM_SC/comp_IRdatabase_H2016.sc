@@ -39,14 +39,25 @@ if [ -r compdatabase ]
 then
   rm compdatabase
 fi
+
+## I have made couple of extra xsec databases, H2012_XSEC and H2016-g51-63_H20120g64-81_XSEC, remove those listing
+sed -i '/H201/d' compdatabase_ir605_2830
+## I have made couple of unc databases, remove those listings
+sed -i '/unc_/d' compdatabase_ir605_2830
+
 ln -s compdatabase_ir605_2830 compdatabase
 
 ######### run code compdatabase.x to produce comp.param
-cp ../../UTILITY/compdatabase.x .
+cp -a ../../UTILITY/compdatabase.x .
+ls -lt compdatabase.x
 if [ -r comp.param ]
 then
   rm comp.param
 fi
+
+########## >>>>>  testing (it was crashing because of H2012_XSEC,H2016-g51-63_H20120g64-81_XSEC)
+#exit 1
+
 compdatabase.x > dope
 
 mv comp.param ABCcomp_ir605_2830.param

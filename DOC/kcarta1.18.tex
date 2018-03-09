@@ -67,10 +67,11 @@ University of Maryland Baltimore County\\Baltimore, MD 21250 USA\\
 
 \vspace{0.5in}
 \begin{center}
-Copyright 1996-2013 \\
+Copyright 1996-2018 \\
 University of Maryland Baltimore County \\
 All Rights Reserved\\
-v1.11,1.12,1.14,1.15,1.16,1.18  \\
+v1.11,1.12,1.14,1.15,1.16,1.18 (f77)\\
+v1.20 (f90)\\
 \today\\
 \end{center}
 
@@ -390,7 +391,23 @@ a) now uses the same uncompression and jacobian routines that are in the Matlab
 b) the code can do limb view calcs; achieved by setting raSpres (at the equivalent 
    tangent height) and raSetEmissivity(iAtm) .GT. 1 if iRTP = -1, or 
      p.nemis(iAtm) = 1, p.emis(iAtm) .GT. 1, and p.spres(iAtm) as appropriate.\\
-   The code calculates the scanang by using spres information
+   The code calculates the scanang by using spres information\newline
+c) uses the new HITRAN 2012 database
+
+\section{Newest Important Features (v1.18,v1.20+)}
+Uses the new HITRAN 2016 database \newline
+f90 modular source code now available \newline
+\begin{itemize}
+\item 2/27/18 : In nm\_spectra, raAltComprDirsScale allows you to scale the
+                optical depths you read in from supplementary compressed tables
+\item 11/25/16 : caaTextOverride in nm\_params allows text file cloud params for 100
+                 layer clouds
+\item 11/16/16 : Can also dump out L2G ODs and transmittances; kThermalAngle (diffusvie
+                 angle) can be set in nm\_params so this angle can be controlled when
+		 you are driving the code with rtp files
+\item 10/8/16 : iaaOverride allows you to control many parameters; see kcartamisc.f
+\item 3/2/16  : TwoSlab clouds now similar to SARTA (4 sub-pixel streams/FOV)          
+\end{itemize}
 
 \section{Installing and running \kc}
 This is for the user that wants to install and use \kc as quickly as possible. 

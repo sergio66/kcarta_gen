@@ -1,3 +1,5 @@
+c ifort -extend-source 132 compdatabase.f;  mv a.out compdatabase.x                  ifort compiler
+
 c this program reads in a list of compressed data files and outputs 
 c this program used to be called compdatabase97.f, but now since the 
 c compressed database has both the main gases and the cross section
@@ -88,6 +90,7 @@ c do ls -1 compdatapath/*.dat> & compdatabase and then run this program
       OPEN(UNIT=10,FILE='compdatabase',FORM='FORMATTED',STATUS='OLD')
  11   READ(10,1000,END=100) caStr
  1000 FORMAT(A80)
+c      print *,caStr
 
       IF (caStr(1:1).EQ. 'f') THEN
         CALL process(caStr,raaArrF,iCntF,0.5) !10000.0*0.00005
