@@ -15,9 +15,10 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
       include '../INCLUDE/pre_defined.param'                          !!!
-c template file : template_kcartaV118_400_H2012.param                 !!!
+c template file : template_kcartaV118_400_H2016.param                 !!!
+!2345678901234567890123456789012345678901234567890123456789012345678901234567890
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-      PARAMETER(caVersion='v1.18 16-10-01 template_kcartaV118_400_H2012.param')      !!!      
+      PARAMETER(caVersion='v1.18 17-11-23 template_kcartaV118_400_H2016.param')      !!!      
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -45,28 +46,16 @@ c                            eg HT1998 means "built with HITRAN 1998 + Toth"
 c parameter kChiFIle tells the code where to look for necessary files
 c that improve the spectroscopy when multiplied with the kCompressed data
       CHARACTER*80 kXsecParamFile,kCompParamFile
-      PARAMETER (kXsecParamFile = '/asl/data/kcarta_sergio/KCDATA/General/junkHT2012.param')
-
+c      PARAMETER (kXsecParamFile = '/asl/data/kcarta_sergio/KCDATA/General/compHT2016.param')
+      PARAMETER (kXsecParamFile = 
+     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param')
+     
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
-
-c NOTE 1
-c if you use Scott's last version of v107 then try
-c      PARAMETER (kCompParamFile = '/asl/data/kcarta/KCARTADATA/General/compHT2007_test.param_andy')
-c      PARAMETER (kXsecParamFile = '/asl/data/kcarta/KCARTADATA/General/compHT2007_test.param_andy')
-c      PARAMETER (kWaterPath = '/asl/data/kcarta/v07.ieee-le/h2o.ieee-le/')
-c      PARAMETER (kCompPath  = '/asl/data/kcarta/v07.ieee-le/etc.ieee-le/')
-c   as it includes info for both /asl/data/kcarta/KCARTADATA/General/xsecHT2007_test.param and
-c                              /asl/data/kcarta/KCARTADATA/General/compHT2007_test.param
-c   looks like this is what he used for 
-c      PARAMETER (kWaterPath  = '/asl/data/kcarta/v07.ieee-le/h2o.ieee-le/')
-c      PARAMETER (kCompPath   = '/asl/data/kcarta/v07.ieee-le/etc.ieee-le/')
-c   when making most recent (2008-2010 version) of SARTA
-c NOTE 1
 
 c this was generic test (ie only had the 605-2830 cm-1 in it)
-c      PARAMETER (kCompParamFile = '/asl/data/kcarta_sergio/KCDATA/General/compHT2012.param')
+c      PARAMETER (kCompParamFile = '/asl/data/kcarta_sergio/KCDATA/General/compHT2016.param')
 c this was generic test (ie only had the 605-2830 cm-1 in it)
 
 c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and latest UMBC CO2 linemixing
@@ -76,10 +65,10 @@ c      PARAMETER (kCompParamFile =
 c     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_newCO2')
 c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and latest CO2 linemixing
 
-c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, TRIED AND TESTED UMBC CO2 linemixing
+c this has new H2016 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, TRIED AND TESTED UMBC CO2 linemixing
       PARAMETER (kCompParamFile = 
-     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_oldCO2')
-c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, working CO2 linemixing
+     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param')
+c this has new H2016 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, TRIED AND TESTED UMBC CO2 linemixing
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
@@ -112,25 +101,24 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/')
 c      PARAMETER (kCompPath       = '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/')
-      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2012_IR/h2o/')
-      PARAMETER (kCompPath       = '/asl/data/kcarta/H2012_IR/etc/')
+      PARAMETER (kWaterPath      = '/asl/data/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/')
+      PARAMETER (kCompPath       = '/asl/data/kcarta/H2016.ieee-le/IR605/etc.ieee-le/')
       PARAMETER (kCKDPath        = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/Compr/')
 
 c this is to account for heavy water in the 605-2830, 2830-3330 cm-1 bands
 c These are the 0,0025 cm-1 resolution bands
 c so first     band starts at 0605 and ends at 1955 cm-1 (ie last chunk is 1930 cm-1)
-c while second band starts at 2405 and ends at 3555 cm-1 (ie last chunk is 3530 cm-1)
+c while second band starts at 1955 and ends at 3555 cm-1 (ie last chunk is 3530 cm-1)
 c >>>>>>> NOTE that ALL the water isotope datafiles are in kWaterIsotopePath
 c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and 
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER*80 kWaterIsotopePath
-c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/')
-      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
+      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
       PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
-      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
+      PARAMETER (kWaterIsobandStart2 = 1955, kWaterIsobandStop2 = 3355)
 c for testing; this will turn off new part of code and just use usual database
 c for testing; this will turn off new part of code and just use usual database
 c      PARAMETER (kWaterIsotopePath = kWaterPath)
@@ -345,7 +333,7 @@ c kGasStore == max number of gases we allocate storage for
 c              (from GASFIL + XSCFIL + WaterSelf + WaterFor <= kMaxGas)
 c kMixFilRows== max number of mixfil rows that can be read in
       INTEGER kMaxAtm,kGasStore,kMixFilRows,kMaxPrint
-      PARAMETER (kMaxAtm=6,kGasStore=80,kMixFilRows=kProfLayer*2)
+      PARAMETER (kMaxAtm=8,kGasStore=80,kMixFilRows=kProfLayer*2)
       PARAMETER (kMaxPrint=10)
 
 c kEmsRegions=how many wavenumber dependent regions can be read in from 

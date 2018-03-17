@@ -333,7 +333,7 @@ c kGasStore == max number of gases we allocate storage for
 c              (from GASFIL + XSCFIL + WaterSelf + WaterFor <= kMaxGas)
 c kMixFilRows== max number of mixfil rows that can be read in
       INTEGER kMaxAtm,kGasStore,kMixFilRows,kMaxPrint
-      PARAMETER (kMaxAtm=6,kGasStore=80,kMixFilRows=kProfLayer*2)
+      PARAMETER (kMaxAtm=8,kGasStore=80,kMixFilRows=kProfLayer*2)
       PARAMETER (kMaxPrint=10)
 
 c kEmsRegions=how many wavenumber dependent regions can be read in from 
