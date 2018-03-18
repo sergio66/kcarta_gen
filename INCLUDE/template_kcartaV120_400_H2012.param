@@ -292,7 +292,7 @@ c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ****
 
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 c NEW versions, first is what was used, tried and tested in SARTA from 2004-2012
-      PARAMETER (kCO2Path = '^/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')  !! default UMBC best
+      PARAMETER (kCO2Path = '^/UMBC_CO2_H1998.ieee-le/CO2ppmv400.ieee-le/')  !! default UMBC best
 c VERY NEW, VERY NEW, VERY NEW trying these new versions
 c      PARAMETER (kCO2Path = '^/H2012.ieee-le/IR605/etc.ieee-le/linemixUMBC/') !! hmm a new try of UMBC linemix
 c      PARAMETER (kCO2Path = '^/H2012.ieee-le/IR605/etc.ieee-le/hartmann/') !! hmm a new try of Hartmann
