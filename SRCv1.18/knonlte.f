@@ -356,6 +356,7 @@ c these are for Matlab style kCOmp Corner Weights
 
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 c fast kCOMP calcs for NLTE ODs and Planck Coeffs
+c the idea is fine, but the results shows it does not really work!!!
       SUBROUTINE NLTE_Fast_Compressed(
      $            iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID,
      $            iSetBloat,iaNLTEChunks,iaaNLTEChunks,raNLTEstrength,
@@ -505,8 +506,8 @@ c these are for Matlab style kCOmp Corner Weights
       REAL raInterpTempUA(kProfLayer),raUpperPress1013(kProfLayer)
       CHARACTER*80 caOutName
       REAL raX(kMaxPts),rMult,rMult0
-      REAL raRPressX(kMaxLayer),raRPPressX(kMaxLayer)
-      REAL raRAmtx(kMaxLayer),raRTempx(kMaxLayer)
+      REAL raRPressX(kProfLayer),raRPPressX(kProfLayer)
+      REAL raRAmtx(kProfLayer),raRTempx(kProfLayer)
 
 c junk to read in HITRAN
       INTEGER iNum,iISO,iLineMixBand,iGasID,iDoVoigtChi

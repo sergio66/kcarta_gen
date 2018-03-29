@@ -374,42 +374,43 @@ CONTAINS
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ! fast kCOMP calcs for NLTE ODs and Planck Coeffs
+! the idea is fine, but the results shows it does not really work!!!
     SUBROUTINE NLTE_Fast_Compressed( &
-    iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
-    iSetBloat,iaNLTEChunks,iaaNLTEChunks,raNLTEstrength, &
-    iTag,iActualTag,iProfileLayers,iL_low,iL_high,rCO2mult, &
-    iSplineType,iaNLTEStart,iaNLTEStart2350,iAllLayersLTE, &
-    iUseWeakBackGnd,raFreq,pProf,iaCont,rSolzen, &
-    iaNLTEBands,caaaNLTEBands,caaNLTETemp,caaStrongLines, &
-    pProfNLTE,raPressLevels,raLayerHeight,raThickness, &
-    pProfNLTE_upatm,raUpperPressLevels,raUpperThickness, &
-    raRAmt,raRTemp,raRPress,raRPartPress, &
-    raVertTemp,iVertTempSet, &
-    raTAmt,raTTemp,raTPress,raTPartPress, &
-    raUpperPress,raUpperPartPress,raUpperTemp, &
-    raUpperGasAmt,raUpperNLTETemp, &
-    iUpper,iDoUpperAtmNLTE, &
-    dLineStrenMin,dDeltaFreqNLTE, &
-    caaUpperMixRatio,iNumberUA_NLTEOut, &
-    rFreqStart,rFreqEnd,rFileStartFr, &
-    iDumpAllUASpectra,iDumpAllUARads,iFileIDLo,iFileIDHi, &
-    caOutUAFile,caOutUABloatFile, &
-    iFunnyCousin,iLTEIn,iWhichChunk,iNLTEStart, &
-    daaGasAbCoeff,raaRestOfLTEGases,raaCO2_LTE, &
-    daaNLTEGasAbCoeff,daaSumNLTEGasAbCoeff,daaPlanckCoeff, &
-    daFreqBloat, &
-    daaNLTEGasAbCoeffBloat,daaSumNLTEGasAbCoeffBloat, &
-    daaPlanckCoeffBloat, &
-    daaUpperPlanckCoeff, &
-    daaUpperNLTEGasAbCoeff,daaUpperSumNLTEGasAbCoeff, &
-    daaUpperPlanckCoeffBloat, &
-    daaUpperNLTEGasAbCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
-    iDoDQ,daaDT,daaDQ, &
-    iaP1,iaP2,raP1,raP2, &
-    iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
-    iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
-    iaQ11,iaQ12,raQ11,raQ12, &
-    iaQ21,iaQ22,raQ21,raQ22)
+      iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
+      iSetBloat,iaNLTEChunks,iaaNLTEChunks,raNLTEstrength, &
+      iTag,iActualTag,iProfileLayers,iL_low,iL_high,rCO2mult, &
+      iSplineType,iaNLTEStart,iaNLTEStart2350,iAllLayersLTE, &
+      iUseWeakBackGnd,raFreq,pProf,iaCont,rSolzen, &
+      iaNLTEBands,caaaNLTEBands,caaNLTETemp,caaStrongLines, &
+      pProfNLTE,raPressLevels,raLayerHeight,raThickness, &
+      pProfNLTE_upatm,raUpperPressLevels,raUpperThickness, &
+      raRAmt,raRTemp,raRPress,raRPartPress, &
+      raVertTemp,iVertTempSet, &
+      raTAmt,raTTemp,raTPress,raTPartPress, &
+      raUpperPress,raUpperPartPress,raUpperTemp, &
+      raUpperGasAmt,raUpperNLTETemp, &
+      iUpper,iDoUpperAtmNLTE, &
+      dLineStrenMin,dDeltaFreqNLTE, &
+      caaUpperMixRatio,iNumberUA_NLTEOut, &
+      rFreqStart,rFreqEnd,rFileStartFr, &
+      iDumpAllUASpectra,iDumpAllUARads,iFileIDLo,iFileIDHi, &
+      caOutUAFile,caOutUABloatFile, &
+      iFunnyCousin,iLTEIn,iWhichChunk,iNLTEStart, &
+      daaGasAbCoeff,raaRestOfLTEGases,raaCO2_LTE, &
+      daaNLTEGasAbCoeff,daaSumNLTEGasAbCoeff,daaPlanckCoeff, &
+      daFreqBloat, &
+      daaNLTEGasAbCoeffBloat,daaSumNLTEGasAbCoeffBloat, &
+      daaPlanckCoeffBloat, &
+      daaUpperPlanckCoeff, &
+      daaUpperNLTEGasAbCoeff,daaUpperSumNLTEGasAbCoeff, &
+      daaUpperPlanckCoeffBloat, &
+      daaUpperNLTEGasAbCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+      iDoDQ,daaDT,daaDQ, &
+      iaP1,iaP2,raP1,raP2, &
+      iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
+      iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
+      iaQ11,iaQ12,raQ11,raQ12, &
+      iaQ21,iaQ22,raQ21,raQ22)
 
     IMPLICIT NONE
 
@@ -523,8 +524,8 @@ CONTAINS
     REAL :: raInterpTempUA(kProfLayer),raUpperPress1013(kProfLayer)
     CHARACTER(80) :: caOutName
     REAL :: raX(kMaxPts),rMult,rMult0
-    REAL :: raRPressX(kMaxLayer),raRPPressX(kMaxLayer)
-    REAL :: raRAmtx(kMaxLayer),raRTempx(kMaxLayer)
+    REAL :: raRPressX(kProfLayer),raRPPressX(kProfLayer)
+    REAL :: raRAmtx(kProfLayer),raRTempx(kProfLayer)
 
 ! junk to read in HITRAN
     INTEGER :: iNum,iISO,iLineMixBand,iGasID,iDoVoigtChi
@@ -705,8 +706,8 @@ CONTAINS
 
         IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2)) THEN
         ! uncompress lower atm ODs
-            i_NLTEFile_TYPE = 100 + nint(rSolzenX)
-            CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
+          i_NLTEFile_TYPE = 100 + nint(rSolzenX)
+          CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
             kProfLayer,iL_low,iL_high, &
             raTAmt,raRAmtx,raTTemp,raRTempx, &
             iErr,iDoDQ,pProf,iProfileLayers, &
@@ -717,10 +718,9 @@ CONTAINS
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
 
-
         ! uncompress lower atm planck
-            i_NLTEFile_TYPE = 200 + nint(rSolzenX)
-            CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
+          i_NLTEFile_TYPE = 200 + nint(rSolzenX)
+          CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
             kProfLayer,iL_low,iL_high, &
             raTAmt,raRAmtx,raTTemp,raRTempx, &
             iErr,iDoDQ,pProf,iProfileLayers, &
@@ -732,15 +732,15 @@ CONTAINS
             iaQ21,iaQ22,raQ21,raQ22)
 
 
-            IF (kJacobian >= 0) THEN
+          IF (kJacobian >= 0) THEN
             ! T dependance in both abs coeffs and planck
             ! q dependance only in abs coeffs
-                DO iL = 1,kProfLayer
-                    DO iFr = 1,kMaxPts
-                        daaDT(iFr,iL) = daaDT(iFr,iL) + daaDTp(iFr,iL)
-                    END DO
-                END DO
-            END IF
+            DO iL = 1,kProfLayer
+              DO iFr = 1,kMaxPts
+                daaDT(iFr,iL) = daaDT(iFr,iL) + daaDTp(iFr,iL)
+              END DO
+            END DO
+          END IF
 
         !!!now do the stuff ABOVE the kCARTA TOA (above 0.005 mb)
             IF (iDoUpperAtmNLTE > 0) THEN

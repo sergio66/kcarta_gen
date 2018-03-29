@@ -421,8 +421,8 @@ c called by Tack_on_profile
 c input/output
       INTEGER iaG(kMaxGas),iaGasUnits(kMaxGas),iNumGases    !! from user supplied list
       INTEGER laysORlevs                                    !! +1 if read 100 US Standard Ref layers, -1 if read 50 AFGL levels
-      INTEGER iaPlanetMolecules(kMaxGas),iPlanetMolecules   !! important moecule list
-      REAL PLEV_KCARTADATABASE_AIRS(kmaxLayer+1)      
+      INTEGER iaPlanetMolecules(kMaxGas),iPlanetMolecules   !! important molecule list
+      REAL PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)      
 c output
 c these are the individual reference profiles, at ~ (kMaxLayer + 10) layers
       REAL raR100Temp(kMaxLayer+10),raaR100MR(kMaxLayer+10,kMaxGas),raR100Press(kMaxLayer+10)
@@ -1629,23 +1629,23 @@ c this reads in the reference levels profile
 
 c input
       INTEGER iGasID
-      REAL PLEV_KCARTADATABASE_AIRS(kProfLayer+1)
+      REAL PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
 c output
       INTEGER iNumLevsx
-      REAL raRx110Temp(kProfLayer+10),raRx110MR(kProfLayer+10),raRx110Press(kProfLayer+10)
+      REAL raRx110Temp(kMaxLayer+10),raRx110MR(kMaxLayer+10),raRx110Press(kMaxLayer+10)
 c local
-      REAL PLEVx110(kProfLayer+10)
-      REAL rLat,raJunk(kProfLayer+10)
+      REAL PLEVx110(kMaxLayer+10)
+      REAL rLat,raJunk(kMaxLayer+10)
       CHARACTER*80 caPFname,caStr,caComment
       INTEGER iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec
 
 c first extend PLEV_KCARTADATABASE_AIRS a little above its lwest value, so can do interps well
-      DO iI=1,kProfLayer+1
+      DO iI=1,kMaxLayer+1
         PLEVx110(iI) = PLEV_KCARTADATABASE_AIRS(iI)
       END DO
-      rLat = PLEV_KCARTADATABASE_AIRS(kProfLayer+1)/20
-      DO iI=kProfLayer+2,kProfLayer+10
-        PLEVx110(iI) = PLEV_KCARTADATABASE_AIRS(kProfLayer+1) - rLat*(iI-(kProfLayer+1))
+      rLat = PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)/20
+      DO iI=kMaxLayer+2,kMaxLayer+10
+        PLEVx110(iI) = PLEV_KCARTADATABASE_AIRS(kMaxLayer+1) - rLat*(iI-(kMaxLayer+1))
       END DO
 
 c      caPFname = '/home/sergio/KCARTA/INCLUDE/glatm_16Aug2010.dat'
@@ -1678,8 +1678,8 @@ c      caPFname = '/home/sergio/KCARTA/INCLUDE/glatm_16Aug2010.dat'
       ELSE
         READ (caStr,*) iNumLevsx
       END IF
-      IF (iNumLevsx .GT. kProfLayer+1) THEN
-        write(kStdErr,*) 'oops iNumLevsx .GT. kProfLayer+1 ',iNumLevsx,kProfLayer+1
+      IF (iNumLevsx .GT. kMaxLayer+1) THEN
+        write(kStdErr,*) 'oops iNumLevsx .GT. kMaxLayer+1 ',iNumLevsx,kMaxLayer+1
         CALL DoStop
       END IF
 
@@ -1821,16 +1821,16 @@ c finally interp these onto the AIRS pressure levels
 c        print *,iI,raRx110Press(iI),raRx110Temp(iI),raRx110MR(iI)
       END DO
 
-      CALL r_sort_loglinear(raRx110Press,raRx110Temp,iNumLevsx,PLEVx110,raJunk,kProfLayer+10)
-      DO iI = 1,kProfLayer+10
+      CALL r_sort_loglinear(raRx110Press,raRx110Temp,iNumLevsx,PLEVx110,raJunk,kMaxLayer+10)
+      DO iI = 1,kMaxLayer+10
         raRx110Temp(iI) = raJunk(iI)
       END DO
-      CALL r_sort_loglinear(raRx110Press,raRx110MR,iNumLevsx,PLEVx110,raJunk,kProfLayer+10)
-      DO iI = 1,kProfLayer+10
+      CALL r_sort_loglinear(raRx110Press,raRx110MR,iNumLevsx,PLEVx110,raJunk,kMaxLayer+10)
+      DO iI = 1,kMaxLayer+10
         raRx110MR(iI) = raJunk(iI)
         raRx110Press(iI) = PLEVx110(iI)
       END DO
-      iNumLevsx = kProfLayer+10
+      iNumLevsx = kMaxLayer+10
 
       RETURN
       END

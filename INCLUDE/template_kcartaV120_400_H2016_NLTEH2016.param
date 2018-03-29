@@ -18,8 +18,8 @@ c!!!                                                                  !!!
 c template file : template_kcartaV120_400_H2016.param                 !!!
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-      PARAMETER(caVersion='v1.20 18-03-26 template_kcartaV120_400_H2016.param')      !!!
-c!!!                       v     YY MM DD template_kcartaV120_PPM_H20XY.param')      !!!
+      PARAMETER(caVersion='v1.20 18-03-26 template_kcartaV120_400_H2016_NLTEH2016.param')      !!!
+c!!!                       v     YY MM DD template_kcartaV120_PPM_H20XY_NLTEH20AB.param')      !!!
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -353,8 +353,8 @@ c this is how many layers are in the user profile
 c now keep in mind kMaxLayer = 100
 c so this is used when kProfLayer ~= 100 !!!!!!
       INTEGER kMaxProfLayer
-c      PARAMETER (kMaxProfLayer=max(kMaxLayer,kProfLayer))
-      PARAMETER (kMaxProfLayer=100)
+      PARAMETER (kMaxProfLayer=max(kMaxLayer,kProfLayer))
+c      PARAMETER (kMaxProfLayer=100)
 
 c kMaxPrint == max number of printing options that can be read in
 c kMaxAtm   == max number of atmosphers we do radiance calculations for

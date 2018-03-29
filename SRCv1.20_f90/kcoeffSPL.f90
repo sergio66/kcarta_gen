@@ -752,18 +752,18 @@ CONTAINS
 
     GOTO 777
 
-    write(kStdWarn,*) 'SUBR GetUS_Std_UA : caUA_US_STD_385ppmv = ',caUA_US_STD_385ppmv
+    write(kStdWarn,*) 'SUBR GetUS_Std_UA : caUA_US_STD = ',caUA_US_STD
     100 write(kStdErr,*) 'Error reading GetUS_Std_UA info : filename = '
-    WRITE(kStdErr,1070) iErr,caUA_US_STD_385ppmv
+    WRITE(kStdErr,1070) iErr,caUA_US_STD
     CALL DoStop
 
     777 CONTINUE
     iIOun = kTempUnit
-    OPEN(UNIT=iIOun,FILE=caUA_US_STD_385ppmv,FORM='formatted',STATUS='OLD',IOSTAT=iErr, &
+    OPEN(UNIT=iIOun,FILE=caUA_US_STD,FORM='formatted',STATUS='OLD',IOSTAT=iErr, &
     ERR = 100)
     IF (iErr /= 0) THEN
         write (kStdErr,*) 'in subroutine GetUS_Std_UA, error reading file  ... '
-        WRITE(kStdErr,1070) iErr, caUA_US_STD_385ppmv
+        WRITE(kStdErr,1070) iErr, caUA_US_STD
         CALL DoSTOP
     END IF
 
@@ -775,10 +775,10 @@ CONTAINS
 !! for IOSTAT look at http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap04/iostatus.html
 !! if iOSTAT = 0, everything fine, if -1 this is EOF, if > 0 this is a problem
     read(iIOUN,123,IOSTAT=iReason,ERR=600) caStr
-!      print *,caStr,caUA_US_STD_385ppmv
+!      print *,caStr,caUA_US_STD
     IF (iReason < 0) GOTO 600       !!!! end of file
     IF (iReason > 0) THEN
-        write(kStdErr,*) 'at iT = ',iI,' IOSTAT=iReason for file ',iReason,caUA_US_STD_385ppmv
+        write(kStdErr,*) 'at iT = ',iI,' IOSTAT=iReason for file ',iReason,caUA_US_STD
         CALL DoStop
     END IF
     IF (caStr(1:1) == '!') THEN
@@ -825,7 +825,7 @@ CONTAINS
     INTEGER :: iIOUN,iI,iErr,iX
     REAL :: r1,r2,r3,r4
 
-    caFname = caLA_US_STD_385ppmv
+    caFname = caLA_US_STD
 
     GOTO 777
 

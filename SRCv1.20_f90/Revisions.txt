@@ -589,6 +589,16 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
+3/29/18        Cleaning up the NLTE routines. Made a H2016/400ppm version of weak background lines
+               and first order linemix coeffs (as opposed to the ~H2004 or H2008 version we have
+	       been using). This meant that
+	         -- caUA_US_STD_385ppmv and caLA_US_STD_385ppmv have been changed in the include
+		    files and source code to caUA_US_STD and caUA_US_STD
+	         -- renamed many of the INCLUDE/template*.param files so they include _NLTEH20XY
+		    to indicate which HITRAN version has been used for NLTE
+		 -- had to fix some of the modules because of PLEV_KCARTADATABASE_AIRS was
+		    having array bound problems
+		    
 2/27/18        SPECTRA now allows you to have raAltComprDirsScale
                which tells you how to scale the "alternate" optical depths
 	       So for example if you made LBLRTM CO2 ODs using 385 ppmv, but the
@@ -619,6 +629,16 @@ September 2017 f90 version. Made modules, so rearranged subroutines/functions
 	       
 v1.18
 -----
+3/29/18        Cleaning up the NLTE routines. Made a H2016/400ppm version of weak background lines
+               and first order linemix coeffs (as opposed to the ~H2004 or H2008 version we have
+	       been using). This meant that
+	         -- caUA_US_STD_385ppmv and caLA_US_STD_385ppmv have been changed in the include
+		    files and source code to caUA_US_STD and caUA_US_STD
+	         -- renamed many of the INCLUDE/template*.param files so they include _NLTEH20XY
+		    to indicate which HITRAN version has been used for NLTE
+		 -- had to fix some of the modules because of PLEV_KCARTADATABASE_AIRS was
+		    having array bound problems
+		    
 2/27/18        SPECTRA now allows you to have raAltComprDirsScale
                which tells you how to scale the "alternate" optical depths
 	       So for example if you made LBLRTM CO2 ODs using 385 ppmv, but the

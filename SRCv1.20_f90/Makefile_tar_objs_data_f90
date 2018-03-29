@@ -509,7 +509,18 @@ clean:
 
 #########################################################################
 datafix400_H2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.20_f90
+
+datafix400_H2016_NLTEH2008:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -520,7 +531,7 @@ datafix400_H2016:
       cd ../SRCv1.20_f90
 
 datafix400_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2012.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -531,7 +542,7 @@ datafix400_H2012:
       cd ../SRCv1.20_f90
 
 datafix385_H2012_LBLRTM:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_LBLRTM.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_LBLRTM_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -542,7 +553,7 @@ datafix385_H2012_LBLRTM:
       cd ../SRCv1.20_f90
 
 datafix385_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \

@@ -203,7 +203,18 @@ all : $(EXECS)
 alldist : $(EXECSDIST)
 
 datafix400_H2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_400_H2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v118.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v118.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.18
+
+datafix400_H2016_NLTEH2008:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_400_H2016_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -214,7 +225,7 @@ datafix400_H2016:
       cd ../SRCv1.18
 
 datafix400_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_400_H2012.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_400_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -225,7 +236,7 @@ datafix400_H2012:
       cd ../SRCv1.18
 
 datafix385_H2012_LBLRTM:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2012_LBLRTM.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2012_LBLRTM_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -236,7 +247,7 @@ datafix385_H2012_LBLRTM:
       cd ../SRCv1.18
 
 datafix385_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2012.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -248,7 +259,7 @@ datafix385_H2012:
 
 ## this is "simple file" with hardly any comments
 datafix385_H2012_IR_ONLY:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g'  ../INCLUDE/template_kcartaV118_385_H2012_IR_ONLY.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g'  ../INCLUDE/template_kcartaV118_385_H2012_IR_ONLY_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -259,7 +270,7 @@ datafix385_H2012_IR_ONLY:
       cd ../SRCv1.18
 
 datafix385_H2012_hartmann_co2:
-	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/template_kcartaV118_385_H2012_hartmann.param > \
+	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/template_kcartaV118_385_H2012_hartmann_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -271,7 +282,7 @@ datafix385_H2012_hartmann_co2:
 
 ## this is "simple file" with hardly any comments
 datafix385_H2008_IR_ONLY:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2008_IR_ONLY.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2008_IR_ONLY_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -282,7 +293,7 @@ datafix385_H2008_IR_ONLY:
       cd ../SRCv1.18
 
 datafix385_H2008:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2008.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV118_385_H2008_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -293,7 +304,7 @@ datafix385_H2008:
       cd ../SRCv1.18
 
 datafix370_H2000:
-	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/template_kcartaV118_370_H2000.param > \
+	sed -e 's|\#|$(DISTDIR)|g' ../INCLUDE/template_kcartaV118_370_H2000_NLTEH2008.param > \
       ../INCLUDE/kcarta_v118.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
