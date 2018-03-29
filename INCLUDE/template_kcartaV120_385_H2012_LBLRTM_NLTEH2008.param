@@ -409,12 +409,14 @@ c /asl/packages/sartaV108/Src_rtpV201
      $     '^/KCDATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat')
 
 c*************************
-c caUA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for UA CO2
-c caLA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for LA CO2
+c caUA_US_STD has the US STD profile (for 385 ppmv) for UA CO2
+c caLA_US_STD has the US STD profile (for 385 ppmv) for LA CO2
 c this is useful when doing LBL NLTE calcs
-      CHARACTER*80 caUA_US_STD_385ppmv,caLA_US_STD_385ppmv
-      PARAMETER (caUA_US_STD_385ppmv = '^/KCDATA/NLTE/UA/us_std_prof_ua')
-      PARAMETER (caLA_US_STD_385ppmv = '^/KCDATA/NLTE/LA/us_std_prof_la')
+c these were originally caUA_US_STD_385ppmv and caLA_US_STD_385ppmv, all in 
+c SRCV1.20_f90/kreadVTprofiles.f or in SRCv1.18/kreadVTprofiles.f
+      CHARACTER*80 caUA_US_STD,caLA_US_STD
+      PARAMETER (caUA_US_STD = '^/KCDATA/NLTE/UA/us_std_prof_ua_385ppmv')
+      PARAMETER (caLA_US_STD = '^/KCDATA/NLTE/LA/us_std_prof_la_385ppmv')
 cc this is where the compressed NLTE files are, for LOWER and UPPER atm
 c the files are ODs, PlanckCoeffs, as a function of solar zenith angle
        CHARACTER*120 kCompressedNLTE_LA,kCompressedNLTE_UA

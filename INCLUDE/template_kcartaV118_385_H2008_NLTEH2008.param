@@ -1,0 +1,509 @@
+c this include file has a lot of # so that the 
+c Makefile uses SED, changing them to actual distribution directory DISTDIR
+
+c this include file has parameters to compile kcartamain.f, kcartabasic.f
+c using pre_defined.param, parameters are set here depending on what 
+c the user specifies
+
+c DO NOT TOUCH pre_defined.param and post_defined.param
+
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
+c!!!                                                                  !!!
+      include '../INCLUDE/pre_defined.param'                          !!!
+c template file : template_kcartaV118_385_H2008.param                 !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
+      PARAMETER(caVersion='v1.18 16-10-01 template_kcartaV118_385_H2008.param')      !!!      
+c!!!                                                                  !!!
+c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+c note some of the parameters are used by more recent versions of kcarta eg 
+c NLTE and scattering are in v1.11
+
+c************************************************************************
+c************* cccc USER DEFINED INFORMATION cccc *********************** 
+c******************* set these as desired *******************************
+c************************************************************************
+
+c kOrigRefPath == path to original 100 layers reference profiles
+c              == these profiles were used in making the kCARTA database
+      CHARACTER*80 kOrigRefPath
+      PARAMETER (kOrigRefPath = 
+     $          '^/KCDATA/RefProf_July2010.For.v115up_CO2ppmv385/')
+
+c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
+c >>>>>>>> set correct path (iee_le vs ieee_be) as necessary <<<<<<<<<<<
+c >>>>>>>> change ieee-le to ieee-be for Intel vs SGI <<<<<<<<<<<<<<<<<<
+c DISTDIR = # is ieee-le, while /strowlab/motteler is ieee-be
+c --------- > (A) these are the water files, and ALL gases EXCEPT CO2
+c kWaterPath      == path to compressed files for water 
+c                   (note gases 101,102 use lookup tables for self, foreign 
+c                   contribution to the continuum)
+c kCompPath       == path to other compressed data files (gasID 3 - 27,51-63)
+c kCKDPath        == path to where the CKD lookup tables are
+c kCKD_compr_path == path to where the CKD compressed data files (gasID 101,102)
+c note : this is default, for the "r" or regular gases in 605-2830 cm-1 range
+      CHARACTER*120 kWaterPath,kCompPath,kCKDPath,kCKD_compr_path
+c these were generated sometime in year 2000 and were used for NLTE 2005
+c      PARAMETER (kWaterPath = '#/v20.ieee-le/h2o.ieee-le/')
+c      PARAMETER (kCompPath  = '#/v20.ieee-le/etc.ieee-le/')
+c      PARAMETER (kCKDPath   = '^/KCDATA/General/CKDieee_le/')
+c G1,3,9,12 were generated in Dec 2007; rest were copied from v20.ieee-le
+c      PARAMETER (kWaterPath = '#/v07.ieee-le/h2o.ieee-le/')
+c      PARAMETER (kCompPath  = '#/v07.ieee-le/etc.ieee-le/')
+c      PARAMETER (kCKDPath   = '^/KCDATA/General/CKDieee_le/')
+c everything redone in July 2010
+      PARAMETER (kWaterPath      = '^/H2008_IR.v1.ieee-le/h2o_ALLISO.ieee-le/')
+      PARAMETER (kCompPath       = '^/H2008_IR.v1.ieee-le/etc.ieee-le/')
+      PARAMETER (kCKDPath        = '^/KCDATA/General/CKDieee_le/')
+      PARAMETER (kCKD_Compr_Path = '^/KCDATA/General/CKDieee_le/Compr/')
+
+c this is to account for heavy water in the 605-2830, 2830-3330 cm-1 bands
+c These are the 0.0025 cm-1 resolution bands
+c so first     band starts at 1105 and ends at 1730 cm-1 (ie last chunk is 1705 cm-1)
+c while second band starts at 2405 and ends at 3555 cm-1 (ie last chunk is 3530 cm-1)
+c >>>>>>> NOTE that ALL the water isotope datafiles are in kWaterIsotopePath
+c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and 
+c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
+      INTEGER kWaterIsobandStart1,kWaterIsobandStop1
+      INTEGER kWaterIsobandStart2,kWaterIsobandStop2
+      PARAMETER (kWaterIsobandStart1 = 1105, kWaterIsobandStop1 = 1730)
+      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
+      CHARACTER*80 kWaterIsotopePath
+      PARAMETER (kWaterIsotopePath = '^/H2008_IR.v1.ieee-le/hDo.ieee-le/')
+c for testing; this will turn off new part of code and just use usual database
+c for testing; this will turn off new part of code and just use usual database
+c      PARAMETER (kWaterIsotopePath = kWaterPath)
+c      PARAMETER (kWaterIsobandStart1 = 2905, kWaterIsobandStop1 = 3355)
+c      PARAMETER (kWaterIsobandStart2 = 3905, kWaterIsobandStop2 = 3355)
+
+c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
+c \\\ this is for the newer gas paths; see pre_defined.param for the  ////
+c \\\ prefix "m","n","v" etc; see       s_misc.f                      ////
+c \\\ these files copied from                                         ////
+c \\\     /strowdata1/s1/sergio/OLD_RUN8_NIRDATABASE/blah/fbin/gah    ////
+
+c !!! f = 020_30 cm-1, at 0.00005 cm-1 spacing (= 0.5 cm-1 chunk span)
+      CHARACTER*80 kWaterPathf,kCompPathf,kCKDPathf
+      PARAMETER (kWaterPathf = '^/H2008_otherbands.ieee-le/FIR15_30/h2o.ieee-le/')
+      PARAMETER (kCompPathf  = '^/H2008_otherbands.ieee-le/FIR15_30/etc.ieee-le/')
+      PARAMETER (kCKDPathf   = '^/H2008_otherbands.ieee-le/FIR15_30/etc.ieee-le/')
+
+c !!! g = 030_50 cm-1, at 0.00010 cm-1 spacing (= 1.0 cm-1 chunk span)
+      CHARACTER*80 kWaterPathg,kCompPathg,kCKDPathg
+      PARAMETER (kWaterPathg = '^/H2008_otherbands.ieee-le/FIR30_50/h2o.ieee-le/')
+      PARAMETER (kCompPathg  = '^/H2008_otherbands.ieee-le/FIR30_50/etc.ieee-le/')
+      PARAMETER (kCKDPathg   = '^/H2008_otherbands.ieee-le/FIR30_50/etc.ieee-le/')
+
+c !!! h = 050_80 cm-1, at 0.00015 cm-1 spacing (= 1.5 cm-1 chunk span)
+      CHARACTER*80 kWaterPathh,kCompPathh,kCKDPathh
+      PARAMETER (kWaterPathh = '^/H2008_otherbands.ieee-le/FIR50_80/h2o.ieee-le/')
+      PARAMETER (kCompPathh  = '^/H2008_otherbands.ieee-le/FIR50_80/etc.ieee-le/')
+      PARAMETER (kCKDPathh   = '^/H2008_otherbands.ieee-le/FIR50_80/etc.ieee-le/')
+
+c !!! j = 080_150 cm-1, at 0.00025 cm-1 spacing (= 2.5 cm-1 chunk span)
+      CHARACTER*80 kWaterPathj,kCompPathj,kCKDPathj
+      PARAMETER (kWaterPathj = '^/H2004_otherbands.ieee-le/FIR80_150/h2o.ieee-le/')
+      PARAMETER (kCompPathj  = '^/H2004_otherbands.ieee-le/FIR80_150/etc.ieee-le/')
+      PARAMETER (kCKDPathj   = '^/H2004_otherbands.ieee-le/FIR80_150/etc.ieee-le/')
+
+c !!! k = 140_310 cm-1, at 0.0005 cm-1 spacing (= 05 cm-1 chunk span)
+      CHARACTER*80 kWaterPathk,kCompPathk,kCKDPathk
+      PARAMETER (kWaterPathk = '^/H2004_otherbands.ieee-le/FIR140_310/h2o.ieee-le/')
+      PARAMETER (kCompPathk  = '^/H2004_otherbands.ieee-le/FIR140_310/etc.ieee-le/')
+      PARAMETER (kCKDPathk   = '^/H2004_otherbands.ieee-le/FIR140_310/etc.ieee-le/')
+
+c !!! p = 300_510 cm-1, at 0.0010 cm-1 spacing (= 10 cm-1 chunk span)
+      CHARACTER*80 kWaterPathp,kCompPathp,kCKDPathp
+      PARAMETER (kWaterPathp = '^/H2004_otherbands.ieee-le/FIR300_510/h2o.ieee-le/')
+      PARAMETER (kCompPathp  = '^/H2004_otherbands.ieee-le/FIR300_510/etc.ieee-le/')
+      PARAMETER (kCKDPathp   = '^/H2004_otherbands.ieee-le/FIR300_510/etc.ieee-le/')
+
+c !!! q = 500_605 cm-1, at 0.0015 cm-1 spacing (= 15 cm-1 chunk span)
+      CHARACTER*80 kWaterPathq,kCompPathq,kCKDPathq
+      PARAMETER (kWaterPathq = '^/H2004_otherbands.ieee-le/FIR500_605/h2o.ieee-le/')
+      PARAMETER (kCompPathq  = '^/H2004_otherbands.ieee-le/FIR500_605/etc.ieee-le/')
+      PARAMETER (kCKDPathq   = '^/H2004_otherbands.ieee-le/FIR500_605/etc.ieee-le/')
+
+c !!! s = 2830-3380 cm-1, at 0.0025 cm-1 spacing (= 25 cm-1 chunk span)
+      CHARACTER*80 kWaterPaths,kCompPaths,kCKDPaths
+      PARAMETER (kWaterPaths = '^/H2004_otherbands.ieee-le/NIR2830_3330/h2o.ieee-le/')
+      PARAMETER (kCompPaths  = '^/H2004_otherbands.ieee-le/NIR2830_3330/etc.ieee-le/')
+      PARAMETER (kCKDPaths   = '^/H2004_otherbands.ieee-le/NIR2830_3330/etc.ieee-le/')
+
+c !!! m = 4050-4950 cm-1, at 0.01 cm-1 spacing (= 100 cm-1 chunk span) done for TIMS 2007/2008
+c      CHARACTER*80 kWaterPathm,kCompPathm,kCKDPathm
+c      PARAMETER (kWaterPathm = '/carrot/s1/sergio/RUN8_VISDATABASE/VIS4000_4500/etc.ieee-le/')
+c      PARAMETER (kCompPathm  = '/carrot/s1/sergio/RUN8_VISDATABASE/VIS4000_4500/etc.ieee-le/')
+c      PARAMETER (kCKDPathm   = '/carrot/s1/sergio/RUN8_VISDATABASE/VIS4000_4500/etc.ieee-le/')
+c !!! m = 3550-5550 cm-1, at 0.01 cm-1 spacing (= 100 cm-1 chunk span)
+      CHARACTER*80 kWaterPathm,kCompPathm,kCKDPathm
+      PARAMETER (kWaterPathm = '^/H2004_otherbands.ieee-le/NIR3550_5550/h2o.ieee-le/')
+      PARAMETER (kCompPathm  = '^/H2004_otherbands.ieee-le/NIR3550_5550/etc.ieee-le/')
+      PARAMETER (kCKDPathm   = '^/H2004_otherbands.ieee-le/NIR3550_5550/etc.ieee-le/')
+
+c !!! n = 5550-8350 cm-1, at 0.015 cm-1 spacing (= 150 cm-1 chunk span)
+      CHARACTER*80 kWaterPathn,kCompPathn,kCKDPathn
+      PARAMETER (kWaterPathn = '^/H2004_otherbands.ieee-le/NIR5550_8200/h2o.ieee-le/')
+      PARAMETER (kCompPathn  = '^/H2004_otherbands.ieee-le/NIR5550_8200/etc.ieee-le/')
+      PARAMETER (kCKDPathn   = '^/H2004_otherbands.ieee-le/NIR5550_8200/etc.ieee-le/')
+
+c !!! o = 8250-12250 cm-1, at 0.025 cm-1 spacing (= 250 cm-1 chunk span)
+      CHARACTER*80 kWaterPatho,kCompPatho,kCKDPatho
+      PARAMETER (kWaterPatho = '^/H2004_otherbands.ieee-le/NIR8250_12250/h2o.ieee-le/')
+      PARAMETER (kCompPatho  = '^/H2004_otherbands.ieee-le/NIR8250_12250/etc.ieee-le/')
+      PARAMETER (kCKDPatho   = '^/H2004_otherbands.ieee-le/NIR8250_12250/etc.ieee-le/')
+
+c !!! v = 12000-25000 cm-1, at 0.0500 cm-1 spacing (= 500 cm-1 chunk span)
+      CHARACTER*80 kWaterPathv,kCompPathv,kCKDPathv
+      PARAMETER (kWaterPathv = '^/H2004_otherbands.ieee-le/VIS12000_25000/h2o.ieee-le/')
+      PARAMETER (kCompPathv  = '^/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
+      PARAMETER (kCKDPathv   = '^/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
+
+c !!! u = 25000-44000 cm-1, at 0.1000 cm-1 spacing (= 1000 cm-1 chunk span)
+      CHARACTER*80 kWaterPathu,kCompPathu,kCKDPathu
+      PARAMETER (kWaterPathu = '^/H2004_otherbands.ieee-le/UV25000_45000/h2o.ieee-le/')
+      PARAMETER (kCompPathu  = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
+      PARAMETER (kCKDPathu   = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
+
+      CHARACTER*80 kCousin_CO2Path,kChiFile
+c kCousin_CO2Path == path to alt (cousin) CO2 compressed data files (gasID 2)
+c (a) v10 has the original database, with GENLN2 Cousin lineshape
+c         warning : if you use the v10 database, you will need to bump
+c         up CO2 in your mixed paths by 370/330 ~ 1.1212!!!!!!!!!!!!!!!!!!!
+c      PARAMETER (kCO2Path    = '#/v10.ieee-le/etc.ieee-le/')
+c kChiFile        == path to any chi files (for eg CO2 and H20)
+c                    kChiFile tells the code where to look for necessary files
+c                    that improve spectroscopy (they multiply kCompressed 
+c                    optical depths) to get smaller radiance biases (as 
+c                    determined by analyzing AIRS radiances)
+c                    Also used in NLTE as it uses simple linemix model in 
+c                    the 2355-2505 region, which needs to agree better with 
+c                    UMBC-LBL model
+c        would need to set iType = 0 in kcoeffMAIN.f for no fudges
+c this is the Cousin LineShape file, with 370 ppmv
+      PARAMETER (kCousin_CO2Path = '#/v10.ieee-le/etc.ieee-le/')
+c this is the chifiles
+      PARAMETER (kChiFile        = '^/KCDATA/General/ChiFile/')
+ccccccc >>>>>>>>
+
+c \\\\\\\\\\\\\\\\\\\\ this is the history of CO2 files /////////////////////
+c kCO2Path        == path to main linemix CO2 compressed data files (gasID 2)
+      CHARACTER*80 kCO2Path
+c (1) v20 has the CO2 database made up in Summer 2000; HITRAN1998, PR mixing
+c         first all linemix database, where only one parameter for temperature
+c         sounding regions at 4um
+c      PARAMETER (kCO2Path    = '#/v20.ieee-le/etc.ieee-le/')
+c (2) v23 has the CO2 database made in Aug 2002, which uses HITRAN2000, PR 
+c         mixing/blending in 3 different regions near 2380 cm-1 R branchead
+c      PARAMETER (kCO2Path    = '#/v23.ieee-le/etc.ieee-le/')
+c (3) v20-23 blends v20,v23 CO2 database : use v20 everywhere except at 
+c         2355,2380,2405 where we use v23 database. Combining these two, we 
+c         have the v20-23 database, or for general distribution to global users, 
+c         the v24 linemix database
+c      PARAMETER (kCO2Path = '/carrot/s1/sergio/CO2database/v20_23.ieee-le/')
+c      PARAMETER (kCO2Path = '#/v24.ieee-le/co2.ieee-le/')
+c (4) This has been copied over to #/v07.ieee-le/etc.ieee-le ie
+c        #/v24.ieee-le/co2.ieee-le ==== #/v07.ieee-le/etc.ieee-le
+c (5) /carrot/s1/sergio/CO2ppmv385/ contains same files as (4), but CO2 ppmv 
+c     is 385 ppmv produced by scaling the coefficients, see 
+c     /KCARTA/UTILITY/for2mat2for_CO2_370_385.m
+c (6) /asl/s1/sergio/RUN8_NIRDATABASE/IR_605_2830_H08_CO2/fbin/etc.ieee-le/ 
+c     contains the JM Hartmann LineMix files ... needs lots of debugging
+c \\\\\\\\\\\\\\\\\\\\ this is the history of CO2 files /////////////////////
+
+c --------- > (B) these are the CO2 files; 
+c ---------->     kCO2_UMBCorHARTMAN tells us linemixing = +1 for UMBC, -1 for Hartmann
+      INTEGER kCO2_UMBCorHARTMAN
+c      PARAMETER (kCO2Path = '#/v20.ieee-le/etc.ieee-le/')
+c      PARAMETER (kCO2Path = '#/v23.ieee-le/etc.ieee-le/')
+c      PARAMETER (kCO2Path = '#/UMBC_CO2_H1998.ieee-le/CO2ppmv370.ieee-le/')
+c      PARAMETER (kCO2Path = '#/v24.ieee-le/co2.ieee-le/')
+      PARAMETER (kCO2Path = '^/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')
+      PARAMETER (kCO2_UMBCorHARTMAN = +1)
+c--->
+c      Am pretty sure this is 385 ppmv
+c      PARAMETER (kCO2Path  = '^/H2008_IR.v1.ieee-le/co2_hartmann.ieee-le/')
+c      PARAMETER (kCO2_UMBCorHARTMAN = -1)
+
+c kCO2ppmvFile      == file that has the CO2 amounts used in the LTE kCARTA database
+c kCO2ppmvFileBack  == file that has the CO2 amounts used in the weak backgnd 
+c                         LTE kCARTA database, layers 1 .. 100
+c kCO2ppmvFileBackUS== file that has the CO2 amounts used in the weak backgnd 
+c                         UA LTE kCARTA database, alyers 101 - 120
+c kCO2ppmv       == CO2 ppmv used in the kCARTA database, for LTE 1 .. 100 layers
+      CHARACTER*80 kCO2ppmvFile,kCO2ppmvFileBack,kCO2ppmvFileBackUA
+      INTEGER      kCO2ppmv
+      PARAMETER (kCO2ppmv           = 385)
+      PARAMETER (kCO2ppmvFile       = '^/KCDATA/General/refgas2_385ppmv')
+      PARAMETER (kCO2ppmvFileBack   = '^/KCDATA/General/refgas2Back_385ppmv')
+      PARAMETER (kCO2ppmvFileBackUA = '^/KCDATA/General/refgas2BackUA_385ppmv')
+
+c --------- > (C) these are the extra needed files
+c also need paths to where the xsec, CKD and Solar Radiance Files are
+      CHARACTER*80 kSolarPath,kXsecFile
+      PARAMETER (kSolarPath = '^/KCDATA/General/SOLARieee_le/')
+      PARAMETER (kXsecFile  = '^/KCDATA/General/xsecdata.dat.intel')
+
+c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+c need paths to comp.param and xsec.param == files that detail what gasID's
+c and frequency combinations are in the compressed/crosssection databases
+c the names are semi-logical eg H1996  means "built with HITRAN 1996"
+c                            eg H1998  means "built with HITRAN 1998"
+c                            eg HT1998 means "built with HITRAN 1998 + Toth"
+c parameter kChiFIle tells the code where to look for necessary files
+c that improve the spectroscopy when multiplied with the kCompressed data
+      CHARACTER*80 kXsecParamFile,kCompParamFile
+      PARAMETER (kXsecParamFile = '^/KCDATA/General/xsecHT2010.param')
+      PARAMETER (kCompParamFile = '^/KCDATA/General/compHT2010.param')
+
+c NOTE 1
+c if you use Scott's last version of v107 then try
+c      PARAMETER (kCompParamFile = '^/KCDATA/General/compHT2007_test.param_andy')
+c   as it includes info for both /asl/data/kcarta/KCARTADATA/General/xsecHT2007_test.param and
+c                              /asl/data/kcarta/KCARTADATA/General/compHT2007_test.param
+c   looks like this is what he used for 
+c      PARAMETER (kWaterPath  = '/asl/data/kcarta/v07.ieee-le/h2o.ieee-le/')
+c      PARAMETER (kCompPath   = '/asl/data/kcarta/v07.ieee-le/etc.ieee-le/')
+c   when making most recent (2008-2010 version) of SARTA
+c NOTE 1
+
+c this is how many layers are in the user profile 
+      INTEGER kProfLayer
+!      PARAMETER (KProfLayer=115)  !!fine lower layers - temperature inversiom
+!      PARAMETER (KProfLayer=43)   !!testing Dave Edwards NLTE
+!      PARAMETER (KProfLayer=97)   !!testing Dave Edwards NLTE
+!      PARAMETER (KProfLayer=120)   !!NLTE so all layers <= 1.25 km thick
+      PARAMETER (KProfLayer=100)  !!regular AIRS layers
+
+c now keep in mind kMaxLayer = 100
+c so this is used when kProfLayer ~= 100 !!!!!!
+      INTEGER kMaxProfLayer
+c      PARAMETER (kMaxProfLayer=max(kMaxLayer,kProfLayer))
+      PARAMETER (kMaxProfLayer=100)
+
+c kMaxPrint == max number of printing options that can be read in
+c kMaxAtm   == max number of atmosphers we do radiance calculations for
+c kGasStore == max number of gases we allocate storage for 
+c              (from GASFIL + XSCFIL + WaterSelf + WaterFor <= kMaxGas)
+c kMixFilRows== max number of mixfil rows that can be read in
+      INTEGER kMaxAtm,kGasStore,kMixFilRows,kMaxPrint
+      PARAMETER (kMaxAtm=5,kGasStore=80,kMixFilRows=kProfLayer*2)
+      PARAMETER (kMaxPrint=10)
+
+c kEmsRegions=how many wavenumber dependent regions can be read in from 
+c             emissivity file
+      INTEGER kEmsRegions
+      PARAMETER (kEmsRegions=2000)
+
+c this is if the user wants to do Jacobians
+c kMaxDQ = max number of gases we do d/dq for (GasID's 1..6) HUGE MEMORY!!!
+c kProfLayerJac = kProfLayer if Jacobians on, 1 otherwise
+c kMaxPtsJac    = kMaxPts=10000 if Jacobians on, 1 otherwise
+      INTEGER kMaxDQ,kProfLayerJac,kMaxPtsJac
+      PARAMETER (kMaxDQ=4,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
+c when kProfLayerJac,kMaxPtsJac are set to 1, this is "space saver" mode
+c      PARAMETER (kMaxDQ=1,kProfLayerJac=1,kMaxPtsJac=1)
+
+c this is if the user wants to do scattering computations
+c kMaxClouds = max number of clouds the user defines
+      INTEGER kMaxClouds
+      PARAMETER (kMaxClouds=3)
+c kMaxLayersPerCloud = max number of layers each cloud can occupy
+c set it to kProfLayer if you are reading in arbitrary ECMWF profiles
+      INTEGER kCloudLayers
+      PARAMETER (kCloudLayers=kProfLayer)
+
+c this parameter tells the code whether or not the Xsec gases are in the new
+c Hitran98 kcompressed Format (+1), or in the older Hitran92 file format(-1)
+      INTEGER kXsecFormat
+      PARAMETER (KXsecFormat=+1)
+
+c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+c this is for the NLTE files 
+c >>>>>>>>>>> ignore if you have v1.10 or less <<<<<<<<<<<<<<<<<<<<<<<<<<<
+c kMaxPtsBox   == for NLTE, kcarta does 5 point box car integration
+c so use 5 times asmany points, plus two extra points on either side
+c kCARTA also tries to figure out which is the best ergression profile to use
+c kBoxCarUse tells the code how many points to bloat things by
+      INTEGER kMaxPtsBox,kRegrProf,kBoxCarUse
+      PARAMETER (kBoxCarUse=5)
+      PARAMETER (kMaxPtsBox=kMaxPts*kBoxCarUse,kRegrProf=48)
+c to do stuff at 0.0005 cm-1 spacing, need to "bloat" optical depths
+c if kBloatPts == 1, then cannot bloat up stuff!!
+      INTEGER kBloatPts
+c high res mode; 0.0005 cm-1 spacing 
+      PARAMETER (kBloatPts=kMaxPts*kBoxCarUse) 
+c space saver; everything at 0.0025 cm-01
+c      PARAMETER (kBloatPts=1)     
+c kUpperAtmRefPath == path to upper atm 100 layers reference profiles
+c                  == profiles were used in making upper atm kCARTA database
+      CHARACTER*80 caUpperAtmRefPath
+      PARAMETER (caUpperAtmRefPath= '^/KCDATA/NLTE/UA/')
+c kAuxNLTERefsPath = path to some US STd reference profiles which include LA,UA
+      CHARACTER*80 caAuxNLTERefsPath
+      PARAMETER (caAuxNLTERefsPath = '^/KCDATA/NLTE/LA/')
+
+c*********************
+c the LineMix,LineParam  and weak CO2 lines 
+c this is where the weak background compressed database files are
+c note we have tested 3 versions so far :
+c   (a) may2004 : leave out 2350,2351,2352,2310,2311,2320,2321           Voigt
+c   (b) dec2004 : leave out 2350,2351,2352,2310,2311,2320,2321,2353,2354 Voigt
+c                 compressed version seems to have been blown away
+c   (c) dec2004 : leave out 2350,2351,2352,2310,2311,2320,2321,2353,2354 Cousin
+c   (d) sep2005 : leave out 2350,2351,2352,2310,2311,2320,2321,2353,2354 Cousin
+c               : leave out 2210,2220,2230,2240...2280 at urging of Manuel
+c ie in (a),(b) the weak lines used the Voight lineshape, while (c) uses the
+c   Cousin lineshape for the weaklines, as this is what GENLN2 does
+c /home/motteler/absdat is actually a symlink to /taro/s2/motteler/abstmp
+c   where the 3 versions reside
+
+c this is where the strong band line params are
+c in the files here are stored the HITRAN line params (stren, freq, width etc)
+c this name should be self consistent with "caaStrongLines" in nm_nonlte of namelist file
+      CHARACTER*80 caStrongLineParams
+c this is new, where we have 19 NLTE bands
+c      PARAMETER (caStrongLineParams=
+c     $         '/strowdata1/s1/sergio/AIRSCO2/CO2_BANDS_PARAM2/co2_allpqr_')
+      PARAMETER (caStrongLineParams=
+     $         '/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/CO2_H08/co2_allpqr_')
+
+c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/, 
+c they have been copied to #; these files have removed 19 NLTE bands
+c this is where we have lower atm weakline database
+      CHARACTER*80 caWeakCO2Path
+      PARAMETER (caWeakCO2Path = '^/BACKGND_COUSIN/fbin/etc.ieee-le/385ppmv/')
+c this is where the upper atm weakline database lies
+      CHARACTER*80 caWeakUpperAtmCO2Path
+      PARAMETER (caWeakUpperAtmCO2Path =
+     $   '^/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/')
+
+c this is where the strong band linemix strengths arel files mmade by SPECTRA/CO2_COMMON/y1s.m
+c see /home/sergio/KCARTA/SRC/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/ReadmeBlog
+      CHARACTER*120 caLineMixDir
+      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H08_385/')      
+c*********************
+
+c the NLTE vib temp profiles
+c this tells the code how many layers/levels to expect in the NLTE profile
+      INTEGER kNLTEProfLayer
+      PARAMETER (kNLTEProfLayer= 150)
+c kRegrPath == path to regression profiles that code needs if it guesses VT
+      CHARACTER*80 kRegrFile
+      PARAMETER (kRegrFile = '^/KCDATA/TestProf/rtp_regress.op.rtp')
+c kLOPEZPUERTAS = path to Manuel Lope Puertas files, for regression fits
+      CHARACTER*80 kLopezPuertas
+      PARAMETER (kLopezPuertas = 
+     $ '/home/sergio/KCARTA/SRCv1.12/NONLTE2/sergio/VT_48PROFILES/sergio_merge/')
+c kNLTEPolyfits = path to where the polynomial fits to NLTE profiles are
+      CHARACTER*120 kNLTEPolyFits
+      PARAMETER (kNLTEPolyFits = 
+     $ '/home/sergio/KCARTA/SRCv1.12/NONLTE2/sergio/VT_48PROFILES/NLTE_POLYFITS/')
+
+cccc this profile is really the same as that in CHARACTER*80 kOrigRefPath
+cccc so subroutine get_us_std has been updated to just use kOrigRefPath/refgas*
+c the US Std Profiles for h.ptype = 2
+c kUSStdPath == path to US Std Profiles for h.ptype = 2
+c      CHARACTER*80 kUSStd
+c      PARAMETER (kUSStd = '^/KCDATA/USSTD/')
+
+c************************
+c this is where the Fast Model NLTE coeffs are
+       CHARACTER*120 kSartaNLTE
+c SARTAv106 version, only has 6 predictors (assumes co2 = 370ppmv)
+c PARAMETER (kSartaNLTE = '^/KCDATA/NLTE/SARTA_COEFS/setnte_oct05.le.dat')
+c SARTAv108 version, has 7 predictors (assumes co2 >= 370ppmv)
+c see incFTC_airs_apr08_m130_m150_template_cal_exper.f in
+c /asl/packages/sartaV108/Src_rtpV201
+       PARAMETER (kSartaNLTE =
+     $     '^/KCDATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat')
+
+c*************************
+c caUA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for UA CO2
+c caLA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for LA CO2
+c this is useful when doing LBL NLTE calcs
+c these were originally caUA_US_STD_385ppmv and caLA_US_STD_385ppmv, all in 
+c SRCV1.20_f90/kreadVTprofiles.f or in SRCv1.18/kreadVTprofiles.f
+      CHARACTER*80 caUA_US_STD,caLA_US_STD
+      PARAMETER (caUA_US_STD = '^/KCDATA/NLTE/UA/us_std_prof_ua_385ppmv')
+      PARAMETER (caLA_US_STD = '^/KCDATA/NLTE/LA/us_std_prof_la_385ppmv')
+cc this is where the compressed NLTE files are, for LOWER and UPPER atm
+c the files are ODs, PlanckCoeffs, as a function of solar zenith angle
+       CHARACTER*120 kCompressedNLTE_LA,kCompressedNLTE_UA
+       PARAMETER (kCompressedNLTE_LA = '^/KCDATA/NLTE/LA_UA_kcomp/')  
+       PARAMETER (kCompressedNLTE_UA = '^/KCDATA/NLTE/LA_UA_kcomp/')  
+
+c************************************************************************
+c this is potentially to use kCARTA for different planets. 
+c Numbers here are for Earth, planet 03
+      INTEGER kPlanet
+      PARAMETER (kPlanet = 03)
+
+c Default kCARTA database for Earth is in Toffsets of 10K from each other
+      REAL kTempOffSet_database
+      PARAMETER (kTempOffSet_database = 10.0)
+
+c 6.785087652174316e-5 = pi(sun diam/sun dist)^2 = pi*((0.6951e9/149.57e9)^2)
+c      we also need to multiply by muSat, and then divide by PI to use
+c      pencil beam intensity instead of Liou's fat beam flux ??
+c      6.785087652174316e-5 = (sun diam/sun dist)^2 = solid angle
+c      in some code this is deivided by PI so watch out!!
+c        rOmegaSun = kPi*((0.6951e9/149.57e9)**2)/kPi
+c        rOmegaSun = 6.785087652174316e-5/kPi
+c        rOmegaSun = 6.785087652174316e-5      version on Jan 2006
+      DOUBLE PRECISION kOmegaSun
+      PARAMETER (kOmegaSun = 6.785087652174316d-5)
+
+C kHeavyWater is the isotopic abundance for HDO from
+c  /asl/data/hitran/HITRAN04/HITRAN2k.pdf, pg 5
+      REAL kHeavyWaterAbundance
+      PARAMETER (kHeavyWaterAbundance = 0.00031069)
+c this is specific heat capaicity of air at constant pressure
+c value is 1.005e3 J kg-1 K-1 = 1.005e6 mJ kg-1 K-1
+c note RRTM uses 1.00464, so this is a 0.1% difference
+      REAL kSp_heat_air_cp
+      PARAMETER (kSp_heat_air_cp = 1.005e3*1e3)
+c sp heat const of dry air, in  J K−1 kg−1 = R/Molecular mass = 8.31/(28.955/1000)
+      REAL kSpecificGasDryAir
+      PARAMETER (kSpecificGasDryAir = 287.00)
+
+c gravity, mostly used in flux computations, together with kSp_heat_air_cp,  units m/s2
+c Re = earth radius, also mostly used in flux computations,  units km
+c kMolarMass = molar mass of atmosphere in g/mol eg for Earth 79% N2, 21% 02
+c   we have 0.79*28 + 0.21*32 = 28.84 g/mol
+c   or   mass=(28*0.78084)+(32*0.20948) + (40*0.00934) + (44*0.00033)
+c kScaleHgt = Scale Height of atm (how quickly does pressure decrease) in km, for isothermal atm
+c  eg for Earth we have Ho = R T / g M = 8.31 * 287 / (9.8 * 28.8/1000) in meters = 8.45 km
+c kStempMin,kStempMax = what you would reasonably expect for stemp
+      REAL kGravity,kPlanetRadius,kScaleHgt,kAtmMolarMass
+      PARAMETER (kGravity = 9.80665, kPlanetRadius = 6370.00)
+      PARAMETER (kScaleHgt = 8.0, kAtmMolarMass = 28.966)
+      REAL kStempMin,kStempMax
+      PARAMETER (kStempMin = 200.0,kStempMax = 330.0)
+
+c this has the AFGL levels profiles for "layers" code
+c if you set this as 'DNE' then ReadRefProf_Units_laysORlevs will only call the LAYERS ref prof
+       CHARACTER*80 kcaLevsRefProf
+       PARAMETER (kcaLevsRefProf = '/home/sergio/KCARTA/INCLUDE/glatm_16Aug2010.dat')
+
+c************************************************************************
+c************* cccc USER DEFINED INFORMATION cccc *********************** 
+c******************* set these as desired *******************************
+c************************************************************************
+
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!! POST DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!! 
+c!!!                                                                  !!!
+      include '../INCLUDE/post_defined.param'                         !!!
+c!!!                                                                  !!!
+c!!!!!!!!!!!!! POST DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!! 
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
