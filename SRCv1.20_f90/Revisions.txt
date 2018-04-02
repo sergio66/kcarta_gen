@@ -589,6 +589,13 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
+3/30/18        Renamed SUBR rsplin() to SUBR rsplin_need_2nd_deriv() as a
+               reminder that it expressly requires a prior call to rSPLY2 beforehand
+	       so that there is a known assigned value of the 2nd deerivative Y2A
+
+               SUBR MakeRefProf was using the default AIRS 101 plevs for both LA and UA
+	       this has been fixed
+	       
 3/29/18        Cleaning up the NLTE routines. Made a H2016/400ppm version of weak background lines
                and first order linemix coeffs (as opposed to the ~H2004 or H2008 version we have
 	       been using). This meant that

@@ -785,15 +785,16 @@ CONTAINS
     ypn=1.0e16
 
     CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
-    DO I=1,NOUT
-        CALL rSPLIN(XA,YA,Y2A,N,XOUT,YOUT)
-    END DO
+    CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT,YOUT)
      
     RETURN
     end SUBROUTINE rspl_one
      
 !************************************************************************
 ! this subroutine directly calls rsply2 and then rspline
+! different than SUBROUTINE rsplin_need_2nd_deriv(XA,YA,Y2A,N,X,Y) because that only does calcs for
+! one point ie NOUT = 1, and that also needs prior call to rSPLY2 for the 2nd deriv
+! IN FACT THIS ROUTINE CALLS rsplin_need_2nd_deriv() 
     SUBROUTINE rspl(XA,YA,N,XOUT,YOUT,NOUT)
      
     IMPLICIT NONE
@@ -823,7 +824,7 @@ CONTAINS
 
     CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
     DO I=1,NOUT
-        CALL rSPLIN(XA,YA,Y2A,N,XOUT(I),YOUT(I))
+      CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))
     END DO
      
     RETURN
@@ -911,7 +912,7 @@ CONTAINS
 
     CALL rSPLY2(logxa,raY,N,Yp1,Ypn,Y2A,work)
     DO I=iStart,NOUT
-        CALL rSPLIN(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))
+        CALL rsplin_need_2nd_deriv(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))
     !        print *,I,logXOUT(I),YOUT(I)
     END DO
 
@@ -950,14 +951,17 @@ CONTAINS
 
     CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
     DO I=1,NOUT
-        CALL rSPLIN(XA,YA,Y2A,N,XOUT(I),YOUT(I))
+        CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))
     END DO
      
     RETURN
     end SUBROUTINE rspl_diffyp1n
      
 !************************************************************************
-    SUBROUTINE rSPLIN(XA,YA,Y2A,N,X,Y)
+! this subroutine NEEDS a PRIOR CALL TO rsply2 BEFORE IT CAN DO rspline
+! different than SUBROUTINE rSPL(XA,YA,N,XOUT,YOUT,NOUT) because that does calcs for
+! many points ie NOUT > 1 AND THIS ONE ALSO EXPECTS Y2A (2nd deriv) AS ADDITIONAL INPUT
+    SUBROUTINE rsplin_need_2nd_deriv(XA,YA,Y2A,N,X,Y)
 
     IMPLICIT NONE
 
@@ -965,7 +969,7 @@ CONTAINS
 
 ! REAL version
 !      -----------------------------------------------------------------
-!      Uses Y2A from SPLY2 to do spline interpolation at X to get Y
+!      NEEDS Y2A from SPLY2 to do spline interpolation at X to get Y
 !      XA  : I  : DOUB arr : x array(N) in increasing order
 !      YA  : I  : DOUB arr : y array(N)
 !      Y2A : I  : DOUB arr : 2nd derivative of points
@@ -979,7 +983,7 @@ CONTAINS
     INTEGER :: N
 
 !      Local Variables
-    INTEGER :: K,KLO,KHI
+    INTEGER :: K,KLO,KHI,I
     REAL :: A,B,H
 
 !      -----------------------------------------------------------------
@@ -1012,8 +1016,13 @@ CONTAINS
     Y=A*YA(KLO) + B*YA(KHI) + ( Y2A(KLO)*(A**3 - A) + &
     Y2A(KHI)*(B**3 - B) )*(H**2)/6.0
 
+!    DO I = 1,N
+!      write(kStdWarn,50) 'rspl',I,N,KLO,KHI,XA(I),YA(I),'--->',X,Y
+!    END DO
+ 50 FORMAT(A4,4(' ',I3),2(' ',F15.7),A4,2(' ',F15.7))
+ 
     RETURN
-    end SUBROUTINE rSPLIN
+    end SUBROUTINE rSPLIN_need_2nd_deriv
 
 !************************************************************************
     SUBROUTINE rSPLY2(XA,YA,N,YP1,YPN,Y2A,WORK)
@@ -1749,7 +1758,7 @@ CONTAINS
     ELSEIF (p <= DATABASELEV(kMaxLayer+1)) THEN
         rH = DatabaseHEIGHT(kMaxLayer)
     ELSE
-        CALL rlinear_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+!        CALL rlinear_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
         CALL rspl_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
     END IF
 

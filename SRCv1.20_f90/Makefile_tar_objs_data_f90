@@ -191,20 +191,20 @@ MOBJSJPL = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_
 #EXECS = basic
 
 ## uncomment this basic (rad+jac) TXT stuff
-#TXTRTPFLAG=-DTXTsetting
+#TXTRTPFLAG= -DTXTsetting
 #EXECS = basicTXT
 
 ## uncomment this for all (rad+jac+scat+flux) RTP stuff
-#TXTRTPFLAG=
-#EXECS = scat
+TXTRTPFLAG=
+EXECS = scat
 
 ## uncomment this for all (rad+jac+scat+flux) TXT stuff
-#TXTRTPFLAG=-DTXTsetting
+#TXTRTPFLAG= -DTXTsetting
 #EXECS = scatTXT
 
 ## uncomment this for all (rad+jac+scat+flux) PARALLEL stuff
-TXTRTPFLAG=
-EXECS = parallel
+#TXTRTPFLAG=
+#EXECS = parallel
 
 all : $(EXECS)
 
@@ -469,7 +469,7 @@ n_duplicate_sky.mod n_duplicate_sky.o : n_duplicate_sky.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_duplicate_sky.f90
 
 n_main.mod n_main.o : n_main.f90 $(PARAMS)
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) $(TXTRTPFLAG) n_main.f90
+	$(FORTRANX) -c -fpp $(FLAGS) $(UFLAG) $(TXTRTPFLAG) n_main.f90
 
 n_mainTXT.mod n_mainTXT.o : n_mainTXT.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_mainTXT.f90

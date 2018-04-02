@@ -67,7 +67,7 @@ CONTAINS
           
     10 CONTINUE
     READ(iIOUN2,1080) caStr
-    IF (caStr(1:1) == '!') THEN
+    IF ((caStr(1:1) == '!') .OR. (caStr(1:1) == '%')) THEN
         GOTO 10   !! keep reading comments
     ELSE
         READ (caStr,*) iNumLevsx
@@ -82,7 +82,7 @@ CONTAINS
 
     30 CONTINUE
     READ(iIOUN2,1080) caStr
-    IF (caStr(1:1) == '!') THEN
+    IF ((caStr(1:1) == '!') .OR. (caStr(1:1) == '%')) THEN
         GOTO 30   !! keep reading comments
     ELSE
         caComment = caStr
@@ -90,7 +90,7 @@ CONTAINS
 
     40 CONTINUE
     READ(iIOUN2,1080) caStr
-    IF (caStr(1:1) == '!') THEN
+    IF ((caStr(1:1) == '!') .OR. (caStr(1:1) == '%')) THEN    
         GOTO 40   !! keep reading comments
     ELSE
         READ (caStr,*) rLat
@@ -5040,7 +5040,7 @@ CONTAINS
     CHARACTER(10) :: caaNamesC(13)
     CHARACTER(10) :: caX
           
-    IF (caStr10(1:1) /= ' ') THEN
+    IF ((caStr10(1:1) /= ' ') .AND. (caStr10(1:1) /= '%')) THEN
         caX = caStr10
     ELSE
         CALL adjustleftstr(caStr10,caX)

@@ -517,7 +517,7 @@ CONTAINS
     iNlay=0
     20 READ(iIOUN,5020,END=199) caLine
     5020 FORMAT(A100)
-    IF (caLine(1:1) /= '!') THEN
+    IF ((caLine(1:1) /= '!') .AND. (caLine(1:1) /= '%')) THEN    
         iNlay=iNlay+1
         READ(caLine,*) iJ,raProP(iNlay),raProPP(iNlay), &
         raProT(iNlay),raProA(iNlay)

@@ -18,6 +18,115 @@ CONTAINS
 !********** and finding the absorption matrix for the relevant gas ******
 !************************************************************************
 
+! this subroutine reads in the AIRS levels, avg pressures and layer thicknesses
+    SUBROUTINE databasestuff(iLowerOrUpper, &
+    raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! output params
+    REAL :: raDatabaseHeight(kMaxLayer)
+    REAL :: raDATABASELEVHEIGHTS(kMaxLayer+1)
+    REAL :: raDATABASELEV(kMaxLayer+1)
+! input params
+    INTEGER :: iLowerOrUpper
+
+    IF (iLowerOrUpper < 0) THEN
+        CALL databasestuff_lower(iLowerOrUpper, &
+        raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
+    ELSEIF (iLowerOrUpper > 0) THEN
+        CALL databasestuff_upper(iLowerOrUpper, &
+        raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
+    END IF
+
+    RETURN
+    end SUBROUTINE databasestuff
+
+!************************************************************************
+! this subroutine reads in the AIRS levels, avg pressures and layer thicknesses
+! for the lower atm
+    SUBROUTINE databasestuff_lower(iLowerOrUpper, &
+    raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
+
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/airsheightsparam.f90'
+    include '../INCLUDE/airslevelsparam.f90'
+    include '../INCLUDE/airslevelheightsparam.f90'
+
+! output params
+    REAL :: raDatabaseHeight(kMaxLayer)
+    REAL :: raDATABASELEVHEIGHTS(kMaxLayer+1)
+    REAL :: raDATABASELEV(kMaxLayer+1)
+! input params
+    INTEGER :: iLowerOrUpper
+
+! local vars
+    INTEGER :: iI
+
+    IF (iLowerOrUpper > -1) THEN
+        write(kStdErr,*) 'trying to make default lower atm profile'
+        CALL DoStop
+    END IF
+
+    DO iI = 1,kMaxLayer
+        raDatabaseHeight(iI) = DatabaseHeight(iI)
+    END DO
+    DO iI = 1,kMaxLayer + 1
+        raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
+    END DO
+    DO iI = 1,kMaxLayer
+        raDATABASELEV(iI) = DATABASELEV(iI)
+    END DO
+
+    RETURN
+    end SUBROUTINE databasestuff_lower
+
+!************************************************************************
+! this subroutine reads in the AIRS levels, avg pressures and layer thicknesses
+! for the uuper atm
+    SUBROUTINE databasestuff_upper(iLowerOrUpper, &
+    raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/airsheights_upperparam.f90'
+    include '../INCLUDE/airslevels_upperparam.f90'
+    include '../INCLUDE/airslevelheights_upperparam.f90'
+
+! output params
+    REAL :: raDatabaseHeight(kMaxLayer)
+    REAL :: raDATABASELEVHEIGHTS(kMaxLayer+1)
+    REAL :: raDATABASELEV(kMaxLayer+1)
+! input params
+    INTEGER :: iLowerOrUpper
+
+! local vars
+    INTEGER :: iI
+
+    IF (iLowerOrUpper < +1) THEN
+        write(kStdErr,*) 'trying to make default upper atm profile'
+        CALL DoStop
+    END IF
+
+    DO iI = 1,kMaxLayer
+        raDatabaseHeight(iI) = DatabaseHeight(iI)
+    END DO
+    DO iI = 1,kMaxLayer + 1
+        raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
+    END DO
+    DO iI = 1,kMaxLayer
+        raDATABASELEV(iI) = DATABASELEV(iI)
+    END DO
+
+    RETURN
+    end SUBROUTINE databasestuff_upper
+
 !************************************************************************
 !*********** NOTE THESE VARIABLES ARE DOUBLE PRECISION ******************
 !************************************************************************
@@ -678,6 +787,7 @@ CONTAINS
         IF (iI > 0) THEN
             write(kStdWarn,*) '>>> found alternate monochromatic SPECTRA for gasID ',iGasID
             IF (iGASID == 2) write(kStdWarn,*) '  >>> gasID = 2, so could simply be NLTE check ...'
+	    write(kStdWarn,*) ' '
         END IF
 
     !      ELSEIF ((iNumAltComprDirs .GT. 0) .AND. (rFileStartFr+0.05 .GE. rAltMinFr-0.05)
@@ -894,8 +1004,9 @@ CONTAINS
     INTEGER :: iPLEV
           
     include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/KCARTA_databaseparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
+! comment out these other include files, since we need to set them according to iLowerOrUpper
+!    include '../INCLUDE/KCARTA_databaseparam.f90'
+!    include '../INCLUDE/airslevelheightsparam.f90'
           
 !  kCARTA levels include P(1)=0.005, P(101) = 1100, P(38)=300
 !  P(x)=(ax^2+bx+c)7/2 formula, with the above 3 b.c.
@@ -922,21 +1033,23 @@ CONTAINS
 ! local variables
     INTEGER :: iI,iJ,iL,iG,iZbndFinal,iNot,iX,iY
     REAL :: raWorkP(kMaxLayer),raXgivenP(kMaxLayer), &
-    raYgivenP(kMaxLayer),raY2P(kMaxLayer)
+            raYgivenP(kMaxLayer),raY2P(kMaxLayer)
     REAL :: raWork(kMaxTemp),rYP1,rYPN,rXPT,r,r0,r2,rPPWgt
     REAL :: raSortPressLevels(kMaxLayer+1)
     REAL :: raSortPressHeights(kMaxLayer+1)
     REAL :: raPPX2(kProfLayer),raQX2(kProfLayer)
 
     REAL :: raDataBaseThickness(kMaxLayer)
-!      REAL DatabaseHeight(kMaxLayer)
-!      REAL DATABASELEVHEIGHTS(kMaxLayer+1)
-!      REAL DATABASELEV(kMaxLayer+1)
-
+    REAL :: raDatabaseHeight(kMaxLayer)
+    REAL :: DATABASELEVHEIGHTS(kMaxLayer+1)
+    REAL :: PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
+    
     INTEGER :: iaBnd(kProfLayer+1,2)
     REAL ::    raBndFrac(kProfLayer+1,2)
     REAL :: rPP,rWgt,rMR,rFrac,rMolecules,rHeight,rQtot
 
+    CALL databasestuff(iLowerOrUpper, DATABASELEVHEIGHTS,PLEV_KCARTADATABASE_AIRS,raDatabaseHeight)
+    
 ! pressure variables!!!!! ----------------->
 ! raaPress in atm
 
@@ -953,16 +1066,18 @@ CONTAINS
     END DO
 
 ! now just happily spline everything on!!!!!! for the temps
-!     Assign values for interpolation
-!     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
-    rYP1 = 1.0E+16
-    rYPN = 1.0E+16
     DO iI = 1,kMaxLayer
         raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
         raXgivenP(iI) = raR100Press(kMaxLayer-iI+1)
         raYgivenP(iI) = raR100Temp(kMaxLayer-iI+1)
     END DO
+    
+!   Assign values for interpolation
+!   Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
+    rYP1 = 1.0E+16
+    rYPN = 1.0E+16
     CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
+    
     DO iI = 1,iNot
         raRTemp(iI) = +999.999
     END DO
@@ -970,7 +1085,7 @@ CONTAINS
         rxpt = log(raaPress(iI,iGas))
         rxpt = raaPress(iI,iGas)
         IF (iSplineType == +1) THEN
-            CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
+            CALL rsplin_need_2nd_deriv(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
         ELSE
             CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
         END IF
@@ -988,9 +1103,16 @@ CONTAINS
     345 FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))
 !! look at the LAYERS and figure out which PLEV_KCARTADATABASE_AIRS bracket them
     iNot = (kProfLayer) - (iNumLayers)+1
+!    DO iL = 1,kProfLayer
+!      write(kStdWarn,*) 'MakeRefProf raPressLevels',iL,raPressLevels(iL),iLowerOrUpper
+!    END DO
+!    DO iL = 1,kMaxLayer
+!      write(kStdWarn,*) 'MakeRefProf PLEV_KCARTADATABASE_AIRS',iL,PLEV_KCARTADATABASE_AIRS(iL)
+!    END DO
+    
     DO iL = iNot,kProfLayer
     !! find plev_airs which is just ABOVE the top of current layer
-        iG = kProfLayer+1
+        iG = kMaxLayer+1
         10 CONTINUE
         IF ((PLEV_KCARTADATABASE_AIRS(iG) <= raPressLevels(iL+1)) .AND. (iG > 1)) THEN
             iG = iG - 1
@@ -1013,8 +1135,9 @@ CONTAINS
         raBndFrac(iL,1) = (raPressLevels(iL)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))/ &
         (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))
               
-    !      write (*,345) iL,raPressLevels(iL),raPressLevels(iL+1),iaBnd(iL,1),raBndFrac(iL,1),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)),
-    !     $                                                       iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
+!          write (*,345) iL,raPressLevels(iL),raPressLevels(iL+1),iaBnd(iL,1),raBndFrac(iL,1),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)), &
+!                                                                 iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
+
     END DO
 !      stop 'ooooo'
           
@@ -1047,8 +1170,9 @@ CONTAINS
             rMR = rMR + raR100PartPress(iY)/raRPress(iY)
             raRAmt(iX) = raRAmt(iX) + raR100Amt(iY)*rFrac
         END DO
-    !! method 1
+!! method 1
         raRPartPress(iX) = rPP/rPPWgt
+!!!!       write(*,5678),iGasID,iX,kProfLayer,raBndFrac(iX,1),raBndFrac(iX,2),raRPartPress(iX) 
 
     !        !! method 2
     !      rMR = rMR/((iaBnd(iX,2)-1)-(iaBnd(iX,1))+1)
@@ -1056,17 +1180,20 @@ CONTAINS
     !      raRAmt(iX) = rMolecules/rHeight
 
     ! bumping raRAmt and raRPartPressup n down
-    ! proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amout
+    ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amount
     ! though WV may be a little more complicated as it depends on pp
     !        raRAmt(iX) = raRAmt(iX) * 100.0
     !        raRPartPress(iX) = raRPartPress(iX) * 20.0
-    ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amout
+    ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amount
     ! though WV may be a little more complicated as it depends on pp
     !      write(*,1234) iGasID,iX,raPressLevels(iX),raaPress(iX,1)*1013.25,raPressLevels(iX+1),iaBnd(iX,1),iaBnd(iX,2),
     !     $           raRTemp(iX),raRPartPress(iX),raRAmt(iX)
 
     END DO
+    5678 FORMAT(3(' ',I3),2(' ',F10.3),1(' ',E10.5))
     1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
+
+!      stop 'zzzzooooo'
 
 !      IF (iGasID .EQ. 2) THEN
 !        DO iL = 1, 100

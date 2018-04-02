@@ -788,7 +788,7 @@ CONTAINS
         READ (caStr,*) iUpperStd_Num,r1,r2,r3,r4,r5,r6,r7,r8,r9
     !        print *,iI+1,iUpperStd_Num,r1,r2,r3,r4,r5
         iI = iI + 1
-        raUpperPress_Std(iI)    = r1
+        raUpperPress_Std(iI)    = r1*kAtm2mb
         raUpperDZ_Std(iI)       = r2
         raUpperCO2Amt_Std(iI)   = r3
         raUpperTemp_Std(iI)     = r4

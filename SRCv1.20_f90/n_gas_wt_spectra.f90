@@ -1244,6 +1244,11 @@ CONTAINS
     END iF
 
     IF (iBand == 1) THEN
+
+!        DO iI=iStart,kProfLayer
+!	  write(kStdWarn,*) iI,raLTE_STD(iI),raNLTE_STD(iI)
+!	END DO
+	
         write(kStdWarn,*) ' '
         write(kStdWarn,*) ' Comparisons of Tk,tNLTE vs USSTD : '
         ca1 = 'iI   Pavg    Tk(klayers)      TStd         dT  |     Tv      TvSTD      dTv'
@@ -1281,11 +1286,13 @@ CONTAINS
     INTEGER :: iNumVibLevels,iStart,iStrongGasID,iStrongISO
     REAL :: raPavg(kProfLayer),raNLTE_STD(kProfLayer),raLTE_STD(kProfLayer)
     DOUBLE PRECISION :: dVibCenter
-    INTEGER :: iI
+    INTEGER :: iI,iJ
 
     REAL :: raPjunk(kProfLayer),raTJunk(kProfLayer)
     REAL :: raLogTPress1(kNLTEProfLayer),raTX1(kNLTEProfLayer),raJunk(kNLTEProfLayer)
     REAL :: rX,rY,raTX2(kNLTEProfLayer)
+    REAL :: rYP1,rYPN,raY2P1(kNLTEProfLayer),raWorkP1(kNLTEProfLayer), &
+                      raY2P2(kNLTEProfLayer),raWorkP2(kNLTEProfLayer)    
 
     caFName = 'xnlte_1_1_1_6_sol_0.genln2'
     CALL concatCA80(caAuxNLTERefsPath,caFName)
@@ -1305,17 +1312,32 @@ CONTAINS
         raLogTPress1(iI) = log(raTPress1(iNumVibLevels-iI+1))
         raTX1(iI)        = raNLTEtemp1(iNumVibLevels-iI+1)
         raTX2(iI)        = raTTemp1(iNumVibLevels-iI+1)
+!	write(kStdWarn,*),'GetUSSTD_2350 A',iI,raTPress1(iNumVibLevels-iI+1),raTX2(iI),raTX1(iI)
     END DO
 
 !! now interp this onto raPavg
+!     Assign values for interpolation
+!     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
+    rYP1 = 1.0E+16
+    rYPN = 1.0E+16
+    CALL rsply2(raLogTPress1,raTX1,iNumVibLevels,rYP1,rYPN,raY2P1,raWorkP1)
+    CALL rsply2(raLogTPress1,raTX2,iNumVibLevels,rYP1,rYPN,raY2P2,raWorkP2)    
+    
     DO iI = iStart,kProfLayer
     !        print *,iI,iStart,kProfLayer,iI-iStart+1
-        raPJunk(iI-iStart+1) = raPAvg(iI)
+    !       raPJunk(iI-iStart+1) = raPAvg(iI)
         rX = log(raPAvg(iI))
-        CALL rsplin(raLogTPress1,raTX1,raJunk,iNumVibLevels,rX,rY)
+        CALL rsplin_need_2nd_deriv(raLogTPress1,raTX1,raY2P1,iNumVibLevels,rX,rY)
         raNLTE_STD(iI) = rY
-        CALL rsplin(raLogTPress1,raTX2,raJunk,iNumVibLevels,rX,rY)
+        CALL rsplin_need_2nd_deriv(raLogTPress1,raTX2,raY2P2,iNumVibLevels,rX,rY)
         raLTE_STD(iI) = rY
+!	write(kStdWarn,*),'GetUSSTD_2350 B',iI,raPAvg(iI),raLTE_STD(iI),raNLTE_STD(iI)
+	if (iI == iStart) then
+	  write(kStdWarn,*) 115,raLogTPress1(115),raTX2(115),raTX1(115)
+	  write(kStdWarn,*) iI,rX,raLTE_STD(iI),raNLTE_STD(iI)
+	  write(kStdWarn,*) 116,raLogTPress1(116),raTX2(116),raTX1(116)
+	end if
+	
     END DO
 
     RETURN

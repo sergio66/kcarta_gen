@@ -645,7 +645,6 @@ CONTAINS
         raXPartPress(iI) = raTPartPress(iI-iStart+1)
     !! need to do these two
     !! pProfNLTE_upatm may have DIFFERENT numlayers than iNumUpperLayers???
-    !! fancula fancula !!
         pProf(iI)        = pProfNLTE_upatm(iI-iStart+1)
         raVertTemp(iI)   = raTTemp(iI-iStart+1)
     END DO
@@ -827,10 +826,11 @@ CONTAINS
         END IF
     END DO
     GOTO 10
-          
+
+    CLOSE(iIOUN)
     kTempUnitOpen = -1
     15 FORMAT(A80)
-
+    
     20 write (kStdErr,15) 'Error reading info in ',caFName
 
     30 CONTINUE
@@ -961,6 +961,7 @@ CONTAINS
 
         close (iIOUN)
         kTempUnitOpen = -1
+	write(kStdWarn,*) 'SUBR read_stronglineLTE_lineparameters : iBand,iCumLineSUm = ',iLoop,iCumLineSUm
     END DO
 
     1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A80)

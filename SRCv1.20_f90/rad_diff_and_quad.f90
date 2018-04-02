@@ -196,7 +196,7 @@ CONTAINS
     REAL :: rAngleTr_m1,rAngleTr,raAngleTr_m1(kMaxPts),raAngleTr(kMaxPts)
     REAL :: raL2G(kMaxPts),raL2Gm1(kMaxPts)
     REAL :: rDiff,rCosDiff,rW
-    REAL :: raAvgAnglePerLayer(kMaxLayer),raMeanOD(kMaxLayer)
+    REAL :: raAvgAnglePerLayer(kProfLayer),raMeanOD(kProfLayer)
     INTEGER :: iS,iE,iM,iBdryP1_O
 
     DO iFr = 1,kProfLayer
@@ -2262,7 +2262,7 @@ CONTAINS
     INTEGER :: iFr,iLay,iL,iLm1,iEnd
     REAL :: rPlanck,rMPTemp
     REAL :: raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts)
-    REAL :: raAvgAnglePerLayer(kMaxLayer),raMeanOD(kMaxLayer)
+    REAL :: raAvgAnglePerLayer(kProfLayer),raMeanOD(kProfLayer)
           
 ! to do the angular integration
     REAL :: rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts)

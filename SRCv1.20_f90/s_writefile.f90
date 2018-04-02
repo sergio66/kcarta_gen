@@ -2308,6 +2308,9 @@ CONTAINS
             END DO
             write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
         END DO
+	write(kStdWarn,*) 'ajajajajajajajajajaxyxxyxyxyx'
+	call dostop
+	
         234 FORMAT ('index = ',I3,' gas HITRAN ID = ',I3,' molecule = ',A20)
          
     ! write sum
@@ -3593,9 +3596,9 @@ CONTAINS
 ! rFrLow     = lowest wavenumber to be output
 ! rFrHigh    = highest wavenumber to be output
 ! rDelta     = point spacing
-! iMainType  = 1 for path spectra                   iAtmNumber for Jacobians
-!              2 for MP spectra                     iAtmNumber for fluxes
-!              3 for radiances
+!! iMainType  = 1 for path spectra                   iAtmNumber for Jacobians
+!!              2 for MP spectra                     iAtmNumber for fluxes
+!!              3 for radiances
 ! iSubMainType = kLayer2Sp (-2,-1,1,2,3,4) for path     GAS ID (1..63) for GasJac
 !              = kLayer2Sp (-2,-1,1,2,3,4) for MP       0           for Temp Jac
 !              = iAtmNumber for radiances             -10         for wgt fcn
@@ -3619,7 +3622,7 @@ CONTAINS
         write(kStdErr,*) rFrHigh,rFrLow,rDelta,kMaxPts,iTag
         CALL DoSTOP
     END IF
-    write(kStdWarn,*) 'dump out : ',iNumberNLTEOut,' for iMain=',iMainType
+    write(kStdWarn,*) 'dump out : ',iNumberNLTEOut,' for iMain=',iPathORRad
 
     iIOUN        = kNLTEOutUA
 

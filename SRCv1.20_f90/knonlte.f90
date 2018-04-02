@@ -294,7 +294,7 @@ CONTAINS
     iLTEIn = -1
           
     IF (iNLTE_SlowORFast == +1) THEN
-        write(kStdWarn,*) 'doing slow LBL NLTE ...'
+        write(kStdWarn,'(A,I2,A,I5)') 'seeing if we need to do slow LBL NLTE for gid ',iaGases(iGas), ' chunk ',nint(raFreq(1))
         CALL NLTE_SLOW_LBL( &
         iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
         iSetBloat,iaNLTEChunks,iaaNLTEChunks,raNLTEstrength, &
@@ -326,7 +326,7 @@ CONTAINS
         daaUpperPlanckCoeffBloat, &
         daaUpperNLTEGasAbCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat)
     ELSEIF (iNLTE_SlowORFast == -2) THEN
-        write(kStdWarn,*) 'doing fast kcompressed NLTE ...'
+        write(kStdWarn,*) 'seeing if we do fast kCompressed NLTE for ',iaGases(iGas), ' for chunk ',raFreq(1)    
         CALL NLTE_Fast_Compressed( &
         iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
         iSetBloat,iaNLTEChunks,iaaNLTEChunks,raNLTEstrength, &
@@ -754,7 +754,7 @@ CONTAINS
                 !! these are pressures in mb
                     pProfNLTE_upatm(iFr)      = raUpperPress(iFr)*kAtm2mb
                     pProfNLTE_upatm(iFr)      = raUpperPress_Std(iFr)*kAtm2mb
-                    raUpperPartPress_Std(iFr) = raUpperPress_Std(iFr) * 385 * 1e-6
+                    raUpperPartPress_Std(iFr) = raUpperPress_Std(iFr) * kCO2ppmv * 1e-6
                 END DO
 
                 CALL read_std_optdepths_upper_UA( &
@@ -961,7 +961,22 @@ CONTAINS
     INTEGER :: iL,iFr,iDoNLTE
 
     INTEGER :: iJunkNum,iaJunk(kGasStore)
+    INTEGER :: iDoWeakBackGndLA,iDoWeakBackGndUA,iDoLBL_LA,iDoLBL_UA
 
+! default
+    iDoWeakBackGndLA = +1     !! do weak background (compressed) for LowerAtm, if this is NLTE gas
+    iDoWeakBackGndUA = +1     !! do weak background (compressed) for UpperAtm, if this is NLTE gas
+    iDoLBL_LA = +1            !! do LBL calcs for LowerAtm, if this is NLTE gas
+    iDoLBL_UA = +1            !! do LBL calcs for UpperAtm, if this is NLTE gas    
+! default
+
+! testing
+    iDoWeakBackGndLA = -1     !! ignore weak background (compressed) for LowerAtm, if this is NLTE gas
+    iDoWeakBackGndUA = +1     !! do weak background (compressed) for UpperAtm, if this is NLTE gas
+    iDoLBL_LA = -1            !! ignore LBL calcs for LowerAtm, if this is NLTE gas
+    iDoLBL_UA = +1            !! do LBL calcs for UpperAtm, if this is NLTE gas    
+! testing
+    
 ! see if current gas ID needs nonLTE spectroscopy
     iLTEIn      = -1
     iWhichChunk = -1
@@ -972,6 +987,29 @@ CONTAINS
     CALL SetUpNLTEStrengths(dLineStrenMin,dDeltaFreqNLTE,iDoVoigtChi)
 
     iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,raFreq(1),605.0,2830.0,20)
+
+
+    IF (iLTEIn < 0) THEN
+      write(kStdWarn,'(A,I5,A,I3,A)') '  ', nint(raFreq(1)),' is a NLTE chunk but ',iaGases(iGas),' is NOT a NLTE gas'
+    ELSE
+      IF (iDoWeakBackGndLA < 0) THEN
+        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak LA backgnd added in'
+        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak LA backgnd added in'
+      END IF
+      IF (iDoWeakBackGndUA < 0) THEN
+        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak UA backgnd added in'
+        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak UA backgnd added in'
+      END IF
+      IF (iDoLBL_LA < 0) THEN
+        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for LA'
+        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for LA'      
+      END IF
+      IF (iDoLBL_UA < 0) THEN
+        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for UA'
+        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for UA'      
+      END IF    
+    END IF
+    
     IF (iLTEIn > 0) THEN
         iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
 
@@ -980,6 +1018,7 @@ CONTAINS
             raNLTEstrength(iLTEIn) = rCO2mult
         !! change the coeffs to coeff*rCO2mult, because all the coeffs
         !! that are computed, have this factor
+            write(kStdWarn,'(A,I5,A,I3,A,F7.2)') '  ',nint(raFreq(1)),' is a NLTE chunk,',iaGases(iGas),' is NLTE gas, use mult',rCO2mult
             iDoNLTE = +1
             DO iL = 1,kProfLayer
                 DO iFr = 1,kMaxPts
@@ -997,8 +1036,8 @@ CONTAINS
             END IF
         !!! do a computation where you change the linemix spectra to
         !!! cousin spectra, using old kCARTA database
-            write(kStdWarn,*) 'Replacing kCARTA database optical depths '
-            write(kStdWarn,*) 'with GENLN2 cousin optical depths'
+            write(kStdWarn,*) 'Replacing kCARTA database CO2 optical depths '
+            write(kStdWarn,*) 'with GENLN2 cousin CO2 optical depths'
             CALL CousinContribution(iaGases(iGas), &
             rFileStartFr,iTag,iActualTag,iProfileLayers,iL_low,iL_high, &
             raTAmt,raRAmt,raTTemp,raRTemp,pProf, &
@@ -1008,10 +1047,10 @@ CONTAINS
 
         ELSEIF (iWhichChunk > 0) THEN
         !!!first compute LTE background optical depths
-            IF (iUseWeakBackGnd > 0) THEN
+            IF ((iUseWeakBackGnd > 0) .AND. (iDoWeakBackGndLA > 0)) THEN
                 write(kStdWarn,*) 'Replacing kCARTA database optical depths with backgnd'
-                write(kStdWarn,*) 'LTE abs coeffs in necessary upper layers ....'
-            ! use pProfNLTE or pProf??????
+                write(kStdWarn,*) 'LTE abs coeffs in upper layers (of standard 100 layers) ....'
+             ! use pProfNLTE or pProf??????
                 CALL lte_spectra(iTag,iActualTag,iLTEin,iaNLTEStart(iLTEin),raFreq, &
                 iaNLTEBands,caaaNLTEBands,caaNLTETemp,caaStrongLines, &
                 pProfNLTE,raPressLevels,raLayerHeight,raThickness, &
@@ -1045,37 +1084,40 @@ CONTAINS
                 pProfNLTE,iProfileLayers, &
                 raTAmt,raTTemp,raTPress,raTPartPress,iSplineType)
             END IF
+	    
         !!!!compute the line shapes for the LineMix bands
         !!!!some of which are in LTE, some in NLTE
         !!!!also find contribution for numerator in beta (planck coeff)
-            write(kStdWarn,*) 'Adding in NLTE upper layers abs coeff ....'
-        ! use pProfNLTE or pProf??????
-            CALL nonlte_spectra(iTag,iActualTag,iLTEin, &
-            iaNLTEStart(iLTEin),iaNLTEStart2350(iLTEin),raFreq, &
-            iaNLTEBands,caaaNLTEBands,caaNLTETemp, &
-            pProfNLTE,raPressLevels,raLayerHeight, &
-            raThickness,iProfileLayers, &
-            raTAmt,raTTemp,raTPress,raTPartPress, &
-            daaNLTEGasAbCoeff,daaPlanckCoeff,daaSumNLTEGasAbCoeff, &
-            iDoUpperAtmNLTE,iAllLayersLTE,dDeltaFreqNLTE, &
-            raNLTEstrength(iLTEIn),iDoVoigtChi, &
-            iSetBloat,daaSumNLTEGasAbCoeffBloat,daaNLTEGasAbCoeffBloat, &
-            daaPlanckCoeffBloat,daFreqBloat)
+	    IF (iDoLBL_LA > 0) THEN
+              write(kStdWarn,*) 'Adding in NLTE upper layers abs coeff (for standard 100 layers) ....'
+          ! use pProfNLTE or pProf??????
+              CALL nonlte_spectra(iTag,iActualTag,iLTEin, &
+              iaNLTEStart(iLTEin),iaNLTEStart2350(iLTEin),raFreq, &
+              iaNLTEBands,caaaNLTEBands,caaNLTETemp, &
+              pProfNLTE,raPressLevels,raLayerHeight, &
+              raThickness,iProfileLayers, &
+              raTAmt,raTTemp,raTPress,raTPartPress, &
+              daaNLTEGasAbCoeff,daaPlanckCoeff,daaSumNLTEGasAbCoeff, &
+              iDoUpperAtmNLTE,iAllLayersLTE,dDeltaFreqNLTE, &
+              raNLTEstrength(iLTEIn),iDoVoigtChi, &
+              iSetBloat,daaSumNLTEGasAbCoeffBloat,daaNLTEGasAbCoeffBloat, &
+              daaPlanckCoeffBloat,daFreqBloat)
 
         !!!update at which layer NONLTE starts
-            iNLTEStart = min(iNLTEStart,iaNLTEStart(iLTEin))
-            iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
+              iNLTEStart = min(iNLTEStart,iaNLTEStart(iLTEin))
+              iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
 
-            CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
-            iNLTEStart,-1)
-
+              CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
+              iNLTEStart,-1)
+            END IF
+	    
         !!!now do the stuff ABOVE the kCARTA TOA (above 0.005 mb)
-            IF (iDoUpperAtmNLTE > 0) THEN
+            IF ((iDoUpperAtmNLTE > 0) .AND. ((iDoLBL_UA > 0) .OR. (iDoWeakBackGndUA > 0))) THEN
                 write(kStdWarn,*) ' '
                 write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>----------------------->>>>>>>>>>>>>>>'
                 write(kStdWarn,*) 'Doing stratosphere NLTE abs coeff ....'
                 write(kStdWarn,*) 'upper atm NLTE abs coeffs ...'
-                IF (iUseWeakBackGnd > 0) THEN
+                IF ((iUseWeakBackGnd > 0) .AND. (iDoWeakBackGndUA > 0)) THEN
                     write(kStdWarn,*) 'backgrnd upper atm LTE abs coeffs ...'
                     CALL lte_spectra_upper( &
                     iTag,iActualTag, &
@@ -1101,27 +1143,30 @@ CONTAINS
                 !! have already put abs coeffs into daaUpperNLTEGasAbCoeff,
                 !! and ignore other gases, so just forget about AddNLTECoeffs
                 END IF
-                CALL UpHigh_Nonlte_Spectra(iTag,iActualTag,iaNLTEStart(iLTEIn), &
-                raFreq,iaGases(iGas),iLTEIn,iaNLTEBands, &
-                caaaNLTEBands,caaNLTETemp,caaUpperMixRatio,rCO2mult, &
-                pProfNLTE,raPressLevels,raLayerHeight,raThickness, &
-                pProfNLTE_upatm,raUpperPressLevels,raUpperThickness, &
-                raUpperPress,raUpperPartPress,raUpperTemp, &
-                raUpperGasAmt,raUpperNLTETemp, &
-                daaUpperPlanckCoeff,daaUpperNLTEGasAbCoeff, &
-                daaUpperSumNLTEGasAbCoeff, &
-                iUpper,iDoUpperAtmNLTE,iAllLayersLTE, &
-                dDeltaFreqNLTE,iDoVoigtChi,raNLTEstrength(iLTEIn), &
-                iSetBloat,daFreqBloat, &
-                daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
-                daaUpperNLTEGasAbCoeffBloat, &
-                iGas,iSplinetype,iNumberUA_NLTEOut, &
-                rFreqStart,rFreqEnd, &
-                iDumpAllUASpectra,iDumpAllUARads,iFileIDLo,iFileIDHi, &
-                iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks, &
-                caOutUAFile,caOutUABloatFile)
-            END IF   !IF (iDoUpperAtmNLTE > 0) THEN
-        END IF     !IF ((iWhichChunk > 0) .AND. 
+
+                IF (iDoLBL_UA > 0) THEN
+                  CALL UpHigh_Nonlte_Spectra(iTag,iActualTag,iaNLTEStart(iLTEIn), &
+                  raFreq,iaGases(iGas),iLTEIn,iaNLTEBands, &
+                  caaaNLTEBands,caaNLTETemp,caaUpperMixRatio,rCO2mult, &
+                  pProfNLTE,raPressLevels,raLayerHeight,raThickness, &
+                  pProfNLTE_upatm,raUpperPressLevels,raUpperThickness, &
+                  raUpperPress,raUpperPartPress,raUpperTemp, &
+                  raUpperGasAmt,raUpperNLTETemp, &
+                  daaUpperPlanckCoeff,daaUpperNLTEGasAbCoeff, &
+                  daaUpperSumNLTEGasAbCoeff, &
+                  iUpper,iDoUpperAtmNLTE,iAllLayersLTE, &
+                  dDeltaFreqNLTE,iDoVoigtChi,raNLTEstrength(iLTEIn), &
+                  iSetBloat,daFreqBloat, &
+                  daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+                  daaUpperNLTEGasAbCoeffBloat, &
+                  iGas,iSplinetype,iNumberUA_NLTEOut, &
+                  rFreqStart,rFreqEnd, &
+                  iDumpAllUASpectra,iDumpAllUARads,iFileIDLo,iFileIDHi, &
+                  iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks, &
+                  caOutUAFile,caOutUABloatFile)
+		END IF !IF iDoLBL_UA > 0
+            END IF     !IF (iDoUpperAtmNLTE > 0) THEN
+        END IF         !IF ((iWhichChunk > 0) .AND. 
     !      (raNLTEstrength(iLTEIn) .LT. 0)
     END IF       !IF (iLTEIn > 0) THEN
 
@@ -1771,7 +1816,8 @@ CONTAINS
         DO iL = iStart,kProfLayer   !!!loop over layers
             dLTE  = raTTemp(iL)*1.0d0
             IF (iNum > 0) THEN
-                write (kStdWarn,*) 'LBL for Strong BackGnd (LTE) Lines : iL,T,Q = ',iL,sngl(dLTE),raTamt(iL)
+!                write (kStdWarn,*) 'LBL for Strong BackGnd (LTE) Lines : iL,Tlte,Q = ',iL,sngl(dLTE),raTamt(iL)
+                write (kStdWarn,123) iL,sngl(dLTE),raTamt(iL)		
                 CALL compute_lte_spectra_fast(iTag,iActualTag, &
                 daK,raFreq,iGasID,iNum,daIso, &
                 daElower,daLineCenter,daJL,daJU,daPshift, &
@@ -1792,14 +1838,15 @@ CONTAINS
             END DO    !loop over layers
         END DO
     END IF        !IF (iUseWeakBackGnd == 1) THEN
-
+    
+ 123 FORMAT('LBL for Strong BackGnd (LTE) Lines : iL,Tlte,Q = ',I3,F10.4,E10.4) 
     write(kStdWarn,*) ' '
 
 ! //////////////----> then read in optical depths of the weaker lines
 ! compute lineshapes, using lineparameters, at layers blah..kProflayer
     IF (iUseWeakBackGnd == 1) THEN
     !!! read in optical depths for the weak LTE lines
-        write(kStdWarn,*) 'Adding in LTE contribution of weak lines ...'
+        write(kStdWarn,*) 'Adding in LTE contribution of weak background LA lines ...'
     !--> this set computed at the US Standard profile plus 10 T
     !--> offsets, so it is literally a compressed database
         iUnCompressType = -2  !!! usual AIRS layers weak CO2 backgnd
@@ -1934,7 +1981,7 @@ CONTAINS
     REAL :: raUpperTemp_Std(kProfLayer)
     INTEGER :: iUpperStd_Num
 
-! his reads in mix ratios from GND to 0.005 mb to 0.00005 mb
+!! this reads in mix ratios from GND to 0.005 mb to 0.00005 mb
 !! read in alt/press/temp/upper mix ratio from caaUpperMixRatio
 !!  into raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs
 !!
@@ -2018,7 +2065,7 @@ CONTAINS
         DO iL = 1,iUpper   !!!loop over layers
             IF (iNum > 0) THEN
                 dLTE  = raUpperTemp(iL)*1.0d0
-                write (kStdWarn,*) 'LBL for UA Strong BackGnd (LTE) Lines : iL,T,Q = ',iL,sngl(dLTE),raUpperGasAmt(iL)
+                write (kStdWarn,'(A,I3,4X,F10.4,4X,E12.6)') 'LBL for UA Strong BackGnd (LTE) Lines : iL,T,Q = ',iL,sngl(dLTE),raUpperGasAmt(iL)
                 CALL compute_lte_spectra_fast(iTag,iActualTag, &
                 daK,raFreq,iGasID,iNum,daIso, &
                 daElower,daLineCenter,daJL,daJU,daPshift, &

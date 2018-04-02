@@ -128,7 +128,8 @@ CONTAINS
         iWhichChunk = NewDataChunk(iNewIn,iaNewData,iaaNewChunks, &
         rFileStartFr)
         IF (iWhichChunk > 0) THEN
-        ! read in new spectra
+            ! read in new spectra
+	    write(kStdWarn,*) ' Reading in external spectra for iGas =',iGas,' iNewIn = ',iNewIn,' iWhichChunk = ',iWhichChunk
             CALL ReadNewData(iGas,iaGases(iGas),kProfLayer, &
             iL_low,iL_high,raTAmt,raTTemp,raTPress,raTPartPress, &
             iaCont,iTag,iActualTag,raFreq,daaDQ,daaDT,iDoDQ, &
@@ -137,6 +138,7 @@ CONTAINS
         ELSE
         ! use kCompressed Database w/o worrying
             kAltComprDirs = -1  !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+	    write(kStdWarn,*) ' still using usual spectra for iGas =',iGas,' iNewIn = ',iNewIn,' iWhichChunk = ',iWhichChunk	    
             CALL GasContribution(iGas,iaGases(iGas),kProfLayer, &
             raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
             pProf,iProfileLayers, &
@@ -155,6 +157,7 @@ CONTAINS
     IF ((iNewIn >= 1001) .AND. (iNewIn < 10000)) THEN
     !!!! use alternate compressed database
         kAltComprDirs = +1 !!overwrite one of kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+        write(kStdWarn,*) ' Reading in alternate compressed database for iGas =',iGas,' iNewIn = ',iNewIn
         CALL GasContributionAlternateDataBase(iGas,iaGases(iGas),kProfLayer, &
         raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
         pProf,iProfileLayers, &

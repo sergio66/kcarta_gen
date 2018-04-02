@@ -669,10 +669,10 @@ CONTAINS
         '          mb       m  kmol/cm2  K           |                 |                     |   ppmv'
         ca105D = &
         '----------------------------------------------------------------------------------------------'
-        write(kStdWarn,*) ca105A
-        write(kStdWarn,*) ca105B
-        write(kStdWarn,*) ca105C
-        write(kStdWarn,*) ca105D
+        write(kStdWarn,105) ca105A
+        write(kStdWarn,105) ca105B
+        write(kStdWarn,105) ca105C
+        write(kStdWarn,105) ca105D
         DO iI = 1,iUpper
             write(kStdWarn,9876) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI),raTTemp(iI), &
             raTTemp(iI),00.0, &
@@ -680,7 +680,7 @@ CONTAINS
         END DO
 
     !! compare what we have to US Std UA
-        write(kStdWarn,*) 'Comparison between user supplied and US STD kCompressed 35 UA layers'
+        write(kStdWarn,*) 'Comparison between user supplied and US STD kCompressed ',min(iUpper,iUpperStd_Num),' UA layers'
         ca105A = &
         '             CURRENT PROF (N)  LAYERS                 |            US STD UA (35) LAYERS'
         ca105B = &
@@ -689,11 +689,11 @@ CONTAINS
         '       mb         m  kmol/cm2        K        ppmv    |  mb         m  kmol/cm2        K        ppmv  '
         ca105D = &
         '------------------------------------------------------------------------------------------------------'
-        write(kStdWarn,*) ca105A
-        write(kStdWarn,*) ca105B
-        write(kStdWarn,*) ca105C
-        write(kStdWarn,*) ca105D
-        DO iI = 1,max(iUpper,iUpperStd_Num)
+        write(kStdWarn,105) ca105A
+        write(kStdWarn,105) ca105B
+        write(kStdWarn,105) ca105C
+        write(kStdWarn,105) ca105D
+        DO iI = 1,min(iUpper,iUpperStd_Num)
             write(kStdWarn,4321) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI), &
             raTTemp(iI),raUAMixRatio(iI), &
             raUpperPress_Std(iI),raUpperDZ_Std(iI),raUpperCO2Amt_Std(iI),raUpperTemp_Std(iI), &
@@ -705,7 +705,8 @@ CONTAINS
     1080 FORMAT(I4,' ',2(E9.4,'  '),1(F10.4,'  '),E12.5,F10.4)
     9876 FORMAT(I4,' ',E9.4,' ',F9.4,' ',E9.4,' ',F9.4,' | ',4(F9.4,' '),' | ',F9.4)
     4321 FORMAT(I4,' ',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')),'|',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')))
-
+     105 FORMAT(A105)
+     
     RETURN
     end SUBROUTINE read_upperatm_nonlte_temperature
 
@@ -816,11 +817,11 @@ CONTAINS
         write(kStdWarn,*) 'iI     pavg      dz        q         T(iI) || Tlte      dT   |     Tnlte     dT |  MixRatio'
         write(kStdWarn,*) '       mb        m       kmol/cm2          ||       K        |         K        |    ppmv'
         write(kStdWarn,*) '-------------------------------------------------------------------------------------------'
-        DO iI = 1,kProfLayer
+        iStart = (kProfLayer-iProfileLayers+1)	
+        DO iI = iStart,kProfLayer
             IF (raLTETemp(iI) < 100.0) THEN
                 iStart = iI+1
             END IF
-            iStart = (kProfLayer-iProfileLayers+1)
             write(kStdWarn,987) iI, &
             pProf(iI),raThickness(iI),raTAmt(iI),raTTemp(iI), &
             raLTETemp(iI),  raLTETemp(iI)-raTTemp(iI), &

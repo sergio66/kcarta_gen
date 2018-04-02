@@ -285,8 +285,9 @@ CONTAINS
     END DO
 !!! compute the voigt lineshape at high resolution, used to be daFreq instead of daHighFreqWavenumbers before Jan 2017
 !!! CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
-    write(kStdErr,*)  ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
-    write(kStdWarn,*) ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
+
+!!!    write(kStdErr,*)  ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
+!!!    write(kStdWarn,*) ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
     CALL DoVoigt(daLineshape,daImag,daHighFreqWavenumbers,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
 !!! this is NEW Jan 2017
 !!! this is NEW Jan 2017

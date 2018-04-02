@@ -121,12 +121,6 @@ CONTAINS
     end FUNCTION length130
 
 !************************************************************************
-    LOGICAL FUNCTION isfinite(a)
-    REAL :: a
-    isfinite = (a-a) == 0
-    end FUNCTION isfinite
-
-!************************************************************************
     SUBROUTINE printstar
 
     IMPLICIT NONE

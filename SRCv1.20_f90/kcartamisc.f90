@@ -26,7 +26,12 @@ IMPLICIT NONE
 CONTAINS
 
 !************************************************************************
+    LOGICAL FUNCTION isfinite(a)
+    REAL :: a
+    isfinite = (a-a) == 0
+    end FUNCTION isfinite
 
+!************************************************************************
 ! check for isnan
     LOGICAL FUNCTION isnan_real(x)
 
@@ -41,13 +46,13 @@ CONTAINS
     ENDIF
     isnan = .TRUE. 
 
-    IF (x >= 0.0) THEN
-        print *,'gt',x
-        isnan = .FALSE. 
-    ELSEIF (x <= 0.0) THEN
-        print *,'lt',x
-        isnan = .FALSE. 
-    ENDIF
+!    IF (x >= 0.0) THEN
+!        print *,'gt',x
+!        isnan = .FALSE. 
+!    ELSEIF (x <= 0.0) THEN
+!        print *,'lt',x
+!        isnan = .FALSE. 
+!    ENDIF
 
     isnan_real = isnan
     RETURN
@@ -1423,117 +1428,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE FindAvgLayerPressure
-
-!************************************************************************
-! this subroutine reads in the AIRS levels, avg pressures and layer thicknesses
-    SUBROUTINE databasestuff(iLowerOrUpper, &
-    raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
-
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! output params
-    REAL :: raDatabaseHeight(kMaxLayer)
-    REAL :: raDATABASELEVHEIGHTS(kMaxLayer+1)
-    REAL :: raDATABASELEV(kMaxLayer+1)
-! input params
-    INTEGER :: iLowerOrUpper
-
-    IF (iLowerOrUpper < 0) THEN
-        CALL databasestuff_lower(iLowerOrUpper, &
-        raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
-    ELSEIF (iLowerOrUpper > 0) THEN
-        CALL databasestuff_upper(iLowerOrUpper, &
-        raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
-    END IF
-
-    RETURN
-    end SUBROUTINE databasestuff
-
-!************************************************************************
-! this subroutine reads in the AIRS levels, avg pressures and layer thicknesses
-! for the lower atm
-    SUBROUTINE databasestuff_lower(iLowerOrUpper, &
-    raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
-
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airsheightsparam.f90'
-    include '../INCLUDE/airslevelsparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
-
-! output params
-    REAL :: raDatabaseHeight(kMaxLayer)
-    REAL :: raDATABASELEVHEIGHTS(kMaxLayer+1)
-    REAL :: raDATABASELEV(kMaxLayer+1)
-! input params
-    INTEGER :: iLowerOrUpper
-
-! local vars
-    INTEGER :: iI
-
-    IF (iLowerOrUpper > -1) THEN
-        write(kStdErr,*) 'trying to make default lower atm profile'
-        CALL DoStop
-    END IF
-
-    DO iI = 1,kMaxLayer
-        raDatabaseHeight(iI) = DatabaseHeight(iI)
-    END DO
-    DO iI = 1,kMaxLayer + 1
-        raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
-    END DO
-    DO iI = 1,kMaxLayer
-        raDATABASELEV(iI) = DATABASELEV(iI)
-    END DO
-
-    RETURN
-    end SUBROUTINE databasestuff_lower
-
-!************************************************************************
-! this subroutine reads in the AIRS levels, avg pressures and layer thicknesses
-! for the uuper atm
-    SUBROUTINE databasestuff_upper(iLowerOrUpper, &
-    raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airsheights_upperparam.f90'
-    include '../INCLUDE/airslevels_upperparam.f90'
-    include '../INCLUDE/airslevelheights_upperparam.f90'
-
-! output params
-    REAL :: raDatabaseHeight(kMaxLayer)
-    REAL :: raDATABASELEVHEIGHTS(kMaxLayer+1)
-    REAL :: raDATABASELEV(kMaxLayer+1)
-! input params
-    INTEGER :: iLowerOrUpper
-
-! local vars
-    INTEGER :: iI
-
-    IF (iLowerOrUpper < +1) THEN
-        write(kStdErr,*) 'trying to make default upper atm profile'
-        CALL DoStop
-    END IF
-
-    DO iI = 1,kMaxLayer
-        raDatabaseHeight(iI) = DatabaseHeight(iI)
-    END DO
-    DO iI = 1,kMaxLayer + 1
-        raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
-    END DO
-    DO iI = 1,kMaxLayer
-        raDATABASELEV(iI) = DATABASELEV(iI)
-    END DO
-
-    RETURN
-    end SUBROUTINE databasestuff_upper
 
 !************************************************************************
 ! this subroutine finds the partial pressure of the layer
