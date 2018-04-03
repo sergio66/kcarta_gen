@@ -789,7 +789,7 @@ C      Parameters
        END
 
 c************************************************************************
-c this subroutine directly calls rsply2 and then rspline
+c this subroutine directly calls rsply2 and then rsplin_need_2nd_derive
        SUBROUTINE rspl1(XA,YA,N,XOUT,YOUT,NOUT) 
  
       IMPLICIT NONE
@@ -824,14 +824,14 @@ C      Parameters
 
        CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work) 
        DO I=1,NOUT 
-         CALL rSPLIN(XA,YA,Y2A,N,XOUT,YOUT)  
+         CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT,YOUT)  
        END DO 
  
        RETURN 
        END 
  
 c************************************************************************ 
-c this subroutine directly calls rsply2 and then rspline
+c this subroutine directly calls rsply2 and then rsplin_need_2nd_derive
        SUBROUTINE rspl(XA,YA,N,XOUT,YOUT,NOUT) 
  
       IMPLICIT NONE
@@ -861,14 +861,14 @@ C      Parameters
 
        CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work) 
        DO I=1,NOUT 
-         CALL rSPLIN(XA,YA,Y2A,N,XOUT(I),YOUT(I))  
+         CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))  
        END DO 
  
        RETURN 
        END 
  
 c************************************************************************ 
-c this subroutine directly calls rsply2 and then rspline
+c this subroutine directly calls rsply2 and then rsplin_need_2nd_derive
 c same as rspl except it changes XA, XOUT to log(XA),log(XOUT)
       SUBROUTINE logrspl(XA,YA,N,XOUT,YOUT,NOUT) 
  
@@ -949,7 +949,7 @@ c      CALL DoStop
 
       CALL rSPLY2(logxa,raY,N,Yp1,Ypn,Y2A,work) 
       DO I=iStart,NOUT 
-        CALL rSPLIN(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))  
+        CALL rsplin_need_2nd_deriv(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))  
 c        print *,I,logXOUT(I),YOUT(I)
       END DO 
 
@@ -957,7 +957,7 @@ c        print *,I,logXOUT(I),YOUT(I)
       END 
  
 c************************************************************************ 
-c this subroutine directly calls rsply2 and then rspline
+c this subroutine directly calls rsply2 and then rsplin_need_2nd_derive
 c same as SUBROUTINE rspl except yp1,ypn are set differently
        SUBROUTINE rspl_diffyp1n(XA,YA,N,XOUT,YOUT,NOUT) 
  
@@ -988,14 +988,14 @@ C      Parameters
 
        CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work) 
        DO I=1,NOUT 
-         CALL rSPLIN(XA,YA,Y2A,N,XOUT(I),YOUT(I))  
+         CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))  
        END DO 
  
        RETURN 
        END 
  
 c************************************************************************ 
-       SUBROUTINE rSPLIN(XA,YA,Y2A,N,X,Y)
+       SUBROUTINE rsplin_need_2nd_deriv(XA,YA,Y2A,N,X,Y)
 
       IMPLICIT NONE
 

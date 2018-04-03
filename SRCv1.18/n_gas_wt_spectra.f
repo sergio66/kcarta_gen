@@ -1272,7 +1272,9 @@ c simple routine to get US STD 2350 NLTE temps
       REAL raPjunk(kProfLayer),raTJunk(kProfLayer)
       REAL raLogTPress1(kNLTEProfLayer),raTX1(kNLTEProfLayer),raJunk(kNLTEProfLayer)
       REAL rX,rY,raTX2(kNLTEProfLayer)
-
+      REAL rYP1,rYPN,raY2P1(kNLTEProfLayer),raWorkP1(kNLTEProfLayer), 
+     c               raY2P2(kNLTEProfLayer),raWorkP2(kNLTEProfLayer)
+				      
       caFName = 'xnlte_1_1_1_6_sol_0.genln2'
       CALL concatCA80(caAuxNLTERefsPath,caFName)
 
@@ -1293,14 +1295,22 @@ c        print *,iI,raLogTPress1(iI),raTPress1(iI),raTTemp1(iI),raNLTEtemp1(iI)
         raTX2(iI)        = raTTemp1(iNumVibLevels-iI+1)
       END DO
 
+!! now interp this onto raPavg
+!     Assign values for interpolation
+!     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
+      rYP1 = 1.0E+16
+      rYPN = 1.0E+16
+      CALL rsply2(raLogTPress1,raTX1,iNumVibLevels,rYP1,rYPN,raY2P1,raWorkP1)
+      CALL rsply2(raLogTPress1,raTX2,iNumVibLevels,rYP1,rYPN,raY2P2,raWorkP2)
+		
       !! now interp this onto raPavg
       DO iI = iStart,kProfLayer
 c        print *,iI,iStart,kProfLayer,iI-iStart+1
         raPJunk(iI-iStart+1) = raPAvg(iI)
         rX = log(raPAvg(iI))
-        CALL rsplin(raLogTPress1,raTX1,raJunk,iNumVibLevels,rX,rY)
+        CALL rsplin_need_2nd_deriv(raLogTPress1,raTX1,raY2P1,iNumVibLevels,rX,rY)
         raNLTE_STD(iI) = rY
-        CALL rsplin(raLogTPress1,raTX2,raJunk,iNumVibLevels,rX,rY)
+        CALL rsplin_need_2nd_deriv(raLogTPress1,raTX2,raY2P2,iNumVibLevels,rX,rY)
         raLTE_STD(iI) = rY
       END DO
 

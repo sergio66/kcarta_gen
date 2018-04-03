@@ -2308,9 +2308,6 @@ CONTAINS
             END DO
             write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
         END DO
-	write(kStdWarn,*) 'ajajajajajajajajajaxyxxyxyxyx'
-	call dostop
-	
         234 FORMAT ('index = ',I3,' gas HITRAN ID = ',I3,' molecule = ',A20)
          
     ! write sum

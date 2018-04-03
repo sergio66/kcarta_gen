@@ -301,7 +301,8 @@ CONTAINS
     END IF
 
     IF (iLineMix == 2) THEN   !this does linemix
-        dT = dLTE
+      dT = dLTE
+      iN = iFreqPts	
     ! compare linemix vs linemixALL
     !        CALL linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
     !        CALL linemixALL(dLineShift,daYmixALL,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
@@ -324,7 +325,7 @@ CONTAINS
         ! oh oh check to see if we need to adjust the linemix to bring it
         ! approximnately equal to UMBC-LBL
             IF ((daFreq(1) <= 2505.0d0) .AND. (daFreq(iN) >= 2355.0d0)) THEN
-                DO iFr = 1,iN
+                DO iFr = 1,kMaxPts
                     daLineshape(iFr) = daLineshape(iFr)*daFudge(iFr)
                 END DO
             END IF

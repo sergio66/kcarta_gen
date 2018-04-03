@@ -70,23 +70,33 @@ SHELL = /bin/sh
 ## Try using simply ifort instead of the full path. When make looks for 'ifort'
 ## it will look at the environment variable 'PATH' which is modified to point to the correct version when you load the module.
 FORTRANX = ifort   ## GENERIC< should always work!!!
-#
+
 # DEBUG TOO MUCH INFO BUT EXCELLENT: see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
 #FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp_created -gen-interfaces -warn interfaces  -mcmodel=medium
-# DEBUG GOOD : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
 #FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+
 ### -diag-disable:remark OR
 ### -diag-disable:remark
 ### -diag-disable:8291   SINCE WE GET THIS remark #8291: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+7'.
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291
+### this gives relocation truncated to fit: R_X86_64_PC32 against symbol errors during link
+### basic_common.o: In function `dostop':
+###/umbc/xfs2/strow/asl/s1/sergio/home/KCARTA/SRCv1.20_f90/basic_common.f90:302: relocation truncated to fit: R_X86_64_PC32 against symbol `ob1' defined in COMMON section in basic_common.o if you forget to use -mcmodel=medium or large
+#FLAGS = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
 
-### happy and you know it, use the preprocessor
+### happy and you know it, use the preprocessor >>>>>>>>>>>>>>>>>>
 ### happy and you know it, use the preprocessor
 FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291
 ### happy and you know it, use the preprocessor
-### happy and you know it, use the preprocessor
+### happy and you know it, use the preprocessor>>>>>>>>>>>>>>>>>>>
 
-# ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT Intel parrallelization
+# ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT Intel parallelization
 #Option -openmp enables OpenMP processing.
 #Option -parallel enables automatic parallelization.
 #Option -par-report3 is useful to see what it does.

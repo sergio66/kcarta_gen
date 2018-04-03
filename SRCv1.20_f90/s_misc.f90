@@ -376,14 +376,14 @@ CONTAINS
 ! here give the directory path to where the reference profiles are
 ! note we need all layers read in (kProfLayer >= kMaxLayer)
     IF (iLowerOrUpper == +1) THEN
-    ! he CO2 profile in NLTE/UA = caUpperAtmRefPath
-    ! hould be DIFFERENT from that in NLTE/USUALLAYERS
-    ! o open upper atm AIRS100 layer reference profile
+    ! the CO2 profile in NLTE/UA = caUpperAtmRefPath
+    ! should be DIFFERENT from that in NLTE/USUALLAYERS
+    ! so open upper atm AIRS100 layer reference profile
         caDir = caUpperAtmRefPath
     ELSEIF (iLowerOrUpper == -1) THEN
-    ! pen original AIRS100 layer reference profile
-    ! NTERESTING NOTE : as expected, the CO2 profile in KOrigRefPath
-    ! hould be the same as that in NLTE/USUALLAYERS
+    ! open original AIRS100 layer reference profile
+    ! INTERESTING NOTE : as expected, the CO2 profile in KOrigRefPath
+    ! should be the same as that in NLTE/USUALLAYERS
         caDir = kOrigRefPath
     ELSE
         write(kStdErr,*) 'need iLowerOrUpper = -/+ 1 or 2'
@@ -413,19 +413,21 @@ CONTAINS
     iLenDir = iLeftjust_lenstr(caFName,len(caFname))
 
     IF (iLowerOrUpper == +1) THEN
-        IF (kCO2ppmv == 370) THEN
+        IF ((kCO2ppmv == 370) .AND. (iGasID == 2)) THEN
         !!!no need to do nothing, this is the name of the ref profile
             iLendir = iLendir
-        ELSEIF (kCO2ppmv == 378) THEN
+        ELSEIF ((kCO2ppmv == 378)  .AND. (iGasID == 2)) THEN
             caFName(iLenDir+1:iLenDir+8) = '_378ppmv'
-        ELSEIF (kCO2ppmv == 385) THEN
+        ELSEIF ((kCO2ppmv == 385)  .AND. (iGasID == 2)) THEN
             caFName(iLenDir+1:iLenDir+8) = '_385ppmv'
-        ELSEIF (kCO2ppmv == 400) THEN
+        ELSEIF ((kCO2ppmv == 400)  .AND. (iGasID == 2)) THEN
             caFName(iLenDir+1:iLenDir+8) = '_400ppmv'
-        ELSE
-            write(kStdErr,*) 'in  subroutine FindReferenceName '
-            write(kStdErr,*) '?? CO2 ppmv = 370/378/385/400, not ',kCO2ppmv
-            CALL DoStop
+        ELSEIF (iGasID == 2) THEN
+          write(kStdErr,*) 'in  subroutine FindReferenceName , for UA CO2'
+          write(kStdErr,*) 'CO2 ppmv = 370/378/385/400, not ',kCO2ppmv
+          CALL DoStop
+	ELSEIF (iGasID /= 2) THEN
+          caFName(iLenDir+1:iLenDir+2) = 'UA'	
         END IF
     END IF
 

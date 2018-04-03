@@ -1008,7 +1008,7 @@ c local variables
       INTEGER iFr,iLay,iL,iLm1,iEnd 
       REAL ttorad,rPlanck,rMPTemp 
       REAL raFreqAngle(kMaxPts),raFreqAngle_m1(kMaxPts) 
-      REAL raAvgAnglePerLayer(kMaxLayer),raMeanOD(kMaxLayer)
+      REAL raAvgAnglePerLayer(kProfLayer),raMeanOD(kProfLayer)
       
 c to do the angular integration 
       REAL rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts) 

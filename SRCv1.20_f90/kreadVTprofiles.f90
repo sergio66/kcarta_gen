@@ -184,7 +184,6 @@ CONTAINS
     end SUBROUTINE MixRatio
 
 !************************************************************************
-
 ! this subroutine reads in the NLTE profiles
     SUBROUTINE read_nlte_file_forUAinfo( &
     raLayerHeight,raThickness,caFName,pProf,iNLTEStart, &
@@ -375,7 +374,7 @@ CONTAINS
     iGasID,iNLTEStart,iLTEin,iBand,caaNLTETemp, &
     raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
     pProf,raPresslevels,raLayerHeight,raThickness, &
-    iUpper,raUpperTemp,raUpperGasAmt,raUpperPress,raUpperPartPress, &
+    iUpper,raTTemp,raTAmt,raTPress,raTPartPress, &
     raUpperPressLevels,raUpperThickness)
 
     IMPLICIT NONE
@@ -398,14 +397,14 @@ CONTAINS
     INTEGER :: iNumMixRatioLevs
 ! output params
     INTEGER :: iUpper             !!how many layers above kPROFLAYER are added
-    REAL :: raUpperTemp(kProfLayer),raUpperGasAmt(kProfLayer)
-    REAL :: raUpperPress(kProfLayer),raUpperPartPress(kProfLayer)
+    REAL :: raTTemp(kProfLayer),raTAmt(kProfLayer)
+    REAL :: raTPress(kProfLayer),raTPartPress(kProfLayer)
 ! this tells the pressure levels and layer thicknesses for upper atm
     REAL :: raUpperPressLevels(kProfLayer+1),raUpperThickness(kProfLayer)
 
 ! local variables
     INTEGER :: iISO,iAllOrSome,iNumVibLevels
-    REAL :: rMixRatio,MGC,rAvgHgt
+    REAL :: rMixRatio,MGC,rAvgHgt,raUAMixRatio(kNLTEProfLayer)
     REAL :: raLayTop1(kNLTEProfLayer),raLayBot1(kNLTEProfLayer)
     REAL :: raThick1(kNLTEProfLayer)
     REAL :: raPavg1(kNLTEProfLayer),raTavg1(kNLTEProfLayer), &
@@ -418,6 +417,11 @@ CONTAINS
     INTEGER :: iaJ_UorL(kHITRAN)
     CHARACTER(80) :: caFname
     DOUBLE PRECISION :: dVibCenter            !!! vib center from GENLN2 file
+
+    CHARACTER(120) :: ca120A,ca120B,ca120C,ca120D
+    
+    REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer),raUA_refMR(kMaxLayer)
+    REAL :: raMixRatioUA_ref(kNLTEProfLayer),raTUA_ref(kNLTEProfLayer)
 
     iUpper = -1               !!!assume nothing up on high
     MGC = kMGC
@@ -440,7 +444,20 @@ CONTAINS
     raPavg1,raTavg1,raNLTavg1,raQTipsAvg1, &
     iNumVibLevels,iUpper,iLay,dVibCenter,raUpperPressLevels)
 
-    IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+    CALL getUArefprofile(1,iGasID,raUA_refP,raUA_refPP,raUA_refT,raUA_refQ)
+    DO iI = 1,kMaxLayer
+      raUA_refMR(iI) = raUA_refPP(iI)/raUA_refP(iI)*1.0e6
+    END DO
+
+!!! -------------------------------------------------------------------------->>>>>>
+    DO iI = 1,kProfLayer
+        raTPress(iI)     = 0.0
+        raTPartPress(iI) = 0.0
+        raTTemp(iI)      = 0.0
+        raTAmt(iI)    = 0.0
+    END DO
+
+    IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &
     (abs(kLongOrShort) <= 1))) THEN
         write(kStdWarn,*) 'LOWER atm LTE temperatures, gas amounts ....'
         write(kStdWarn,*) 'read in direct from GENLN2 NLTE profile file ',caFName
@@ -450,19 +467,12 @@ CONTAINS
         write(kStdWarn,*) '---------------------------------------------------'
     END IF
 
-    DO iI = 1,kProfLayer
-        raUpperPress(iI)     = 0.0
-        raUpperPartPress(iI) = 0.0
-        raUpperTemp(iI)      = 0.0
-        raUpperGasAmt(iI)    = 0.0
-    END DO
-
 !!!dope, for the regular kCARTA atmosphere, just a check
     DO iI = 1,iLay-1
         iJ = iI
         raUpperThickness(iI) = raThick1(iJ)  !!! in m
-        raUpperPress(iI)     = raPavg1(iJ)   !!! in mb
-        raUpperTemp(iI)      = raTavg1(iJ)
+        raTPress(iI)     = raPavg1(iJ)   !!! in mb
+        raTTemp(iI)      = raTavg1(iJ)
     ! ppmv = (number of gas molecules)/(number of air molecules) * 1e6
     ! pV = NRT ==> N(g) = p(g) V(a)/RT(g),  N(a) = p(a) V(a)/ RT(a)
     ! now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
@@ -470,26 +480,27 @@ CONTAINS
     ! thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
         CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
-        raUpperPress(iI),rMixRatio,1)
-        raUpperPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
-        raUpperPartPress(iI)=raUpperPress(iI)*rMixRatio/(1.0e6+rMixRatio) !atm
-        raUpperGasAmt(iI) = raThick1(iJ) * 100.0           !!! in cm
-        raUpperGasAmt(iI)=raUpperGasAmt(iI)*kAtm2mb*100.0*raUpperPartPress(iI)
-        raUpperGasAmt(iI) = raUpperGasAmt(iI)/1e9/MGC/raUpperTemp(iI)
+                     raTPress(iI),rMixRatio,1)
+        raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
+        raTPartPress(iI)=raTPress(iI)*rMixRatio/(1.0e6+rMixRatio) !atm
+        raTAmt(iI) = raThick1(iJ) * 100.0           !!! in cm
+        raTAmt(iI)=raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
+        raTAmt(iI) = raTAmt(iI)/1e9/MGC/raTTemp(iI)
 
         IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
         (abs(kLongOrShort) <= 1))) THEN
-            write(kStdWarn,6543) iI,raUpperPress(iI)*kAtm2mb,raUpperThickness(iI), &
-            raUpperGasAmt(iI),raUpperTemp(iI)
+            write(kStdWarn,6543) iI,raTPress(iI)*kAtm2mb,raUpperThickness(iI), &
+            raTAmt(iI),raTTemp(iI)
         END IF
     END DO
 
+!!! -------------------------------------------------------------------------->>>>>>
 !! now concentrate on upper atm
     DO iI = 1,kProfLayer
-        raUpperPress(iI)     = 0.0
-        raUpperPartPress(iI) = 0.0
-        raUpperTemp(iI)      = 0.0
-        raUpperGasAmt(iI)    = 0.0
+        raTPress(iI)     = 0.0
+        raTPartPress(iI) = 0.0
+        raTTemp(iI)      = 0.0
+        raTAmt(iI)    = 0.0
     END DO
 
     IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
@@ -497,16 +508,26 @@ CONTAINS
         write(kStdWarn,*) ' '
         write(kStdWarn,*) 'UPPER atm LTE temperatures, gas amounts ....'
         write(kStdWarn,*) 'read in direct from GENLN2 NLTE profile file ',caFName
-        write(kStdWarn,*) 'iI     pavg   dz   q        T(iI)  '
-        write(kStdWarn,*) '       (mb)   (m) (mol/cm2)  (K)'
-        write(kStdWarn,*) '---------------------------------------------------'
+	write(kStdWarn,*) ' '
+	write(kStdWarn,*) ' >>> NOTE if the CO2 mix ratios do not agree, this routine'
+	write(kStdWarn,*) ' >>> will modify the input MR so they are same as US STd by end of this subr'
+	write(kStdWarn,*) ' '
+        ca120B = &
+        ' |                    VT profile                                   | US STd UA reference     |           '
+        ca120C = &
+        ' lay    p (mb)         pp(mb)        T(K)      Q(mol/cm2)  CO2 ppm |  Tstd(K)   CO2Std(ppm)  | CO2Std/CO2'
+        ca120D = &
+        '---------------------------------------------------------------------------------------------------------'
+        write(kStdWarn,120) ca120B
+        write(kStdWarn,120) ca120C
+        write(kStdWarn,120) ca120D      
     END IF
      
     DO iI = 1,iUpper
         iJ = iLay+(iI-1)
         raUpperThickness(iI) = raThick1(iJ)  !!! in m
-        raUpperPress(iI)     = raPavg1(iJ)   !!! in mb
-        raUpperTemp(iI)      = raTavg1(iJ)
+        raTPress(iI)     = raPavg1(iJ)   !!! in mb
+        raTTemp(iI)      = raTavg1(iJ)
     ! ppmv = (number of gas molecules)/(number of air molecules) * 1e6
     ! pV = NRT ==> N(g) = p(g) V(a)/RT(g),  N(a) = p(a) V(a)/ RT(a)
     ! now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
@@ -514,22 +535,34 @@ CONTAINS
     ! thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
         CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
-        raUpperPress(iI),rMixRatio,1)
-        raUpperPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
-        raUpperPartPress(iI)=raUpperPress(iI)*rMixRatio/(1.0e6+rMixRatio) !!atm
-        raUpperGasAmt(iI) = raThick1(iJ) * 100.0           !!! in cm
-        raUpperGasAmt(iI) =raUpperGasAmt(iI)*kAtm2mb*100.0*raUpperPartPress(iI)
-        raUpperGasAmt(iI) = raUpperGasAmt(iI)/1e9/MGC/raUpperTemp(iI)
+                      raTPress(iI),rMixRatio,1)
+        raUAMixRatio(iI)     = rMixRatio		      
+        raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
+        raTPartPress(iI) = raTPress(iI)*rMixRatio/(1.0e6+rMixRatio) !!atm
+        raTAmt(iI)    = raThick1(iJ) * 100.0           !!! in cm
+        raTAmt(iI)    = raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
+        raTAmt(iI)    = raTAmt(iI)/1e9/MGC/raTTemp(iI)
 
-        IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-        (abs(kLongOrShort) <= 1))) THEN
-            write(kStdWarn,6543) iI,raUpperPress(iI)*kAtm2mb,raUpperThickness(iI), &
-            raUpperGasAmt(iI),raUpperTemp(iI)
+        CALL r_sort_logspl_one(raUA_refP,raUA_refT, kMaxLayer,raTPress(iI),raTUA_ref(iI))
+        CALL r_sort_logspl_one(raUA_refP,raUA_refMR,kMaxLayer,raTPress(iI),raMixRatioUA_ref(iI))
+
+        IF ((iBand == 1) .AND. &
+          (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &
+          (abs(kLongOrShort) <= 1))) THEN
+          write(kStdWarn,1080) kProfLayer+iI,raTPress(iI)*kAtm2mb, &
+                  raTPartPress(iI)*kAtm2mb,raTTemp(iI),raTamt(iI),rMixRatio, &
+                  raTUA_ref(iI),raMixRatioUA_ref(iI),raMixRatioUA_ref(iI)/rMixRatio
         END IF
+	raTPartPress(iI) = raTPartPress(iI) * raMixRatioUA_ref(iI)/rMixRatio
+	raTAmt(iI)       = raTAmt(iI) * raMixRatioUA_ref(iI)/rMixRatio
+	raUAMixRatio(iI) = raUAMixRatio(iI) * raMixRatioUA_ref(iI)/rMixRatio
+	
     END DO
 
     1070 FORMAT('ERROR! number ',I5,' opening upper atm NONLTE profile:',/,A80)
+    1080 FORMAT(I4,' ',2(ES12.5,'  '),1(F10.4,'  '),ES12.5,F10.4,'|',2(F10.4,'  '),F10.5)    
     6543 FORMAT(I4,' ',1(E9.4,' '),1(F9.3,' '),1(E9.4,' '),1(F8.3,' '))
+    120  FORMAT(A120)    
 
     RETURN
     end SUBROUTINE read_upperatm_lte_temperature
@@ -600,8 +633,11 @@ CONTAINS
     CHARACTER(80) :: caFname
     CHARACTER(80) :: caStr
     CHARACTER(3) ::  ca3
-    CHARACTER(105) :: ca105A,ca105B,ca105C,ca105D
+    CHARACTER(120) :: ca120A,ca120B,ca120C,ca120D
 
+    REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer),raUA_refMR(kMaxLayer)
+    REAL :: raMixRatioUA_ref(kNLTEProfLayer),raTUA_ref(kNLTEProfLayer)
+    
     iUpper = -1               !!!assume nothing up on high
     MGC = kMGC
     iAllOrSome = +1
@@ -617,6 +653,11 @@ CONTAINS
     raPavg1,raTavg1,raNLTavg1,raQTipsAvg1, &
     iNumVibLevels,iUpper,iLay,dVibCenter,raUpperPressLevels)
 
+    CALL getUArefprofile(1,iGasID,raUA_refP,raUA_refPP,raUA_refT,raUA_refQ)
+    DO iI = 1,kMaxLayer
+      raUA_refMR(iI) = raUA_refPP(iI)/raUA_refP(iI)*1.0e6
+    END DO
+    
     DO iI = 1,kProfLayer
         raTPress(iI)     = 0.0
         raTPartPress(iI) = 0.0
@@ -624,6 +665,22 @@ CONTAINS
         raTamt(iI)       = 0.0
     END DO
 
+    IF ((iBand == 1) .AND. &
+      (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &
+      (abs(kLongOrShort) <= 1))) THEN
+        ca120A = '      Comparing VT profile info against US STd UA info'
+        ca120B = &
+        ' |                    VT profile                                   | US STd UA reference     |           '
+        ca120C = &
+        ' lay    p (mb)         pp(mb)     Tlte(K)      Q(mol/cm2)  CO2 ppm |  Tstd(K)   CO2Std(ppm)  | CO2Std/CO2'
+        ca120D = &
+        '---------------------------------------------------------------------------------------------------------'
+        write(kStdWarn,120) ca120A
+        write(kStdWarn,120) ca120B
+        write(kStdWarn,120) ca120C
+        write(kStdWarn,120) ca120D      
+    END IF
+    
     DO iI = 1,iUpper
         iJ = iLay+(iI-1)
         raUpperThickness(iI) = raThick1(iJ)  !!! in m
@@ -644,35 +701,49 @@ CONTAINS
     ! thus p(g) = (p(total)/(1e6+ppmv) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
         CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
-        raTPress(iI),rMixRatio,1)
+                      raTPress(iI),rMixRatio,1)
         raUAMixRatio(iI) = rMixRatio
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raTPartPress(iI) = raTPress(iI) * rMixRatio/(1.0e6 + rMixRatio) !!! atm
         raTAmt(iI)       = raThick1(iJ) * 100.0           !!! in cm
         raTAmt(iI)       = raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
         raTAmt(iI)       = raTAmt(iI)/1e9/MGC/raTTemp(iI)
-    !        write(kStdWarn,1080) kProfLayer+iI,raTPress(iI)*kAtm2mb,
-    !     $            raTPartPress(iI)*kAtm2mb,raTTemp(iI),raTamt(iI),rMixRatio
-    END DO
+	
+        CALL r_sort_logspl_one(raUA_refP,raUA_refT, kMaxLayer,raTPress(iI),raTUA_ref(iI))
+        CALL r_sort_logspl_one(raUA_refP,raUA_refMR,kMaxLayer,raTPress(iI),raMixRatioUA_ref(iI))
 
+        IF ((iBand == 1) .AND. &
+          (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &
+          (abs(kLongOrShort) <= 1))) THEN
+          write(kStdWarn,1080) kProfLayer+iI,raTPress(iI)*kAtm2mb, &
+                  raTPartPress(iI)*kAtm2mb,raTTemp(iI),raTamt(iI),rMixRatio, &
+                  raTUA_ref(iI),raMixRatioUA_ref(iI),raMixRatioUA_ref(iI)/rMixRatio
+        END IF
+	raTPartPress(iI) = raTPartPress(iI) * raMixRatioUA_ref(iI)/rMixRatio
+	raTAmt(iI)       = raTAmt(iI) * raMixRatioUA_ref(iI)/rMixRatio
+	raUAMixRatio(iI) = raUAMixRatio(iI) * raMixRatioUA_ref(iI)/rMixRatio
+    END DO
+    
 ! ccc this is typical kProfLayer (~ 100) CO2 amounts
 ! ccc 200 2 0.93681E-05 0.34536E-08   198.16440  0.14706E-09
 
     IF ((iBand == 1) .AND. &
-    (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+    (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &
     (abs(kLongOrShort) <= 1))) THEN
-        ca105A = &
-        '       klayers                              |            vibtemp file'
-        ca105B = &
-        'iI        pavg    dz      q         T(iI)   |  Tlte       dT  |     Tnlte        dT | MixRatio '
-        ca105C = &
-        '          mb       m  kmol/cm2  K           |                 |                     |   ppmv'
-        ca105D = &
-        '----------------------------------------------------------------------------------------------'
-        write(kStdWarn,105) ca105A
-        write(kStdWarn,105) ca105B
-        write(kStdWarn,105) ca105C
-        write(kStdWarn,105) ca105D
+        ca120A = &
+        '       klayers                                     |            vibtemp file'
+        ca120B = &
+        'iI        pavg       dz          q         T(iI)   |  Tlte       dT      | Tnlte        dT    | MixRatio'
+        ca120C = &
+        '          mb         m       kmol/cm2  K           |                     |                    |   ppmv'
+        ca120D = &
+        '--------------------------------------------------------------------------------------------------------'
+	write(kStdWarn,*) ' '
+        write(kStdWarn,*) 'this is after readjusting VT profile ppmv to be same as that in the reference profile ...'	
+        write(kStdWarn,120) ca120A
+        write(kStdWarn,120) ca120B
+        write(kStdWarn,120) ca120C
+        write(kStdWarn,120) ca120D
         DO iI = 1,iUpper
             write(kStdWarn,9876) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI),raTTemp(iI), &
             raTTemp(iI),00.0, &
@@ -680,33 +751,33 @@ CONTAINS
         END DO
 
     !! compare what we have to US Std UA
+        write(kStdWarn,*) ' '
         write(kStdWarn,*) 'Comparison between user supplied and US STD kCompressed ',min(iUpper,iUpperStd_Num),' UA layers'
-        ca105A = &
-        '             CURRENT PROF (N)  LAYERS                 |            US STD UA (35) LAYERS'
-        ca105B = &
-        'iI     pavg       dz      q         T(iI)   MixRatio  |  pavg       dz      q         T(iI)   MixRatio'
-        ca105C = &
-        '       mb         m  kmol/cm2        K        ppmv    |  mb         m  kmol/cm2        K        ppmv  '
-        ca105D = &
-        '------------------------------------------------------------------------------------------------------'
-        write(kStdWarn,105) ca105A
-        write(kStdWarn,105) ca105B
-        write(kStdWarn,105) ca105C
-        write(kStdWarn,105) ca105D
+        ca120A = &
+        '             CURRENT PROF (N)  LAYERS                        |            US STD UA (interpd) LAYERS'
+        ca120B = &
+        'iI     pavg          dz          q         T(iI)   MixRatio  |  T(iI)   MixRatio'
+        ca120C = &
+        '       mb            m        kmol/cm2        K      ppmv    |    K        ppm'
+        ca120D = &
+        '--------------------------------------------------------------------------------------------------------------------'
+        write(kStdWarn,120) ca120A
+        write(kStdWarn,120) ca120B
+        write(kStdWarn,120) ca120C
+        write(kStdWarn,120) ca120D
         DO iI = 1,min(iUpper,iUpperStd_Num)
-            write(kStdWarn,4321) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI), &
+            write(kStdWarn,4322) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI), &
             raTTemp(iI),raUAMixRatio(iI), &
-            raUpperPress_Std(iI),raUpperDZ_Std(iI),raUpperCO2Amt_Std(iI),raUpperTemp_Std(iI), &
-            raUpperMixRatio_Std(iI)
+            raTUA_ref(iI),raMixRatioUA_ref(iI)
         END DO
     END IF
 
     1070 FORMAT('ERROR! number ',I5,' opening upper atm NONLTE profile:',/,A80)
-    1080 FORMAT(I4,' ',2(E9.4,'  '),1(F10.4,'  '),E12.5,F10.4)
-    9876 FORMAT(I4,' ',E9.4,' ',F9.4,' ',E9.4,' ',F9.4,' | ',4(F9.4,' '),' | ',F9.4)
-    4321 FORMAT(I4,' ',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')),'|',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')))
-     105 FORMAT(A105)
-     
+    1080 FORMAT(I4,' ',2(ES12.5,'  '),1(F10.4,'  '),ES12.5,F10.4,'|',2(F10.4,'  '),F10.5)
+    9876 FORMAT(I4,' ',ES12.5,' ',F9.4,' ',ES12.5,' ',F9.4,' | ',4(F9.4,' '),' | ',F9.4)
+    4322 FORMAT(I4,' ',1(ES12.5,' ',F9.4,' ',ES12.5,' ',2(F9.4,' ')),'|',2(F9.4,' '))    
+    120  FORMAT(A120)
+
     RETURN
     end SUBROUTINE read_upperatm_nonlte_temperature
 
@@ -813,10 +884,10 @@ CONTAINS
 !! doing NLTE ie running 2205-2405 cm-1
     IF ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
     (abs(kLongOrShort) <= 1))) THEN
-        write(kStdWarn,*) '        klayers                            ||        vibtemp file               |  '
-        write(kStdWarn,*) 'iI     pavg      dz        q         T(iI) || Tlte      dT   |     Tnlte     dT |  MixRatio'
-        write(kStdWarn,*) '       mb        m       kmol/cm2          ||       K        |         K        |    ppmv'
-        write(kStdWarn,*) '-------------------------------------------------------------------------------------------'
+        write(kStdWarn,120) '        klayers                            ||        vibtemp file               |  '
+        write(kStdWarn,120) 'iI     pavg      dz        q         T(iI) || Tlte      dT   |     Tnlte     dT |  MixRatio'
+        write(kStdWarn,120) '       mb        m       kmol/cm2          ||       K        |         K        |    ppmv'
+        write(kStdWarn,120) '-------------------------------------------------------------------------------------------'
         iStart = (kProfLayer-iProfileLayers+1)	
         DO iI = iStart,kProfLayer
             IF (raLTETemp(iI) < 100.0) THEN
@@ -851,7 +922,7 @@ CONTAINS
             write(kStdWarn,*) ' '
             write(kStdWarn,*) ' Comparisons of Tk,tNLTE vs USSTD : '
             ca1 = 'iI   Pavg    Tk(klayers)      TStd         dT  |     Tv      TvSTD      dTv'
-            ca2 = '-----------------------------------------------|----------------------------'
+            ca2 = '-----------------------------------------------|------------------------------'
 
             write(kStdWarn,*) ca1
             write(kStdWarn,*) ca2
@@ -865,9 +936,10 @@ CONTAINS
     1234 FORMAT(I3,' ',2(F10.5,' '),A1,' ',2(F10.5,' '),A1,' ',2(F10.5,' '),A1)
     1250 FORMAT(I3,' ',4(F10.5,' '),A1,' ',3(F10.5,' '))
     1070 FORMAT('ERROR! number ',I5,' opening NONLTE profile:',/,A80)
-    987 FORMAT(I4,' ',1(E9.4,' '),1(F9.3,' '),1(E9.4,' '),1(F8.3,' '),'||',1(F8.3,' '), &
-    &        1(F6.3,' '),'|',2(F8.3,' '),'|',E8.3)
-
+    987  FORMAT(I4,' ',1(E9.4,' '),1(F9.3,' '),1(E9.4,' '),1(F8.3,' '),'||',1(F8.3,' '), &
+    &        1(F6.3,' '),'|',2(F8.3,' '),'|',F8.3)
+    120  FORMAT(A120)
+    
     RETURN
     end SUBROUTINE read_nonlte_temperature
 

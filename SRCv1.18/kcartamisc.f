@@ -7,6 +7,12 @@ c******** THIS FILE CONTAINS VARIOUS USEFUL SUBROUTINES/FUNCTIONS *******
 c** such as sorting, setting vertical temperature profiles, checking ****
 c** kcarta.param, checking comp.param and xsec.param, splines etc *******
 c************************************************************************
+      LOGICAL FUNCTION isfinite(a)
+      REAL a
+      isfinite = (a-a).EQ.0
+      END
+
+c************************************************************************
 c check for isnan
       LOGICAL FUNCTION isnan_real(x)
 
@@ -21,13 +27,13 @@ c check for isnan
       ENDIF
       isnan = .true.
 
-      IF (x .ge. 0.0) THEN
-        print *,'gt',x
-        isnan = .false.
-      ELSEIF (x .le. 0.0) THEN
-        print *,'lt',x
-        isnan = .false.
-      ENDIF
+!      IF (x .ge. 0.0) THEN
+!        print *,'gt',x
+!        isnan = .false.
+!      ELSEIF (x .le. 0.0) THEN
+!        print *,'lt',x
+!        isnan = .false.
+!      ENDIF
 
       isnan_real = isnan
       RETURN
@@ -2684,7 +2690,7 @@ C     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
         rxpt = log(raaPress(iI,iGas))
         rxpt = raaPress(iI,iGas)
         IF (iSplineType .EQ. +1) THEN
-          CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)	
+          CALL rsplin_need_2nd_deriv(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)	
         ELSE
           CALL rlinear1(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
         END IF
@@ -2704,7 +2710,7 @@ C     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
       iNot = (kProfLayer) - (iNumLayers)+1
       DO iL = iNot,kProfLayer
         !! find plev_airs which is just ABOVE the top of current layer
-        iG = kProfLayer+1
+        iG = kMaxLayer+1
  10     CONTINUE
 	IF ((PLEV_KCARTADATABASE_AIRS(iG) .LE. raPressLevels(iL+1)) .AND. (iG .GT. 1)) THEN
 	  iG = iG - 1

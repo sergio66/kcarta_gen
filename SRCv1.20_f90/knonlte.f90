@@ -965,16 +965,16 @@ CONTAINS
 
 ! default
     iDoWeakBackGndLA = +1     !! do weak background (compressed) for LowerAtm, if this is NLTE gas
-    iDoWeakBackGndUA = +1     !! do weak background (compressed) for UpperAtm, if this is NLTE gas
     iDoLBL_LA = +1            !! do LBL calcs for LowerAtm, if this is NLTE gas
+    iDoWeakBackGndUA = +1     !! do weak background (compressed) for UpperAtm, if this is NLTE gas
     iDoLBL_UA = +1            !! do LBL calcs for UpperAtm, if this is NLTE gas    
 ! default
 
 ! testing
-    iDoWeakBackGndLA = -1     !! ignore weak background (compressed) for LowerAtm, if this is NLTE gas
-    iDoWeakBackGndUA = +1     !! do weak background (compressed) for UpperAtm, if this is NLTE gas
-    iDoLBL_LA = -1            !! ignore LBL calcs for LowerAtm, if this is NLTE gas
-    iDoLBL_UA = +1            !! do LBL calcs for UpperAtm, if this is NLTE gas    
+!    iDoWeakBackGndLA = -1     !! ignore weak background (compressed) for LowerAtm, if this is NLTE gas
+!    iDoLBL_LA = -1            !! ignore LBL calcs for LowerAtm, if this is NLTE gas
+!    iDoWeakBackGndUA = +1     !! do weak background (compressed) for UpperAtm, if this is NLTE gas
+!    iDoLBL_UA = +1            !! do LBL calcs for UpperAtm, if this is NLTE gas    
 ! testing
     
 ! see if current gas ID needs nonLTE spectroscopy
@@ -987,7 +987,6 @@ CONTAINS
     CALL SetUpNLTEStrengths(dLineStrenMin,dDeltaFreqNLTE,iDoVoigtChi)
 
     iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,raFreq(1),605.0,2830.0,20)
-
 
     IF (iLTEIn < 0) THEN
       write(kStdWarn,'(A,I5,A,I3,A)') '  ', nint(raFreq(1)),' is a NLTE chunk but ',iaGases(iGas),' is NOT a NLTE gas'
@@ -1063,10 +1062,10 @@ CONTAINS
                 dLineStrenMin,dDeltaFreqNLTE, &
                 iDoVoigtChi,raNLTEstrength(iLTEIn))
                 CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
-                iaNLTEStart(iLTEin),-1)
+                iaNLTEStart(iLTEin),-1)  !!! -1 means replace daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=weak backgnd in relevant layers
             ELSE
                 CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
-                iaNLTEStart(iLTEin),0)
+                iaNLTEStart(iLTEin),0)   !!! 0 means replace daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=0.0 in relevant layers
             END IF
 
             IF (iSetBloat > 0) THEN
@@ -1108,9 +1107,12 @@ CONTAINS
               iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
 
               CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
-              iNLTEStart,-1)
+              iNLTEStart,+1)  !!! +1 means add daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=weak backgnd in relevant layers
+	                      !!! for some reason was set to -1 which is replace, instead of add ... wierd!!!!
             END IF
-	    
+
+              iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
+	      
         !!!now do the stuff ABOVE the kCARTA TOA (above 0.005 mb)
             IF ((iDoUpperAtmNLTE > 0) .AND. ((iDoLBL_UA > 0) .OR. (iDoWeakBackGndUA > 0))) THEN
                 write(kStdWarn,*) ' '
@@ -1992,6 +1994,9 @@ CONTAINS
     raUpperPress_Std,raUpperMixRatio_Std,raUpperDZ_Std, &
     raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
 
+    !! this is just so that SUBR read_upperatm_lte_temperature prints out some stuff
+    iBand = 2350
+    iBand = 1
     CALL read_upperatm_lte_temperature( &
     iGasID,iNLTEStart,iLTEin,iBand,caaNLTETemp, &
     raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
@@ -2065,7 +2070,8 @@ CONTAINS
         DO iL = 1,iUpper   !!!loop over layers
             IF (iNum > 0) THEN
                 dLTE  = raUpperTemp(iL)*1.0d0
-                write (kStdWarn,'(A,I3,4X,F10.4,4X,E12.6)') 'LBL for UA Strong BackGnd (LTE) Lines : iL,T,Q = ',iL,sngl(dLTE),raUpperGasAmt(iL)
+                write (kStdWarn,'(A,I3,4X,ES12.6,4X,F10.4,4X,ES12.6)') 'LBL for UA Strong BackGnd (LTE) Lines : iL,P,T,Q = ', &
+		                 iL,raUpperPress(iL)*kAtm2mb,sngl(dLTE),raUpperGasAmt(iL)
                 CALL compute_lte_spectra_fast(iTag,iActualTag, &
                 daK,raFreq,iGasID,iNum,daIso, &
                 daElower,daLineCenter,daJL,daJU,daPshift, &

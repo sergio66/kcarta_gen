@@ -79,7 +79,7 @@ CONTAINS
     DO iI = 1,kMaxLayer + 1
         raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
     END DO
-    DO iI = 1,kMaxLayer
+    DO iI = 1,kMaxLayer+1
         raDATABASELEV(iI) = DATABASELEV(iI)
     END DO
 
@@ -120,7 +120,7 @@ CONTAINS
     DO iI = 1,kMaxLayer + 1
         raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
     END DO
-    DO iI = 1,kMaxLayer
+    DO iI = 1,kMaxLayer+1
         raDATABASELEV(iI) = DATABASELEV(iI)
     END DO
 
@@ -1031,7 +1031,7 @@ CONTAINS
     REAL :: pMax100,pMin100
 
 ! local variables
-    INTEGER :: iI,iJ,iL,iG,iZbndFinal,iNot,iX,iY
+    INTEGER :: iI,iJ,iL,iG,iZbndFinal,iStart,iX,iY
     REAL :: raWorkP(kMaxLayer),raXgivenP(kMaxLayer), &
             raYgivenP(kMaxLayer),raY2P(kMaxLayer)
     REAL :: raWork(kMaxTemp),rYP1,rYPN,rXPT,r,r0,r2,rPPWgt
@@ -1039,29 +1039,54 @@ CONTAINS
     REAL :: raSortPressHeights(kMaxLayer+1)
     REAL :: raPPX2(kProfLayer),raQX2(kProfLayer)
 
-    REAL :: raDataBaseThickness(kMaxLayer)
     REAL :: raDatabaseHeight(kMaxLayer)
     REAL :: DATABASELEVHEIGHTS(kMaxLayer+1)
     REAL :: PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
+    
+    REAL :: raDatabaseHeightLA(kMaxLayer)
+    REAL :: DATABASELEVHEIGHTSLA(kMaxLayer+1)
+    REAL :: PLEV_KCARTADATABASE_AIRSLA(kMaxLayer+1)
+    REAL :: PAVG_KCARTADATABASE_AIRSLA(kMaxLayer)    
+    INTEGER :: iTopLA
+    REAL :: rMinLA
     
     INTEGER :: iaBnd(kProfLayer+1,2)
     REAL ::    raBndFrac(kProfLayer+1,2)
     REAL :: rPP,rWgt,rMR,rFrac,rMolecules,rHeight,rQtot
 
-    CALL databasestuff(iLowerOrUpper, DATABASELEVHEIGHTS,PLEV_KCARTADATABASE_AIRS,raDatabaseHeight)
+    REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer)
     
+    CALL databasestuff(iLowerOrUpper, DATABASELEVHEIGHTS,PLEV_KCARTADATABASE_AIRS,raDatabaseHeight)
+    IF (kProfLayer /= kMaxLayer) THEN
+      !! we do not really need this, but go for it
+      CALL getUArefprofile(1,iGasID,raUA_refP,raUA_refPP,raUA_refT,raUA_refQ)
+      CALL databasestuff(-1, DATABASELEVHEIGHTSLA,PLEV_KCARTADATABASE_AIRSLA,raDatabaseHeightLA)      
+      DO iL = 1,kMaxLayer
+        raUA_refP(iL)  = raUA_refP(iL) * katm2mb
+        raUA_refPP(iL) = raUA_refPP(iL) * katm2mb
+	rPP = PLEV_KCARTADATABASE_AIRSLA(iL)-PLEV_KCARTADATABASE_AIRSLA(iL+1)
+	rMR = log(PLEV_KCARTADATABASE_AIRSLA(iL)/PLEV_KCARTADATABASE_AIRSLA(iL+1))
+	PAVG_KCARTADATABASE_AIRSLA(iL) = rPP/rMR
+      END DO
+      iTopLA = kProfLayer
+      rMinLA = PLEV_KCARTADATABASE_AIRSLA(kMaxLayer+1)
+      DO iL = kProfLayer+1,kProfLayer-iNumLayers,-1
+        IF ((raPressLevels(iL) > 0) .AND. (raPressLevels(iL) <= rMinLA)) iTopLA = iL
+      END DO
+    END IF
+        
 ! pressure variables!!!!! ----------------->
 ! raaPress in atm
 
-!!!this tells how many layers are NOT dumped out by kLAYERS, iNot is reset below
-    iNot = kProfLayer-iNumLayers
+!! this tells how many layers are NOT dumped out by kLAYERS, iStart is reset below
+    iStart = kProfLayer-iNumLayers
 
 ! simply put in the pressures
-    DO iI = 1,iNot
-    ! hese are "junk"
-        raRPress(iI) = raaPress(iNot+1,iGas)
+    DO iI = 1,iStart
+    ! these are "junk"
+        raRPress(iI) = raaPress(iStart+1,iGas)
     END DO
-    DO iI = iNot+1,kProfLayer
+    DO iI = iStart+1,kProfLayer
         raRPress(iI) = raaPress(iI,iGas)
     END DO
 
@@ -1078,10 +1103,10 @@ CONTAINS
     rYPN = 1.0E+16
     CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
     
-    DO iI = 1,iNot
+    DO iI = 1,iStart
         raRTemp(iI) = +999.999
     END DO
-    DO iI = iNot+1,kProfLayer
+    DO iI = iStart+1,kProfLayer
         rxpt = log(raaPress(iI,iGas))
         rxpt = raaPress(iI,iGas)
         IF (iSplineType == +1) THEN
@@ -1100,17 +1125,18 @@ CONTAINS
 !!!this tells how many layers are NOT dumped out by kLAYERS
     iZbndFinal = kProfLayer-iNumLayers
 
-    345 FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))
-!! look at the LAYERS and figure out which PLEV_KCARTADATABASE_AIRS bracket them
-    iNot = (kProfLayer) - (iNumLayers)+1
 !    DO iL = 1,kProfLayer
 !      write(kStdWarn,*) 'MakeRefProf raPressLevels',iL,raPressLevels(iL),iLowerOrUpper
 !    END DO
 !    DO iL = 1,kMaxLayer
 !      write(kStdWarn,*) 'MakeRefProf PLEV_KCARTADATABASE_AIRS',iL,PLEV_KCARTADATABASE_AIRS(iL)
 !    END DO
-    
-    DO iL = iNot,kProfLayer
+
+!! look at the LAYERS and figure out which PLEV_KCARTADATABASE_AIRS bracket them
+!! now reset iStart
+    iStart = (kProfLayer) - (iNumLayers)+1
+
+    DO iL = iStart,kProfLayer
     !! find plev_airs which is just ABOVE the top of current layer
         iG = kMaxLayer+1
         10 CONTINUE
@@ -1126,7 +1152,7 @@ CONTAINS
     !! find plev_airs which is just BELOW the bottom of current layer
         iG = 1
         20 CONTINUE
-        IF (PLEV_KCARTADATABASE_AIRS(iG) > raPressLevels(iL)) THEN
+        IF ((PLEV_KCARTADATABASE_AIRS(iG) > raPressLevels(iL)) .AND. (iG .LE. kMaxLayer)) THEN
             iG = iG + 1
             GOTO 20
         ELSE
@@ -1139,7 +1165,7 @@ CONTAINS
 !                                                                 iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
 
     END DO
-!      stop 'ooooo'
+    345 FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))    
           
 ! now that we know the weights and boundaries, off we go!!!
 ! remember pV = nRT ==> p(z) dz/ r T(z) = dn(z)/V = dq(z) ==> Q = sum(p Z / R T)
@@ -1147,7 +1173,7 @@ CONTAINS
 !                                                   = sum(p(i)Z(i)/RT(i) zfrac(i)/Z(i))
 ! or Qnew = sum(frac(i) Q(i))
 
-    DO iX = iNot,kProfLayer
+    DO iX = iStart,kProfLayer
         raRAmt(iX) = 0.0
         rPP = 0.0
         rPPWgt = 0.0
@@ -1169,15 +1195,16 @@ CONTAINS
             rPPWgt = rPPWgt + rFrac
             rMR = rMR + raR100PartPress(iY)/raRPress(iY)
             raRAmt(iX) = raRAmt(iX) + raR100Amt(iY)*rFrac
+!	    write(kStdErr,'(I3,I4,I4,2X,E10.4,2X,E10.4,2X,F10.4,2X,E10.4,2X,E10.4)') &
+!	        iGasID,iX,iY,raPressLevels(iX),rPP,rFrac,raR100Amt(iY),raRAmt(iX)
         END DO
-!! method 1
+        !! method 1
         raRPartPress(iX) = rPP/rPPWgt
-!!!!       write(*,5678),iGasID,iX,kProfLayer,raBndFrac(iX,1),raBndFrac(iX,2),raRPartPress(iX) 
 
-    !        !! method 2
-    !      rMR = rMR/((iaBnd(iX,2)-1)-(iaBnd(iX,1))+1)
-    !            raRPartPress(iX) = rMR * raPressLevels(iX)/1013.25
-    !      raRAmt(iX) = rMolecules/rHeight
+        !! method 2
+        !! rMR = rMR/((iaBnd(iX,2)-1)-(iaBnd(iX,1))+1)
+        !! raRPartPress(iX) = rMR * raPressLevels(iX)/1013.25
+        !! raRAmt(iX) = rMolecules/rHeight
 
     ! bumping raRAmt and raRPartPressup n down
     ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amount
@@ -1189,9 +1216,12 @@ CONTAINS
     !      write(*,1234) iGasID,iX,raPressLevels(iX),raaPress(iX,1)*1013.25,raPressLevels(iX+1),iaBnd(iX,1),iaBnd(iX,2),
     !     $           raRTemp(iX),raRPartPress(iX),raRAmt(iX)
 
+        !!  write(*,5678),iGasID,iX,kProfLayer,raBndFrac(iX,1),raBndFrac(iX,2),raRPartPress(iX) 
+
     END DO
-    5678 FORMAT(3(' ',I3),2(' ',F10.3),1(' ',E10.5))
-    1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
+     
+  5678 FORMAT(3(' ',I3),2(' ',F10.3),1(' ',E10.5))
+  1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
 
 !      stop 'zzzzooooo'
 
@@ -1204,6 +1234,31 @@ CONTAINS
     RETURN
     end SUBROUTINE MakeRefProf
 
+!************************************************************************
+! this gets UA refprof for GASID 1,2,3,4,5,6,7,22
+      SUBROUTINE getUArefprofile(iLowerOrUpper,iGasID,raUA_refP,raUA_refPP,raUA_refT,raUA_refQ)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! input
+      INTEGER iLowerOrUpper,iGAsID
+! output
+      REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer)
+! local vars
+      INTEGER :: iErrOut
+      CHARACTER*80 :: caFName
+      
+      raUA_refQ = 1.0e-5
+      IF ((iGasID == 1) .OR. (iGasID == 2) .OR. (iGasID == 3) .OR. (iGasID == 4) .OR. (iGasID == 5) .OR. (iGasID == 6) &
+          .OR. (iGasID == 7) .OR. (iGasID == 22)) THEN
+        CALL FindReferenceName(caFName,iGasID,iLowerOrUpper)
+	CALL ReadRefProf(caFName,kMaxLayer,raUA_refQ,raUA_refT,raUA_refP,raUA_refPP,iErrOut)
+      END IF
+      
+      RETURN
+      END SUBROUTINE getUArefprofile
 !************************************************************************
 
 END MODULE kcoeff_common

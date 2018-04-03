@@ -2839,11 +2839,50 @@ c this is new code, same as in subr ReadRefProf (in n_pth_mix.f)
       RETURN
       END
 
+!************************************************************************
+      logical function xisnan2(a)
+      real a
+      if (a.ne.a) then
+        xisnan2 = .true.
+      else
+        xisnan2 = .false.
+      end if
+      return
+      end
+
+      logical function xisinf2(a)
+      real a
+
+      if ((a*0).ne.0) then
+        xisinf2 = .true.
+      else
+        xisinf2 = .false.
+      end if
+      return
+      end
+
+      logical function xisfinite2(a)
+      real a
+      logical xisinf2,xisnan2
+
+      if (xisinf2(a) .OR. xisnan2(a)) then
+        xisfinite2 = .false.
+      else
+        xisfinite2 = .true.
+      end if
+      return
+      end
+    
 c************************************************************************
 c this subroutine adds on US STandard Profile gas amounts for those gases NOT
 c in the RTP profile (using h.ptype = 2 or even 1)
 
 c note : have to be careful about 101 AIRS levls versus actual raPressLevels
+c this correctly sets raPX and raTX for kProflayers, but only reads in/sets
+c raPPX and raQX for kMaxLayers = 100
+c and then "fudges" things beyond kMaxLayers
+
+c big assumption here .... raPressLevels from 1-100 == raSartaPressLevels
 
       SUBROUTINE AddOnStandardProfile(
      $      iNumberofGasesRead,iNumGases,iaInputOrder,iaWhichGasRead,
@@ -2877,7 +2916,10 @@ c local variables
       REAL raPPX(kMaxProfLayer),raQX(kMaxProfLayer)  !!US Std layer ppress, amt
       REAL raPX(kMaxProfLayer), raTX(kMaxProfLayer)  !!US Std layer press, temp
       CHARACTER*1 cY,cN
-
+      REAL rPPM_layer100,rDiffPress
+      INTEGER iCntFinite
+      LOGICAL xisfinite2
+      
       cY = 'Y'
       cN = 'N'
 
@@ -2961,15 +3003,36 @@ c thus the difference between the lists is what we need US Std profiles for
           CALL get_us_std(iIDgas,raPX,raPPX,raTX,raQX)
           Call FindIndexPosition(iIDgas,iNumGases,iaInputOrder,
      $                           iFoundX,iGasIndex)
+          rDiffPress = 0.0
+          iCntFinite = 0
           IF (iFoundX .GT. 0) THEN 
             !write(kStdWarn,4321) iIDGas,iLay,rAmt,rT,rP,rPP
             DO iLay = 1,kProfLayer
+              IF ((iLay .LE. kMaxLayer) .AND. (xisfinite2(raaPress(iLay,iG0)))) THEN
+                iCntFinite = iCntFinite + 1
+                rDiffPress = rDiffPress + abs(raaPress(iLay,iG0)-raPX(iLay))
+                !write(kStdWarn,*) iIDGas,iLay,raaPress(iLay,iG0),raPX(iLay),raThickness(iLay)
+              ENDIF
               raaAmt(iLay,iGasIndex)       = raQX(iLay)
               raaTemp(iLay,iGasIndex)      = raaTemp(iLay,iG0)
               raaPress(iLay,iGasIndex)     = raaPress(iLay,iG0)
               raaPartPress(iLay,iGasIndex) = raPPX(iLay)
               raaHeight(iLay,iGasIndex)    = raaHeight(iLay,iG0)
             END DO
+
+            IF (kProfLayer .GT. kMaxLayer) THEN
+              iLay = 100
+              write(kStdWarn,*) 'Gas ',iIDGas,'mean press diff between RTP,USStd = ',rDiffPress/iCntFinite,' atm'
+              rPPM_layer100 = raaPartPress(iLay,iGasIndex)/raaPress(iLay,iGasIndex)
+              !! change raThickness from cm to m
+              !! change raaPress from atm to N/m2
+              DO iLay = kMaxLayer+1,kProfLayer
+                raaPartPress(iLay,iGasIndex) = raaPress(iLay,iGasIndex) * rPPM_layer100
+                raaAmt(iLay,iGasIndex) = raThickness(iLay)/100*(1013.25*100)*raaPartPress(iLay,iGasIndex)
+                raaAmt(iLay,iGasIndex) = raaAmt(iLay,iGasIndex)/8.314674269981136/raaTemp(iLay,iGasIndex)/1.0e7
+              END DO
+            END IF
+
             iaWhichGasRead(iIDgas)    = 1
           ELSE 
             write (kStdErr,*) 'huh? FindIndexPosition failed for ',iIDgas

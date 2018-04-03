@@ -7,12 +7,6 @@ c        implemented on all compilers! (eg it does not work on g77)
 c so can instead do call adjustleftstr(caIn,caOut)
 
 c************************************************************************ 
-      LOGICAL FUNCTION isfinite(a)
-      REAL a
-      isfinite = (a-a).EQ.0
-      END
-
-c************************************************************************
       SUBROUTINE printstar
 
       IMPLICIT NONE

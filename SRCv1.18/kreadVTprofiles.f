@@ -962,10 +962,10 @@ ccccc 200 2 0.93681E-05 0.34536E-08   198.16440  0.14706E-09
      $    '          mb       m  kmol/cm2  K           |                 |                     |   ppmv'
         ca105D = 
      $    '----------------------------------------------------------------------------------------------'
-        write(kStdWarn,*) ca105A
-        write(kStdWarn,*) ca105B
-        write(kStdWarn,*) ca105C
-        write(kStdWarn,*) ca105D
+        write(kStdWarn,105) ca105A
+        write(kStdWarn,105) ca105B
+        write(kStdWarn,105) ca105C
+        write(kStdWarn,105) ca105D
         DO iI = 1,iUpper
           write(kStdWarn,9876) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI),raTTemp(iI),
      $             raTTemp(iI),00.0,
@@ -982,10 +982,10 @@ ccccc 200 2 0.93681E-05 0.34536E-08   198.16440  0.14706E-09
      $   '       mb         m  kmol/cm2        K        ppmv    |  mb         m  kmol/cm2        K        ppmv  ' 
         ca105D = 
      $   '------------------------------------------------------------------------------------------------------'
-        write(kStdWarn,*) ca105A
-        write(kStdWarn,*) ca105B
-        write(kStdWarn,*) ca105C
-        write(kStdWarn,*) ca105D
+        write(kStdWarn,105) ca105A
+        write(kStdWarn,105) ca105B
+        write(kStdWarn,105) ca105C
+        write(kStdWarn,105) ca105D
         DO iI = 1,max(iUpper,iUpperStd_Num)
           write(kStdWarn,4321) iI+kProfLayer,raTPress(iI)*kAtm2mb,raUpperThickness(iI),raTamt(iI),
      $                   raTTemp(iI),raUAMixRatio(iI),
@@ -998,7 +998,8 @@ ccccc 200 2 0.93681E-05 0.34536E-08   198.16440  0.14706E-09
  1080 FORMAT(I4,' ',2(E9.4,'  '),1(F10.4,'  '),E12.5,F10.4)
  9876 FORMAT(I4,' ',E9.4,' ',F9.4,' ',E9.4,' ',F9.4,' | ',4(F9.4,' '),' | ',F9.4)
  4321 FORMAT(I4,' ',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')),'|',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')))
-
+  105 FORMAT(A105)
+  
       RETURN
       END
 

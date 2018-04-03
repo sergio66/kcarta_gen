@@ -722,6 +722,37 @@ CONTAINS
 !************************************************************************
 ! this subroutine first sorts, then splines
 ! changes input X, output XOUT, to log(X) and log(XOUT)
+    SUBROUTINE r_sort_spl_one(XA,YA,N,XOUT,YOUT)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+!      Parameters
+    REAL :: XA(*),YA(*),XOUT,YOUT
+    INTEGER :: N
+
+    REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB
+    INTEGER :: iI,NOUT
+
+    NOUT = 1
+    
+    DO iI = 1,N
+        XAA(iI) = XA(iI)
+        YAA(iI) = YA(iI)
+    END DO
+    CALL DoSort2Real(XAA,YAA,N,1)
+
+    XBB = XOUT
+
+    CALL rspl_one(XAA,YAA,N,XBB,YOUT,NOUT)
+
+    RETURN
+    end SUBROUTINE r_sort_spl_one
+
+!************************************************************************
+! this subroutine first sorts, then splines
+! changes input X, output XOUT, to log(X) and log(XOUT)
     SUBROUTINE r_sort_logspl_one(XA,YA,N,XOUT,YOUT)
 
     IMPLICIT NONE
