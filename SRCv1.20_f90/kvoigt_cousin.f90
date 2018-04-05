@@ -267,33 +267,75 @@ CONTAINS
     DOUBLE PRECISION :: daChi(kMaxPtsBox),dT
     DOUBLE PRECISION :: df,f0,tau2_birn,tau2
     DOUBLE PRECISION :: daYmix(kHITRAN),daYmixALL(kHITRAN),dY
-    INTEGER :: iFr,iN,iLine,iNum
+    INTEGER :: iFr,iN,iLine,iNum,iDebug,iUseJan2017orApr2018
+
+    CHARACTER*60 fmt3,fmt5
 
 !      iDoVoigtChi = -1  !! do not multiply by chi function in voigt_chi; all
 !                        !!   necesary things will be done by calling
 !                        !!   Co2_4um_fudge_nlte_fast
 !      iDoVoigtChi = +1  !! do multiply by chi function in voigt_chi
 
+!!!    write(kStdErr,*)  ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
+!!!    write(kStdWarn,*) ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
+
+    iDebug = -1
+    iUseJan2017orApr2018 = 0  !! use the original 2016 CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
+    iUseJan2017orApr2018 = -1 !! use the jan2017   daHighFreqWavenumbers(iFr) = dble(daFreq(1)) + (iFr-1)*df
+    iUseJan2017orApr2018 = +1 !! use the apr2018   daHighFreqWavenumbers(iFr) = daFreq(iFr) <<<< CORRECT VERSION >>>
+
+!    fmt3 = '(A,3(' ' F10.4))'
+!    fmt5 = '(A,5(' ' F10.4))'
+    fmt3 = '(A,1X,E10.4,1X,E10.4,1X,E10.4)'
+    fmt5 = '(A,1X,E10.4,1X,E10.4,1X,E10.4,1X,E10.4,1X,E10.4)'
+    
+    IF (iDebug > 0) THEN
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) '<<<< debugging SUBR voigt_ch >>>>'
+      write(kStdWarn,*) 'iFreqPts,iLineMix,dVibCenter = ',iFreqPts,iLineMix,dVibCenter
+      write(kStdWarn,fmt5) 'dP,dPP,dLineShift,dMass,dBroad = ',dP,dPP,dLineShift,dMass,dBroad
+      write(kStdWarn,fmt3) 'daFreq(1),daFreq(nint(iFreqPts/2)),daFreq(iFreqPts) = ',daFreq(1),daFreq(nint(iFreqPts/2.0)),daFreq(iFreqPts)
+      write(kStdWarn,fmt3) 'daFudge(1),daFudge(nint(iFreqPts/2)),daFudge(iFreqPts) = ',daFudge(1),daFudge(nint(iFreqPts/2.0)),daFudge(iFreqPts)
+      write(kStdWarn,*) 'iNptsBirn = ',iNptsBirn
+      write(kStdWarn,fmt3) 'xBirn(1),xBirn(nint(iFreqPts/2)),xBirn(iFreqPts) = ',xBirn(1),xBirn(nint(iFreqPts/2.0)),xBirn(iFreqPts)
+      write(kStdWarn,fmt3) 'chiBirn(1),chiBirn(nint(iFreqPts/2)),chiBirn(iFreqPts) = ',chiBirn(1),chiBirn(nint(iFreqPts/2.0)),chiBirn(iFreqPts)
+    END IF
+    
     iTooFar = -1
     iN = iFreqPts
 
-!!! this is NEW Jan 2017
-!!! this is NEW Jan 2017 !!!!
-    iN = iFreqPts*5
-    DO iFr = 1,kMaxPtsBox
-        daHighFreqWavenumbers(iFr) = dble(daFreq(1)) + (iFr-1)*(daFreq(2)-daFreq(1))/(kBoxCarUse * 1.0d0)
-    END DO
-!!! compute the voigt lineshape at high resolution, used to be daFreq instead of daHighFreqWavenumbers before Jan 2017
-!!! CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
+    IF (iUseJan2017orApr2018 == -1) THEN      
+      !!! this is NEW Jan 2017 but wrong !!!
+      !!! this is NEW Jan 2017 but wrong !!!
+      iN = iFreqPts*5
+      df = (daFreq(2)-daFreq(1))/(kBoxCarUse * 1.0d0)
+      DO iFr = 1,kMaxPtsBox
+        daHighFreqWavenumbers(iFr) = dble(daFreq(1)) + (iFr-1)*df
+      END DO
+    ELSEIF (iUseJan2017orApr2018 == +1) THEN      
+      !!! this is NEW Mar 2018
+      !!! this is NEW Mar 2018 !!!!
+      iN = iFreqPts
+      DO iFr = 1,kMaxPts
+        daHighFreqWavenumbers(iFr) = dble(daFreq(iFr))
+      END DO
+    END IF
 
-!!!    write(kStdErr,*)  ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
-!!!    write(kStdWarn,*) ' >>>>>>>>>>> check this voigt stuff before making NLTE production run!!!! <<<<<<<<<<<<<'
-    CALL DoVoigt(daLineshape,daImag,daHighFreqWavenumbers,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
-!!! this is NEW Jan 2017
-!!! this is NEW Jan 2017
-
+    IF (iUseJan2017orApr2018 == 0) THEN
+      !!! this is almost correct, except the wavenumber array should have length kMaxPtsBox      
+      !!CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
+      write(kStdErr,*) 'f90 compiler .... error #7983: The storage extent of the dummy argument exceeds that of the actual argument.   [DAFREQ]'
+      CALL DoStop
+    ELSE
+      !!! compute the voigt lineshape using larger raFreqWavenumbers array
+      !!! this is NEW Jan 2017, Mar 2018
+       !!! this is NEW Jan 2017, Mar2018
+       CALL DoVoigt(daLineshape,daImag,daHighFreqWavenumbers,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
+    END IF
+    
     IF (iLineMix == 1) THEN    !this does cousin
         dT = dLTE
+        iN = iFreqPts		
         CALL Cousin(daChi,daHighFreqWavenumbers,dLineShift,dBroad,dT,dP,dPP,1,iN)
         DO iFr = 1,iN
             daLineshape(iFr) = daLineshape(iFr) * daChi(iFr)
@@ -310,26 +352,34 @@ CONTAINS
     !          print *,iN,dLineShift,daYmix(iN),daYmixALL(iN),daYmixALL(iN)/daYmix(iN)
     !      end do
     !      call dostop
-        CALL linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
+      CALL linemix(dLineShift,daYmix,iTooFar,iNum,iLine,dJL,dJU,dJLowerQuantumRot,iISO,dT,dP)
 
     ! c        tau2 = tau2_birn(dP,dPP)
     ! c        CALL birnbaum(daChi,daFreq,dLineShift,dBroad,dT,tau2,iN)
     !      print *,'doing birnbaum_interp ',dJL,dJU,iISO,daFreq(1)
-        CALL birnbaum_interp(daChi,daHighFreqWavenumbers,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
+      CALL birnbaum_interp(daChi,daHighFreqWavenumbers,dLineShift,iN,chiBirn,xBirn,iNptsBirn)
               
-        dY = daYmix(iLine)*dP
-        DO iFr = 1,iN
+      dY = daYmix(iLine)*dP
+      DO iFr = 1,iN
             daLineshape(iFr) = (daLineshape(iFr)+daImag(iFr)*dY)*daChi(iFr)
-        END DO
-        IF ((dJU == 9) .AND. (iISO == 1) .AND. (iDoVoigtChi > 0)) THEN
+      END DO
+      IF ((dJU == 9) .AND. (iISO == 1) .AND. (iDoVoigtChi > 0)) THEN
         ! oh oh check to see if we need to adjust the linemix to bring it
         ! approximnately equal to UMBC-LBL
-            IF ((daFreq(1) <= 2505.0d0) .AND. (daFreq(iN) >= 2355.0d0)) THEN
-                DO iFr = 1,kMaxPts
-                    daLineshape(iFr) = daLineshape(iFr)*daFudge(iFr)
-                END DO
-            END IF
+        IF ((daFreq(1) <= 2505.0d0) .AND. (daFreq(iN) >= 2355.0d0)) THEN
+          DO iFr = 1,iN
+            daLineshape(iFr) = daLineshape(iFr)*daFudge(iFr)
+          END DO
         END IF
+      END IF
+    END IF
+
+    IF (iDebug > 0) THEN
+      write(kStdWarn,*) ' '
+      write(kStdWarn,fmt3) 'daFreq(1),daFreq(nint(iFreqPts/2)),daFreq(iFreqPts) = ',daFreq(1),daFreq(nint(iFreqPts/2.0)),daFreq(iFreqPts)
+      write(kStdWarn,fmt3) 'daLineshape(1),daLineshape(nint(iFreqPts/2)),daLineshape(iFreqPts) = ',daLineshape(1),daLineshape(nint(iFreqPts/2.0)),daLineshape(iFreqPts)
+      write(kStdWarn,*) '<<<< finish debugging SUBR voigt_ch >>>>'      
+      CALL DoStop
     END IF
 
     RETURN

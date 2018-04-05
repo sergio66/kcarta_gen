@@ -14,6 +14,9 @@ thedir2 = '/home/sergio/KCARTA/SRCv1.16/WORKS_April30_2012/';
 thedir2 = '/home/sergio/KCARTA/SRCv1.17/WORKS_May01_2012/';
 
 thedir2 = '/home/sergio/KCARTA/SRCv1.18/';
+
+thedir1 = '/home/sergio/KCARTA/SRCv1.18/WORKS_March30_2016_ChrisHepplewhiteCopy/';
+thedir2 = '/home/sergio/KCARTA/SRCv1.18/WORKS_Feb28_2018_Verified/';
 %}
 
 thefiles = dir([thedir1 '/*.f']);

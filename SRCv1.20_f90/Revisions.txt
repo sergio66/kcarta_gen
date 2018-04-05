@@ -590,7 +590,12 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.20
 -----
 4/3/2018       The SRCv1.18 and SRCv1.20_f90 code agree for LTE calcs
-               However only the SRCv1.20_f90 version has bee debugged for NLTE
+               However only the SRCv1.20_f90 version has been debugged for NLTE
+	       
+	       caaUpperMixRatio is now essentially redundant, since the code
+	       adjusts VibTempo gas amounts (mostly from Manuel Lopez Puertas files)
+	       based on the US Std UA profile in INCLUDE/kcartaparam.f90.
+	       caaUpperMixRatio is set by user in nm_nonlte
 	       
 3/30/18        Renamed SUBR rsplin() to SUBR rsplin_need_2nd_deriv() as a
                reminder that it expressly requires a prior call to rSPLY2 beforehand
@@ -601,8 +606,8 @@ v1.20
 
                SUBR read_upperatm_nonlte_temperature has been modified so that after reading
 	       in the VibTemp profiles (which include CO2 ppmv), it also reads in the
-	       US Std UA profile in the INCLUDE/kcartaparam.f90, and based on those
-	       ppmv, it adjust the VibTemp gas amounts
+	       US Std UA profile in INCLUDE/kcartaparam.f90, and based on those ppmv,
+	       it adjust the VibTemp gas amounts
 
                SUBR voigt_chi has been corrected so that array bounds are respected
 

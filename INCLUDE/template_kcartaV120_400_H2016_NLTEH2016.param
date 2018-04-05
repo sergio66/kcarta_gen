@@ -188,7 +188,7 @@ c this is where the upper atm weakline database lies
 c older H2008? exists /asl/data/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/400ppmv/
 c older H2008? exists /asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/400ppmv/     
 
-c this is where the strong band linemix strengths are ...files made by SPECTRA/CO2_COMMON/y1s.m
+c this is where the strong band linemix strengths are ... files made by SPECTRA/CO2_COMMON/y1s.m
 c see /home/sergio/KCARTA/SRC/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/ReadmeBlog
       CHARACTER*120 caLineMixDir
       PARAMETER (caLineMixDir='^/KCDATA/NLTE/AIRSCO2/LINEMIX_H16_400/')
@@ -203,7 +203,7 @@ c SRCV1.20_f90/kreadVTprofiles.f or in SRCv1.18/kreadVTprofiles.f
       PARAMETER (caUA_US_STD = '^/KCDATA/NLTE/UA/us_std_prof_ua_400ppmv')
       PARAMETER (caLA_US_STD = '^/KCDATA/NLTE/LA/us_std_prof_la_400ppmv')
 
-c*************************
+c************************
 c this tells the code how many layers/levels to expect in the NLTE profile
       INTEGER kNLTEProfLayer
       PARAMETER (kNLTEProfLayer= 150)
@@ -219,9 +219,9 @@ c /asl/packages/sartaV108/Src_rtpV201
        PARAMETER (kSartaNLTE =
      $     '^/KCDATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat')
 
-c*************************
-c*************************
-c*************************
+c*********************
+c*********************
+c*********************
 cc this is where the compressed NLTE (OD, planck) files are, for LOWER and UPPER atm
 c this is not working, so may get rid of this eventually
 c the files are ODs, PlanckCoeffs, as a function of solar zenith angle
@@ -334,6 +334,10 @@ c !!! u = 25000-44000 cm-1, at 0.1000 cm-1 spacing (= 1000 cm-1 chunk span)
       PARAMETER (kCompPathu  = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
       PARAMETER (kCKDPathu   = '^/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
 
+c************************************************************************
+c************************************************************************
+c************************************************************************
+
 c --------- > (C) these are the extra needed files
 c also need paths to where the xsec, CKD and Solar Radiance Files are
       CHARACTER*80 kSolarPath,kXsecFile
@@ -394,7 +398,7 @@ c Hitran98 kcompressed Format (+1), or in the older Hitran92 file format(-1)
       PARAMETER (KXsecFormat=+1)
 
 c*************************
-c this is potentially to use kCARTA for different planets, in future KCARTA versions. 
+c this is potentially to use kCARTA for different planets, in future KCARTA versions
 c Numbers here are for Earth, planet 03
       INTEGER kPlanet
       PARAMETER (kPlanet = 03)
