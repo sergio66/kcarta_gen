@@ -591,11 +591,18 @@ v1.20
 -----
 4/3/2018       The SRCv1.18 and SRCv1.20_f90 code agree for LTE calcs
                However only the SRCv1.20_f90 version has been debugged for NLTE
+	       Some of the fixes made during the debugging are in SRCv1.18 version
+	       but not all, so one can anticipate a divergence between the NLTE results
 	       
 	       caaUpperMixRatio is now essentially redundant, since the code
 	       adjusts VibTempo gas amounts (mostly from Manuel Lopez Puertas files)
 	       based on the US Std UA profile in INCLUDE/kcartaparam.f90.
 	       caaUpperMixRatio is set by user in nm_nonlte
+
+               Had to fix SUBROUTINE voigt_chi since it was using it's own
+	       high res wavenumber array / 50000 points (instead o simply using the input
+	       (low res) wavenumber array and subsetted number of points (depending on high/med/coarse mesh)
+	       [see 07/17/15 comments]
 	       
 3/30/18        Renamed SUBR rsplin() to SUBR rsplin_need_2nd_deriv() as a
                reminder that it expressly requires a prior call to rSPLY2 beforehand
