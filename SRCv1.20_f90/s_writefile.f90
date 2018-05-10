@@ -2308,6 +2308,25 @@ CONTAINS
             END DO
             write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
         END DO
+        DO iI=2,iNumGases
+            write(iIOUN,234) iI,iaGases(iI),caGID(iaGases(iI))
+            WRITE(iIOUN,7169) caStr1
+            WRITE(iIOUN,7169) caStr2
+            WRITE(iIOUN,7169) caStr3
+            DO iJ=kProfLayer-iProfileLayers+1,kProfLayer
+                iP=(iI-1)*kProfLayer+iJ
+                raSumTotalGasAmt(iaGases(iI)) = raSumTotalGasAmt(iaGases(iI)) + raaAmt(iJ,iI)
+            ! this is writing pressures in mb
+                WRITE(iIOUN,7170)iP,iaGases(iI),raPActualAvg(iJ),raaPartPress(iJ,iI)*kAtm2mb, &
+                raaPartPress(iJ,iI)*kAtm2mb/(raPActualAvg(iJ)-raaPartPress(iJ,1))*1.0e6,raaTemp(iJ,iI),raaAmt(iJ,iI)*kAvog,'||', &
+                raaRPartPress(iJ,iI)*kAtm2mb,raaRAmt(iJ,iI)*kAvog,raaAmt(iJ,iI)/raaRAmt(iJ,iI)
+            ! this is writing pressures in atm
+            !            WRITE(iIOUN,7171)iP,iaGases(iI),raPActualAvg(iJ)/kAtm2mb,raaPartPress(iJ,iI),
+            !     $                   raaPartPress(iJ,iI)/(raPActualAvg(iJ)/kAtm2mb)*1.0e6,raaTemp(iJ,iI),raaAmt(iJ,iI),'||',
+            !     $                   raaRPartPress(iJ,iI),raaRAmt(iJ,iI),raaAmt(iJ,iI)/raaRAmt(iJ,iI)
+            END DO
+            write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
+        END DO
         234 FORMAT ('index = ',I3,' gas HITRAN ID = ',I3,' molecule = ',A20)
          
     ! write sum

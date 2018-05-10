@@ -1819,7 +1819,7 @@ CONTAINS
     iCount = 0
     DO iI = iBot,iTop
         iCount = iCount + 1
-        rX = rX + raaPartPress(iI,2)/raaPress(iI,2)
+        rX = rX + raaPartPress(iI,2)/(raaPress(iI,2)-raaPartPress(i1,1))   !! wrt dry air
     END DO
     rX = rX * 1.0e6/iCount
     rCO2MixRatio = rX
@@ -1834,7 +1834,7 @@ CONTAINS
     iCount = 0
     DO iI = iBot,iTop
         iCount = iCount + 1
-        rX = rX + raaPartPress(iI,3)/raaPress(iI,3)
+        rX = rX + raaPartPress(iI,3)/(raaPress(iI,2)-raaPartPress(i1,1))   !! wrt dry air
     END DO
     rX = rX * 1.0e6/iCount
     write(kStdWarn,*)'avg rO3Mix = ',rX,' ppmv'
@@ -1867,7 +1867,7 @@ CONTAINS
     iCount = 0
     DO iI = iBot,iTop
         iCount = iCount + 1
-        rX = rX + raaPartPress(iI,4)/raaPress(iI,4)
+        rX = rX + raaPartPress(iI,4)/(raaPress(iI,4)-raaPartPress(i1,1))   !! wrt dry air
     END DO
     rX = rX * 1.0e6/iCount
     write(kStdWarn,*)'avg rN2OMix = ',rX,' ppmv'
@@ -1876,7 +1876,7 @@ CONTAINS
     iCount = 0
     DO iI = iBot,iTop
         iCount = iCount + 1
-        rX = rX + raaPartPress(iI,5)/raaPress(iI,5)
+        rX = rX + raaPartPress(iI,5)/(raaPress(iI,5)-raaPartPress(i1,1))   !! wrt dry air
     END DO
     rX = rX * 1.0e6/iCount
     write(kStdWarn,*)'avg rCOMix = ',rX,' ppmv'
@@ -1885,7 +1885,7 @@ CONTAINS
     iCount = 0
     DO iI = iBot,iTop
         iCount = iCount + 1
-        rX = rX + raaPartPress(iI,6)/raaPress(iI,6)
+        rX = rX + raaPartPress(iI,6)/(raaPress(iI,6)-raaPartPress(i1,1))   !! wrt dry air
     END DO
     rX = rX * 1.0e6/iCount
     write(kStdWarn,*)'avg rCH4Mix = ',rX,' ppmv'

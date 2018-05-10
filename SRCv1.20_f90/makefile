@@ -1,4 +1,6 @@
-echo "IMPORTANT -- make sure you ALWAYS un cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB"
+#echo "IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB"
+
+$(info IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB, if you do things by hand)
 
 400_H16_default_f90:
 	make -f Makefile_v120_Intelf90 datafix400_H2016
@@ -10,7 +12,7 @@ echo "IMPORTANT -- make sure you ALWAYS un cp_param_files_to_f90.sc AFTER doing 
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H16
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16	
+	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16
 
 400_H16_NLTEH08_f90:
 	make -f Makefile_v120_Intelf90 datafix400_H2016_NLTEH2008
@@ -22,8 +24,8 @@ echo "IMPORTANT -- make sure you ALWAYS un cp_param_files_to_f90.sc AFTER doing 
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H16
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16	
-
+	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16
+	
 400_H16_NLTEH04_f90:
 	make -f Makefile_v120_Intelf90 datafix400_H2016_NLTEH2004
 	cp_param_files_to_f90.sc
@@ -34,8 +36,8 @@ echo "IMPORTANT -- make sure you ALWAYS un cp_param_files_to_f90.sc AFTER doing 
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H16
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16	
-
+	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16
+	
 400_H12_default_f90:
 	make -f Makefile_v120_Intelf90 datafix400_H2012
 	cp_param_files_to_f90.sc
@@ -46,7 +48,7 @@ echo "IMPORTANT -- make sure you ALWAYS un cp_param_files_to_f90.sc AFTER doing 
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv	
+	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv
 
 ########################################################################
 ### these are basically "old" SRCv1.18
