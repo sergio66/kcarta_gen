@@ -668,33 +668,33 @@ dist:
 	cd ../.. ;				\
 	rm $(KTAR) 2> /dev/null || true;	\
 	tar -cf $(KTAR)				\
-		kcartaV118/BIN/kcarta.x		\
-		kcartaV118/BIN/bkcarta.x	\
-		kcartaV118/LIB                  \
-		kcartaV118/INCLUDE 		\
-		kcartaV118/SCATTERCODE          \
-		kcartaV118/DOC			\
-		kcartaV118/MATLAB		\
-		kcartaV118/README.1ST		\
-		kcartaV118/SCRIPTS		\
-		kcartaV118/SRCv1.18/*.f         \
-		kcartaV118/SRCv1.18/Makefile    \
+		KCARTA/BIN/kcarta.x		\
+		KCARTA/BIN/bkcarta.x	\
+		KCARTA/LIB                  \
+		KCARTA/INCLUDE 		\
+		KCARTA/SCATTERCODE          \
+		KCARTA/DOC			\
+		KCARTA/MATLAB		\
+		KCARTA/README.1ST		\
+		KCARTA/SCRIPTS		\
+		KCARTA/SRCv1.18/*.f         \
+		KCARTA/SRCv1.18/Makefile    \
 		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
 		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
-		kcartaV118/UTILITY;		\
+		KCARTA/UTILITY;		\
 	chmod 664 $(KTAR)
 
 bugfix:
 	cd ../.. ;				\
 	rm $(KTARBUG) 2> /dev/null || true;	\
 	tar -cf $(KTARBUG)			\
-		kcartaV118/README.1ST		\
-		kcartaV118/INCLUDE		\
-		kcartaV118/DOC/kcarta1.18*	\
-		kcartaV118/SRCv1.18/Makefile    \
+		KCARTA/README.1ST		\
+		KCARTA/INCLUDE		\
+		KCARTA/DOC/kcarta1.18*	\
+		KCARTA/SRCv1.18/Makefile    \
 		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
 		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
-		kcartaV118/SRCv1.18/*.f;        \
+		KCARTA/SRCv1.18/*.f;        \
 	chmod 664 $(KTARBUG)
 
 ##############################
@@ -703,7 +703,7 @@ matlab:
 	cd ../.. ;				\
 	rm $(KMATLAB) 2> /dev/null || true;     \
 	tar -cf $(KMATLAB)			\
-		kcartaV118/MATLAB;		\
+		KCARTA/MATLAB;		\
 	chmod 664 $(KMATLAB)
 
 data:
@@ -726,7 +726,7 @@ kcwrap:
 		/asl/matlab/sconv		\
 		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
 		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
-		kcartaV118/SCRIPTS;		\
+		KCARTA/SCRIPTS;		\
 	chmod 664 $(KCWRAP)
 
 ftp: $(KTAR)
@@ -746,66 +746,66 @@ giveout:
 	cd ../.. ;				\
 	rm $(KGIVEOUT) 2> /dev/null || true;	\
 	tar -cf $(KGIVEOUT)			\
-		kcartaV118/BIN/kcarta.x		\
-		kcartaV118/BIN/bkcarta.x	\
-		kcartaV118/LIB                  \
-		kcartaV118/INCLUDE 		\
-		kcartaV118/DOC			\
-		kcartaV118/MATLAB		\
-		kcartaV118/README.1ST		\
-		kcartaV118/SCRIPTS		\
-                kcartaV118/INCLUDE/*.param      \
-                kcartaV118/SRCv1.18/freqfile.f  \
-                kcartaV118/SRCv1.18/j*.f        \
-                kcartaV118/SRCv1.18/k*.f        \
-                kcartaV118/SRCv1.18/n*.f        \
-                kcartaV118/SRCv1.18/r*.f        \
-                kcartaV118/SRCv1.18/s_*.f       \
-                kcartaV118/SRCv1.18/spline_*.f  \
-                kcartaV118/SRCv1.18/clear_scatter_misc.f  \
-                kcartaV118/SRCv1.18/singlescatter.f       \
-                kcartaV118/SRCv1.18/Makefile    \
-		kcartaV118/UTILITY;		\
+		KCARTA/BIN/kcarta.x		\
+		KCARTA/BIN/bkcarta.x	\
+		KCARTA/LIB                  \
+		KCARTA/INCLUDE 		\
+		KCARTA/DOC			\
+		KCARTA/MATLAB		\
+		KCARTA/README.1ST		\
+		KCARTA/SCRIPTS		\
+                KCARTA/INCLUDE/*.param      \
+                KCARTA/SRCv1.18/freqfile.f  \
+                KCARTA/SRCv1.18/j*.f        \
+                KCARTA/SRCv1.18/k*.f        \
+                KCARTA/SRCv1.18/n*.f        \
+                KCARTA/SRCv1.18/r*.f        \
+                KCARTA/SRCv1.18/s_*.f       \
+                KCARTA/SRCv1.18/spline_*.f  \
+                KCARTA/SRCv1.18/clear_scatter_misc.f  \
+                KCARTA/SRCv1.18/singlescatter.f       \
+                KCARTA/SRCv1.18/Makefile    \
+		KCARTA/UTILITY;		\
 	chmod 664 $(KGIVEOUT)
 
 giveout_bugfix:
 	cd ../.. ;				         \
 	rm $(KTARBUGGIVEOUT) 2> /dev/null || true;	 \
 	tar -cf $(KTARBUGGIVEOUT)			 \
-		kcartaV118/README.1ST		         \
-		kcartaV118/INCLUDE		         \
-		kcartaV118/DOC/kcarta1.18*	         \
-		kcartaV118/SRCv1.18/Makefile             \
-                kcartaV118/SRCv1.18/freqfile.f           \
-                kcartaV118/SRCv1.18/j*.f                 \
-                kcartaV118/SRCv1.18/k*.f                 \
-                kcartaV118/SRCv1.18/n*.f                 \
-                kcartaV118/SRCv1.18/r*.f                 \
-                kcartaV118/SRCv1.18/s_*.f                \
-                kcartaV118/SRCv1.18/spline_*.f           \
-                kcartaV118/SRCv1.18/clear_scatter_misc.f \
-                kcartaV118/SRCv1.18/singlescatter.f      \
-                kcartaV118/SRCv1.18/Makefile;            \
+		KCARTA/README.1ST		         \
+		KCARTA/INCLUDE		         \
+		KCARTA/DOC/kcarta1.18*	         \
+		KCARTA/SRCv1.18/Makefile             \
+                KCARTA/SRCv1.18/freqfile.f           \
+                KCARTA/SRCv1.18/j*.f                 \
+                KCARTA/SRCv1.18/k*.f                 \
+                KCARTA/SRCv1.18/n*.f                 \
+                KCARTA/SRCv1.18/r*.f                 \
+                KCARTA/SRCv1.18/s_*.f                \
+                KCARTA/SRCv1.18/spline_*.f           \
+                KCARTA/SRCv1.18/clear_scatter_misc.f \
+                KCARTA/SRCv1.18/singlescatter.f      \
+                KCARTA/SRCv1.18/Makefile;            \
 	chmod 664 $(KTARBUGGIVEOUT)
 
 giveout_aux:
 	cd ../.. ;                              \
 	rm $(KTARAUX) 2> /dev/null || true;     \
 	tar -cf $(KTARAUX)                      \
-		kcartaV118/INCLUDE                  \
-		kcartaV118/TEST/R*		     \
-		kcartaV118/TEST/b*                  \
-		kcartaV118/TEST/t*                  \
-		kcartaV118/TEST/*.m                 \
-		kcartaV118/TEST/*.sc                \
-		kcartaV118/TEST/COMPARISON_v1.18    \
-		kcartaV118/DOC                  \
-		kcartaV118/MATLAB               \
-		kcartaV118/README.1ST           \
-		kcartaV118/SCRIPTS              \
-		kcartaV118/INCLUDE/*.param      \
-		kcartaV118/INCLUDE/*.m          \
-		kcartaV118/UTILITY;             \
+		KCARTA/INCLUDE                  \
+		KCARTA/TEST/R*		     \
+		KCARTA/TEST/b*                  \
+		KCARTA/TEST/t*                  \
+		KCARTA/TEST/*.m                 \
+		KCARTA/TEST/*.sc                \
+		KCARTA/TEST/COMPARISON_v1.18    \
+		KCARTA/DOC                  \
+		KCARTA/MATLAB               \
+		KCARTA/README.1ST           \
+		KCARTA/SCRIPTS              \
+		KCARTA/INCLUDE/*.param      \
+		KCARTA/INCLUDE/*.m          \
+		KCARTA/UTILITY;             \
 	chmod 664 $(KTARAUX) 
 
 ################### DISTRIBUTIONS ########################################

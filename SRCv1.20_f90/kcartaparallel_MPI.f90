@@ -921,6 +921,10 @@
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
 
+                IF (iaGases(iGas) .EQ. 2) THEN
+                  CALL add_co2_wv_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness)
+                END IF
+
             ! see if current gas ID needs nonLTE spectroscopy
                 iLTEIn = -1
                 dDeltaFreqNLTE = 0.0025d0

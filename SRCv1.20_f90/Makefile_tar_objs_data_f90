@@ -703,7 +703,7 @@ giveout_bugfix:
 	tar -cf $(KTARBUGGIVEOUT)			 \
 		KCARTA/README.1ST		         \
 		KCARTA/INCLUDE		         \
-		KCARTA/DOC/kcarta1.20_f90*	         \
+		KCARTA/DOC/kcarta1.18*	         \
 		KCARTA/SRCv1.20_f90/Makefile             \
                 KCARTA/SRCv1.20_f90/freqfile.f90           \
                 KCARTA/SRCv1.20_f90/j*.f90                 \
@@ -714,7 +714,7 @@ giveout_bugfix:
                 KCARTA/SRCv1.20_f90/spline_*.f90           \
                 KCARTA/SRCv1.20_f90/clear_scatter_misc.f90 \
                 KCARTA/SRCv1.20_f90/singlescatter.f90      \
-                KCARTA/SRCv1.20_f90/Makefile;            \
+                KCARTA/SRCv1.20_f90/*akefile*;            \
 	chmod 664 $(KTARBUGGIVEOUT)
 
 giveout_aux:

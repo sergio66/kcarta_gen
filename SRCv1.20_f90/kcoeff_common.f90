@@ -740,6 +740,117 @@ CONTAINS
     end SUBROUTINE multiply_co2_chi_functions
 
 !************************************************************************
+! this subroutine mutiplies the daaGasAbsCoeff by CO2/WV chi functions
+! reference : Measurements and modeling of absorption by CO2+ H2O mixtures in
+!    the spectral region beyond the CO2 ν3-band head : H. Tran, M. Turbet,
+!    P. Chelin, X. Landsheere, Icarus 306 (2018) 116–121
+!
+! od ~ rho^2 xco2 xwv L CA   wheo rho = denisity in amagat, xco2/xwv are the mix ratios. L = path length of layer
+! Ha Tran told me no experimentally measured T dependance, no d(CA)/dT = 0; however the density changes with
+! T since rho ~ P/RT so d(rho^2)/dT ~ -2P/RT^3
+
+    SUBROUTINE add_co2_wv_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness)
+    
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! input
+    INTEGER :: iGasID
+    REAL :: raFreq(kMaxPts)
+    REAL :: raPress(kProfLayer),raaPartPress(kProfLayer,kGasStore),raTemp(kProfLayer)
+    REAL :: raThickness(kProfLayer)
+! input/output
+    DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
+
+! local vars
+    INTEGER :: iCO2Chi,iDefault,iI,iFr,iNumPts
+    INTEGER :: iaChiChunks(kMaxGas),iChiChunks,iDoFudge
+
+    INTEGER :: iIOUN,iERR
+    CHARACTER(120) :: FNAME
+    REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),rScale
+    REAL :: raXCO2(kProfLayer),raXWV(kprofLayer),raRho(kProfLayer)
+
+    FNAME = '//home/sergio/SPECTRA/CKDLINUX/ca_wv_co2_forkcarta_2000_2900.dat'
+    
+    iCO2Chi = 0  !!no continuum chi fixes applied .. with database being
+    iCO2Chi = 2  !!default July 2018; only fixes 4um
+
+    iDefault = 2
+    iCO2Chi = 2    !!! DEFAULT
+    iCO2Chi = iaaOverrideDefault(1,9)
+    IF ((iCO2Chi /= 0) .AND. (iCO2Chi /= 2)) THEN
+        write(kStdErr,*) 'invalid iCO2/WV Chi = ',iCO2Chi
+        CALL DoStop
+    END IF
+
+    iCO2Chi = -1    !! testing
+
+ 10   FORMAT(I2,I2,I2)
+ 999  FORMAT('CO2 chi fudge iDefault = ',I2,' iCO2Chi = ',I2,' kCO2_UMBCorHARTMAN = ',I2)
+ 
+    IF (iGasID .EQ. 2 .and. iCO2Chi > 0 .and. (raFreq(1) >= 2355.0 .and. raFreq(1) <= 2805.0))  THEN
+
+      iIOUN = kTempUnit
+      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='UNFORMATTED', &
+          IOSTAT=IERR)
+      IF (IERR /= 0) THEN
+        WRITE(kStdErr,*) 'In subroutine multiply_co2_wv_continuum'
+        WRITE(kStdErr,1010) IERR, FNAME
+ 1010   FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+        CALL DoSTOP
+      ENDIF
+
+      kTempUnitOpen=1
+      READ(iIOUN) iNumPts
+      READ(iIOUN) (raFChi(iFr),iFr=1,iNumPts)
+      READ(iIOUN) (raChi(iFr),iFr=1,iNumPts)      
+      CLOSE(iIOUN)
+      kTempUnitOpen=-1
+
+      !! get the abs coeff in cm-1, normalized by (rho)^2 Xco2 Xwv
+      CALL rspl(raFChi,raChi,iNumPts,raFreq,raX,kMaxPts)
+      
+!      print *,-9999,raFChi(1),raChi(1),raFreq(1),raX(1)
+!      DO iI = 1,iNumPts
+!        print *,iI,iNumPts,raFChi(iI),raChi(iI)
+!      END DO
+!      DO iI = 1,kMaxPts,100
+!        print *,iI,raFreq(iI),raX(iI)
+!      END DO
+      
+      DO iI = 1,kProfLayer
+        raXWV(iI)  = raaPartPress(iI,1)/raPress(iI)      ! fraction of WV
+        raXCO2(iI) = raaPartPress(iI,2)/raPress(iI)      ! fraction of CO2
+	!! now compute density in amagats
+	raRho(iI) = (raPress(iI) * kAtm2mb * 100)/(kMGC * raTemp(iI))*kAvog/1000.0   !! molecules/m3
+	raRho(iI) = raRho(iI)/1.0e6/2.6867805e19                                     !! amagat
+	
+        rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm	
+!        print *,iI,raXWV(iI),raXCO2(iI),raRho(iI),raThickness(iI),rScale,raX(1),daaAbsCoeff(1,iI)
+      END DO
+
+      DO iI = 1,kProfLayer
+        rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm
+	if (isfinite2(rScale) .EQ. .false. ) rScale = 0.0
+        DO iFr = 1,kMaxPts
+	  daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + rScale*raX(iFr)
+	END DO
+      END DO
+    END IF
+           
+    RETURN
+    end SUBROUTINE add_co2_wv_continuum
+
+!************************************************************************
+
+    LOGICAL FUNCTION isfinite2(a)
+    REAL :: a
+    isfinite2 = (a-a) == 0
+    end FUNCTION isfinite2
+
+!************************************************************************
 ! this function checks to see if there is NEW data for the  current gas
 !   if so, it returns a positive integer that tells the code which spectra
 !   dataset to use (from *SPECTRA) ** would be between 1 to 110 **

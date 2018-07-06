@@ -967,8 +967,12 @@
                 iaP1,iaP2,raP1,raP2,                                          &
                 iaT11,iaT12,raT11,raT12,raJT11,raJT12,                        &
                 iaT21,iaT22,raT21,raT22,raJT21,raJT22,                        &
-                iaQ11,iaQ12,raQ11,raQ12,                                      & &
+                iaQ11,iaQ12,raQ11,raQ12,                                      &
                 iaQ21,iaQ22,raQ21,raQ22)
+
+                IF (iaGases(iGas) .EQ. 2) THEN
+                  CALL add_co2_wv_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness)
+                END IF
 
             ! see if current gas ID needs nonLTE spectroscopy
 !                print *,'parallel Hx',iOuterLoop

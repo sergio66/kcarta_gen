@@ -327,6 +327,14 @@ c local variables
       REAL raMult(kProfLayer)
       REAL a1,a2
 
+c raAmt(iLay) is in kmoles/cm2   pressures are in atm, CKD coeffs are in (molecules/cm2 1/cm-1)-1 1/atm
+c      DO iLay =  iMin,iMax
+c        print *,iLay,raAmt(iLay),raPartPress(iLay),raPress(iLay)
+c      END DO
+c      CALL DoStop
+c so raAmt*kAvog*pressyre is in molecules/cm2*atm
+c so CX * v tanh(hcv/2KT) * raAmt*kAvog*pressure = [(molecules/cm2 1/cm-1)-1 1/atm] [cm-1] [molecules/cm2*atm] = OD no units
+
       rMin=1.0e10 
       rECCount=0.0 
       DO iLay=iMin,iMax
@@ -347,7 +355,7 @@ c     $                         iGasID,iLay,iFr,daaCon(iFr,iLay)
       END IF
 
 c add the continuum abs coeffs to the k-compressed coeffs raaCon = daaTemp
-c keeping track of whether the added values are all greater than 0.0
+c keeping track of whether the added values are all greater than 0.0      
       IF (iGasID .EQ. kNewGasLo) THEN      !CSelf
         DO iLay =iMin,iMax
           raMult(iLay)=raAmt(iLay)*kAvog*raPartPress(iLay)

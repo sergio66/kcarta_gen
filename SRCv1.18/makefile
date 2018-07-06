@@ -9,7 +9,7 @@
 	make -f Makefile_tar_objs_data datafix400_H2016_NLTEH2008
 	make -f Makefile
 	make -f Makefile scat
-        mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv_H16
+	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv_H16
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv_H16			  
 
 400_H12_default:
@@ -45,6 +45,13 @@
 	make -f Makefile scat		
 	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_385ppmv
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_385ppmv
+
+385_H08_default:
+	make -f Makefile datafix385_H2008
+	make -f Makefile
+	make -f Makefile scat		
+	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_385ppmv_H08
+	mv ../BIN/kcarta.x ../BIN/kcarta.x_385ppmv_H08
 
 385_H12_lblrtm12.4:
 	make -f Makefile datafix385_H2012_LBLRTM
