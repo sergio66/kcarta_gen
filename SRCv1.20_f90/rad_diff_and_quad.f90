@@ -992,7 +992,8 @@ CONTAINS
 
     INTEGER :: iDiffmethod,iDefault
     REAL :: rf1,rf2
-
+    CHARACTER*80 FMT
+    
 !! bugfix 11/08/2010
     IF (kThermalAngle < 0) THEN
         kThermalAngle = acos(3.0/5.0) * 180/kPi
@@ -1001,10 +1002,10 @@ CONTAINS
     rf1 = raFreq(1)
     rf2 = raFreq(kMaxPts)
     IF ((rf2 <= 605.00) .OR. (rf1 >= 2830.0)) THEN
-        write (kStdWarn,*) 'oops f(1),f(kMaxPts) = ',rf1,rf2,' outside 605 < f < 2830'
-        write(kStdWarn,*) '      cannot use diffusivity approx, use acos(3/5) instead'
-        iDiffmethod = +1
-        kThermalAngle = acos(3.0/5.0) * 180/kPi
+      write (kStdWarn,*) 'oops f(1),f(kMaxPts) = ',rf1,rf2,' outside 605 < f < 2830'
+      write(kStdWarn,*) '      cannot use diffusivity approx, use acos(3/5) instead'
+      iDiffmethod = +1
+      kThermalAngle = acos(3.0/5.0) * 180/kPi
     END IF
 
 ! iDiffmethod = -1  => use choose angles subroutine to get diffusivity angle
@@ -1026,7 +1027,14 @@ CONTAINS
 ! **** look at comparisons of downwelling surface radiation in KCARTA/TEST/REFL_BACKGND_THERMAL ***
 
     IF (kOuterLoop == 1) THEN
-        write(kStdWarn,*) 'Using diffusivity angle = ',kThermalAngle,cos(kThermalAngle*kPi/180)
+        FMT = '(A,F10.4,A,F10.4)'
+        IF (kThermalAngle .EQ. -1) THEN
+          write(kStdWarn,FMT) 'kThermalAngle = ',kThermalAngle,' : UA layers use diffusivity angle  of = ',53.13
+        ELSEIF (kThermalAngle .EQ. +1) THEN
+          write(kStdWarn,FMT) 'kThermalAngle = ',kThermalAngle,' : UA layers use diffusivity angle  of = ',53.13
+	ELSE
+          write(kStdWarn,FMT) 'kThermalAngle = ',kThermalAngle,' : all layers use diffusivity angle of = ',kThermalAngle
+	END IF
     END IF
           
     iDefault = -1

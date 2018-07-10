@@ -156,7 +156,8 @@ CONTAINS
     INTEGER :: iC,iaStory(kProfLayer),iNumLinesRead
     REAL :: rJunk
     INTEGER :: iFake
-          
+    CHARACTER*20 :: FMT
+    
     caWord = '*RADNCE'
     iErr = -1
 
@@ -454,9 +455,12 @@ CONTAINS
         iakThermalJacob(iC) = kThermalJacob
         iaSetThermalAngle(iC) = kSetThermalAngle
 
-        write(kStdWarn,*)'Solar on/off, Solar angle, Solar emiss = ', &
+        FMT = '(A,I2,F10.4,F10.4)'
+        write(kStdWarn,FMT)'Solar on/off, Solar angle, Solar emiss = ', &
         kSolar,kSOlarAngle,kSolarRefl
-        write(kStdWarn,*)'Thermal on/off,Thermal angle,Thermal Jacob =', &
+
+        FMT = '(A,I2,F10.4,I2)'
+        write(kStdWarn,FMT)'Thermal on/off,Thermal angle,Thermal Jacob =', &
         kThermal,kThermalAngle,kThermalJacob
 
     ! this reader allows for filenames, thus parsing in filename correctly

@@ -1880,7 +1880,8 @@ CONTAINS
     REAL :: raHeight(kProfLayer+1),raThickness(kProfLayer),pobs,pobs1,pTemp,rSURFaltitude
     REAL :: r1,rEms,rAngleX,rAngleY
     INTEGER*4 :: i4CTYPE1,i4CTYPE2,iNclouds_RTP_black
-     
+    CHARACTER*50 FMT
+    
     integer :: rtpopen, rtpread, rtpwrite, rtpclose
     record /RTPHEAD/ head
     record /RTPPROF/ prof
@@ -2396,7 +2397,9 @@ CONTAINS
     ELSE
         kSetThermalAngle = +1   !use user specified angle everywhere
     END IF
-    write(kStdWarn,*) 'in rtp_interface.f --> kFlux,kTemperVary,kSetThermalAngle = ',kFlux,kTemperVary,kSetThermalAngle
+    
+    FMT = '(A,3(I3,1X))'
+    write(kStdWarn,FMT) 'in rtp_interface.f --> kFlux,kTemperVary,kSetThermalAngle = ',kFlux,kTemperVary,kSetThermalAngle
 
     IF (iDirection > 0) THEN
     ! heck things make sense for downlook in
@@ -2477,9 +2480,12 @@ CONTAINS
     iakThermalJacob(iC)   = kThermalJacob
     iaSetThermalAngle(iC) = kSetThermalAngle
 
-    write(kStdWarn,*)'Solar on/off, Solar angle, Solar emiss = ', &
+    FMT = '(A,I2,F10.4,F10.4)'
+    write(kStdWarn,FMT)'Solar on/off, Solar angle, Solar emiss = ', &
     kSolar,kSolarAngle,kSolarRefl
-    write(kStdWarn,*)'Thermal on/off,Thermal angle,Thermal Jacob =', &
+
+    FMT = '(A,I2,F10.4,I2)'
+    write(kStdWarn,FMT)'Thermal on/off,Thermal angle,Thermal Jacob =', &
     kThermal,kThermalAngle,kThermalJacob
 
 ! now read in the emissivity values

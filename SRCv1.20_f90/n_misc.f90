@@ -73,6 +73,8 @@ CONTAINS
 ! ----------------------------------------------------------------------------
 ! AER-STD      27 : self, foreign   is by CKD and modified by Mlawer/Tobin
 !                                 ... this is the MT_CKD 2.5 version of Feb 2016
+! AER-STD      32 : self, foreign   is by CKD and modified by Mlawer/Alvarado
+!                                 ... this is the MT_CKD 3.2 version of Feb 2017
 ! ----------------------------------------------------------------------------
 ! old versions of AER CKD
 ! AER-CKD      00 : version 00
@@ -137,7 +139,7 @@ CONTAINS
 
 ! origCKD = [0 21 23 24];
 ! MTCKD1  = [ [1] [4 6]];
-! MTCKD25 = [ [25]  [] ];
+! MTCKD25 = [ [25 32]  ];
 ! allowedCKD = [origCKD MTCKD1 MTCKD25];
 ! ----------------------------------------------------------------------------
 
@@ -258,7 +260,7 @@ CONTAINS
     iaaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
                                     !!!   in clear_scatter_misc.f
     iaaOverrideDefault(1,8) = -1    !!! -1 to keep h.vcmin/h.vcmax as read in from RTPfile, +1 to override with rf1,rf2
-    iaaOverrideDefault(1,9) = +2    !!! iCO2WVCA = +2     for SUBR add_co2_wv_continuum in kcoeffMAIN.f/kcoeff_common.f90
+    iaaOverrideDefault(1,9) =  0    !!! iCO2WVCA = +2 will turn it on for SUBR add_co2_wv_continuum in kcoeffMAIN.f/kcoeff_common.f90
     
 ! RadTrans
     iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
@@ -377,7 +379,8 @@ CONTAINS
      .AND. (kCKD /= 0) .AND. (kCKD /= 21) .AND. (kCKD /= 23) .AND. (kCKD /= 24) & &
 !!! these are MT_CKD1 and research versions from AIRS data
      .AND. (kCKD /= 1) .AND. (kCKD /= 4) .AND. (kCKD /= 6) &
-     .AND. (kCKD /= 25) .AND. (kCKD /= 27)) &
+!!! these are MT_CKD25 owards more recent versions
+     .AND. (kCKD /= 25) .AND. (kCKD /= 27) .AND. (kCKD /= 32)) &
     THEN
         write(kStdErr,*) 'In *PARAMS, need kCKD = [-1] for no continuum OR'
         write(kStdErr,*) '                 CKD    versions 0,21,23 or 24'
@@ -387,7 +390,8 @@ CONTAINS
         write(kStdErr,*) '       (latest AER versions =  1, released Dec 2002)'
         write(kStdErr,*) '       (latest AER versions = 25, released Dec 2010)'
         write(kStdErr,*) '       (latest AER versions = 27, released Feb 2016)'
-        write(kStdErr,*) '           [ are our modifications ] '
+        write(kStdErr,*) '       (latest AER versions = 32, released Feb 2017)'	
+        write(kStdErr,*) '           [ are UMBC modifications of CKD or MT-CKD] '
         write(kStdErr,*) 'kCKD is water continuum calculation version'
         write(kStdErr,*) 'Please reset and retry'
         CALL DoSTOP

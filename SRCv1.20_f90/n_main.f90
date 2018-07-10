@@ -1430,9 +1430,10 @@ CONTAINS
     IF (cfrac12 >= cfrac) cfrac12 = cfrac
 
     IF ((kRTP == 0) .OR. (kRTP == 1))  THEN
+        FMT = '(A,F12.5,1X,F12.5,1X,I6,1X,F12.5,1X,F12.5,1X)'
         write(kStdWarn,*) 'cfrac12 = ',cfrac12
-        write(kStdWarn,*) 'cfrac1,cngwat1,ctype1,ctop1,cbot1 = ',cfrac1,cngwat1,ctype1,ctop1,cbot1
-        write(kStdWarn,*) 'cfrac2,cngwat2,ctype2,ctop2,cbot2 = ',cfrac2,cngwat2,ctype2,ctop2,cbot2
+        write(kStdWarn,FMT) 'cfrac1,cngwat1,ctype1,ctop1,cbot1 = ',cfrac1,cngwat1,ctype1,ctop1,cbot1
+        write(kStdWarn,FMT) 'cfrac2,cngwat2,ctype2,ctop2,cbot2 = ',cfrac2,cngwat2,ctype2,ctop2,cbot2
         write(kStdWarn,*) 'iNclouds_RTP = ',iNclouds_RTP
     END IF
 
