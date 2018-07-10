@@ -2036,7 +2036,8 @@ c GENERAL
       iaaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
                                       !!!   in clear_scatter_misc.f
       iaaOverrideDefault(1,8) = -1    !!! -1 to keep h.vcmin/h.vcmax as read in from RTPfile, +1 to override with rf1,rf2
-      
+      iaaOverrideDefault(1,9) = +2    !!! iCO2WVCA = +2     for SUBR add_co2_wv_continuum in kcoeffMAIN.f/kcoeff_common.f90
+    
 c RadTrans
       iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
       iaaOverrideDefault(2,2) = +3    !!! THIS IS LBLRTM STYLE iGaussPts = 3 for flux and downwell gauss quad

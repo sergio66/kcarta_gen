@@ -2,6 +2,20 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+! use must precede IMPLICIT and INCLUDE statements
+
+    PROGRAM kcartajpl
+    use omp_lib          ! Fortran 90; omp_get_thread_num, omp_get_num_threads
+    use ifport           ! for getenv
+
+    use basic_common     ! misc routines
+    use kcartamisc       ! more misc routines
+    use jac_main         ! jacobians
+    use rad_main         ! main rad routines
+    use n_main           ! main reader for namelist
+    use kcoeffmain       ! uncompression routines
+    use knonlte          ! nonlte routines
+
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
 !   kcartaparam.f90  : parameter declarations (for the array sizes)
@@ -31,9 +45,6 @@
 
 !     Written by Sergio De Souza-Machado, UMBC (sergio@umbc.edu)
 !************************************************************************
-
-    PROGRAM kcartajpl
-
     IMPLICIT NONE
 
     include '../INCLUDE/scatterparam.f90'
@@ -618,7 +629,13 @@
                 iaQ21,iaQ22,raQ21,raQ22)
 
                 IF (iaGases(iGas) .EQ. 2) THEN
-                  CALL add_co2_wv_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness)
+                  CALL add_co2_wv_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness, &
+                                            daaDQ,daaDT,iDoDQ,DoGasJacob(1,iaJacob,iJacob),daaDQWV,iYesNoCO2WVContinuum)
+	          IF ((DoGasJacob(1,iaJacob,iJacob) .EQ. 1) .AND. (iYesNoCO2WVContinuum > 0) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
+                    write(kStdWarn,*) '   including CO2/WV continuum d/dq for gasID 1 in Jacob list using CO2/WV jac'	
+                    write(kStdErr,*)  '   including CO2/WV continuum d/dq for gasID 1 in Jacob list using CO2/WV jac'
+                    CALL DoSet(daaDQWV,raaaAllDQ,1,iDoAdd)                   		    
+		  END IF
                 END IF
 
             ! see if current gas ID needs nonLTE spectroscopy
@@ -689,11 +706,11 @@
                         write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
                         CALL DoSet(daaDQ,raaaAllDQ,iDoDQ,iDoAdd)
                     ELSEIF ((kActualJacs == -1) .OR. (kActualJacs == 100)) THEN
-                        write(kStdWarn,*) ' set d/dq for gas',iDoDQ,' in colJacob list'
+                        write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'		    
                         write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
                         CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
                     ELSEIF ((kActualJacs == -2) .OR. (kActualJacs == 102)) THEN
-                        write(kStdWarn,*) ' set d/dq for gas#',iDoDQ,' in colJacob list'
+                        write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'		    		    
                         write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
                         CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
                     END IF

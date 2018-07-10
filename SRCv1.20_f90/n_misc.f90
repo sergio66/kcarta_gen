@@ -249,14 +249,14 @@ CONTAINS
     caaTextOverrideDefault  = 'notset'
           
     iaaOverrideDefault(1,1) = -1    !!! iSARTAChi = -1  for no tuning, see kcartabasic/kcartamain/kcartajpl
-!!!                 kcartaparallel and finally used in kcoeffMAIN.f
+                                    !!!                 kcartaparallel and finally used in kcoeffMAIN.f
     iaaOverrideDefault(1,2) = +1    !!! iSplinetype = +1 for SUBR iSetSplineType in kcartamisc.f
     iaaOverrideDefault(1,3) = +2    !!! iCO2Chi = +2     for SUBR multiply_co2_chi_functions in kcoeffMAIN.f
     iaaOverrideDefault(1,4) = +1    !!! iMatlabORf77 = +1  use Maltab style uncompression,  kcoeffMAIN.f
     iaaOverrideDefault(1,5) = +5    !!! iWHichScatterCode = 5 for PCLSAM in rtp_interface.f
     iaaOverrideDefault(1,6) = +1    !!! iReadP = 1 when assuming GENLN2 style profile in n_pth_mix.f
     iaaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
-!!!   in clear_scatter_misc.f
+                                    !!!   in clear_scatter_misc.f
     iaaOverrideDefault(1,8) = -1    !!! -1 to keep h.vcmin/h.vcmax as read in from RTPfile, +1 to override with rf1,rf2
     iaaOverrideDefault(1,9) = +2    !!! iCO2WVCA = +2     for SUBR add_co2_wv_continuum in kcoeffMAIN.f/kcoeff_common.f90
     

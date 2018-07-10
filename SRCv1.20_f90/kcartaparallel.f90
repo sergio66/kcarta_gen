@@ -248,7 +248,8 @@
 
 ! daaDT,daaDQ are the d/dq,d/dT matrices
     DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
-    DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
+    DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac),daaDQWV(kMaxPtsJac,kProfLayerJac)
+    INTEGER :: iYesNoCO2WVContinuum
 ! raaaAllDQ has the ALL the d/dq coeffs for current freq block for each gas
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
 ! raaAllDT has the cumulative d/dT coeffs from ALL gases
@@ -971,7 +972,13 @@
                 iaQ21,iaQ22,raQ21,raQ22)
 
                 IF (iaGases(iGas) .EQ. 2) THEN
-                  CALL add_co2_wv_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness)
+                  CALL add_co2_wv_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness, &
+                                            daaDQ,daaDT,iDoDQ,DoGasJacob(1,iaJacob,iJacob),daaDQWV,iYesNoCO2WVContinuum)
+	          IF ((DoGasJacob(1,iaJacob,iJacob) .EQ. 1) .AND. (iYesNoCO2WVContinuum > 0) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
+                    write(kStdWarn,*) '   including CO2/WV continuum d/dq for gasID 1 in Jacob list using CO2/WV jac'	
+                    write(kStdErr,*)  '   including CO2/WV continuum d/dq for gasID 1 in Jacob list using CO2/WV jac'
+                    CALL DoSet(daaDQWV,raaaAllDQ,1,iDoAdd)                   		    
+		  END IF 
                 END IF
 
             ! see if current gas ID needs nonLTE spectroscopy
@@ -1044,11 +1051,11 @@
                         write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
                         CALL DoSet(daaDQ,raaaAllDQ,iDoDQ,iDoAdd)
                     ELSEIF ((kActualJacs == -1) .OR. (kActualJacs == 100)) THEN
-                        write(kStdWarn,*) ' set d/dq for gas#',iDoDQ,' in colJacob list'
+                        write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'		    		    
                         write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
                         CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
                     ELSEIF ((kActualJacs == -2) .OR. (kActualJacs == 102)) THEN
-                        write(kStdWarn,*) ' set d/dq for gas#',iDoDQ,' in colJacob list'
+                        write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'		    		    
                         write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
                         CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
                     END IF

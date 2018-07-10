@@ -387,6 +387,9 @@ CONTAINS
     REAL :: rLow,rHigh,rTemp
     INTEGER :: iDummy
 
+    write(kStdErr,*) ' '
+    write(kStdWarn,*) ' '    
+    
     write(kStdWarn,*) '*********************************************'
     write(kStdWarn,*) '**Setting freqs, fileID lower/upper bounds***'
 

@@ -65,67 +65,77 @@ CONTAINS
 ! if iDoThermal =  0 ==> do diffusivity approx (theta_eff=53 degrees)
 ! ALMOST ALL, IF NOT ALL, calls to this routine have iDoAcos35 = -1
     IF (iDoAcos35 < 0) THEN
-    ! not doing the special computation for Jacobians ==> use 0 or 1
-        iDoThermal = kThermal
+      ! not doing the special computation for Jacobians ==> use 0 or 1
+      iDoThermal = kThermal
     ELSE IF (iDoAcos35 > 0) THEN
-    ! doing the special computation for Jacobians ==> use 0 (diffusive approx)
-        iDoThermal = 0
+      ! doing the special computation for Jacobians ==> use 0 (diffusive approx)
+      iDoThermal = 0
     END IF
 
     CALL AddUppermostLayers(iaRadLayer,iNumLayer,rFracTop, &
-    iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
+                            iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
 
     IF (iDoThermal /= iaaOverrideDefault(2,3)) THEN
-        IF (kOuterLoop == 1)  THEN
-            FMT = '(A,I3,I3)'
-            write(kStdErr,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
-            write(kStdWarn,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+      IF (kOuterLoop == 1)  THEN
+        FMT = '(A,I3,I3)'
+        write(kStdErr,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+        write(kStdWarn,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+	write(kStdErr,*) ' '	
+	write(kStdWarn,*) ' '	
         END IF
-        iDoThermal = iaaOverrideDefault(2,3)
-        IF (kOuterLoop == 1)  THEN
-            IF (iDoThermal == 2 ) THEN
-                write(kStdErr,*) '  do LINEAR-in-tau integration over zenith angles for backgnd therm'
-                write(kStdWarn,*)'  do LINEAR-in-tau integration over zenith angles for backgnd therm'
-            END IF
-            IF (iDoThermal == 1 ) THEN
-                write(kStdErr,*)  '  do CONST-in-tau integration over zenith angles for backgnd therm'
-                write(kStdWarn,*) '  do CONST-in-tau integration over zenith angles for backgnd therm'
-            END IF
-            IF (iDoThermal == 0 ) THEN
-                FMT = '(A,I3,A)'
-                write(kStdErr,FMT)  '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
-                write(kStdWarn,FMT) '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
-                IF (kSetThermalAngle == -1) THEN
-                    write(kStdErr,*)  ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
-                    write(kStdWarn,*) ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
-                ELSE
-                    write(kStdErr,FMT)  ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'
-                    write(kStdWarn,FMT) ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'
-                END IF
-            END IF
-            IF (iDoThermal == -1) THEN
-                write(kStdErr,*)  '  will NOT DO backgnd thermal'
-                write(kStdWarn,*) '  will NOT DO backgnd thermal'
-            END IF
+      iDoThermal = iaaOverrideDefault(2,3)
+      IF (kOuterLoop == 1)  THEN
+        IF (iDoThermal == 2 ) THEN
+          write(kStdErr,*) '  do LINEAR-in-tau integration over zenith angles for backgnd therm'
+          write(kStdWarn,*)'  do LINEAR-in-tau integration over zenith angles for backgnd therm'
+  	  write(kStdErr,*) ' '	  	  
+	  write(kStdWarn,*) ' '	  
         END IF
+        IF (iDoThermal == 1 ) THEN
+          write(kStdErr,*)  '  do CONST-in-tau integration over zenith angles for backgnd therm'
+          write(kStdWarn,*) '  do CONST-in-tau integration over zenith angles for backgnd therm'
+  	  write(kStdErr,*) ' '	  	  
+	  write(kStdWarn,*) ' '	  	  
+        END IF
+        IF (iDoThermal == 0 ) THEN
+          FMT = '(A,I3,A)'
+          write(kStdErr,FMT)  '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
+          write(kStdWarn,FMT) '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
+          IF (kSetThermalAngle == -1) THEN
+            write(kStdErr,*)  ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
+            write(kStdWarn,*) ' >> will use acos(3/5) in upper layers, and accurate angle in lower layers'
+          ELSE
+            write(kStdErr,FMT)  ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'
+            write(kStdWarn,FMT) ' >> will use kSetThermalAngle =',kSetThermalAngle,' in all layers'
+          END IF
+  	  write(kStdErr,*) ' '	  	  
+	  write(kStdWarn,*) ' '	  	  	  
+        END IF
+        IF (iDoThermal == -1) THEN
+          write(kStdErr,*)  '  will NOT DO backgnd thermal'
+          write(kStdWarn,*) '  will NOT DO backgnd thermal'
+  	  write(kStdErr,*) ' '	  	  
+	  write(kStdWarn,*) ' '	  	  	  
+        END IF
+      END IF
     END IF
           
 ! now do the radiative transfer!!!
     IF ((kSetThermalAngle == 2) .OR. (iDothermal == 2)) THEN
-        write(kStdWarn,*) 'doing background thermal using LINEAR-in-tau slow/accurate integration over zenith angles'
-        write(kStdWarn,*) '  this is the LBLRTM 3angle style'
-        CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq, &
+      write(kStdWarn,*) 'doing background thermal using LINEAR-in-tau slow/accurate integration over zenith angles'
+      write(kStdWarn,*) '  this is the LBLRTM 3angle style'
+      CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq, &
         raPressLevels,raTPressLevels, &
         raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop, &
         rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
     ELSEIF (iDoThermal == 1) THEN
-        write(kStdWarn,*) 'doing background thermal using CONST-in-tau slow/accurate integration over zenith angles'
-        CALL IntegrateOverAngles(raThermal,raVT1,rTSpace,raFreq, &
+      write(kStdWarn,*) 'doing background thermal using CONST-in-tau slow/accurate integration over zenith angles'
+      CALL IntegrateOverAngles(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop, &
         rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
     ELSE IF (iDoThermal == 0) THEN
-        write(kStdWarn,*) 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
-        CALL DoDiffusivityApprox(raThermal,raVT1,rTSpace,raFreq, &
+      write(kStdWarn,*) 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
+      CALL DoDiffusivityApprox(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer, &
         raaAbsCoeff,rFracTop,rFracBot,iaRadLayerTemp,iT, &
@@ -139,8 +149,8 @@ CONTAINS
 ! whether we did gaussian quadrature or diffusive approx, we now need the 2pi
 ! factor from the azimuthal integration
     DO iFr=1,kMaxPts
-        raThermal(iFr) = raThermal(iFr)*2.0*kPi
-        raExtraThermal(iFr) = raExtraThermal(iFr)*2.0*kPi
+      raThermal(iFr) = raThermal(iFr)*2.0*kPi
+      raExtraThermal(iFr) = raExtraThermal(iFr)*2.0*kPi
     END DO
 
     RETURN
@@ -200,14 +210,14 @@ CONTAINS
     INTEGER :: iS,iE,iM,iBdryP1_O
 
     DO iFr = 1,kProfLayer
-        raAvgAnglePerLayer(iFr) = 0.0
-        raMeanOD(iFr) = 0.0
+      raAvgAnglePerLayer(iFr) = 0.0
+      raMeanOD(iFr) = 0.0
     END DO
 
     DO iLay = 1,kMaxLayer
-        DO iFr = 1,kMaxPts
-            raMeanOD(iLay) = raMeanOD(iLay) + raaOrigAbsCoeff(iFr,iLay)
-        END DO
+      DO iFr = 1,kMaxPts
+        raMeanOD(iLay) = raMeanOD(iLay) + raaOrigAbsCoeff(iFr,iLay)
+      END DO
     END DO
 
     iS = iaRadLayer(iS0)
@@ -235,26 +245,26 @@ CONTAINS
 ! CASE B : quite easy -- this is do atmosphere -- instr
 ! iS=100   iE>iB                  ==> do iS->iE using acos(3/5)
     IF ((iS >= iBdry) .AND. (iBdry <= iE)) THEN
-        iCase     = 2
-        iBdryP1   = iE
-        iBdryP1_O = iE
+      iCase     = 2
+      iBdryP1   = iE
+      iBdryP1_O = iE
     END IF
 ! CASE C : easy -- this is do instr-gnd
 ! iS~50    iE~1   iB > iS,iE      ==> do iB->iE using accurate diff approx
     IF ((iBdry >= iS) .AND. (iBdry >= iE)) THEN
-        iCase = 3
-        iBdry = iS
+      iCase = 3
+      iBdry = iS
     END IF
 
     IF (iCase == -1) THEN
-        write(kStdErr,*)'In orig_const_in_tau_FastBDRYL2GDiffusiveApprox, icase = -1'
-        CALL DoSTOP
+      write(kStdErr,*)'In orig_const_in_tau_FastBDRYL2GDiffusiveApprox, icase = -1'
+      CALL DoSTOP
     END IF
 
 !! fixed this in Feb 2010
     IF (iBdryP1_O > kProfLayer) THEN
     !        print *,iBdryP1_O,kProfLayer
-        iBdryP1_O = iBdryP1_O - iM*kProfLayer
+      iBdryP1_O = iBdryP1_O - iM*kProfLayer
     END IF
 
     rDiff    = (kThermalAngle*kPi/180.0)
@@ -262,24 +272,24 @@ CONTAINS
 
 ! initalize raL2G,raL2Gm1
     DO iFr = 1,kMaxPts
-        raL2G(iFr)   = 0.0
-        raL2Gm1(iFr) = 0.0
+      raL2G(iFr)   = 0.0
+      raL2Gm1(iFr) = 0.0
     END DO
 
 ! calculate raL2Gm1 which is the L2G optical depth from TOA layer to ground
     DO iLay = iS0-1,1,-1
-        iL = iaRadLayer(iLay)
-    ! do not have to worry about fractional top layers here, 'cos abs coeffs are
-    ! for FULL layers! but have to worry about bottom layer!
-        IF (iLay /= 1) THEN
-            DO iFr = 1,kMaxPts
-                raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
-            END DO
-        ELSE
-            DO iFr=1,kMaxPts
-                raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)*rFracBot
-            END DO
-        END IF
+      iL = iaRadLayer(iLay)
+      ! do not have to worry about fractional top layers here, 'cos abs coeffs are
+      ! for FULL layers! but have to worry about bottom layer!
+      IF (iLay /= 1) THEN
+        DO iFr = 1,kMaxPts
+          raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
+        END DO
+      ELSE
+        DO iFr=1,kMaxPts
+          raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)*rFracBot
+        END DO
+      END IF
     END DO
 
 ! calculate raL2G which is the L2G optical depth from TOA layer to ground
@@ -288,7 +298,7 @@ CONTAINS
 ! do not have to worry about fractional top layers here, 'cos abs coeffs are
 ! for FULL layers!
     DO iFr=1,kMaxPts
-        raL2G(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
+      raL2G(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
     END DO
 
 !      print *,iTemperVariation
@@ -296,107 +306,107 @@ CONTAINS
           
 ! do top part of atmosphere, where we can use acos(3/5)
     IF ((iCase == 1)  .OR. (iCase == 2)) THEN
-    ! go from top of atmosphere to boundary
-        DO iLay=iS0,iBdryp1_O,-1
-            iL = iaRadLayer(iLay)
-            iLm1 = iaRadLayer(iLay-1)
-            rMPTemp = raVT1(iL)
+      ! go from top of atmosphere to boundary
+      DO iLay=iS0,iBdryp1_O,-1
+        iL = iaRadLayer(iLay)
+        iLm1 = iaRadLayer(iLay-1)
+        rMPTemp = raVT1(iL)
         ! do not have to worry about fractional top layers here, 'cos abs coeffs are
         ! for FULL layers! but have to worry about bottom layer!
-            IF (iLay == 2) THEN
-                rW = rFracBot
-            ELSE
-                rW = 1.0
-            END IF
-            DO iFr=1,kMaxPts
-            ! find the diffusive angles for the layer beneath
-                raAvgAnglePerLayer(iL) =  raAvgAnglePerLayer(iL) + rCosDiff
-                rAngleTr_m1  = exp(-raL2Gm1(iFr)/rCosDiff)
-                rAngleTr     = exp(-raL2G(iFr)/rCosDiff)
-                raAngleTr_m1(iFr) = rAngleTr_m1
-                raAngleTr(iFr)    = rAngleTr
-            ! Planckian emissions
-                rPlanck      = ttorad(raFreq(iFr),rMPTemp)
-                raTemp(iFr)  = raTemp(iFr) + rPlanck*(rAngleTr_m1-rAngleTr)
-            ! get ready for the layer beneath
-                raL2G(iFr)   = raL2Gm1(iFr)
-                raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
-            END DO
-        !          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
+        IF (iLay == 2) THEN
+          rW = rFracBot
+        ELSE
+          rW = 1.0
+        END IF
+        DO iFr=1,kMaxPts
+          ! find the diffusive angles for the layer beneath
+          raAvgAnglePerLayer(iL) =  raAvgAnglePerLayer(iL) + rCosDiff
+          rAngleTr_m1  = exp(-raL2Gm1(iFr)/rCosDiff)
+          rAngleTr     = exp(-raL2G(iFr)/rCosDiff)
+          raAngleTr_m1(iFr) = rAngleTr_m1
+          raAngleTr(iFr)    = rAngleTr
+          ! Planckian emissions
+          rPlanck      = ttorad(raFreq(iFr),rMPTemp)
+          raTemp(iFr)  = raTemp(iFr) + rPlanck*(rAngleTr_m1-rAngleTr)
+          ! get ready for the layer beneath
+          raL2G(iFr)   = raL2Gm1(iFr)
+          raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
         END DO
+        !print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
+      END DO
     END IF
 
     IF ((iCase == 1) .OR. (iCase == 3)) THEN
-    ! go from boundary to ground, or iE
-    ! do bottom part of atmosphere ACCURATELY
+      ! go from boundary to ground, or iE
+      ! do bottom part of atmosphere ACCURATELY
 
-        IF (iE0 == 1) THEN
+      IF (iE0 == 1) THEN
         ! if iE0 == bottom layer, then go accurately all the way to the
         ! last-from-bottom layer in this loop, and then accurately add on the effects
         ! of the bottommost layer
-            iSecondEnd=2
+        iSecondEnd=2
         ELSE
         ! if iE0 <> bottom layer, then do radiative transfer all the way down to iE0
-            iSecondEnd=iE0
+        iSecondEnd=iE0
         END IF
 
         DO iFr=1,kMaxPts
-            rAngleTr = FindDiffusiveAngleExp(raL2G(iFr))
-            raFreqAngle(iFr) = rAngleTr
-            IF (iFr == 1) rCosDiff = raFreqAngle(iFr)
+          rAngleTr = FindDiffusiveAngleExp(raL2G(iFr))
+          raFreqAngle(iFr) = rAngleTr
+          IF (iFr == 1) rCosDiff = raFreqAngle(iFr)
         END DO
 
         DO iLay=iBdry0,iSecondEnd,-1
-            iL      = iaRadLayer(iLay)
-            iLm1    = iaRadLayer(iLay-1)
-            rMPTemp = raVT1(iL)
-        ! do not have to worry about fractional top layers here, 'cos abs coeffs are
-        ! for FULL layers! but have to worry about bottom layer
-            IF (iLay == 2) THEN
-                rW = rFracBot
-            ELSE
-                rW = 1.0
-            END IF
-            DO iFr=1,kMaxPts
+          iL      = iaRadLayer(iLay)
+          iLm1    = iaRadLayer(iLay-1)
+          rMPTemp = raVT1(iL)
+          ! do not have to worry about fractional top layers here, 'cos abs coeffs are
+          ! for FULL layers! but have to worry about bottom layer
+          IF (iLay == 2) THEN
+            rW = rFracBot
+          ELSE
+            rW = 1.0
+          END IF
+          DO iFr=1,kMaxPts
             ! find the diffusive angles for the layer beneath
-                rAngleTr_m1         = FindDiffusiveAngleExp(raL2Gm1(iFr))
-                raFreqAngle_m1(iFr) = rAngleTr_m1
-                rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1)
+            rAngleTr_m1         = FindDiffusiveAngleExp(raL2Gm1(iFr))
+            raFreqAngle_m1(iFr) = rAngleTr_m1
+            rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1)
                           
-                rAngleTr               = raFreqAngle(iFr)
-                raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr
-                rAngleTr               = exp(-raL2G(iFr)/rAngleTr)
+            rAngleTr               = raFreqAngle(iFr)
+            raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr
+            rAngleTr               = exp(-raL2G(iFr)/rAngleTr)
                           
-                raAngleTr_m1(iFr) = rAngleTr_m1
-                raAngleTr(iFr)    = rAngleTr
+            raAngleTr_m1(iFr) = rAngleTr_m1
+            raAngleTr(iFr)    = rAngleTr
             ! Planckian emissions
-                rPlanck     = ttorad(raFreq(iFr),rMPTemp)
-                raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
+            raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
             ! get ready for the layer beneath
-                raL2G(iFr)       = raL2Gm1(iFr)
-                raL2Gm1(iFr)     = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
-                raFreqAngle(iFr) = raFreqAngle_m1(iFr)
-            END DO
-        !          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
+            raL2G(iFr)       = raL2Gm1(iFr)
+            raL2Gm1(iFr)     = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
+            raFreqAngle(iFr) = raFreqAngle_m1(iFr)
+          END DO
+          ! print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
         END DO
 
         IF (iSecondEnd == 2) THEN
-        ! now do the bottommost layer, recalling its transmission = 1.0 always
-            iL          = iaRadLayer(1)
-            rMPTemp     = raVT1(iL)
-            rAngleTr_m1 = 1.0
-            DO iFr=1,kMaxPts
+          ! now do the bottommost layer, recalling its transmission = 1.0 always
+          iL          = iaRadLayer(1)
+          rMPTemp     = raVT1(iL)
+          rAngleTr_m1 = 1.0
+          DO iFr=1,kMaxPts
                         
-                rAngleTr    = raFreqAngle(iFr)
-                raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr
-                rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
+            rAngleTr    = raFreqAngle(iFr)
+            raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + rAngleTr
+            rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
                           
-                rPlanck     = ttorad(raFreq(iFr),rMPTemp)
-                raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
-                raAngleTr_m1(iFr) = rAngleTr_m1
-                raAngleTr(iFr)    = rAngleTr
-            END DO
-        !          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
+            rPlanck     = ttorad(raFreq(iFr),rMPTemp)
+            raTemp(iFr) = raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+            raAngleTr_m1(iFr) = rAngleTr_m1
+            raAngleTr(iFr)    = rAngleTr
+          END DO
+          ! print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
         END IF
     END IF
 
@@ -412,13 +422,13 @@ CONTAINS
 
     rAngleTr = 0.0    !!! this acts as Space2Gnd OD
     DO iLay = 1,iS0
-        iL = iaRadLayer(iLay)
-        raAvgAnglePerLayer(iL) = acos(raAvgAnglePerLayer(iL)/kMaxPts) * 180/kPi
-        raMeanOD(iL)           = raMeanOD(iL)/kMaxPts
-        rAngleTr               = rAngleTr + raMeanOD(iL)
-        write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),654654
+      iL = iaRadLayer(iLay)
+      raAvgAnglePerLayer(iL) = acos(raAvgAnglePerLayer(iL)/kMaxPts) * 180/kPi
+      raMeanOD(iL)           = raMeanOD(iL)/kMaxPts
+      rAngleTr               = rAngleTr + raMeanOD(iL)
+      write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),654654
     END DO
-    321 FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
+321 FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
           
 ! after grepping the warning.msg file eg
 ! grep 654654  ~sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/warning.msg > diffusive_angles
@@ -503,58 +513,58 @@ CONTAINS
 ! iS~50    iE~1   iS > iB > iE    ==> do iS->iB using acos(3/5)
 !                                     do iB->iE using accurate diff approx
     IF ((iS >= iBdry) .AND. (iBdry >= iE)) THEN
-        iCase     = 1
-        iBdryP1   = iBdry  + 1
-        iBdryP1_O = iBdry0 + 1
+      iCase     = 1
+      iBdryP1   = iBdry  + 1
+      iBdryP1_O = iBdry0 + 1
     END IF
 ! CASE B : quite easy -- this is do atmosphere -- instr
 ! iS=100   iE>iB                  ==> do iS->iE using acos(3/5)
     IF ((iS >= iBdry) .AND. (iBdry <= iE)) THEN
-        iCase     = 2
-        iBdryP1   = iE
-        iBdryP1_O = iE
+      iCase     = 2
+      iBdryP1   = iE
+      iBdryP1_O = iE
     END IF
 ! CASE C : easy -- this is do instr-gnd
 ! iS~50    iE~1   iB > iS,iE      ==> do iB->iE using accurate diff approx
     IF ((iBdry >= iS) .AND. (iBdry >= iE)) THEN
-        iCase = 3
-        iBdry = iS
+      iCase = 3
+      iBdry = iS
     END IF
 
     IF (iCase == -1) THEN
-        write(kStdErr,*)'In new_linear_in_tau_FastBDRYL2GDiffusiveApprox, icase = -1'
-        CALL DoSTOP
+      write(kStdErr,*)'In new_linear_in_tau_FastBDRYL2GDiffusiveApprox, icase = -1'
+      CALL DoSTOP
     END IF
 
 !! fixed this in Feb 2010
     IF (iBdryP1_O > kProfLayer) THEN
-        iBdryP1_O = iBdryP1_O - iM*kProfLayer
+      iBdryP1_O = iBdryP1_O - iM*kProfLayer
     END IF
 
     rDiff    = (kThermalAngle*kPi/180.0)
     DO iFr = 1,kMaxPts
-        raCosDiff(iFr) = cos(rDiff)
+      raCosDiff(iFr) = cos(rDiff)
     END DO
           
 ! initalize raL2G,raL2Gm1
     DO iFr = 1,kMaxPts
-        raL2G(iFr)   = 0.0
-        raL2Gm1(iFr) = 0.0
+      raL2G(iFr)   = 0.0
+      raL2Gm1(iFr) = 0.0
     END DO
 
 ! calculate raL2Gm1 which is the L2G optical depth from TOA layer to ground
     DO iLay = iS0-1,1,-1
-        iL = iaRadLayer(iLay)
-    ! do not have to worry about fractional top layers here, 'cos abs coeffs are
-    ! for FULL layers! but have to worry about bottom layer!
-        IF (iLay /= 1) THEN
-            DO iFr = 1,kMaxPts
-                raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
-            END DO
-        ELSE
-            DO iFr=1,kMaxPts
-                raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)*rFracBot
-            END DO
+      iL = iaRadLayer(iLay)
+      ! do not have to worry about fractional top layers here, 'cos abs coeffs are
+      ! for FULL layers! but have to worry about bottom layer!
+      IF (iLay /= 1) THEN
+        DO iFr = 1,kMaxPts
+          raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
+        END DO
+      ELSE
+        DO iFr=1,kMaxPts
+          raL2Gm1(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)*rFracBot
+        END DO
         END IF
     END DO
 
@@ -564,112 +574,112 @@ CONTAINS
 ! do not have to worry about fractional top layers here, 'cos abs coeffs are
 ! for FULL layers!
     DO iFr=1,kMaxPts
-        raL2G(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
+      raL2G(iFr) = raL2Gm1(iFr) + raaOrigAbsCoeff(iFr,iL)
     END DO
 
 ! see subroutine flux_moment_slowloopLinearVaryT in rad_flux.f
-!      print *,iTemperVariation
-!      print *,9999,raFreq(1),raTemp(1)
+!     print *,iTemperVariation
+!     print *,9999,raFreq(1),raTemp(1)
           
 ! do top part of atmosphere, where we can use acos(3/5)
     IF ((iCase == 1)  .OR. (iCase == 2)) THEN
-    ! go from top of atmosphere to boundary
-        DO iLay=iS0,iBdryp1_O,-1
-            iL = iaRadLayer(iLay)
-            iLm1 = iaRadLayer(iLay-1)
-            rMPTemp = raVT1(iL)
+      ! go from top of atmosphere to boundary
+      DO iLay=iS0,iBdryp1_O,-1
+        iL = iaRadLayer(iLay)
+        iLm1 = iaRadLayer(iLay-1)
+        rMPTemp = raVT1(iL)
         ! do not have to worry about fractional top layers here, 'cos abs coeffs are
         ! for FULL layers! but have to worry about bottom layer!
-            IF (iLay == 2) THEN
-                rW = rFracBot
-            ELSE
-                rW = 1.0
-            END IF
-            DO iFr=1,kMaxPts
-            ! find the diffusive angles for the layer beneath
-                rAngleTr_m1       = exp(-raL2Gm1(iFr)/raCosDiff(iFr))
-                rAngleTr          = exp(-raL2G(iFr)/raCosDiff(iFr))
-                raAngleTr_m1(iFr) = rAngleTr_m1
-                raAngleTr(iFr)    = rAngleTr
-            ! get ready for the layer beneath
-                raL2G(iFr)   = raL2Gm1(iFr)
-                raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
-            END DO
-            CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1, &
+        IF (iLay == 2) THEN
+          rW = rFracBot
+        ELSE
+          rW = 1.0
+        END IF
+        DO iFr=1,kMaxPts
+          ! find the diffusive angles for the layer beneath
+          rAngleTr_m1       = exp(-raL2Gm1(iFr)/raCosDiff(iFr))
+          rAngleTr          = exp(-raL2G(iFr)/raCosDiff(iFr))
+          raAngleTr_m1(iFr) = rAngleTr_m1
+          raAngleTr(iFr)    = rAngleTr
+          ! get ready for the layer beneath
+          raL2G(iFr)   = raL2Gm1(iFr)
+          raL2Gm1(iFr) = raL2Gm1(iFr) - raaOrigAbsCoeff(iFr,iLm1)*rW
+        END DO
+        CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1, &
             raCosDiff,rFracTop, &
             iVary,raTemp)
-        !          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
+          ! print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
         END DO
     END IF
           
     IF ((iCase == 1) .OR. (iCase == 3)) THEN
-    ! go from boundary to ground, or iE
-    ! do bottom part of atmosphere ACCURATELY
+      ! go from boundary to ground, or iE
+      ! do bottom part of atmosphere ACCURATELY
 
-        IF (iE0 == 1) THEN
+      IF (iE0 == 1) THEN
         ! if iE0 == bottom layer, then go accurately all the way to the
         ! last-from-bottom layer in this loop, and then accurately add on the effects
         ! of the bottommost layer
-            iSecondEnd=2
-        ELSE
+        iSecondEnd=2
+      ELSE
         ! if iE0 <> bottom layer, then do radiative transfer all the way down to iE0
-            iSecondEnd=iE0
-        END IF
+        iSecondEnd=iE0
+      END IF
 
-        DO iFr=1,kMaxPts
-            rAngleTr = FindDiffusiveAngleExp(raL2G(iFr))
-            raFreqAngle(iFr) = rAngleTr
-        END DO
+      DO iFr=1,kMaxPts
+        rAngleTr = FindDiffusiveAngleExp(raL2G(iFr))
+        raFreqAngle(iFr) = rAngleTr
+      END DO
 
-        DO iLay=iBdry0,iSecondEnd,-1
-            iL      = iaRadLayer(iLay)
-            iLm1    = iaRadLayer(iLay-1)
-            rMPTemp = raVT1(iL)
+      DO iLay=iBdry0,iSecondEnd,-1
+        iL      = iaRadLayer(iLay)
+        iLm1    = iaRadLayer(iLay-1)
+        rMPTemp = raVT1(iL)
         ! do not have to worry about fractional top layers here, 'cos abs coeffs are
         ! for FULL layers! but have to worry about bottom layer
-            IF (iLay == 2) THEN
-                rW = rFracBot
-            ELSE
-                rW = 1.0
-            END IF
-            DO iFr=1,kMaxPts
-            ! find the diffusive angles for the layer beneath
-                rAngleTr_m1         = FindDiffusiveAngleExp(raL2Gm1(iFr))
-                raFreqAngle_m1(iFr) = rAngleTr_m1
-                rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1)
-                rAngleTr            = raFreqAngle(iFr)
-                rAngleTr            = exp(-raL2G(iFr)/rAngleTr)
-                raAngleTr_m1(iFr)   = rAngleTr_m1
-                raAngleTr(iFr)      = rAngleTr
-            ! get ready for the layer beneath
-                raL2G(iFr)       = raL2Gm1(iFr)
-                raL2Gm1(iFr)     = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
-                raFreqAngle(iFr) = raFreqAngle_m1(iFr)
-            ! raCosDiff(iFr)   = raFreqAngle(iFr)       ! returns cosine BUT THIS ANGLE TOO SMALL in WINDOW
-            ! raCosDiff(iFr)   = raFreqAngle(iFr)-0.05  ! returns cosine ADJUST THIS ANGLE, over compensates
-            ! raCosDiff(iFr)   = raFreqAngle(iFr)-0.1   ! returns cosine ADJUST THIS ANGLE, over compensates
-            ! raCosDiff(iFr)   = raFreqAngle(iFr)+0.1   ! returns cosine ADJUST THIS ANGLE, under compensates
-                raCosDiff(iFr)   = raFreqAngle(iFr)+0.05  ! returns cosine ADJUST THIS ANGLE, best ****
-                raCosDiff(iFr)   = min(max(raCosDiff(iFr),0.0),1.0)
-            END DO
-            CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1, &
+        IF (iLay == 2) THEN
+          rW = rFracBot
+        ELSE
+          rW = 1.0
+        END IF
+        DO iFr=1,kMaxPts
+          ! find the diffusive angles for the layer beneath
+          rAngleTr_m1         = FindDiffusiveAngleExp(raL2Gm1(iFr))
+          raFreqAngle_m1(iFr) = rAngleTr_m1
+          rAngleTr_m1         = exp(-raL2Gm1(iFr)/rAngleTr_m1)
+          rAngleTr            = raFreqAngle(iFr)
+          rAngleTr            = exp(-raL2G(iFr)/rAngleTr)
+          raAngleTr_m1(iFr)   = rAngleTr_m1
+          raAngleTr(iFr)      = rAngleTr
+          ! get ready for the layer beneath
+          raL2G(iFr)       = raL2Gm1(iFr)
+          raL2Gm1(iFr)     = raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
+          raFreqAngle(iFr) = raFreqAngle_m1(iFr)
+          ! raCosDiff(iFr)   = raFreqAngle(iFr)       ! returns cosine BUT THIS ANGLE TOO SMALL in WINDOW
+          ! raCosDiff(iFr)   = raFreqAngle(iFr)-0.05  ! returns cosine ADJUST THIS ANGLE, over compensates
+          ! raCosDiff(iFr)   = raFreqAngle(iFr)-0.1   ! returns cosine ADJUST THIS ANGLE, over compensates
+          ! raCosDiff(iFr)   = raFreqAngle(iFr)+0.1   ! returns cosine ADJUST THIS ANGLE, under compensates
+          raCosDiff(iFr)   = raFreqAngle(iFr)+0.05  ! returns cosine ADJUST THIS ANGLE, best ****
+          raCosDiff(iFr)   = min(max(raCosDiff(iFr),0.0),1.0)
+        END DO
+        CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1, &
             raCosDiff,1.0, &
             iVary,raTemp)
-        !          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
-        END DO
+          !          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)
+      END DO
 
-        IF (iSecondEnd == 2) THEN
+      IF (iSecondEnd == 2) THEN
         ! now do the bottommost layer, recalling its transmission = 1.0 always
-            iL          = iaRadLayer(1)
-            rMPTemp     = raVT1(iL)
-            rAngleTr_m1 = 1.0
-            DO iFr=1,kMaxPts
-                rAngleTr    = raFreqAngle(iFr)
-                rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
-                raAngleTr_m1(iFr) = rAngleTr_m1
-                raAngleTr(iFr)    = rAngleTr
-            END DO
-            CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1, &
+        iL          = iaRadLayer(1)
+        rMPTemp     = raVT1(iL)
+        rAngleTr_m1 = 1.0
+        DO iFr=1,kMaxPts
+          rAngleTr    = raFreqAngle(iFr)
+          rAngleTr    = exp(-raL2G(iFr)/rAngleTr)
+          raAngleTr_m1(iFr) = rAngleTr_m1
+          raAngleTr(iFr)    = rAngleTr
+        END DO
+        CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX_ang(raFreq,raaOrigAbsCoeff,iL,raTPressLevels,raVT1, &
             raCosDiff,rFracBot, &
             iVary,raTemp)
         !          print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raTPressLevels(iL),raCosDiff(1),raL2G(1)

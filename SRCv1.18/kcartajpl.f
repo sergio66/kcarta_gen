@@ -617,6 +617,11 @@ c compute the abs coeffs
      $                   iaQ11,iaQ12,raQ11,raQ12,
      $                   iaQ21,iaQ22,raQ21,raQ22)
 
+          IF (iaGases(iGas) .EQ. 2) THEN
+            CALL add_co2_wv_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness, 
+     $                                       daaDQ,daaDT,iDoDQ)		  		  
+          END IF
+
 c see if current gas ID needs nonLTE spectroscopy
           IF ((iChunk_DoNLTE .EQ. 1) .OR. (iChunk_DoNLTE .EQ. 3)) THEN
             CALL NLTEDriver(

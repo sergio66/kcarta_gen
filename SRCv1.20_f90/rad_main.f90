@@ -378,46 +378,54 @@ CONTAINS
 
     INTEGER :: iI,iL,iJ,iFr
     REAL :: raaTemp(kMaxPts,kMixFilRows),raJunk(kMaxPts)
-
+ 
     INTEGER :: iIOUN_USE,iJacT,iJacB
     REAL :: rDefaultColMult,raVTemp2(kMixFilRows)
-          
+    CHARACTER*50 FMT
+
+    FMT = '(A,I3,A,I3)'
+
     rDefaultColMult = kDefaultColMult
 
 !! remember we define iJacT,iJacB as radiating layer number wrt SURFACE
     IF  (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN
-    ! downlook instrument : radiation going UP to instrument, very easy
-        iJacT = kActualJacsT
-        iJacB = kActualJacsB
+      ! downlook instrument : radiation going UP to instrument, very easy
+      iJacT = kActualJacsT
+      iJacB = kActualJacsB
     ELSE
-    ! uplook instrument : radiation going DOWN to instrument
-    !! got to swap things
-        iJacT = iaNumlayer(iAtm)-kActualJacsB+1
-        iJacB = iaNumlayer(iAtm)-kActualJacsT+1
+      ! uplook instrument : radiation going DOWN to instrument
+      !! got to swap things
+      iJacT = iaNumlayer(iAtm)-kActualJacsB+1
+      iJacB = iaNumlayer(iAtm)-kActualJacsT+1
     END IF
         
-!! raaX = raaXO - raaGas + 1.1raaGas = = raaXO + 0.1raaGas
+!! raaX = raaXO - raaGas + 1.1raaGas = = raaXO + 0.1raaGas    
     DO iJ = 1,iJacob
-        write(kStdWarn,*) ' '
-        write(kStdWarn,*) ' ---> Doing rQj : ColJac for gas ',iaJacob(iJ)
-        DO iL = 1,iaNumLayer(iAtm)
-            iI = iaaRadLayer(iAtm,iL)
-            IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
-            !! remember we perturb layers WRT surface, so use iL in this if-then comparison
-                write(kStdWarn,*) 'Q(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-                DO iFr = 1,kMaxPts
-                    raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI) + &
-                    rDefaultColMult*raaaColDQ(iJ,iFr,iI)
-                END DO
-            ELSE
-            ! o need to perturb layer
-                DO iFr = 1,kMaxPts
-                    raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI)
-                END DO
-            END IF
-        END DO
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) ' ---> Doing rQj : ColJac for gas ',iaJacob(iJ)
+      DO iL = 1,iaNumLayer(iAtm)
+        iI = iaaRadLayer(iAtm,iL)
+        IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
+          !! remember we perturb layers WRT surface, so use iL in this if-then comparison
+          write(kStdWarn,FMT) 'Q(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
+	  
+	  !if (raFreq(1) > 2375) then
+  	  !  print *,'col dq rad',raFreq(4552),rDefaultColMult,raaaColDQ(iJ,4552,iI)
+	  !  call dostop
+	  !endif
+	  
+          DO iFr = 1,kMaxPts
+            raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI) + rDefaultColMult*raaaColDQ(iJ,iFr,iI)
+          END DO
+        ELSE
+          ! no need to perturb layer
+          DO iFr = 1,kMaxPts
+            raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI)
+          END DO
+        END IF
+      END DO
                 
-        CALL find_radiances(raFreq,-1, &
+      CALL find_radiances(raFreq,-1, &
         raaTemp,raVTemp,caJacobFile2, &
         iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &
         raTSpace(iAtm),raTSurf(iAtm),rSurfPress,raUseEmissivity, &
@@ -437,40 +445,40 @@ CONTAINS
     write(kStdWarn,*) ' '
     write(kStdWarn,*) ' ---> Doing rTz : Temp(z) Jacobian calcs ...'
     DO iL = 1,kMixFilRows
-        raVTemp2(iL) = raVTemp(iL)
+      raVTemp2(iL) = raVTemp(iL)
     END DO
 
 ! erturb the temperature of the necessary layers
     DO iL = 1,iaNumLayer(iAtm)
-        iI = iaaRadLayer(iAtm,iL)
-        IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
+      iI = iaaRadLayer(iAtm,iL)
+      IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
         !! remember we perturb layers WRT surface, so use iL in this if-then comparison
-            write(kStdWarn,*) 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-            raVTemp2(iI) = raVTemp(iI) + 1.0
-        ELSE
-        ! o need to perturb layer
-            raVTemp2(iI) = raVTemp(iI)
-        END IF
+        write(kStdWarn,FMT) 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
+        raVTemp2(iI) = raVTemp(iI) + 1.0
+      ELSE
+        ! no need to perturb layer
+        raVTemp2(iI) = raVTemp(iI)
+      END IF
     END DO
 
     write(kStdWarn,*) ' '
     write(kStdWarn,*) ' ---> ---------> also need to do d(OD(T(z)))/dT for gases '
     DO iL = 1,iaNumLayer(iAtm)
-        iI = iaaRadLayer(iAtm,iL)
-        IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
+      iI = iaaRadLayer(iAtm,iL)
+      IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
         !! remember we perturb layers WRT surface, so use iL in this if-then comparison
-            write(kStdWarn,*) 'dOD(z)/dT pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-            DO iFr = 1,kMaxPts
-            !! recall deltaT = 1 K (ie technically need to multiply raaAllDt(iFr,iI) by deltaT)
-                raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI) + raaAllDt(iFr,iI)
-            !            print *,iFr,iL,iI,raaTemp(iFr,iI),raaSumAbCoeff(iFr,iI),raaAllDt(iFr,iI),raVTemp2(iI),raVTemp(iI)
-            END DO
-        ELSE
-        ! o need to perturb layer
-            DO iFr = 1,kMaxPts
-                raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI)
-            END DO
-        END IF
+        write(kStdWarn,FMT) 'dOD(z)/dT pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
+        DO iFr = 1,kMaxPts
+          !! recall deltaT = 1 K (ie technically need to multiply raaAllDt(iFr,iI) by deltaT)
+          raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI) + raaAllDt(iFr,iI)
+          !! print *,iFr,iL,iI,raaTemp(iFr,iI),raaSumAbCoeff(iFr,iI),raaAllDt(iFr,iI),raVTemp2(iI),raVTemp(iI)
+        END DO
+      ELSE
+        ! no need to perturb layer
+        DO iFr = 1,kMaxPts
+          raaTemp(iFr,iI) = raaSumAbCoeff(iFr,iI)
+        END DO
+      END IF
     END DO
 
 ! recall r(v) =  sum(i=1,n) B(Ti,v) (1-tau(i,v))tau(i+1 --> n,v)
@@ -481,37 +489,37 @@ CONTAINS
 ! so           0      ==> use d/dT[{planck}{ (1-tau)(tauL2S) }] use all
 
     CALL find_radiances(raFreq,-1, &
-    raaTemp,raVTemp2,caJacobFile2, &
-    iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &
-    raTSpace(iAtm),raTSurf(iAtm),rSurfPress,raUseEmissivity, &
-    raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
-    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-    raSurface,raSun,raThermal,raSunRefl, &
-    raLayAngles,raSunAngles,iTag, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
-    raTPressLevels,iKnowTP, &
-    rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-    iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-    raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iChunk_DoNLTE, &
-    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
+      raaTemp,raVTemp2,caJacobFile2, &
+      iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &
+      raTSpace(iAtm),raTSurf(iAtm),rSurfPress,raUseEmissivity, &
+      raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
+      iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
+      raSurface,raSun,raThermal,raSunRefl, &
+      raLayAngles,raSunAngles,iTag, &
+      raThickness,raPressLevels,iProfileLayers,pProf, &
+      raTPressLevels,iKnowTP, &
+      rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
+      iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
+      raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iChunk_DoNLTE, &
+      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
 !! do the stemp jacobian radiance
     write(kStdWarn,*) ' '
     write(kStdWarn,*) ' ---> Doing rST : STemp Jacobian calcs ...'
     CALL find_radiances(raFreq,-1, &
-    raaSumAbCoeff,raVTemp,caJacobFile2, &
-    iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &
-    raTSpace(iAtm),raTSurf(iAtm)+1.0,rSurfPress,raUseEmissivity, &
-    raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
-    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-    raSurface,raSun,raThermal,raSunRefl, &
-    raLayAngles,raSunAngles,iTag, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
-    raTPressLevels,iKnowTP, &
-    rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-    iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-    raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iChunk_DoNLTE, &
-    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
+      raaSumAbCoeff,raVTemp,caJacobFile2, &
+      iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &
+      raTSpace(iAtm),raTSurf(iAtm)+1.0,rSurfPress,raUseEmissivity, &
+      raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
+      iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
+      raSurface,raSun,raThermal,raSunRefl, &
+      raLayAngles,raSunAngles,iTag, &
+      raThickness,raPressLevels,iProfileLayers,pProf, &
+      raTPressLevels,iKnowTP, &
+      rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
+      iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
+      raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iChunk_DoNLTE, &
+      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     write(kStdWarn,*) ' '
     RETURN

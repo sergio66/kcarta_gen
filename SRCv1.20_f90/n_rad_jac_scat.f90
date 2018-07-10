@@ -1093,7 +1093,9 @@ CONTAINS
     END IF
 
     IF (iJacob > 0) THEN
-    ! eventually make sure the right number of molecular ID's in the namelist
+      ! eventually make sure the right number of molecular ID's in the namelist
+      ! first sort the numbers
+      CALL DoSort(iaJacob,iJacob)
     ELSE IF (iJacob < 0) THEN
     ! use all gases upto kMaxDQ
         iJacob = kMaxDQ

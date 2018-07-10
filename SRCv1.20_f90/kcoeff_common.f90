@@ -749,31 +749,54 @@ CONTAINS
 ! Ha Tran told me no experimentally measured T dependance, no d(CA)/dT = 0; however the density changes with
 ! T since rho ~ P/RT so d(rho^2)/dT ~ -2P/RT^3
 
-    SUBROUTINE add_co2_wv_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness)
+    SUBROUTINE add_co2_wv_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness, &
+                                    daaDQ,daaDT,iDoDQ,iDoWVjac,daaDQWV,iYesNoCO2WVContinuum)
     
     IMPLICIT NONE
 
     include '../INCLUDE/kcartaparam.f90'
 
 ! input
-    INTEGER :: iGasID
+    INTEGER :: iGasID,iDoDQ,iDoWVjac
     REAL :: raFreq(kMaxPts)
     REAL :: raPress(kProfLayer),raaPartPress(kProfLayer,kGasStore),raTemp(kProfLayer)
     REAL :: raThickness(kProfLayer)
 ! input/output
+    INTEGER :: iYesNoCO2WVContinuum
     DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
+    DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
+    DOUBLE PRECISION :: daaDQWV(kMaxPtsJac,kProfLayerJac)    
+    DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
 
 ! local vars
+    DOUBLE PRECISION :: daaOD_continuum_WV_CO2(kMaxPts,kProfLayer)
     INTEGER :: iCO2Chi,iDefault,iI,iFr,iNumPts
     INTEGER :: iaChiChunks(kMaxGas),iChiChunks,iDoFudge
 
     INTEGER :: iIOUN,iERR
-    CHARACTER(120) :: FNAME
-    REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),rScale
-    REAL :: raXCO2(kProfLayer),raXWV(kprofLayer),raRho(kProfLayer)
+    CHARACTER(160) :: FNAME
+    REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),rScale,raQCO2(kProfLayer),raQWV(kProfLayer)
+    REAL :: raXCO2(kProfLayer),raXWV(kProfLayer),raRho(kProfLayer),raCO2MRdry(kProfLayer)
+    CHARACTER(80) :: FMT,FMT2
 
-    FNAME = '//home/sergio/SPECTRA/CKDLINUX/ca_wv_co2_forkcarta_2000_2900.dat'
+    iYesNoCO2WVContinuum = -1    !! assume no CO2/WV continuum added on
     
+!! see n_rtp.f90, SUBR READRTP_1B
+!! rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
+!! IF (iDownWard == -1) THEN
+!!    this automatically puts partial pressure in ATM, assuming
+!!    gas amount in kilomolecules/cm2, length in cm, T in kelvin
+!!    rPP  = rAmt*1.0e9*MGC*rT / (raThickness(j)*kAtm2mb*100.0)
+!!    --->> pp V = nRT ==> n/V L = q = pp L/RT ==> pp = q RT /L  indpt of dry or wet air
+
+    FNAME = '//home/sergio/SPECTRA/CKDLINUX/ca_wv_co2_forkcarta_2000_2900.dat'    
+    FNAME =  'ca_wv_co2_forkcarta_2000_2900.dat'
+    
+    FNAME = trim(kCKDPath) // trim(FNAME)
+
+    FMT  = '(I4,1X,E10.5,1X,E10.5,1X,F10.5,1X,F10.5,1X,E10.5,1X,E10.5,1X,E10.5,1X)'
+    FMT2 = '(I4,1X,E12.5,1X,E12.5,1X,E12.5,1X)'
+       
     iCO2Chi = 0  !!no continuum chi fixes applied .. with database being
     iCO2Chi = 2  !!default July 2018; only fixes 4um
 
@@ -785,16 +808,17 @@ CONTAINS
         CALL DoStop
     END IF
 
-    iCO2Chi = -1    !! testing
+!    iCO2Chi = -1    !! testing
 
  10   FORMAT(I2,I2,I2)
  999  FORMAT('CO2 chi fudge iDefault = ',I2,' iCO2Chi = ',I2,' kCO2_UMBCorHARTMAN = ',I2)
  
     IF (iGasID .EQ. 2 .and. iCO2Chi > 0 .and. (raFreq(1) >= 2355.0 .and. raFreq(1) <= 2805.0))  THEN
 
+      iYesNoCO2WVContinuum = +1
+      
       iIOUN = kTempUnit
-      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='UNFORMATTED', &
-          IOSTAT=IERR)
+      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='UNFORMATTED',IOSTAT=IERR)
       IF (IERR /= 0) THEN
         WRITE(kStdErr,*) 'In subroutine multiply_co2_wv_continuum'
         WRITE(kStdErr,1010) IERR, FNAME
@@ -811,35 +835,59 @@ CONTAINS
 
       !! get the abs coeff in cm-1, normalized by (rho)^2 Xco2 Xwv
       CALL rspl(raFChi,raChi,iNumPts,raFreq,raX,kMaxPts)
-      
-!      print *,-9999,raFChi(1),raChi(1),raFreq(1),raX(1)
-!      DO iI = 1,iNumPts
-!        print *,iI,iNumPts,raFChi(iI),raChi(iI)
-!      END DO
-!      DO iI = 1,kMaxPts,100
-!        print *,iI,raFreq(iI),raX(iI)
-!      END DO
-      
+            
       DO iI = 1,kProfLayer
-        raXWV(iI)  = raaPartPress(iI,1)/raPress(iI)      ! fraction of WV
-        raXCO2(iI) = raaPartPress(iI,2)/raPress(iI)      ! fraction of CO2
+        raXWV(iI)  = raaPartPress(iI,1)/raPress(iI)                               ! fraction of WV
+        raXCO2(iI) = raaPartPress(iI,2)/raPress(iI)                               ! fraction of CO2
+        raCO2MRDry(iI) = raaPartPress(iI,2)/(raPress(iI)-raaPartPress(iI,1))      ! MR dry of CO2
+	raQWV(iI)      = raaPartPress(iI,1) * kAtm2mb * 100 * raThickness(iI) /kMGC/raTemp(iI)/1e7    !! mol/m2 --> kmol/cm2	
+	raQCO2(iI)     = raaPartPress(iI,2) * kAtm2mb * 100 * raThickness(iI) /kMGC/raTemp(iI)/1e7    !! mol/m2 --> kmol/cm2
+	
 	!! now compute density in amagats
 	raRho(iI) = (raPress(iI) * kAtm2mb * 100)/(kMGC * raTemp(iI))*kAvog/1000.0   !! molecules/m3
 	raRho(iI) = raRho(iI)/1.0e6/2.6867805e19                                     !! amagat
 	
-        rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm	
-!        print *,iI,raXWV(iI),raXCO2(iI),raRho(iI),raThickness(iI),rScale,raX(1),daaAbsCoeff(1,iI)
+        rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm
+	
       END DO
 
       DO iI = 1,kProfLayer
         rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm
 	if (isfinite2(rScale) .EQ. .false. ) rScale = 0.0
         DO iFr = 1,kMaxPts
-	  daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + rScale*raX(iFr)
+	  daaOD_continuum_WV_CO2(iFr,iI) = rScale*raX(iFr)	
+	  daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + daaOD_continuum_WV_CO2(iFr,iI)
 	END DO
       END DO
+
+      write(kStdWarn,*) ' added on CO2/WV continuum at chunk starting at ',raFreq(1)
+      print *,' added on CO2/WV continuum at chunk starting at ',raFreq(1)      
+
+      !! now worry about jacobians
+      !! there is no T dependance
+      !! there only is Q dependance
+
+      !! Qco2 = Xco2 * qtot = raXCO2(iI) * (raRho(iI)*raThickness(iI)*100.0)
+      !! but to get tot number of molecules we need dry MR, and also remember raRho is in amagats so need to x1.0e6x2.6867805e25
+      !! Qco2 = Xdryco2 * qtot = raCO2MRdry(iI) * (raRho(iI)*raThickness(iI)*100.0)      
+      IF (iDoDQ >= -1) THEN
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+          write(kStdWarn,*) '   including CO2/WV continuum d/dq for gasID 2 in Jacob list using CO2/WV jac'	
+          write(kStdErr,*)  '   including CO2/WV continuum d/dq for gasID 2 in Jacob list using CO2/WV jac'
+          ! the gas amount jacobians
+          DO iI=1,kProfLayer
+!            write(kStdErr,FMT2) iI,raCO2MRdry(iI),(raRho(iI)*raThickness(iI)*100.0*raXCO2(iI)*1e6*2.6867805e25/kAvog),raQCO2(iI)
+!            write(kSTdErr,FMT2) iI,raThickness(iI),raCO2MRdry(iI),raQCO2(iI)	    
+            DO iFr=1,kMaxPts
+              daaDQ(iFr,iI)   = daaDQ(iFr,iI) + daaOD_continuum_WV_CO2(iFr,iI)/(raQCO2(iI))
+              daaDQWV(iFr,iI) =                 daaOD_continuum_WV_CO2(iFr,iI)/(raQWV(iI))	      
+            END DO
+          END DO
+        END IF
+      END IF
+!      call dostop
     END IF
-           
+
     RETURN
     end SUBROUTINE add_co2_wv_continuum
 
@@ -988,6 +1036,7 @@ CONTAINS
     INTEGER :: iDoFudge,iI,iJ,iK
     INTEGER :: iFr,iLay,iIOUN,iERR,iChi
     REAL :: raF(kMaxPts),raChi(kMaxPts),m,c,rF,rX,rChi,r1,r2,r3,rAmp,rAmp0
+    CHARACTER(50) :: FMT    
     CHARACTER(120) :: FNAME
     CHARACTER(3) :: ca3
     CHARACTER(4) :: ca4
@@ -1057,8 +1106,10 @@ CONTAINS
      
     CALL FindChiFileName(fname)
 
+    FMT = '(A,A80,A,F12.5)'
     IF (iChi > 0) THEN
-        write(kStdWarn,*) '   Reading in CO2 chifile ',fname
+        write(kStdWarn,FMT) ' UMBC CO2 : chifile ',fname,' for chunk ',rFileStartFr
+        write(kStdErr,FMT)  ' UMBC CO2 : chifile ',fname,' for chunk ',rFileStartFr	
         iIOUN = kTempUnit
         OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED', &
         IOSTAT=IERR)

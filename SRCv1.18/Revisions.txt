@@ -584,6 +584,13 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+7/6/2018       Added Tran et. al WV/CO2 continuum to the 4.3 um bandhead
+               See SUBROUTINE add_co2_wv_continuum in kcoeff_common.f90
+               The continuum has no temperature dependance so d/dT = 0; 
+	       
+	       It depends on path length, density^2, xCO2 and xWV where xi = mole fraction
+	         iaaOverrideDefault(1,9) = +2 keeps it on, can be overturned
+	       
 3/29/18        Cleaning up the NLTE routines. Made a H2016/400ppm version of weak background lines
                and first order linemix coeffs (as opposed to the ~H2004 or H2008 version we have
 	       been using). This meant that

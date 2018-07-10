@@ -98,20 +98,20 @@ CONTAINS
     CALL ckd_init(raAmt,iMin,iMax,daaCon,iLay,iFr,rFStep,kFrStep)
 
     IF (iMethod == 0) THEN
-    ! reads the oldstyle 2901 point lookup table which is fcn(fr,T)
-    ! old style, been using this for years
-        write (kStdWarn,*) ' WV cont : using Lookup Table (fr x T) format'
-        rConvFac = 1.0   !!! scale factor = 1 in the ORIG tables
-        CALL f_by_T_CKDfilereader(iGasID,iTag,iMin,iMax,iDoDQ, &
+      ! reads the oldstyle 2901 point lookup table which is fcn(fr,T)
+      ! old style, been using this for years
+      write (kStdWarn,*) ' WV cont : using Lookup Table (fr x T) format'
+      rConvFac = 1.0   !!! scale factor = 1 in the ORIG tables
+      CALL f_by_T_CKDfilereader(iGasID,iTag,iMin,iMax,iDoDQ, &
         rFStep,raFreq,kFrStep, &
         raTemp,daaDQ,daaDT,daaCon)
     ELSEIF (iMethod == 1) THEN
-    ! reads the Compressed Style lookup fcn(fr,T)
-    ! new style, since Sept 2011
-        write (kStdWarn,*) ' WV cont : using kCompressed Database format'
-        rConvFac = 1.0e-23    !! SELF/FORN continuum coeffs in compressed
-    !! database were remultiplied by 1.0e+23
-        CALL xCKDgases(iGasID,rFileStartFr,iTag,iActualTag, &
+      ! reads the Compressed Style lookup fcn(fr,T)
+      ! new style, since Sept 2011
+      write (kStdWarn,*) ' WV cont : using kCompressed Database format'
+      rConvFac = 1.0e-23    !! SELF/FORN continuum coeffs in compressed
+                              !! database were remultiplied by 1.0e+23
+      CALL xCKDgases(iGasID,rFileStartFr,iTag,iActualTag, &
         iRefLayer,iL,iU, &
         raAmt,raRAmt,raTemp,raRTemp, &
         iErr1,iDoDQ,pProf,iProfileLayers, &
@@ -124,7 +124,7 @@ CONTAINS
     END IF
 
     CALL aux_ckd(iMin,iMax,iGasID,raPress,raPartPress,raTemp,raAmt, &
-    raFreq,kFrStep,rConvFac,daaCon,daaTemp,daaDQ,daaDT,iDoDQ)
+                raFreq,kFrStep,rConvFac,daaCon,daaTemp,daaDQ,daaDT,iDoDQ)
 
     RETURN
     end SUBROUTINE AddContinuum
@@ -343,100 +343,100 @@ CONTAINS
 !        print *,iLay,raAmt(iLay),raPartPress(iLay),raPress(iLay)
 !      END DO
 !      CALL DoStop
-! so raAmt*kAvog*pressyre is in molecules/cm2*atm
+! so raAmt*kAvog*pressure is in molecules/cm2*atm
 ! so CX * v tanh(hcv/2KT) * raAmt*kAvog*pressure = [(molecules/cm2 1/cm-1)-1 1/atm] [cm-1] [molecules/cm2*atm] = OD no units
 
     rMin=1.0e10
     rECCount=0.0
     DO iLay=iMin,iMax
-        DO iFr=1,kMaxPts
-            IF (daaCon(iFr,iLay) < 0.0) THEN
-            !            write(kStdWarn,*) 'continuum < 0 for iGasID,ilay,iFr',
-            !     $                         iGasID,iLay,iFr,daaCon(iFr,iLay)
-                daaCon(iFr,iLay) = 0.0
-                rECCount = rECCount + 1.0
-                IF (daaCon(iFr,iLay) < rMin) THEN
-                    rMin = daaCon(iFr,iLay)
-                END IF
-            END IF
-        END DO
+      DO iFr=1,kMaxPts
+        IF (daaCon(iFr,iLay) < 0.0) THEN
+          ! write(kStdWarn,*) 'continuum < 0 for iGasID,ilay,iFr',
+          !                    iGasID,iLay,iFr,daaCon(iFr,iLay)
+          daaCon(iFr,iLay) = 0.0
+          rECCount = rECCount + 1.0
+          IF (daaCon(iFr,iLay) < rMin) THEN
+            rMin = daaCon(iFr,iLay)
+          END IF
+        END IF
+      END DO
     END DO
     IF (rECCount > 0) THEN
-        write(kStdWarn,*) ' >>> WARNING !!! Continuum for iGasID ',iGasID,' < 0 for ',int(rECCount),' points'
+      write(kStdWarn,*) ' >>> WARNING !!! Continuum for iGasID ',iGasID,' < 0 for ',int(rECCount),' points'
     END IF
 
 ! add the continuum abs coeffs to the k-compressed coeffs raaCon = daaTemp
 ! keeping track of whether the added values are all greater than 0.0
     IF (iGasID == kNewGasLo) THEN      !CSelf
-        DO iLay =iMin,iMax
-            raMult(iLay)=raAmt(iLay)*kAvog*raPartPress(iLay)
-        END DO
+      DO iLay =iMin,iMax
+        raMult(iLay)=raAmt(iLay)*kAvog*raPartPress(iLay)
+      END DO
     ELSEIF (iGasID == kNewGasHi) THEN      !CFor
-        DO iLay =iMin,iMax
-            raMult(iLay)=raAmt(iLay)*kAvog*(raPress(iLay)-raPartPress(iLay))
-        END DO
+      DO iLay =iMin,iMax
+        raMult(iLay)=raAmt(iLay)*kAvog*(raPress(iLay)-raPartPress(iLay))
+      END DO
     END IF
 
     DO iLay =iMin,iMax
-        a1 = raMult(iLay)*296.0/raTemp(iLay)
-        a2 = kPlanck2/2/raTemp(iLay)
-        DO iFr=1,kMaxPts
-            daaTemp(iFr,iLay) = rConvFac * daaCon(iFr,iLay)*a1*raFreq(iFr)* &
-            tanh(a2*raFreq(iFr))
-        END DO
+      a1 = raMult(iLay)*296.0/raTemp(iLay)
+      a2 = kPlanck2/2/raTemp(iLay)
+      DO iFr=1,kMaxPts
+        daaTemp(iFr,iLay) = rConvFac * daaCon(iFr,iLay)*a1*raFreq(iFr)* &
+        tanh(a2*raFreq(iFr))
+      END DO
     END DO
 
     IF (rECCount > 0.5) THEN
-        rEC=rEC/rECCount
-        write(kStdWarn,*)'Error in CKD data!!! Some values negative!!!'
-        write(kStdWarn,*)'and reset to 0.0'
-        write(kStdWarn,*) rECCount,' values have avg value ',rEC
-        write(kStdWarn,*) 'min negative value in 10000*100 = ',rMin
-        IF (abs(rMin) > 1.0e-7) THEN
-            iErr=1
-            write(kStdErr,*)'Error in CKD data!!! Some values negative!!!'
-            CALL DoSTOP
-        END IF
+      rEC=rEC/rECCount
+      write(kStdWarn,*)'Error in CKD data!!! Some values negative!!!'
+      write(kStdWarn,*)'and reset to 0.0'
+      write(kStdWarn,*) rECCount,' values have avg value ',rEC
+      write(kStdWarn,*) 'min negative value in 10000*100 = ',rMin
+      IF (abs(rMin) > 1.0e-7) THEN
+        iErr=1
+         write(kStdErr,*)'Error in CKD data!!! Some values negative!!!'
+        CALL DoSTOP
+      END IF
     END IF
-
+    
     IF (iDoDQ >= -1) THEN
-        IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+      IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
 
         ! the gas amount jacobians
-            IF (iGasID == 101) THEN   !!!there is a factor of 2
-                DO iLay=iMin,iMax
-                    DO iFr=1,kMaxPts
-                        daaDQ(iFr,iLay) = 2 * daaTemp(iFr,iLay)/raAmt(iLay)
-                    END DO
-                END DO
-            ELSEIF (iGasID == 102) THEN
-                DO iLay=iMin,iMax
-                    DO iFr=1,kMaxPts
-                        daaDQ(iFr,iLay) = daaTemp(iFr,iLay)/raAmt(iLay)
-                    END DO
-                END DO
-            END IF
+        IF (iGasID == 101) THEN   !!!there is a factor of 2
+          DO iLay=iMin,iMax
+            DO iFr=1,kMaxPts
+              daaDQ(iFr,iLay) = 2 * daaTemp(iFr,iLay)/raAmt(iLay)
+            END DO
+          END DO
+        ELSEIF (iGasID == 102) THEN
+          DO iLay=iMin,iMax
+            DO iFr=1,kMaxPts
+              daaDQ(iFr,iLay) = daaTemp(iFr,iLay)/raAmt(iLay)
+            END DO
+          END DO
         END IF
+      END IF
          
-        IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+      IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
         (kActualJacs == 32) .OR. &
         (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
         ! this is the temperature jacobian
-            DO iLay=iMin,iMax
-                DO iFr=1,kMaxPts
-                    doop = tanh(kPlanck2*raFreq(iFr)/2/raTemp(iLay))
-                    der1 = -(296/raTemp(iLay)**2)* doop
-                    der1 = der1-(296*kPlanck2*raFreq(iFr)/2/(raTemp(iLay)**3))/ &
-                    (cosh(kPlanck2*raFreq(iFr)/2/raTemp(iLay))**2)
-                    der1 = der1*daaCon(iFr,iLay)
+        DO iLay=iMin,iMax
+          DO iFr=1,kMaxPts
+            doop = tanh(kPlanck2*raFreq(iFr)/2/raTemp(iLay))
+            der1 = -(296/raTemp(iLay)**2)* doop
+            der1 = der1-(296*kPlanck2*raFreq(iFr)/2/(raTemp(iLay)**3))/ &
+                   (cosh(kPlanck2*raFreq(iFr)/2/raTemp(iLay))**2)
+            der1 = der1*daaCon(iFr,iLay)
 
-                    der2 = (296/raTemp(iLay))* doop
-                    der2 = der2*daaDT(iFr,iLay)
+            der2 = (296/raTemp(iLay))* doop
+            der2 = der2*daaDT(iFr,iLay)
 
-                    daaDT(iFr,iLay) = raMult(iLay)*raFreq(iFr)*(der1+der2)*rConvFac
-                END DO
-            END DO
-        END IF
+            daaDT(iFr,iLay) = raMult(iLay)*raFreq(iFr)*(der1+der2)*rConvFac
+          END DO
+        END DO
+      END IF
 
     END IF
 
@@ -496,56 +496,56 @@ CONTAINS
 
 ! for each freq point in raFreq, find where nearest low CKD freq grid point is
     DO iFr=1,kMaxPts
-        iaFrIndex(iFr)=1 + iFloor(real((raFreq(iFr)-d1)/df))
-        daFrDelta(iFr)=raFreq(iFr)*1d0-(d1+(iaFrIndex(iFr)-1)*df)
+      iaFrIndex(iFr)=1 + iFloor(real((raFreq(iFr)-d1)/df))
+      daFrDelta(iFr)=raFreq(iFr)*1d0-(d1+(iaFrIndex(iFr)-1)*df)
     END DO
 
 ! for each layer temp, find where the nearest low CKD tempr grid point is
     DO iLay=iMin,iMax
-        iaTempIndex(iLay)=1 + iFloor(real((raTemp(iLay)-daTemprt(1))/dTemp))
+      iaTempIndex(iLay)=1 + iFloor(real((raTemp(iLay)-daTemprt(1))/dTemp))
     END DO
 
     IF (iDoDQ < -1) THEN         !no need to do temp jacobians
-        IF (iGasID == kNewGasLo) THEN
-        ! elf continuum has temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
-                     
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
-                    y3=daaCKD(iL+1,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
+      IF (iGasID == kNewGasLo) THEN
+       ! self continuum has temp dependance
+       DO iLay=iMin,iMax
+         iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
+         DO iFr=1,kMaxPts
+           iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
+                    
+           y2=daaCKD(iL,iF) + &
+           daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+           y3=daaCKD(iL+1,iF) + &
+           daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
                               
-                ! ind out line that goes thru the 2 "x(j)" points to give "y(j)"
-                    x2 = daTemprt(iL)
-                    x3 = daTemprt(iL+1)
+           !find out line that goes thru the 2 "x(j)" points to give "y(j)"
+           x2 = daTemprt(iL)
+           x3 = daTemprt(iL+1)
 
-                    a = (y3-y2)/(x3-x2)
-                    b = y3-a*x3
+           a = (y3-y2)/(x3-x2)
+           b = y3-a*x3
 
-                    x = raTemp(iLay)
-                    daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
+           x = raTemp(iLay)
+           daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
 
-                END DO
-            END DO
+         END DO
+       END DO
 
-        ELSEIF (iGasID == kNewGasHi) THEN
-        ! oreign continuum has no temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
+     ELSEIF (iGasID == kNewGasHi) THEN
+       ! foreign continuum has no temp dependance
+       DO iLay=iMin,iMax
+         iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
+         DO iFr=1,kMaxPts
+           iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
 
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
-                    y3=daaCKD(iL+1,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
+           y2=daaCKD(iL,iF) + &
+           daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+           y3=daaCKD(iL+1,iF) + &
+           daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
                               
-                ! ind out line that goes thru the 2 "x(j)" points to give "y(j)"
-                    x2 = daTemprt(iL)
-                    x3 = daTemprt(iL+1)
+           !find out line that goes thru the 2 "x(j)" points to give "y(j)"
+           x2 = daTemprt(iL)
+           x3 = daTemprt(iL+1)
 
                     a = (y3-y2)/(x3-x2)
                     b = y3-a*x3
@@ -558,66 +558,66 @@ CONTAINS
         END IF
 
     ELSE          !!!!!!!!!do the temp jacobians
-        IF (iGasID == kNewGasLo) THEN
-        ! elf continuum has temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
+      IF (iGasID == kNewGasLo) THEN
+        !self continuum has temp dependance
+        DO iLay=iMin,iMax
+          iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
+          DO iFr=1,kMaxPts
+            iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
                      
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
-                    y3=daaCKD(iL+1,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
+            y2=daaCKD(iL,iF) + &
+               daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+            y3=daaCKD(iL+1,iF) + &
+               daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
                               
-                ! ind quadratic that goes thru the 2 "x(j)" points to give "y(j)"
-                    x2 = daTemprt(iL)
-                    x3 = daTemprt(iL+1)
+            !find quadratic that goes thru the 2 "x(j)" points to give "y(j)"
+             x2 = daTemprt(iL)
+             x3 = daTemprt(iL+1)
 
-                    a = (y3-y2)/(x3-x2)
-                    b = y3-a*x3
+             a = (y3-y2)/(x3-x2)
+             b = y3-a*x3
 
-                    x = raTemp(iLay)
-                    daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
-                    daaDT(iFr,iLay)  = a           !this is temp jacobian!
+             x = raTemp(iLay)
+             daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
+             daaDT(iFr,iLay)  = a           !this is temp jacobian!
 
-                END DO
-            END DO
+           END DO
+          END DO
 
         ELSEIF (iGasID == kNewGasHi) THEN
-        ! oreign continuum has no temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
+          !foreign continuum has no temp dependance
+          DO iLay=iMin,iMax
+            iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
+            DO iFr=1,kMaxPts
+              iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
 
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
-                    y3=daaCKD(iL+1,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
+              y2=daaCKD(iL,iF) + &
+                 daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+              y3=daaCKD(iL+1,iF) + &
+                 daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
                               
-                ! ind quadratic that goes thru the 2 "x(j)" points to give "y(j)"
-                    x2 = daTemprt(iL)
-                    x3 = daTemprt(iL+1)
+              !find quadratic that goes thru the 2 "x(j)" points to give "y(j)"
+              x2 = daTemprt(iL)
+              x3 = daTemprt(iL+1)
 
-                    a = (y3-y2)/(x3-x2)
-                    b = y3-a*x3
+              a = (y3-y2)/(x3-x2)
+              b = y3-a*x3
 
-                    x = raTemp(iLay)
-                    daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
-                    daaDT(iFr,iLay)  = a           !this is temp jacobian!
-                      
-                END DO
+              x = raTemp(iLay)
+              daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
+              daaDT(iFr,iLay)  = a           !this is temp jacobian!
+                    
             END DO
+          END DO
         END IF
     END IF
 
     IF (iMult > 0) THEN
-        DO iLay = iMin,iMax
-            DO iFr = 1,kMaxPts
-                daaCon(iFr,iLay) = daaCon(iFr,iLay) * daaCKD1Mult(iFr,iLay)
-            END DO
+      DO iLay = iMin,iMax
+        DO iFr = 1,kMaxPts
+          daaCon(iFr,iLay) = daaCon(iFr,iLay) * daaCKD1Mult(iFr,iLay)
         END DO
+      END DO
     END IF
 
     RETURN
@@ -661,98 +661,98 @@ CONTAINS
 
 ! for each freq point in raFreq, find where nearest low CKD freq grid point is
     DO iFr=1,kMaxPts
-        iaFrIndex(iFr)=1 + iFloor(real((raFreq(iFr)-d1)/df))
-        daFrDelta(iFr)=raFreq(iFr)*1d0-(d1+(iaFrIndex(iFr)-1)*df)
+      iaFrIndex(iFr)=1 + iFloor(real((raFreq(iFr)-d1)/df))
+      daFrDelta(iFr)=raFreq(iFr)*1d0-(d1+(iaFrIndex(iFr)-1)*df)
     END DO
 
 ! for each layer temp, find where the nearest low CKD tempr grid point is
     DO iLay=iMin,iMax
-        iaTempIndex(iLay)=1 + iFloor(real((raTemp(iLay)-daTemprt(1))/dTemp))
+      iaTempIndex(iLay)=1 + iFloor(real((raTemp(iLay)-daTemprt(1))/dTemp))
     END DO
 
     IF (iDoDQ < -1) THEN         !no need to do temp jacobians
-        IF (iGasID == kNewGasLo) THEN
-        ! elf continuum has temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
+      IF (iGasID == kNewGasLo) THEN
+        !self continuum has temp dependance
+          DO iLay=iMin,iMax
+            iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
+            DO iFr=1,kMaxPts
+              iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
                      
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
-                    y3=daaCKD(iL+1,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
+              y2=daaCKD(iL,iF) + &
+                 daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+              y3=daaCKD(iL+1,iF) + &
+                 daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
                               
-                ! ind out line that goes thru the 2 "x(j)" points to give "y(j)"
-                    x2 = daTemprt(iL)
-                    x3 = daTemprt(iL+1)
+              !find out line that goes thru the 2 "x(j)" points to give "y(j)"
+              x2 = daTemprt(iL)
+              x3 = daTemprt(iL+1)
 
-                    a = (y3-y2)/(x3-x2)
-                    b = y3-a*x3
+               a = (y3-y2)/(x3-x2)
+               b = y3-a*x3
 
-                    x = raTemp(iLay)
-                    daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
+               x = raTemp(iLay)
+               daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
 
-                END DO
-            END DO
+             END DO
+           END DO
 
         ELSEIF (iGasID == kNewGasHi) THEN
-        ! oreign continuum has no temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
+          !foreign continuum has no temp dependance
+          DO iLay=iMin,iMax
+            iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
+            DO iFr=1,kMaxPts
+              iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
                      
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+              y2=daaCKD(iL,iF) + &
+                 daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
                               
-                    daaCon(iFr,iLay)=y2    !this is temp dependance!
-                      
-                END DO
+              daaCon(iFr,iLay)=y2    !this is temp dependance!
+                    
+              END DO
             END DO
         END IF
 
     ELSE          !!!!!!!!!do the temp jacobians
         IF (iGasID == kNewGasLo) THEN
-        ! elf continuum has temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
+          !self continuum has temp dependance
+           DO iLay=iMin,iMax
+             iL=iaTempIndex(iLay)!closest temp index lower than raTemp(iLay)
+             DO iFr=1,kMaxPts
+               iF=iaFrIndex(iFr)   !closest freq index lower than raFreq(iFr)
                      
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
-                    y3=daaCKD(iL+1,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
+               y2=daaCKD(iL,iF) + &
+                  daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+               y3=daaCKD(iL+1,iF) + &
+                  daFrDelta(iFr)*(daaCKD(iL+1,iF+1)-daaCKD(iL+1,iF))/df
                               
-                ! ind quadratic that goes thru the 2 "x(j)" points to give "y(j)"
-                    x2 = daTemprt(iL)
-                    x3 = daTemprt(iL+1)
+                !find quadratic that goes thru the 2 "x(j)" points to give "y(j)"
+                x2 = daTemprt(iL)
+                x3 = daTemprt(iL+1)
 
-                    a = (y3-y2)/(x3-x2)
-                    b = y3-a*x3
+                a = (y3-y2)/(x3-x2)
+                b = y3-a*x3
 
-                    x = raTemp(iLay)
-                    daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
-                    daaDT(iFr,iLay)  = a           !this is temp jacobian!
+                x = raTemp(iLay)
+                daaCon(iFr,iLay) = a*x + b     !this is temp dependance!
+                daaDT(iFr,iLay)  = a           !this is temp jacobian!
 
-                END DO
+              END DO
             END DO
 
         ELSEIF (iGasID == kNewGasHi) THEN
-        ! oreign continuum has no temp dependance
-            DO iLay=iMin,iMax
-                iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
-                DO iFr=1,kMaxPts
-                    iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
+          !foreign continuum has no temp dependance
+          DO iLay=iMin,iMax
+            iL=iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
+            DO iFr=1,kMaxPts
+              iF=iaFrIndex(iFr)   !closest freq indexlower than raFreq(iFr)
                      
-                    y2=daaCKD(iL,iF) + &
-                    daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
+              y2=daaCKD(iL,iF) + &
+                 daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
                               
-                    daaCon(iFr,iLay)=y2    !this is temp dependance!
-                    daaDT(iFr,iLay)=0.0d0  !this is temp jacobian!
-                      
-                END DO
+              daaCon(iFr,iLay)=y2    !this is temp dependance!
+              daaDT(iFr,iLay)=0.0d0  !this is temp jacobian!
+                     
+              END DO
             END DO
         END IF
     END IF

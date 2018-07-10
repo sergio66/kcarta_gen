@@ -1216,18 +1216,18 @@ CONTAINS
     INTEGER :: iLay,iFr
 
     IF (iDoAdd > 0) THEN
-        DO iLay = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-            !          raaaGasAbCoeff(iCount,iFr,iLay) = real(daaGasAbCoeff(iFr,iLay))
-                raaaGasAbCoeff(iCount,iFr,iLay) = daaGasAbCoeff(iFr,iLay)
-            END DO
+      DO iLay = 1,kProfLayerJac
+        DO iFr = 1,kMaxPtsJac
+          !raaaGasAbCoeff(iCount,iFr,iLay) = real(daaGasAbCoeff(iFr,iLay))
+          raaaGasAbCoeff(iCount,iFr,iLay) = daaGasAbCoeff(iFr,iLay)
         END DO
+      END DO
     ELSEIF (iDoAdd <= 0) THEN
-        DO iLay = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-                raaaGasAbCoeff(iCount,iFr,iLay) = 0.0
-            END DO
+      DO iLay = 1,kProfLayerJac
+        DO iFr = 1,kMaxPtsJac
+          raaaGasAbCoeff(iCount,iFr,iLay) = 0.0
         END DO
+      END DO
     END IF
 
     RETURN
