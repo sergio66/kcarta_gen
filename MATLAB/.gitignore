@@ -1,4 +1,3 @@
-#
 # kcarta top-level git ignore file
 #
 # The top-level ignore does two things--it sets general exclusions
@@ -10,3 +9,12 @@ readkcstdx_v118_oldcode.m
 *.dat
 CLUSTER
 CLUSTER/*
+
+EMISSIVITYx
+GLATM/
+LBLRTM/
+REFLECTIVITYx
+TAPE5_mcclatchey_orig
+TAPE5x
+junk_levels.prf
+readkcBasic.c

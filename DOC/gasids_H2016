@@ -148,11 +148,11 @@ XSEC GASES (* denotes in LBLRTM (see Table II in
 %%% 64-74 requested by Evan Fishbein, 28 June 2010
   64 C2F6            hexafluoroethane
   65 CHCl2CF3        HCFC-123
-  66 : CHCLFCF3      HCFC 124 ------> [CHCl2C2F5 NONONO XXXXX]
-  67 : CH3CCL2F      HCFC-141b -----> CCl2FCH3
-  68 : CH3CCLF2      HCFC-142b -----> CH3CClF2
-  69 : CHCL2CF2CF3   HCFC-225ca ----> C3HCl2F5
-  70 : CCLF2CF2CHCLF HCFC-225cb ----> C3HCl2F5
+  66 CHCLFCF3        HCFC 124 ------> [CHCl2C2F5 NONONO XXXXX]
+  67 CH3CCL2F        HCFC-141b -----> CCl2FCH3
+  68 CH3CCLF2        HCFC-142b -----> CH3CClF2
+  69 CHCL2CF2CF3     HCFC-225ca ----> C3HCl2F5
+  70 CCLF2CF2CHCLF   HCFC-225cb ----> C3HCl2F5
   71 CH2F2           HFC-32
   72 CFH2CF3         HFC-134a * (I had mistakenly called this CHF2CF3) 
   73 CF3CH3          HFC-143a

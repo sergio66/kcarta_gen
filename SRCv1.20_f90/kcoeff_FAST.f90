@@ -421,7 +421,7 @@ CONTAINS
         write(kStdErr,*) (raP1(iI),iI=1,kProfLayer)
         write(kStdErr,*) 'raP2 =  '
         write(kStdErr,*) (raP2(iI),iI=1,kProfLayer)
-        write(kStdErr,*) 'need iaP1(iL) or iaP2(iL) == iL',iL,iaP1(iL),iaP2(iL)
+        write(kStdErr,*) 'need iL = ',iL,' to equal iaP1(iL) or iaP2(iL)',iaP1(iL),iaP2(iL)
         Call DoStop
     END IF
 

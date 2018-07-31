@@ -4,3 +4,9 @@ UNUSED
 OLD_CONT_BLOCKDATA_AND_XSEC
 SAFE_klines_July15
 ugh
+
+diff_kcarta_results.txt
+diff_kcarta_results.txt_chepplegood_verifiedbad
+fixcon
+oldkcartaparallel.f
+oldkcartaparallel.f90

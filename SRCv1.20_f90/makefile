@@ -14,6 +14,18 @@ $(info IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doin
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16
 	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16
 
+400_G15_NLTEH16_f90:
+	make -f Makefile_v120_Intelf90 datafix400_G2015_NLTEH2016
+	cp_param_files_to_f90.sc
+	make -f Makefile_v120_Intelf90 basic
+	make -f Makefile_v120_Intelf90 basicTXT	
+	make -f Makefile_v120_Intelf90 scat
+	make -f Makefile_v120_Intelf90 parallel	
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_G15
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_G15
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_G15
+	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_G15
+
 400_H16_NLTEH08_f90:
 	make -f Makefile_v120_Intelf90 datafix400_H2016_NLTEH2008
 	cp_param_files_to_f90.sc

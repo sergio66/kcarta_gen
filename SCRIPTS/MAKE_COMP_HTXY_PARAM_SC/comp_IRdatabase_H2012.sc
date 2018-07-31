@@ -6,7 +6,14 @@
 
 ### WARNING (1) : 
 ### look at kcarta.param and set correct paths to kWaterPath,kCompPath
- 
+
+echo "mkdir PARAM_HT2012 and edit so all reference to H2008 are change to H2012"
+echo "mkdir PARAM_HT2012 and edit so all reference to H2008 are change to H2012"
+echo "mkdir PARAM_HT2012 and edit so all reference to H2008 are change to H2012"
+echo "mkdir PARAM_HT2012 and edit so all reference to H2008 are change to H2012"
+read -rsp $'Press any key to continue...\n' -n1 key
+read -p "Press [Enter] key to continue ..."
+
 shome=`pwd`
 
 #first do the water
