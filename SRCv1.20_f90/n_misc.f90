@@ -260,7 +260,7 @@ CONTAINS
     iaaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
                                     !!!   in clear_scatter_misc.f
     iaaOverrideDefault(1,8) = -1    !!! -1 to keep h.vcmin/h.vcmax as read in from RTPfile, +1 to override with rf1,rf2
-    iaaOverrideDefault(1,9) =  0    !!! iCO2WVCA = +2 will turn it on for SUBR add_co2_wv_continuum in kcoeffMAIN.f/kcoeff_common.f90
+    iaaOverrideDefault(1,9) =  0    !!! iCO2WVCA = +2 will turn it on for SUBR add_co2_wv_n2_continuum in kcoeffMAIN.f/kcoeff_common.f90
     
 ! RadTrans
     iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary

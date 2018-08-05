@@ -172,14 +172,14 @@ CONTAINS
     INTEGER :: IERR,I,J,K,RESORT,IHOLD
     REAL :: rTemp
 
-    1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
-    OPEN(UNIT=iIOUN,FILE=FNAM,STATUS='OLD',FORM='UNFORMATTED', &
-    IOSTAT=IERR)
-    IF (IERR /= 0) THEN
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
+      OPEN(UNIT=iIOUN,FILE=FNAM,STATUS='OLD',FORM='UNFORMATTED', &
+      IOSTAT=IERR)
+      IF (IERR /= 0) THEN
         WRITE(kStdErr,*) 'In subroutine RDCOMPWATER'
         WRITE(kStdErr,1010) IERR, FNAM
         CALL DoSTOP
-    ENDIF
+      ENDIF
     kCompUnitOpen=1
 
 !     Read in the header
@@ -745,7 +745,49 @@ CONTAINS
 !    the spectral region beyond the CO2 ν3-band head : H. Tran, M. Turbet,
 !    P. Chelin, X. Landsheere, Icarus 306 (2018) 116–121
 !
-! od ~ rho^2 xco2 xwv L CA   wheo rho = denisity in amagat, xco2/xwv are the mix ratios. L = path length of layer
+! od ~ rho^2 xco2 xwv L CA   wheo rho = density in amagat, xco2/xwv are the mix ratios. L = path length of layer
+! Ha Tran told me no experimentally measured T dependance, no d(CA)/dT = 0; however the density changes with
+! T since rho ~ P/RT so d(rho^2)/dT ~ -2P/RT^3
+
+    SUBROUTINE add_co2_wv_n2_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness, &
+                                    daaDQ,daaDT,iDoDQ,iDoWVjac,daaDQWV,iYesNoCO2WVContinuum)
+    
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! input
+    INTEGER :: iGasID,iDoDQ,iDoWVjac
+    REAL :: raFreq(kMaxPts)
+    REAL :: raPress(kProfLayer),raaPartPress(kProfLayer,kGasStore),raTemp(kProfLayer)
+    REAL :: raThickness(kProfLayer)
+! input/output
+    INTEGER :: iYesNoCO2WVContinuum
+    DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
+    DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
+    DOUBLE PRECISION :: daaDQWV(kMaxPtsJac,kProfLayerJac)    
+    DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
+
+    IF (((iaaOverrideDefault(1,9) .EQ. 2) .OR. (iaaOverrideDefault(1,9) .EQ. 6)) .AND. (iGasID .EQ. 2)) THEN
+      CALL add_co2_wv_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness, &
+                                    daaDQ,daaDT,iDoDQ,iDoWVjac,daaDQWV,iYesNoCO2WVContinuum)
+    END IF
+    
+    IF (((iaaOverrideDefault(1,9) .EQ. 4) .OR. (iaaOverrideDefault(1,9) .EQ. 6)) .AND. (iGasID .EQ. 22)) THEN
+      CALL add_wv_n2_CIA_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness, &
+                                    daaDQ,daaDT,iDoDQ,iDoWVjac,daaDQWV,iYesNoCO2WVContinuum)
+    END IF
+
+    RETURN
+    end SUBROUTINE add_co2_wv_n2_continuum
+
+!************************************************************************
+! this subroutine adds CO2/WV contunuum to CO2 OD
+! reference : Measurements and modeling of absorption by CO2+H2O mixtures in
+!    the spectral region beyond the CO2 ν3-band head : H. Tran, M. Turbet,
+!    P. Chelin, X. Landsheere, Icarus 306 (2018) 116–121
+!
+! od ~ rho^2 xco2 xwv L CA   where rho = density in amagat, xco2/xwv are the mix ratios. L = path length of layer
 ! Ha Tran told me no experimentally measured T dependance, no d(CA)/dT = 0; however the density changes with
 ! T since rho ~ P/RT so d(rho^2)/dT ~ -2P/RT^3
 
@@ -803,7 +845,7 @@ CONTAINS
     iDefault = 2
     iCO2Chi = 2    !!! DEFAULT
     iCO2Chi = iaaOverrideDefault(1,9)
-    IF ((iCO2Chi /= 0) .AND. (iCO2Chi /= 2)) THEN
+    IF ((iCO2Chi /= 0) .AND. (iCO2Chi /= 2) .AND. (iCO2Chi /= 6)) THEN
         write(kStdErr,*) 'invalid iCO2/WV Chi = ',iCO2Chi
         CALL DoStop
     END IF
@@ -861,7 +903,7 @@ CONTAINS
       END DO
 
       write(kStdWarn,*) ' added on CO2/WV continuum at chunk starting at ',raFreq(1)
-      print *,' added on CO2/WV continuum at chunk starting at ',raFreq(1)      
+      write(kStdErr,*)  ' added on CO2/WV continuum at chunk starting at ',raFreq(1)      
 
       !! now worry about jacobians
       !! there is no T dependance
@@ -890,6 +932,306 @@ CONTAINS
 
     RETURN
     end SUBROUTINE add_co2_wv_continuum
+
+!************************************************************************
+! this subroutine adds WV/N2 CIA to the N2 OD
+! ref : Effect of humiity on the absorption continua of CO2 and N2 near 4 um :
+!       calculations, comparisons with measurements, consequences on atmospheric spectra
+!       JM Hartmann, C. Boulet, D. Tran, H. Tran, Y. Baranov
+!       Journal of Chemical Phycis, v 148 pg 54304 (2018)
+!Also see /home/sergio/SPECTRA/CKDLINUX/N2_routines.f
+
+! od ~ rho xco2 xN2 L CA   where rho = density in amagat, xco2/xwv are the mix ratios. L = path length of layer
+
+    SUBROUTINE add_wv_n2_CIA_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness, &
+                                    daaDQ,daaDT,iDoDQ,iDoWVjac,daaDQWV,iYesNoWVN2Continuum)
+    
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! input
+    INTEGER :: iGasID,iDoDQ,iDoWVjac
+    REAL :: raFreq(kMaxPts)
+    REAL :: raPress(kProfLayer),raaPartPress(kProfLayer,kGasStore),raTemp(kProfLayer)
+    REAL :: raThickness(kProfLayer)
+! input/output
+    INTEGER :: iYesNoWVN2Continuum
+    DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
+    DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
+    DOUBLE PRECISION :: daaDQWV(kMaxPtsJac,kProfLayerJac)    
+    DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
+
+! local vars
+    DOUBLE PRECISION :: daaOD_continuum_WV_N2(kMaxPts,kProfLayer)
+    INTEGER :: iCO2Chi,iDefault,iI,iFr,iNumPts
+    INTEGER :: iaChiChunks(kMaxGas),iChiChunks,iDoFudge
+
+    INTEGER :: iIOUN,iERR
+    CHARACTER(160) :: FNAME
+    REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),rScale,raQCO2(kProfLayer),raQWV(kProfLayer)
+    REAL :: raXN2(kProfLayer),raXWV(kProfLayer),raRho(kProfLayer)
+    CHARACTER(80) :: FMT,FMT2
+
+!! see n_rtp.f90, SUBR READRTP_1B
+!! rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
+!! IF (iDownWard == -1) THEN
+!!    this automatically puts partial pressure in ATM, assuming
+!!    gas amount in kilomolecules/cm2, length in cm, T in kelvin
+!!    rPP  = rAmt*1.0e9*MGC*rT / (raThickness(j)*kAtm2mb*100.0)
+!!    --->> pp V = nRT ==> n/V L = q = pp L/RT ==> pp = q RT /L  indpt of dry or wet air
+
+! This part reads the data that enable calculations
+! of the N2-N2 and N2-H2O collision-induced absorptions
+! in the fundamental band of N2
+
+! These data have been generated as explained in the paper 
+! "Indirect influence of of humidity on atmospheric emission 
+!  and transmission spectra near 4 microns"
+
+! Creted by J-M Hartmann, March 2018
+! jmhartmann@lmd.polytechnique.fr
+
+! Number of tabulated values
+      INTEGER, PARAMETER :: NVAL=901   !!
+      INTEGER            :: I,iWhich
+      DOUBLE PRECISION, PARAMETER :: T0 = 273.16D0
+      DOUBLE PRECISION, PARAMETER :: TREF = 296.0D0      
+      
+      DOUBLE PRECISION :: SIGRF(NVAL),B0air(NVAL),BETA0air(NVAL),B0H2O(NVAL),BETA0H2O(NVAL)
+      REAL             :: T,PN2,PH2O,PTOT
+      
+      iIOUN = kTempUnit
+      
+! Open files and read data
+
+      FNAME = 'CT-N2.N2'
+      FNAME = trim(kCKDPath) // trim(FNAME)
+
+      kTempUnitOpen = 1      
+      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED',IOSTAT=IERR)
+      IF (IERR /= 0) THEN
+        WRITE(kStdErr,*) 'In subroutine multiply_wv_N2_continuum'
+        WRITE(kStdErr,1010) IERR, FNAME
+ 1010   FORMAT('ERROR! number ',I5,' opening data file (a) : ',/,A80)
+        CALL DoSTOP
+      ENDIF
+      
+! Read header then read data
+      DO I=1,11
+        READ(kTempUnit,*)
+      END DO
+      DO I=1,NVAL
+        READ(kTempUnit,*)SIGRF(I),B0air(I),BETA0air(I)
+      END DO
+      CLOSE(kTempUnit)
+      kTempUnitOpen = -1      
+
+      FNAME = 'CT-N2.H2O'
+      FNAME = trim(kCKDPath) // trim(FNAME)
+      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED',IOSTAT=iERR)
+      IF (IERR /= 0) THEN
+        WRITE(kStdErr,*) 'In subroutine multiply_wv_N2_continuum'
+        WRITE(kStdErr,1011) IERR, FNAME
+ 1011   FORMAT('ERROR! number ',I5,' opening data file (b) : ',/,A80)
+        CALL DoSTOP
+      ENDIF
+      
+! Read header then read data
+      DO I=1,11
+        READ(kTempUnit,*)
+      END DO
+      DO I=1,NVAL
+        READ(kTempUnit,*)SIGRF(I),B0H2O(I),BETA0H2O(I)
+      END DO
+      CLOSE(kTempUnit)
+      kTempUnitOpen = -1      
+
+    iYesNoWVN2Continuum = -1    !! assume no CO2/WV continuum added on
+    
+    iCO2Chi = 0  !!no continuum chi fixes applied .. with database being
+    iCO2Chi = 4  !!default July 2018; only fixes 4um
+
+    iDefault = 4
+    iCO2Chi = 4    !!! DEFAULT
+    iCO2Chi = iaaOverrideDefault(1,9)
+    IF ((iCO2Chi /= 0) .AND. (iCO2Chi /= 4) .AND. (iCO2Chi /= 6)) THEN
+        write(kStdErr,*) 'invalid iCO2/WV Chi = ',iCO2Chi
+        CALL DoStop
+    END IF
+
+!    iCO2Chi = -1    !! testing
+
+ 10   FORMAT(I2,I2,I2)
+ 999  FORMAT('CO2 chi fudge iDefault = ',I2,' iCO2Chi = ',I2,' kCO2_UMBCorHARTMAN = ',I2)
+
+    iWhich = +1   !! N2/WV + N2/N2
+    iWhich =  0   !! N2/N2 only
+    iWhich = -1   !! N2/WV only   >>>>>>>>>>>> use this
+    
+    IF (iGasID .EQ. 22 .and. iCO2Chi > 0 .and. (raFreq(1) >= 1930.0 .and. raFreq(1) <= 2805.0))  THEN
+
+      iYesNoWVN2Continuum = +1
+      
+      DO iI = 1,kProfLayer
+        rScale = raThickness(iI)*100.0      !! thickness m --> cm
+	if (isfinite2(rScale) .EQ. .false. ) rScale = 0.0
+        PH2O = raaPartPress(iI,1)
+        PN2  = raPress(iI) * 0.78	
+	PTOT = raPress(iI)
+	T    = raTemp(iI)
+	CALL CTN2_vect(raFreq,PN2,PH2O,PTOT,T,iWhich,       &
+	                     SIGRF,B0air,BETA0air,B0H2O,BETA0H2O, &
+  	                     raX)	
+        DO iFr = 1,kMaxPts
+	  daaOD_continuum_WV_N2(iFr,iI) = rScale*raX(iFr)	
+	  daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + daaOD_continuum_WV_N2(iFr,iI)
+	END DO
+      END DO
+
+      write(kStdWarn,*) ' added on N2/WV continuum at chunk starting at ',raFreq(1)
+      print *,' added on N2/WV continuum at chunk starting at ',raFreq(1)      
+
+      !! now worry about jacobians
+      !! there is no T dependance
+      !! there only is Q dependance
+
+      !! Qco2 = Xco2 * qtot = raXN2(iI) * (raRho(iI)*raThickness(iI)*100.0)
+      !! but to get tot number of molecules we need dry MR, and also remember raRho is in amagats so need to x1.0e6x2.6867805e25
+      !! Qco2 = Xdryco2 * qtot = raCO2MRdry(iI) * (raRho(iI)*raThickness(iI)*100.0)      
+      IF (iDoDQ >= -1) THEN
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+          write(kStdWarn,*) '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'	
+          write(kStdErr,*)  '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'
+	  write(kStdErr,*)  'oops please fix'
+	  call dostop
+          ! the gas amount jacobians
+          DO iI=1,kProfLayer
+!            write(kStdErr,FMT2) iI,raCO2MRdry(iI),(raRho(iI)*raThickness(iI)*100.0*raXN2(iI)*1e6*2.6867805e25/kAvog),raQCO2(iI)
+!            write(kSTdErr,FMT2) iI,raThickness(iI),raCO2MRdry(iI),raQCO2(iI)	    
+            DO iFr=1,kMaxPts
+              daaDQ(iFr,iI)   = daaDQ(iFr,iI) + daaOD_continuum_WV_N2(iFr,iI)/(raQCO2(iI))
+              daaDQWV(iFr,iI) =                 daaOD_continuum_WV_N2(iFr,iI)/(raQWV(iI))	      
+            END DO
+          END DO
+        END IF
+      END IF
+!      call dostop
+    END IF
+
+    RETURN
+    end SUBROUTINE add_wv_n2_CIA_continuum
+
+!************************************************************************
+	SUBROUTINE CTN2_vect(raFreq,PN2,PH2O,PTOT,T,iWhich,       &
+	                     SIGRF,B0air,BETA0air,B0H2O,BETA0H2O, &
+  	                     raCTN2)
+	
+! This routine computes the absorption coefficient in the collision
+! nnduced fundamental absorption band of N2 for air in the presence
+! of some humidity.using the data that have been read by Subroutine "LECN2"
+
+!     The arguments and their units are the following
+!  input        
+!    raFreq: wavenumber in units of "1/cm" (reciprocal centimeter)
+!    PN2  : partial pressure of N2 in units of "atm" (atmosphere)
+!    PH2O : partial pressure of H2O in units of "atm" (atmosphere)
+!    PTOT : total pressure in units of "atm" (atmosphere)
+!     T   : temperature in units of "K" (Kelvin)
+!  iWhich : +1 for N2/N2 and N2/WV and 0 for N2/N2 and [[-1 for N2/WV]]
+!  output        
+!    raCTN2   :  absorption coefficient for the considered conditions
+!           in units of "1/cm" (reciprocal centimeter). Hence, for
+!           an optical path of legth L, the transmission is
+!           trans = exp(-CTN2*L) where L has to be in centimeer units 
+
+! Important: if the nominal N2 vmr of 0.781 is used to compute
+! PN2, then PN2=0.781*(PTOT-PH2O) and NOT PN2=0.781*PTOT
+
+! This routine uses a model that is described in the paper 
+! "Indirect influence of of humidity on atmospheric emission 
+!  and transmission spectra near 4 microns"
+
+! Created by J-M Hartmann, March 2018
+! jmhartmann@lmd.polytechnique.fr
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+
+      INTEGER, PARAMETER :: NVAL=901   !!
+      DOUBLE PRECISION, PARAMETER :: T0 = 273.16D0
+      DOUBLE PRECISION, PARAMETER :: TREF = 296.0D0      
+      DOUBLE PRECISION, PARAMETER :: StpSig=1.D0
+
+      INTEGER          :: iWhich
+      REAL             :: raFreq(kMaxPts),raCTN2(kMaxPts),T,PN2,PH2O,PTOT
+      DOUBLE PRECISION :: SIGRF(NVAL),B0air(NVAL),BETA0air(NVAL),B0H2O(NVAL),BETA0H2O(NVAL)
+
+! local var
+      DOUBLE PRECISION :: CTN2(kMaxPts),DTOT,DN2,DH2O
+      DOUBLE PRECISION :: SIGMA,D1ST,BINFair,BSUPair,Bair,BINFH2O,BSUPH2O,BH2O
+      INTEGER          :: iI,iNpts,IINF,ISUP
+      
+!      
+! Tabulated values of the data for N2-N2 and N2-H2O
+! These have been read by routine "LECN2"
+
+      iNpts = kMaxPts
+      
+      DO iI = 1,iNpts
+        SIGMA    = raFreq(iI)*1.0D0
+        CTN2(iI) = 0.D0	
+        IF (( T.GT.350.D0 ) .OR. (SIGMA.LT.SIGRF(1)) .OR.(SIGMA.GT.SIGRF(NVAL))) THEN
+          CTN2(iI) = 0.D0
+        ELSE
+! Compute the N2-N2 and N2-H2O CIA absorption coefficients
+! (Bair and BH2o, respectively) by using the exponential Temperature
+! dependence from the tabulated values and a liner interpolation versus
+! wavenumber using the two sorrounding points (INF and SUP)
+!  The CIA at T is computed from B0*exp[BETA0*(1/Tref-1/T)]
+
+          IINF=INT( (SIGMA-SIGRF(1)+0.1D-4)/StpSig ) + 1
+          IINF=MIN0(IINF,NVAL-1)
+          ISUP=IINF+1
+          D1ST=(1.D0/TREF)-(1.D0/T)
+          BINFair=B0air(IINF)*DEXP(BETA0air(IINF)*D1ST)
+          BSUPair=B0air(ISUP)*DEXP(BETA0air(ISUP)*D1ST)
+          Bair=BINFair+(BSUPair-BINFair)*(SIGMA-SIGRF(IINF))/StpSig
+          BINFH2O=B0H2O(IINF)*DEXP(BETA0H2O(IINF)*D1ST)
+          BSUPH2O=B0H2O(ISUP)*DEXP(BETA0H2O(ISUP)*D1ST)
+          BH2O=BINFH2O+(BSUPH2O-BINFH2O)*(SIGMA-SIGRF(IINF))/StpSig
+
+! Then correct Bair by introducing the contribution of the N2-O2 CIA
+
+          Bair=Bair*(0.79 + 0.21*(1.294D0-0.4545D0*T/TREF))
+
+! Switch from pressures (in atm) to densities (in amagat)
+! and compute CIA by combining dry air (N2+O2) and H2O
+! contributions
+
+          DTOT=PTOT*(T0/T)*1.0D0
+          DN2=PN2*(T0/T)*1.0D0
+          DH2O=PH2O*(T0/T)*1.0D0
+
+          IF (iWhich .EQ. 1) THEN
+            !! both N2/N2 and N2/WV
+            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)+BH2O*DH2O)
+          ELSEIF (iWhich .EQ. 0) THEN
+            !! only N2/N2         
+            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)+0.0D0*BH2O*DH2O)
+          ELSEIF (iWhich .EQ. -1) THEN
+            !! only N2/WV                  
+             CTN2(iI)=DN2*(Bair*(DTOT-DH2O)*0.0D0+BH2O*DH2O)
+          END IF
+	  raCTN2(iI) = CTN2(iI)	  
+        END IF
+      END DO
+      
+      RETURN
+      END SUBROUTINE CTN2_vect
 
 !************************************************************************
 
