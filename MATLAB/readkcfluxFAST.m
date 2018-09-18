@@ -189,6 +189,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for chunk = 1:nchunk
+  fprintf(1,'chunk = %3i of %3i \n',chunk,nchunk);
   cumODBrow = 1;
   for atmospheres=1:iNumAtm   %%%%%go atm by atm
 
@@ -249,6 +250,7 @@ for chunk = 1:nchunk
   end % loop on chunks
 
 fclose(fin);
+disp('done reading ....')
 
 if iNumAtm > 1
   datax = data;
@@ -269,7 +271,6 @@ end
 if nargin == 3 
   fclose (fout);
 end
-
 
 if nargin == 1
   plevs = load('airslevels.dat');  %% from GND to TOA, decreasing p; 101 levels
@@ -299,7 +300,7 @@ dvx = dv;
 dvx = mean(diff(wnums));
 if (max(diff(wnums)) - min(diff(wnums))) > 0.0001
   error('oops! cannot figure out point spacing!');
-  end
+end
 
 iPower = -9:+3;
 remain = dvx ./ (10.^iPower);

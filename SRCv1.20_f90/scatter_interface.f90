@@ -280,7 +280,11 @@ CONTAINS
                 END DO
             END DO
         END IF
-
+        write(kStdWarn,*) ' '
+	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'
+	write(kStdWarn,*) '  Cloudy Calcs, iAtm = ',iAtm   
+	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'	
+	
         iDoPCLSAM = -1    !! assume no need to do PCLSAM scatter calc
 
         IF ((ctype2 > 10) .AND. (iAtm <= 4) .AND. (k100layerCloud < 0)) THEN
@@ -483,6 +487,7 @@ CONTAINS
                     CALL wrtout(iIOUNX,caFluxFile,raFreq,raRadsX)
                 END DO
             END IF
+        CALL PrintPound	    
         END IF
               
         IF (kJacobian >= 0 .AND. kActualJacs < 100) THEN

@@ -623,9 +623,10 @@ CONTAINS
     rAtmLoopCom = iAtmLoop * 1.0    !!! this is part of comBlockAtmLoop
     iTemperVary1 = iTemperVary
 
-    IF (iAtmLoop < 0) THEN
+    IF (iAtmLoop <= 0) THEN
         DO iI = 1,kMaxAtm
-            raAtmLoop(iI) = -9999
+            raAtmLoop1(iI) = -9999.0
+            raAtmLoop(iI)  = -9999.0
         END DO
     END IF
           
@@ -1170,6 +1171,7 @@ CONTAINS
     ctop2 = -100.0
     cbot1 = -100.0
     cbot2 = -100.0
+
 
     CALL TranslateNameListFile(caDriverName, &
     rf_low,rf_high, &
@@ -1881,6 +1883,7 @@ CONTAINS
                 DO iInt = 1,5
                     raAtmLoop(iInt) = 1.0
                 END DO
+		
             ELSEIF ((cngwat2 <= 0) .AND. (cfrac2 <= 0) .AND. (iaCloudScatType(2) <= 0))  THEN
                 iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
                           

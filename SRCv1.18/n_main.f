@@ -598,8 +598,9 @@ c      iTemperVary  = -1          !assume const-in-tau temperature variation
       rAtmLoopCom = iAtmLoop * 1.0    !!! this is part of comBlockAtmLoop
       iTemperVary1 = iTemperVary
 
-      IF (iAtmLoop .LT. 0) THEN
+      IF (iAtmLoop .LE. 0) THEN
         DO iI = 1,kMaxAtm
+          raAtmLoop1(iI) = -9999.0	
 	  raAtmLoop(iI) = -9999
 	END DO
       END IF
