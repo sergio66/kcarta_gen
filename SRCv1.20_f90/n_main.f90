@@ -1326,6 +1326,7 @@ CONTAINS
 
 ! ******** PRFILE section
     namecomment = '******* PRFILE section *******'
+    
 #IF (TXTsetting)
     CALL pthfil4NMLonly(raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &

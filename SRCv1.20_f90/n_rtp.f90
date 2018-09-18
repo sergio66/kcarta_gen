@@ -404,7 +404,7 @@ CONTAINS
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
     END IF
-          
+
 ! this piece of "output" displays the amounts for the first 3 gases
 ! also displays temperature of first stored gas.
 ! if less than 3 gases stored it is smart enuff to display <= 3 gas amts
@@ -541,6 +541,10 @@ CONTAINS
     5050 FORMAT(I3,' ',6(E11.5,' '))
     5060 FORMAT(I3,' ',11(E11.5,' '))
 
+!    do iL=1,kProfLayer
+!      print *,'E finished pthfil4RTPorNML',iL,raaPress(iL,1),raaPress(iL,2),raaPress(iL,3)
+!    end do
+    
     RETURN
     end SUBROUTINE pthfil4RTPorNML
 
@@ -2898,7 +2902,7 @@ CONTAINS
     REAL :: raaCld100Amt(kProfLayer,3)
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
-    integer :: iPtype
+    integer :: iPtype,i
 
     integer :: rtpopen, rtpread, rtpwrite, rtpclose
     record /RTPHEAD/ head
@@ -2930,14 +2934,14 @@ CONTAINS
     !! layers profile
         write(kStdWarn,*) 'Expecting ',iNumGases,' gases in rtp profile'
         IF (head.ngas >= iNumGases) THEN
-        ! ead in rtp profile; hope all gas profiles are there
+        ! read in rtp profile; hope all gas profiles are there
             CALL READRTP_1A(raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iaCld100Read,raaCld100Amt, &
             iNpath,caPfName,iRTP, &
             iProfileLayers,raPresslevels,raThickness)
         ELSEIF (head.ngas < iNumGases) THEN
-        ! ead in rtp profile; augment profiles using US Std
+        ! read in rtp profile; augment profiles using US Std
             CALL READRTP_1B(raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iaCld100Read,raaCld100Amt, &
@@ -3133,7 +3137,7 @@ CONTAINS
         pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
     END DO
 
-! heck that spres lies withn plevs(nlevs) and plevs(nlevs-1)
+! check that spres lies withn plevs(nlevs) and plevs(nlevs-1)
     IF ((prof.plevs(prof.nlevs) > prof.spres) .AND. &
     (prof.plevs(prof.nlevs-1) > prof.spres)) THEN
         write(kStdErr,*) 'p.nlevs | p.plevs(p.nlevs) p.spres p.plevs(p.nlevs-1)'
@@ -3144,7 +3148,6 @@ CONTAINS
         DO i = 1,prof.nlevs-1
             print *,i,raPressLevels(i),pProf(i),raPressLevels(i+1),prof.spres
         END DO
-
         CALL DoStop
     END IF
 
@@ -3302,6 +3305,7 @@ CONTAINS
                 END IF
                 rAmt = 0.0
                 rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+		rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb		
                 rPP  = 0.0
                 rH   = raHeight(j)
             ! EAD (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -3348,8 +3352,8 @@ CONTAINS
                 j = iFindJ(kProfLayer,I,iDownWard)
                 iNpathCounterJunk = iNpathCounterJunk + 1
 
-            !            rCC = prof.cc(i)
-            !          print *,i,rCC
+               ! rCC = prof.cc(i)
+               ! print *,i,rCC
                           
                 rAmt = prof.gamnt(i,iG)
                 IF (isfinite(rAmt) == .FALSE. ) THEN
@@ -3403,6 +3407,7 @@ CONTAINS
                 END IF
                 rAmt = 0.0
                 rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+		rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb		
                 rPP  = 0.0
                 rH   = raHeight(j)
                 raaCld100Amt(j,iGasIndex)       = rAmt
@@ -3643,6 +3648,13 @@ CONTAINS
         write (kStdWarn,*) 'Will add on dummy info to UPPER layers'
     END IF
 
+    ! fill this for fun (below the surface)
+    DO i = prof.nlevs+1,kProfLayer+1
+        j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
+        raHeight(j) = prof.palts(i)                     !!!!in meters
+        raPressLevels(j) = prof.plevs(i)                !!!!in mb
+    END DO
+
     DO i = 1,prof.nlevs
         j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
         raHeight(j) = prof.palts(i)                     !!!!in meters
@@ -3782,7 +3794,7 @@ CONTAINS
                     Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder, &
                     iFound,iGasIndex)
                     IF (iFound > 0) THEN
-                    ! rite(kStdWarn,4321) iIDGas,j,rAmt,rT,rP,rPP
+                    ! write(kStdWarn,4321) iIDGas,j,rAmt,rT,rP,rPP
                         raaAmt(j,iGasIndex)       = rAmt
                         raaTemp(j,iGasIndex)      = rT
                         raaPress(j,iGasIndex)     = rP
@@ -3809,6 +3821,7 @@ CONTAINS
                 END IF
                 rAmt = 0.0
                 rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+		rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb
                 rPP  = 0.0
                 rH   = raHeight(j)
             ! EAD (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -3819,8 +3832,8 @@ CONTAINS
                     Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder, &
                     iFound,iGasIndex)
                     IF (iFound > 0) THEN
-                        write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0',iIDGas, &
-                        'gindx,layer ',iGasIndex,i
+                        write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0 and rP = ',iIDGas, &
+                        'gindx,layer ',iGasIndex,i,rP
                         raaAmt(j,iGasIndex)       = rAmt
                         raaTemp(j,iGasIndex)      = rT
                         raaPress(j,iGasIndex)     = rP
@@ -3907,6 +3920,7 @@ CONTAINS
                 END IF
                 rAmt = 0.0
                 rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+		rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb		
                 rPP  = 0.0
                 rH   = raHeight(j)
                 raaCld100Amt(j,iGasIndex)       = rAmt
@@ -3934,10 +3948,10 @@ CONTAINS
         write(kStdErr,*) 'that MOLGAS, XSCGAS indicated it should have'
         write(kStdErr,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
         CALL AddOnAFGLProfile(kAFGLProf, &
-        iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead, &
-        raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
+          iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead, &
+          raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
     END IF
-
+    
     4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3)
     6000 FORMAT('Gas molecular ID ',I2,' not set from GASFIL or XSCFIL')
     5030 FORMAT(A130)
@@ -3952,9 +3966,6 @@ CONTAINS
     DO i = 1,kProfLayer
         raThickness(i) = raThickness(i)/100
         raH1(i) = raThickness(i)/1000         !!!dump out info in km
-    END DO
-    DO i = 1,kProfLayer+1
-        raP1(i) = raPresslevels(i)
     END DO
 
     i = prof.nlevs - 1     !!!!!!number of layers in RTP file
@@ -3982,6 +3993,16 @@ CONTAINS
     write (kStdWarn,*) 'Lowest  klayers pressure (highest level) : ', &
     raP1(kProfLayer+1)
 
+    DO i = 1,kProfLayer+1
+        raP1(i) = raPresslevels(i)
+    END DO
+
+!    DO i = 1,kProfLayer
+!	print *,'C0 end of READRTP_1B',i,raP1(i),raaPress(i,1),raaPress(i,2)
+!    end do
+!    i = kProfLayer+1
+!    print *,'C0 end of READRTP_1B',i,raP1(i),-9999
+    
     RETURN
     END SUBROUTINE READRTP_1B
 
@@ -4354,6 +4375,7 @@ CONTAINS
                 END IF
                 rAmt = 0.0
                 rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+		rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb		
                 rPP  = 0.0
                 rH   = raHeight(j)
             ! EAD (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -4484,10 +4506,11 @@ CONTAINS
 
     IF ((rAmt < 0.0) .OR. (rAmt > 1.0e3)) THEN
         WRITE(kStdWarn,1080)
-        WRITE(kStdWarn,1111) iIDgas,iCnt,rAmt
+        WRITE(kStdWarn,1111) iIDgas,iCnt,rAmt,rPP
         iError = 2
         rAmt = 0.0
-    ! ALL DoStop
+	rPP  = 0.0
+    ! CALL DoStop
     END IF
 
     IF ((rT < 140.0) .OR. (rT > 400.0)) THEN
@@ -4495,7 +4518,7 @@ CONTAINS
         WRITE(kStdWarn,1111) iIDgas,iCnt,rT
         iError = 1
         rT = 0.0
-    ! ALL DoStop
+    ! CALL DoStop
     END IF
 
     IF ((rP < 0.0) .OR. (rP > 1.0e5)) THEN
@@ -4503,22 +4526,25 @@ CONTAINS
         WRITE(kStdWarn,1111) iIDgas,iCnt,rP
         iError = 1
         rP = 0.0
-    ! ALL DoStop
+    ! CALL DoStop
     END IF
 
     IF ((rPP < 0.0) .OR. (rPP > 1.0e5)) THEN
         WRITE(kStdWarn,1083)
         WRITE(kStdWarn,1111) iIDgas,iCnt,rPP
-        iError = 1
+!	if (iIDgas .EQ. 2) print *,'wah',rAmt,rAmt0,rPP0
+        iError = 2
         rPP = 0.0
-    ! ALL DoStop
+	rAmt = 0.0
+    ! CALL DoStop
     END IF
 
     IF (iError == 1) THEN
         write(kStdWarn,4320) iIDGas,iCnt,rAmt0,rT0,rP0,rPP0
         rP = 1.0e3
+        rT = 300.0	
         rPP = 1.0e-3
-        rT = 300.0
+        rPP = 0.0	
         rAmt = 0.000000
         write(kStdWarn,4321) iIDGas,iCnt,rAmt,rT,rP,rPP
     END IF

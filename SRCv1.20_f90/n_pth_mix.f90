@@ -68,36 +68,36 @@ CONTAINS
     rPmax = -1.0e10
     iI = 75   !!! make this really high up
     IF ((raaPress(iI,iCO2_ind) > raaPress(iI+1,iCO2_ind)) .AND. &
-    (raaPress(iI+1,iCO2_ind) > raaPress(iI+2,iCO2_ind))) THEN
-    !! pressures decreasing with index; use CO2 temps and pressures
-        DO iI = kProfLayer-iProfileLayers+1,kProfLayer
-            iJ = iI-iOffSet
-            raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
-            logP(iJ) = log(raP(iJ))
-            raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
-            IF (logP(iJ) > rPmax) rPmax = logP(iJ)
-            IF (logP(iJ) < rPmin) rPmin = logP(iJ)
-        !           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
-        END DO
+      (raaPress(iI+1,iCO2_ind) > raaPress(iI+2,iCO2_ind))) THEN
+      !! pressures decreasing with index; use CO2 temps and pressures
+      DO iI = kProfLayer-iProfileLayers+1,kProfLayer
+        iJ = iI-iOffSet
+        raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
+        logP(iJ) = log(raP(iJ))
+        raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
+        IF (logP(iJ) > rPmax) rPmax = logP(iJ)
+        IF (logP(iJ) < rPmin) rPmin = logP(iJ)
+        ! print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
+      END DO
     ELSEIF &
-        ((raaPress(iI,iCO2_ind) < raaPress(iI+1,iCO2_ind)) .AND. &
-        (raaPress(iI+1,iCO2_ind) < raaPress(iI+2,iCO2_ind))) THEN
-    !! pressures increasing with index; use CO2 temps and pressures
-        DO iI = kProfLayer-iProfileLayers+1,kProfLayer
-            iJ = iI-iOffSet
-            raP(iJ) = raaPress(iJ,iCO2_ind)*kAtm2mb
-            logP(iJ) = log(raP(iJ))
-            raT(iJ) = raaTemp(iJ,iCO2_ind)
-            IF (logP(iJ) > rPmax) rPmax = logP(iJ)
-            IF (logP(iJ) < rPmin) rPmin = logP(iJ)
-        !          print *,'b',iJ,raP(iJ),raT(iJ)
-        END DO
+      ((raaPress(iI,iCO2_ind) < raaPress(iI+1,iCO2_ind)) .AND. &
+      (raaPress(iI+1,iCO2_ind) < raaPress(iI+2,iCO2_ind))) THEN
+      !! pressures increasing with index; use CO2 temps and pressures
+      DO iI = kProfLayer-iProfileLayers+1,kProfLayer
+        iJ = iI-iOffSet
+        raP(iJ) = raaPress(iJ,iCO2_ind)*kAtm2mb
+        logP(iJ) = log(raP(iJ))
+        raT(iJ) = raaTemp(iJ,iCO2_ind)
+        IF (logP(iJ) > rPmax) rPmax = logP(iJ)
+        IF (logP(iJ) < rPmin) rPmin = logP(iJ)
+        !print *,'b',iJ,raP(iJ),raT(iJ)
+      END DO
     ELSE
-        DO iJ = iI-2,iI+2
-            write(kStdErr,*) 'Get_Temp_Plevs ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
-        END DO
-        write(kStdErr,*) 'In Get_Temp_Plevs, Pressures neither increasing nor decreasing'
-        CALL DoStop
+      DO iJ = iI-2,iI+2
+        write(kStdErr,*) 'Get_Temp_Plevs ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
+      END DO
+      write(kStdErr,*) 'In Get_Temp_Plevs, Pressures neither increasing nor decreasing'
+      CALL DoStop
     END IF
 
     iDefault = +1       ! spline is default
@@ -108,7 +108,7 @@ CONTAINS
         write(kStdErr,*) 'need iInterpType = +1 or -1 not ',iInterpType
         CALL DoStop
     END IF
-          
+
     IF ((iDefault /= iInterpType) .AND. (kOuterLoop == 1)) THEN
         write(kStdErr,*) 'in Get_Temp_Plevs, default is take layer temps and spline interp them to plevs'
         write(kStdErr,*) '                   we are   taking layer temps and linear interp them to plevs'
@@ -247,6 +247,8 @@ CONTAINS
     write(kStdWarn,*) '------------------------------------------------------------'
     write(kStdWarn,*) '  '
 
+    write(kStdErr,*) 'here done 3a'
+       
     RETURN
     end SUBROUTINE Get_Temp_Plevs
 

@@ -982,6 +982,7 @@ c allocated in GASFIL or XSCFIL
             END IF
             rAmt = 0.0
             rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+            rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb
             rPP  = 0.0
             rH   = raHeight(j)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -1083,6 +1084,7 @@ c allocated in GASFIL or XSCFIL
             END IF
             rAmt = 0.0
             rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+            rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb	    
             rPP  = 0.0
             rH   = raHeight(j)
             raaCld100Amt(j,iGasIndex)       = rAmt
@@ -1496,6 +1498,7 @@ c allocated in GASFIL or XSCFIL
             END IF
             rAmt = 0.0
             rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+            rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb	    
             rPP  = 0.0
             rH   = raHeight(j)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -1594,6 +1597,7 @@ c allocated in GASFIL or XSCFIL
             END IF
             rAmt = 0.0
             rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+            rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb	    
             rPP  = 0.0
             rH   = raHeight(j)
             raaCld100Amt(j,iGasIndex)       = rAmt
@@ -2041,6 +2045,7 @@ c allocated in GASFIL or XSCFIL
             END IF
             rAmt = 0.0
             rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
+            rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb	    
             rPP  = 0.0
             rH   = raHeight(j)
             !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -3800,6 +3805,7 @@ c local vars
         WRITE(kStdWarn,1111) iIDgas,iCnt,rAmt
         iError = 2
         rAmt = 0.0
+	rPP  = 0.0
         !CALL DoStop
       END IF
 
@@ -3824,14 +3830,16 @@ c local vars
         WRITE(kStdWarn,1111) iIDgas,iCnt,rPP
         iError = 1
         rPP = 0.0
+	rAmt = 0.0
         !CALL DoStop
       END IF
 
       IF (iError .EQ. 1) THEN
         write(kStdWarn,4320) iIDGas,iCnt,rAmt0,rT0,rP0,rPP0      
         rP = 1.0e3
+        rT = 300.0	
         rPP = 1.0e-3
-        rT = 300.0
+	rPP = 0.0
         rAmt = 0.000000
         write(kStdWarn,4321) iIDGas,iCnt,rAmt,rT,rP,rPP
       END IF

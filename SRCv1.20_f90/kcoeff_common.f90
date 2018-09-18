@@ -1107,11 +1107,13 @@ CONTAINS
 	  call dostop
           ! the gas amount jacobians
           DO iI=1,kProfLayer
-!            write(kStdErr,FMT2) iI,raCO2MRdry(iI),(raRho(iI)*raThickness(iI)*100.0*raXN2(iI)*1e6*2.6867805e25/kAvog),raQCO2(iI)
-!            write(kSTdErr,FMT2) iI,raThickness(iI),raCO2MRdry(iI),raQCO2(iI)	    
-            DO iFr=1,kMaxPts
-              daaDQ(iFr,iI)   = daaDQ(iFr,iI) + daaOD_continuum_WV_N2(iFr,iI)/(raQCO2(iI))
-              daaDQWV(iFr,iI) =                 daaOD_continuum_WV_N2(iFr,iI)/(raQWV(iI))	      
+            PH2O = raaPartPress(iI,1)
+            PN2  = raPress(iI) * 0.78	
+	    PTOT = raPress(iI)
+	    T    = raTemp(iI)
+	    DO iFr=1,kMaxPts
+              daaDQ(iFr,iI)   = daaDQ(iFr,iI) + daaOD_continuum_WV_N2(iFr,iI)/PN2
+              daaDQWV(iFr,iI) =                 daaOD_continuum_WV_N2(iFr,iI)/PH2O
             END DO
           END DO
         END IF
@@ -1223,8 +1225,17 @@ CONTAINS
             !! only N2/N2         
             CTN2(iI)=DN2*(Bair*(DTOT-DH2O)+0.0D0*BH2O*DH2O)
           ELSEIF (iWhich .EQ. -1) THEN
-            !! only N2/WV                  
-             CTN2(iI)=DN2*(Bair*(DTOT-DH2O)*0.0D0+BH2O*DH2O)
+            !! only N2/WV
+	    !! orig code, same as final code below
+!            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)*0.0D0 + BH2O*DH2O)
+	    
+!	    PTOT = PH2O
+!	    PN2  = PN2    !! unchanged
+!            DTOT=PTOT*(T0/T)*1.0D0
+!            DN2=PN2*(T0/T)*1.0D0
+!            DH2O=PH2O*(T0/T)*1.0D0	    
+!            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)*0.0D0 + BH2O*DH2O)
+            CTN2(iI)=DN2*(BH2O*DH2O)
           END IF
 	  raCTN2(iI) = CTN2(iI)	  
         END IF
