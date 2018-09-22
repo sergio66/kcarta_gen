@@ -719,6 +719,8 @@
     iDoAdd,iErr)
     IF (iDoAdd <= 0) THEN
         write(kStdErr,*) 'need other than gid = 1 to set kComp Interp Wgts'
+	write(kSTdErr,*) 'raFreq(1) = ',raFreq(1),' kCompParamFile = '
+	write(kStdErr,*) kCompParamFile	
         CALL DoStop
     ELSE
         rDerivAmt  = 0.1

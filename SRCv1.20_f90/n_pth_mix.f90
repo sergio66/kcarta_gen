@@ -247,8 +247,6 @@ CONTAINS
     write(kStdWarn,*) '------------------------------------------------------------'
     write(kStdWarn,*) '  '
 
-    write(kStdErr,*) 'here done 3a'
-       
     RETURN
     end SUBROUTINE Get_Temp_Plevs
 
