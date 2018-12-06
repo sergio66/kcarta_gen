@@ -2,6 +2,13 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
+! need to make sure that you have
+!  (a) grabbed more than one processor on a node
+!  (b) module load mvapich2/gcc
+!  (c1) time ../BIN/kcarta.x_f90_400ppmv_H16                      quickuse.nml junkserial.dat
+!  (c2) time mpiexec -n 8 ../BIN/kcartaparallel.x_f90_400ppmv_H16 quickuse.nml junkparallel.dat
+! and of course it fails bitterly because all 8 processors try to open the same output file ...
+
     PROGRAM kcartaparallel
     use omp_lib            ! Fortran 90; omp_get_thread_num, omp_get_num_threads
     use ifport             ! for getenv

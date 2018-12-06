@@ -357,6 +357,8 @@ CONTAINS
     write(kStdWarn,*) ' '
     write(kStdWarn,*) 'The following paths hold for kCompressed Database : '
     write(kStdWarn,*) '  (unless explicitly overridden by nm_spectra)'
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> 605-2830 cm-1 : '
     write(kStdWarn,120) kWaterPath(1:80)
     write(kStdWarn,121) kWaterIsotopePath(1:80)
     write(kStdWarn,122) kCO2Path(1:80)
@@ -366,12 +368,78 @@ CONTAINS
     ELSEIF (kCO2_UMBCorHARTMAN == -1) THEN
         write(kStdWarn,*) '  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN,' ==> LBLRTM CO2 linemixing'
     END IF
+    
     write(kStdWarn,123) kCompPath(1:80)
     write(kStdWarn,124) kCKDPath(1:80)
     write(kStdWarn,125) kCKD_Compr_Path(1:80)
     write(kStdWarn,*) ' '
     write(kStdWarn,126) kOrigRefPath(1:80)
-          
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (f) 15-30 cm-1 : '
+    write(kStdWarn,120) kWaterPathf(1:80)
+    write(kStdWarn,123) kCompPathf(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (g) 30-50 cm-1 : '
+    write(kStdWarn,120) kWaterPathg(1:80)
+    write(kStdWarn,123) kCompPathf(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (h) 50-80 cm-1 : '
+    write(kStdWarn,120) kWaterPathh(1:80)
+    write(kStdWarn,123) kCompPathh(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (j) 80-140 cm-1 : '
+    write(kStdWarn,120) kWaterPathj(1:80)
+    write(kStdWarn,123) kCompPathj(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (k) 140-300 cm-1 : '
+    write(kStdWarn,120) kWaterPathk(1:80)
+    write(kStdWarn,123) kCompPathk(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (p) 300-510 cm-1 : '
+    write(kStdWarn,120) kWaterPathp(1:80)
+    write(kStdWarn,123) kCompPathp(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (q) 500-605 cm-1 : '
+    write(kStdWarn,120) kWaterPathq(1:80)
+    write(kStdWarn,123) kCompPathq(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (s) 2830-3580 cm-1 : '
+    write(kStdWarn,120) kWaterPaths(1:80)
+    write(kStdWarn,123) kCompPaths(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (m) 3550-5550 cm-1 : '
+    write(kStdWarn,120) kWaterPathm(1:80)
+    write(kStdWarn,123) kCompPathm(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (n) 5550-8350 cm-1 : '
+    write(kStdWarn,120) kWaterPathn(1:80)
+    write(kStdWarn,123) kCompPathn(1:80)
+    
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (o) 8250-12250 cm-1 : '
+    write(kStdWarn,120) kWaterPatho(1:80)
+    write(kStdWarn,123) kCompPatho(1:80)    
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (v) 12000-25000 cm-1 : '
+    write(kStdWarn,120) kWaterPathv(1:80)
+    write(kStdWarn,123) kCompPathv(1:80)    
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*) ' >>> (u) 25000-44000 cm-1 : '
+    write(kStdWarn,120) kWaterPathu(1:80)
+    write(kStdWarn,123) kCompPathu(1:80)    
+
     120 FORMAT('Water MolGas  ',A80)
     121 FORMAT('Water HDO     ',A80)
     122 FORMAT('CO2           ',A80)

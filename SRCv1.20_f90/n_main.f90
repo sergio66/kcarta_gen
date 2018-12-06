@@ -85,22 +85,26 @@ CONTAINS
     CHARACTER(80) :: caDriverName
 
 ! this is for overriding the defaults
+! this is for nm_PARAMS
+! note kLayer2Sp,kCKD,kGasTempkLongOrShort,kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,kThermalAngle
+! are all defined in the param files, but they can be re-set inside nm_PARAMS
     INTEGER :: iaaOverride(4,10),iaaOverrideOrig(4,10)
+    CHARACTER(80) :: caNMLReset_param_spectra,caNMLReset_param_spectra1
 ! this is a dummy, but could in useful eg when giving the 100 layer cloud fracs for scattering
     CHARACTER(80) :: caaTextOverride,caaTextOverride1
-          
-! this is for MOLGAS
+
+! this is for nm_MOLGAS
     INTEGER :: iNGas,iaGasesNL(kGasComp)
     INTEGER :: iNGas1,iaGasesNL1(kGasComp)
-! this is for xscfil
+! this is for nm_XSCGAS
     INTEGER :: iNxsec,iaLXsecNL(kGasXSecHi-kGasXSecLo+1)
     INTEGER :: iNxsec1,iaLXsecNL1(kGasXSecHi-kGasXSecLo+1)
 
-! this is for FRQNCY
+! this is for nm_FRQNCY
 ! rf_low,rf_high   = lower/upper wavenumber bounds
     REAL :: rf1,rf2,rf_low1,rf_high1
 
-! this is for PRFILE
+! this is for nm_PRFILE
 ! gives the name of input file containing profiles,
 !                   input file containing cloud params
 !                   which of the rtp profiles to use, number of clouds
@@ -109,14 +113,14 @@ CONTAINS
     CHARACTER(80) :: caPFname,caPFName1,caCloudPFname,caCloudPFName1
     INTEGER :: iRTP,iRTP1,iNcloudRTP,iNcloud_RTP1,iAFGLProf,iAFGLProf1
 
-! this is for WEIGHT
+! this is for nm_WEIGHT
 ! iNpmix        = number of mixed paths
 ! caaMixFileLines = lines containing the mixing table info - assume there are
 !                   less than 100 of them!!!
     INTEGER :: iNpmix,iNpmix1
     CHARACTER(130) :: caaMixFileLines(kProfLayer),caaMixFileLines1(kProfLayer)
 
-! this is for RADNCE
+! this is for nm_RADNCE
 ! iNatm           = number of radiating atmospheres
 ! raTSpace        = for each radiating atmosphere, the background (space) temperature
 ! raTSurf         = for each atmosphere, the surface temperature
@@ -159,16 +163,16 @@ CONTAINS
     REAL :: raWindSpeed(kMaxAtm),raWindSpeed1(kMaxAtm)
     INTEGER :: iakSolar1(kMaxAtm),iakThermalJacob1(kMaxAtm)
     INTEGER :: iMPSetForRadRTP1,iMPSetForRadRTP   !!these are used if kRTP = 1
-! this is assuming purely absorptive scattering
+! assuming purely absorptive scattering
     CHARACTER(80) :: caaScatter1(kMaxAtm),caaScatter(kMaxAtm)
     REAL :: raaScatterPressure1(kMaxAtm,2),raaScatterPressure(kMaxAtm,2)
     REAL :: raScatterDME1(kMaxAtm),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP1(kMaxAtm),raScatterIWP(kMaxAtm)
-! this is for looping over one particular atm
+! looping over one particular atm
     INTEGER :: iAtmLoop,iAtmLoop1
     REAL ::    raAtmLoop(kMaxAtm),raAtmLoop1(kMaxAtm)
 
-! this is for OUTPUT
+! this is for nm_OUTPUT
 ! caLogFile     = name of success/warning log file 'warning.msg'
 ! caComment     = comment the user writes
 ! iOutTypes     = number of printing options specified
@@ -187,12 +191,12 @@ CONTAINS
     CHARACTER(80) :: caLogFile,caLogFile1
     REAL :: raaOp(kMaxPrint,kPathsOut),raaOp1(kMaxPrint,kProfLayer)
 
-! this is for JACOBN
+! this is for nm_JACOBN
 ! iJacob        = number of gas Jacobians to output
 ! iaJacob       = list of GasID's to do Jacobian for
     INTEGER :: iJacob,iaJacob(kMaxDQ),iJacob1,iaJacob1(kMaxDQ)
 
-! this is for SCATTR
+! this is for nm_SCATTR
 ! iScatBinaryFile tells if the scattering files are binary (+1) or text (-1)
     INTEGER :: iScatBinaryFile,iScatBinaryFile1
 ! iNclouds tells us how many clouds there are
@@ -236,7 +240,7 @@ CONTAINS
     REAL :: raaPCloudBot1(kMaxClouds,kCloudLayers)
     INTEGER :: iWhichScatterCode0
 
-! this is for new spectroscopy
+! this is for new spectroscopy nm_SPECTR
 ! iNumNewGases   tells number of new gases
 ! iaNewGasID     tells which gases we want to update spectroscopy
 ! iaNewData      tells how many new data sets to read in for each gas
@@ -261,7 +265,7 @@ CONTAINS
     CHARACTER(80) :: caaAltComprDirs1(kGasStore)
     REAL :: rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
 
-! this is for non LTE
+! this is for nm_NONLTE
 ! raNLTEstrength    tells how strongly to add on the LTE files
 ! iNumNLTEGases     tells number of NLTE gases
 ! iNLTE_SlowORFast  tells whether to use slow model (+1) or fast model (-1/-2)
@@ -307,7 +311,7 @@ CONTAINS
           
     NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort, &
     kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs, &
-    kThermalAngle,iaaOverride,caaTextOverride
+    kThermalAngle,iaaOverride,caaTextOverride,caNMLReset_param_spectra
     NAMELIST /nm_frqncy/namecomment,rf1,rf2
     NAMELIST /nm_molgas/namecomment,iNGas,iaGasesNL
     NAMELIST /nm_xscgas/namecomment,iNXsec,iaLXsecNL
@@ -473,7 +477,8 @@ CONTAINS
     CALL CheckParams
 
 ! set default overrides
-    caaTextOverride    = 'notset'
+    caaTextOverride           = 'notset'
+    caNMLReset_param_spectra  = 'notset'
     DO iI = 1,4
         DO iJ = 1,10
             iaaOverride(iI,iJ) = iaaOverrideDefault(iI,iJ)
@@ -505,6 +510,7 @@ CONTAINS
     write (kStdWarn,*) 'successfully read in params .....'
 ! hese are global variables and so need to be checked
 ! set overrides
+    caNMLReset_param_spectra1 = caNMLReset_param_spectra   !! if caaNMLReset was defined here
     caaTextOverride1 = caaTextOverride   !! if caaTextOverride was defined here
     caaTextOverrideDefault = caaTextOverride
     DO iJ = 1,10
@@ -865,8 +871,174 @@ CONTAINS
 !      print nm_scattr
 !      CALL DoSTOP
 
+    caNMLReset_param_spectra1 = trim(caNMLReset_param_spectra1)
+    IF ((caNMLReset_param_spectra1  /= 'notset') .AND. (caNMLReset_param_spectra1  /= 'NOTSET')) THEN
+      CALL OverrideNML_nmParam_nmSpectra(caNMLReset_param_spectra1,                      &
+        iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1, &
+        iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1)
+    END IF
+      
     RETURN
     end SUBROUTINE TranslateNameListFile
+
+!************************************************************************
+! this subroutine re-reads in the namelists, for nm_PARAMS and nm_SPECTRA
+! as those are the ones with the MOST use
+
+! note : iaaOverrideDefault is what is used through the program (ie it is a global var)
+!        iaaOverride        is what is set/used in the .nml files
+
+    SUBROUTINE OverrideNML_nmParam_nmSpectra(caNMLReset_param_spectra, &
+! new spectroscopy
+    iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1, &
+    iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! this is the driver file name
+    CHARACTER(80) :: caNMLReset_param_spectra
+
+! this is for overriding the defaults
+! this is for nm_PARAMS
+! note kLayer2Sp,kCKD,kGasTempkLongOrShort,kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,kThermalAngle
+! are all defined in the param files, but they can be re-set inside nm_PARAMS
+    INTEGER :: iaaOverride(4,10),iaaOverrideOrig(4,10)
+    CHARACTER(80) :: caaTextOverride,caaTextOverride1
+    
+! this is for new spectroscopy nm_SPECTR
+! iNumNewGases   tells number of new gases
+! iaNewGasID     tells which gases we want to update spectroscopy
+! iaNewData      tells how many new data sets to read in for each gas
+! iaaNewChunks   tells which data chunks to read in
+! caaaNewChunks  tells the name of the files associated with the chunks
+    INTEGER :: iaNewGasID(kGasStore),iaNewData(kGasStore)
+    INTEGER :: iaNewGasID1(kGasStore),iaNewData1(kGasStore)
+    INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
+    INTEGER :: iNumNewGases1,iaaNewChunks1(kGasStore,kNumkCompT)
+    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(80) :: caaaNewChunks1(kGasStore,kNumkCompT)
+! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
+! iaAltComprDirs      tells which gases we want to use alternate compressed files
+! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
+!                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
+! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
+! rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
+    REAL :: raAltComprDirsScale(kGasStore),raAltComprDirsScale1(kGasStore)
+    INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
+    INTEGER :: iaAltComprDirs1(kGasStore),iNumAltComprDirs1
+    CHARACTER(80) :: caaAltComprDirs(kGasStore)
+    CHARACTER(80) :: caaAltComprDirs1(kGasStore)
+    REAL :: rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
+
+! define the namelists!!!!!!!!
+
+! local variables
+    INTEGER :: iI,iJ,iIOUN,iErr
+    CHARACTER(30) :: namecomment
+    CHARACTER(50) :: FMT
+          
+    NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort, &
+    kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs, &
+    kThermalAngle,iaaOverride,caaTextOverride
+    NAMELIST /nm_spectr/namecomment,iNumNewGases,iaNewGasID,iaNewData, &
+    iaaNewChunks,caaaNewChunks, &
+    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs, &
+    rAltMinFr,rAltMaxFr
+    NAMELIST /nm_endinp/namecomment
+
+! *************** read input name list file *********************************
+    write (kStdWarn,*) 'Re-Reading in nm_param,nm_spectra namelists ............. '
+    write (kStdWarn,'(A80)') caNMLReset_param_spectra
+    iIOun = kStdDriver
+    IF (iIOUN /= 5) THEN
+        OPEN(UNIT=iIOun,FILE=caNMLReset_param_spectra,STATUS='OLD',IOSTAT=iErr)
+        IF (iErr /= 0) THEN
+            WRITE(kStdErr,1070) iErr, caNMLReset_param_spectra
+            1070 FORMAT('ERROR! number ',I5,' opening reset namelist file:',/,A80)
+            CALL DoSTOP
+        ENDIF
+    END IF
+    kStdDriverOpen = 1
+
+    namecomment = '******* PARAMS section *******'
+
+!! note I have moved this part of the loop here, since we are also
+!! setting iaaOverride
+    DO iJ = 1,10
+        DO iI = 1,4
+            iaaOverride(iI,iJ)     = iaaOverrideDefault(iI,iJ)	
+            iaaOverrideOrig(iI,iJ) = iaaOverrideDefault(iI,iJ)
+        END DO
+    END DO
+
+    read (iIOUN,nml = nm_params)
+    write (kStdWarn,*) 'successfully read in params .....'
+! these are global variables and so need to be checked
+! set overrides
+!!!    caaNMLReset1     = caaNMLReset       !! if caaNMLReset     was defined here
+    caaTextOverride1 = caaTextOverride   !! if caaTextOverride was defined here
+    caaTextOverrideDefault = caaTextOverride
+    IF (iaaOverride(2,1) /= iaaOverrideDefault(2,1)) THEN
+        write(kStdWarn,*) 'kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
+        write(kStdWarn,*) 'UserSet         iaaOverride(2,1) = ',iaaOverride(2,1)
+        kTemperVary = iaaOverride(2,1)
+    END IF
+    DO iI = 1,4
+        DO iJ = 1,10
+            iaaOverrideDefault(iI,iJ) = iaaOverride(iI,iJ)
+        END DO
+    END DO
+    write(kStdWarn,*) 'input | output | diff override params'
+    write(kStdWarn,*) '---------------------------------------'
+    DO iI = 1,4
+        write(kStdWarn,'(A,I2)') 'iI = ',iI
+        DO iJ = 1,10
+            write(kStdWarn,*) iaaOverrideOrig(iI,iJ),iaaOverrideDefault(iI,iJ),iaaOverrideOrig(iI,iJ)-iaaOverrideDefault(iI,iJ)
+        END DO
+        write(kStdWarn,*) '---------------------------------------'
+    END DO
+    kTemperVary = iaaOverrideDefault(2,1)
+    CALL CheckParams
+    CALL printstar
+
+    namecomment = '******* SPECTRA section *******'
+    read (iIOUN,nml = nm_spectr)
+    iNumNewGases1 = iNumNewGases
+    DO iI = 1,kGasStore
+        iaNewGasID1(iI) = iaNewGasID(iI)
+        iaNewData1(iI) = iaNewData(iI)
+    END DO
+    DO iI = 1,kGasStore
+        DO iJ = 1,kNumkCompT
+            iaaNewChunks1(iI,iJ) = iaaNewChunks(iI,iJ)
+            caaaNewChunks1(iI,iJ) = caaaNewChunks(iI,iJ)
+        END DO
+    END DO
+    iNumAltComprDirs1 = iNumAltComprDirs
+    DO iI = 1,kGasStore
+        iaAltComprDirs1(iI) = iaAltComprDirs(iI)
+	raAltComprDirsScale1(iI) = raAltComprDirsScale(iI)
+    END DO
+    DO iI = 1,kGasStore
+        caaAltComprDirs1(iI) = caaAltComprDirs(iI)
+    END DO
+    rAltMinFr1 = rAltMinFr
+    rAltMaxFr1 = rAltMaxFr
+    write (kStdWarn,*) 'successfully read in spectra2 .....'
+    CALL printstar
+
+    namecomment = '******* ENDINP section *******'
+    read (iIOUN,nml = nm_endinp)
+    write (kStdWarn,*) 'successfully read in endinp2 .....'
+    CALL printstar
+
+    close (iIOUN)
+    kStdDriverOpen = -1
+
+    RETURN
+    end SUBROUTINE 
 
 !************************************************************************
 ! this subroutine reads in the namelists and processes them

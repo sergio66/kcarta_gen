@@ -1,6 +1,6 @@
-function [data, wnums, plevs, hgt, hr] = readkcfluxFAST(kfile, plevsIN, dfile, versionlength)
+function [data, wnums, plevs, hgt, hr] = readkcflux(kfile, plevsIN, dfile)
 
-% function [data, wnums, plevs, hgt, hr] = readkcfluxFAST(kfile, plevsIN, dfile)
+% function [data, wnums, plevs, hgt, hr] = readkcflux(kfile, plevsIN, dfile)
 %
 % readkcflux is a simple reader & unchunker for kcarta flux output files
 %
@@ -39,11 +39,6 @@ function [data, wnums, plevs, hgt, hr] = readkcfluxFAST(kfile, plevsIN, dfile, v
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if nargin < 4
-  versionlength = 080; %% upto kcarta 1.16
-  versionlength = 120; %% kcarta 1.18 onwards
-end
-
 hr = [];
 
 [fin,msg] = fopen(kfile, 'r');
@@ -72,8 +67,8 @@ fid=fin;                    %<------------- my modification
 
 %this is the reality .. see lines 2860 - 2870 of v1.18/s_writefile.f
 flen    = fread(fin, 1, 'integer*4');
-version = fread(fin, versionlength, 'char');
-version = char(version');
+version = fread(fin, 80, 'char')
+version = char(version')
 %caVersion.include_param = char(version')
 %version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
@@ -104,7 +99,7 @@ flen   = fread(fin, 1, 'integer*4');
 
 %number of atmospheres
 flen   = fread(fin, 1, 'integer*4');
-natmos = fread(fin, 1, 'integer*4');
+natmos = fread(fin, 1, 'integer*4')
 flen   = fread(fin, 1, 'integer*4');
 
 %number of layers per atmosphere
@@ -158,7 +153,7 @@ noutrow = nchunk * 10000;       % number of output rows
 noutcol = sum(nODBrows);        % number of output columns
 ODBrowdat = zeros(10000, 1);    % ODB row data buffer
 
-if nargin == 1 | nargin == 2 | nargin == 4
+if nargin == 1 | nargin == 2
  
   % initialize output arrays
   data = zeros(noutrow, noutcol);
@@ -236,7 +231,7 @@ for chunk = 1:nchunk
         error(['fread failed, odb=',num2str(odb),' chunk=',num2str(chunk)]);
       end
       flen2 = fread(fin, 1, 'integer*4');
-       if nargin == 1 | nargin == 2 | nargin == 4
+       if nargin == 1 | nargin == 2
         % write ODBrowdat to the data array
         outrows = (chunk-1) * 10000 + 1 : chunk * 10000;
         outcol = cumODBrow;
@@ -280,8 +275,7 @@ if nargin == 3
   fclose (fout);
 end
 
-if length(plevsIN) == 0
-  %% plevsIN could be [] or ' '
+if nargin == 1
   plevs = load('airslevels.dat');  %% from GND to TOA, decreasing p; 101 levels
   if length(strfind(kfile,'_ALL')) > 0    
     plevs = plevs(101-nn/2+1:end);

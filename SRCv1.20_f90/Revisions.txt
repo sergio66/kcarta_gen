@@ -589,6 +589,18 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
+12/6/2018      nm_param now allows you to have a file "caNMLReset" which
+               allows you to read in a "override file" that overrides
+	       the current settings of nm_param and nm_spectra
+
+               This will be useful in eg making SARTA as we use a number
+	       of namelist files (one for breakouts, one for radiances,
+	       one for thermal background) and it is critical that all
+	       these files uses the same spectroscopy and CKD settings!
+
+               The new namelist files has exactly the same specs of
+	       nm_param and nm_spectra as the master namelist file
+	       
 8/3/2018       Added JM Hartmann N2/WV continuum to the 4.3 um bandhead
                See SUBROUTINE add_co2_wv_continuum in kcoeff_common.f90
                The continuum has no temperature dependance so d/dT = 0; 
