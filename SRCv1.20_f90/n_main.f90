@@ -397,13 +397,13 @@ CONTAINS
     iJacob       = 0          !assume no jacobians to be done
 
 ! default scaling from new to default database
+    iNumNewGases     = -1      !assume no new spectroscopy
     DO iI = 1,kGasStore
       raAltComprDirsScale(iI) = 1.0
     END DO
 		    
 ! default NLTE
     iNumAltComprDirs      = -1      !assume no alternate compressed dirs
-    iNumNewGases     = -1      !assume no new spectroscopy
     iNumNLTEGases    = -1      !assume no nonLTE
     iDoUpperAtmNLTE  = -1      !assume do not do upper atm NLTE
     iAllLayersLTE    = -1      !top layers in NLTE, bottom layers in LTE
@@ -963,8 +963,7 @@ CONTAINS
     kStdDriverOpen = 1
 
     namecomment = '******* PARAMS section *******'
-
-!! note I have moved this part of the loop here, since we are also
+!! note I have moved this initialization part of the loop here, since we are also
 !! setting iaaOverride
     DO iJ = 1,10
         DO iI = 1,4
@@ -972,6 +971,7 @@ CONTAINS
             iaaOverrideOrig(iI,iJ) = iaaOverrideDefault(iI,iJ)
         END DO
     END DO
+! now go ahead and read in the new data
 
     read (iIOUN,nml = nm_params)
     write (kStdWarn,*) 'successfully read in params .....'
@@ -1004,6 +1004,30 @@ CONTAINS
     CALL printstar
 
     namecomment = '******* SPECTRA section *******'
+! this is the initialization
+    iNumNewGases = iNumNewGases1
+    DO iI = 1,kGasStore
+        iaNewGasID(iI) = iaNewGasID1(iI)
+        iaNewData(iI) = iaNewData1(iI)
+    END DO
+    DO iI = 1,kGasStore
+        DO iJ = 1,kNumkCompT
+            iaaNewChunks(iI,iJ) = iaaNewChunks1(iI,iJ)
+            caaaNewChunks(iI,iJ) = caaaNewChunks1(iI,iJ)
+        END DO
+    END DO
+    iNumAltComprDirs = iNumAltComprDirs1
+    DO iI = 1,kGasStore
+        iaAltComprDirs(iI) = iaAltComprDirs1(iI)
+	raAltComprDirsScale(iI) = raAltComprDirsScale1(iI)
+    END DO
+    DO iI = 1,kGasStore
+        caaAltComprDirs(iI) = caaAltComprDirs1(iI)
+    END DO
+    rAltMinFr = rAltMinFr1
+    rAltMaxFr = rAltMaxFr1
+! now go ahead and read in the new data
+
     read (iIOUN,nml = nm_spectr)
     iNumNewGases1 = iNumNewGases
     DO iI = 1,kGasStore

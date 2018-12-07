@@ -589,8 +589,9 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
-12/6/2018      nm_param now allows you to have a file "caNMLReset" which
-               allows you to read in a "override file" that overrides
+12/6/2018      nm_param now allows you to have a file
+                      "caNMLReset_param_spectra"
+	       which allows you to read in a "override file" that overrides
 	       the current settings of nm_param and nm_spectra
 
                This will be useful in eg making SARTA as we use a number
