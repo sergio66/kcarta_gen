@@ -378,7 +378,7 @@ CONTAINS
             iNpath,caPfName,raPressLevels,raThickness,raTPressLevels, &
             iProfileLayers)
         END IF
-    ELSEIF (kRTP >= 0) THEN
+    ELSEIF ((kRTP >= 0) .AND. (kRTP <= 1)) THEN
         write(kStdWarn,*) 'new style RTP profile to be read is  : '
         write(kStdWarn,5040) caPfname
         write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
@@ -404,7 +404,7 @@ CONTAINS
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
     END IF
-
+    
 ! this piece of "output" displays the amounts for the first 3 gases
 ! also displays temperature of first stored gas.
 ! if less than 3 gases stored it is smart enuff to display <= 3 gas amts
@@ -529,13 +529,19 @@ CONTAINS
     END IF
 
     write(kStdWarn,*) '  '
-    caStr = ' Pressure LEVELS '
-    write(kStdWarn,5040) caStr
+    caStr = ' Pressure LEVELS 1 to SURF-1'
+    write(kStdWarn,5040) caStr    
+    DO iL = 1,kProfLayer-iProfileLayers
+        rP = raPressLevels(iL)
+        write(kStdWarn,*) iL,rP
+    END DO
+    caStr = ' Pressure LEVELS SURF to TOA'
+    write(kStdWarn,5040) caStr        
     DO iL = kProfLayer-iProfileLayers+1,kProfLayer+1
         rP = raPressLevels(iL)
         write(kStdWarn,*) iL,rP
     END DO
-
+    
     5030 FORMAT(A160)
     5040 FORMAT(A80)
     5050 FORMAT(I3,' ',6(E11.5,' '))
@@ -3653,6 +3659,7 @@ CONTAINS
         j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
         raHeight(j) = prof.palts(i)                     !!!!in meters
         raPressLevels(j) = prof.plevs(i)                !!!!in mb
+        raPressLevels(j) = 0.0                          !!!!in mb, safer !!!!		
     END DO
 
     DO i = 1,prof.nlevs
@@ -3660,7 +3667,7 @@ CONTAINS
         raHeight(j) = prof.palts(i)                     !!!!in meters
         raPressLevels(j) = prof.plevs(i)                !!!!in mb
     END DO
-
+    
     DO i = 1,prof.nlevs-1
         pProf(i) = raPressLevels(i) - raPressLevels(i+1)
         pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))

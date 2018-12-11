@@ -1783,12 +1783,15 @@ CONTAINS
         END IF
 
         IF ((iaOp(iI) > iaNumLayer(iAtm)) .OR. (iaOp(iI) < 1))THEN
-            write(kStdErr,*) 'iaaRadLayer(iAtm,1),iOne,=', &
-            iaaRadLayer(iAtm,1),iOne
+            write(kStdErr,*) 'iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,End),iNumLayer,iOne,='
+            write(kStdErr,*) iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iaNumlayer(iAtm)),iaNumlayer(iAtm),iOne
             write(kStdErr,*) 'iI,iaOp(iI) = ',iI,iaOp(iI)
-            write(kStdErr,*) 'Pressure ',rP,'invalid for atm# ',iAtm
-            CALL DoSTOP
-        END IF
+            write(kStdErr,*) 'Pressure ',rP,'invalid for atm# ',iAtm, 'see press levels below : '
+	    DO i2 = 1,kProfLayer
+	      write(kStdErr,*) i2,raPresslevels(i2)
+	    END DO
+            CALL DoSTOP	    
+         END IF
 
         IF (raaOpT(iOutTypes,iI) < 0.0) THEN
             raaOpT(iOutTypes,iI) = 0.0

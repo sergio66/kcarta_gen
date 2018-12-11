@@ -1368,7 +1368,6 @@ CONTAINS
     cbot1 = -100.0
     cbot2 = -100.0
 
-
     CALL TranslateNameListFile(caDriverName, &
     rf_low,rf_high, &
     iNGas,iaGasesNL,iNXsec,iaLXsecNL, &
@@ -1535,6 +1534,10 @@ CONTAINS
     iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
 #ENDIF
 
+!	    DO iInt = 1,kProfLayer
+!	      write(kStdErr,*) 'bobobo B',iInt,raPresslevels(iInt)
+!	    END DO
+	    
     IF (iKnowTP < 0) THEN
         CALL Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress, &
         raThickness,raPressLevels,raTPressLevels)
@@ -2129,6 +2132,7 @@ CONTAINS
 
 ! ******** OUTPUT section
     namecomment = '******* OUTPUT section *******'
+
     kWarnFile = caLogFile
     CALL output4(iaPrinter,iaGPMPAtm,iaNp, &
     iaaOp,raaOp,raaUserPress, &
