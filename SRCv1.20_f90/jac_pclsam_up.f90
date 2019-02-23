@@ -45,7 +45,7 @@ CONTAINS
     iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
     rSatAngle,raLayAngles,raSunAngles,raVTemp, ctype2,rFracx,&
     iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
-    raaaAllDQ,raaAllDT,raaAllWgt,raaAllSurf,raaAmt,raInten, &
+    raaaAllDQ,raaAllDT,raaAmt,raInten, &
     raSurface,raSun,raThermal,rFracTop,rFracBot, &
     iaJacob,iJacob,raaMix,raSunRefl,rDelta, &
     iNpMix,iTag,iActualTag, &
@@ -53,7 +53,8 @@ CONTAINS
     raaExtJacobIWP,raaSSAlbJacobIWP,raaAsymJacobIWP, &
     raaExtJacobDME,raaSSAlbJacobDME,raaAsymJacobDME, &
     iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA, iPrintAllPCLSAMJacs, &
-    iNLTEStart,raaPlanckCoeff)
+    iNLTEStart,raaPlanckCoeff, &
+    raaaAllJacQOut,raaAllJacTOut,raaAllWgtOut,raaAllSurfOut)
 
     IMPLICIT NONE
 
@@ -92,9 +93,12 @@ CONTAINS
        raVTemp(kMixFilRows),rSatAngle,raFreq(kMaxPts),rFracx
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
-    REAL :: raaAllWgt(kMaxPtsJac,kProfLayerJac)
-    REAL :: raaAllSurf(kMaxPtsJac,4)
     REAL :: raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
+! this is to help the cumulative sums over clouds
+    REAL :: raaaAllJacQout(kMaxDQ,kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllJacTout(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllWgtOut(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllSurfOut(kMaxPtsJac,4)
     CHARACTER(80) :: caJacobFile
     INTEGER :: iJacob,iaJacob(kMaxDQ),iProfileLayers,iTag,iActualTag
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
@@ -549,7 +553,7 @@ CONTAINS
             CALL scale_raResults(raResults,rFracx)		
             CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
             DO iFr = 1,kMaxPts
-              raaAllWgt(iFr,iLay) = raResults(iFr)
+              raaAllWgtOut(iFr,iLay) = raResults(iFr)
             END DO
         END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
@@ -558,7 +562,7 @@ CONTAINS
         END DO
         DO iLay = iNumLayer,1,-1
           DO iFr = 1,kMaxPts
-            raaAllWgt(iFr,iLay) = 0.0
+            raaAllWgtOut(iFr,iLay) = 0.0
           END DO
           CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
         END DO
@@ -569,7 +573,7 @@ CONTAINS
       rDelta,iAtm,-20,4)
     DO iLay = 1,4
       DO iFr=1,kMaxPts
-        raaAllSurf(iFr,iLay) = 0.0
+        raaAllSurfOut(iFr,iLay) = 0.0
       END DO
     END DO
     DO iG=1,kMaxPts
