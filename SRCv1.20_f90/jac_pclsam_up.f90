@@ -148,7 +148,7 @@ CONTAINS
     REAL :: raaSolarScatterCumul(kMaxPts,kProfLayer),raLMm1_toGnd(kMaxPts)
     INTEGER :: iWhichLayer
 
-    INTEGER :: iDefault,iWhichJac,iFr
+    INTEGER :: iDefault,iWhichJac,iFr,iJ
     INTEGER :: iDoAdd,iErr
 
     iDefault  = -1     !! do all jacs (Q,T,W,surface)
@@ -343,16 +343,20 @@ CONTAINS
         END IF
     END DO
 
-    IF ((iWhichJac == -1) .OR. (iWhichJac == -2) &
-     .OR. (iWhichJac == 20)) THEN
+    IF ((iWhichJac == -1) .OR. (iWhichJac == -2).OR. (iWhichJac == 20)) THEN
+        iJ = 0
         DO iG=1,iNumGases
         ! for each of the iNumGases whose ID's <= kMaxDQ
         ! have to do all the iNumLayer radiances
             iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
             IF (iGasJacList > 0) THEN
+                iJ = iJ + 1
                 iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
-                CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
-                raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
+                IF (iPrintAllPCLSAMJacs > 0) THEN
+!                 print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
+                  CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
+                    raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
+                END IF
                 DO iLay = iNumLayer,1,-1
                     rWeight = raaMix(iaaRadLayer(iAtm,iLay),iG)
                     IF (iLay == iNumLayer) THEN
@@ -383,13 +387,14 @@ CONTAINS
                         iWhichLayer = iaaRadLayer(iAtm,iLay)-iLowest+1
                         CALL scale_raResults(raResults,rFracx)				
                         CALL doJacobOutput(iLowest,raFreq,raResults, &
-                        radBTdr,raaAmt,raInten,iaGases(iG),iWhichLayer,iGasPosn)
+                          radBTdr,raaAmt,raInten,iaGases(iG),iWhichLayer,iGasPosn)
+                        raaaAllJacQOut(iJ,:,iLay) = raResults
                     ELSE
-                        DO iFr = 1,kMaxPts
-                            raResults(iFr) = 0.0
-                        END DO
+                        raResults = 0.0
                     END IF
-                    CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+                    IF (iPrintAllPCLSAMJacs > 0) THEN
+                      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+                    END IF
                 END DO
             END IF
         END DO
@@ -397,17 +402,23 @@ CONTAINS
         DO iFr = 1,kMaxPts
             raResults(iFr) = 0.0
         END DO
+        iJ = 0
         DO iG=1,iNumGases
         ! for each of the iNumGases whose ID's <= kMaxDQ
         ! have to do all the iNumLayer radiances
             iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
             IF (iGasJacList > 0) THEN
+                iJ = iJ + 1
                 iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
-                CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
-                raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
-                DO iLay = iNumLayer,1,-1
+                IF (iPrintAllPCLSAMJacs > 0) THEN
+!                  print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
+                  CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
+                    raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
+                  DO iLay = iNumLayer,1,-1
                     CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-                END DO
+                    raaaAllJacQOut(iJ,:,iLay) = raResults
+                  END DO
+              END IF
             END IF
         END DO
     END IF
@@ -419,14 +430,18 @@ CONTAINS
         ! have to do all the iNumLayer radiances
             iGasJacList = DoGasJacob(iaGasesTemp(iG),iaJacob,iJacob)
             IF (iGasJacList > 0) THEN
+                iJ = iJ + 1
                 iGasPosn = -1   !!!for JacobOutput
                 IF (iG == iNumGases+1) THEN
                     iIWPorDME = +1
                 ELSEIF (iG == iNumGases+2) THEN
                     iIWPorDME = -1
                 END IF
-                CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
-                raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
+                IF (iPrintAllPCLSAMJacs > 0) THEN
+!                 print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
+                  CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
+                    raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
+                END IF
                 DO iLay=iNumLayer,1,-1
                     rWeight = 1.0
                     IF (iG == iNumGases+1) THEN
@@ -435,10 +450,11 @@ CONTAINS
                         write(kStdWarn,*)'DME d/dq lay#',iLay,iaaRadLayer(iAtm,iLay)
                     END IF
                     IF (iaCldLayer(iLay) <= 0) THEN
-                    ! no cloud here, so indpt of cloud params!!!
-                        DO iFr = 1,kMaxPts
-                            raResults(iFr) = 0.0
-                        END DO
+                      ! no cloud here, so indpt of cloud params!!!
+                      DO iFr = 1,kMaxPts
+                        raResults(iFr) = 0.0
+                      END DO
+                      raaaAllJacQOut(iJ,:,iLay) = raResults
                     ELSE
                         CALL JacobCloudAmtUp(raFreq,raaRad,raaRadDT, &
                         iLay,iNumGasesTemp,iaaRadLayer,iAtm,iNumLayer,raUseEmissivity, &
@@ -463,11 +479,14 @@ CONTAINS
                             raResults)
                         END IF
                         CALL scale_raResults(raResults,rFracx)				
+                        raaaAllJacQOut(iJ,:,iLay) = raResults
                     END IF
                     iWhichLayer = iaaRadLayer(iAtm,iLay)-iLowest+1
                     CALL doJacobOutput(iLowest,raFreq,raResults, &
                     radBTdr,raaAmt,raInten,iaGasesTemp(iG),iWhichLayer,iGasPosn)
-                    CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+                    IF (iPrintAllPCLSAMJacs > 0) THEN
+                      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+                     END IF
                 END DO
             END IF
         END DO
@@ -480,19 +499,27 @@ CONTAINS
         ! have to do all the iNumLayer radiances
             iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
             IF (iGasJacList > 0) THEN
+                iJ = iJ + 1
                 iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
-                CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
-                raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
-                DO iLay = iNumLayer,1,-1
+                IF (iPrintAllPCLSAMJacs > 0) THEN
+!                 print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
+                  CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
+                  raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
+                  DO iLay = iNumLayer,1,-1
                     CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-                END DO
+                    raaaAllJacQOut(iJ,:,iLay) = raResults
+                  END DO
+                END IF
             END IF
         END DO
     END IF
 
 ! then do the temperatures d/dT
-    CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
-    rDelta,iAtm,0,iNumLayer)
+    IF (iPrintAllPCLSAMJacs > 0) THEN
+!     print *,'wrtout head T',iNumLayer
+      CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
+        rDelta,iAtm,0,iNumLayer)
+    END IF
     IF ((iWhichJac == -1) .OR. (iWhichJac == 30) .OR. &
     (iWhichJac == -2) .OR. (iWhichJac == 32)) THEN
         DO iLay = iNumLayer,1,-1
@@ -525,20 +552,28 @@ CONTAINS
             iWhichLayer = iaaRadLayer(iAtm,iLay)-iLowest+1
             CALL doJacobOutput(iLowest,raFreq,raResults,radBTdr,raaAmt,raInten,0,iWhichLayer,-1)
             CALL scale_raResults(raResults,rFracx)		    
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+            raaAllJacTOut(:,iLay) = raResults        
+            IF (iPrintAllPCLSAMJacs > 0) THEN
+              CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+            END IF
         END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
         DO iFr = 1,kMaxPts
             raResults(iFr) = 0.0
         END DO
-        DO iLay = iNumLayer,1,-1
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-        END DO
+        IF (iPrintAllPCLSAMJacs > 0) THEN
+          DO iLay = iNumLayer,1,-1
+              CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+          END DO
+        END IF
     END IF
 
 ! do the weighting functions
-    CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
-    rDelta,iAtm,-10,iNumLayer)
+    IF (iPrintAllPCLSAMJacs > 0) THEN
+!     print *,'wrtout head WGT',iNumLayer
+      CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
+        rDelta,iAtm,-10,iNumLayer)
+    END IF
     IF ((iWhichJac == -1) .OR. (iWhichJac == 40) .OR. &
     (iWhichJac == -2)) THEN
         DO iLay = iNumLayer,1,-1
@@ -551,39 +586,39 @@ CONTAINS
         !     $                               iWhichLayer)
         ! so just output the weighting functions
             CALL scale_raResults(raResults,rFracx)		
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-            DO iFr = 1,kMaxPts
-              raaAllWgtOut(iFr,iLay) = raResults(iFr)
-            END DO
+            raaAllWgtOut(:,iLay) = raResults
+            IF (iPrintAllPCLSAMJacs > 0) THEN
+              CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+            END IF
+            raaAllWgtOut(:,iLay) = raResults
         END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-        DO iFr = 1,kMaxPts
-            raResults(iFr) = 0.0
-        END DO
+        raResults = 0.0
         DO iLay = iNumLayer,1,-1
-          DO iFr = 1,kMaxPts
-            raaAllWgtOut(iFr,iLay) = 0.0
-          END DO
-          CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+          raaAllWgtOut(:,iLay) = 0.0
+          IF (iPrintAllPCLSAMJacs > 0) THEN
+            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+          END IF
         END DO
     END IF
      
 ! computing Jacobians wrt surface parameters is meanigless .. output 0's
-    CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
-      rDelta,iAtm,-20,4)
+   IF (iPrintAllPCLSAMJacs > 0) THEN
+!      print *,'wrtout head Surf',4
+      CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
+        rDelta,iAtm,-20,4)
+    END IF
     DO iLay = 1,4
-      DO iFr=1,kMaxPts
-        raaAllSurfOut(iFr,iLay) = 0.0
-      END DO
+      raaAllSurfOut(:,iLay) = 0.0
     END DO
-    DO iG=1,kMaxPts
-        raResults(iG) = 0.0
-    END DO
-    CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-    CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-    CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-    CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-     
+    raResults = 0.0
+    IF (iPrintAllPCLSAMJacs > 0) THEN
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+    END IF
+
     RETURN
     end SUBROUTINE UpwardJacobian_ScatPCLSAM
 

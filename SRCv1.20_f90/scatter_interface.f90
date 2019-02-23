@@ -183,11 +183,11 @@ CONTAINS
       iPrintAllPCLSAMJacs = +1   !! print all the individual jacs and the final weighted combo
     END IF
 
-    !! debug : see scatter_interface.f90 and s_writefile.f90
-    iNatmCldEffective    = iNatm    !!! debug
-    iPrintAllPCLSAMJacs  = 1        !!! debug
-    print *,'scatter_interface.f90 : iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs'
-    print *,'scatter_interface.f90 : ',iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs
+    !! uncomment these next two to debug : see scatter_interface.f90 and s_writefile.f90
+    !! iNatmCldEffective    = iNatm    !!! debug
+    !! iPrintAllPCLSAMJacs  = 1        !!! debug
+    !! print *,'scatter_interface.f90 : iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs'
+    !! print *,'scatter_interface.f90 : ',iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs
 
     iNumGasesTemp = iNumGases
     DO iL = 1,iNumGases
@@ -598,8 +598,8 @@ CONTAINS
               raaAllSurfOut5(iFr,iL)  = raaAllSurfOut5(iFr,iL)  + raaAllSurfOut(iFr,iL)  
             END DO
           END DO
-        print *,iAtm,raaAllDT(6100,1),raaAllWgtOut(6100,1),raaaAllDQ(6100,1,1), &
-                     raaAllDT5(6100,1),raaAllWgtOut5(6100,1),raaaAllDQ5(6100,1,1)
+!        print *,iAtm,raaAllDT(6100,1),raaAllWgtOut(6100,1),raaaAllDQ(6100,1,1), &
+!                     raaAllDT5(6100,1),raaAllWgtOut5(6100,1),raaaAllDQ5(6100,1,1)
 
         ELSEIF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. iDoPCLSAM < 0) THEN
           rDelta = real(kaFrStep(iTag))
@@ -610,7 +610,7 @@ CONTAINS
             iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
             IF (iGasJacList > 0) THEN
               iJ = iJ + 1
-              print *,'wrtout head G in scat_in',iG,iaGases(iG),iNumLayer
+!              print *,'wrtout head G in scat_in',iG,iaGases(iG),iNumLayer
               CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1), &
                                raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
               DO iL = 1,iNumLayer
@@ -626,7 +626,7 @@ CONTAINS
             iGasJacList=DoGasJacob(iaGasesTemp(iG),iaJacob,iJacob)
             IF (iGasJacList > 0) THEN
               iJ = iJ + 1
-              print *,'wrtout head G 101/102 in scat_in',iG,iaGasesTemp(iG),iNumLayer
+!              print *,'wrtout head G 101/102 in scat_in',iG,iaGasesTemp(iG),iNumLayer
               CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1), &
                                raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
               DO iL = 1,iNumLayer
@@ -639,7 +639,7 @@ CONTAINS
             END IF
           END DO
 
-          print *,'wrtout head T in scat_in',iNumLayer
+!          print *,'wrtout head T in scat_in',iNumLayer
           CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
                    rDelta,iAtm,0,iNumLayer)
           DO iL = 1,iNumLayer
@@ -649,7 +649,7 @@ CONTAINS
             CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
           END DO
 
-          print *,'wrtout head WGT in scat_in',iNumLayer
+!          print *,'wrtout head WGT in scat_in',iNumLayer
           CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
                 rDelta,iAtm,-10,iNumLayer)
           DO iL = 1,iNumLayer
@@ -659,7 +659,7 @@ CONTAINS
             CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
           END DO
 
-          print *,'wrtout head Surf in scat_in',4
+!          print *,'wrtout head Surf in scat_in',4
           CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
                   rDelta,iAtm,-20,4)
           DO iL = 1,4

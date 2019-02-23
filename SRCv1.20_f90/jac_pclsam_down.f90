@@ -168,8 +168,6 @@ CONTAINS
 
     iWhichJac = kActualJacs
 
-    print *,'jac_pclsam_down.f90 here'
-    
     IF (iDefault /= iWhichJac) THEN
         print *,'iDefault,iWhichJac = ',iDefault,iWhichJac
     END IF
@@ -359,7 +357,7 @@ CONTAINS
           iJ = iJ + 1
           iGasPosn = WhichGasPosn(iaGasesTemp(iG),iaGasesTemp,iNumGasesTemp)
           IF (iPrintAllPCLSAMJacs > 0) THEN
-            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
+!            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
             CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                            raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
           END IF
@@ -420,7 +418,7 @@ CONTAINS
           iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
           iJ = iJ + 1
           IF (iPrintAllPCLSAMJacs > 0) THEN
-            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
+!            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
             CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                 raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
             DO iLay = 1,iNumLayer
@@ -438,8 +436,8 @@ CONTAINS
         ! for each of the iNumGases whose ID's <= kMaxDQ
         ! have to do all the iNumLayer radiances
         iGasJacList = DoGasJacob(iaGasesTemp(iG),iaJacob,iJacob)
-        iJ = iJ + 1
         IF (iGasJacList > 0) THEN
+          iJ = iJ + 1
           iGasPosn = -1   !!!for JacobOutput
           IF (iG == iNumGases+1) THEN
             iIWPorDME = +1
@@ -447,7 +445,7 @@ CONTAINS
             iIWPorDME = -1
           END IF
           IF (iPrintAllPCLSAMJacs > 0) THEN
-            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
+!            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
             CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                 raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
           END IF
@@ -515,6 +513,7 @@ CONTAINS
           iJ = iJ + 1
           iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
           IF (iPrintAllPCLSAMJacs > 0) THEN
+!            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
             CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                            raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
             DO iLay = 1,iNumLayer
@@ -528,7 +527,7 @@ CONTAINS
 
 ! then do the temperatures d/dT
     IF (iPrintAllPCLSAMJacs > 0) THEN
-       print *,'wrtout head T',iNumLayer
+!       print *,'wrtout head T',iNumLayer
       CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
         rDelta,iAtm,0,iNumLayer)
     END IF
@@ -584,7 +583,7 @@ CONTAINS
 
 ! do the weighting functions
     IF (iPrintAllPCLSAMJacs > 0) THEN
-       print *,'wrtout head WGT',iNumLayer
+!       print *,'wrtout head WGT',iNumLayer
       CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
         rDelta,iAtm,-10,iNumLayer)
     END IF
@@ -615,7 +614,7 @@ CONTAINS
 ! finally do the surface sensitivities : d/d(SurfaceTemp),
 ! d/d(SurfEmiss) for total,thermal and d/d(solar emis) of solar radiances
     IF (iPrintAllPCLSAMJacs > 0) THEN
-      print *,'wrtout head Surf',4
+!      print *,'wrtout head Surf',4
       CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
             rDelta,iAtm,-20,4)
     END IF

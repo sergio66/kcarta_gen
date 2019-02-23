@@ -2961,11 +2961,11 @@ CONTAINS
       iPrintAllPCLSAMJacs = +1   !! print all the individual jacs and the final weighted combo
     END IF
 
-    !! debug : see scatter_interface.f90 and s_writefile.f90
-    iNatmCldEffective    = iNatm    !!! debug
-    iPrintAllPCLSAMJacs  = 1        !!! debug
-    print *,'s_writefile : iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs'
-    print *,'s_writefile : ',iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs
+    !! uncomment these next two to debug : see scatter_interface.f90 and s_writefile.f90
+    !! iNatmCldEffective    = iNatm    !!! debug
+    !! iPrintAllPCLSAMJacs  = 1        !!! debug
+    !! print *,'s_writefile : iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs'
+    !! print *,'s_writefile : ',iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs
     
     IF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. kScatter > 0) THEN
 	
