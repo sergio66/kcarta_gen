@@ -211,4 +211,22 @@ CONTAINS
     end SUBROUTINE find_jacobians
 
 !************************************************************************
+! this is a very simple subroutine that multimplies raResults by a constant
+    SUBROUTINE scale_raResults(raResults,rFracx)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/scatterparam.f90'
+    
+    REAL :: raResults(kMaxPtsJac),rFracx
+
+    INTEGER :: iFr
+
+    DO iFr = 1,kMaxPtsJac
+      raResults(iFr) = raResults(iFr) * rFracx
+    END DO
+    
+    RETURN
+    end SUBROUTINE scale_raResults
+!************************************************************************
 END MODULE jac_main

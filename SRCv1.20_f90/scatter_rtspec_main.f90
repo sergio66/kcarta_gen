@@ -397,13 +397,13 @@ CONTAINS
 !        CAll DoSTOP
 !      ENDIF
 
-    CALL SetMieTables_RTSPEC(raFreq, & &
+    CALL SetMieTables_RTSPEC(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
-    -1,              &  & !!!!iSergio = -1 as this is ORIG RTSPEC code
+    -1,              &  !!!!iSergio = -1 as this is ORIG RTSPEC code
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -518,7 +518,7 @@ CONTAINS
                 CALL COMPUTE_RADIATIVE_TRANSFER (RTMODEL, &
                 MUOBS, IOBS, WAVENO, &
                 NLEV, TEMP, TAUGAS, SFCTEMP, SFCEMIS, &
-                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, & &
+                NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
             !!!!!!!!!!!!!!!!!!!MAXTAB, MAXGRID,
                 NSCATTAB, MUINC, &
                 NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &

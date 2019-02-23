@@ -568,17 +568,6 @@ CONTAINS
             raUpperPress,raUpperTemp, &
             raaRadsX,iNumOutX)
         END IF
-
-    ELSE
-    !          iIOUN_USE = kStdJacob2
-    !          write(kStdWarn,*) 'dump out zeros instead of col jacs/stemp jacs'
-    !          DO iFr = 1,kMaxPts
-    !            raJunk(iFr) = 0.0
-    !          END DO
-    !          DO iI = 1,iJacob+1
-    !            CALL wrtout(iIOUN_USE,caJacobFile2,raFreq,raJunk)
-    !          END DO
-    !! just do nothing and dump out nothing, to save space
     END IF
     RETURN
     end SUBROUTINE rad_pclsam_coljac
@@ -1233,9 +1222,6 @@ CONTAINS
     DO iFr=1,kMaxPts
         raSun(iFr) = 0.0
     END DO
-
-! un      iNumOutX = iNumOutX + 1
-! un      CALL wrtout(iIOUN,caOutName,raFreq,raThermal)
 
     RETURN
     end SUBROUTINE rad_UP_pclsam_solar
@@ -1968,18 +1954,6 @@ CONTAINS
             END IF
         END IF
                
-    ! un          DO iFr=1,kMaxPts
-    ! un            raInten(iFr) = raaSolarScatter1Lay(iFr,iL) +
-    ! un     $                     raInten(iFr)*raaLayTrans(iFr,iLay)
-    ! un          END DO
-    ! un          CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-         
-    !c no need to do radiative transfer thru this layer
-    !c        DO iFr=1,kMaxPts
-    !c          raInten(iFr) = raaEmission(iFr,iLay)+
-    !c     $                   raaSolarScatter1Lay(iFr,iL) +
-    !c     $                   raInten(iFr)*raaLayTrans(iFr,iLay)
-    !c        END DO
     END DO      !!       DO iLay=iHigh,iHigh
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2487,18 +2461,6 @@ CONTAINS
             END IF
         END IF
                
-    ! un          DO iFr=1,kMaxPts
-    ! un            raInten(iFr) = raaSolarScatter1Lay(iFr,iL) +
-    ! un     $                     raInten(iFr)*raaLayTrans(iFr,iLay)
-    ! un          END DO
-    ! un          CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-         
-    !c no need to do radiative transfer thru this layer
-    !c        DO iFr=1,kMaxPts
-    !c          raInten(iFr) = raaEmission(iFr,iLay)+
-    !c     $                   raaSolarScatter1Lay(iFr,iL) +
-    !c     $                   raInten(iFr)*raaLayTrans(iFr,iLay)
-    !c        END DO
     END DO      !!       DO iLay=iHigh,iHigh
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 

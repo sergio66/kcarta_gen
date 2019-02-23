@@ -457,13 +457,13 @@ CONTAINS
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
         write(kStdWarn,*) '  >> Setting cloud params for TwoSlab PCLSAM'
-        CALL SetMieTables_RTSPEC(raFreq, & &
+        CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
-        -1,              &  & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iSergio = -1 to make things OK
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -473,15 +473,15 @@ CONTAINS
         iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA)
     ELSE
         write(kStdWarn,*) '  >> Setting cloud params for 100 layer PCLSAM'
-        CALL SetMieTables_RTSPEC_100layer(raFreq, & &
+        CALL SetMieTables_RTSPEC_100layer(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
-        -1,              &  & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iSergio = -1 to make things OK
     !!!!!!!!!!!!!!!!!! these are the cloud profiles
-        iaCldTypes,raaKlayersCldAmt,raVTemp, & &
+        iaCldTypes,raaKlayersCldAmt,raVTemp, &
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &

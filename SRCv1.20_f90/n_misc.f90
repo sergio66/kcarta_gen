@@ -261,7 +261,10 @@ CONTAINS
                                     !!!   in clear_scatter_misc.f
     iaaOverrideDefault(1,8) = -1    !!! -1 to keep h.vcmin/h.vcmax as read in from RTPfile, +1 to override with rf1,rf2
     iaaOverrideDefault(1,9) =  0    !!! iCO2WVCA = +2 will turn it on for SUBR add_co2_wv_n2_continuum in kcoeffMAIN.f/kcoeff_common.f90
-    
+! new for cloudy jacs
+    iaaOverrideDefault(1,10) =  -1  !!! output only final jacobian (ie wieghted sum); if you set +1, it will output all jacobians
+                                    !!!   so the file can be 5 times larger than needed (ice/water/both/clear/total) HUGE! SAD!
+
 ! RadTrans
     iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
     iaaOverrideDefault(2,2) = +3    !!! THIS IS LBLRTM STYLE iGaussPts = 3 for flux and downwell gauss quad
@@ -374,9 +377,9 @@ CONTAINS
 ! allowedCKD = [origCKD MTCKD1 MTCKD25];
 ! ----------------------------------------------------------------------------
 
-    IF ((kCKD /= -1) & &
+    IF ((kCKD /= -1) &
 !!! the std CKD pre-2002 versions
-     .AND. (kCKD /= 0) .AND. (kCKD /= 21) .AND. (kCKD /= 23) .AND. (kCKD /= 24) & &
+     .AND. (kCKD /= 0) .AND. (kCKD /= 21) .AND. (kCKD /= 23) .AND. (kCKD /= 24) &
 !!! these are MT_CKD1 and research versions from AIRS data
      .AND. (kCKD /= 1) .AND. (kCKD /= 4) .AND. (kCKD /= 6) &
 !!! these are MT_CKD25 owards more recent versions

@@ -11,9 +11,9 @@
 # -N109 fold all names to upper case
 # -N15  so that LAPACK lib can be included; adds trailing underscores
 #
-F77 = /usr/bin/f77
-F77 = f77
-F77 = /asl/opt/absoft/absoft10.0/bin/af77
+#F77 = /usr/bin/f77
+#F77 = f77
+#F77 = /asl/opt/absoft/absoft10.0/bin/af77
 #FFLAGS = -w -W -C -N3 -N109
 #FFLAGS = -w -W -O -N3 -N109
 FFLAGS = -w -W -O3 -N3 -f -N15
@@ -27,8 +27,9 @@ FFLAGS = -w -W -O3 -N3 -f -N15
 
 #Linux with ifort
 #----------------------
-#F77 = /cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
-#FFLAGS = -names lowercase -extend-source 132 -check bounds -msse2
+F77 = /cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
+F77 = ifort
+FFLAGS = -names lowercase -extend-source 132 -check bounds -msse2
 
 libblas.a:
 	$(F77) -c $(FFLAGS) *.f

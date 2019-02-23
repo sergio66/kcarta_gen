@@ -2864,15 +2864,15 @@ CONTAINS
 ! Authors: ZHIAN SUN; KEITH P. SHINE
 ! Source: Quarterly Journal of the Royal Meteorological Society,
 ! Volume 120, Number 515, January 1994 Part A, pp. 111-137(27)
-    SUBROUTINE SetMieTables_RTSPEC_100layer(raFreq, & &
+    SUBROUTINE SetMieTables_RTSPEC_100layer(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
-    iSergio, & &
+    iSergio, &
 !!!!!!!!!!!!!!!!!! these are the cloud profiles PLUS output
-    iaCldTypes,raaKlayersCldAmt,raVTemp, & &
+    iaCldTypes,raaKlayersCldAmt,raVTemp, &
 !!!!!!!!!!!!!!!!!! these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &

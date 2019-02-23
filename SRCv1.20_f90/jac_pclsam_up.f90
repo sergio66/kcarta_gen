@@ -41,18 +41,18 @@ CONTAINS
 !****** THESE ARE THE SCATTERING JACOBIANS FOR THE UP LOOK INSTR ******
 !************************************************************************
 ! this subroutine does the Jacobians for downward looking instrument
-    SUBROUTINE UpwardJacobian_Scat(raFreq,iProfileLayers,raPressLevels, &
+    SUBROUTINE UpwardJacobian_ScatPCLSAM(raFreq,iProfileLayers,raPressLevels, &
     iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
-    rSatAngle,raLayAngles,raSunAngles,raVTemp, &
+    rSatAngle,raLayAngles,raSunAngles,raVTemp, ctype2,rFracx,&
     iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
-    raaaAllDQ,raaAllDT,raaAmt,raInten, &
+    raaaAllDQ,raaAllDT,raaAllWgt,raaAllSurf,raaAmt,raInten, &
     raSurface,raSun,raThermal,rFracTop,rFracBot, &
     iaJacob,iJacob,raaMix,raSunRefl,rDelta, &
     iNpMix,iTag,iActualTag, &
     raaExtTemp,raaSSAlbTemp,raaAsymTemp,raaPhaseJacobASYM, &
     raaExtJacobIWP,raaSSAlbJacobIWP,raaAsymJacobIWP, &
     raaExtJacobDME,raaSSAlbJacobDME,raaAsymJacobDME, &
-    iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA, &
+    iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA, iPrintAllPCLSAMJacs, &
     iNLTEStart,raaPlanckCoeff)
 
     IMPLICIT NONE
@@ -89,14 +89,16 @@ CONTAINS
     REAL :: raSunRefl(kMaxPts),rFracTop,rFracBot
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: rTSpace,rTSurface,raUseEmissivity(kMaxPts), &
-    raVTemp(kMixFilRows),rSatAngle,raFreq(kMaxPts)
+       raVTemp(kMixFilRows),rSatAngle,raFreq(kMaxPts),rFracx
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllWgt(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaAllSurf(kMaxPtsJac,4)
     REAL :: raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
     CHARACTER(80) :: caJacobFile
     INTEGER :: iJacob,iaJacob(kMaxDQ),iProfileLayers,iTag,iActualTag
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
-    INTEGER :: iNumGases,iAtm,iNatm,iaGases(kMaxGas)
+    INTEGER :: iNumGases,iAtm,iNatm,ctype2,iaGases(kMaxGas)
 ! this is for NLTE weight fcns
     INTEGER :: iNLTEStart
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
@@ -111,7 +113,7 @@ CONTAINS
     REAL :: raaSSAlbTemp(kMaxPts,kMixFilRows)  !scattering temporary copy
     REAL :: raaAsymTemp(kMaxPts,kMixFilRows)   !asymmetry temporary copy
     REAL :: raaPhaseJacobASYM(kMaxPts,kProfLayerJac) !phase fcn jacobians wrt g
-    INTEGER :: iNpMix,iCLoudySky
+    INTEGER :: iNpMix,iCLoudySky,iPrintAllPCLSAMJacs
 
 ! local variables
     INTEGER :: iNumGasesTemp,iaGasesTemp(kMaxGas)
@@ -375,6 +377,7 @@ CONTAINS
                             raResults)
                         END IF
                         iWhichLayer = iaaRadLayer(iAtm,iLay)-iLowest+1
+                        CALL scale_raResults(raResults,rFracx)				
                         CALL doJacobOutput(iLowest,raFreq,raResults, &
                         radBTdr,raaAmt,raInten,iaGases(iG),iWhichLayer,iGasPosn)
                     ELSE
@@ -455,6 +458,7 @@ CONTAINS
                             raaExtJacobDME,raaSSAlbJacobDME,raaAsymJacobDME, &
                             raResults)
                         END IF
+                        CALL scale_raResults(raResults,rFracx)				
                     END IF
                     iWhichLayer = iaaRadLayer(iAtm,iLay)-iLowest+1
                     CALL doJacobOutput(iLowest,raFreq,raResults, &
@@ -515,8 +519,8 @@ CONTAINS
                 raResults)
             END IF
             iWhichLayer = iaaRadLayer(iAtm,iLay)-iLowest+1
-            CALL doJacobOutput(iLowest,raFreq,raResults, &
-            radBTdr,raaAmt,raInten,0,iWhichLayer,-1)
+            CALL doJacobOutput(iLowest,raFreq,raResults,radBTdr,raaAmt,raInten,0,iWhichLayer,-1)
+            CALL scale_raResults(raResults,rFracx)		    
             CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
         END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
@@ -542,20 +546,32 @@ CONTAINS
         !      CALL doJacobOutput(raFreq,raResults,radBTdr,raaAmt,raInten,0,
         !     $                               iWhichLayer)
         ! so just output the weighting functions
+            CALL scale_raResults(raResults,rFracx)		
             CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+            DO iFr = 1,kMaxPts
+              raaAllWgt(iFr,iLay) = raResults(iFr)
+            END DO
         END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
         DO iFr = 1,kMaxPts
             raResults(iFr) = 0.0
         END DO
         DO iLay = iNumLayer,1,-1
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+          DO iFr = 1,kMaxPts
+            raaAllWgt(iFr,iLay) = 0.0
+          END DO
+          CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
         END DO
     END IF
      
 ! computing Jacobians wrt surface parameters is meanigless .. output 0's
     CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
-    rDelta,iAtm,-20,4)
+      rDelta,iAtm,-20,4)
+    DO iLay = 1,4
+      DO iFr=1,kMaxPts
+        raaAllSurf(iFr,iLay) = 0.0
+      END DO
+    END DO
     DO iG=1,kMaxPts
         raResults(iG) = 0.0
     END DO
@@ -565,7 +581,7 @@ CONTAINS
     CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
      
     RETURN
-    end SUBROUTINE UpwardJacobian_Scat
+    end SUBROUTINE UpwardJacobian_ScatPCLSAM
 
 !************************************************************************
 ! this subroutine adds on the solar contribution to the Cld Amt Jacobian

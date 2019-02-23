@@ -78,6 +78,7 @@ CONTAINS
 
     IF (head.ngas > MAXGAS) THEN
     !! see /home/sergio/git/rtp/rtpV201/include/rtpdefs.f90
+    !! see /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90    
         write(kStdErr,*) ' SUBR  IdentifyChannelsRTP >>>> number of gases in RTP     file = ',head.ngas
         write(kStdErr,*) '                           >>>> number of gases in RTPDEFS      = ',MAXGAS
         Call DoStop

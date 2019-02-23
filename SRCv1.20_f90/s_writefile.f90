@@ -2146,6 +2146,9 @@ CONTAINS
     INTEGER :: iCo2,iaCO2path(kProfLayer),iaLayerFlux(kMaxAtm)
     INTEGER :: iaJunkFlux(2*kProfLayer)
 
+! this is for cloudy jacobians and PCLSAM
+    INTEGER :: iNatmCldEffective,iPrintAllPCLSAMJacs
+    
     CHARACTER(120) :: caStr1,caStr2,caStr3
           
     include '../INCLUDE/gasIDnameparam.f90'
@@ -2945,7 +2948,25 @@ CONTAINS
 
     END IF
 !--------------- JACOBIAN BINARY FILE --------------------------------
-    IF (kJacobian >= 0 .AND. kActualJacs < 100) THEN
+
+
+    iNatmCldEffective   = +1     !! pretend you only have to print one atmosphere
+    iPrintAllPCLSAMJacs = -1     !! only print the weighted combo
+    IF ((kJacobian > 0) .AND. (kActualJacs /= 100) .AND. (iaaOverrideDefault(1,10) == -1) .AND. &
+        (kScatter > 0) .AND. (kWhichScatterCode == 5)) THEN
+      iNatmCldEffective = 1      !! this is PCLSAM so multiple imaginary (sub column) atmospheres
+      iPrintAllPCLSAMJacs = -1   !! only print the weighted combo
+    ELSE
+      iNatmCldEffective = iNatm
+      iPrintAllPCLSAMJacs = +1   !! print all the individual jacs and the final weighted combo
+    END IF
+
+    iNatmCldEffective    = iNatm    !!! debug
+    iPrintAllPCLSAMJacs  = 1        !!! debug
+    print *,'s_writefile',iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs
+        
+    IF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. kScatter > 0) THEN
+	
         write(kStdWarn,*) 'opening regular (large) jacobian output file (X(z))'
         write(kStdWarn,*) 'kJacobOutput = ',kJacobOutput
         iIOUN2 = kStdJacob
@@ -2988,7 +3009,7 @@ CONTAINS
     ! have a radiance and hence jacobian calculation associated with them
     ! assume all error checking done in section above (when blah.dat is created)
         iNatmJac=0
-        DO iI=1,iNatm
+        DO iI=1,iNatmCldEffective
         ! now output the list of mixed paths to be printed, for this atmosphere
             DO iJ=1,iOutTypes
                 IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN

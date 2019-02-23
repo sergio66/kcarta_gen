@@ -180,12 +180,12 @@
 
 !************************************************************************
 ! this subroutine sets up the scattering table info from SSCATMIE.F
-    SUBROUTINE SetMieTables_DISORT(raFreq, & &
+    SUBROUTINE SetMieTables_DISORT(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
     raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, & &
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -947,11 +947,11 @@
 
 !************************************************************************
 ! this does the final initializations before calling DISORT
-    SUBROUTINE FinalInitialization( & &
+    SUBROUTINE FinalInitialization( &
 !!!!inputs
     iDownWard,rSatAngle,rTopIntensity,rSolarBeam,emiss, &
     rSurfaceTemp,dtauc,dTotalOpticalDepth,iDoFlux,nlev, &
-    iNp,iaOp, & &
+    iNp,iaOp, &
 !!!!outputs
     usrtau,ntau,utau,usrang,numu,umu, &
     nphi,phi,fisot,fbeam,umu0,phi0, &
@@ -1348,12 +1348,12 @@
     WRITE (kStdWarn,*) 'cos(rSatAngle),sfctemp = ',cos(rSatAngle*kPi/180.0), &
     rSurfaceTemp
 
-    CALL SetMieTables_DISORT(raFreq, & &
+    CALL SetMieTables_DISORT(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
     raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, & &
+    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &

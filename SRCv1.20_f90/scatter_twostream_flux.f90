@@ -449,13 +449,13 @@
         raThickness,raDensityX,raDensity0,raDeltaPressure,rFracTop,rFracBot)
     END IF
 
-    CALL SetMieTables_RTSPEC(raFreq, & &
+    CALL SetMieTables_RTSPEC(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
-    -1,              &  & !!!!iSergio = -1 to make things OK
+    -1,              & !!!!iSergio = -1 to make things OK
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &

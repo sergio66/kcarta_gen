@@ -108,6 +108,7 @@ FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assum
 #
 #UFLAG = 
 LIBS  = -lblas -mkl
+LIBS  = -L ../LIB -lblas -mkl
 FDOUBLE = -r8
 
 ########################################################################
