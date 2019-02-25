@@ -575,7 +575,6 @@ CONTAINS
             raaRadsX,iNumOutX,rFracX)
       END IF
     END IF
-print *,'rad_pclsam_coljac rFRacX = ',rFracX
 
     RETURN
     end SUBROUTINE rad_pclsam_coljac
@@ -708,6 +707,14 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
     REAL :: raRad1(kMaxPts),raRefl(kMaxPts),raTOA2GND(kMaxPts)
     REAL :: raSunDirect(kMaxPts)
 
+    REAL :: rWeight
+
+    rWeight = 1.0
+    IF ((kActualJacs == 100) .AND. (rFracX .GE. 0.0) .AND. (rFracX .LE. 1.0)) THEN
+      rWeight = rFracX
+      print *,'hahahaha reset rWeight rad_UP_pclsam_solar ',rWeight
+    END IF
+       
     iDefault = +1         !!debugging,    use constant temp
     iDefault = -1         !!no debugging, use linear variation in temp
 
@@ -930,8 +937,9 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
-                    raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
+                  raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
                 CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
             END DO
@@ -1077,6 +1085,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
@@ -1161,6 +1170,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
@@ -1620,6 +1630,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
     REAL :: suncos,scos1,vsec1
 
 ! general
+!rFracX : mostly used for col jac radiance calcs
     REAL :: raOutFrac(kProfLayer)
     REAL :: raVT1(kMixFilRows),raVT2(kProfLayer+1)
     INTEGER :: iIOUN,N,iI,iLocalCldTop,iLocalCldBot
@@ -1627,7 +1638,14 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
     INTEGER :: iSTopNormalRadTransfer
     REAL :: rFrac,rL,rU,r0
     REAL :: raCC(kProfLayer),rC
-           
+    REAL :: rWeight
+
+    rWeight = 1.0
+    IF ((kActualJacs == 100) .AND. (rFracX .GE. 0.0) .AND. (rFracX .LE. 1.0)) THEN
+      rWeight = rFracX
+!      print *,'hahahaha reset rWeight rad_DOWN_pclsam_solar ',rWeight
+    END IF
+
     iNumOutX = 0
           
     rThermalRefl = 1.0/kPi
@@ -1850,6 +1868,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
@@ -1888,6 +1907,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
@@ -1928,6 +1948,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                     iProfileLayers,raPressLevels, &
                     iNLTEStart,raaPlanckCoeff)
                     iNumOutX = iNumOutX + 1
+                    raInten2 = raInten2 * rWeight
                     DO iFrX = 1,kMaxPts
                         raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                     END DO
@@ -1953,6 +1974,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
                 iaRadLayer,iNumlayer,raInten2,rCO2MixRatio)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
@@ -2079,6 +2101,9 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
     REAL :: raSunGasOnly(kMaxPts),raThermalGasOnly(kMaxPts)
     REAL :: raaExtWeighted(kMaxPts,kMixFilRows)
     REAL :: raIntenGasOnly(kMaxPts),raIntenWeighted(kMaxPts)
+    REAL :: rWeight
+
+    rWeight = 1.0
 
     iNumOutX = 0
           
@@ -2339,6 +2364,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
@@ -2386,6 +2412,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO
@@ -2434,6 +2461,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                     iProfileLayers,raPressLevels, &
                     iNLTEStart,raaPlanckCoeff)
                     iNumOutX = iNumOutX + 1
+                    raInten2 = raInten2 * rWeight
                     DO iFrX = 1,kMaxPts
                         raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                     END DO
@@ -2460,6 +2488,7 @@ print *,'rad_pclsam_coljac rFRacX = ',rFracX
                 CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
                 iaRadLayer,iNumlayer,raInten2,rCO2MixRatio)
                 iNumOutX = iNumOutX + 1
+                raInten2 = raInten2 * rWeight
                 DO iFrX = 1,kMaxPts
                     raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
                 END DO

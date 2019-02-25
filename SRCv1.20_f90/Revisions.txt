@@ -589,6 +589,17 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
+2/25/2019      Fixing bugs in the PCLSAM column jacobians : right now you 
+               read them in, and then add eg(1 thru 4) WHICH ARE ALREADY CORRECTLY WEIGHTED 
+               to get final weighted 5
+
+               So suppose there are 2 gases to be dumped, and T and stemp
+               This means for each chunk, the x.jac_COL will have 20 columns,
+               1:4 being for cld1, 5:8 being for cld2, 9:12 being for cld1/cld2 
+               overlap, 13:16 being for clear and then 17:20 being zeros for the sum
+               SO then the four jacs you need would be 
+                  jac(:,1:4) + jac(:,5:8) + jac(9:12) + jac(13:16)
+               
 2/23/2019      Rewrote PCLSAM TwoSLab jacobians so that you can either dump
                out a HUGE monchromatic jacobian file with x5 what you need 
                (ie the two individual clouds, overlap, clear AND final) or 

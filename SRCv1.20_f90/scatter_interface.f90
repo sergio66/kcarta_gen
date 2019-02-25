@@ -694,11 +694,9 @@ CONTAINS
             CALL PrintPound
 
           !! note : raaAllDT5  by rFracX as this is NOT done in doscatter_pclsam
-          DO iL = 1,kProfLayerJac
-            raaAllDT5(:,iL)  = raaAllDT5(:,iL)  + rFracX*raaRadsX(:,iL)
-          END DO
-          print *,'dumping out coljacs : ',raaAllDT5(1,1:5)
-
+!          DO iL = 1,kProfLayerJac
+!            raaAllDT5(:,iL)  = raaAllDT5(:,iL)  + rFracX*raaRadsX(:,iL)
+!          END DO
         END IF
 
     ! %%%%%%%%%%%%% CLOUDY SKY  %%%%%% FIRST ORDER PERTURBATION %%%%%%%%%%%%%%%
