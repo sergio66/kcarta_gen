@@ -345,10 +345,6 @@ CONTAINS
             END DO
 
         END IF
-        write(kStdWarn,*) ' '
-	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'
-	write(kStdWarn,*) '  Cloudy Calcs, iAtm = ',iAtm   
-	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'	
 	
         iDoPCLSAM = -1    !! assume no need to do PCLSAM scatter calc
 
@@ -366,9 +362,18 @@ CONTAINS
         1011 FORMAT(' Add PCLSAM contribution to total flux     : iAtm,Frac = ',I4,F10.5)
         1012 FORMAT(A31,I4,F10.5)
 
+        write(kStdWarn,*) ' '
+	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'
+	write(kStdWarn,*) '  Cloudy Calcs, iAtm = ',iAtm   
+	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'	
+
         IF (iDoPCLSAM > 0) THEN
-        !! this routine internally figures out 100 layer (cc = 0,1) or 100 layer (0 < cc < 1)
-        !! versus vs 2Slab
+          !! this internally figures out 100 layer (cc = 0,1) or 100 layer (0 < cc < 1)
+          !! versus vs 2Slab
+
+            rFracX = 0.0
+            rFracX = 1.0
+
             CALL doscatter_pclsam( &
             +1,raFreq,raaSumAbCoeff,raMixVertTemp, &
             caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
@@ -391,7 +396,7 @@ CONTAINS
             iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
             iaJacob,iJacob, &
             raTPressLevels,iKnowTP, &
-            raaRadsX,iNumOutX)
+            raaRadsX,iNumOutX,-1,rFracX)
 
             IF (iNumOutX > kProfLayer) THEN
                 write(kStdErr,*) 'Ooops : user has asked for >= kProfLayer radiance outputs'
@@ -400,8 +405,6 @@ CONTAINS
                 CALL DoStop
             END IF
 
-            rFracX = 0.0
-            rFracX = 1.0
             IF ((ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
             !!! keep acumulating for one cloud case
                 IF ((cfrac12 > 0) .OR. (cfrac2 > 0)) THEN
@@ -418,9 +421,7 @@ CONTAINS
                 END IF
                 write(kStdWarn,1012) 'One Cloud Case : iAtm,rFracX = ',iAtm,rFracX
                 DO iL = 1,iNumOutX
-                    DO iFr = 1,kMaxPts
-                        raaRads5(iFr,iL) = raaRads5(iFr,iL) + rFracX * raaRadsX(iFr,iL)
-                    END DO
+                   raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
                 END DO
 
             ELSEIF (k100layerCloud == 100) THEN
@@ -439,9 +440,7 @@ CONTAINS
                 END IF
                 write(kStdWarn,1012) '100 Cloud case : iAtm,rFracX = ',iAtm,rFracX
                 DO iL = 1,iNumOutX
-                    DO iFr = 1,kMaxPts
-                        raaRads5(iFr,iL) = raaRads5(iFr,iL) + rFracX * raaRadsX(iFr,iL)
-                    END DO
+                   raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
                 END DO
 
             ELSEIF ((ctype2 > 10) .AND. (k100layerCloud < 0)) THEN
@@ -461,27 +460,25 @@ CONTAINS
                 END IF
                 write(kStdWarn,1012) 'Two Cloud case : iAtm,rFracX = ',iAtm,rFracX
                 DO iL = 1,iNumOutX
-                    DO iFr = 1,kMaxPts
-                        raaRads5(iFr,iL) = raaRads5(iFr,iL) + rFracX * raaRadsX(iFr,iL)
-                    END DO
+                  raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
                 END DO
             END IF
 
         ELSEIF (iDoPCLSAM < 0) THEN
             IF ((iAtm == 5) .AND. (ctype2 > 0) .AND. (k100layerCloud < 0)) THEN
-                write(kStdWarn,*) 'Add PCLSAM two cloud case : doing linear combo of rads'
+                write(kStdWarn,*) 'Add PCLSAM two cloud case : writing out linear combo of rads'
             ELSEIF ((iAtm == 3) .AND. (ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
-                write(kStdWarn,*) 'Add PCLSAM one cloud case : doing linear combo of rads'
+                write(kStdWarn,*) 'Add PCLSAM one cloud case : writing out linear combo of rads'
             ELSEIF ((iAtm == 3) .AND. (k100layerCloud == 1)) THEN
-                write(kStdWarn,*) 'Add PCLSAM 100 layer cloud case : doing linear combo of rads'
+                write(kStdWarn,*) 'Add PCLSAM 100 layer cloud case : writing out linear combo of rads'
             END IF
             iIOUNX = kStdkCarta
+
             DO iL = 1,iNumOutX
-                DO iFr = 1,kMaxPts
-                    raRadsX(iFr) = raaRads5(iFr,iL)
-                END DO
-                CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
+              raRadsX = raaRads5(:,iL)
+              CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
             END DO
+            write(kStdWarn,*) 'PCLSAM Clouds : wrote out linear combo of rads'            
 
         END IF    !! iDoPCLSAM > 0
 
@@ -553,7 +550,7 @@ CONTAINS
         END IF       !!! kFlux > 0
               
         IF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. iDoPCLSAM > 0) THEN
-          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians'
+          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians 100 layers Q/T/Wgt/Surf Jacs'
           CALL find_jacobians_pclsam(raFreq,iTag,iActualTag, &
               iFileID,caJacobFile, &
               rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -670,7 +667,7 @@ CONTAINS
           END DO
 
        ELSEIF (kJacobian >= 0 .AND. ((kActualJacs == 100) .OR. (kActualJacs == 102))) THEN
-          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering ColJacobians'
+          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Column Jacobians for iAtm = ',iAtm
           CALL doscatter_pclsam( &
             -1,raFreq,raaSumAbCoeff,raMixVertTemp, &
             caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
@@ -693,8 +690,14 @@ CONTAINS
             iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
             iaJacob,iJacob, &
             raTPressLevels,iKnowTP, &
-            raaRadsX,iNumOutX)
+            raaRadsX,iNumOutX,+1,rFracX)
             CALL PrintPound
+
+          !! note : raaAllDT5  by rFracX as this is NOT done in doscatter_pclsam
+          DO iL = 1,kProfLayerJac
+            raaAllDT5(:,iL)  = raaAllDT5(:,iL)  + rFracX*raaRadsX(:,iL)
+          END DO
+          print *,'dumping out coljacs : ',raaAllDT5(1,1:5)
 
         END IF
 

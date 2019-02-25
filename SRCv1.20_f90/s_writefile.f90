@@ -2931,7 +2931,7 @@ CONTAINS
         write(kStdWarn,*) 'Opened file for col jacobian binary output : '
         write(kStdWarn,*) caJacobFile2
 
-    ! now essentially dump out header that resmebles kLongOrShort == 0
+    ! now essentially dump out header that resembles kLongOrShort == 0
         WRITE(iIOUN_Jac2) caVersion               !!kcarta version number
         WRITE(iIOUN_Jac2) kProfLayer
         WRITE(iIOUN_Jac2) kMaxUserSet
@@ -2943,7 +2943,9 @@ CONTAINS
     !!!this is new stuff, to tell reader how many chunks to read
         WRITE(iIOUN_Jac2) kaFrStep(iTag)          !!freq step size
         WRITE(iIOUN_Jac2) kaBlSize(iTag)          !!10000 point freq block size
-        iImportant=iJacob+1+1                     !!r(gasQ'),r(temp'),r(stemp')
+        iImportant = iJacob+1+1                   !!r(gasQ'),r(temp'),r(stemp')
+        iImportant = iImportant*iNatm             !! repeated for EACH atmosphere
+        print *,iJacob,iJacob+1+1,iNatm,iImportant
         WRITE(iIOUN_Jac2) iImportant              !!number of outputs
 
     END IF

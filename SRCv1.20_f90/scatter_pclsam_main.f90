@@ -67,7 +67,7 @@ CONTAINS
     iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
     iaJacob,iJacob, &
     raTPressLevels,iKnowTP, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,iColJacobOrRad_IOUN,rFracX)
 
     IMPLICIT NONE
 
@@ -99,7 +99,7 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 ! usual stuff
-    REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm)
+    REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),rFracX
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
     pProf(kProfLayer)
     INTEGER :: iProfileLayers,iRadOrColJac
@@ -147,10 +147,12 @@ CONTAINS
 
 ! this are column jacs
 ! this is to do with flux
+!iColJacobOrRad_IOUN = -1 typically ie this is a radiance calc, so dump out to kStdKCARTA
+!                    = +1 if this is for column jacobians, so has to dump out to kStdJacob
     CHARACTER(80) :: caFluxFile
 ! this is to do with jacobians
     CHARACTER(80) :: caJacobFile,caJacobFile2
-    INTEGER :: iNumGases,iaGases(kMaxGas),iNatm
+    INTEGER :: iNumGases,iaGases(kMaxGas),iNatm,iColJacobOrRad_IOUN
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
@@ -250,7 +252,7 @@ CONTAINS
     iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
     iaJacob,iJacob, &
     raTPressLevels,iKnowTP, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,iColJacobOrRad_IOUN,rFracX)
 
     RETURN
     end SUBROUTINE doscatter_pclsam
@@ -289,22 +291,22 @@ CONTAINS
     raLayAngles,raSunAngles, &
     rSatAzimuth,rSolAzimuth, &
     raThickness,raPressLevels,iProfileLayers,pProf, &
-! hen the necessary scattering variables
+! then the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
-! hen the nlte variables
+! then the nlte variables
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
     iCldProfile,iaCldTypes,raaKlayersCldAmt, &
-! hen the col jacob stuff
+! then the col jacob stuff
     raaSumAbCoeff,caFluxFile, &
     caJacobFile,caJacobFile2, &
     iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
     iaJacob,iJacob, &
     raTPressLevels,iKnowTP, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,iColJacobOrRad_IOUN,rFracX)
 
     IMPLICIT NONE
 
@@ -337,10 +339,12 @@ CONTAINS
 !                   user specified value if positive
 ! iDownward = +1 ==> downward looking instrument
 !             -1 ==> upward looking instrument
-    INTEGER :: iNumOutX
+!iColJacobOrRad_IOUN = -1 typically ie this is a radiance calc, so dump out to kStdKCARTA
+!                    = +1 if this is for column jacobians, so has to dump out to kStdJacob
+    INTEGER :: iNumOutX,iColJacobOrRad_IOUN
     REAL :: raTPressLevels(kProfLayer+1)
     INTEGER :: iKnowTP
-    REAL :: raaRadsX(kMaxPts,kProfLayer)
+    REAL :: raaRadsX(kMaxPts,kProfLayer),rFracX
     REAL :: rSatAzimuth,rSolAzimuth
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1)
     REAL :: pProf(kProfLayer)
@@ -431,9 +435,9 @@ CONTAINS
     INTEGER :: IACLDTOP(kMaxClouds), IACLDBOT(kMaxClouds)
     INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA
 
-    INTEGER :: iaTable(kMaxClouds*kCloudLayers)
+    INTEGER :: iaTable(kMaxClouds*kCloudLayers),iIOUN
     CHARACTER(80) :: caName
-    INTEGER :: iIn,iJ,iI,iCloud,iScat,iIOUN,iF,iL
+    INTEGER :: iIn,iJ,iI,iCloud,iScat,iF,iL
     REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
     INTEGER :: iaRadLayer(kProfLayer)
 
@@ -450,6 +454,10 @@ CONTAINS
     INTEGER :: iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
 
     iIOUN = kStdkCarta
+    IF (iColJacobOrRad_IOUN == +1) THEN
+      iIOUN = kStdJacob2KK
+    END IF
+!    print *,'iIOUN,iColJacobOrRad_IOUN = ',iIOUN,iColJacobOrRad_IOUN
 
     WRITE (kStdWarn,*) 'PCLSAM radiative transfer code'
     WRITE (kStdWarn,*) 'Includes layer temperature profile effects in clds'
@@ -492,6 +500,20 @@ CONTAINS
     END IF
 
 !!!!!!! if iCloudSky .LT. 0 do clear sky rad transfer easily !!!!!!!
+    IF ((iCloudySky < 0) .AND. (kActualJacs == 100)) THEN
+        !! skip this and do cloudy for coljac sake
+        write(kstdWarn,*) 'ooer trying to do clr sky RT when expecting cloudy sky'
+        write(kstdWarn,*) 'thats technically ok, one of PCLSAM 2Slab streams is for clear'
+        write(kStdWarn,*) 'but for coljac case set to iCloudSky = 1'
+
+        write(kstdErr,*) 'ooer trying to do clr sky RT when expecting cloudy sky'
+        write(kstdErr,*) 'thats technically ok, one of PCLSAM 2Slab streams is for clear'
+        write(kStdErr,*) 'but for coljac case set to iCloudSky = 1'
+
+        iCloudySky = 1
+    END IF
+
+!!! so this loop may not be run, depending on clear/PCLSAM col jacs
     IF (iCloudySky < 0) THEN
         write(kStdWarn,*) 'CLEAR SKY IN PCLSAM RADTRANS', &
         ICLDTOPKCARTA,ICLDBOTKCARTA
@@ -512,7 +534,7 @@ CONTAINS
             IOBS   = 1
         END IF
 
-    ! hange to RTSPEC layering
+        ! change to RTSPEC layering
         iobs=(iNumLayer+1)-iobs+1
 
         IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN
@@ -520,7 +542,7 @@ CONTAINS
             raFreq,raInten,raVTemp, &
             raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,rSatAngle, &
             rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
-            caOutName,kStdkCarta,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
+            caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
             raThickness,raPressLevels,iProfileLayers,pProf, &
             raTPressLevels,iKnowTP,rCO2MixRatio, &
@@ -530,11 +552,11 @@ CONTAINS
             raFreq,raInten,raVTemp, &
             raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,rSatAngle, &
             rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
-            caOutName,kStdkCarta,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
+            caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
             raThickness,raPressLevels,iProfileLayers,pProf, &
             raTPressLevels,iKnowTP, &
-            raaRadsX,iNumOutX)
+            raaRadsX,iNumOutX,+1)
             write(kStdErr,*) 'In pclsam, found clear sky uplook .. need to debug quick_clear_radtrans_up'
             CALL DoStop
         END IF
@@ -544,8 +566,8 @@ CONTAINS
 ! if CloudySky > 0 then go ahead with PCLSAM!
     IF (iCloudySky > 0) THEN
         write(kStdWarn,*) 'CLOUD SKY IN PCLSAM RADTRANS',ICLDTOPKCARTA,ICLDBOTKCARTA
-    !!!!!!! need the temperature profile in terms of the
-    !!!!!!! pressure layers, so we need to fill in the array TEMP
+        !!!!!!! need the temperature profile in terms of the
+        !!!!!!! pressure layers, so we need to fill in the array TEMP
         CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
         iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
         ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
@@ -610,7 +632,7 @@ CONTAINS
         caJacobFile,caJacobFile2, &
         iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
         iaJacob,iJacob, &
-        raaRadsX,iNumOutX)
+        raaRadsX,iNumOutX,rFracX)
     END IF      !!!       IF (iCloudySky < 0) THEN
 
     RETURN

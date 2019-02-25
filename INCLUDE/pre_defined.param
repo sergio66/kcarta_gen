@@ -189,10 +189,8 @@ cccc
       PARAMETER (kStdErr=0,kStdWarn=1)
 c if the user wants actual files, instead of STDIN,STDOUT,
 c these set driver file input,kcarta std output, jacobian file unit numbers
-      INTEGER    kStdDriverKK,  kStdkCartaKK,   kStdJacobKK,    
-     c           kStdJacob2KK
-      PARAMETER (kStdDriverKK=9,kStdkCartaKK=10,kStdJacobKK=11,
-     c           kStdJacob2KK=25)
+      INTEGER    kStdDriverKK,  kStdkCartaKK,   kStdJacobKK,    kStdJacob2KK
+      PARAMETER (kStdDriverKK=9,kStdkCartaKK=10,kStdJacobKK=11, kStdJacob2KK=25)
 c this sets the compressed/cross sectional database, profile unit number
       INTEGER    kCompUnit,   kProfileUnit
       PARAMETER (kCompUnit=12,kProfileUnit=13)

@@ -48,7 +48,7 @@ CONTAINS
     caJacobFile,caJacobFile2, &
     iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
     iaJacob,iJacob, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,rFracX)
 
     IMPLICIT NONE
 
@@ -79,6 +79,7 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 ! TEMP        = tempertaure profile in terms of pressure levels
+! rFracX : weighting of column jacobian radiance
     REAL :: rSatAzimuth,rSolAzimuth
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
@@ -87,7 +88,7 @@ CONTAINS
     REAL :: raaAsym(kMaxPts,kMixFilRows)
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows)
     REAL :: rTSpace,raUseEmissivity(kMaxPts),rSurfaceTemp,rSatAngle
-    REAL :: raaOp(kMaxPrint,kProfLayer),rFracTop,rFracBot
+    REAL :: raaOp(kMaxPrint,kProfLayer),rFracTop,rFracBot,rFracX
     REAL :: raaMix(kMixFilRows,kGasStore),raInten(kMaxPts)
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,ICLDTOPKCARTA, ICLDBOTKCARTA
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iRadOrColJac
@@ -118,7 +119,7 @@ CONTAINS
     REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
     REAL :: raaAmt(kProfLayer,kGasStore)
 ! iaJacob       = list of GasID's to do Jacobian for
-    INTEGER :: iJacob,iaJacob(kMaxDQ),iIOUN_USE,iIOUN_IN
+    INTEGER :: iJacob,iaJacob(kMaxDQ),iIOUN_IN
 ! this is to do with cloud fracs
     INTEGER :: iNumOutX,iMRO
     REAL :: raaRadsX(kMaxPts,kProfLayer),tcc,raCC(kProfLayer)
@@ -212,7 +213,8 @@ CONTAINS
         write(kStdErr,*)  ' ---> Cannot do Column Gas AMT, STEMP Jacs for 100 layer code ...'
         Call DoStop
     ELSEIF ((iRadOrColJac == -1) .AND. (k100layerCloud == -1)) THEN
-        write(kStdWarn,*) ' ---> Doing Column Gas AMT, STEMP Jacs ...'
+        write(kStdWarn,*) ' ---> PCLSAM 2slab code : Doing Column Gas AMT, STEMP Jacs ...'
+        write(kSTdWarn,*) '  IOUN_IN = ',iIOUN_IN
         CALL rad_pclsam_coljac(raFreq,iDownward, &
         iJacob,iaJacob,raaaColDQ,raaSumAbCoeff, &
         raInten,raVTemp,raaExt,raaSSAlb,raaAsym, &
@@ -229,7 +231,7 @@ CONTAINS
         iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
         iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
         raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-        raaRadsX,iNumOutX)
+        raaRadsX,iNumOutX,rFracX)
 
     ELSEIF (iRadOrColJac == +1) THEN
         IF ((iDownward == 1) .AND. (k100layerCloud <= 1)) THEN
@@ -247,7 +249,7 @@ CONTAINS
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-            raaRadsX,iNumOutX)
+            raaRadsX,iNumOutX,rFRacX)
         ELSEIF ((iDownward == 1) .AND. (k100layerCloud == 100) .AND. (abs(iMRO) == 1)) THEN
             CALL rad_DOWN_pclsam_solar100_simplemodel(raFreq,+1, &
             raInten,raVTemp,raaExt,raaSSAlb,raaAsym,raaAbs,iMRO,tcc,raCC, &
@@ -297,7 +299,7 @@ CONTAINS
             iNLTEStart,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp, &
-            raaRadsX,iNumOutX)
+            raaRadsX,iNumOutX,rFracX)
 
         END IF
     END IF
@@ -327,7 +329,7 @@ CONTAINS
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,rFracX)
 
     include '../INCLUDE/scatterparam.f90'
 
@@ -355,7 +357,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
-    REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
+! rFracX : weighting of column jacobian radiance
+    REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac),rFracX
     REAL :: rSatAzimuth,rSolAzimuth,raaSumAbCoeff(kMaxPts,kMixFilRows)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
@@ -396,6 +399,10 @@ CONTAINS
     INTEGER :: iDefault,iColJac,iJacT,iJacB
     REAL :: rDefaultColMult,raMixVertTemp2(kMixFilRows)
 
+    CHARACTER*50 FMT
+
+    FMT = '(A,I3,A,I3)'
+
     iDefault  = +1   !! do the (Stemp,col) Jacs
 
     iColJac = -1     !! skip  the (Stemp,col) Jacs (dump out zeros)
@@ -423,28 +430,28 @@ CONTAINS
            
     IF (iColJac == +1) THEN
     !! raaX = raaXO - raaGas + 1.1raaGas = = raaXO + 0.1raaGas
-        DO iJ = 1,iJacob
-            write(kStdWarn,*) ' '
-            write(kStdWarn,*) ' ---> Doing rQj : ColJac for gas ',iaJacob(iJ)
-            DO iL = 1,iNumLayer
-                iI = iaaRadLayer(iAtm,iL)
-            !              IF ((iI .GE. kActualJacsB) .AND. (iI .LE. kActualJacsT)) THEN
-                IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
-                    write(kStdWarn,*) 'Q(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-                    DO iFr = 1,kMaxPts
-                        raaTemp(iFr,iI) = raaExt(iFr,iI) + &
-                        rDefaultColMult*raaaColDQ(iJ,iFr,iI)
-                    END DO
-                ELSE
-                !                write(kStdWarn,*) 'not perturbing gas layer ',iI
-                    DO iFr = 1,kMaxPts
-                        raaTemp(iFr,iI) = raaExt(iFr,iI)
-                    END DO
-                END IF
+      DO iJ = 1,iJacob
+        write(kStdWarn,*) ' '
+        write(kStdWarn,*) ' ---> PCLSAM 2slab code : Doing rQj : ColJac for jacob gas ',iaJacob(iJ)
+        write(kSTdWarn,*) '      IOUN_USE = ',iIOUN_USE
+        DO iL = 1,iNumLayer
+          iI = iaaRadLayer(iAtm,iL)
+          IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
+            write(kStdWarn,FMT) 'Q(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
+            DO iFr = 1,kMaxPts
+              raaTemp(iFr,iI) = raaExt(iFr,iI) + &
+              rDefaultColMult*raaaColDQ(iJ,iFr,iI)
             END DO
+          ELSE
+            ! write(kStdWarn,*) 'not perturbing gas layer ',iI
+            DO iFr = 1,kMaxPts
+              raaTemp(iFr,iI) = raaExt(iFr,iI)
+            END DO
+          END IF
+        END DO
 
-            IF (iDownward == 1) THEN
-                CALL rad_DOWN_pclsam_solar(raFreq,-1, &
+        IF (iDownward == 1) THEN
+          CALL rad_DOWN_pclsam_solar(raFreq,-1, &
                 raInten,raVTemp,raaTemp,raaSSAlb,raaAsym, &
                 iPhase,raPhasePoints,raComputedPhase, &
                 ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -458,9 +465,9 @@ CONTAINS
                 iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
                 iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
                 raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-                raaRadsX,iNumOutX)
-            ELSE
-                CALL rad_UP_pclsam_solar(raFreq,-1, &
+                raaRadsX,iNumOutX,rFracX)
+        ELSE
+          CALL rad_UP_pclsam_solar(raFreq,-1, &
                 raInten,raVTemp,raaTemp,raaSSAlb,raaAsym, &
                 iPhase,raPhasePoints,raComputedPhase, &
                 ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -474,32 +481,30 @@ CONTAINS
                 iNLTEStart,raaPlanckCoeff, &
                 iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
                 raUpperPress,raUpperTemp, &
-                raaRadsX,iNumOutX)
-            END IF
-        END DO
+                raaRadsX,iNumOutX,rFracX)
+        END IF
+      END DO
 
-    !! do the column temperature jacobian radiance
-        write(kStdWarn,*) ' '
-        write(kStdWarn,*) ' ---> Doing rTz : Temp(z) Jacobian calcs ...'
-    !        DO iL = 1,kMixFilRows
-    !          raMixVertTemp2(iL) = raVTemp(iL) + 1.0
-    !        END DO
-        DO iL = 1,kMixFilRows
-            raMixVertTemp2(iL) = 0.0
-        END DO
-        DO iL = 1,iNumLayer
-            iI = iaaRadLayer(iAtm,iL)
+      !! do the column temperature jacobian radiance
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) ' ---> PCLSAM 2slab code : Doing rTz : Temp(z) Jacobian calcs ...'
+      write(kSTdWarn,*) '      IOUN_USE = ',iIOUN_USE
+      DO iL = 1,kMixFilRows
+        raMixVertTemp2(iL) = 0.0
+      END DO
+      DO iL = 1,iNumLayer
+        iI = iaaRadLayer(iAtm,iL)
         !          IF ((iI .GE. kActualJacsB) .AND. (iI .LE. kActualJacsT)) THEN
-            IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
-                write(kStdWarn,*) 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-                raMixVertTemp2(iI) = raVTemp(iI) + 1.0
-            ELSE
-            !            write(kStdWarn,*) 'not perturbing tempr layer ',iI
-                raMixVertTemp2(iI) = raVTemp(iI)
-            END IF
-        END DO
-        IF (iDownward == 1) THEN
-            CALL rad_DOWN_pclsam_solar(raFreq,-1, &
+        IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
+          write(kStdWarn,FMT) 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
+          raMixVertTemp2(iI) = raVTemp(iI) + 1.0
+        ELSE
+          !            write(kStdWarn,*) 'not perturbing tempr layer ',iI
+          raMixVertTemp2(iI) = raVTemp(iI)
+        END IF
+      END DO
+      IF (iDownward == 1) THEN
+        CALL rad_DOWN_pclsam_solar(raFreq,-1, &
             raInten,raMixVertTemp2,raaExt,raaSSAlb,raaAsym, &
             iPhase,raPhasePoints,raComputedPhase, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -513,9 +518,9 @@ CONTAINS
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-            raaRadsX,iNumOutX)
-        ELSE
-            CALL rad_UP_pclsam_solar(raFreq,-1, &
+            raaRadsX,iNumOutX,rFracX)
+      ELSE
+        CALL rad_UP_pclsam_solar(raFreq,-1, &
             raInten,raMixVertTemp2,raaExt,raaSSAlb,raaAsym, &
             iPhase,raPhasePoints,raComputedPhase, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -529,14 +534,15 @@ CONTAINS
             iNLTEStart,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp, &
-            raaRadsX,iNumOutX)
-        END IF
+            raaRadsX,iNumOutX,rFracX)
+      END IF
 
-    !! do the stemp jacobian radiance
-        write(kStdWarn,*) ' '
-        write(kStdWarn,*) ' ---> Doing rTz : Temp(z) Jacobian calcs ...'
-        IF (iDownward == 1) THEN
-            CALL rad_DOWN_pclsam_solar(raFreq,-1, &
+      !! do the stemp jacobian radiance
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) ' ---> PCLSAM 2slab code : Doing stemp Jacobian calcs ...'
+      write(kSTdWarn,*) '      IOUN_USE = ',iIOUN_USE
+      IF (iDownward == 1) THEN
+        CALL rad_DOWN_pclsam_solar(raFreq,-1, &
             raInten,raVTemp,raaExt,raaSSAlb,raaAsym, &
             iPhase,raPhasePoints,raComputedPhase, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -550,9 +556,9 @@ CONTAINS
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-            raaRadsX,iNumOutX)
-        ELSE
-            CALL rad_UP_pclsam_solar(raFreq,-1, &
+            raaRadsX,iNumOutX,rFracX)
+      ELSE
+        CALL rad_UP_pclsam_solar(raFreq,-1, &
             raInten,raVTemp,raaExt,raaSSAlb,raaAsym, &
             iPhase,raPhasePoints,raComputedPhase, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -566,9 +572,11 @@ CONTAINS
             iNLTEStart,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp, &
-            raaRadsX,iNumOutX)
-        END IF
+            raaRadsX,iNumOutX,rFracX)
+      END IF
     END IF
+print *,'rad_pclsam_coljac rFRacX = ',rFracX
+
     RETURN
     end SUBROUTINE rad_pclsam_coljac
 
@@ -622,7 +630,7 @@ CONTAINS
     iNLTEStart,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,rFracX)
 
     IMPLICIT NONE
 
@@ -652,7 +660,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
-    REAL :: rSatAzimuth,rSolAzimuth
+!rFracX : mostly used for col jac radiance calcs
+    REAL :: rSatAzimuth,rSolAzimuth,rFracX
     REAL :: raSurFace(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunScatter(kMaxPts),raSun(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
@@ -913,7 +922,7 @@ CONTAINS
         IF (iDp > 0) THEN
         ! note this really messes up if it is a scattering layer, as it does not use
         ! cloudy sky rad transfer. Else it is fine for clear sky
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raThermal,raInten2, &
@@ -1060,7 +1069,7 @@ CONTAINS
         IF (iDp > 0) THEN
         ! note this really messes up if it is a scattering layer, as it does not use
         ! cloudy sky rad transfer. Else it is fine for clear sky
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raThermal,raInten2, &
@@ -1144,7 +1153,7 @@ CONTAINS
         IF (iDp > 0) THEN
         ! note this really messes up if it is a scattering layer, as it does not use
         ! cloudy sky rad transfer. Else it is fine for clear sky
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raThermal,raInten2, &
@@ -1536,7 +1545,7 @@ CONTAINS
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,rFracX)
 
     IMPLICIT NONE
 
@@ -1566,7 +1575,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
-    REAL :: rSatAzimuth,rSolAzimuth
+!rFracX : mostly used for col jac radiance calcs
+    REAL :: rSatAzimuth,rSolAzimuth,rFracX
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSatAngle
@@ -1832,7 +1842,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raInten,raInten2, &
@@ -1870,7 +1880,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raInten,raInten2, &
@@ -1910,7 +1920,7 @@ CONTAINS
 
         IF (iDoSolar < 0) THEN
             IF (iDp > 0) THEN
-                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
                 DO iFr=1,iDp
                     CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                     raVTemp,muSat,iLay,iaRadLayer,raaExt,raInten,raInten2, &
@@ -1926,7 +1936,7 @@ CONTAINS
             END IF
         ELSE
             IF (iDp == 1) THEN
-                write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer'
+                write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
 
                 suncos = raSunAngles(iaRadLayer(1))           !! at surface
                 scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
@@ -2321,7 +2331,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExtWeighted,raIntenWeighted,raInten2, &
@@ -2368,7 +2378,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExtWeighted,raIntenWeighted,raInten2, &
@@ -2416,7 +2426,7 @@ CONTAINS
 
         IF (iDoSolar < 0) THEN
             IF (iDp > 0) THEN
-                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
                 DO iFr=1,iDp
                     CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                     raVTemp,muSat,iLay,iaRadLayer,raaExtWeighted,raIntenWeighted,raInten2, &
@@ -2432,7 +2442,7 @@ CONTAINS
             END IF
         ELSE
             IF (iDp == 1) THEN
-                write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer'
+                write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
 
                 suncos = raSunAngles(iaRadLayer(1))           !! at surface
                 scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA

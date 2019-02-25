@@ -589,6 +589,16 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
+2/23/2019      Rewrote PCLSAM TwoSLab jacobians so that you can either dump
+               out a HUGE monchromatic jacobian file with x5 what you need 
+               (ie the two individual clouds, overlap, clear AND final) or 
+               default to dumping out only the final weightted sums (so the
+               file is comparable in size to the clear sky case)
+               iaaOverrideDefault(1,10) = -1 : small file (default)
+                                          +1 : huge file (if you dare)
+               (see n_misc.f90)
+               (testing : see /home/sergio/KCARTA/TEST/Test_KCARTAJac_PCLSAM_2Slab)
+
 12/6/2018      nm_param now allows you to have a file
                       "caNMLReset_param_spectra"
 	       which allows you to read in a "override file" that overrides

@@ -252,7 +252,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -285,7 +285,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
-            write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -323,7 +323,7 @@ CONTAINS
 
             IF (iDoSolar < 0) THEN
                 IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
-                    write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+                    write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
                     DO iFr=1,iDp
                         CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                         raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -339,7 +339,7 @@ CONTAINS
                 END IF
             ELSE
                 IF (iDp == 1) THEN
-                    write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer'
+                    write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
 
                     suncos = raSunAngles(iaRadLayer(1))           !! at surface
                     scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
@@ -389,7 +389,7 @@ CONTAINS
     raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
     raThickness,raPressLevels,iProfileLayers,pProf, &
     raTPressLevels,iKnowTP, &
-    raaRadsX,iNumOutX)
+    raaRadsX,iNumOutX,iWriteToOutputFile)
 
     IMPLICIT NONE
 
@@ -426,7 +426,7 @@ CONTAINS
     REAL :: raaAbs(kMaxPts,kMixFilRows)
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
-    INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN
+    INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN,iWriteToOutputFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
     CHARACTER(80) :: caOutName
 ! these are to do with the arbitrary pressure layering
@@ -573,7 +573,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -606,7 +606,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -642,7 +642,7 @@ CONTAINS
 
             CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
             IF (iDp > 0) THEN
-                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
                 DO iFr=1,iDp
                     CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -1027,7 +1027,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -1054,7 +1054,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -1124,7 +1124,7 @@ CONTAINS
         !!! since we might have to do fractions!
             CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
             IF (iDp > 0) THEN
-                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
                 DO iFr=1,iDp
                     CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -1506,7 +1506,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
@@ -1532,7 +1532,7 @@ CONTAINS
     ! since we might have to do fractions!
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
                 CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
