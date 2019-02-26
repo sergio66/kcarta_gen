@@ -589,6 +589,17 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.20
 -----
+2/25/2019      [rad,jac,w] = readkcPCLSAM_coljac(radfile,jacfile);
+               is a new reader that reeads in the radfile, figures out number of pixels
+               and from that figures out number of column jacs (Q(1),Q(2), ...Q(n),T,stemp)
+               It then adds together the appropriate entries to produce the final
+               column jacs
+               Note as mentioned below, the Tcol jac is strictly wrong since it 
+               only includes BT(T+dT) effects
+            
+               Testing of this code is in 
+                 KCARTA/TEST/Test_KCARTAJac_PCLSAM_2Slab/.\test_oldVSnew_kcarta.m
+
 2/25/2019      Fixing bugs in the PCLSAM column jacobians : right now you 
                read them in, and then add eg(1 thru 4) WHICH ARE ALREADY CORRECTLY WEIGHTED 
                to get final weighted 5
@@ -603,7 +614,7 @@ v1.20
                Note the column T jac is strictly inaccurate since               
     write(kStdWarn,*) ' ---> Note : only includes change in BT(T+dT) and not')
     write(kStdWarn,*) ' --->   change in OD(T+dT) so not completely accurate')
-               
+   
 2/23/2019      Rewrote PCLSAM TwoSLab jacobians so that you can either dump
                out a HUGE monchromatic jacobian file with x5 what you need 
                (ie the two individual clouds, overlap, clear AND final) or 

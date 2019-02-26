@@ -2944,8 +2944,17 @@ CONTAINS
         WRITE(iIOUN_Jac2) kaFrStep(iTag)          !!freq step size
         WRITE(iIOUN_Jac2) kaBlSize(iTag)          !!10000 point freq block size
         iImportant = iJacob+1+1                   !!r(gasQ'),r(temp'),r(stemp')
-        iImportant = iImportant*iNatm             !! repeated for EACH atmosphere
-        print *,iJacob,iJacob+1+1,iNatm,iImportant
+        IF (kWhichScatterCode == 5) THEN
+          iImportant = iImportant*iNatm             !! repeated for EACH atmosphere
+          write(kStdWarn,*) '  '
+          write(kStdWarn,*) 'Cloudy PCLSAM 2slab ==> repeat column jac for each subpixel'
+          write(kStdWarn,*) '  '
+
+          write(kStdErr,*) '  '
+          write(kStdErr,*)  'Cloudy PCLSAM 2slab ==> repeat column jac for each subpixel'
+          write(kStdErr,*) '  '
+
+        END IF
         WRITE(iIOUN_Jac2) iImportant              !!number of outputs
 
     END IF
