@@ -599,6 +599,10 @@ v1.20
                overlap, 13:16 being for clear and then 17:20 being zeros for the sum
                SO then the four jacs you need would be 
                   jac(:,1:4) + jac(:,5:8) + jac(9:12) + jac(13:16)
+
+               Note the column T jac is strictly inaccurate since               
+    write(kStdWarn,*) ' ---> Note : only includes change in BT(T+dT) and not')
+    write(kStdWarn,*) ' --->   change in OD(T+dT) so not completely accurate')
                
 2/23/2019      Rewrote PCLSAM TwoSLab jacobians so that you can either dump
                out a HUGE monchromatic jacobian file with x5 what you need 

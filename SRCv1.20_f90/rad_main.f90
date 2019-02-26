@@ -403,6 +403,7 @@ CONTAINS
     DO iJ = 1,iJacob
       write(kStdWarn,*) ' '
       write(kStdWarn,*) ' ---> Doing rQj : ColJac for gas ',iaJacob(iJ)
+      raaTemp = 0.0
       DO iL = 1,iaNumLayer(iAtm)
         iI = iaaRadLayer(iAtm,iL)
         IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
@@ -444,11 +445,14 @@ CONTAINS
 !! do the column temperature jacobian radiance
     write(kStdWarn,*) ' '
     write(kStdWarn,*) ' ---> Doing rTz : Temp(z) Jacobian calcs ...'
+    write(kStdWarn,*) ' ---> Note : only includes change in BT(T+dT) and not'
+    write(kStdWarn,*) ' --->   change in OD(T+dT) so not completely accurate'
     DO iL = 1,kMixFilRows
       raVTemp2(iL) = raVTemp(iL)
     END DO
 
 ! erturb the temperature of the necessary layers
+    raaTemp = raaSumAbCoeff
     DO iL = 1,iaNumLayer(iAtm)
       iI = iaaRadLayer(iAtm,iL)
       IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN

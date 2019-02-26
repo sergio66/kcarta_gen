@@ -434,13 +434,13 @@ CONTAINS
         write(kStdWarn,*) ' '
         write(kStdWarn,*) ' ---> PCLSAM 2slab code : Doing rQj : ColJac for jacob gas ',iaJacob(iJ)
         write(kSTdWarn,*) '      IOUN_USE = ',iIOUN_USE
+        raaTemp = 0.0
         DO iL = 1,iNumLayer
           iI = iaaRadLayer(iAtm,iL)
           IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
             write(kStdWarn,FMT) 'Q(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
             DO iFr = 1,kMaxPts
-              raaTemp(iFr,iI) = raaExt(iFr,iI) + &
-              rDefaultColMult*raaaColDQ(iJ,iFr,iI)
+              raaTemp(iFr,iI) = raaExt(iFr,iI) + rDefaultColMult*raaaColDQ(iJ,iFr,iI)
             END DO
           ELSE
             ! write(kStdWarn,*) 'not perturbing gas layer ',iI
@@ -488,10 +488,13 @@ CONTAINS
       !! do the column temperature jacobian radiance
       write(kStdWarn,*) ' '
       write(kStdWarn,*) ' ---> PCLSAM 2slab code : Doing rTz : Temp(z) Jacobian calcs ...'
+      write(kStdWarn,*) ' ---> Note : only includes change in BT(T+dT) and not'
+      write(kStdWarn,*) ' --->   change in OD(T+dT) so not completely accurate'
       write(kSTdWarn,*) '      IOUN_USE = ',iIOUN_USE
       DO iL = 1,kMixFilRows
         raMixVertTemp2(iL) = 0.0
       END DO
+      raaTemp = raaExt
       DO iL = 1,iNumLayer
         iI = iaaRadLayer(iAtm,iL)
         !          IF ((iI .GE. kActualJacsB) .AND. (iI .LE. kActualJacsT)) THEN
