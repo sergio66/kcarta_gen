@@ -597,6 +597,19 @@ v1.20
                Note as mentioned below, the Tcol jac is strictly wrong since it 
                only includes BT(T+dT) effects
             
+               so to read column jacs (eg suppose 2 gases, T, stemp)
+               (a) clear sky : use [coljac_clr,w] = readkcBasic('clr.jac_COL');
+                      and coljac_clr = (10000 x numchunks) x 4 ~ 89000 x 8
+               (b) PCLSAM 2slab sky : (subpixels = 1,3,5 for clr,2 cloud, 2 clouds
+                      has a funky wrapper that does the work for you (adding together
+                      the individual weighted subpixel jacs) to give correct result
+                      [rad_cld,coljac_cld,w] = readkcPCLSAM_coljac('rad_cld','cld.jac_COL');
+                      and coljac_cld = (10000 x numchunks) x (4 x subpixels)
+                                     ~ 89000 x 20  
+                   the wrapper reads it in, and since(:,17:20) are all zeros, it just
+                   adds together (:,1:4)+(:,5:8)+(:,9:13)+(:,13:16) which are alredy
+                   correctly weighted, and outputs THAT as the final 890000x4 coljac!
+
                Testing of this code is in 
                  KCARTA/TEST/Test_KCARTAJac_PCLSAM_2Slab/.\test_oldVSnew_kcarta.m
 

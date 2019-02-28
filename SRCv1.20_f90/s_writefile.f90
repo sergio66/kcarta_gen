@@ -2960,7 +2960,6 @@ CONTAINS
     END IF
 !--------------- JACOBIAN BINARY FILE --------------------------------
 
-
     iNatmCldEffective   = +1     !! pretend you only have to print one atmosphere
     iPrintAllPCLSAMJacs = -1     !! only print the weighted combo
     IF ((kJacobian > 0) .AND. (kActualJacs /= 100) .AND. (iaaOverrideDefault(1,10) == -1) .AND. &
@@ -2977,8 +2976,8 @@ CONTAINS
     !! iPrintAllPCLSAMJacs  = 1        !!! debug
     !! print *,'s_writefile : iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs'
     !! print *,'s_writefile : ',iNatm,iNatmCldEffective,iaaOverrideDefault(1,10),iPrintAllPCLSAMJacs
-    
-    IF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. kScatter > 0) THEN
+
+    IF (kJacobian >= 0 .AND. kActualJacs < 100) THEN
 	
         write(kStdWarn,*) 'opening regular (large) jacobian output file (X(z))'
         write(kStdWarn,*) 'kJacobOutput = ',kJacobOutput

@@ -2,7 +2,11 @@ function [data, wnums, caVersion] = readkcBasic(kfile)
 
 % function [data, wnums, caVersion] = readkcBasic(kfile)
 %
-% readkc is a simple reader & unchunker for kcarta output files
+% readkcBasic is a simple reader & unchunker for kcarta output files
+% and is also used for reading kCARTA clear sky column jacs 
+%
+% use readkcPCLSAM_coljac forPCLSAM 2slab column jacs; 
+% that wrapper calls this
 %
 % INPUTS
 %

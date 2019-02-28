@@ -503,12 +503,12 @@ CONTAINS
     IF ((iCloudySky < 0) .AND. (kActualJacs == 100)) THEN
         !! skip this and do cloudy for coljac sake
         write(kstdWarn,*) 'ooer trying to do clr sky RT when expecting cloudy sky'
-        write(kstdWarn,*) 'thats technically ok, one of PCLSAM 2Slab streams is for clear'
-        write(kStdWarn,*) 'but for coljac case set to iCloudSky = 1'
+        write(kstdWarn,*) '  thats technically ok, one of PCLSAM 2Slab streams is for clear'
+        write(kStdWarn,*) '  but for coljac case it is reset to iCloudSky = 1'
 
         write(kstdErr,*) 'ooer trying to do clr sky RT when expecting cloudy sky'
-        write(kstdErr,*) 'thats technically ok, one of PCLSAM 2Slab streams is for clear'
-        write(kStdErr,*) 'but for coljac case set to iCloudSky = 1'
+        write(kstdErr,*) '  thats technically ok, one of PCLSAM 2Slab streams is for clear'
+        write(kStdErr,*) '  but for coljac case it is reset to iCloudSky = 1'
 
         iCloudySky = 1
     END IF
