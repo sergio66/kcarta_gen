@@ -583,6 +583,7 @@ CONTAINS
 
     IF (kJacobian > 0) THEN !do temperature jacobians
 ! do not need this as have ALREADY computed daaT above!!!
+! else since daaT1,daaT2 ..daaT5 are all 0, you will reset daaT to 0
 !        CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
 !        raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
 !        pProf,iProfileLayers,iSPlineType)
