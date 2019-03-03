@@ -275,53 +275,57 @@ CONTAINS
     CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
     rDelta,iAtm,0,iNumLayer)
     IF ((iWhichJac == -1) .OR. (iWhichJac == 30) .OR. &
-    (iWhichJac == -2) .OR. (iWhichJac == 32)) THEN
-        DO iLay=1,iNumLayer
+       (iWhichJac == -2) .OR. (iWhichJac == 32)) THEN
+      DO iLay=1,iNumLayer
         ! for each of the iNumLayer radiances, cumulatively add on all
         ! iNumGases contributions (this loop is done in JacobTemp)
-            IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
             (abs(kLongOrShort) <= 1)) THEN
-                write(kStdWarn,*)'temp d/dT layer# = ',iLay,iaaRadLayer(iAtm,iLay)
+          write(kStdWarn,*)'temp d/dT layer# = ',iLay,iaaRadLayer(iAtm,iLay)
+        END IF
+        IF (iNatm > 1) THEN
+          rWeight = 0.0
+          DO iG=1,iNumGases
+            rWeight = rWeight+raaMix(iaaRadLayer(iAtm,iLay),iG)
+            IF (iLay == 1) THEN
+              rWeight = rWeight*rFracBot
+            ELSEIF (iLay == iNumLayer) THEN
+              rWeight = rWeight*rFracTop
             END IF
-            IF (iNatm > 1) THEN
-                rWeight = 0.0
-                DO iG=1,iNumGases
-                    rWeight = rWeight+raaMix(iaaRadLayer(iAtm,iLay),iG)
-                END DO
-                rWeight = rWeight/(iNumGases*1.0)
-            ELSE
-                rWeight = 1.0
-            END IF
-            CALL JacobTempFM1(raFreq,raaRad,raaRadDT,iLay,iNumGases, &
+          END DO
+          rWeight = rWeight/(iNumGases*1.0)
+        ELSE
+          rWeight = 1.0
+        END IF
+        CALL JacobTempFM1(raFreq,raaRad,raaRadDT,iLay,iNumGases, &
             iaaRadLayer,iAtm,iNumLayer, &
             raUseEmissivity, &
             raaOneMinusTau,raaTau,raaAllDT,raaLay2Sp,raResults, &
             raThermal,raaLay2Gnd,rSatAngle,raLayAngles,raaGeneral, &
             raaGeneralTh,raaOneMinusTauTh,rWeight)
-            CALL doJacobOutput(iLowest,raFreq,raResults, &
-            radBTdr,raaAmt,raInten,0,iLay,-1)
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-        END DO
+        CALL doJacobOutput(iLowest,raFreq,raResults, &
+             radBTdr,raaAmt,raInten,0,iLay,-1)
+        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-        DO iFr = 1,kMaxPts
-            raResults(iFr) = 0.0
-        END DO
-        DO iLay = 1,iNumLayer
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-        END DO
+      DO iFr = 1,kMaxPts
+        raResults(iFr) = 0.0
+      END DO
+      DO iLay = 1,iNumLayer
+        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      END DO
     END IF
 
 ! do the weighting functions
     CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
     rDelta,iAtm,-10,iNumLayer)
-    IF ((iWhichJac == -1) .OR. (iWhichJac == 40) .OR. &
-    (iWhichJac == -2)) THEN
-        DO iLay=1,iNumLayer
-            IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+    IF ((iWhichJac == -1) .OR. (iWhichJac == 40) .OR. (iWhichJac == -2)) THEN
+      DO iLay=1,iNumLayer
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
             (abs(kLongOrShort) <= 1)) THEN
-                write(kStdWarn,*)'wgt fcn # = ',iLay,iaaRadLayer(iAtm,iLay)
-            END IF
-            CALL wgtfcndown(iLay,iNumLayer,rSatAngle,raLayAngles, &
+          write(kStdWarn,*)'wgt fcn # = ',iLay,iaaRadLayer(iAtm,iLay)
+        END IF
+        CALL wgtfcndown(iLay,iNumLayer,rSatAngle,raLayAngles, &
             iaaRadLayer,iAtm,raaLay2Sp,raaAbs,raResults,rFracTop,rFracBot, &
             iNLTEStart,raaPlanckCoeff)
 
@@ -329,25 +333,25 @@ CONTAINS
         !        CALL doJacobOutput(iLowest,raFreq,raResults,
         !     $                     radBTdr,raaAmt,raInten,0,iLay,-1)
         ! so just output the weighting functions
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-        END DO
+        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-        DO iFr = 1,kMaxPts
-            raResults(iFr) = 0.0
-        END DO
-        DO iLay = 1,iNumLayer
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-        END DO
+      DO iFr = 1,kMaxPts
+        raResults(iFr) = 0.0
+      END DO
+      DO iLay = 1,iNumLayer
+        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      END DO
     END IF
 
 ! finally do the surface sensitivities : d/d(SurfaceTemp),
 ! d/d(SurfEmiss) for total,thermal and d/d(solar emis) of solar radiances
     CALL wrtout_head(iIOUN,caJacobFile,raFreq(1),raFreq(kMaxPts), &
     rDelta,iAtm,-20,4)
-    IF ((iWhichJac == -1) .OR. (iWhichJac == 50) .OR. &
-    (iWhichJac == -2)) THEN
-        iLay=1
-    ! computing Jacobians wrt surface parameters are meaningful
+    IF ((iWhichJac == -1) .OR. (iWhichJac == 50) .OR.(iWhichJac == -2)) THEN
+      ! computing Jacobians wrt surface parameters are meaningful       
+      iLay = 1  !!! dummy
+
         CALL JacobSurfaceTemp(raFreq,iLay, &
         rTSurface,raUseEmissivity,raaLay2Sp,raResults)
         CALL doJacobOutput(iLowest,raFreq,raResults, &
@@ -537,12 +541,12 @@ CONTAINS
     IF ((kTempJac == 0) .OR. (kTempJac == -2)) THEN
         DO iL=1,iNumLayer
             iLay = iaaRadLayer(iAtm,iL)
-            DO iFr=1,kMaxPts
+            DO iFr = 1,kMaxPts
                 r3 = r1*(raFreq(iFr)**3)
             ! note that the data will be stored in "layer" iL, while the temperature
             ! is that of raVT1(iLay) ... there should be an equivalence
                 r4 = r2*raFreq(iFr)/raVT1(iLay)
-                r5=exp(r4)
+                r5 = exp(r4)
                 raaRad(iFr,iL) = r3/(r5-1.0)
                 raaRadDT(iFr,iL) = raaRad(iFr,iL)*r4*r5/(r5-1.0)/raVT1(iLay)
             END DO
@@ -1151,8 +1155,18 @@ CONTAINS
         END DO
     END IF
 
-    RETURN
-    end SUBROUTINE JacobTempFM1
+!  data = [+1 iLay raaGeneral(1,iLay) jacTG(1,iLay) raTemp(1) ...
+!                 raaRad(1,iLay) raaRadDT(1,iLay) raaLay2Sp(1,iLay) raaOneMinusTau(1,iLay) ...
+!                 raResults(1)];
+!  fprintf(1,' %3i %3i %10.6e %10.6e %10.6e %10.6e %10.6f %10.6f %10.6f %10.6e \n',data);
+
+ 123  FORMAT(I3,1X,I3,1X,4(ES10.4,' '),3(F10.4,' '),E10.4)
+!      write(*,123) +1,iLay,raaGeneral(1,iLay),raaAllDt(1,iLay),raTemp(1), &
+!                  raaRad(1,iLay),raaRadDT(1,iLay),raaLay2Sp(1,iLay),  &
+!                  raaOneMinusTau(1,iLay),raResults(1)
+
+      RETURN
+      end SUBROUTINE JacobTempFM1
 
 !************************************************************************
 ! this subroutine does the hard part of backgnd thermal Jacobians wrt amt

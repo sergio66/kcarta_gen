@@ -29,7 +29,7 @@ FFLAGS = -w -W -O3 -N3 -f -N15
 #----------------------
 F77 = /cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
 F77 = ifort
-FFLAGS = -names lowercase -extend-source 132 -check bounds -msse2
+FFLAGS = -names lowercase -extend-source 132 -check bounds -msse2 -nothreads -noreentrancy
 
 libblas.a:
 	$(F77) -c $(FFLAGS) *.f

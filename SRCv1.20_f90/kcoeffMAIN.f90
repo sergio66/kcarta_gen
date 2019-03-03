@@ -935,12 +935,18 @@ CONTAINS
     daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUX)
 
 ! check that the file has the data for the correct gas
+ 120 FORMAT(A80)
     IF (iFileGasID /= iGasID) THEN
+      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
+        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+      ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
         1000 FORMAT('Error! file : ',/,A120,/, &
         'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
+      END IF
     END IF
 
 ! check that the data file has the right number of layers ===== AIRS layers
@@ -1093,11 +1099,16 @@ CONTAINS
 
 ! check that the file has the data for the correct gas
     IF (iFileGasID /= iGasID) THEN
+      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
+        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+      ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
         1000 FORMAT('Error! file : ',/,A120,/, &
         'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
+      END IF
     END IF
 
 ! check that the data file has the right number of layers
@@ -1195,11 +1206,16 @@ CONTAINS
 
 ! check that the file has the data for the correct gas
     IF (iFileGasID /= iGasID) THEN
+      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
+        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+      ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
         1000 FORMAT('Error! file : ',/,A120,/, &
         'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
+      END IF
     END IF
 
 ! check that the data file has the right number of layers

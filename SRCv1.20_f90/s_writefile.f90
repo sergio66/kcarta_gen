@@ -212,7 +212,7 @@ CONTAINS
 
     INTEGER :: iFr,iM1
 
-    IF ((iGasID == 101) .OR. (iGasID == 102)) THEN
+    IF ((iGasID == 101) .OR. (iGasID == 102) .OR. (iGasID == 103)) THEN
         iGasPosn  = 1   !!!! corresponds to water
     END IF
 
@@ -231,10 +231,9 @@ CONTAINS
                     raResults(iFr) = raResults(iFr) * raaAmt(iM1,iGasPosn)
                 END DO
             ELSE IF (kJacobOutPut == 1) THEN
-            ! user wants d(BT)/dq * q for a normal gas; this is the default option
+            ! user wants d(BT)/dq * q = d(BT)/d(ln(q)) for a normal gas; this is the default option
                 DO iFr = 1,kMaxPts
-                    raResults(iFr) = &
-                    raResults(iFr) * raaAmt(iM1,iGasPosn) * radBTdr(iFr)
+                    raResults(iFr) = raResults(iFr) * raaAmt(iM1,iGasPosn) * radBTdr(iFr)
                 END DO
             ELSE IF (kJacobOutPut == 2) THEN
             ! user wants d(BT)/dq for a normal gas
@@ -260,14 +259,17 @@ CONTAINS
         ELSE IF (iGasID <= 0) THEN
         ! we are doing d/dT or cloud amt, size jacobians
             IF (kJacobOutPut == 0) THEN
-                iFr = 1
-            ! user wants d(rad)/dT so do nothing
+              ! user wants d(rad)/dT so do nothing
+              iFr = 1
             ELSE IF (kJacobOutPut == 1) THEN
-            ! user wants d(BT)/dT
-                DO iFr = 1,kMaxPts
-                    raResults(iFr) = raResults(iFr) * radBTdr(iFr)
-                END DO
+              ! user wants d(BT)/dT = dr/dT d(BT)/dr
+!    print *,'-',iM,raResults(1),raFreq(1),raInten(1),radBTdr(1)
+              DO iFr = 1,kMaxPts
+                raResults(iFr) = raResults(iFr) * radBTdr(iFr)
+              END DO
+!    print *,'+',iM,raResults(1),raFreq(1),raInten(1),radBTdr(1)
             END IF
+
         END IF
 
     END IF   !IF (kJacobOutput /= -1) THEN !oh well, do this

@@ -463,7 +463,7 @@ CONTAINS
 ! this is to calculate d/dq,d/dT
     DOUBLE PRECISION :: daaaTemp(kMaxK,kMaxTemp,kMaxLayer)
     DOUBLE PRECISION :: daaQ(kMaxK,kProfLayer),daaT(kMaxK,kProfLayer), &
-    daa_Unused_K_from_Temp(kMaxPts,kProfLayer)
+                        daa_Unused_K_from_Temp(kMaxPts,kProfLayer)
     DOUBLE PRECISION :: daaT1(kMaxK,kProfLayer),daaT2(kMaxK,kProfLayer)
     DOUBLE PRECISION :: daaT3(kMaxK,kProfLayer),daaT4(kMaxK,kProfLayer)
     DOUBLE PRECISION :: daaT5(kMaxK,kProfLayer)
@@ -481,6 +481,17 @@ CONTAINS
 
     DOUBLE PRECISION :: daQ(kMaxLayer)
     DOUBLE PRECISION :: daaaaKxNew(kMaxK,kMaxTemp,kMaxLayer,kMaxWater)
+
+! first interpolate in each of the five water offset matrices, in temperature
+! and in pressure to obtain the five current temp profile water matrices
+! hence daaAn = the n th matrix, interpolated in layer temperature T
+! note that daaT is just a dummy role here!!!!!!!!!!!!!!!!!!
+    IF ((kActualJacs == -1) .OR. (kActualJacs == +30) .OR. &
+    (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
+        iActuallyDoDT = 1
+    ELSE
+        iActuallyDoDT = -1
+    END IF
 
 ! pressure units!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! raOrigP in atm
@@ -571,9 +582,10 @@ CONTAINS
     iLDB,dBeta,daaAbsCoeff,iLDC)
 
     IF (kJacobian > 0) THEN !do temperature jacobians
-        CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
-        raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
-        pProf,iProfileLayers,iSPlineType)
+! do not need this as have ALREADY computed daaT above!!!
+!        CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
+!        raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
+!        pProf,iProfileLayers,iSPlineType)
         CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
         iLDA,iLDB,iLDC,dbeta,iUm,iUn)
         CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &

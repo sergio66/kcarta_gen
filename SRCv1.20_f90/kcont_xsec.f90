@@ -485,7 +485,7 @@ CONTAINS
 
     dTemp=daTemprt(2)-daTemprt(1)       !temperature spacing in CKD file
 
-!      iMult = -1
+      iMult = -1
 !      IF ((kCKD .EQ. 1) .AND.
 !     $  (raFreq(1) .LT. 979.0) .AND. (raFreq(kMaxPts) .GE. 780)) THEN
 !        iMult = +1

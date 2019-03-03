@@ -895,7 +895,7 @@ CONTAINS
 
       DO iI = 1,kProfLayer
         rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm
-	if (isfinite2(rScale) .EQ. .false. ) rScale = 0.0
+	if (isfinite2(rScale) .EQV. .false. ) rScale = 0.0
         DO iFr = 1,kMaxPts
 	  daaOD_continuum_WV_CO2(iFr,iI) = rScale*raX(iFr)	
 	  daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + daaOD_continuum_WV_CO2(iFr,iI)
@@ -1075,7 +1075,7 @@ CONTAINS
       
       DO iI = 1,kProfLayer
         rScale = raThickness(iI)*100.0      !! thickness m --> cm
-	if (isfinite2(rScale) .EQ. .false. ) rScale = 0.0
+	if (isfinite2(rScale) .EQV. .false. ) rScale = 0.0
         PH2O = raaPartPress(iI,1)
         PN2  = raPress(iI) * 0.78	
 	PTOT = raPress(iI)

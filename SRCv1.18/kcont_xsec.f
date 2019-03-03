@@ -474,7 +474,7 @@ c this is for CKD1 temeperature dependant multipliers from 780-980 cm-1
 
       dTemp=daTemprt(2)-daTemprt(1)       !temperature spacing in CKD file
 
-c      iMult = -1
+      iMult = -1
 c      IF ((kCKD .EQ. 1) .AND. 
 c     $  (raFreq(1) .LT. 979.0) .AND. (raFreq(kMaxPts) .GE. 780)) THEN
 c        iMult = +1

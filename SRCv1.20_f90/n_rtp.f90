@@ -2180,9 +2180,9 @@ CONTAINS
                 write(kStdWarn,*) 'scanangIN and saconv(satzenIN,zobsIN) disagree'
                 write(kSTdWarn,*) 'using satzenIN (AIRS preference!!!) --> scanang'
                 IF (prof%zobs < 2000.0) THEN
-                    write(kStdErr,*) 'used 705 km as satellite height'
+                    write(kStdErr,*) 'used 705 km as satellite hgt'
                 ELSE
-                    write(kStdErr,*) 'used ',prof%zobs/1000 ,' km as satellite hght'
+                    write(kStdErr,*) 'used ',prof%zobs/1000 ,' km as satellite hgt'
                 END IF
                 rAngle = rAngleY   !!! replace input scanang with that derived
             !!! from satzen,zobs

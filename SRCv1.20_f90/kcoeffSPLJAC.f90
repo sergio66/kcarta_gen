@@ -492,7 +492,6 @@ CONTAINS
         iLDA,iLDB,iLDC,dbeta,iUm,iUn)
         CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
         iLDB,dBeta,daaDT,iLDC)
-
         IF (iDoDQ > 0) THEN       !do amount jacobians
             DO  iM=1,kMaxPtsJac
                 DO iN=1,kProfLayerJac
@@ -530,7 +529,7 @@ CONTAINS
     DOUBLE PRECISION :: daaQ(kMaxK,kProfLayer)
     INTEGER :: iNk,iKm,iKn,iUm,iUn,iProfileLayers,iSPlineType
 
-!     for interpolating
+!   for interpolating
     DOUBLE PRECISION :: daWork(kMaxWater),dYP1,dYPN,dXPT, &
     daXgiven(kMaxWater),daYgiven(kMaxWater),daY2(kMaxWater)
     INTEGER :: iI,iL,iLowest
