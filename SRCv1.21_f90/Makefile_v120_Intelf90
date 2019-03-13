@@ -1,0 +1,118 @@
+#
+# see http://parfum-echecs.chez-alice.fr/builder/
+#
+# makefile to build kcarta.x
+# >>>>>>>>  make basic >>>>>>>>>>>>>>>>>> is the easiest one!!
+#
+# "make" or "make scat" will compile kcarta.x and move it to
+# its home in the ../BIN directory
+# 
+# "make kcarta.x" will compile kcarta.x and leave it in the current
+# directory
+#
+# Example compiler flags and libraries are included for several
+# compilers and architectures.  Initial testing should be done with
+# array checking on; When things are working OK, you can leave out
+# the array checking and crank up the optimization.
+
+# Things to do before typing "Make"
+# Remember all .param and include files are in ../INCLUDE (kcarta.param, 
+#    scatter.param, pre_defined.param, gauss.param) while for rtpdefs.f, we 
+#    have a Makefile directive for the include file (see RTP section below)
+
+# see Readme_MakefileCommentsA
+
+########################################################################
+## if this does not work, just delete following line and bring in
+## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"
+
+include Makefile_intel_hdf_rtp
+
+SHELL = /bin/sh
+
+############################################################################
+## set up the appropriate compiler and its options                        ##
+## NOTE 1) only SGI F77 and Absoft have been tested with the autodoubling ##
+##         required by DISORT                                             ##
+##      2) g77 does not support Fortan structures, so it cannot be used   ##
+##         when compiling the RTP related code                            ##
+##      3) If you ignore the above two limitations, and can figure out if ##
+##         your compiler supports autodoubling and F77 structures, then   ##
+##         we have a set of options for SunOS and SUN Solaris F77         ##
+############################################################################
+
+# ifort F90
+# ------------
+# -u  : turn off implicit typing of variables
+# -g  : generate debugging information (turns off optimization)
+# -C  : do run time subscript range checking
+# -w0 : inform about unused variables 
+# -O3 : heavy optimization
+# -64 : 64-bit objects (libraries must match)
+# -us : puts trailing underscore
+#
+# see https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
+# -i8 -I${MKLROOT}/include/mic/ilp64 -I${MKLROOT}/include -mmic
+# see http://fulla.fnal.gov/acml/html/Intro.html#Intro,
+#     https://software.intel.com/en-us/node/510802 claims libimf.a,libm.a automatically linked in
+# ifort "icc does not adds underscores to symbols"
+# >>> mkl is for dgemm
+# (http://hpcf.umbc.edu/using-your-hpcf-account/#heading_toc_j_5). To answer your question do the following:
+# $ module unload intel/compiler/64/15.0/full
+# $ module load intel/compiler/64/15.0/full
+# $ module load intel/compiler/64/2017
+# $ module load intel/mkl/64
+# $ module load szip/2.1
+
+#FORTRANX = /cm/shared/apps/intel/composer_xe/2015.3.187/bin/intel64/ifort  before Apr 2016
+#FORTRANX = /cm/shared/apps/intel/composer_xe/2015.5.223/bin/intel64/ifort  after April 2016
+#FORTRANX = /cm/shared/apps/intel/composer_xe/current/bin/intel64/ifort     after April 2016
+## Try using simply ifort instead of the full path. When make looks for 'ifort'
+## it will look at the environment variable 'PATH' which is modified to point to the correct version when you load the module.
+FORTRANX = ifort   ## GENERIC< should always work!!!
+
+# DEBUG TOO MUCH INFO BUT EXCELLENT: see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+#####FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp_created -gen-interfaces -warn interfaces  -mcmodel=medium
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+####FLAGS = -openmp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
+
+### -diag-disable:remark OR
+### -diag-disable:remark
+### -diag-disable:8291   SINCE WE GET THIS remark #8291: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+7'.
+### this gives relocation truncated to fit: R_X86_64_PC32 against symbol errors during link
+### basic_common.o: In function `dostop':
+###/umbc/xfs2/strow/asl/s1/sergio/home/KCARTA/SRCv1.20_f90/basic_common.f90:302: relocation truncated to fit: R_X86_64_PC32 against symbol `ob1' defined in COMMON section in basic_common.o if you forget to use -mcmodel=medium or large
+FLAGS = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
+
+# ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT Intel parallelization
+#Option -openmp enables OpenMP processing.
+#Option -parallel enables automatic parallelization.
+#Option -par-report3 is useful to see what it does.
+#FLAGS = -fpp -parallel -par_report3 -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
+# ALL COOL  >>>>>>>>>>>>>>>>>>> SERGIO parallelization
+#https://software.intel.com/en-us/node/532813
+#FLAGS = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291
+#FLAGS = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291  -check bounds
+#
+
+### happy and you know it, use the preprocessor >>>>>>>>>>>>>>>>>>
+### happy and you know it, use the preprocessor, Note that -O2/-O3 are paralleliization UGH, so -O1 is safer; also cut out any threads
+FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -nothreads -noreentrancy
+FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291
+### happy and you know it, use the preprocessor
+### happy and you know it, use the preprocessor>>>>>>>>>>>>>>>>>>>
+
+#UFLAG = 
+LIBS  = -lblas -mkl
+LIBS  = -L ../LIB -lblas -mkl
+FDOUBLE = -r8
+
+########################################################################
+## if this does not work, just delete following line and bring in "Makefile_tar_objs_data_f90"
+include Makefile_tar_objs_data_f90
+

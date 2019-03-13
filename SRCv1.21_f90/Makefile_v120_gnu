@@ -1,0 +1,62 @@
+#
+# see http://parfum-echecs.chez-alice.fr/builder/
+#
+# makefile to build kcarta.x
+# >>>>>>>>  make basic >>>>>>>>>>>>>>>>>> is the easiest one!!
+#
+# "make" or "make scat" will compile kcarta.x and move it to
+# its home in the ../BIN directory
+# 
+# "make kcarta.x" will compile kcarta.x and leave it in the current
+# directory
+#
+# Example compiler flags and libraries are included for several
+# compilers and architectures.  Initial testing should be done with
+# array checking on; When things are working OK, you can leave out
+# the array checking and crank up the optimization.
+
+# Things to do before typing "Make"
+# Remember all .param and include files are in ../INCLUDE (kcarta.param, 
+#    scatter.param, pre_defined.param, gauss.param) while for rtpdefs.f, we 
+#    have a Makefile directive for the include file (see RTP section below)
+
+# see Readme_MakefileCommentsA
+
+########################################################################
+## if this does not work, just delete following line and bring in
+## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"
+
+include Makefile_intel_hdf_rtp
+
+SHELL = /bin/sh
+
+############################################################################
+## set up the appropriate compiler and its options                        ##
+## NOTE 1) only SGI F77 and Absoft have been tested with the autodoubling ##
+##         required by DISORT                                             ##
+##      2) g77 does not support Fortan structures, so it cannot be used   ##
+##         when compiling the RTP related code                            ##
+##      3) If you ignore the above two limitations, and can figure out if ##
+##         your compiler supports autodoubling and F77 structures, then   ##
+##         we have a set of options for SunOS and SUN Solaris F77         ##
+############################################################################
+
+# Warning: this will not compile the structures (rtp_interface.f)
+# However it is a good compile test for the rest of the code
+# Linux with g95
+# ---------------
+# every variable auto-rolled to lower case
+
+FORTRANX=/usr/ebuild/software/GCCcore/7.3.0/bin/f95
+FLAGS= -ffixed-line-length-120 -fdec-structure
+LIBS = -L ../LIB -lblas
+
+#UFLAG = 
+LIBS  = -lblas -mkl
+LIBS  = -L ../LIB -lblas -mkl
+FDOUBLE = -r8
+
+########################################################################
+## if this does not work, just delete following line and bring in "Makefile_tar_objs_data_f90"
+include Makefile_tar_objs_data_f90
+

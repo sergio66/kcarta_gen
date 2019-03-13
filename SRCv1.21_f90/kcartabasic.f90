@@ -1,19 +1,20 @@
-! Copyright 2000
+! Copyright 2018
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
-    PROGRAM kcartamain
-    use omp_lib            ! Fortran 90; omp_get_thread_num, omp_get_num_threads
-    use ifport             ! for getenv
+! use must precede IMPLICIT and INCLUDE statements
 
-    use basic_common       ! misc routines
-    use kcartamisc         ! more misc routines
-    use jac_main           ! jacobians
-    use rad_main           ! main rad routines
-    use n_main             ! main reader for namelist
-    use kcoeffmain         ! uncompression routines
-    use knonlte            ! nonlte routines
-    use scatter_interface  ! scattering
+    PROGRAM kcartabasic
+    use omp_lib          ! Fortran 90; omp_get_thread_num, omp_get_num_threads
+    use ifport           ! for getenv
+
+    use basic_common     ! misc routines
+    use kcartamisc       ! more misc routines
+    use jac_main         ! jacobians
+    use rad_main         ! main rad routines
+    use n_main           ! main reader for namelist
+    use kcoeffmain       ! uncompression routines
+    use knonlte          ! nonlte routines
     
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
@@ -29,6 +30,8 @@
 !   calcon*.f     : H2O continuum routinues
 !   calq,calxsc.f : cross section routinues
 !************************************************************************
+
+
 
 !     This fortran file builds up an atmosphere and calculates the radiance
 !     transmitted between the lower and uppermost layers
@@ -143,7 +146,7 @@
 ! this gives us the cloud profile info
     INTEGER :: iCldProfile,iaCldTypes(kMaxClouds)
     REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
-
+         
 ! this is for new spectroscopy
 ! iNumNewGases   tells number of new gases
 ! iaNewGasID     tells which gases we want to update spectroscopy
@@ -156,10 +159,10 @@
     CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
 ! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
-! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
-! rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
 ! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
 !                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
+! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
+! rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     CHARACTER(80) :: caaAltComprDirs(kGasStore)
     REAL ::          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
@@ -319,8 +322,8 @@
 ! this is the output radiance intensity array (measured at instrument)
     REAL :: raInten(kMaxPts)
 ! this allows us to do c1,c2,c12,clear cloud fracs, plus combo, to do TwoSlab
-    REAL :: raaRadsX(kMaxPts,kProfLayer),raaFluxX(kMaxPts,2*(kProfLayer+1))
-    INTEGER :: iNumOutX,iLayPrintFlux
+!      REAL raaRadsX(kMaxPts,kProfLayer),raaFluxX(kMaxPts,2*(kProfLayer+1))
+!      INTEGER iNumOutX,iLayPrintFlux
 
 ! this is the mixing table
     REAL :: rCO2Mult   !!! for NLTE
@@ -337,13 +340,13 @@
     INTEGER :: iOutTypes,iaPrinter(kMaxPrint),iaNp(kMaxPrint)
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iaGPMPAtm(kMaxPrint)
     REAL :: raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
-
+          
 ! iJacob        = number of gas Jacobians to output
 ! iaJacob       = list of GasID's to do Jacobian for
     INTEGER :: iJacob,iaJacob(kMaxDQ)
 
 ! (max of kNumkComp blocks, from 605 to 2805)
-    INTEGER :: iFileIDLo,iFileIDHi,iInt,iFileID
+    INTEGER :: iFileIDLo,iFileIDHi,iInt,iFileID,iaInt(kMaxPts)
 
 ! iaTagIndex tells which TagIndex (1 .. 10) is associated with which file
 !     (1,2,3,4 for k,p,q,r etc
@@ -386,19 +389,19 @@
 
 ! these are actually used
     INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
-    INTEGER :: iFr,ID
     INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 ! these are temporary dumy variables
-    REAL :: raX(kMaxPts),raY2(kMaxPts),raY3(kMaxPts),raY4(kMaxPts)
+    REAL :: raX(kMaxPts),raY2(kMaxPts),raY3(kMaxPts) !used for splines
 !      REAL rDummy,rDummy2,rDummy3,rDerivTemp,rDerivAmt,PLKAVG_ORIG, PLKAVG
     REAL :: rDummy,rDerivTemp,rDerivAmt
-    DOUBLE PRECISION :: dDummy
+    DOUBLE PRECISION :: daDumbAbs(kMaxPts)
 
 !************************************************************************
 !************************************************************************
 !************************************************************************
+
     double precision :: wtime
     wtime = omp_get_wtime ( )
 
@@ -406,9 +409,9 @@
 !!! very very pleasant to everyone, 4 is better (but still limits to about one processor)
 !!! default on new machines ie without having line before, is 32 threads or 32 processors
     call mkl_set_num_threads(4)
-
-! allow scattering computations if in .nml or RTP file
-    kAllowScatter = +1
+    
+! do not allow scattering computations if in .nml or RTP file
+    kAllowScatter = -1
 
 ! set up dummy layer for nonLTE calcs
     iNLTEStart = kMixFilRows + 1
@@ -422,6 +425,7 @@
     caJacobFile,iOutFileName)
 
     CALL ErrorLogName(caDriverName)
+
     OPEN(UNIT=kStdWarn,FILE=kWarnFile,STATUS='UNKNOWN', &
     FORM='FORMATTED',IOSTAT=IERR)
     kStdWarnOpen = 1
@@ -492,7 +496,18 @@
 
     CALL SetSplineType(raPresslevels,iProfileLayers, &
     iNumNLTEGases,iNLTE_SlowORFast,iSplineType)
-         
+
+!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    IF (kFlux > 0) THEN
+        write (kStdErr,*) 'This is basic kCARTA, cannot compute fluxes'
+        CALL DoStop
+    END IF
+
+    IF (kWhichScatterCode /= 0) THEN
+        write (kStdErr,*) 'This is basic kCARTA, cannot do scattering!'
+        CALL DoStop
+    END IF
+
     IF ((kLongOrShort == 0) .AND. &
     ((kFlux > 0) .OR. (kJacobian >= 0))) THEN
         write (kStdErr,*) 'kLongOrShort = 0, so only output basic kCARTA'
@@ -526,33 +541,6 @@
         write(kStdErr,*) 'for wavenumbers > 50000 cm-1, need Rayleigh '
         CALL DoStop
     END IF
-
-!      IF ((iakSolar(1) .GE. 0) .AND. (rFreqStart .GE. 5000.0) .AND.
-!     $     (raKsolarAngle(1) .LE. 90) .AND. (raKsolarAngle(1) .GE. 0)) THEN
-!        kWhichScatterCode = 6
-!        iNclouds_RTP = 1
-!        iNclouds     = 1
-!        iaaScatTable(1,1)   = 1
-!        caaaScatTable(1,1)  = 'junk'
-!        raScatterDME(1)     = 1.0
-!        raScatterIWP(1)     = 1.0
-!        rDummy1       = raaPrBdry(1,1) - 200.0
-!        rDummy2      = raaPrBdry(1,1) - 10.0
-!        iaCloudNumLayers(1)    = 0
-!        iL_low = iaaRadlayer(1,1)
-! 765    CONTINUE
-!        IF (raPressLevels(iL_low) .GE. rDummy1 .AND.
-!     $      raPressLevels(iL_low) .LE. rDummy2) THEN
-!          iaCloudNumLayers(1)    =  iaCloudNumLayers(1) + 1
-!        END IF
-!        IF (iL_low .LT.  iaaRadlayer(1,iaNumLayer(1))) THEN
-!          iL_low = iL_Low + 1
-!          GOTO 765
-!        END IF
-!        iaCloudNumAtm(1)       = 1
-!        iaaCloudWhichAtm(1,1)  = 1
-!        iaPhase(1)             = -1       !default to HG phase function
-!      END IF
 
 !************************************************************************
 ! do initializations of reference profiles and output binary files
@@ -608,6 +596,7 @@
     iakSolar,rakSolarAngle,rakSolarRefl,iakThermal, &
     rakThermalAngle,iakThermalJacob,iaOutNumbers,iTotal,iTotalStuff, &
     iDoUpperAtmNLTE,iDumpAllUASpectra,iDumpAllUARads)
+
     WRITE(kStdWarn,*) 'called PrepareOutput .......'
     CALL printstar
 
@@ -642,19 +631,6 @@
 
 ! END PROGRAM
 !************************************************************************
-    IF ((iaCloudNumLayers(1) == iaNumLayer(1)) .AND. &
-    (iCldProfile < 0)) THEN
-        write(kStdWarn,*) 'you claim cloudprofile has iNumlayers'
-        write(kStdWarn,*) 'but iCldProfile < 0'
-        CALL DoStop
-    END IF
-    IF ((iaCloudNumLayers(1) < iaNumLayer(1)) .AND. &
-    (iCldProfile > 0)) THEN
-        write(kStdWarn,*) 'you claim cloudprofile has < iNumlayers'
-        write(kStdWarn,*) 'but iCldProfile > 0'
-        CALL DoStop
-    END IF
-
 ! check Jacobian array sizes
     IF (kJacobian > 0) THEN
         IF (kProfLayerJac /= kProfLayer) THEN
@@ -681,6 +657,14 @@
 !c raBlock  tells the current kComp wavenumber block
 !c raFileStep tells you the current wavenumber step size*10000
 !c iaList   has the final list of iTotal files that should be uncompressed
+!c      INTEGER iaList(kNumkCompT),iTotal,iOuterLoop
+!c      INTEGER iTag,iDoAdd
+!c      INTEGER raFiles(kNumkCompT)
+!c      INTEGER iaTagIndex(kNumkCompT),iaActualTag(kNumkCompT)
+!c      REAL raBlock(kNumkCompT),raFileStep(kNumkCompT)
+!c
+!c      print *,(iaList(iOutnum),iOutnum=1,iTotal)
+!c      print *,(raFiles(iaList(iOutnum)),iOutnum=1,iTotal)
 
 !******************
 ! set the kCmp Interp Wgts
@@ -694,8 +678,9 @@
     iActualTag   = iaActualTag(iFileID)
 
     DO iInt=1,kMaxPts
-        raFreq(iInt) = raBlock(iFileID)+(iInt-1)*real(kaFrStep(iTag))
+      iaInt(iInt) = iInt-1
     END DO
+    raFreq = raBlock(iFileID) + iaInt*real(kaFrStep(iTag))
 
     iGas = 1
     CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag, &
@@ -703,7 +688,7 @@
     IF (iDoAdd <= 0) THEN
         write(kStdErr,*) 'need other than gid = 1 to set kComp Interp Wgts'
 	write(kSTdErr,*) 'raFreq(1) = ',raFreq(1),' kCompParamFile = '
-	write(kStdErr,*) kCompParamFile	
+	write(kStdErr,*) kCompParamFile
         CALL DoStop
     ELSE
         rDerivAmt  = 0.1
@@ -742,7 +727,7 @@
         END DO
         write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
     END IF
-          
+
 !******************
 
 ! LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
@@ -768,11 +753,7 @@
         IF (kJacobian > 0 .AND. &
         ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
         (kActualJacs == 100) .OR. (kActualJacs == 102))) THEN
-            DO iDummy=1,kProfLayer
-                DO iInt=1,kMaxPts
-                    raaAllDT(iInt,iDummy) = 0.0
-                END DO
-            END DO
+            raaAllDT = 0.0
         END IF
 
     ! if there will  be mixed path calculations, initialize raaSumAbCoeff
@@ -815,9 +796,7 @@
         END IF
 
     ! set the frequency range for the current file block
-        DO iInt=1,kMaxPts
-            raFreq(iInt) = raBlock(iFileID)+(iInt-1)*kaFrStep(iTag)
-        END DO
+        raFreq = raBlock(iFileID) + iaInt*real(kaFrStep(iTag))
 
     ! check to see if any of the printing options set iPrinter=1
         iFound  = -1
@@ -848,7 +827,7 @@
         DO iGas=1,iNumGases
             write(kStdWarn,*) ' //////////// new gas ////////////////////'
             CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag,iDoAdd,iErr)
-             
+              
             IF (kJacobian > 0) THEN
                 iDoDQ = DoGasJacob(iaGases(iGas),iaJacob,iJacob)
                 IF (iDoDQ > 0) THEN
@@ -876,10 +855,10 @@
             ! get contribution of i-th gas to the absorption coeff profile
             ! current gas ID is iaGases(iGas)
 
-            IF (kJacobian < 0) THEN
-              ! if no need to do gas or temp jacobians, then do not waste time doing them
-              iDoDQ = -2
-            END IF
+                IF (kJacobian < 0) THEN
+                ! if no need to do gas or temp jacobians, then do not waste time doing them
+                    iDoDQ = -2
+                END IF
             ! else we have already checked to see if we need to do gas amt jacobians
             ! iDoDQ = -2 if no need to do ANY jacobian
             ! iDoDQ = -1 if no need to do gas jacobian, do temp jacobian
@@ -968,10 +947,10 @@
             ! set daaAb ---> raaAb
                 CALL DoDtoR(daaGasAbCoeff,raaTempAbCoeff)
                 IF ((iaGases(iGas) == 2) .AND. &
-                  (raFreq(1) >= 500) .AND. (raFreq(kMaxPts) <= 605)) THEN
-                  !! gas2 has NaNs for 500 < f < 605
-                  write(kStdWarn,*) 'gas2 has NaNs for 500 < f < 605, layer 100 ... setting to 0'
-                  Call ZeroLayer(raaTempAbCoeff,kProfLayer)
+                (raFreq(1) >= 500) .AND. (raFreq(kMaxPts) <= 605)) THEN
+                !! gas2 has NaNs for 500 < f < 605
+                    write(kStdWarn,*) 'gas2 has NaNs for 500 < f < 605, layer 100 ... setting to 0'
+                    Call ZeroLayer(raaTempAbCoeff,kProfLayer)
                 END IF
 
                 IF ((raFreq(1) >= 605.0) .AND. (raFreq(1) <= 2805.0) .AND. (iSARTAChi > 0)) THEN
@@ -1076,7 +1055,6 @@
         END DO            !!!!!!!do igas=1,iNumGases
 
         CALL PrintPound
-
     ! ******************** MIXED PATH OUTPUT  ********************************
 
         IF (iNpmix <= 0) THEN
@@ -1181,18 +1159,8 @@
         END IF
         IF (iNpmix > 0) THEN
 
-                     
         ! LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
         ! LOOP OVER THE ATMOSPHERE B.C. set in *RADFIL
-        ! kWhichScatterCode = 0,2,3,5 for ABS, RTSPEC, DISORT, PCLSAM type clouds
-            IF (((kWhichScatterCode == 5) .OR. (kWhichScatterCode == 3)) .AND. (iAtm >= 1)) THEN
-                DO iFr = 1,kMaxPts
-                    DO iAtm = 1,kProfLayer
-                        raaRadsX(iFr,iAtm) = 0.0
-                    END DO
-                END DO
-            END IF
-
             DO iAtm = 1,iNatm
             ! see if this atmosphere radiance is to be output by looping over the
             ! printing options. If it is, build up the atmosphere. Else loop to next
@@ -1232,10 +1200,9 @@
 
                 ! reset the frequency range for the current file block, if things are screwy
                 ! due to NLTE test
+                                  
                     IF (dDeltaFreqNLTE > 0.0d0) THEN
-                        DO iInt=1,kMaxPts
-                            raFreq(iInt)=raBlock(iFileID)+(iInt-1)*dDeltaFreqNLTE
-                        END DO
+                        raFreq=raBlock(iFileID)+iaInt*dDeltaFreqNLTE
                     END IF
 
                     IF ((iChunk_DoNLTE == -1) .AND. (kPlanckOut == 0)) THEN
@@ -1310,65 +1277,7 @@
                         iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
                         iaJacob,iJacob)
 
-                    ELSEIF ((kWhichScatterCode == 0) .AND. (iaLimb(iAtm) > 0)) THEN
-                    ! %%%%%%%%%%%%% CLEAR SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                        write(kStdWarn,*) ' ---> Clear Sky LIMB Computations ...'
-			write(kStdWarn,*) ' oops turned this off!!!'
-                        write(kStdErr,*) ' ---> Clear Sky LIMB Computations ...'
-			write(kStdErr,*) ' oops turned this off!!!'
-			CALL DoStop
-!                        CALL InterfaceClearSkyLimb( &
-!                        raFreq, &
-!                        raaSumAbCoeff,raMixVertTemp,caOutName, &
-!                        iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
-!                        raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
-!                        raSatAngle,raFracTop,raFracBot, &
-!                        iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-!                        raSurface,raSun,raThermal,raSunRefl, &
-!                        raLayAngles,raSunAngles,iTag,iActualTag, &
-!                        raThickness,raPressLevels,iProfileLayers,pProf, &
-!                        raTPressLevels,iKnowTP, &
-!                        rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-!                        iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-!                        raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-!                        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-!                        iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
-!                        daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
-!                        daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
-!                        daaUpperNLTEGasAbCoeffBloat, &
-!                        caOutUAFile,caOutBloatFile, &
-!                        caFLuxFile, &
-!                        caJacobFile,caJacobFile2, &
-!                        iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
-!                        iaJacob,iJacob)
-
-                    ELSE IF ((abs(kWhichScatterCode) /= 0) .AND. (iaLimb(iAtm) < 0)) THEN
-                    ! %%%%%%%%%%%%% CLOUDY SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                        write(kStdWarn,*) ' ---> Cloud Sky Computations ...'
-                        CALL InterfaceScattering( &
-                        raFreq,raaSumAbCoeff,raMixVertTemp,raNumberDensity, &
-                        raaAmt,raaaAllDQ,raaaColDQ,raaAllDT,iaJacob,iJacob, &
-                        iNumGases,iaGases,iNatm, &
-                        caOutName,iOutNum,iAtm,iaNumLayer(iAtm),iaaRadLayer, &
-                        raTSpace(iAtm),raTSurf(iAtm),rSurfPress,raUseEmissivity, &
-                        raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
-                        iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-                        raSurface,raSun,raThermal,raSunRefl, &
-                        raLayAngles,raSunAngles, &
-                        raSatAzimuth,raSolAzimuth, &
-                        raThickness,raPressLevels,iProfileLayers,pProf, &
-                        cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis, &
-                        iCldProfile,iaCldTypes,raaKlayersCldAmt, &
-                        iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-                        raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-                        iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag, &
-                        iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
-                        iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-                        raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-                        caJacobFile,caJacobFile2, &
-                        raTPressLevels,iKnowTP, &
-                        raaRadsX,iNumOutX,raaFluxX,iLayPrintFlux)
-                    END IF
+                    END IF      !!kWhichScatterCode == 0
                 END IF
 
             ! this ends the loop over the atmospheres read in from *radfil
@@ -1378,18 +1287,18 @@
         END IF
 
     ! go to the next wavenumber range
+
         IF (iOuterLoop < iTotal) THEN
             rFileStartFr = rFileStartFr+raFileStep(iFileID)
             iFileID      = iFileID+1
             iTag         = iaTagIndex(iFileID)
             iActualTag   = iaActualTag(iFileID)
         END IF
-
     END DO               !!!!!!iOuterLoop=1,iTotal
-          
+
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
-    CALL DateTime('kcartamain.x')
+    CALL DateTime('kcartabasic.x')
     wtime = omp_get_wtime ( ) - wtime
     write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
     write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    

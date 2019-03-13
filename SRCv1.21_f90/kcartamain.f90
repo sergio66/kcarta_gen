@@ -343,7 +343,7 @@
     INTEGER :: iJacob,iaJacob(kMaxDQ)
 
 ! (max of kNumkComp blocks, from 605 to 2805)
-    INTEGER :: iFileIDLo,iFileIDHi,iInt,iFileID
+    INTEGER :: iFileIDLo,iFileIDHi,iInt,iaInt(kMaxPts),iFileID
 
 ! iaTagIndex tells which TagIndex (1 .. 10) is associated with which file
 !     (1,2,3,4 for k,p,q,r etc
@@ -694,8 +694,9 @@
     iActualTag   = iaActualTag(iFileID)
 
     DO iInt=1,kMaxPts
-        raFreq(iInt) = raBlock(iFileID)+(iInt-1)*real(kaFrStep(iTag))
+        iaInt(iInt) = (iInt-1)
     END DO
+    raFreq = raBlock(iFileID) + iaInt*real(kaFrStep(iTag))
 
     iGas = 1
     CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag, &
@@ -815,9 +816,7 @@
         END IF
 
     ! set the frequency range for the current file block
-        DO iInt=1,kMaxPts
-            raFreq(iInt) = raBlock(iFileID)+(iInt-1)*kaFrStep(iTag)
-        END DO
+        raFreq = raBlock(iFileID) + iaInt*real(kaFrStep(iTag))
 
     ! check to see if any of the printing options set iPrinter=1
         iFound  = -1
@@ -1233,9 +1232,7 @@
                 ! reset the frequency range for the current file block, if things are screwy
                 ! due to NLTE test
                     IF (dDeltaFreqNLTE > 0.0d0) THEN
-                        DO iInt=1,kMaxPts
-                            raFreq(iInt)=raBlock(iFileID)+(iInt-1)*dDeltaFreqNLTE
-                        END DO
+                        raFreq = raBlock(iFileID) + iaInt*dDeltaFreqNLTE
                     END IF
 
                     IF ((iChunk_DoNLTE == -1) .AND. (kPlanckOut == 0)) THEN
