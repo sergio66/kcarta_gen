@@ -2,19 +2,6 @@
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
-    PROGRAM kcartamain
-    use omp_lib            ! Fortran 90; omp_get_thread_num, omp_get_num_threads
-    use ifport             ! for getenv
-
-    use basic_common       ! misc routines
-    use kcartamisc         ! more misc routines
-    use jac_main           ! jacobians
-    use rad_main           ! main rad routines
-    use n_main             ! main reader for namelist
-    use kcoeffmain         ! uncompression routines
-    use knonlte            ! nonlte routines
-    use scatter_interface  ! scattering
-    
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
 !   kcartaparam.f90  : parameter declarations (for the array sizes)
@@ -45,6 +32,11 @@
     IMPLICIT NONE
 
     include '../INCLUDE/scatterparam.f90'
+
+!     Include the MPI library definitons:
+!      include 'mpif.h'
+!      integer numtasks, rank, ierr, rc, len, i
+!      character*(MPI_MAX_PROCESSOR_NAME) name
 
     INTEGER :: iIOUN
 
@@ -340,7 +332,7 @@
 
 ! iJacob        = number of gas Jacobians to output
 ! iaJacob       = list of GasID's to do Jacobian for
-    INTEGER :: iJacob,iaJacob(kMaxDQ)
+    INTEGER :: iJacob,iaJacob(kMaxDQ),DoGasJacob
 
 ! (max of kNumkComp blocks, from 605 to 2805)
     INTEGER :: iFileIDLo,iFileIDHi,iInt,iFileID
@@ -385,27 +377,52 @@
     REAL ::    raQ21(kProfLayer),raQ22(kProfLayer)
 
 ! these are actually used
-    INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
-    INTEGER :: iFr,ID
-    INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
+    INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
+    INTEGER :: iFr,ID,OMP_GET_THREAD_NUM
+    INTEGER :: DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 ! these are temporary dumy variables
     REAL :: raX(kMaxPts),raY2(kMaxPts),raY3(kMaxPts),raY4(kMaxPts)
 !      REAL rDummy,rDummy2,rDummy3,rDerivTemp,rDerivAmt,PLKAVG_ORIG, PLKAVG
-    REAL :: rDummy,rDerivTemp,rDerivAmt
+    REAL :: rDummy,rDerivTemp,rDerivAmt,p2h
     DOUBLE PRECISION :: dDummy
 
 !************************************************************************
 !************************************************************************
 !************************************************************************
-    double precision :: wtime
-    wtime = omp_get_wtime ( )
 
-!!! else ifort starts taking over the machine : Howard says 1 is 
-!!! very very pleasant to everyone, 4 is better (but still limits to about one processor)
-!!! default on new machines ie without having line before, is 32 threads or 32 processors
-    call mkl_set_num_threads(4)
+!     Initialize the MPI library:
+!      call MPI_INIT(ierr)
+!      if (ierr .ne. MPI_SUCCESS) then
+!         print *,'Error starting MPI program. Terminating.'
+!         call MPI_ABORT(MPI_COMM_WORLD, rc, ierr)
+!      end if
+
+!     Get the number of processors this job is using:
+!      call MPI_COMM_SIZE(MPI_COMM_WORLD, numtasks, ierr)
+
+!     Get the rank of the processor this thread is running on.  (Each
+!     processor has a unique rank.)
+!      call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+
+!     Get the name of this processor (usually the hostname)
+!      call MPI_GET_PROCESSOR_NAME(name, len, ierr)
+!      if (ierr .ne. MPI_SUCCESS) then
+!         print *,'Error getting processor name. Terminating.'
+!         call MPI_ABORT(MPI_COMM_WORLD, rc, ierr)
+!      end if
+
+!      print 30, "hello_parallel.f: Number of",numtasks,rank,name
+! 30      format (A,' tasks=',I3,' My rank=',I3,' My name=',A80,'')
+
+!************************************************************************
+!************************************************************************
+!************************************************************************
+
+!      CALL InputMR_profile('../SRC/levels_prof1.txt')
+!      print *,'yihaa'
+!      Call Dostop
 
 ! allow scattering computations if in .nml or RTP file
     kAllowScatter = +1
@@ -747,7 +764,13 @@
 
 ! LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
 ! outermost loop over the 10000 pt freq chunks
+    CALL OMP_SET_NUM_THREADS(8)
+! OMP PARALLEL
+! OMP DO
     DO iOuterLoop=1,iTotal
+        ID = OMP_GET_THREAD_NUM()
+        print *,'hello world OMP_GET_THREAD_NUM() = ',ID
+              
         kOuterLoop = iOuterLoop
         call PrintStar
         write (kStdwarn,*) 'Processing new kCompressed Block ....'
@@ -848,7 +871,7 @@
         DO iGas=1,iNumGases
             write(kStdWarn,*) ' //////////// new gas ////////////////////'
             CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag,iDoAdd,iErr)
-             
+
             IF (kJacobian > 0) THEN
                 iDoDQ = DoGasJacob(iaGases(iGas),iaJacob,iJacob)
                 IF (iDoDQ > 0) THEN
@@ -876,10 +899,10 @@
             ! get contribution of i-th gas to the absorption coeff profile
             ! current gas ID is iaGases(iGas)
 
-            IF (kJacobian < 0) THEN
-              ! if no need to do gas or temp jacobians, then do not waste time doing them
-              iDoDQ = -2
-            END IF
+                IF (kJacobian < 0) THEN
+                ! if no need to do gas or temp jacobians, then do not waste time doing them
+                    iDoDQ = -2
+                END IF
             ! else we have already checked to see if we need to do gas amt jacobians
             ! iDoDQ = -2 if no need to do ANY jacobian
             ! iDoDQ = -1 if no need to do gas jacobian, do temp jacobian
@@ -968,10 +991,10 @@
             ! set daaAb ---> raaAb
                 CALL DoDtoR(daaGasAbCoeff,raaTempAbCoeff)
                 IF ((iaGases(iGas) == 2) .AND. &
-                  (raFreq(1) >= 500) .AND. (raFreq(kMaxPts) <= 605)) THEN
-                  !! gas2 has NaNs for 500 < f < 605
-                  write(kStdWarn,*) 'gas2 has NaNs for 500 < f < 605, layer 100 ... setting to 0'
-                  Call ZeroLayer(raaTempAbCoeff,kProfLayer)
+                (raFreq(1) >= 500) .AND. (raFreq(kMaxPts) <= 605)) THEN
+                !! gas2 has NaNs for 500 < f < 605
+                    write(kStdWarn,*) 'gas2 has NaNs for 500 < f < 605, layer 100 ... setting to 0'
+                    Call ZeroLayer(raaTempAbCoeff,kProfLayer)
                 END IF
 
                 IF ((raFreq(1) >= 605.0) .AND. (raFreq(1) <= 2805.0) .AND. (iSARTAChi > 0)) THEN
@@ -981,35 +1004,37 @@
             END IF            !if iDoAdd > 0
 
             IF (kJacobian > 0) THEN
-              ! save the d/dq, for the current gas in a real matrix
-              ! cumulatively add on the d/dT to raaAllDT for the current gas
-              IF (iDoDQ > 0) THEN
-                IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                  write(kStdWarn,*) ' set d/dq for gas# ',iDoDQ,' in Jacob list'
-                  write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
-                  CALL DoSet(daaDQ,raaaAllDQ,iDoDQ,iDoAdd)
-                ELSEIF ((kActualJacs == -1) .OR. (kActualJacs == 100)) THEN
-                  write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'
-                  write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
-                  CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
-                ELSEIF ((kActualJacs == -2) .OR. (kActualJacs == 102)) THEN
-                  write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'		
-                  write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
-                  CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
-                END IF
-              END IF
-              IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. (kActualJacs == 100)) THEN
-                !! accumulate d/dT for ALL gases
-                write(kStdWarn,*) ' use d/dT for all gases : gas ',iGas,' = gasID ',iaGases(iGas)
-                CALL cumulativeDT(daaDT,raaAllDT,raaMix,iGas,iNatm,iaaRadLayer)
-              ELSEIF ((kActualJacs == -2) .OR. (kActualJacs == 32) .OR. (kActualJacs == 102)) THEN
-                !! accumulate d/dT for some gases
+            ! save the d/dq, for the current gas in a real matrix
+            ! cumulatively add on the d/dT to raaAllDT for the current gas
                 IF (iDoDQ > 0) THEN
-                  write(kStdWarn,*) ' use d/dT for gas# ',iDoDQ,' in Jacob list'
-                  write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
-                  CALL cumulativeDT(daaDT,raaAllDT,raaMix,iGas,iNatm,iaaRadLayer)
+                    IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+                        write(kStdWarn,*) ' set d/dq for gas# ',iDoDQ,' in Jacob list'
+                        write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
+                        CALL DoSet(daaDQ,raaaAllDQ,iDoDQ,iDoAdd)
+                    ELSEIF ((kActualJacs == -1) .OR. (kActualJacs == 100)) THEN
+                        write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'		    		    		    
+                        write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
+                        CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
+                    ELSEIF ((kActualJacs == -2) .OR. (kActualJacs == 102)) THEN
+                        write(kStdWarn,*) ' set GasAbCoeff --> d/dq for gas#',iDoDQ,' in colJacob list'		    		    		    
+                        write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
+                        CALL DoSet(daaGasAbCoeff,raaaColDQ,iDoDQ,iDoAdd)
+                    END IF
                 END IF
-              END IF
+                IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+                (kActualJacs == 100)) THEN
+                !! accumulate d/dT for ALL gases
+                    write(kStdWarn,*) ' use d/dT for all gases : gas ',iGas,' = gasID ',iaGases(iGas)
+                    CALL cumulativeDT(daaDT,raaAllDT,raaMix,iGas,iNatm,iaaRadLayer)
+                ELSEIF ((kActualJacs == -2) .OR. (kActualJacs == 32) .OR. &
+                    (kActualJacs == 102)) THEN
+                !! accumulate d/dT for some gases
+                    IF (iDoDQ > 0) THEN
+                        write(kStdWarn,*) ' use d/dT for gas# ',iDoDQ,' in Jacob list'
+                        write(kStdWarn,*) ' this is gas ',iGas,' = gasID ',iaGases(iGas)
+                        CALL cumulativeDT(daaDT,raaAllDT,raaMix,iGas,iNatm,iaaRadLayer)
+                    END IF
+                END IF
             END IF
 
         ! after checking to see that the absorption coeffs are non zero, add them
@@ -1313,34 +1338,30 @@
                     ELSEIF ((kWhichScatterCode == 0) .AND. (iaLimb(iAtm) > 0)) THEN
                     ! %%%%%%%%%%%%% CLEAR SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         write(kStdWarn,*) ' ---> Clear Sky LIMB Computations ...'
-			write(kStdWarn,*) ' oops turned this off!!!'
-                        write(kStdErr,*) ' ---> Clear Sky LIMB Computations ...'
-			write(kStdErr,*) ' oops turned this off!!!'
-			CALL DoStop
-!                        CALL InterfaceClearSkyLimb( &
-!                        raFreq, &
-!                        raaSumAbCoeff,raMixVertTemp,caOutName, &
-!                        iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
-!                        raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
-!                        raSatAngle,raFracTop,raFracBot, &
-!                        iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-!                        raSurface,raSun,raThermal,raSunRefl, &
-!                        raLayAngles,raSunAngles,iTag,iActualTag, &
-!                        raThickness,raPressLevels,iProfileLayers,pProf, &
-!                        raTPressLevels,iKnowTP, &
-!                        rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-!                        iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-!                        raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-!                        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-!                        iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
-!                        daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
-!                        daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
-!                        daaUpperNLTEGasAbCoeffBloat, &
-!                        caOutUAFile,caOutBloatFile, &
-!                        caFLuxFile, &
-!                        caJacobFile,caJacobFile2, &
-!                        iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
-!                        iaJacob,iJacob)
+                        CALL InterfaceClearSkyLimb( &
+                        raFreq, &
+                        raaSumAbCoeff,raMixVertTemp,caOutName, &
+                        iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
+                        raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
+                        raSatAngle,raFracTop,raFracBot, &
+                        iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
+                        raSurface,raSun,raThermal,raSunRefl, &
+                        raLayAngles,raSunAngles,iTag,iActualTag, &
+                        raThickness,raPressLevels,iProfileLayers,pProf, &
+                        raTPressLevels,iKnowTP, &
+                        rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
+                        iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
+                        raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
+                        caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
+                        iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
+                        daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
+                        daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+                        daaUpperNLTEGasAbCoeffBloat, &
+                        caOutUAFile,caOutBloatFile, &
+                        caFLuxFile, &
+                        caJacobFile,caJacobFile2, &
+                        iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
+                        iaJacob,iJacob)
 
                     ELSE IF ((abs(kWhichScatterCode) /= 0) .AND. (iaLimb(iAtm) < 0)) THEN
                     ! %%%%%%%%%%%%% CLOUDY SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1386,19 +1407,19 @@
         END IF
 
     END DO               !!!!!!iOuterLoop=1,iTotal
-          
+! OMP END PARALLEL
+
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
-    CALL DateTime('kcartamain.x')
-    wtime = omp_get_wtime ( ) - wtime
-    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
-    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
 
     write(kStdWarn,*) 'end of run!!!!!!!!!!!'
     CLOSE(UNIT = kStdWarn)
     kStdWarnOpen = -1
     CLOSE(UNIT = kStdErr)
     kStdErrOpen = -1
+
+!     Tell the MPI library to release all resources it is using:
+!      call MPI_FINALIZE(ierr)
 
     call exit(0)           !!!!happy exit!
 

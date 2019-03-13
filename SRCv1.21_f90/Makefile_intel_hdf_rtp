@@ -1,0 +1,76 @@
+############################################################################
+##          set up the appropriate RTP and HDF paths and libraries        ##
+##          current options are SGI and LINUX                             ##
+############################################################################
+# ---------
+# HDF flags
+# ---------
+# HDF_INSTALL : set this to point to the HDF location
+# HDFLIB : hdf lib, relative to install path above
+#
+# set HDFHOME to point to the local HDF installation, pre Aug 2015
+# HDF_INSTALL = /usr/local/hdf
+# HDF_INSTALL = /asl/opt
+# HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
+
+################### Paul has split things post Aug 2015
+#HDF_INSTALL1 = /asl/opt/hdf/4.2r4
+#HDFLIB1   = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz       ## -lmfhdf
+
+# more libs
+#HDF_INSTALL2 = /asl/opt/szip/2.1
+#HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
+
+################## more recent Jan 2016
+HDF_INSTALL1 = /usr/cluster/contrib/hdf4/4.2.11
+HDFLIB1   = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz       ## -lmfhdf
+
+# more libs
+HDF_INSTALL2 = /usr/cluster/contrib/szip2/szip2.1
+HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
+
+HDFLIB = $(HDFLIB1) $(HDFLIB2)
+
+# ---------
+# RTP flags
+# ---------
+# RTPLIB : point this to the lib you created in RTP/Src_rtp
+#
+# linux
+# these are gases 1 .. 63
+# RTPLIB = -L/asl/packages/rtpV105/lib -lrtp
+# these are gases 1 .. 63 plus clouds 201 - 203
+# RTPLIB = -L/asl/packages/rtpV105_4500/lib -lrtp
+#
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
+#RTPHOME = /asl/packages/rtpV201_g80
+#RTPLIB = -L$(RTPHOME)/lib -lrtp
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
+### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
+#
+### rtpV201 on compiled with ifort
+RTPHOME = /home/sergio/maya_home/git/rtp/rtpV201
+RTPLIB = -L$(RTPHOME)/lib -lrtp90
+#
+
+# ---------------
+# RTP include dir
+# ---------------
+# this is where the RTP package files are stored
+#
+# linux
+# this is on asl.umbc.edu
+# RTPINC = -I/asl/packages/rtpV105_4500/include
+# RTPDEFS_FILE = /asl/packages/rtpV105_4500/include/rtpdefs.f
+#
+### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
+#RTPINC = -I/asl/packages/rtpV201_g80/include
+#RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs.f
+###RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs_f90.f90
+### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
+#
+### 16 gases rtpV201 with ifort
+RTPINC = -I/home/sergio/maya_home/git/rtp/rtpV201/include
+RTPDEFS_FILE = /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90
+#

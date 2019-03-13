@@ -1,0 +1,111 @@
+#
+# makefile to build kcarta.x
+# >>>>>>>>  make basic >>>>>>>>>>>>>>>>>> is the easiest one!!
+#
+# "make" or "make scat" will compile kcarta.x and move it to
+# its home in the ../BIN directory
+# 
+# "make kcarta.x" will compile kcarta.x and leave it in the current
+# directory
+#
+# Example compiler flags and libraries are included for several
+# compilers and architectures.  Initial testing should be done with
+# array checking on; When things are working OK, you can leave out
+# the array checking and crank up the optimization.
+
+# Things to do before typing "Make"
+# Remember all .param and include files are in ../INCLUDE (kcarta.param, 
+#    scatter.param, pre_defined.param, gauss.param) while for rtpdefs.f, we 
+#    have a Makefile directive for the include file (see RTP section below)
+
+# see Readme_MakefileCommentsA
+
+########################################################################
+## if this does not work, just delete following line and bring in
+## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"
+include Makefile_generic_hdf_rtp
+
+SHELL = /bin/sh
+
+############################################################################
+## set up the appropriate compiler and its options                        ##
+## NOTE 1) only SGI F77 and Absoft have been tested with the autodoubling ##
+##         required by DISORT                                             ##
+##      2) g77 does not support Fortan structures, so it cannot be used   ##
+##         when compiling the RTP related code                            ##
+##      3) If you ignore the above two limitations, and can figure out if ##
+##         your compiler supports autodoubling and F77 structures, then   ##
+##         we have a set of options for SunOS and SUN Solaris F77         ##
+############################################################################
+
+# Warning: this will not compile the structures (rtp_interface.f)
+# However it is a good compile test for the rest of the code
+# Linux with g77
+# ---------------
+#FORTRANX=/usr/bin/g77
+#FLAGS= -fcase-lower -ffixed-line-length-120
+#LIBS = -L ../LIB -lblas
+
+# SunOS FORTRAN
+# -------------
+# for compiling on air2.ssec.wisc.edu:Solaris 2.5.1 on a Sun Ultra-2
+# -e     wide sources
+# -fast  plausible optimizations
+# -w     ignore warning
+# -g     link w/ debugging info (don't use w/ optimization)
+# 
+#FORTRANX = /opt/SUNWspro/bin/f77
+#### FLAGS = -c -g -u -O0  don't seem to need -static
+#### FLAGS = -e -fast -w 
+#FLAGS = -e -fast -w
+#LIBS = -lblas
+
+# SUN Solaris Fortran
+# -------------------
+# SUN compiler options
+# -g  : generate debugging information (turns off optimization)
+# -e     wide sources
+# -O3 : heavy optimization
+# -w     ignore warning
+# -xarch: Sparc chip family
+#       v8plus for UltraSPARC or UltraSPARC II  (sun4u)
+#       v8 for SuperSPARC or SuperSPARC II or HyperSPARC (sun4m or Sun4d)
+#       v8a for microSPARC or microSPARC II  (sun4m)
+#       v7 for earlier SPARC chips  (sun4c or sun4m for Sun4-630/670/690)
+# -dalign to be compatible with the Sun Performance library
+# -xlic_lib=sunperf Link option for selecting the Sun Performance library
+#FORTRANX=f77
+#FLAGS = -O3 -dalign -xarch=v8plus -e -w
+#LIBS  = -xlic_lib=sunperf
+
+#DEC Alpha Fortran
+#------------------
+# DEC compiler options
+# -extend_source : wide sources
+# -C             : run time checks on array and character subscripts
+# -O4            : optimization
+# -names lowercase : change all cases
+#FORTRANX=f77
+#FLAGS = -extend_source -C -names lowercase -warn argument_checking
+#LIBS  = -lblas
+
+# SGI Fortran
+# ------------
+# SGI compiler options; already have the LAPACK routines built it
+# -u  : turn off implicit typing of variables
+# -g  : generate debugging information (turns off optimization)
+# -C  : do run time subscript range checking
+# -w0 : inform about unused variables 
+# -O3 : heavy optimization
+# -64 : 64-bit objects (libraries must match)
+#
+#FORTRANX=/usr/bin/f77
+## FLAGS = -static -C -col120
+#FLAGS = -static -O2 -64 -col120 -C
+#UFLAG = -u
+#LIBS  = -lblas -lcomplib.sgimath
+#FDOUBLE = -r8
+
+########################################################################
+## if this does not work, just delete following line and bring in "Makefile_tar_objs_data"
+include Makefile_tar_objs_data
