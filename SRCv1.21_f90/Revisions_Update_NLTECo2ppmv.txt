@@ -1,0 +1,54 @@
+first read KCARTA/NONLTE/Readme_make_NLTE_H2016 on how to make
+the weak background CO2 compressed database, and the first order
+line mix coeeffs (/home/sergio/SPECTRA/CO2_COMMON/y1s.m)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+KCARTA : subroutines findreferencename (s_misc.f) and
+                     ua_avg_databasepressures (kcoeffSPL) 
+          need to be updated to handle the string "_385" or "_400"
+
+INCLUDE FILE : eg template_kcartaV1XY_400_H2016_NLTEH2008.param
+         need to have PARAMETER (kCO2ppmv           = 400)
+	 
+make symbolic links : sergio_merge and Results
+  eg
+    Results -> /carrot/s1/sergio/VT_48PROFILES_120_SRCv1.14_385ppmv
+    sergio_merge -> /home/sergio/KCARTA/SRC/NONLTE/sergio/VT_48PROFILES_120_370ppmv/sergio_merge
+  or
+    Results -> /asl/s1/sergio/VT_48PROFILES_120_SRCv1.20_400ppmv_H16
+    new_sergio_merge -> ../MATLAB_Wrapper_LopezPuertasF90_code/new_sergio_merge
+    
+edit lte_120km.nml,nlte_120km.nml
+  change rtp_regress_SSS_385.op.rtp to rtp_regress_SSS_400.op.rtp or whatever ppmv is being used
+
+>>>>>>>>>>>
+X edit cluster_lte_test.m and cluster_nlte_test.m 
+X   change 385 to whatever ppmv is being used
+X
+X these were previously used with clustcmd, now change to sbatch use
+X and has been rendered irrelevant
+>>>>>>>>>>>
+
+edit outnlte_120km_sergio_paul and outlte_120km_sergio_paul
+  change bkcarta.385ppmv.x to whatever is being used eg /home/sergio/KCARTA/BIN/kcarta.x_f90_400ppmv_H16_120NLTElayers
+
+edit convolve_rad_results_nobloat.m
+  change 385 to whatever ppmv is being used
+  update themaindir if needed
+  
+edit update_rtp_regress.m
+  change 385 to whatever ppmv is being used
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+X 
+X go back to kCARTA/INCLUDE dir and make the needed files
+X   - kcarta385.param -->  kcarta.param.H2007.v1.14_385ppmv
+X
+X go back to kCARTA/SRC dir and make the exec
+X
+X go back to KCARTA/UTILITY and edit for2mat2for_CO2_370_385.m or whatever,
+X   this makes the kcarta database 
+X   this also makes the new reference profiles   refgas2_400ppmv required by
+X   subr ua_avg_databasepressures
+

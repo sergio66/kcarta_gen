@@ -2816,6 +2816,40 @@ CONTAINS
     end Function hg2_real
 
 !************************************************************************
+! this function computes the Henyey Greenstein function, assuming the
+! cos(phi1-phi2) factor = 1
+    Function rahg2_real(mu1,mu2,g)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+    REAL :: mu1,mu2,g(kMaxPts)       !mu1,mu2 are the two angles, g is the asymmetry vector
+    REAL :: rahg2_real(kMaxPts)
+
+    REAL :: normB,mu0,yexact(kMaxPts)
+
+! normB is normalisation of mu from -1 to 1 and works out to be 2.0
+!! we also know that (1/2) integral P(-1,1) = 1
+! ormB = 1/sqrt(1+g*g - 2.0*g) - 1/sqrt(1+g*g + 2.0*g)
+! ormB = (1-g*g)/g * normB
+! ormB = 2.0
+
+!!!compute mu0 = cos ofangle between the two
+    mu0 = mu1*mu2 + sqrt(1-mu1*mu1)*sqrt(1-mu2*mu2)
+     
+    yexact = (1 + g*g - 2.0*g*mu0) * sqrt(1 + g*g - 2.0*g*mu0)
+    yexact = (1-g*g)/yexact
+
+! exact = yexact/normB * 2.0
+    yexact = yexact
+
+    rahg2_real = yexact
+
+    RETURN
+    end Function rahg2_real
+
+!************************************************************************
 ! this function computes the d/dg for Henyey Greenstein function, assuming the
 ! cos(phi1-phi2) factor = 1
 ! see /home/sergio/MATLABCODE/RADTrans/GENERAL_CLOUD/hg2_deriv.m

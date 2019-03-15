@@ -34,10 +34,10 @@ CONTAINS
     INTEGER :: iLowerOrUpper
 
     IF (iLowerOrUpper < 0) THEN
-        CALL databasestuff_lower(iLowerOrUpper, &
+      CALL databasestuff_lower(iLowerOrUpper, &
         raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
     ELSEIF (iLowerOrUpper > 0) THEN
-        CALL databasestuff_upper(iLowerOrUpper, &
+      CALL databasestuff_upper(iLowerOrUpper, &
         raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
     END IF
 
@@ -49,7 +49,6 @@ CONTAINS
 ! for the lower atm
     SUBROUTINE databasestuff_lower(iLowerOrUpper, &
     raDATABASELEVHEIGHTS,raDataBaseLev,raDatabaseHeight)
-
 
     IMPLICIT NONE
 
@@ -69,19 +68,13 @@ CONTAINS
     INTEGER :: iI
 
     IF (iLowerOrUpper > -1) THEN
-        write(kStdErr,*) 'trying to make default lower atm profile'
-        CALL DoStop
+      write(kStdErr,*) 'trying to make default lower atm profile'
+      CALL DoStop
     END IF
 
-    DO iI = 1,kMaxLayer
-        raDatabaseHeight(iI) = DatabaseHeight(iI)
-    END DO
-    DO iI = 1,kMaxLayer + 1
-        raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
-    END DO
-    DO iI = 1,kMaxLayer+1
-        raDATABASELEV(iI) = DATABASELEV(iI)
-    END DO
+    raDatabaseHeight(1:kMaxLayer)       = DatabaseHeight(1:kMaxLayer)
+    raDATABASELEVHEIGHTS(1:kMaxLayer+1) = DATABASELEVHEIGHTS(1:kMaxLayer+1)
+    raDATABASELEV(1:kMaxLayer+1)        = DATABASELEV(1:kMaxLayer+1)
 
     RETURN
     end SUBROUTINE databasestuff_lower
@@ -110,19 +103,13 @@ CONTAINS
     INTEGER :: iI
 
     IF (iLowerOrUpper < +1) THEN
-        write(kStdErr,*) 'trying to make default upper atm profile'
-        CALL DoStop
+      write(kStdErr,*) 'trying to make default upper atm profile'
+      CALL DoStop
     END IF
 
-    DO iI = 1,kMaxLayer
-        raDatabaseHeight(iI) = DatabaseHeight(iI)
-    END DO
-    DO iI = 1,kMaxLayer + 1
-        raDATABASELEVHEIGHTS(iI) = DATABASELEVHEIGHTS(iI)
-    END DO
-    DO iI = 1,kMaxLayer+1
-        raDATABASELEV(iI) = DATABASELEV(iI)
-    END DO
+    raDatabaseHeight(1:kMaxLayer) = DatabaseHeight(1:kMaxLayer)
+    raDATABASELEVHEIGHTS(1:kMaxLayer+1) = DATABASELEVHEIGHTS(1:kMaxLayer+1)
+    raDATABASELEV(1:kMaxLayer+1) = DATABASELEV(1:kMaxLayer+1)
 
     RETURN
     end SUBROUTINE databasestuff_upper
@@ -173,8 +160,7 @@ CONTAINS
     REAL :: rTemp
 
  1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
-      OPEN(UNIT=iIOUN,FILE=FNAM,STATUS='OLD',FORM='UNFORMATTED', &
-      IOSTAT=IERR)
+      OPEN(UNIT=iIOUN,FILE=FNAM,STATUS='OLD',FORM='UNFORMATTED',IOSTAT=IERR)
       IF (IERR /= 0) THEN
         WRITE(kStdErr,*) 'In subroutine RDCOMPWATER'
         WRITE(kStdErr,1010) IERR, FNAM
@@ -183,114 +169,111 @@ CONTAINS
     kCompUnitOpen=1
 
 !     Read in the header
-    READ(iIOUN) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, &
-    UM, UN
+    READ(iIOUN) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN
 
-    1110 FORMAT('Error! Compressed data array dimension exceeds ', &
-    'max size')
-    1120 FORMAT('NK = ',I3,', kMaxK = ',I3)
-!     Make sure the array sizes are <= to the declared sizes
-    IF (NK > kMaxK) THEN
+ 1110 FORMAT('Error! Compressed data array dimension exceeds ','max size')
+ 1120 FORMAT('NK = ',I3,', kMaxK = ',I3)
+      ! Make sure the array sizes are <= to the declared sizes
+      IF (NK > kMaxK) THEN
         WRITE(kStdErr,1110)
         WRITE(kStdErr,1120) NK, kMaxK
         CALL DoSTOP
-    ENDIF
+      ENDIF
 
-    1130 FORMAT('KT = ',I2,', kMaxTemp = ',I2)
-    IF (KT > kMaxTemp) THEN
+ 1130 FORMAT('KT = ',I2,', kMaxTemp = ',I2)
+      IF (KT > kMaxTemp) THEN
         WRITE(kStdErr,1110)
         WRITE(kStdErr,1130) KT, kMaxTemp
         CALL DoSTOP
-    ENDIF
+      ENDIF
 
-    1140 FORMAT('KN = ',I3,', kMaxLayer = ',I3)
-    IF (KN > kMaxLayer) THEN
+ 1140 FORMAT('KN = ',I3,', kMaxLayer = ',I3)
+      IF (KN > kMaxLayer) THEN
         WRITE(kStdErr,1110)
         WRITE(kStdErr,1140) KN, kMaxLayer
         CALL DoSTOP
-    ENDIF
+      ENDIF
 
-    1150 FORMAT('UM = ',I5,', kMaxPts = ',I5)
-    IF (UM > kMaxPts) THEN
+ 1150 FORMAT('UM = ',I5,', kMaxPts = ',I5)
+      IF (UM > kMaxPts) THEN
         WRITE(kStdErr,1110)
         WRITE(kStdErr,1150) UM, kMaxPts
         CALL DoSTOP
-    ENDIF
+      ENDIF
 
-    1160 FORMAT('UN = ',I3,', kMaxK = ',I3)
-    IF (UN > kMaxK) THEN
+ 1160 FORMAT('UN = ',I3,', kMaxK = ',I3)
+      IF (UN > kMaxK) THEN
         WRITE(KSTDERR,1110)
         WRITE(KSTDERR,1160) UN, kMaxK
         CALL DoSTOP
-    ENDIF
+      ENDIF
 
-!     Read in the temperature offsets
+    ! Read in the temperature offsets
     READ(iIOUN) (TOFF(I),I=1,KT)
 
-! check to make sure the offsets differ by kTempOffSet_database
+    ! check to make sure the offsets differ by kTempOffSet_database
     DO I=1,KT-1
-        rTemp = abs(TOFF(I)-TOFF(I+1))
-        rTemp = abs(rTemp - kTempOffSet_database)
-        IF (rTemp > 0.001) THEN
-            write(kStdErr,*) 'gasID = ',IDGAS,' start freq chunk = ',SFREQ
-            write(kStdErr,*) 'looking at kCARTA Compressed DataBase Toffsets'
-            write(kStdErr,*) (TOFF(J),J=1,KT)
-            write(kStdErr,*) 'looking at difference between T(I),T(I+1); not what is expected!'
-            write(kStdErr,*) I,kTempOffSet_database
-            CALL DoStop
-        END IF
+      rTemp = abs(TOFF(I)-TOFF(I+1))
+      rTemp = abs(rTemp - kTempOffSet_database)
+      IF (rTemp > 0.001) THEN
+        write(kStdErr,*) 'gasID = ',IDGAS,' start freq chunk = ',SFREQ
+        write(kStdErr,*) 'looking at kCARTA Compressed DataBase Toffsets'
+        write(kStdErr,*) (TOFF(J),J=1,KT)
+        write(kStdErr,*) 'looking at difference between T(I),T(I+1); not what is expected!'
+        write(kStdErr,*) I,kTempOffSet_database
+        CALL DoStop
+      END IF
     ENDDO
 
-!      Find which of the offsets is 0 (error if none).
-    IT0=0
+    ! Find which of the offsets is 0 (error if none).
+    IT0 = 0
     DO I=1,KT
-        IF (TOFF(I) == 0.0) IT0=I
-        ITSORT(I)=I
+      IF (TOFF(I) == 0.0) IT0=I
+      ITSORT(I)=I
     ENDDO
+ 1180 FORMAT('ERROR! One of the temperature offsets must be 0',/,'offsets =',20(' ',F5.1))
     IF (IT0 == 0) THEN
-        WRITE(KSTDERR,1180) (TOFF(I),I=1,KT)
-        1180 FORMAT('ERROR! One of the temperature offsets must be 0',/, &
-        'offsets =',20(' ',F5.1))
-        CALL DoSTOP
+      WRITE(KSTDERR,1180) (TOFF(I),I=1,KT)
+      CALL DoSTOP
     ENDIF
 
-!     Sort the indices of the temperature offsets in ascending order
+    ! Sort the indices of the temperature offsets in ascending order
     RESORT=1
-    10 IF (RESORT == 1) THEN
-        RESORT=0
-        DO I=1,KT-1
-            IF (TOFF( ITSORT(I) ) > TOFF( ITSORT(I+1) )) THEN
-                IHOLD=ITSORT(I)
-                ITSORT(I)=ITSORT(I+1)
-                ITSORT(I+1)=IHOLD
-                RESORT=1
-            ENDIF
-        ENDDO
-        GOTO 10
+ 10 IF (RESORT == 1) THEN
+      RESORT = 0
+      DO I=1,KT-1
+        IF (TOFF( ITSORT(I) ) > TOFF( ITSORT(I+1) )) THEN
+          IHOLD = ITSORT(I)
+          ITSORT(I) = ITSORT(I+1)
+          ITSORT(I+1) = IHOLD
+          RESORT = 1
+        ENDIF
+      ENDDO
+      GOTO 10
     ENDIF
 
 !      Read in the five K matrices
 ! for the old mat2for files READ(iIOUN) ((KX1(I,J,K),J=1,KT),K=1,KN)
 ! for the WATER mat2for files, READ(iIOUN) ((KX1(I,J,K),K=1,KN),J=1,KT)
     DO I=1,NK
-        READ(iIOUN) ((KX1(I,J,K),K=1,KN),J=1,KT)
+      READ(iIOUN) ((KX1(I,J,K),K=1,KN),J=1,KT)
     ENDDO
     DO I=1,NK
-        READ(iIOUN) ((KX2(I,J,K),K=1,KN),J=1,KT)
+      READ(iIOUN) ((KX2(I,J,K),K=1,KN),J=1,KT)
     ENDDO
     DO I=1,NK
-        READ(iIOUN) ((KX3(I,J,K),K=1,KN),J=1,KT)
+      READ(iIOUN) ((KX3(I,J,K),K=1,KN),J=1,KT)
     ENDDO
     DO I=1,NK
-        READ(iIOUN) ((KX4(I,J,K),K=1,KN),J=1,KT)
+      READ(iIOUN) ((KX4(I,J,K),K=1,KN),J=1,KT)
     ENDDO
     DO I=1,NK
-        READ(iIOUN) ((KX5(I,J,K),K=1,KN),J=1,KT)
+      READ(iIOUN) ((KX5(I,J,K),K=1,KN),J=1,KT)
     ENDDO
 
 !     Read in the U matrix
     DO I=1,NK
-        READ(iIOUN) (UX(J,I),J=1,NPTS)
+      READ(iIOUN) (UX(J,I),J=1,NPTS)
     ENDDO
 
     CLOSE(iIOUN)
@@ -338,131 +321,128 @@ CONTAINS
     REAL :: rTemp
 !-----------------------------------------------------------------------
 
-    1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
     OPEN(UNIT=iIOUN,FILE=FNAM,STATUS='OLD',FORM='UNFORMATTED', &
     IOSTAT=IERR)
     IF (IERR /= 0) THEN
-        WRITE(kStdErr,*) 'In subroutine RDCOMP'
-        WRITE(KSTDERR,1010) IERR, FNAM
-        CALL DoSTOP
+      WRITE(kStdErr,*) 'In subroutine RDCOMP'
+      WRITE(KSTDERR,1010) IERR, FNAM
+      CALL DoSTOP
     ENDIF
     kCompUnitOpen=1
 
 !     Read in the header
-    READ(iIOUN) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, &
-    UM, UN
+    READ(iIOUN) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN
 
-    1110 FORMAT('Error! Compressed data array dimension exceeds ', &
-    'max size')
+    1110 FORMAT('Error! Compressed data array dimension exceeds ', 'max size')
     1120 FORMAT('NK = ',I3,', kMaxK = ',I3)
 !     Make sure the array sizes are <= to the declared sizes
     IF (NK > kMaxK) THEN
-        WRITE(KSTDERR,1110)
-        WRITE(KSTDERR,1120) NK, kMaxK
-        CALL DoSTOP
+      WRITE(KSTDERR,1110)
+      WRITE(KSTDERR,1120) NK, kMaxK
+      CALL DoSTOP
     ENDIF
 
-    1130 FORMAT('KT = ',I2,', kMaxTemp = ',I2)
+ 1130 FORMAT('KT = ',I2,', kMaxTemp = ',I2)
     IF (KT > kMaxTemp) THEN
-        WRITE(KSTDERR,1110)
-        WRITE(KSTDERR,1130) KT, kMaxTemp
-        CALL DoSTOP
+      WRITE(KSTDERR,1110)
+      WRITE(KSTDERR,1130) KT, kMaxTemp
+      CALL DoSTOP
     ENDIF
 
-    1140 FORMAT('KN = ',I3,', kMaxLayer = ',I3)
+ 1140 FORMAT('KN = ',I3,', kMaxLayer = ',I3)
     IF (KN > kMaxLayer) THEN
-        WRITE(KSTDERR,1110)
-        WRITE(KSTDERR,1140) KN, kMaxLayer
-        CALL DoSTOP
+      WRITE(KSTDERR,1110)
+      WRITE(KSTDERR,1140) KN, kMaxLayer
+      CALL DoSTOP
     ENDIF
 
-    1150 FORMAT('UM = ',I5,', kMaxPts = ',I5)
+  1150 FORMAT('UM = ',I5,', kMaxPts = ',I5)
     IF (UM > kMaxPts) THEN
-        WRITE(KSTDERR,1110)
-        WRITE(KSTDERR,1150) UM, kMaxPts
-        CALL DoSTOP
+      WRITE(KSTDERR,1110)
+      WRITE(KSTDERR,1150) UM, kMaxPts
+      CALL DoSTOP
     ENDIF
 
-    1160 FORMAT('UN = ',I3,', kMaxK = ',I3)
+ 1160 FORMAT('UN = ',I3,', kMaxK = ',I3)
     IF (UN > kMaxK) THEN
-        WRITE(KSTDERR,1110)
-        WRITE(KSTDERR,1160) UN, kMaxK
-        CALL DoSTOP
+      WRITE(KSTDERR,1110)
+      WRITE(KSTDERR,1160) UN, kMaxK
+      CALL DoSTOP
     ENDIF
 
-!      Read in the temperature offsets
+    !      Read in the temperature offsets
     READ(iIOUN) (TOFF(I),I=1,KT)
 
 ! check to make sure the offsets differ by kTempOffSet_database
     DO I=1,KT-1
-        rTemp = abs(TOFF(I)-TOFF(I+1))
-        rTemp = abs(rTemp - kTempOffSet_database)
-        IF (rTemp > 0.001) THEN
-            write(kStdErr,*) 'gasID = ',IDGAS,' start freq chunk = ',SFREQ
-            write(kStdErr,*) 'looking at kCARTA Compressed DataBase Toffsets'
-            write(kStdErr,*) (TOFF(J),J=1,KT)
-            write(kStdErr,*) 'looking at difference between T(I),T(I+1); not what is expected!'
-            write(kStdErr,*) I,kTempOffSet_database
-            CALL DoStop
-        END IF
+      rTemp = abs(TOFF(I)-TOFF(I+1))
+      rTemp = abs(rTemp - kTempOffSet_database)
+      IF (rTemp > 0.001) THEN
+        write(kStdErr,*) 'gasID = ',IDGAS,' start freq chunk = ',SFREQ
+        write(kStdErr,*) 'looking at kCARTA Compressed DataBase Toffsets'
+        write(kStdErr,*) (TOFF(J),J=1,KT)
+        write(kStdErr,*) 'looking at difference between T(I),T(I+1); not what is expected!'
+        write(kStdErr,*) I,kTempOffSet_database
+        CALL DoStop
+      END IF
     ENDDO
 
-!      Find which of the offsets is 0 (error if none).
-    1180 FORMAT('ERROR! One of the temperature offsets must be 0',/, &
-    'offsets =',20(' ',F5.1))
-    IT0=0
-    DO I=1,KT
-        IF (TOFF(I) == 0.0) IT0=I
-        ITSORT(I)=I
+    !      Find which of the offsets is 0 (error if none).
+ 1180 FORMAT('ERROR! One of the temperature offsets must be 0',/, 'offsets =',20(' ',F5.1))
+    IT0 = 0
+    DO I = 1,KT
+      IF (TOFF(I) == 0.0) IT0 = I
+      ITSORT(I) = I
     ENDDO
     IF (IT0 == 0) THEN
-        WRITE(KSTDERR,1180) (TOFF(I),I=1,KT)
-        CALL DoSTOP
+      WRITE(KSTDERR,1180) (TOFF(I),I=1,KT)
+      CALL DoSTOP
     ENDIF
 
-!     Sort the indices of the temperature offsets in ascending order
+    !     Sort the indices of the temperature offsets in ascending order
     RESORT=1
-    10 IF (RESORT == 1) THEN
-        RESORT=0
-        DO I=1,KT-1
-            IF (TOFF( ITSORT(I) ) > TOFF( ITSORT(I+1) )) THEN
-                IHOLD=ITSORT(I)
-                ITSORT(I)=ITSORT(I+1)
-                ITSORT(I+1)=IHOLD
-                RESORT=1
-            ENDIF
-        ENDDO
-        GOTO 10
+ 10 IF (RESORT == 1) THEN
+      RESORT = 0
+      DO I=1,KT-1
+        IF (TOFF( ITSORT(I) ) > TOFF( ITSORT(I+1) )) THEN
+          IHOLD       = ITSORT(I)
+          ITSORT(I)   = ITSORT(I+1)
+          ITSORT(I+1) = IHOLD
+          RESORT      = 1
+        ENDIF
+      ENDDO
+      GOTO 10
     ENDIF
 
     iDebugMatlab = +1   !!! do     debug using print statements
     iDebugMatlab = -1   !!! do not debug using print statements
     IF (iDebugMatlab > 0) THEN
-        print *,idgas,nk,kn,kt,ktype
-    !! kx is a matrix(nk,kt,kn) = matrix(nk,11,100)
-    !!   where nk = number of basis vectors
-    !! this is matrix "kcomp" in the cg5v4250.mat files kcomp(nk,100,11)
-    !! where the code is cg"IDGAS"v"FREQ".mat -- see abscmp/ReadmeVIS
+      print *,idgas,nk,kn,kt,ktype
+      !! kx is a matrix(nk,kt,kn) = matrix(nk,11,100)
+      !!   where nk = number of basis vectors
+      !! this is matrix "kcomp" in the cg5v4250.mat files kcomp(nk,100,11)
+      !! where the code is cg"IDGAS"v"FREQ".mat -- see abscmp/ReadmeVIS
     END IF
     DO I=1,NK
-        READ(iIOUN) ((KX(I,J,K),K=1,KN),J=1,KT)
+      READ(iIOUN) ((KX(I,J,K),K=1,KN),J=1,KT)
     ENDDO
 
-!     Read in the U matrix
-!! this is matrix "B" in the cg5v4250.mat files  B(10000,nk)
+    !     Read in the U matrix
+    !! this is matrix "B" in the cg5v4250.mat files  B(10000,nk)
     DO I=1,NK
-        READ(iIOUN) (UX(J,I),J=1,NPTS)
+      READ(iIOUN) (UX(J,I),J=1,NPTS)
     ENDDO
 
     CLOSE(iIOUN)
     kCompUnitOpen=-1
 
-!      iDebugMatlab = 1
+     !      iDebugMatlab = 1
     IF (iDebugMatlab > 0) THEN
-        IF (idgas == 2) THEN
-            print *,(UX(J,1),J=1,5)     !! should equal B(1:5,1)
-            print *,(KX(1,J,6),J=1,6)   !! should equal kcomp(1,6,1:6)
-        END IF
+      IF (idgas == 2) THEN
+        print *,(UX(J,1),J=1,5)     !! should equal B(1:5,1)
+        print *,(KX(1,J,6),J=1,6)   !! should equal kcomp(1,6,1:6)
+      END IF
     END IF
 
     RETURN
@@ -481,11 +461,7 @@ CONTAINS
 
     INTEGER :: iLay,iFr
 
-    DO iLay=1,kProfLayer
-        DO iFr=1,kMaxPts
-            daaAbsCoeff(iFr,iLay)=(daaAbsCoeff(iFr,iLay))**4
-        END DO
-    END DO
+    daaAbsCoeff = (daaAbsCoeff)**4
 
     RETURN
     end SUBROUTINE RaisePower
@@ -512,10 +488,8 @@ CONTAINS
     dZero=DBLE(0.0)
 
     DO iLay=1,kProfLayer
-        rScale=raPAmt(iLay)
-        DO iFr=1,kMaxPts
-            daaAbsCoeff(iFr,iLay)=max(daaAbsCoeff(iFr,iLay),dZero)*rScale
-        END DO
+      rScale=raPAmt(iLay)
+      daaAbsCoeff(:,iLay) = max(daaAbsCoeff(:,iLay),dZero)*rScale
     END DO
 
     RETURN
@@ -550,12 +524,9 @@ CONTAINS
 !                                                        + K(v,T)
 ! get this by saying daaDA --> 4 daaDA q(actual) daaAbsCoeff^3 +  daaAbsCoeff^4
     DO iLay=1,kProfLayer
-        rScale=raPAmt(iLay)
-        DO iFr=1,kMaxPts
-            daaDA(iFr,iLay)=daaDA(iFr,iLay)*rScale* &
-            &                       4.0*(daaAbsCoeff(iFr,iLay)**3) &
-            + (daaAbsCoeff(iFr,iLay)**4)
-        END DO
+      rScale=raPAmt(iLay)
+      daaDA(:,iLay) = daaDA(:,iLay)*rScale*4.0*(daaAbsCoeff(:,iLay)**3) &
+                   + (daaAbsCoeff(:,iLay)**4)
     END DO
 
     RETURN
@@ -577,17 +548,7 @@ CONTAINS
     INTEGER :: iLay,iFr
 
     IF (iType == 2) THEN
-        DO iLay = 1,kProfLayerJac
-            DO iFr=1,kMaxPtsJac
-                daaDQ(iFr,iLay)=(daaDQ(iFr,iLay)**4)
-            END DO
-        END DO
-    ELSE
-        DO iLay = 1,kProfLayerJac
-            DO iFr=1,kMaxPtsJac
-                daaDQ(iFr,iLay)=(daaDQ(iFr,iLay))
-            END DO
-        END DO
+      daaDQ = (daaDQ)**4
     END IF
 
     RETURN
@@ -615,25 +576,20 @@ CONTAINS
     REAL :: rScale
 
     IF (iKtype == 1) THEN
-        DO iLay=1,kProfLayer
-            rScale = raPAmt(iLay)
-            DO iFr=1,kMaxPts
-                daaDA(iFr,iLay)=daaDA(iFr,iLay)*rScale
-            END DO
-        END DO
+      DO iLay=1,kProfLayer
+        rScale = raPAmt(iLay)
+        daaDA(:,iLay) = daaDA(:,iLay)*rScale
+      END DO
     ELSE
-    ! remember we still have K^1/4 ie daaAbsCoeff = K^1/4 and NOT K!!!!!!!!
-    ! what comes from the spline interpolation routines is d/dT (K(v,T))^(1/4)
-    ! or in other words, we get = (1/4) K(v,T)^(-3/4) dK/dT = daaDA
-    ! we need d/dT(optical depth) = d/dT q(actual) K(v,T) = q(actual) d/dT K(v,T)
-    ! so we get this by saying daaDA --> 4 daaDA q(actual) daaAbsCoeff^3
-        DO iLay=1,kProfLayer
-            rScale = raPAmt(iLay)
-            DO iFr=1,kMaxPts
-                daaDA(iFr,iLay)=daaDA(iFr,iLay)*rscale* &
-                &                       4.0*(daaAbsCoeff(iFr,iLay)**3)
-            END DO
-        END DO
+      ! remember we still have K^1/4 ie daaAbsCoeff = K^1/4 and NOT K!!!!!!!!
+      ! what comes from the spline interpolation routines is d/dT (K(v,T))^(1/4)
+      ! or in other words, we get = (1/4) K(v,T)^(-3/4) dK/dT = daaDA
+      ! we need d/dT(optical depth) = d/dT q(actual) K(v,T) = q(actual) d/dT K(v,T)
+      ! so we get this by saying daaDA --> 4 daaDA q(actual) daaAbsCoeff^3
+      DO iLay=1,kProfLayer
+        rScale = raPAmt(iLay)
+        daaDA(:,iLay)=daaDA(:,iLay)*rscale*4.0*(daaAbsCoeff(:,iLay)**3)
+      END DO
     END IF
 
     RETURN
@@ -678,9 +634,9 @@ CONTAINS
 !        iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing
 !      END IF
     IF ((kCO2_UMBCorHARTMAN == +1) .AND. (kAltComprDirs == -1)) THEN
-        iCO2Chi = iCO2Chi   !! ie stick to (+2) option, to turn on CO2 chi when using UMBC linemix
+      iCO2Chi = iCO2Chi   !! ie stick to (+2) option, to turn on CO2 chi when using UMBC linemix
     ELSEIF ((kCO2_UMBCorHARTMAN == -1) .OR. (kAltComprDirs == +1)) THEN
-        iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing, or other databases
+      iCO2Chi = 0   !! turn off chi fcns when using JM Hartmann linemixing, or other databases
     END IF
 
 !!!! iCO2Chi = 2   TESTING
@@ -691,49 +647,48 @@ CONTAINS
     IF ((iCO2Chi /= iDefault) .AND. (kAltComprDirs == -1) .AND. (kOuterLoop == 1)) THEN
       write(kStdWarn,999) iDefault,iCO2Chi,kCO2_UMBCorHARTMAN
       write(kStdErr,999)  iDefault,iCO2Chi,kCO2_UMBCorHARTMAN
-    !ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1) .AND. (kOuterLoop .EQ. 1)) THEN
-    !  write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,' but using other user suppl CO2 dir'
+      !ELSEIF ((iCO2Chi .NE. iDefault) .AND. (kAltComprDirs .EQ. +1) .AND. (kOuterLoop .EQ. 1)) THEN
+      !  write(kStdErr,*) ' CO2 chi fudge iDefault,iCO2Chi = ',iDefault,iCO2Chi,' but using other user suppl CO2 dir'
     END IF
 
     IF (iCO2Chi == 2) THEN
-    ! this is old; prior to March 2004
-    ! notice how we only need to fudge fix 2255,2280 and 2305,2405 chunks here!
-        iChiChunks = 4
-        iaChiChunks(1) = 2255
-        iaChiChunks(2) = 2280
-        iaChiChunks(3) = 2380
-        iaChiChunks(4) = 2405
+      ! this is old; prior to March 2004
+      ! notice how we only need to fudge fix 2255,2280 and 2305,2405 chunks here!
+      iChiChunks = 4
+      iaChiChunks(1) = 2255
+      iaChiChunks(2) = 2280
+      iaChiChunks(3) = 2380
+      iaChiChunks(4) = 2405
     ELSE IF (iCO2Chi == 3) THEN
-    ! this is new; after March 2004
-    ! notice we fix 15 um and 4 um here
-        iChiChunks = 18
-        iaChiChunks(1)  =  630
-        iaChiChunks(2)  =  655
-        iaChiChunks(3)  =  680
-        iaChiChunks(4)  =  705
-        iaChiChunks(5)  =  730
-        iaChiChunks(6)  =  755
-        iaChiChunks(7)  = 2180
-        iaChiChunks(8)  = 2205
-        iaChiChunks(9)  = 2230
-        iaChiChunks(10) = 2255
-        iaChiChunks(11) = 2280
-        iaChiChunks(12) = 2355
-        iaChiChunks(13) = 2380
-        iaChiChunks(14) = 2405
-        iaChiChunks(15) = 2430
-        iaChiChunks(16) = 2530
-        iaChiChunks(17) = 2555
-        iaChiChunks(18) = 2580
+      ! this is new; after March 2004
+      ! notice we fix 15 um and 4 um here
+      iChiChunks = 18
+      iaChiChunks(1)  =  630
+      iaChiChunks(2)  =  655
+      iaChiChunks(3)  =  680
+      iaChiChunks(4)  =  705
+      iaChiChunks(5)  =  730
+      iaChiChunks(6)  =  755
+      iaChiChunks(7)  = 2180
+      iaChiChunks(8)  = 2205
+      iaChiChunks(9)  = 2230
+      iaChiChunks(10) = 2255
+      iaChiChunks(11) = 2280
+      iaChiChunks(12) = 2355
+      iaChiChunks(13) = 2380
+      iaChiChunks(14) = 2405
+      iaChiChunks(15) = 2430
+      iaChiChunks(16) = 2530
+      iaChiChunks(17) = 2555
+      iaChiChunks(18) = 2580
     END IF
 
     IF (iCO2Chi > 0) THEN
-        iDoFudge = WhichGasPosn(int(rFileStartFr),iaChiChunks,iChiChunks)
-    !        print *,int(rFileStartFr),iCO2Chi,iDoFudge
-        IF (iDoFudge > 0) THEN
-            CALL co2_4um_fudge(daaAbsCoeff,rFileStartFr, &
-            iCO2Chi,iaChiChunks,iChiChunks)
-        END IF
+      iDoFudge = WhichGasPosn(int(rFileStartFr),iaChiChunks,iChiChunks)
+      !        print *,int(rFileStartFr),iCO2Chi,iDoFudge
+      IF (iDoFudge > 0) THEN
+        CALL co2_4um_fudge(daaAbsCoeff,rFileStartFr,iCO2Chi,iaChiChunks,iChiChunks)
+      END IF
     END IF
            
     RETURN
@@ -817,7 +772,7 @@ CONTAINS
 
     INTEGER :: iIOUN,iERR
     CHARACTER(160) :: FNAME
-    REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),rScale,raQCO2(kProfLayer),raQWV(kProfLayer)
+    REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),raScale(kProfLayer),raQCO2(kProfLayer),raQWV(kProfLayer)
     REAL :: raXCO2(kProfLayer),raXWV(kProfLayer),raRho(kProfLayer),raCO2MRdry(kProfLayer)
     CHARACTER(80) :: FMT,FMT2
 
@@ -846,8 +801,8 @@ CONTAINS
     iCO2Chi = 2    !!! DEFAULT
     iCO2Chi = iaaOverrideDefault(1,9)
     IF ((iCO2Chi /= 0) .AND. (iCO2Chi /= 2) .AND. (iCO2Chi /= 6)) THEN
-        write(kStdErr,*) 'invalid iCO2/WV Chi = ',iCO2Chi
-        CALL DoStop
+      write(kStdErr,*) 'invalid iCO2/WV Chi = ',iCO2Chi
+      CALL DoStop
     END IF
 
 !    iCO2Chi = -1    !! testing
@@ -858,13 +813,13 @@ CONTAINS
     IF (iGasID .EQ. 2 .and. iCO2Chi > 0 .and. (raFreq(1) >= 2355.0 .and. raFreq(1) <= 2805.0))  THEN
 
       iYesNoCO2WVContinuum = +1
-      
+
+ 1010   FORMAT('ERROR! number ',I5,' opening data file:',/,A80)      
       iIOUN = kTempUnit
       OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='UNFORMATTED',IOSTAT=IERR)
       IF (IERR /= 0) THEN
         WRITE(kStdErr,*) 'In subroutine multiply_co2_wv_continuum'
         WRITE(kStdErr,1010) IERR, FNAME
- 1010   FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
         CALL DoSTOP
       ENDIF
 
@@ -877,29 +832,24 @@ CONTAINS
 
       !! get the abs coeff in cm-1, normalized by (rho)^2 Xco2 Xwv
       CALL rspl(raFChi,raChi,iNumPts,raFreq,raX,kMaxPts)
-            
+      
+      raXWV  = raaPartPress(:,1)/raPress                               ! fraction of WV
+      raXCO2 = raaPartPress(:,2)/raPress                               ! fraction of CO2
+      raCO2MRDry = raaPartPress(:,2)/(raPress-raaPartPress(:,1))       ! MR dry of CO2
+      raQWV      = raaPartPress(:,1) * kAtm2mb * 100 * raThickness /kMGC/raTemp/1e7    !! mol/m2 --> kmol/cm2	
+      raQCO2     = raaPartPress(:,2) * kAtm2mb * 100 * raThickness /kMGC/raTemp/1e7    !! mol/m2 --> kmol/cm2
+	
+      !! now compute density in amagats
+      raRho = (raPress * kAtm2mb * 100)/(kMGC * raTemp)*kAvog/1000.0   !! molecules/m3
+      raRho = raRho/1.0e6/2.6867805e19                                 !! amagat	
+	
+      raScale = raRho*raRho*raXWV*raXCO2*raThickness*100.0             !! thickness m --> cm
       DO iI = 1,kProfLayer
-        raXWV(iI)  = raaPartPress(iI,1)/raPress(iI)                               ! fraction of WV
-        raXCO2(iI) = raaPartPress(iI,2)/raPress(iI)                               ! fraction of CO2
-        raCO2MRDry(iI) = raaPartPress(iI,2)/(raPress(iI)-raaPartPress(iI,1))      ! MR dry of CO2
-	raQWV(iI)      = raaPartPress(iI,1) * kAtm2mb * 100 * raThickness(iI) /kMGC/raTemp(iI)/1e7    !! mol/m2 --> kmol/cm2	
-	raQCO2(iI)     = raaPartPress(iI,2) * kAtm2mb * 100 * raThickness(iI) /kMGC/raTemp(iI)/1e7    !! mol/m2 --> kmol/cm2
-	
-	!! now compute density in amagats
-	raRho(iI) = (raPress(iI) * kAtm2mb * 100)/(kMGC * raTemp(iI))*kAvog/1000.0   !! molecules/m3
-	raRho(iI) = raRho(iI)/1.0e6/2.6867805e19                                     !! amagat
-	
-        rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm
-	
+	if (isfinite2(raScale(iI)) .EQV. .false. ) raScale(iI) = 0.0
       END DO
-
       DO iI = 1,kProfLayer
-        rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm
-	if (isfinite2(rScale) .EQV. .false. ) rScale = 0.0
-        DO iFr = 1,kMaxPts
-	  daaOD_continuum_WV_CO2(iFr,iI) = rScale*raX(iFr)	
-	  daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + daaOD_continuum_WV_CO2(iFr,iI)
-	END DO
+        daaOD_continuum_WV_CO2(:,iI) = raScale(iI)*raX
+        daaAbsCoeff(:,iI)            = daaAbsCoeff(:,iI) + daaOD_continuum_WV_CO2(:,iI)
       END DO
 
       write(kStdWarn,*) ' added on CO2/WV continuum at chunk starting at ',raFreq(1)
@@ -918,16 +868,14 @@ CONTAINS
           write(kStdErr,*)  '   including CO2/WV continuum d/dq for gasID 2 in Jacob list using CO2/WV jac'
           ! the gas amount jacobians
           DO iI=1,kProfLayer
-!            write(kStdErr,FMT2) iI,raCO2MRdry(iI),(raRho(iI)*raThickness(iI)*100.0*raXCO2(iI)*1e6*2.6867805e25/kAvog),raQCO2(iI)
-!            write(kSTdErr,FMT2) iI,raThickness(iI),raCO2MRdry(iI),raQCO2(iI)	    
-            DO iFr=1,kMaxPts
-              daaDQ(iFr,iI)   = daaDQ(iFr,iI) + daaOD_continuum_WV_CO2(iFr,iI)/(raQCO2(iI))
-              daaDQWV(iFr,iI) =                 daaOD_continuum_WV_CO2(iFr,iI)/(raQWV(iI))	      
-            END DO
+            ! write(kStdErr,FMT2) iI,raCO2MRdry(iI),(raRho(iI)*raThickness(iI)*100.0*raXCO2(iI)*1e6*2.6867805e25/kAvog),raQCO2(iI)
+            ! write(kSTdErr,FMT2) iI,raThickness(iI),raCO2MRdry(iI),raQCO2(iI)	    
+            daaDQ(:,iI)   = daaDQ(:,iI) + daaOD_continuum_WV_CO2(:,iI)/(raQCO2(iI))
+            daaDQWV(:,iI) =               daaOD_continuum_WV_CO2(:,iI)/(raQWV(iI))	      
           END DO
         END IF
       END IF
-!      call dostop
+    ! call dostop
     END IF
 
     RETURN
@@ -1008,12 +956,12 @@ CONTAINS
       FNAME = 'CT-N2.N2'
       FNAME = trim(kCKDPath) // trim(FNAME)
 
+ 1010   FORMAT('ERROR! number ',I5,' opening data file (a) : ',/,A80)
       kTempUnitOpen = 1      
       OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED',IOSTAT=IERR)
       IF (IERR /= 0) THEN
         WRITE(kStdErr,*) 'In subroutine multiply_wv_N2_continuum'
         WRITE(kStdErr,1010) IERR, FNAME
- 1010   FORMAT('ERROR! number ',I5,' opening data file (a) : ',/,A80)
         CALL DoSTOP
       ENDIF
       
@@ -1027,13 +975,14 @@ CONTAINS
       CLOSE(kTempUnit)
       kTempUnitOpen = -1      
 
+ 1011   FORMAT('ERROR! number ',I5,' opening data file (b) : ',/,A80)
       FNAME = 'CT-N2.H2O'
       FNAME = trim(kCKDPath) // trim(FNAME)
+      kTempUnitOpen = 1      
       OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED',IOSTAT=iERR)
       IF (IERR /= 0) THEN
         WRITE(kStdErr,*) 'In subroutine multiply_wv_N2_continuum'
         WRITE(kStdErr,1011) IERR, FNAME
- 1011   FORMAT('ERROR! number ',I5,' opening data file (b) : ',/,A80)
         CALL DoSTOP
       ENDIF
       
@@ -1056,8 +1005,8 @@ CONTAINS
     iCO2Chi = 4    !!! DEFAULT
     iCO2Chi = iaaOverrideDefault(1,9)
     IF ((iCO2Chi /= 0) .AND. (iCO2Chi /= 4) .AND. (iCO2Chi /= 6)) THEN
-        write(kStdErr,*) 'invalid iCO2/WV Chi = ',iCO2Chi
-        CALL DoStop
+      write(kStdErr,*) 'invalid iCO2/WV Chi = ',iCO2Chi
+      CALL DoStop
     END IF
 
 !    iCO2Chi = -1    !! testing
@@ -1083,14 +1032,12 @@ CONTAINS
 	CALL CTN2_vect(raFreq,PN2,PH2O,PTOT,T,iWhich,       &
 	                     SIGRF,B0air,BETA0air,B0H2O,BETA0H2O, &
   	                     raX)	
-        DO iFr = 1,kMaxPts
-	  daaOD_continuum_WV_N2(iFr,iI) = rScale*raX(iFr)	
-	  daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + daaOD_continuum_WV_N2(iFr,iI)
-	END DO
+        daaOD_continuum_WV_N2(:,iI) = rScale*raX
+	daaAbsCoeff(:,iI)           = daaAbsCoeff(:,iI) + daaOD_continuum_WV_N2(:,iI)
       END DO
 
       write(kStdWarn,*) ' added on N2/WV continuum at chunk starting at ',raFreq(1)
-      print *,' added on N2/WV continuum at chunk starting at ',raFreq(1)      
+      write(kStdErr,*)  ' added on N2/WV continuum at chunk starting at ',raFreq(1)      
 
       !! now worry about jacobians
       !! there is no T dependance
@@ -1111,14 +1058,12 @@ CONTAINS
             PN2  = raPress(iI) * 0.78	
 	    PTOT = raPress(iI)
 	    T    = raTemp(iI)
-	    DO iFr=1,kMaxPts
-              daaDQ(iFr,iI)   = daaDQ(iFr,iI) + daaOD_continuum_WV_N2(iFr,iI)/PN2
-              daaDQWV(iFr,iI) =                 daaOD_continuum_WV_N2(iFr,iI)/PH2O
-            END DO
+            daaDQ(:,iI)   = daaDQ(:,iI) + daaOD_continuum_WV_N2(:,iI)/PN2
+            daaDQWV(:,iI) =               daaOD_continuum_WV_N2(:,iI)/PH2O
           END DO
         END IF
       END IF
-!      call dostop
+    !      call dostop
     END IF
 
     RETURN
@@ -1195,47 +1140,47 @@ CONTAINS
 ! wavenumber using the two sorrounding points (INF and SUP)
 !  The CIA at T is computed from B0*exp[BETA0*(1/Tref-1/T)]
 
-          IINF=INT( (SIGMA-SIGRF(1)+0.1D-4)/StpSig ) + 1
-          IINF=MIN0(IINF,NVAL-1)
-          ISUP=IINF+1
-          D1ST=(1.D0/TREF)-(1.D0/T)
-          BINFair=B0air(IINF)*DEXP(BETA0air(IINF)*D1ST)
-          BSUPair=B0air(ISUP)*DEXP(BETA0air(ISUP)*D1ST)
-          Bair=BINFair+(BSUPair-BINFair)*(SIGMA-SIGRF(IINF))/StpSig
-          BINFH2O=B0H2O(IINF)*DEXP(BETA0H2O(IINF)*D1ST)
-          BSUPH2O=B0H2O(ISUP)*DEXP(BETA0H2O(ISUP)*D1ST)
-          BH2O=BINFH2O+(BSUPH2O-BINFH2O)*(SIGMA-SIGRF(IINF))/StpSig
+          IINF = INT( (SIGMA-SIGRF(1)+0.1D-4)/StpSig ) + 1
+          IINF = MIN0(IINF,NVAL-1)
+          ISUP = IINF+1
+          D1ST = (1.D0/TREF)-(1.D0/T)
+          BINFair = B0air(IINF)*DEXP(BETA0air(IINF)*D1ST)
+          BSUPair = B0air(ISUP)*DEXP(BETA0air(ISUP)*D1ST)
+          Bair = BINFair+(BSUPair-BINFair)*(SIGMA-SIGRF(IINF))/StpSig
+          BINFH2O = B0H2O(IINF)*DEXP(BETA0H2O(IINF)*D1ST)
+          BSUPH2O = B0H2O(ISUP)*DEXP(BETA0H2O(ISUP)*D1ST)
+          BH2O = BINFH2O+(BSUPH2O-BINFH2O)*(SIGMA-SIGRF(IINF))/StpSig
 
 ! Then correct Bair by introducing the contribution of the N2-O2 CIA
 
-          Bair=Bair*(0.79 + 0.21*(1.294D0-0.4545D0*T/TREF))
+          Bair = Bair*(0.79 + 0.21*(1.294D0-0.4545D0*T/TREF))
 
 ! Switch from pressures (in atm) to densities (in amagat)
 ! and compute CIA by combining dry air (N2+O2) and H2O
 ! contributions
 
-          DTOT=PTOT*(T0/T)*1.0D0
-          DN2=PN2*(T0/T)*1.0D0
-          DH2O=PH2O*(T0/T)*1.0D0
+          DTOT = PTOT*(T0/T)*1.0D0
+          DN2 = PN2*(T0/T)*1.0D0
+          DH2O = PH2O*(T0/T)*1.0D0
 
           IF (iWhich .EQ. 1) THEN
             !! both N2/N2 and N2/WV
-            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)+BH2O*DH2O)
+            CTN2(iI) = DN2*(Bair*(DTOT-DH2O)+BH2O*DH2O)
           ELSEIF (iWhich .EQ. 0) THEN
             !! only N2/N2         
-            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)+0.0D0*BH2O*DH2O)
+            CTN2(iI) = DN2*(Bair*(DTOT-DH2O)+0.0D0*BH2O*DH2O)
           ELSEIF (iWhich .EQ. -1) THEN
             !! only N2/WV
 	    !! orig code, same as final code below
-!            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)*0.0D0 + BH2O*DH2O)
+!            CTN2(iI) = DN2*(Bair*(DTOT-DH2O)*0.0D0 + BH2O*DH2O)
 	    
 !	    PTOT = PH2O
 !	    PN2  = PN2    !! unchanged
-!            DTOT=PTOT*(T0/T)*1.0D0
-!            DN2=PN2*(T0/T)*1.0D0
-!            DH2O=PH2O*(T0/T)*1.0D0	    
-!            CTN2(iI)=DN2*(Bair*(DTOT-DH2O)*0.0D0 + BH2O*DH2O)
-            CTN2(iI)=DN2*(BH2O*DH2O)
+!            DTOT = PTOT*(T0/T)*1.0D0
+!            DN2 = PN2*(T0/T)*1.0D0
+!            DH2O = PH2O*(T0/T)*1.0D0	    
+!            CTN2(iI) = DN2*(Bair*(DTOT-DH2O)*0.0D0 + BH2O*DH2O)
+            CTN2(iI) = DN2*(BH2O*DH2O)
           END IF
 	  raCTN2(iI) = CTN2(iI)	  
         END IF
@@ -1282,46 +1227,51 @@ CONTAINS
 
     iI = -1
 
-!      print *,iNumNewGases
-!      print *,(iaNewGasID(iI),iI=1,iNumNewGases)
-!      call dostopmesg('subr OutsideSpectra$')
+    !print *,iNumNewGases
+    !print *,(iaNewGasID(iI),iI=1,iNumNewGases)
+    !call dostopmesg('subr OutsideSpectra$')
           
     IF (iNumNewGases > 0) THEN
-        iJ = 1
-    ! search to see if there is new data!
-        10 CONTINUE
-        IF (iaNewGasID(iJ) == iGasID) THEN
-            iI = iJ
-        ELSEIF (iJ  < iNumNewGases) THEN
-            iJ = iJ + 1
-            GOTO 10
-        END IF
-        IF (iI > 0) THEN
-            write(kStdWarn,*) '>>> found alternate monochromatic SPECTRA for gasID ',iGasID
-            IF (iGASID == 2) write(kStdWarn,*) '  >>> gasID = 2, so could simply be NLTE check ...'
-	    write(kStdWarn,*) ' '
-        END IF
+      iJ = 1
+      ! search to see if there is new data!
+ 10   CONTINUE
+      IF (iaNewGasID(iJ) == iGasID) THEN
+        iI = iJ
+      ELSEIF (iJ  < iNumNewGases) THEN
+        iJ = iJ + 1
+        GOTO 10
+      END IF
 
-    !      ELSEIF ((iNumAltComprDirs .GT. 0) .AND. (rFileStartFr+0.05 .GE. rAltMinFr-0.05)
-    !     $                                  .AND. (rFileStartFr-0.05 .LE. rAltMaxFr+0.05)) THEN
+      IF (iI > 0) THEN
+        write(kStdWarn,*) '>>> found alternate monochromatic SPECTRA for gasID ',iGasID
+        IF (iGASID == 2) THEN
+          write(kStdWarn,*) '  >>> gasID = 2, so could simply be NLTE check ...'
+        END IF
+        write(kStdWarn,*) ' '
+      END IF
     ELSEIF ((iNumAltComprDirs > 0) .AND. (rFileStartFr+0.05 >= rAltMinFr-0.05) &
          .AND. (rFileStartFr+kaBlSize(iTag)-0.05 <= rAltMaxFr+0.05)) THEN
-        iJ = 1
-    ! search to see if there is new data!
-        20 CONTINUE
-        IF (iaAltComprDirs(iJ) == iGasID) THEN
-            iI = iJ
-        ELSEIF (iJ  < iNumAltComprDirs) THEN
-            iJ = iJ + 1
-            GOTO 20
-        END IF
-        IF (iI > 0) THEN
-            write(kStdWarn,*) '>>> found alternate COMPRESSED DATABASE for gasID ',iGasID
-        END IF
-        IF (iI > 0) iI = iI + 1000
-    END IF
+      iJ = 1
+      !search to see if there is new data!
+ 20   CONTINUE
 
-!      print *,iNumNewGases,iNumAltComprDirs,rFileStartFr,rAltMinFr,rAltMaxFr,iI
+      IF (iaAltComprDirs(iJ) == iGasID) THEN
+        iI = iJ
+      ELSEIF (iJ  < iNumAltComprDirs) THEN
+        iJ = iJ + 1
+        GOTO 20
+      END IF
+
+      IF (iI > 0) THEN
+        write(kStdWarn,*) '>>> found alternate COMPRESSED DATABASE for gasID ',iGasID
+      END IF
+
+      IF (iI > 0) THEN
+        iI = iI + 1000
+      END IF
+
+    END IF
+    ! print *,iNumNewGases,iNumAltComprDirs,rFileStartFr,rAltMinFr,rAltMaxFr,iI
 
     OutsideSpectra = iI
 
@@ -1353,10 +1303,10 @@ CONTAINS
 ! search to see if there is new data!
     10 CONTINUE
     IF (iaaNewChunks(iNewIn,iJ) == nint(rFileStartFr)) THEN
-        iI = iJ
+      iI = iJ
     ELSEIF (iJ  < iaNewData(iNewIn)) THEN
-        iJ = iJ + 1
-        GOTO 10
+      iJ = iJ + 1
+      GOTO 10
     END IF
 
     NewDataChunk = iI
@@ -1395,100 +1345,69 @@ CONTAINS
     CHARACTER(4) :: ca4
 
     IF ((iCO2Chi /= 2) .AND. (iCO2Chi /= 3)) THEN
-        write(kStdErr,*) 'Illegal type for co2 chi function',iCO2Chi
-        CALL DoStop
+      write(kStdErr,*) 'Illegal type for co2 chi function',iCO2Chi
+      CALL DoStop
     END IF
 
     iChi = -1
     iDoFudge = WhichGasPosn(int(rFileStartFr),iaChiChunks,iChiChunks)
     IF (iDoFudge > 0) THEN
-        iChi = +1
-        DO iI = 1,120
-            fname(iI:iI) = ' '
-        END DO
-        FNAME = 'co2_4um_fudge_'
-        iJ = 1
-        11 CONTINUE
-        IF ((fname(iJ:iJ) /= ' ') .AND. (iJ < 120)) THEN
-            iJ = iJ + 1
-            GOTO 11
-        END IF
-        IF (rFileStartFr < 1000) THEN
-            write(ca3,30) nint(rFileStartFr)
-            fname(iJ:iJ+2) = ca3(1:3)
-            iJ = iJ+3
-        ELSEIF (rFileStartFr >= 1000) THEN
-            write(ca4,40) nint(rFileStartFr)
-            fname(iJ:iJ+3) = ca4(1:4)
-            iJ = iJ+4
-        END IF
+      iChi = +1
+      DO iI = 1,120
+        fname(iI:iI) = ' '
+      END DO
+      FNAME = 'co2_4um_fudge_'
+      iJ = 1
+ 11 CONTINUE
+     IF ((fname(iJ:iJ) /= ' ') .AND. (iJ < 120)) THEN
+       iJ = iJ + 1
+       GOTO 11
+     END IF
+     IF (rFileStartFr < 1000) THEN
+      write(ca3,30) nint(rFileStartFr)
+      fname(iJ:iJ+2) = ca3(1:3)
+      iJ = iJ+3
+    ELSEIF (rFileStartFr >= 1000) THEN
+      write(ca4,40) nint(rFileStartFr)
+      fname(iJ:iJ+3) = ca4(1:4)
+      iJ = iJ+4
+      END IF
     END IF
 
     IF (iCO2Chi == 2) THEN
-        fname(iJ:iJ+5) = '_b.txt'
+      fname(iJ:iJ+5) = '_b.txt'
     ELSEIF (iCO2Chi == 3) THEN
-        fname(iJ:iJ+5) = '_c.txt'
+      fname(iJ:iJ+5) = '_c.txt'
     END IF
 
-    30 FORMAT(I3)
-    40 FORMAT(I4)
+ 30 FORMAT(I3)
+ 40 FORMAT(I4)
 
-!      IF (iFileStartFR .EQ. 2255) THEN
-!        write(kStdWarn,*) 'need CO2 chifunction for 2255 chunk ....'
-!        FNAME = 'co2_4um_fudge_2255.txt'
-!        FNAME = 'co2_4um_fudge_2255_a.txt'
-!        FNAME = 'co2_4um_fudge_2255_b.txt'  !!!'a' and 'b are copies
-!        iChi = +1
-!      ELSEIF (iFileStartFR .EQ. 2280) THEN
-!        write(kStdWarn,*) 'need CO2 chifunction for 2280 chunk ....'
-!        FNAME = 'co2_4um_fudge_2280.txt'
-!        FNAME = 'co2_4um_fudge_2280_a.txt'
-!        FNAME = 'co2_4um_fudge_2280_b.txt'  !!!'a' and 'b are copies
-!        iChi = +1
-!      ELSEIF (iFileStartFR .EQ. 2380) THEN
-!        write(kStdWarn,*) 'need CO2 chifunction for 2380 chunk ....'
-!        FNAME = 'co2_4um_fudge_2380.txt'
-!        FNAME = 'co2_4um_fudge_2380_b.txt'
-!        iChi = +1
-!      ELSEIF (iFileStartFR .EQ. 2405) THEN
-!        write(kStdWarn,*) 'need CO2 chifunction for 2405 chunk ....'
-!        FNAME = 'co2_4um_fudge_2405.txt'
-!        FNAME = 'co2_4um_fudge_2405_b.txt'
-!        iChi = +1
-!      END IF
-     
     CALL FindChiFileName(fname)
 
     FMT = '(A,A80,A,F12.5)'
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
     IF (iChi > 0) THEN
-        write(kStdWarn,FMT) ' UMBC CO2 : chifile ',fname,' for chunk ',rFileStartFr
-        write(kStdErr,FMT)  ' UMBC CO2 : chifile ',fname,' for chunk ',rFileStartFr	
-        iIOUN = kTempUnit
-        OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED', &
+      write(kStdWarn,FMT) ' UMBC CO2 : chifile ',fname,' for chunk ',rFileStartFr
+      write(kStdErr,FMT)  ' UMBC CO2 : chifile ',fname,' for chunk ',rFileStartFr	
+      iIOUN = kTempUnit
+      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED', &
         IOSTAT=IERR)
-        IF (IERR /= 0) THEN
-            WRITE(kStdErr,*) 'In subroutine co2_4um_fudge'
-            WRITE(kStdErr,1010) IERR, FNAME
-            1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
-            CALL DoSTOP
-        ENDIF
-        kTempUnitOpen=1
-        READ(iIOUN,*) (raF(iFr),raChi(iFr),iFr=1,kMaxPts)
-        CLOSE(iIOUN)
-        kTempUnitOpen=-1
+      IF (IERR /= 0) THEN
+        WRITE(kStdErr,*) 'In subroutine co2_4um_fudge'
+        WRITE(kStdErr,1010) IERR, FNAME
+        CALL DoSTOP
+      ENDIF
+      kTempUnitOpen=1
+      READ(iIOUN,*) (raF(iFr),raChi(iFr),iFr=1,kMaxPts)
+      CLOSE(iIOUN)
+      kTempUnitOpen=-1
 
-    ! to print out the chifcn
-    !          DO iFr=1,kMaxPts
-    !           print *,raF(iFr),raChi(iFr)
-    !           end do
-
-        DO iLay=1,kProfLayer
-            DO iFr=1,kMaxPts
-                daaAbsCoeff(iFr,iLay)=daaAbsCoeff(iFr,iLay)*raChi(iFr)
-            END DO
-        END DO
+      DO iLay=1,kProfLayer
+        daaAbsCoeff(:,iLay)=daaAbsCoeff(:,iLay)*raChi
+      END DO
     ELSE
-        write(kStdWarn,*) 'do not need CO2 chifunction for chunk ',rFileStartFr
+      write(kStdWarn,*) 'do not need CO2 chifunction for chunk ',rFileStartFr
     END IF
 
     RETURN
@@ -1566,23 +1485,24 @@ CONTAINS
     REAL :: rMinLA
     
     INTEGER :: iaBnd(kProfLayer+1,2)
-    REAL ::    raBndFrac(kProfLayer+1,2)
-    REAL :: rPP,rWgt,rMR,rFrac,rMolecules,rHeight,rQtot
+    REAL :: raBndFrac(kProfLayer+1,2)
+    REAL :: raPP(kMaxLayer),rWgt,raMR(kMaxLayer),rFrac,rMolecules,rHeight,rQtot,rPP,rMR
 
     REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer)
     
     CALL databasestuff(iLowerOrUpper, DATABASELEVHEIGHTS,PLEV_KCARTADATABASE_AIRS,raDatabaseHeight)
+
     IF (kProfLayer /= kMaxLayer) THEN
       !! we do not really need this, but go for it
       CALL getUArefprofile(1,iGasID,raUA_refP,raUA_refPP,raUA_refT,raUA_refQ)
       CALL databasestuff(-1, DATABASELEVHEIGHTSLA,PLEV_KCARTADATABASE_AIRSLA,raDatabaseHeightLA)      
-      DO iL = 1,kMaxLayer
-        raUA_refP(iL)  = raUA_refP(iL) * katm2mb
-        raUA_refPP(iL) = raUA_refPP(iL) * katm2mb
-	rPP = PLEV_KCARTADATABASE_AIRSLA(iL)-PLEV_KCARTADATABASE_AIRSLA(iL+1)
-	rMR = log(PLEV_KCARTADATABASE_AIRSLA(iL)/PLEV_KCARTADATABASE_AIRSLA(iL+1))
-	PAVG_KCARTADATABASE_AIRSLA(iL) = rPP/rMR
-      END DO
+
+      raUA_refP  = raUA_refP * katm2mb
+      raUA_refPP = raUA_refPP * katm2mb
+      raPP = PLEV_KCARTADATABASE_AIRSLA(1:kMaxLayer)-PLEV_KCARTADATABASE_AIRSLA(2:kMaxLayer+1)
+      raMR = log(PLEV_KCARTADATABASE_AIRSLA(1:kMaxLayer)/PLEV_KCARTADATABASE_AIRSLA(2:kMaxLayer+1))
+      PAVG_KCARTADATABASE_AIRSLA = raPP/raMR
+
       iTopLA = kProfLayer
       rMinLA = PLEV_KCARTADATABASE_AIRSLA(kMaxLayer+1)
       DO iL = kProfLayer+1,kProfLayer-iNumLayers,-1
@@ -1597,19 +1517,16 @@ CONTAINS
     iStart = kProfLayer-iNumLayers
 
 ! simply put in the pressures
-    DO iI = 1,iStart
     ! these are "junk"
-        raRPress(iI) = raaPress(iStart+1,iGas)
-    END DO
-    DO iI = iStart+1,kProfLayer
-        raRPress(iI) = raaPress(iI,iGas)
-    END DO
+    raRPress(1:iStart) = raaPress(iStart+1,iGas)
+    ! these are "correct"
+    raRPress(iStart+1:kProfLayer) = raaPress(iStart+1:kProfLayer,iGas)
 
 ! now just happily spline everything on!!!!!! for the temps
     DO iI = 1,kMaxLayer
-        raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
-        raXgivenP(iI) = raR100Press(kMaxLayer-iI+1)
-        raYgivenP(iI) = raR100Temp(kMaxLayer-iI+1)
+      raXgivenP(iI) = log(raR100Press(kMaxLayer-iI+1))
+      raXgivenP(iI) = raR100Press(kMaxLayer-iI+1)
+      raYgivenP(iI) = raR100Temp(kMaxLayer-iI+1)
     END DO
     
 !   Assign values for interpolation
@@ -1618,69 +1535,58 @@ CONTAINS
     rYPN = 1.0E+16
     CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
     
-    DO iI = 1,iStart
-        raRTemp(iI) = +999.999
-    END DO
+    raRTemp(1:iStart) = +999.999
     DO iI = iStart+1,kProfLayer
-        rxpt = log(raaPress(iI,iGas))
-        rxpt = raaPress(iI,iGas)
-        IF (iSplineType == +1) THEN
-            CALL rsplin_need_2nd_deriv(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
-        ELSE
-            CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
-        END IF
-        raRTemp(iI) = r
+      rxpt = log(raaPress(iI,iGas))
+      rxpt = raaPress(iI,iGas)
+      IF (iSplineType == +1) THEN
+        CALL rsplin_need_2nd_deriv(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
+      ELSE
+        CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
+      END IF
+      raRTemp(iI) = r
     END DO
           
-    DO iL = 1,kProfLayer
-        raRAmt(iL) = 0.0
-        raRPartPress(iL) = 0.0
-    END DO
+    raRAmt = 0.0
+    raRPartPress = 0.0
           
 !!!this tells how many layers are NOT dumped out by kLAYERS
     iZbndFinal = kProfLayer-iNumLayers
-
-!    DO iL = 1,kProfLayer
-!      write(kStdWarn,*) 'MakeRefProf raPressLevels',iL,raPressLevels(iL),iLowerOrUpper
-!    END DO
-!    DO iL = 1,kMaxLayer
-!      write(kStdWarn,*) 'MakeRefProf PLEV_KCARTADATABASE_AIRS',iL,PLEV_KCARTADATABASE_AIRS(iL)
-!    END DO
 
 !! look at the LAYERS and figure out which PLEV_KCARTADATABASE_AIRS bracket them
 !! now reset iStart
     iStart = (kProfLayer) - (iNumLayers)+1
 
     DO iL = iStart,kProfLayer
-    !! find plev_airs which is just ABOVE the top of current layer
-        iG = kMaxLayer+1
-        10 CONTINUE
-        IF ((PLEV_KCARTADATABASE_AIRS(iG) <= raPressLevels(iL+1)) .AND. (iG > 1)) THEN
-            iG = iG - 1
-            GOTO 10
-        ELSE
-            iaBnd(iL,2) = min(iG+1,kMaxLayer+1)   !! top bndry of plevs_database is lower pressure than top bndry of raPressLevels layer iL
-        END IF
-        raBndFrac(iL,2) = (raPressLevels(iL+1)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))/ &
-        (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))
+      !! find plev_airs which is just ABOVE the top of current layer
+      iG = kMaxLayer+1
+ 10   CONTINUE
+      IF ((PLEV_KCARTADATABASE_AIRS(iG) <= raPressLevels(iL+1)) .AND. (iG > 1)) THEN
+        iG = iG - 1
+        GOTO 10
+      ELSE
+        iaBnd(iL,2) = min(iG+1,kMaxLayer+1)   !! top bndry of plevs_database is lower pressure than top bndry of raPressLevels layer iL
+      END IF
+      raBndFrac(iL,2) = (raPressLevels(iL+1)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))/ &
+                         (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2)-1))
 
-    !! find plev_airs which is just BELOW the bottom of current layer
-        iG = 1
-        20 CONTINUE
-        IF ((PLEV_KCARTADATABASE_AIRS(iG) > raPressLevels(iL)) .AND. (iG .LE. kMaxLayer)) THEN
-            iG = iG + 1
-            GOTO 20
-        ELSE
-            iaBnd(iL,1) = max(iG-1,1) !! bot boundary of plevs_database is bigger pressure than top bndry of raPressLevels layer iL
-        END IF
-        raBndFrac(iL,1) = (raPressLevels(iL)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))/ &
+      !! find plev_airs which is just BELOW the bottom of current layer
+      iG = 1
+ 20   CONTINUE
+      IF ((PLEV_KCARTADATABASE_AIRS(iG) > raPressLevels(iL)) .AND. (iG .LE. kMaxLayer)) THEN
+        iG = iG + 1
+        GOTO 20
+      ELSE
+        iaBnd(iL,1) = max(iG-1,1) !! bot boundary of plevs_database is bigger pressure than top bndry of raPressLevels layer iL
+      END IF
+      raBndFrac(iL,1) = (raPressLevels(iL)-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))/ &
         (PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1))-PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)+1))
               
-!          write (*,345) iL,raPressLevels(iL),raPressLevels(iL+1),iaBnd(iL,1),raBndFrac(iL,1),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)), &
-!                                                                 iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
+     !          write (*,345) iL,raPressLevels(iL),raPressLevels(iL+1),iaBnd(iL,1),raBndFrac(iL,1),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,1)), &
+     !                                                                 iaBnd(iL,2),raBndFrac(iL,2),PLEV_KCARTADATABASE_AIRS(iaBnd(iL,2))
 
     END DO
-    345 FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))    
+ 345 FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))    
           
 ! now that we know the weights and boundaries, off we go!!!
 ! remember pV = nRT ==> p(z) dz/ r T(z) = dn(z)/V = dq(z) ==> Q = sum(p Z / R T)
@@ -1689,63 +1595,55 @@ CONTAINS
 ! or Qnew = sum(frac(i) Q(i))
 
     DO iX = iStart,kProfLayer
-        raRAmt(iX) = 0.0
-        rPP = 0.0
-        rPPWgt = 0.0
-        rMR = 0.0
-        rMolecules = 0.0
-        rHeight = 0.0
-        DO iY = iaBnd(iX,1),iaBnd(iX,2)-1
-            IF (iY == iaBnd(iX,2)-1) THEN
-                rFrac = raBndFrac(iX,2)
-            ELSEIF (iY == iaBnd(iX,1)) THEN
-            !! this also takes care of case when iY .EQ. iaBnd(iX,1) .EQ. iaBnd(iX,2)-1
-                rFrac = raBndFrac(iX,1)
-            ELSE
-                rFrac = 1.0
-            END IF
-            rHeight = rHeight + rFrac*DATABASELEVHEIGHTS(iY)
-            rMolecules = rMolecules + raR100Amt(iY)*rFrac*DATABASELEVHEIGHTS(iY)
-            rPP = rPP + raR100PartPress(iY)*rFrac
-            rPPWgt = rPPWgt + rFrac
-            rMR = rMR + raR100PartPress(iY)/raRPress(iY)
-            raRAmt(iX) = raRAmt(iX) + raR100Amt(iY)*rFrac
-!	    write(kStdErr,'(I3,I4,I4,2X,E10.4,2X,E10.4,2X,F10.4,2X,E10.4,2X,E10.4)') &
-!	        iGasID,iX,iY,raPressLevels(iX),rPP,rFrac,raR100Amt(iY),raRAmt(iX)
-        END DO
-        !! method 1
-        raRPartPress(iX) = rPP/rPPWgt
+      raRAmt(iX) = 0.0
+      rPP = 0.0
+      rPPWgt = 0.0
+      rMR = 0.0
+      rMolecules = 0.0
+      rHeight = 0.0
+      DO iY = iaBnd(iX,1),iaBnd(iX,2)-1
+        IF (iY == iaBnd(iX,2)-1) THEN
+          rFrac = raBndFrac(iX,2)
+        ELSEIF (iY == iaBnd(iX,1)) THEN
+          !! this also takes care of case when iY .EQ. iaBnd(iX,1) .EQ. iaBnd(iX,2)-1
+          rFrac = raBndFrac(iX,1)
+        ELSE
+          rFrac = 1.0
+        END IF
+        rHeight = rHeight + rFrac*DATABASELEVHEIGHTS(iY)
+        rMolecules = rMolecules + raR100Amt(iY)*rFrac*DATABASELEVHEIGHTS(iY)
+        rPP = rPP + raR100PartPress(iY)*rFrac
+        rPPWgt = rPPWgt + rFrac
+        rMR = rMR + raR100PartPress(iY)/raRPress(iY)
+        raRAmt(iX) = raRAmt(iX) + raR100Amt(iY)*rFrac
+        !	    write(kStdErr,'(I3,I4,I4,2X,E10.4,2X,E10.4,2X,F10.4,2X,E10.4,2X,E10.4)') &
+        !	        iGasID,iX,iY,raPressLevels(iX),rPP,rFrac,raR100Amt(iY),raRAmt(iX)
+      END DO
+      !! method 1
+      raRPartPress(iX) = rPP/rPPWgt
 
-        !! method 2
-        !! rMR = rMR/((iaBnd(iX,2)-1)-(iaBnd(iX,1))+1)
-        !! raRPartPress(iX) = rMR * raPressLevels(iX)/1013.25
-        !! raRAmt(iX) = rMolecules/rHeight
+      !! method 2
+      !! rMR = rMR/((iaBnd(iX,2)-1)-(iaBnd(iX,1))+1)
+      !! raRPartPress(iX) = rMR * raPressLevels(iX)/1013.25
+      !! raRAmt(iX) = rMolecules/rHeight
 
-    ! bumping raRAmt and raRPartPressup n down
-    ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amount
-    ! though WV may be a little more complicated as it depends on pp
-    !        raRAmt(iX) = raRAmt(iX) * 100.0
-    !        raRPartPress(iX) = raRPartPress(iX) * 20.0
-    ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amount
-    ! though WV may be a little more complicated as it depends on pp
-    !      write(*,1234) iGasID,iX,raPressLevels(iX),raaPress(iX,1)*1013.25,raPressLevels(iX+1),iaBnd(iX,1),iaBnd(iX,2),
-    !     $           raRTemp(iX),raRPartPress(iX),raRAmt(iX)
+      ! bumping raRAmt and raRPartPressup n down
+      ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amount
+      ! though WV may be a little more complicated as it depends on pp
+      !        raRAmt(iX) = raRAmt(iX) * 100.0
+      !        raRPartPress(iX) = raRPartPress(iX) * 20.0
+      ! this proves uncompression is done using OD(p,T)/gasamt(p) === abscoeff(p,T) and is therefore INDPT of ref gas amount
+      !  though WV may be a little more complicated as it depends on pp
+      !      write(*,1234) iGasID,iX,raPressLevels(iX),raaPress(iX,1)*1013.25,raPressLevels(iX+1),iaBnd(iX,1),iaBnd(iX,2),
+      !     $           raRTemp(iX),raRPartPress(iX),raRAmt(iX)
 
-        !!  write(*,5678),iGasID,iX,kProfLayer,raBndFrac(iX,1),raBndFrac(iX,2),raRPartPress(iX) 
+      !!  write(*,5678),iGasID,iX,kProfLayer,raBndFrac(iX,1),raBndFrac(iX,2),raRPartPress(iX) 
 
     END DO
      
   5678 FORMAT(3(' ',I3),2(' ',F10.3),1(' ',E10.5))
   1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
 
-!      stop 'zzzzooooo'
-
-!      IF (iGasID .EQ. 2) THEN
-!        DO iL = 1, 100
-!        print *,iL,raR100Amt(iL),raRAmt(iL)
-!      END DO
-!      END IF
-          
     RETURN
     end SUBROUTINE MakeRefProf
 

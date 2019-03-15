@@ -1,7 +1,66 @@
 ! Copyright 1997
 ! University of Maryland Baltimore County
 ! All Rights Reserved
+!
+!************************************************************************
+! how to declare a function that outputs an array (or a matrix) see for example
+! http://www.pcc.qub.ac.uk/tec/courses/f90/stu-notes/F90_notesMIF_5.html     or
+! https://stackoverflow.com/questions/26347090/how-to-declare-the-type-of-a-function-that-returns-an-array-in-fortran
+! see example of making functions to output arrays
+!
+!    module so_func
+!    INTEGER, PARAMETER :: MAX_SIZE = 5
+!    TYPE MY_DATA
+!        INTEGER :: SIZE
+!        REAL, DIMENSION(MAX_SIZE) :: DATA
+!    ENDTYPE
+! contains
+!
+!    FUNCTION f1(A,N) RESULT(X)
+!    implicit none
+!    INTEGER, INTENT(IN) :: N
+!    REAL, INTENT(IN) :: A(N)
+!    REAL :: X(N)
+!    ! ....
+!    X = 1.0+A
+!    END FUNCTION f1
+!
+!    TYPE(MY_DATA) FUNCTION f2(A,N)
+!    implicit none
+!    INTEGER, INTENT(IN) :: N
+!    REAL, INTENT(IN) :: A(N)
+!    ! ....
+!    f2%SIZE = N
+!    f2%DATA(1:N) = 1.0+A
+!    END FUNCTION f2
+!
+!    FUNCTION f3(A,N)
+!    implicit none
+!    INTEGER, INTENT(IN) :: N
+!    REAL, INTENT(IN) :: A(N)
+!    REAL :: f3(N)
+!    ! ....
+!    f3 = 1.0+A
+!    END FUNCTION f3
+!
+!end module
+!
+!program SO_RESULT
+!    use so_func
+!    implicit none
+!    integer, parameter :: n=5
+!    REAL :: A(n), y1(n), y3(n)    
+!    TYPE(MY_DATA) :: y2
+!    INTEGER :: i
+!
+!    ! Variables
+!    A =(/ (i, i=1,n) /)
+!    y1 = f1(A,n)
+!    y2 = f2(A,n)
+!    y3 = f3(A,n)
+!end program SO_RESULT
 
+!************************************************************************
 MODULE basic_common
 
 IMPLICIT NONE
@@ -16,33 +75,7 @@ CONTAINS
 
     REAL :: rX
      
-    INTEGER :: iI,iIm1,iIp1,iIm2,iIp2,iF
-           
-    iF=nint(rX)
-
-    iI=nint(rX)
-    iIm1=iI-1
-    iIm2=iI-2
-    iIp1=iI+1
-    iIp2=iI+2
-     
-    IF (rX >= iIm2*1.0) THEN
-        iF=iIm2
-    END IF
-    IF (rX >= iIm1*1.0) THEN
-        iF=iIm1
-    END IF
-    IF (rX >= iI*1.0) THEN
-        iF=iI
-    END IF
-    IF (rX >= iIp1*1.0) THEN
-        iF=iIp1
-    END IF
-    IF (rX >= iIp2*1.0) THEN
-        iF=iIp2
-    END IF
-     
-    iFloor = iF
+    iFloor = int(floor(rX))
 
     RETURN
     end FUNCTION iFloor
@@ -54,33 +87,7 @@ CONTAINS
 
     REAL :: rX
      
-    INTEGER :: iI,iIm1,iIp1,iIm2,iIp2,iC
-           
-    iC=nint(rX)
-
-    iI=nint(rX)
-    iIm1=iI-1
-    iIm2=iI-2
-    iIp1=iI+1
-    iIp2=iI+2
-     
-    IF (rX <= iIp2*1.0) THEN
-        iC=iIp2
-    END IF
-    IF (rX <= iIp1*1.0) THEN
-        iC=iIp1
-    END IF
-    IF (rX <= iI*1.0) THEN
-        iC=iI
-    END IF
-    IF (rX <= iIm1*1.0) THEN
-        iC=iIm1
-    END IF
-    IF (rX <= iIm2*1.0) THEN
-        iC=iIm2
-    END IF
-
-    iCeil = iC
+    iCeil = int(ceiling(rX))
      
     RETURN
     end FUNCTION iCeil
@@ -746,6 +753,58 @@ CONTAINS
 
     RETURN
     end function ttorad
+
+!************************************************************************
+! this subroutine changes the brightness temperatures to intensities
+! for an array
+!    REAL function rattorad(raf,rBT) RESULT(raX)
+    Function rattorad(raf,rBT)
+
+! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
+! Constants; values from NIST (CODATA98)
+!   c = 2.99792458e+08;  % speed of light      299 792 458 m s-1
+!   h = 6.62606876e-34;  % Planck constant     6.626 068 76 x 10-34 J s
+!   k = 1.3806503e-23;   % Boltzmann constant  1.380 6503 x 10-23 J K-1
+!   c1 = 2*h*c*c * 1e+11;  % Changed 1e+8 to 1e+11 to convert Watts to milliWatts
+!   c2 = (h*c/k) * 100;
+
+! at small T, exp(c2 fr/T) >>> 1
+!   rad --> c1 fr^3  exp(-c2 fr/T)
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raf = wavenumber, rBT = brightness temp
+    REAL :: raf(kMaxPts),rBT
+    REAL :: raX(kMaxPts)
+    REAL :: rattorad(kMaxPts)
+
+! local variables
+    REAL :: r1,r2,raPlanck(kMaxPts)
+    INTEGER :: iInt
+     
+    r1 = sngl(kPlanck1)
+    r2 = sngl(kPlanck2)
+
+!! 10^10 = e^23.03
+!! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
+!! 10^38  = 87.49
+          
+    raPlanck = r2*raf/rBT
+    DO iInt = 1,kMaxPts
+      IF (raPlanck(iInt) > 87.49) THEN
+        raPlanck(iInt) = 1.0e38
+      ELSE
+        raPlanck(iInt) = exp(raPlanck(iInt)) - 1
+      END IF
+    END DO
+
+    raX = r1*(raf**3)/raPlanck
+
+    rattorad = raX
+
+    RETURN
+    end function rattorad
 
 !************************************************************************
 ! this function converts the Mixed Path number to a layer number

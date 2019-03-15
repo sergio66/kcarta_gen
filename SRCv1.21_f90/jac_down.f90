@@ -154,110 +154,107 @@ CONTAINS
     END IF
 
     CALL DoPlanck_LookDown(raVTemp,rFracTop,rFracBot,raFreq, &
-    iAtm,iNumLayer,iaaRadLayer, &
-    rSatAngle,raLayAngles,raaAbs, &
-    raaRad,raaRadDT,raaOneMinusTau,raaTau, &
-    raaLay2Gnd,iProfileLayers,raPressLevels)
+      iAtm,iNumLayer,iaaRadLayer, &
+      rSatAngle,raLayAngles,raaAbs, &
+      raaRad,raaRadDT,raaOneMinusTau,raaTau, &
+      raaLay2Gnd,iProfileLayers,raPressLevels)
 
     IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-    (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,*)'initializing Jacobian loops ...'
+      (abs(kLongOrShort) <= 1)) THEN
+      write(kStdWarn,*)'initializing Jacobian loops ...'
     END IF
 
     CALL Loop_LookDown(iaaRadLayer, &
-    iAtm,iNumLayer,rSatAngle,raLayAngles,raSunRefl, &
-    raUseEmissivity,raSurface,raSun,raSunAngles,raThermal, &
-    raaOneMinusTau,raaLay2Sp,raaRad,raaGeneral)
+      iAtm,iNumLayer,rSatAngle,raLayAngles,raSunRefl, &
+      raUseEmissivity,raSurface,raSun,raSunAngles,raThermal, &
+      raaOneMinusTau,raaLay2Sp,raaRad,raaGeneral)
 
     IF ((kThermal >= 0) .AND. (kThermalJacob > 0)) THEN
-        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-        (abs(kLongOrShort) <= 1)) THEN
-            write(kStdWarn,*)'initializing Jacobian thermal loops ...'
-        END IF
-        CALL Loop_thermaldown(raaRad,rSatAngle,raLayAngles, &
+      IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,*)'initializing Jacobian thermal loops ...'
+      END IF
+      CALL Loop_thermaldown(raaRad,rSatAngle,raLayAngles, &
         iProfileLayers,raPressLevels, &
         iaaRadLayer,iAtm,iNumLayer,raaAbs, &
         raaOneMinusTauTh,raaLay2Gnd,raaGeneralTh,raFreq)
     END IF
 
     IF (kJacobOutPut >= 1) THEN
-    ! have to set the backgnd thermal, solar radiances so that we can do
-    ! dr_th/ds dBT/dr_th, dr_solar/ds dBT/dr_solar  easily
-        IF (kThermal >= 0) THEN
-          radBackgndThermdT = raThermal
-        END IF
+      ! have to set the backgnd thermal, solar radiances so that we can do
+      ! dr_th/ds dBT/dr_th, dr_solar/ds dBT/dr_solar  easily
+      IF (kThermal >= 0) THEN
+        radBackgndThermdT = raThermal
+      END IF
 
-        IF (kSolar >= 0) THEN
-          ! compute the Solar contribution
-          iLay=1
-          ! remember that raSun is that at the gnd -- we have to propagate this back
-          ! up to the top of the atmosphere
-          ! note that here we are calculating the SOLAR contribution
-          radSolardT = raUseEmissivity*raaLay2Sp(:,iLay)*raSun
-        END IF
+      IF (kSolar >= 0) THEN
+        ! compute the Solar contribution
+        iLay=1
+        ! remember that raSun is that at the gnd -- we have to propagate this back
+        ! up to the top of the atmosphere
+        ! note that here we are calculating the SOLAR contribution
+        radSolardT = raUseEmissivity*raaLay2Sp(:,iLay)*raSun
+      END IF
 
-        CALL Find_BT_rad(raInten,radBTdr,raFreq,radBackgndThermdT,radSolardT)
+      CALL Find_BT_rad(raInten,radBTdr,raFreq,radBackgndThermdT,radSolardT)
 
     END IF
 
-    IF ((iWhichJac == -1) .OR. (iWhichJac == -2) &
-     .OR. (iWhichJac == 20)) THEN
-        DO iG=1,iNumGases
+    IF ((iWhichJac == -1) .OR. (iWhichJac == -2) .OR. (iWhichJac == 20)) THEN
+      DO iG=1,iNumGases
         ! for each of the iNumGases whose ID's <= kMaxDQ
         ! have to do all the iNumLayer radiances
-            iGasJacList = DoGasJacob(iaGases(iG),iaJacob,iJacob)
-            IF (iGasJacList > 0) THEN
-                iGasPosn = WhichGasPosn(iaGases(iG),iaGases,iNumGases)
-                CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
+        iGasJacList = DoGasJacob(iaGases(iG),iaJacob,iJacob)
+        IF (iGasJacList > 0) THEN
+          iGasPosn = WhichGasPosn(iaGases(iG),iaGases,iNumGases)
+          CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                 raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
-            !! see if this gas does exist for this chunk
-                CALL DataBaseCheck(iaGases(iG),raFreq,iTag,iActualTag, &
+          !! see if this gas does exist for this chunk
+          CALL DataBaseCheck(iaGases(iG),raFreq,iTag,iActualTag, &
                 iDoAdd,iErr)
-                IF (iDoAdd > 0) THEN
-                    DO iLay=1,iNumLayer
-                        rWeight = raaMix(iaaRadLayer(iAtm,iLay),iG)
-                        IF (iLay == 1) THEN
-                            rWeight = rWeight*rFracBot
-                        ELSEIF (iLay == iNumLayer) THEN
-                            rWeight = rWeight*rFracTop
-                        END IF
-                        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-                        (abs(kLongOrShort) <= 1)) THEN
-                            write(kStdWarn,*)'gas d/dq : gas# iaaRadlayer# :',iG,iaaRadLayer(iAtm,iLay)
-                        END IF
-                        CALL JacobGasAmtFM1(raFreq,raaRad,raaRadDT,iGasJacList, &
+          IF (iDoAdd > 0) THEN
+            DO iLay=1,iNumLayer
+              rWeight = raaMix(iaaRadLayer(iAtm,iLay),iG)
+              IF (iLay == 1) THEN
+                rWeight = rWeight*rFracBot
+              ELSEIF (iLay == iNumLayer) THEN
+                rWeight = rWeight*rFracTop
+              END IF
+              IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+                write(kStdWarn,*)'gas d/dq : gas# iaaRadlayer# :',iG,iaaRadLayer(iAtm,iLay)
+              END IF
+              CALL JacobGasAmtFM1(raFreq,raaRad,raaRadDT,iGasJacList, &
                         iLay,iNumGases,iaaRadLayer,iAtm,iNumLayer,raUseEmissivity, &
                         raaOneMinusTau,raaTau,raaaAllDQ, &
                         raaLay2Sp,raResults,raThermal,raaLay2Gnd, &
                         rSatAngle,raLayAngles, &
                         raaGeneral,raaGeneralTh,raaOneMinusTauTh, &
                         rWeight)
-                        CALL doJacobOutput(iLowest,raFreq, &
+              CALL doJacobOutput(iLowest,raFreq, &
                         raResults,radBTdr,raaAmt,raInten,iaGases(iG),iLay,iGasPosn)
-                        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-                    END DO
-                ELSE
-                    raResults = 0.0
-                    DO iLay=1,iNumLayer
-                        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-                    END DO
-                END IF
+              CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+            END DO
+          ELSE
+            raResults = 0.0
+            DO iLay=1,iNumLayer
+              CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+            END DO
             END IF
-        END DO
-    ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-        raResults = 0.0
-        DO iG=1,iNumGases
-          ! for each of the iNumGases whose ID's <= kMaxDQ
-          ! have to do all the iNumLayer radiances
-          iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
-          IF (iGasJacList > 0) THEN
-              iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
-              CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
-                raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
-              DO iLay = 1,iNumLayer
-                CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-              END DO
           END IF
+      END DO
+    ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
+      raResults = 0.0
+      DO iG=1,iNumGases
+        ! for each of the iNumGases whose ID's <= kMaxDQ
+        ! have to do all the iNumLayer radiances
+        iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
+        IF (iGasJacList > 0) THEN
+          iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
+          CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
+                raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
+          DO iLay = 1,iNumLayer
+            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+          END DO
+        END IF
       END DO
     END IF
 
@@ -338,33 +335,26 @@ CONTAINS
       ! computing Jacobians wrt surface parameters are meaningful       
       iLay = 1  !!! dummy
 
-        CALL JacobSurfaceTemp(raFreq,iLay, &
-        rTSurface,raUseEmissivity,raaLay2Sp,raResults)
-        CALL doJacobOutput(iLowest,raFreq,raResults, &
-        radBTdr,raaAmt,raInten,-1,iLay,-1)
-        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      CALL JacobSurfaceTemp(raFreq,iLay,rTSurface,raUseEmissivity,raaLay2Sp,raResults)
+      CALL doJacobOutput(iLowest,raFreq,raResults,radBTdr,raaAmt,raInten,-1,iLay,-1)
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
 
-        CALL JacobSurfaceEmis(iLay, &
-        raSurface,raThermal,raaLay2Sp,raResults)
-        CALL doJacobOutput(iLowest,raFreq,raResults, &
-        radBTdr,raaAmt,raInten,-2,iLay,-1)
-        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      CALL JacobSurfaceEmis(iLay,raSurface,raThermal,raaLay2Sp,raResults)
+      CALL doJacobOutput(iLowest,raFreq,raResults,radBTdr,raaAmt,raInten,-2,iLay,-1)
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
 
-        CALL JacobBackgndThermal(iLay, &
-        raaLay2Sp,raThermal,raResults)
-        CALL doJacobOutput(iLowest,raFreq,raResults, &
-        radBackgndThermdT,raaAmt,raInten,-3,iLay,-1)
-        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      CALL JacobBackgndThermal(iLay,raaLay2Sp,raThermal,raResults)
+      CALL doJacobOutput(iLowest,raFreq,raResults,radBackgndThermdT,raaAmt,raInten,-3,iLay,-1)
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
 
-        CALL JacobSolar(iLay,raaLay2Sp,raSun,raResults)
-        CALL doJacobOutput(iLowest,raFreq,raResults, &
-        radSolardT,raaAmt,raInten,-4,iLay,-1)
-        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      CALL JacobSolar(iLay,raaLay2Sp,raSun,raResults)
+      CALL doJacobOutput(iLowest,raFreq,raResults,radSolardT,raaAmt,raInten,-4,iLay,-1)
+      CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-        raResults = 0.0
-        DO iLay = 1,4
-            CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
-        END DO
+      raResults = 0.0
+      DO iLay = 1,4
+        CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
+      END DO
     END IF
 
     RETURN
@@ -661,36 +651,36 @@ CONTAINS
 
 ! loop over the remaining layers
     DO iLyr=2,iNumLayer
-        iLay = iaaRadLayer(iAtm,iLyr)
-        rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
-        ! first do the surface term
-        iJ1=1
-        CALL JacobTerm(iJ1,iLyr,raaLay2Sp,raTemp)
+      iLay = iaaRadLayer(iAtm,iLyr)
+      rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
+      ! first do the surface term
+      iJ1=1
+      CALL JacobTerm(iJ1,iLyr,raaLay2Sp,raTemp)
         raaGeneral(:,iLyr) = raUseEmissivity*raSurface*raTemp
 
-    ! recall raTemp is raL2S from gnd to top
-        IF (kSolar >= 0) THEN
-            rWsun=cos(raSunAngles(MP2Lay(iLay))*kPi/180.0)
-            raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+raSunRefl*raSun*raTemp*(1+rCos/rWsun)
-        END IF
-    ! include the EASY part of thermal contribution
-        IF ((kThermal >= 0) .AND. (kThermalJacob > 0)) THEN
-          raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+(1.0-raUseEmissivity)/kPi*raThermal*raTemp
-        END IF
+      ! recall raTemp is raL2S from gnd to top
+      IF (kSolar >= 0) THEN
+        rWsun=cos(raSunAngles(MP2Lay(iLay))*kPi/180.0)
+        raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+raSunRefl*raSun*raTemp*(1+rCos/rWsun)
+      END IF
+      ! include the EASY part of thermal contribution
+      IF ((kThermal >= 0) .AND. (kThermalJacob > 0)) THEN
+        raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+(1.0-raUseEmissivity)/kPi*raThermal*raTemp
+      END IF
 
-    ! cdebug === this aids in turn off surface term for both DB/DT amd D(tau)/DT
-    ! c        IF (kTempJac .NE. 0) THEN
-    ! c          DO iFr=1,kMaxPts
-    ! c            raaSurfLoop(iFr,iLyr) = raaGeneral(iFr,iLyr)
-    ! c            END DO
-    ! c          END IF
+      ! cdebug === this aids in turn off surface term for both DB/DT amd D(tau)/DT
+      ! c        IF (kTempJac .NE. 0) THEN
+      ! c          DO iFr=1,kMaxPts
+      ! c            raaSurfLoop(iFr,iLyr) = raaGeneral(iFr,iLyr)
+      ! c            END DO
+      ! c          END IF
 
-    ! now loop over the layers that contribute (i.e. < iLyr) ....
-        iJ = iLyr-1
-        iJ1 = iJ+1
-        CALL JacobTerm(iJ1,iLyr,raaLay2Sp,raTemp)
-        raTemp1 = raTemp1+raaOneMinusTau(:,iJ)*raaRad(:,iJ)*raTemp
-        raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+raTemp1
+      ! now loop over the layers that contribute (i.e. < iLyr) ....
+      iJ = iLyr-1
+      iJ1 = iJ+1
+      CALL JacobTerm(iJ1,iLyr,raaLay2Sp,raTemp)
+      raTemp1 = raTemp1+raaOneMinusTau(:,iJ)*raaRad(:,iJ)*raTemp
+      raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+raTemp1
 
     END DO
 
@@ -856,9 +846,9 @@ CONTAINS
       iJ1 = iLay
       raResults = raResults+raTemp*raaRad(:,iJ1)*raaLay2Sp(:,iJ1)
     ELSE IF (iLay == iNumLayer) THEN
-    ! do the topmost layer correctly
-        iJ1 = iLay
-        raResults = raResults+raTemp*raaTau(:,iJ1)*raaRad(:,iJ1)
+      ! do the topmost layer correctly
+      iJ1 = iLay
+      raResults = raResults+raTemp*raaTau(:,iJ1)*raaRad(:,iJ1)
     END IF
 
 ! now multiply results by the 1/cos(viewing angle) factor
@@ -873,7 +863,7 @@ CONTAINS
         raUseEmissivity,raTemp,raaLay2Sp, &
         raResultsTh,raaLay2Gnd,raaGeneralTh,raaOneMinusTauTh)
       ! now add on the effects to raResults
-       raResults = raResultsTh+raResults
+      raResults = raResultsTh+raResults
     END IF
 
 ! now multiply results by the weight factor
@@ -981,12 +971,12 @@ CONTAINS
 
 ! this turns off dK/dT  ==> use for kTempJac=-2 (DB/DT )
     IF (kTempJac == -2) THEN
-       raTemp = 0.0
-       raResults = 0.0
-    ! else if we want dK/dT use this
-    ! ie use for kTempJac = 0 (DB/DT, d(tau)/DT), -1 (D(tau)/DT )
+      raTemp = 0.0
+      raResults = 0.0
+      ! else if we want dK/dT use this
+      ! ie use for kTempJac = 0 (DB/DT, d(tau)/DT), -1 (D(tau)/DT )
     ELSE IF (kTempJac /= -2) THEN
-       raTemp = raaAllDT(:,iM1)
+      raTemp = raaAllDT(:,iM1)
       CALL MinusOne(raTemp,raResults)
     END IF
 
@@ -1102,9 +1092,9 @@ CONTAINS
 
 ! this is the part where we include the effect of the radiating layer
     IF ((iLay > 1) .AND. (iLay <= iNumLayer)) THEN
-        iJ1 = iLay
-        raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Gnd(:,iJ1)
-        raResultsTh = raResultsTh+raEmittance
+      iJ1 = iLay
+      raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Gnd(:,iJ1)
+      raResultsTh = raResultsTh+raEmittance
     ELSE IF (iLay == 1) THEN
       ! do the bottommost layer correctly
       iJ1 = iLay
@@ -1172,19 +1162,19 @@ CONTAINS
 
 ! this is the part where we include the effect of the radiating layer
     IF ((iLay > 1) .AND. (iLay <= iNumLayer)) THEN
-        iJ1 = iLay
-        iJm1 = iJ1-1
-        raEmittance = raaOneMinusTauTh(:,iJ1)
-        raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Gnd(:,iJ1)+ &
+      iJ1 = iLay
+      iJm1 = iJ1-1
+      raEmittance = raaOneMinusTauTh(:,iJ1)
+      raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Gnd(:,iJ1)+ &
                           raEmittance/rTempTh*raaRadDT(:,iJ1)*raaLay2Gnd(:,iJm1)
-        raResultsTh = raResultsTh+raEmittance
+      raResultsTh = raResultsTh+raEmittance
     ELSE IF (iLay == 1) THEN
-    ! do the bottommost layer correctly
-        iJ1 = iLay
-        raEmittance = raaOneMinusTauTh(:,iJ1)
-        raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Gnd(:,iJ1)+ &
+      ! do the bottommost layer correctly
+      iJ1 = iLay
+      raEmittance = raaOneMinusTauTh(:,iJ1)
+      raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Gnd(:,iJ1)+ &
                           raEmittance/rTempTh*raaRadDT(:,iJ1)
-        raResultsTh = raResultsTh+raEmittance
+      raResultsTh = raResultsTh+raEmittance
     END IF
 
 ! now multiply results by the tau(layer_to_space)
@@ -1234,48 +1224,46 @@ CONTAINS
     raResults = 0.0
      
     IF (iLay > iNumLayer) THEN
-        write(kStdErr,*) 'Cannot compute wt fcn for layer ',iLay
-        write(kStdErr,*) 'if atm only consists of ',iNumLayer,' layers'
-        CALL DoSTOP
+      write(kStdErr,*) 'Cannot compute wt fcn for layer ',iLay
+      write(kStdErr,*) 'if atm only consists of ',iNumLayer,' layers'
+      CALL DoSTOP
     END IF
      
     IF (iLay <= 0) THEN
-        write(kStdErr,*) 'Cannot compute wt fcn for layer ',iLay
-        write(kStdErr,*) 'if atm only consists of ',iNumLayer,' layers'
-        CALL DoSTOP
+      write(kStdErr,*) 'Cannot compute wt fcn for layer ',iLay
+      write(kStdErr,*) 'if atm only consists of ',iNumLayer,' layers'
+      CALL DoSTOP
     END IF
      
     IF (iLay == iNumLayer) THEN
-    ! use layer to space transmission iM+1 --> infinity == 1.0
-        iM = iaaRadLayer(iAtm,iLay)
-        rCos = cos(raLayAngles(MP2Lay(iM))*kPi/180.0)
-        iModKprofLayer = mod(iM,kProfLayer)
-        IF (iModKprofLayer < iNLTEStart) THEN
-           raResults = 1.0-exp(-raaAbs(:,iM)*rFracTop/rCos)
-        ELSEIF (iModKprofLayer >= iNLTEStart) THEN
-           raResults = (1.0-exp(-raaAbs(:,iM)*rFracTop/rCos))*raaPlanckCoeff(:,iM)
-        END IF
+      ! use layer to space transmission iM+1 --> infinity == 1.0
+      iM = iaaRadLayer(iAtm,iLay)
+      rCos = cos(raLayAngles(MP2Lay(iM))*kPi/180.0)
+      iModKprofLayer = mod(iM,kProfLayer)
+      IF (iModKprofLayer < iNLTEStart) THEN
+        raResults = 1.0-exp(-raaAbs(:,iM)*rFracTop/rCos)
+      ELSEIF (iModKprofLayer >= iNLTEStart) THEN
+        raResults = (1.0-exp(-raaAbs(:,iM)*rFracTop/rCos))*raaPlanckCoeff(:,iM)
+      END IF
     ELSE IF (iLay == 1) THEN
-        iM1 = iaaRadLayer(iAtm,iLay+1)
-        iM = iaaRadLayer(iAtm,iLay)
-        iModKprofLayer = mod(iM,kProfLayer)
-        IF (iModKprofLayer < iNLTEStart) THEN
-          raResults = (1.0-exp(-raaAbs(:,iM)*rFracBot/rCos))* &
-          raaLay2Sp(:,iLay+1)
-        ELSEIF (iModKprofLayer >= iNLTEStart) THEN
-          raResults = (1.0-exp(-raaAbs(:,iM)*rFracTop/rCos))* &
-          raaLay2Sp(:,iLay+1)*raaPlanckCoeff(:,iM)
+      iM1 = iaaRadLayer(iAtm,iLay+1)
+      iM = iaaRadLayer(iAtm,iLay)
+      iModKprofLayer = mod(iM,kProfLayer)
+      IF (iModKprofLayer < iNLTEStart) THEN
+        raResults = (1.0-exp(-raaAbs(:,iM)*rFracBot/rCos))*raaLay2Sp(:,iLay+1)
+      ELSEIF (iModKprofLayer >= iNLTEStart) THEN
+        raResults = (1.0-exp(-raaAbs(:,iM)*rFracTop/rCos))*raaLay2Sp(:,iLay+1)*raaPlanckCoeff(:,iM)
         END IF
     ELSE
-        iM1 = iaaRadLayer(iAtm,iLay+1)
-        iM = iaaRadLayer(iAtm,iLay)
-        iModKprofLayer = mod(iM,kProfLayer)
-        IF (iModKprofLayer < iNLTEStart) THEN
-          raResults = (1.0-exp(-raaAbs(:,iM)/rCos))*raaLay2Sp(:,iLay+1)
-        ELSEIF (iModKprofLayer >= iNLTEStart) THEN
-           raResults = (1.0-exp(-raaAbs(:,iM)*rFracTop/rCos))* &
-                          raaLay2Sp(:,iLay+1)*raaPlanckCoeff(:,iM)
-        END IF
+      iM1 = iaaRadLayer(iAtm,iLay+1)
+      iM = iaaRadLayer(iAtm,iLay)
+      iModKprofLayer = mod(iM,kProfLayer)
+      IF (iModKprofLayer < iNLTEStart) THEN
+        raResults = (1.0-exp(-raaAbs(:,iM)/rCos))*raaLay2Sp(:,iLay+1)
+      ELSEIF (iModKprofLayer >= iNLTEStart) THEN
+        raResults = (1.0-exp(-raaAbs(:,iM)*rFracTop/rCos))* &
+                    raaLay2Sp(:,iLay+1)*raaPlanckCoeff(:,iM)
+      END IF
     END IF
      
     RETURN

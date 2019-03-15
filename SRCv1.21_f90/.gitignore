@@ -1,0 +1,5 @@
+WORKS_*
+*.optrpt
+*genmod.*
+*.mod
+diff_kcarta_results.txt

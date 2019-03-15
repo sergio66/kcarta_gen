@@ -58,61 +58,41 @@ CONTAINS
     mode = 'r'
     status = rtpopen(fname, mode, head, hatt, patt, rchan)
     IF (status == -1) THEN
-        write(kStdErr,*) 'Abs77 status of rtp open file = -1'
-        Call DoStop
+      write(kStdErr,*) 'Abs77 status of rtp open file = -1'
+      Call DoStop
     END IF
     kProfileUnitOpen = +1
-!      write(kStdWarn,*) 'read open status = ', status
-
-!      DO i = 1, iRTP
-!        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
-!        status = rtpread(rchan, prof)
-!      END DO
 
     status = rtpclose(rchan)
-!      write(kStdWarn,*) 'read close status = ', status
     kProfileUnitOpen = -1
 
     rf1 = head%vcmin
     rf2 = head%vcmax
 
     IF (head.ngas > MAXGAS) THEN
-    !! see /home/sergio/git/rtp/rtpV201/include/rtpdefs.f90
-    !! see /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90    
-        write(kStdErr,*) ' SUBR  IdentifyChannelsRTP >>>> number of gases in RTP     file = ',head.ngas
-        write(kStdErr,*) '                           >>>> number of gases in RTPDEFS      = ',MAXGAS
-        Call DoStop
+      !! see /home/sergio/git/rtp/rtpV201/include/rtpdefs.f90
+      !! see /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90    
+      write(kStdErr,*) ' SUBR  IdentifyChannelsRTP >>>> number of gases in RTP     file = ',head.ngas
+      write(kStdErr,*) '                           >>>> number of gases in RTPDEFS      = ',MAXGAS
+      Call DoStop
     END IF
           
     IF ((rf1 < 0) .AND. (rf2 < 0)) THEN
-        write(kStdWarn,*) 'resetting head%vcmin from ',rf1,' to 605.0'
-        rf1 = 605.0
-        write(kStdWarn,*) 'resetting head%vcmax from ',rf2,' to 2830.0'
-        rf2 = 2830.0
+      write(kStdWarn,*) 'resetting head%vcmin from ',rf1,' to 605.0'
+      rf1 = 605.0
+      write(kStdWarn,*) 'resetting head%vcmax from ',rf2,' to 2830.0'
+      rf2 = 2830.0
     ENDIF
 
     IF (rf1 < 0) THEN
-        write(kStdErr,*) 'head%vcmin = ',rf1
-        CALL DoStop
+      write(kStdErr,*) 'head%vcmin = ',rf1
+      CALL DoStop
     END IF
 
     IF (rf2 < 0) THEN
-        write(kStdErr,*) 'head%vcmax = ',rf2
-        CALL DoStop
+      write(kStdErr,*) 'head%vcmax = ',rf2
+      CALL DoStop
     END IF
-
-!!! TEST DEBUG
-!       rf1 = 1255
-!       rf2 = 1205   !!  HIRES kcarta only between 605 and 1205
-!       rf1 = 1780
-!       rf2 = 1805
-!       rf1 = 630
-!       rf2 = 605
-!       rf2 = 1205
-!       print *,'*********************************************************'
-!       print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for testing'
-!       print *,'*********************************************************'
-!      !!! TEST DEBUG
 
     RETURN
     END SUBROUTINE 
@@ -208,13 +188,10 @@ CONTAINS
     cbot2 = -100.0
 
     DO iI = 1,kMaxClouds
-        raCngwat(iI) = 0.0
-        raCpsize(iI) = 1.0
+      raCngwat(iI) = 0.0
+      raCpsize(iI) = 1.0
     END DO
 
-!       DO iI = 1,kMaxAtm
-!         iaSetSolarRefl(iI) = -1
-!       END DO
 
 !!!kRTP = -1 : read old style kLAYERS profile; set atm from namelist
 !!!kRTP =  0 : read RTP style kLAYERS profile; set atm from namelist
@@ -247,30 +224,29 @@ CONTAINS
     END IF
 
     IF ((raPresslevels(kProfLayer+1) > 10.00) .AND. (iNatm >= 1)) THEN
-        write(kStdErr,*) 'WARNING : '
-        write(kStdErr,*) 'Radiative transfer computations might be wrong as'
-        write(kStdErr,*) 'the TOA pressure level (TOA) is not high enough'
-        write(kStdErr,*) '(we would like it to be <= 10 mb)'
-        write(kStdErr,*) 'Please correct the levels you ask KLAYERS to use'
-    !        CALL DoStop
+      write(kStdErr,*) 'WARNING : '
+      write(kStdErr,*) 'Radiative transfer computations might be wrong as'
+      write(kStdErr,*) 'the TOA pressure level (TOA) is not high enough'
+      write(kStdErr,*) '(we would like it to be <= 10 mb)'
+      write(kStdErr,*) 'Please correct the levels you ask KLAYERS to use'
     END IF
 
     DO iI = 1,iNatm
-        IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. &
+      IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. &
         (rakSolarAngle(iI) <= 90.0))) THEN
-            write(kStdWarn,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
-            iI,iaKsolar(iI),rakSolarAngle(iI)
-            write(kStdErr,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
-            iI,iaKsolar(iI),rakSolarAngle(iI)
-            CALL DoStop
-        END IF
+        write(kStdWarn,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+          iI,iaKsolar(iI),rakSolarAngle(iI)
+        write(kStdErr,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+          iI,iaKsolar(iI),rakSolarAngle(iI)
+        CALL DoStop
+      END IF
     END DO
 
-!     now go through and see if any of these atmospheres are for limb sounding
+!   now go through and see if any of these atmospheres are for limb sounding
     CALL check_limbsounder(iNatm,raPressStart,raPressStop,raFracTop,raFracBot,raTSurf, &
-    raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
-    raPressLevels,raLayerHeight, &
-    iaKsolar,rakSolarAngle)
+      raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
+      raPressLevels,raLayerHeight, &
+      iaKsolar,rakSolarAngle)
 
     RETURN
     end SUBROUTINE radnceRTPorNML
@@ -322,9 +298,9 @@ CONTAINS
     iGenln4 = +1        !!!use Dave Edwards's "layers" output
     iGenln4 = -1        !!!use Scott Hannon's "klayers" output
     IF (kRTP == -2) THEN
-        iGenln4 = +1
+      iGenln4 = +1
     ELSE
-        iGenln4 = -1
+      iGenln4 = -1
     END IF
 
     caWord='*PTHFIL'
@@ -339,68 +315,68 @@ CONTAINS
 !!!kRTP = +2  : use JPL/NOAA style LAYERS profile; set atm from namelist
     iNumLinesRead=0
     IF ((kRTP < 0) .AND. (kRTP > -3) .AND. (iGenln4 > 0)) THEN
-        write(kStdWarn,*) 'KCARTA expecting text GENLN4 style input profile'
+      write(kStdWarn,*) 'KCARTA expecting text GENLN4 style input profile'
     ELSEIF ((kRTP < 0) .AND. (kRTP > -3) .AND. (iGenln4 < 0)) THEN
-        write(kStdWarn,*) 'KCARTA expecting text KLAYERS style input profile'
+      write(kStdWarn,*) 'KCARTA expecting text KLAYERS style input profile'
     ELSEIF (kRTP == -5) THEN
-        write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE5 style input profile'
+      write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE5 style input profile'
     ELSEIF (kRTP == -6) THEN
-        write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE6 style input profile'
+      write(kStdWarn,*) 'KCARTA expecting text LBLRTM TAPE6 style input profile'
     ELSEIF (kRTP == -10) THEN
-        write(kStdWarn,*) 'KCARTA expecting text LEVELS style input profile'
+      write(kStdWarn,*) 'KCARTA expecting text LEVELS style input profile'
     ELSEIF ((kRTP == 0) .OR. (kRTP == 1)) THEN
-        write(kStdWarn,*) 'KCARTA expecting RTP hdf style input profile'
+      write(kStdWarn,*) 'KCARTA expecting RTP hdf style input profile'
     ELSEIF (kRTP == 2) THEN
-        write(kStdWarn,*) 'KCARTA expecting JPL/NOAA based profile input from arguments'
-        write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
+      write(kStdWarn,*) 'KCARTA expecting JPL/NOAA based profile input from arguments'
+      write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
     ENDIF
 
     IF ((iAFGLProf < 1) .OR. (iAFGLProf > 6)) THEN
-        write(kStdErr,*) 'in nm_prfile, iAFGLProf must be between 1 .. 6'
-        CALL DoStop
+      write(kStdErr,*) 'in nm_prfile, iAFGLProf must be between 1 .. 6'
+      CALL DoStop
     ELSE
-        kAFGLProf = iAFGLProf
+      kAFGLProf = iAFGLProf
     END IF
 
     IF ((kRTP < 0) .AND. (kRTP >= -2)) THEN
-        IF (iGenln4 < 0) THEN
-            write(kStdWarn,*) 'Scott Hannon "Klayers" Profile to be read is  : '
-            write(kStdWarn,*) caPfname
-            CALL readKLAYERS4(raaAmt,raaTemp,raaPress,raaPartPress, &
+      IF (iGenln4 < 0) THEN
+        write(kStdWarn,*) 'Scott Hannon "Klayers" Profile to be read is  : '
+        write(kStdWarn,*) caPfname
+        CALL readKLAYERS4(raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iNpath,caPfName,raPressLevels,raThickness)
             iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
-        ELSEIF (iGenln4 > 0) THEN
-            write(kStdWarn,*) 'Dave Edwards "Layers" Profile to be read is  : '
-            write(kStdWarn,*) caPfname
-            iKnowTP = +1
-            CALL readGENLN4LAYERS(raaAmt,raaTemp,raaPress,raaPartPress, &
+      ELSEIF (iGenln4 > 0) THEN
+        write(kStdWarn,*) 'Dave Edwards "Layers" Profile to be read is  : '
+        write(kStdWarn,*) caPfname
+        iKnowTP = +1
+        CALL readGENLN4LAYERS(raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iNpath,caPfName,raPressLevels,raThickness,raTPressLevels, &
             iProfileLayers)
-        END IF
+      END IF
     ELSEIF ((kRTP >= 0) .AND. (kRTP <= 1)) THEN
-        write(kStdWarn,*) 'new style RTP profile to be read is  : '
-        write(kStdWarn,5040) caPfname
-        write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
-        CALL readRTP(raaAmt,raaTemp,raaPress,raaPartPress, &
+      write(kStdWarn,*) 'new style RTP profile to be read is  : '
+      write(kStdWarn,5040) caPfname
+      write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
+      CALL readRTP(raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raThickness)
     ELSEIF (kRTP == 2) THEN
-        write(kStdWarn,*) 'NOAA/JPL layers profile '
-        write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
+      write(kStdWarn,*) 'NOAA/JPL layers profile '
+      write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
     ELSEIF (kRTP == -10) THEN
-        write(kStdWarn,*) 'LEVELS style TEXT profile to be read is  : '
-        write(kStdWarn,5040) caPfname
-        CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+      write(kStdWarn,*) 'LEVELS style TEXT profile to be read is  : '
+      write(kStdWarn,5040) caPfname
+      CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
     ELSEIF ((kRTP == -5) .OR. (kRTP == -6)) THEN
-        write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
-        write(kStdWarn,5040) caPfname
-        CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+      write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
+      write(kStdWarn,5040) caPfname
+      CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
@@ -411,21 +387,21 @@ CONTAINS
 ! if less than 3 gases stored it is smart enuff to display <= 3 gas amts
 ! notice here that gA == first gas in the MOLGAS, usually water
     DO iL = 1,12
-        iaDispGasID(iL) = -1
+      iaDispGasID(iL) = -1
     END DO
 
     iCount = 0
     DO iL = 1,kMaxGas
-        IF (iaWhichGasRead(iL) > 0) THEN
-            iCount = iCount + 1
-            iaDispGasID(iCount) = iL
-        END IF
-        IF ((iCount == iNumGases) .OR. (iCount == 12)) THEN
-            GOTO 5000
-        END IF
+      IF (iaWhichGasRead(iL) > 0) THEN
+        iCount = iCount + 1
+        iaDispGasID(iCount) = iL
+      END IF
+      IF ((iCount == iNumGases) .OR. (iCount == 12)) THEN
+        GOTO 5000
+      END IF
     END DO
 
-    5000 CONTINUE
+ 5000 CONTINUE
 
     iLBLDIS = -1     !!! do not dump out stuff for LBLDIS to use
     iLBLDIS = +7     !!! do     dump out stuff for LBLDIS to use (TAPE7)
@@ -443,115 +419,111 @@ CONTAINS
     >>>>>>>>>>>'
 
     IF ((iLBLDIS == 16) .AND. (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,5040) caStr
-        write(kStdWarn,*) 'RRTM PSEUDO IN (ie incorrect format!!) --- start cut below this line ----'
-        write(kStdWarn,5040) caPFName
-        caStr = '$ start of info'
-        write(kStdWarn,5040) caStr
-        caStr = '                                                 0                   1              4  0 '
-        write(kStdWarn,5040) caStr
-        caStr = 'Stemp 1 0 Emis '
-        write(kStdWarn,5040) caStr
-        write(kStdWarn,*) 1,iProfileLayers,7,1.000
-        DO iL = kProfLayer-iProfileLayers+1,kProfLayer
-            write(kStdWarn,*) raaPress(iL,1),raaTemp(iL,1),raPressLevels(iL),raaTemp(iL,1),raPressLevels(iL+1),raaTemp(iL,1)
-            write(kStdWarn,3030) kAvog*raaAmt(iL,1),kAvog*raaAmt(iL,2),kAvog*raaAmt(iL,3), &
-            kAvog*raaAmt(iL,4),kAvog*raaAmt(iL,5),kAvog*raaAmt(iL,6), &
-            kAvog*raaAmt(iL,7),kAvog*raaAmt(iL,22)
-        END DO
+      write(kStdWarn,5040) caStr
+      write(kStdWarn,*) 'RRTM PSEUDO IN (ie incorrect format!!) --- start cut below this line ----'
+      write(kStdWarn,5040) caPFName
+      caStr = '$ start of info'
+      write(kStdWarn,5040) caStr
+      caStr = '                                                 0                   1              4  0 '
+      write(kStdWarn,5040) caStr
+      caStr = 'Stemp 1 0 Emis '
+      write(kStdWarn,5040) caStr
+      write(kStdWarn,*) 1,iProfileLayers,7,1.000
+      DO iL = kProfLayer-iProfileLayers+1,kProfLayer
+        write(kStdWarn,*) raaPress(iL,1),raaTemp(iL,1),raPressLevels(iL),raaTemp(iL,1),raPressLevels(iL+1),raaTemp(iL,1)
+        write(kStdWarn,3030) kAvog*raaAmt(iL,1),kAvog*raaAmt(iL,2),kAvog*raaAmt(iL,3), &
+          kAvog*raaAmt(iL,4),kAvog*raaAmt(iL,5),kAvog*raaAmt(iL,6), &
+          kAvog*raaAmt(iL,7),kAvog*raaAmt(iL,22)
+      END DO
     END IF
-    3030 FORMAT(8('   ',E10.4))
+  3030 FORMAT(8('   ',E10.4))
 
     IF ((iLBLDIS == 7) .AND. (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,5040) caStr
-        write(kStdWarn,*) 'LBLRTM TAPE7 --- start cut below this line ----'
-        write(kStdWarn,5040) caPFName
-        iL = 7
-        write(kStdWarn,*) iL*2,iProfileLayers,iL   !!! "junk",number of layers
-    !!! and number of gases dumping amts for
-        iL = kProfLayer-iProfileLayers+1
-        rP = raaPress(iL,1)
-        IF (iL > 1) THEN
-            rPP = (raaTemp(iL,1)-raaTemp(iL-1,1))/2.0   !! delta(T) across layer
-        ELSE
+      write(kStdWarn,5040) caStr
+      write(kStdWarn,*) 'LBLRTM TAPE7 --- start cut below this line ----'
+      write(kStdWarn,5040) caPFName
+      iL = 7
+      write(kStdWarn,*) iL*2,iProfileLayers,iL   !!! "junk",number of layers
+      !!! and number of gases dumping amts for
+      iL = kProfLayer-iProfileLayers+1
+      rP = raaPress(iL,1)
+      IF (iL > 1) THEN
+        rPP = (raaTemp(iL,1)-raaTemp(iL-1,1))/2.0   !! delta(T) across layer
+      ELSE
         !! we really need surface temp
         ! PP = (raaTemp(iL,1)-rSurfTemp)/2.0   !! delta(T) across layer
-            rPP = 0.0
-        END IF
-        write(kStdWarn,9879) rP*kAtm2mb,raaTemp(iL,1),-1.0, &
+        rPP = 0.0
+      END IF
+      write(kStdWarn,9879) rP*kAtm2mb,raaTemp(iL,1),-1.0, &
         raLayerHeight(iL)/1000,raPressLevels(iL),raaTemp(iL,1)-rPP, &
         (raLayerHeight(iL)+raThickness(iL))/1000, &
         raPressLevels(iL+1),raaTemp(iL,1)+rPP
-    ! N2 = gas22 is stored at index 20
-        write(kStdWarn,9878) raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3), &
+        ! N2 = gas22 is stored at index 20
+      write(kStdWarn,9878) raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3), &
         raaAmt(iL,4),raaAmt(iL,5),raaAmt(iL,6),raaAmt(iL,7),raaAmt(iL,20)
-        DO iL = kProfLayer-iProfileLayers+1+1,kProfLayer
-            rP = raaPress(iL,1)
+      DO iL = kProfLayer-iProfileLayers+1+1,kProfLayer
+        rP = raaPress(iL,1)
         !! this is delta(T) across the layer
-            rPP = (raaTemp(iL,1)-raaTemp(iL-1,1))/2.0
-            write(kStdWarn,9876) rP*kAtm2mb,raaTemp(iL,1),-1.0, &
+        rPP = (raaTemp(iL,1)-raaTemp(iL-1,1))/2.0
+        write(kStdWarn,9876) rP*kAtm2mb,raaTemp(iL,1),-1.0, &
             (raLayerHeight(iL)+raThickness(iL))/1000, &
             raPressLevels(iL+1),raaTemp(iL,1)+rPP
         ! N2 = gas22 is stored at index 20
-            write(kStdWarn,9878) raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3), &
+        write(kStdWarn,9878) raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3), &
             raaAmt(iL,4),raaAmt(iL,5),raaAmt(iL,6),raaAmt(iL,7),raaAmt(iL,20)
-        END DO
-        write(kStdWarn,*) 'LBLRTM TAPE7 --- end cut above this line ----'
-        write(kStdWarn,5040) caStr
+      END DO
+      write(kStdWarn,*) 'LBLRTM TAPE7 --- end cut above this line ----'
+      write(kStdWarn,5040) caStr
     END IF
 !!!! this is for LBLDIS =======================<<<<<<< >>>>=============
            
     IF ((iLBLDIS == 7) .AND. (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,*) '  '
-        caStr160 = ' Lay    P(gA)      PP(gA)       Temp        GasID=       GasID=    GasID='
-        castr160 = castr160 // '       GasID=       GasID=       GasID=       GasID=       GasID='
-        write(kStdWarn,5030) caStr160
-        write(kStdWarn,*) '                                           ', &
-        iaDispGasID(1),'         ',iaDispGasID(2),'         ',iaDispGasID(3), &
-        iaDispGasID(4),'         ',iaDispGasID(5),'         ',iaDispGasID(6), &
-        iaDispGasID(9),'         ',iaDispGasID(12)
-        caStr='---------------------------------------------------------------- &
-        -----------'
-        write(kStdWarn,5040) caStr
+      write(kStdWarn,*) '  '
+      caStr160 = ' Lay    P(gA)      PP(gA)       Temp        GasID=       GasID=    GasID='
+      castr160 = castr160 // '       GasID=       GasID=       GasID=       GasID=       GasID='
+      write(kStdWarn,5030) caStr160
+      write(kStdWarn,*) '                                           ', &
+            iaDispGasID(1),'         ',iaDispGasID(2),'         ',iaDispGasID(3), &
+            iaDispGasID(4),'         ',iaDispGasID(5),'         ',iaDispGasID(6), &
+            iaDispGasID(9),'         ',iaDispGasID(12)
+      caStr='---------------------------------------------------------------- &
+      -----------'
+      write(kStdWarn,5040) caStr
     END IF
 
     IF ((iLBLDIS == 7) .AND. (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt -- start cut below this line --'
-        DO iL = kProfLayer-iProfileLayers+1,kProfLayer
-            rP = raaPress(iL,1)
-            rPP = raaPartPress(iL,1)
-            write(kStdWarn,5050) iL,rP*kAtm2mb,rPP*kAtm2mb,raaTemp(iL,1), &
+      write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt -- start cut below this line --'
+      DO iL = kProfLayer-iProfileLayers+1,kProfLayer
+        rP = raaPress(iL,1)
+        rPP = raaPartPress(iL,1)
+        write(kStdWarn,5050) iL,rP*kAtm2mb,rPP*kAtm2mb,raaTemp(iL,1), &
             raaAmt(iL,1),raaAmt(iL,2),raaAmt(iL,3),raaAmt(iL,4),raaAmt(iL,5), &
             raaAmt(iL,6),raaAmt(iL,9),raaAmt(iL,12)
-        END DO
+      END DO
     END IF
     IF ((iLBLDIS == 7) .AND. (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt --- end cut above this line ---'
+      write(kStdWarn,*) 'LBLRTM TAPE7AUX.txt --- end cut above this line ---'
     END IF
 
     write(kStdWarn,*) '  '
     caStr = ' Pressure LEVELS 1 to SURF-1'
     write(kStdWarn,5040) caStr    
     DO iL = 1,kProfLayer-iProfileLayers
-        rP = raPressLevels(iL)
-        write(kStdWarn,*) iL,rP
+      rP = raPressLevels(iL)
+      write(kStdWarn,*) iL,rP
     END DO
     caStr = ' Pressure LEVELS SURF to TOA'
     write(kStdWarn,5040) caStr        
     DO iL = kProfLayer-iProfileLayers+1,kProfLayer+1
-        rP = raPressLevels(iL)
-        write(kStdWarn,*) iL,rP
+      rP = raPressLevels(iL)
+      write(kStdWarn,*) iL,rP
     END DO
     
-    5030 FORMAT(A160)
-    5040 FORMAT(A80)
-    5050 FORMAT(I3,' ',6(E11.5,' '))
-    5060 FORMAT(I3,' ',11(E11.5,' '))
+  5030 FORMAT(A160)
+  5040 FORMAT(A80)
+  5050 FORMAT(I3,' ',6(E11.5,' '))
+  5060 FORMAT(I3,' ',11(E11.5,' '))
 
-!    do iL=1,kProfLayer
-!      print *,'E finished pthfil4RTPorNML',iL,raaPress(iL,1),raaPress(iL,2),raaPress(iL,3)
-!    end do
-    
     RETURN
     end SUBROUTINE pthfil4RTPorNML
 
@@ -636,11 +608,11 @@ CONTAINS
     CHARACTER(4) :: caStrJunk(7)
 
     IF (kAllowScatter == -1) THEN
-        write(kStdErr,*) 'bkcarta.x (basic) version does not allow scattering'
-        write(kStdErr,*) 'Please either use Makefile to compile/run kcarta.x'
-        write(kStdErr,*) 'which allows scattering, or modify our .nml and/or'
-        write(kStdErr,*) '.rtp files, so that only basic kCARTA is used'
-        CALL DoStop
+      write(kStdErr,*) 'bkcarta.x (basic) version does not allow scattering'
+      write(kStdErr,*) 'Please either use Makefile to compile/run kcarta.x'
+      write(kStdErr,*) 'which allows scattering, or modify our .nml and/or'
+      write(kStdErr,*) '.rtp files, so that only basic kCARTA is used'
+      CALL DoStop
     END IF
 
     iDefault = 5
@@ -653,171 +625,169 @@ CONTAINS
     iWhichScatterCode = 0         !!simple absorb; directly goes to rad_main
     iWhichScatterCode = iaaOverrideDefault(1,5)
     IF ((iWhichScatterCode < 0) .OR. (iWhichScatterCode > 6)) THEN
-        write(kStdErr,*) 'invalid iWhichScatterCode = ',iWhichScatterCode
-        CALL DoStop
+      write(kStdErr,*) 'invalid iWhichScatterCode = ',iWhichScatterCode
+      CALL DoStop
     END IF
     IF (iDefault /= iWhichScatterCode) THEN
-        print *,'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
+      print *,'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
     END IF
 
     IF (iWhichScatterCode == 6) THEN
-        kWhichScatterCode = 6        !use Rayleigh in nir/vis/uv
-        kScatter          = 1        !
+      kWhichScatterCode = 6        !use Rayleigh in nir/vis/uv
+      kScatter          = 1        !
     ELSEIF (iWhichScatterCode == 5) THEN
-        kWhichScatterCode = 5        !use PCLSAM
-        kScatter          = 1        !
+      kWhichScatterCode = 5        !use PCLSAM
+      kScatter          = 1        !
     ELSEIF (iWhichScatterCode == 4) THEN
-        kWhichScatterCode = 4        !use r = r0 + r1 = perturb
-        kScatter          = 1        !
+      kWhichScatterCode = 4        !use r = r0 + r1 = perturb
+      kScatter          = 1        !
     ELSEIF (iWhichScatterCode == 3) THEN
-        kWhichScatterCode = 3        !use Disort
-        kScatter          = 1        !use this setting
-        kDis_Pts          = 400      !do 1 every 400 pts
+      kWhichScatterCode = 3        !use Disort
+      kScatter          = 1        !use this setting
+      kDis_Pts          = 400      !do 1 every 400 pts
     ELSEIF (iWhichScatterCode == 2) THEN
-        kWhichScatterCode = 2        !use RTSPEC
-        kScatter          = 1        !use this setting  SingleScatter
-        kScatter          = 3        !use this setting  Hybrid
-        IF (kScatter /= 3) THEN
-            write (kStdErr,*) 'doing RTSPEC with kScatter = ',kScatter,' not 3'
-        END IF
+      kWhichScatterCode = 2        !use RTSPEC
+      kScatter          = 1        !use this setting  SingleScatter
+      kScatter          = 3        !use this setting  Hybrid
+      IF (kScatter /= 3) THEN
+        write (kStdErr,*) 'doing RTSPEC with kScatter = ',kScatter,' not 3'
+      END IF
     ELSEIF (iWhichScatterCode == 1) THEN
-        kWhichScatterCode = 1        !use TwoStream
-        kScatter          = 1        !use one run of TwoStream
+      kWhichScatterCode = 1        !use TwoStream
+      kScatter          = 1        !use one run of TwoStream
     ELSEIF (iWhichScatterCode == 0) THEN
-        kWhichScatterCode = 0        !direct absorption in 1 layer!!!!!
-        kScatter          = 1        !
+      kWhichScatterCode = 0        !direct absorption in 1 layer!!!!!
+      kScatter          = 1        !
     END IF
 
     IF ((iakSolar(1) >= 0)  .AND. (kWhichScatterCode == 2)) THEN
-        write(kStdErr,*) 'Cannot have sun when using RTSPEC scattering'
-        CALL DoStop
+      write(kStdErr,*) 'Cannot have sun when using RTSPEC scattering'
+      CALL DoStop
     END IF
 
     IF ((iakSolar(1) >= 0)  .AND. (kWhichScatterCode == 4)) THEN
-        write(kStdErr,*) 'Cannot have sun and FIRST ORDER PERTURB scattering'
-        CALL DoStop
+      write(kStdErr,*) 'Cannot have sun and FIRST ORDER PERTURB scattering'
+      CALL DoStop
     END IF
      
     IF (ctype1 /= iaCtype(1)) THEN
-        write(kStdErr,*) 'hmm ctype1,iaCtype(1) = ',ctype1,iaCtype(1)
-        CALL DoStop
+      write(kStdErr,*) 'hmm ctype1,iaCtype(1) = ',ctype1,iaCtype(1)
+      CALL DoStop
     END IF
     IF (ctype2 /= iaCtype(2)) THEN
-        write(kStdErr,*) 'hmm ctype2,iaCtype(2) = ',ctype2,iaCtype(2)
-        CALL DoStop
+      write(kStdErr,*) 'hmm ctype2,iaCtype(2) = ',ctype2,iaCtype(2)
+      CALL DoStop
     END IF
 
     iNclouds_RTPX = iNclouds_RTP
           
     IF ((ctype1 <= 0) .AND. (ctype2 <= 0)) THEN
-        write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 0'
-        iNclouds_RTP = 0
-        DO iI = 1,kMaxClouds
-            raaaCloudParams(iI,1,1) = 0.0
-        END DO
-        ctype1 = -9999
-        ctype2 = -9999
-        iaCtype(1) = -9999
-        iaCtype(2) = -9999
-        RETURN
+      write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 0'
+      iNclouds_RTP = 0
+      raaaCloudParams(1:kMaxClouds,1,1) = 0.0
+      ctype1 = -9999
+      ctype2 = -9999
+      iaCtype(1) = -9999
+      iaCtype(2) = -9999
+      RETURN
     END IF
 
     IF ((ctype1 <= 0) .AND. (ctype2 > 0)) THEN
-        write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 1'
-        write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' swapping info for clouds1,2'
+      write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 1'
+      write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' swapping info for clouds1,2'
          
-        ctype1       = ctype2
-        cfrac1       = cfrac2
-        cngwat1      = cngwat2
-        iaCtype(1)   = ctype1
+      ctype1       = ctype2
+      cfrac1       = cfrac2
+      cngwat1      = cngwat2
+      iaCtype(1)   = ctype1
 
-        raCprTop(1)  = raCprTop(2)
-        raCprBot(1)  = raCprBot(2)
-        raCpSize(1)  = raCpSize(2)
-        raCngwat(1)  = raCngwat(2)
-        iNclouds_RTP = 1
+      raCprTop(1)  = raCprTop(2)
+      raCprBot(1)  = raCprBot(2)
+      raCpSize(1)  = raCpSize(2)
+      raCngwat(1)  = raCngwat(2)
+      iNclouds_RTP = 1
 
-        ctype2       = -9999
-        iaCtype(2)   = -9999
-        raCngwat(2)  = 0.0
-        cngwat2      = 0.0
-        cfrac2       = 0.0
-        cfrac12      = 0.0
+       ctype2       = -9999
+      iaCtype(2)   = -9999
+      raCngwat(2)  = 0.0
+      cngwat2      = 0.0
+      cfrac2       = 0.0
+      cfrac12      = 0.0
     END IF
 
     IF ((ctype1 > 0) .AND. (ctype2 <= 0)) THEN
-        write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 1'
-        iNclouds_RTP = 1
+      write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 1'
+      iNclouds_RTP = 1
     END IF
      
     iFound1 = -1
     DO iI = 1,iNclouds_RTPX
-        IF (iaNML_Ctype(iI) == ctype1) THEN
-            iFound1 = iI
-            GOTO 1234
-        END IF
+      IF (iaNML_Ctype(iI) == ctype1) THEN
+        iFound1 = iI
+        GOTO 1234
+      END IF
     END DO
-    1234 CONTINUE
+ 1234 CONTINUE
     IF ((iFound1 < 0) .AND. (ctype1 > 0)) THEN
-        write(kStdErr,*) 'ctype1 cfrac1 cngwat1 = ',ctype1,cfrac1,cngwat1
-        write(kStdErr,*) 'Could not find a match between ctype1 = ',ctype1,' and iaNML_Ctype'
-        CALL DoStop
+      write(kStdErr,*) 'ctype1 cfrac1 cngwat1 = ',ctype1,cfrac1,cngwat1
+      write(kStdErr,*) 'Could not find a match between ctype1 = ',ctype1,' and iaNML_Ctype'
+      CALL DoStop
     END IF
 
     iFound2 = -1
     DO iI = 1,iNclouds_RTPX
-        IF (iaNML_Ctype(iI) == ctype2) THEN
-            iFound2 = iI
-            GOTO 2345
-        END IF
+      IF (iaNML_Ctype(iI) == ctype2) THEN
+        iFound2 = iI
+        GOTO 2345
+      END IF
     END DO
-    2345 CONTINUE
+ 2345 CONTINUE
     IF ((iFound2 <= 0) .AND. (ctype2 > 0)) THEN
-        write(kStdErr,*) 'ctype2 cfrac2 cngwat2 cfrac12 = ',ctype2,cfrac2,cngwat2, cfrac12
-        write(kStdErr,*) 'Could not find a match between ctype2 = ',ctype2,' and iaNML_Ctype'
-        CALL DoStop
+      write(kStdErr,*) 'ctype2 cfrac2 cngwat2 cfrac12 = ',ctype2,cfrac2,cngwat2, cfrac12
+      write(kStdErr,*) 'Could not find a match between ctype2 = ',ctype2,' and iaNML_Ctype'
+      CALL DoStop
     END IF
 
     IF ((iNclouds_RTP == 3) .AND. (iFound1 > 0) .AND. (iFound2 > 0)) THEN
-        write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found two clouds, resetting'
-        iNclouds_RTP = 2
+      write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found two clouds, resetting'
+      iNclouds_RTP = 2
     ELSEIF ((iNclouds_RTP == 3) .AND. (iFound1 > 0) .AND. (iFound2 <= 0)) THEN
-        write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found one clouds, resetting'
-        iNclouds_RTP = 1
+      write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found one clouds, resetting'
+      iNclouds_RTP = 1
     ELSEIF ((iNclouds_RTP == 3) .AND. (iFound1 <= 0) .AND. (iFound2 >= 0)) THEN
-        write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found one clouds, resetting'
-        iNclouds_RTP = 1
+      write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found one clouds, resetting'
+      iNclouds_RTP = 1
     ELSEIF ((iNclouds_RTP == 3) .AND. (iFound1 <= 0) .AND. (iFound2 <= 0)) THEN
-        write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found zero clouds, resetting'
-        iNclouds_RTP = 0
-        ctype1 = -9999
-        iaCtype(1) = -9999
-        raCngwat(1) = 0.0
-        cngwat1     = 0.0
-        cfrac1       = 0.0
+      write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found zero clouds, resetting'
+      iNclouds_RTP = 0
+      ctype1 = -9999
+      iaCtype(1) = -9999
+      raCngwat(1) = 0.0
+      cngwat1     = 0.0
+      cfrac1       = 0.0
 
-        ctype2       = -9999
-        iaCtype(2)   = -9999
-        raCngwat(2)  = 0.0
-        cngwat2      = 0.0
-        cfrac2       = 0.0
-        cfrac12      = 0.0
+      ctype2       = -9999
+      iaCtype(2)   = -9999
+      raCngwat(2)  = 0.0
+      cngwat2      = 0.0
+      cfrac2       = 0.0
+      cfrac12      = 0.0
     END IF
 
     IF (iWhichScatterCode == 0) THEN
-        write(kStdWarn,*) 'ONE Purely absorptive cloud is set from rtp!!!!!'
-        iScatBinaryFile         = iBinORasc
-        iNClouds                = 1
-        caaScatter(1)           = caaCloudFile(iFound1)
-        raaScatterPressure(1,1) = raCprTop(1)
-        raaScatterPressure(1,2) = raCprBot(1)
-        raScatterDME(1)         = raCpSize(1)
-        raScatterIWP(1)         = raCngWat(1)
-        write(kStdWarn,*) 'Cloud datafile  is : '
-        write(kStdWarn,222) caaScatter(1)
-        write(kStdWarn,*) 'dme,iwp,presstop,bot = ', raScatterDME(1), &
-        raScatterIWP(1),raaScatterPressure(1,1),raaScatterPressure(1,2)
-        GOTO 333
+      write(kStdWarn,*) 'ONE Purely absorptive cloud is set from rtp!!!!!'
+      iScatBinaryFile         = iBinORasc
+      iNClouds                = 1
+      caaScatter(1)           = caaCloudFile(iFound1)
+      raaScatterPressure(1,1) = raCprTop(1)
+      raaScatterPressure(1,2) = raCprBot(1)
+      raScatterDME(1)         = raCpSize(1)
+      raScatterIWP(1)         = raCngWat(1)
+      write(kStdWarn,*) 'Cloud datafile  is : '
+      write(kStdWarn,222) caaScatter(1)
+      write(kStdWarn,*) 'dme,iwp,presstop,bot = ', raScatterDME(1), &
+      raScatterIWP(1),raaScatterPressure(1,1),raaScatterPressure(1,2)
+      GOTO 333
     END IF
 
 ! from /asl/packages/sartaV105/yukyung_readme.txt
@@ -850,150 +820,150 @@ CONTAINS
     iNClouds               = iNclouds_RTP
 
     DO iI = 1,iNclouds_RTP
-        raExp(iI)               = 0.0      !same amount in all layers
-        iaCloudNumLayers(iI)    = 1
-        iaaScatTable(iI,1)      = iI
-        caaCloudName(iI)        = 'RTP cloud'
-        IF (iI == 1) THEN
-            caaaScatTable(iI,1)     = caaCloudFile(iFound1)
-        ELSEIF (iI == 2) THEN
-            caaaScatTable(iI,1)     = caaCloudFile(iFound2)
-        END IF
-        raaaCloudParams(iI,1,1) = raCngwat(iI)
-        raaaCloudParams(iI,1,2) = raCpsize(iI)
-        raaPCloudTop(iI,1)      = raCprtop(iI)
-        raaPCloudBot(iI,1)      = raCprbot(iI)
-        iaCloudNumAtm(iI)       = 1
-        iaaCloudWhichAtm(iI,1)  = 1
-        iaPhase(iI)             = -1       !default to HG phase function
+      raExp(iI)               = 0.0      !same amount in all layers
+      iaCloudNumLayers(iI)    = 1
+      iaaScatTable(iI,1)      = iI
+      caaCloudName(iI)        = 'RTP cloud'
+      IF (iI == 1) THEN
+        caaaScatTable(iI,1)     = caaCloudFile(iFound1)
+      ELSEIF (iI == 2) THEN
+        caaaScatTable(iI,1)     = caaCloudFile(iFound2)
+      END IF
+      raaaCloudParams(iI,1,1) = raCngwat(iI)
+      raaaCloudParams(iI,1,2) = raCpsize(iI)
+      raaPCloudTop(iI,1)      = raCprtop(iI)
+      raaPCloudBot(iI,1)      = raCprbot(iI)
+      iaCloudNumAtm(iI)       = 1
+      iaaCloudWhichAtm(iI,1)  = 1
+      iaPhase(iI)             = -1       !default to HG phase function
 
-        write(kStdWarn,*)    'cloud info for RTP cloud # ',iI
-        write (KStdWarn,223) caaCloudFile(iI)
-        write (kStdWarn,*)   '  cloud top     = ',raCprtop(iI),' mb'
-        write (kStdWarn,*)   '  cloud bot     = ',raCprbot(iI),' mb'
-        write (kStdWarn,*)   '  cloud IWP     = ',raCngwat(iI),' gm m-2'
-        write (kStdWarn,*)   '  particle size = ',raCpsize(iI),' um'
-        IF (iI == 1) THEN
-            write (kStdWarn,*)   '  cloud frac    = ',cfrac1
-        ELSEIF (iI == 2) THEN
-            write (kStdWarn,*)   '  cloud frac    = ',cfrac2
-        END IF
+      write(kStdWarn,*)    'cloud info for RTP cloud # ',iI
+      write (KStdWarn,223) caaCloudFile(iI)
+      write (kStdWarn,*)   '  cloud top     = ',raCprtop(iI),' mb'
+      write (kStdWarn,*)   '  cloud bot     = ',raCprbot(iI),' mb'
+      write (kStdWarn,*)   '  cloud IWP     = ',raCngwat(iI),' gm m-2'
+      write (kStdWarn,*)   '  particle size = ',raCpsize(iI),' um'
+      IF (iI == 1) THEN
+        write (kStdWarn,*)   '  cloud frac    = ',cfrac1
+      ELSEIF (iI == 2) THEN
+        write (kStdWarn,*)   '  cloud frac    = ',cfrac2
+      END IF
     END DO
 
 ! now have to stretch out the cloud if necessary
     CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB, &
-    caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable, &
-    iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp, &
-    raPressLevels,iProfileLayers, &
-    raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
+      caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable, &
+      iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp, &
+      raPressLevels,iProfileLayers, &
+      raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
 
 ! now start checking the info
     DO iIn=1,iNclouds
-        caName = caaCloudName(iIn)
-        iJ     = iaCloudNumLayers(iIn)
-        iaCloudNumLayers(iIn) = iJ
-        write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
+      caName = caaCloudName(iIn)
+      iJ     = iaCloudNumLayers(iIn)
+      iaCloudNumLayers(iIn) = iJ
+      write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
 
     ! set individual cloud layer parameters but STRETCH the cloud out as necessary
     ! from pressure level rPT to pressure level rPB
     ! note it will occupy the entire layer
-        DO iJ1=1,iJ
-        ! op and bottom pressures CloudName/Type  IWP/LWP DME
-            rPT = raaPCloudTop(iIn,iJ1)
-            rPB = raaPCloudBot(iIn,iJ1)
+    DO iJ1=1,iJ
+      ! op and bottom pressures CloudName/Type  IWP/LWP DME
+      rPT = raaPCloudTop(iIn,iJ1)
+      rPB = raaPCloudBot(iIn,iJ1)
 
-            IF (rPT > rPB) THEN
-                rSwap = rPT
-                rPT   = rPB
-                rPB   = rSwap
-                write (kStdWarn,*) 'Swapped cloud top & bottom pressures',iJ1,iJ,rPT,rPB
-            END IF
+      IF (rPT > rPB) THEN
+        rSwap = rPT
+        rPT   = rPB
+        rPB   = rSwap
+        write (kStdWarn,*) 'Swapped cloud top & bottom pressures',iJ1,iJ,rPT,rPB
+      END IF
 
-            iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
-            iBot = FindCloudLayer(rPB,raPressLevels,iProfileLayers)
-            iNum = iTop
-            IF ((iTop - iBot) < 0) THEN
-                write (kStdErr,*) 'the top of your cloud is below the bottom'
-                CALL DoStop
-            END IF
+      iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
+      iBot = FindCloudLayer(rPB,raPressLevels,iProfileLayers)
+      iNum = iTop
+      IF ((iTop - iBot) < 0) THEN
+        write (kStdErr,*) 'the top of your cloud is below the bottom'
+        CALL DoStop
+      END IF
 
-            iaaCloudWhichLayers(iIn,iJ1) = iNum  !layer number wrt 1 ..kProfLayer
-            rP1 = raaaCloudParams(iIn,iJ1,1)     !IWP
-            rP2 = raaaCloudParams(iIn,iJ1,2)     !mean size
+      iaaCloudWhichLayers(iIn,iJ1) = iNum  !layer number wrt 1 ..kProfLayer
+      rP1 = raaaCloudParams(iIn,iJ1,1)     !IWP
+      rP2 = raaaCloudParams(iIn,iJ1,2)     !mean size
 
-            iScat=iaaScatTable(iIn,iJ1)
-            caName=caaaScatTable(iIn,iJ1)
-            write(kStdWarn,*) '   layer #',iJ1,' = kLAYERS pressure layer ',iNum
-            write(kStdWarn,*) '     avg layer press = ',rPT,' mb'
-        !          write(kStdWarn,*) '     layer top/bot press = ',rPT,rPB,' mb'
-            write(kStdWarn,*) '     IWP (or LWP) (gm-2)      = ',rP1
-            write(kStdWarn,*) '     mean particle size (um)  = ',rP2
-            write(kStdWarn,*) '     scatter table number = ',iScat
-            write(kStdWarn,222) caName
+      iScat = iaaScatTable(iIn,iJ1)
+      caName = caaaScatTable(iIn,iJ1)
+      write(kStdWarn,*) '   layer #',iJ1,' = kLAYERS pressure layer ',iNum
+      write(kStdWarn,*) '     avg layer press = ',rPT,' mb'
+      write(kStdWarn,*) '     layer top/bot press = ',rPT,rPB,' mb'
+      write(kStdWarn,*) '     IWP (or LWP) (gm-2)      = ',rP1
+      write(kStdWarn,*) '     mean particle size (um)  = ',rP2
+      write(kStdWarn,*) '     scatter table number = ',iScat
+      write(kStdWarn,222) caName
         END DO
 
-    ! raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
-    !      raaRTPCloudParamsF(1,1) = iaCtype(1)
-        raaRTPCloudParamsF(1,2) = raaJunkCloudTB(1,1)
-        raaRTPCloudParamsF(1,3) = raaJunkCloudTB(1,2)
-    !      raaRTPCloudParamsF(1,4) = prof%cngwat
-    !      raaRTPCloudParamsF(1,5) = prof%cpsize
-    !      raaRTPCloudParamsF(1,6) = prof%cfrac
-    !      raaRTPCloudParamsF(1,7) = prof%cfrac12
-    ! raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
-    !      raaRTPCloudParamsF(2,1) = iaCtype(2)
-        raaRTPCloudParamsF(2,2) = raaJunkCloudTB(2,1)
-        raaRTPCloudParamsF(2,3) = raaJunkCloudTB(2,2)
-    !      raaRTPCloudParamsF(2,4) = prof%cngwat2
-    !      raaRTPCloudParamsF(2,5) = prof%cpsize2
-    !      raaRTPCloudParamsF(2,6) = prof%cfrac2
-    !      raaRTPCloudParamsF(2,7) = prof%cfrac12
+      ! raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+      !      raaRTPCloudParamsF(1,1) = iaCtype(1)
+      raaRTPCloudParamsF(1,2) = raaJunkCloudTB(1,1)
+      raaRTPCloudParamsF(1,3) = raaJunkCloudTB(1,2)
+      !      raaRTPCloudParamsF(1,4) = prof%cngwat
+      !      raaRTPCloudParamsF(1,5) = prof%cpsize
+      !      raaRTPCloudParamsF(1,6) = prof%cfrac
+      !      raaRTPCloudParamsF(1,7) = prof%cfrac12
+      ! raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+      !      raaRTPCloudParamsF(2,1) = iaCtype(2)
+      raaRTPCloudParamsF(2,2) = raaJunkCloudTB(2,1)
+      raaRTPCloudParamsF(2,3) = raaJunkCloudTB(2,2)
+      !      raaRTPCloudParamsF(2,4) = prof%cngwat2
+      !      raaRTPCloudParamsF(2,5) = prof%cpsize2
+      !      raaRTPCloudParamsF(2,6) = prof%cfrac2
+      !      raaRTPCloudParamsF(2,7) = prof%cfrac12
 
-        caStrJunk(1) = 'typ '
-        caStrJunk(2) = 'ctop'
-        caStrJunk(3) = 'cbot'
-        caStrJunk(4) = 'cng '
-        caStrJunk(5) = 'csz '
-        caStrJunk(6) = 'frac'
-        caStrJunk(7) = 'fr12'
-    !      print *,' '
-    !      print *,'  after expandscatter'
-    !      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
-    !      print *,'-------------------------------------------------------'
-    !      DO iJ1=1,7
-    !        print *,iJ1,caStrJunk(iJ1),raaRTPCloudParams0(1,iJ1),raaRTPCloudParamsF(1,iJ1),'XF',
-    !     $raaRTPCloudParams0(2,iJ1),raaRTPCloudParamsF(2,iJ1)
-    !      END DO
-        ctop1 = raaRTPCloudParamsF(1,2)
-        cbot1 = raaRTPCloudParamsF(1,3)
-        ctop2 = raaRTPCloudParamsF(2,2)
-        cbot2 = raaRTPCloudParamsF(2,3)
+      caStrJunk(1) = 'typ '
+      caStrJunk(2) = 'ctop'
+      caStrJunk(3) = 'cbot'
+      caStrJunk(4) = 'cng '
+      caStrJunk(5) = 'csz '
+      caStrJunk(6) = 'frac'
+      caStrJunk(7) = 'fr12'
+      !      print *,' '
+      !      print *,'  after expandscatter'
+      !      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
+      !      print *,'-------------------------------------------------------'
+      !      DO iJ1=1,7
+      !         print *,iJ1,caStrJunk(iJ1),raaRTPCloudParams0(1,iJ1),raaRTPCloudParamsF(1,iJ1),'XF',
+      !     $raaRTPCloudParams0(2,iJ1),raaRTPCloudParamsF(2,iJ1)
+      !      END DO
+      ctop1 = raaRTPCloudParamsF(1,2)
+      cbot1 = raaRTPCloudParamsF(1,3)
+      ctop2 = raaRTPCloudParamsF(2,2)
+      cbot2 = raaRTPCloudParamsF(2,3)
               
-    ! set how many, and which atmospheres to use with this cloud
-        iNum=iaCloudNumAtm(iIn)
-        IF (iNum > iNatm) THEN
-            write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
-            write(kStdErr,*)'*SCATTR wants to use',iNum,' atmospheres!!'
-            write(kStdErr,*)'please check and retry!'
-            CALL DOStop
+      ! set how many, and which atmospheres to use with this cloud
+      iNum=iaCloudNumAtm(iIn)
+      IF (iNum > iNatm) THEN
+        write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
+        write(kStdErr,*)'*SCATTR wants to use',iNum,' atmospheres!!'
+        write(kStdErr,*)'please check and retry!'
+        CALL DOStop
+      END IF
+      ! check which atmospheres to use this cloud
+      DO iJ = 1,iNum
+        iaTemp(iJ)=iaaCloudWhichAtm(iIn,iJ)
+      END DO
+      DO iJ = 1,iNum
+        IF (iaTemp(iJ) > iNatm) THEN
+          write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
+          write(kStdErr,*)'*SCATTR wants to use atmosphere #',iaTemp(iJ)
+          write(kStdErr,*)'please check and retry!'
+          CALL DOStop
         END IF
-    ! heck which atmospheres to use this cloud
-        DO iJ = 1,iNum
-            iaTemp(iJ)=iaaCloudWhichAtm(iIn,iJ)
-        END DO
-        DO iJ = 1,iNum
-            IF (iaTemp(iJ) > iNatm) THEN
-                write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
-                write(kStdErr,*)'*SCATTR wants to use atmosphere #',iaTemp(iJ)
-                write(kStdErr,*)'please check and retry!'
-                CALL DOStop
-            END IF
-        END DO
+      END DO
 
-        write(kStdWarn,*) 'number of atms for cloud is ',iNum
-        write(kStdWarn,*) '  atmospheres to be used with this cloud  : '
-        write(kStdWarn,*)(iaTemp(iJ),iJ=1,iNum)
-        write(kStdWarn,*) '  '
+      write(kStdWarn,*) 'number of atms for cloud is ',iNum
+      write(kStdWarn,*) '  atmospheres to be used with this cloud  : '
+      write(kStdWarn,*)(iaTemp(iJ),iJ=1,iNum)
+      write(kStdWarn,*) '  '
 
     END DO
 ! cccccccccccccccccccc now check the info
@@ -1001,89 +971,87 @@ CONTAINS
     write(kStdWarn,*) 'finished preprocessing *SCATTR .. checking info ...'
 
     write(kStdWarn,*) 'checking cloud boundaries lies in start/stop press...'
-! heck that cloud boundaries lie within those defined for atmosphere
+! check that cloud boundaries lie within those defined for atmosphere
     DO iIn = 1,iNClouds
-    ! hese would be cloud top and bottom pressures
-        r1 = raPressLevels(iaaCloudWhichLayers(iIn,1)+1)
-        r2 = raPressLevels(iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn)))
-    ! heck top pressure
-        DO iJ = 1,iaCloudNumAtm(iIn)
-            iI  = iaaCloudWhichAtm(iIn,iJ)
-            rPT = raaPrBdry(iI,1)         !start pressure
-            rPB = raaPrBdry(iI,2)         !stop pressure
-            IF (rPT > rPB) THEN      !atm is for down look instr
-                rP1 = rPT
-                rPT = rPB
-                rPB = rP1
-            END IF
-        ! heck top pressure
-            IF (r1 < rPT) THEN
-                write(kStdErr,*)'*RADNCE defines top pressure for atmosphere'
-                write(kStdErr,*)'number ',iI,' as ',rPT
-                write(kStdErr,*)'*SCATTR says to use cloud number ',iIn,' in'
-                write(kStdErr,*)'that atmosphere; cloud top at ',r1
-                iErr = 1
-                CALL DOStop
-            END IF
-        ! heck bot pressure
-            IF (r2 > rPB) THEN
-                write(kStdWarn,*)'*RADNCE defines bottom pressure for atmosphere'
-                write(kStdWarn,*)'number ',iI,' as ',rPB
-                write(kStdWarn,*)'*SCATTR says to use cloud number ',iIn,' in'
-                write(kStdWarn,*)'that atmosphere; cloud bottom at',r2
-                write(kStdWarn,*)'Resetting r2 ...'
-                r2 = rPB
-            END IF
-        END DO
+      ! these would be cloud top and bottom pressures
+      r1 = raPressLevels(iaaCloudWhichLayers(iIn,1)+1)
+      r2 = raPressLevels(iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn)))
+      ! check top pressure
+      DO iJ = 1,iaCloudNumAtm(iIn)
+        iI  = iaaCloudWhichAtm(iIn,iJ)
+        rPT = raaPrBdry(iI,1)         !start pressure
+        rPB = raaPrBdry(iI,2)         !stop pressure
+        IF (rPT > rPB) THEN      !atm is for down look instr
+          rP1 = rPT
+          rPT = rPB
+          rPB = rP1
+        END IF
+        ! check top pressure
+        IF (r1 < rPT) THEN
+          write(kStdErr,*)'*RADNCE defines top pressure for atmosphere'
+          write(kStdErr,*)'number ',iI,' as ',rPT
+          write(kStdErr,*)'*SCATTR says to use cloud number ',iIn,' in'
+          write(kStdErr,*)'that atmosphere; cloud top at ',r1
+          iErr = 1
+          CALL DOStop
+        END IF
+        ! check bot pressure
+        IF (r2 > rPB) THEN
+          write(kStdWarn,*)'*RADNCE defines bottom pressure for atmosphere'
+          write(kStdWarn,*)'number ',iI,' as ',rPB
+          write(kStdWarn,*)'*SCATTR says to use cloud number ',iIn,' in'
+          write(kStdWarn,*)'that atmosphere; cloud bottom at',r2
+          write(kStdWarn,*)'Resetting r2 ...'
+          r2 = rPB
+        END IF
+      END DO
     END DO
 
     write(kStdWarn,*) 'checking cloud layers sequential ...'
-! heck that the layers for a cloud are sequential eg 16,15,14
+! check that the layers for a cloud are sequential eg 16,15,14
     DO iIn=1,iNclouds
-    ! f there is only one layer in the cloud, things OK, else
-        IF (iaCloudNumLayers(iIn)  > 1) THEN
-            iJ = 1
-            iJ1 = iaaCloudWhichLayers(iIn,iJ)
-            DO iJ = 2,iaCloudNumLayers(iIn)
-                iScat = iaaCloudWhichLayers(iIn,iJ)
-                IF (iScat >= iJ1) THEN
-                    write(kStdErr,*) 'checking cloud # ',iIn
-                    write(kStdErr,*) 'layer ',iJ,' is not below preceding layer'
-                    write(kStdErr,*) 'please check and retry'
-                    CALL DoStop
-                END IF
-                IF ((iJ1-iScat) > 1) THEN
-                    write(kStdErr,*) 'checking cloud # ',iIn
-                    write(kStdErr,*) 'layers not sequential!!',iJ1,iScat
-                    write(kStdErr,*) 'please check and retry'
-                    CALL DoStop
-                END IF
-                iJ1 = iScat
-            END DO
-        END IF
+      !if there is only one layer in the cloud, things OK, else
+      IF (iaCloudNumLayers(iIn)  > 1) THEN
+        iJ = 1
+        iJ1 = iaaCloudWhichLayers(iIn,iJ)
+        DO iJ = 2,iaCloudNumLayers(iIn)
+          iScat = iaaCloudWhichLayers(iIn,iJ)
+          IF (iScat >= iJ1) THEN
+            write(kStdErr,*) 'checking cloud # ',iIn
+            write(kStdErr,*) 'layer ',iJ,' is not below preceding layer'
+            write(kStdErr,*) 'please check and retry'
+            CALL DoStop
+          END IF
+          IF ((iJ1-iScat) > 1) THEN
+            write(kStdErr,*) 'checking cloud # ',iIn
+            write(kStdErr,*) 'layers not sequential!!',iJ1,iScat
+            write(kStdErr,*) 'please check and retry'
+            CALL DoStop
+          END IF
+          iJ1 = iScat
+        END DO
+      END IF
     END DO
 
 ! check that the scattering tables are unique within a cloud
     write(kStdWarn,*) 'checking scattering tables unique within a cloud ...'
     DO iIn = 1,iNclouds
-        DO iJ = 1,iaCloudNumLayers(iIn)
-            iI = iaaScatTable(iIn,iJ)
-            caName = caaaScatTable(iIn,iJ)
-            DO iJ1 = iJ+1,iaCloudNumLayers(iIn)
-                IF (iI == iaaScatTable(iIn,iJ1)) THEN
-                    write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
-                    write(kStdWarn,*) 'found nonunique scattering table numbers'
-                    write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE &
-                    profile layer temperature'
-                END IF
-                IF (caName == caaaScatTable(iIn,iJ1)) THEN
-                    write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
-                    write(kStdWarn,*) 'found nonunique scattering table file names'
-                    write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE &
-                    profile layer temperature'
-                END IF
-            END DO
+      DO iJ = 1,iaCloudNumLayers(iIn)
+        iI = iaaScatTable(iIn,iJ)
+        caName = caaaScatTable(iIn,iJ)
+        DO iJ1 = iJ+1,iaCloudNumLayers(iIn)
+          IF (iI == iaaScatTable(iIn,iJ1)) THEN
+            write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
+            write(kStdWarn,*) 'found nonunique scattering table numbers'
+            write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE profile layer temperature'
+          END IF
+          IF (caName == caaaScatTable(iIn,iJ1)) THEN
+            write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
+            write(kStdWarn,*) 'found nonunique scattering table file names'
+            write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE profile layer temperature'
+          END IF
         END DO
+      END DO
     END DO
 
 ! if this test is successfully passed, then do the next check!!!
@@ -1091,32 +1059,31 @@ CONTAINS
 ! map this code to rtspec.f
 ! these are to check that the scattering table names are unique
     DO iIn = 1,kMaxClouds*kCloudLayers
-        iaTable(iIn) = -1
-        caaTable(iIn) = '                                                     '
+      iaTable(iIn) = -1
+      caaTable(iIn) = '                                                     '
     END DO
     write(kStdWarn,*) 'checking scattering tables unique thru all clouds ...'
     DO iIn = 1,iNclouds
-        DO iJ = 1,iaCloudNumLayers(iIn)
-            iI = iaaScatTable(iIn,iJ)
-            caName = caaaScatTable(iIn,iJ)
-            IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
-                iaTable(iI) = 1
-                caaTable(iI) = caName
-            ELSE                          !check to see file names are the same
-                IF (caaTable(iI) /= caName) THEN
-                    write(kStdErr,*)'Scattering table #',iI,' <-> ',caaTable(iI)
-                    write(kStdErr,*)'for same scattering table, new cloud in &
-                    *SCATTR is associating file ',caName
-                    write(kStdErr,*)'please check and retry'
-                    CALL DoStop
-                END IF
-            END IF
-        END DO
+      DO iJ = 1,iaCloudNumLayers(iIn)
+        iI = iaaScatTable(iIn,iJ)
+        caName = caaaScatTable(iIn,iJ)
+        IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
+          iaTable(iI) = 1
+          caaTable(iI) = caName
+        ELSE                          !check to see file names are the same
+          IF (caaTable(iI) /= caName) THEN
+            write(kStdErr,*)'Scattering table #',iI,' <-> ',caaTable(iI)
+            write(kStdErr,*)'for same scattering table, new cloud in *SCATTR is associating file ',caName
+            write(kStdErr,*)'please check and retry'
+            CALL DoStop
+          END IF
+        END IF
+      END DO
     END DO
 
-    222 FORMAT(A120)
-    223 FORMAT('   cloud file    = ',A120)
-    333 CONTINUE
+ 222 FORMAT(A120)
+ 223 FORMAT('   cloud file    = ',A120)
+ 333 CONTINUE
 
     RETURN
     end SUBROUTINE SetRTPCloud

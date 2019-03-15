@@ -94,14 +94,12 @@ CONTAINS
     rsumWgt1 = 0.0
     rsumWgt2 = 0.0
 
-    DO iL = 1,kMaxLayer+1
-        xPLEV_KCARTADATABASE_AIRS(iL) = PLEV_KCARTADATABASE_AIRS(iL)/1013.25
-    END DO
+    xPLEV_KCARTADATABASE_AIRS(1:kMaxLayer+1) = PLEV_KCARTADATABASE_AIRS(1:kMaxLayer+1)/1013.25
 
     i1 = 0
     DO iL = -5,5
-        i1 = i1 + 1
-        raToffSet(i1) = iL*10.0
+      i1 = i1 + 1
+      raToffSet(i1) = iL*10.0
     END DO
 
     raPPoffSet(1) = 0.1
@@ -135,198 +133,190 @@ CONTAINS
 !      call dostop
           
     DO iL = iLowest,kProfLayer
-    !!!!!!!!!!!!!!!!!!!!!! pressure !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        rP = pProf(iL)/1013.25
-    !! get pressure bounding interval [p1 p2]
-    !! replaced .... raOrig100P,kMaxLayer) with
-    !!          .... xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
-    !! so
+      !!!!!!!!!!!!!!!!!!!!!! pressure !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      rP = pProf(iL)/1013.25
 
-    !! this was code till Dec 2015
-        iaP1(iL) = iFindMaxMin(+1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
-        iaP2(iL) = iFindMaxMin(-1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
+      !! get pressure bounding interval [p1 p2]
+      !! replaced .... raOrig100P,kMaxLayer) with
+      !!          .... xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
+      !! this was code till Dec 2015
+      iaP1(iL) = iFindMaxMin(+1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
+      iaP2(iL) = iFindMaxMin(-1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
 
-    !! this is newer code, Jan 2016
-        iaP1(iL) = iFindMaxMin(+1,rP,raOrig100P,kMaxLayer)
-        iaP2(iL) = iFindMaxMin(-1,rP,raOrig100P,kMaxLayer)
+      !! this is newer code, Jan 2016
+      iaP1(iL) = iFindMaxMin(+1,rP,raOrig100P,kMaxLayer)
+      iaP2(iL) = iFindMaxMin(-1,rP,raOrig100P,kMaxLayer)
 
-    !! >>>>>>>>>>> now switch from LEVELS to average LAY pressure <<<<<<<<<
-        IF (iaP1(iL) > kMaxLayer) iaP1(iL) = kMaxLayer
-        IF (iaP2(iL) > kMaxLayer) iaP2(iL) = kMaxLayer
-        p1 = raOrig100P(iaP1(iL))  !! lower avg press bound (so upper in hgt)
-    !! if iSplineType ~ 2 weight should be ~ 0
-    !! as should be iL=iaP2(iL) should be 1
-    !! ie they are OFFSET and NOT the same layer
-        p2 = raOrig100P(iaP2(iL))  !! upper avg press bound (so lower in hgt)
-    !! if iSplineType ~ 2 weight should be ~ 1
-    !! as should be one-> one correspondance
-    !! between iL and iaP2(iL)
-        p1LEV = xPLEV_KCARTADATABASE_AIRS(iaP1(iL))
-        p2LEV = xPLEV_KCARTADATABASE_AIRS(iaP2(iL))
+      !! >>>>>>>>>>> now switch from LEVELS to average LAY pressure <<<<<<<<<
+      IF (iaP1(iL) > kMaxLayer) iaP1(iL) = kMaxLayer
+      IF (iaP2(iL) > kMaxLayer) iaP2(iL) = kMaxLayer
+      p1 = raOrig100P(iaP1(iL))  !! lower avg press bound (so upper in hgt)
+
+      !! if iSplineType ~ 2 weight should be ~ 0
+      !! as should be iL=iaP2(iL) should be 1
+      !! ie they are OFFSET and NOT the same layer
+      p2 = raOrig100P(iaP2(iL))  !! upper avg press bound (so lower in hgt)
+
+      !! if iSplineType ~ 2 weight should be ~ 1
+      !! as should be one-> one correspondance
+      !! between iL and iaP2(iL)
+      p1LEV = xPLEV_KCARTADATABASE_AIRS(iaP1(iL))
+      p2LEV = xPLEV_KCARTADATABASE_AIRS(iaP2(iL))
               
-    !! pressure interp weight
-    !! oops this originally was 1e-3. but the <p> and rp are in atm, so can range from 1013/1013 to 0.005/1013
-    !! or from 1 to 1e-6
-        IF (abs(p1-p2) >= 1.0e-6) THEN
-            raP2(iL) = (rP - p1) / (p2 - p1)
-            raP1(iL) = 1.0 - raP2(iL)
-        ELSE
-            raP2(iL) = 1.0
-            raP1(iL) = 0.0
-        END IF
+      !! pressure interp weight
+      !! oops this originally was 1e-3. but the <p> and rp are in atm, so can range from 1013/1013 to 0.005/1013
+      !! or from 1 to 1e-6
+      IF (abs(p1-p2) >= 1.0e-6) THEN
+        raP2(iL) = (rP - p1) / (p2 - p1)
+        raP1(iL) = 1.0 - raP2(iL)
+      ELSE
+        raP2(iL) = 1.0
+        raP1(iL) = 0.0
+      END IF
               
-    !      write(kStdErr,456) ,iL,p1,rp,p2,p1-p2,raP1(iL),raP2(iL)
+      !      write(kStdErr,456) ,iL,p1,rp,p2,p1-p2,raP1(iL),raP2(iL)
 
-    !! want raP2(iL) > raP1(iL)
-        IF (raP1(iL) < raP2(iL)) THEN
-            rSwap = raP1(iL)
-            raP1(iL) = raP2(iL)
-            raP2(iL) = rSwap
-            iSwap = iaP1(iL)
-            iaP1(iL) = iaP2(iL)
-            iaP2(iL) = iSwap
-        END IF
-        IF (abs(iSplinetype) == +2) THEN
-            CALL Check_xWeights_iSplinetype(iL,iaP1,iaP2,raP1,raP2)
-        END IF
+      !! want raP2(iL) > raP1(iL)
+      IF (raP1(iL) < raP2(iL)) THEN
+        rSwap = raP1(iL)
+        raP1(iL) = raP2(iL)
+        raP2(iL) = rSwap
+        iSwap = iaP1(iL)
+        iaP1(iL) = iaP2(iL)
+        iaP2(iL) = iSwap
+      END IF
+      IF (abs(iSplinetype) == +2) THEN
+        CALL Check_xWeights_iSplinetype(iL,iaP1,iaP2,raP1,raP2)
+      END IF
 
-        rSumWgt1 = rSumWgt1 + raP1(iL)
-        rSumWgt2 = rSumWgt2 + raP2(iL)
+      rSumWgt1 = rSumWgt1 + raP1(iL)
+      rSumWgt2 = rSumWgt2 + raP2(iL)
 
-    !!!!!!!!!!!!!!!!!!!!!! temperature !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        rT = raPTemp(iL)
-    !! get temperature tabulation bounding interval [t11, t12] at p1
-        DO i2 = 1,kMaxTemp
-            raTSpan(i2) = raTOffSet(i2) + raOrig100T(iaP1(iL))
-        END DO
-        iaT11(iL) = iFindMaxMin(+1,rT,raTSpan,kMaxTemp)
-        iaT12(iL) = iFindMaxMin(-1,rT,raTSpan,kMaxTemp)
-    !! need iaT11 and iaT12 to be separate, for the jacobian
-        IF (iaT11(iL) == iaT12(iL)) THEN
-            IF (iaT11(iL) == kMaxTemp) THEN
-                iaT11(iL) = iaT11(iL)-1   !!move iaT11(iL) down by one
-            ELSE
-                iaT12(iL) = iaT12(iL)+1   !!move iaT12(iL) up by one
-            END IF
+      !!!!!!!!!!!!!!!!!!!!!! temperature !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      rT = raPTemp(iL)
+      !! get temperature tabulation bounding interval [t11, t12] at p1
+      raTSpan(1:kMaxTemp) = raTOffSet(1:kMaxTemp) + raOrig100T(iaP1(iL))
+      iaT11(iL) = iFindMaxMin(+1,rT,raTSpan,kMaxTemp)
+      iaT12(iL) = iFindMaxMin(-1,rT,raTSpan,kMaxTemp)
+      !! need iaT11 and iaT12 to be separate, for the jacobian
+      IF (iaT11(iL) == iaT12(iL)) THEN
+        IF (iaT11(iL) == kMaxTemp) THEN
+          iaT11(iL) = iaT11(iL)-1   !!move iaT11(iL) down by one
+        ELSE
+          iaT12(iL) = iaT12(iL)+1   !!move iaT12(iL) up by one
         END IF
-        t11 = raTSpan(iaT11(iL))  ! lower temperature bound at p1
-        t12 = raTSpan(iaT12(iL))  ! upper temperature bound at p1
-        IF (abs(t11 - t12) > 1.0e-3) THEN
+      END IF
+      t11 = raTSpan(iaT11(iL))  ! lower temperature bound at p1
+      t12 = raTSpan(iaT12(iL))  ! upper temperature bound at p1
+      IF (abs(t11 - t12) > 1.0e-3) THEN
         ! temperature interpolation weight
-            raT12(iL)  = (rT - t11) / (t12 - t11)
-            raT11(iL)  = 1.0 - raT12(iL)
-            raJT12(iL) = +1/(t12-t11)
-            raJT11(iL) = -1/(t12-t11)
-        ELSE
-            raT12(iL)  = 1.0
-            raT11(iL)  = 0.0
-            raJT12(iL) = +1/(t12-t11)
-            raJT11(iL) = -1/(t12-t11)
-        END IF
+        raT12(iL)  = (rT - t11) / (t12 - t11)
+        raT11(iL)  = 1.0 - raT12(iL)
+        raJT12(iL) = +1/(t12-t11)
+        raJT11(iL) = -1/(t12-t11)
+      ELSE
+        raT12(iL)  = 1.0
+        raT11(iL)  = 0.0
+        raJT12(iL) = +1/(t12-t11)
+        raJT11(iL) = -1/(t12-t11)
+      END IF
 
-    ! get temperature tabulation bounding interval [t21, t22] at p2
-        DO i2 = 1,kMaxTemp
-            raTSpan(i2) = raTOffSet(i2) + raOrig100T(iaP2(iL))
-        END DO
-        iaT21(iL) = iFindMaxMin(+1,rT,raTSpan,kMaxTemp)
-        iaT22(iL) = iFindMaxMin(-1,rT,raTSpan,kMaxTemp)
-    !! need iaT21 and iaT22 to be separate, for the jacobian
-        IF (iaT21(iL) == iaT22(iL)) THEN
-            IF (iaT21(iL) == kMaxTemp) THEN
-                iaT21(iL) = iaT21(iL)-1   !!move iaT21(iL) down by one
-            ELSE
-                iaT22(iL) = iaT22(iL)+1   !!move iaT22(iL) up by one
-            END IF
+      ! get temperature tabulation bounding interval [t21, t22] at p2
+      raTSpan(1:kMaxTemp) = raTOffSet(1:kMaxTemp) + raOrig100T(iaP2(iL))
+      iaT21(iL) = iFindMaxMin(+1,rT,raTSpan,kMaxTemp)
+      iaT22(iL) = iFindMaxMin(-1,rT,raTSpan,kMaxTemp)
+      !! need iaT21 and iaT22 to be separate, for the jacobian
+      IF (iaT21(iL) == iaT22(iL)) THEN
+        IF (iaT21(iL) == kMaxTemp) THEN
+          iaT21(iL) = iaT21(iL)-1   !!move iaT21(iL) down by one
+        ELSE
+          iaT22(iL) = iaT22(iL)+1   !!move iaT22(iL) up by one
         END IF
-        t21 = raTSpan(iaT21(iL))  ! lower temperature bound at p2
-        t22 = raTSpan(iaT22(iL))  ! upper temperature bound at p2
-        IF (abs(t21 - t22) > 1.0e-3) THEN
+      END IF
+      t21 = raTSpan(iaT21(iL))  ! lower temperature bound at p2
+      t22 = raTSpan(iaT22(iL))  ! upper temperature bound at p2
+      IF (abs(t21 - t22) > 1.0e-3) THEN
         ! temperature interpolation weight
-            raT22(iL)  = (rT - t21) / (t22 - t21)
-            raT21(iL)  = 1.0 - raT22(iL)
-            raJT22(iL) = +1/(t22-t21)
-            raJT21(iL) = -1/(t22-t21)
-        ELSE
-            raT22(iL)  = 1.0
-            raT21(iL)  = 0.0
-            raJT22(iL) = +1/(t22-t21)
-            raJT21(iL) = -1/(t22-t21)
-        END IF
+        raT22(iL)  = (rT - t21) / (t22 - t21)
+        raT21(iL)  = 1.0 - raT22(iL)
+        raJT22(iL) = +1/(t22-t21)
+        raJT21(iL) = -1/(t22-t21)
+      ELSE
+        raT22(iL)  = 1.0
+        raT21(iL)  = 0.0
+        raJT22(iL) = +1/(t22-t21)
+        raJT21(iL) = -1/(t22-t21)
+      END IF
 
-        wsum = raP1(iL)*raT11(iL) + raP1(iL)*raT12(iL) + &
-        raP2(iL)*raT21(iL) + raP2(iL)*raT22(iL)
-        IF (abs(1.0-wsum) >= 1.0e-6) THEN
-            print *,iL,raP1(iL),raP2(iL)
-            write(kStdErr,*) 'error: PT wsum should be 1, not ',wsum
-            CALL DoStop
-        END IF
+      wsum = raP1(iL)*raT11(iL) + raP1(iL)*raT12(iL) + &
+      raP2(iL)*raT21(iL) + raP2(iL)*raT22(iL)
+      IF (abs(1.0-wsum) >= 1.0e-6) THEN
+        print *,iL,raP1(iL),raP2(iL)
+        write(kStdErr,*) 'error: PT wsum should be 1, not ',wsum
+        CALL DoStop
+      END IF
 
-    !!!!!!!!!!!!!!!!!!!!!! water partial pressure !!!!!!!!!!!!!!!!!!!!!!!!
-        rQ = raPPart(iL)
+      !!!!!!!!!!!!!!!!!!!!!! water partial pressure !!!!!!!!!!!!!!!!!!!!!!!!
+      rQ = raPPart(iL)
 
-    ! get partpressure tabulation bounding interval [t11, t12] at p1
-        DO i2 = 1,kMaxWater
-            raPPSpan(i2) = raPPoffSet(i2) * raOrig100PP(iaP1(iL))
-        END DO
-        iaQ11(iL) = iFindMaxMin(+1,rQ,raPPSpan,kMaxWater)
-        iaQ12(iL) = iFindMaxMin(-1,rQ,raPPSpan,kMaxWater)
-        q11 = raPPSpan(iaQ11(iL))  ! lower partpressure bound at p1
-        q12 = raPPSpan(iaQ12(iL))  ! upper partpressure bound at p1
-    !! this delta(q) was originally 1e-3, but the q of water can get pretty small!!!
-        IF (abs(q11 - q12) > 1.0e-11) THEN
+      ! get partpressure tabulation bounding interval [t11, t12] at p1
+      raPPSpan(1:kMaxWater) = raPPoffSet(1:kMaxWater) * raOrig100PP(iaP1(iL))
+      iaQ11(iL) = iFindMaxMin(+1,rQ,raPPSpan,kMaxWater)
+      iaQ12(iL) = iFindMaxMin(-1,rQ,raPPSpan,kMaxWater)
+      q11 = raPPSpan(iaQ11(iL))  ! lower partpressure bound at p1
+      q12 = raPPSpan(iaQ12(iL))  ! upper partpressure bound at p1
+      !! this delta(q) was originally 1e-3, but the q of water can get pretty small!!!
+      IF (abs(q11 - q12) > 1.0e-11) THEN
         ! partpressure interpolation weight
-            raQ12(iL) = (rQ - q11) / (q12 - q11)
-            raQ11(iL) = 1.0 - raQ12(iL)
-        ELSE
-            raQ12(iL) = 1.0
-            raQ11(iL) = 0.0
-        END IF
+        raQ12(iL) = (rQ - q11) / (q12 - q11)
+        raQ11(iL) = 1.0 - raQ12(iL)
+      ELSE
+        raQ12(iL) = 1.0
+        raQ11(iL) = 0.0
+      END IF
 
-    ! get partpressure tabulation bounding interval [t21, t22] at p2
-        DO i2 = 1,kMaxWater
-            raPPSpan(i2) = raPPoffSet(i2) * raOrig100PP(iaP2(iL))
-        END DO
-        iaQ21(iL) = iFindMaxMin(+1,rQ,raPPSpan,kMaxWater)
-        iaQ22(iL) = iFindMaxMin(-1,rQ,raPPSpan,kMaxWater)
-        q21 = raPPSpan(iaQ21(iL))  ! lower partpressure bound at p2
-        q22 = raPPSpan(iaQ22(iL))  ! upper partpressure bound at p2
-    !! this delta(q) was originally 1e-3, but the q of water can get pretty small!!!
-        IF (abs(q21 - q22) > 1.0e-11) THEN
+      ! get partpressure tabulation bounding interval [t21, t22] at p2
+      raPPSpan(1:kMaxWater) = raPPoffSet(1:kMaxWater) * raOrig100PP(iaP2(iL))
+      iaQ21(iL) = iFindMaxMin(+1,rQ,raPPSpan,kMaxWater)
+      iaQ22(iL) = iFindMaxMin(-1,rQ,raPPSpan,kMaxWater)
+      q21 = raPPSpan(iaQ21(iL))  ! lower partpressure bound at p2
+      q22 = raPPSpan(iaQ22(iL))  ! upper partpressure bound at p2
+      !! this delta(q) was originally 1e-3, but the q of water can get pretty small!!!
+      IF (abs(q21 - q22) > 1.0e-11) THEN
         ! partpressure interpolation weight
-            raQ22(iL) = (rQ - q21) / (q22 - q21)
-            raQ21(iL) = 1.0 - raQ22(iL)
-        ELSE
-            raQ22(iL) = 1.0
-            raQ21(iL) = 0.0
-        END IF
+        raQ22(iL) = (rQ - q21) / (q22 - q21)
+        raQ21(iL) = 1.0 - raQ22(iL)
+      ELSE
+        raQ22(iL) = 1.0
+        raQ21(iL) = 0.0
+      END IF
 
-        qsum = raP1(iL)*raT11(iL)*raQ11(iL) + raP1(iL)*raT12(iL)*raQ11(iL) + &
-        raP2(iL)*raT21(iL)*raQ21(iL) + raP2(iL)*raT22(iL)*raQ21(iL) + &
-        raP1(iL)*raT11(iL)*raQ12(iL) + raP1(iL)*raT12(iL)*raQ12(iL) + &
-        raP2(iL)*raT21(iL)*raQ22(iL) + raP2(iL)*raT22(iL)*raQ22(iL)
-        IF (abs(1-qsum) >= 1.0e-6) THEN
-            write(kStdErr,*) 'error: PTQ wsum should be 1, not ',qsum
-            CALL DoStop
-        END IF
+      qsum = raP1(iL)*raT11(iL)*raQ11(iL) + raP1(iL)*raT12(iL)*raQ11(iL) + &
+      raP2(iL)*raT21(iL)*raQ21(iL) + raP2(iL)*raT22(iL)*raQ21(iL) + &
+      raP1(iL)*raT11(iL)*raQ12(iL) + raP1(iL)*raT12(iL)*raQ12(iL) + &
+      raP2(iL)*raT21(iL)*raQ22(iL) + raP2(iL)*raT22(iL)*raQ22(iL)
+      IF (abs(1-qsum) >= 1.0e-6) THEN
+        write(kStdErr,*) 'error: PTQ wsum should be 1, not ',qsum
+        CALL DoStop
+      END IF
 
-        IF (raP1(iL) >= raP2(iL)) THEN
+      IF (raP1(iL) >= raP2(iL)) THEN
         ! this is the dominant weight for pressure
-            iX1 = iaP1(iL)
-            iX2 = iaT11(iL)
-            iX3 = iaQ11(iL)
-            rX1 = raP1(iL)
-            rX2 = raT11(iL)
-            rX3 = raQ11(iL)
-        ELSE
-            iX1 = iaP2(iL)
-            iX2 = iaT12(iL)
-            iX3 = iaQ12(iL)
-            rX1 = raP2(iL)
-            rX2 = raT12(iL)
-            rX3 = raQ12(iL)
-        END IF
-    !        write(kStdWarn,100) iL,rP,iaP1(iL),raP1(iL),rT,iaT11(iL),raT11(iL),rQ,iaQ11(iL),raQ11(iL)
-        write(kStdWarn,100) iL,rP,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
+        iX1 = iaP1(iL)
+        iX2 = iaT11(iL)
+        iX3 = iaQ11(iL)
+        rX1 = raP1(iL)
+        rX2 = raT11(iL)
+        rX3 = raQ11(iL)
+      ELSE
+        iX1 = iaP2(iL)
+        iX2 = iaT12(iL)
+        iX3 = iaQ12(iL)
+        rX1 = raP2(iL)
+        rX2 = raT12(iL)
+        rX3 = raQ12(iL)
+      END IF
+      write(kStdWarn,100) iL,rP,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
     END DO
 
     iL = (kProfLayer-iLowest+1)
@@ -334,19 +324,19 @@ CONTAINS
     write(kStdWarn,*) 'Mean pressure 1 weight = ',rSumWgt1/iL
     write(kStdWarn,*) 'Mean pressure 2 weight = ',rSumWgt2/iL
     IF ((rSumWgt1/iL <= 1.0e-3) .AND. (rSumWgt2/iL >= 1.0-1.0e-3)) THEN
-        iE = 2
-        write(kStdWarn,*) 'xWeights says do fast interp (iSplinetype = 2)'
+      iE = 2
+      write(kStdWarn,*) 'xWeights says do fast interp (iSplinetype = 2)'
     ELSE
-        iE = 1
-        write(kStdWarn,*) 'xWeights says do slow interp (iSplinetype = 1)'
+      iE = 1
+      write(kStdWarn,*) 'xWeights says do slow interp (iSplinetype = 1)'
     END IF
     write(kStdWarn,*) 'iSplineType was already determined to be ',iSPlineType
     IF (abs(iE) /= abs(iSplinetype)) THEN
-        write(kStdErr,*) 'OOPS : Determining whether SLOW or FAST interp!'
-        write(kStdErr,*) '     : SetSplineType determined ',iSplinetype
-        write(kStdErr,*) '     : xWeights      determined ',iE
-        write(kStdErr,*) ' ..... run proceeding with SetSplineType = ',iE
-        iSplinetype = iE
+      write(kStdErr,*) 'OOPS : Determining whether SLOW or FAST interp!'
+      write(kStdErr,*) '     : SetSplineType determined ',iSplinetype
+      write(kStdErr,*) '     : xWeights      determined ',iE
+      write(kStdErr,*) ' ..... run proceeding with SetSplineType = ',iE
+      iSplinetype = iE
     END IF
     write(kStdWarn,*) ' '
 
@@ -363,10 +353,10 @@ CONTAINS
     write(kStdWarn,121) kWaterIsotopePath(1:80)
     write(kStdWarn,122) kCO2Path(1:80)
     IF (kCO2_UMBCorHARTMAN == +1) THEN
-        write(kStdWarn,*) '  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN,' ==> UMBC CO2 linemixing ;;; ChiFile = '
-        write(kStdWarn,222) kChiFile(1:80)
+      write(kStdWarn,*) '  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN,' ==> UMBC CO2 linemixing ;;; ChiFile = '
+      write(kStdWarn,222) kChiFile(1:80)
     ELSEIF (kCO2_UMBCorHARTMAN == -1) THEN
-        write(kStdWarn,*) '  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN,' ==> LBLRTM CO2 linemixing'
+      write(kStdWarn,*) '  kCO2_UMBCorHARTMAN = ',kCO2_UMBCorHARTMAN,' ==> LBLRTM CO2 linemixing'
     END IF
     
     write(kStdWarn,123) kCompPath(1:80)
@@ -481,40 +471,40 @@ CONTAINS
 !! if iSplinetype == 2, asuming we can do FAST interp
 !! so either iaP1 or iaP2 must equal iL
     IF ((iaP1(iL) /= iL) .AND. (iaP2(iL) /= iL)) THEN
-        write(kStdErr,*) 'iaP1 =  '
-        write(kStdErr,*) (iaP1(iI),iI=1,kProfLayer)
-        write(kStdErr,*) 'iaP2 =  '
-        write(kStdErr,*) (iaP2(iI),iI=1,kProfLayer)
-        write(kStdErr,*) 'raP1 =  '
-        write(kStdErr,*) (raP1(iI),iI=1,kProfLayer)
-        write(kStdErr,*) 'raP2 =  '
-        write(kStdErr,*) (raP2(iI),iI=1,kProfLayer)
-        write(kStdErr,*) 'need iL = ',iL,' to equal iaP1(iL) or iaP2(iL)',iaP1(iL),iaP2(iL)
-        Call DoStop
+      write(kStdErr,*) 'iaP1 =  '
+      write(kStdErr,*) (iaP1(iI),iI=1,kProfLayer)
+      write(kStdErr,*) 'iaP2 =  '
+      write(kStdErr,*) (iaP2(iI),iI=1,kProfLayer)
+      write(kStdErr,*) 'raP1 =  '
+      write(kStdErr,*) (raP1(iI),iI=1,kProfLayer)
+      write(kStdErr,*) 'raP2 =  '
+      write(kStdErr,*) (raP2(iI),iI=1,kProfLayer)
+      write(kStdErr,*) 'need iL = ',iL,' to equal iaP1(iL) or iaP2(iL)',iaP1(iL),iaP2(iL)
+      Call DoStop
     END IF
 
     IF (raP1(iL) > raP2(iL)) THEN
-        rP = raP2(iL)
-        rQ = raP1(iL)
+      rP = raP2(iL)
+      rQ = raP1(iL)
     ELSE
-        rQ = raP2(iL)
-        rP = raP1(iL)
+      rQ = raP2(iL)
+      rP = raP1(iL)
     END IF
 
 !! if kRTP == 6, the pavg is coming straight from LBLRTM layers code,
 !! which may not agree with KLAYERS code
     IF (abs(rP-0.0) >= 1.0e-3) THEN
-        write(kStdErr,*) 'WARNING need the smaller weight ~ 0, not ',rP
-        IF (kRTP /= -6) THEN
-            CALL DoStop
-        END IF
+      write(kStdErr,*) 'WARNING need the smaller weight ~ 0, not ',rP
+      IF (kRTP /= -6) THEN
+        CALL DoStop
+      END IF
     END IF
 
     IF (abs(rQ-1.0) >= 1.0e-3) THEN
-        write(kStdErr,*) 'WARNING need the larger weight ~ 1, not ',rQ
-        IF (kRTP /= -6) THEN
-            CALL DoStop
-        END IF
+      write(kStdErr,*) 'WARNING need the larger weight ~ 1, not ',rQ
+      IF (kRTP /= -6) THEN
+          CALL DoStop
+       END IF
     END IF
 
 !! if all this is satisfied, go ahead
@@ -546,67 +536,62 @@ CONTAINS
     INTEGER :: iOut,iAscOrDsc,iJ
 
     IF ((raArray(1) <= raArray(2)) .AND. (raArray(2) <= raArray(3)) &
-     .AND. (raArray(iLen-2) <= raArray(iLen-1)) &
-     .AND. (raArray(iLen-1) <= raArray(iLen))) THEN
-    !!! array values incrs with index eg temperatures increase with offset
-    !!  raArray(iX,iWhich = -1) < rV < raArray(iY,iWhich = +1); iX < iY
-        iAscorDsc = +1
+       .AND. (raArray(iLen-2) <= raArray(iLen-1)) &
+       .AND. (raArray(iLen-1) <= raArray(iLen))) THEN
+      !!! array values incrs with index eg temperatures increase with offset
+      !!  raArray(iX,iWhich = -1) < rV < raArray(iY,iWhich = +1); iX < iY
+      iAscorDsc = +1
     ELSEIF ((raArray(1) >= raArray(2)) .AND. (raArray(2) >= raArray(3)) &
          .AND. (raArray(iLen-2) >= raArray(iLen-1)) &
          .AND. (raArray(iLen-1) >= raArray(iLen))) THEN
-    !!! array values decrs with index eg pressure decreasing with height
-    !!  raArray(iX,iWhich = -1) < rV < raArray(iY,iWhich = +1); iX > iY
-        iAscorDsc = -1
+      !!! array values decrs with index eg pressure decreasing with height
+      !!  raArray(iX,iWhich = -1) < rV < raArray(iY,iWhich = +1); iX > iY
+      iAscorDsc = -1
     ELSE
-        write(kStdErr,*) 'iFindMaxMin : array values must increase OR decrease'
-        CALL DoStop
+      write(kStdErr,*) 'iFindMaxMin : array values must increase OR decrease'
+      CALL DoStop
     END IF
 
     iOut = -1
     IF (iAscOrDsc == -1) THEN
-        IF (iWhich == +1) THEN
-            iOut = 1
-            10 CONTINUE
-            IF ((raArray(iOut) > rV) .AND. (iOut < iLen)) THEN
-                iOut = iOut + 1
-                GOTO 10
-            END IF
-        ELSEIF (iWhich == -1) THEN
-            iOut = iLen
-            20 CONTINUE
-            IF ((raArray(iOut) < rV) .AND. (iOut > 1)) THEN
-                iOut = iOut - 1
-                GOTO 20
-            END IF
+      IF (iWhich == +1) THEN
+        iOut = 1
+  10    CONTINUE
+        IF ((raArray(iOut) > rV) .AND. (iOut < iLen)) THEN
+          iOut = iOut + 1
+          GOTO 10
         END IF
+      ELSEIF (iWhich == -1) THEN
+        iOut = iLen
+  20    CONTINUE
+        IF ((raArray(iOut) < rV) .AND. (iOut > 1)) THEN
+          iOut = iOut - 1
+          GOTO 20
+        END IF
+      END IF
     ELSEIF (iAscOrDsc == +1) THEN
-        IF (iWhich == -1) THEN
-            iOut = 1
-            30 CONTINUE
-            IF ((raArray(iOut) < rV) .AND. (iOut < iLen)) THEN
-                iOut = iOut + 1
-                GOTO 30
-            END IF
-        ELSEIF (iWhich == +1) THEN
-            iOut = iLen
-            40 CONTINUE
-            IF ((raArray(iOut) > rV) .AND. (iOut > 1)) THEN
-                iOut = iOut - 1
-                GOTO 40
-            END IF
+      IF (iWhich == -1) THEN
+        iOut = 1
+  30    CONTINUE
+        IF ((raArray(iOut) < rV) .AND. (iOut < iLen)) THEN
+          iOut = iOut + 1
+          GOTO 30
         END IF
+      ELSEIF (iWhich == +1) THEN
+        iOut = iLen
+  40    CONTINUE
+        IF ((raArray(iOut) > rV) .AND. (iOut > 1)) THEN
+          iOut = iOut - 1
+          GOTO 40
+        END IF
+      END IF
     END IF
 
     IF (iOut == -1) THEN
-        write(kStdErr,*) 'iFindMaxMin not set?? iWhich requires +/-1 ',iWhich
-        Call DoStop
+      write(kStdErr,*) 'iFindMaxMin not set?? iWhich requires +/-1 ',iWhich
+      Call DoStop
     END IF
 
-!      DO iJ = 1,iLen
-!        if (rV .LT. raArray(iJ)) print *,iJ,iWhich,rV,raArray(iJ),'---',iOut
-!        if (rV .GE. raArray(iJ)) print *,iJ,iWhich,rV,raArray(iJ),'+++',iOut
-!      END DO
-          
     iFindMaxMin = iOut
      
     RETURN
@@ -682,18 +667,19 @@ CONTAINS
     INTEGER :: iDefault,iMultiplyHeavyWater
 
     IF ((iGasID /= 1) .AND. (iGasID /= kNewGasHi+1)) THEN
-        write(kStdErr,*) 'Expecting to read in water profile/database'
-        iErr=1
-        CALL DoSTOP
+      write(kStdErr,*) 'Expecting to read in water profile/database'
+      iErr=1
+      CALL DoSTOP
     END IF
 
     iIOUN = kCompUnit
     CALL CompFileName(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     CALL rdcompwater(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts, &
-    iNLay,iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
-    daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUX)
+      iNLay,iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
+      daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUX)
 
 ! check that the file has the data for the correct gas
+  1000 FORMAT('Error! file : ',/,A120,/,'contains data for GasID ',I3,' not desired GasID ',I3)
     IF (iFileGasID /= iGasID) THEN
       IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
@@ -701,19 +687,16 @@ CONTAINS
       ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
     END IF
 
 ! check that the data file has the right number of layers ===== AIRS layers
+ 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
-        CALL DoSTOP
+      iErr=1
+      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
+      CALL DoSTOP
     END IF
 
 ! kGenln2Water   = self broadening correction for water, using interpolation
@@ -726,12 +709,12 @@ CONTAINS
 ! interpolate compressed data in temperature, and then in partial pressure,
 ! to get abs coeff matrix
     IF (kGenln2Water > 0) THEN
-    ! worry about the self broadening corrections
-    ! this is pretty good
-        IF (kJacobian > 0) THEN
-            IF (abs(iSplineType) == 2) THEN
-            !! very fast
-                CALL x2GetAbsCoeffWaterJAC(daaAbsCoeff,daToffset, &
+      ! worry about the self broadening corrections
+      ! this is pretty good
+      IF (kJacobian > 0) THEN
+        IF (abs(iSplineType) == 2) THEN
+          !! very fast
+          CALL x2GetAbsCoeffWaterJAC(daaAbsCoeff,daToffset, &
                 daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx, &
                 raPTemp,raRTemp,raPPart,raRPart,iaTsort, &
                 iNk,iKm,iKn,iUm,iUn,daaDQ,daaDT,iDoDQ,iGasID,pProf, &
@@ -742,25 +725,25 @@ CONTAINS
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
 
-            ELSE
-            !! fast
-                CALL xGetAbsCoeffWaterJAC(daaAbsCoeff,daToffset, &
-                daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx, &
-                raPTemp,raRTemp,raPPart,raRPart,iaTsort, &
-                iNk,iKm,iKn,iUm,iUn,daaDQ,daaDT,iDoDQ,iGasID,pProf, &
-                iProfileLayers,iSPlineType, &
-                iaP1,iaP2,raP1,raP2, &
-                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
-                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
-                iaQ11,iaQ12,raQ11,raQ12, &
-                iaQ21,iaQ22,raQ21,raQ22)
-
-            END IF
         ELSE
-            iLowerOrUpper = -1
-            IF (abs(iSplineType) == 2) THEN
-            !! very fast
-                CALL x2GetAbsCoeffWaterNOJAC(daaAbsCoeff,daToffset, &
+         !! fast
+         CALL xGetAbsCoeffWaterJAC(daaAbsCoeff,daToffset, &
+                daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx, &
+                raPTemp,raRTemp,raPPart,raRPart,iaTsort, &
+                iNk,iKm,iKn,iUm,iUn,daaDQ,daaDT,iDoDQ,iGasID,pProf, &
+                iProfileLayers,iSPlineType, &
+                iaP1,iaP2,raP1,raP2, &
+                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
+                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
+                iaQ11,iaQ12,raQ11,raQ12, &
+                iaQ21,iaQ22,raQ21,raQ22)
+
+        END IF
+      ELSE
+        iLowerOrUpper = -1
+        IF (abs(iSplineType) == 2) THEN
+          !! very fast
+          CALL x2GetAbsCoeffWaterNOJAC(daaAbsCoeff,daToffset, &
                 daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx,raPTemp, &
                 raRTemp,raPPart,raRPart,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
                 pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
@@ -770,9 +753,9 @@ CONTAINS
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
 
-            ELSE
+          ELSE
             !! fast
-                CALL xGetAbsCoeffWaterNOJAC(daaAbsCoeff,daToffset, &
+            CALL xGetAbsCoeffWaterNOJAC(daaAbsCoeff,daToffset, &
                 daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx,raPTemp, &
                 raRTemp,raPPart,raRPart,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
                 pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
@@ -782,32 +765,32 @@ CONTAINS
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
 
-            END IF
+          END IF
         END IF
 
-    ! because iKtype=2 do any necessary jacobians calcs HERE!
+        ! because iKtype=2 do any necessary jacobians calcs HERE!
         IF (kJacobian > 0) THEN
-            IF (iDoDQ > 0)  THEN
-                IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                    CALL FinalWaterAmtDeriv(iKtype,daaAbsCoeff,daaDQ,raPAmt)
-                END IF
+          IF (iDoDQ > 0)  THEN
+            IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+              CALL FinalWaterAmtDeriv(iKtype,daaAbsCoeff,daaDQ,raPAmt)
             END IF
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
-            (kActualJacs == 32) .OR. &
-            (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-                CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
-            END IF
+          END IF
+          IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+              (kActualJacs == 32) .OR. &
+              (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
+            CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
+          END IF
         END IF
             
     ELSE
-    ! Genln2Water .LT. 0  ==> do same uncompression as for CO2
-    ! e do not worry about the self broadening corrections
-    ! his is not very good at all!
-    ! interpolate compressed data in temperature, to get abs coeff matrix
-        IF (kJacobian >= 0) THEN
-            IF (abs(iSplineType) == 2) THEN
-            !! very fast
-                CALL x2GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+      ! Genln2Water .LT. 0  ==> do same uncompression as for CO2
+      ! we do not worry about the self broadening corrections
+      ! this is not very good at all!
+      ! interpolate compressed data in temperature, to get abs coeff matrix
+      IF (kJacobian >= 0) THEN
+        IF (abs(iSplineType) == 2) THEN
+          !! very fast
+          CALL x2GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
                 raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
                 daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSplineType, &
                 iaP1,iaP2,raP1,raP2, &
@@ -815,61 +798,62 @@ CONTAINS
                 iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
-            ELSE
-            !! fast
-                CALL xGetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
-                raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
-                daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSplineType, &
-                iaP1,iaP2,raP1,raP2, &
-                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
-                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
-                iaQ11,iaQ12,raQ11,raQ12, &
-                iaQ21,iaQ22,raQ21,raQ22)
-
-            END IF
         ELSE
-            iLowerOrUpper = -1
-            IF (abs(iSplineType) == 2) THEN
-            !! very fast
-                CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
-                raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
-                pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
+          !! fast
+          CALL xGetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+                raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
+                daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSplineType, &
                 iaP1,iaP2,raP1,raP2, &
                 iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
                 iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
-            ELSE
-            !! fast
-                CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
-                raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
-                pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
-                iaP1,iaP2,raP1,raP2, &
-                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
-                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
-                iaQ11,iaQ12,raQ11,raQ12, &
-                iaQ21,iaQ22,raQ21,raQ22)
-            END IF
-        END IF
 
-    ! because of iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
-        IF (kJacobian >= 0) THEN
-            IF (iDoDQ > 0) THEN
-                IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                    CALL FinalAmtDeriv(daaDQ,iKtype)
-                END IF
-            END IF
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+        END IF
+      ELSE
+        iLowerOrUpper = -1
+        IF (abs(iSplineType) == 2) THEN
+         !! very fast
+         CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+                raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
+                pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
+                iaP1,iaP2,raP1,raP2, &
+                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
+                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
+                iaQ11,iaQ12,raQ11,raQ12, &
+                iaQ21,iaQ22,raQ21,raQ22)
+       ELSE
+         !! fast
+         CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+                raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
+                pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
+                iaP1,iaP2,raP1,raP2, &
+                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
+                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
+                iaQ11,iaQ12,raQ11,raQ12, &
+                iaQ21,iaQ22,raQ21,raQ22)
+       END IF
+     END IF
+
+     ! because of iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
+     IF (kJacobian >= 0) THEN
+       IF (iDoDQ > 0) THEN
+         IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+           CALL FinalAmtDeriv(daaDQ,iKtype)
+         END IF
+       END IF
+       IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
             (kActualJacs == 32) .OR. &
             (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-                CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
-            END IF
-        END IF
-    END IF
+         CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
+       END IF
+     END IF
+
+   END IF
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaAbsCoeff)
+      CALL RaisePower(daaAbsCoeff)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
@@ -950,10 +934,12 @@ CONTAINS
     iIOUN = kCompUnit
     CALL CompFileName(-1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     CALL rdcomp(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts,iNLay, &
-    iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
-    daaaKX,daaUX)
+      iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
+      daaaKX,daaUX)
 
 ! check that the file has the data for the correct gas
+ 1000 FORMAT('Error! file : ',/,A120,/,'contains data for GasID ',I3,' not desired GasID ',I3)
+
     IF (iFileGasID /= iGasID) THEN
       IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
@@ -961,31 +947,28 @@ CONTAINS
       ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
     END IF
 
 ! check that the data file has the right number of layers
+ 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
+      iErr=1
+      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
         CALL DoSTOP
     END IF
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN
-        write(kStdErr,*) 'Cannot do Jacobians and willy nilly replace '
-        write(kStdErr,*) 'linemix spectroscopy with cousin spectroscopy'
-        CALL DoStop
+      write(kStdErr,*) 'Cannot do Jacobians and willy nilly replace '
+      write(kStdErr,*) 'linemix spectroscopy with cousin spectroscopy'
+      CALL DoStop
     ELSE
-        iLowerOrUpper = -1    !!!!only use 100 AIRS layers; nuthin above
-        IF (abs(iSplineType) == 2) THEN
+      iLowerOrUpper = -1    !!!!only use 100 AIRS layers; nuthin above
+      IF (abs(iSplineType) == 2) THEN
         !! very fast
-            CALL x2GetAbsCoeffNOJAC(daaCousin,daToffset,daaaKx,daaUx, &
+        CALL x2GetAbsCoeffNOJAC(daaCousin,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
             iaP1,iaP2,raP1,raP2, &
@@ -994,9 +977,9 @@ CONTAINS
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
 
-        ELSE
+      ELSE
         !! fast
-            CALL xGetAbsCoeffNOJAC(daaCousin,daToffset,daaaKx,daaUx, &
+        CALL xGetAbsCoeffNOJAC(daaCousin,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
             iaP1,iaP2,raP1,raP2, &
@@ -1010,7 +993,7 @@ CONTAINS
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaCousin)
+      CALL RaisePower(daaCousin)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
@@ -1020,11 +1003,7 @@ CONTAINS
     write (kStdWarn,*) 'Replacing LINEMIX spectra with COUSIN spectra'
     write (kStdWarn,*) 'start layer, strength = ',iNLTEStart, &
     abs(rLTEStrength)
-    DO iL = iNLTEStart,kProfLayer
-        DO iFr = 1,kMaxPts
-            daaAbsCoeff(iFr,iL) = daaCousin(iFr,iL) * abs(rLTEStrength)
-        END DO
-    END DO
+    daaAbsCoeff(:,iNLTEStart:kProfLayer) = daaCousin(:,iNLTEStart:kProfLayer) * abs(rLTEStrength)
 
     RETURN
     end SUBROUTINE xCousinContribution
@@ -1094,16 +1073,17 @@ CONTAINS
 
     iIOUN = kCompUnit
     IF ((iGasID /= kNewGasLo) .AND. (iGasID /= kNewGasHi)) THEN
-        CALL CompFileName(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
+      CALL CompFileName(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     ELSE
-        CALL CompFileNameCKD(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
+      CALL CompFileNameCKD(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     END IF
 
     CALL rdcomp(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts,iNLay, &
-    iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
-    daaaKX,daaUX)
+      iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
+      daaaKX,daaUX)
 
 ! check that the file has the data for the correct gas
+  1000 FORMAT('Error! file : ',/,A120,/, 'contains data for GasID ',I3,' not desired GasID ',I3)
     IF (iFileGasID /= iGasID) THEN
       IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
@@ -1111,26 +1091,23 @@ CONTAINS
       ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
     END IF
 
 ! check that the data file has the right number of layers
+ 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
-        CALL DoSTOP
+      iErr=1
+      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
+      CALL DoSTOP
     END IF
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN
-        IF (abs(iSplineType) == 2) THEN
+      IF (abs(iSplineType) == 2) THEN
         !! very fast
-            CALL x2GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL x2GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
             daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSPlinetype, &
             iaP1,iaP2,raP1,raP2, &
@@ -1138,9 +1115,9 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        ELSE
+      ELSE
         !! fast
-            CALL xGetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL xGetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
             daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSPlinetype, &
             iaP1,iaP2,raP1,raP2, &
@@ -1148,12 +1125,12 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        END IF
+      END IF
     ELSE
-        iLowerOrUpper = -1
-        IF (abs(iSplineType) == 2) THEN
+      iLowerOrUpper = -1
+      IF (abs(iSplineType) == 2) THEN
         !! very fast
-            CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSplineType,iLowerOrUpper, &
             iaP1,iaP2,raP1,raP2, &
@@ -1161,9 +1138,9 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        ELSE
+      ELSE
         !! fast
-            CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSplineType,iLowerOrUpper, &
             iaP1,iaP2,raP1,raP2, &
@@ -1171,26 +1148,26 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        END IF
+      END IF
     END IF
 
 ! because of the iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
     IF (kJacobian >= 0) THEN
-        IF (iDoDQ > 0) THEN
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                CALL FinalAmtDeriv(daaDQ,iKtype)
-            END IF
-        END IF
-        IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+      IF (iDoDQ > 0) THEN
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+           CALL FinalAmtDeriv(daaDQ,iKtype)
+         END IF
+      END IF
+      IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
         (kActualJacs == 32) .OR. &
         (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-            CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
-        END IF
+        CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
+      END IF
     END IF
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaAbsCoeff)
+      CALL RaisePower(daaAbsCoeff)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
@@ -1199,7 +1176,7 @@ CONTAINS
 ! print *,iGasID,int(rFileStartFr),kAltDirs
 
     IF (iGasID == 2) THEN
-        CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
+      CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
     END IF
            
     RETURN
@@ -1270,23 +1247,22 @@ CONTAINS
     INTEGER :: iDefault,iLowerOrUpper,iJ,iJunk
     REAL :: raRXAmt(kProfLayer),raPXAmt(kProfLayer)
             
-    DO iJ = 1,kProfLayer
-        raRXAmt(iJ) = 1.0
-        raPXAmt(iJ) = 1.0
-    END DO
+    raRXAmt = 1.0
+    raPXAmt = 1.0
 
     iIOUN = kCompUnit
     IF ((iGasID /= kNewGasLo) .AND. (iGasID /= kNewGasHi)) THEN
-        write (kStdErr,*) 'xCKDgases is only for gases 101,102'
-        CALL DoStop
+      write (kStdErr,*) 'xCKDgases is only for gases 101,102'
+      CALL DoStop
     ELSE
-        CALL CompFileNameCKD(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
+      CALL CompFileNameCKD(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     END IF
     CALL rdcomp(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts,iNLay, &
-    iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
-    daaaKX,daaUX)
+      iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
+      daaaKX,daaUX)
 
 ! check that the file has the data for the correct gas
+ 1000 FORMAT('Error! file : ',/,A120,/, 'contains data for GasID ',I3,' not desired GasID ',I3)
     IF (iFileGasID /= iGasID) THEN
       IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
@@ -1294,26 +1270,23 @@ CONTAINS
       ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
     END IF
 
 ! check that the data file has the right number of layers
+ 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
-        CALL DoSTOP
+      iErr=1
+      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
+      CALL DoSTOP
     END IF
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN
-        IF (abs(iSplineType) == 2) THEN
+      IF (abs(iSplineType) == 2) THEN
         !! very fast
-            CALL x2GetAbsCoeffJAC_CKD(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL x2GetAbsCoeffJAC_CKD(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
             daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSPlinetype, &
             iaP1,iaP2,raP1,raP2, &
@@ -1321,12 +1294,12 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        ELSE
-            write(kStdErr,*) 'klayers different from DataBase'
-            write(kStdErr,*) 'Prefer using older CKD code'
-            CALL DoStop
+      ELSE
+        write(kStdErr,*) 'klayers different from DataBase'
+        write(kStdErr,*) 'Prefer using older CKD code'
+        CALL DoStop
         !! fast
-            CALL xGetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL xGetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
             daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSPlinetype, &
             iaP1,iaP2,raP1,raP2, &
@@ -1334,12 +1307,12 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        END IF
+      END IF
     ELSE
-        iLowerOrUpper = -1
-        IF (abs(iSplineType) == 2) THEN
+      iLowerOrUpper = -1
+      IF (abs(iSplineType) == 2) THEN
         !! very fast
-            CALL x2GetAbsCoeffNOJAC_CKD(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL x2GetAbsCoeffNOJAC_CKD(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSplineType,iLowerOrUpper, &
             iaP1,iaP2,raP1,raP2, &
@@ -1347,12 +1320,12 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        ELSE
-            write(kStdErr,*) 'klayers different from DataBase'
-            write(kStdErr,*) 'Prefer using older CKD code'
-            CALL DoStop
+      ELSE
+        write(kStdErr,*) 'klayers different from DataBase'
+        write(kStdErr,*) 'Prefer using older CKD code'
+        CALL DoStop
         !! fast
-            CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+        CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSplineType,iLowerOrUpper, &
             iaP1,iaP2,raP1,raP2, &
@@ -1360,30 +1333,30 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        END IF
+      END IF
     END IF
 
 ! because of the iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
     IF (kJacobian >= 0) THEN
-        IF (iDoDQ > 0) THEN
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                CALL FinalAmtDeriv(daaDQ,iKtype)
-            END IF
+      IF (iDoDQ > 0) THEN
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+          CALL FinalAmtDeriv(daaDQ,iKtype)
         END IF
-        IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
-        (kActualJacs == 32) .OR. &
-        (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-            CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPXAmt)
-        END IF
+      END IF
+      IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+          (kActualJacs == 32) .OR. &
+          (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
+        CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPXAmt)
+      END IF
     END IF
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaAbsCoeff)
+      CALL RaisePower(daaAbsCoeff)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
-!      CALL AmtScale(daaAbsCoeff,raPXAmt)
+!     CALL AmtScale(daaAbsCoeff,raPXAmt)
 ! no need as raPXAmt == 1
            
     RETURN

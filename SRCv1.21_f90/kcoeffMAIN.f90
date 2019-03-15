@@ -107,9 +107,9 @@ CONTAINS
     iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs, &
     rFileStartFr,rAltMinFr,rAltMaxFr,iTag)
     IF (iNewIn < 0) THEN
-    ! use kCompressed Database w/o worrying
-        kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
-        CALL GasContribution(iGas,iaGases(iGas),kProfLayer, &
+      ! use kCompressed Database w/o worrying
+      kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+      CALL GasContribution(iGas,iaGases(iGas),kProfLayer, &
         raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
         pProf,iProfileLayers, &
         raTAmt,raTTemp,raTPress,raTPartPress,iaCont,kXsecFile, &
@@ -124,22 +124,21 @@ CONTAINS
     END IF
 
     IF ((iNewIn >= 1) .AND. (iNewIn < 1000)) THEN
-    !!!! new monochromatic spectra from file
-        iWhichChunk = NewDataChunk(iNewIn,iaNewData,iaaNewChunks, &
-        rFileStartFr)
-        IF (iWhichChunk > 0) THEN
-            ! read in new spectra
-	    write(kStdWarn,*) ' Reading in external spectra for iGas =',iGas,' iNewIn = ',iNewIn,' iWhichChunk = ',iWhichChunk
-            CALL ReadNewData(iGas,iaGases(iGas),kProfLayer, &
+      !!!! new monochromatic spectra from file
+      iWhichChunk = NewDataChunk(iNewIn,iaNewData,iaaNewChunks,rFileStartFr)
+      IF (iWhichChunk > 0) THEN
+        ! read in new spectra
+        write(kStdWarn,*) ' Reading in external spectra for iGas =',iGas,' iNewIn = ',iNewIn,' iWhichChunk = ',iWhichChunk
+        CALL ReadNewData(iGas,iaGases(iGas),kProfLayer, &
             iL_low,iL_high,raTAmt,raTTemp,raTPress,raTPartPress, &
             iaCont,iTag,iActualTag,raFreq,daaDQ,daaDT,iDoDQ, &
             daaGasAbCoeff,iNewIn,iWhichChunk,caaaNewChunks, &
             kaFrStep(iTag),rFileStartFr*1.00000)
-        ELSE
+      ELSE
         ! use kCompressed Database w/o worrying
-            kAltComprDirs = -1  !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
-	    write(kStdWarn,*) ' still using usual spectra for iGas =',iGas,' iNewIn = ',iNewIn,' iWhichChunk = ',iWhichChunk	    
-            CALL GasContribution(iGas,iaGases(iGas),kProfLayer, &
+        kAltComprDirs = -1  !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+	write(kStdWarn,*) ' still using usual spectra for iGas =',iGas,' iNewIn = ',iNewIn,' iWhichChunk = ',iWhichChunk	    
+        CALL GasContribution(iGas,iaGases(iGas),kProfLayer, &
             raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
             pProf,iProfileLayers, &
             raTAmt,raTTemp,raTPress,raTPartPress,iaCont,kXsecFile, &
@@ -151,14 +150,14 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        END IF
+      END IF
     END IF
 
     IF ((iNewIn >= 1001) .AND. (iNewIn < 10000)) THEN
-    !!!! use alternate compressed database
-        kAltComprDirs = +1 !!overwrite one of kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
-        write(kStdWarn,*) ' Reading in alternate compressed database for iGas =',iGas,' iNewIn = ',iNewIn
-        CALL GasContributionAlternateDataBase(iGas,iaGases(iGas),kProfLayer, &
+      !!!! use alternate compressed database
+      kAltComprDirs = +1 !!overwrite one of kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
+      write(kStdWarn,*) ' Reading in alternate compressed database for iGas =',iGas,' iNewIn = ',iNewIn
+      CALL GasContributionAlternateDataBase(iGas,iaGases(iGas),kProfLayer, &
         raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
         pProf,iProfileLayers, &
         raTAmt,raTTemp,raTPress,raTPartPress,iaCont,kXsecFile, &
@@ -258,10 +257,9 @@ CONTAINS
 
     kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath
 
-    IF (((1 <= iGasID) .AND. (iGasID <= kGasComp)) .OR. &
-    (iGasID == kNewGasHi+1)) THEN
-        kFrStep = kaFrStep(iTag)
-        CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
+    IF (((1 <= iGasID) .AND. (iGasID <= kGasComp)) .OR. (iGasID == kNewGasHi+1)) THEN
+      kFrStep = kaFrStep(iTag)
+      CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
         raRPartPress,iL,iU,raVTemp,iVTSet,rFileStartFr,iTag,iActualTag, &
         raFreq,iErr,raAmt,raTemp,raPress,raPartPress,iaCont, &
         pProf,iProfileLayers,iDoDQ, &
@@ -274,10 +272,10 @@ CONTAINS
     END IF
 
     IF ((kGasXsecLo <= iGasID) .AND. (iGasID <= kGasXsecHi)) THEN
-        kFrStep = kaFrStep(iTag)
-        IF (KXsecFormat > 0) THEN
-            write (kStdWarn,*) ' xsec gas : using kCompressed Database format'
-            CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
+      kFrStep = kaFrStep(iTag)
+      IF (KXsecFormat > 0) THEN
+        write (kStdWarn,*) ' xsec gas : using kCompressed Database format'
+        CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
             raRPartPress,iL,iU,raVTemp,iVTSet,rFileStartFr,iTag,iActualTag, &
             raFreq,iErr,raAmt,raTemp,raPress,raPartPress,iaCont, &
             pProf,iProfileLayers,iDoDQ, &
@@ -287,19 +285,19 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        ELSE
-            write (kStdWarn,*) ' xsec gas : using old style binary file format'
-            CALL CrossSectionOLD(iCount,iGasID,iRefLayer,iL,iU,kFrStep,daaTemp, &
+      ELSE
+        write (kStdWarn,*) ' xsec gas : using old style binary file format'
+        CALL CrossSectionOLD(iCount,iGasID,iRefLayer,iL,iU,kFrStep,daaTemp, &
             raVTemp,iVTSet,raFreq,iErr,caXsecF, &
             raAmt,raTemp,raPress,raPartPress,iaCont, &
             daaDQ,daaDT,iDoDQ)
-        END IF
+      END IF
     END IF
 
     IF ((kNewGasLo <= iGasID) .AND. (iGasID <= kNewGasHi)) THEN
-        IF (kCKD >= 0) THEN           !add on continuum
-            kFrStep = kaFrStep(iTag)
-            CALL driver_continuum(iCount,iGasID,iRefLayer,iProfileLayers, &
+      IF (kCKD >= 0) THEN           !add on continuum
+        kFrStep = kaFrStep(iTag)
+        CALL driver_continuum(iCount,iGasID,iRefLayer,iProfileLayers, &
             raRAmt,raRTemp,raRPress,raRPartPress, &
             iL,iU,daaTemp,raVTemp,iVTSet, &
             rFileStartFr,iTag,iActualTag, &
@@ -310,22 +308,14 @@ CONTAINS
             iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
-        ELSE
-            write(kStdWarn,*)'even if 101,102 are valid gases, '
-            write(kStdWarn,*)'not adding on continuum as kCKD < 0'
-            DO iLay=1,kProfLayer
-                DO iFr=1,kMaxPts
-                    daaTemp(iFr,iLay)=0.0d0
-                END DO
-            END DO
-            IF (iDoDQ > -2) THEN
-                DO iLay=1,kProfLayer
-                    DO iFr=1,kMaxPts
-                        daaDQ(iFr,iLay)=0.0d0
-                    END DO
-                END DO
-            END IF
+      ELSE
+        write(kStdWarn,*)'even if 101,102 are valid gases, '
+        write(kStdWarn,*)'not adding on continuum as kCKD < 0'
+        daaTemp = 0.0d0
+        IF (iDoDQ > -2) THEN
+          daaDQ = 0.0d0
         END IF
+      END IF
     END IF
 
     RETURN
@@ -408,21 +398,21 @@ CONTAINS
     iErr = -1
 
     DO iFr = 1,80
-        kcaAltComprDirs(iFr:iFr) = ' '
+      kcaAltComprDirs(iFr:iFr) = ' '
     END DO
     kcaAltComprDirs = caaAltComprDirs(iNewIN)
     write(kStdWarn,*) '>>> substituting caCompressedDataPath for gasID ',iGasID
     write(kStdWarn,80) kcaAltComprDirs
 
     IF (iGasID == 2) THEN
-        IF ((strfind(kcaAltComprDirs,'lblrtm') == 1) .OR. (strfind(kcaAltComprDirs,'LBLRTM') == 1)) THEN
-            IF (kCO2_UMBCorHARTMAN > 0) THEN
-                write(kStdWarn,*) ' kCO2_UMBCorHARTMAN is +1 for UMBC CO2 linemix',kCO2_UMBCorHARTMAN
-                write(kStdWarn,*) ' ignore so NO chi fcns, since you are using LBLRTM CO2 database'
-                write(kStdErr,*)  ' ignore kCO2_UMBCorHARTMAN (+1) so NO chi fcns, for LBLRTM CO2 database'
-            ! CO2_UMBCorHARTMAN = -1
-            END IF
+      IF ((strfind(kcaAltComprDirs,'lblrtm') == 1) .OR. (strfind(kcaAltComprDirs,'LBLRTM') == 1)) THEN
+        IF (kCO2_UMBCorHARTMAN > 0) THEN
+          write(kStdWarn,*) ' kCO2_UMBCorHARTMAN is +1 for UMBC CO2 linemix',kCO2_UMBCorHARTMAN
+          write(kStdWarn,*) ' ignore so NO chi fcns, since you are using LBLRTM CO2 database'
+          write(kStdErr,*)  ' ignore kCO2_UMBCorHARTMAN (+1) so NO chi fcns, for LBLRTM CO2 database'
+          ! CO2_UMBCorHARTMAN = -1
         END IF
+      END IF
     END IF
             
     IF ( ((1 <= iGasID) .AND. (iGasID <= kGasComp)) .OR. (iGasID == kNewGasHi+1)) THEN
@@ -440,19 +430,15 @@ CONTAINS
 
       IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
         write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
-        DO iLay = 1,kProfLayer
-          DO iFr = 1,kMaxPts
-            daaTemp(iFr,iLay) = daaTemp(iFr,iLay) * raAltComprDirsScale(iNewIN)
-          END DO
-        END DO
+        daaTemp = daaTemp * raAltComprDirsScale(iNewIN)
       END IF												    
     END IF
 
     IF ((kGasXsecLo <= iGasID) .AND. (iGasID <= kGasXsecHi)) THEN
-        kFrStep = kaFrStep(iTag)
-        IF (KXsecFormat > 0) THEN
-            write (kStdWarn,*) ' xsec gas : using kCompressed Database format'
-            CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
+      kFrStep = kaFrStep(iTag)
+      IF (KXsecFormat > 0) THEN
+        write (kStdWarn,*) ' xsec gas : using kCompressed Database format'
+        CALL compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
             raRPartPress,iL,iU,raVTemp,iVTSet,rFileStartFr,iTag,iActualTag, &
             raFreq,iErr,raAmt,raTemp,raPress,raPartPress,iaCont, &
             pProf,iProfileLayers,iDoDQ, &
@@ -463,31 +449,26 @@ CONTAINS
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
 
-            IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
-              write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
-              DO iLay = 1,kProfLayer
-                DO iFr = 1,kMaxPts
-                  daaTemp(iFr,iLay) = daaTemp(iFr,iLay) * raAltComprDirsScale(iNewIN)
-                END DO
-              END DO
-            END IF												    
-
-        ELSE
-            write(kStdWarn,*) ' xsec gas : using old style binary file format'
-            write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'
-            CALL DoStop
-        END IF
+        IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
+          write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+          daaTemp = daaTemp * raAltComprDirsScale(iNewIN)
+        END IF												    
+      ELSE
+        write(kStdWarn,*) ' xsec gas : using old style binary file format'
+        write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'
+        CALL DoStop
+      END IF
     END IF
 
     IF ((kNewGasLo <= iGasID) .AND. (iGasID <= kNewGasHi)) THEN
-        IF (kCKD >= 0) THEN           !add on continuum
-            kFrStep = kaFrStep(iTag)
-            write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'
-            CALL DoStop
-        END IF
+      IF (kCKD >= 0) THEN           !add on continuum
+        kFrStep = kaFrStep(iTag)
+        write(kStdErr,*)  'not supported here in GasContributionAlternateDatabase'
+        CALL DoStop
+      END IF
     END IF
 
-    80 FORMAT(A80)
+ 80 FORMAT(A80)
 
     RETURN
     end SUBROUTINE GasContributionAlternateDatabase
@@ -557,11 +538,11 @@ CONTAINS
     iErr=0
 
     IF (iGasID == kNewGasLo) THEN
-    ! check if user wants to include continuum .. if so, compute and include
-        iAns=iaCont(1)        !check to see water continuum ON or OFF
-        kFrStep = kaFrStep(iTag)
-        IF ((iAns > 0) .AND. (kCKD >= 0)) THEN
-            CALL AddContinuum(iGasID,iTag,iActualTag,rFileStartFr, &
+      ! check if user wants to include continuum .. if so, compute and include
+      iAns=iaCont(1)        !check to see water continuum ON or OFF
+      kFrStep = kaFrStep(iTag)
+      IF ((iAns > 0) .AND. (kCKD >= 0)) THEN
+        CALL AddContinuum(iGasID,iTag,iActualTag,rFileStartFr, &
             iRefLayer,iProfileLayers,raFreq,raTAmt,raTTemp, &
             kFrStep,raTPress,raTPart,iL,iU,daaTemp, &
             daaDQ,daaDT,iDoDQ,iSPlineType, &
@@ -572,15 +553,15 @@ CONTAINS
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
             write(kStdWarn,*) 'added self water continuum'
-        END IF
+      END IF
     END IF
 
     IF (iGasID == kNewGasHi) THEN
-    ! check if user wants to include continuum .. if so, compute and include
-        iAns=iaCont(1)        !check to see water continuum ON or OFF
-        kFrStep = kaFrStep(iTag)
-        IF ((iAns > 0) .AND. (kCKD >= 0)) THEN
-            CALL AddContinuum(iGasID,iTag,iActualTag,rFileStartFr, &
+      ! check if user wants to include continuum .. if so, compute and include
+      iAns=iaCont(1)        !check to see water continuum ON or OFF
+      kFrStep = kaFrStep(iTag)
+      IF ((iAns > 0) .AND. (kCKD >= 0)) THEN
+        CALL AddContinuum(iGasID,iTag,iActualTag,rFileStartFr, &
             iRefLayer,iProfileLayers,raFreq,raTAmt,raTTemp, &
             kFrStep,raTPress,raTPart,iL,iU,daaTemp, &
             daaDQ,daaDT,iDoDQ,iSPlineType, &
@@ -591,7 +572,7 @@ CONTAINS
             iaQ11,iaQ12,raQ11,raQ12, &
             iaQ21,iaQ22,raQ21,raQ22)
             write(kStdWarn,*) 'added foreign water continuum'
-        END IF
+      END IF
     END IF
 
     RETURN
@@ -660,36 +641,35 @@ CONTAINS
     iErr1=0    !this sees if data successfully uncompressed
 
     IF (iErr1 <= 0) THEN
-    ! set the vertical temperature profile if iGasID < 51 (first profile read)
-        IF ((iGasID <= kGasComp) .AND. (iVTSet < 0)) THEN
-            write(kStdWarn,* )'Setting the vertical tempr profile ...'
-            DO iCnt=1,kProfLayer
-                raVTemp(iCnt)=raTTemp(iCnt)
-            END DO
-            iVTset=1
-        END IF
-    ! if previous profiles have been read in, check to make sure the
-    ! temperature profiles are the same!!!!
-        IF ((iGasID <= kGasComp) .AND. (iVTSet > 0)) THEN
-            IF ((abs(kLongOrShort) > 1) .AND. (kOuterLoop == 1)) THEN
-                write(kStdWarn,*) 'Regular gas : Checking the vertical tempr profile ...'
-            ELSE
-                write(kStdWarn,*) 'Regular gas : Checking the vertical tempr profile ...'
-            ENDIF
-            DO iCnt=1,kProfLayer
-                rCheckTemp=raTTemp(iCnt)-raVTemp(iCnt)
-                IF (abs(rCheckTemp) >= 1.0e-3) THEN
-                    write(kStdErr,*)'Warning!!Tempr profiles do not match!!'
-                    write(kStdErr,*)'Gas#,layer, gastemp, vertical temp = '
-                    write(kStdErr,*)iCount,iCnt,raTTemp(iCnt),raVTemp(iCnt)
+      ! set the vertical temperature profile if iGasID < 51 (first profile read)
+      IF ((iGasID <= kGasComp) .AND. (iVTSet < 0)) THEN
+        write(kStdWarn,* )'Setting the vertical tempr profile ...'
+        raVTemp(1:kProfLayer) = raTTemp(1:kProfLayer)
+        iVTset = 1
+      END IF
 
-                    write(kStdWarn,*)'Warning!!Tempr profiles do not match!!'
-                    write(kStdWarn,*)'Gas#,layer, gastemp, vertical temp = '
-                    write(kStdWarn,*)iCount,iCnt,raTTemp(iCnt),raVTemp(iCnt)
+      ! if previous profiles have been read in, check to make sure the
+      ! temperature profiles are the same!!!!
+      IF ((iGasID <= kGasComp) .AND. (iVTSet > 0)) THEN
+        IF ((abs(kLongOrShort) > 1) .AND. (kOuterLoop == 1)) THEN
+          write(kStdWarn,*) 'Regular gas : Checking the vertical tempr profile ...'
+        ELSE
+          write(kStdWarn,*) 'Regular gas : Checking the vertical tempr profile ...'
+        ENDIF
+        DO iCnt=1,kProfLayer
+          rCheckTemp = raTTemp(iCnt)-raVTemp(iCnt)
+          IF (abs(rCheckTemp) >= 1.0e-3) THEN
+            write(kStdErr,*)'Warning!!Tempr profiles do not match!!'
+            write(kStdErr,*)'Gas#,layer, gastemp, vertical temp = '
+            write(kStdErr,*)iCount,iCnt,raTTemp(iCnt),raVTemp(iCnt)
 
-                END IF
-            END DO
-        END IF
+            write(kStdWarn,*)'Warning!!Tempr profiles do not match!!'
+            write(kStdWarn,*)'Gas#,layer, gastemp, vertical temp = '
+            write(kStdWarn,*)iCount,iCnt,raTTemp(iCnt),raVTemp(iCnt)
+
+          END IF
+        END DO
+      END IF
     END IF
 
     iDefault = +1
@@ -697,27 +677,27 @@ CONTAINS
     iMatlabORf77 = +1   !!! use Matlab based (2011)     uncompression routines
     iMatlabORf77 = iaaOverrideDefault(1,4)
     IF (abs(iMatlabORf77) /= 1) THEN
-        write(kStdErr,*) 'invalid iMatlabORf77 = ',iMatlabORf77
-        CALL DoStop
+      write(kStdErr,*) 'invalid iMatlabORf77 = ',iMatlabORf77
+      CALL DoStop
     END IF
     IF ((iMatlabORf77 /= iDefault) .AND. (kOuterLoop == 1)) THEN
-        write(kStdErr,*) 'using iMatlab/f77 = ',iMatlabORf77,' not ',iDefault
-        write(kStdWarn,*) 'using iMatlab/f77 = ',iMatlabORf77,' not ',iDefault
+      write(kStdErr,*) 'using iMatlab/f77 = ',iMatlabORf77,' not ',iDefault
+      write(kStdWarn,*) 'using iMatlab/f77 = ',iMatlabORf77,' not ',iDefault
     END IF
 
-! then read in the compressed data ... if water do the uncompression
-! differently than if the gas is one of the others
+    ! then read in the compressed data ... if water do the uncompression
+    ! differently than if the gas is one of the others
     iErr1=0
     IF (iErr <= 0) THEN
-        IF ((iGasID == 1) .OR. (iGasID == (kNewGasHi + 1))) THEN
-            IF (iMatlabORf77 == -1) THEN
-                CALL water(iGasID,rFileStartFr,iTag,iActualTag, &
+      IF ((iGasID == 1) .OR. (iGasID == (kNewGasHi + 1))) THEN
+        IF (iMatlabORf77 == -1) THEN
+          CALL water(iGasID,rFileStartFr,iTag,iActualTag, &
                 iRefLayer,iL,iU, &
                 raTAmt,raRAmt,raTPart,raRPartPress,raTTemp,raRTemp, &
                 iErr1,iDoDQ,pProf,iProfileLayers, &
                 daaDQ,daaDT,daaTemp,iSplineType)
-            ELSEIF (iMatlabORf77 == +1) THEN
-                CALL xwater(iGasID,rFileStartFr,iTag,iActualTag, &
+        ELSEIF (iMatlabORf77 == +1) THEN
+          CALL xwater(iGasID,rFileStartFr,iTag,iActualTag, &
                 iRefLayer,iL,iU, &
                 raTAmt,raRAmt,raTPart,raRPartPress,raTTemp,raRTemp, &
                 iErr1,iDoDQ,pProf,iProfileLayers, &
@@ -727,16 +707,16 @@ CONTAINS
                 iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
-            END IF
-        ELSE
-            IF (iMatlabORf77 == -1) THEN
-                CALL othergases(iGasID,rFileStartFr,iTag,iActualTag, &
+        END IF
+      ELSE
+        IF (iMatlabORf77 == -1) THEN
+          CALL othergases(iGasID,rFileStartFr,iTag,iActualTag, &
                 iRefLayer,iL,iU, &
                 raTAmt,raRAmt,raTTemp,raRTemp, &
                 iErr1,iDoDQ,pProf,iProfileLayers, &
                 daaDQ,daaDT,daaTemp,iSplineType)
-            ELSEIF (iMatlabORf77 == +1) THEN
-                CALL xothergases(iGasID,rFileStartFr,iTag,iActualTag, &
+        ELSEIF (iMatlabORf77 == +1) THEN
+          CALL xothergases(iGasID,rFileStartFr,iTag,iActualTag, &
                 iRefLayer,iL,iU, &
                 raTAmt,raRAmt,raTTemp,raRTemp, &
                 iErr1,iDoDQ,pProf,iProfileLayers, &
@@ -746,16 +726,16 @@ CONTAINS
                 iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
-            END IF
         END IF
-        IF (iErr1 <= 0) THEN
-            WRITE(kStdWarn,1005) iGasID
-            Write(kStdWarn,*) '     '
-        ELSE
-            iErr=1
-            WRITE(kStdWarn,1006) iGasID
-            Write(kStdWarn,*) '     '
-        END IF
+      END IF
+      IF (iErr1 <= 0) THEN
+        WRITE(kStdWarn,1005) iGasID
+        Write(kStdWarn,*) '     '
+      ELSE
+        iErr=1
+        WRITE(kStdWarn,1006) iGasID
+        Write(kStdWarn,*) '     '
+      END IF
     END IF
 
     1005 FORMAT('Successfully read in k-comp data for GAS ID ',I3)
@@ -817,14 +797,14 @@ CONTAINS
     write(kStdWarn,*) 'In ReadNewData, opening data file for GasID'
     write(kStdWarn,*) iGasID,FNAM
 
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
     iIOUN = kCompUnit
     OPEN(UNIT=iIOUN,FILE=FNAM,STATUS='OLD',FORM='UNFORMATTED', &
     IOSTAT=IERR)
     IF (IERR /= 0) THEN
-        WRITE(kStdErr,*) 'In subroutine ReadNewData'
-        WRITE(kStdErr,1010) IERR, FNAM
-        1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
-        CALL DoSTOP
+      WRITE(kStdErr,*) 'In subroutine ReadNewData'
+      WRITE(kStdErr,1010) IERR, FNAM
+      CALL DoSTOP
     ENDIF
     kCompUnitOpen=1
 
@@ -833,34 +813,34 @@ CONTAINS
     READ(iIOUN) SFREQ, FSTEP
 
     IF (IDGAS /= iGasID) THEN
-        write(kStdErr,*) 'Wanted gas ',iGasID,'but new data is for gas ',IDGAS
-        CALL DoStop
+      write(kStdErr,*) 'Wanted gas ',iGasID,'but new data is for gas ',IDGAS
+      CALL DoStop
     END IF
 
     IF (NLAY /= kProfLayer) THEN
-        write(kStdErr,*) ' new data has ',NLAY,'layers instead of kProfLayer'
-        CALL DoStop
+      write(kStdErr,*) ' new data has ',NLAY,'layers instead of kProfLayer'
+      CALL DoStop
     END IF
 
     IF (NPTS /= kMaxPts) THEN
-        write(kStdErr,*) ' new data has ',NPTS,' freq pts instead of kMaxPts'
-        CALL DoStop
+      write(kStdErr,*) ' new data has ',NPTS,' freq pts instead of kMaxPts'
+      CALL DoStop
     END IF
 
     IF (abs(df-FSTEP) > 1e-4) THEN
-        write(kStdErr,*) ' new data has ',FSTEP,'freq spacing instead of ',df
-        CALL DoStop
+      write(kStdErr,*) ' new data has ',FSTEP,'freq spacing instead of ',df
+      CALL DoStop
     END IF
 
     IF (abs(sf-SFREQ) > 1e-4) THEN
-        write(kStdErr,*) ' new data starts at ',SFREQ,' instead of ',sf
-        CALL DoStop
+      write(kStdErr,*) ' new data starts at ',SFREQ,' instead of ',sf
+      CALL DoStop
     END IF
           
 ! passed all tests, so read data
 !     Read in the optical depths
     DO I=1,kProfLayer
-        READ(iIOUN) (daaGasAbCoeff(J,I),J=1,kMaxPts)
+      READ(iIOUN) (daaGasAbCoeff(J,I),J=1,kMaxPts)
     ENDDO
 
     CLOSE(iIOUN)
@@ -923,19 +903,20 @@ CONTAINS
     INTEGER :: iDefault,iMultiplyHeavyWater
 
     IF ((iGasID /= 1) .AND. (iGasID /= kNewGasHi+1)) THEN
-        write(kStdErr,*) 'Expecting to read in water profile/database'
-        iErr=1
-        CALL DoSTOP
+      write(kStdErr,*) 'Expecting to read in water profile/database'
+      iErr=1
+      CALL DoSTOP
     END IF
 
     iIOUN = kCompUnit
     CALL CompFileName(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     CALL rdcompwater(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts, &
-    iNLay,iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
-    daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUX)
+      iNLay,iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
+      daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUX)
 
 ! check that the file has the data for the correct gas
  120 FORMAT(A80)
+ 1000 FORMAT('Error! file : ',/,A120,/, 'contains data for GasID ',I3,' not desired GasID ',I3)
     IF (iFileGasID /= iGasID) THEN
       IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
@@ -943,19 +924,16 @@ CONTAINS
       ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
     END IF
 
 ! check that the data file has the right number of layers ===== AIRS layers
+ 1010 FORMAT('Error! file : ',/,A120,/, 'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
-        CALL DoSTOP
+      iErr=1
+      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
+      CALL DoSTOP
     END IF
 
 ! kGenln2Water   = self broadening correction for water, using interpolation
@@ -968,70 +946,70 @@ CONTAINS
 ! interpolate compressed data in temperature, and then in partial pressure,
 ! to get abs coeff matrix
     IF (kGenln2Water > 0) THEN
-    ! e worry about the self broadening corrections
-    ! his is pretty good
-        IF (kJacobian > 0) THEN
-            CALL GetAbsCoeffWaterJAC(daaAbsCoeff,daToffset, &
+      ! we worry about the self broadening corrections
+      ! this is pretty good
+      IF (kJacobian > 0) THEN
+        CALL GetAbsCoeffWaterJAC(daaAbsCoeff,daToffset, &
             daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx, &
             raPTemp,raRTemp,raPPart,raRPart,iaTsort, &
             iNk,iKm,iKn,iUm,iUn,daaDQ,daaDT,iDoDQ,iGasID,pProf, &
             iProfileLayers,iSPlineType)
-        ELSE
-            iLowerOrUpper = -1
-            CALL GetAbsCoeffWaterNOJAC(daaAbsCoeff,daToffset, &
+      ELSE
+        iLowerOrUpper = -1
+        CALL GetAbsCoeffWaterNOJAC(daaAbsCoeff,daToffset, &
             daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx,raPTemp, &
             raRTemp,raPPart,raRPart,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSPlineType,iLowerOrUpper)
-        END IF
+      END IF
 
-    ! because iKtype=2 do any necessary jacobians calcs HERE!
-        IF (kJacobian > 0) THEN
-            IF (iDoDQ > 0)  THEN
-                IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                    CALL FinalWaterAmtDeriv(iKtype,daaAbsCoeff,daaDQ,raPAmt)
-                END IF
-            END IF
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+      ! because iKtype=2 do any necessary jacobians calcs HERE!
+      IF (kJacobian > 0) THEN
+        IF (iDoDQ > 0)  THEN
+          IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+            CALL FinalWaterAmtDeriv(iKtype,daaAbsCoeff,daaDQ,raPAmt)
+          END IF
+        END IF
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
             (kActualJacs == 32) .OR. &
             (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-                CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
-            END IF
+          CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
         END IF
+      END IF
             
     ELSE
-    ! Genln2Water .LT. 0  ==> do same uncompression as for CO2
-    ! e do not worry about the self broadening corrections
-    ! his is not very good at all!
-    ! interpolate compressed data in temperature, to get abs coeff matrix
-        IF (kJacobian >= 0) THEN
-            CALL GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+      ! Genln2Water .LT. 0  ==> do same uncompression as for CO2
+      ! we do not worry about the self broadening corrections
+      ! this is not very good at all!
+      ! interpolate compressed data in temperature, to get abs coeff matrix
+      IF (kJacobian >= 0) THEN
+        CALL GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
             daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSplineType)
-        ELSE
-            iLowerOrUpper = -1
-            CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+      ELSE
+        iLowerOrUpper = -1
+        CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
             raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
             pProf,iProfileLayers,iSPlineType,iLowerOrUpper)
-        END IF
+      END IF
 
-    ! because of iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
-        IF (kJacobian >= 0) THEN
-            IF (iDoDQ > 0) THEN
-                IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                    CALL FinalAmtDeriv(daaDQ,iKtype)
-                END IF
-            END IF
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+      ! because of iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
+      IF (kJacobian >= 0) THEN
+        IF (iDoDQ > 0) THEN
+          IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+            CALL FinalAmtDeriv(daaDQ,iKtype)
+          END IF
+        END IF
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
             (kActualJacs == 32) .OR. &
             (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-                CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
-            END IF
+          CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
         END IF
+      END IF
     END IF
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaAbsCoeff)
+      CALL RaisePower(daaAbsCoeff)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
@@ -1087,8 +1065,8 @@ CONTAINS
     DOUBLE PRECISION :: daaCousin(kMaxPts,kProfLayer)
 
     IF (iGasID /= 2) THEN
-        write(kStdErr,*) 'This subroutine is onlty for CO2!!!'
-        CALL DoStop
+      write(kStdErr,*) 'This subroutine is onlty for CO2!!!'
+      CALL DoStop
     END IF
 
     iIOUN = kCompUnit
@@ -1098,6 +1076,7 @@ CONTAINS
     daaaKX,daaUX)
 
 ! check that the file has the data for the correct gas
+ 1000 FORMAT('Error! file : ',/,A120,/,'contains data for GasID ',I3,' not desired GasID ',I3)
     IF (iFileGasID /= iGasID) THEN
       IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
@@ -1105,36 +1084,33 @@ CONTAINS
       ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
     END IF
 
 ! check that the data file has the right number of layers
+ 1010 FORMAT('Error! file : ',/,A120,/, 'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
-        CALL DoSTOP
+      iErr=1
+      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
+      CALL DoSTOP
     END IF
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN
-        write(kStdErr,*) 'Cannot do Jacobians and willy nilly replace '
-        write(kStdErr,*) 'linemix spectroscopy with cousin spectroscopy'
-        CALL DoStop
+      write(kStdErr,*) 'Cannot do Jacobians and willy nilly replace '
+      write(kStdErr,*) 'linemix spectroscopy with cousin spectroscopy'
+      CALL DoStop
     ELSE
-        iLowerOrUpper = -1    !!!!only use 100 AIRS layers; nuthin above
-        CALL GetAbsCoeffNOJAC(daaCousin,daToffset,daaaKx,daaUx, &
+      iLowerOrUpper = -1    !!!!only use 100 AIRS layers; nuthin above
+      CALL GetAbsCoeffNOJAC(daaCousin,daToffset,daaaKx,daaUx, &
         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
         pProf,iProfileLayers,iSPlineType,iLowerOrUpper)
     END IF
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaCousin)
+      CALL RaisePower(daaCousin)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
@@ -1142,13 +1118,8 @@ CONTAINS
 
 ! now multiply all spectra by scaling factor, and replace daaGasAb as required
     write (kStdWarn,*) 'Replacing LINEMIX spectra with COUSIN spectra'
-    write (kStdWarn,*) 'start layer, strength = ',iNLTEStart, &
-    abs(rLTEStrength)
-    DO iL = iNLTEStart,kProfLayer
-        DO iFr = 1,kMaxPts
-            daaAbsCoeff(iFr,iL) = daaCousin(iFr,iL) * abs(rLTEStrength)
-        END DO
-    END DO
+    write (kStdWarn,*) 'start layer, strength = ',iNLTEStart,abs(rLTEStrength)
+    daaAbsCoeff(:,iNLTEStart:kProfLayer) = daaCousin(:,iNLTEStart:kProfLayer) * abs(rLTEStrength)
 
     RETURN
     end SUBROUTINE CousinContribution
@@ -1201,10 +1172,11 @@ CONTAINS
     iIOUN = kCompUnit
     CALL CompFileName(+1,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     CALL rdcomp(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts,iNLay, &
-    iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
-    daaaKX,daaUX)
+      iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
+      daaaKX,daaUX)
 
 ! check that the file has the data for the correct gas
+ 1000 FORMAT('Error! file : ',/,A120,/,'contains data for GasID ',I3,' not desired GasID ',I3)
     IF (iFileGasID /= iGasID) THEN
       IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
@@ -1212,106 +1184,59 @@ CONTAINS
       ELSE
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
     END IF
 
 ! check that the data file has the right number of layers
+ 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
-        CALL DoSTOP
+      iErr=1
+      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
+      CALL DoSTOP
     END IF
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN
-        CALL GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+      CALL GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
         daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSPlinetype)
     ELSE
-        iLowerOrUpper = -1
-        CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+      iLowerOrUpper = -1
+      CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
         pProf,iProfileLayers,iSplineType,iLowerOrUpper)
     END IF
 
 ! because of the iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
     IF (kJacobian >= 0) THEN
-        IF (iDoDQ > 0) THEN
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                CALL FinalAmtDeriv(daaDQ,iKtype)
-            END IF
+      IF (iDoDQ > 0) THEN
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+          CALL FinalAmtDeriv(daaDQ,iKtype)
         END IF
-        IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+      END IF
+      IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
         (kActualJacs == 32) .OR. &
         (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-            CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
-        END IF
+         CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
+      END IF
     END IF
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaAbsCoeff)
+      CALL RaisePower(daaAbsCoeff)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
     CALL AmtScale(daaAbsCoeff,raPAmt)
           
-!      print *,iGasID,int(rFileStartFr),kAltComprDirs
-
     IF (iGasID == 2) THEN
-        CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
+      CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
     END IF
 
     RETURN
     end SUBROUTINE othergases
 
-!************************************************************************
-! baed on LLStrow's analysis of the AERI data, this subroutine further scales
-! the CO2 absorption coefficients in the 2380-2405 regions
-    SUBROUTINE AERI_LLS_fudge(daaAbsCoeff,rFileStartFr,iWhichGas)
-
-    include '../INCLUDE/kcartaparam.f90'
-
-! daaAbsCoeff = uncompressed gas abs coeffs, for reference profile
-! rFileStartFr = which chunk
-    INTEGER :: iWhichGas
-    REAL :: rFileStartFr
-    DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
-
-    INTEGER :: iFr,iLay,iChi
-    REAL :: raFreq(kMaxPts),raMystery(kMaxPts)
-
-    iChi = -1
-    IF (iWHichGas == 1) THEN
-        write(kStdWarn,*) 'need H20 AERI chifunction for ',rFileStartFr
-        iChi = +1
-    ELSEIF (iWHichGas == 2) THEN
-        write(kStdWarn,*) 'need CO2 AERI chifunction for ',rFileStartFr
-        iChi = +1
-    END IF
-
-    IF (iChi > 0) THEN
-        DO iFr=1,kMaxPts
-            raFreq(iFr) = rFileStartFr*1.0 + (iFr-1)*0.0025
-        END DO
-        Call FindMysteryFactor(raFreq,raMystery,iWhichGas)
-        DO iLay=1,kProfLayer
-            DO iFr=1,kMaxPts
-                daaAbsCoeff(iFr,iLay)=daaAbsCoeff(iFr,iLay)*raMystery(iFr)
-            END DO
-        END DO
-    ELSE
-        write(kStdWarn,*) 'do not need CO2 chifunction for chunk ',rFileStartFr
-    END IF
-
-    RETURN
-    end SUBROUTINE AERI_LLS_fudge
-         
 !************************************************************************
 ! this subroutine reads in a generic Scott Hannon tuning file, and applies
 ! the tuning to INDIVIDUAL gas optical depths (ie daaAbsCoeff)
@@ -1369,126 +1294,101 @@ CONTAINS
     1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
 
     IF ((rFileStartFr >= 605.0) .AND. (rFileStartFr <= 2805.0)) THEN
-        OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED', &
+      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED', &
         IOSTAT=IERR)
-        IF (IERR /= 0) THEN
-            WRITE(kStdErr,*) 'In subroutine generic_sarta_tunmult'
-            WRITE(kStdErr,1010) IERR, FNAME
-            CALL DoSTOP
-        ENDIF
+      IF (IERR /= 0) THEN
+        WRITE(kStdErr,*) 'In subroutine generic_sarta_tunmult'
+        WRITE(kStdErr,1010) IERR, FNAME
+        CALL DoSTOP
+      ENDIF
 
-        iNpts = 0
-        kTempUnitOpen=1
-        10 CONTINUE
-        READ(iIOUN,80,ERR=20,IOSTAT=IERR) caStr
-        IF ((caStr(1:1) == '%') .AND. (IERR == 0)) THEN
-          GOTO 10
-        ELSEIF (IERR == 0) THEN
-          iNpts = iNpts + 1
-          read(caStr,*) iFr,rF,fixed,water,watercon,o3,co,ch4,nte
-          raF(iNpts)   = rF
-          raChi(iNpts) = 1.0
-          IF ((iGasID == 1) .OR. (iGasID == 103)) THEN
-            raChi(iNpts) = water
-          !ELSEIF (iGasID .EQ. 2) THEN
-          !            raChi(iNpts) = co2
-          ELSEIF (iGasID == 3) THEN
-            raChi(iNpts) = o3
-          ELSEIF (iGasID == 5) THEN
-            raChi(iNpts) = co
-          ELSEIF (iGasID == 6) THEN
-            raChi(iNpts) = ch4
-          ELSEIF (iGasID <= 100) THEN
-            raChi(iNpts) = fixed
-          END IF
-	ELSEIF (iERR /= 0) THEN
-	  GOTO 20
-        END IF
+      iNpts = 0
+      kTempUnitOpen = 1
+ 10 CONTINUE
+      READ(iIOUN,80,ERR=20,IOSTAT=IERR) caStr
+      IF ((caStr(1:1) == '%') .AND. (IERR == 0)) THEN
         GOTO 10
+      ELSEIF (IERR == 0) THEN
+        iNpts = iNpts + 1
+        read(caStr,*) iFr,rF,fixed,water,watercon,o3,co,ch4,nte
+        raF(iNpts)   = rF
+        raChi(iNpts) = 1.0
+        IF ((iGasID == 1) .OR. (iGasID == 103)) THEN
+          raChi(iNpts) = water
+        !ELSEIF (iGasID .EQ. 2) THEN
+        !            raChi(iNpts) = co2
+        ELSEIF (iGasID == 3) THEN
+          raChi(iNpts) = o3
+        ELSEIF (iGasID == 5) THEN
+          raChi(iNpts) = co
+        ELSEIF (iGasID == 6) THEN
+          raChi(iNpts) = ch4
+        ELSEIF (iGasID <= 100) THEN
+          raChi(iNpts) = fixed
+        END IF
+      ELSEIF (iERR /= 0) THEN
+        GOTO 20
+      END IF
+      GOTO 10
 
-20      CONTINUE
-        CLOSE(iIOUN)
-        kTempUnitOpen = -1
+20    CONTINUE
+      CLOSE(iIOUN)
+      kTempUnitOpen = -1
 
-        IF (iSARTAChi == +1) THEN
+      IF (iSARTAChi == +1) THEN
         ! add on two boundary points to cover the huge 1600-2050 cm-1 gap
         ! 2696  1614.607  1.00000  1.13000  1.00000  1.00000  1.00000  1.00000  1.00000
         ! 2697  2165.877  0.99000  1.00000  1.53116  1.00000  1.00000  1.00000  1.00000
-            iNpts = iNpts + 1
-            raF(iNpts) = 1614.607 + 0.1
-            raChi(iNpts) = 1.0
+        iNpts = iNpts + 1
+        raF(iNpts) = 1614.607 + 0.1
+        raChi(iNpts) = 1.0
 
-            iNpts = iNpts + 1
-            raF(iNpts) = 2165.877 - 0.1
-            raChi(iNpts) = 1.0
-        END IF
+        iNpts = iNpts + 1
+        raF(iNpts) = 2165.877 - 0.1
+        raChi(iNpts) = 1.0
+      END IF
 
-    !x        call r_sort_spl(raF,raChi,2378,raFreq,raChi2,kMaxPts)
-        call r_sort_spl(raF,raChi,iNpts,raFreq,raChi2,kMaxPts)
+      ! call r_sort_spl(raF,raChi,2378,raFreq,raChi2,kMaxPts)
+      call r_sort_spl(raF,raChi,iNpts,raFreq,raChi2,kMaxPts)
 
-    !        !! now check simple boundaries, between [raF(1) and raF(end)]
-    !        IF (raFreq(1) .LT. raF(1)) THEN
-    !          iMin = 1
-    !          IF (raFreq(kMaxPts) .LT. raF(1)) THEN
-    !            iMax = kMaxPts
-    !          ELSE
-    !            iMax = int((raF(1)-raFreq(1))/0.0025)
-    !          END IF
-    !          DO iFr=iMin,iMax
-    !            raChi2(iFr) = 1.0
-    !          END DO
-    !        END IF
-    !        IF (raFreq(kMaxPts) .GT. raF(2378)) THEN
-    !          iMax = kMaxPts
-    !          IF (raFreq(1) .GT. raF(2378)) THEN
-    !            iMin = 1
-    !          ELSE
-    !            iMin = int((raF(2378)-raFreq(1))/0.0025)
-    !          END IF
-    !          DO iFr=iMin,iMax
-    !            raChi2(iFr) = 1.0
-    !          END DO
-    !        END IF
-
-    !! now check more complicated boundaries
-        CALL DoSort2Real(raF,raChi,iNpts,1)
-        iBand = 0
-        iX = 1
-        30 CONTINUE
-        IF (abs(raChi(iX)-1.0) >= 1.0e-5) THEN
+      !! now check more complicated boundaries
+      CALL DoSort2Real(raF,raChi,iNpts,1)
+      iBand = 0
+      iX = 1
+ 30 CONTINUE
+      IF (abs(raChi(iX)-1.0) >= 1.0e-5) THEN
         !! found  the start of a "band" at which to multiply ODs
-            iBand = iBand + 1
-            raBeginBand(iBand) = raF(iX)
-            iX = iX + 1
-            40 CONTINUE
+        iBand = iBand + 1
+        raBeginBand(iBand) = raF(iX)
+        iX = iX + 1
+ 40 CONTINUE
         !! now look for the band end
-            IF ((abs(raChi(iX)-1.0) >= 1.0e-5) .AND. (iX < iNpts)) THEN
-                iX = iX + 1
-                GOTO 40
-            ELSE
-                raEndBand(iBand) = raF(iX)
-            END IF
+        IF ((abs(raChi(iX)-1.0) >= 1.0e-5) .AND. (iX < iNpts)) THEN
+          iX = iX + 1
+          GOTO 40
+        ELSE
+          raEndBand(iBand) = raF(iX)
         END IF
-        IF (iX < iNpts) THEN
+      END IF
+      IF (iX < iNpts) THEN
         !! did not find start of new band, so go to next point
-            iX = iX + 1
-            GOTO 30
-        END IF
+        iX = iX + 1
+        GOTO 30
+      END IF
 
     !! now adjust raChi2 so that anything outside the bands gets set to 1
+      iaOK = -1
+
+      DO iX = 1,iBand
         DO iFr = 1,kMaxPts
-            iaOK(iFr) = -1
+          IF ((raFreq(iFr) >= raBeginBand(iX)) .AND. (raFreq(iFr) <= raEndBand(iX))) THEN
+            iaOK(iFr) = +1
+          END IF
         END DO
-        DO iX = 1,iBand
-            DO iFr = 1,kMaxPts
-                IF ((raFreq(iFr) >= raBeginBand(iX)) .AND. (raFreq(iFr) <= raEndBand(iX))) THEN
-                    iaOK(iFr) = +1
-                END IF
-            END DO
-        END DO
-        DO iFr = 1,kMaxPts
-            IF (iaOK(iFr) == -1) raChi2(iFr) = 1.0
-        END DO
+      END DO
+      DO iFr = 1,kMaxPts
+        IF (iaOK(iFr) == -1) raChi2(iFr) = 1.0
+      END DO
 
     !        IF (iGasID .LE. 6) THEN
     !          print *,iGasID,iBand
@@ -1496,15 +1396,15 @@ CONTAINS
     !          print *,(raEndBand(iX),iX=1,iBand)
     !        END IF
 
-        DO iLay=1,kProfLayer
-            DO iFr=1,kMaxPts
-                raaAbsCoeff(iFr,iLay) = raaAbsCoeff(iFr,iLay)*max(0.0,raChi2(iFr))
-            END DO
+      DO iLay=1,kProfLayer
+        DO iFr=1,kMaxPts
+          raaAbsCoeff(iFr,iLay) = raaAbsCoeff(iFr,iLay)*max(0.0,raChi2(iFr))
         END DO
+      END DO
 
     END IF
 
-    80 FORMAT(A80)
+  80 FORMAT(A80)
 
     RETURN
     end SUBROUTINE generic_sarta_tunmult
@@ -1526,56 +1426,44 @@ CONTAINS
 
     iChi = -1
     IF (abs(rFileStartFR-2830.0) <= 0.0001) THEN
-        write(kStdWarn,*) 'need water chifunction for ',nint(rFileStartFR),' &
-        chunk ....'
-        iChi = +2
+      write(kStdWarn,*) 'need water chifunction for ',nint(rFileStartFR),'chunk ....'
+      iChi = +2
     ELSEIF (rFileStartFR >= 2405.0) THEN
-        write(kStdWarn,*) 'need water chifunction for ',nint(rFileStartFR),' &
-        chunk ....'
-        iChi = +1
+      write(kStdWarn,*) 'need water chifunction for ',nint(rFileStartFR),'chunk ....'
+      iChi = +1
     END IF
 
     IF (iChi == 1) THEN
-    !!! for all freqs, for all layers, multiply lines by 0.93
-        dX = 0.93d0
-        DO iLay=1,kProfLayer
-            DO iFr=1,kMaxPts
-                daaAbsCoeff(iFr,iLay)=daaAbsCoeff(iFr,iLay)*dX
-            END DO
-        END DO
+      !!! for all freqs, for all layers, multiply lines by 0.93
+      dX = 0.93d0
+      daaAbsCoeff = daaAbsCoeff*dX
     ELSEIF (iChi == 2) THEN
-    !!! for all freqs < 2392, multiply lines by 1.00
-        dX = 1.0d0
-        iFileEnd = 2405
-        i1 = nint((2392.0-2380)*10000.0/25.0)
-        DO iFr = 1,i1
-            daX(iFr) = dX
-        END DO
+      !!! for all freqs < 2392, multiply lines by 1.00
+      dX = 1.0d0
+      iFileEnd = 2405
+      i1 = nint((2392.0-2380)*10000.0/25.0)
+      daX(1:i1) = dX
 
-    !!! for all freqs > 2393, multiply lines by 0.93
-        dX = 0.93d0
-        iFileEnd = 2405
-        i2 = nint((2393.0-2380)*10000.0/25.0)
-        DO iFr = i2,kMaxPts
-            daX(iFr) = dX
-        END DO
+      !!! for all freqs > 2393, multiply lines by 0.93
+      dX = 0.93d0
+      iFileEnd = 2405
+      i2 = nint((2393.0-2380)*10000.0/25.0)
+      daX(i2:kMaxpts) = dX
 
-    !!!smoothly join the mulitplication factors
-        dSlope = (dX-1.0d0)/((2393-2392)*1.0d0)
-        xA = 2392.0d0
-        DO iFr = i1+1,i2-1
-            x = 2380.0d0 + (iFr-1)*0.0025*1.0d0
-            daX(iFr) = dSlope*(x-xA) + 1.0d0
-        END DO
+      !!!smoothly join the mulitplication factors
+      dSlope = (dX-1.0d0)/((2393-2392)*1.0d0)
+      xA = 2392.0d0
+      DO iFr = i1+1,i2-1
+        x = 2380.0d0 + (iFr-1)*0.0025*1.0d0
+        daX(iFr) = dSlope*(x-xA) + 1.0d0
+      END DO
 
-        DO iLay=1,kProfLayer
-            DO iFr=1,kMaxPts
-                daaAbsCoeff(iFr,iLay)=daaAbsCoeff(iFr,iLay)*daX(iFr)
-            END DO
-        END DO
+      DO iLay=1,kProfLayer
+        daaAbsCoeff(:,iLay)=daaAbsCoeff(:,iLay)*daX(:)
+      END DO
 
     ELSE
-        write(kStdWarn,*) 'do not need H2O chifunction for chunk ',rFileStartFr
+      write(kStdWarn,*) 'do not need H2O chifunction for chunk ',rFileStartFr
     END IF
 
     RETURN
@@ -1600,56 +1488,54 @@ CONTAINS
 
     iChi = -1
     IF (rFileStartFR >= 1380.0 .AND. rFileStartFR <= 1680.0) THEN
-        write(kStdWarn,*) 'need water_sarta_fudge for ',nint(rFileStartFR),' &
-        chunk ....'
-        write(kStdWarn,*)' h20_sarta_fudge for ',nint(rFileStartFR),' chunk ..'
-        iChi = +1
+      write(kStdWarn,*) 'need water_sarta_fudge for ',nint(rFileStartFR),'chunk ....'
+      write(kStdWarn,*)' h20_sarta_fudge for ',nint(rFileStartFR),' chunk ..'
+      iChi = +1
     END IF
 
+  1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
     IF (iChi == 1) THEN
-        Fname = '/home/sergio/SPECTRA/CKDLINUX/tunmlt_jan04deliv.txt'
-        iIOUN = kTempUnit
-        OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED', &
+      Fname = '/home/sergio/SPECTRA/CKDLINUX/tunmlt_jan04deliv.txt'
+      iIOUN = kTempUnit
+      OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED', &
         IOSTAT=IERR)
-        IF (IERR /= 0) THEN
-            WRITE(kStdErr,*) 'In subroutine water_sarta_fudge'
-            WRITE(kStdErr,1010) IERR, FNAME
-            1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
-            CALL DoSTOP
-        ENDIF
-        kTempUnitOpen=1
-        10 CONTINUE
-        READ(iIOUN,80) caStr
-        IF (caStr(1:1) == '%') THEN
-            GOTO 10
+      IF (IERR /= 0) THEN
+        WRITE(kStdErr,*) 'In subroutine water_sarta_fudge'
+        WRITE(kStdErr,1010) IERR, FNAME
+        CALL DoSTOP
+      ENDIF
+      kTempUnitOpen=1
+ 10 CONTINUE
+      READ(iIOUN,80) caStr
+      IF (caStr(1:1) == '%') THEN
+        GOTO 10
+      ELSE
+        read(caStr,*) iFr,rF,fixed,water,watercon,o3,co,ch4,co2
+        raF(iFr)   = rF
+        raChi(iFr) = water
+        IF (iFr < 2378) THEN
+          GOTO 10
         ELSE
-            read(caStr,*) iFr,rF,fixed,water,watercon,o3,co,ch4,co2
-            raF(iFr)   = rF
-            raChi(iFr) = water
-            IF (iFr < 2378) THEN
-                GOTO 10
-            ELSE
-                GOTO 20
-            END IF
+          GOTO 20
         END IF
-        20 CONTINUE
-        CLOSE(iIOUN)
-        kTempUnitOpen = -1
+      END IF
 
-        DO iFr = 1,kMaxPts
-            raFreq(iFr) = rFileStartFr*1.0 + (iFr-1)*0.0025
-        END DO
+ 20   CONTINUE
+      CLOSE(iIOUN)
+      kTempUnitOpen = -1
 
-        call rspl(raF,raChi,2378,raFreq,raChi2,kMaxPts)
+      DO iFr = 1,kMaxPts
+        raFreq(iFr) = rFileStartFr*1.0 + (iFr-1)*0.0025
+      END DO
 
-        DO iLay=1,kProfLayer
-            DO iFr=1,kMaxPts
-                daaAbsCoeff(iFr,iLay)=daaAbsCoeff(iFr,iLay)*(raChi2(iFr)*1.0d0)
-            END DO
-        END DO
+      call rspl(raF,raChi,2378,raFreq,raChi2,kMaxPts)
+
+      DO iLay=1,kProfLayer
+        daaAbsCoeff(:,iLay)=daaAbsCoeff(:,iLay)*(raChi2*1.0d0)
+      END DO
 
     ELSE
-        write(kStdWarn,*) 'do not need H2O chifunction for chunk ',rFileStartFr
+      write(kStdWarn,*) 'do not need H2O chifunction for chunk ',rFileStartFr
     END IF
 
     80 FORMAT(A80)

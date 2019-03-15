@@ -190,25 +190,16 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 !  Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix x matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-    iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro, &
-    iLDB,dBeta,daaAbsCoeff,iLDC)
+    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
            
     IF (kJacobian > 0) THEN
-        CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-        iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-        CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
-        iLDB,dBeta,daaDT,iLDC)
+        CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+        CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT,iLDB,dBeta,daaDT,iLDC)
     END IF
 
-    IF  ((kJacobian > 0)  .AND. (iDoDQ > 0) .AND. &
-    ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
-        DO  iI=1,kMaxPtsJac
-            DO iL=1,kProfLayerJac
-                daaDQ(iI,iL)=daaAbsCoeff(iI,iL)
-            END DO
-        END DO
+    IF  ((kJacobian > 0)  .AND. (iDoDQ > 0) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
+      daaDQ(1:kMaxPtsJac,1:kProfLayerJac)=daaAbsCoeff(1:kMaxPtsJac,1:kProfLayerJac)
     END IF
 
     RETURN
@@ -314,63 +305,55 @@ CONTAINS
     raOrig100P,raOrig100PP,iE)
 
     IF (iLowerOrUpper == -1) THEN
-        DO iI = 1,kMaxLayer
-            pAvgUse(iI) = pavg_kcartadatabase_AIRS(iI)
-        END DO
+      pAvgUse(1:kMaxLayer) = pavg_kcartadatabase_AIRS(1:kMaxLayer)
     ELSEIF (iLowerOrUpper == +1) THEN
-        IF (iGasID /= 2) THEN
-            write(kStdErr,*) 'need iGasID = 2 in SplineTempInterpolateNOJAC'
-            CALL DoStop
-        ELSE
-            write(kStdWarn,*) 'when uncompressing the database, replacing '
-            write(kStdWarn,*) 'usual database pressures with UA'
-            CALL ua_avg_databasepressures(pAvgUse,raPP2,raT2,raA2)
-        END IF
-    ELSE
-        write(kStdErr,*) 'Error in SplineTempInterpolateNOJAC'
-        write(kStdErr,*) 'iLowerOrUpper = ',iLowerOrUpper
+      IF (iGasID /= 2) THEN
+        write(kStdErr,*) 'need iGasID = 2 in SplineTempInterpolateNOJAC'
         CALL DoStop
+      ELSE
+        write(kStdWarn,*) 'when uncompressing the database, replacing '
+        write(kStdWarn,*) 'usual database pressures with UA'
+        CALL ua_avg_databasepressures(pAvgUse,raPP2,raT2,raA2)
+      END IF
+    ELSE
+      write(kStdErr,*) 'Error in SplineTempInterpolateNOJAC'
+      write(kStdErr,*) 'iLowerOrUpper = ',iLowerOrUpper
+      CALL DoStop
     END IF
 
-    DO iI = 1,kMaxLayer
-        daOrig100A(iI) = raOrig100A(iI) * 1.0d0
-        daQ(iI)        = daOrig100A(iI)**0.25
-    END DO
+     daOrig100A = raOrig100A * 1.0d0
+     daQ        = daOrig100A**0.25
 
-    iLowest = kProfLayer - iProfileLayers + 1
-
-!      DO iI=1,iKm
-!        daXgiven(iI)=daToffset(iaTsort(iI))
-!        ENDDO
+     iLowest = kProfLayer - iProfileLayers + 1
 
 !  even if kProfLayer =========== kMaxLayer, allow for possibility that
 !  user has changed layering, so we have to do PRESSURE interpolation
 !  of daaaKx onto daaaKnNew
 
-! otice how daXgivenP is initialised with increasing pressure
-! otice how doYgiven normalised to daaaKx/(100layer ref amount)
-! his  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
-! s being changed to raw (abs coeff)^(1/4)
+! notice how daXgivenP is initialised with increasing pressure
+! notice how doYgiven normalised to daaaKx/(100layer ref amount)
+! this  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
+! is being changed to raw (abs coeff)^(1/4)
 
-    kaaNumVectors(iGasID,kOuterLoop) = iNk
+     kaaNumVectors(iGasID,kOuterLoop) = iNk
 
 !!!l change k (optical depth, dimenstionless) --> k (abs coeff, cm2 mol-1)
     DO iI=1,iNk            !! basis vecs
-        DO iJ=1,iKm          !! temp offsets
-            DO iE=1,kMaxLayer  !! numlayers
-                daaaaKxNew(iI,iJ,iE,1) = daaaKx1(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,2) = daaaKx2(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,3) = daaaKx3(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,4) = daaaKx4(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,5) = daaaKx5(iI,iJ,iE)/daQ(iE)
-            END DO
-        END DO
+      DO iJ=1,iKm          !! temp offsets
+        DO iE=1,kMaxLayer  !! numlayers
+          daaaaKxNew(iI,iJ,iE,1) = daaaKx1(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,2) = daaaKx2(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,3) = daaaKx3(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,4) = daaaKx4(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,5) = daaaKx5(iI,iJ,iE)/daQ(iE)
+       END DO
+      END DO
     END DO
 
 !     now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
-        DO iK=iLowest,kProfLayer   !Loop over the layers
-            daaKpro(iI,iK) = &
+      DO iK=iLowest,kProfLayer   !Loop over the layers
+        daaKpro(iI,iK) = &
             daaaaKxNew(iI,iaT11(iK),iaP1(iK),iaQ11(iK))*raP1(iK)*raT11(iK)*raQ11(iK)+ &
             daaaaKxNew(iI,iaT12(iK),iaP1(iK),iaQ11(iK))*raP1(iK)*raT12(iK)*raQ11(iK)+ &
             daaaaKxNew(iI,iaT21(iK),iaP2(iK),iaQ21(iK))*raP2(iK)*raT21(iK)*raQ21(iK)+ &
@@ -379,15 +362,13 @@ CONTAINS
             daaaaKxNew(iI,iaT12(iK),iaP1(iK),iaQ12(iK))*raP1(iK)*raT12(iK)*raQ12(iK)+ &
             daaaaKxNew(iI,iaT21(iK),iaP2(iK),iaQ22(iK))*raP2(iK)*raT21(iK)*raQ22(iK)+ &
             daaaaKxNew(iI,iaT22(iK),iaP2(iK),iaQ22(iK))*raP2(iK)*raT22(iK)*raQ22(iK)
-        ENDDO
+      ENDDO
     ENDDO
 
 ! multiply daaUx with daaKpro to get daaAbsCoeff
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-    iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro, &
-    iLDB,dBeta,daaAbsCoeff,iLDC)
+    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     RETURN
     end SUBROUTINE xGetAbsCoeffWaterNOJAC
@@ -503,10 +484,8 @@ CONTAINS
     CALL ReadRefProf(caFName,kMaxLayer,raOrig100A,raOrig100T, &
     raOrig100P,raOrig100PP,iE)
 
-    DO iI = 1,kMaxLayer
-        daOrig100A(iI) = raOrig100A(iI) * 1.0d0
-        daQ(iI)        = daOrig100A(iI)**0.25
-    END DO
+    daOrig100A = raOrig100A * 1.0d0
+    daQ        = daOrig100A**0.25
 
     iLowest = kProfLayer - iProfileLayers + 1
 
@@ -527,21 +506,21 @@ CONTAINS
 
 !!!l change k (optical depth, dimenstionless) --> k (abs coeff, cm2 mol-1)
     DO iI=1,iNk
-        DO iJ=1,iKm
-            DO iE=1,kMaxLayer
-                daaaaKxNew(iI,iJ,iE,1) = daaaKx1(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,2) = daaaKx2(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,3) = daaaKx3(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,4) = daaaKx4(iI,iJ,iE)/daQ(iE)
-                daaaaKxNew(iI,iJ,iE,5) = daaaKx5(iI,iJ,iE)/daQ(iE)
-            END DO
+      DO iJ=1,iKm
+        DO iE=1,kMaxLayer
+          daaaaKxNew(iI,iJ,iE,1) = daaaKx1(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,2) = daaaKx2(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,3) = daaaKx3(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,4) = daaaKx4(iI,iJ,iE)/daQ(iE)
+          daaaaKxNew(iI,iJ,iE,5) = daaaKx5(iI,iJ,iE)/daQ(iE)
         END DO
+      END DO
     END DO
 
 !     now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
-        DO iK=iLowest,kProfLayer   !Loop over the layers
-            daaKpro(iI,iK) = &
+      DO iK=iLowest,kProfLayer   !Loop over the layers
+        daaKpro(iI,iK) = &
             daaaaKxNew(iI,iaT11(iK),iaP1(iK),iaQ11(iK))*raP1(iK)*raT11(iK)*raQ11(iK)+ &
             daaaaKxNew(iI,iaT12(iK),iaP1(iK),iaQ11(iK))*raP1(iK)*raT12(iK)*raQ11(iK)+ &
             daaaaKxNew(iI,iaT21(iK),iaP2(iK),iaQ21(iK))*raP2(iK)*raT21(iK)*raQ21(iK)+ &
@@ -551,7 +530,7 @@ CONTAINS
             daaaaKxNew(iI,iaT21(iK),iaP2(iK),iaQ22(iK))*raP2(iK)*raT21(iK)*raQ22(iK)+ &
             daaaaKxNew(iI,iaT22(iK),iaP2(iK),iaQ22(iK))*raP2(iK)*raT22(iK)*raQ22(iK)
 
-            daaT(iI,iK) = &
+        daaT(iI,iK) = &
             daaaaKxNew(iI,iaT11(iK),iaP1(iK),iaQ11(iK))*raP1(iK)*raJT11(iK)*raQ11(iK)+ &
             daaaaKxNew(iI,iaT12(iK),iaP1(iK),iaQ11(iK))*raP1(iK)*raJT12(iK)*raQ11(iK)+ &
             daaaaKxNew(iI,iaT21(iK),iaP2(iK),iaQ21(iK))*raP2(iK)*raJT21(iK)*raQ21(iK)+ &
@@ -561,44 +540,33 @@ CONTAINS
             daaaaKxNew(iI,iaT21(iK),iaP2(iK),iaQ22(iK))*raP2(iK)*raJT21(iK)*raQ22(iK)+ &
             daaaaKxNew(iI,iaT22(iK),iaP2(iK),iaQ22(iK))*raP2(iK)*raJT22(iK)*raQ22(iK)
 
-        ENDDO
+      ENDDO
     ENDDO
 
 ! first interpolate in each of the five water offset matrices, in temperature
 ! and in pressure to obtain the five current temp profile water matrices
 ! hence daaAn = the n th matrix, interpolated in layer temperature T
 ! note that daaT is just a dummy role here!!!!!!!!!!!!!!!!!!
-    IF ((kActualJacs == -1) .OR. (kActualJacs == +30) .OR. &
-    (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-        iActuallyDoDT = 1
+    IF ((kActualJacs == -1) .OR. (kActualJacs == +30) .OR. (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
+      iActuallyDoDT = 1
     ELSE
-        iActuallyDoDT = -1
+      iActuallyDoDT = -1
     END IF
 
 ! multiply daaUx with daaKpro to get daaAbsCoeff
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-    iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro, &
-    iLDB,dBeta,daaAbsCoeff,iLDC)
+    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     IF (kJacobian > 0) THEN !do temperature jacobians
-        CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
-        raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
-        pProf,iProfileLayers,iSPlineType)
-        CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-        iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-        CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
-        iLDB,dBeta,daaDT,iLDC)
+      CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5,raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
+                        pProf,iProfileLayers,iSPlineType)
+      CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+      CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT,iLDB,dBeta,daaDT,iLDC)
 
-        IF (iDoDQ > 0) THEN       !do amount jacobians
-            DO  iM=1,kMaxPtsJac
-                DO iN=1,kProfLayerJac
-                    daaDQ(iM,iN)=daaAbsCoeff(iM,iN)
-                END DO
-            END DO
-
-        END IF
+      IF (iDoDQ > 0) THEN       !do amount jacobians
+        daaDQ(1:kMaxPtsJac,1:kProfLayerJac)=daaAbsCoeff(1:kMaxPtsJac,1:kProfLayerJac)
+      END IF
     END IF
 
     RETURN
@@ -708,67 +676,56 @@ CONTAINS
         CALL FindReferenceName(caFName,iGasID,iLowerOrUpper)
     END IF
 
-    CALL ReadRefProf(caFName,kMaxLayer,raOrig100A,raOrig100T, &
-    raOrig100P,raOrig100PP,iE)
+    CALL ReadRefProf(caFName,kMaxLayer,raOrig100A,raOrig100T,raOrig100P,raOrig100PP,iE)
 
     IF (iLowerOrUpper == -1) THEN
-        DO iI = 1,kMaxLayer
-            pAvgUse(iI) = pavg_kcartadatabase_AIRS(iI)
-        END DO
+       pAvgUse(1:kMaxLayer) = pavg_kcartadatabase_AIRS(1:kMaxLayer)
     ELSEIF (iLowerOrUpper == +1) THEN
-        IF (iGasID /= 2) THEN
-            write(kStdErr,*) 'need iGasID = 2 in SplineTempInterpolateNOJAC'
-            CALL DoStop
-        ELSE
-            write(kStdWarn,*) 'when uncompressing the database, replacing '
-            write(kStdWarn,*) 'usual database pressures with UA'
-            CALL ua_avg_databasepressures(pAvgUse,raPP2,raT2,raA2)
-        END IF
+      IF (iGasID /= 2) THEN
+         write(kStdErr,*) 'need iGasID = 2 in SplineTempInterpolateNOJAC'
+         CALL DoStop
+      ELSE
+        write(kStdWarn,*) 'when uncompressing the database, replacing '
+        write(kStdWarn,*) 'usual database pressures with UA'
+        CALL ua_avg_databasepressures(pAvgUse,raPP2,raT2,raA2)
+      END IF
     ELSE
-        write(kStdErr,*) 'Error in SplineTempInterpolateNOJAC'
-        write(kStdErr,*) 'iLowerOrUpper = ',iLowerOrUpper
-        CALL DoStop
+      write(kStdErr,*) 'Error in SplineTempInterpolateNOJAC'
+      write(kStdErr,*) 'iLowerOrUpper = ',iLowerOrUpper
+      CALL DoStop
     END IF
 
-    DO iI = 1,kMaxLayer
-        daOrig100A(iI) = raOrig100A(iI) * 1.0d0
-        daQ(iI)        = daOrig100A(iI)**0.25
-    END DO
+    daOrig100A(1:kMaxLayer) = raOrig100A(1:kMaxLayer) * 1.0d0
+    daQ(1:kMaxLayer)        = daOrig100A(1:kMaxLayer)**0.25
 
     iLowest = kProfLayer - iProfileLayers + 1
-
-!      DO iI=1,iKm
-!        daXgiven(iI) = daToffset(iaTsort(iI))
-!        END DO
 
 !  even if kProfLayer =========== kMaxLayer, allow for possibility that
 !  user has changed layering, so we have to do PRESSURE interpolation
 !  of daaaKx onto daaaKnNew
 
-! otice how daXgivenP is initialised with increasing pressure
-! otice how doYgiven normalised to daaaKx/(100layer ref amount)
-! his  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
-! s being changed to raw (abs coeff)^(1/4)
+! notice how daXgivenP is initialised with increasing pressure
+! notice how doYgiven normalised to daaaKx/(100layer ref amount)
+! this  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
+! is being changed to raw (abs coeff)^(1/4)
 
     kaaNumVectors(iGasID,kOuterLoop) = iNk
 
-!!!l change k (optical depth, dimenstionless) --> k (abs coeff, cm2 mol-1)
+    !!!l change k (optical depth, dimenstionless) --> k (abs coeff, cm2 mol-1)
     DO iI=1,iNk
-        DO iJ=1,iKm
-            DO iE=1,kMaxLayer
-                daaaKxNew(iI,iJ,iE) = daaaKx(iI,iJ,iE)/daQ(iE)
-            END DO
-        END DO
+      DO iJ=1,iKm
+        daaaKxNew(iI,iJ,1:kMaxLayer) = daaaKx(iI,iJ,1:kMaxLayer)/daQ(1:kMaxLayer)
+      END DO
     END DO
 
-!     now do the spline Interpolation of the K vectors in TEMPERATURE
+    ! now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
-        DO iK=iLowest,kProfLayer   !Loop over the layers
-            daaKpro(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raT11(iK)+ &
+      DO iK=iLowest,kProfLayer   !Loop over the layers
+        daaKpro(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raT11(iK)+ &
             daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raT12(iK)+ &
             daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raT21(iK)+ &
             daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raT22(iK)
-        ENDDO
+      ENDDO
     ENDDO
 
     RETURN
@@ -876,41 +833,33 @@ CONTAINS
     CALL ReadRefProf(caFName,kMaxLayer,raOrig100A,raOrig100T, &
     raOrig100P,raOrig100PP,iE)
 
-    DO iI = 1,kMaxLayer
-        daOrig100A(iI) = raOrig100A(iI) * 1.0d0
-        daQ(iI)        = daOrig100A(iI)**0.25
-    END DO
+    daOrig100A(1:kMaxLayer) = raOrig100A(1:kMaxLayer) * 1.0d0
+    daQ(1:kMaxLayer)        = daOrig100A(1:kMaxLayer)**0.25
 
     iLowest = kProfLayer - iProfileLayers + 1
-
-!      DO iI=1,iKm
-!        daXgiven(iI) = daToffset(iaTsort(iI))
-!        END DO
 
 !  even if kProfLayer =========== kMaxLayer, allow for possibility that
 !  user has changed layering, so we have to do PRESSURE interpolation
 !  of daaaKx onto daaaKnNew
 
-! otice how daXgivenP is initialised with increasing pressure
-! otice how doYgiven normalised to daaaKx/(100layer ref amount)
-! his  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
-! s being changed to raw (abs coeff)^(1/4)
+! notice how daXgivenP is initialised with increasing pressure
+! notice how doYgiven normalised to daaaKx/(100layer ref amount)
+! this  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
+! is being changed to raw (abs coeff)^(1/4)
 
     kaaNumVectors(iGasID,kOuterLoop) = iNk
 
 !!!l change k (optical depth, dimenstionless) --> k (abs coeff, cm2 mol-1)
     DO iI=1,iNk
-        DO iJ=1,iKm
-            DO iE=1,kMaxLayer
-                daaaKxNew(iI,iJ,iE) = daaaKx(iI,iJ,iE)/daQ(iE)
-            END DO
-        END DO
+      DO iJ=1,iKm
+        daaaKxNew(iI,iJ,1:kMaxLayer) = daaaKx(iI,iJ,1:kMaxLayer)/daQ(1:kMaxLayer)
+      END DO
     END DO
 
-!     now do the spline Interpolation of the K vectors in TEMPERATURE
+    !   now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
-        DO iK=iLowest,kProfLayer   !Loop over the layers
-            daaKpro(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raT11(iK)+ &
+      DO iK=iLowest,kProfLayer   !Loop over the layers
+        daaKpro(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raT11(iK)+ &
             daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raT12(iK)+ &
             daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raT21(iK)+ &
             daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raT22(iK)
@@ -918,7 +867,7 @@ CONTAINS
             daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raJT12(iK)+ &
             daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raJT21(iK)+ &
             daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raJT22(iK)
-        ENDDO
+      ENDDO
     ENDDO
 
     RETURN
@@ -1209,22 +1158,17 @@ CONTAINS
     iLDB,dBeta,daaAbsCoeff,iLDC)
 
     IF (kJacobian > 0) THEN !do temperature jacobians
-        CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
+      CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
         raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
         pProf,iProfileLayers,iSPlineType)
-        CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
+      CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
         iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-        CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
+      CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
         iLDB,dBeta,daaDT,iLDC)
 
-        IF (iDoDQ > 0) THEN       !do amount jacobians
-            DO  iM=1,kMaxPtsJac
-                DO iN=1,kProfLayerJac
-                    daaDQ(iM,iN)=daaAbsCoeff(iM,iN)
-                END DO
-            END DO
-
-        END IF
+      IF (iDoDQ > 0) THEN       !do amount jacobians
+        daaDQ(1:kMaxPtsJac,1:kProfLayerJac)=daaAbsCoeff(1:kMaxPtsJac,1:kProfLayerJac)
+      END IF
     END IF
 
     RETURN

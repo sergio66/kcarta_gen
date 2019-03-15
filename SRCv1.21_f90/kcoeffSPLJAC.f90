@@ -30,8 +30,7 @@ CONTAINS
 ! daY2       == d2y/dx2     (known)
 ! x          == value where we need to find dy/dx at
 ! iKm        == number of set data points daXgiven(1..iKm)
-    DOUBLE PRECISION :: daXgiven(kMaxTemp),daYgiven(kMaxTemp), &
-    daY2(kMaxTemp),x
+    DOUBLE PRECISION :: daXgiven(kMaxTemp),daYgiven(kMaxTemp),daY2(kMaxTemp),x
     INTEGER :: iKm
 
 ! local variables
@@ -40,25 +39,25 @@ CONTAINS
     INTEGER :: KLO,KHI
 
 !     Determine between which pair of points X falls (bisect loop)
-    KLO=1
-    KHI=iKm
-    20 IF ( (KHI - KLO) > 1) THEN
-        iK=(KHI + KLO)/2
-        IF (daXgiven(iK) > X) THEN
-            KHI=iK
-        ELSE
-            KLO=iK
-        ENDIF
-        GOTO 20
-    ENDIF
+     KLO=1
+     KHI=iKm
+ 20  IF ( (KHI - KLO) > 1) THEN
+       iK=(KHI + KLO)/2
+       IF (daXgiven(iK) > X) THEN
+         KHI=iK
+       ELSE
+         KLO=iK
+       ENDIF
+       GOTO 20
+     ENDIF
 
     dAns=0.0
 
     IF (iK < iKm) THEN
-        a=(daXgiven(iK+1)-x)/(daXgiven(iK+1)-daXgiven(iK))
-        b=1-a
+      a = (daXgiven(iK+1)-x)/(daXgiven(iK+1)-daXgiven(iK))
+      b = 1-a
 
-        dAns=(daYgiven(iK+1)-daYgiven(iK))/(daXgiven(iK+1)-daXgiven(iK)) &
+      dAns=(daYgiven(iK+1)-daYgiven(iK))/(daXgiven(iK+1)-daXgiven(iK)) &
         -(3.0*a*a-1.0)/6.0*(daXgiven(iK+1)-daXgiven(iK))*daY2(iK) &
         +(3.0*b*b-1.0)/6.0*(daXgiven(iK+1)-daXgiven(iK))*daY2(iK+1)
     END IF
@@ -135,9 +134,9 @@ CONTAINS
     REAL :: raQAirs(kProfLayer)
 
     IF (iGasID_0 < kMaxGas) THEN
-        iGasID = iGasID_0
+      iGasID = iGasID_0
     ELSEIF (iGasID_0 == kMaxGas) THEN
-        iGasID = 1
+      iGasID = 1
     END IF
 
 ! ead in the orig 100 layer prof
@@ -145,138 +144,132 @@ CONTAINS
     write (kStdWarn,*) '  Reading in 100 AIRS layer and kProfLayer reference'
     write (kStdWarn,*) '  profiles for GasID = ',iGasID,' ............ '
     IF (iGasID_0 == kMaxGas) THEN
-        write (kStdWarn,*) 'Warning : Read in ref gas profile 1 for gasID 103'
+      write (kStdWarn,*) 'Warning : Read in ref gas profile 1 for gasID 103'
     END IF
 
     CALL FindReferenceName(caFName,iGasID,-1)
-    CALL ReadRefProf(caFName,kMaxLayer,raOrig100A,raOrig100T, &
-    raOrig100P,raOrig100PP,iE)
+    CALL ReadRefProf(caFName,kMaxLayer,raOrig100A,raOrig100T,raOrig100P,raOrig100PP,iE)
 
-!     Assign values for interpolation
-!     Set dYP1 and dYPN for "natural" derivatives of 1st and Nth points
+    !     Assign values for interpolation
+    !     Set dYP1 and dYPN for "natural" derivatives of 1st and Nth points
     dYP1=1.0E+16
     dYPN=1.0E+16
      
     iLowest = kProfLayer - iProfileLayers + 1
 
-    DO iI=1,iKm
-        daXgiven(iI) = daToffset(iaTsort(iI))
-    END DO
+    daXgiven(1:iKm) = daToffset(iaTsort(1:iKm))
 
-!  even if kProfLayer =========== kMaxLayer, allow for possibility that
-!  user has changed layering, so we have to do PRESSURE interpolation
-!  of daaaKx onto daaaKnNew
+    !  even if kProfLayer =========== kMaxLayer, allow for possibility that
+    !  user has changed layering, so we have to do PRESSURE interpolation
+    !  of daaaKx onto daaaKnNew
 
     kaaNumVectors(iGasID_0,kOuterLoop) = iNk
 
     IF (iSplineType == +1) THEN
-    !!!spline pressure interpolation
-        DO iI=1,iNk
-            DO iJ=1,iKm
-            ! irst set up the daXgivenP,daYgivenP arrays
-                DO iK=1,kMaxLayer
-                    iE = kMaxLayer-iK+1
-                ! otice how daXgivenP is initialised with increasing pressure
-                ! o interpolate in log(pressure)
-                    daXgivenP(iK) = log(pavg_kcartadatabase_AIRS(iE))*1.0d0
-                ! otice how doYgiven normalised to daaaKx/(100layer ref amount)
-                ! his  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
-                ! s being changed to raw (abs coeff)^(1/4)
-                    daYgivenP(iK) = daaaKx(iI,iJ,iE)/(raOrig100A(iE)**0.25)
-                END DO
-                CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN, &
-                daY2P,daWorkP)
+      !!!spline pressure interpolation
+      DO iI=1,iNk
+        DO iJ=1,iKm
+          ! first set up the daXgivenP,daYgivenP arrays
+          DO iK=1,kMaxLayer
+            iE = kMaxLayer-iK+1
+            ! notice how daXgivenP is initialised with increasing pressure
+            ! to interpolate in log(pressure)
+            daXgivenP(iK) = log(pavg_kcartadatabase_AIRS(iE))*1.0d0
+            ! notice how doYgiven normalised to daaaKx/(100layer ref amount)
+            ! this  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
+            ! is being changed to raw (abs coeff)^(1/4)
+            daYgivenP(iK) = daaaKx(iI,iJ,iE)/(raOrig100A(iE)**0.25)
+          END DO
+          CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN,daY2P,daWorkP)
 
-            !  do the new set of layers ..need AIRS layers interpolations
-                DO iK=iLowest,kProfLayer
-                    dxpt = log(pProf(iK))*1.0d0
-                    CALL dsplin(daXgivenP,daYgivenP,daY2P,kMaxLayer,dxpt,d)
-                    daaaKxNew(iI,iJ,iK) = d
-                END DO
-            END DO
+          !  do the new set of layers ..need AIRS layers interpolations
+          DO iK=iLowest,kProfLayer
+            dxpt = log(pProf(iK))*1.0d0
+            CALL dsplin(daXgivenP,daYgivenP,daY2P,kMaxLayer,dxpt,d)
+            daaaKxNew(iI,iJ,iK) = d
+          END DO
         END DO
+      END DO
 
     ELSEIF (iSplineType == -1) THEN
-    !!!linear pressure interpolation
-        DO iI=1,iNk
-            DO iJ=1,iKm
-            ! irst set up the daXgivenP,daYgivenP arrays
-                DO iK=1,kMaxLayer
-                    iE = kMaxLayer-iK+1
-                ! otice how daXgivenP is initialised with increasing pressure
-                ! o interpolate in log(pressure)
-                ! o interpolate in pressure
-                    daXgivenP(iK) = (pavg_kcartadatabase_AIRS(iE))*1.0d0
-                ! otice how doYgiven normalised to daaaKx/(100layer ref amount)
-                ! his  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
-                ! s being changed to raw (abs coeff)^(1/4)
-                    daYgivenP(iK) = daaaKx(iI,iJ,iE)/(raOrig100A(iE)**0.25)
-                END DO
-                CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN, &
+      !!!linear pressure interpolation
+      DO iI=1,iNk
+        DO iJ=1,iKm
+          ! first set up the daXgivenP,daYgivenP arrays
+          DO iK=1,kMaxLayer
+            iE = kMaxLayer-iK+1
+            ! notice how daXgivenP is initialised with increasing pressure
+            ! so interpolate in log(pressure)
+            ! so interpolate in pressure
+            daXgivenP(iK) = (pavg_kcartadatabase_AIRS(iE))*1.0d0
+            ! notice how doYgiven normalised to daaaKx/(100layer ref amount)
+            ! this  means (optical depth)^(1/4) = (abs coeff * gas amt)^(1/4)
+            ! is being changed to raw (abs coeff)^(1/4)
+            daYgivenP(iK) = daaaKx(iI,iJ,iE)/(raOrig100A(iE)**0.25)
+          END DO
+          CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN, &
                 daY2P,daWorkP)
 
-            !  do the new set of layers ..need AIRS layers interpolations
-                DO iK=iLowest,kProfLayer
-                    dxpt = (pProf(iK))*1.0d0
-                    CALL DLINEAR_ONE(daXgivenP,daYgivenP,kMaxLayer,dXPT,d)
-                    daaaKxNew(iI,iJ,iK) = d
-                END DO
-            END DO
+          !  do the new set of layers ..need AIRS layers interpolations
+          DO iK=iLowest,kProfLayer
+            dxpt = (pProf(iK))*1.0d0
+            CALL DLINEAR_ONE(daXgivenP,daYgivenP,kMaxLayer,dXPT,d)
+            daaaKxNew(iI,iJ,iK) = d
+          END DO
         END DO
+      END DO
 
     ELSEIF ((iSplineType == +2) .OR. (iSplineType == -2)) THEN
-    !!!no need to do pressure interpolation
-    !!!no need to do pressure interpolation
-        DO iK=1,kMaxLayer
-            iE = kMaxLayer-iK+1
-            IF (iSplineType == +2) THEN
-                daXgivenP(iK) = log(pavg_kcartadatabase_AIRS(iE)*1.0d0)
-            ELSE
-                daXgivenP(iK) = (pavg_kcartadatabase_AIRS(iE))*1.0d0
-            END IF
+      !!!no need to do pressure interpolation
+      !!!no need to do pressure interpolation
+      DO iK=1,kMaxLayer
+        iE = kMaxLayer-iK+1
+        IF (iSplineType == +2) THEN
+          daXgivenP(iK) = log(pavg_kcartadatabase_AIRS(iE)*1.0d0)
+        ELSE
+          daXgivenP(iK) = (pavg_kcartadatabase_AIRS(iE))*1.0d0
+        END IF
+      END DO
+      DO iI=1,iNk
+        DO iJ=1,iKm
+          daaaKxNew(iI,iJ,1:kMaxLayer) = daaaKx(iI,iJ,1:kMaxLayer)/(raOrig100A(1:kMaxLayer)**0.25)
         END DO
-        DO iI=1,iNk
-            DO iJ=1,iKm
-                DO iK=1,kMaxLayer
-                    daaaKxNew(iI,iJ,iK) = daaaKx(iI,iJ,iK)/(raOrig100A(iK)**0.25)
-                END DO
-            END DO
-        END DO
+      END DO
     END IF
 
-!     now do the spline Interpolation of the K vectors in TEMPERATURE
+    ! now do the spline Interpolation of the K vectors in TEMPERATURE
     IF (iSplineType > 0) THEN
-    !!!spline temperature interpolation
-        DO iI=1,iNk                         !Loop over the K vectors
-            DO iK=iLowest,kProfLayer   !Loop over the layers
-                DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
-                    daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
-                ENDDO
-                CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
-            ! subtract the ref temp from the profile temperature
-                dXPT=raPtemp(iK) - raRTemp(iK)
-                CALL DSPLIN(daXgiven,daYgiven,daY2,iKm,dXPT,daaKpro(iI,iK))
-                IF ((kJacobian > 0) .AND. (iActuallydoDT > 0)) THEN
-                    daaT(iI,iK) = FirstDeriv(dXPT,daXgiven,daYgiven,daY2,iKm)
-                END IF
-            ENDDO
+      !!!spline temperature interpolation
+      DO iI=1,iNk                         !Loop over the K vectors
+        DO iK=iLowest,kProfLayer   !Loop over the layers
+          DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
+            daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
+          ENDDO
+          CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
+          ! subtract the ref temp from the profile temperature
+          dXPT=raPtemp(iK) - raRTemp(iK)
+          CALL DSPLIN(daXgiven,daYgiven,daY2,iKm,dXPT,daaKpro(iI,iK))
+          IF ((kJacobian > 0) .AND. (iActuallydoDT > 0)) THEN
+            daaT(iI,iK) = FirstDeriv(dXPT,daXgiven,daYgiven,daY2,iKm)
+          END IF
         ENDDO
+      ENDDO
     ELSEIF (iSplineType < 0) THEN
-    !!!linear temperature interpolation
-        DO iI=1,iNk                         !Loop over the K vectors
-            DO iK=iLowest,kProfLayer   !Loop over the layers
-                DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
-                    daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
-                ENDDO
-                CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
-            ! subtract the ref temp from the profile temperature
-                dXPT = raPtemp(iK) - raRTemp(iK)
-                CALL DLINEAR_ONE(daXgiven,daYgiven,iKm,dXPT,daaKpro(iI,iK))
-                IF ((kJacobian > 0) .AND. (iActuallydoDT > 0)) THEN
-                    daaT(iI,iK) = FirstDeriv(dXPT,daXgiven,daYgiven,daY2,iKm)
-                END IF
-            ENDDO
+      !!!linear temperature interpolation
+      DO iI=1,iNk                         !Loop over the K vectors
+        DO iK=iLowest,kProfLayer   !Loop over the layers
+          DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
+            daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
+          ENDDO
+          CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
+          ! subtract the ref temp from the profile temperature
+          dXPT = raPtemp(iK) - raRTemp(iK)
+          CALL DLINEAR_ONE(daXgiven,daYgiven,iKm,dXPT,daaKpro(iI,iK))
+          IF ((kJacobian > 0) .AND. (iActuallydoDT > 0)) THEN
+            daaT(iI,iK) = FirstDeriv(dXPT,daXgiven,daYgiven,daY2,iKm)
+          END IF
         ENDDO
+      ENDDO
     END IF
 
     RETURN
@@ -344,32 +337,23 @@ CONTAINS
     END IF
 
     CALL SplineTempInterpolateJAC(daaKpro,daToffset,daaaKx, &
-    raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
-    iGasID,daaT,iActuallyDoDT,pProf,iProfileLayers,iSPlineType)
+      raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
+      iGasID,daaT,iActuallyDoDT,pProf,iProfileLayers,iSPlineType)
 
 ! multiply daaUx with daaKpro to get daaAbsCoeff
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 !  Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix x matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-    iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro, &
-    iLDB,dBeta,daaAbsCoeff,iLDC)
+    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
            
     IF (kJacobian > 0) THEN
-        CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-        iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-        CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
-        iLDB,dBeta,daaDT,iLDC)
+      CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+      CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT,iLDB,dBeta,daaDT,iLDC)
     END IF
 
-    IF  ((kJacobian > 0)  .AND. (iDoDQ > 0) .AND. &
-    ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
-        DO  iI=1,kMaxPtsJac
-            DO iL=1,kProfLayerJac
-                daaDQ(iI,iL)=daaAbsCoeff(iI,iL)
-            END DO
-        END DO
+    IF  ((kJacobian > 0)  .AND. (iDoDQ > 0) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
+      daaDQ(1:kMaxPtsJac,1:kProfLayerJac)=daaAbsCoeff(1:kMaxPtsJac,1:kProfLayerJac)
     END IF
 
     RETURN
@@ -443,63 +427,56 @@ CONTAINS
 ! hence daaAn = the n th matrix, interpolated in layer temperature T
 ! note that daaT is just a dummy role here!!!!!!!!!!!!!!!!!!
     IF ((kActualJacs == -1) .OR. (kActualJacs == +30) .OR. &
-    (kActualJacs == 32) .OR. &
-    (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-        iActuallyDoDT = 1
+      (kActualJacs == 32) .OR. &
+      (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
+      iActuallyDoDT = 1
     ELSE
-        iActuallyDoDT = -1
+      iActuallyDoDT = -1
     END IF
 
 ! we could either send in "iGasID" or "1" as SplineTempInterpolateNOJAC
 ! only needs to uncompress a "1" reference profile; however we keep track
 ! of kaaNumVec using the gasID, so send this one in!
     CALL SplineTempInterpolateJAC(daaA1,daToffset,daaaKx1, &
-    raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT1,iActuallyDoDT, &
-    pProf,iProfileLayers,iSplineType)
+      raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT1,iActuallyDoDT, &
+      pProf,iProfileLayers,iSplineType)
     CALL SplineTempInterpolateJAC(daaA2,daToffset,daaaKx2, &
-    raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT2,iActuallyDoDT, &
-    pProf,iProfileLayers,iSplineType)
+      raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT2,iActuallyDoDT, &
+      pProf,iProfileLayers,iSplineType)
     CALL SplineTempInterpolateJAC(daaA3,daToffset,daaaKx3, &
-    raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT3,iActuallyDoDT, &
-    pProf,iProfileLayers,iSplineType)
+      raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT3,iActuallyDoDT, &
+      pProf,iProfileLayers,iSplineType)
     CALL SplineTempInterpolateJAC(daaA4,daToffset,daaaKx4, &
-    raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT4,iActuallyDoDT, &
-    pProf,iProfileLayers,iSPlineType)
+      raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT4,iActuallyDoDT, &
+      pProf,iProfileLayers,iSPlineType)
     CALL SplineTempInterpolateJAC(daaA5,daToffset,daaaKx5, &
-    raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT5,iActuallyDoDT, &
-    pProf,iProfileLayers,iSPlineType)
+      raPTemp,raRtemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,daaT5,iActuallyDoDT, &
+      pProf,iProfileLayers,iSPlineType)
 
 ! then interpolate the five matrices in water partial pressure to get the
 ! Compressed Absorption Matrix for water
 !   daaKpro will have the daaAn interpolated in water amount
 ! note do not need daaQ as we know d(Rad)/dq ~ optdepth = daaAbsCoeff
     CALL WaterAmountJAC(daaA1,daaA2,daaA3,daaA4,daaA5, &
-    raPPart,raRPart,daaKpro,iNk,iKm,iKn,iUm,iUn,daaQ, &
-    pProf,iProfileLayers,iSPlineType)
+      raPPart,raRPart,daaKpro,iNk,iKm,iKn,iUm,iUn,daaQ, &
+      pProf,iProfileLayers,iSPlineType)
 
 ! multiply daaUx with daaKpro to get daaAbsCoeff
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-    iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro, &
-    iLDB,dBeta,daaAbsCoeff,iLDC)
+    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     IF (kJacobian > 0) THEN !do temperature jacobians
-        CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
-        raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
-        pProf,iProfileLayers,iSPlineType)
-        CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-        iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-        CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
-        iLDB,dBeta,daaDT,iLDC)
-        IF (iDoDQ > 0) THEN       !do amount jacobians
-            DO  iM=1,kMaxPtsJac
-                DO iN=1,kProfLayerJac
-                    daaDQ(iM,iN)=daaAbsCoeff(iM,iN)
-                END DO
-            END DO
-
-        END IF
+      CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
+          raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
+          pProf,iProfileLayers,iSPlineType)
+      CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
+          iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+      CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT, &
+          iLDB,dBeta,daaDT,iLDC)
+      IF (iDoDQ > 0) THEN       !do amount jacobians
+        daaDQ(1:kMaxPtsJac,1:kProfLayerJac)=daaAbsCoeff(1:kMaxPtsJac,1:kProfLayerJac)
+      END IF
     END IF
 
     RETURN
@@ -543,33 +520,33 @@ CONTAINS
 !     Do the spline Interpolation of the K vectors
 !     Loop over the K singular vectors
     DO iI=1,iNk
-    !       Loop over the layers
-        DO iL=iLowest,kProfLayer
-        !         Interpolate across kMaxWater for the profile amount
-            daXgiven(1)=0.1*raRPart(iL)
-            daXgiven(2)=1.0*raRPart(iL)
-            daXgiven(3)=3.3*raRPart(iL)
-            daXgiven(4)=6.7*raRPart(iL)
-            daXgiven(5)=10.0*raRPart(iL)
+      ! Loop over the layers
+      DO iL=iLowest,kProfLayer
+        ! Interpolate across kMaxWater for the profile amount
+        daXgiven(1)=0.1*raRPart(iL)
+        daXgiven(2)=1.0*raRPart(iL)
+        daXgiven(3)=3.3*raRPart(iL)
+        daXgiven(4)=6.7*raRPart(iL)
+        daXgiven(5)=10.0*raRPart(iL)
 
-            daYgiven(1)=daaA1(iI,iL)
-            daYgiven(2)=daaA2(iI,iL)
-            daYgiven(3)=daaA3(iI,iL)
-            daYgiven(4)=daaA4(iI,iL)
-            daYgiven(5)=daaA5(iI,iL)
-            CALL DSPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
+        daYgiven(1)=daaA1(iI,iL)
+        daYgiven(2)=daaA2(iI,iL)
+        daYgiven(3)=daaA3(iI,iL)
+        daYgiven(4)=daaA4(iI,iL)
+        daYgiven(5)=daaA5(iI,iL)
+        CALL DSPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
 
         ! directly take the Part Press amount in the actual profile as the X point
-            dXPT=raPPart(iL)
-            IF (dXPT < daXgiven(1)) THEN
-                dXPT=daXgiven(1)
-            END IF
-            IF (dXPT > daXgiven(5)) THEN
-                dXPT=daXgiven(5)
-            END IF
-            CALL DSPLIN(daXgiven,daYgiven,daY2,KMaxWater,dXPT,daaKpro(iI,iL))
+        dXPT=raPPart(iL)
+        IF (dXPT < daXgiven(1)) THEN
+          dXPT=daXgiven(1)
+        END IF
+        IF (dXPT > daXgiven(5)) THEN
+          dXPT=daXgiven(5)
+        END IF
+        CALL DSPLIN(daXgiven,daYgiven,daY2,KMaxWater,dXPT,daaKpro(iI,iL))
 
-        ENDDO
+      ENDDO
     ENDDO
 
     RETURN
@@ -620,33 +597,33 @@ CONTAINS
 
 ! loop over the layers
     DO iI=1,iNk                       !loop over the k singular Vectors
-        DO iL=iLowest,kProfLayer        !loop over the layers
-            daXgiven(1) = 0.1  * raRPart(iL)
-            daXgiven(2) = 1.0  * raRPart(iL)
-            daXgiven(3) = 3.3  * raRPart(iL)
-            daXgiven(4) = 6.6  * raRPart(iL)
-            daXgiven(5) = 10.0 * raRPart(iL)
+      DO iL=iLowest,kProfLayer        !loop over the layers
+        daXgiven(1) = 0.1  * raRPart(iL)
+        daXgiven(2) = 1.0  * raRPart(iL)
+        daXgiven(3) = 3.3  * raRPart(iL)
+        daXgiven(4) = 6.6  * raRPart(iL)
+        daXgiven(5) = 10.0 * raRPart(iL)
 
-            daYgiven(1) = daaT1(iI,iL)
-            daYgiven(2) = daaT2(iI,iL)
-            daYgiven(3) = daaT3(iI,iL)
-            daYgiven(4) = daaT4(iI,iL)
-            daYgiven(5) = daaT5(iI,iL)
+        daYgiven(1) = daaT1(iI,iL)
+        daYgiven(2) = daaT2(iI,iL)
+        daYgiven(3) = daaT3(iI,iL)
+        daYgiven(4) = daaT4(iI,iL)
+        daYgiven(5) = daaT5(iI,iL)
 
         ! directly take the Part Press amount in the actual profile as the X point
-            dXPT=raPPart(iL)
-            IF (dXPT < daXgiven(1)) THEN
-                dXPT=daXgiven(1)
-            END IF
-            IF (dXPT > daXgiven(5)) THEN
-                dXPT=daXgiven(5)
-            END IF
+        dXPT=raPPart(iL)
+        IF (dXPT < daXgiven(1)) THEN
+          dXPT=daXgiven(1)
+        END IF
+        IF (dXPT > daXgiven(5)) THEN
+          dXPT=daXgiven(5)
+        END IF
 
-            CALL DSPLY2(daXgiven,daYgiven,5,dYP1,dYPN,daY2,daWork)
-            CALL DSPLIN(daXgiven,daYgiven,daY2,5,dXPT,d)  !d is just a dummy
+        CALL DSPLY2(daXgiven,daYgiven,5,dYP1,dYPN,daY2,daWork)
+        CALL DSPLIN(daXgiven,daYgiven,daY2,5,dXPT,d)  !d is just a dummy
             daaT(iI,iL)=FirstDeriv(dXPT,daXgiven,daYgiven,daY2,5)
 
-        ENDDO
+      ENDDO
     ENDDO
 
     RETURN
