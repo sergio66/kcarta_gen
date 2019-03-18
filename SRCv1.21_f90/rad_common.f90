@@ -88,15 +88,15 @@ CONTAINS
 ! for the NLTE which is not used in this routine
     INTEGER :: iNLTEStart,iSTopNormalRadTransfer,iUpper
              
-    REAL :: raOutFrac(kProfLayer),rT
+    REAL :: raOutFrac(kProfLayer)
     REAL :: raVT1(kMixFilRows)
-    REAL :: bt2rad,t2s,rPlanck
+    REAL :: bt2rad,t2s,raPlanck(kMaxPts),raT(kMaxPts)
     INTEGER :: iFr1,troplayer
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
 ! for specular reflection
     REAL :: raSpecularRefl(kMaxPts)
-    INTEGER :: iSpecular,iFrX
+    INTEGER :: iSpecular,iFrX,iOr
 
 ! for NLTE
     REAL :: suncos,scos1,vsec1
@@ -125,32 +125,30 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
-        iL = iaRadLayer(iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
+      iL = iaRadLayer(iLay)
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
 
 ! note raVT1 is the array that has the interpolated bottom and top layer temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
-        raVT1(iFr) = raVTemp(iFr)
-    END DO
+    raVT1 = raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
     raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -167,22 +165,20 @@ CONTAINS
 ! find the highest layer that we need to output radiances for
     iHigh=-1
     DO iLay=1,iNp
-        IF (iaOp(iLay) > iHigh) THEN
-            iHigh = iaOp(iLay)
-        END IF
+      IF (iaOp(iLay) > iHigh) THEN
+        iHigh = iaOp(iLay)
+      END IF
     END DO
     write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
     write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
     write(kStdWarn,*) 'topindex in atmlist where rad required =',iHigh
           
-    DO iFr=1,kMaxPts
     ! initialize the solar and thermal contribution to 0
-        raSun(iFr)=0.0
-        raThermal(iFr)=0.0
+    raSun     = 0.0
+    raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        raInten(iFr) = ttorad(raFreq(iFr),rTSurf)
-        raSurface(iFr) = raInten(iFr)
-    END DO
+    raInten   = rattorad(raFreq,rTSurf)
+    raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
@@ -198,20 +194,20 @@ CONTAINS
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
 
 ! see if we have to add on the solar contribution
 ! this figures out the solar intensity at the ground
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
+      write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
 
     iSpecular = +1    !some specular refl, plus diffuse
@@ -221,20 +217,16 @@ CONTAINS
     raSunRefl(1)
 
     IF (iSpecular > 0) THEN
-        write(kStdErr,*) 'doing specular refl in rad_trans_SAT_LOOK_DOWN'
-        CALL loadspecular(raFreq,raSpecularRefl)
-        DO iFr=1,kMaxPts
-        ! aSpecularRefl(iFr) = 0.0272   !!! smooth water
-            raInten(iFr) = raSurface(iFr)*raUseEmissivity(iFr)+ &
-            raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-            raSun(iFr)*(raSpecularRefl(iFr) + raSunRefl(iFr))
-        END DO
+      write(kStdErr,*) 'doing specular refl in rad_trans_SAT_LOOK_DOWN'
+      CALL loadspecular(raFreq,raSpecularRefl)
+      !raSpecularRefl = 0.0272   !!! smooth water
+      raInten = raSurface*raUseEmissivity+ &
+            raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+            raSun*(raSpecularRefl + raSunRefl)
     ELSE
-        DO iFr=1,kMaxPts
-            raInten(iFr) = raSurface(iFr)*raUseEmissivity(iFr)+ &
-            raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-            raSun(iFr)*raSunRefl(iFr)
-        END DO
+      raInten = raSurface*raUseEmissivity+ &
+            raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+            raSun*raSunRefl
     END IF
 
 ! now we can compute the upwelling radiation!!!!!
@@ -244,134 +236,117 @@ CONTAINS
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! first do the bottommost layer (could be fractional)
     DO iLay=1,1
-        iL = iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp = raVT1(iL)
-    !         print *,iLay,rMPTemp,raaAbs(8000,iL),raLayAngles(MP2Lay(iL))
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      !         print *,iLay,rMPTemp,raaAbs(8000,iL),raLayAngles(MP2Lay(iL))
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaRadsX)   !!don't worry about raaRadsX here
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                iNumOutX = iNumOutX + 1
-                DO iFrX = 1,kMaxPts
-                    raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
-                END DO
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this bottom layer
-        DO iFr=1,kMaxPts
-            rT = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
-            rPlanck = ttorad(raFreq(iFr),rMPTemp)
-            raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+          iNumOutX = iNumOutX + 1
+          raaRadsX(:,iNumOutX) = raInten2
         END DO
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      END IF
+
+      ! now do the radiative transfer thru this bottom layer
+      raT = exp(-raaAbs(:,iL)*rFracBot/rCos)
+      raPlanck = rattorad(raFreq,rMPTemp)
+      raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
     DO iLay=2,iHigh-1
-        iL = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp = raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
-            write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
+        write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaRadsX)
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                iNumOutX = iNumOutX + 1
-                DO iFrX = 1,kMaxPts
-                    raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
-                END DO
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this complete layer
-        DO iFr=1,kMaxPts
-            rT = exp(-raaAbs(iFr,iL)/rCos)
-            rPlanck = ttorad(raFreq(iFr),rMPTemp)
-            raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+          iNumOutX = iNumOutX + 1
+          raaRadsX(:,iNumOutX) = raInten2
         END DO
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      END IF
+
+      ! now do the radiative transfer thru this complete layer
+      raT = exp(-raaAbs(:,iL)/rCos)
+      raPlanck = rattorad(raFreq,rMPTemp)
+      raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the topmost layer (could be fractional)
-    777 CONTINUE
+ 777 CONTINUE
     IF (iHigh > 1) THEN   !! else you have the ludicrous do iLay = 1,1
-    !! and rads get printed again!!!!!
-        DO iLay = iHigh,iHigh
-            iL = iaRadLayer(iLay)
-            rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-            rMPTemp = raVT1(iL)
+      !! and rads get printed again!!!!!
+      DO iLay = iHigh,iHigh
+        iL = iaRadLayer(iLay)
+        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        rMPTemp = raVT1(iL)
 
-            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-
-            IF (iDoSolar < 0) THEN
-                IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
-                    write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-                    DO iFr=1,iDp
-                        CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+        IF (iDoSolar < 0) THEN
+          IF ((iDp > 0) .AND. (iWriteToOutputFile > 0)) THEN
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+            DO iOr=1,iDp
+              CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                         raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                         raSun,-1,iNumLayer,rFracTop,rFracBot, &
                         iProfileLayers,raPressLevels, &
                         iNLTEStart,raaRadsX)
-                        CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                        iNumOutX = iNumOutX + 1
-                        DO iFrX = 1,kMaxPts
-                            raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
-                        END DO
-                    END DO
-                END IF
-            ELSE
-                IF (iDp == 1) THEN
-                    write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+              CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+              iNumOutX = iNumOutX + 1
+              raaRadsX(:,iNumOutX) = raInten2
+            END DO
+          END IF
+        ELSE
+          IF (iDp == 1) THEN
+            write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
 
-                    suncos = raSunAngles(iaRadLayer(1))           !! at surface
-                    scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
-                    vsec1  = raLayAngles(iaRadLayer(iNumLayer))   !! at TOA
+            suncos = raSunAngles(iaRadLayer(1))           !! at surface
+            scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
+            vsec1  = raLayAngles(iaRadLayer(iNumLayer))   !! at TOA
 
-                    suncos = cos(suncos*kPi/180.0)
-                    scos1  = cos(scos1*kPi/180.0)
-                    vsec1  = 1/cos(vsec1*kPi/180.0)
+            suncos = cos(suncos*kPi/180.0)
+            scos1  = cos(scos1*kPi/180.0)
+            vsec1  = 1/cos(vsec1*kPi/180.0)
 
-                    DO iFr=1,kMaxPts
-                        rT = exp(-raaAbs(iFr,iL)/rCos)
-                        rPlanck = ttorad(raFreq(iFr),rMPTemp)
-                        raInten2(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
-                    END DO
-                                
-                    CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
+            raT = exp(-raaAbs(:,iL)/rCos)
+            raPlanck = rattorad(raFreq,rMPTemp)
+            raInten2 = raPlanck*(1-raT) + raInten*raT
+                               
+            CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
                     iaRadLayer,iNumlayer,raInten2,rCO2MixRatio)
-                    iNumOutX = iNumOutX + 1
-                    DO iFrX = 1,kMaxPts
-                        raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
-                    END DO
-                !              print *,'abcde',raSunAngles(iaRadLayer(1)),suncos,raFreq(1),raInten(1),raInten2(1)
-                    IF ((iDp == 1) .AND. (iWriteToOutputFile > 0)) THEN
-                        CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                    END IF
+            iNumOutX = iNumOutX + 1
+            raaRadsX(:,iNumOutX) = raInten2
+            !              print *,'abcde',raSunAngles(iaRadLayer(1)),suncos,raFreq(1),raInten(1),raInten2(1)
+            IF ((iDp == 1) .AND. (iWriteToOutputFile > 0)) THEN
+              CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+            END IF
                                 
-                ELSEIF (iDp > 1) THEN
-                    write(kStdErr,*) 'oops in scatter_pclsam_cpde, at NLTE, dump more than 1 rad at TOA???'
-                    CALL DoStop
-                END IF
-            END IF            !! if iDoSolar
-        END DO              !! do iLay = iHigh,iHigh
+          ELSEIF (iDp > 1) THEN
+            write(kStdErr,*) 'oops in scatter_pclsam_cpde, at NLTE, dump more than 1 rad at TOA???'
+            CALL DoStop
+          END IF
+        END IF            !! if iDoSolar
+      END DO              !! do iLay = iHigh,iHigh
     END IF                !! if iHigh > 0
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -439,7 +414,7 @@ CONTAINS
     REAL :: raaRadsX(kMaxPts,kProfLayer)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
+    INTEGER :: iOr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
     REAL :: rCos,raInten2(kMaxPts),rMPTemp
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: rDum1,rDum2
@@ -450,9 +425,9 @@ CONTAINS
 ! for the NLTE which is not used in this routine
     INTEGER :: iNLTEStart,iSTopNormalRadTransfer,iUpper
              
-    REAL :: raOutFrac(kProfLayer),rT
+    REAL :: raOutFrac(kProfLayer),raT(kMaxPts)
     REAL :: raVT1(kMixFilRows)
-    REAL :: bt2rad,t2s,rPlanck
+    REAL :: bt2rad,t2s,raPlanck(kMaxPts)
     INTEGER :: iFr1,troplayer
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
@@ -465,7 +440,7 @@ CONTAINS
     rThermalRefl=1.0/kPi
           
 ! calculate cos(SatAngle)
-    rCos=cos(rSatAngle*kPi/180.0)
+    rCos = cos(rSatAngle*kPi/180.0)
 
 ! if iDoSolar = 1, then include solar contribution from file
 ! if iDoSolar = 0 then include solar contribution from T=5700K
@@ -484,32 +459,30 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
-        iL = iaRadLayer(iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
+      iL = iaRadLayer(iLay)
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
 
 ! note raVT1 is the array that has the interpolated bottom and top layer temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
-        raVT1(iFr) = raVTemp(iFr)
-    END DO
+    raVT1 = raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
     raVT1(iL) = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -526,9 +499,9 @@ CONTAINS
 ! find the lowest layer that we need to output radiances for
     iHigh = +100000000
     DO iLay=1,iNp
-        IF (iaOp(iLay) < iHigh) THEN
-            iHigh = iaOp(iLay)
-        END IF
+      IF (iaOp(iLay) < iHigh) THEN
+        iHigh = iaOp(iLay)
+      END IF
     END DO
     write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
     write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
@@ -537,26 +510,23 @@ CONTAINS
 ! see if we have to add on the solar contribution
 ! this figures out the solar intensity at the ground
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
+      write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
 
     iSpecular = +1    !some specular refl, plus diffuse
     iSpecular = -1    !no   specular refl, only diffuse
 
-    write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1), &
-    raSunRefl(1)
+    write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1),raSunRefl(1)
 
     iLay = 1
     iL = iaRadLayer(iLay)
     rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
     rMPTemp = sngl(kTSpace)
-    DO iFr=1,kMaxPts
-        rT = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
-        raInten(iFr) = ttorad(raFreq(iFr),rMPTemp)
-    END DO
+    raT = exp(-raaAbs(:,iL)*rFracBot/rCos)
+    raInten = rattorad(raFreq,rMPTemp)
 
 ! now we can compute the downwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
@@ -565,98 +535,86 @@ CONTAINS
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! first do the top layer (could be fractional)
     DO iLay=1,1
-        iL = iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp = raVT1(iL)
-    !         print *,iLay,rMPTemp,raaAbs(8000,iL),raLayAngles(MP2Lay(iL))
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      !         print *,iLay,rMPTemp,raaAbs(8000,iL),raLayAngles(MP2Lay(iL))
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaRadsX)   !!don't worry about raaRadsX here
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                iNumOutX = iNumOutX + 1
-                DO iFrX = 1,kMaxPts
-                    raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
-                END DO
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this bottom layer
-        DO iFr=1,kMaxPts
-            rT = exp(-raaAbs(iFr,iL)*rFracTop/rCos)
-            rPlanck = ttorad(raFreq(iFr),rMPTemp)
-            raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+          iNumOutX = iNumOutX + 1
+          raaRadsX(:,iNumOutX) = raInten2
         END DO
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      END IF
+
+      ! now do the radiative transfer thru this bottom layer
+      raT = exp(-raaAbs(:,iL)*rFracTop/rCos)
+      raPlanck = rattorad(raFreq,rMPTemp)
+      raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then go down thru the rest of the layers till the last but one(all will be full)
     DO iLay=2,iHigh-1
-        iL = iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp = raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaRadsX)
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                iNumOutX = iNumOutX + 1
-                DO iFrX = 1,kMaxPts
-                    raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
-                END DO
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this complete layer
-        DO iFr=1,kMaxPts
-            rT = exp(-raaAbs(iFr,iL)/rCos)
-            rPlanck = ttorad(raFreq(iFr),rMPTemp)
-            raInten(iFr) = rPlanck*(1-rT) + raInten(iFr)*rT
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+          iNumOutX = iNumOutX + 1
+          raaRadsX(:,iNumOutX) = raInten2
         END DO
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      END IF
+
+      ! now do the radiative transfer thru this complete layer
+      raT = exp(-raaAbs(:,iL)/rCos)
+      raPlanck = rattorad(raFreq,rMPTemp)
+      raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the bottommost layer (could be fractional)
-    777 CONTINUE
+ 777 CONTINUE
     IF (iHigh > 1) THEN   !! else you have the ludicrous do iLay = 1,1
-    !! and rads get printed again!!!!!
-        DO iLay = iHigh,iHigh
-            iL = iaRadLayer(iLay)
-            rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-            rMPTemp = raVT1(iL)
+      !! and rads get printed again!!!!!
+      DO iLay = iHigh,iHigh
+        iL = iaRadLayer(iLay)
+        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+        rMPTemp = raVT1(iL)
 
-            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-            IF (iDp > 0) THEN
-                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-                DO iFr=1,iDp
-                    CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+        IF (iDp > 0) THEN
+          write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+          DO iOr=1,iDp
+            CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
                     iNLTEStart,raaRadsX)
-                    CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                    iNumOutX = iNumOutX + 1
-                    DO iFrX = 1,kMaxPts
-                        raaRadsX(iFrX,iNumOutX) = raInten2(iFrX)
-                    END DO
-                END DO
-            END IF
-        END DO
+            CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+            iNumOutX = iNumOutX + 1
+            raaRadsX(:,iNumOutX) = raInten2
+          END DO
+        END IF
+      END DO
     END IF
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -759,8 +717,8 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
+    INTEGER :: iOr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),raPlanck(kMaxPts),rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
@@ -800,49 +758,45 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-        iL = iaRadLayer(iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+      iL = iaRadLayer(iLay)
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
 
     iCloudLayerTop = -1
     iCloudLayerBot = -1
     IF (raaScatterPressure(iAtm,1) > 0) THEN
-        write(kStdWarn,*) 'add absorptive cloud >- ',raaScatterPressure(iAtm,1)
-        write(kStdWarn,*) 'add absorptive cloud <- ',raaScatterPressure(iAtm,2)
-        write(kStdWarn,*) 'cloud params dme,iwp = ',raScatterDME(iAtm), &
-        raScatterIWP(iAtm)
-        CALL FIND_ABS_ASY_EXT(caaScatter(iAtm),raScatterDME(iAtm), &
+      write(kStdWarn,*) 'add absorptive cloud >- ',raaScatterPressure(iAtm,1)
+      write(kStdWarn,*) 'add absorptive cloud <- ',raaScatterPressure(iAtm,2)
+      write(kStdWarn,*) 'cloud params dme,iwp = ',raScatterDME(iAtm),raScatterIWP(iAtm)
+      CALL FIND_ABS_ASY_EXT(caaScatter(iAtm),raScatterDME(iAtm), &
         raScatterIWP(iAtm), &
         raaScatterPressure(iAtm,1),raaScatterPressure(iAtm,2), &
         raPressLevels,raFreq,iaRadLayer,iNumLayer, &
         raExtinct,raAbsCloud,raAsym,iCloudLayerTop,iCLoudLayerBot)
-        write(kStdWarn,*) 'first five cloud extinctions depths are : '
-        write(kStdWarn,*) (raExtinct(iL),iL=1,5)
+      write(kStdWarn,*) 'first five cloud extinctions depths are : '
+      write(kStdWarn,*) (raExtinct(iL),iL=1,5)
     END IF
 
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1=raVTemp
 
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
@@ -861,9 +815,9 @@ CONTAINS
 ! find the highest layer that we need to output radiances for
     iHigh = -1
     DO iLay=1,iNp
-        IF (iaOp(iLay) > iHigh) THEN
-            iHigh=iaOp(iLay)
-        END IF
+      IF (iaOp(iLay) > iHigh) THEN
+        iHigh=iaOp(iLay)
+      END IF
     END DO
     write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
     write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
@@ -872,115 +826,94 @@ CONTAINS
 ! note while computing downward solar/ thermal radiation, have to be careful
 ! for the BOTTOMMOST layer!!!!!!!!!!!
     DO iLay = 1,1
-        iL   = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = raaAbs(iFr,iL)*rFracBot + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracBot + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay) = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL   = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracBot + raExtinct
+        raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay) = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracBot/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
 
     DO iLay = 2,iNumLayer-1
-        iL   = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay)  = raaAbs(iFr,iL) + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay) = raaAbs(iFr,iL) + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay)  = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay)  = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL   = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay)  = raaAbs(:,iL) + raExtinct
+        raaLayTrans(:,iLay)  = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay)  = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
 
     DO iLay = iNumLayer,iNumLayer
-        iL = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = raaAbs(iFr,iL)*rFracTop + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracTop + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay) = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)*rFracTop/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracTop + raExtinct
+        raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay) = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracTop/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
           
-    DO iFr=1,kMaxPts
     ! initialize the solar and thermal contribution to 0
-        raSun(iFr)     = 0.0
-        raThermal(iFr) = 0.0
-        raInten(iFr)   = ttorad(raFreq(iFr),rTSurf)
-        raSurface(iFr) = raInten(iFr)
-    END DO
+    raSun     = 0.0
+    raThermal = 0.0
+    raInten   = rattorad(raFreq,rTSurf)
+    raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
 ! note iNLTEStart = kProfLayer + 1, unless NLTE computations done!
 ! so usually only the usual LTE computations are done!!
     IF (iNLTEStart > kProfLayer) THEN
-        iSTopNormalRadTransfer = iNumLayer  !!!normal rad transfer everywhere
-        write (kStdErr,*) 'Normal rad transfer .... no NLTE'
-        write (kStdErr,*) 'stop normal radtransfer at',iSTopNormalRadTransfer
-        write (kStdErr,*) 'should be calling rad_trans_SAT_LOOK_DOWN'
-        CALL DoStop
+      iSTopNormalRadTransfer = iNumLayer  !!!normal rad transfer everywhere
+      write (kStdErr,*) 'Normal rad transfer .... no NLTE'
+      write (kStdErr,*) 'stop normal radtransfer at',iSTopNormalRadTransfer
+      write (kStdErr,*) 'should be calling rad_trans_SAT_LOOK_DOWN'
+      CALL DoStop
     ELSE
-        iLay = 1
-        987 CONTINUE
-        iL=iaRadLayer(iLay)
-        iLModKprofLayer = mod(iL,kProfLayer)
-        IF (iLModKprofLayer == 0) THEN
-            iLModKprofLayer = kProfLayer
-        END IF
-        IF ((iLModKprofLayer < iNLTEStart) .AND. (iLay < iNumLayer)) THEN
-            iLay = iLay + 1
-            GOTO 987
-        END IF
-        iSTopNormalRadTransfer = iLay
-        write (kStdWarn,*) 'normal rad transfer only in lower atm.. then NLTE'
-        write (kStdWarn,*) 'stop normal radtransfer at ',iStopNormalRadTransfer
+      iLay = 1
+  987 CONTINUE
+      iL = iaRadLayer(iLay)
+      iLModKprofLayer = mod(iL,kProfLayer)
+      IF (iLModKprofLayer == 0) THEN
+        iLModKprofLayer = kProfLayer
+      END IF
+      IF ((iLModKprofLayer < iNLTEStart) .AND. (iLay < iNumLayer)) THEN
+        iLay = iLay + 1
+        GOTO 987
+      END IF
+      iSTopNormalRadTransfer = iLay
+      write (kStdWarn,*) 'normal rad transfer only in lower atm.. then NLTE'
+      write (kStdWarn,*) 'stop normal radtransfer at ',iStopNormalRadTransfer
     END IF
 
     DO iLay=1,iNumLayer
-        iL=iaRadLayer(iLay)
-    ! first get the Mixed Path temperature for this radiating layer
-        rMPTemp=raVT1(iL)
-        iLModKprofLayer = mod(iL,kProfLayer)
-        IF (iLModKprofLayer == 0) THEN
-            iLModKprofLayer = kProfLayer
-        END IF
-        IF (iLModKprofLayer < iNLTEStart) THEN
-        ! ormal, no LTE emission stuff
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rMPTemp)
-                raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
-            END DO
-        ELSEIF (iLModKprofLayer >= iNLTEStart) THEN
-        ! ew; LTE emission stuff
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rMPTemp) * raaPlanckCoeff(iFr,iL)
-                raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
-            END DO
-        END IF
+      iL=iaRadLayer(iLay)
+      ! first get the Mixed Path temperature for this radiating layer
+      rMPTemp=raVT1(iL)
+      iLModKprofLayer = mod(iL,kProfLayer)
+      IF (iLModKprofLayer == 0) THEN
+        iLModKprofLayer = kProfLayer
+      END IF
+      IF (iLModKprofLayer < iNLTEStart) THEN
+        ! normal, no LTE emission stuff
+        raPlanck = rattorad(raFreq,rMPTemp)
+        raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
+      ELSEIF (iLModKprofLayer >= iNLTEStart) THEN
+        !new; LTE emission stuff
+        raPlanck = rattorad(raFreq,rMPTemp) * raaPlanckCoeff(:,iL)
+        raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
+      END IF
     END DO
 
 ! now go from top of atmosphere down to the surface to compute the total
@@ -988,30 +921,27 @@ CONTAINS
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer, &
         iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
 
 ! see if we have to add on the solar contribution
 ! this figures out the solar intensity at the ground
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
+      write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
 
-    write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1), &
-    raSunRefl(1)
+    write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1),raSunRefl(1)
 
-    DO iFr=1,kMaxPts
-        raInten(iFr)=raSurface(iFr)*raUseEmissivity(iFr)+ &
-        raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-        raSun(iFr)*raSunRefl(iFr)
-    END DO
+    raInten=raSurface*raUseEmissivity+ &
+        raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+        raSun*raSunRefl
 
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
@@ -1020,57 +950,50 @@ CONTAINS
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! first do the bottommost layer (could be fractional)
     DO iLay=1,1
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this bottom layer
-        DO iFr=1,kMaxPts
-            raInten(iFr)=raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
         END DO
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      END IF
+
+      ! now do the radiative transfer thru this bottom layer
+      raInten=raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
     DO iLay=2,iHigh-1
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this complete layer
-        DO iFr=1,kMaxPts
-            raInten(iFr)=raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
         END DO
+      END IF
 
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      ! now do the radiative transfer thru this complete layer
+      raInten=raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
 
     END DO
 
@@ -1078,69 +1001,60 @@ CONTAINS
 ! then do the topmost layer (could be fractional)
     777 CONTINUE
     DO iLay=iHigh,iHigh
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
 
-        IF (iUpper >= 1) THEN
+      IF (iUpper >= 1) THEN
         !!! need to compute stuff at extra layers (100-200 km)
-            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-            IF (iDp >= 1) THEN
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+        IF (iDp >= 1) THEN
 
-                write(kStdWarn,*) 'Should output',iDp,' rad at',iLay,' rad layer'
-                write(kStdWarn,*) 'This is the top of the usual AIRS atmosphere'
-                write(kStdWarn,*) '   you have iDoUpperATM > 0'
-                write(kStdWarn,*) 'kCARTA will compute rad thru stratosphere'
-                write(kStdWarn,*) 'and output stuff into the blah_UA file'
-                write(kStdWarn,*) 'Finally kCARTA will output stuff at the TOP of'
-                write(kStdWarn,*) 'stratosphere into both this and the UA file'
+          write(kStdWarn,*) 'Should output',iDp,' rad at',iLay,' rad layer'
+          write(kStdWarn,*) 'This is the top of the usual AIRS atmosphere'
+          write(kStdWarn,*) '   you have iDoUpperATM > 0'
+          write(kStdWarn,*) 'kCARTA will compute rad thru stratosphere'
+          write(kStdWarn,*) 'and output stuff into the blah_UA file'
+          write(kStdWarn,*) 'Finally kCARTA will output stuff at the TOP of'
+          write(kStdWarn,*) 'stratosphere into both this and the UA file'
 
-            ! o radiative transfer thru this layer
-                DO iFr=1,kMaxPts
-                    raInten(iFr) = &
-                    raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
-                END DO
+          ! do radiative transfer thru this layer
+          raInten = raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
 
-            ! ow do complete rad transfer thru upper part of atmosphere
-                CALL UpperAtmRadTrans(raInten,raFreq,raLayAngles(MP2Lay(iL)), &
+          ! now do complete rad transfer thru upper part of atmosphere
+          CALL UpperAtmRadTrans(raInten,raFreq,raLayAngles(MP2Lay(iL)), &
                 iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
                 raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iDumpAllUARads)
-            !!! forget about interpolation thru the layers, just dump out the
-            !!! radiance at the top of stratosphere (120-200 km)
+          !!! forget about interpolation thru the layers, just dump out the
+          !!! radiance at the top of stratosphere (120-200 km)
 
-                write(kStdWarn,*) 'finally outputting radiances at TOTAL Complete TOA into'
-                write(kStdWarn,*) 'usual binary file (iLay = ',iLay,')'
+          write(kStdWarn,*) 'finally outputting radiances at TOTAL Complete TOA into'
+          write(kStdWarn,*) 'usual binary file (iLay = ',iLay,')'
 
-                DO iFr=1,iDp
-                    CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-                END DO
-            END IF
+          DO iOr=1,iDp
+            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+          END DO
         END IF
+      END IF
 
-        IF (iUpper < 1) THEN
+      IF (iUpper < 1) THEN
         !!! no need to compute stuff at extra layers (100-200 km)
         !!! so just do usual stuff
         !!! see if this mixed path layer is in the list iaOp to be output
         !!! since we might have to do fractions!
-            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-            IF (iDp > 0) THEN
-                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-                DO iFr=1,iDp
-                    CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+          IF (iDp > 0) THEN
+            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+            DO iOr=1,iDp
+              CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
                     iNLTEStart,raaPlanckCoeff)
-                    CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                END DO
-            END IF
+              CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+            END DO
+          END IF
         END IF
-
-    !c no need to do radiative transfer thru this layer
-    !c        DO iFr=1,kMaxPts
-    !c          raInten(iFr)=raaEmission(iFr,iLay)+
-    !c     $        raInten(iFr)*raaLayTrans(iFr,iLay)
-    !c          END DO
 
     END DO
 
@@ -1245,8 +1159,8 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
-    REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
+    INTEGER :: iOr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
+    REAL :: raaLayTrans(kMaxPts,kProfLayer),raPlanck(kMaxPts),rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
     REAL :: raSumLayEmission(kMaxPts),raSurfaceEmissionToSpace(kMaxPts)
@@ -1294,48 +1208,45 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-        iL = iaRadLayer(iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+      iL = iaRadLayer(iLay)
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
 
     iCloudLayerTop = -1
     iCloudLayerBot = -1
     IF (raaScatterPressure(iAtm,1) > 0) THEN
-        write(kStdWarn,*) 'add absorptive cloud >- ',raaScatterPressure(iAtm,1)
-        write(kStdWarn,*) 'add absorptive cloud <- ',raaScatterPressure(iAtm,2)
-        write(kStdWarn,*) 'cloud params dme,iwp = ',raScatterDME(iAtm), &
-        raScatterIWP(iAtm)
-        CALL FIND_ABS_ASY_EXT(caaScatter(iAtm),raScatterDME(iAtm), &
+      write(kStdWarn,*) 'add absorptive cloud >- ',raaScatterPressure(iAtm,1)
+      write(kStdWarn,*) 'add absorptive cloud <- ',raaScatterPressure(iAtm,2)
+      write(kStdWarn,*) 'cloud params dme,iwp = ',raScatterDME(iAtm),raScatterIWP(iAtm)
+     CALL FIND_ABS_ASY_EXT(caaScatter(iAtm),raScatterDME(iAtm), &
         raScatterIWP(iAtm), &
         raaScatterPressure(iAtm,1),raaScatterPressure(iAtm,2), &
         raPressLevels,raFreq,iaRadLayer,iNumLayer, &
         raExtinct,raAbsCloud,raAsym,iCloudLayerTop,iCLoudLayerBot)
-        write(kStdWarn,*) 'first five cloud extinctions depths are : '
-        write(kStdWarn,*) (raExtinct(iL),iL=1,5)
+      write(kStdWarn,*) 'first five cloud extinctions depths are : '
+      write(kStdWarn,*) (raExtinct(iL),iL=1,5)
     END IF
 
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1=raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
     raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -1353,9 +1264,9 @@ CONTAINS
 ! find the highest layer that we need to output radiances for
     iHigh = -1
     DO iLay=1,iNp
-        IF (iaOp(iLay) > iHigh) THEN
-            iHigh=iaOp(iLay)
-        END IF
+      IF (iaOp(iLay) > iHigh) THEN
+        iHigh=iaOp(iLay)
+      END IF
     END DO
     write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
     write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
@@ -1364,89 +1275,70 @@ CONTAINS
 ! note while computing downward solar/ thermal radiation, have to be careful
 ! for the BOTTOMMOST layer!!!!!!!!!!!
     DO iLay = 1,1
-        iL   = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = raaAbs(iFr,iL)*rFracBot + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracBot + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay) = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL   = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracBot + raExtinct
+        raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay) = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracBot/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
 
     DO iLay = 2,iNumLayer-1
-        iL   = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay)  = raaAbs(iFr,iL) + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay) = raaAbs(iFr,iL) + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay)  = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay)  = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL   = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay)  = raaAbs(:,iL) + raExtinct
+        raaLayTrans(:,iLay)  = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay)  = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
 
     DO iLay = iNumLayer,iNumLayer
-        iL = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = raaAbs(iFr,iL)*rFracTop + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracTop + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay) = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)*rFracTop/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracTop + raExtinct
+        raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay) = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracTop/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
           
-    DO iFr=1,kMaxPts
     ! initialize the solar and thermal contribution to 0
-        raSun(iFr)     = 0.0
-        raThermal(iFr) = 0.0
-        raInten(iFr)   = ttorad(raFreq(iFr),rTSurf)
-        raSurface(iFr) = raInten(iFr)
-    END DO
+    raSun     = 0.0
+    raThermal = 0.0
+    raInten   = rattorad(raFreq,rTSurf)
+    raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
 ! note iNLTEStart = kProfLayer + 1, unless NLTE computations done!
 ! so usually only the usual LTE computations are done!!
     IF (iNLTEStart <= kProfLayer) THEN
-        write (kStdWarn,*) 'this routine expects SARTA NLTE',iNLTEStart
-        CALL DoStop
+      write (kStdWarn,*) 'this routine expects SARTA NLTE',iNLTEStart
+      CALL DoStop
     ELSE
-    !        write (kStdWarn,*) 'Normal rad transfer .... '
-    !        write (kStdWarn,*) 'adding on SARTA NLTE if DAYTIME'
-        iLay = 1
-        iSTopNormalRadTransfer = kProfLayer + 1
+      !        write (kStdWarn,*) 'Normal rad transfer .... '
+      !        write (kStdWarn,*) 'adding on SARTA NLTE if DAYTIME'
+      iLay = 1
+      iSTopNormalRadTransfer = kProfLayer + 1
     END IF
 
     DO iLay=1,iNumLayer
-        iL=iaRadLayer(iLay)
-    ! first get the Mixed Path temperature for this radiating layer
-        rMPTemp=raVT1(iL)
-        DO iFr=1,kMaxPts
-            rPlanck = ttorad(raFreq(iFr),rMPTemp)
-            raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
-        END DO
+      iL=iaRadLayer(iLay)
+      ! first get the Mixed Path temperature for this radiating layer
+      rMPTemp=raVT1(iL)
+      raPlanck = rattorad(raFreq,rMPTemp)
+      raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
     END DO
 
 ! now go from top of atmosphere down to the surface to compute the total
@@ -1454,42 +1346,37 @@ CONTAINS
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer, &
         iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
 
 ! see if we have to add on the solar contribution
 ! this figures out the solar intensity at the ground
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
+      write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
 
-    write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1), &
-    raSunRefl(1)
+    write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1),raSunRefl(1)
 
     iSpecular = +1    !some specular refl, plus diffuse
     iSpecular = -1    !no   specular refl, only diffuse
     IF (iSpecular > 0) THEN
-        write(kStdErr,*) 'doing specular refl in rad_trans_SAT_LOOK_DOWN_NLTE_FAST'
-        CALL loadspecular(raFreq,raSpecularRefl)
-        DO iFr=1,kMaxPts
-        ! aSpecularRefl(iFr) = 0.0272   !!! smooth water
-            raInten(iFr) = raSurface(iFr)*raUseEmissivity(iFr)+ &
-            raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-            raSun(iFr)*(raSpecularRefl(iFr) + raSunRefl(iFr))
-        END DO
+      write(kStdErr,*) 'doing specular refl in rad_trans_SAT_LOOK_DOWN_NLTE_FAST'
+      CALL loadspecular(raFreq,raSpecularRefl)
+      ! raSpecularRefl = 0.0272   !!! smooth water
+      raInten = raSurface*raUseEmissivity+ &
+            raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+            raSun*(raSpecularRefl + raSunRefl)
     ELSE
-        DO iFr=1,kMaxPts
-            raInten(iFr) = raSurface(iFr)*raUseEmissivity(iFr)+ &
-            raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-            raSun(iFr)*raSunRefl(iFr)
-        END DO
+      raInten = raSurface*raUseEmissivity+ &
+            raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+            raSun*raSunRefl
     END IF
 
 ! now we can compute the upwelling radiation!!!!!
@@ -1499,89 +1386,79 @@ CONTAINS
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! first do the bottommost layer (could be fractional)
     DO iLay=1,1
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this bottom layer
-        DO iFr=1,kMaxPts
-            raInten(iFr)=raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
         END DO
+      END IF
+
+      ! now do the radiative transfer thru this bottom layer
+      raInten=raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
     DO iLay=2,iHigh-1
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        DO iOr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iOr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this complete layer
-        DO iFr=1,kMaxPts
-            raInten(iFr)=raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
         END DO
+      END IF
+
+      ! now do the radiative transfer thru this complete layer
+      raInten=raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the topmost layer (could be fractional)
-    777 CONTINUE
+ 777 CONTINUE
     DO iLay=iHigh,iHigh
-    ! o rad transfer to TOA (80 km)
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
-        DO iFr=1,kMaxPts
-            raInten(iFr)=raaEmission(iFr,iLay)+ &
-            raInten(iFr)*raaLayTrans(iFr,iLay)
-        END DO
+      ! do rad transfer to TOA (80 km)
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      raInten=raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
 
-        suncos = raSunAngles(iaRadLayer(1))           !! at surface
-        scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
-        vsec1  = raLayAngles(iaRadLayer(iNumLayer))   !! at TOA
+      suncos = raSunAngles(iaRadLayer(1))           !! at surface
+      scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
+      vsec1  = raLayAngles(iaRadLayer(iNumLayer))   !! at TOA
 
-        suncos = cos(suncos*kPi/180.0)
-        scos1  = cos(scos1*kPi/180.0)
-        vsec1  = 1/cos(vsec1*kPi/180.0)
+      suncos = cos(suncos*kPi/180.0)
+      scos1  = cos(scos1*kPi/180.0)
+      vsec1  = 1/cos(vsec1*kPi/180.0)
 
-        IF (iDoSolar >= 0) THEN
-        !         do iFr = 1,iNumlayer
-        !           write(kStdWarn,*) iFr,iaRadLayer(iFr),raSunAngles(iaRadLayer(iFr))
-        !           end do
-            write(kStdWarn,*)'day .... add SARTA_NLTE at solangle for chunk ',raSunAngles(iaRadLayer(1)),raFreq(1)
-            CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
+      IF (iDoSolar >= 0) THEN
+       write(kStdWarn,*)'day .... add SARTA_NLTE at solangle for chunk ',raSunAngles(iaRadLayer(1)),raFreq(1)
+       CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
             iaRadLayer,iNumlayer,raInten,rCO2MixRatio)
-        ELSE
-            write(kStdWarn,*)'nighttime ... do not need SARTA_NLTE'
-        END IF
+      ELSE
+        write(kStdWarn,*)'nighttime ... do not need SARTA_NLTE'
+      END IF
 
-        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+      CALL wrtout(iIOUN,caOutName,raFreq,raInten)
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^

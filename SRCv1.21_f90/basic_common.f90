@@ -807,6 +807,58 @@ CONTAINS
     end function rattorad
 
 !************************************************************************
+! this subroutine changes the brightness temperatures to intensities
+! for an array
+!    DOUBLE PRECISION function dattorad(raf,rBT) RESULT(raX)
+    Function dattorad(daf,dBT)
+
+! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
+! Constants; values from NIST (CODATA98)
+!   c = 2.99792458e+08;  % speed of light      299 792 458 m s-1
+!   h = 6.62606876e-34;  % Planck constant     6.626 068 76 x 10-34 J s
+!   k = 1.3806503e-23;   % Boltzmann constant  1.380 6503 x 10-23 J K-1
+!   c1 = 2*h*c*c * 1e+11;  % Changed 1e+8 to 1e+11 to convert Watts to milliWatts
+!   c2 = (h*c/k) * 100;
+
+! at small T, exp(c2 fr/T) >>> 1
+!   rad --> c1 fr^3  exp(-c2 fr/T)
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raf = wavenumber, rBT = brightness temp
+    DOUBLE PRECISION :: daf(kBloatPts),dBT
+    DOUBLE PRECISION :: daX(kBloatPts)
+    DOUBLE PRECISION :: dattorad(kBloatPts)
+
+! local variables
+    DOUBLE PRECISION :: d1,d2,daPlanck(kBloatPts)
+    INTEGER :: iInt
+     
+    d1 = (kPlanck1)
+    d2 = (kPlanck2)
+
+!! 10^10 = e^23.03
+!! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
+!! 10^38  = 87.49
+          
+    daPlanck = d2*daf/dBT
+    DO iInt = 1,kBloatPts
+      IF (daPlanck(iInt) > 87.49) THEN
+        daPlanck(iInt) = 1.0e38
+      ELSE
+        daPlanck(iInt) = dexp(daPlanck(iInt)) - 1
+      END IF
+    END DO
+
+    daX = d1*(daf**3)/daPlanck
+
+    dattorad = daX
+
+    RETURN
+    end function dattorad
+
+!************************************************************************
 ! this function converts the Mixed Path number to a layer number
     INTEGER FUNCTION MP2Lay(iNum)
      

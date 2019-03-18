@@ -91,30 +91,28 @@ CONTAINS
     rPts = 10000.0/(raFreq(kMaxPts)-raFreq(1))
 
 ! for safety, set everything to default 1.0
-    DO iI=1,kMaxPts
-        raSunRefl(iI) = 1.0
-    END DO
+    raSunRefl = 1.0
 
 ! first do any necessary linear interpolations
 ! go thru wavenumber dependent regions ... if there are iaSetSolarRefl(iAtm)
 ! in the emissivity file, then there are iaSetSolarRefl(iAtm)-1 regions
     DO iJ=1,iaSetSolarRefl(iAtm)
-        raX(iJ) = raaaSetSolarRefl(iAtm,iJ,1)
-        raY(iJ) = raaaSetSolarRefl(iAtm,iJ,2)
+      raX(iJ) = raaaSetSolarRefl(iAtm,iJ,1)
+      raY(iJ) = raaaSetSolarRefl(iAtm,iJ,2)
     END DO
     IF (raX(1) > raX(2)) THEN
-        DO iJ=1,iaSetSolarRefl(iAtm)
-            raSwap(iJ) = raX(iaSetSolarRefl(iAtm)-iJ+1)
-        END DO
-        DO iJ=1,iaSetSolarRefl(iAtm)
-            raX(iJ) = raSwap(iJ)
-        END DO
-        DO iJ=1,iaSetSolarRefl(iAtm)
-            raSwap(iJ) = raY(iaSetSolarRefl(iAtm)-iJ+1)
-        END DO
-        DO iJ=1,iaSetSolarRefl(iAtm)
-            raY(iJ) = raSwap(iJ)
-        END DO
+      DO iJ=1,iaSetSolarRefl(iAtm)
+        raSwap(iJ) = raX(iaSetSolarRefl(iAtm)-iJ+1)
+      END DO
+      DO iJ=1,iaSetSolarRefl(iAtm)
+        raX(iJ) = raSwap(iJ)
+      END DO
+      DO iJ=1,iaSetSolarRefl(iAtm)
+        raSwap(iJ) = raY(iaSetSolarRefl(iAtm)-iJ+1)
+      END DO
+      DO iJ=1,iaSetSolarRefl(iAtm)
+        raY(iJ) = raSwap(iJ)
+      END DO
     END IF
 
 ! this was before 09/22/08
@@ -129,42 +127,34 @@ CONTAINS
     r1    = raaaSetSolarRefl(iAtm,iJ,1)
     rEms1 = raaaSetSolarRefl(iAtm,iJ,2)
     IF (r1 > raFreq(1)) THEN
-    ! get the stop index point
-        iStop = iNT((r1-raFreq(1))*rPts)
-        IF (iStop > kMaxPts) THEN
-            iStop = kMaxPts
-        END IF
-        DO iI=1,iStop
-            raSunRefl(iI) = rEms1
-        END DO
+      ! get the stop index point
+      iStop = iNT((r1-raFreq(1))*rPts)
+      IF (iStop > kMaxPts) THEN
+        iStop = kMaxPts
+      END IF
+      raSunRefl(1:iStop) = rEms1
     END IF
 
     iJ    = iaSetSolarRefl(iAtm)
     r2    = raaaSetSolarRefl(iAtm,iJ,1)
     rEms2 = raaaSetSolarRefl(iAtm,iJ,2)
     IF (r2 < raFreq(kMaxPts)) THEN
-    ! get the start index point
-        iStart = iNT((r2-raFreq(1))*rPts)
-        IF (iStart < 1) THEN
-            iStart = 1
-        END IF
-        DO iI = iStart,kMaxPts
-            raSunRefl(iI) = rEms2
-        END DO
+      ! get the start index point
+      iStart = iNT((r2-raFreq(1))*rPts)
+      IF (iStart < 1) THEN
+        iStart = 1
+      END IF
+      raSunRefl(iStart:kMaxPts) = rEms2
     END IF
 
 !!!!accordin to DISORT, for energy conservation, 1 = e + b
 !!!(assuming that the bidir reflectance b is isotropic)
     IF (kScatter > 0) THEN
-        DO iI=1,kMaxPts
-        !          DISORTraBiDirRefl(iI) = (1.0 - raSunRefl(iI))*1.0d0
-            DISORTraBiDirRefl(iI) = raSunRefl(iI)*1.0d0
-        END DO
+      DISORTraBiDirRefl = raSunRefl*1.0d0
     END IF
           
     write (kStdWarn,*) 'Solar Reflectance 00001 = ',raFreq(1),raSunRefl(1)
-    write (kStdWarn,*) 'Solar Reflectance 10000 = ', &
-    raFreq(kMaxPts),raSunRefl(kMaxPts)
+    write (kStdWarn,*) 'Solar Reflectance 10000 = ',raFreq(kMaxPts),raSunRefl(kMaxPts)
 
     RETURN
     end SUBROUTINE SetSurfaceSolarReflectance
@@ -203,43 +193,39 @@ CONTAINS
     INTEGER :: iI,iJ,iStart,iSTop
     REAL :: r1,r2,rEms1,rEms2,rSlope,rPts,rInt
 
-! ompute number of points per wavenumber eg in 805-830, have 10000 pts
-! or 25 cm-1 ==> 400 pts per 1 cm-1
+! compute number of points per wavenumber eg in 805-830, have 10000 pts
+! for 25 cm-1 ==> 400 pts per 1 cm-1
     rPts = 10000.0/(raFreq(kMaxPts)-raFreq(1))
 
 ! for safety, set everything to default 1.0
-    DO iI=1,kMaxPts
-        raUseEmissivity(iI) = 1.0
-    END DO
+    raUseEmissivity = 1.0
 
 ! first do any necessary linear interpolations
 ! now go thru the wavenumber dependent regions ... if there are iaSetEms(iAtm)
 ! in the emissivity file, then there are iaSetEms(iAtm)-1 regions
     DO iJ=1,iaSetEms(iAtm)-1
-        r1    = raaaSetEmissivity(iAtm,iJ,1)
-        rEms1 = raaaSetEmissivity(iAtm,iJ,2)
-        r2    = raaaSetEmissivity(iAtm,iJ+1,1)
-        rEms2 = raaaSetEmissivity(iAtm,iJ+1,2)
-        IF ((r1 <= raFreq(kMaxPts)) .AND. (r2 >= raFreq(1))) THEN
+      r1    = raaaSetEmissivity(iAtm,iJ,1)
+      rEms1 = raaaSetEmissivity(iAtm,iJ,2)
+      r2    = raaaSetEmissivity(iAtm,iJ+1,1)
+      rEms2 = raaaSetEmissivity(iAtm,iJ+1,2)
+      IF ((r1 <= raFreq(kMaxPts)) .AND. (r2 >= raFreq(1))) THEN
         ! get the starting index point
-            IF (r1 <=  raFreq(1)) THEN
-                iStart = 1
-            ELSE
-                iStart = iNT((r1-raFreq(1))*rPts)
-            END IF
-        ! get the stopping index point
-            IF (r2 >  raFreq(kMaxPts)) THEN
-                iStop = kMaxPts
-            ELSE
-                iStop = iNT((r2-raFreq(1))*rPts)
-            END IF
-        ! now set the emissivities! linearly interpolate between r1,r2 and current pt
-            rSlope=(rEms2-rEms1)/(r2-r1) !slope of the line
-            rInt = rEms2-rSlope*r2
-            DO iI = iStart,iStop
-                raUseEmissivity(iI) = raFreq(iI)*rSlope + rInt
-            END DO
+        IF (r1 <=  raFreq(1)) THEN
+          iStart = 1
+        ELSE
+          iStart = iNT((r1-raFreq(1))*rPts)
         END IF
+        ! get the stopping index point
+        IF (r2 >  raFreq(kMaxPts)) THEN
+          iStop = kMaxPts
+        ELSE
+          iStop = iNT((r2-raFreq(1))*rPts)
+        END IF
+        ! now set the emissivities! linearly interpolate between r1,r2 and current pt
+        rSlope=(rEms2-rEms1)/(r2-r1) !slope of the line
+        rInt = rEms2-rSlope*r2
+        raUseEmissivity(iStart:iStop) = raFreq(iStart:iStop)*rSlope + rInt
+      END IF
     END DO
 
 ! now see if we need to set the constant emissivities, depending on
@@ -248,28 +234,24 @@ CONTAINS
     r1    = raaaSetEmissivity(iAtm,iJ,1)
     rEms1 = raaaSetEmissivity(iAtm,iJ,2)
     IF (r1 > raFreq(1)) THEN
-    ! get the stop index point
-        iStop = iNT((r1-raFreq(1))*rPts)
-        IF (iStop > kMaxPts) THEN
-            iStop = kMaxPts
-        END IF
-        DO iI=1,iStop
-            raUseEmissivity(iI) = rEms1
-        END DO
+      ! get the stop index point
+      iStop = iNT((r1-raFreq(1))*rPts)
+      IF (iStop > kMaxPts) THEN
+        iStop = kMaxPts
+      END IF
+      raUseEmissivity(1:iStop) = rEms1
     END IF
 
     iJ    = iaSetEms(iAtm)
     r2    = raaaSetEmissivity(iAtm,iJ,1)
     rEms2 = raaaSetEmissivity(iAtm,iJ,2)
     IF (r2 < raFreq(kMaxPts)) THEN
-    ! get the start index point
-        iStart = iNT((r2-raFreq(1))*rPts)
-        IF (iStart < 1) THEN
-            iStart = 1
-        END IF
-        DO iI = iStart,kMaxPts
-            raUseEmissivity(iI) = rEms2
-        END DO
+      ! get the start index point
+      iStart = iNT((r2-raFreq(1))*rPts)
+      IF (iStart < 1) THEN
+        iStart = 1
+      END IF
+      raUseEmissivity(iStart:kMaxPts) = rEms2
     END IF
 
 !!!!accordin to DISORT, for energy conservation, 1 = e + b
@@ -309,17 +291,8 @@ CONTAINS
 
 ! find the weight
     rL = raaMix(iIpmix,iGas)
-
-! add on contribution of the iGas th gas to the iIpmix th row of raaSum
-!      DO iL = 1,50
-!        print *,iL,raaMix(50,iL)
-!      END DO
-!      Call DoStop
-!      print *,iGas,iIpmix,iL,rL
-                
-    DO iFreq=1,kMaxPts
-        raaSum(iFreq,iIpmix) = raaSum(iFreq,iIpmix)+rL*raaGas(iFreq,iL)
-    END DO
+            
+    raaSum(:,iIpmix) = raaSum(:,iIpmix)+rL*raaGas(:,iL)
 
     RETURN
     end SUBROUTINE Accumulate
@@ -360,7 +333,7 @@ CONTAINS
 ! raExtraSun = solar radiation incident at posn of instrument NOT USED!
     REAL :: raExtraSun(kMaxPts)
     REAL :: rSunTemp,rOmegaSun,rSunAngle
-    REAL :: r1,r2,rPlanck,rCos,raKabs(kMaxPts)
+    REAL :: r1,r2,raPlanck(kMaxPts),rCos,raKabs(kMaxPts)
     INTEGER :: iDoSolar,iL,iI,iFr,iExtraSun
     INTEGER :: iaRadLayerTemp(kMixFilRows),iT,iLay
      
@@ -369,28 +342,22 @@ CONTAINS
 
 !!! raSun will be in units of mW/m2/sr/cm-1 with NO sun solidangle correction
     IF (iDoSolar == 0) THEN
+      write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
+      rSunTemp = kSunTemp
+      !compute the Plank radiation from the sun
+      raSun = rattorad(raFreq,rSunTemp)
+    ELSEIF (iDoSolar == 1) THEN
+      IF (raFreq(1) >= 605) THEN
+        write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
+        !read in data from file
+        CALL ReadSolarData(raFreq,raSun,iTag)
+      ELSEIF (raFreq(1) < 605) THEN
+        !! who cares about accurate sun irradiance, solar contribution is so small
         write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
         rSunTemp = kSunTemp
-        DO iFr=1,kMaxPts
-        ! ompute the Plank radiation from the sun
-            rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0
-            raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-        END DO
-    ELSEIF (iDoSolar == 1) THEN
-        IF (raFreq(1) >= 605) THEN
-            write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
-        ! ead in data from file
-            CALL ReadSolarData(raFreq,raSun,iTag)
-        ELSEIF (raFreq(1) < 605) THEN
-        !! who cares, solar contribution is so small
-            write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
-            rSunTemp = kSunTemp
-            DO iFr=1,kMaxPts
-            ! compute the Plank radiation from the sun
-                rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0
-                raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-            END DO
-        END IF
+        ! compute the Plank radiation from the sun
+        raSun = rattorad(raFreq,rSunTemp)
+      END IF
     END IF
 
 !! now do the solid angle correction
@@ -402,10 +369,8 @@ CONTAINS
     rCos      = cos(rSunAngle)
            
 ! now adjust raSun by cos(rSunAngle) * rSolidAngle
-    DO iFr=1,kMaxPts
-        raSun(iFr) = raSun(iFr)*rCos*rOmegaSun      !!!!this is correct
-        raKAbs(iFr) = 0.0
-    END DO
+    raSun = raSun*rCos*rOmegaSun      !!!!this is correct
+    raKAbs = 0.0
 
     RETURN
     end SUBROUTINE SolarTOA
@@ -461,93 +426,75 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iLay,iL
-    REAL :: r1,r2,rPlanck,rMPTemp
+    REAL :: r1,r2,raPlanck(kMaxPts),rMPTemp
 
 ! to do the angular integration
-    REAL :: rAngleEmission,rAngleTrans
+    REAL :: raAngleEmission(kMaxPts),rAangleTrans(kMaxPts)
 
     r1 = sngl(kPlanck1)
     r2 = sngl(kPlanck2)
 
     IF ((iS > iE) .AND. (iUpDown /= -1)) THEN
-        write(kStdErr,*) 'iS,iE = ',iS,iE
-        write(kStdErr,*) 'Error!iS > iE but you want radiation to go up'
-        CALL DoSTOP
+      write(kStdErr,*) 'iS,iE = ',iS,iE
+      write(kStdErr,*) 'Error!iS > iE but you want radiation to go up'
+      CALL DoSTOP
     ELSE IF ((iS < iE) .AND. (iUpDown /= +1)) THEN
-        write(kStdErr,*) 'iS,iE = ',iS,iE
-        write(kStdErr,*) 'Error!iS < iE but you want radn to go down'
-        CALL DoSTOP
+      write(kStdErr,*) 'iS,iE = ',iS,iE
+      write(kStdErr,*) 'Error!iS < iE but you want radn to go down'
+      CALL DoSTOP
     END IF
 
     IF (iUpDown > 0) THEN
-        DO iLay = iS,iS
-            iL = iaRadLayer(iLay)
-            rMPTemp = raVT1(iL)
-            DO iFr=1,kMaxPts
-                rAngleTrans    = raaAbs(iFr,iL)*rFracBot
-                rAngleTrans    = exp(-rAngleTrans/cos(raFreqAngle(iFr)))
-                rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-                rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
-                rAngleEmission = (1.0-rAngleTrans)*rPlanck
-                raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
-            END DO
-        END DO
-        DO iLay = iS+1,iE,iUpDown
-            iL = iaRadLayer(iLay)
-            rMPTemp = raVT1(iL)
-            DO iFr=1,kMaxPts
-                rAngleTrans    = exp(-raaAbs(iFr,iL)/cos(raFreqAngle(iFr)))
-                rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-                rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
-                rAngleEmission = (1.0-rAngleTrans)*rPlanck
-                raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
-            END DO
-        END DO
-
+      DO iLay = iS,iS
+        iL = iaRadLayer(iLay)
+        rMPTemp = raVT1(iL)
+        raAngleTrans    = raaAbs(:,iL)*rFracBot
+        raAngleTrans    = exp(-raAngleTrans/cos(raFreqAngle))
+        raPlanck        = rattorad(raFreq,rMPTemp)
+        raAngleEmission = (1.0-raAngleTrans)*raPlanck
+        raTemp          = raAngleEmission + raTemp*raAngleTrans
+      END DO
+      DO iLay = iS+1,iE,iUpDown
+        iL = iaRadLayer(iLay)
+        rMPTemp = raVT1(iL)
+        raAngleTrans    = exp(-raaAbs(:,iL)/cos(raFreqAngle))
+        raPlanck        = rattorad(raFreq,rMPTemp)
+        raAngleEmission = (1.0-raAngleTrans)*raPlanck
+        raTemp          = raAngleEmission + raTemp*raAngleTrans
+      END DO
     ELSEIF (iUpDown < 0) THEN
-        DO iLay = iS,iE+1,iUpDown
-            iL = iaRadLayer(iLay)
-            rMPTemp = raVT1(iL)
-            DO iFr=1,kMaxPts
-                rAngleTrans    = raaAbs(iFr,iL)
-                rAngleTrans    = exp(-rAngleTrans/cos(raFreqAngle(iFr)))
-                rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-                rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
-                rAngleEmission = (1.0-rAngleTrans)*rPlanck
-                raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
-            END DO
-        END DO
-        DO iLay = iE,iE
-            iL = iaRadLayer(iLay)
-            rMPTemp = raVT1(iL)
-            DO iFr=1,kMaxPts
-                rAngleTrans    = raaAbs(iFr,iL)*rFracBot
-                rAngleTrans    = exp(-raaAbs(iFr,iL)/cos(raFreqAngle(iFr)))
-                rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
-                rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
-                rAngleEmission = (1.0-rAngleTrans)*rPlanck
-                raTemp(iFr)    = rAngleEmission+raTemp(iFr)*rAngleTrans
-            END DO
-        END DO
+      DO iLay = iS,iE+1,iUpDown
+        iL = iaRadLayer(iLay)
+        rMPTemp = raVT1(iL)
+        raAngleTrans    = raaAbs(:,iL)
+        raAngleTrans    = exp(-raAngleTrans/cos(raFreqAngle))
+        raPlanck        = rattorad(raFreq,rMPTemp)
+        raAngleEmission = (1.0-raAngleTrans)*raPlanck
+        raTemp          = raAngleEmission + raTemp*raAngleTrans
+      END DO
+      DO iLay = iE,iE
+        iL = iaRadLayer(iLay)
+        rMPTemp = raVT1(iL)
+        raAngleTrans    = raaAbs(:,iL)*rFracBot
+        raAngleTrans    = exp(-raAngleTrans/cos(raFreqAngle))
+        raPlanck        = rattorad(raFreq,rMPTemp)
+        raAngleEmission = (1.0-raAngleTrans)*raPlanck
+        raTemp          = raAngleEmission + raTemp*raAngleTrans
+      END DO
     END IF
 
 ! if weightfactor=1, do nothing
-
     IF (iWeightFactor == 0) THEN
-    ! this is where we are integrating over all azimuth angles  ==> multiply by
-    ! cos(theta) to find contribution to thermal backgnd
-    ! used by the d(theta) cos(theta) sin(theta) algorithm
-        DO iFr=1,kMaxPts
-            raTemp(iFr) = raTemp(iFr)*cos(raFreqAngle(iFr))
-        END DO
+      ! this is where we are integrating over all azimuth angles  ==> multiply by
+      ! cos(theta) to find contribution to thermal backgnd
+      ! used by the d(theta) cos(theta) sin(theta) algorithm
+      raTemp = raTemp*cos(raFreqAngle)
 
     ELSE IF (iWeightFactor == -1) THEN
-    ! this is the thermal diffusive approx ==> multiply by 0.5
-    ! and is used by the simple call to diffusive approx for thermal backgnd
-    ! in this diffusive approx, we use theta=acos(3/5) or acos(user spec angle)
-        DO iFr=1,kMaxPts
-            raTemp(iFr) = raTemp(iFr)*0.5
-        END DO
+      ! this is the thermal diffusive approx ==> multiply by 0.5
+      ! and is used by the simple call to diffusive approx for thermal backgnd
+      ! in this diffusive approx, we use theta=acos(3/5) or acos(user spec angle)
+      raTemp = raTemp * 0.5
     END IF
       
     RETURN
@@ -610,53 +557,51 @@ CONTAINS
     iaSetEms,raaaSetEmissivity,raUseEmissivity)
 
     IF (kSolar >= 0) THEN
-        CALL SetSurfaceSolarReflectance(iAtm,raFreq, &
+      CALL SetSurfaceSolarReflectance(iAtm,raFreq, &
         iaSetSolarRefl,raaaSetSolarRefl,raSunRefl)
     ELSE
-        DO iFr=1,kMaxPts
-            raSunRefl(iFr) = 0.0
-        END DO
+      raSunRefl = 0.0
     END IF
 
 ! for up or down look instr, calculate layer dependent local angles
     CALL FindLayerAngles(raSatHeight(iAtm),raLayerHeight, &
-    raaPrBdry(iAtm,1),raaPrBdry(iAtm,2), &
-    raSatAngle(iAtm),raLayAngles,iAtm,iaaRadLayer,iaNumlayer,raNumberDensity)
+      raaPrBdry(iAtm,1),raaPrBdry(iAtm,2), &
+      raSatAngle(iAtm),raLayAngles,iAtm,iaaRadLayer,iaNumlayer,raNumberDensity)
 
 ! for up look instr, set the layer dependent solar angles as kSolarAngle
     DO iDummy=1,kProfLayer
-        raSunAngles(iDummy) = kSolarAngle
+      raSunAngles(iDummy) = kSolarAngle
     END DO
             
     IF (raaPrBdry(iAtm,1) > raaPrBdry(iAtm,2)) THEN
-    ! for down look instr, calculate the layer dependent solar angles
-        IF ((kSolar >= 0) .AND. (raSatHeight(iAtm) > 0.0))THEN
-            rSatHeight = raSatHeight(iAtm)  !!if > 0 tells us to do ray trace
-            rSurfHeight = raLayerHeight(iaaRadLayer(iAtm,1))
-            CALL FindSunLayerAngles(rSatHeight,rSurfHeight,iAtm,iaNumLayer,iaaRadLayer,raLayerHeight, &
+      ! for down look instr, calculate the layer dependent solar angles
+      IF ((kSolar >= 0) .AND. (raSatHeight(iAtm) > 0.0))THEN
+        rSatHeight = raSatHeight(iAtm)  !!if > 0 tells us to do ray trace
+        rSurfHeight = raLayerHeight(iaaRadLayer(iAtm,1))
+        CALL FindSunLayerAngles(rSatHeight,rSurfHeight,iAtm,iaNumLayer,iaaRadLayer,raLayerHeight, &
             raaPrBdry(iAtm,1),raaPrBdry(iatm,2), &
             kSolarAngle,raSunAngles)
-        ELSE IF ((kSolar >= 0) .AND. (raSatHeight(iAtm) < 0.0)) THEN
-            DO iDummy=1,kProfLayer
-                raSunAngles(iDummy) = kSolarAngle
-            END DO
-        END IF
+      ELSE IF ((kSolar >= 0) .AND. (raSatHeight(iAtm) < 0.0)) THEN
+        DO iDummy=1,kProfLayer
+          raSunAngles(iDummy) = kSolarAngle
+        END DO
+      END IF
     END IF
 
     IF (raaPrBdry(iAtm,1) < raaPrBdry(iAtm,2)) THEN
-    ! for up look instr, calculate the layer dependent solar angles
-    ! !!!!!!!!!!!! remember satellite angle==solar angle !!!!!!!!!!!!!!!!!!!
-        IF ((raTspace(iAtm) > 100.0) .AND. (raSatHeight(iAtm) > 0.0))THEN
-            rSatHeight = raSatHeight(iAtm)  !!if > 0 tells us to do ray trace
-            rSurfHeight = raLayerHeight(iaaRadLayer(iAtm,iaNumLayer(iAtm)))
-            CALL FindSunLayerAngles(rSatHeight,rSurfHeight,iAtm,iaNumLayer,iaaRadLayer,raLayerHeight, &
+      ! for up look instr, calculate the layer dependent solar angles
+      ! !!!!!!!!!!!! remember satellite angle==solar angle !!!!!!!!!!!!!!!!!!!
+      IF ((raTspace(iAtm) > 100.0) .AND. (raSatHeight(iAtm) > 0.0))THEN
+        rSatHeight = raSatHeight(iAtm)  !!if > 0 tells us to do ray trace
+        rSurfHeight = raLayerHeight(iaaRadLayer(iAtm,iaNumLayer(iAtm)))
+        CALL FindSunLayerAngles(rSatHeight,rSurfHeight,iAtm,iaNumLayer,iaaRadLayer,raLayerHeight, &
             raaPrBdry(iAtm,1),raaPrBdry(iatm,2), &
             raSatAngle(iAtm),raSunAngles)
-        ELSE IF((raTspace(iAtm) > 100.0) .AND. (raSatHeight(iAtm) < 0.0)) THEN
-            DO iDummy=1,kProfLayer
-                raSunAngles(iDummy) = raSatAngle(iAtm)
-            END DO
-        END IF
+      ELSE IF((raTspace(iAtm) > 100.0) .AND. (raSatHeight(iAtm) < 0.0)) THEN
+        DO iDummy=1,kProfLayer
+          raSunAngles(iDummy) = raSatAngle(iAtm)
+        END DO
+      END IF
     END IF
 
     RETURN
@@ -685,25 +630,25 @@ CONTAINS
     REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
 
     DO iLay=1,MAXNZ
-        Temp1(iLay) = 0.0
-        Temp(iLay) = 0.0
+      Temp1(iLay) = 0.0
+      Temp(iLay) = 0.0
     END DO
 
     DO iLay=1,kProfLayer
-        pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
-        pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
+      pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
+      pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
     END DO
 
 ! now set iaRadLayerTemp the same as  iaRadLayer if downlook instr
 !     set iaRadLayerTemp flipped from iaRadLayer if uplook   instr
     IF (iDownWard == 1) THEN      !!!!keep everything the same
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iLay)
-        END DO
+      DO iLay = 1,iNumLayer
+        iaRadLayerTemp(iLay) = iaRadLayer(iLay)
+      END DO
     ELSE            !!!gotta do a bit of reverse logic for uplook instr
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
-        END DO
+      DO iLay = 1,iNumLayer
+        iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
+      END DO
     END IF
 
 ! see which set of Mixed Paths the current atmosphere occupies eg
@@ -713,22 +658,22 @@ CONTAINS
 ! assume each atmosphere has at least 25 layers in it!!!
     iM = idiv(iaRadLayerTemp(25),kProfLayer)+1
     DO iLay=1,kProfLayer
-        raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
+      raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
     END DO
 
     DO iLay=1,iNumLayer
-        iL = iaRadLayerTemp(iLay)
-    ! ap this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
-        iL = iL-idiv(iL,kProfLayer)*kProfLayer
-        IF (iL == 0) THEN
-            iL = kProfLayer
-        END IF
-        rP=raPressLevels(iL+1)-10000*delta
-        if (rp < raPressLevels(kProfLayer+1)) then
-            rp = raPressLevels(kProfLayer+1)+10000*delta
-        end if
-        TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
-        raPressLevels,iProfileLayers)
+      iL = iaRadLayerTemp(iLay)
+      !map this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
+      iL = iL-idiv(iL,kProfLayer)*kProfLayer
+      IF (iL == 0) THEN
+        iL = kProfLayer
+      END IF
+      rP=raPressLevels(iL+1)-10000*delta
+      if (rp < raPressLevels(kProfLayer+1)) then
+        rp = raPressLevels(kProfLayer+1)+10000*delta
+      end if
+      TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
+      raPressLevels,iProfileLayers)
     END DO
 
     rP = DISORTsurfPress
@@ -736,13 +681,13 @@ CONTAINS
     raPressLevels,iProfileLayers)
 
     IF (iDownWard == 1) THEN
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1(iLay)
-        END DO
+      DO iLay=1,iNumLayer+1
+        temp(iLay) = temp1(iLay)
+      END DO
     ELSE
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1((iNumLayer+1)-iLay+1)
-        END DO
+      DO iLay=1,iNumLayer+1
+        temp(iLay) = temp1((iNumLayer+1)-iLay+1)
+      END DO
     END IF
 
     RETURN

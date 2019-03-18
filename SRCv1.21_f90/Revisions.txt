@@ -195,6 +195,7 @@ Future plans
   -------------------------------------------------------------------------- 
   | Test and run  NLTE Compressed ODs                                      |
   -------------------------------------------------------------------------- 
+v1.21   f90 version, using implied do loops!
 
 v1.20   f90 version! The Modules meant a lot of subroutines/files got rerranged
         This may get cleaned up further along the line
@@ -597,6 +598,12 @@ v1.21
                END DO
                Note instead of Matlab raX(1:2:9) to access 1,3,5,7,9, in f90
                use raX(1:9:2)
+
+               Also note that the modifications are minimal in the subroutines 
+               reading in nml and rtp files, or setting eg cloud layer spans
+  
+               << rad_common.f90 >> needs a lot of vectorized implied do looping work
+               << rad_diff_and_quad.f90 >> needs lot of vectorziation because FindDiffusiveAngleExp is scalar, not vector
 
 v1.20
 -----

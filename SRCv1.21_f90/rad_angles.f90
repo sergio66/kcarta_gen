@@ -65,58 +65,52 @@ CONTAINS
     rSunHeight = 150.0e9  !! in km
 
 ! as default, set all angles to be the sun view angle
-    DO iI=1,kProfLayer
-        raSunAngles(iI) = rSunAngle
-    END DO
+    raSunAngles = rSunAngle
 
     iMin = +1000000
     iMax = -1000000
     DO iI=1,iaNumlayer(iAtm)
-        iaRadLayer(iI) = iaaRadLayer(iAtm,iI)
-        IF (iaRadLayer(iI) > iMax) iMax = iaRadLayer(iI)
-        IF (iaRadLayer(iI) < iMin) iMin = iaRadLayer(iI)
+      iaRadLayer(iI) = iaaRadLayer(iAtm,iI)
+      IF (iaRadLayer(iI) > iMax) iMax = iaRadLayer(iI)
+      IF (iaRadLayer(iI) < iMin) iMin = iaRadLayer(iI)
     END DO
 
 ! *********************** rSatHeight, raLayHgt is in METERS ***************
 
     IF ((rSatHeight > 0.0) .AND. (abs(rSunAngle) > 1.0e-4)) THEN
-    ! ave to find layer dependent angles
-        IF (rPrBdry1 > rPrBdry2) THEN !downward looking instr
-            DO iI=1,kProfLayer
-                IF (rSatHeight > raLayHgt(iI)) THEN
-                    raSunAngles(iI) = saconv_sun(abs(rSunAngle),rSurfHeight/1000,raLayHgt(iI)/1000)
-                    IF (rSunAngle < 0.0) raSunAngles(iI) = -raSunAngles(iI)
-                    IF (kOuterLoop == 1) THEN
-                        IF (iI >= iMin .AND. iX <= iMax) THEN
-                            iX = (iI - iMin + 1)
-                        ELSE
-                            iX = -1
-                        END IF
-                        IF (iX == 1) write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                        write(kStdWarn,*)'sun: lay#/rad# lay/surfhgt, localzen/traced angle ', &
+      !have to find layer dependent angles
+      IF (rPrBdry1 > rPrBdry2) THEN !downward looking instr
+        DO iI=1,kProfLayer
+          IF (rSatHeight > raLayHgt(iI)) THEN
+            raSunAngles(iI) = saconv_sun(abs(rSunAngle),rSurfHeight/1000,raLayHgt(iI)/1000)
+            IF (rSunAngle < 0.0) raSunAngles(iI) = -raSunAngles(iI)
+            IF (kOuterLoop == 1) THEN
+              IF (iI >= iMin .AND. iX <= iMax) THEN
+                iX = (iI - iMin + 1)
+              ELSE
+                iX = -1
+              END IF
+              IF (iX == 1) write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+              write(kStdWarn,*)'sun: lay#/rad# lay/surfhgt, localzen/traced angle ', &
                         iI,iX,raLayHgt(iI)/1000,rSurfHeight/1000,rSunAngle,raSunAngles(iI)
-                    END IF
-                END IF
-            END DO
-        END IF
-        IF (rPrBdry2 > rPrBdry1) THEN !upward looking instr
-            salt=705.00
-            DO iI=1,kProfLayer
-            !            write(kStdWarn,*)'sun up lay hgt ',iI,raLayHgt(iI)/1000
-                IF (rSatHeight > raLayHgt(iI)) THEN
-                    raSunAngles(iI) = saconv_sun(abs(rSunAngle),rSurfHeight/1000,raLayHgt(iI)/1000)
-                    IF (rSunAngle < 0.0) raSunAngles(iI) = -raSunAngles(iI)
-                    IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-                    (abs(kLongOrShort) <= 1)) THEN
-                        write(kStdWarn,*)'sun up lay hgt, orig/traced angle ', &
-                        iI,raLayHgt(iI)/1000,rSunAngle,raSunAngles(iI)
-                    END IF
-                END IF
-            END DO
-        END IF
+            END IF
+          END IF
+        END DO
+      END IF
+      IF (rPrBdry2 > rPrBdry1) THEN !upward looking instr
+        salt=705.00
+        DO iI=1,kProfLayer
+          ! write(kStdWarn,*)'sun up lay hgt ',iI,raLayHgt(iI)/1000
+          IF (rSatHeight > raLayHgt(iI)) THEN
+            raSunAngles(iI) = saconv_sun(abs(rSunAngle),rSurfHeight/1000,raLayHgt(iI)/1000)
+            IF (rSunAngle < 0.0) raSunAngles(iI) = -raSunAngles(iI)
+            IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+              write(kStdWarn,*)'sun up lay hgt, orig/traced angle ',iI,raLayHgt(iI)/1000,rSunAngle,raSunAngles(iI)
+            END IF
+          END IF
+        END DO
+      END IF
     END IF
-
-!      call dostop
 
     RETURN
     end SUBROUTINE FindSunLayerAngles
@@ -152,10 +146,8 @@ CONTAINS
     INTEGER :: iI,iaRadLayer(kProfLayer),iMin,iMax,iX,iDefault,iUseSnell
 
 ! as default, set all angles to be the satellite view angle
-    DO iI=1,kProfLayer
-        raLayAngles(iI)      = rSatAngle
-        raLayAnglesSnell(iI) = rSatAngle
-    END DO
+    raLayAngles      = rSatAngle
+    raLayAnglesSnell = rSatAngle
 
     iDefault = -1   !! no  Snell, yes layer curvature, similar to SARTA
           
@@ -165,20 +157,20 @@ CONTAINS
           
     iUseSnell = iaaOverrideDefault(2,7)
     IF (abs(iUseSnell) > 1) THEN
-        write(kStdErr,*) 'invalid iUseSnell ',iUseSnell
-        CALL DoStop
+      write(kStdErr,*) 'invalid iUseSnell ',iUseSnell
+      CALL DoStop
     END IF
     if ((iDefault /= iUseSnell) .AND. (kOuterLoop == 1)) THEN
-        write(kStdWarn,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
-        write(kStdErr,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
+      write(kStdWarn,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
+      write(kStdErr,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
     END IF
           
     iMin = +1000000
     iMax = -1000000
     DO iI = 1,iaNumlayer(iAtm)
-        iaRadLayer(iI) = iaaRadLayer(iAtm,iI)
-        IF (iaRadLayer(iI) > iMax) iMax = iaRadLayer(iI)
-        IF (iaRadLayer(iI) < iMin) iMin = iaRadLayer(iI)
+      iaRadLayer(iI) = iaaRadLayer(iAtm,iI)
+      IF (iaRadLayer(iI) > iMax) iMax = iaRadLayer(iI)
+      IF (iaRadLayer(iI) < iMin) iMin = iaRadLayer(iI)
     END DO
 
 ! *********** vaconv assumes layheight,satheight is in KM ***************
@@ -189,124 +181,120 @@ CONTAINS
 ! orig/traced angle  <<< --------- >>> scanang(at satellite)/satzen(local angle)
 
     IF ((rSatHeight > 0.0) .AND. (abs(rSatAngle) > 1.0e-4) .AND. (abs(iUseSnell) == 0)) THEN
-        DO iI=1,kProfLayer
-            raLayAnglesNoSnell(iI) = abs(rSatAngle)
-            raLayAnglesSnell(iI) = abs(rSatAngle)
-            IF (kOuterLoop == 1) THEN
-                IF (iI >= iMin .AND. iX <= iMax) THEN
-                    iX = (iI - iMin + 1)
-                ELSE
-                    iX = -1
-                END IF
-                IF (iX == 1) THEN
-                    write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                    write(kStdWarn,*) 'Downlook Instr'
-                    write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
-                    write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
-                    write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
-                END IF
-                write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI), &
-                &  1.0/cos(raLayAngles(iI)*kPi/180.0)
-            END IF      !! if kOuterLoop == 1
-                    
-        END DO
-    ELSEIF ((rSatHeight > 0.0) .AND. (abs(rSatAngle) > 1.0e-4) .AND. (abs(iUseSnell) == 1)) THEN
-    ! ave to find layer dependent angles
-        IF (rPrBdry1 > rPrBdry2) THEN !downward looking instr
-            DO iI=1,kProfLayer
-            !            print *,iI,rSatHeight,raLayHgt(iI)
-                IF (rSatHeight > raLayHgt(iI)) THEN
-                    raLayAnglesNoSnell(iI) = vaconv(abs(rSatAngle),raLayHgt(iI)/1000, &
-                    rSatHeight/1000)
-                    raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),raLayHgt(iI)/1000, &
-                    rSatHeight/1000,raNumberDensity(iI))
-                ! diff between Snell and noSnell is less than 2e-2
-                !              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAnglesNoSnell(iI)-raLayAnglesSnell(iI)
-                ! but Scott/SARTA uses NoSnell
-                    IF (iUseSnell == 1) THEN
-                        raLayAngles(iI) = raLayAnglesSnell(iI)    !!! sergio
-                    ELSEIF (iUseSnell == -1) THEN
-                        raLayAngles(iI) = raLayAnglesNoSnell(iI)      !!! scott
-                    END IF
-                    IF (rSatAngle < 0.0) raLayAngles(iI) = -raLayAngles(iI)
-                    IF (kOuterLoop == 1) THEN
-                        IF (iI >= iMin .AND. iX <= iMax) THEN
-                            iX = (iI - iMin + 1)
-                        ELSE
-                            iX = -1
-                        END IF
-                        IF (iX == 1) THEN
-                            write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                            write(kStdWarn,*) 'Downlook Instr'
-                            write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
-                            write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
-                            write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
-                        END IF
-                        write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI), &
-                        &  1.0/cos(raLayAngles(iI)*kPi/180.0)
-                    END IF      !! if kOuterLoop == 1
-                END IF
-            END DO
-        ELSE
-        ! o need to do anything much, the angles are so close to nadir
+      DO iI=1,kProfLayer
+        raLayAnglesNoSnell(iI) = abs(rSatAngle)
+        raLayAnglesSnell(iI) = abs(rSatAngle)
+        IF (kOuterLoop == 1) THEN
+          IF (iI >= iMin .AND. iX <= iMax) THEN
+            iX = (iI - iMin + 1)
+          ELSE
             iX = -1
+          END IF
+          IF (iX == 1) THEN
             write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
             write(kStdWarn,*) 'Downlook Instr'
             write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
             write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
             write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
-            DO iI=1,kProfLayer
-                write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),1.0
-            END DO
-        END IF
+          END IF
+          write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI), &
+                &  1.0/cos(raLayAngles(iI)*kPi/180.0)
+        END IF      !! if kOuterLoop == 1
+      END DO
+    ELSEIF ((rSatHeight > 0.0) .AND. (abs(rSatAngle) > 1.0e-4) .AND. (abs(iUseSnell) == 1)) THEN
+      !have to find layer dependent angles
+      IF (rPrBdry1 > rPrBdry2) THEN !downward looking instr
+        DO iI=1,kProfLayer
+          ! print *,iI,rSatHeight,raLayHgt(iI)
+          IF (rSatHeight > raLayHgt(iI)) THEN
+            raLayAnglesNoSnell(iI) = vaconv(abs(rSatAngle),raLayHgt(iI)/1000,rSatHeight/1000)
+            raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),raLayHgt(iI)/1000,rSatHeight/1000,raNumberDensity(iI))
+            ! diff between Snell and noSnell is less than 2e-2
+            !              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAnglesNoSnell(iI)-raLayAnglesSnell(iI)
+            ! but Scott/SARTA uses NoSnell
+            IF (iUseSnell == 1) THEN
+              raLayAngles(iI) = raLayAnglesSnell(iI)    !!! sergio
+            ELSEIF (iUseSnell == -1) THEN
+              raLayAngles(iI) = raLayAnglesNoSnell(iI)      !!! scott
+            END IF
+            IF (rSatAngle < 0.0) raLayAngles(iI) = -raLayAngles(iI)
+            IF (kOuterLoop == 1) THEN
+              IF (iI >= iMin .AND. iX <= iMax) THEN
+                iX = (iI - iMin + 1)
+              ELSE
+                iX = -1
+              END IF
+              IF (iX == 1) THEN
+                write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+                write(kStdWarn,*) 'Downlook Instr'
+                write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
+                write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
+                write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
+              END IF
+              write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI), &
+                        &  1.0/cos(raLayAngles(iI)*kPi/180.0)
+            END IF      !! if kOuterLoop == 1
+          END IF
+        END DO
+      ELSE
+        ! no need to do anything much, the angles are so close to nadir
+        iX = -1
+        write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+        write(kStdWarn,*) 'Downlook Instr'
+        write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
+        write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
+        write(kStdWarn,*)'lay#/rad#   lay hgt   sat hgt  sat.scanang loc.satzen sec(satzen)'
+        DO iI=1,kProfLayer
+          write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI),1.0
+        END DO
+      END IF
 
-        IF ((rPrBdry2 > rPrBdry1) .AND. (abs(iUseSnell) == 0)) THEN !upward looking instr
-            DO iI=1,kProfLayer
-                raLayAnglesNoSnell(iI) = abs(rSatAngle)
-                raLayAngles(iI) = raLayAnglesSnell(iI)
-                IF (kOuterLoop == 1) THEN
-                    IF (iI >= iMin .AND. iX <= iMax) THEN
-                        iX = (iI - iMin + 1)
-                    ELSE
-                        iX = -1
-                    END IF
-                    IF (iX == 1) THEN
-                        write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                        write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
-                    END IF
-                    write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
-                END IF
-            END DO
+      IF ((rPrBdry2 > rPrBdry1) .AND. (abs(iUseSnell) == 0)) THEN !upward looking instr
+        DO iI=1,kProfLayer
+          raLayAnglesNoSnell(iI) = abs(rSatAngle)
+          raLayAngles(iI) = raLayAnglesSnell(iI)
+          IF (kOuterLoop == 1) THEN
+            IF (iI >= iMin .AND. iX <= iMax) THEN
+              iX = (iI - iMin + 1)
+            ELSE
+              iX = -1
+            END IF
+            IF (iX == 1) THEN
+              write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+              write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
+            END IF
+            write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+          END IF
+        END DO
                     
-        ELSEIF ((rPrBdry2 > rPrBdry1) .AND. (abs(iUseSnell) == 1)) THEN !upward looking instr
+      ELSEIF ((rPrBdry2 > rPrBdry1) .AND. (abs(iUseSnell) == 1)) THEN !upward looking instr
         !          print *,'FindLayerAngles',iMin,iMax,iAtm,rSatHeight,iaNumLayer(iAtm),
         !     $               raLayHgt(iaaRadLayer(iAtm,iaNumLayer(iAtm)))/1000
-            DO iI=1,kProfLayer
-                IF (rSatHeight > raLayHgt(iI)) THEN
-                    raLayAnglesNoSnell(iI) = saconv_sun(abs(rSatAngle), &
+        DO iI=1,kProfLayer
+          IF (rSatHeight > raLayHgt(iI)) THEN
+            raLayAnglesNoSnell(iI) = saconv_sun(abs(rSatAngle), &
                     raLayHgt(iaaRadLayer(iAtm,iaNumLayer(iAtm)))/1000, &
                     raLayHgt(iI)/1000)
-                    raLayAngles(iI) = raLayAnglesSnell(iI)
-                    raLayAngles(iI) = raLayAnglesNoSnell(iI)
-                    IF (rSatAngle < 0.0) raLayAngles(iI) = -raLayAngles(iI)
-                    IF (kOuterLoop == 1) THEN
-                        IF (iI >= iMin .AND. iX <= iMax) THEN
-                            iX = (iI - iMin + 1)
-                        ELSE
-                            iX = -1
-                        END IF
-                        IF (iX == 1) THEN
-                            write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-                            write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
-                        END IF
-                        write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
-                    END IF
-                END IF
-            END DO
-        END IF
+            raLayAngles(iI) = raLayAnglesSnell(iI)
+            raLayAngles(iI) = raLayAnglesNoSnell(iI)
+            IF (rSatAngle < 0.0) raLayAngles(iI) = -raLayAngles(iI)
+            IF (kOuterLoop == 1) THEN
+              IF (iI >= iMin .AND. iX <= iMax) THEN
+                iX = (iI - iMin + 1)
+              ELSE
+                iX = -1
+              END IF
+              IF (iX == 1) THEN
+                write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+                write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
+              END IF
+              write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
+            END IF
+          END IF
+        END DO
+      END IF
     END IF
-
-          
+    
     999 FORMAT(I3,' ',I3,'  ',5(F10.4,' '))
      
     RETURN
@@ -336,21 +324,21 @@ CONTAINS
     x2 = +1.0D0
           
     IF ((nn > kGauss) .OR. (nn < 0)) THEN
-        write (kStdErr,*) 'need 0 < nn <= kGauss'
-        CALL DoStop
+      write (kStdErr,*) 'need 0 < nn <= kGauss'
+      CALL DoStop
     END IF
 
     n=nn*2
 
     IF (MOD(n,2) == 1) THEN
-        write (kStdErr,*) 'need n to be even'
-        CALL DoSTOP
+      write (kStdErr,*) 'need n to be even'
+      CALL DoSTOP
     END IF
 
     IF (x2 < x1) THEN
-        xm = x1
-        x1 = x2
-        x2 = xm
+      xm = x1
+      x1 = x2
+      x2 = xm
     END IF
 
     m  = (n+1)/2
@@ -360,29 +348,29 @@ CONTAINS
     xl = 0.5*(x2-x1)
 
     DO i = 1,m                    !loop over desired roots
-        z = cos(kPi*(i-0.25)/(n+0.5))
-        20 CONTINUE
-        p1 = 1.0
-        p2 = 0.0
-        DO j = 1,n
-            p3 = p2
-            p2 = p1
-            p1 = ((2*j-1)*z*p2-(j-1)*p3)/j
-        END DO
-        pp = n*(z*p1-p2)/(z*z-1)
-        z1 = z
-        z  = z1-p1/pp
-        IF (abs(z-z1) > epss) THEN
-            GOTO 20
-        END IF
+      z = cos(kPi*(i-0.25)/(n+0.5))
+ 20   CONTINUE
+      p1 = 1.0
+      p2 = 0.0
+      DO j = 1,n
+        p3 = p2
+        p2 = p1
+        p1 = ((2*j-1)*z*p2-(j-1)*p3)/j
+      END DO
+      pp = n*(z*p1-p2)/(z*z-1)
+      z1 = z
+      z  = z1-p1/pp
+      IF (abs(z-z1) > epss) THEN
+        GOTO 20
+      END IF
                    
-        daX(i)     = xm+xl*z
-        daW(i)     = 2*xl/((1-z*z)*pp*pp)
+      daX(i)     = xm+xl*z
+      daW(i)     = 2*xl/((1-z*z)*pp*pp)
 
-        daX1(i)     = xm-xl*z
-        daX1(n+1-i) = xm+xl*z
-        daW1(i)     = 2*xl/((1-z*z)*pp*pp)
-        daW1(n+1-i) = daW(i)
+      daX1(i)     = xm-xl*z
+      daX1(n+1-i) = xm+xl*z
+      daW1(i)     = 2*xl/((1-z*z)*pp*pp)
+      daW1(n+1-i) = daW(i)
     END DO
      
     RETURN
@@ -403,32 +391,32 @@ CONTAINS
     DOUBLE PRECISION :: daX(kGauss),daW(kGauss)
 
     IF (nn == 1) THEN
-        daX(1) = 2.0/3.0
-        daW(1) = 1.0/2.0
+      daX(1) = 2.0/3.0
+      daW(1) = 1.0/2.0
     ELSEIF (nn == 2) THEN
-        daX(1) = 0.3550510
-        daX(2) = 0.8449489
-        daW(1) = 0.1819856
-        daW(2) = 0.3180414
+      daX(1) = 0.3550510
+      daX(2) = 0.8449489
+      daW(1) = 0.1819856
+      daW(2) = 0.3180414
     ELSEIF (nn == 3) THEN
-        daX(1) = 0.2123405
-        daX(2) = 0.5905331
-        daX(3) = 0.9114120
-        daW(1) = 0.0698270
-        daW(2) = 0.2292411
-        daW(3) = 0.2009319
+      daX(1) = 0.2123405
+      daX(2) = 0.5905331
+      daX(3) = 0.9114120
+      daW(1) = 0.0698270
+      daW(2) = 0.2292411
+      daW(3) = 0.2009319
     ELSEIF (nn == 4) THEN
-        daX(1) = 0.1397599
-        daX(2) = 0.4164096
-        daX(3) = 0.7231570
-        daX(4) = 0.9428958
-        daW(1) = 0.0311810
-        daW(2) = 0.1298475
-        daW(3) = 0.2034646
-        daW(4) = 0.1355069
+      daX(1) = 0.1397599
+      daX(2) = 0.4164096
+      daX(3) = 0.7231570
+      daX(4) = 0.9428958
+      daW(1) = 0.0311810
+      daW(2) = 0.1298475
+      daW(3) = 0.2034646
+      daW(4) = 0.1355069
     ELSE
-        write(kStdErr,*) 'FindGauss2 : need nn = 1,2,3 or 4 not ',nn
-        CALL DoStop
+      write(kStdErr,*) 'FindGauss2 : need nn = 1,2,3 or 4 not ',nn
+      CALL DoStop
     END IF
 
     RETURN
@@ -450,37 +438,37 @@ CONTAINS
     DOUBLE PRECISION :: daX(kGauss),daW(kGauss)
 
     IF (nn == 1) THEN
-        daX(1) = 3.0/2.0
-        daW(1) = 1.0/2.0
+      daX(1) = 3.0/2.0
+      daW(1) = 1.0/2.0
     ELSEIF (nn == 2) THEN
-        daX(1) = 2.81649655
-        daX(2) = 1.18350343
-        daW(1) = 0.1819586183
-        daW(2) = 0.3180413817
+      daX(1) = 2.81649655
+      daX(2) = 1.18350343
+      daW(1) = 0.1819586183
+      daW(2) = 0.3180413817
     ELSEIF (nn == 3) THEN
-        daX(1) = 4.70941630
-        daX(2) = 1.69338507
-        daX(3) = 1.09719858
-        daW(1) = 0.0698269799
-        daW(2) = 0.2292411064
-        daW(3) = 0.2009319137
+      daX(1) = 4.70941630
+      daX(2) = 1.69338507
+      daX(3) = 1.09719858
+      daW(1) = 0.0698269799
+      daW(2) = 0.2292411064
+      daW(3) = 0.2009319137
     ELSEIF (nn == 4) THEN
-        daX(1) = 7.15513024
-        daX(2) = 2.40148179
-        daX(3) = 1.38282560
-        daX(4) = 1.06056257
-        daW(1) = 0.0311809710
-        daW(2) = 0.1298475476
-        daW(3) = 0.2034645680
-        daW(4) = 0.1355069134
+      daX(1) = 7.15513024
+      daX(2) = 2.40148179
+      daX(3) = 1.38282560
+      daX(4) = 1.06056257
+      daW(1) = 0.0311809710
+      daW(2) = 0.1298475476
+      daW(3) = 0.2034645680
+      daW(4) = 0.1355069134
     ELSE
-        write(kStdErr,*) 'FindGauss2 : need nn = 1,2,3 or 4 not ',nn
-        CALL DoStop
+      write(kStdErr,*) 'FindGauss2 : need nn = 1,2,3 or 4 not ',nn
+      CALL DoStop
     END IF
 
     DO ii = 1,nn
-    ! hange from secant to cosine
-        daX(ii) = 1.0/daX(ii)
+      !c hange from secant to cosine
+      daX(ii) = 1.0/daX(ii)
     END DO
           
     RETURN
@@ -504,15 +492,15 @@ CONTAINS
 
     CALL expint(raX,raY)               !do y = expint(x)
     DO iI = 1,kMaxPts
-        IF (raX(iI) < 1.0e-28) THEN
-            raY(iI) = 0.5
-        ELSEIF (raX(iI) < 0.0) THEN
-            write(kStdErr,*) 'in expint3 iI,raX(iI) = ',iI,raX(iI)
-            write(kStdErr,*) 'cannot have negative values!'
-            CALL DoStop
-        ELSE
-            raY(iI) = (exp(-raX(iI))*(1-raX(iI)) + (raX(iI)**2)*raY(iI))/2.0
-        END IF
+      IF (raX(iI) < 1.0e-28) THEN
+        raY(iI) = 0.5
+      ELSEIF (raX(iI) < 0.0) THEN
+        write(kStdErr,*) 'in expint3 iI,raX(iI) = ',iI,raX(iI)
+        write(kStdErr,*) 'cannot have negative values!'
+        CALL DoStop
+      ELSE
+        raY(iI) = (exp(-raX(iI))*(1-raX(iI)) + (raX(iI)**2)*raY(iI))/2.0
+      END IF
     END DO
 
     RETURN
@@ -536,15 +524,15 @@ CONTAINS
 
     CALL expint(raX,raY)               !do y = expint(x)
     DO iI = 1,kMaxPts
-        IF (raX(iI) < 1.0e-28) THEN
-            raY(iI) = 1.0
-        ELSEIF (raX(iI) < 0.0) THEN
-            write(kStdErr,*) 'in expint2 iI,raX(iI) = ',iI,raX(iI)
-            write(kStdErr,*) 'cannot have negative values!'
-            CALL DoStop
-        ELSE
-            raY(iI) = exp(-raX(iI)) - raX(iI)*raY(iI)
-        END IF
+      IF (raX(iI) < 1.0e-28) THEN
+        raY(iI) = 1.0
+      ELSEIF (raX(iI) < 0.0) THEN
+        write(kStdErr,*) 'in expint2 iI,raX(iI) = ',iI,raX(iI)
+        write(kStdErr,*) 'cannot have negative values!'
+        CALL DoStop
+      ELSE
+        raY(iI) = exp(-raX(iI)) - raX(iI)*raY(iI)
+      END IF
     END DO
 
     RETURN
@@ -580,11 +568,11 @@ CONTAINS
     -3.012432892762715d-01, -7.773807325735529d-01,  8.267661952366478d+00/
 
     DO iFr = 1,kMaxPts
-        daY(iFr) = 0.0D0
-        DO iJ = 1,9
-            iI = 9-iJ
-            daY(iFr) = daY(iFr) + p(iJ)*((raX(iFr)*1.0D0)**iI)
-        END DO
+      daY(iFr) = 0.0D0
+      DO iJ = 1,9
+        iI = 9-iJ
+        daY(iFr) = daY(iFr) + p(iJ)*((raX(iFr)*1.0D0)**iI)
+      END DO
     END DO
 
 ! polyv = polyval(p,real(x))
@@ -593,57 +581,57 @@ CONTAINS
     iNeg = 0
     dImag = 0.0D0
     DO iFr = 1,kMaxPts
-        IF (dImag <= daY(iFr)) THEN
-            iPos = iPos + 1
-            iaPositive(iPos) = iFr
-        ELSE
-            iNeg = iNeg + 1
-            iaNegative(iNeg) = iFr
-        END IF
+      IF (dImag <= daY(iFr)) THEN
+        iPos = iPos + 1
+        iaPositive(iPos) = iFr
+      ELSE
+        iNeg = iNeg + 1
+        iaNegative(iNeg) = iFr
+      END IF
     END DO
 
 ! ---------- these are for x >= 0 ------------------------------------------
     IF (iPos >= 1) THEN
-        egamma = 5.7721566490153286061D-1
-        DO iK = 1,iPos
-            iFr = iaPositive(iK)
-            daX(iFr) = raX(iFr)*1.0d0
-            daZ(iFr) = -egamma - cdlog(dcmplx(daX(iFr),0.0D0))
-            daPterm(iFr) = daX(iFr)
-            daterm(iFr)  = daX(iFr)
-        END DO
+      egamma = 5.7721566490153286061D-1
+      DO iK = 1,iPos
+        iFr = iaPositive(iK)
+        daX(iFr) = raX(iFr)*1.0d0
+        daZ(iFr) = -egamma - cdlog(dcmplx(daX(iFr),0.0D0))
+        daPterm(iFr) = daX(iFr)
+        daterm(iFr)  = daX(iFr)
+      END DO
 
-        iJ = 1
+      iJ = 1
 
-        10 CONTINUE
-        iJ = iJ + 1
+ 10   CONTINUE
+      iJ = iJ + 1
 
-        DO iK = 1,iPos
-            iFr = iaPositive(iK)
-            daZ(iFr) = daZ(iFr) + daTerm(iFr)
-            daPterm(iFr) = -daX(iFr) * daPterm(iFr)/iJ
-            daTerm(iFr)  = daPterm(iFr)/iJ
-        END DO
+      DO iK = 1,iPos
+        iFr = iaPositive(iK)
+        daZ(iFr) = daZ(iFr) + daTerm(iFr)
+        daPterm(iFr) = -daX(iFr) * daPterm(iFr)/iJ
+        daTerm(iFr)  = daPterm(iFr)/iJ
+      END DO
 
-    ! check for convergence
-        iFound = -1
-        DO iK = 1,iPos
-            iFr = iaPositive(iK)
-            IF (abs(daTerm(iFr)) > 1.0d-16*cdabs(daZ(iFr))) THEN
-                iFound = +1
-                GOTO 11
-            END IF
-        END DO
-        11 CONTINUE
-
-        IF (iFound > 0) THEN
-            GOTO 10
+      ! check for convergence
+      iFound = -1
+      DO iK = 1,iPos
+        iFr = iaPositive(iK)
+        IF (abs(daTerm(iFr)) > 1.0d-16*cdabs(daZ(iFr))) THEN
+          iFound = +1
+          GOTO 11
         END IF
+      END DO
+ 11   CONTINUE
 
-        DO iK = 1,iPos
-            iFr = iaPositive(iK)
-            raY(iFr) = sngl(dreal(daZ(iFr)))
-        END DO
+      IF (iFound > 0) THEN
+        GOTO 10
+      END IF
+
+      DO iK = 1,iPos
+        iFr = iaPositive(iK)
+        raY(iFr) = sngl(dreal(daZ(iFr)))
+      END DO
     END IF
 
 ! ---------- these are for x < 0  ------------------------------------------
@@ -750,13 +738,13 @@ CONTAINS
     INTEGER :: iI
 
     DO iI = 1,kMaxPts
-        IF (raX(iI) < 0.0) THEN
-            write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
-            write(kStdErr,*) 'cannot have negative values!'
-            CALL DoStop
-        ELSE
-            raY(iI) = fastExpint(3,raX(iI))
-        END IF
+      IF (raX(iI) < 0.0) THEN
+        write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
+        write(kStdErr,*) 'cannot have negative values!'
+        CALL DoStop
+      ELSE
+        raY(iI) = fastExpint(3,raX(iI))
+      END IF
     END DO
 
     RETURN
@@ -791,52 +779,52 @@ CONTAINS
 
     nm1 = n-1
     IF (n == 0) THEN
-        r = exp(-x)/x
+      r = exp(-x)/x
     ELSEIF (x <= Eps) THEN
-        r = 1.0/nm1
+      r = 1.0/nm1
     ELSEIF (x > 1.0) THEN
-        b = x + n
-        c = 1/FPmin
-        d = 1.0/b
-        h = d
-        DO i = 1,MAXIT
-            a = -i*(nm1+i)
-            b = b + 2.0
-            d = 1/(a*d+b)
-            c = b + a/c
-            del = c*d
-            h = h*del
-            IF (abs(del-1) <= eps) THEN
-                r = h*exp(-x)
-                GOTO 10
-            END IF
-        END DO
+      b = x + n
+      c = 1/FPmin
+      d = 1.0/b
+      h = d
+      DO i = 1,MAXIT
+        a = -i*(nm1+i)
+        b = b + 2.0
+        d = 1/(a*d+b)
+        c = b + a/c
+        del = c*d
+        h = h*del
+        IF (abs(del-1) <= eps) THEN
+          r = h*exp(-x)
+          GOTO 10
+        END IF
+      END DO
 
     ELSEIF ((x >= Eps) .AND. (x <= 1.0)) THEN
-    ! et first term ... wow
-        IF (nm1 /= 0) THEN
-            r = 1.0/nm1
+      !get first term ... wow
+      IF (nm1 /= 0) THEN
+        r = 1.0/nm1
+      ELSE
+        r = -log(x) - Euler
+      END IF
+      fact = 1.0
+      DO i = 1,MaxIT
+        fact = fact * (-x/i)
+        IF (i /= nm1) THEN
+          del = -fact/(i-nm1)
         ELSE
-            r = -log(x) - Euler
+          psi = -euler
+          DO ii = 1,nm1
+            psi = psi + 1.0/ii
+          END DO
+          del = fact*(-log(x) + psi)
         END IF
-        fact = 1.0
-        DO i = 1,MaxIT
-            fact = fact * (-x/i)
-            IF (i /= nm1) THEN
-                del = -fact/(i-nm1)
-            ELSE
-                psi = -euler
-                DO ii = 1,nm1
-                    psi = psi + 1.0/ii
-                END DO
-                del = fact*(-log(x) + psi)
-            END IF
-            r = r + del
-            IF (abs(del) < abs(r)*Eps) GOTO 10
-        END DO
+        r = r + del
+        IF (abs(del) < abs(r)*Eps) GOTO 10
+      END DO
     END IF
       
-    10 CONTINUE
+ 10 CONTINUE
     fastExpint = r
 
     RETURN
@@ -885,43 +873,43 @@ CONTAINS
     &    9.510785069482322e+00, -2.619205947978609e+01,  3.863540676528253e+01/
 
     DO iI = 1,kMaxPts
+      raY(iI) = 0.0
+      IF (raX(iI) < 0.0) THEN
+        write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
+        write(kStdErr,*) 'cannot have negative values!'
+        CALL DoStop
+      ELSEIF (raX(iI) <= 0.1) THEN
+        iWhich = 1
+        DO j = 1,6
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+        END DO
+      ELSEIF (raX(iI) <= 1.0) THEN
+        iWhich = 2
+        DO j = 1,6
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+        END DO
+      ELSEIF (raX(iI) <= 6.0) THEN
+        iWhich = 3
+        DO j = 1,6
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raX(iI))
+      ELSEIF (raX(iI) <= 10.0) THEN
+        iWhich = 4
+        DO j = 1,6
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raX(iI))
+      ELSEIF (raX(iI) <= 20.0) THEN
+        iWhich = 5
+        DO j = 1,6
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raX(iI))
+      ELSE !!   expint3(x) <= 1e-10 for x >= 20
+        iWhich = 6
         raY(iI) = 0.0
-        IF (raX(iI) < 0.0) THEN
-            write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
-            write(kStdErr,*) 'cannot have negative values!'
-            CALL DoStop
-        ELSEIF (raX(iI) <= 0.1) THEN
-            iWhich = 1
-            DO j = 1,6
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-            END DO
-        ELSEIF (raX(iI) <= 1.0) THEN
-            iWhich = 2
-            DO j = 1,6
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-            END DO
-        ELSEIF (raX(iI) <= 6.0) THEN
-            iWhich = 3
-            DO j = 1,6
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raX(iI))
-        ELSEIF (raX(iI) <= 10.0) THEN
-            iWhich = 4
-            DO j = 1,6
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raX(iI))
-        ELSEIF (raX(iI) <= 20.0) THEN
-            iWhich = 5
-            DO j = 1,6
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raX(iI))
-        ELSE !!   expint3(x) <= 1e-10 for x >= 20
-            iWhich = 6
-            raY(iI) = 0.0
-        END IF
+      END IF
     END DO
 
     RETURN
@@ -969,48 +957,48 @@ CONTAINS
     &   1.873706336320716e-03,   9.115323790575932e-01, -1.489123902774130e+00/
 
     DO iI = 1,kMaxPts
+      raY(iI) = 0.0
+      IF (raX(iI) < 0.0) THEN
+        write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
+        write(kStdErr,*) 'cannot have negative values!'
+        CALL DoStop
+      ELSEIF (raX(iI) <= 0.1) THEN
+        iWhich = 1
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+        END DO
+      ELSEIF (raX(iI) <= 1.0) THEN
+        iWhich = 2
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
+        END DO
+      ELSEIF (raX(iI) <= 6.0) THEN
+        iWhich = 3
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raX(iI))
+      ELSEIF (raX(iI) <= 10.0) THEN
+        iWhich = 4
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raX(iI))
+      ELSEIF (raX(iI) <= 20.0) THEN
+        iWhich = 5
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raX(iI))
+      ELSE !!   expint3(x) <= 1e-10 for x >= 20
+        iWhich = 6
         raY(iI) = 0.0
-        IF (raX(iI) < 0.0) THEN
-            write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
-            write(kStdErr,*) 'cannot have negative values!'
-            CALL DoStop
-        ELSEIF (raX(iI) <= 0.1) THEN
-            iWhich = 1
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-            END DO
-        ELSEIF (raX(iI) <= 1.0) THEN
-            iWhich = 2
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-            END DO
-        ELSEIF (raX(iI) <= 6.0) THEN
-            iWhich = 3
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raX(iI))
-        ELSEIF (raX(iI) <= 10.0) THEN
-            iWhich = 4
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raX(iI))
-        ELSEIF (raX(iI) <= 20.0) THEN
-            iWhich = 5
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raX(iI))
-        ELSE !!   expint3(x) <= 1e-10 for x >= 20
-            iWhich = 6
-            raY(iI) = 0.0
-        END IF
+      END IF
     END DO
 
     RETURN
@@ -1059,48 +1047,48 @@ CONTAINS
     &   1.873706336320716e-03,   9.115323790575932e-01, -1.489123902774130e+00/
 
     DO iI = 1,kMaxPts
+      raY(iI) = 0.0
+      IF (raaX(iI,iL) < 0.0) THEN
+        write(kStdErr,*) 'in expint iI,raaX(iI,iL) = ',iI,raaX(iI,iL)
+        write(kStdErr,*) 'cannot have negative values!'
+        CALL DoStop
+      ELSEIF (raaX(iI,iL) <= 0.1) THEN
+        iWhich = 1
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
+        END DO
+      ELSEIF (raaX(iI,iL) <= 1.0) THEN
+        iWhich = 2
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
+        END DO
+      ELSEIF (raaX(iI,iL) <= 6.0) THEN
+        iWhich = 3
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raaX(iI,iL))
+      ELSEIF (raaX(iI,iL) <= 10.0) THEN
+        iWhich = 4
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raaX(iI,iL))
+      ELSEIF (raaX(iI,iL) <= 20.0) THEN
+        iWhich = 5
+        iCnt = iaMax(iWhich)
+        DO j = 1,iCnt
+          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
+        END DO
+        raY(iI) = raY(iI)*exp(-raaX(iI,iL))
+      ELSE !!   expint3(x) <= 1e-10 for x >= 20
+        iWhich = 6
         raY(iI) = 0.0
-        IF (raaX(iI,iL) < 0.0) THEN
-            write(kStdErr,*) 'in expint iI,raaX(iI,iL) = ',iI,raaX(iI,iL)
-            write(kStdErr,*) 'cannot have negative values!'
-            CALL DoStop
-        ELSEIF (raaX(iI,iL) <= 0.1) THEN
-            iWhich = 1
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
-            END DO
-        ELSEIF (raaX(iI,iL) <= 1.0) THEN
-            iWhich = 2
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
-            END DO
-        ELSEIF (raaX(iI,iL) <= 6.0) THEN
-            iWhich = 3
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raaX(iI,iL))
-        ELSEIF (raaX(iI,iL) <= 10.0) THEN
-            iWhich = 4
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raaX(iI,iL))
-        ELSEIF (raaX(iI,iL) <= 20.0) THEN
-            iWhich = 5
-            iCnt = iaMax(iWhich)
-            DO j = 1,iCnt
-                raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
-            END DO
-            raY(iI) = raY(iI)*exp(-raaX(iI,iL))
-        ELSE !!   expint3(x) <= 1e-10 for x >= 20
-            iWhich = 6
-            raY(iI) = 0.0
-        END IF
+      END IF
     END DO
 
     RETURN
