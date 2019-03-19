@@ -40,75 +40,68 @@ CONTAINS
 ! assume GASID , freqs are wrong
     iCheckXsecDataBase = -1
 
+ 103 FORMAT('ERROR! number ',I5,' opening xsec database file : ',/,A84)
     caFName = kXsecParamFile
     iIOUN = kTempUnit
-    OPEN(UNIT=iIOUN,FILE=caFName,STATUS='old', &
-    FORM='FORMATTED',IOSTAT=iFileErr)
-
+    OPEN(UNIT=iIOUN,FILE=caFName,STATUS='old',FORM='FORMATTED',IOSTAT=iFileErr)
     IF (kXsecFormat < 0) THEN
-    ! ccccccccc this is the original format : read old style xsec.param file
-        IF (iFileErr /= 0) THEN
-            iErr = 0
-            WRITE(kStdErr,103) iFileErr,caFName
-            103 FORMAT('ERROR! number ',I5,' opening xsec database file : &
-            ',/,A84)
-            CALL DoSTOP
-        END IF
-
-        kTempUnitOpen = 1
+      ! ccccccccc this is the original format : read old style xsec.param file
+      IF (iFileErr /= 0) THEN
+        iErr = 0
+        WRITE(kStdErr,103) iFileErr,caFName
+        CALL DoSTOP
+      END IF
+      kTempUnitOpen = 1
               
-    ! read file util GASID, freq bounds match found or EOF
-        20 READ(iIOUN,5020,END=777) caLine
-        READ(caLine,*) iLine,iID,iNpts,iTemps,rLower,rHigher
+      ! read file util GASID, freq bounds match found or EOF
+ 20   READ(iIOUN,5020,END=777) caLine
+      READ(caLine,*) iLine,iID,iNpts,iTemps,rLower,rHigher
 
-        IF ((iID == iGasID) .AND. (rL < 0) .AND. (rH < 0)) THEN
+      IF ((iID == iGasID) .AND. (rL < 0) .AND. (rH < 0)) THEN
         ! basic presence of gas tested for, and found
         ! this is the -1 option in XSCGAS
-            iCheckXsecDataBase = 1
-        END IF
+        iCheckXsecDataBase = 1
+      END IF
 
-        IF ((iID == iGasID) .AND. (rL >= rLower) .AND. &
-        (rH <= rHigher)) THEN
+      IF ((iID == iGasID) .AND. (rL >= rLower) .AND. (rH <= rHigher)) THEN
         ! presence of gas tested for, with freq bounds, and found well within
-            iCheckXsecDataBase = 1
-        END IF
+         iCheckXsecDataBase = 1
+      END IF
 
-        IF ((iID == iGasID) .AND. (rL <= rHigher) .AND. &
-        (rH >= rLower)) THEN
+      IF ((iID == iGasID) .AND. (rL <= rHigher) .AND. (rH >= rLower)) THEN
         ! presence of gas tested for, with freq bounds, and found
-            iCheckXsecDataBase = 1
-        END IF
+        iCheckXsecDataBase = 1
+      END IF
 
-        IF (iCheckXsecDataBase < 0) THEN
-            GOTO 20
-        END IF
+      IF (iCheckXsecDataBase < 0) THEN
+        GOTO 20
+      END IF
               
-        777 CONTINUE
+  777 CONTINUE
     ELSE
-    ! ccccccccc this is the new format : read comp.param style xsec.param file
-    ! read file util GASID, freq bounds match found or EOF
-        30 READ(iIOUN,5020,END=888) caLine
-        READ(caLine,*) iID,rLower,rHigher,iTag
+      ! ccccccccc this is the new format : read comp.param style xsec.param file
+      ! read file util GASID, freq bounds match found or EOF
+ 30   READ(iIOUN,5020,END=888) caLine
+      READ(caLine,*) iID,rLower,rHigher,iTag
 
-        IF ((iID == iGasID) .AND. (rL < 0) .AND. (rH < 0)) THEN
+      IF ((iID == iGasID) .AND. (rL < 0) .AND. (rH < 0)) THEN
         ! basic presence of gas tested for, and found
         ! this is basically the -1 option in XSCGAS
-            iCheckXSecDataBase = 1
-        END IF
+        iCheckXSecDataBase = 1
+      END IF
 
-        IF ((iID == iGasID) .AND. (rL >= rLower) .AND. &
-        (rH <= rHigher)) THEN
+      IF ((iID == iGasID) .AND. (rL >= rLower) .AND. (rH <= rHigher)) THEN
         ! presence of gas tested for, with freq bounds, and found well within
         ! this is when we WANT to UNCOMPRESS files!
-            IF (iTag == iTagIn) THEN   !actually uncompressing stuff
-                iCheckXsecDataBase = 1
-            END IF
+        IF (iTag == iTagIn) THEN   !actually uncompressing stuff
+          iCheckXsecDataBase = 1
         END IF
+      END IF
 
-        IF (iCheckXSecDataBase < 0) THEN
-            GOTO 30
-        END IF
-        888 CONTINUE
+      IF (iCheckXSecDataBase < 0) THEN
+        GOTO 30
+      END IF
+ 888 CONTINUE
 
     END IF
 
@@ -144,46 +137,41 @@ CONTAINS
 ! assume GASID , freqs are wrong
     iCheckCompDataBase = -1
 
+ 103 FORMAT('ERROR! number ',I5,' opening comp database file : ',/,A84)
     caFName = kCompParamFile
     iIOUN = kTempUnit
-!      print *,iIOUN,caFName
-    OPEN(UNIT=iIOUN,FILE=caFname,STATUS='old', &
-    FORM='FORMATTED',IOSTAT=iFileErr)
-
+    OPEN(UNIT=iIOUN,FILE=caFname,STATUS='old',FORM='FORMATTED',IOSTAT=iFileErr)
     IF (iFileErr /= 0) THEN
-        iErr = 0
-        WRITE(kStdErr,103) iFileErr,caFname
-        103 FORMAT('ERROR! number ',I5,' opening comp database file : &
-        ',/,A84)
-        CALL DoSTOP
+      iErr = 0
+      WRITE(kStdErr,103) iFileErr,caFname
+      CALL DoSTOP
     END IF
     kTempUnitOpen = 1
 
 ! read file until GASID, freq bounds match found or EOF
-    20 READ(iIOUN,5020,END=777) caLine
-    5020 FORMAT(A80)
+ 20 READ(iIOUN,5020,END=777) caLine
+ 5020 FORMAT(A80)
     READ(caLine,*) iID,rLower,rHigher,iTag
 
     IF ((iID == iGasID) .AND. (rL < 0) .AND. (rH < 0)) THEN
-    ! basic presence of gas tested for, and found
-    ! this is basically the -1 option in MOLGAS
-        iCheckCompDataBase = 1
+      ! basic presence of gas tested for, and found
+      ! this is basically the -1 option in MOLGAS
+      iCheckCompDataBase = 1
     END IF
 
-    IF ((iID == iGasID) .AND. (rL >= rLower) .AND. &
-    (rH <= rHigher)) THEN
-    ! presence of gas tested for, with freq bounds, and found well within
-    ! this is when we WANT to UNCOMPRESS files!
-        IF (iTag == iTagIn) THEN   !actually uncompressing stuff
-            iCheckCompDataBase = 1
-        END IF
+    IF ((iID == iGasID) .AND. (rL >= rLower) .AND. (rH <= rHigher)) THEN
+      ! presence of gas tested for, with freq bounds, and found well within
+      ! this is when we WANT to UNCOMPRESS files!
+      IF (iTag == iTagIn) THEN   !actually uncompressing stuff
+        iCheckCompDataBase = 1
+      END IF
     END IF
 
     IF (iCheckCompDataBase < 0) THEN
-        GOTO 20
+      GOTO 20
     END IF
           
-    777 CONTINUE
+  777 CONTINUE
     CLOSE(iIOUN)
     kTempUnitOpen = -1
 
@@ -209,78 +197,71 @@ CONTAINS
 
     iDoAdd = -1
 
-    333 FORMAT('---> Warning! No comprsd data gasID ',I3, &
-    ' in ',f10.4,' cm-1 chunk; tagIN = ', I3)
-    334 FORMAT('---> Warning! No comprsd data heavywater gasID ',I3, &
-    ' in ',f10.4,' cm-1 chunk')
-    414 FORMAT('Comp data exists for HeavyWater (gas#) ',I3,f10.4,' cm-1 chunk')
+  333 FORMAT('---> Warning! No comprsd data gasID ',I3,' in ',f10.4,' cm-1 chunk; tagIN = ', I3)
+  334 FORMAT('---> Warning! No comprsd data heavywater gasID ',I3,' in ',f10.4,' cm-1 chunk')
+  414 FORMAT('Comp data exists for HeavyWater (gas#) ',I3,f10.4,' cm-1 chunk')
 
-! check to see if the k-comp file exists for the (GAS ID/freq) combination
+    ! check to see if the k-comp file exists for the (GAS ID/freq) combination
     IF ((1 <= iGasID) .AND. (iGasID <= kGasComp)) THEN
-        iDoAdd = &
-        iCheckCompDataBase(iGasID,raFreq(1),raFreq(kMaxPts),iActualTag,iErr)
-        IF (iDoAdd < 0) THEN
-            WRITE(kStdWarn,333) iGasID,raFreq(1),iActualTag
-            WRITE(kStdWarn,*) ' '
-        END IF
-        GOTO 2000
+      iDoAdd = iCheckCompDataBase(iGasID,raFreq(1),raFreq(kMaxPts),iActualTag,iErr)
+      IF (iDoAdd < 0) THEN
+        WRITE(kStdWarn,333) iGasID,raFreq(1),iActualTag
+        WRITE(kStdWarn,*) ' '
+      END IF
+      GOTO 2000
     END IF
 
     IF (iGasID == kMaxGas) THEN
-    !! this is heavy water
-        IF (((raFreq(1) + 1.0) >= kWaterIsobandStart1*1.0)  .AND. &
-        ((raFreq(kMaxPts) - 1.0) <= kWaterIsobandStop1*1.0)) THEN
-            iDoAdd = +1
-            WRITE(kStdWarn,414) iGasID,raFreq(1)
-        ELSEIF (((raFreq(1) + 1.0) >= kWaterIsobandStart2*1.0)  .AND. &
-            ((raFreq(kMaxPts) - 1.0) <= kWaterIsobandStop2*1.0)) THEN
-            iDoAdd = +1
-            WRITE(kStdWarn,414) iGasID,raFreq(1)
-        ELSE
-            iDoAdd = -1
-            WRITE(kStdWarn,334) iGasID,raFreq(1)
-        END IF
+      !! this is heavy water
+      IF (((raFreq(1) + 1.0) >= kWaterIsobandStart1*1.0)  .AND. &
+         ((raFreq(kMaxPts) - 1.0) <= kWaterIsobandStop1*1.0)) THEN
+        iDoAdd = +1
+        WRITE(kStdWarn,414) iGasID,raFreq(1)
+      ELSEIF (((raFreq(1) + 1.0) >= kWaterIsobandStart2*1.0)  .AND. &
+          ((raFreq(kMaxPts) - 1.0) <= kWaterIsobandStop2*1.0)) THEN
+        iDoAdd = +1
+        WRITE(kStdWarn,414) iGasID,raFreq(1)
+      ELSE
+        iDoAdd = -1
+        WRITE(kStdWarn,334) iGasID,raFreq(1)
+      END IF
     END IF
 
-! check to see if the xsec file exists for the (GAS ID/freq) combination
-    444 FORMAT('---> Warning! No xsec data for gasID ',I3, &
-    ' in ',f10.4,' cm-1 chunk')
+!   check to see if the xsec file exists for the (GAS ID/freq) combination
+    444 FORMAT('---> Warning! No xsec data for gasID ',I3, ' in ',f10.4,' cm-1 chunk')
 
     IF ((kGasXsecLo <= iGasID) .AND. (iGasID <= kGasXsecHi)) THEN
-        iDoAdd = iCheckXsecDataBase(iGasID,raFreq(1),raFreq(kMaxPts), &
-        iActualTag,iErr)
-        IF (iDoAdd < 0) THEN
-            WRITE(kStdWarn,444) iGasID,raFreq(1)
-            WRITE(kStdWarn,*) ' '
-        END IF
-        GOTO 2000
+      iDoAdd = iCheckXsecDataBase(iGasID,raFreq(1),raFreq(kMaxPts),iActualTag,iErr)
+      IF (iDoAdd < 0) THEN
+         WRITE(kStdWarn,444) iGasID,raFreq(1)
+         WRITE(kStdWarn,*) ' '
+      END IF
+      GOTO 2000
     END IF
 
-! c   IF ((29 .LE. iGasID) .AND. (iGasID .LE. 50)) THEN
+ 1000 FORMAT('No contribution to absorption cross sections from GAS ID = ',I2,/,'... skipping to next gas ...')
     IF ((kGasComp+1 <= iGasID) .AND. (iGasID <= kGasXsecLo-1)) THEN
-        iDoAdd = -1
-        WRITE(kStdWarn,1000) iGasID
-        1000 FORMAT('No contribution to absorption cross sections from GAS ID &
-        = ',I2,/,'... skipping to next gas ...')
-        GOTO 2000
+      iDoAdd = -1
+      WRITE(kStdWarn,1000) iGasID
+      GOTO 2000
     END IF
 
 ! check to see if we need to add on the water continuum
     IF (kCKD >= 0) THEN
-        IF ((iGasID >= kNewGasLo) .AND. (iGasID <= kNewGasHi)) THEN
-            iDoAdd = 1
-            GOTO 2000
-        END IF
+      IF ((iGasID >= kNewGasLo) .AND. (iGasID <= kNewGasHi)) THEN
+        iDoAdd = 1
+        GOTO 2000
+      END IF
     END IF
 
+ 1010 FORMAT('Cannot add contribution of GAS ID = ',I2)
     IF ((iGasID < 1) .OR. (iGasID > kMaxGas)) THEN
-        iErr = 1
-        WRITE(kStdWarn,1010) iGasID
-        1010 FORMAT('Cannot add contribution of GAS ID = ',I2)
-        CALL DoSTOP
+      iErr = 1
+      WRITE(kStdWarn,1010) iGasID
+      CALL DoSTOP
     END IF
 
-    2000 CONTINUE
+ 2000 CONTINUE
     RETURN
     end SUBROUTINE DataBaseCheck
 
@@ -300,41 +281,40 @@ CONTAINS
 !! but then in kcartaparam.f90 we define kMaxClouds
 !! beter have kMaxUserSet > kMaxClouds else array bound problems!!!
     IF (kMaxUserSet < kMaxClouds) THEN
-        write(kStdErr,*) 'because of comblock6, need kMaxUserSet > kMaxClouds'
-        write(kStdErr,*) 'kMaxUserSet,kMaxClouds = ',kMaxUserSet,kMaxClouds
-        CALL DoStop
+      write(kStdErr,*) 'because of comblock6, need kMaxUserSet > kMaxClouds'
+      write(kStdErr,*) 'kMaxUserSet,kMaxClouds = ',kMaxUserSet,kMaxClouds
+      CALL DoStop
     END IF
 
     DO iJ = 1,kW
-        rF = kMaxPts*kaFrStep(iJ)
-        rG = kaBlSize(iJ)
-        IF (abs(rF-kaBlSize(iJ)) > kaFrStep(iJ)/2.0) THEN
-            write(kStdErr,*) 'iJ =  ',iJ
-            write(kStdErr,*) 'kcartaparam.f90 claims kaBlSize(iJ) = ',rG
-            write(kStdErr,*) 'while it should be ',rF
-            CALL DoSTOP
-        END IF
-        iI = NINT((kaMaxFr(iJ)-kaMinFr(iJ))/rF)
-        IF (iI /= kaNumKComp(iJ)) THEN
-            write(kStdErr,*) 'iJ = ',iJ
-            write(kStdErr,*) 'kcartaparam.f90 says that the number of '
-            write(kStdErr,*) 'kCompressed files = kaNumKComp(iJ) = ',kaNumKComp(iJ)
-            write(kStdErr,*) 'based on following parameters, there should be iI = ',iI
-            write(kStdErr,*) kaMinFr(iJ),kaMaxFr(iJ),kaFrStep(iJ),kMaxPts
-            write(kStdErr,*) 'iI = iNT((kMaxFreq-kMinFreq)/ &
-            (kMaxPts*kFreqStep))'
-            CALL DoSTOP
-        END IF
+      rF = kMaxPts*kaFrStep(iJ)
+      rG = kaBlSize(iJ)
+      IF (abs(rF-kaBlSize(iJ)) > kaFrStep(iJ)/2.0) THEN
+        write(kStdErr,*) 'iJ =  ',iJ
+        write(kStdErr,*) 'kcartaparam.f90 claims kaBlSize(iJ) = ',rG
+        write(kStdErr,*) 'while it should be ',rF
+        CALL DoSTOP
+      END IF
+      iI = NINT((kaMaxFr(iJ)-kaMinFr(iJ))/rF)
+      IF (iI /= kaNumKComp(iJ)) THEN
+        write(kStdErr,*) 'iJ = ',iJ
+        write(kStdErr,*) 'kcartaparam.f90 says that the number of '
+        write(kStdErr,*) 'kCompressed files = kaNumKComp(iJ) = ',kaNumKComp(iJ)
+        write(kStdErr,*) 'based on following parameters, there should be iI = ',iI
+        write(kStdErr,*) kaMinFr(iJ),kaMaxFr(iJ),kaFrStep(iJ),kMaxPts
+        write(kStdErr,*) 'iI = iNT((kMaxFreq-kMinFreq)/(kMaxPts*kFreqStep))'
+        CALL DoSTOP
+      END IF
     END DO
 
     iI = 0
     DO iJ = 1,kW
-        iI = iI+(kaNumkComp(iJ))
+      iI = iI+(kaNumkComp(iJ))
     END DO
     IF (iI /= kNumkCompT) THEN
-        write(kStdErr,*) 'kcartaparam.f90 says kNumkCompT = ',kNumkCompT
-        write(kStdErr,*) 'while it should be ',iI
-        CALL DoSTOP
+      write(kStdErr,*) 'kcartaparam.f90 says kNumkCompT = ',kNumkCompT
+      write(kStdErr,*) 'while it should be ',iI
+      CALL DoSTOP
     END IF
 
     RETURN
@@ -393,14 +373,11 @@ CONTAINS
     write(kStdWarn,*) '*********************************************'
     write(kStdWarn,*) '**Setting freqs, fileID lower/upper bounds***'
 
-!      print *,'input (rFrLow,rFrHigh) : '
-!      read *,rFrLow,rFrHigh
-
     IF (rFrLow >= rFrHigh) THEN
-        write(kStdWarn,*) 'Swapping frequencies found in *FRQNCY'
-        rTemp = rFrLow
-        rFrLow = rFrHigh
-        rFrHigh = rTemp
+      write(kStdWarn,*) 'Swapping frequencies found in *FRQNCY'
+      rTemp = rFrLow
+      rFrLow = rFrHigh
+      rFrHigh = rTemp
     END IF
     write(kStdWarn,*) 'input freqs are  : ',rFrLow,rFrHigh
 
@@ -408,36 +385,36 @@ CONTAINS
 ! remember : nint(x) === round(x)
 ! if the bands are FIR3,FIR2,FIR1,IR,NIR1,NIR2 onwards then
     IF (rFrlow >= 140.0) THEN
-    !! start/stop chunks are integer numbers, so use this fact
-        rLow = rFrLow
-        rHigh = rFrHigh
-    ! irst round down rFrLow, and round up rFrHigh
-        rFrLow = 1.0*INT(rFrLow)
-        IF (abs(rFrHigh-1.0*INT(rFrHigh)) > 0.000000) THEN
-            rFrHigh = rFrHigh+1.0
-        END IF
-        rFrHigh = 1.0*INT(rFrHigh)
-        write(kStdWarn,*) 'rounded down/up rFrLow/rFrhigh to ',rFrLow,rFrHigh
+      !! start/stop chunks are integer numbers, so use this fact
+      rLow = rFrLow
+      rHigh = rFrHigh
+      !first round down rFrLow, and round up rFrHigh
+      rFrLow = 1.0*INT(rFrLow)
+      IF (abs(rFrHigh-1.0*INT(rFrHigh)) > 0.000000) THEN
+        rFrHigh = rFrHigh+1.0
+      END IF
+      rFrHigh = 1.0*INT(rFrHigh)
+      write(kStdWarn,*) 'rounded down/up rFrLow/rFrhigh to ',rFrLow,rFrHigh
     ELSE
-        write(kStdWarn,*) ' --> for bands with wavenumbers < 140 cm-1, kCARTA'
-        write(kStdWarn,*) ' --> compressed files are not on integer bdries'
-        write(kStdWarn,*) ' --> so we hope you got things correct!'
+      write(kStdWarn,*) ' --> for bands with wavenumbers < 140 cm-1, kCARTA'
+      write(kStdWarn,*) ' --> compressed files are not on integer bdries'
+      write(kStdWarn,*) ' --> so we hope you got things correct!'
     END IF
 
     rLow = rFrLow
     rHigh = rFrHigh
 
     IF (rLow >= rHigh) THEN
-        rTemp = rLow
-        rLow = rHigh
-        rHigh = rTemp
+      rTemp = rLow
+      rLow = rHigh
+      rHigh = rTemp
     END IF
 
     CALL filebounds(rLow,rHigh, &
-    rFileStartFrLo,rFileStartFrHi,iFileIDLo,iFileIDHi, &
-    raBlock,raFiles, &
-    iaTagIndex,iaActualTag, &
-    raFileStep,iaList,iTotal)
+      rFileStartFrLo,rFileStartFrHi,iFileIDLo,iFileIDHi, &
+      raBlock,raFiles, &
+      iaTagIndex,iaActualTag, &
+      raFileStep,iaList,iTotal)
 
     rFrLow = rLow
     rFrHigh = rHigh
@@ -453,25 +430,24 @@ CONTAINS
     write (kStdWarn,*) '#,rBlock,iFile,iTagIndex,iActualTag,iFileStep,iList'
     write (kStdWarn,*) '----------------------------------------------'
     DO iDummy = iFileIDLo,iFileIDHi
-        write(kStdWarn,111) iDummy,raBlock(iDummy),raFiles(iDummy), &
+      write(kStdWarn,111) iDummy,raBlock(iDummy),raFiles(iDummy), &
         iaTagIndex(iDummy),iaActualTag(iDummy), &
         raFileStep(iDummy),iaList(iDummy-iFileIDLo+1)
     END DO
     111 FORMAT(I4,2(' ',F10.4),2(' ',I3),' ',F10.4,' ',I5)
      
     IF (iaActualTag(iaList(1)) /= iaActualTag(iaList(iTotal))) THEN
-        write(kStdWarn,*) 'Start file tag = ',iaActualTag(iaList(1))
-        write(kStdWarn,*) 'Stop  file tag = ',iaActualTag(iaList(iTotal))
+      write(kStdWarn,*) 'Start file tag = ',iaActualTag(iaList(1))
+      write(kStdWarn,*) 'Stop  file tag = ',iaActualTag(iaList(iTotal))
 
-        write(kStdErr,*) 'program requires you choose start/stop freqs'
-        write(kStdErr,*) 'that only span one wavenumber spacing, as '
-        write(kStdErr,*) 'defined at the bottom of kcartaparam.f90'
-        DO iDummy = 1,kW
-            write(kStdErr,333) kaMinFr(iDummy),kaMaxFr(iDummy), &
-            kaFrStep(iDummy),kaTag(iDummy)
-        END DO
-        write(kStdErr,*) 'please reset *FRQNCY and retry',rFrLow,rFrHigh
-        CALL DoSTOP
+      write(kStdErr,*) 'program requires you choose start/stop freqs'
+      write(kStdErr,*) 'that only span one wavenumber spacing, as '
+      write(kStdErr,*) 'defined at the bottom of kcartaparam.f90'
+      DO iDummy = 1,kW
+        write(kStdErr,333) kaMinFr(iDummy),kaMaxFr(iDummy),kaFrStep(iDummy),kaTag(iDummy)
+      END DO
+      write(kStdErr,*) 'please reset *FRQNCY and retry',rFrLow,rFrHigh
+      CALL DoSTOP
     END IF
 
     333 FORMAT('rF1,rF2,d_f,Tag = ',2(f8.2,'  '),f12.7,' ',i4)
@@ -535,12 +511,10 @@ CONTAINS
     CALL CheckLimits(rL,rH)
 
     iErr = 0
-    DO iDummy = 1,kW            !compute total number of kCOMP chunks present
-        iErr = iErr+kaNumkComp(iDummy)
-    END DO
+    iErr = sum(kaNumkComp(1:kW))
     IF (iErr /= kNumkCompT) THEN
-        write(kStdErr,*) 'Error in kNumkCompT',iErr,kNumkCompT
-        CALL DoStop
+      write(kStdErr,*) 'Error in kNumkCompT',iErr,kNumkCompT
+      CALL DoStop
     END IF
 
 ! note there could be "overlaps" between the q r s files eg
@@ -548,87 +522,83 @@ CONTAINS
 !                                  <5=605-630> <6=630-655> <7=655-680> .....
     iDummy = 0
     DO iFound = 1,kW
-        DO iInt = 1,kaNumkComp(iFound)
-            iDummy = iDummy+1
-        ! his is needed by kcartamain.f
-            raBlock(iDummy)     = kaMinFr(iFound)+(iInt-1)*kaBlSize(iFound)
-            raFiles(iDummy)     = raBlock(iDummy)
-            iaActualTag(iDummy) = kaTag(iFound)
-            iaTagIndex(iDummy)  = iFound
-            raFileStep(iDummy)  = kaBlSize(iFound)
+      DO iInt = 1,kaNumkComp(iFound)
+        iDummy = iDummy+1
+        !this is needed by kcartamain.f
+        raBlock(iDummy)     = kaMinFr(iFound)+(iInt-1)*kaBlSize(iFound)
+        raFiles(iDummy)     = raBlock(iDummy)
+        iaActualTag(iDummy) = kaTag(iFound)
+        iaTagIndex(iDummy)  = iFound
+        raFileStep(iDummy)  = kaBlSize(iFound)
 
-        ! his is needed within misc.f
-            raBlockEnd(iDummy) = raBlock(iDummy)+kaBlSize(iFound)
-            raBlockEnd(iDummy) = raBlockEnd(iDummy)-kaFrStep(iFound)
-            raDelta(iDummy)    = kaFrStep(iFound)
-        END DO
+        !this is needed within misc.f
+        raBlockEnd(iDummy) = raBlock(iDummy)+kaBlSize(iFound)
+        raBlockEnd(iDummy) = raBlockEnd(iDummy)-kaFrStep(iFound)
+        raDelta(iDummy)    = kaFrStep(iFound)
+      END DO
     END DO
 
 ! go thru raBlock and see where we think the start file ID, stop file ID
 ! should be set at
     CALL LowerLimits(rL,rL1,rL2,iFileIDLo1,iFileIDLo2, &
-    rFileStartFrLo1,rFileStartFrLo2,raBlock,raBlockEnd,raFiles,raDelta)
+      rFileStartFrLo1,rFileStartFrLo2,raBlock,raBlockEnd,raFiles,raDelta)
     CALL UpperLimits(rH,rH1,rH2,iFileIDHi1,iFileIDHi2, &
-    rFileStartFrHi1,rFileStartFrHi2,raBlock,raBlockEnd,raFiles,raDelta)
+      rFileStartFrHi1,rFileStartFrHi2,raBlock,raBlockEnd,raFiles,raDelta)
 
 ! now set the fileID's to be used
     CALL LowerFileID(rL,rL1,rL2,iFileIDLo1,iFileIDLo2, &
-    rFileStartFrLo1,rFileStartFrLo2,raBlock,raBlockEnd, &
-    iaActualTag,iFileIDHi1,iFileIDHi2,iTruthLo,iFileIDLo,rFileStartFrLo)
+      rFileStartFrLo1,rFileStartFrLo2,raBlock,raBlockEnd, &
+      iaActualTag,iFileIDHi1,iFileIDHi2,iTruthLo,iFileIDLo,rFileStartFrLo)
     CALL UpperFileID(rH,rH1,rH2,iFileIDHi1,iFileIDHi2, &
-    rFileStartFrHi1,rFileStartFrHi2,raBlock,raBlockEnd, &
-    iaActualTag,iFileIDLo1,iFileIDLo2,iTruthHi,iFileIDHi,rFileStartFrHi)
+      rFileStartFrHi1,rFileStartFrHi2,raBlock,raBlockEnd, &
+      iaActualTag,iFileIDLo1,iFileIDLo2,iTruthHi,iFileIDHi,rFileStartFrHi)
 
     IF ((iFileIDLo >= 1) .AND. (iFileIDLo <= kNumkCompT) .AND. &
-    (iFileIDHi >= 1) .AND. (iFileIDHi <= kNumkCompT) .AND. &
-    (iFileIDLo <= iFileIDHi)  .AND. &
-    (iTruthLo > 0) .AND. (iTruthHi > 0)) THEN
-        iErr = -1
+      (iFileIDHi >= 1) .AND. (iFileIDHi <= kNumkCompT) .AND. &
+      (iFileIDLo <= iFileIDHi)  .AND. &
+      (iTruthLo > 0) .AND. (iTruthHi > 0)) THEN
+      iErr = -1
     ELSE
-        write(kStdErr,*) 'Error in setting file '
-        write(kStdErr,*) 'lower/upper bounds from *FRQNCY'
-        CALL DoSTOP
+      write(kStdErr,*) 'Error in setting file '
+      write(kStdErr,*) 'lower/upper bounds from *FRQNCY'
+      CALL DoSTOP
     END IF
 
     iJunk  =  kLongOrShort
     iJunk  =  2
     IF  (abs(iJunk) <= 1) THEN  !! verbose printing
-        iFound = iaActualTag(1)
-        write(kStdWarn,*) ' '
-        write(kStdWarn,*) 'iCnt  raBlock  raBlockEnd  iaTag'
-        write(kStdWarn,*) '--------------------------------'
-        DO iDummy = 1,kNumkCompT-1
-            IF ((iDummy /= iFileIDLo) .AND. (iDummy /= iFileIDHi)) THEN
-                write(kStdWarn,10) iDummy,raBlock(iDummy),raBlockEnd(iDummy), &
-                iaActualTag(iDummy)
-            ELSE
-                write(kStdWarn,11) iDummy,raBlock(iDummy),raBlockEnd(iDummy), &
-                iaActualTag(iDummy)
-            END IF
-            IF (iFound /=  iaActualTag(iDummy+1)) THEN
-                write(kStdWarn,*) '--------------------------------'
-                iFound =  iaActualTag(iDummy+1)
-            END IF
-        END DO
-        iDummy = kNumkCompT
+      iFound = iaActualTag(1)
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) 'iCnt  raBlock  raBlockEnd  iaTag'
+      write(kStdWarn,*) '--------------------------------'
+      DO iDummy = 1,kNumkCompT-1
         IF ((iDummy /= iFileIDLo) .AND. (iDummy /= iFileIDHi)) THEN
-            write(kStdWarn,10) iDummy,raBlock(iDummy),raBlockEnd(iDummy), &
-            iaActualTag(iDummy)
+          write(kStdWarn,10) iDummy,raBlock(iDummy),raBlockEnd(iDummy),iaActualTag(iDummy)
         ELSE
-            write(kStdWarn,11) iDummy,raBlock(iDummy),raBlockEnd(iDummy), &
-            iaActualTag(iDummy)
+          write(kStdWarn,11) iDummy,raBlock(iDummy),raBlockEnd(iDummy),iaActualTag(iDummy)
         END IF
-        write(kStdWarn,*) '--------------------------------'
-        write(kStdWarn,*) ' '
+        IF (iFound /=  iaActualTag(iDummy+1)) THEN
+          write(kStdWarn,*) '--------------------------------'
+          iFound =  iaActualTag(iDummy+1)
+        END IF
+      END DO
+      iDummy = kNumkCompT
+      IF ((iDummy /= iFileIDLo) .AND. (iDummy /= iFileIDHi)) THEN
+        write(kStdWarn,10) iDummy,raBlock(iDummy),raBlockEnd(iDummy),iaActualTag(iDummy)
+      ELSE
+        write(kStdWarn,11) iDummy,raBlock(iDummy),raBlockEnd(iDummy),iaActualTag(iDummy)
+      END IF
+      write(kStdWarn,*) '--------------------------------'
+      write(kStdWarn,*) ' '
     ELSE  !! quiet printing
-        iFound = iaActualTag(1)
-        write(kStdWarn,*) ' '
-        DO iDummy = 1,kNumkCompT-1
-            IF (iFound /=  iaActualTag(iDummy+1)) THEN
-                iFound =  iaActualTag(iDummy+1)
-            END IF
-        END DO
-        iDummy = kNumkCompT
+      iFound = iaActualTag(1)
+      write(kStdWarn,*) ' '
+      DO iDummy = 1,kNumkCompT-1
+        IF (iFound /=  iaActualTag(iDummy+1)) THEN
+          iFound =  iaActualTag(iDummy+1)
+        END IF
+      END DO
+      iDummy = kNumkCompT
     END IF
             
     10 FORMAT(I4,' ',F12.5,' ',F12.5,' ',I3)
@@ -638,41 +608,39 @@ CONTAINS
 ! remember that iFileID is basically an index setting equal to iDummy above
 ! thus if we know iFileID we know everything!!!!!
     IF (iaActualTag(iFileIDLo) == iaActualTag(iFileIDHi)) THEN
-    ! ery easy everything is in either q or r or s database
-        iTotal = 0
-        DO iInt = 1,(iFileIDHi-iFileIDLo+1)
-            iTotal = iTotal+1
-            iaList(iTotal) = iFileIDLo+(iInt-1)     !save file ID
-            IF  (abs(kLongOrShort) <= 1) THEN  !! verbose printing
-                write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
-                raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
-            END IF
-        END DO
-    ELSE
-    ! ery hard : mixing of q,r,s databases
-        iTotal = 0
+      !very easy everything is in either q or r or s database
+      iTotal = 0
+      DO iInt = 1,(iFileIDHi-iFileIDLo+1)
         iTotal = iTotal+1
-        iaList(iTotal) = iFileIDLo                !save file ID
-        rEnd = raBlockEnd(iaList(iTotal))
-        write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
-        raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
-        DO iInt = 2,(iFileIDHi-iFileIDLo+1)
-            IF (rEnd < raBlockEnd(iFileIDLo+iInt-1)) THEN
-                iTotal = iTotal+1
-                iaList(iTotal) = iFileIDLo+(iInt-1)   !save file ID
-                write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
-                raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
-                rEnd = raBlockEnd(iaList(iTotal))
-            END IF
-        END DO
+        iaList(iTotal) = iFileIDLo+(iInt-1)     !save file ID
+        IF  (abs(kLongOrShort) <= 1) THEN  !! verbose printing
+          write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
+              raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
+        END IF
+      END DO
+    ELSE
+      !very hard : mixing of q,r,s databases
+      iTotal = 0
+      iTotal = iTotal+1
+      iaList(iTotal) = iFileIDLo                !save file ID
+      rEnd = raBlockEnd(iaList(iTotal))
+      write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
+      raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
+      DO iInt = 2,(iFileIDHi-iFileIDLo+1)
+        IF (rEnd < raBlockEnd(iFileIDLo+iInt-1)) THEN
+          iTotal = iTotal+1
+          iaList(iTotal) = iFileIDLo+(iInt-1)   !save file ID
+          write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
+            raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
+          rEnd = raBlockEnd(iaList(iTotal))
+        END IF
+      END DO
     END IF
 
 ! now that we have the ActualTag eg 20 for r=0605-2830 cm-1, or
 !                                   25 for s=2805-3305 cm-1, or
 !                                   30 for m=4000-5000 cm-1,
 ! we have also mapped this back into an TagIndex
-
-!      call dostop
 
     RETURN
     end SUBROUTINE filebounds
@@ -692,24 +660,22 @@ CONTAINS
     REAL :: rL,rH
 
     IF (rL < kaMinFr(1)) THEN
-        write(kStdWarn,*) 'Error!!Setting min wavenumber to ',kaMinFr(1)
-        rL = kaMinFr(1)
+      write(kStdWarn,*) 'Error!!Setting min wavenumber to ',kaMinFr(1)
+      rL = kaMinFr(1)
     END IF
     IF (rL > (kaMaxFr(kW)-kaBlSize(kW))) THEN
-    !! input start wavenumber waaaaaay tooooooooo high
-        write(kStdWarn,*) 'Error!!Setting minimum wavenumber to ', &
-        kaMaxFr(kW)-kaBlSize(kW)
-        rL = kaMaxFr(kW)-kaBlSize(kW)
+      !! input start wavenumber waaaaaay tooooooooo high
+      write(kStdWarn,*) 'Error!!Setting minimum wavenumber to ',kaMaxFr(kW)-kaBlSize(kW)
+      rL = kaMaxFr(kW)-kaBlSize(kW)
     END IF
     IF (rH > kaMaxFr(kW)) THEN
-        write(kStdWarn,*)'Error!!Setting max wavenumber to ',kaMaxFr(kW)
-        rH = kaMaxFr(kW)
+      write(kStdWarn,*)'Error!!Setting max wavenumber to ',kaMaxFr(kW)
+      rH = kaMaxFr(kW)
     END IF
     IF (rH < (kaMinFr(1)+kaBlSize(1))) THEN
-    !! input stop wavenumber waaaaaay tooooooooo low
-        write(kStdWarn,*) 'Error!!Setting maximum wavenumber to ', &
-        kaMinFr(1)+kaBlSize(1)
-        rH = kaMinFr(1)+kaBlSize(1)
+      !! input stop wavenumber waaaaaay tooooooooo low
+      write(kStdWarn,*) 'Error!!Setting maximum wavenumber to ',kaMinFr(1)+kaBlSize(1)
+      rH = kaMinFr(1)+kaBlSize(1)
     END IF
 
     1111 FORMAT(A1)
@@ -752,10 +718,10 @@ CONTAINS
 ! original code
     iInt = kNumkCompT
     rL1 = rL
-    11 CONTINUE
+  11 CONTINUE
     IF ((iInt > 1) .AND. (rL1 < raBlock(iInt))) THEN
-        iInt = iInt-1
-        GO TO 11
+      iInt = iInt-1
+      GO TO 11
     END IF
     iFileIDLo1 = iInt
     rFileStartFrLo1 = raFiles(iInt)
@@ -768,8 +734,8 @@ CONTAINS
     iInt = 1
     12 CONTINUE
     IF ((iInt < kNumkCompT) .AND. (rL2 >= raBlockEnd(iInt))) THEN
-        iInt = iInt+1
-        GO TO 12
+      iInt = iInt+1
+      GO TO 12
     END IF
     iFileIDLo2 = iInt
     rFileStartFrLo2 = raFiles(iInt)
@@ -777,7 +743,7 @@ CONTAINS
     write(kStdWarn,*) 'reset lower freq to start of kcomp block',rL2
 
     IF (abs(rL1 - rL2) > 0.01) THEN
-        write(kStdWarn,*) 'hmmm, lower freq needs to be fixed ...'
+      write(kStdWarn,*) 'hmmm, lower freq needs to be fixed ...'
     END IF
 
     RETURN
@@ -819,15 +785,14 @@ CONTAINS
     rH1 = rH
     22 CONTINUE
     IF (iInt == kNumkCompT) THEN
-        GOTO 24
-    ! c was raBlock(iInt+1)
-    ELSEIF ((iInt < kNumkCompT) .AND. &
-        (rH1-2*raDelta(iInt) > raBlockEnd(iInt))) THEN
-    !        print *,iInt,rH1-2*raDelta(iInt),raBlock(iInt),raBlockEnd(iInt)
-        iInt = iInt+1
-        GO TO 22
+      GOTO 24
+      ! c was raBlock(iInt+1)
+    ELSEIF ((iInt < kNumkCompT) .AND. (rH1-2*raDelta(iInt) > raBlockEnd(iInt))) THEN
+      !  print *,iInt,rH1-2*raDelta(iInt),raBlock(iInt),raBlockEnd(iInt)
+      iInt = iInt+1
+      GO TO 22
     END IF
-    24 CONTINUE
+  24 CONTINUE
     iFileIDHi1 = iInt
     rFileStartFrHi1 = raFiles(iInt)
     rH1 = raBlockEnd(iInt)
@@ -839,8 +804,8 @@ CONTAINS
     rH2 = rH
     23 CONTINUE
     IF ((iInt > 1) .AND. (rH2+2*raDelta(iInt) <= raBlock(iInt))) THEN
-        iInt = iInt-1
-        GO TO 23
+      iInt = iInt-1
+      GO TO 23
     END IF
     iFileIDHi2 = iInt
     rFileStartFrHi2 = raFiles(iInt)
@@ -848,7 +813,7 @@ CONTAINS
     write(kStdWarn,*) 'reset upper freq to end of kcomp block',rH2
 
     IF (abs(rH1 - rH2) > 0.01) THEN
-        write(kStdWarn,*) 'hmmm, upper freqs need to be fixed ...'
+      write(kStdWarn,*) 'hmmm, upper freqs need to be fixed ...'
     END IF
 
     RETURN
@@ -893,109 +858,106 @@ CONTAINS
 
     INTEGER :: iDiff11,iDiff12,iDiff21,iDiff22
 
-    iTruthLo=-1
+    iTruthLo = -1
     IF (iFileIDLo1 == iFileIDLo2) THEN !lower limit simple:equal file ID's
-        iFileIDLo = iFileIDLo1
-        rFileStartFrLo = rFileStartFrLo1
-        iTruthLo=1
-        rL = rL1
-        write(kStdWarn,*) 'Equal lower limit : iFileIDLo = ',iFileIDLo
+      iFileIDLo = iFileIDLo1
+      rFileStartFrLo = rFileStartFrLo1
+      iTruthLo = 1
+      rL = rL1
+      write(kStdWarn,*) 'Equal lower limit : iFileIDLo = ',iFileIDLo
     END IF
 
     IF (iFileIDLo1 /= iFileIDLo2) THEN    !lower limit hard
-        write(kStdWarn,*) 'Unequal lower limit : iFileIDLo1,2 = ', &
-        iFileIDLo1,iFileIDLo2
-        write(kStdWarn,*)'thinking ... '
-        write(kStdWarn,*) 'loTag',iFileIDLo1,iaActualTag(iFileIDLo1), &
-        iFileIDLo2,iaActualTag(iFileIDLo2)
-        write(kStdWarn,*) 'hiTag',iFileIDHi1,iaActualTag(iFileIDHi1), &
-        iFileIDHi2,iaActualTag(iFileIDHi2)
-        IF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDHi2)) THEN
-        ! or UPPER limit, equal tags; so now see if either of the
-        ! ower iFileIDLo1 or iFileIDLo2 fall in the same tag block
-            IF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDHi2)) THEN
-            ! hese two tags are the same
-                iFileIDLo = iFileIDLo1
-                rFileStartFrLo = rFileStartFrLo1
-                iTruthLo=1
-                rL = rL1
-            ELSE IF (iaActualTag(iFileIDLo2) == iaActualTag(iFileIDHi2)) THEN
-            ! hese two tags are the same
-                iFileIDLo = iFileIDLo2
-                rFileStartFrLo = rFileStartFrLo2
-                iTruthLo=1
-                rL = rL2
-            ELSE IF ((iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo1)) < &
+      write(kStdWarn,*) 'Unequal lower limit : iFileIDLo1,2 = ',iFileIDLo1,iFileIDLo2
+      write(kStdWarn,*)'thinking ... '
+      write(kStdWarn,*) 'loTag',iFileIDLo1,iaActualTag(iFileIDLo1),iFileIDLo2,iaActualTag(iFileIDLo2)
+      write(kStdWarn,*) 'hiTag',iFileIDHi1,iaActualTag(iFileIDHi1),iFileIDHi2,iaActualTag(iFileIDHi2)
+      IF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDHi2)) THEN
+        ! for UPPER limit, equal tags; so now see if either of the
+        ! lower iFileIDLo1 or iFileIDLo2 fall in the same tag block
+        IF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDHi2)) THEN
+          !these two tags are the same
+          iFileIDLo = iFileIDLo1
+          rFileStartFrLo = rFileStartFrLo1
+          iTruthLo = 1
+          rL = rL1
+        ELSEIF (iaActualTag(iFileIDLo2) == iaActualTag(iFileIDHi2)) THEN
+          !these two tags are the same
+          iFileIDLo = iFileIDLo2
+          rFileStartFrLo = rFileStartFrLo2
+          iTruthLo = 1
+          rL = rL2
+        ELSEIF ((iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo1)) < &
                 (iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo2))) THEN
-            ! ook for min diff between tags
-                iFileIDLo = iFileIDLo1
-                rFileStartFrLo = rFileStartFrLo1
-                iTruthLo=1
-                rL = rL1
-            ELSE
-            ! ook for min diff between tags
-                iFileIDLo = iFileIDLo2
-                rFileStartFrLo = rFileStartFrLo2
-                iTruthLo=1
-                rL = rL2
-            END IF
+          !look for min diff between tags
+          iFileIDLo = iFileIDLo1
+          rFileStartFrLo = rFileStartFrLo1
+          iTruthLo = 1
+          rL = rL1
+        ELSE
+          !look for min diff between tags
+          iFileIDLo = iFileIDLo2
+          rFileStartFrLo = rFileStartFrLo2
+          iTruthLo = 1
+          rL = rL2
         END IF
+      END IF
 
-        IF (iaActualTag(iFileIDHi1) /= iaActualTag(iFileIDHi2)) THEN
-        ! or UPPER limit, unequal file tags
-        ! o look for minimum difference between TAGS
-            iDiff11 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo1)
-            iDiff12 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo2)
-            iDiff21 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo1)
-            iDiff22 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo2)
+      IF (iaActualTag(iFileIDHi1) /= iaActualTag(iFileIDHi2)) THEN
+        !for UPPER limit, unequal file tags
+        !so look for minimum difference between TAGS
+        iDiff11 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo1)
+        iDiff12 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo2)
+        iDiff21 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo1)
+        iDiff22 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo2)
 
-            IF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDHi2)) THEN
-            ! hese two tags are the same
-                iFileIDLo = iFileIDLo1
-                rFileStartFrLo = rFileStartFrLo1
-                iTruthLo=1
-                rL = rL1
-            ELSE IF (iaActualTag(iFileIDLo2) == iaActualTag(iFileIDHi2)) THEN
-            ! hese two tags are the same
-                iFileIDLo = iFileIDLo2
-                rFileStartFrLo = rFileStartFrLo2
-                iTruthLo=1
-                rL = rL2
-            ELSE IF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDHi1)) THEN
-            ! hese two tags are the same
-                iFileIDLo = iFileIDLo1
-                rFileStartFrLo = rFileStartFrLo1
-                iTruthLo=1
-                rL = rL1
-            ELSE IF (iaActualTag(iFileIDLo2) == iaActualTag(iFileIDHi1)) THEN
-            ! hese two tags are the same
-                iFileIDLo = iFileIDLo2
-                rFileStartFrLo = rFileStartFrLo2
-                iTruthLo=1
-                rL = rL2
-            ! ags are rather different : come to the first acceptable combination
-            ELSE IF (iDiff11 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDLo = iFileIDLo1
-                rFileStartFrLo = rFileStartFrLo1
-                iTruthLo=1
-                rL = rL1
-            ELSE IF (iDiff21 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDLo = iFileIDLo1
-                rFileStartFrLo = rFileStartFrLo1
-                iTruthLo=1
-                rL = rL1
-            ELSE IF (iDiff12 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDLo = iFileIDLo2
-                rFileStartFrLo = rFileStartFrLo2
-                iTruthLo=1
-                rL = rL2
-            ELSE IF (iDiff22 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDLo = iFileIDLo2
-                rFileStartFrLo = rFileStartFrLo2
-                iTruthLo=1
-                rL = rL2
-            END IF
+        IF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDHi2)) THEN
+          !these two tags are the same
+          iFileIDLo = iFileIDLo1
+          rFileStartFrLo = rFileStartFrLo1
+          iTruthLo = 1
+          rL = rL1
+        ELSEIF (iaActualTag(iFileIDLo2) == iaActualTag(iFileIDHi2)) THEN
+          !these two tags are the same
+          iFileIDLo = iFileIDLo2
+          rFileStartFrLo = rFileStartFrLo2
+          iTruthLo = 1
+          rL = rL2
+        ELSEIF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDHi1)) THEN
+          !these two tags are the same
+          iFileIDLo = iFileIDLo1
+          rFileStartFrLo = rFileStartFrLo1
+          iTruthLo = 1
+          rL = rL1
+        ELSEIF (iaActualTag(iFileIDLo2) == iaActualTag(iFileIDHi1)) THEN
+          !these two tags are the same
+          iFileIDLo = iFileIDLo2
+          rFileStartFrLo = rFileStartFrLo2
+          iTruthLo = 1
+          rL = rL2
+        ELSEIF (iDiff11 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          !tags are rather different : come to the first acceptable combination
+          iFileIDLo = iFileIDLo1
+          rFileStartFrLo = rFileStartFrLo1
+          iTruthLo = 1
+          rL = rL1
+        ELSEIF (iDiff21 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          iFileIDLo = iFileIDLo1
+          rFileStartFrLo = rFileStartFrLo1
+          iTruthLo = 1
+          rL = rL1
+        ELSEIF (iDiff12 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          iFileIDLo = iFileIDLo2
+          rFileStartFrLo = rFileStartFrLo2
+          iTruthLo = 1
+          rL = rL2
+        ELSEIF (iDiff22 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          iFileIDLo = iFileIDLo2
+          rFileStartFrLo = rFileStartFrLo2
+          iTruthLo = 1
+          rL = rL2
         END IF
+      END IF
     END IF
 
     iFileIDlo1 = iFileIDlo
@@ -1049,108 +1011,105 @@ CONTAINS
 
     iTruthHi=-1
     IF (iFileIDHi1 == iFileIDHi2) THEN    !upper limit simple
-        iFileIDHi = iFileIDHi1
-        rFileStartFrHi = rFileStartFrHi1
-        iTruthHi=1
-        rH = rH1
-        write(kStdWarn,*)'Equal upper limit : iFileIDHi = ',iFileIDHi
+      iFileIDHi = iFileIDHi1
+      rFileStartFrHi = rFileStartFrHi1
+      iTruthHi = 1
+      rH = rH1
+      write(kStdWarn,*)'Equal upper limit : iFileIDHi = ',iFileIDHi
     END IF
 
     IF (iFileIDHi1 /= iFileIDHi2) THEN    !upper limit hard
-        write(kStdWarn,*) 'Unequal upper limit : iFileIDHi1,2 = ', &
-        iFileIDHi1,iFileIDHi2
-        write(kStdWarn,*)'thinking ... '
-        write(kStdWarn,*) 'loTag',iFileIDLo1,iaActualTag(iFileIDLo1), &
-        iFileIDLo2,iaActualTag(iFileIDLo2)
-        write(kStdWarn,*) 'hiTag',iFileIDHi1,iaActualTag(iFileIDHi1), &
-        iFileIDHi2,iaActualTag(iFileIDHi2)
+      write(kStdWarn,*) 'Unequal upper limit : iFileIDHi1,2 = ',iFileIDHi1,iFileIDHi2
+      write(kStdWarn,*)'thinking ... '
+      write(kStdWarn,*) 'loTag',iFileIDLo1,iaActualTag(iFileIDLo1),iFileIDLo2,iaActualTag(iFileIDLo2)
+      write(kStdWarn,*) 'hiTag',iFileIDHi1,iaActualTag(iFileIDHi1),iFileIDHi2,iaActualTag(iFileIDHi2)
 
-        IF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDLo2)) THEN
+      IF (iaActualTag(iFileIDLo1) == iaActualTag(iFileIDLo2)) THEN
         ! or LOWER limit, equal tags; so now see if either of the
         ! pper iFileIDHi1 or iFileIDHi2 fall in the same tag block
-            IF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDLo2)) THEN
-            ! hese two tags are the same
-                iFileIDHi = iFileIDHi1
-                rFileStartFrHi = rFileStartFrHi1
-                iTruthHi = 1
-                rH = rH1
-            ELSE IF (iaActualTag(iFileIDHi2) == iaActualTag(iFileIDLo2)) THEN
-            ! hese two tags are the same
-                iFileIDHi = iFileIDHi2
-                rFileStartFrHi = rFileStartFrHi2
-                iTruthHi = 1
-                rH = rH2
-            ELSE IF ((iaActualTag(iFileIDLo2)-iaActualTag(iFileIDHi1)) < &
-                (iaActualTag(iFileIDLo2)-iaActualTag(iFileIDHi2))) THEN
-            ! ook for min diff between tags
-                iFileIDHi = iFileIDHi1
-                rFileStartFrHi = rFileStartFrHi1
-                iTruthHi = 1
-                rH = rH1
-            ELSE
-            ! ook for min diff between tags
-                iFileIDHi = iFileIDHi2
-                rFileStartFrHi = rFileStartFrHi2
-                iTruthHi = 1
-                rH = rH2
-            END IF
+        IF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDLo2)) THEN
+          !these two tags are the same
+          iFileIDHi = iFileIDHi1
+          rFileStartFrHi = rFileStartFrHi1
+          iTruthHi = 1
+          rH = rH1
+        ELSEIF (iaActualTag(iFileIDHi2) == iaActualTag(iFileIDLo2)) THEN
+          !these two tags are the same
+          iFileIDHi = iFileIDHi2
+          rFileStartFrHi = rFileStartFrHi2
+          iTruthHi = 1
+          rH = rH2
+        ELSEIF ((iaActualTag(iFileIDLo2)-iaActualTag(iFileIDHi1)) < &
+              (iaActualTag(iFileIDLo2)-iaActualTag(iFileIDHi2))) THEN
+          !look for min diff between tags
+          iFileIDHi = iFileIDHi1
+          rFileStartFrHi = rFileStartFrHi1
+          iTruthHi = 1
+          rH = rH1
+        ELSE
+          !look for min diff between tags
+          iFileIDHi = iFileIDHi2
+          rFileStartFrHi = rFileStartFrHi2
+          iTruthHi = 1
+          rH = rH2
         END IF
+      END IF
 
-        IF (iaActualTag(iFileIDLo1) /= iaActualTag(iFileIDLo2)) THEN
+      IF (iaActualTag(iFileIDLo1) /= iaActualTag(iFileIDLo2)) THEN
         ! or LOWER limit, unequal file tags
-        ! o look for minimum difference between TAGS
-            iDiff11 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo1)
-            iDiff12 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo2)
-            iDiff21 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo1)
-            iDiff22 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo2)
+        ! so look for minimum difference between TAGS
+        iDiff11 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo1)
+        iDiff12 = iaActualTag(iFileIDHi1)-iaActualTag(iFileIDLo2)
+        iDiff21 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo1)
+        iDiff22 = iaActualTag(iFileIDHi2)-iaActualTag(iFileIDLo2)
 
-            IF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDLo2)) THEN
-            ! hese two tags are the same
-                iFileIDHi = iFileIDHi1
-                rFileStartFrHi = rFileStartFrHi1
-                iTruthHi = 1
-                rH = rH1
-            ELSE IF (iaActualTag(iFileIDHi2) == iaActualTag(iFileIDLo2)) THEN
-            ! hese two tags are the same
-                iFileIDHi = iFileIDHi2
-                rFileStartFrHi = rFileStartFrHi2
-                iTruthHi = 1
-                rH = rH2
-            ELSE IF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDLo1)) THEN
-            ! hese two tags are the same
-                iFileIDHi = iFileIDHi1
-                rFileStartFrHi = rFileStartFrHi1
-                iTruthHi = 1
-                rH = rH1
-            ELSE IF (iaActualTag(iFileIDHi2) == iaActualTag(iFileIDLo1)) THEN
-            ! hese two tags are the same
-                iFileIDHi = iFileIDHi2
-                rFileStartFrHi = rFileStartFrHi2
-                iTruthHi = 1
-                rH = rH2
-            ! ags are rather different : come to the first acceptable combination
-            ELSE IF (iDiff11 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDHi = iFileIDHi1
-                rFileStartFrHi = rFileStartFrHi1
-                iTruthHi = 1
-                rH = rH1
-            ELSE IF (iDiff21 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDHi = iFileIDHi1
-                rFileStartFrHi = rFileStartFrHi1
-                iTruthHi = 1
-                rH = rH1
-            ELSE IF (iDiff12 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDHi = iFileIDHi2
-                rFileStartFrHi = rFileStartFrHi2
-                iTruthHi = 1
-                rH = rH2
-            ELSE IF (iDiff22 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
-                iFileIDHi = iFileIDHi2
-                rFileStartFrHi = rFileStartFrHi2
-                iTruthHi = 1
-                rH = rH2
-            END IF
+        IF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDLo2)) THEN
+          !these two tags are the same
+          iFileIDHi = iFileIDHi1
+          rFileStartFrHi = rFileStartFrHi1
+          iTruthHi = 1
+          rH = rH1
+        ELSEIF (iaActualTag(iFileIDHi2) == iaActualTag(iFileIDLo2)) THEN
+          !these two tags are the same
+          iFileIDHi = iFileIDHi2
+          rFileStartFrHi = rFileStartFrHi2
+          iTruthHi = 1
+          rH = rH2
+        ELSEIF (iaActualTag(iFileIDHi1) == iaActualTag(iFileIDLo1)) THEN
+          !these two tags are the same
+          iFileIDHi = iFileIDHi1
+          rFileStartFrHi = rFileStartFrHi1
+          iTruthHi = 1
+          rH = rH1
+        ELSEIF (iaActualTag(iFileIDHi2) == iaActualTag(iFileIDLo1)) THEN
+          !these two tags are the same
+          iFileIDHi = iFileIDHi2
+          rFileStartFrHi = rFileStartFrHi2
+          iTruthHi = 1
+          rH = rH2
+        ELSEIF (iDiff11 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          !tags are rather different : come to the first acceptable combination
+          iFileIDHi = iFileIDHi1
+          rFileStartFrHi = rFileStartFrHi1
+          iTruthHi = 1
+          rH = rH1
+        ELSEIF (iDiff21 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          iFileIDHi = iFileIDHi1
+          rFileStartFrHi = rFileStartFrHi1
+          iTruthHi = 1
+          rH = rH1
+        ELSEIF (iDiff12 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          iFileIDHi = iFileIDHi2
+          rFileStartFrHi = rFileStartFrHi2
+          iTruthHi = 1
+          rH = rH2
+        ELSEIF (iDiff22 == min(iDiff11,iDiff12,iDiff21,iDiff22)) THEN
+          iFileIDHi = iFileIDHi2
+          rFileStartFrHi = rFileStartFrHi2
+          iTruthHi = 1
+          rH = rH2
         END IF
+      END IF
     END IF
 
 ! now subtract delta(wavenumber) so that we don't have to do an additional

@@ -239,13 +239,9 @@ CONTAINS
 !   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
 !                             iLinearOrSpline iDoCO2Continuum iMethod
 !   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
-!      INTEGER iaaOverrideDefault(8,10)
+!      INTEGER iaaOverrideDefault(4,10)
 !      COMMON/comBlockDefault/iaaOverrideDefault
-    DO iI = 1,4
-        DO iJ = 1,10
-            iaaOverrideDefault(iI,iJ) = -9999
-        END DO
-    END DO
+    iaaOverrideDefault = -9999
           
 ! GENERAL
     caaTextOverrideDefault  = 'notset'
@@ -346,16 +342,16 @@ CONTAINS
     write(kStdWarn,*) '  '
 
     IF ((iabs(kLayer2Sp) /= 1) .AND. (iabs(kLayer2Sp) /= 2) .AND. (kLayer2Sp /= 3) .AND. (kLayer2Sp /= 4)) THEN
-        write(kStdErr,*) 'In *PARAMS, need kLayer2Sp = +/-1,+/-2,+3,+4'
-        write(kStdErr,*) 'kLayer2Sp == do layer-to-space calc or not'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'In *PARAMS, need kLayer2Sp = +/-1,+/-2,+3,+4'
+      write(kStdErr,*) 'kLayer2Sp == do layer-to-space calc or not'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
     IF (iabs(kGasTemp) /= 1) THEN
-        write(kStdErr,*) 'In *PARAMS, program needs kGasTemp = +/- 1'
-        write(kStdErr,*) 'kGasTemp = use CO2 temperature profile or not'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'In *PARAMS, program needs kGasTemp = +/- 1'
+      write(kStdErr,*) 'kGasTemp = use CO2 temperature profile or not'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
 
 ! CKD    releases are 0,21,23,24
@@ -385,28 +381,28 @@ CONTAINS
 !!! these are MT_CKD25 owards more recent versions
      .AND. (kCKD /= 25) .AND. (kCKD /= 27) .AND. (kCKD /= 32)) &
     THEN
-        write(kStdErr,*) 'In *PARAMS, need kCKD = [-1] for no continuum OR'
-        write(kStdErr,*) '                 CKD    versions 0,21,23 or 24'
-        write(kStdErr,*) '              MT_CKD    versions 1,  [4,6]'
-        write(kStdErr,*) '              MT_CKD    versions 25  [   ]'
-        write(kStdErr,*) '              MT_CKD    versions 27  [   ]'
-        write(kStdErr,*) '       (latest AER versions =  1, released Dec 2002)'
-        write(kStdErr,*) '       (latest AER versions = 25, released Dec 2010)'
-        write(kStdErr,*) '       (latest AER versions = 27, released Feb 2016)'
-        write(kStdErr,*) '       (latest AER versions = 32, released Feb 2017)'	
-        write(kStdErr,*) '           [ are UMBC modifications of CKD or MT-CKD] '
-        write(kStdErr,*) 'kCKD is water continuum calculation version'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'In *PARAMS, need kCKD = [-1] for no continuum OR'
+      write(kStdErr,*) '                 CKD    versions 0,21,23 or 24'
+      write(kStdErr,*) '              MT_CKD    versions 1,  [4,6]'
+      write(kStdErr,*) '              MT_CKD    versions 25  [   ]'
+      write(kStdErr,*) '              MT_CKD    versions 27  [   ]'
+      write(kStdErr,*) '       (latest AER versions =  1, released Dec 2002)'
+      write(kStdErr,*) '       (latest AER versions = 25, released Dec 2010)'
+      write(kStdErr,*) '       (latest AER versions = 27, released Feb 2016)'
+      write(kStdErr,*) '       (latest AER versions = 32, released Feb 2017)'	
+      write(kStdErr,*) '           [ are UMBC modifications of CKD or MT-CKD] '
+      write(kStdErr,*) 'kCKD is water continuum calculation version'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
 
     IF (iabs(kLongOrShort) > 2) THEN
-        write(kStdErr,*) 'In *PARAMS, program needs kLongOrShort = -2,-1,0,+1,+2'
-        write(kStdErr,*) 'kLongOrShort = complete header info (+1) or not (-1),  long warning.msg'
-        write(kStdErr,*) 'kLongOrShort = complete header info (+2) or not (-2), short warning.msg'
-        write(kStdErr,*) '               or file containing results only (0)'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'In *PARAMS, program needs kLongOrShort = -2,-1,0,+1,+2'
+      write(kStdErr,*) 'kLongOrShort = complete header info (+1) or not (-1),  long warning.msg'
+      write(kStdErr,*) 'kLongOrShort = complete header info (+2) or not (-2), short warning.msg'
+      write(kStdErr,*) '               or file containing results only (0)'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
 
 ! kActualJacs = -1 if we compute and output ALL profile(z) jacs
@@ -421,123 +417,123 @@ CONTAINS
 !              102 if we compute only stemp and column gas jacs
 
     IF ((kActualJacs /= -1)  .AND. (kActualJacs /= 20)   .AND. &
-    (kActualJacs /= 30)  .AND. (kActualJacs /= 40)   .AND. &
-    (kActualJacs /= 50)  .AND. (kActualJacs /= 100)  .AND. &
-    (kActualJacs /= -2)  .AND. (kActualJacs /= 32)   .AND. &
-    (kActualJacs /= 102) .AND. (kActualJacs < 102)) THEN
-        write(kStdErr,*) 'In *PARAMS, need kActualJacs = -1,20,30,40,50'
-        write(kStdErr,*) '  or 100 or 100ABCXYZ'
-        write(kStdErr,*) 'OR -2, 32,102 or 102ABCXYZ'
-        write(kStdErr,*) 'kActualJacs = 100(2) ==> column gas/temp jacs '
-        write(kStdErr,*) '   for all layers, plus stemp jac'
-        write(kStdErr,*) 'kActualJacs = 100(2)ABCXYZ ==> column gas/temp jacs '
-        write(kStdErr,*) '   for layers ABC to XYZ, plus stemp jac'
-        write(kStdErr,*) 'kActualJacs = actually compute all profile jacs (-1)'
-        write(kStdErr,*) '              or Q(z),T(z),W(z) jacs (0s elsewhere)'
-        write(kStdErr,*) ' '
-        write(kStdErr,*) 'You have set this as ',kActualJacs
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      (kActualJacs /= 30)  .AND. (kActualJacs /= 40)   .AND. &
+      (kActualJacs /= 50)  .AND. (kActualJacs /= 100)  .AND. &
+      (kActualJacs /= -2)  .AND. (kActualJacs /= 32)   .AND. &
+      (kActualJacs /= 102) .AND. (kActualJacs < 102)) THEN
+      write(kStdErr,*) 'In *PARAMS, need kActualJacs = -1,20,30,40,50'
+      write(kStdErr,*) '  or 100 or 100ABCXYZ'
+      write(kStdErr,*) 'OR -2, 32,102 or 102ABCXYZ'
+      write(kStdErr,*) 'kActualJacs = 100(2) ==> column gas/temp jacs '
+      write(kStdErr,*) '   for all layers, plus stemp jac'
+      write(kStdErr,*) 'kActualJacs = 100(2)ABCXYZ ==> column gas/temp jacs '
+      write(kStdErr,*) '   for layers ABC to XYZ, plus stemp jac'
+      write(kStdErr,*) 'kActualJacs = actually compute all profile jacs (-1)'
+      write(kStdErr,*) '              or Q(z),T(z),W(z) jacs (0s elsewhere)'
+      write(kStdErr,*) ' '
+      write(kStdErr,*) 'You have set this as ',kActualJacs
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
     iT = -1
     iB = -1
     iGah = -1
 
     IF (kActualJacs > 102) THEN
-        IF (kActualJacs < 100000001) THEN
-            write(kStdErr,*) 'too few characters in kActualJacs : ',kActualJacs
-            write(kStdErr,*) 'check it !'
-            CALL DoStop
-        END IF
-        IF (kActualJacs > 102999999) THEN
-            write(kStdErr,*) 'too many characters in kActualJacs : ',kActualJacs
-            write(kStdErr,*) 'max possible value is 102999999'
-            CALL DoStop
-        END IF
+      IF (kActualJacs < 100000001) THEN
+        write(kStdErr,*) 'too few characters in kActualJacs : ',kActualJacs
+        write(kStdErr,*) 'check it !'
+        CALL DoStop
+      END IF
+      IF (kActualJacs > 102999999) THEN
+        write(kStdErr,*) 'too many characters in kActualJacs : ',kActualJacs
+        write(kStdErr,*) 'max possible value is 102999999'
+        CALL DoStop
+      END IF
 
-        i0 = kActualJacs
-    !! i0 better be 9 characters long
-        write(iIOUN9,99) kActualJacs
-        iJ = 9
-        10 CONTINUE
-        IF ((iIOUN9(iJ:iJ) /= ' ') .AND. (iJ >= 1)) THEN
-        !         write(kStdErr,*) 'good',iJ,iIOUN9(iJ:iJ),kActualJacs
-            iJ = iJ - 1
-            GOTO 10
-        ELSEIF (iJ > 0) THEN
-            iGah = iJ
+      i0 = kActualJacs
+      !! i0 better be 9 characters long
+      write(iIOUN9,99) kActualJacs
+      iJ = 9
+ 10   CONTINUE
+      IF ((iIOUN9(iJ:iJ) /= ' ') .AND. (iJ >= 1)) THEN
+        !write(kStdErr,*) 'good',iJ,iIOUN9(iJ:iJ),kActualJacs
+        iJ = iJ - 1
+        GOTO 10
+      ELSEIF (iJ > 0) THEN
+        iGah = iJ
             write(kStdErr,*) 'space in  kActualJacs at ',iJ,iIOUN9(iJ:iJ)
-        END IF
-        IF (iGah > 0) THEN
-            write(kStdErr,*) 9-iGah,' chars in kActualJacs = ',kActualJacs
-            write(kStdErr,*) 'In *PARAMS, need kActualJacs = -1,20,30,40,50'
-            write(kStdErr,*) '  or 100 or 100ABCXYZ'
-            write(kStdErr,*) '  or 102 or 102ABCXYZ'
-            write(kStdErr,*) 'need 9 characters 10E ABC XYZ .. try again'
-            CALL DoStop
-        END IF
+      END IF
+      IF (iGah > 0) THEN
+        write(kStdErr,*) 9-iGah,' chars in kActualJacs = ',kActualJacs
+        write(kStdErr,*) 'In *PARAMS, need kActualJacs = -1,20,30,40,50'
+        write(kStdErr,*) '  or 100 or 100ABCXYZ'
+        write(kStdErr,*) '  or 102 or 102ABCXYZ'
+        write(kStdErr,*) 'need 9 characters 10E ABC XYZ .. try again'
+        CALL DoStop
+      END IF
 
-        write(kStdWarn,*) 'kActualJacs passed test ... '
-        IF (kActualJacs <= 102000000) THEN
-            iT = i0 - 100000000
-            iT = int(iT/1000)
-            iB = i0 - int(i0/1000)*1000
-            kActualJacs = 100
-        ELSE
-            i0 = i0 - 2000000
-            iT = i0 - 100000000
-            iT = int(iT/1000)
-            iB = i0 - int(i0/1000)*1000
-            kActualJacs = 102
-        END IF
+      write(kStdWarn,*) 'kActualJacs passed test ... '
+      IF (kActualJacs <= 102000000) THEN
+        iT = i0 - 100000000
+        iT = int(iT/1000)
+        iB = i0 - int(i0/1000)*1000
+        kActualJacs = 100
+      ELSE
+        i0 = i0 - 2000000
+        iT = i0 - 100000000
+        iT = int(iT/1000)
+        iB = i0 - int(i0/1000)*1000
+        kActualJacs = 102
+      END IF
 
-        IF (iT < iB) THEN
-            iJ = iT
-            iT = iB
-            iB = iJ
-        END IF
-        IF (iT > kProfLayer) THEN
-            write(kStdWarn,*) 'IT = ',iT,' greater than kProfLayer = ',kProfLayer
-            write(kStdWarn,*) 'resetting iT = kProfLayer'
-            iT = kProfLayer
-        END IF
-        IF (iB > kProfLayer) THEN
-            write(kStdWarn,*) 'IB = ',iB,' greater than kProfLayer = ',kProfLayer
-            write(kStdWarn,*) 'resetting iB = 1'
-            iB = 1
-        END IF
-        kActualJacsT = iT
-        kActualJacsB = iB
+      IF (iT < iB) THEN
+        iJ = iT
+        iT = iB
+        iB = iJ
+      END IF
+      IF (iT > kProfLayer) THEN
+        write(kStdWarn,*) 'IT = ',iT,' greater than kProfLayer = ',kProfLayer
+        write(kStdWarn,*) 'resetting iT = kProfLayer'
+        iT = kProfLayer
+      END IF
+      IF (iB > kProfLayer) THEN
+        write(kStdWarn,*) 'IB = ',iB,' greater than kProfLayer = ',kProfLayer
+        write(kStdWarn,*) 'resetting iB = 1'
+        iB = 1
+      END IF
+      kActualJacsT = iT
+      kActualJacsB = iB
     END IF
-    99 FORMAT(I9)
+ 99 FORMAT(I9)
 
     IF ((iabs(kJacobOutput) /= 1) .AND. (kJacobOutput /= 0) .AND. &
-    (kJacobOutput /= 2))  THEN
-        write(kStdErr,*) 'kJacobOutput = ',kJacobOutput
-        write(kStdErr,*) 'In *PARAMS, need kJacobOutput =-1,0,+1,+2'
-        write(kStdErr,*) 'kJacobOutput = format to output Jacobians'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      (kJacobOutput /= 2))  THEN
+      write(kStdErr,*) 'kJacobOutput = ',kJacobOutput
+      write(kStdErr,*) 'In *PARAMS, need kJacobOutput =-1,0,+1,+2'
+      write(kStdErr,*) 'kJacobOutput = format to output Jacobians'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
 
     IF ((kFlux < -1) .OR. (kFlux >  6)) THEN
-        write(kStdErr,*) 'In *PARAMS, program needs kFlux =-1 OR 1,2,3,4,5,6'
-        write(kStdErr,*) 'where kFlux = do/do not compute fluxes'
-        write(kStdErr,*) 'OR         program needs kFlux =-1,+1,2,3,4,5,6 OR 0'
-        write(kStdErr,*) 'where kFlux = do not/do  output NLTE Planck'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'In *PARAMS, program needs kFlux =-1 OR 1,2,3,4,5,6'
+      write(kStdErr,*) 'where kFlux = do/do not compute fluxes'
+      write(kStdErr,*) 'OR         program needs kFlux =-1,+1,2,3,4,5,6 OR 0'
+      write(kStdErr,*) 'where kFlux = do not/do  output NLTE Planck'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
 
 ! only effective in following cases
 ! if kRTP = -1 (text input from nm_radnce, profile input from text file)
 ! if kRTP =  0 (text input from nm_radnce, profile input from rtp file)
     IF ((abs(kSurfTemp)-1.0) >= 1e-5) THEN
-        write(kStdErr,*) 'In *PARAMS, program needs kSurfTemp = +/-1.0'
-        write(kStdErr,*) 'where kSurfTemp tells the program how to use'
-        write(kStdErr,*) 'the surftemperatures in *RADNCE'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'In *PARAMS, program needs kSurfTemp = +/-1.0'
+      write(kStdErr,*) 'where kSurfTemp tells the program how to use'
+      write(kStdErr,*) 'the surftemperatures in *RADNCE'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
 
 !!!kRTP = -6 : read LBLRTM       LAYERS profile; set atm from namelist
@@ -550,45 +546,45 @@ CONTAINS
 !!!kRTP = +2  : use JPL/NOAA style LAYERS profile; set atm from namelist
     IF ((kRTP /= -5) .AND. (kRTP /= -6) .AND. (kRTP /= +2) .AND. &
     (kRTP /= -10) .AND. ((kRTP < -2) .OR. (kRTP > 1))) THEN
-        write(kStdErr,*) 'Need to set RTP = -10,-6,-5,-2,-1,0,+1,+2'
-        write(kStdErr,*) 'Please reset kRTP and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'Need to set RTP = -10,-6,-5,-2,-1,0,+1,+2'
+      write(kStdErr,*) 'Please reset kRTP and retry'
+      CALL DoSTOP
     END IF
 
     IF ((kSurfTemp > 0) .AND. (kRTP == 1)) THEN
-        write(kStdErr,*) 'Cannot read surface temperature info from RTP file'
-        write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
-        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'Cannot read surface temperature info from RTP file'
+      write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
+      write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
+      CALL DoSTOP
     END IF
 
     IF ((kSurfTemp > 0) .AND. (kRTP == 2)) THEN
-        write(kStdErr,*) 'Cannot read surface temperature info from JPL/NOAA input'
-        write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
-        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'Cannot read surface temperature info from JPL/NOAA input'
+      write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
+      write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
+      CALL DoSTOP
     END IF
 
     IF ((kSurfTemp > 0) .AND. ((kRTP == -5) .OR. (kRTP == -6))) THEN
-        write(kStdErr,*) 'Will read surface temperature info from LBLRTM file'
-        write(kStdErr,*) 'and ask kCARTA to add on raTSurf offset from nm_radnces!!!'
-    !        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
-    !        CALL DoSTOP
+      write(kStdErr,*) 'Will read surface temperature info from LBLRTM file'
+      write(kStdErr,*) 'and ask kCARTA to add on raTSurf offset from nm_radnces!!!'
+      !        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
+      !        CALL DoSTOP
     END IF
 
     IF ((kSurfTemp > 0) .AND. (kRTP == -10)) THEN
-        write(kStdErr,*) 'Cannot read surface temperature info from LEVELS TXT file'
-        write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
-        write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'Cannot read surface temperature info from LEVELS TXT file'
+      write(kStdErr,*) 'and ask kCARTA to interpolate surface temps!!!'
+      write(kStdErr,*) 'Please reset (kSurfTemp,kRTP) and retry'
+      CALL DoSTOP
     END IF
      
     IF ((kTempJac < -2) .OR. (kTempJac > 0)) THEN
-        write(kStdErr,*) 'In *PARAMS, program needs kTempJac=-2,-1,0'
-        write(kStdErr,*) 'where kTempJac = use Planck or tau or both '
-        write(kStdErr,*) 'when doing d/dT'
-        write(kStdErr,*) 'Please reset and retry'
-        CALL DoSTOP
+      write(kStdErr,*) 'In *PARAMS, program needs kTempJac=-2,-1,0'
+      write(kStdErr,*) 'where kTempJac = use Planck or tau or both '
+      write(kStdErr,*) 'when doing d/dT'
+      write(kStdErr,*) 'Please reset and retry'
+      CALL DoSTOP
     END IF
 
     RETURN
@@ -636,23 +632,23 @@ CONTAINS
     iConstOrVary = +1   !! if only RaDTrans, then do constant T in layer, default SARTA/kCARTA for RT only
           
     IF (kFlux <= 0) THEN
-        IF (iConstOrVary > 0) THEN
-            kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
-            write(kStdWarn,*) 'kFlux <= 0 so set kTemperVary = -1'
-        ELSEIF (iConstOrVary < 0) THEN
-            kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has
-        !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
-            write(kStdWarn,*) 'kFlux < 0 but set kTemperVary = 43'
-        END IF
-    ELSEIF (kFlux > 0) THEN
+      IF (iConstOrVary > 0) THEN
+        kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
+        write(kStdWarn,*) 'kFlux <= 0 so set kTemperVary = -1'
+      ELSEIF (iConstOrVary < 0) THEN
         kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has
-    !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
-        write(kStdWarn,*) 'kFlux > 0 so set kTemperVary = 43'
+        !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
+        write(kStdWarn,*) 'kFlux < 0 but set kTemperVary = 43'
+      END IF
+    ELSEIF (kFlux > 0) THEN
+      kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has
+      !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
+      write(kStdWarn,*) 'kFlux > 0 so set kTemperVary = 43'
     END IF
 
 !!! new, do what the user wishes!!!
     IF ((kFlux <= 0) .AND. (iTemperVary > 0)) THEN
-        kTemperVary = +43
+      kTemperVary = +43
     END IF
           
 !!! >>>>>>>>>>>>> uncomment this if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
@@ -665,24 +661,24 @@ CONTAINS
 !!! >>>>>>>>>>>>> uncomment this if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
                 
     IF (kTemperVary == -1) THEN
-        write(kStdWarn,*) 'kTemperVary = -1     !layer temp constant (SARTA DEFAULT)'
+      write(kStdWarn,*) 'kTemperVary = -1     !layer temp constant (SARTA DEFAULT)'
     ELSEIF (kTemperVary == +1) THEN
-        write(kStdWarn,*) 'kTemperVary = +1     !layer temp varies'
+      write(kStdWarn,*) 'kTemperVary = +1     !layer temp varies'
     ELSEIF (kTemperVary == +2) THEN
-        write(kStdWarn,*) 'kTemperVary = +2     !layer temp varies linearly, simple v2'
+      write(kStdWarn,*) 'kTemperVary = +2     !layer temp varies linearly, simple v2'
     ELSEIF (kTemperVary == +3) THEN
-        write(kStdWarn,*) 'kTemperVary = +3     !layer temp varies linearly, ala LBLRTM v3'
+      write(kStdWarn,*) 'kTemperVary = +3     !layer temp varies linearly, ala LBLRTM v3'
     ELSEIF (kTemperVary == +4) THEN
-        write(kStdWarn,*) 'kTemperVary = +4     !layer temp varies linearly, ala LBLRTM v4 O(tau^2)'
+      write(kStdWarn,*) 'kTemperVary = +4     !layer temp varies linearly, ala LBLRTM v4 O(tau^2)'
     ELSEIF (kTemperVary == +41) THEN
-        write(kStdWarn,*) 'kTemperVary = +41    !layer temp varies linearly, ala LBLRTM v4 (Pade)'
+      write(kStdWarn,*) 'kTemperVary = +41    !layer temp varies linearly, ala LBLRTM v4 (Pade)'
     ELSEIF (kTemperVary == +42) THEN
-        write(kStdWarn,*) 'kTemperVary = +42    !layer temp varies linearly, ala LBLRTM v4 O(tau)'
+      write(kStdWarn,*) 'kTemperVary = +42    !layer temp varies linearly, ala LBLRTM v4 O(tau)'
     ELSEIF (kTemperVary == +43) THEN
-        write(kStdWarn,*) 'kTemperVary = +43    !layer temp varies linearly, ala LBLRTM v4 O(tau) -> tau/6'
+      write(kStdWarn,*) 'kTemperVary = +43    !layer temp varies linearly, ala LBLRTM v4 O(tau) -> tau/6'
     ELSE
-        write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
-        CALL DoStop
+      write(kStdErr,*)'kTemperVary = ',kTemperVary,'unknown option'
+      CALL DoStop
     END IF
 
     iaaOverrideDefault(2,1) = kTemperVary
@@ -801,21 +797,21 @@ CONTAINS
 !      Assign some values
 !      ------------------
 !      CONV = pi/180 = degrees to radians conversion factor
-    CONV=1.7453292E-02
+      CONV=1.7453292E-02
 
 !      RE = radius of the Earth (in km)
-!       RE=6.37E+03
-    RE = kPlanetRadius
+!      RE=6.37E+03
+      RE = kPlanetRadius
 
 !      RA = radius of the point to calc the angle at (in km)
 !      Note: layer altitude already in kilometers
-    RA = rE + ALT
+      RA = rE + ALT
 
 !      -----------------
 !      Do the conversion
 !      -----------------
 
-    SACONV=ASIN( (RE/RA) * SIN(CONV*SZA) )
+      SACONV=ASIN( (RE/RA) * SIN(CONV*SZA) )
            
 ! change back to degrees
     ORIG_SACONV_SUN = SACONV/conv
@@ -947,10 +943,10 @@ CONTAINS
     gamma = (n0*n0-1)/(n0*n0+2)
 
     IF (ALT >= 200) THEN
-        ref_ind = 1.0
+      ref_ind = 1.0
     ELSE
-        mu = rNumberDensity/rLosch * gamma
-        ref_ind = sqrt((2*mu+1)/(1-mu))
+      mu = rNumberDensity/rLosch * gamma
+      ref_ind = sqrt((2*mu+1)/(1-mu))
     END IF
 
 

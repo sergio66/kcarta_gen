@@ -29,19 +29,19 @@ CONTAINS
 ! assume not in set
     iAns = -1
 
-!      IF ((iNumElements .LT. 1).OR.(iNumElements .GT. kMaxUserSet)) THEN
+!  IF ((iNumElements .LT. 1).OR.(iNumElements .GT. kMaxUserSet)) THEN
     IF (iNumElements < 1) THEN
-        write(kStdErr,*) 'fcn INSET : need valid number of elements',iNumElements
-        CALL DoSTOP
+      write(kStdErr,*) 'fcn INSET : need valid number of elements',iNumElements
+      CALL DoSTOP
     END IF
 
     iJ = 0
-    10 CONTINUE
+ 10 CONTINUE
     iJ = iJ+1
     IF (iaSet(iJ) == iI) THEN
-        iAns = iJ
+      iAns = iJ
     ELSE IF (iJ < iNumElements) THEN
-        GO TO 10
+      GO TO 10
     END IF
       
     InSet = iAns
@@ -60,6 +60,7 @@ CONTAINS
 ! recall INT truncates the real number
     iInt=INT((i1*1.0)/(i2*1.0))
     idiv=iInt
+
     RETURN
     end FUNCTION idiv
 
@@ -107,84 +108,84 @@ CONTAINS
 ! refer Numerical Recipes in F77, Second Edition, pg 330 (subroutine indexx)
 
     IF (No > kMaxPts) THEN
-        write (kStdErr,*) 'can only sort and index <= kMaxPts points'
-        CALL DoStop
+      write (kStdErr,*) 'can only sort and index <= kMaxPts points'
+      CALL DoStop
     END IF
 
-    n=No
-    DO j=1,n
-        indx(j) = j
+    n = No
+    DO j = 1,n
+      indx(j) = j
     END DO
 
-    jstack=0
-    l=1
-    ir=n
-    1 IF ((ir-l) < M) THEN
-        DO j=l+1,ir
-            indxt=indx(j)
-            a=arr(indxt)
-            DO i=j-1,1,-1
-                IF (arr(indx(i)) <= a) GOTO 2
-                indx(i+1)=indx(i)
-            END DO
-            i=0
-            2 indx(i+1)=indxt
+    jstack = 0
+    l = 1
+    ir = n
+ 1  IF ((ir-l) < M) THEN
+      DO j = l+1,ir
+        indxt = indx(j)
+        a = arr(indxt)
+        DO i = j-1,1,-1
+          IF (arr(indx(i)) <= a) GOTO 2
+          indx(i+1) = indx(i)
         END DO
-        IF (jstack == 0) GOTO 1000
-        ir = istack(jstack)
-        l=istack(jstack-1)
-        jstack=jstack-2
+        i = 0
+ 2      indx(i+1) = indxt
+      END DO
+      IF (jstack == 0) GOTO 1000
+      ir = istack(jstack)
+      l = istack(jstack-1)
+      jstack = jstack-2
     ELSE
-        k=(l+ir)/2
-        itemp=indx(k)
-        indx(k)=indx(l+1)
-        indx(l+1)=itemp
-        IF (arr(indx(l+1)) > arr(indx(ir))) THEN
-            itemp=indx(l+1)
-            indx(l+1)=indx(ir)
-            indx(ir)=itemp
-        END IF
-        IF (arr(indx(l)) > arr(indx(ir))) THEN
-            itemp=indx(l)
-            indx(l)=indx(ir)
-            indx(ir)=itemp
-        END IF
-        IF (arr(indx(l+1)) > arr(indx(l))) THEN
-            itemp=indx(l+1)
-            indx(l+1)=indx(l)
-            indx(l)=itemp
-        END IF
-        i=l+1
-        j=ir
-        indxt=indx(l)
-        a=arr(indxt)
-        3 CONTINUE
-        i=i+1
-        IF (arr(indx(i)) < a) GOTO 3
-        4 CONTINUE
-        j=j-1
-        IF (arr(indx(j)) > a) GOTO 4
-        IF (j < i) GOTO 5
-        itemp = indx(i)
-        indx(i) = indx(j)
-        indx(j) = itemp
-        GOTO 3
-        5 indx(l)=indx(j)
-        indx(j)=indxt
-        jstack=jstack+2
-        IF (jstack > nstack) THEN
-            write(kStdErr,*) 'nstack too small in indexx (sorting k)'
-            CALL DoStop
-        END IF
-        IF (ir-i+1 >= j-l) THEN
-            istack(jstack) = ir
-            istack(jstack-1) = i
-            ir=j-1
-        ELSE
-            istack(jstack) = j-1
-            istack(jstack-1) = l
-            l=i
-        END IF
+      k = (l+ir)/2
+      itemp = indx(k)
+      indx(k) = indx(l+1)
+      indx(l+1) = itemp
+      IF (arr(indx(l+1)) > arr(indx(ir))) THEN
+        itemp = indx(l+1)
+        indx(l+1) = indx(ir)
+        indx(ir) = itemp
+      END IF
+      IF (arr(indx(l)) > arr(indx(ir))) THEN
+        itemp = indx(l)
+        indx(l) = indx(ir)
+        indx(ir) = itemp
+      END IF
+      IF (arr(indx(l+1)) > arr(indx(l))) THEN
+        itemp = indx(l+1)
+        indx(l+1) = indx(l)
+        indx(l) = itemp
+      END IF
+      i = l+1
+      j = ir
+      indxt = indx(l)
+      a = arr(indxt)
+ 3    CONTINUE
+      i = i+1
+      IF (arr(indx(i)) < a) GOTO 3
+ 4 CONTINUE
+      j = j-1
+      IF (arr(indx(j)) > a) GOTO 4
+      IF (j < i) GOTO 5
+      itemp  =  indx(i)
+      indx(i) = indx(j)
+      indx(j) = itemp
+      GOTO 3
+ 5 indx(l) = indx(j)
+      indx(j) = indxt
+      jstack = jstack+2
+      IF (jstack > nstack) THEN
+        write(kStdErr,*) 'nstack too small in indexx (sorting k)'
+        CALL DoStop
+      END IF
+      IF (ir-i+1 >= j-l) THEN
+        istack(jstack) = ir
+        istack(jstack-1) = i
+        ir = j-1
+      ELSE
+        istack(jstack) = j-1
+        istack(jstack-1) = l
+        l = i
+      END IF
     END IF
     GOTO 1
     1000 CONTINUE
@@ -208,27 +209,27 @@ CONTAINS
 ! local variables
     INTEGER :: iTrue,iT,i1,i2
 
-    i1=1
-    iTrue=1
+    i1 = 1
+    iTrue = 1
 
-    60 CONTINUE
+  60 CONTINUE
     IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
-        i2=iCnt
-        iTrue=-1
-        70 CONTINUE
-        IF (i2 > i1) THEN
-            IF (iaArr(i2) < iaArr(i2-1)) THEN
-                iTrue=1
-                iT=iaArr(i2-1)
-                iaArr(i2-1)=iaArr(i2)
-                iaArr(i2)=iT
-            END IF
-            i2=i2-1
-            GO TO 70
+      i2 = iCnt
+      iTrue = -1
+  70  CONTINUE
+      IF (i2 > i1) THEN
+        IF (iaArr(i2) < iaArr(i2-1)) THEN
+          iTrue = 1
+          iT = iaArr(i2-1)
+          iaArr(i2-1) = iaArr(i2)
+          iaArr(i2) = iT
         END IF
+        i2 = i2-1
+        GO TO 70
+      END IF
               
-        i1=i1+1
-        GO TO 60
+      i1 = i1+1
+      GO TO 60
     END IF
 
     RETURN
@@ -256,75 +257,74 @@ CONTAINS
     REAL :: rT
 
     IF (iUD > 0) THEN
-        i1=1
-        iTrue=1
+      i1 = 1
+      iTrue = 1
 
-        60 CONTINUE
-        IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
-            i2=iCnt
-            iTrue=-1
-            70 CONTINUE
-            IF (i2 > i1) THEN
-                IF (raP1(i2) < raP1(i2-1)) THEN
-                    iTrue=1
-                    rT=raP1(i2-1)
-                    raP1(i2-1)=raP1(i2)
-                    raP1(i2)=rT
-                    rT=ra1(i2-1)
-                    ra1(i2-1)=ra1(i2)
-                    ra1(i2)=rT
-                    iT=ia1(i2-1)
-                    ia1(i2-1)=ia1(i2)
-                    ia1(i2)=iT
-                END IF
-                i2=i2-1
-                GO TO 70
-            END IF
+ 60   CONTINUE
+      IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
+        i2 = iCnt
+        iTrue = -1
+ 70     CONTINUE
+        IF (i2 > i1) THEN
+          IF (raP1(i2) < raP1(i2-1)) THEN
+            iTrue = 1
+            rT = raP1(i2-1)
+            raP1(i2-1) = raP1(i2)
+            raP1(i2) = rT
+            rT = ra1(i2-1)
+            ra1(i2-1) = ra1(i2)
+            ra1(i2) = rT
+            iT = ia1(i2-1)
+            ia1(i2-1) = ia1(i2)
+            ia1(i2) = iT
+          END IF
+          i2 = i2-1
+          GO TO 70
+          END IF
                   
-            i1=i1+1
-            GO TO 60
+          i1 = i1+1
+          GO TO 60
         END IF
 
-    ELSE IF (iUD < 0) THEN
-        DO i1=1,iCnt
-            raP1(i1)=-raP1(i1)
-        END DO
-        i1=1
-        iTrue=1
+    ELSEIF (iUD < 0) THEN
+      DO i1 = 1,iCnt
+        raP1(i1) = -raP1(i1)
+      END DO
+      i1 = 1
+      iTrue = 1
 
-        80 CONTINUE
-        IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
-            i2=iCnt
-            iTrue=-1
-            90 CONTINUE
-            IF (i2 > i1) THEN
-                IF (raP1(i2) < raP1(i2-1)) THEN
-                    iTrue=1
-                    rT=raP1(i2-1)
-                    raP1(i2-1)=raP1(i2)
-                    raP1(i2)=rT
-                    rT=ra1(i2-1)
-                    ra1(i2-1)=ra1(i2)
-                    ra1(i2)=rT
-                    iT=ia1(i2-1)
-                    ia1(i2-1)=ia1(i2)
-                    ia1(i2)=iT
-                END IF
-                i2=i2-1
-                GO TO 90
-            END IF
-                  
-            i1=i1+1
-            GO TO 80
+ 80   CONTINUE
+      IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
+        i2 = iCnt
+        iTrue = -1
+ 90     CONTINUE
+        IF (i2 > i1) THEN
+          IF (raP1(i2) < raP1(i2-1)) THEN
+            iTrue = 1
+            rT = raP1(i2-1)
+            raP1(i2-1) = raP1(i2)
+            raP1(i2) = rT
+            rT = ra1(i2-1)
+            ra1(i2-1) = ra1(i2)
+            ra1(i2) = rT
+            iT = ia1(i2-1)
+            ia1(i2-1) = ia1(i2)
+            ia1(i2) = iT
+          END IF
+          i2 = i2-1
+          GO TO 90
         END IF
+                  
+        i1 = i1+1
+        GO TO 80
+      END IF
 
-        DO i1=1,iCnt
-            raP1(i1)=-raP1(i1)
-        END DO
-        i1=1
+      DO i1 = 1,iCnt
+        raP1(i1) = -raP1(i1)
+      END DO
+      i1 = 1
     END IF
-            
-     
+           
     RETURN
     end SUBROUTINE DoSortPress
 
@@ -350,19 +350,19 @@ CONTAINS
     REAL :: raArrNew(2*kProfLayer)
 
     IF (iCnt > 2*kProfLayer) THEN
-        write(kStdErr,*)  'Oops, DoUniqueReal only allows iCnt <= 2*kProfLayer ',iCnt,2*kProfLayer
-        write(kStdWarn,*) 'Oops, DoUniqueReal only allows iCnt <= 2*kProfLayer ',iCnt,2*kProfLayer
-        CALL DoStop
+      write(kStdErr,*)  'Oops, DoUniqueReal only allows iCnt <= 2*kProfLayer ',iCnt,2*kProfLayer
+      write(kStdWarn,*) 'Oops, DoUniqueReal only allows iCnt <= 2*kProfLayer ',iCnt,2*kProfLayer
+      CALL DoStop
     END IF
           
     CALL DoSortReal(raArr,iCnt,iUD)
           
     iTrack = 0
     DO iI = 2,iCnt
-        IF ((raArr(iI)-raArr(iI-1)) > rEps) THEN
-            iTrack = iTrack + 1
-            raArrNew(iTrack) = raArr(iI-1)
-        END IF
+      IF ((raArr(iI)-raArr(iI-1)) > rEps) THEN
+        iTrack = iTrack + 1
+        raArrNew(iTrack) = raArr(iI-1)
+      END IF
     END DO
           
     iI = iCnt
@@ -372,16 +372,16 @@ CONTAINS
 !        raArrNew(iTrack) = raArr(iI)
 !      END IF
     IF ((raArr(iCnt)-raArrNew(iTrack)) > rEps) THEN
-        iTrack = iTrack + 1
-        raArrNew(iTrack) = raArr(iI)
+      iTrack = iTrack + 1
+      raArrNew(iTrack) = raArr(iI)
     END IF
           
     IF (iTrack < iCnt) THEN
-        write(kStdWarn,*) 'sent in array with ',iCnt,' entries of which ',iTrack,' were unique'
-        DO iI = 1,iTrack
-            raArr(iI) = raArrNew(iI)
-        END DO
-        iCnt = iTrack
+      write(kStdWarn,*) 'sent in array with ',iCnt,' entries of which ',iTrack,' were unique'
+      DO iI = 1,iTrack
+        raArr(iI) = raArrNew(iI)
+      END DO
+      iCnt = iTrack
     END IF
           
     RETURN
@@ -409,62 +409,61 @@ CONTAINS
     REAL :: rT
 
     IF (iUD > 0) THEN
-        i1=1
-        iTrue=1
+      i1 = 1
+      iTrue = 1
 
-        60 CONTINUE
-        IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
-            i2=iCnt
-            iTrue=-1
-            70 CONTINUE
-            IF (i2 > i1) THEN
-                IF (raArr(i2) < raArr(i2-1)) THEN
-                    iTrue=1
-                    rT=raArr(i2-1)
-                    raArr(i2-1)=raArr(i2)
-                    raArr(i2)=rT
-                END IF
-                i2=i2-1
-                GO TO 70
-            END IF
-                  
-            i1=i1+1
-            GO TO 60
+ 60   CONTINUE
+      IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
+        i2 = iCnt
+        iTrue = -1
+ 70     CONTINUE
+        IF (i2 > i1) THEN
+          IF (raArr(i2) < raArr(i2-1)) THEN
+            iTrue = 1
+            rT = raArr(i2-1)
+            raArr(i2-1) = raArr(i2)
+            raArr(i2) = rT
+          END IF
+          i2 = i2-1
+          GO TO 70
         END IF
+                  
+        i1 = i1+1
+        GO TO 60
+      END IF
 
     ELSE IF (iUD < 0) THEN
-        DO i1=1,iCnt
-            raArr(i1)=-raArr(i1)
-        END DO
-        i1=1
-        iTrue=1
+      DO i1 = 1,iCnt
+        raArr(i1) = -raArr(i1)
+      END DO
+      i1 = 1
+      iTrue = 1
 
-        80 CONTINUE
-        IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
-            i2=iCnt
-            iTrue=-1
-            90 CONTINUE
-            IF (i2 > i1) THEN
-                IF (raArr(i2) < raArr(i2-1)) THEN
-                    iTrue=1
-                    rT=raArr(i2-1)
-                    raArr(i2-1)=raArr(i2)
-                    raArr(i2)=rT
-                END IF
-                i2=i2-1
-                GO TO 90
-            END IF
-                  
-            i1=i1+1
-            GO TO 80
+ 80   CONTINUE
+      IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
+        i2 = iCnt
+        iTrue = -1
+ 90     CONTINUE
+        IF (i2 > i1) THEN
+          IF (raArr(i2) < raArr(i2-1)) THEN
+            iTrue = 1
+            rT = raArr(i2-1)
+            raArr(i2-1) = raArr(i2)
+            raArr(i2) = rT
+          END IF
+          i2 = i2-1
+          GO TO 90
         END IF
+                  
+        i1 = i1+1
+        GO TO 80
+      END IF
 
-        DO i1=1,iCnt
-            raArr(i1)=-raArr(i1)
-        END DO
-        i1=1
-    END IF
-            
+      DO i1 = 1,iCnt
+        raArr(i1) = -raArr(i1)
+      END DO
+      i1 = 1
+    END IF    
      
     RETURN
     end SUBROUTINE DoSortReal
@@ -496,73 +495,73 @@ CONTAINS
     REAL :: rT1,rT2
 
     IF (iUD > 0) THEN
-        i1 = 1
-        iTrue = 1
+      i1 = 1
+      iTrue = 1
 
-        60 CONTINUE
-        IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
-            i2 = iCnt
-            iTrue = -1
-            70 CONTINUE
-            IF (i2 > i1) THEN
-                IF (raArr1(i2) < raArr1(i2-1)) THEN
-                    iTrue = 1
-                    rT1 = raArr1(i2-1)
-                    raArr1(i2-1) = raArr1(i2)
-                    raArr1(i2) = rT1
+ 60   CONTINUE
+      IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
+        i2 = iCnt
+        iTrue = -1
+ 70     CONTINUE
+        IF (i2 > i1) THEN
+          IF (raArr1(i2) < raArr1(i2-1)) THEN
+            iTrue = 1
+            rT1 = raArr1(i2-1)
+            raArr1(i2-1) = raArr1(i2)
+            raArr1(i2) = rT1
 
-                    rT2 = raArr2(i2-1)
-                    raArr2(i2-1) = raArr2(i2)
-                    raArr2(i2) = rT2
+            rT2 = raArr2(i2-1)
+            raArr2(i2-1) = raArr2(i2)
+            raArr2(i2) = rT2
 
-                END IF
-                i2 = i2-1
-                GO TO 70
-            END IF
-                  
-            i1 = i1+1
-            GO TO 60
+          END IF
+          i2 = i2-1
+          GO TO 70
         END IF
+                  
+        i1 = i1+1
+        GO TO 60
+      END IF
 
     ELSE IF (iUD < 0) THEN
-        DO i1 = 1,iCnt
-            raArr1(i1) = -raArr1(i1)
-            raArr2(i1) = -raArr2(i1)
-        END DO
-        i1 = 1
-        iTrue = 1
+      DO i1 = 1,iCnt
+        raArr1(i1) = -raArr1(i1)
+        raArr2(i1) = -raArr2(i1)
+      END DO
+      i1 = 1
+      iTrue = 1
 
-        80 CONTINUE
-        IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
-            i2 = iCnt
-            iTrue = -1
-            90 CONTINUE
-            IF (i2 > i1) THEN
-                IF (raArr1(i2) < raArr1(i2-1)) THEN
-                    iTrue = 1
+   80 CONTINUE
+      IF ((i1 < iCnt) .AND. (iTrue > 0)) THEN
+        i2 = iCnt
+        iTrue = -1
+    90  CONTINUE
+        IF (i2 > i1) THEN
+          IF (raArr1(i2) < raArr1(i2-1)) THEN
+            iTrue = 1
 
-                    rT1 = raArr1(i2-1)
-                    raArr1(i2-1) = raArr1(i2)
-                    raArr1(i2) = rT1
+            rT1 = raArr1(i2-1)
+            raArr1(i2-1) = raArr1(i2)
+            raArr1(i2) = rT1
 
-                    rT2 = raArr2(i2-1)
-                    raArr2(i2-1) = raArr2(i2)
-                    raArr2(i2) = rT2
+            rT2 = raArr2(i2-1)
+            raArr2(i2-1) = raArr2(i2)
+            raArr2(i2) = rT2
 
-                END IF
-                i2 = i2-1
-                GO TO 90
-            END IF
-                  
-            i1 = i1+1
-            GO TO 80
+          END IF
+          i2 = i2-1
+          GO TO 90
         END IF
+                  
+        i1 = i1+1
+        GO TO 80
+      END IF
 
-        DO i1 = 1,iCnt
-            raArr1(i1) = -raArr1(i1)
-            raArr2(i1) = -raArr2(i1)
-        END DO
-        i1 = 1
+      DO i1 = 1,iCnt
+        raArr1(i1) = -raArr1(i1)
+        raArr2(i1) = -raArr2(i1)
+      END DO
+      i1 = 1
     END IF
             
     RETURN
@@ -586,32 +585,32 @@ CONTAINS
 ! local variables
     INTEGER :: iAns,iFound,iMp,iF,iL,iLocation
 
-    iAns=-1
-    iFound=-1
-    iF=1
-    iL=iNp
+    iAns = -1
+    iFound = -1
+    iF = 1
+    iL = iNp
 
     15 CONTINUE
     IF ((iF <= iL) .AND. (iFound < 0)) THEN
-        iMp=IDIV(iF+iL,2)
-        IF (iaOp(iMp) == iLay) THEN
-            iFound=1
+      iMp = IDIV(iF+iL,2)
+      IF (iaOp(iMp)  == iLay) THEN
+        iFound = 1
+      ELSE
+        IF (iaOp(iMp) > iLay) THEN
+          iL = iMp-1
         ELSE
-            IF (iaOp(iMp) > iLay) THEN
-                iL=iMp-1
-            ELSE
-                iF=iMp+1
-            END IF
+          iF = iMp+1
         END IF
-        GO TO 15
+      END IF
+      GO TO 15
     END IF
           
     IF (iFound > 0) THEN
-        iLocation=iMp
-        iAns=1
+      iLocation = iMp
+      iAns = 1
     END IF
 
-    BinarySearch=iAns
+    BinarySearch = iAns
     RETURN
     end FUNCTION BinarySearch
 
@@ -633,25 +632,25 @@ CONTAINS
 ! local variables
     INTEGER :: iDp,iDpC
           
-    iDp=-1
+    iDp = -1
     IF (iNp < 0) THEN
     ! easy ! print all layers
-        iDp=1
+        iDp = 1
     END IF
     IF (iNp > 0) THEN
-    ! actually have to go thru list to see if this layer is to be output
-        iDpC=1
-        101 CONTINUE
-        IF ((iDpc <= iNp)  .AND. (iaOp(iDpC) == iLay)) THEN
-            iDp=1
-        END IF
-        IF ((iDpc <= iNp)  .AND. (iDp < 0)) THEN
-            iDpc=iDpc+1
-            GO TO 101
-        END IF
+      ! actually have to go thru list to see if this layer is to be output
+      iDpC = 1
+  101 CONTINUE
+      IF ((iDpc <= iNp)  .AND. (iaOp(iDpC) == iLay)) THEN
+        iDp = 1
+      END IF
+      IF ((iDpc <= iNp)  .AND. (iDp < 0)) THEN
+        iDpc = iDpc+1
+        GO TO 101
+      END IF
     END IF
 
-    SequentialSearch=iDp
+    SequentialSearch = iDp
 
     RETURN
     end FUNCTION SequentialSearch
@@ -677,12 +676,9 @@ CONTAINS
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox)
     INTEGER :: iI
 
-    DO iI = 1,N
-        XAA(iI) = XA(iI)
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = XA(1:N)
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
-
     CALL rspl(XAA,YAA,N,XOUT,YOUT,NOUT)
 
     RETURN
@@ -704,15 +700,11 @@ CONTAINS
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB(kMaxPtsBox)
     INTEGER :: iI
 
-    DO iI = 1,N
-        XAA(iI) = log(XA(iI))
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = log(XA(1:N))
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
-    DO iI = 1,NOUT
-        XBB(iI) = log(XOUT(iI))
-    END DO
+    XBB(1:NOUT) = log(XOUT(1:NOUT))
 
     CALL rspl(XAA,YAA,N,XBB,YOUT,NOUT)
 
@@ -737,10 +729,8 @@ CONTAINS
 
     NOUT = 1
     
-    DO iI = 1,N
-        XAA(iI) = XA(iI)
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = XA(1:N)
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
     XBB = XOUT
@@ -768,10 +758,8 @@ CONTAINS
 
     NOUT = 1
     
-    DO iI = 1,N
-        XAA(iI) = log(XA(iI))
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = log(XA(1:N))
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
     XBB = log(XOUT)
@@ -808,12 +796,12 @@ CONTAINS
     INTEGER :: I
 
     IF (NOUT /= 1) THEN
-        write(kStdErr,*) 'rspl_one assumes you only want 1 calc'
-        CALL DoStop
+      write(kStdErr,*) 'rspl_one assumes you only want 1 calc'
+      CALL DoStop
     END IF
            
-    yp1=1.0e16
-    ypn=1.0e16
+    yp1 = 1.0e16
+    ypn = 1.0e16
 
     CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
     CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT,YOUT)
@@ -890,61 +878,57 @@ CONTAINS
     REAL :: raX(kMaxPtsBox),raY(kMaxPtsBox)
     INTEGER :: I,iFlip,iStart
 
-    yp1=1.0e16
-    ypn=1.0e16
-
-!      write(kStdErr,*) 'logrspl does not seem to work ???'
-!      CALL DoStop
+    yp1 = 1.0e16
+    ypn = 1.0e16
 
     DO I = 1,N
-        IF (XA(I) < 0.0) THEN
-            write(kStdErr,*) 'Error .. cannot do log(x) if x < 0'
-            CALL DoStop
-        ELSE
-            LOGXA(I) = log(XA(I))
-        END IF
+      IF (XA(I) < 0.0) THEN
+        write(kStdErr,*) 'Error .. cannot do log(x) if x < 0'
+        CALL DoStop
+      ELSE
+        LOGXA(I) = log(XA(I))
+      END IF
     END DO
 
     DO I = 1,NOUT
-        IF (xout(I) < 0.0) THEN
-            write(kStdErr,*) 'Error .. cannot do log(xout) if xout < 0'
-            CALL DoStop
-        ELSE
-            LOGXOUT(I) = log(xout(I))
-        END IF
+      IF (xout(I) < 0.0) THEN
+        write(kStdErr,*) 'Error .. cannot do log(xout) if xout < 0'
+        CALL DoStop
+      ELSE
+        LOGXOUT(I) = log(xout(I))
+      END IF
     END DO
      
     iFlip = -1    !!assume everything ordered correctly
     IF ((XA(N-1) > XA(N)) .OR. (XA(N-2) > XA(N-1))) THEN
-        iFlip = +1
-        DO I = 1,N
-            raX(N-I+1) = LOGXA(I)
-        END DO
-        DO I = 1,N
-            logxa(I) = raX(I)
-        END DO
-        DO I = 1,N
-            raY(N-I+1) = ya(I)
-        END DO
+      iFlip = +1
+      DO I = 1,N
+        raX(N-I+1) = LOGXA(I)
+      END DO
+      DO I = 1,N
+        logxa(I) = raX(I)
+      END DO
+      DO I = 1,N
+        raY(N-I+1) = ya(I)
+      END DO
     ELSE
-        iFlip = -1
-        DO I = 1,N
-            raY(I) = ya(I)
-        END DO
+      iFlip = -1
+      DO I = 1,N
+        raY(I) = ya(I)
+      END DO
     END IF
 
 !!! find out where we can start from
     iStart = 1
     10 CONTINUE
     IF (XOUT(iStart) > XA(1)) THEN
-        iSTart = iStart + 1
-        GOTO 10
+      iSTart = iStart + 1
+      GOTO 10
     END IF
 
     CALL rSPLY2(logxa,raY,N,Yp1,Ypn,Y2A,work)
-    DO I=iStart,NOUT
-        CALL rsplin_need_2nd_deriv(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))
-    !        print *,I,logXOUT(I),YOUT(I)
+    DO I = iStart,NOUT
+      CALL rsplin_need_2nd_deriv(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))
     END DO
 
     RETURN
@@ -977,12 +961,12 @@ CONTAINS
     REAL :: Y2A(kMaxPtsBox),work(kMaxPtsBox),Yp1,yPn
     INTEGER :: I
 
-    yp1=1.0
-    ypn=1.0
+    yp1 = 1.0
+    ypn = 1.0
 
     CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
-    DO I=1,NOUT
-        CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))
+    DO I = 1,NOUT
+      CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))
     END DO
      
     RETURN
@@ -1020,36 +1004,32 @@ CONTAINS
 !      -----------------------------------------------------------------
 
 !      Determine between which pair of pints X falls (bisect loop)
-    KLO=1
-    KHI=N
-    20 IF ( (KHI - KLO) > 1) THEN
-        K=(KHI + KLO)/2
-        IF (XA(K) > X) THEN
-            KHI = k
-        ELSE
-            KLO = k
-        ENDIF
-        GOTO 20
+    KLO = 1
+    KHI = N
+ 20 IF ( (KHI - KLO) > 1) THEN
+      K = (KHI + KLO)/2
+      IF (XA(K) > X) THEN
+        KHI = k
+      ELSE
+        KLO = k
+      ENDIF
+      GOTO 20
     ENDIF
 
-    H=XA(KHI) - XA(KLO)
+    H = XA(KHI) - XA(KLO)
     IF (H <= 0.0) THEN
-        WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
-        1010 FORMAT('ERROR! rSPLINT: bad XA array.',/, &
+      WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
+      1010 FORMAT('ERROR! rSPLINT: bad XA array.',/, &
         'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5, &
         ', XA(KHI)=',E12.5,'. Quitting.')
-        CALL DoStop
+      CALL DoStop
     ENDIF
 
-    A=(XA(KHI) - X)/H
-    B=(X - XA(KLO))/H
+    A = (XA(KHI) - X)/H
+    B = (X - XA(KLO))/H
 
-    Y=A*YA(KLO) + B*YA(KHI) + ( Y2A(KLO)*(A**3 - A) + &
-    Y2A(KHI)*(B**3 - B) )*(H**2)/6.0
+    Y = A*YA(KLO) + B*YA(KHI) + ( Y2A(KLO)*(A**3 - A) + Y2A(KHI)*(B**3 - B) )*(H**2)/6.0
 
-!    DO I = 1,N
-!      write(kStdWarn,50) 'rspl',I,N,KLO,KHI,XA(I),YA(I),'--->',X,Y
-!    END DO
  50 FORMAT(A4,4(' ',I3),2(' ',F15.7),A4,2(' ',F15.7))
  
     RETURN
@@ -1085,46 +1065,42 @@ CONTAINS
 
 !      Lower boundary
     IF (YP1 > 1.0E+15) THEN
-    !         "Natural" boundary condition
-        Y2A(1)=0.0
-        WORK(1)=0.0
+      ! "Natural" boundary condition
+      Y2A(1) = 0.0
+      WORK(1) = 0.0
     ELSE
-    !         Set to a specific first derivative
-        Y2A(1)=-0.5
-        WORK(1)=( 3.0/(XA(2) - XA(1)) )*( (YA(2) - YA(1))/ &
-        (XA(2) - XA(1)) - YP1)
+      !         Set to a specific first derivative
+      Y2A(1) = -0.5
+      WORK(1) = ( 3.0/(XA(2) - XA(1)) )*( (YA(2) - YA(1))/(XA(2) - XA(1)) - YP1)
     ENDIF
 
 !      Decomposition loop of the tridiagonal algorithm
-    DO I=2,N-1
-    ! this is from the progas code
-    !          SIG=(XA(I) - XA(I-1))/(XA(I+1) - XA(I))
-        SIG=(XA(I) - XA(I-1))/(XA(I+1) - XA(I-1))
-        P=SIG*Y2A(I-1) + 2.0
-        Y2A(I)=(SIG - 1.0)/P
-        WORK(I)=(YA(I+1) - YA(I))/(XA(I+1) - XA(I)) - &
-        (YA(I) - YA(I-1))/(XA(I) - XA(I-1))
-        WORK(I)=( 6.0*WORK(I)/(XA(I+1) - XA(I-1)) - &
-        SIG*WORK(I-1) )/P
+    DO I = 2,N-1
+      ! this is from the progas code
+      !          SIG = (XA(I) - XA(I-1))/(XA(I+1) - XA(I))
+      SIG = (XA(I) - XA(I-1))/(XA(I+1) - XA(I-1))
+      P = SIG*Y2A(I-1) + 2.0
+      Y2A(I) = (SIG - 1.0)/P
+      WORK(I) = (YA(I+1) - YA(I))/(XA(I+1) - XA(I)) - (YA(I) - YA(I-1))/(XA(I) - XA(I-1))
+      WORK(I) = ( 6.0*WORK(I)/(XA(I+1) - XA(I-1)) - SIG*WORK(I-1) )/P
     ENDDO
 
-!      Upper boundary
+    !      Upper boundary
     IF (YPN > 1.0E+15) THEN
-    !         "Natural" boundary condition
-        QN=0.0
-        UN=0.0
+      ! "Natural" boundary condition
+      QN = 0.0
+      UN = 0.0
     ELSE
-    !         Set to a specific first derivative
-        QN=0.5
-        UN=( 3.0/(XA(N) - XA(N-1)) )*( YPN - &
-        (YA(N) - YA(N-1))/(XA(N) - XA(N-1)) )
+      !         Set to a specific first derivative
+      QN = 0.5
+      UN = ( 3.0/(XA(N) - XA(N-1)) )*( YPN - (YA(N) - YA(N-1))/(XA(N) - XA(N-1)) )
     ENDIF
-    Y2A(N)=(UN - QN*WORK(N-1))/(QN*Y2A(N-1) + 1.0)
+    Y2A(N) = (UN - QN*WORK(N-1))/(QN*Y2A(N-1) + 1.0)
 
 !      Assign the other 2nd derivatives using the back-substitution
 !      loop of the tridiagonal algorithm
-    DO K=N-1,1,-1
-        Y2A(K)=Y2A(K)*Y2A(K+1) + WORK(K)
+    DO K = N-1,1,-1
+      Y2A(K) = Y2A(K)*Y2A(K+1) + WORK(K)
     ENDDO
 
     RETURN
@@ -1157,12 +1133,12 @@ CONTAINS
     DOUBLE PRECISION :: Y2A(kMaxPtsBox),work(kMaxPtsBox),Yp1,yPn
     INTEGER :: I
 
-    yp1=1.0e16
-    ypn=1.0e16
+    yp1 = 1.0e16
+    ypn = 1.0e16
 
     CALL dSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
-    DO I=1,NOUT
-        CALL dSPLIN(XA,YA,Y2A,N,XOUT(I),YOUT(I))
+    DO I = 1,NOUT
+      CALL dSPLIN(XA,YA,Y2A,N,XOUT(I),YOUT(I))
     END DO
      
     RETURN
@@ -1199,30 +1175,29 @@ CONTAINS
 !      Determine between which pair of pints X falls (bisect loop)
     KLO=1
     KHI=N
-    20 IF ( (KHI - KLO) > 1) THEN
-        K=(KHI + KLO)/2
-        IF (XA(K) > X) THEN
-            KHI = k
-        ELSE
-            KLO = k
-        ENDIF
-        GOTO 20
+ 20 IF ( (KHI - KLO) > 1) THEN
+      K = (KHI + KLO)/2
+      IF (XA(K) > X) THEN
+        KHI = k
+      ELSE
+        KLO = k
+      ENDIF
+      GOTO 20
     ENDIF
 
-    H=XA(KHI) - XA(KLO)
+    H = XA(KHI) - XA(KLO)
     IF (H <= 0.0) THEN
-        WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
-        1010 FORMAT('ERROR! dSPLINT: bad XA array.',/, &
+      WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
+      1010 FORMAT('ERROR! dSPLINT: bad XA array.',/, &
         'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5, &
         ', XA(KHI)=',E12.5,'. Quitting.')
         CALL DoStop
     ENDIF
 
-    A=(XA(KHI) - X)/H
-    B=(X - XA(KLO))/H
+    A = (XA(KHI) - X)/H
+    B = (X - XA(KLO))/H
 
-    Y=A*YA(KLO) + B*YA(KHI) + ( Y2A(KLO)*(A**3 - A) + &
-    Y2A(KHI)*(B**3 - B) )*(H**2)/6.0
+    Y = A*YA(KLO) + B*YA(KHI) + ( Y2A(KLO)*(A**3 - A) + Y2A(KHI)*(B**3 - B) )*(H**2)/6.0
 
     RETURN
     end SUBROUTINE dSPLIN
@@ -1257,46 +1232,42 @@ CONTAINS
 
 !      Lower boundary
     IF (YP1 > 1.0E+15) THEN
-    !         "Natural" boundary condition
-        Y2A(1)=0.0
-        WORK(1)=0.0
+      ! "Natural" boundary condition
+      Y2A(1) = 0.0
+      WORK(1) = 0.0
     ELSE
-    !         Set to a specific first derivative
-        Y2A(1)=-0.5
-        WORK(1)=( 3.0/(XA(2) - XA(1)) )*( (YA(2) - YA(1))/ &
-        (XA(2) - XA(1)) - YP1)
+      ! Set to a specific first derivative
+      Y2A(1) = -0.5
+      WORK(1) = ( 3.0/(XA(2) - XA(1)) )*( (YA(2) - YA(1))/(XA(2) - XA(1)) - YP1)
     ENDIF
 
-!      Decomposition loop of the tridiagonal algorithm
-    DO I=2,N-1
-    ! this is from the progas code
-    !          SIG=(XA(I) - XA(I-1))/(XA(I+1) - XA(I))
-        SIG=(XA(I) - XA(I-1))/(XA(I+1) - XA(I-1))
-        P=SIG*Y2A(I-1) + 2.0
-        Y2A(I)=(SIG - 1.0)/P
-        WORK(I)=(YA(I+1) - YA(I))/(XA(I+1) - XA(I)) - &
-        (YA(I) - YA(I-1))/(XA(I) - XA(I-1))
-        WORK(I)=( 6.0*WORK(I)/(XA(I+1) - XA(I-1)) - &
-        SIG*WORK(I-1) )/P
+    !      Decomposition loop of the tridiagonal algorithm
+    DO I = 2,N-1
+      ! this is from the progas code
+      !          SIG = (XA(I) - XA(I-1))/(XA(I+1) - XA(I))
+      SIG = (XA(I) - XA(I-1))/(XA(I+1) - XA(I-1))
+      P = SIG*Y2A(I-1) + 2.0
+      Y2A(I) = (SIG - 1.0)/P
+      WORK(I) = (YA(I+1) - YA(I))/(XA(I+1) - XA(I)) - (YA(I) - YA(I-1))/(XA(I) - XA(I-1))
+      WORK(I) = ( 6.0*WORK(I)/(XA(I+1) - XA(I-1)) - SIG*WORK(I-1) )/P
     ENDDO
 
-!      Upper boundary
+    !      Upper boundary
     IF (YPN > 1.0E+15) THEN
-    !         "Natural" boundary condition
-        QN=0.0
-        UN=0.0
+      ! "Natural" boundary condition
+      QN = 0.0
+      UN = 0.0
     ELSE
-    !         Set to a specific first derivative
-        QN=0.5
-        UN=( 3.0/(XA(N) - XA(N-1)) )*( YPN - &
-        (YA(N) - YA(N-1))/(XA(N) - XA(N-1)) )
+      ! Set to a specific first derivative
+      QN = 0.5
+      UN = ( 3.0/(XA(N) - XA(N-1)) )*( YPN - (YA(N) - YA(N-1))/(XA(N) - XA(N-1)) )
     ENDIF
-    Y2A(N)=(UN - QN*WORK(N-1))/(QN*Y2A(N-1) + 1.0)
+    Y2A(N) = (UN - QN*WORK(N-1))/(QN*Y2A(N-1) + 1.0)
 
-!      Assign the other 2nd derivatives using the back-substitution
-!      loop of the tridiagonal algorithm
-    DO K=N-1,1,-1
-        Y2A(K)=Y2A(K)*Y2A(K+1) + WORK(K)
+    !      Assign the other 2nd derivatives using the back-substitution
+    !      loop of the tridiagonal algorithm
+    DO K = N-1,1,-1
+      Y2A(K) = Y2A(K)*Y2A(K+1) + WORK(K)
     ENDDO
 
     RETURN
@@ -1331,39 +1302,39 @@ CONTAINS
     REAL :: A,B,H
 
     IF (NOUT /= 1) THEN
-        write(kStdErr,*) 'RLINEAR_ONE only gives one output'
-        CALL DoStop
+      write(kStdErr,*) 'RLINEAR_ONE only gives one output'
+      CALL DoStop
     END IF
 
 !      -----------------------------------------------------------------
 
 !      Determine between which pair of points X falls (bisect loop)
-    KLO=1
-    KHI=N
+    KLO = 1
+    KHI = N
 
-    20 IF ( (KHI - KLO) > 1) THEN
-        K=(KHI + KLO)/2
-        IF (XA(K) > X) THEN
-            KHI = k
-        ELSE
-            KLO = k
-        ENDIF
-        GOTO 20
+ 20 IF ( (KHI - KLO) > 1) THEN
+      K = (KHI + KLO)/2
+      IF (XA(K) > X) THEN
+        KHI = k
+      ELSE
+        KLO = k
+      ENDIF
+      GOTO 20
     ENDIF
 
-    H=XA(KHI) - XA(KLO)
+    H = XA(KHI) - XA(KLO)
     IF (H <= 0.0) THEN
-        WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
-        1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
+      WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
+      1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
         'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5, &
         ', XA(KHI)=',E12.5,'. Quitting.')
-        CALL DoStop
+      CALL DoStop
     ENDIF
 
-    A=(XA(KHI) - X)/H
-    B=YA(KHI)-YA(KLO)
+    A = (XA(KHI) - X)/H
+    B = YA(KHI)-YA(KLO)
 
-    Y=YA(KHI)-A*B
+    Y = YA(KHI)-A*B
 
     RETURN
     END SUBROUTINE RLINEAR_ONE
@@ -1393,8 +1364,8 @@ CONTAINS
      
     INTEGER :: I
      
-    DO I=1,NOUT
-        CALL RLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I),1)
+    DO I = 1,NOUT
+      CALL RLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I),1)
     END DO
 
     RETURN
@@ -1435,50 +1406,50 @@ CONTAINS
 
 !      Determine between which pair of points X falls (bisect loop)
     IF ((NSMART_LO < 0) .AND. (NSMART_HI < 0)) THEN
-    !!!start looking from beginning
-        KLO=1
-        KHI=N
-        20 IF ( (KHI - KLO) > 1) THEN
-            K=(KHI + KLO)/2
-            IF (XA(K) > X) THEN
-                KHI = k
-            ELSE
-                KLO = k
-            ENDIF
-            GOTO 20
+      !!!start looking from beginning
+      KLO = 1
+      KHI = N
+  20  IF ( (KHI - KLO) > 1) THEN
+        K = (KHI + KLO)/2
+        IF (XA(K) > X) THEN
+          KHI  =  k
+        ELSE
+          KLO  =  k
         ENDIF
-        NSMART_LO = KLO
-        NSMART_HI = KHI
+        GOTO 20
+      ENDIF
+      NSMART_LO  =  KLO
+      NSMART_HI  =  KHI
     ELSE
-    !!!start looking from previous try!
-        KLO=max(NSMART_LO - 1,1)
-        KHI=min(NSMART_HI + 1,N)
-        30 IF ( (KHI - KLO) > 1) THEN
-            K=(KHI + KLO)/2
-            IF (XA(K) > X) THEN
-                KHI = k
-            ELSE
-                KLO = k
-            ENDIF
-            GOTO 30
+      !!!start looking from previous try!
+      KLO = max(NSMART_LO - 1,1)
+      KHI = min(NSMART_HI + 1,N)
+ 30   IF ( (KHI - KLO) > 1) THEN
+        K = (KHI + KLO)/2
+        IF (XA(K) > X) THEN
+          KHI = k
+        ELSE
+          KLO = k
         ENDIF
-        NSMART_LO = KLO
-        NSMART_HI = KHI
+        GOTO 30
+      ENDIF
+      NSMART_LO = KLO
+      NSMART_HI = KHI
     END IF
 
-    H=XA(KHI) - XA(KLO)
+    H = XA(KHI) - XA(KLO)
     IF (H <= 0.0) THEN
-        WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
-        1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
+      WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
+  1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/,&
         'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5, &
         ', XA(KHI)=',E12.5,'. Quitting.')
-        CALL DoStop
+      CALL DoStop
     ENDIF
 
-    A=(XA(KHI) - X)/H
-    B=YA(KHI)-YA(KLO)
+    A = (XA(KHI) - X)/H
+    B = YA(KHI)-YA(KLO)
 
-    Y=YA(KHI)-A*B
+    Y = YA(KHI)-A*B
 
     RETURN
     end SUBROUTINE dLINEAR_SMART_ONE
@@ -1514,7 +1485,7 @@ CONTAINS
     CALL dLINEAR_smart_one(NSMART_LO,NSMART_HI,XA,YA,N,XOUT(I),YOUT(I))
 
     DO I=2,NOUT
-        CALL dLINEAR_smart_one(NSMART_LO,NSMART_HI,XA,YA,N,XOUT(I),YOUT(I))
+      CALL dLINEAR_smart_one(NSMART_LO,NSMART_HI,XA,YA,N,XOUT(I),YOUT(I))
     END DO
 
     RETURN
@@ -1549,31 +1520,31 @@ CONTAINS
 !      -----------------------------------------------------------------
 
 !      Determine between which pair of points X falls (bisect loop)
-    KLO=1
-    KHI=N
-    20 IF ( (KHI - KLO) > 1) THEN
-        K=(KHI + KLO)/2
-        IF (XA(K) > X) THEN
-            KHI = k
-        ELSE
-            KLO = k
-        ENDIF
-        GOTO 20
+    KLO = 1
+    KHI = N
+ 20 IF ( (KHI - KLO) > 1) THEN
+      K = (KHI + KLO)/2
+      IF (XA(K) > X) THEN
+        KHI = k
+      ELSE
+        KLO = k
+      ENDIF
+      GOTO 20
     ENDIF
 
-    H=XA(KHI) - XA(KLO)
+    H = XA(KHI) - XA(KLO)
     IF (H <= 0.0) THEN
-        WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
+      WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
         1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
         'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5, &
         ', XA(KHI)=',E12.5,'. Quitting.')
-        CALL DoStop
+      CALL DoStop
     ENDIF
 
-    A=(XA(KHI) - X)/H
-    B=YA(KHI)-YA(KLO)
+    A = (XA(KHI) - X)/H
+    B = YA(KHI)-YA(KLO)
 
-    Y=YA(KHI)-A*B
+    Y = YA(KHI)-A*B
 
     RETURN
     end SUBROUTINE dLINEAR_ONE
@@ -1603,8 +1574,8 @@ CONTAINS
      
     INTEGER :: I
      
-    DO I=1,NOUT
-        CALL dLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I))
+    DO I = 1,NOUT
+      CALL dLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I))
     END DO
 
     RETURN
@@ -1625,10 +1596,8 @@ CONTAINS
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox)
     INTEGER :: iI
 
-    DO iI = 1,N
-        XAA(iI) = XA(iI)
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = XA(1:N)
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
     CALL rlinear(XAA,YAA,N,XOUT,YOUT,NOUT)
@@ -1652,15 +1621,11 @@ CONTAINS
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB(kMaxPtsBox)
     INTEGER :: iI
 
-    DO iI = 1,N
-        XAA(iI) = log(XA(iI))
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = log(XA(1:N))
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
-    DO iI = 1,NOUT
-        XBB(iI) = log(XOUT(iI))
-    END DO
+    XBB(1:NOUT) = log(XOUT(1:NOUT))
 
     CALL rlinear(XAA,YAA,N,XBB,YOUT,NOUT)
 
@@ -1683,14 +1648,12 @@ CONTAINS
     INTEGER :: iI
 
     IF (NOUT /= 1) THEN
-        write(kStdErr,*) 'r_sort_linear1 is only for 1 point'
-        CALL DoStop
+      write(kStdErr,*) 'r_sort_linear1 is only for 1 point'
+      CALL DoStop
     END IF
            
-    DO iI = 1,N
-        XAA(iI) = XA(iI)
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = XA(1:N)
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
     CALL rlinear_one(XAA,YAA,N,XOUT,YOUT,NOUT)
@@ -1715,18 +1678,16 @@ CONTAINS
     INTEGER :: iI
 
     IF (NOUT /= 1) THEN
-        write(kStdErr,*) 'r_sort_loglinear1 is only for 1 point'
-        CALL DoStop
+      write(kStdErr,*) 'r_sort_loglinear1 is only for 1 point'
+      CALL DoStop
     END IF
 
-    DO iI = 1,N
-        XAA(iI) = log(XA(iI))
-        YAA(iI) = YA(iI)
-    END DO
+    XAA(1:N) = log(XA(1:N))
+    YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
     DO iI = 1,NOUT
-        XBB = log(XOUT)
+      XBB = log(XOUT)
     END DO
 
     CALL rlinear_one(XAA,YAA,N,XBB,YOUT,NOUT)
@@ -1753,9 +1714,9 @@ CONTAINS
     INTEGER :: iLay,iNp,iaOp(*)
 
     IF (iNp < 16) THEN
-        DoOutputLayer = SequentialSearch(iLay,iNp,iaOp)
+      DoOutputLayer = SequentialSearch(iLay,iNp,iaOp)
     ELSE
-        DoOutputLayer = BinarySearch(iLay,iNp,iaOp)
+      DoOutputLayer = BinarySearch(iLay,iNp,iaOp)
     END IF
 
     RETURN
@@ -1776,21 +1737,17 @@ CONTAINS
     REAL :: pavg,rH,raY2P(kMaxLayer),p,logpavg(kMaxLayer),raHgt(kMaxLayer)
          
     DO iI = 1,100
-        pavg = (DATABASELEV(iI+1)-DATABASELEV(iI))/log(DATABASELEV(iI+1)/DATABASELEV(iI))
-        logpavg(kMaxLayer-iI+1) = log(pavg)      !! need this to be smallest to largest
-        raHgt(kMaxLayer-iI+1)   = DatabaseHEIGHT(iI)
+      pavg = (DATABASELEV(iI+1)-DATABASELEV(iI))/log(DATABASELEV(iI+1)/DATABASELEV(iI))
+      logpavg(kMaxLayer-iI+1) = log(pavg)      !! need this to be smallest to largest
+      raHgt(kMaxLayer-iI+1)   = DatabaseHEIGHT(iI)
     END DO
 
-!      print *,(logpavg(iI),iI=1,kMaxLayer)
-!      print *,(raHgt(iI),iI=1,kMaxLayer)
-
     IF (p >= DATABASELEV(1)) THEN
-        rH = DatabaseHEIGHT(1)
+      rH = DatabaseHEIGHT(1)
     ELSEIF (p <= DATABASELEV(kMaxLayer+1)) THEN
-        rH = DatabaseHEIGHT(kMaxLayer)
+      rH = DatabaseHEIGHT(kMaxLayer)
     ELSE
-!        CALL rlinear_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
-        CALL rspl_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+      CALL rspl_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
     END IF
 
     p2h = rH

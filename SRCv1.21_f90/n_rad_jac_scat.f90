@@ -39,49 +39,45 @@ CONTAINS
     REAL :: rSwap
 
     DO iA = 1,iNatm
-        IF (iaLimb(iA) > 0) THEN
-            kThermal      = -1
-            kThermalJacob = -1
-            raTsurf(iA) = 0.0             !! no need to have any stemp;
+      IF (iaLimb(iA) > 0) THEN
+        kThermal      = -1
+        kThermalJacob = -1
+        raTsurf(iA) = 0.0             !! no need to have any stemp;
         !! besides we have emiss = 0
-            IF (raSatHeight(iA) < 0) THEN
-                raSatHeight(iA) = 705000 !! AIRS height, m
-            END IF
-
-            IF (raPressStart(iA) < raPressStop(iA)) THEN
-            !! need to swap things around
-                rSwap = raPressStart(iA)
-                raPressStart(iA) = raPressStop(iA)
-                raPressStop(iA) = rSwap
-
-                rSwap = raaPrBdry(iA,1)
-                raaPrBdry(iA,1) = raaPrBdry(iA,2)
-                raaPrBdry(iA,2) = rSwap
-
-                DO iL = 1,iaNumlayer(iA)
-                    iaTemp(iL) = iaaRadLayer(iA,iaNumlayer(iA)-iL+1)
-                END DO
-                DO iL = 1,iaNumlayer(iA)
-                    iaaRadLayer(iA,iL) = iaTemp(iL)
-                END DO
-            END IF
-
-            raSatAngle(iA) = LimbViewScanAng(iA,raPressStart,raSatHeight,iaaRadLayer, &
-            raPressLevels,raLayerHeight)
-
-            IF (iaKsolar(iA) >= 0) THEN
-                write(kStdWarn,*) '  setting up solar angle for occultation'
-            !! remember, this is SOLAR ZENITH = angle at observer
-            !! and NOT angle at TOA, so it is 90 degrees!
-            !! rakSolarAngle(iA) = raSatAngle(iA)
-                rakSolarAngle(iA) = 89.0
-                kSolarAngle = rakSolarAngle(iA)
-            END IF
-
-        !          print *,'yada ',raPressStart(iA),raSatAngle(iA),rakSolarAngle(iA)
-        !          call dostop
-
+        IF (raSatHeight(iA) < 0) THEN
+          raSatHeight(iA) = 705000 !! AIRS height, m
         END IF
+
+        IF (raPressStart(iA) < raPressStop(iA)) THEN
+          !! need to swap things around
+          rSwap = raPressStart(iA)
+          raPressStart(iA) = raPressStop(iA)
+          raPressStop(iA) = rSwap
+
+          rSwap = raaPrBdry(iA,1)
+          raaPrBdry(iA,1) = raaPrBdry(iA,2)
+          raaPrBdry(iA,2) = rSwap
+
+          DO iL = 1,iaNumlayer(iA)
+            iaTemp(iL) = iaaRadLayer(iA,iaNumlayer(iA)-iL+1)
+          END DO
+          DO iL = 1,iaNumlayer(iA)
+            iaaRadLayer(iA,iL) = iaTemp(iL)
+          END DO
+        END IF
+
+        raSatAngle(iA) = LimbViewScanAng(iA,raPressStart,raSatHeight,iaaRadLayer,raPressLevels,raLayerHeight)
+
+        IF (iaKsolar(iA) >= 0) THEN
+          write(kStdWarn,*) '  setting up solar angle for occultation'
+          !! remember, this is SOLAR ZENITH = angle at observer
+          !! and NOT angle at TOA, so it is 90 degrees!
+          !! rakSolarAngle(iA) = raSatAngle(iA)
+          rakSolarAngle(iA) = 89.0
+          kSolarAngle = rakSolarAngle(iA)
+        END IF
+
+      END IF
     END DO
 
     RETURN
@@ -162,316 +158,310 @@ CONTAINS
     iErr = -1
 
     iNumLinesRead = 0
-    13 IF (iNumLinesRead > 0) THEN
-        iErr = 1
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+ 13 IF (iNumLinesRead > 0) THEN
+      iErr = 1
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
-    5010 FORMAT('Error reading section ',A7)
+ 5010 FORMAT('Error reading section ',A7)
 
     iNumLinesRead = 1
 
 ! read in how many atmospheres
     IF (iNatm > kMaxAtm) THEN
-        write(kStdErr,*) 'ERROR'
-        write(kStdErr,*) 'in kcartaparam.f90, kMaxAtm set to ',kMaxAtm
-        write(kStdErr,*) 'in *RADNCE, iNatm = ',iNatm,' > kMaxAtm '
-        CALL DoSTOP
+      write(kStdErr,*) 'ERROR'
+      write(kStdErr,*) 'in kcartaparam.f90, kMaxAtm set to ',kMaxAtm
+      write(kStdErr,*) 'in *RADNCE, iNatm = ',iNatm,' > kMaxAtm '
+      CALL DoSTOP
     END IF
 
     IF ((kRTP == -10) .OR. (kRTP == -5) .OR. (kRTP == -6)) THEN
-        write (kStdWarn,*) 'Need to reset some parameters (set in .nml file) which were read from text LVLS/LBLRTM code'
-        write(kStdWarn,*) 'raPressStart(1) = ',raPressStart(1),' --> ',raRTP_TxtInput(1)
-        raPressStart(1) = raRTP_TxtInput(1)
-        IF (kSurfTemp <= 0) THEN
-            write(kStdWarn,*) 'kSurfTemp in nm_params <= 0 so IGNORE raTSurf in nm_radnce'
-            write(kStdWarn,*) 'raTSurf(1)      = ',raTSurf(1),' --> ',raRTP_TxtInput(2)
-            raTSurf(1)      = raRTP_TxtInput(2)
-        ELSEIF (kSurfTemp > 0) THEN
-            write(kStdWarn,*) 'kSurfTemp in nm_params >  0 so USE raTSurf from nm_radnce'
-            write(kStdWarn,*) 'ie ignore info from LBLRTM TAPE 5 and use raTSurf = ',raTSurf(1)
-            raTSurf(1)      = raTSurf(1)
-        END IF
-    !!! check the angle dangle bangle
-        IF ((kRTP == -5) .OR. (kRTP == -6)) THEN
+      write (kStdWarn,*) 'Need to reset some parameters (set in .nml file) which were read from text LVLS/LBLRTM code'
+      write(kStdWarn,*) 'raPressStart(1) = ',raPressStart(1),' --> ',raRTP_TxtInput(1)
+      raPressStart(1) = raRTP_TxtInput(1)
+      IF (kSurfTemp <= 0) THEN
+        write(kStdWarn,*) 'kSurfTemp in nm_params <= 0 so IGNORE raTSurf in nm_radnce'
+        write(kStdWarn,*) 'raTSurf(1)      = ',raTSurf(1),' --> ',raRTP_TxtInput(2)
+        raTSurf(1)      = raRTP_TxtInput(2)
+      ELSEIF (kSurfTemp > 0) THEN
+        write(kStdWarn,*) 'kSurfTemp in nm_params >  0 so USE raTSurf from nm_radnce'
+        write(kStdWarn,*) 'ie ignore info from LBLRTM TAPE 5 and use raTSurf = ',raTSurf(1)
+        raTSurf(1)      = raTSurf(1)
+      END IF
+      !!! check the angle dangle bangle
+      IF ((kRTP == -5) .OR. (kRTP == -6)) THEN
         !        print *, 'wah this is for testing, correct set raRTP_TxtInput(5) .GT. 90 for UPLOOK !!'
         !        print *, 'wah this is for testing, correct set raRTP_TxtInput(5) .LE. 90 for DNLOOK !!'
-            IF (raRTP_TxtInput(5) > 90) THEN
-                write(kStdWarn,*) 'raSatAngle(1) = ',raSatAngle(1),' --> ',abs(180.0 - raRTP_TxtInput(5)), &
+        IF (raRTP_TxtInput(5) > 90) THEN
+          write(kStdWarn,*) 'raSatAngle(1) = ',raSatAngle(1),' --> ',abs(180.0 - raRTP_TxtInput(5)), &
                 ' UPLOOK INSTR (downward going rad to satellite H == 0)'
-                write(kStdWarn,*) 'raSatHeight(1) = ',raSatHeight(1),' --> ',raRTP_TxtInput(4)*1000.0
-                raSatAngle(1) = abs(180.0 - raRTP_TxtInput(5))
-                raSatHeight(1) = raRTP_TxtInput(4)*1000.0
-                raPressStart(1) = raRTP_TxtInput(6)
-                raPressStop(1)  = raRTP_TxtInput(1)
-            ELSEIF (raRTP_TxtInput(5) <= 90) THEN
-                write(kStdWarn,*) 'raSatAngle(1) = ',raSatAngle(1),' --> ',raRTP_TxtInput(5), &
+          write(kStdWarn,*) 'raSatHeight(1) = ',raSatHeight(1),' --> ',raRTP_TxtInput(4)*1000.0
+          raSatAngle(1) = abs(180.0 - raRTP_TxtInput(5))
+          raSatHeight(1) = raRTP_TxtInput(4)*1000.0
+          raPressStart(1) = raRTP_TxtInput(6)
+          raPressStop(1)  = raRTP_TxtInput(1)
+        ELSEIF (raRTP_TxtInput(5) <= 90) THEN
+          write(kStdWarn,*) 'raSatAngle(1) = ',raSatAngle(1),' --> ',raRTP_TxtInput(5), &
                 ' DNLOOK INSTR (upward going rad to satellite H > 0)'
-                write(kStdWarn,*) 'raSatHeight(1) = ',raSatHeight(1),' --> ',raRTP_TxtInput(4)*1000.0
-                raSatAngle(1) = raRTP_TxtInput(5)
-                raSatHeight(1) = raRTP_TxtInput(4)*1000.0
-                raPressStart(1) = raRTP_TxtInput(1)
-                raPressStop(1)  = 0.005
-            END IF
+          write(kStdWarn,*) 'raSatHeight(1) = ',raSatHeight(1),' --> ',raRTP_TxtInput(4)*1000.0
+          raSatAngle(1) = raRTP_TxtInput(5)
+          raSatHeight(1) = raRTP_TxtInput(4)*1000.0
+          raPressStart(1) = raRTP_TxtInput(1)
+          raPressStop(1)  = 0.005
         END IF
+      END IF
     END IF
 
     iFake = -1
     IF ((iNatm < 1) .AND. ((KRTP == -10) .OR. (kRTP == -5) .OR. (kRTP == -6))) THEN
-        write(kStdErr,*) 'oh oh looks like kRTP = -10,-6 or -5 and you forgot to set nm_radnce'
-        write(kStdErr,*) 'trying to fake things so iNatm = +1'
-        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>'
-        write(kStdWarn,*) 'oh oh looks like kRTP = -10,-6 or -5 and you forgot to set nm_radnce'
-        write(kStdWarn,*) 'trying to fake things so iNatm = +1'
-        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>'
-        iNatm = 1
-        iFake = +1
+      write(kStdErr,*) 'oh oh looks like kRTP = -10,-6 or -5 and you forgot to set nm_radnce'
+      write(kStdErr,*) 'trying to fake things so iNatm = +1'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) 'oh oh looks like kRTP = -10,-6 or -5 and you forgot to set nm_radnce'
+      write(kStdWarn,*) 'trying to fake things so iNatm = +1'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>'
+      iNatm = 1
+      iFake = +1
     END IF
           
     iC = 0
 ! now loop iNatm times
     DO iC = 1,iNatm
-        iW = iaMPSetForRad(iC)
+      iW = iaMPSetForRad(iC)
 
-        IF ((iFake > 0) .AND. (raPressStart(iC) < raPressStop(iC))) THEN
-            write(kStdWarn,*) '  since we are "faking" an atm, do it for upwelling radiation (downlook intr)'
-            write(kStdWarn,*) '  swap raPressStart and raPressStop for atm ',iC
-            rJunk = raPressStart(iC)
-            raPressStart(iC) = raPressStop(iC)
-            raPressStop(iC) = rJunk
-        END IF
+      IF ((iFake > 0) .AND. (raPressStart(iC) < raPressStop(iC))) THEN
+        write(kStdWarn,*) '  since we are "faking" an atm, do it for upwelling radiation (downlook intr)'
+        write(kStdWarn,*) '  swap raPressStart and raPressStop for atm ',iC
+        rJunk = raPressStart(iC)
+        raPressStart(iC) = raPressStop(iC)
+        raPressStop(iC) = rJunk
+      END IF
               
-        rPressStart = raPressStart(iC)
-        rPressStop = raPressStop(iC)
-        rTbdy = raTSpace(iC)
-        rTSurf = raTSurf(iC)
-        rAngle = raSatAngle(iC)
-        rHeight = raSatHeight(iC)    !! in meters
+      rPressStart = raPressStart(iC)
+      rPressStop = raPressStop(iC)
+      rTbdy = raTSpace(iC)
+      rTSurf = raTSurf(iC)
+      rAngle = raSatAngle(iC)
+      rHeight = raSatHeight(iC)    !! in meters
 
-        IF (rTbdy > 3.0) THEN
-            write(kStdErr,*) 'Please reset temperature of deep space to <= 3 K'
-            CALL DoStop
-        END IF
+      IF (rTbdy > 3.0) THEN
+        write(kStdErr,*) 'Please reset temperature of deep space to <= 3 K'
+        CALL DoStop
+      END IF
 
-        write(kStdWarn,*) ' '
-        write(kStdWarn,*) 'Processing info for atm # ',iC,' of ',iNatm
-        CALL StartStopMP(iW,rPressStart,rPressStop,iC, &
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) 'Processing info for atm # ',iC,' of ',iNatm
+      CALL StartStopMP(iW,rPressStart,rPressStop,iC, &
         raPressLevels,iProfileLayers, &
         raFracTop,raFracBot,raaPrBdry,iStart,iStop)
 
-    ! figure out if the start/stop MixedPath numbers are legitimate
-        IF ((iStart > iNpmix) .OR. (iStart < 1) .OR. &
+      ! figure out if the start/stop MixedPath numbers are legitimate
+      IF ((iStart > iNpmix) .OR. (iStart < 1) .OR. &
         (iStop > iNpmix) .OR. (iStop < 1)) THEN
-            write(kStdErr,*)'Error while setting Start/Stop Mixed Path '
-            write(kStdErr,*)'numbers for atmosphere # ',iC
-            write(kStdErr,*)'Must be between 1 and ',iNpmix
-            write(kStdErr,*)'Instead they are ',iStart,iStop
-            CALL DoSTOP
-        END IF
+        write(kStdErr,*)'Error while setting Start/Stop Mixed Path '
+        write(kStdErr,*)'numbers for atmosphere # ',iC
+        write(kStdErr,*)'Must be between 1 and ',iNpmix
+        write(kStdErr,*)'Instead they are ',iStart,iStop
+        CALL DoSTOP
+      END IF
 
-    ! figure out how many radiating layers (or MPs) in this atmosphere, and check
-    ! that that it is less than or equal to kProfLayer
-        IF (iStop >= iStart) THEN
-            iNlay = (iStop-iStart+1)
-            iDirection = +1                           !down look instr
-        ELSE IF (iStop <= iStart) THEN
-            iNlay = (iStart-iStop+1)
-            iDirection = -1                           !up look instr
-        END IF
-        IF (iNLay > kProfLayer) THEN
-            write(kStdErr,*)'Error for atm # ',iC
-            write(kStdErr,*)'number of layers/atm must be <= ',kProfLayer
-            CALL DoSTOP
-        END IF
+      ! figure out how many radiating layers (or MPs) in this atmosphere, and check
+      ! that that it is less than or equal to kProfLayer
+      IF (iStop >= iStart) THEN
+        iNlay = (iStop-iStart+1)
+        iDirection = +1                           !down look instr
+      ELSE IF (iStop <= iStart) THEN
+        iNlay = (iStart-iStop+1)
+        iDirection = -1                           !up look instr
+      END IF
+      IF (iNLay > kProfLayer) THEN
+        write(kStdErr,*)'Error for atm # ',iC
+        write(kStdErr,*)'number of layers/atm must be <= ',kProfLayer
+        CALL DoSTOP
+      END IF
 
-    ! set the B.C.'s
-        raTSpace(iC) = rTbdy
-        raTSurf(iC) = FindSurfaceTemp(rPressStart,rPressStop, &
-        rTSurf,raProfileTemp, &
-        raPressLevels,iProfileLayers)
+      ! set the B.C.'s
+      raTSpace(iC) = rTbdy
+      raTSurf(iC) = FindSurfaceTemp(rPressStart,rPressStop,rTSurf,raProfileTemp, &
+          raPressLevels,iProfileLayers)
 
-        raSatAngle(iC) = rAngle
-        IF (abs(rAngle) <= 1.0e-4) THEN !nadir view
-            rHeight = -1.0
-            raSatHeight(iC) = -1.0
-        ELSE
-            raSatHeight(iC) = rHeight   !height in km
-        END IF
-        iaNumLayer(iC) = iNlay
+      raSatAngle(iC) = rAngle
+      IF (abs(rAngle) <= 1.0e-4) THEN !nadir view
+        rHeight = -1.0
+        raSatHeight(iC) = -1.0
+      ELSE
+        raSatHeight(iC) = rHeight   !height in km
+      END IF
+      iaNumLayer(iC) = iNlay
 
-        write(kStdWarn,*)'Atmosphere has ',iNlay,' layers'
-        write(kStdWarn,*)'BC : Tspace,Sat angle = ',rTbdy,rAngle
-        write(kStdWarn,*)'BC : Tsurface_Readin,TsurfaceAdjusted =  ', &
-        rTsurf,raTSurf(iC)
+      write(kStdWarn,*)'Atmosphere has ',iNlay,' layers'
+      write(kStdWarn,*)'BC : Tspace,Sat angle = ',rTbdy,rAngle
+      write(kStdWarn,*)'BC : Tsurface_Readin,TsurfaceAdjusted =  ',rTsurf,raTSurf(iC)
 
-    ! set the mixed path numbers for the current atmosphere, in direction of
-    ! radiation travel
-        DO iInt = 1,iNlay
-            iaaRadLayer(iC,iInt) = iStart+iDirection*(iInt-1)
-            iaStory(iInt) = iStart+iDirection*(iInt-1)
-        END DO
+      ! set the mixed path numbers for the current atmosphere, in direction of
+      ! radiation travel
+      DO iInt = 1,iNlay
+        iaaRadLayer(iC,iInt) = iStart+iDirection*(iInt-1)
+        iaStory(iInt) = iStart+iDirection*(iInt-1)
+      END DO
 
-    !        iaLow(iC) = iaStory(1)
-    !        iaHigh(iC) = iaStory(iNlay)
-    !        print *,'current atm ',iC,' has ',iNlay,' layers'
-    !        print *,'iStart,iDirection = ',iStart,iDirection
-    !        print *,'kMixFilRows = ',kMixFilRows
-    !        print *,'  iaLow(iC)=iaStory(1)',iaLow(iC),iaStory(1)
-    !        print *,'  iaHigh(iC)=iaStory(iNlay)',iaHigh(iC),iaStory(iNlay)
+      !        iaLow(iC) = iaStory(1)
+      !        iaHigh(iC) = iaStory(iNlay)
+      !        print *,'current atm ',iC,' has ',iNlay,' layers'
+      !        print *,'iStart,iDirection = ',iStart,iDirection
+      !        print *,'kMixFilRows = ',kMixFilRows
+      !        print *,'  iaLow(iC)=iaStory(1)',iaLow(iC),iaStory(1)
+      !        print *,'  iaHigh(iC)=iaStory(iNlay)',iaHigh(iC),iaStory(iNlay)
 
-    ! use the solar on/off, thermal on/off etc.
+      ! use the solar on/off, thermal on/off etc.
 
-    !      print *,'----> warning : set raKthermalangle = 53.3 (acos(3/5))'
-    !      raKThermalAngle(iC) = +53.13
-    !      print *,'----> so this will be used at all layers '
-    !      print *,'----> instead of varying the diffusivity angle'
-        kSolar = iaKSolar(iC)
-        kSolarAngle = raKSolarAngle(iC)
-        kSolarRefl = raKSolarRefl(iC)
-        kThermal = iaKThermal(iC)
-        kThermalAngle = raKThermalAngle(iC)
-        kThermalJacob = iakThermalJacob(iC)
+      !      print *,'----> warning : set raKthermalangle = 53.3 (acos(3/5))'
+      !      raKThermalAngle(iC) = +53.13
+      !      print *,'----> so this will be used at all layers '
+      !      print *,'----> instead of varying the diffusivity angle'
+      kSolar = iaKSolar(iC)
+      kSolarAngle = raKSolarAngle(iC)
+      kSolarRefl = raKSolarRefl(iC)
+      kThermal = iaKThermal(iC)
+      kThermalAngle = raKThermalAngle(iC)
+      kThermalJacob = iakThermalJacob(iC)
 
-    !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
-        raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
-        IF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
-            write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-            write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
-            write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-            write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
-            raKThermalAngle(iC) = +53.13
-        ELSEIF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary == 43)) THEN
-            write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-            write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
-            write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-            write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
-            raKThermalAngle(iC) = +53.13
+      !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
+      raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
+      IF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+      ELSEIF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary == 43)) THEN
+        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
+        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+        raKThermalAngle(iC) = +53.13
+        kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+        kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+      END IF
+      kThermalAngle = raKThermalAngle(iC)
+              
+      IF ((kSolar >= 0)  .AND. (kWhichScatterCode == 2)) THEN
+        write(kStdErr,*) 'Cannot have sun when using RTSPEC SCATTER'
+        CALL DoStop
+      END IF
+
+      IF ((kSolar >= 0)  .AND. (kWhichScatterCode == 4)) THEN
+        write(kStdErr,*) 'Cannot have sun with FIRST ORDER PERTURB SCATTER'
+        CALL DoStop
+      END IF
+
+      IF (kThermal == 0) THEN
+        IF (kThermalAngle  < 0) THEN
+          kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
+          IF ((kFlux > 0) .OR. (kTemperVary >= 4)) THEN
+            ! kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
             kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
             kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+          END IF
+        ELSE
+          kSetThermalAngle = +1   !use user specified angle everywhere
         END IF
-        kThermalAngle = raKThermalAngle(iC)
+      END IF
+      write(kStdWarn,*) 'in n_rad_jac_scat.f --> kFlux,kTemperVary,kSetThermalAngle = '
+      write(kStdWarn,*) kFlux,kTemperVary,kSetThermalAngle
               
-        IF ((kSolar >= 0)  .AND. (kWhichScatterCode == 2)) THEN
-            write(kStdErr,*) 'Cannot have sun when using RTSPEC SCATTER'
-            CALL DoStop
+      IF (iDirection > 0) THEN
+        !check things make sense for downlook instr
+        IF ((kSolarAngle < 0.0) .OR. (kSolarAngle > 90.0)) THEN
+          write(kStdWarn,*) 'Warning! Resetting Solar Angle from ',kSolarAngle,' to 150.0'
+          write(kStdWarn,*) 'and setting kSolar from ',kSolar, ' to -1 (solar = off)'
+          kSolar      = -1
+          kSolarAngle = 150.0
         END IF
-
-        IF ((kSolar >= 0)  .AND. (kWhichScatterCode == 4)) THEN
-            write(kStdErr,*) 'Cannot have sun with FIRST ORDER PERTURB SCATTER'
-            CALL DoStop
+        IF ((abs(kSolar) /= 1) .AND. (kSolar /= 0)) THEN
+          write(kStdErr,*)'need Solar on/off parameter = -1,0,+1'
+          CALL DoSTOP
         END IF
-
+        IF ((abs(kThermal) > 1) .AND. (kThermal /= 2)) THEN
+          write(kStdErr,*)'need Thermal on/off parameter = -1/0/1/2',kThermal
+          CALL DoSTOP
+        END IF
+        !set the diffusivity angle in degrees
         IF (kThermal == 0) THEN
-            IF (kThermalAngle  < 0) THEN
-                kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
-                IF ((kFlux > 0) .OR. (kTemperVary >= 4)) THEN
-                ! kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
-                    kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
-                    kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
-                END IF
-            ELSE
-                kSetThermalAngle = +1   !use user specified angle everywhere
-            END IF
+          IF (kThermalAngle > 90.0) THEN
+            write(kStdWarn,*)'Warning! Reset Diff Angle to acos(3/5)'
+            kThermalAngle = acos(3.0/5.0)*180.0/kPi
+          END IF
         END IF
-        write(kStdWarn,*) 'in n_rad_jac_scat.f --> kFlux,kTemperVary,kSetThermalAngle = '
-        write(kStdWarn,*) kFlux,kTemperVary,kSetThermalAngle
-              
-        IF (iDirection > 0) THEN
-        ! heck things make sense for downlook instr
-            IF ((kSolarAngle < 0.0) .OR. (kSolarAngle > 90.0)) THEN
-                write(kStdWarn,*) 'Warning! Resetting Solar Angle from ',kSolarAngle,' to 150.0'
-                write(kStdWarn,*) 'and setting kSolar from ',kSolar, ' to -1 (solar = off)'
-                kSolar      = -1
-                kSolarAngle = 150.0
-            END IF
-            IF ((abs(kSolar) /= 1) .AND. (kSolar /= 0)) THEN
-                write(kStdErr,*)'need Solar on/off parameter = -1,0,+1'
-                CALL DoSTOP
-            END IF
-        !          IF (abs(kThermal) .GT. 1) THEN
-        !            write(kStdErr,*)'need Thermal on/off parameter = -1/0/1',kThermal
-        !            CALL DoSTOP
-        !          END IF
-            IF ((abs(kThermal) > 1) .AND. (kThermal /= 2)) THEN
-                write(kStdErr,*)'need Thermal on/off parameter = -1/0/1/2',kThermal
-                CALL DoSTOP
-            END IF
-        ! et the diffusivity angle in degrees
-            IF (kThermal == 0) THEN
-                IF (kThermalAngle > 90.0) THEN
-                    write(kStdWarn,*)'Warning! Reset Diff Angle to acos(3/5)'
-                    kThermalAngle = acos(3.0/5.0)*180.0/kPi
-                END IF
-            END IF
-        END IF
+      END IF
 
-        IF ((kWhichScatterCode == 2) .OR. (kWhichScatterCode == 4)) THEN
-            kSolar = -1    !!!RTPSEC and FIRST ORDER PERTURB cannot handle sun
-            kSolarAngle = 0.0
-            kSolarRefl = 0.0
-        ! et all else to nonsense values for RTSPEC
-            kThermal = -1
-            kThermalAngle = 90.0
-            kThermal = 0
-            kThermalAngle = -45.0
-            kThermalJacob = -1
-        ELSEIF (kWhichScatterCode == 3) THEN
-        ! et to nonsense values for DISORT
+      IF ((kWhichScatterCode == 2) .OR. (kWhichScatterCode == 4)) THEN
+        kSolar = -1    !!!RTPSEC and FIRST ORDER PERTURB cannot handle sun
+        kSolarAngle = 0.0
+        kSolarRefl = 0.0
+        !set all else to nonsense values for RTSPEC
+        kThermal = -1
+        kThermalAngle = 90.0
+        kThermal = 0
+        kThermalAngle = -45.0
+        kThermalJacob = -1
+      ELSEIF (kWhichScatterCode == 3) THEN
+        !set to nonsense values for DISORT
         !!!kSolar = -1        !!!kCARTA nonscatter can handle this
         !!!kSolarAngle = 0.0  !!!kCARTA nonscatter can handle this
         !!!kSolarRefl = 0.0   !!!kCARTA nonscatter can handle this
-            kSolarRefl = 0.01
-            kThermal = -1
-            kThermalAngle = 90.0
-            kThermal = 0
-            kThermalAngle = -45.0
-            kThermalJacob = -1
-        ELSEIF (kWhichScatterCode == 1) THEN
-        ! et to nonsense values for TWOSTREAM
+        kSolarRefl = 0.01
+        kThermal = -1
+        kThermalAngle = 90.0
+        kThermal = 0
+        kThermalAngle = -45.0
+        kThermalJacob = -1
+      ELSEIF (kWhichScatterCode == 1) THEN
+        !set to nonsense values for TWOSTREAM
         !!!kSolar = -1        !!!kCARTA nonscatter can handle this
         !!!kSolarAngle = 0.0  !!!kCARTA nonscatter can handle this
         !!!kSolarRefl = 0.0   !!!kCARTA nonscatter can handle this
-            kThermal = 0
-            kThermalAngle = -45.0
-            kSolarRefl = 0.01
-            kThermalJacob = -1
-        ELSEIF (kWhichScatterCode == 5) THEN
-        ! et to nonsense values for PCLSAM
+        kThermal = 0
+        kThermalAngle = -45.0
+        kSolarRefl = 0.01
+        kThermalJacob = -1
+      ELSEIF (kWhichScatterCode == 5) THEN
+        !set to nonsense values for PCLSAM
         !!!kSolar = -1        !!!kCARTA nonscatter can handle this
         !!!kSolarAngle = 0.0  !!!kCARTA nonscatter can handle this
         !!!kSolarRefl = 0.0   !!!kCARTA nonscatter can handle this
-            kThermal = 0
-            kThermalAngle = -45.0
-            kSolarRefl = 0.01
-            kThermalJacob = -1
-        ! ELSE leave everything unchanged for clear sky kCARTA
-        END IF
+        kThermal = 0
+        kThermalAngle = -45.0
+        kSolarRefl = 0.01
+        kThermalJacob = -1
+      ! ELSE leave everything unchanged for clear sky kCARTA
+      END IF
 
-        iakSolar(iC) = kSolar
-        rakSolarAngle(iC) = kSolarAngle
-        rakSolarRefl(iC) = kSolarRefl
-        iakThermal(iC) = kThermal
-        rakThermalAngle(iC) = kThermalAngle
-        iakThermalJacob(iC) = kThermalJacob
-        iaSetThermalAngle(iC) = kSetThermalAngle
+      iakSolar(iC) = kSolar
+      rakSolarAngle(iC) = kSolarAngle
+      rakSolarRefl(iC) = kSolarRefl
+      iakThermal(iC) = kThermal
+      rakThermalAngle(iC) = kThermalAngle
+      iakThermalJacob(iC) = kThermalJacob
+      iaSetThermalAngle(iC) = kSetThermalAngle
 
-        FMT = '(A,I2,F10.4,F10.4)'
-        write(kStdWarn,FMT)'Solar on/off, Solar angle, Solar emiss = ', &
+      FMT = '(A,I2,F10.4,F10.4)'
+      write(kStdWarn,FMT)'Solar on/off, Solar angle, Solar emiss = ', &
         kSolar,kSOlarAngle,kSolarRefl
 
-        FMT = '(A,I2,F10.4,I2)'
-        write(kStdWarn,FMT)'Thermal on/off,Thermal angle,Thermal Jacob =', &
+      FMT = '(A,I2,F10.4,I2)'
+      write(kStdWarn,FMT)'Thermal on/off,Thermal angle,Thermal Jacob =', &
         kThermal,kThermalAngle,kThermalJacob
 
-    ! this reader allows for filenames, thus parsing in filename correctly
-        CALL ReadEmissivity(iC,raaaSetEmissivity,iaSetEms, &
+      ! this reader allows for filenames, thus parsing in filename correctly
+      CALL ReadEmissivity(iC,raaaSetEmissivity,iaSetEms, &
         caEmissivity,raSetEmissivity)
 
-        IF (kSolar >= 0) THEN
-            CALL ReadReflectivity(iC,raaaSetSolarRefl,iaSetSolarRefl, &
+      IF (kSolar >= 0) THEN
+        CALL ReadReflectivity(iC,raaaSetSolarRefl,iaSetSolarRefl, &
             caSetSolarRefl,raKSolarRefl, &
             raaaSetEmissivity,iaSetEms)
-        END IF
+      END IF
 
     END DO
 
@@ -513,137 +503,133 @@ CONTAINS
     iNumLinesRead = 0
 
 ! this if loop only executed if there is an error while reading the file
-    13 IF (iNumLinesRead > 0) THEN
-        iErr = 1
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+ 13 IF (iNumLinesRead > 0) THEN
+      iErr = 1
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
-    5010 FORMAT('Error in section ',A7,' of input file (solar refl files)')
+ 5010 FORMAT('Error in section ',A7,' of input file (solar refl files)')
 
     IF (caSetSolarRefl(iAtm) == 'NONESPECIFIED') THEN
-        IF (raSetSolarRefl(iAtm) < 0) THEN
+      IF (raSetSolarRefl(iAtm) < 0) THEN
         !! get the surface emissivity and use it
         !! set this dumbly!!!!!!!!!!!!!!
-            raSetSolarRefl(iAtm) = (1-raaaSetEmissivity(iAtm,1,2))/kPi
-            write(kStdWarn,*)'For atm # ',iAtm,' setting refl = (1-emiss)/pi'
-            iaSetSolarRefl(iAtm) = iaSetEms(iAtm)
-            write(kStdWarn,*) 'iI   f(cm-1)     ems      l(um)       rho'
-            write(kStdWarn,*) '-------------------------------------------'
-            DO iI = 1,iaSetEms(iAtm)
-            !!!first is wavenumber, second is point
-                raaaSetSolarRefl(iAtm,iI,1) = raaaSetEmissivity(iAtm,iI,1)
-                rX = (1-raaaSetEmissivity(iAtm,iI,2))/kPi
-                raaaSetSolarRefl(iAtm,iI,2) = rX
-                IF ((rX > 1) .OR. (rX < 0)) THEN
-                    write(kStdErr,*) 'need 0 <= rX <= 1 ... rX = ',rX
-                    CALL DoStop
-                END IF
-                write(kStdWarn,*) iI,raaaSetEmissivity(iAtm,iI,1), &
-                raaaSetEmissivity(iAtm,iI,2), &
-                &            10000/raaaSetEmissivity(iAtm,iI,1),raaaSetSolarRefl(iAtm,iI,2)
-            END DO
-        ELSEIF (raSetSolarRefl(iAtm) > 0) THEN
+        raSetSolarRefl(iAtm) = (1-raaaSetEmissivity(iAtm,1,2))/kPi
+        write(kStdWarn,*)'For atm # ',iAtm,' setting refl = (1-emiss)/pi'
+        iaSetSolarRefl(iAtm) = iaSetEms(iAtm)
+        write(kStdWarn,*) 'iI   f(cm-1)     ems      l(um)       rho'
+        write(kStdWarn,*) '-------------------------------------------'
+        DO iI = 1,iaSetEms(iAtm)
+          !!!first is wavenumber, second is point
+          raaaSetSolarRefl(iAtm,iI,1) = raaaSetEmissivity(iAtm,iI,1)
+          rX = (1-raaaSetEmissivity(iAtm,iI,2))/kPi
+          raaaSetSolarRefl(iAtm,iI,2) = rX
+          IF ((rX > 1) .OR. (rX < 0)) THEN
+            write(kStdErr,*) 'need 0 <= rX <= 1 ... rX = ',rX
+            CALL DoStop
+          END IF
+          write(kStdWarn,*) iI,raaaSetEmissivity(iAtm,iI,1), &
+                raaaSetEmissivity(iAtm,iI,2),10000/raaaSetEmissivity(iAtm,iI,1),raaaSetSolarRefl(iAtm,iI,2)
+        END DO
+      ELSEIF (raSetSolarRefl(iAtm) > 0) THEN
         !! user has set a constant value in nm_radnce, use this!!!!!!!!!
-            write(kStdWarn,*)'For atm # ',iAtm,' using user set refl'
-            iaSetSolarRefl(iAtm) = iaSetEms(iAtm)
-            write(kStdWarn,*) 'iI   f(cm-1)     ems      l(um)       rho'
-            write(kStdWarn,*) '-------------------------------------------'
-            DO iI = 1,iaSetEms(iAtm)
-            !!!first is wavenumber, second is point
-                raaaSetSolarRefl(iAtm,iI,1) = raaaSetEmissivity(iAtm,iI,1)
-                rX = raSetSolarRefl(iAtm)
-                raaaSetSolarRefl(iAtm,iI,2) = rX
-                IF ((rX > 1) .OR. (rX < 0)) THEN
-                    write(kStdErr,*) 'need 0 <= rX <= 1 ... rX = ',rX
-                    CALL DoStop
-                END IF
-                write(kStdWarn,*) iI,raaaSetEmissivity(iAtm,iI,1), &
-                raaaSetEmissivity(iAtm,iI,2), &
-                &            10000/raaaSetEmissivity(iAtm,iI,1),raaaSetSolarRefl(iAtm,iI,2)
-            END DO
-        END IF
+        write(kStdWarn,*)'For atm # ',iAtm,' using user set refl'
+        iaSetSolarRefl(iAtm) = iaSetEms(iAtm)
+        write(kStdWarn,*) 'iI   f(cm-1)     ems      l(um)       rho'
+        write(kStdWarn,*) '-------------------------------------------'
+        DO iI = 1,iaSetEms(iAtm)
+          !!!first is wavenumber, second is point
+          raaaSetSolarRefl(iAtm,iI,1) = raaaSetEmissivity(iAtm,iI,1)
+          rX = raSetSolarRefl(iAtm)
+          raaaSetSolarRefl(iAtm,iI,2) = rX
+          IF ((rX > 1) .OR. (rX < 0)) THEN
+            write(kStdErr,*) 'need 0 <= rX <= 1 ... rX = ',rX
+            CALL DoStop
+          END IF
+          write(kStdWarn,*) iI,raaaSetEmissivity(iAtm,iI,1), &
+                raaaSetEmissivity(iAtm,iI,2),10000/raaaSetEmissivity(iAtm,iI,1),raaaSetSolarRefl(iAtm,iI,2)
+        END DO
+      END IF
     ELSE
-    ! get the name of the file in which the emissivity parameters are
-        caE = caSetSolarRefl(iAtm)
-        DO iI = 1,130
-            caEmsFile = ' '
-        END DO
-        DO iI = 1,80
-            caEmsFile(iI:iI) = caE(iI:iI)
-        END DO
+      ! get the name of the file in which the emissivity parameters are
+      caE = caSetSolarRefl(iAtm)
+      DO iI = 1,130
+        caEmsFile = ' '
+      END DO
+      DO iI = 1,80
+        caEmsFile(iI:iI) = caE(iI:iI)
+      END DO
 
-        CALL rightpad130(caEmsFile)
-        write(kStdWarn,*)'SolarRefl file to be read is  : '
-        write(kStdWarn,*)caEmsFile
+      CALL rightpad130(caEmsFile)
+      write(kStdWarn,*)'SolarRefl file to be read is  : '
+      write(kStdWarn,*)caEmsFile
 
-        iIOUN3 = kTempUnit
-        OPEN(UNIT=iIOun3,FILE=caEmsFile,STATUS='OLD',FORM='FORMATTED', &
-        IOSTAT=iErrIO)
-        IF (iErrIO /= 0) THEN
-            iErr = 1
-            WRITE(kStdErr,1070) iErrIO, caEmsFile
-            1070 FORMAT('ERROR! number ',I5,' opening SolarRefl file ' &
-            ,/,A130)
-            CALL DoSTOP
-        ENDIF
-        kTempUnitOpen = 1
+ 1070 FORMAT('ERROR! number ',I5,' opening SolarRefl file ',/,A130)
+      iIOUN3 = kTempUnit
+      OPEN(UNIT=iIOun3,FILE=caEmsFile,STATUS='OLD',FORM='FORMATTED',IOSTAT=iErrIO)
+      IF (iErrIO /= 0) THEN
+        iErr = 1
+        WRITE(kStdErr,1070) iErrIO, caEmsFile
+        CALL DoSTOP
+      ENDIF
+      kTempUnitOpen = 1
 
-    ! if no error in opening the file, then read it in
-    ! it should be in the format
-    ! n = INT = number of wavenumber points >= 2
-    ! r1start       eps1
-    ! r2start       eps2
-    !    ..           ..           ..
-    ! rNstart       epsN
+      ! if no error in opening the file, then read it in
+      ! it should be in the format
+      ! n = INT = number of wavenumber points >= 2
+      ! r1start       eps1
+      ! r2start       eps2
+      !    ..           ..           ..
+      ! rNstart       epsN
 
-        READ (iIOUN3,*) iaSetSolarRefl(iAtm)
-        IF (iaSetSolarRefl(iAtm) < 2) THEN
-            write(kStdErr,*)'Need > 1 point to interpolate between'
-            write(kStdErr,*)'Please edit emissivity file and retry'
-            CALL DoSTOP
+      READ (iIOUN3,*) iaSetSolarRefl(iAtm)
+      IF (iaSetSolarRefl(iAtm) < 2) THEN
+        write(kStdErr,*)'Need > 1 point to interpolate between'
+        write(kStdErr,*)'Please edit emissivity file and retry'
+        CALL DoSTOP
+      END IF
+      IF (iaSetSolarRefl(iAtm) > kEmsRegions) THEN
+        write(kStdErr,*)'Cannot set so many emiss regions. Change'
+        write(kStdErr,*)'kEmsRegions in kcartaparam.f90 and recompile'
+        CALL DoSTOP
+      END IF
+
+      DO iI = 1,iaSetSolarRefl(iAtm)
+        READ (iIOUN3,*) r1,rEms
+        write(kStdWarn,*) r1,rEms
+        raaaSetSolarRefl(iAtm,iI,1) = r1
+        raaaSetSolarRefl(iAtm,iI,2) = rEms
+        IF ((rEms < 0.0) .OR. (rEms > 1.0)) THEN
+           write(kStdErr,*)'Need emissivity between 0 and 1'
+           write(kStdErr,*)'check your emissivity values in file'
+           CALL DoSTOP
         END IF
-        IF (iaSetSolarRefl(iAtm) > kEmsRegions) THEN
-            write(kStdErr,*)'Cannot set so many emiss regions. Change'
-            write(kStdErr,*)'kEmsRegions in kcartaparam.f90 and recompile'
-            CALL DoSTOP
-        END IF
-
-        DO iI = 1,iaSetSolarRefl(iAtm)
-            READ (iIOUN3,*) r1,rEms
-            write(kStdWarn,*) r1,rEms
-            raaaSetSolarRefl(iAtm,iI,1) = r1
-            raaaSetSolarRefl(iAtm,iI,2) = rEms
-            IF ((rEms < 0.0) .OR. (rEms > 1.0)) THEN
-                write(kStdErr,*)'Need emissivity between 0 and 1'
-                write(kStdErr,*)'check your emissivity values in file'
-                CALL DoSTOP
-            END IF
-        END DO
-        CLOSE(iIOUN3)
-        kTempUnitOpen = -1
-    !!!!set this dumbly!!!!!!!!!!!!!!
-        raSetSolarRefl(iAtm) = raaaSetSolarRefl(iAtm,1,2)
+      END DO
+      CLOSE(iIOUN3)
+      kTempUnitOpen = -1
+      !!!!set this dumbly!!!!!!!!!!!!!!
+      raSetSolarRefl(iAtm) = raaaSetSolarRefl(iAtm,1,2)
     END IF
 
-!!! if necessary, flip arrays so that we have increasing wavenumbers
+    !!! if necessary, flip arrays so that we have increasing wavenumbers
     iSwap = -1
     DO iI = 1,iaSetSolarRefl(iAtm)
-        raX(iI) = raaaSetSolarRefl(iAtm,iI,1)
-        raY(iI) = raaaSetSolarRefl(iAtm,iI,2)
+      raX(iI) = raaaSetSolarRefl(iAtm,iI,1)
+      raY(iI) = raaaSetSolarRefl(iAtm,iI,2)
     END DO
     IF (raX(1) > raX(2)) THEN
-        DO iI = 1,iaSetSolarRefl(iAtm)
-            raSwap(iI) = raX(iaSetSolarRefl(iAtm)-iI+1)
-        END DO
-        DO iI = 1,iaSetSolarRefl(iAtm)
-            raaaSetSolarRefl(iAtm,iI,1) = raSwap(iI)
-        END DO
-        DO iI = 1,iaSetSolarRefl(iAtm)
-            raSwap(iI) = raY(iaSetSolarRefl(iAtm)-iI+1)
-        END DO
-        DO iI = 1,iaSetSolarRefl(iAtm)
-            raaaSetSolarRefl(iAtm,iI,2) = raSwap(iI)
-        END DO
+      DO iI = 1,iaSetSolarRefl(iAtm)
+        raSwap(iI) = raX(iaSetSolarRefl(iAtm)-iI+1)
+      END DO
+      DO iI = 1,iaSetSolarRefl(iAtm)
+        raaaSetSolarRefl(iAtm,iI,1) = raSwap(iI)
+      END DO
+      DO iI = 1,iaSetSolarRefl(iAtm)
+        raSwap(iI) = raY(iaSetSolarRefl(iAtm)-iI+1)
+      END DO
+      DO iI = 1,iaSetSolarRefl(iAtm)
+        raaaSetSolarRefl(iAtm,iI,2) = raSwap(iI)
+      END DO
     END IF
 
     RETURN
@@ -678,119 +664,118 @@ CONTAINS
     iNumLinesRead = 0
 
 ! this if loop only executed if there is an error while reading the file
-    13 IF (iNumLinesRead > 0) THEN
-        iErr = 1
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+ 13 IF (iNumLinesRead > 0) THEN
+      iErr = 1
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
     5010 FORMAT('Error in section ',A7,' of input file (emissivity files)')
 
     IF (raSetEmissivity(iAtm) > 0.0) THEN
-    ! get the constant emissivity
-        rDefault = raSetEmissivity(iAtm)
-        IF (rDefault < 0.0) THEN
-            write(kStdErr,*)'Need emissivity > 0 and < 1'
-            write(kStdErr,*)'check your constant emissivity value in nm_radnce'
-            CALL DoSTOP
-        ELSEIF ((rDefault > 1.0) .OR. (rDefault >= 0 .AND. rDefault <= 1e-5)) THEN
-            write(kStdWarn,*)'Need emissivity > 0 and < 1'
-            write(kStdWarn,*)'assuming LIMB VIEW : emissivity = 0'
-            iaLimb(iAtm) = +1
-            rDefault = 0.0
-        END IF
+      ! get the constant emissivity
+      rDefault = raSetEmissivity(iAtm)
+      IF (rDefault < 0.0) THEN
+        write(kStdErr,*)'Need emissivity > 0 and < 1'
+        write(kStdErr,*)'check your constant emissivity value in nm_radnce'
+        CALL DoSTOP
+      ELSEIF ((rDefault > 1.0) .OR. (rDefault >= 0 .AND. rDefault <= 1e-5)) THEN
+        write(kStdWarn,*)'Need emissivity > 0 and < 1'
+        write(kStdWarn,*)'assuming LIMB VIEW : emissivity = 0'
+        iaLimb(iAtm) = +1
+        rDefault = 0.0
+      END IF
 
-        iaSetEms(iAtm) = 2
-        raaaSetEmissivity(iAtm,1,1) = kaMinFr(1)-0.1
-        raaaSetEmissivity(iAtm,1,2) = rDefault
-        raaaSetEmissivity(iAtm,2,1) = kaMaxFr(kW)+0.1
-        raaaSetEmissivity(iAtm,2,2) = rDefault
-        write(kStdWarn,*)'set emiss value ',rDefault,'across freq rng'
+      iaSetEms(iAtm) = 2
+      raaaSetEmissivity(iAtm,1,1) = kaMinFr(1)-0.1
+      raaaSetEmissivity(iAtm,1,2) = rDefault
+      raaaSetEmissivity(iAtm,2,1) = kaMaxFr(kW)+0.1
+      raaaSetEmissivity(iAtm,2,2) = rDefault
+      write(kStdWarn,*)'set emiss value ',rDefault,'across freq rng'
                 
     ELSE
-    ! get the name of the file in which the emissivity parameters are
-        caE = caEmissivity(iAtm)
-        DO iI = 1,130
-            caEmsFile = ' '
-        END DO
-        DO iI = 1,80
-            caEmsFile(iI:iI) = caE(iI:iI)
-        END DO
+      ! get the name of the file in which the emissivity parameters are
+      caE = caEmissivity(iAtm)
+      DO iI = 1,130
+        caEmsFile = ' '
+      END DO
+      DO iI = 1,80
+        caEmsFile(iI:iI) = caE(iI:iI)
+      END DO
 
-        CALL rightpad130(caEmsFile)
-        write(kStdWarn,*) 'Emissivity file to be read is  : '
-        write(kStdWarn,*) caEmsFile
+      CALL rightpad130(caEmsFile)
+      write(kStdWarn,*) 'Emissivity file to be read is  : '
+      write(kStdWarn,*) caEmsFile
 
-        iIOUN3 = kTempUnit
-        OPEN(UNIT=iIOun3,FILE=caEmsFile,STATUS='OLD',FORM='FORMATTED', &
-        IOSTAT=iErrIO)
-        IF (iErrIO /= 0) THEN
-            iErr = 1
-            WRITE(kStdErr,1070) iErrIO, caEmsFile
-            1070 FORMAT('ERROR! number ',I5,' opening Emissivity file ',/,A130)
-            CALL DoSTOP
-        ENDIF
-        kTempUnitOpen = 1
+ 1070 FORMAT('ERROR! number ',I5,' opening Emissivity file ',/,A130)
+      iIOUN3 = kTempUnit
+      OPEN(UNIT=iIOun3,FILE=caEmsFile,STATUS='OLD',FORM='FORMATTED',IOSTAT=iErrIO)
+      IF (iErrIO /= 0) THEN
+        iErr = 1
+        WRITE(kStdErr,1070) iErrIO, caEmsFile
+        CALL DoSTOP
+      ENDIF
+      kTempUnitOpen = 1
 
-    ! if no error in opening the file, then read it in
-    ! it should be in the format
-    ! n = INT = number of wavenumber points >= 2
-    ! r1start       eps1
-    ! r2start       eps2
-    !    ..           ..           ..
-    ! rNstart       epsN
+      ! if no error in opening the file, then read it in
+      ! it should be in the format
+      ! n = INT = number of wavenumber points >= 2
+      ! r1start       eps1
+      ! r2start       eps2
+      !    ..           ..           ..
+      ! rNstart       epsN
 
-        READ (iIOUN3,*) iaSetEms(iAtm)
-        IF (iaSetEms(iAtm) < 2) THEN
-            write(kStdErr,*)'Need > 1 point to interpolate between'
-            write(kStdErr,*)'Please edit emissivity file and retry'
-            CALL DoSTOP
+      READ (iIOUN3,*) iaSetEms(iAtm)
+      IF (iaSetEms(iAtm) < 2) THEN
+        write(kStdErr,*)'Need > 1 point to interpolate between'
+        write(kStdErr,*)'Please edit emissivity file and retry'
+        CALL DoSTOP
+      END IF
+      IF (iaSetEms(iAtm) > kEmsRegions) THEN
+        write(kStdErr,*)'Cannot set so many emiss regions. Change'
+        write(kStdErr,*)'kEmsRegions in kcartaparam.f90 and recompile'
+        CALL DoSTOP
+      END IF
+
+      DO iI = 1,iaSetEms(iAtm)
+        READ (iIOUN3,*) r1,rEms
+        raaaSetEmissivity(iAtm,iI,1) = r1
+        raaaSetEmissivity(iAtm,iI,2) = rEms
+        IF ((rEms < 0.0) .OR. (rEms > 1.0)) THEN
+          write(kStdErr,*)'Need emissivity between 0 and 1'
+          write(kStdErr,*)'check your emissivity values in file'
+          CALL DoSTOP
         END IF
-        IF (iaSetEms(iAtm) > kEmsRegions) THEN
-            write(kStdErr,*)'Cannot set so many emiss regions. Change'
-            write(kStdErr,*)'kEmsRegions in kcartaparam.f90 and recompile'
-            CALL DoSTOP
-        END IF
-
-        DO iI = 1,iaSetEms(iAtm)
-            READ (iIOUN3,*) r1,rEms
-            raaaSetEmissivity(iAtm,iI,1) = r1
-            raaaSetEmissivity(iAtm,iI,2) = rEms
-            IF ((rEms < 0.0) .OR. (rEms > 1.0)) THEN
-                write(kStdErr,*)'Need emissivity between 0 and 1'
-                write(kStdErr,*)'check your emissivity values in file'
-                CALL DoSTOP
-            END IF
-        END DO
-        CLOSE(iIOUN3)
-        kTempUnitOpen = -1
+      END DO
+      CLOSE(iIOUN3)
+      kTempUnitOpen = -1
     END IF
 
 !!! if necessary, flip arrays so that we have increasing wavenumbers
     iSwap = -1
     DO iI = 1,iaSetEms(iAtm)
-        raX(iI) = raaaSetEmissivity(iAtm,iI,1)
-        raY(iI) = raaaSetEmissivity(iAtm,iI,2)
+      raX(iI) = raaaSetEmissivity(iAtm,iI,1)
+      raY(iI) = raaaSetEmissivity(iAtm,iI,2)
     END DO
     IF (raX(1) > raX(2)) THEN
-        iSwap = +1
-        DO iI = 1,iaSetEms(iAtm)
-            raSwap(iI)  =  raX(iaSetEms(iAtm)-iI+1)
-        END DO
-        DO iI = 1,iaSetEms(iAtm)
-            raaaSetEmissivity(iAtm,iI,1) = raSwap(iI)
-        END DO
-        DO iI = 1,iaSetEms(iAtm)
-            raSwap(iI) = raY(iaSetEms(iAtm)-iI+1)
-        END DO
-        DO iI = 1,iaSetEms(iAtm)
-            raaaSetEmissivity(iAtm,iI,2) = raSwap(iI)
-        END DO
+      iSwap = +1
+      DO iI = 1,iaSetEms(iAtm)
+        raSwap(iI)  =  raX(iaSetEms(iAtm)-iI+1)
+      END DO
+      DO iI = 1,iaSetEms(iAtm)
+        raaaSetEmissivity(iAtm,iI,1) = raSwap(iI)
+      END DO
+      DO iI = 1,iaSetEms(iAtm)
+        raSwap(iI) = raY(iaSetEms(iAtm)-iI+1)
+      END DO
+      DO iI = 1,iaSetEms(iAtm)
+        raaaSetEmissivity(iAtm,iI,2) = raSwap(iI)
+      END DO
     END IF
 
     DO iI = 1,iaSetEms(iAtm)
-        r1   = raaaSetEmissivity(iAtm,iI,1)
-        rEms = raaaSetEmissivity(iAtm,iI,2)
-        write(kStdWarn,*) r1,rEms
+      r1   = raaaSetEmissivity(iAtm,iI,1)
+      rEms = raaaSetEmissivity(iAtm,iI,2)
+      write(kStdWarn,*) r1,rEms
     END DO
 
     RETURN
@@ -836,90 +821,90 @@ CONTAINS
 
 ! the first two IF statements assume instrument looks down
     IF ((kRTP < 0) .OR. (kRTP == +2)) THEN
-    !!!using the usual kLAYERS kProfLayer stuff
-        IF (rPressStart >= rPressStop) THEN
-            IF (rPressStop < raPressLevels(kProfLayer+1)) THEN
-            ! adiation going UPTO top of atmos
-                rPressStop = raPressLevels(kProfLayer+1)+delta
-            ! et top (stop) level as kProfLayer
-                rPressStop = raPressLevels(kProfLayer+1)
-            ! et top (stop) level as kProfLayer
-                write(kStdWarn,*) 'Reset pressure of top level to ',rPressStop
-            END IF
-            IF (rPressStart > raPressLevels(iLowest)) THEN
-            ! adiation going below Dead Sea
-                rPressStart = raPressLevels(iLowest)-delta
-            ! et bottom (start) level as iLowest
-                rPressStart = raPressLevels(iLowest)
-            ! et bottom (start) level as iLowest
-                write(kStdWarn,*) 'Reset pressure of bot level to',rPressStart
-            END IF
+      !!!using the usual kLAYERS kProfLayer stuff
+      IF (rPressStart >= rPressStop) THEN
+        IF (rPressStop < raPressLevels(kProfLayer+1)) THEN
+          !radiation going UPTO top of atmos
+          rPressStop = raPressLevels(kProfLayer+1)+delta
+          !set top (stop) level as kProfLayer
+          rPressStop = raPressLevels(kProfLayer+1)
+          !set top (stop) level as kProfLayer
+          write(kStdWarn,*) 'Reset pressure of top level to ',rPressStop
         END IF
+        IF (rPressStart > raPressLevels(iLowest)) THEN
+          !radiation going below Dead Sea
+          rPressStart = raPressLevels(iLowest)-delta
+          !set bottom (start) level as iLowest
+          rPressStart = raPressLevels(iLowest)
+          !set bottom (start) level as iLowest
+          write(kStdWarn,*) 'Reset pressure of bot level to',rPressStart
+        END IF
+      END IF
 
-    ! the next two IF statements assume instrument looks up
-        IF (rPressStart <= rPressStop) THEN
-            IF (rPressStart < raPressLevels(kProfLayer+1)) THEN
-            ! adiation going DOWN from atmtop
-                rPressStart = raPressLevels(kProfLayer+1)+delta
-            ! et top (start) level as kProfLayer
-                rPressStart = raPressLevels(kProfLayer+1)
-            ! et top (start) level as kProfLayer
-                write(kStdWarn,*)'Reset pressure of top level to ',rPressStart
-            END IF
-            IF (rPressStop > raPressLevels(iLowest)) THEN
-            ! adiation going below Dead Sea
-                rPressStop = raPressLevels(iLowest)-delta
-            ! et bottom (stop) level as iLowest
-                rPressStop = raPressLevels(iLowest)
-            ! et bottom (stop) level as iLowest
-                write(kStdWarn,*)'Reset press of bottom level to ',rPressStop
-            END IF
+      ! the next two IF statements assume instrument looks up
+      IF (rPressStart <= rPressStop) THEN
+        IF (rPressStart < raPressLevels(kProfLayer+1)) THEN
+          !radiation going DOWN from atmtop
+          rPressStart = raPressLevels(kProfLayer+1)+delta
+          !set top (start) level as kProfLayer
+          rPressStart = raPressLevels(kProfLayer+1)
+          !set top (start) level as kProfLayer
+          write(kStdWarn,*)'Reset pressure of top level to ',rPressStart
         END IF
+        IF (rPressStop > raPressLevels(iLowest)) THEN
+          !radiation going below Dead Sea
+          rPressStop = raPressLevels(iLowest)-delta
+          !set bottom (stop) level as iLowest
+          rPressStop = raPressLevels(iLowest)
+          !set bottom (stop) level as iLowest
+          write(kStdWarn,*)'Reset press of bottom level to ',rPressStop
+        END IF
+      END IF
 
     ELSE
-    !!!using the usual RTP stuff
-        IF (iProfileLayers /= (kRTPTop+1-kRTPBot)) THEN
-            write (kStdErr,*) 'In StartStopMP, there is discrepancy between'
-            write (kStdErr,*) 'kRTPTop,kRTPBot and iProfileLayers'
-            write (kStdErr,*) kRTPTop,kRTPBot,iProfileLayers
-            CALL DOStop
-        END IF
+      !!!using the usual RTP stuff
+      IF (iProfileLayers /= (kRTPTop+1-kRTPBot)) THEN
+        write (kStdErr,*) 'In StartStopMP, there is discrepancy between'
+        write (kStdErr,*) 'kRTPTop,kRTPBot and iProfileLayers'
+        write (kStdErr,*) kRTPTop,kRTPBot,iProfileLayers
+        CALL DOStop
+      END IF
 
-        IF (rPressStart >= rPressStop) THEN
-            IF (rPressStop < raPressLevels(kRTPTop+1)) THEN
-            ! adiation going UPTO top of atmos
-                rPressStop = raPressLevels(kRTPTop+1)+delta
-            ! et top (stop) level as kProfLayer
-                rPressStop = raPressLevels(kRTPTop+1)
-            ! et top (stop) level as kProfLayer
-                write(kStdWarn,*) 'Reset pressure of top level to ',rPressStop
-            END IF
-            IF (rPressStart > raPressLevels(kRTPBot)) THEN
-            ! ad going below Dead Sea
-                rPressStart = raPressLevels(kRTPBot)-delta !set bottom (start) level
-                rPressStart = raPressLevels(kRTPBot)       !set bottom (start) level
-                write(kStdWarn,*) 'Reset pressure of bot level to',rPressStart
-            END IF
+      IF (rPressStart >= rPressStop) THEN
+        IF (rPressStop < raPressLevels(kRTPTop+1)) THEN
+          !radiation going UPTO top of atmos
+          rPressStop = raPressLevels(kRTPTop+1)+delta
+          !set top (stop) level as kProfLayer
+          rPressStop = raPressLevels(kRTPTop+1)
+          !set top (stop) level as kProfLayer
+          write(kStdWarn,*) 'Reset pressure of top level to ',rPressStop
         END IF
+        IF (rPressStart > raPressLevels(kRTPBot)) THEN
+          !rad going below Dead Sea
+          rPressStart = raPressLevels(kRTPBot)-delta !set bottom (start) level
+          rPressStart = raPressLevels(kRTPBot)       !set bottom (start) level
+          write(kStdWarn,*) 'Reset pressure of bot level to',rPressStart
+        END IF
+      END IF
 
-    ! the next two IF statements assume instrument looks up
-        IF (rPressStart <= rPressStop) THEN
-            IF (rPressStart < raPressLevels(kRTPTop+1)) THEN
-            ! adiation going DOWN from atmtop
-                rPressStart = raPressLevels(kRTPTop+1)+delta
-            ! et top (start) level as kProfLayer
-                rPressStart = raPressLevels(kRTPTop+1)
-            ! et top (start) level as kProfLayer
-                write(kStdWarn,*)'Reset pressure of top level to ',rPressStart
-            END IF
-            IF (rPressStop > raPressLevels(iLowest)) THEN
-            ! adiation going below Dead Sea
-                rPressStop = raPressLevels(kRTPBot)-delta
-            ! et bottom (stop) level as iLowest
-                rPressStop = raPressLevels(kRTPBot)
-            ! et bottom (stop) level as iLowest
-                write(kStdWarn,*)'Reset press of bottom level to ',rPressStop
-            END IF
+      ! the next two IF statements assume instrument looks up
+      IF (rPressStart <= rPressStop) THEN
+        IF (rPressStart < raPressLevels(kRTPTop+1)) THEN
+          !radiation going DOWN from atmtop
+          rPressStart = raPressLevels(kRTPTop+1)+delta
+          !set top (start) level as kProfLayer
+          rPressStart = raPressLevels(kRTPTop+1)
+          !set top (start) level as kProfLayer
+          write(kStdWarn,*)'Reset pressure of top level to ',rPressStart
+        END IF
+        IF (rPressStop > raPressLevels(iLowest)) THEN
+          !radiation going below Dead Sea
+          rPressStop = raPressLevels(kRTPBot)-delta
+          !set bottom (stop) level as iLowest
+          rPressStop = raPressLevels(kRTPBot)
+          !set bottom (stop) level as iLowest
+          write(kStdWarn,*)'Reset press of bottom level to ',rPressStop
+          END IF
         END IF
 
     END IF
@@ -929,27 +914,26 @@ CONTAINS
     iG = iLowest
     iL = iLowest+1
     20 CONTINUE
-    IF ((raPressLevels(iG) >= rPressStart) .AND. &
-    (raPressLevels(iL) < rPressStart)) THEN
-        iTemp = 1
-        iStart = iG
+    IF ((raPressLevels(iG) >= rPressStart) .AND. (raPressLevels(iL) < rPressStart)) THEN
+      iTemp = 1
+      iStart = iG
     END IF
     IF ((iTemp < 0) .AND. (iL <= kProfLayer)) THEN
-        iG = iG+1
-        iL = iL+1
-        GO TO 20
+      iG = iG+1
+      iL = iL+1
+      GO TO 20
     END IF
     IF (iTemp < 0) THEN
-        IF (rPressStart == raPressLevels(kProfLayer+1)) THEN
-            iG = kProfLayer
-            iL = kProfLayer+1
-            iStart = iG
-            iTemp = 1
-        ELSE
-            write(kStdErr,*)'Could not change specified start pressure to'
-            write(kStdErr,*)'layer#. Start pressure = ',rPressStart
-            CALL DoSTOP
-        END IF
+      IF (rPressStart == raPressLevels(kProfLayer+1)) THEN
+        iG = kProfLayer
+        iL = kProfLayer+1
+        iStart = iG
+        iTemp = 1
+      ELSE
+        write(kStdErr,*)'Could not change specified start pressure to'
+        write(kStdErr,*)'layer#. Start pressure = ',rPressStart
+        CALL DoSTOP
+      END IF
     END IF
 
 ! find the pressure level/ layer that the stop pressure corresponds to
@@ -957,80 +941,75 @@ CONTAINS
     iG = iLowest
     iL = iLowest + 1
     25 CONTINUE
-    IF ((raPressLevels(iG) >= rPressStop) .AND. &
-    (raPressLevels(iL) < rPressStop)) THEN
-        iTemp = 1
-        iStop = iG
+    IF ((raPressLevels(iG) >= rPressStop) .AND. (raPressLevels(iL) < rPressStop)) THEN
+      iTemp = 1
+      iStop = iG
     END IF
     IF ((iTemp < 0) .AND. (iL <= kProfLayer)) THEN
-        iG = iG+1
-        iL = iL+1
-        GO TO 25
+      iG = iG+1
+      iL = iL+1
+      GO TO 25
     END IF
     IF (iTemp < 0) THEN
-        IF (rPressStop == raPressLevels(kProfLayer+1)) THEN
-            iG  =  kProfLayer
-            iL = kProfLayer+1
-            iStop = iG
-            iTemp = 1
-        ELSE
-            write(kStdErr,*)'Could not change specified stop pressure to '
-            write(kStdErr,*)'layer#. Stop pressure = ',rPressStop
-            CALL DoSTOP
-        END IF
+      IF (rPressStop == raPressLevels(kProfLayer+1)) THEN
+        iG  =  kProfLayer
+        iL = kProfLayer+1
+        iStop = iG
+        iTemp = 1
+      ELSE
+        write(kStdErr,*)'Could not change specified stop pressure to '
+        write(kStdErr,*)'layer#. Stop pressure = ',rPressStop
+        CALL DoSTOP
+      END IF
     END IF
 
 ! now we have to set the fractions!!!
     IF (iStart <= iStop) THEN    !radiation going upward
-    ! irst set top layer frac, then bottom layer frac
-        rFrac1 = (raPressLevels(iStop)-rPressStop)/ &
-        (raPressLevels(iStop)-raPressLevels(iStop+1))
-        IF (abs(rFrac1-1.00000) <= delta) THEN
-            rFrac1 = 1.0
-        END IF
-        IF (abs(rFrac1) <= delta) THEN  !go to one layer lower
-            rPressStop = rPressStop+delta
-            iStop = iStop-1
-            rFrac1 = 1.0
-        END IF
-        raFracTop(iAtm) = rFrac1
-        rFrac2 = (rPressStart-raPressLevels(iStart+1))/ &
-        (raPressLevels(iStart)-raPressLevels(iStart+1))
-        IF (abs(rFrac2-1.00000) <= delta) THEN
-            rFrac2 = 1.0
-        END IF
-        IF (abs(rFrac2) <= delta) THEN  !go to one layer higher
-            rPressStart = rPressStart-delta
-            iStart = iStart+1
-            rFrac2 = 1.0
-        END IF
-        raFracBot(iAtm) = rFrac2
+      !first set top layer frac, then bottom layer frac
+      rFrac1 = (raPressLevels(iStop)-rPressStop)/(raPressLevels(iStop)-raPressLevels(iStop+1))
+      IF (abs(rFrac1-1.00000) <= delta) THEN
+        rFrac1 = 1.0
+      END IF
+      IF (abs(rFrac1) <= delta) THEN  !go to one layer lower
+        rPressStop = rPressStop+delta
+        iStop = iStop-1
+        rFrac1 = 1.0
+      END IF
+      raFracTop(iAtm) = rFrac1
+      rFrac2 = (rPressStart-raPressLevels(iStart+1))/(raPressLevels(iStart)-raPressLevels(iStart+1))
+      IF (abs(rFrac2-1.00000) <= delta) THEN
+        rFrac2 = 1.0
+      END IF
+      IF (abs(rFrac2) <= delta) THEN  !go to one layer higher
+        rPressStart = rPressStart-delta
+         iStart = iStart+1
+        rFrac2 = 1.0
+      END IF
+      raFracBot(iAtm) = rFrac2
     END IF
 
     IF (iStart >= iStop) THEN    !radiation going downward
-    ! irst set top layer frac, then bottom layer frac
-        rFrac1 = (raPressLevels(iStart)-rPressStart)/ &
-        (raPressLevels(iStart)-raPressLevels(iStart+1))
-        IF (abs(rFrac1-1.00000) <= delta) THEN
-            rFrac1 = 1.0
-        END IF
-        IF (abs(rFrac1) <= delta) THEN  !go to one layer lower
-            rPressStart = rPressStart+delta
-            iStart = iStart-1
-            rFrac1 = 1.0
-        END IF
-        raFracTop(iAtm) = rFrac1
-        rFrac2 = (rPressStop-raPressLevels(iStop+1))/ &
-        (raPressLevels(iStop)-raPressLevels(iStop+1))
-        IF (abs(rFrac2-1.00000) <= delta) THEN
-            rFrac2 = 1.0
-        END IF
-        IF (abs(rFrac1) <= delta) THEN  !go to one layer higher
-            rPressStop = rPressStop-delta
-            iStop = iStop+1
-            rFrac2 = 1.0
-        END IF
-        raFracBot(iAtm) = rFrac2
+      !first set top layer frac, then bottom layer frac
+      rFrac1 = (raPressLevels(iStart)-rPressStart)/(raPressLevels(iStart)-raPressLevels(iStart+1))
+      IF (abs(rFrac1-1.00000) <= delta) THEN
+        rFrac1 = 1.0
+      END IF
+      IF (abs(rFrac1) <= delta) THEN  !go to one layer lower
+        rPressStart = rPressStart+delta
+        iStart = iStart-1
+        rFrac1 = 1.0
+      END IF
+      raFracTop(iAtm) = rFrac1
+      rFrac2 = (rPressStop-raPressLevels(iStop+1))/(raPressLevels(iStop)-raPressLevels(iStop+1))
+      IF (abs(rFrac2-1.00000) <= delta) THEN
+        rFrac2 = 1.0
+      END IF
+      IF (abs(rFrac1) <= delta) THEN  !go to one layer higher
+        rPressStop = rPressStop-delta
+        iStop = iStop+1
+        rFrac2 = 1.0
+      END IF
+      raFracBot(iAtm) = rFrac2
     END IF
 
 ! finally set iStart,iStop according to the mixing table by using iW
@@ -1041,13 +1020,13 @@ CONTAINS
     raaPrBdry(iAtm,2) = rPressStop
 
     IF (rPressStart > rPressStop) THEN
-        write(kStdWarn,*)'Downlooking instrument : Press, Layer, Frac'
-        write(kStdWarn,*)'START',rPressStart,iStart,rFrac2
-        write(kStdWarn,*)'STOP ',rPressStop,iStop,rFrac1
+      write(kStdWarn,*)'Downlooking instrument : Press, Layer, Frac'
+      write(kStdWarn,*)'START',rPressStart,iStart,rFrac2
+      write(kStdWarn,*)'STOP ',rPressStop,iStop,rFrac1
     ELSE
-        write(kStdWarn,*)'Uplooking instrument : Press, Layer, Frac'
-        write(kStdWarn,*)'START',rPressStart,iStart,rFrac1
-        write(kStdWarn,*)'STOP ',rPressStop,iStop,rFrac2
+      write(kStdWarn,*)'Uplooking instrument : Press, Layer, Frac'
+      write(kStdWarn,*)'START',rPressStart,iStart,rFrac1
+      write(kStdWarn,*)'STOP ',rPressStop,iStop,rFrac2
     END IF
 
     RETURN
@@ -1078,22 +1057,22 @@ CONTAINS
     iNumLinesRead = 0
 
 ! this if loop only executed if there is an error while reading the file
-    13 IF (iNumLinesRead > 0) THEN
-        iErr = 1
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+ 13 IF (iNumLinesRead > 0) THEN
+      iErr = 1
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
     5010 FORMAT('Error while reading in section ',A7,' of main user file')
 
     IF (iJacob == 0) THEN
-        write(kStdErr,*)'input file indicates 0 gases for d/dq!!'
-        CALL DoSTOP
+      write(kStdErr,*)'input file indicates 0 gases for d/dq!!'
+      CALL DoSTOP
     END IF
 
     IF (iJacob > kMaxDQ) THEN
-        write(kStdErr,*)'You have allocated space for ',KMaxDQ,' d/dq '
-        write(kStdErr,*)'gases. please edit section *JACOBN and retry'
-        CALL DoSTOP
+      write(kStdErr,*)'You have allocated space for ',KMaxDQ,' d/dq '
+      write(kStdErr,*)'gases. please edit section *JACOBN and retry'
+      CALL DoSTOP
     END IF
 
     IF (iJacob > 0) THEN
@@ -1101,41 +1080,41 @@ CONTAINS
       ! first sort the numbers
       CALL DoSort(iaJacob,iJacob)
     ELSE IF (iJacob < 0) THEN
-    ! use all gases upto kMaxDQ
-        iJacob = kMaxDQ
-        DO iC = 1,iJacob
-            iaJacob(iC) = iC
-        END DO
+      ! use all gases upto kMaxDQ
+      iJacob = kMaxDQ
+      DO iC = 1,iJacob
+        iaJacob(iC) = iC
+      END DO
     END IF
 
 ! check the molecular ID's in iaJacob are not repeated
     IF (iJacob > 0) THEN
-        DO iC = 1,iJacob
-            DO iFound = 1,iJacob
-                IF ((iaJacob(iC) == iaJacob(iFound)) .AND. (iC /= iFound)) THEN
-                    write(kStdErr,*) 'You have repeated gasID in iaJacob list!!!'
-                    write(kStdErr,*) 'i1  gas(i1)        i2  gas(i2)'
-                    write(kStdErr,*) iC,'  ',iaJacob(iC),' <----->',iFound,'   ',iaJacob(iFound)
-                    CALL DoStop
-                END IF
-            END DO
+      DO iC = 1,iJacob
+        DO iFound = 1,iJacob
+          IF ((iaJacob(iC) == iaJacob(iFound)) .AND. (iC /= iFound)) THEN
+            write(kStdErr,*) 'You have repeated gasID in iaJacob list!!!'
+            write(kStdErr,*) 'i1  gas(i1)        i2  gas(i2)'
+            write(kStdErr,*) iC,'  ',iaJacob(iC),' <----->',iFound,'   ',iaJacob(iFound)
+            CALL DoStop
+          END IF
         END DO
+      END DO
     END IF
 
 ! check the molecular ID's in iaJacob are in iaGases
     DO iC = 1,iJacob
-        iFound = -1
-        IF (iaGases(iaJacob(iC)) > 0) THEN
-            iFound = 1
-        END IF
+      iFound = -1
+      IF (iaGases(iaJacob(iC)) > 0) THEN
+        iFound = 1
+      END IF
          
-        IF (iFound < 0) THEN
-            write(kStdErr,*) 'You want to output d/dq for GasID = ', &
-            iaJacob(iC)
-            write(kStdErr,*) 'but this gas does not exist in list from'
-            write(kStdErr,*) 'MOLGAS/XSCGAS. Edit input file and retry'
-            CALL DoSTOP
-        END IF
+      IF (iFound < 0) THEN
+        write(kStdErr,*) 'You want to output d/dq for GasID = ', &
+        iaJacob(iC)
+        write(kStdErr,*) 'but this gas does not exist in list from'
+        write(kStdErr,*) 'MOLGAS/XSCGAS. Edit input file and retry'
+        CALL DoSTOP
+      END IF
     END DO
 
     RETURN
@@ -1216,74 +1195,73 @@ CONTAINS
     5030 FORMAT(A130)
 
     iNumLinesRead = 0
-    13 IF (iNumLinesRead > 0) THEN
-        iErr = 1
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+ 13 IF (iNumLinesRead > 0) THEN
+      iErr = 1
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
-    5010 FORMAT('Error reading section ',A7)
+ 5010 FORMAT('Error reading section ',A7)
 
     iNumLinesRead = 1
 
-    IF ((kWhichScatterCode > 6) .OR. (kWhichScatterCode < 1)) &
-    THEN
-        write(kStdErr,*)'invalid scattering code !!',kWhichScatterCode
-        write(kStdErr,*)'need kWhichScatterCode = 1 (TWOSTREAM)'
-        write(kStdErr,*)'                       = 2 (RTSPEC)'
-        write(kStdErr,*)'                       = 3 (DISORT)'
-        write(kStdErr,*)'                       = 4 (FIRST ORDER PERTURB)'
-        write(kStdErr,*)'                       = 5 (PCLSAM)'
-        write(kStdErr,*)'                       = 6 (RAYLEIGH)'
-        write(kStdErr,*)'please check and retry!'
-        CALL DoSTOP
+    IF ((kWhichScatterCode > 6) .OR. (kWhichScatterCode < 1)) THEN
+      write(kStdErr,*)'invalid scattering code !!',kWhichScatterCode
+      write(kStdErr,*)'need kWhichScatterCode = 1 (TWOSTREAM)'
+      write(kStdErr,*)'                       = 2 (RTSPEC)'
+      write(kStdErr,*)'                       = 3 (DISORT)'
+      write(kStdErr,*)'                       = 4 (FIRST ORDER PERTURB)'
+      write(kStdErr,*)'                       = 5 (PCLSAM)'
+      write(kStdErr,*)'                       = 6 (RAYLEIGH)'
+      write(kStdErr,*)'please check and retry!'
+      CALL DoSTOP
     END IF
 
     IF (kWhichScatterCode == 1) THEN
-        IF ((kScatter < 1) .OR. (kScatter > 3)) THEN
-            write(kStdErr,*)'invalid TWOSTREAM repeat algorithm in input file!!'
-            write(kStdErr,*)'need kScatter = 1,2 or 3 for number of iterations'
-            write(kStdErr,*)'please check and retry!'
-            CALL DoSTOP
-        END IF
+      IF ((kScatter < 1) .OR. (kScatter > 3)) THEN
+        write(kStdErr,*)'invalid TWOSTREAM repeat algorithm in input file!!'
+        write(kStdErr,*)'need kScatter = 1,2 or 3 for number of iterations'
+        write(kStdErr,*)'please check and retry!'
+        CALL DoSTOP
+      END IF
     END IF
 
     IF (kWhichScatterCode == 2) THEN
-        IF ((kScatter < 1) .OR. (kScatter > 3)) THEN
-            write(kStdErr,*)'invalid RTSPEC scatter algorithm in input file!!'
-            write(kStdErr,*)'need kScatter = 1,2,3 for Single,Eddington or Hybrid'
-            write(kStdErr,*)'please check and retry!'
-            CALL DoSTOP
-        END IF
+      IF ((kScatter < 1) .OR. (kScatter > 3)) THEN
+        write(kStdErr,*)'invalid RTSPEC scatter algorithm in input file!!'
+        write(kStdErr,*)'need kScatter = 1,2,3 for Single,Eddington or Hybrid'
+        write(kStdErr,*)'please check and retry!'
+        CALL DoSTOP
+      END IF
     END IF
 
     IF (kWhichScatterCode == 3) THEN
-        kScatter = +1   !!!this wavenumber interpolation is the best for now
-        IF ((kScatter < 1) .OR. (kScatter > 3)) THEN
-            write(kStdErr,*)'invalid DISORT scatter algorithm in input file!!'
-            write(kStdErr,*)'need kScatter = 1,2 or 3 for Skip,Small or Corrlt'
-            write(kStdErr,*)'please check and retry!'
-            CALL DoSTOP
-        END IF
+      kScatter = +1   !!!this wavenumber interpolation is the best for now
+      IF ((kScatter < 1) .OR. (kScatter > 3)) THEN
+        write(kStdErr,*)'invalid DISORT scatter algorithm in input file!!'
+        write(kStdErr,*)'need kScatter = 1,2 or 3 for Skip,Small or Corrlt'
+        write(kStdErr,*)'please check and retry!'
+        CALL DoSTOP
+      END IF
     END IF
 
 ! read if scattering file is binary (+1) or text (-1)
     IF (abs(iScatBinaryFile) > 1) THEN
-        write(kStdErr,*)'need iScatBinaryFile = +/- 1 or 0'
-        write(kStdErr,*)'please check and retry!'
-        CALL DoSTOP
+      write(kStdErr,*)'need iScatBinaryFile = +/- 1 or 0'
+      write(kStdErr,*)'please check and retry!'
+      CALL DoSTOP
     END IF
      
 ! read the no of clouds to read in
     IF (iNClouds <= 0) THEN
-        write(kStdErr,*)'input file indicates <= 0 clouds!!'
-        write(kStdErr,*)'please check and retry!'
-        CALL DoSTOP
+      write(kStdErr,*)'input file indicates <= 0 clouds!!'
+      write(kStdErr,*)'please check and retry!'
+      CALL DoSTOP
     END IF
     IF (iNClouds > kMaxClouds) THEN
-        write(kStdErr,*)'input file indicates',iNClouds,' clouds!!'
-        write(kStdErr,*)'but kcartaparam.f90 has kMaxClouds = ',kMaxClouds
-        write(kStdErr,*)'please check and retry!'
-        CALL DoSTOP
+      write(kStdErr,*)'input file indicates',iNClouds,' clouds!!'
+      write(kStdErr,*)'but kcartaparam.f90 has kMaxClouds = ',kMaxClouds
+      write(kStdErr,*)'please check and retry!'
+      CALL DoSTOP
     END IF
 
     222 FORMAT(A80)
@@ -1310,137 +1288,137 @@ CONTAINS
     cngwat1 = 0.0
     cngwat2 = 0.0
     DO iI = 1,kCloudLayers
-        cngwat1 = cngwat1 + raaaCloudParams(1,iI,1)
-        cngwat2 = cngwat2 + raaaCloudParams(2,iI,1)
+      cngwat1 = cngwat1 + raaaCloudParams(1,iI,1)
+      cngwat2 = cngwat2 + raaaCloudParams(2,iI,1)
     END DO
     cfrac1 = raCloudFrac(1,1)
     IF (cngwat2 > 0) THEN
-        cfrac2  = raCloudFrac(1,2)
-        cfrac12 = raCloudFrac(1,3)
+      cfrac2  = raCloudFrac(1,2)
+      cfrac12 = raCloudFrac(1,3)
     ELSE
-        cfrac2 = 0.0
-        cfrac12 = 0.0
+      cfrac2 = 0.0
+      cfrac12 = 0.0
     END IF
 
 ! now do sanity checks
     IF (iNclouds == 1) THEN
-        IF ((cngwat1 >= 0.0) .AND. (cfrac1 < 0)) THEN
-            write(kStdErr,*) 'Ooops, for cloud1 : cngwat = ',cngwat1,' but cfrac1 = ',cfrac1
-            CALL DoStop
-        END IF
-        IF ((cngwat1 >= 0.0) .AND. (cfrac1 >= 0) .AND. (ctype1 <= 0)) THEN
-            write(kStdErr,*) 'Ooops, for cloud1 : cngwat = ',cngwat1,' cfrac1 = ',cfrac1
-            write(kStdErr,*) '  but bad ctype1 = ',ctype1
-            CALL DoStop
-        END IF
+      IF ((cngwat1 >= 0.0) .AND. (cfrac1 < 0)) THEN
+        write(kStdErr,*) 'Ooops, for cloud1 : cngwat = ',cngwat1,' but cfrac1 = ',cfrac1
+        CALL DoStop
+      END IF
+      IF ((cngwat1 >= 0.0) .AND. (cfrac1 >= 0) .AND. (ctype1 <= 0)) THEN
+        write(kStdErr,*) 'Ooops, for cloud1 : cngwat = ',cngwat1,' cfrac1 = ',cfrac1
+        write(kStdErr,*) '  but bad ctype1 = ',ctype1
+        CALL DoStop
+      END IF
     ELSEIF (iNclouds == 2) THEN
-        IF ((cngwat2 >= 0.0) .AND. (cfrac2 < 0)) THEN
-            write(kStdErr,*) 'Ooops, for cloud2 : cngwat = ',cngwat2,' but cfrac2 = ',cfrac2
-            CALL DoStop
-        END IF
-        IF ((cngwat2 >= 0.0) .AND. (cfrac2 >= 0) .AND. (ctype2 <= 0)) THEN
-            write(kStdErr,*) 'Ooops, for cloud2 : cngwat = ',cngwat2,' cfrac2 = ',cfrac2
-            write(kStdErr,*) '  but bad ctype2 = ',ctype2
-            CALL DoStop
-        END IF
+      IF ((cngwat2 >= 0.0) .AND. (cfrac2 < 0)) THEN
+        write(kStdErr,*) 'Ooops, for cloud2 : cngwat = ',cngwat2,' but cfrac2 = ',cfrac2
+        CALL DoStop
+      END IF
+      IF ((cngwat2 >= 0.0) .AND. (cfrac2 >= 0) .AND. (ctype2 <= 0)) THEN
+        write(kStdErr,*) 'Ooops, for cloud2 : cngwat = ',cngwat2,' cfrac2 = ',cfrac2
+        write(kStdErr,*) '  but bad ctype2 = ',ctype2
+        CALL DoStop
+      END IF
 
-        IF ((cngwat1 >= 0.0) .AND. (cfrac1 >= 0) .AND. &
+      IF ((cngwat1 >= 0.0) .AND. (cfrac1 >= 0) .AND. &
         (cngwat2 >= 0.0) .AND. (cfrac2 > 0) .AND. (cfrac12 < 0)) THEN
-            write(kStdErr,*) 'in nm_scattr you have defined clouds1,2 but cfrac12 < 0'
-            write(kStdErr,*) 'cfrac1,cngwat1,cfrac2,cngwat2,cfrac12 = ', &
-            cfrac1,cngwat1,cfrac2,cngwat2,cfrac12
-            CALL DoStop
-        END IF
+        write(kStdErr,*) 'in nm_scattr you have defined clouds1,2 but cfrac12 < 0'
+        write(kStdErr,*) 'cfrac1,cngwat1,cfrac2,cngwat2,cfrac12 = ', &
+          cfrac1,cngwat1,cfrac2,cngwat2,cfrac12
+        CALL DoStop
+      END IF
 
-        IF ((cngwat1 >= 0.0) .AND. (cfrac1 >= 0) .AND. &
+      IF ((cngwat1 >= 0.0) .AND. (cfrac1 >= 0) .AND. &
         (cngwat2 >= 0.0) .AND. (cfrac2 > 0) .AND. &
         (cfrac12 > max(cfrac1,cfrac2))) THEN
-            write(kStdErr,*) 'in nm_scattr you have defined clouds1,2 but cfrac12 > max(cfrac1,cfrac2)'
-            write(kStdErr,*) 'cfrac1,cngwat1,cfrac2,cngwat2,cfrac12 = ', &
+        write(kStdErr,*) 'in nm_scattr you have defined clouds1,2 but cfrac12 > max(cfrac1,cfrac2)'
+        write(kStdErr,*) 'cfrac1,cngwat1,cfrac2,cngwat2,cfrac12 = ', &
             cfrac1,cngwat1,cfrac2,cngwat2,cfrac12
-            CALL DoStop
-        END IF
+        CALL DoStop
+      END IF
     END IF
 ! now do sanity checks
 
     write(kStdWarn,*) 'from NML scatter, cfrac1,cngwat1,cfrac2,cngwat2,cfrac12 = ', &
-    cfrac1,cngwat1,cfrac2,cngwat2,cfrac12
+      cfrac1,cngwat1,cfrac2,cngwat2,cfrac12
           
     CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB, &
-    caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable, &
-    iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp, &
-    raPressLevels,iProfileLayers, &
-    raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
+      caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable, &
+      iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp, &
+      raPressLevels,iProfileLayers, &
+      raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
      
 ! now start checking the info
     DO iIn = 1,iNclouds
-        caName = caaCloudName(iIn)
-        iJ = iaCloudNumLayers(iIn)
-        iaCloudNumLayers(iIn) = iJ
-        write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
+      caName = caaCloudName(iIn)
+      iJ = iaCloudNumLayers(iIn)
+      iaCloudNumLayers(iIn) = iJ
+      write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
 
-    ! set individual cloud layer parameters but STRETCH the cloud out as necessary
-    ! from pressure level rPT to pressure level rPB
-    ! note it will occupy the entire layer
-        DO iJ1 = 1,iJ
-        ! op and bottom pressures CloudName/Type  IWP/LWP DME
-            rPT = raaPCloudTop(iIn,iJ1)
-            rPB = raaPCloudBot(iIn,iJ1)
+      ! set individual cloud layer parameters but STRETCH the cloud out as necessary
+      ! from pressure level rPT to pressure level rPB
+      ! note it will occupy the entire layer
+      DO iJ1 = 1,iJ
+        !top and bottom pressures CloudName/Type  IWP/LWP DME
+        rPT = raaPCloudTop(iIn,iJ1)
+        rPB = raaPCloudBot(iIn,iJ1)
 
-            IF (rPT > rPB) THEN
-                rSwap = rPT
-                rPT = rPB
-                rPB = rSwap
-                write (kStdWarn,*) 'Swapped cloud top & bottom pressures'
-            END IF
-
-            iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
-            iBot = FindCloudLayer(rPB,raPressLevels,iProfileLayers)
-            iNum = iTop
-            IF ((iTop - iBot) < 0) THEN
-                write (kStdErr,*) 'the top of your cloud is below the bottom'
-                CALL DoStop
-            END IF
-
-            iaaCloudWhichLayers(iIn,iJ1) = iNum    !layer number wrt 1 ..kProfLayer
-
-            rP1 = raaaCloudParams(iIn,iJ1,1)        !IWP
-            rP2 = raaaCloudParams(iIn,iJ1,2)        !mean size
-
-            iScat = iaaScatTable(iIn,iJ1)
-            caName = caaaScatTable(iIn,iJ1)
-            write(kStdWarn,*) '   layer #',iJ1,' = kLAYERS pressure layer ',iNum
-            write(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
-            write(kStdWarn,*) '   mean particle size (um)  = ',rP2
-            write(kStdWarn,*) '   scatter table number = ',iScat
-            write(kStdWarn,222) caName
-        END DO
-
-    ! set how many, and which atmospheres to use with this cloud
-        iNum = iaCloudNumAtm(iIn)
-        IF (iNum > iNatm) THEN
-            write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
-            write(kStdErr,*)'*SCATTR wants to use',iNum,' atmospheres!!'
-            write(kStdErr,*)'please check and retry!'
-            CALL DOStop
+        IF (rPT > rPB) THEN
+          rSwap = rPT
+          rPT = rPB
+          rPB = rSwap
+          write (kStdWarn,*) 'Swapped cloud top & bottom pressures'
         END IF
-    ! heck which atmospheres to use this cloud
-        DO iJ = 1,iNum
-            iaTemp(iJ) = iaaCloudWhichAtm(iIn,iJ)
-        END DO
-        DO iJ = 1,iNum
-            IF (iaTemp(iJ) > iNatm) THEN
-                write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
-                write(kStdErr,*)'*SCATTR wants to use atmosphere #',iaTemp(iJ)
-                write(kStdErr,*)'please check and retry!'
-                CALL DOStop
-            END IF
-        END DO
 
-        write(kStdWarn,*) 'number of atms for cloud is ',iNum
-        write(kStdWarn,*) '  atmospheres to be used with this cloud  : '
-        write(kStdWarn,*)(iaTemp(iJ),iJ = 1,iNum)
-        write(kStdWarn,*) '  '
+        iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
+        iBot = FindCloudLayer(rPB,raPressLevels,iProfileLayers)
+        iNum = iTop
+        IF ((iTop - iBot) < 0) THEN
+          write (kStdErr,*) 'the top of your cloud is below the bottom'
+          CALL DoStop
+        END IF
+
+        iaaCloudWhichLayers(iIn,iJ1) = iNum    !layer number wrt 1 ..kProfLayer
+
+        rP1 = raaaCloudParams(iIn,iJ1,1)        !IWP
+        rP2 = raaaCloudParams(iIn,iJ1,2)        !mean size
+
+        iScat = iaaScatTable(iIn,iJ1)
+        caName = caaaScatTable(iIn,iJ1)
+        write(kStdWarn,*) '   layer #',iJ1,' = kLAYERS pressure layer ',iNum
+        write(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
+        write(kStdWarn,*) '   mean particle size (um)  = ',rP2
+        write(kStdWarn,*) '   scatter table number = ',iScat
+        write(kStdWarn,222) caName
+      END DO
+
+      ! set how many, and which atmospheres to use with this cloud
+      iNum = iaCloudNumAtm(iIn)
+      IF (iNum > iNatm) THEN
+        write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
+        write(kStdErr,*)'*SCATTR wants to use',iNum,' atmospheres!!'
+        write(kStdErr,*)'please check and retry!'
+        CALL DOStop
+      END IF
+      !check which atmospheres to use this cloud
+      DO iJ = 1,iNum
+        iaTemp(iJ) = iaaCloudWhichAtm(iIn,iJ)
+      END DO
+      DO iJ = 1,iNum
+        IF (iaTemp(iJ) > iNatm) THEN
+          write(kStdErr,*)'*RADNCE defines',iNatm,' atmospheres!!'
+          write(kStdErr,*)'*SCATTR wants to use atmosphere #',iaTemp(iJ)
+          write(kStdErr,*)'please check and retry!'
+          CALL DOStop
+        END IF
+      END DO
+
+      write(kStdWarn,*) 'number of atms for cloud is ',iNum
+      write(kStdWarn,*) '  atmospheres to be used with this cloud  : '
+      write(kStdWarn,*)(iaTemp(iJ),iJ = 1,iNum)
+      write(kStdWarn,*) '  '
 
     END DO
 ! cccccccccccccccccccc now check the info
@@ -1448,91 +1426,87 @@ CONTAINS
     write(kStdWarn,*) 'finished preprocessing *SCATTR .. checking info ...'
 
     write(kStdWarn,*) 'checking cloud boundaries within start/stop press...'
-! heck that cloud boundaries lie within those defined for atmosphere
+   !check that cloud boundaries lie within those defined for atmosphere
     DO iIn = 1,iNClouds
-    ! hese would be cloud top and bottom pressures
-        r1 = raPressLevels(iaaCloudWhichLayers(iIn,1)+1)
-        r2 = raPressLevels(iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn)))
-    ! heck top pressure
-        DO iJ = 1,iaCloudNumAtm(iIn)
-            iI = iaaCloudWhichAtm(iIn,iJ)
-            rPT = raaPrBdry(iI,1)         !start pressure
-            rPB = raaPrBdry(iI,2)         !stop pressure
-            IF (rPT > rPB) THEN      !atm is for down look instr
-                rP1 = rPT
-                rPT = rPB
-                rPB = rP1
-            END IF
-        ! heck top pressure
-            IF (r1 < rPT) THEN
-                write(kStdErr,*)'*RADNCE defines top pressure for atmosphere'
-                write(kStdErr,*)'number ',iI,' as ',rPT
-                write(kStdErr,*)'*SCATTR says to use cloud number ',iIn,' in'
-                write(kStdErr,*)'that atmosphere; cloud top at ',r1
-                iErr = 1
-                CALL DOStop
-            END IF
-        ! heck bot pressure
-            IF (r2 > rPB) THEN
-                write(kStdWarn,*)'*RADNCE defines bottom pressure for atmosphere'
-                write(kStdWarn,*)'number ',iI,' as ',rPB
-                write(kStdWarn,*)'*SCATTR says to use cloud number ',iIn,' in'
-                write(kStdWarn,*)'that atmosphere; cloud bottom at',r2
-                write(kStdWarn,*)'Resetting r2 ...'
-                r2  =  rPB
-            !            iErr = 1
-            !            CALL DOStop
-            END IF
-        END DO
+     !these would be cloud top and bottom pressures
+     r1 = raPressLevels(iaaCloudWhichLayers(iIn,1)+1)
+     r2 = raPressLevels(iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn)))
+     !check top pressure
+     DO iJ = 1,iaCloudNumAtm(iIn)
+       iI = iaaCloudWhichAtm(iIn,iJ)
+       rPT = raaPrBdry(iI,1)         !start pressure
+       rPB = raaPrBdry(iI,2)         !stop pressure
+       IF (rPT > rPB) THEN      !atm is for down look instr
+         rP1 = rPT
+         rPT = rPB
+         rPB = rP1
+       END IF
+       !check top pressure
+       IF (r1 < rPT) THEN
+         write(kStdErr,*)'*RADNCE defines top pressure for atmosphere'
+         write(kStdErr,*)'number ',iI,' as ',rPT
+         write(kStdErr,*)'*SCATTR says to use cloud number ',iIn,' in'
+         write(kStdErr,*)'that atmosphere; cloud top at ',r1
+         iErr = 1
+         CALL DOStop
+       END IF
+       !check bot pressure
+       IF (r2 > rPB) THEN
+         write(kStdWarn,*)'*RADNCE defines bottom pressure for atmosphere'
+         write(kStdWarn,*)'number ',iI,' as ',rPB
+         write(kStdWarn,*)'*SCATTR says to use cloud number ',iIn,' in'
+         write(kStdWarn,*)'that atmosphere; cloud bottom at',r2
+         write(kStdWarn,*)'Resetting r2 ...'
+         r2  =  rPB
+       END IF
+      END DO
     END DO
 
     write(kStdWarn,*) 'checking cloud layers sequential ...'
-! heck that the layers for a cloud are sequential eg 16,15,14
+    !check that the layers for a cloud are sequential eg 16,15,14
     DO iIn = 1,iNclouds
-    ! f there is only one layer in the cloud, things OK, else
-        IF (iaCloudNumLayers(iIn)  > 1) THEN
-            iJ = 1
-            iJ1 = iaaCloudWhichLayers(iIn,iJ)
-            DO iJ = 2,iaCloudNumLayers(iIn)
-                iScat = iaaCloudWhichLayers(iIn,iJ)
-                IF (iScat >= iJ1) THEN
-                    write(kStdErr,*) 'checking cloud # ',iIn
-                    write(kStdErr,*) 'layer ',iJ,' is not below preceding layer'
-                    write(kStdErr,*) 'please check and retry'
-                    CALL DoStop
-                END IF
-                IF ((iJ1-iScat) > 1) THEN
-                    write(kStdErr,*) 'checking cloud # ',iIn
-                    write(kStdErr,*) 'layers not sequential!!',iJ1,iScat
-                    write(kStdErr,*) 'please check and retry'
-                    CALL DoStop
-                END IF
-                iJ1 = iScat
-            END DO
-        END IF
+      !if there is only one layer in the cloud, things OK, else
+      IF (iaCloudNumLayers(iIn)  > 1) THEN
+        iJ = 1
+        iJ1 = iaaCloudWhichLayers(iIn,iJ)
+        DO iJ = 2,iaCloudNumLayers(iIn)
+          iScat = iaaCloudWhichLayers(iIn,iJ)
+          IF (iScat >= iJ1) THEN
+            write(kStdErr,*) 'checking cloud # ',iIn
+            write(kStdErr,*) 'layer ',iJ,' is not below preceding layer'
+            write(kStdErr,*) 'please check and retry'
+            CALL DoStop
+          END IF
+          IF ((iJ1-iScat) > 1) THEN
+            write(kStdErr,*) 'checking cloud # ',iIn
+            write(kStdErr,*) 'layers not sequential!!',iJ1,iScat
+            write(kStdErr,*) 'please check and retry'
+            CALL DoStop
+          END IF
+          iJ1 = iScat
+        END DO
+      END IF
     END DO
 
-! check that the scattering tables are unique within a cloud
+    ! check that the scattering tables are unique within a cloud
     write(kStdWarn,*) 'checking scattering tables unique within a cloud ...'
     DO iIn = 1,iNclouds
-        DO iJ = 1,iaCloudNumLayers(iIn)
-            iI = iaaScatTable(iIn,iJ)
-            caName = caaaScatTable(iIn,iJ)
-            DO iJ1 = iJ+1,iaCloudNumLayers(iIn)
-                IF (iI == iaaScatTable(iIn,iJ1)) THEN
-                    write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
-                    write(kStdWarn,*) 'found nonunique scattering table numbers'
-                    write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE &
-                    profile layer temperature'
-                END IF
-                IF (caName == caaaScatTable(iIn,iJ1)) THEN
-                    write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
-                    write(kStdWarn,*) 'found nonunique scattering table file names'
-                    write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE &
-                    profile layer temperature'
-                END IF
-            END DO
+      DO iJ = 1,iaCloudNumLayers(iIn)
+        iI = iaaScatTable(iIn,iJ)
+        caName = caaaScatTable(iIn,iJ)
+        DO iJ1 = iJ+1,iaCloudNumLayers(iIn)
+          IF (iI == iaaScatTable(iIn,iJ1)) THEN
+            write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
+            write(kStdWarn,*) 'found nonunique scattering table numbers'
+            write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE profile layer temperature'
+          END IF
+          IF (caName == caaaScatTable(iIn,iJ1)) THEN
+            write(kStdWarn,*) 'checking cloud number ',iIn, ' layers ',iJ,iJ1
+            write(kStdWarn,*) 'found nonunique scattering table file names'
+            write(kStdWarn,*) '  Might mean : Cloud datafile temperature NE profile layer temperature'
+          END IF
         END DO
+      END DO
     END DO
 
 ! if this test is successfully passed, then do the next check!!!
@@ -1540,47 +1514,46 @@ CONTAINS
 ! map this code to rtspec.f
 ! these are to check that the scattering table names are unique
     DO iIn = 1,kMaxClouds*kCloudLayers
-        iaTable(iIn) = -1
-        caaTable(iIn) = '                                                     '
+      iaTable(iIn) = -1
+      caaTable(iIn) = '                                                     '
     END DO
     write(kStdWarn,*) 'checking scattering tables unique thru all clouds ...'
     DO iIn = 1,iNclouds
-        DO iJ = 1,iaCloudNumLayers(iIn)
-            iI = iaaScatTable(iIn,iJ)
-            caName = caaaScatTable(iIn,iJ)
-            IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
-                iaTable(iI) = 1
-                caaTable(iI) = caName
-            ELSE                          !check to see file names are the same
-                IF (caaTable(iI) /= caName) THEN
-                    write(kStdErr,*)'Scattering table #',iI,' <-> ',caaTable(iI)
-                    write(kStdErr,*)'for same scattering table, new cloud in &
-                    *SCATTR is associating file ',caName
-                    write(kStdErr,*)'please check and retry'
-                    CALL DoStop
-                END IF
-            END IF
-        END DO
+      DO iJ = 1,iaCloudNumLayers(iIn)
+        iI = iaaScatTable(iIn,iJ)
+        caName = caaaScatTable(iIn,iJ)
+        IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
+          iaTable(iI) = 1
+          caaTable(iI) = caName
+        ELSE                          !check to see file names are the same
+          IF (caaTable(iI) /= caName) THEN
+            write(kStdErr,*)'Scattering table #',iI,' <-> ',caaTable(iI)
+            write(kStdErr,*)'for same scattering table, new cloud in *SCATTR is associating file ',caName
+            write(kStdErr,*)'please check and retry'
+            CALL DoStop
+          END IF
+        END IF
+      END DO
     END DO
               
 ! finally check how many clouds/atmosphere
     write(kStdWarn,*) 'checking how many clouds per atm...'
     DO iIn = 1,iNatm
-        iJ1 = 0
-        DO iJ = 1,iNclouds
-            DO iScat = 1,iaCloudNumAtm(iJ)
-                IF (iaaCloudWhichAtm(iJ,iScat) == iIn) THEN
-                    iJ1 = iJ1+1
-                END IF
-            END DO
+      iJ1 = 0
+      DO iJ = 1,iNclouds
+        DO iScat = 1,iaCloudNumAtm(iJ)
+          IF (iaaCloudWhichAtm(iJ,iScat) == iIn) THEN
+            iJ1 = iJ1+1
+          END IF
         END DO
-        write(kStdWarn,*)'Atmosphere # ',iIn,' has ',iJ1,' clouds in it'
-    !        IF (iJ1 .GT. 1) THEN
-    !          write(kStdErr,*)'Atmosphere # ',iIn,' has ',iJ1,' clouds in it'
-    !          write(kStdErr,*) 'each atmosphere can have at most one cloud in it'
-    !          write(kStdErr,*) 'please check and retry'
-    !          CALL DoStop
-    !        END IF
+      END DO
+      write(kStdWarn,*)'Atmosphere # ',iIn,' has ',iJ1,' clouds in it'
+      !        IF (iJ1 .GT. 1) THEN
+      !          write(kStdErr,*)'Atmosphere # ',iIn,' has ',iJ1,' clouds in it'
+      !          write(kStdErr,*) 'each atmosphere can have at most one cloud in it'
+      !          write(kStdErr,*) 'please check and retry'
+      !          CALL DoStop
+      !        END IF
     END DO
 
     RETURN
@@ -1612,22 +1585,22 @@ CONTAINS
 
 ! find the pressure level the top of clouds lies below (or at)
     iI = kProfLayer+1
-    10 CONTINUE
+  10 CONTINUE
     IF (r1 <= raPressLevels(iI)) THEN
-        iT = iI
+      iT = iI
     ELSE IF (iI > iLowest) THEN
-        iI = iI-1
-        GOTO 10
+      iI = iI-1
+      GOTO 10
     ELSE IF (iI == iLowest) THEN
-        write(kStdErr,*) 'could not assign pressure layer to cloud layer'
-        write(kStdErr,*) 'please recheck clouds in *SCATTR and retry'
-        Call DoSTop
+      write(kStdErr,*) 'could not assign pressure layer to cloud layer'
+      write(kStdErr,*) 'please recheck clouds in *SCATTR and retry'
+      Call DoSTop
     END IF
 
     IF (iT < 0) THEN
-        write(kStdErr,*) 'could not assign pressure layer to cloud layer'
-        write(kStdErr,*) 'please recheck clouds in *SCATTR and retry'
-        Call DoSTop
+      write(kStdErr,*) 'could not assign pressure layer to cloud layer'
+      write(kStdErr,*) 'please recheck clouds in *SCATTR and retry'
+      Call DoSTop
     END IF
 
     FindCloudLayer = iT
@@ -1664,31 +1637,30 @@ CONTAINS
 
     rPmin = 0.0e10
     rPmax = 0.0e10
-    DO iI = 1,iNatm
-        rPMin = rPMin + raPressStop(iI)
-        rPMax = rPMax + raPressStart(iI)
-    END DO
+    rPMin = sum(raPressStop(1:iNatm))
+    rPMax = sum(raPressStart(1:iNatm))
+
     rPMin = rPMin/iNatm
     rPMax = rPMax/iNatm
     IF (abs(rPmin - raPressStop(1)) > 1.0e-5) THEN
-        write(kStdWarn,*) 'WARNING : raIwp might get messed up !!!'
-        write(kStdWarn,*) 'Atmospheres in kCARTA have different raPressStop'
-        rPmin = raPressStop(1)   !!!what the heck!
+      write(kStdWarn,*) 'WARNING : raIwp might get messed up !!!'
+      write(kStdWarn,*) 'Atmospheres in kCARTA have different raPressStop'
+      rPmin = raPressStop(1)   !!!what the heck!
     ELSE
-        rPmin = raPressStop(1)
+      rPmin = raPressStop(1)
     END IF
     IF (abs(rPmax - raPressStart(1)) > 1.0e-5) THEN
-        write(kStdWarn,*) 'WARNING : raIwp might get messed up !!!'
-        write(kStdWarn,*) 'Atmospheres in kCARTA have different raPressStart'
-        rPmax = raPressStart(1)   !!!what the heck!
+      write(kStdWarn,*) 'WARNING : raIwp might get messed up !!!'
+      write(kStdWarn,*) 'Atmospheres in kCARTA have different raPressStart'
+      rPmax = raPressStart(1)   !!!what the heck!
     ELSE
-        rPmax = raPressStart(1)
+      rPmax = raPressStart(1)
     END IF
 
     IF (rPmin > rPmax) THEN
-        rSwap = rPmin
-        rPmin = rPmax
-        rPmax = rSwap
+      rSwap = rPmin
+      rPmin = rPmax
+      rPmax = rSwap
     END IF
           
 !!!! cloud top occupies layer whose pressues are :
@@ -1699,22 +1671,17 @@ CONTAINS
     rBb = raPressLevels(iBot)
           
     IF (rPmin < rTa) THEN
-    !!! whew , no partial cloud layer to worry about
-        write(kSTdWarn,*) 'Cloud top is BELOW TOA .... '
+      !!! whew , no partial cloud layer to worry about
+      write(kSTdWarn,*) 'Cloud top is BELOW TOA .... '
     ELSE
-        rIWP_mod = raFracTop(1)
+      rIWP_mod = raFracTop(1)
     END IF
     IF (rPmax > rBb) THEN
-    !!! whew , no partial cloud layer to worry about
-        write(kSTdWarn,*) 'Cloud bottom is ABOVE GND .... '
+      !!! whew , no partial cloud layer to worry about
+      write(kSTdWarn,*) 'Cloud bottom is ABOVE GND .... '
     ELSE
-        rIWP_mod = raFracBot(1)
+      rIWP_mod = raFracBot(1)
     END IF
-
-!      print *,raPressLevels(iTop),raPressLevels(iBot),rPt,rPb,rPmin,rPmax
-!      print *,iTop,iBot
-!      print *,rPmin,rTa,rTb,rBa,rPmax,rBb,rIWP_mod
-!      stop
 
     RETURN
     end SUBROUTINE FullPlusPartialLayer
@@ -1765,294 +1732,251 @@ CONTAINS
     write(kStdWarn,*) ' '
     write(kStdWarn,*) ' <<<<<<<<<<<<<<<<<        EXPAND SCATTER               >>>>>>>>>>>>>>> '
     DO iJ = 1,iNatm
-        raSurfPres(iJ) = max(raPressStart(iJ),raPressStop(iJ))
-        write(kStdWarn,*) '   surf pres(',iJ,') in ExpandScatter = ',raSurfPres(iJ)
+      raSurfPres(iJ) = max(raPressStart(iJ),raPressStop(iJ))
+      write(kStdWarn,*) '   surf pres(',iJ,') in ExpandScatter = ',raSurfPres(iJ)
     END DO
           
 ! first figure out the temp variables to be set
-    DO iI = 1,kMaxClouds
-        iaCloudNumLayersT(iI) = iaCloudNumLayers(iI)
-        caaCloudNameT(iI)     = caaCloudName(iI)
-        iaCloudNumAtmT(iI)    = iaCloudNumAtm(iI)
-        DO iJ = 1,kCloudLayers
-            raaPCloudTopT(iI,iJ)        = raaPCloudTop(iI,iJ)
-            raaPCloudBotT(iI,iJ)        = raaPCloudBot(iI,iJ)
-            iaaScatTableT(iI,iJ)        = iaaScatTable(iI,iJ)
-            caaaScatTableT(iI,iJ)       = caaaScatTable(iI,iJ)
-            DO iK = 1,2
-                raaaCloudParamsT(iI,iJ,iK) = raaaCloudParams(iI,iJ,iK)
-            END DO
-        END DO
-    END DO
-    DO iI = 1,kMaxClouds
-        DO iJ = 1,kMaxAtm
-            iaaCloudWhichAtmT(iI,iJ)       = iaaCloudWhichAtm(iI,iJ)
-        END DO
-    END DO
+    iaCloudNumLayersT = iaCloudNumLayers
+    caaCloudNameT     = caaCloudName
+    iaCloudNumAtmT    = iaCloudNumAtm
+    raaPCloudTopT     = raaPCloudTop
+    raaPCloudBotT     = raaPCloudBot
+    iaaScatTableT     = iaaScatTable
+    caaaScatTableT    = caaaScatTable
+    raaaCloudParamsT  = raaaCloudParams
+    iaaCloudWhichAtmT = iaaCloudWhichAtm
 
-! reset the temp variables
-    DO iI = 1,kMaxClouds
-        iaCloudNumLayersT(iI) = -1
-        caaCloudNameT(iI)     = '      '
-        iaCloudNumAtmT(iI)    = -1
-        DO iJ = 1,kCloudLayers
-            raaPCloudTopT(iI,iJ)        = -100.0
-            raaPCloudBotT(iI,iJ)        = -100.0
-            iaaScatTableT(iI,iJ)        = -1
-            caaaScatTableT(iI,iJ)       = '   '
-            DO iK = 1,2
-                raaaCloudParamsT(iI,iJ,iK) = -1.0
-            END DO
-        END DO
-    END DO
-    DO iI = 1,kMaxClouds
-        DO iJ = 1,kMaxAtm
-            iaaCloudWhichAtmT(iI,iJ) = iaaCloudWhichAtm(iI,iJ)
-        END DO
-    END DO
+    iaCloudNumLayersT = -1
+    caaCloudNameT     = '      '
+    iaCloudNumAtmT    = -1
+    raaPCloudTopT     = -100.0
+    raaPCloudBotT     = -100.0
+    iaaScatTableT     = -1
+    caaaScatTableT    = '   '
+    raaaCloudParamsT  = -1.0
+    iaaCloudWhichAtmT = iaaCloudWhichAtm
 
 ! now start checking the info ...as you go along, fill out the *T variables
     write (kStdWarn,*) ' in ExpandScatter ... check Initial Cloud Info .....'
     DO iIn = 1,iNclouds
-        caName = caaCloudName(iIn)
-        iJ = iaCloudNumLayers(iIn)
+      caName = caaCloudName(iIn)
+      iJ = iaCloudNumLayers(iIn)
 
-        caaCloudNameT(iIn)     = caName
-        iaCloudNumLayersT(iIn) = iJ
-        iaCloudNumAtmT(iIn)    = iaCloudNumAtm(iIn)
+      caaCloudNameT(iIn)     = caName
+      iaCloudNumLayersT(iIn) = iJ
+      iaCloudNumAtmT(iIn)    = iaCloudNumAtm(iIn)
 
-        write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
-        iSkipper = 0
+      write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
+      iSkipper = 0
 
-    ! set individual cloud layer parameters but STRETCH the cloud out as necessary
-    ! from pressure level rPT to pressure level rPB
-    ! note it will occupy the entire layer
-        DO iJ1 = 1,iJ
-        ! op and bottom pressures CloudName/Type  IWP/LWP DME
-            rPT = raaPCloudTop(iIn,iJ1)
-            rPB = raaPCloudBot(iIn,iJ1)
+      ! set individual cloud layer parameters but STRETCH the cloud out as necessary
+      ! from pressure level rPT to pressure level rPB
+      ! note it will occupy the entire layer
+      DO iJ1 = 1,iJ
+        !top and bottom pressures CloudName/Type  IWP/LWP DME
+        rPT = raaPCloudTop(iIn,iJ1)
+        rPB = raaPCloudBot(iIn,iJ1)
 
-            IF (rPT > rPB) THEN
-                rSwap = rPT
-                rPT   = rPB
-                rPB   = rSwap
-                write (kStdWarn,*) 'Swapped cloud top & bottom pressures'
-            END IF
+        IF (rPT > rPB) THEN
+          rSwap = rPT
+          rPT   = rPB
+          rPB   = rSwap
+          write (kStdWarn,*) 'Swapped cloud top & bottom pressures'
+        END IF
 
-        ! et these two variables, assuming that we need to "expand" cloud
-            rPBot = rPB
-            rPTop = rPT
-            rIWP0 = raaaCloudParams(iIn,iJ1,1)
+        !set these two variables, assuming that we need to "expand" cloud
+        rPBot = rPB
+        rPTop = rPT
+        rIWP0 = raaaCloudParams(iIn,iJ1,1)
 
-            iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
-            iBot = FindCloudLayer(rPB,raPressLevels,iProfileLayers)
-            iNum = iTop
-            write (kStdWarn,*) 'From the initial info in *SCATTR'
-            write (KStdWarn,*) 'cloud #, layer #',iIn,iJ1
-            write (kStdWarn,*) 'top pressure, pressure layer = ',rPT,iTop
-            write (kStdWarn,*) 'bot pressure, pressure layer = ',rPB,iBot
-            IF ((iTop - iBot) < 0) THEN
-                write (kStdErr,*) 'the top of your cloud is below the bottom'
-                CALL DoStop
-            END IF
+        iTop = FindCloudLayer(rPT,raPressLevels,iProfileLayers)
+        iBot = FindCloudLayer(rPB,raPressLevels,iProfileLayers)
+        iNum = iTop
+        write (kStdWarn,*) 'From the initial info in *SCATTR'
+        write (KStdWarn,*) 'cloud #, layer #',iIn,iJ1
+        write (kStdWarn,*) 'top pressure, pressure layer = ',rPT,iTop
+        write (kStdWarn,*) 'bot pressure, pressure layer = ',rPB,iBot
+        IF ((iTop - iBot) < 0) THEN
+          write (kStdErr,*) 'the top of your cloud is below the bottom'
+          CALL DoStop
+        END IF
 
-            raaJunkCloudTB(iIn,1) = raPressLevels(iTop+1)
-            raaJunkCloudTB(iIn,2) = raPressLevels(iBot)
+        raaJunkCloudTB(iIn,1) = raPressLevels(iTop+1)
+        raaJunkCloudTB(iIn,2) = raPressLevels(iBot)
 
-            IF ((iTop - iBot) == 0) THEN
-            ! othing special : user defined ONE layer, keep things as they are
-                rP1 = raaaCloudParams(iIn,iJ1,1)        !IWP
-                rP2 = raaaCloudParams(iIn,iJ1,2)        !mean size
-                iScat  = iaaScatTable(iIn,iJ1)
-                caName = caaaScatTable(iIn,iJ1)
+        IF ((iTop - iBot) == 0) THEN
+          !nothing special : user defined ONE layer, keep things as they are
+          rP1 = raaaCloudParams(iIn,iJ1,1)        !IWP
+          rP2 = raaaCloudParams(iIn,iJ1,2)        !mean size
+          iScat  = iaaScatTable(iIn,iJ1)
+          caName = caaaScatTable(iIn,iJ1)
 
-                raaPCloudTopT(iIn,iJ1) = rPT
-                raaPCloudBotT(iIn,iJ1) = rPB
-                CALL FullPlusPartialLayer(rPT,rPB,iTop,iBot,raPressLevels, &
+          raaPCloudTopT(iIn,iJ1) = rPT
+          raaPCloudBotT(iIn,iJ1) = rPB
+          CALL FullPlusPartialLayer(rPT,rPB,iTop,iBot,raPressLevels, &
                 raPressStart,raPressStop, &
                 raFracTop,raFracBot,iNatm,rIWP_Mod)
 
-                IF (rIWP_Mod < 0.9999) THEN
-                    IF (abs(rIWP_Mod - raFracBot(1)) > 1.0e-4) THEN
-                        write(kStdErr,*) 'Resetting raIWP in ExpandScatter!'
-                        write(kStdErr,*) 'It will reset in RTSPEC,DISORT,kTWOSTREAM'
-                        write(kStdErr,*) 'because of the partial layers'
-                        write(kStdErr,*) 'but for one layer .... this'
-                        write(kStdErr,*) 'should NOT happen rIWP_Mod == 1!!!!',rIWP_Mod
-                        write(kStdErr,*) ' even checking raFracBot = ',raFracBot(1)
-                        CALL DoStop
-                    ENDIF
-                ELSEIF (rIWP_Mod > 1.00001) THEN
-                    write(kStdErr,*) 'Resetting raIWP in ExpandScatter!'
-                    write(kStdErr,*) 'It will reset in RTSPEC,DISORT,kTWOSTREAM'
-                    write(kStdErr,*) 'because of the partial layers'
-                    write(kStdErr,*) 'but for one layer .... this'
-                    write(kStdErr,*) 'should NOT happen rIWP_Mod == 1!!!!',rIWP_Mod
-                    CALL DoStop
-                ELSEIF (rIWP_Mod < 0.0) THEN
-                    write(kStdErr,*) 'modifying cloud fraction factor < 0 ... Quit!'
-                    CALL DoStop
-                END IF
-                raaaCloudParamsT(iIn,iJ1,1) = rP1/rIWP_Mod        !IWP
-                raaaCloudParamsT(iIn,iJ1,2) = rP2                 !mean size
-                iaaScatTableT(iIn,iJ1)  = iScat
-                caaaScatTableT(iIn,iJ1) = caName
+          IF (rIWP_Mod < 0.9999) THEN
+            IF (abs(rIWP_Mod - raFracBot(1)) > 1.0e-4) THEN
+              write(kStdErr,*) 'Resetting raIWP in ExpandScatter!'
+              write(kStdErr,*) 'It will reset in RTSPEC,DISORT,kTWOSTREAM'
+              write(kStdErr,*) 'because of the partial layers'
+              write(kStdErr,*) 'but for one layer .... this'
+              write(kStdErr,*) 'should NOT happen rIWP_Mod == 1!!!!',rIWP_Mod
+              write(kStdErr,*) ' even checking raFracBot = ',raFracBot(1)
+              CALL DoStop
+            ENDIF
+          ELSEIF (rIWP_Mod > 1.00001) THEN
+            write(kStdErr,*) 'Resetting raIWP in ExpandScatter!'
+            write(kStdErr,*) 'It will reset in RTSPEC,DISORT,kTWOSTREAM'
+            write(kStdErr,*) 'because of the partial layers'
+            write(kStdErr,*) 'but for one layer .... this'
+            write(kStdErr,*) 'should NOT happen rIWP_Mod == 1!!!!',rIWP_Mod
+            CALL DoStop
+          ELSEIF (rIWP_Mod < 0.0) THEN
+            write(kStdErr,*) 'modifying cloud fraction factor < 0 ... Quit!'
+            CALL DoStop
+          END IF
+          raaaCloudParamsT(iIn,iJ1,1) = rP1/rIWP_Mod        !IWP
+          raaaCloudParamsT(iIn,iJ1,2) = rP2                 !mean size
+          iaaScatTableT(iIn,iJ1)  = iScat
+          caaaScatTableT(iIn,iJ1) = caName
 
-            ! rite(kStdWarn,*) '   layer #',iJ1,' = pressure layer ',iNum
-            ! rite(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
-            ! rite(kStdWarn,*) '   mean particle size (um)  = ',rP2
-            ! rite(kStdWarn,*) '   has scatter table number = ',iScat
-            ! rite(kStdWarn,222) caName
-            ! rite(kStdWarn,*) ' '
+          !write(kStdWarn,*) '   layer #',iJ1,' = pressure layer ',iNum
+          !write(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
+          !write(kStdWarn,*) '   mean particle size (um)  = ',rP2
+          !write(kStdWarn,*) '   has scatter table number = ',iScat
+          !write(kStdWarn,222) caName
+          !write(kStdWarn,*) ' '
+        ELSE
+          ! hoo boy : have to expand the cloud!
+
+          rCld = iTop-iBot+1.0
+          rCldFull = rCld-1 !!assume top part of cloud occupies full layers
+          rCldPart = 1.0    !!assume bottom part of cld occupies full layers
+
+          write(kStdWarn,*) ' Expanding layer ',iJ1,' from 1 to ',iTop-iBot+1
+          write(kStdWarn,*) ' <IWP> per layer will be about ',rIWP0/rCld
+
+          !number of layers in cloud has increased from x to x + (iTop-iBot)
+          IF ((iaCloudNumLayers(iIn) + (iTop-iBot)) > kCloudLayers) THEN
+            write(kStdErr,*) 'Tried to expand cloud layers, but now the '
+            write(kStdErr,*) 'number of layers in cloud > kCloudLayers'
+            CALL DoStop
+          END IF
+          iaCloudNumLayersT(iIn) = iaCloudNumLayersT(iIn) + (iTop-iBot)
+
+          !compute avg pressures of top and bottom layers
+          iK = iTop                       !!avg press of top layer
+          rPTop = raPressLevels(iK) + (raPressLevels(iK+1)-raPressLevels(iK))/2
+          rPtopX = raPressLevels(iK+1)  !!topmost pressure
+          iK = iBot                       !!avg press of bot layer
+          rPBot = raPressLevels(iK) + (raPressLevels(iK+1)-raPressLevels(iK))/2
+          rPbotX = raPressLevels(iK)    !!bottommost pressure
+          CALL FullPlusPartialLayer(rPTop,rPBot,iTop,iBot,raPressLevels,&
+                raPressStart,raPressStop, &
+                raFracTop,raFracBot,iNatm,rIWP_Mod)
+          IF (rIWP_Mod < 0.99) THEN
+            write(kStdWarn,*) 'Resetting raIWP in ExpandScatter!'
+            write(kStdWarn,*) 'It will reset in RTSPEC,DISORT,kTWOSTREAM'
+            write(kStdWarn,*) 'because of the partial layers'
+            rCldFull = rCld - 1
+            rCldPart = rIWP_Mod
+          ELSEIF (rIWP_Mod < 0.0) THEN
+            write(kStdErr,*) 'modifying cloud fraction factor < 0 ... Quit!'
+            CALL DoStop
+          END IF
+
+          ! let the pressure layers of the cloud, and <dme>,IWP
+          ! also set the scattering table number and file names
+          iK = iTop
+          rIWPSum = 0.0
+          DO iJ2=1,(iTop-iBot)+1
+            rPT = raPressLevels(iK) + (raPressLevels(iK)-raPressLevels(iK+1))/2
+            rPT = raPressLevels(iK) + (raPressLevels(iK+1)-raPressLevels(iK))/2
+            IF (raPressLevels(iK-1) > raPressLevels(iK)) THEN
+              rPB = raPressLevels(iK-1) + (raPressLevels(iK)-raPressLevels(iK-1))/2
+            ELSEIF (raPressLevels(iK-1) < raPressLevels(iK)) THEN
+              rPB = raSurfPres(1)
+              write(kStdErr,*) '  oh oh, in expand_scatter : cloud near surface???'
+              write(kStdErr,*) '  ',iIn,iIndex,rPT,rPB,raSurfPres(1),iK,raPressLevels(iK-1),raPressLevels(iK)
+              write(kStdWarn,*) '  oh oh, in expand_scatter : cloud near surface???'
+              write(kStdWarn,*) '  ',iIn,iIndex,rPT,rPB,raSurfPres(1),iK,raPressLevels(iK-1),raPressLevels(iK)
+            END IF
+            iIndex = iJ1+(iJ2-1)+iSkipper
+            raaPCloudTopT(iIn,iIndex) = rPT
+            raaPCloudBotT(iIn,iIndex) = rPB  !! this was rPT before
+            !            print *,'n_rad_jac_scat.f : expand_scatter : ',iIn,iIndex,rPT,rPB,raSurfPres(1),
+            !     $                   iK,raPressLevels(iK-1),raPressLevels(iK)
+            IF (iJ2 < iTop-iBot+1) THEN
+              !!!this is a full layer
+              rXCld = (rCldFull + rCldPart)
             ELSE
-            ! h boy : have to expand the cloud!
-
-                rCld = iTop-iBot+1.0
-                rCldFull = rCld-1 !!assume top part of cloud occupies full layers
-                rCldPart = 1.0    !!assume bottom part of cld occupies full layers
-
-                write(kStdWarn,*) ' Expanding layer ',iJ1,' from 1 to ',iTop-iBot+1
-                write(kStdWarn,*) ' <IWP> per layer will be about ',rIWP0/rCld
-
-            ! umber of layers in cloud has increased from x to x + (iTop-iBot)
-                IF ((iaCloudNumLayers(iIn) + (iTop-iBot)) > kCloudLayers) THEN
-                    write(kStdErr,*) 'Tried to expand cloud layers, but now the '
-                    write(kStdErr,*) 'number of layers in cloud > kCloudLayers'
-                    CALL DoStop
-                END IF
-                iaCloudNumLayersT(iIn) = iaCloudNumLayersT(iIn) + (iTop-iBot)
-
-            ! ompute avg pressures of top and bottom layers
-                iK = iTop                       !!avg press of top layer
-                rPTop = raPressLevels(iK) + &
-                (raPressLevels(iK+1)-raPressLevels(iK))/2
-                rPtopX = raPressLevels(iK+1)  !!topmost pressure
-                iK = iBot                       !!avg press of bot layer
-                rPBot = raPressLevels(iK) + &
-                (raPressLevels(iK+1)-raPressLevels(iK))/2
-                rPbotX = raPressLevels(iK)    !!bottommost pressure
-                CALL FullPlusPartialLayer(rPTop,rPBot,iTop,iBot,raPressLevels, &
-                raPressStart,raPressStop, &
-                raFracTop,raFracBot,iNatm,rIWP_Mod)
-                IF (rIWP_Mod < 0.99) THEN
-                    write(kStdWarn,*) 'Resetting raIWP in ExpandScatter!'
-                    write(kStdWarn,*) 'It will reset in RTSPEC,DISORT,kTWOSTREAM'
-                    write(kStdWarn,*) 'because of the partial layers'
-                    rCldFull = rCld - 1
-                    rCldPart = rIWP_Mod
-                ELSEIF (rIWP_Mod < 0.0) THEN
-                    write(kStdErr,*) 'modifying cloud fraction factor < 0 ... Quit!'
-                    CALL DoStop
-                END IF
-
-            ! et the pressure layers of the cloud, and <dme>,IWP
-            ! lso set the scattering table number and file names
-                iK = iTop
-                rIWPSum = 0.0
-                DO iJ2=1,(iTop-iBot)+1
-                    rPT = raPressLevels(iK) + &
-                    (raPressLevels(iK)-raPressLevels(iK+1))/2
-                    rPT = raPressLevels(iK) + &
-                    (raPressLevels(iK+1)-raPressLevels(iK))/2
-                    IF (raPressLevels(iK-1) > raPressLevels(iK)) THEN
-                        rPB = raPressLevels(iK-1) + &
-                        (raPressLevels(iK)-raPressLevels(iK-1))/2
-                    ELSEIF (raPressLevels(iK-1) < raPressLevels(iK)) THEN
-                        rPB = raSurfPres(1)
-                        write(kStdErr,*) '  oh oh, in expand_scatter : cloud near surface???'
-                        write(kStdErr,*) '  ',iIn,iIndex,rPT,rPB,raSurfPres(1),iK,raPressLevels(iK-1),raPressLevels(iK)
-                        write(kStdWarn,*) '  oh oh, in expand_scatter : cloud near surface???'
-                        write(kStdWarn,*) '  ',iIn,iIndex,rPT,rPB,raSurfPres(1),iK,raPressLevels(iK-1),raPressLevels(iK)
-                    END IF
-                    iIndex = iJ1+(iJ2-1)+iSkipper
-                    raaPCloudTopT(iIn,iIndex) = rPT
-                    raaPCloudBotT(iIn,iIndex) = rPB  !! this was rPT before
-                !            print *,'n_rad_jac_scat.f : expand_scatter : ',iIn,iIndex,rPT,rPB,raSurfPres(1),
-                !     $                   iK,raPressLevels(iK-1),raPressLevels(iK)
-                    IF (iJ2 < iTop-iBot+1) THEN
-                    !!!this is a full layer
-                        rXCld = (rCldFull + rCldPart)
-                    ELSE
-                    !!!bottom layer is a partial layer
-                        rXCld = (rCldFull + rCldPart)/rCldPart
-                    END IF
-                    IF (abs(raExp(iIn)) > 0.001) THEN
-                    !!!do an exponential distribution of particles among layers
-                        rIWP = rIWP0/rXCld*exp(raExp(iIn)*(rPBot-rPT)/(rPBot-rPTop))
-                        rIWPSum = rIWPSum + exp(raExp(iIn)*(rPBot-rPT)/(rPBot-rPTop))
-                    ELSEIF ((abs(raExp(iIn)) < 0.001)) THEN
-                    !!!before March 06, do equal distribution of particles among layers
-                        rFrac1 = 1/rXCld
-                        rIWP = rIWP0*rFrac1
-
-                    !!!after March 06, distribute according to pressure levels
-                        rFrac2 = raPressLevels(iK)-raPressLevels(iK+1)
-                        rFrac2 = rFrac2/(rPBotX-rPTopX)
-                        rIWP  = rIWP0*rFrac2
-
-                    !! Jul 2015, see how rFrac1 works!
-                    ! IWP = rIWP0*rFrac1
-                                    
-                    ! rint *,iJ2,rFrac1,rFrac2,raPressLevels(iK),raPressLevels(iK+1),rPBotX,rPTopX
-                    END IF
-                    raaaCloudParamsT(iIn,iIndex,1) = rIWP
-                    raaaCloudParamsT(iIn,iIndex,2) = raaaCloudParams(iIn,iJ1,2)
-                    caaaScatTableT(iIn,iIndex)     = caaaScatTable(iIn,iJ1)
-                    iaaScatTableT(iIn,iIndex)      = iaaScatTable(iIn,iJ1)
-
-                    iScat  = iaaScatTableT(iIn,iIndex)
-                    rP1 = raaaCloudParamsT(iIn,iIndex,1)
-                    rP2 = raaaCloudParamsT(iIn,iIndex,2)
-                    write(kStdWarn,*) 'press levels = ',raPressLevels(iK), &
-                    raPressLevels(iK+1),' mb'
-                    write(kStdWarn,*) '   layer #',iJ2,' = pressure layer ',iK
-                    write(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
-                    write(kStdWarn,*) '   mean particle size (um)  = ',rP2
-                ! rite(kStdWarn,*) '   has scatter table number = ',iScat
-                ! rite(kStdWarn,222) caName
-                    write(kStdWarn,*) ' '
-
-                    iK = iK - 1
-                END DO
-
-                IF (abs(raExp(iIn)) > 0.001) THEN
-                    DO iJ2 = 1,(iTop-iBot)+1
-                        iIndex = iJ1+(iJ2-1)+iSkipper
-                        rIWP = raaaCloudParamsT(iIn,iIndex,1)
-                        rIWP = rIWP*rCld/rIWPSum
-                        raaaCloudParamsT(iIn,iIndex,1) = rIWP
-                    END DO
-                END IF
-
-                iSkipper = iTop - iBot
-
+              !!!bottom layer is a partial layer
+              rXCld = (rCldFull + rCldPart)/rCldPart
             END IF
+            IF (abs(raExp(iIn)) > 0.001) THEN
+              !!!do an exponential distribution of particles among layers
+              rIWP = rIWP0/rXCld*exp(raExp(iIn)*(rPBot-rPT)/(rPBot-rPTop))
+              rIWPSum = rIWPSum + exp(raExp(iIn)*(rPBot-rPT)/(rPBot-rPTop))
+            ELSEIF ((abs(raExp(iIn)) < 0.001)) THEN
+              !!!before March 06, do equal distribution of particles among layers
+              rFrac1 = 1/rXCld
+              rIWP = rIWP0*rFrac1
 
-        END DO
+              !!!after March 06, distribute according to pressure levels
+              rFrac2 = raPressLevels(iK)-raPressLevels(iK+1)
+              rFrac2 = rFrac2/(rPBotX-rPTopX)
+              rIWP  = rIWP0*rFrac2
+
+              !print *,iJ2,rFrac1,rFrac2,raPressLevels(iK),raPressLevels(iK+1),rPBotX,rPTopX
+            END IF
+            raaaCloudParamsT(iIn,iIndex,1) = rIWP
+            raaaCloudParamsT(iIn,iIndex,2) = raaaCloudParams(iIn,iJ1,2)
+            caaaScatTableT(iIn,iIndex)     = caaaScatTable(iIn,iJ1)
+            iaaScatTableT(iIn,iIndex)      = iaaScatTable(iIn,iJ1)
+
+            iScat  = iaaScatTableT(iIn,iIndex)
+            rP1 = raaaCloudParamsT(iIn,iIndex,1)
+            rP2 = raaaCloudParamsT(iIn,iIndex,2)
+            write(kStdWarn,*) 'press levels = ',raPressLevels(iK),raPressLevels(iK+1),' mb'
+            write(kStdWarn,*) '   layer #',iJ2,' = pressure layer ',iK
+            write(kStdWarn,*) '   IWP (or LWP) (gm-2)      = ',rP1
+            write(kStdWarn,*) '   mean particle size (um)  = ',rP2
+            !write(kStdWarn,*) '   has scatter table number = ',iScat
+            !write(kStdWarn,222) caName
+            write(kStdWarn,*) ' '
+
+            iK = iK - 1
+          END DO
+
+          IF (abs(raExp(iIn)) > 0.001) THEN
+            DO iJ2 = 1,(iTop-iBot)+1
+              iIndex = iJ1+(iJ2-1)+iSkipper
+              rIWP = raaaCloudParamsT(iIn,iIndex,1)
+              rIWP = rIWP*rCld/rIWPSum
+              raaaCloudParamsT(iIn,iIndex,1) = rIWP
+            END DO
+          END IF
+          iSkipper = iTop - iBot
+        END IF
+      END DO
     END DO
 
     222 FORMAT(' name = ',A80)
 
 ! then reset the variables
-    DO iI = 1,kMaxClouds
-        iaCloudNumLayers(iI) = iaCloudNumLayersT(iI)
-        caaCloudName(iI)     = caaCloudNameT(iI)
-        iaCloudNumAtm(iI)    = iaCloudNumAtmT(iI)
-        DO iJ = 1,kCloudLayers
-            raaPCloudTop(iI,iJ)  = raaPCloudTopT(iI,iJ)
-            raaPCloudBot(iI,iJ)  = raaPCloudBotT(iI,iJ)
-            iaaScatTable(iI,iJ)  = iaaScatTableT(iI,iJ)
-            caaaScatTable(iI,iJ) = caaaScatTableT(iI,iJ)
-            DO iK = 1,2
-                raaaCloudParams(iI,iJ,iK) = raaaCloudParamsT(iI,iJ,iK)
-            END DO
-        END DO
-    END DO
-    DO iI = 1,kMaxClouds
-        DO iJ = 1,kMaxAtm
-            iaaCloudWhichAtm(iI,iJ) = iaaCloudWhichAtmT(iI,iJ)
-        END DO
-    END DO
+    iaCloudNumLayers = iaCloudNumLayersT
+    caaCloudName     = caaCloudNameT
+    iaCloudNumAtm    = iaCloudNumAtmT
+    raaPCloudTop  = raaPCloudTopT
+    raaPCloudBot  = raaPCloudBotT
+    iaaScatTable  = iaaScatTableT
+    caaaScatTable = caaaScatTableT
+    raaaCloudParams  = raaaCloudParamsT
+    iaaCloudWhichAtm = iaaCloudWhichAtmT
 
     write(kStdWarn,*) 'Ended Checking/Expanding Initial Cloud Info ..... exiting expandscatter'
     write(kStdWarn,*) ' <<<<<<<<<<<<<<<<<    exit EXPAND SCATTER            >>>>>>>>>>>>>>> '

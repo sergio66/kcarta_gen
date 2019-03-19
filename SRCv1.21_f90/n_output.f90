@@ -205,68 +205,57 @@ CONTAINS
 
     INTEGER :: iaPrinter1(kMaxPrint),iaGPMPAtm1(kMaxPrint)
     INTEGER :: iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint),iMaxMinLBLRTMOp
-    REAL :: raaOp1(kMaxPrint,kProfLayer),rMaxMinLBLRTMOp
+    REAL :: raaOp1(kMaxPrint,kPathsOut),rMaxMinLBLRTMOp
 
     IF ((kRTP == -10) .OR. (kRTP == -5) .OR. (kRTP == -6)) THEN
-        write (kStdWarn,*) 'Need to reset some output params as they came from text LVLS/LBLRTM code'
-        write(kStdWarn,*) 'raaOp(1,1) = ',raaOp(1,1),' --> ',raRTP_TxtInput(6),' mb'
-        rMaxMinLBLRTMOp = +1.0e10
-        iMaxMinLBLRTMOp = 1
-        DO iI=1,kMaxPrint
-            DO iJ=1,kProfLayer
-                IF (raaOp(iI,iJ) < rMaxMinLBLRTMOp) THEN
-                    iMaxMinLBLRTMOp = iJ
-                    rMaxMinLBLRTMOp = raaOp(iI,iJ)
-                END IF
-            END DO
-            raaOp(iI,iMaxMinLBLRTMOp) = raRTP_TxtInput(6)
+      write (kStdWarn,*) 'Need to reset some output params as they came from text LVLS/LBLRTM code'
+      write(kStdWarn,*) 'raaOp(1,1) = ',raaOp(1,1),' --> ',raRTP_TxtInput(6),' mb'
+      rMaxMinLBLRTMOp = +1.0e10
+      iMaxMinLBLRTMOp = 1
+      DO iI=1,kMaxPrint
+        DO iJ=1,kProfLayer
+          IF (raaOp(iI,iJ) < rMaxMinLBLRTMOp) THEN
+            iMaxMinLBLRTMOp = iJ
+            rMaxMinLBLRTMOp = raaOp(iI,iJ)
+          END IF
         END DO
+      raaOp(iI,iMaxMinLBLRTMOp) = raRTP_TxtInput(6)
+      END DO
     END IF
 
-    DO iI=1,kMaxPrint
-        iaPrinter1(iI)=iaPrinter(iI)
-        iaGPMPAtm1(iI)=iaGPMPAtm(iI)
-        iaNP1(iI)=iaNP(iI)
-    END DO
-    DO iI=1,kMaxPrint
-        DO iJ=1,kPathsOut
-            iaaOp1(iI,iJ)=iaaOp(iI,iJ)
-        END DO
-    END DO
-    DO iI=1,kMaxPrint
-        DO iJ=1,kProfLayer
-            raaOp1(iI,iJ)=raaOp(iI,iJ)
-        END DO
-    END DO
+    iaPrinter1 = iaPrinter
+    iaGPMPAtm1 = iaGPMPAtm
+    iaNP1      = iaNP
 
-    caWord='*OUTPUT'
-    iErr=-1
+    iaaOp1 = iaaOp
+    raaOp1 = raaOp
 
-    iOutTypes=1
-    iNatm2=-1
+    caWord = '*OUTPUT'
+    iErr = -1
 
-    DO iI=1,kMaxGas
-        iaGasID(iI)=-100
-    END DO
+    iOutTypes = 1
+    iNatm2    = -1
+
+    iaGasID = -100
 
     iJ=0
     DO iI=1,kMaxGas
-        IF (iaGases(iI) > 0) THEN
-            iJ=iJ+1
-            iaGasID(iJ)=iI
-        END IF
+      IF (iaGases(iI) > 0) THEN
+        iJ = iJ+1
+        iaGasID(iJ) = iI
+      END IF
     END DO
     IF (iNumGases /= iJ) THEN
-        write(kStdErr,*) 'discrepancy in number of gases stored'
-        write(kStdErr,*) 'iNumGases, iGasStored = ',iNumGases,iJ
-        CALL DoSTOP
+      write(kStdErr,*) 'discrepancy in number of gases stored'
+      write(kStdErr,*) 'iNumGases, iGasStored = ',iNumGases,iJ
+      CALL DoSTOP
     END IF
 
     iNumLinesRead=0
-    13 IF (iNumLinesRead > 0) THEN
-        iErr=1
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+ 13 IF (iNumLinesRead > 0) THEN
+      iErr=1
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
     5010 FORMAT('Error reading section ',A7,' of main file')
 
@@ -275,260 +264,245 @@ CONTAINS
 ! figure out as a first guess how many printing options there have to be
     iOutTypesMax=0
     DO iErr=1,kMaxPrint
-        IF (iaPrinter(iErr) > 0) THEN
-            iOutTypesMax=iOutTypesMax+1
-        END IF
+      IF (iaPrinter(iErr) > 0) THEN
+        iOutTypesMax=iOutTypesMax+1
+      END IF
     END DO
           
     iOutTypes=1
     DO iOut2=1,iOutTypesMax
-        iPrinter=iaPrinter1(iOut2)
-        iaPrinterT(iOutTypes)=iPrinter
-        IF ((iPrinter /= 1) .AND. (iPrinter /= 2) .AND. (iPrinter /= 3))THEN
-            write(kStdErr,*) 'iPrinterOption = ',iPrinter
-            write(kStdErr,*)'in *OUTPUT .. Need iPrinterOption= 1,2 or 3'
-            CALL DoSTOP
-        END IF
+      iPrinter=iaPrinter1(iOut2)
+      iaPrinterT(iOutTypes)=iPrinter
+      IF ((iPrinter /= 1) .AND. (iPrinter /= 2) .AND. (iPrinter /= 3))THEN
+        write(kStdErr,*) 'iPrinterOption = ',iPrinter
+        write(kStdErr,*)'in *OUTPUT .. Need iPrinterOption= 1,2 or 3'
+        CALL DoSTOP
+      END IF
 
-    ! now read which atmosphere, gaspath or MP set to print and do check ...
-        IF (iPrinter == 3) THEN
-            iGs=-1000
-            iAtm=iaGPMPAtm1(iOut2)
-            iNp=iaNp1(iOut2)
-            CALL Read3(iAtm,iNp,iNpmix,iNatm,iNatm2,iListType, &
+      ! now read which atmosphere, gaspath or MP set to print and do check ...
+      IF (iPrinter == 3) THEN
+        iGs = -1000
+        iAtm = iaGPMPAtm1(iOut2)
+        iNp = iaNp1(iOut2)
+        CALL Read3(iAtm,iNp,iNpmix,iNatm,iNatm2,iListType, &
             iaGPMPAtmT,iaNpT,iOutTypes,iaPrinterT,iPrinter)
-        !          IF ((kWhichScatterCode .NE. 0) .AND. (iNp .NE. 1)) THEN
-        !            write(kStdErr,*) 'For DISORT,RTSPEC, can only output radiance'
-        !            write(kStdErr,*) 'at one level. Please reset iaNp(j) and retry'
-        !            CALL DoStop
-        !          END IF
-        ELSE IF (iPrinter == 2) THEN
-            iAtm=0                 !make sure this is set to 0
-            iGs=iaGPMPAtm1(iOut2)
-            iNp=iaNp1(iOut2)
+      ELSE IF (iPrinter == 2) THEN
+        iAtm = 0                 !make sure this is set to 0
+        iGs = iaGPMPAtm1(iOut2)
+        iNp = iaNp1(iOut2)
         !***warning*** iNp can be reset from -1 to another number by Read2
-        ! ee subroutine ReCheck_iNp
-        ! f initially -1, it is left as -1 if ALL mixed paths to be output
-            CALL Read2(iGS,iNp,iNpmix,iMPSets,iAtm, &
+        ! see subroutine ReCheck_iNp
+        ! if initially -1, it is left as -1 if ALL mixed paths to be output
+        CALL Read2(iGS,iNp,iNpmix,iMPSets,iAtm, &
             iList,iListType,iaGPMPAtmT,iaNpT,iOutTypes,iPrinter,iNumGases)
-        ELSE IF (iPrinter == 1) THEN
-            iAtm=0                 !make sure this is set to 0
-            iGs=iaGPMPAtm1(iOut2)
-            iNp=iaNp1(iOut2)
+      ELSE IF (iPrinter == 1) THEN
+        iAtm = 0                 !make sure this is set to 0
+        iGs = iaGPMPAtm1(iOut2)
+        iNp = iaNp1(iOut2)
         !***warning*** iNp can be reset from -1 to another number by Read1
-        ! ee subroutine ReCheck_iNp
-        ! f initially -1, it is left as -1 if ALL paths to be output
-            CALL Read1(iGS,iNp,iNpmix,iMPSets,iAtm, &
+        ! see subroutine ReCheck_iNp
+        ! if initially -1, it is left as -1 if ALL paths to be output
+        CALL Read1(iGS,iNp,iNpmix,iMPSets,iAtm, &
             iList,iListType,iaGPMPAtmT,iaNpT,iOutTypes,iPrinter, &
             iNumGases,iaGasID)
-        END IF
+      END IF
 
-    ! if iNp=0 then nothing to be printed --- abort program
-        IF (iNp == 0) THEN
-            write(kStdErr,*) 'in *OUTPUT!! You have chosen a valid printing'
-            write(kStdErr,*) 'option (1,2 or 3) but do not specify any '
-            write(kStdErr,*) 'paths/mixed paths/radiances to be printed !!!'
-            CALL DoSTOP
-        END IF
+      ! if iNp=0 then nothing to be printed --- abort program
+      IF (iNp == 0) THEN
+        write(kStdErr,*) 'in *OUTPUT!! You have chosen a valid printing'
+        write(kStdErr,*) 'option (1,2 or 3) but do not specify any '
+        write(kStdErr,*) 'paths/mixed paths/radiances to be printed !!!'
+        CALL DoSTOP
+      END IF
 
-    ! now consider the case where iNp < 0 but we only set ONE single option
-    ! iAtm = 0, iNp < 0 ==> we want to print out a set of mixed paths or
-    !                                          a set of gas optical depths
-    ! iAtm > 0, iNp < 0 ==> want to print out radiances at all levels of an
-    !                       atmosphere
-    ! &&&&&&&&&& BEGIN CASE 1
-        IF ((iAtm >= 0)  .AND. (iNp < 0)) THEN
-            IF (iPrinter == 1) THEN
-            ! have to output ALL the single paths, corresponding to all KProfLayers for
-            ! each of the iNumGases gases present
-                DO iI=1,kProfLayer*iNumGases
-                    iaOp(iI)=iI
-                    iaaOpT(iOutTypes,iI)=iI
-                END DO
-            ELSE IF (iPrinter == 2) THEN
-            ! have to output ALL the mixed paths, corresponding to all 1..iNpMix
-                DO iI=1,iNpmix
-                    iaOp(iI)=iI
-                    iaaOpT(iOutTypes,iI)=iI
-                END DO
-            ! if iNp < 0 and iPrinter = 3, then set iaOp to "ALL" values, as follows
-            ELSE IF (iPrinter == 3) THEN !set pressure fraction=1.0
-            ! his subroutine sets iaOp and iaaOpT
-                CALL AllLayersOutputPress(iaaRadLayer,iAtm,iaNumLayer, &
+      ! now consider the case where iNp < 0 but we only set ONE single option
+      ! iAtm = 0, iNp < 0 ==> we want to print out a set of mixed paths or
+      !                                          a set of gas optical depths
+      ! iAtm > 0, iNp < 0 ==> want to print out radiances at all levels of an
+      !                       atmosphere
+      ! &&&&&&&&&& BEGIN CASE 1
+      IF ((iAtm >= 0)  .AND. (iNp < 0)) THEN
+        IF (iPrinter == 1) THEN
+          ! have to output ALL the single paths, corresponding to all KProfLayers for
+          ! each of the iNumGases gases present
+          DO iI = 1,kProfLayer*iNumGases
+            iaOp(iI) = iI
+            iaaOpT(iOutTypes,iI) = iI
+          END DO
+        ELSE IF (iPrinter == 2) THEN
+          ! have to output ALL the mixed paths, corresponding to all 1..iNpMix
+          DO iI = 1,iNpmix
+            iaOp(iI)=iI
+            iaaOpT(iOutTypes,iI)=iI
+          END DO
+          ! if iNp < 0 and iPrinter = 3, then set iaOp to "ALL" values, as follows
+        ELSE IF (iPrinter == 3) THEN !set pressure fraction=1.0
+          ! this subroutine sets iaOp and iaaOpT
+          CALL AllLayersOutputPress(iaaRadLayer,iAtm,iaNumLayer, &
                 iaOp,iaaOpT,raaOpT,iOutTypes,raaUserPressT, &
                 raaPrBdry,raFracTop,raFracBot,raPressLevels)
-            END IF
-        END IF       !IF ((iAtm >= 0)  .AND. (iNp < 0)) THEN
-    ! &&&&&&&&&& END CASE 1
+        END IF
+      END IF       !IF ((iAtm >= 0)  .AND. (iNp < 0)) THEN
+      ! &&&&&&&&&& END CASE 1
 
-    ! &&&&&&&&&& BEGIN CASE 2
-    ! now consider the case where iNp > 0
-    ! if iNp > 0 then look for list of layers/mixed paths/radiances
-    ! &&&&&&&&&& BEGIN CASE 2A
-        IF ((iAtm >= 0)  .AND. (iNp > 0)) THEN
-            IF (iPrinter == 3) THEN
-            ! can easily set things for the ONE atmosphere
-                DO iI=1,iNp
-                    raTemp(iI)=raaOp1(iOut2,iI)
-                END DO
-                IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN
-                    iUpDown=1            !upward travelling radiation
-                ELSE
-                    iUpDown=-1           !downward travelling radiation
-                END IF
-                CALL DoSortReal(raTemp,iNp,-iUpDown)
-                CALL PressTOLayers(raaOpT,iaOp,iaNumLayer,iaaRadLayer,iAtm, &
+      ! &&&&&&&&&& BEGIN CASE 2
+      ! now consider the case where iNp > 0
+      ! if iNp > 0 then look for list of layers/mixed paths/radiances
+      ! &&&&&&&&&& BEGIN CASE 2A
+      IF ((iAtm >= 0)  .AND. (iNp > 0)) THEN
+        IF (iPrinter == 3) THEN
+          ! can easily set things for the ONE atmosphere
+          raTemp(1:iNp)=raaOp1(iOut2,1:iNp)
+          IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN
+            iUpDown = 1            !upward travelling radiation
+          ELSE
+            iUpDown = -1           !downward travelling radiation
+          END IF
+          CALL DoSortReal(raTemp,iNp,-iUpDown)
+          CALL PressTOLayers(raaOpT,iaOp,iaNumLayer,iaaRadLayer,iAtm, &
                 iOutTypes,raTemp,iNp,raaPrBdry,raaUserPressT,raPressLevels)
-                DO iI=1,iNp
-                    iaaOpT(iOutTypes,iI)=iaOp(iI)
-                END DO
-            ! &&&&&&&&&& END CASE 2A
+          iaaOpT(iOutTypes,1:iNp)=iaOp(1:iNp)
+          ! &&&&&&&&&& END CASE 2A
 
-            ! for iPrinter = 1,2 (path or MP)
-            ! iList     = set how many items found in list
-            ! iListType = 1,2,3,4    1 if -1  -1
-            !                        2 if -1  iL
-            !                        3 if iGS -1
-            !                        4 if iGS iL
+          ! for iPrinter = 1,2 (path or MP)
+          ! iList     = set how many items found in list
+          ! iListType = 1,2,3,4    1 if -1  -1
+          !                        2 if -1  iL
+          !                        3 if iGS -1
+          !                        4 if iGS iL
 
-            ELSE IF (iPrinter /= 3) THEN
-            ! &&&&&&&&&& BEGIN CASE 2B
-                IF  ((iListType == 2) .OR. (iListType == 4)) THEN
-                    IF  (iListType == 2) THEN
-                        DO iI=1,iList
-                            iaOp(iI)=iaaOp1(iOut2,iI)
-                        END DO
-                        CALL DoSort(iaOp,iList)
-                    ! aving read in path/mixed path integers for ALL gas/MP sets
-                    ! ow for all gas/MP sets, set the relevant paths/mixed paths
-                        CALL DoSetAll(iaOp,iList,iNp,iPrinter,iNumGases,iMPSets)
-                    ELSE IF  (iListType == 4) THEN
-                        DO iI=1,iNp
-                            iaOp(iI)=iaaOp1(iOut2,iI)
-                        END DO
-                        CALL DoSort(iaOp,iNp)
-                    ! aving read in path/mixed path integers for the gas/MP set
-                    ! ow for all gas/MP sets, set the relevant paths/mixed paths
-                        CALL DoSetSome(iaOp,iList,iNp,iPrinter,iNumGases,iaGasID, &
-                        iMPSets,iGS)
-                    END IF
-                ! &&&&&&&&&& END CASE 2B
+        ELSE IF (iPrinter /= 3) THEN
+          ! &&&&&&&&&& BEGIN CASE 2B
+          IF  ((iListType == 2) .OR. (iListType == 4)) THEN
+            IF  (iListType == 2) THEN
+              iaOp(1:iList)=iaaOp1(iOut2,1:iList)
+              CALL DoSort(iaOp,iList)
+              !having read in path/mixed path integers for ALL gas/MP sets
+              !now for all gas/MP sets, set the relevant paths/mixed paths
+              CALL DoSetAll(iaOp,iList,iNp,iPrinter,iNumGases,iMPSets)
+            ELSE IF  (iListType == 4) THEN
+              iaOp(1:iNp)=iaaOp1(iOut2,1:iNp)
+              CALL DoSort(iaOp,iNp)
+              !having read in path/mixed path integers for the gas/MP set
+              !now for all gas/MP sets, set the relevant paths/mixed paths
+              CALL DoSetSome(iaOp,iList,iNp,iPrinter,iNumGases,iaGasID,iMPSets,iGS)
+            END IF
+         ! &&&&&&&&&& END CASE 2B
 
-                ! &&&&&&&&&& BEGIN CASE 2C
-                ELSE IF ((iPrinter == 2) .AND. (iListType == 3)) THEN
-                ! ave to set all MPs for a particular MP set
-                    DO iI=1,kProfLayer
-                        iaOp(iI)=iI+(iGS-1)*kProfLayer
-                    END DO
-                ! &&&&&&&&&& END CASE 2C
+       ELSE IF ((iPrinter == 2) .AND. (iListType == 3)) THEN
+         ! &&&&&&&&&& BEGIN CASE 2C
+         ! have to set all MPs for a particular MP set
+         DO iI = 1,kProfLayer
+           iaOp(iI) = iI+(iGS-1)*kProfLayer
+         END DO
+         ! &&&&&&&&&& END CASE 2C
 
-                ! &&&&&&&&&& BEGIN CASE 2D
-                ELSE IF ((iPrinter == 1) .AND. (iListType == 3)) THEN  !no list
-                ! ave to set all paths for a particular gas
-                ! ee where in the list gas iGS lies
-                    iI=1
-                    111 CONTINUE
-                    IF (iaGasID(iI) /= iGS) THEN
-                        iI=iI+1
-                        GO TO 111
-                    END IF
-                    iGS=iI
-                    DO iI=1,kProfLayer
-                        iaOp(iI)=iI+(iGS-1)*kProfLayer
-                    END DO
-                END IF       !if iListype = 2,4 or 3
-            ! &&&&&&&&&& END CASE 2D
-            END IF         !ELSE IF (iPrinter /= 3) THEN
-        ! &&&&&&&&&& END CASE 2
-        END IF           !      IF ((iNp > 0) .AND. (iAtm >= 0)) THEN
+       ELSE IF ((iPrinter == 1) .AND. (iListType == 3)) THEN  !no list
+         ! &&&&&&&&&& BEGIN CASE 2D
+         ! have to set all paths for a particular gas
+         ! see where in the list gas iGS lies
+         iI = 1
+ 111     CONTINUE
+         IF (iaGasID(iI) /= iGS) THEN
+           iI = iI+1
+           GO TO 111
+         END IF
+         iGS = iI
+         DO iI=1,kProfLayer
+           iaOp(iI)=iI+(iGS-1)*kProfLayer
+         END DO
+       END IF       !if iListype = 2,4 or 3
+       ! &&&&&&&&&& END CASE 2D
+
+       END IF         !ELSE IF (iPrinter /= 3) THEN
+      ! &&&&&&&&&& END CASE 2
+    END IF           !      IF ((iNp > 0) .AND. (iAtm >= 0)) THEN
 
     ! whew!!! we have now parsed in Print Option (1,2 or 3), the line following
     ! it (iAtm/iGS  iNp) and if necessary, the next line that has the list of iNp
     ! paths/mixed paths/pressures ... the list is stored in iaOpT
     ! if iAtm > 0, everything is almost set .. all we have to do is make sure this
     ! option can be included in iaPrinter(kMaxPrint) etc
-        IF (iAtm >= 0) THEN
-            CALL SetIaaOpT(iaaOpT,iaOp,iOutTypes,iPrinter,iAtm,iNpmix, &
+    IF (iAtm >= 0) THEN
+      CALL SetIaaOpT(iaaOpT,iaOp,iOutTypes,iPrinter,iAtm,iNpmix, &
             iNumGases,iNp,iaNumLayer)
-        ! f there is a duplicate, do not update iOutTypes, else increment
-        ! OutTypes by 1
-        ! f we find there are more than kMaxPrint options being stored,
-        ! hen HALT!!!
-            IF (iPrinter /= 3) THEN  !thus iAtm was set to 0 (no radiance)
-                CALL CheckIaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
+      ! if there is a duplicate, do not update iOutTypes, else increment
+      ! OutTypes by 1
+      ! if we find there are more than kMaxPrint options being stored,
+      ! then HALT!!!
+      IF (iPrinter /= 3) THEN  !thus iAtm was set to 0 (no radiance)
+        CALL CheckIaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
                 iNp,iaNpT,iaPrinterT)
-            END IF
-            IF ((iPrinter == 3) .AND. (iAtm > 0)) THEN
-                CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
+      END IF
+      IF ((iPrinter == 3) .AND. (iAtm > 0)) THEN
+        CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
                 iNp,iaNpT,iaPrinterT,iNatm,iAtm,iaGPMPAtmT, &
                 raaOpT,raaUserPressT,iaNumLayer,iUpDown)
-            END IF
-        END IF           !if iAtm >= 0)
+      END IF
+    END IF           !if iAtm >= 0)
 
     ! &&&&&&&&&& BEGIN CASE 3
     ! if iAtm < 0 and iNp > 0, we now have to set the same printing output paths
     ! for all the atmospheres
-        IF (iAtm < 0) THEN
-            IF (iPrinter /= 3) THEN
-                write(kStdErr,*)'Something gone wrong in *OUTPUT'
-                CALL DoSTOP
-            END IF
-        ! &&&&&&&&&& BEGIN CASE 3A
-            IF (iNp > 0) THEN
-                DO iJ=1,iNp
-                    raTemp(iJ)=raaOp1(iOut2,iJ)
-                END DO
-                DO iJ=1,iNatm
-                    IF (iaaRadLayer(iJ,1) < iaaRadLayer(iJ,2)) THEN
-                        iUpDown=1            !upward travelling radiation
-                    ELSE
-                        iUpDown=-1           !downward travelling radiation
-                    END IF
+    IF (iAtm < 0) THEN
+      IF (iPrinter /= 3) THEN
+        write(kStdErr,*)'Something gone wrong in *OUTPUT'
+        CALL DoSTOP
+      END IF
+      ! &&&&&&&&&& BEGIN CASE 3A
+      IF (iNp > 0) THEN
+        raTemp(1:iNp) = raaOp1(iOut2,1:iNp)
+        DO iJ = 1,iNatm
+          IF (iaaRadLayer(iJ,1) < iaaRadLayer(iJ,2)) THEN
+            iUpDown = 1            !upward travelling radiation
+          ELSE
+            iUpDown = -1           !downward travelling radiation
+          END IF
 
-                    iaGPMPAtmT(iOutTypes)=iJ
-                    iaNpT(iOutTypes)=iNp
-                    iaPrinterT(iOutTypes)=iPrinter
+          iaGPMPAtmT(iOutTypes) = iJ
+          iaNpT(iOutTypes)      = iNp
+          iaPrinterT(iOutTypes) = iPrinter
                                 
-                    CALL DoSortReal(raTemp,iNp,-iUpDown)
-                    CALL PressTOLayers(raaOpT,iaOp,iaNumLayer,iaaRadLayer,iJ, &
-                    iOutTypes,raTemp,iNp,raaPrBdry,raaUserPressT,raPressLevels)
-                    DO iI=1,iNp
-                        iaaOpT(iOutTypes,iI)=iaOp(iI)
-                    END DO
-                    CALL SetIaaOpT(iaaOpT,iaOp,iOutTypes,iPrinter,iJ,iNpmix, &
-                    iNumGases,iNp,iaNumLayer)
-                    CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
-                    iNp,iaNpT,iaPrinterT,iNatm,iJ,iaGPMPAtmT, &
-                    raaOpT,raaUserPressT,iaNumLayer,iUpDown)
-                END DO
-            END IF   !iAtm < 0, iNp > 0
-        ! &&&&&&&&&& END CASE 3A
+          CALL DoSortReal(raTemp,iNp,-iUpDown)
+          CALL PressTOLayers(raaOpT,iaOp,iaNumLayer,iaaRadLayer,iJ, &
+            iOutTypes,raTemp,iNp,raaPrBdry,raaUserPressT,raPressLevels)
+          DO iI=1,iNp
+            iaaOpT(iOutTypes,iI)=iaOp(iI)
+          END DO
+          CALL SetIaaOpT(iaaOpT,iaOp,iOutTypes,iPrinter,iJ,iNpmix, &
+            iNumGases,iNp,iaNumLayer)
+          CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
+            iNp,iaNpT,iaPrinterT,iNatm,iJ,iaGPMPAtmT, &
+            raaOpT,raaUserPressT,iaNumLayer,iUpDown)
+        END DO
+      END IF   !iAtm < 0, iNp > 0
+      ! &&&&&&&&&& END CASE 3A
 
-        ! &&&&&&&&&& BEGIN CASE 3B
-            IF (iNp < 0) THEN
-                DO iJ=1,iNatm
-                    IF (iaaRadLayer(iJ,1) < iaaRadLayer(iJ,2)) THEN
-                        iUpDown=1            !upward travelling radiation
-                    ELSE
-                        iUpDown=-1           !downward travelling radiation
-                    END IF
+      ! &&&&&&&&&& BEGIN CASE 3B
+      IF (iNp < 0) THEN
+        DO iJ = 1,iNatm
+          IF (iaaRadLayer(iJ,1) < iaaRadLayer(iJ,2)) THEN
+            iUpDown = 1            !upward travelling radiation
+          ELSE
+            iUpDown = -1           !downward travelling radiation
+          END IF
 
-                    iaGPMPAtmT(iOutTypes)=iJ
-                    iaNpT(iOutTypes)=iNp
-                    iaPrinterT(iOutTypes)=iPrinter
-                                
-                    CALL AllLayersOutputPress(iaaRadLayer,iJ,iaNumLayer, &
-                    iaOp,iaaOpT,raaOpT,iOutTypes,raaUserPressT, &
-                    raaPrBdry,raFracTop,raFracBot,raPressLevels)
+          iaGPMPAtmT(iOutTypes) = iJ
+          iaNpT(iOutTypes)      = iNp
+          iaPrinterT(iOutTypes) = iPrinter
+                        
+          CALL AllLayersOutputPress(iaaRadLayer,iJ,iaNumLayer, &
+            iaOp,iaaOpT,raaOpT,iOutTypes,raaUserPressT, &
+            raaPrBdry,raFracTop,raFracBot,raPressLevels)
 
-                    CALL SetIaaOpT(iaaOpT,iaOp,iOutTypes,iPrinter,iJ,iNpmix, &
-                    iNumGases,iNp,iaNumLayer)
-                    CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
-                    iNp,iaNpT,iaPrinterT,iNatm,iJ,iaGPMPAtmT, &
-                    raaOpT,raaUserPressT,iaNumLayer,iUpDown)
-                END DO
-            END IF   !iAtm < 0, iNp < 0
-        ! &&&&&&&&&& END CASE 3B
+          CALL SetIaaOpT(iaaOpT,iaOp,iOutTypes,iPrinter,iJ,iNpmix, &
+            iNumGases,iNp,iaNumLayer)
+          CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
+            iNp,iaNpT,iaPrinterT,iNatm,iJ,iaGPMPAtmT, &
+            raaOpT,raaUserPressT,iaNumLayer,iUpDown)
+        END DO
+      END IF   !iAtm < 0, iNp < 0
+      ! &&&&&&&&&& END CASE 3B
         END IF     !overall iAtm < 0 if loop
     ! &&&&&&&&&& END CASE 3
     END DO       !do loop over iOut2
@@ -538,8 +512,8 @@ CONTAINS
 ! now set the elements of the temporary arrays/matrices to those that are
 ! sent out to the main program
     CALL SetActualPrintOptions(iOutTypes,iaPrinter,iaPrinterT, &
-    iaGPMPAtm,iaGPMPAtmT,iaNp,iaNpT,iaaOp,iaaOpT,raaOp,raaOpT, &
-    raaUserPress,raaUserPressT,iaNumlayer)
+      iaGPMPAtm,iaGPMPAtmT,iaNp,iaNpT,iaaOp,iaaOpT,raaOp,raaOpT, &
+      raaUserPress,raaUserPressT,iaNumlayer)
 
     RETURN
     end SUBROUTINE output4
@@ -567,55 +541,52 @@ CONTAINS
     INTEGER :: iI,iD,iaOpTemp(kPathsOut)
 
 ! make a working copy of iaOp
-    DO iI=1,kPathsOut
-        iaOpTemp(iI)=iaOp(iI)
-    END DO
+    iaOpTemp = iaOp
 
     IF (iPrinter == 2) THEN
-        iD=iGS
-        IF (iD > iMPSets) THEN
-            write (kStdErr,*) 'oops! mixed path set iGS > those set in *WEIGHT'
-            CALL DoSTOP
-        END IF
+      iD = iGS
+      IF (iD > iMPSets) THEN
+        write (kStdErr,*) 'oops! mixed path set iGS > those set in *WEIGHT'
+        CALL DoSTOP
+      END IF
     ELSE
-        iI=1
-        11 CONTINUE
-        IF (iGS /= iaGasID(iI)) THEN
-            iI=iI+1
-            GO TO 11
-        END IF
-        IF (iI <= iNumGases) THEN
-            iD=iI
-        ELSE
-            write(kStdErr,*)'could not find gas ID iGS in list iaGASID'
-            CALL DoSTOP
-        END IF
+      iI = 1
+ 11   CONTINUE
+      IF (iGS /= iaGasID(iI)) THEN
+        iI = iI+1
+        GO TO 11
+      END IF
+      IF (iI <= iNumGases) THEN
+        iD = iI
+      ELSE
+        write(kStdErr,*)'could not find gas ID iGS in list iaGASID'
+        CALL DoSTOP
+      END IF
     END IF
 
 ! heck that the input list read in from file has numbers <= kProfLayer
-    DO iI=1,iList
-        IF ((iaOp(iI) > kProfLayer) .OR. (iaOp(iI) < 1)) THEN
-            IF (iPrinter == 1) THEN
-                write(kStdErr,*) 'path number : ',iaOp(iI)
-                write(kStdErr,*)'Invalid path in list found in *OUTPUT'
-            ELSEIF (iPrinter == 2) THEN
-                write(kStdErr,*) 'mixed path number : ',iaOp(iI)
-                write(kStdErr,*) 'Invalid mixedpath in list found in *OUTPUT'
-            END IF
-            CALL DoSTOP
+    DO iI = 1,iList
+      IF ((iaOp(iI) > kProfLayer) .OR. (iaOp(iI) < 1)) THEN
+        IF (iPrinter == 1) THEN
+          write(kStdErr,*) 'path number : ',iaOp(iI)
+          write(kStdErr,*)'Invalid path in list found in *OUTPUT'
+        ELSEIF (iPrinter == 2) THEN
+          write(kStdErr,*) 'mixed path number : ',iaOp(iI)
+          write(kStdErr,*) 'Invalid mixedpath in list found in *OUTPUT'
         END IF
+      CALL DoSTOP
+      END IF
     END DO
-! ow that everything seems OK, go ahead and replicate list
+
+! now that everything seems OK, go ahead and replicate list
 ! thus eg if iGS = 4 th gas, and the list contains 3 items 15 34 72 then we
 ! need the following final list 315 334 372
-    DO iI=1,iList
-        iaOpTemp(iI)=iaOpTemp(iI)+(iD-1)*kProfLayer
+    DO iI = 1,iList
+      iaOpTemp(iI) = iaOpTemp(iI)+(iD-1)*kProfLayer
     END DO
 
 ! reset iaOp
-    DO iI=1,kPathsOut
-        iaOp(iI)=iaOpTemp(iI)
-    END DO
+    iaOp = iaOpTemp
 
     RETURN
     end SUBROUTINE DoSetSome
@@ -638,64 +609,61 @@ CONTAINS
     INTEGER :: iI,iD,iaOpTemp(kPathsOut)
 
 ! make a working copy of iaOp
-    DO iI=1,kPathsOut
-        iaOpTemp(iI)=iaOp(iI)
-    END DO
+    iaOpTemp = iaOp
 
     IF (iPrinter == 1) THEN
-        IF (iNp /= iList*iNumGases) THEN
-            write(kStdErr,*)'bad *OUTPUT for paths output option -1 iN'
-            write(kStdErr,*) '(iNp /= iList*iNumGases)'
-            CALL DoSTOP
+      IF (iNp /= iList*iNumGases) THEN
+        write(kStdErr,*)'bad *OUTPUT for paths output option -1 iN'
+        write(kStdErr,*) '(iNp /= iList*iNumGases)'
+        CALL DoSTOP
+      END IF
+      !check that the input list read in from file has numbers <= kProfLayer
+      DO iI = 1,iList
+        IF ((iaOp(iI) > kProfLayer) .OR. (iaOp(iI) < 1)) THEN
+          write(kStdErr,*) 'path number : ',iaOp(iI)
+          write(kStdErr,*) 'Invalid path in list found in *OUTPUT'
+          write(kStdErr,*)'((iaOp(iI)>kProfLayer) or (iaOp(iI) <1)) '
+          CALL DoSTOP
         END IF
-    ! heck that the input list read in from file has numbers <= kProfLayer
-        DO iI=1,iList
-            IF ((iaOp(iI) > kProfLayer) .OR. (iaOp(iI) < 1)) THEN
-                write(kStdErr,*) 'path number : ',iaOp(iI)
-                write(kStdErr,*) 'Invalid path in list found in *OUTPUT'
-                write(kStdErr,*)'((iaOp(iI)>kProfLayer) or (iaOp(iI) <1)) '
-                CALL DoSTOP
-            END IF
+      END DO
+      !now that everything seems OK, go ahead and replicate list
+      ! thus eg is there are 4 gases, and the list contains 3 items 15 34 72 then we
+      ! need follwoing final list 15 34 72  115 134 172  215 234 272  315 334 372
+      DO iD = 1,iNumGases
+        DO iI = 1,iList
+          iaOpTemp(iI+(iD-1)*iList) = iaOpTemp(iI)+(iD-1)*kProfLayer
         END DO
-    ! ow that everything seems OK, go ahead and replicate list
-    ! thus eg is there are 4 gases, and the list contains 3 items 15 34 72 then we
-    ! need follwoing final list 15 34 72  115 134 172  215 234 272  315 334 372
-        DO iD=1,iNumGases
-            DO iI=1,iList
-                iaOpTemp(iI+(iD-1)*iList)=iaOpTemp(iI)+(iD-1)*kProfLayer
-            END DO
-        END DO
+      END DO
     END IF
 
     IF (iPrinter == 2) THEN
-        IF (iNp /= iList*iMPSets) THEN
-            write(kStdErr,*)'bad *OUTPUT for MP output option -1 iN'
-            write(kStdErr,*)'(iNp /= iList*iMPSets)'
-            CALL DoSTOP
+      IF (iNp /= iList*iMPSets) THEN
+        write(kStdErr,*)'bad *OUTPUT for MP output option -1 iN'
+        write(kStdErr,*)'(iNp /= iList*iMPSets)'
+        CALL DoSTOP
+      END IF
+      !check that the input list read in from file has numbers <= kProfLayer
+      DO iI = 1,iList
+        IF ((iaOp(iI) > kProfLayer) .OR. (iaOp(iI) < 1)) THEN
+          write(kStdErr,*) 'Invalid MP in list found in *OUTPUT'
+          write(kStdErr,*) '(iaOp(iI) > kProfLayer)or(iaOp(iI) < 1)'
+          write(kStdErr,*) 'iI,iaOp(iI) = ',iI,iaOp(iI)
+          CALL DoSTOP
         END IF
-    ! heck that the input list read in from file has numbers <= kProfLayer
-        DO iI=1,iList
-            IF ((iaOp(iI) > kProfLayer) .OR. (iaOp(iI) < 1)) THEN
-                write(kStdErr,*) 'Invalid MP in list found in *OUTPUT'
-                write(kStdErr,*) '(iaOp(iI) > kProfLayer)or(iaOp(iI) < 1)'
-                write(kStdErr,*) 'iI,iaOp(iI) = ',iI,iaOp(iI)
-                CALL DoSTOP
-            END IF
+      END DO
+
+      !now that everything seems OK, go ahead and replicate list
+      !thus eg is there are 4 gases, and the list contains 3 items 15 34 72 then we
+      !need follwoing final list 15 34 72  115 134 172  215 234 272  315 334 372
+      DO iD = 1,iMPSets
+        DO iI = 1,iList
+          iaOpTemp(iI+(iD-1)*iList) = iaOpTemp(iI)+(iD-1)*kProfLayer
         END DO
-    ! ow that everything seems OK, go ahead and replicate list
-    ! thus eg is there are 4 gases, and the list contains 3 items 15 34 72 then we
-    ! need follwoing final list 15 34 72  115 134 172  215 234 272  315 334 372
-        DO iD=1,iMPSets
-            DO iI=1,iList
-                iaOpTemp(iI+(iD-1)*iList)=iaOpTemp(iI)+(iD-1)*kProfLayer
-            END DO
-        END DO
+      END DO
     END IF
 
 ! reset iaOp
-    DO iI=1,kPathsOut
-        iaOp(iI)=iaOpTemp(iI)
-    END DO
+    iaOp = iaOpTemp
 
     RETURN
     end SUBROUTINE DoSetAll
@@ -727,52 +695,52 @@ CONTAINS
 
     INTEGER :: iI,iJ,iM
 
-    DO iI=1,iOutTypes
-        iaPrinter(iI)=iaPrinterT(iI)
-        iaGPMPAtm(iI)=iaGPMPAtmT(iI)
-        iaNp(iI)=iaNpT(iI)
+    DO iI = 1,iOutTypes
+      iaPrinter(iI) = iaPrinterT(iI)
+      iaGPMPAtm(iI) = iaGPMPAtmT(iI)
+      iaNp(iI) = iaNpT(iI)
     END DO
 
-    DO iI=1,iOutTypes
-        DO iJ=1,kPathsOut
-            iaaOp(iI,iJ)=iaaOpT(iI,iJ)
-        END DO
+    DO iI = 1,iOutTypes
+      DO iJ = 1,kPathsOut
+        iaaOp(iI,iJ) = iaaOpT(iI,iJ)
+      END DO
     END DO
 
-    DO iI=1,iOutTypes
-        DO iJ=1,kProfLayer
-            raaOp(iI,iJ)=raaOpT(iI,iJ)
-            raaUserPress(iI,iJ)=raaUserPressT(iI,iJ)
-        END DO
+    DO iI = 1,iOutTypes
+      DO iJ = 1,kProfLayer
+        raaOp(iI,iJ) = raaOpT(iI,iJ)
+        raaUserPress(iI,iJ) = raaUserPressT(iI,iJ)
+      END DO
     END DO
 
     write(kStdWarn,*) 'namelist file specified ',iOutTypes,' total outputs '
     IF (iOutTypes <= 0) THEN
-        write(kStdErr,*) 'need to specify >= 1 output for kCARTA to run!'
-        CALL DoStop
+      write(kStdErr,*) 'need to specify >= 1 output for kCARTA to run!'
+      CALL DoStop
     END IF
 
     write(kStdWarn,*)'Output_number  OutOption(1/2/3)   Atm number'
     write(kStdWarn,*)'Num of path/MP/rads to output (if -1, list all)'
     write(kStdWarn,*)'Item      Type(1=path,2=MP,3=rad)      List'
     write(kStdWarn,*)'----------------------------------------------'
-    DO ii=1,iouttypes
-        write(kStdWarn,30) ii,iaPrinter(iI),iaGPMPAtm(iI)
-        write(kStdWarn,*) (iaaOp(ii,ij),ij=1,iaNp(ii))
-        IF (iaPrinter(iI) == 3) THEN
-            IF (iaNp(iI) == -1) THEN
-                iM=iaNumLayer(iaGPMPAtm(iI))
-            ELSE
-                iM=iaNp(iI)
-            END IF
-            write(kStdWarn,*) 'list of pressures (partial fractions)'
-            DO ij=1,iM
-                write(kStdWarn,*) raaUserPress(ii,ij),'(',raaOp(ii,ij),')'
-            END DO
+    DO ii = 1,iouttypes
+      write(kStdWarn,30) ii,iaPrinter(iI),iaGPMPAtm(iI)
+      write(kStdWarn,*) (iaaOp(ii,ij),ij=1,iaNp(ii))
+      IF (iaPrinter(iI) == 3) THEN
+        IF (iaNp(iI) == -1) THEN
+          iM = iaNumLayer(iaGPMPAtm(iI))
+        ELSE
+          iM = iaNp(iI)
         END IF
-        write(kStdWarn,*) ' '
+        write(kStdWarn,*) 'list of pressures (partial fractions)'
+        DO ij = 1,iM
+          write(kStdWarn,*) raaUserPress(ii,ij),'(',raaOp(ii,ij),')'
+        END DO
+      END IF
+      write(kStdWarn,*) ' '
     END DO
-    30 FORMAT('     ',3(I5,'           '))
+ 30 FORMAT('     ',3(I5,'           '))
 
     RETURN
     end SUBROUTINE SetActualPrintOptions
@@ -805,49 +773,49 @@ CONTAINS
 
     CHARACTER(7) :: caWord
 
-    caWord='*OUTPUT'
+    caWord = '*OUTPUT'
 
     IF (iNpmix < 0) THEN
-        write(kStdErr,*)'Have not found *WEIGHTS ... cannot process'
-        write(kStdErr,*)'make sure *WEIGHT is set before *OUTPUT'
-        CALL DoSTOP
+      write(kStdErr,*)'Have not found *WEIGHTS ... cannot process'
+      write(kStdErr,*)'make sure *WEIGHT is set before *OUTPUT'
+      CALL DoSTOP
     END IF
 
     IF (iNatm == 0) THEN
-        write(kStdErr,*)'Have not found *RADNCE ... cannot process'
-        write(kStdErr,*)'make sure *RADNCE is before *OUTPUT'
-        CALL DoSTOP
+      write(kStdErr,*)'Have not found *RADNCE ... cannot process'
+      write(kStdErr,*)'make sure *RADNCE is before *OUTPUT'
+      CALL DoSTOP
     END IF
      
     IF (iAtm == 0) THEN
-        write(kStdErr,*) 'Cannot output spectra for atmosphere # 0 !!'
-        write(kStdErr,*)'check *OUTPUT!!'
-        CALL DoSTOP
+      write(kStdErr,*) 'Cannot output spectra for atmosphere # 0 !!'
+      write(kStdErr,*)'check *OUTPUT!!'
+      CALL DoSTOP
     END IF
     IF (iAtm > iNatm) THEN
-        write(kStdErr,*) 'atmosphere # ',iAtm,' undefined in *RADNCE'
-        write(kStdErr,*)'check *OUTPUT!!'
-        CALL DoSTOP
+      write(kStdErr,*) 'atmosphere # ',iAtm,' undefined in *RADNCE'
+      write(kStdErr,*)'check *OUTPUT!!'
+      CALL DoSTOP
     END IF
 
     IF (iAtm > iNatm2) THEN
-        iNatm2=iAtm
+      iNatm2 = iAtm
     END IF
     IF (iNp < 0) THEN
-        iListType=1
+      iListType = 1
     ELSE
-        iListType=2
+      iListType = 2
     END IF
      
 ! do things one at a time!!!! ie even if iAtm < 0, think of ONE atmosphere!
     IF (iAtm > 0) THEN
-        iaGPMPAtmT(iOutTypes)=iAtm
+      iaGPMPAtmT(iOutTypes) = iAtm
     ELSE
-        iaGPMPAtmT(iOutTypes)=1
+      iaGPMPAtmT(iOutTypes) = 1
     END IF
 
-    iaNpT(iOutTypes)=iNp
-    iaPrinterT(iOutTypes)=iPrinter
+    iaNpT(iOutTypes) = iNp
+    iaPrinterT(iOutTypes) = iPrinter
      
     RETURN
     end SUBROUTINE Read3
@@ -883,38 +851,38 @@ CONTAINS
     CHARACTER(7) :: caWord
     INTEGER :: iNumLinesRead
 
-    caWord='*OUTPUT'
+    caWord = '*OUTPUT'
 
-    iNumLinesRead=0
-    13 IF (iNumLinesRead > 0) THEN
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+    iNumLinesRead = 0
+ 13 IF (iNumLinesRead > 0) THEN
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
     5010 FORMAT('Error reading section ',A7,' of main file')
 
-    iAtm=0
+    iAtm = 0
     IF (iNpmix < 0) THEN
-        write(kStdErr,*)'Have not found mixing table ... cannot process'
-        write(kStdErr,*)'make sure *WEIGHT is set before *OUTPUT'
-        CALL DoSTOP
+      write(kStdErr,*)'Have not found mixing table ... cannot process'
+      write(kStdErr,*)'make sure *WEIGHT is set before *OUTPUT'
+      CALL DoSTOP
     END IF
     iMPSets = iFloor(iNpmix*1.0/(kProfLayer))
 
     IF (iGS == 0) THEN
-        write(kStdErr,*)'Cannot output spectra for mixed path set # 0 !'
-        write(kStdErr,*)'check *OUTPUT!!'
-        CALL DoSTOP
+      write(kStdErr,*)'Cannot output spectra for mixed path set # 0 !'
+      write(kStdErr,*)'check *OUTPUT!!'
+      CALL DoSTOP
     END IF
     IF (iGS > iMPSets) THEN
-        write(kStdErr,*)'MP set # ',iGS,' undefined in *WEIGHT'
-        write(kStdErr,*)'check *OUTPUT!!'
-        CALL DoSTOP
+      write(kStdErr,*)'MP set # ',iGS,' undefined in *WEIGHT'
+      write(kStdErr,*)'check *OUTPUT!!'
+      CALL DoSTOP
     END IF
 
 ! now recheck iNp and reset if necessary
     CALL ReCheck_iNp(iList,iListType,iGS,iNp,iMPSets,iNumGases,2)
-    iaGPMPAtmT(iOutTypes)=iAtm     !=0 as NO radiances to be output
-    iaNpT(iOutTypes)=iNp
+    iaGPMPAtmT(iOutTypes) = iAtm     !=0 as NO radiances to be output
+    iaNpT(iOutTypes) = iNp
 
     RETURN
     end SUBROUTINE Read2
@@ -952,42 +920,41 @@ CONTAINS
     CHARACTER(7) :: caWord
     INTEGER :: iNumLinesRead,iI
 
-    caWord='*OUTPUT'
+    caWord = '*OUTPUT'
 
-    iNumLinesRead=0
-    13 IF (iNumLinesRead > 0) THEN
-        WRITE(kStdErr,5010) caWord
-        CALL DoSTOP
+    iNumLinesRead = 0
+ 13 IF (iNumLinesRead > 0) THEN
+      WRITE(kStdErr,5010) caWord
+      CALL DoSTOP
     END IF
-    5010 FORMAT('Error reading section ',A7,' of main file')
+ 5010 FORMAT('Error reading section ',A7,' of main file')
 
-    iNumLinesRead=1
+    iNumLinesRead = 1
 
-    iAtm=0
+    iAtm = 0
 
     IF (iGS == 0) THEN
-        write(kStdErr,*)'Cannot output spectra for GAS ID  = 0 !!'
-        write(kStdErr,*)'check *OUTPUT!!'
-        CALL DoSTOP
+      write(kStdErr,*)'Cannot output spectra for GAS ID  = 0 !!'
+      write(kStdErr,*)'check *OUTPUT!!'
+      CALL DoSTOP
     END IF
     IF (iGS > kMaxGas) THEN
-        write(kStdErr,*)'Gas ID ',iGS,' undefined '
-        write(kStdErr,*)'check *OUTPUT!!'
-        CALL DoSTOP
+      write(kStdErr,*)'Gas ID ',iGS,' undefined '
+      write(kStdErr,*)'check *OUTPUT!!'
+      CALL DoSTOP
     END IF
-    IF ((DoOutputLayer(iGS,iNumGases,iaGasID) < 0) .AND. &
-    (iGS > 0)) THEN
-        write(kStdErr,*)'List of Gas IDs from MOLGAS/XSCGAS = '
-        write(kStdErr,*)(iaGasID(iI),iI=1,iNumGases)
-        write(kStdErr,*)'Gas ID ',iGS,' not set from *MOLGAS,*XSCGAS '
-        write(kStdErr,*)'check *OUTPUT!!'
-        CALL DoSTOP
+    IF ((DoOutputLayer(iGS,iNumGases,iaGasID) < 0) .AND. (iGS > 0)) THEN
+      write(kStdErr,*)'List of Gas IDs from MOLGAS/XSCGAS = '
+      write(kStdErr,*)(iaGasID(iI),iI=1,iNumGases)
+      write(kStdErr,*)'Gas ID ',iGS,' not set from *MOLGAS,*XSCGAS '
+      write(kStdErr,*)'check *OUTPUT!!'
+      CALL DoSTOP
     END IF
 
 ! now recheck iNp and reset if necessary
     CALL ReCheck_iNp(iList,iListType,iGS,iNp,iMPSets,iNumGases,1)
-    iaGPMPAtmT(iOutTypes)=iAtm     !=0 as NO radiances to be output
-    iaNpT(iOutTypes)=iNp
+    iaGPMPAtmT(iOutTypes) = iAtm     ! = 0 as NO radiances to be output
+    iaNpT(iOutTypes) = iNp
 
     RETURN
     end SUBROUTINE Read1
@@ -1014,28 +981,28 @@ CONTAINS
     INTEGER :: iI
 
     IF (iPrinter == 1) THEN
-        iI=iNumGases
+      iI = iNumGases
     ELSE
-        iI=iMPSets
+      iI = iMPSets
     END IF
 
-    iList=0                !set how many items to be found in list
+    iList = 0                !set how many items to be found in list
     IF ((iGS == -1) .AND. (iNp == -1)) THEN
-        iList=iNp
-        iListType=1
-        iNp = -1             !for ALL gases/MP sets, output all layers
+      iList = iNp
+      iListType = 1
+      iNp  =  -1             !for ALL gases/MP sets, output all layers
     ELSE IF ((iGS == -1) .AND. (iNp /= -1)) THEN
-        iList=iNp
-        iListType=2
-        iNp = iNp*iI         !for ALL gases/MP sets, output some layers
+      iList = iNp
+      iListType = 2
+      iNp  =  iNp*iI         !for ALL gases/MP sets, output some layers
     ELSE IF ((iGS > 0) .AND. (iNp == -1)) THEN
-        iList=iNp
-        iListType=3
-        iNp = kProfLayer      !for one gas/MP set, output all layers
+      iList = iNp
+      iListType = 3
+      iNp  =  kProfLayer      !for one gas/MP set, output all layers
     ELSE IF ((iGS > 0) .AND. (iNp /= -1)) THEN
-        iList=iNp
-        iListType=4
-        iNp = iNp            !for one gas/MP set, output iNp layers
+      iList = iNp
+      iListType = 4
+      iNp  =  iNp            !for one gas/MP set, output iNp layers
     END IF
 
     RETURN
@@ -1075,58 +1042,58 @@ CONTAINS
     INTEGER :: iUpDown,iI,iLay
 
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN
-        iUpDown = 1        !radiation going up
+      iUpDown = 1        !radiation going up
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,2)) THEN
-        iUpDown = -1       !radiation going down
+      iUpDown = -1       !radiation going down
     END IF
 ! the following loop just does the number of layers in the relevant atmosphere
 ! taking care of the case iAtm > 0,iNp < 0
-    DO iI=2,iaNumLayer(iAtm)-1    !do complete layers
-        iaOp(iI)=iI
-        iaaOpT(iOutTypes,iI)=iI
-        raaOpT(iOutTypes,iI)=1.0  !define complete layer (fraction=1.0)
-        iLay=MP2Lay(iaaRadLayer(iAtm,iI))
-        IF (iUpDown > 0) THEN
-            raaUserPressT(iOutTypes,iI)=raPressLevels(iLay+1)
-        ELSE
-            raaUserPressT(iOutTypes,iI)=raPressLevels(iLay)
-        END IF
+    DO iI = 2,iaNumLayer(iAtm)-1    !do complete layers
+      iaOp(iI) = iI
+      iaaOpT(iOutTypes,iI) = iI
+      raaOpT(iOutTypes,iI) = 1.0  !define complete layer (fraction = 1.0)
+      iLay = MP2Lay(iaaRadLayer(iAtm,iI))
+      IF (iUpDown > 0) THEN
+        raaUserPressT(iOutTypes,iI) = raPressLevels(iLay+1)
+      ELSE
+        raaUserPressT(iOutTypes,iI) = raPressLevels(iLay)
+      END IF
     END DO
     IF (iUpDown > 0) THEN
-    ! pecial : bottom
-        iI       = 1
-        iaOp(iI) = iI
-        iaaOpT(iOutTypes,iI) = iI
-        iLay     = MP2Lay(iaaRadLayer(iAtm,iI))
-        raaUserPressT(iOutTypes,iI) = raPressLevels(iLay+1)-delta
-    ! ince we flip defns of partial layers for bottom ==> fraction <= 1.0
-        raaOpT(iOutTypes,iI) = 1.0 !was incorrectly raFracBot(iAtm)
-        raaOpT(iOutTypes,iI) = raFracBot(iAtm)
+      !special : bottom
+      iI       = 1
+      iaOp(iI) = iI
+      iaaOpT(iOutTypes,iI) = iI
+      iLay     = MP2Lay(iaaRadLayer(iAtm,iI))
+      raaUserPressT(iOutTypes,iI) = raPressLevels(iLay+1)-delta
+      !since we flip defns of partial layers for bottom ==> fraction <= 1.0
+      raaOpT(iOutTypes,iI) = 1.0 !was incorrectly raFracBot(iAtm)
+      raaOpT(iOutTypes,iI) = raFracBot(iAtm)
 
-    ! pecial : top
-        iI       = iaNumLayer(iAtm)
-        iaOp(iI) = iI
-        iaaOpT(iOutTypes,iI) = iI
-        raaUserPressT(iOutTypes,iI) = raaPrBdry(iAtm,2)
-        raaOpT(iOutTypes,iI)        = raFracTop(iAtm)
+      !special : top
+      iI       = iaNumLayer(iAtm)
+      iaOp(iI) = iI
+      iaaOpT(iOutTypes,iI) = iI
+      raaUserPressT(iOutTypes,iI) = raaPrBdry(iAtm,2)
+      raaOpT(iOutTypes,iI)        = raFracTop(iAtm)
 
     ELSE IF (iUpDown < 0) THEN
-    ! pecial : top
-        iI       = 1
-        iaOp(iI) = iI
-        iaaOpT(iOutTypes,iI) = iI
-        iLay     = MP2Lay(iaaRadLayer(iAtm,iI))
-        raaUserPressT(iOutTypes,iI) = raPressLevels(iLay)
-    ! ince we flip defns of partial layers for top ==> fraction = 1.0
-        raaOpT(iOutTypes,iI) = 1.0 !was incorrectly raFracTop(iAtm)
-        raaOpT(iOutTypes,iI) = raFracTop(iAtm)
+      !special : top
+      iI       = 1
+      iaOp(iI) = iI
+      iaaOpT(iOutTypes,iI) = iI
+      iLay     = MP2Lay(iaaRadLayer(iAtm,iI))
+      raaUserPressT(iOutTypes,iI) = raPressLevels(iLay)
+      !since we flip defns of partial layers for top ==> fraction = 1.0
+      raaOpT(iOutTypes,iI) = 1.0 !was incorrectly raFracTop(iAtm)
+      raaOpT(iOutTypes,iI) = raFracTop(iAtm)
 
-    ! pecial : bottom
-        iI       = iaNumLayer(iAtm)
-        iaOp(iI) = iI
-        iaaOpT(iOutTypes,iI) = iI
-        raaUserPressT(iOutTypes,iI) = raaPrBdry(iAtm,2)
-        raaOpT(iOutTypes,iI) = raFracBot(iAtm)
+      !special : bottom
+      iI       = iaNumLayer(iAtm)
+      iaOp(iI) = iI
+      iaaOpT(iOutTypes,iI) = iI
+      raaUserPressT(iOutTypes,iI) = raaPrBdry(iAtm,2)
+      raaOpT(iOutTypes,iI) = raFracBot(iAtm)
     END IF
 
     RETURN
@@ -1157,44 +1124,39 @@ CONTAINS
 
     INTEGER :: iI
 
-    DO iI=1,iNp
-        iaaOpT(iOutTypes,iI)=iaOp(iI)
-        IF ((iPrinter == 3) .AND. (iAtm > 0)) THEN
-        ! all numbers here should be between 1 and iaNumLayer(relevant atm)
-            IF ((iaOp(iI) < 1) .OR. (iaOp(iI) > iaNumlayer(iAtm))) &
-            THEN
-                write(kStdErr,*)'Printing option selected = ',iPrinter
-                write(kStdErr,*)'layer # ',iI,' = ',iaOp(iI)
-                write(kStdErr,*)'Error in reading *output section'
-                write(kStdErr,*)'Radiating MP must be between 1 and ', &
-                iaNumLayer(iAtm)
-                CALL DoSTOP
-            END IF
+    DO iI = 1,iNp
+      iaaOpT(iOutTypes,iI) = iaOp(iI)
+      IF ((iPrinter == 3) .AND. (iAtm > 0)) THEN
+        !all numbers here should be between 1 and iaNumLayer(relevant atm)
+        IF ((iaOp(iI) < 1) .OR. (iaOp(iI) > iaNumlayer(iAtm))) THEN
+          write(kStdErr,*)'Printing option selected = ',iPrinter
+          write(kStdErr,*)'layer # ',iI,' = ',iaOp(iI)
+          write(kStdErr,*)'Error in reading *output section'
+          write(kStdErr,*)'Radiating MP must be between 1 and ',iaNumLayer(iAtm)
+          CALL DoSTOP
         END IF
-        IF (iPrinter == 2) THEN
+      END IF
+      IF (iPrinter == 2) THEN
         ! all numbers here should be between 1 and iNpmix
-            IF ((iaOp(iI) < 1) .OR. (iaOp(iI) > iNpmix)) THEN
-                write(kStdErr,*)'Printing option selected = ',iPrinter
-                write(kStdErr,*)'mixed path # ',iI,' = ',iaOp(iI)
-                write(kStdErr,*)'Error in reading *output section'
-                write(kStdErr,*)'Mixed Path number must be between 1 and ', &
-                iNpmix
-                CALL DoSTOP
-            END IF
+        IF ((iaOp(iI) < 1) .OR. (iaOp(iI) > iNpmix)) THEN
+          write(kStdErr,*)'Printing option selected = ',iPrinter
+          write(kStdErr,*)'mixed path # ',iI,' = ',iaOp(iI)
+          write(kStdErr,*)'Error in reading *output section'
+          write(kStdErr,*)'Mixed Path number must be between 1 and ',iNpmix
+          CALL DoSTOP
         END IF
-        IF ((iPrinter == 1)) THEN
+      END IF
+      IF ((iPrinter == 1)) THEN
         ! all numbers here should be between 1 and kProfLayer*iNumGases
-            IF ((iaOp(iI) < 1) .OR. (iaOp(iI) > kProfLayer*iNumGases)) &
-            THEN
-                write(kStdErr,*)'Printing option selected = ',iPrinter
-                write(kStdErr,*)'# of gases in GASFIL+XSCFIL = ',iNumGases
-                write(kStdErr,*)'path # ',iI,' = ',iaOp(iI)
-                write(kStdErr,*)'Error in reading *output section'
-                write(kStdErr,*)'Path number must be between 1 and ', &
-                kProfLayer*iNumGases
-                CALL DoSTOP
-            END IF
+        IF ((iaOp(iI) < 1) .OR. (iaOp(iI) > kProfLayer*iNumGases)) THEN
+          write(kStdErr,*)'Printing option selected = ',iPrinter
+          write(kStdErr,*)'# of gases in GASFIL+XSCFIL = ',iNumGases
+          write(kStdErr,*)'path # ',iI,' = ',iaOp(iI)
+          write(kStdErr,*)'Error in reading *output section'
+          write(kStdErr,*)'Path number must be between 1 and ',kProfLayer*iNumGases
+          CALL DoSTOP
         END IF
+      END IF
     END DO
 
     RETURN
@@ -1240,65 +1202,65 @@ CONTAINS
 
 ! heck to see if any of the previous print options  == iPrinter,iAtm
     iFound = -1
-    DO iI=1,iOutTypes-1
-        IF ((iaPrinterT(iI) == iPrinter) .AND. (iaGPMPAtmT(iI) == iAtm))THEN
-            iFound = iI
-        END IF
+    DO iI = 1,iOutTypes-1
+      IF ((iaPrinterT(iI) == iPrinter) .AND. (iaGPMPAtmT(iI) == iAtm))THEN
+        iFound = iI
+      END IF
     END DO
 
     IF (iFound > 0) THEN    !have found a match!!! have to merge together
-    ! irst check to see if one or the other option wants ALL paths output
-        IF (iaNpT(iFound) == -1) THEN
-            iaNpT(iFound) = -1      !old option included ALL layers
-            iJ1=iFound
-        END IF
-        IF (iaNpT(iOutTypes) == -1) THEN
-            iaNpT(iFound) = -1      !new option includes ALL layers
-            iJ1=iOutTypes
-        END IF
-        IF (iaNpT(iFound) == -1) THEN
-            iJ=iaNumLayer(iAtm)
-            DO iI=1,iJ
-                iaaOpT(iFound,iI)=iI
-                raaOpT(iFound,iI)=raaOpT(iJ1,iI)
-                raaUserPressT(iFound,iI)=raaUserPressT(iJ1,iI)
-            END DO
-        END IF
+      !irst check to see if one or the other option wants ALL paths output
+      IF (iaNpT(iFound) == -1) THEN
+        iaNpT(iFound) = -1      !old option included ALL layers
+        iJ1=iFound
+      END IF
+      IF (iaNpT(iOutTypes) == -1) THEN
+        iaNpT(iFound) = -1      !new option includes ALL layers
+        iJ1=iOutTypes
+      END IF
+      IF (iaNpT(iFound) == -1) THEN
+        iJ = iaNumLayer(iAtm)
+        DO iI = 1,iJ
+          iaaOpT(iFound,iI) = iI
+          raaOpT(iFound,iI) = raaOpT(iJ1,iI)
+          raaUserPressT(iFound,iI) = raaUserPressT(iJ1,iI)
+        END DO
+      END IF
 
-        IF ((iaNpT(iOutTypes) /= -1) .AND. (iaNpT(iFound) /= -1)) THEN
-        ! ave to slug it out! ah well!!!!
-            DO iI=1,iaNpT(iFound)
-                iaOp1(iI)=iaaOpT(iFound,iI)
-                ra1(iI)=raaOpT(iFound,iI)
-                raP1(iI)=raaUserPressT(iFound,iI)
-            END DO
-            DO iI=1,iaNpT(iOutTypes)
-                iaOp2(iI)=iaaOpT(iOutTypes,iI)
-                ra2(iI)=raaOpT(iOutTypes,iI)
-                raP2(iI)=raaUserPressT(iOutTypes,iI)
-            END DO
-            CALL MergeRads(iaOp1,iaOp2,ra1,ra2,raP1,raP2, &
+      IF ((iaNpT(iOutTypes) /= -1) .AND. (iaNpT(iFound) /= -1)) THEN
+        !have to slug it out! ah well!!!!
+        DO iI = 1,iaNpT(iFound)
+          iaOp1(iI) = iaaOpT(iFound,iI)
+          ra1(iI) = raaOpT(iFound,iI)
+          raP1(iI) = raaUserPressT(iFound,iI)
+        END DO
+        DO iI = 1,iaNpT(iOutTypes)
+          iaOp2(iI) = iaaOpT(iOutTypes,iI)
+          ra2(iI) = raaOpT(iOutTypes,iI)
+          raP2(iI) = raaUserPressT(iOutTypes,iI)
+        END DO
+        CALL MergeRads(iaOp1,iaOp2,ra1,ra2,raP1,raP2, &
             iaNpT(iFound),iaNpT(iOutTypes),i12,iUD)
-        ! ow update raaOpT,raaUserPressT,iaaOpT,iaNpT
-            iaNpT(iFound)=i12
-            DO iI=1,i12
-                iaaOpT(iFound,iI)=iaOp1(iI)
-                raaOpT(iFound,iI)=ra1(iI)
-                raaUserPressT(iFound,iI)=raP1(iI)
-            END DO
-        END IF
+        !now update raaOpT,raaUserPressT,iaaOpT,iaNpT
+        iaNpT(iFound) = i12
+        DO iI = 1,i12
+          iaaOpT(iFound,iI) = iaOp1(iI)
+          raaOpT(iFound,iI) = ra1(iI)
+          raaUserPressT(iFound,iI) = raP1(iI)
+        END DO
+      END IF
     END IF
 
     IF (iFound < 0) THEN !we really have found a new print option
-        iOutTypes=iOutTypes+1
+      iOutTypes = iOutTypes+1
     END IF
 
     IF (iOutTypes > kMaxPrT) THEN
-        write(kStdErr,*)'iOutTypes,kMaxPrT = ',iOutTypes,kMaxPrT
-        write(kStdErr,*)'Cannot store so many printing options!!!'
-        write(kStdErr,*)'Either increase kMaxPrint in kcartaparam.f90, or '
-        write(kStdErr,*)'decrease # of print options found in *OUTPUT'
-        CALL DoSTOP
+      write(kStdErr,*)'iOutTypes,kMaxPrT = ',iOutTypes,kMaxPrT
+      write(kStdErr,*)'Cannot store so many printing options!!!'
+      write(kStdErr,*)'Either increase kMaxPrint in kcartaparam.f90, or '
+      write(kStdErr,*)'decrease # of print options found in *OUTPUT'
+      CALL DoSTOP
     END IF
 
     RETURN
@@ -1332,58 +1294,58 @@ CONTAINS
 
 ! heck to see if any of the previous print options  == iPrinter
     iFound = -1
-    DO iI=1,iOutTypes-1
-        IF (iaPrinterT(iI) == iPrinter) THEN
-            iFound = iI
-        END IF
+    DO iI = 1,iOutTypes-1
+      IF (iaPrinterT(iI) == iPrinter) THEN
+        iFound  =  iI
+      END IF
     END DO
 
     IF (iFound > 0) THEN    !have found a match!!! have to merge together
-    ! irst check to see if one or the other option wants ALL paths output
-        IF (iaNpT(iFound) == -1) THEN
-            iaNpT(iFound) = -1      !old option included ALL paths/mixed paths
+      !first check to see if one or the other option wants ALL paths output
+      IF (iaNpT(iFound) == -1) THEN
+        iaNpT(iFound) = -1      !old option included ALL paths/mixed paths
+      END IF
+      IF (iaNpT(iOutTypes) == -1) THEN
+        iaNpT(iFound) = -1      !new option includes ALL paths/mixed paths
+      END IF
+      IF (iaNpT(iFound) == -1) THEN
+        IF (iPrinter == 1) THEN
+          iJ = iNumGases*kProfLayer
+        ELSE
+          iJ = iNpMix
         END IF
-        IF (iaNpT(iOutTypes) == -1) THEN
-            iaNpT(iFound) = -1      !new option includes ALL paths/mixed paths
-        END IF
-        IF (iaNpT(iFound) == -1) THEN
-            IF (iPrinter == 1) THEN
-                iJ=iNumGases*kProfLayer
-            ELSE
-                iJ=iNpMix
-            END IF
-            DO iI=1,iJ
-                iaaOpT(iFound,iI)=iI
-            END DO
-        END IF
+        DO iI = 1,iJ
+          iaaOpT(iFound,iI) = iI
+        END DO
+      END IF
 
-        IF ((iaNpT(iOutTypes) /= -1) .AND. (iaNpT(iFound) /= -1)) THEN
-        ! ave to slug it out! ah well!!!!
-            DO iI=1,iaNpT(iFound)
-                iaOp1(iI)=iaaOpT(iFound,iI)
-            END DO
-            DO iI=1,iaNpT(iOutTypes)
-                iaOp2(iI)=iaaOpT(iOutTypes,iI)
-            END DO
-            CALL MergeLists(iaOp1,iaOp2,iaNpT(iFound),iaNpT(iOutTypes),iI)
-        ! ow update iaaOpT,iaNpT
-            iaNpT(iFound)=iI
-            DO iI=1,iaNpT(iFound)
-                iaaOpT(iFound,iI)=iaOp1(iI)
-            END DO
-        END IF
+      IF ((iaNpT(iOutTypes) /= -1) .AND. (iaNpT(iFound) /= -1)) THEN
+        !have to slug it out! ah well!!!!
+        DO iI = 1,iaNpT(iFound)
+          iaOp1(iI) = iaaOpT(iFound,iI)
+        END DO
+        DO iI = 1,iaNpT(iOutTypes)
+          iaOp2(iI) = iaaOpT(iOutTypes,iI)
+        END DO
+        CALL MergeLists(iaOp1,iaOp2,iaNpT(iFound),iaNpT(iOutTypes),iI)
+        !now update iaaOpT,iaNpT
+        iaNpT(iFound) = iI
+        DO iI = 1,iaNpT(iFound)
+          iaaOpT(iFound,iI) = iaOp1(iI)
+        END DO
+      END IF
     END IF
 
     IF (iFound < 0) THEN !we really have found a new print option
-        iOutTypes=iOutTypes+1
+      iOutTypes = iOutTypes+1
     END IF
 
     IF (iOutTypes > kMaxPrT) THEN
-        write(kStdErr,*)'iOutTypes,kMaxPrT = ',iOutTypes,kMaxPrT
-        write(kStdErr,*)'Cannot store so many printing options!!!'
-        write(kStdErr,*)'Either increase kMaxPrint in kcartaparam.f90, or'
-        write(kStdErr,*)'decrease # of print options found in *OUTPUT'
-        CALL DoSTOP
+      write(kStdErr,*)'iOutTypes,kMaxPrT = ',iOutTypes,kMaxPrT
+      write(kStdErr,*)'Cannot store so many printing options!!!'
+      write(kStdErr,*)'Either increase kMaxPrint in kcartaparam.f90, or'
+      write(kStdErr,*)'decrease # of print options found in *OUTPUT'
+      CALL DoSTOP
     END IF
 
     RETURN
@@ -1403,29 +1365,29 @@ CONTAINS
     INTEGER :: iI,iaRes(kPathsOut),iOK
 
 ! irst put in elements of iaOp1 into iaRes
-    DO iI=1,i1
-        iaRes(iI)=iaOp1(iI)
+    DO iI = 1,i1
+      iaRes(iI) = iaOp1(iI)
     END DO
-    iSum=i1
+    iSum = i1
 
 ! ow put in elements of iaOp2 into iaRes, ensuring no duplicates
-    DO iI=1,i2
-        iOK=DoOutputLayer(iaOp2(iI),iSum,iaRes)
-        IF (iOK < 0) THEN   !iaOp2(iI) not found .. add to list
-            iSum=iSum+1
-            iaRes(iSum)=iaOp2(iI)
-            CALL dosort(iaRes,iSum)
-        ELSE
-            write(kStdWarn,*) 'following is duplicate : ',iaOp2(iI)
-        END IF
+    DO iI = 1,i2
+      iOK = DoOutputLayer(iaOp2(iI),iSum,iaRes)
+      IF (iOK < 0) THEN   !iaOp2(iI) not found .. add to list
+        iSum = iSum+1
+        iaRes(iSum) = iaOp2(iI)
+        CALL dosort(iaRes,iSum)
+      ELSE
+        write(kStdWarn,*) 'following is duplicate : ',iaOp2(iI)
+      END IF
     END DO
 
 ! ort iaRes
     CALL dosort(iaRes,iSum)
 
 ! pdate iaOp1
-    DO iI=1,iSum
-        iaOp1(iI)=iaRes(iI)
+    DO iI = 1,iSum
+      iaOp1(iI) = iaRes(iI)
     END DO
 
     RETURN
@@ -1455,29 +1417,28 @@ CONTAINS
     REAL :: raRes(kProfLayer),raPRes(kProfLayer)
 
 ! irst put in elements of ia1 into iaRes
-    DO iI=1,i1
-        iaRes(iI)=ia1(iI)
-        raRes(iI)=ra1(iI)
-        raPRes(iI)=raP1(iI)
+    DO iI = 1,i1
+      iaRes(iI) = ia1(iI)
+      raRes(iI) = ra1(iI)
+      raPRes(iI) = raP1(iI)
     END DO
-    iSum=i1
+    iSum = i1
 
 ! ow put in elements of ia2 into iaRes, ensuring no duplicates
-    DO iI=1,i2
-        CALL DoMergePress(raP2(iI),raPRes,ia2(iI),iaRes,ra2(iI),raRes, &
-        iSum,iUD,iNew)
-        IF (iNew < 0) THEN   !raP2(iI) already present in array ..
-            write(kStdWarn,*) 'following is duplicate : ',raP2(iI)
-        END IF
+    DO iI = 1,i2
+      CALL DoMergePress(raP2(iI),raPRes,ia2(iI),iaRes,ra2(iI),raRes,iSum,iUD,iNew)
+      IF (iNew < 0) THEN   !raP2(iI) already present in array ..
+        write(kStdWarn,*) 'following is duplicate : ',raP2(iI)
+      END IF
     END DO
 
     CALL DoSortPress(iaRes,raRes,raPRes,iSum,-iUD)
 
-! pdate ia1
-    DO iI=1,iSum
-        ia1(iI)=iaRes(iI)
-        ra1(iI)=raRes(iI)
-        raP1(iI)=raPRes(iI)
+!update ia1
+    DO iI = 1,iSum
+      ia1(iI) = iaRes(iI)
+      ra1(iI) = raRes(iI)
+      raP1(iI) = raPRes(iI)
     END DO
 
     RETURN
@@ -1514,28 +1475,28 @@ CONTAINS
 ! being processed has an output pressure level, and it goes thru the WHOLE
 ! list while doing the check, we do not REALLY have to set everything in
 ! increasing or decreasing order (ie iUD not really needed)
-    iNew=1   !assume new pressure
-    iI=1
-    10 CONTINUE
+    iNew = 1   !assume new pressure
+    iI = 1
+ 10 CONTINUE
     IF (abs(raPRes(iI)-rP) <= delta) THEN !this pressure was there before
-        iNew=-1
+      iNew = -1
     END IF
     IF ((iI < iSum) .AND. (iNew > 0)) THEN
-    ! till not found pressure and have some more elements to check in array
-        iI=iI+1
-        GO TO 10
+      ! till not found pressure and have some more elements to check in array
+      iI = iI+1
+      GO TO 10
     END IF
 
     IF (iNew > 0) THEN     !pressure not found .. add it on
-        IF (iSum < kProfLayer) THEN !we add on relevant elements to arrays
-            iSum=iSum+1
-            raPRes(iSum)=rP
-            iaRes(iSum)=i2
-            raRes(iSum)=r2
-        ELSE IF (iSum == kProfLayer) THEN !we cannot add it on
-            write(kStdErr,*)'cannot merge press',rP,'into previous list'
-            CALL DoSTOP
-        END IF
+      IF (iSum < kProfLayer) THEN !we add on relevant elements to arrays
+        iSum = iSum+1
+        raPRes(iSum) = rP
+        iaRes(iSum) = i2
+        raRes(iSum) = r2
+      ELSE IF (iSum == kProfLayer) THEN !we cannot add it on
+        write(kStdErr,*)'cannot merge press',rP,'into previous list'
+        CALL DoSTOP
+      END IF
     END IF
 
     RETURN
@@ -1579,9 +1540,9 @@ CONTAINS
 
 ! check the radiation direction
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,2)) THEN
-        iDirection=1     !going up
+      iDirection = 1     !going up
     ELSE
-        iDirection=-1    !going down
+      iDirection = -1    !going down
     END IF
 
 ! find which set of 100 mixed paths the layers for this atmosphere are from
@@ -1592,146 +1553,146 @@ CONTAINS
 !            == iFloor(100.0/100.0)+1=2  instead of 1
 
     iW = iFloor((iaaRadLayer(iAtm,2)*1.0)/(kProfLayer*1.0))+1
-    iOffSet=(iW-1)*kProfLayer
+    iOffSet = (iW-1)*kProfLayer
           
 ! set which radiating pressure layer atmosphere starts at, to compare to iI
-    iStartLay=MP2Lay(iaaRadLayer(iAtm,1))
+    iStartLay = MP2Lay(iaaRadLayer(iAtm,1))
 
-    DO iI=1,iNp
+    DO iI = 1,iNp
 
-    ! see if this pressure lies within the start/stop defined in raaPrBdry
-    ! if not, then redefine
-        rP=raPress(iI)
-        IF (iDirection > 0) THEN
-            IF (rP < 0) THEN
-                rP = 0.0
-                rP = raaPrBdry(iAtm,2)
-                write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
-                write(kStdWarn,*) raPress(iI),' to TOA',rP
-            END IF
-            IF (rP > raaPrBdry(iAtm,1)) THEN
-                rP = raaPrBdry(iAtm,1)-delta*1.001
-                rP = raaPrBdry(iAtm,1)
-                write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
-                write(kStdWarn,*) raPress(iI),' to GND',rP
-            END IF
-            IF (rP < raaPrBdry(iAtm,2)) THEN
-                rP = raaPrBdry(iAtm,2)+delta*1.001
-                rP = raaPrBdry(iAtm,2)
-                write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
-                write(kStdWarn,*) raPress(iI),' to TOA',rP
-            END IF
+      ! see if this pressure lies within the start/stop defined in raaPrBdry
+      ! if not, then redefine
+      rP = raPress(iI)
+      IF (iDirection > 0) THEN
+        IF (rP < 0) THEN
+          rP = 0.0
+          rP = raaPrBdry(iAtm,2)
+          write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
+          write(kStdWarn,*) raPress(iI),' to TOA',rP
         END IF
-        IF (iDirection < 0) THEN
-            IF (rP < 0) THEN
-                rP = 1200.0
-                rP = raaPrBdry(iAtm,2)
-                write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
-                write(kStdWarn,*) raPress(iI),' to GND',rP
-            END IF
-            IF (rP < raaPrBdry(iAtm,1)) THEN
-                rP = raaPrBdry(iAtm,1)+delta*1.001
-                rP = raaPrBdry(iAtm,1)
-                write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
-                write(kStdWarn,*) raPress(iI),' to TOA',rP
-            END IF
-            IF (rP > raaPrBdry(iAtm,2)) THEN
-                rP = raaPrBdry(iAtm,2)-delta*1.001
-                rP = raaPrBdry(iAtm,2)
-                write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
-                write(kStdWarn,*) raPress(iI),' to GND',rP
-            END IF
+        IF (rP > raaPrBdry(iAtm,1)) THEN
+          rP = raaPrBdry(iAtm,1)-delta*1.001
+          rP = raaPrBdry(iAtm,1)
+          write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
+          write(kStdWarn,*) raPress(iI),' to GND',rP
         END IF
+        IF (rP < raaPrBdry(iAtm,2)) THEN
+          rP = raaPrBdry(iAtm,2)+delta*1.001
+          rP = raaPrBdry(iAtm,2)
+          write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
+          write(kStdWarn,*) raPress(iI),' to TOA',rP
+        END IF
+      END IF
+      IF (iDirection < 0) THEN
+        IF (rP < 0) THEN
+          rP = 1200.0
+          rP = raaPrBdry(iAtm,2)
+          write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
+          write(kStdWarn,*) raPress(iI),' to GND',rP
+        END IF
+        IF (rP < raaPrBdry(iAtm,1)) THEN
+          rP = raaPrBdry(iAtm,1)+delta*1.001
+          rP = raaPrBdry(iAtm,1)
+          write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
+          write(kStdWarn,*) raPress(iI),' to TOA',rP
+        END IF
+        IF (rP > raaPrBdry(iAtm,2)) THEN
+          rP = raaPrBdry(iAtm,2)-delta*1.001
+          rP = raaPrBdry(iAtm,2)
+          write(kStdWarn,*) 'For atm ',iAtm,' reset output press from'
+          write(kStdWarn,*) raPress(iI),' to GND',rP
+        END IF
+      END IF
 
-    ! if DISORT or RTSPEC, as a first cut, find out which pressure level rP
-    ! lies closest to. we really HAVE to be careful about up and downlook stuff
-        IF ((kWhichScatterCode /= 0) .AND. &
-        ((kWhichScatterCode /= 1) .OR. (kWhichScatterCode /= 4) .OR. &
-        (kWhichScatterCode /= 5))) THEN
-            rPressDiffMin = +1.0e10
-            DO i1 = 1,kProfLayer + 1
-                raPressDiff(i1) = abs(rP - raPressLevels(i1))
-            END DO
-            DO i1 = 1,kProfLayer + 1
-                IF (raPressDiff(i1) < rPressDiffMin) THEN
-                    rPressDiffMin =  raPressDiff(i1)
-                    i2 = i1
-                END IF
-            END DO
-            rPScatter  = rP
+      ! if DISORT or RTSPEC, as a first cut, find out which pressure level rP
+      ! lies closest to. we really HAVE to be careful about up and downlook stuff
+      IF ((kWhichScatterCode /= 0) .AND. &
+         ((kWhichScatterCode /= 1) .OR. (kWhichScatterCode /= 4) .OR. &
+         (kWhichScatterCode /= 5))) THEN
+        rPressDiffMin = +1.0e10
+        DO i1 = 1,kProfLayer + 1
+          raPressDiff(i1) = abs(rP - raPressLevels(i1))
+        END DO
+        DO i1 = 1,kProfLayer + 1
+          IF (raPressDiff(i1) < rPressDiffMin) THEN
+            rPressDiffMin =  raPressDiff(i1)
+            i2 = i1
+          END IF
+          END DO
+          rPScatter  = rP
 
-            iSilly = 1
-            111 CONTINUE
-            IF ((rP <= raPressLevels(iSilly)) .AND. &
+          iSilly = 1
+ 111      CONTINUE
+          IF ((rP <= raPressLevels(iSilly)) .AND. &
             (rP >= raPressLevels(iSilly+1))) THEN
-                GOTO 121
-            ELSE
-                iSilly = iSilly + 1
-                GOTO 111
-            END IF
-            121 CONTINUE
-            IF (iDirection < 0) THEN
-                rPScatter1 = raPressLevels(iSilly) !uplook, so reset to layer bottom
-                write(kStdWarn,*) 'low level of output layer is ',rPScatter1, 'mb'
-            ELSEIF (iDirection > 0) THEN
-                rPScatter1 = raPressLevels(iSilly+1) !downlook, reset to layer top
-                write(kStdWarn,*) 'top level of output layer is ',rPScatter1, 'mb'
-            END IF
+            GOTO 121
+          ELSE
+            iSilly = iSilly + 1
+            GOTO 111
+          END IF
+ 121      CONTINUE
+          IF (iDirection < 0) THEN
+            rPScatter1 = raPressLevels(iSilly) !uplook, so reset to layer bottom
+            write(kStdWarn,*) 'low level of output layer is ',rPScatter1, 'mb'
+          ELSEIF (iDirection > 0) THEN
+            rPScatter1 = raPressLevels(iSilly+1) !downlook, reset to layer top
+            write(kStdWarn,*) 'top level of output layer is ',rPScatter1, 'mb'
+          END IF
 
-            IF ((i2 /= iSilly) .OR. (abs(rPscatter-rPScatter1) >= 1.0e-3)) THEN
-                rPScatter = rPScatter1
-            END IF
+          IF ((i2 /= iSilly) .OR. (abs(rPscatter-rPScatter1) >= 1.0e-3)) THEN
+            rPScatter = rPScatter1
+          END IF
 
-        ! having saved this in variable rPscatter, make sure you are still w/in atm!!!
-            IF (iDirection < 0) THEN  !!! you probably want P ~ 1200 mb
+          ! having saved this in variable rPscatter, make sure you are still w/in atm!!!
+          IF (iDirection < 0) THEN  !!! you probably want P ~ 1200 mb
             !!!! raaPrBdry(iAtm,1) = TOA, raaPrBdry(iAtm,2) = GND
             !!!! check that things are ok for downward dir to instr at GND
-                IF (rPScatter > raaPrBdry(iAtm,2)) THEN
-                    rPScatter = raaPrBdry(iAtm,2)
-                END IF
-                IF (rPScatter < raaPrBdry(iAtm,1)) THEN
-                    rPScatter = raaPrBdry(iAtm,1)
-                END IF
+            IF (rPScatter > raaPrBdry(iAtm,2)) THEN
+              rPScatter = raaPrBdry(iAtm,2)
             END IF
-            IF (iDirection > 0) THEN
+            IF (rPScatter < raaPrBdry(iAtm,1)) THEN
+              rPScatter = raaPrBdry(iAtm,1)
+            END IF
+          END IF
+          IF (iDirection > 0) THEN
             !!!! raaPrBdry(iAtm,1) = GND, raaPrBdry(iAtm,2) = TOA
             !!!! check that things are ok for upward direction to intr at TOA
-                IF (rPScatter > raaPrBdry(iAtm,1)) THEN
-                    rPScatter = raaPrBdry(iAtm,1)
-                END IF
-                IF (rPScatter < raaPrBdry(iAtm,2)) THEN
-                    rPScatter = raaPrBdry(iAtm,2)
-                END IF
+            IF (rPScatter > raaPrBdry(iAtm,1)) THEN
+              rPScatter = raaPrBdry(iAtm,1)
             END IF
-            rP = rPScatter
-            write (kStdWarn,*) 'for RTSPEC/DISORT, reset pressure to ',rP
+            IF (rPScatter < raaPrBdry(iAtm,2)) THEN
+              rPScatter = raaPrBdry(iAtm,2)
+            END IF
+          END IF
+          rP = rPScatter
+          write (kStdWarn,*) 'for RTSPEC/DISORT, reset pressure to ',rP
         END IF
                      
-    ! now find out the pressure layer this pressure lies within
+        ! now find out the pressure layer this pressure lies within
         iFound = -1
         i1     = 1
         i2     = 2
         10 CONTINUE
         IF ((rP <= raPressLevels(i1)) .AND. (rP > raPressLevels(i2))) THEN
-            iFound = 1
-            iOne=i1+(iW-1)*kProfLayer  !set this correctly as Mixed Path number
+          iFound = 1
+          iOne = i1+(iW-1)*kProfLayer  !set this correctly as Mixed Path number
         END IF
         IF ((iFound < 0) .AND. (i1 < kProfLayer)) THEN
-            i1 = i1+1
-            i2 = i2+1
-            GO TO 10
+          i1 = i1+1
+          i2 = i2+1
+          GO TO 10
         END IF
         IF ((iFound < 0)) THEN
-            IF (abs(rP-raPressLevels(kProfLayer+1)) <= delta) THEN
-                i1     = kProfLayer
-                iFound = 1
-                iOne=i1+(iW-1)*kProfLayer  !set this correctly as Mix Path number
-            ELSE
-                write(kStdErr,*) 'atm#',iAtm,' could not find pressure ',rP
-                write(kStdErr,*) 'within KLAYERS pressure levels. Check'
-                write(kStdErr,*) '*RADNCE and *OUTPUT sections'
-                CALL DoSTOP
-            END IF
+          IF (abs(rP-raPressLevels(kProfLayer+1)) <= delta) THEN
+            i1     = kProfLayer
+            iFound = 1
+            iOne = i1+(iW-1)*kProfLayer  !set this correctly as Mix Path number
+          ELSE
+            write(kStdErr,*) 'atm#',iAtm,' could not find pressure ',rP
+            write(kStdErr,*) 'within KLAYERS pressure levels. Check'
+            write(kStdErr,*) '*RADNCE and *OUTPUT sections'
+            CALL DoSTOP
+          END IF
         END IF
 
     ! now see which radiating layer this corresponds to in defined atmosphere
@@ -1750,54 +1711,54 @@ CONTAINS
     ! the current atm, so if this is bottom or topmost layer, cannot exceed
     ! rFracBot or rFracTop respectively
         IF (iDirection > 0) THEN   !radiation goes up
-            iaOp(iI)=iOne-iaaRadLayer(iAtm,1)+1
-        ! ant BOTTOM fraction of layer
-            rF=(raPressLevels(i1)-rP)/(raPressLevels(i1)-raPressLevels(i2))
-            IF (iOne == (iaaRadLayer(iAtm,1))) THEN
-            ! ant TOP fraction of  lowest layer
-            !            print *,'aha : bottom layer for down look instr!!!!!!'
-                rF=1-rF
-            END IF
-            IF (abs(rF-1.00) <= delta) THEN
-                rF=1.00
-            END IF
-            raaUserPressT(iOutTypes,iI)=rP
-            raaOpT(iOutTypes,iI)=rF
-            write(kStdWarn,*) 'iDirection,rP,rF = ',iDirection,rP,rF
+          iaOp(iI) = iOne-iaaRadLayer(iAtm,1)+1
+          !want BOTTOM fraction of layer
+          rF = (raPressLevels(i1)-rP)/(raPressLevels(i1)-raPressLevels(i2))
+          IF (iOne == (iaaRadLayer(iAtm,1))) THEN
+            !want TOP fraction of  lowest layer
+            !print *,'aha : bottom layer for down look instr!!!!!!'
+            rF = 1-rF
+          END IF
+          IF (abs(rF-1.00) <= delta) THEN
+            rF = 1.00
+          END IF
+          raaUserPressT(iOutTypes,iI) = rP
+          raaOpT(iOutTypes,iI) = rF
+          write(kStdWarn,*) 'iDirection,rP,rF = ',iDirection,rP,rF
 
         ELSE IF (iDirection < 0) THEN !radiation goes up
-            iaOp(iI)=iaaRadLayer(iAtm,1)-iOne+1
-        ! ant BOTTOM fraction of layer
-            rF=(rP-raPressLevels(i2))/(raPressLevels(i1)-raPressLevels(i2))
-            IF (iOne == (iaaRadLayer(iAtm,1))) THEN
-            ! ant BOTTOM  fraction of highest layer
-            !            print *,'aha : top layer for up look instr!!!!!!'
-                rF=1-rF
-            END IF
-            IF (abs(rF-1.00) <= delta) THEN
-                rF=1.00
-            END IF
-            raaUserPressT(iOutTypes,iI)=rP
-            raaOpT(iOutTypes,iI)=rF
-            write(kStdWarn,*) 'iDirection,rP,rF = ',iDirection,rP,rF
+          iaOp(iI) = iaaRadLayer(iAtm,1)-iOne+1
+          !want BOTTOM fraction of layer
+          rF = (rP-raPressLevels(i2))/(raPressLevels(i1)-raPressLevels(i2))
+          IF (iOne == (iaaRadLayer(iAtm,1))) THEN
+            !want BOTTOM  fraction of highest layer
+            !print *,'aha : top layer for up look instr!!!!!!'
+            rF = 1-rF
+          END IF
+          IF (abs(rF-1.00) <= delta) THEN
+            rF = 1.00
+          END IF
+          raaUserPressT(iOutTypes,iI) = rP
+          raaOpT(iOutTypes,iI) = rF
+          write(kStdWarn,*) 'iDirection,rP,rF = ',iDirection,rP,rF
         END IF
 
         IF ((iaOp(iI) > iaNumLayer(iAtm)) .OR. (iaOp(iI) < 1))THEN
-            write(kStdErr,*) 'iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,End),iNumLayer,iOne,='
-            write(kStdErr,*) iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iaNumlayer(iAtm)),iaNumlayer(iAtm),iOne
-            write(kStdErr,*) 'iI,iaOp(iI) = ',iI,iaOp(iI)
-            write(kStdErr,*) 'Pressure ',rP,'invalid for atm# ',iAtm, 'see press levels below : '
-	    DO i2 = 1,kProfLayer
-	      write(kStdErr,*) i2,raPresslevels(i2)
-	    END DO
-            CALL DoSTOP	    
-         END IF
+          write(kStdErr,*) 'iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,End),iNumLayer,iOne,='
+          write(kStdErr,*) iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iaNumlayer(iAtm)),iaNumlayer(iAtm),iOne
+          write(kStdErr,*) 'iI,iaOp(iI) = ',iI,iaOp(iI)
+          write(kStdErr,*) 'Pressure ',rP,'invalid for atm# ',iAtm, 'see press levels below : '
+	  DO i2 = 1,kProfLayer
+	    write(kStdErr,*) i2,raPresslevels(i2)
+	  END DO
+          CALL DoSTOP	    
+        END IF
 
         IF (raaOpT(iOutTypes,iI) < 0.0) THEN
-            raaOpT(iOutTypes,iI) = 0.0
+          raaOpT(iOutTypes,iI) = 0.0
         END IF
         IF (raaOpT(iOutTypes,iI) > 1.0) THEN
-            raaOpT(iOutTypes,iI) = 1.0
+          raaOpT(iOutTypes,iI) = 1.0
         END IF
          
     END DO

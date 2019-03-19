@@ -60,33 +60,22 @@ CONTAINS
     REAL :: rW
 
     IF (iNatm > 1) THEN
-    ! cannot correctly weight the d/dT, so just use unit weight here and then try
-    ! an average weight when JacobTemp is actually called
-        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-        (abs(kLongOrShort) <= 1)) THEN
-            write(kStdWarn,*)'Gas iG, weight rW = ',iG,1.0
-        END IF
-
-        DO iL = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + daaDT(iFr,iL)
-            END DO
-        END DO
+      ! cannot correctly weight the d/dT, so just use unit weight here and then try
+      ! an average weight when JacobTemp is actually called
+      IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,*)'Gas iG, weight rW = ',iG,1.0
+      END IF
+      raaAllDT = raaAllDT + daaDT
     ELSE IF (iNatm == 1) THEN
-    ! have only one atmosphere and so correctly weight this gas's contribution to
-    ! d/dT matrix ... then use weight of 1.0 when calling JacobTemp
-        iL = iaaRadLayer(1,2)  !for atm#1, find which is the second mixed path
-    ! s the first,last could have fractional weights
-        rW = raaMix(iL,iG)   !find the gas weight in the second radiating layer
-        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-        (abs(kLongOrShort) <= 1)) THEN
-            write(kStdWarn,*)'jacobian d/dT Gas iG, weight rW = ',iG,rW
-        END IF
-        DO iL = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-                raaAllDT(iFr,iL) = raaAllDT(iFr,iL) + rW*daaDT(iFr,iL)
-            END DO
-        END DO
+      ! have only one atmosphere and so correctly weight this gas's contribution to
+      ! d/dT matrix ... then use weight of 1.0 when calling JacobTemp
+      iL = iaaRadLayer(1,2)  !for atm#1, find which is the second mixed path
+      ! is the first,last could have fractional weights
+      rW = raaMix(iL,iG)   !find the gas weight in the second radiating layer
+      IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,*)'jacobian d/dT Gas iG, weight rW = ',iG,rW
+      END IF
+      raaAllDT = raaAllDT + rW*daaDT
     END IF
        
     RETURN
@@ -169,25 +158,23 @@ CONTAINS
 ! radiation travelling upwards to instrument ==> sat looking down iDownWard = 1
 ! radiation travelling down to instrument ==> sat looking up iDownWard =-1
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
-        iDownWard = 1
+      iDownWard = 1
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
-        iDownWard = -1
+      iDownWard = -1
     END IF
     IF (abs(iDownWard) /= 1) THEN
-        write(kStdErr,*) 'hmm : jacobian code cannot decide up/down look!'
-        write(kStdErr,*) (iaaRadLayer(iAtm,iI),iI=1,iNumLayer)
-        write(kStdErr,*) iAtm,iNumLayer,iaaRadLayer(iAtm,1), &
-        iaaRadLayer(iAtm,iNumLayer)
-        CALL DoStop
+      write(kStdErr,*) 'hmm : jacobian code cannot decide up/down look!'
+      write(kStdErr,*) (iaaRadLayer(iAtm,iI),iI=1,iNumLayer)
+      write(kStdErr,*) iAtm,iNumLayer,iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer)
+      CALL DoStop
     END IF
 
-    IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-    (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,*) 'in Jacobian, have set set iDownWard = ',iDownWard
+    IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+      write(kStdWarn,*) 'in Jacobian, have set set iDownWard = ',iDownWard
     END IF
 
     IF (iDownWard == 1) THEN
-        CALL DownWardJacobian(raFreq,iTag,iActualTag, &
+      CALL DownWardJacobian(raFreq,iTag,iActualTag, &
         iProfileLayers,raPressLevels, &
         iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
         rSatAngle,raLayAngles,raSunAngles,raVTemp, &
@@ -197,7 +184,7 @@ CONTAINS
         iaJacob,iJacob,raaMix,raSunRefl,rDelta, &
         iNLTEStart,raaPlanckCoeff)
     ELSE IF (iDownWard == -1) THEN
-        CALL UpWardJacobian(raFreq,iTag,iActualTag, &
+      CALL UpWardJacobian(raFreq,iTag,iActualTag, &
         iProfileLayers,raPressLevels, &
         iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
         rSatAngle,raLayAngles,raSunAngles,raVTemp, &
@@ -222,9 +209,7 @@ CONTAINS
 
     INTEGER :: iFr
 
-    DO iFr = 1,kMaxPtsJac
-      raResults(iFr) = raResults(iFr) * rFracx
-    END DO
+    raResults = raResults * rFracx
     
     RETURN
     end SUBROUTINE scale_raResults

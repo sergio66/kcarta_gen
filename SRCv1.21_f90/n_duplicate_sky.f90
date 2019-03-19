@@ -83,154 +83,148 @@ CONTAINS
 ! first find out how many raAtmLoop the user did set
     iX = 1
     DO WHILE ((iX <= kMaxAtm) .AND. (raAtmLoop(iX) >= 0.0))
-        iX = iX + 1
-        IF (iX > kMaxAtm) GOTO 10
+      iX = iX + 1
+      IF (iX > kMaxAtm) GOTO 10
     END DO
-    10 CONTINUE
+ 10 CONTINUE
     iX = iX - 1
           
     write(kStdWarn,*) ' >>>> Duplicate Clear Sky Params from Atm # 1 for ',iX,' atmospheres'
     iNatm = iX
+
+    iaMPSetForRad(2:iNatm)      = iaMPSetForRad(1)
+
+    iaSetEms(2:iNatm)           = iaSetEms(1)
+    iaSetSolarRefl(2:iNatm)     = iaSetSolarRefl(1)
+    caEmissivity(2:iNatm)       = caEmissivity(1)
+    raSetEmissivity(2:iNatm)    = raSetEmissivity(1)
     DO iX = 2,iNatm
-        iaMPSetForRad(iX)      = iaMPSetForRad(1)
-
-        iaSetEms(iX)           = iaSetEms(1)
-        iaSetSolarRefl(iX)     = iaSetSolarRefl(1)
-        caEmissivity(iX)       = caEmissivity(1)
-        raSetEmissivity(iX)    = raSetEmissivity(1)
-        DO iY = 1,kEmsRegions
-            raaaSetEmissivity(ix,iY,1) = raaaSetEmissivity(1,iY,1)
-            raaaSetEmissivity(ix,iY,2) = raaaSetEmissivity(1,iY,2)
-            raaaSetSolarRefl(ix,iY,1)  = raaaSetSolarRefl(1,iY,1)
-            raaaSetSolarRefl(ix,iY,2)  = raaaSetSolarRefl(1,iY,2)
-        END DO
-        iaKSolar(iX)           = iaKSolar(1)
-        rakSolarAngle(iX)      = rakSolarAngle(1)
-        rakSolarRefl(iX)       = rakSolarRefl(1)
-        iaKThermal(iX)         = iaKThermal(1)
-        rakThermalAngle(iX)    = rakThermalAngle(1)
-        iakThermalJacob(iX)    = iakThermalJacob(1)
-        iaSetThermalAngle(iX)  = iaSetThermalAngle(1)
-        raSatHeight(iX)        = raSatHeight(1)
-        raSatAngle(iX)         = raSatAngle(1)
-
-        DO iY = 1,2
-            raaPrBdry(iX,iY)        = raaPrBdry(1,iY)
-        END DO
-        raPressStart(iX)       = raPressStart(1)
-        raPressStop(iX)        = raPressStop(1)
-
-        raTspace(iX)           = raTSpace(1)
-        raTSurf(iX)            = raTSurf(1)
-
-        iaNumLayer(iX)         = iaNumLayer(1)
-        DO iY = 1,kProfLayer
-            iaaRadLayer(iX,iY)     = iaaRadLayer(1,iY)
-        END DO
-
-        iaLimb(iX)     = iaLimb(1)
-        raFracTop(iX)  = raFracTop(1)
-        raFracBot(iX)  = raFracBot(1)
+      DO iY = 1,kEmsRegions
+        raaaSetEmissivity(iX,iY,1:2) = raaaSetEmissivity(1,iY,1:2)
+        raaaSetSolarRefl(iX,iY,1:2)  = raaaSetSolarRefl(1,iY,1:2)
+      END DO
     END DO
+    iaKSolar(2:iNatm)           = iaKSolar(1)
+    rakSolarAngle(2:iNatm)      = rakSolarAngle(1)
+    rakSolarRefl(2:iNatm)       = rakSolarRefl(1)
+    iaKThermal(2:iNatm)         = iaKThermal(1)
+    rakThermalAngle(2:iNatm)    = rakThermalAngle(1)
+    iakThermalJacob(2:iNatm)    = iakThermalJacob(1)
+    iaSetThermalAngle(2:iNatm)  = iaSetThermalAngle(1)
+    raSatHeight(2:iNatm)        = raSatHeight(1)
+    raSatAngle(2:iNatm)         = raSatAngle(1)
+    DO iX = 2,iNatm
+      raaPrBdry(iX,:)        = raaPrBdry(1,:)
+    END DO
+    raPressStart(2:iNatm)       = raPressStart(1)
+    raPressStop(2:iNatm)        = raPressStop(1)
+
+    raTspace(2:iNatm)           = raTSpace(1)
+    raTSurf(2:iNatm)            = raTSurf(1)
+
+    iaNumLayer(2:iNatm)         = iaNumLayer(1)
+    DO iX = 2,iNatm
+      DO iY = 1,kProfLayer
+        iaaRadLayer(iX,iY)     = iaaRadLayer(1,iY)
+      END DO
+    END DO
+
+    iaLimb(2:iNatm)     = iaLimb(1)
+    raFracTop(2:iNatm)  = raFracTop(1)
+    raFracBot(2:iNatm)  = raFracBot(1)
 
 ! now set the param you need to set
     IF (iAtmLoop == 1) THEN
-        write(kStdWarn,*) '  Resetting raPressStart for looping'
-        write(kStdErr,*)  '  Resetting raPressStart for looping'
-        IF ((raaPrBdry(1,1) > raaPrBdry(1,2)) .AND. (iaLimb(1) <= 0)) THEN
-            write(kStdWarn,*) '  ---> warning : reset Psurf for downlook instr w/o code resetting Tsurf is odd'
-            write(kStdErr,*)  '  ---> warning : reset Psurf for downlook instr w/o code resetting Tsurf is odd'
-        ELSEIF ((raaPrBdry(1,1) > raaPrBdry(1,2)) .AND. (iaLimb(1) > 0)) THEN
-            write(kStdWarn,*) '  ---> warning : reset Psurf for downlook instr for LIMB view is ok'
-            write(kStdErr,*)  '  ---> warning : reset Psurf for downlook instr for LIMB view is ok'
-        END IF
-        IF (raaPrBdry(1,1) < raaPrBdry(1,2)) THEN
-            write(kStdWarn,*) '  ---> warning : reset TOA press for uplook instr is odd'
-            write(kStdErr,*)  '  ---> warning : reset TOA press for uplook instr is odd'
-            CALL DoStop
-        END IF
-        DO iX = 1,iNatm
-            raPressStart(iX) = raAtmLoop(iX)
-            raaPrBdry(iX,1)  = raAtmLoop(iX)
-        END DO
+      write(kStdWarn,*) '  Resetting raPressStart for looping'
+      write(kStdErr,*)  '  Resetting raPressStart for looping'
+      IF ((raaPrBdry(1,1) > raaPrBdry(1,2)) .AND. (iaLimb(1) <= 0)) THEN
+        write(kStdWarn,*) '  ---> warning : reset Psurf for downlook instr w/o code resetting Tsurf is odd'
+        write(kStdErr,*)  '  ---> warning : reset Psurf for downlook instr w/o code resetting Tsurf is odd'
+      ELSEIF ((raaPrBdry(1,1) > raaPrBdry(1,2)) .AND. (iaLimb(1) > 0)) THEN
+        write(kStdWarn,*) '  ---> warning : reset Psurf for downlook instr for LIMB view is ok'
+        write(kStdErr,*)  '  ---> warning : reset Psurf for downlook instr for LIMB view is ok'
+      END IF
+      IF (raaPrBdry(1,1) < raaPrBdry(1,2)) THEN
+        write(kStdWarn,*) '  ---> warning : reset TOA press for uplook instr is odd'
+        write(kStdErr,*)  '  ---> warning : reset TOA press for uplook instr is odd'
+        CALL DoStop
+      END IF
+      raPressStart = raAtmLoop
+      raaPrBdry(:,1)  = raAtmLoop
 
     ELSEIF (iAtmLoop == 2) THEN
-        write(kStdWarn,*) '  Resetting raPressStop for looping'
-        write(kStdErr,*)  '  Resetting raPressStop for looping'
-        IF (raaPrBdry(1,1) < raaPrBdry(1,2)) THEN
-            write(kStdWarn,*) '  ---> reset Psurf for uplook instr w/o code resetting Tsurf is OK, for clear sky'
-            write(kStdErr,*) '  ---> reset Psurf for uplook instr w/o code resetting Tsurf is OK, for clear sky'
-        END IF
-        DO iX = 1,iNatm
-            raPressStop(iX) = raAtmLoop(iX)
-            raaPrBdry(iX,2)  = raAtmLoop(iX)
-        END DO
+      write(kStdWarn,*) '  Resetting raPressStop for looping'
+      write(kStdErr,*)  '  Resetting raPressStop for looping'
+      IF (raaPrBdry(1,1) < raaPrBdry(1,2)) THEN
+        write(kStdWarn,*) '  ---> reset Psurf for uplook instr w/o code resetting Tsurf is OK, for clear sky'
+        write(kStdErr,*) '  ---> reset Psurf for uplook instr w/o code resetting Tsurf is OK, for clear sky'
+      END IF
+      raPressStop = raAtmLoop
+      raaPrBdry(:,2)  = raAtmLoop
 
     ELSEIF (iAtmLoop == 3) THEN
-        write(kStdWarn,*) '  Resetting raSatZen for looping (so need to compute scanang)'
-        write(kStdErr,*)  '  Resetting raSatZen for looping (so need to compute scanang)'
-        IF (iaLimb(1) > 0) THEN
-            write(kStdErr,*) 'Atm 1 set up for Limb sounding'
-            write(kStdErr,*) '  so cannot willy nilly reset scanang'
-            write(kStdErr,*) 'Go and reset raStartPress instead'
-            CALL DoStop
-        ELSE
-            write(kStdWarn,*) '  changing user input SatZen (angle at gnd)  to       Instr ScanAng '
-            write(kStdWarn,*) '  raAtmLoop(iX) --> raSatAngle(iX)     GNDsecant  --> SATELLITEsecant'
+      write(kStdWarn,*) '  Resetting raSatZen for looping (so need to compute scanang)'
+      write(kStdErr,*)  '  Resetting raSatZen for looping (so need to compute scanang)'
+      IF (iaLimb(1) > 0) THEN
+        write(kStdErr,*) 'Atm 1 set up for Limb sounding'
+        write(kStdErr,*) '  so cannot willy nilly reset scanang'
+        write(kStdErr,*) 'Go and reset raStartPress instead'
+        CALL DoStop
+      ELSE
+        write(kStdWarn,*) '  changing user input SatZen (angle at gnd)  to       Instr ScanAng '
+        write(kStdWarn,*) '  raAtmLoop(iX) --> raSatAngle(iX)     GNDsecant  --> SATELLITEsecant'
 
-            IF (rSatHeightCom < 0) THEN
-                write(kStdWarn,*) '  WARNING : raSatHeight == -1 so kCARTA uses SATELLITEsecant!!!!'
-                DO iX = 1,iNatm
-                    raSatAngle(iX) = raAtmLoop(iX)
-                    rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
-                    rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
-                    write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
-                END DO
-            ELSE
-                DO iX = 1,iNatm
-                    raSatAngle(iX) = raAtmLoop(iX)
-                !!!! positive number so this is genuine input angle that will vary with layer height
-                    raSatAngle(iX) = SACONV_SUN(raAtmLoop(iX),0.0,705.0)
-                    rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
-                    rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
-                    write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
-                END DO
-            END IF
+        IF (rSatHeightCom < 0) THEN
+          write(kStdWarn,*) '  WARNING : raSatHeight == -1 so kCARTA uses SATELLITEsecant!!!!'
+          DO iX = 1,iNatm
+            raSatAngle(iX) = raAtmLoop(iX)
+            rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
+            rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
+            write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
+          END DO
+        ELSE
+          DO iX = 1,iNatm
+            raSatAngle(iX) = raAtmLoop(iX)
+            !!!! positive number so this is genuine input angle that will vary with layer height
+            raSatAngle(iX) = SACONV_SUN(raAtmLoop(iX),0.0,705.0)
+            rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
+            rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
+            write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
+          END DO
         END IF
-        111 FORMAT('   ',F10.5,' ---> ',F10.5,'   +++   ',F10.5,' ---> ',F10.5)
+      END IF
+  111 FORMAT('   ',F10.5,' ---> ',F10.5,'   +++   ',F10.5,' ---> ',F10.5)
               
     ELSEIF (iAtmLoop == 4) THEN
-        write(kStdWarn,*) '  Resetting raSolZen for looping'
-        write(kStdErr,*)  '  Resetting raSolZen for looping'
-        DO iX = 1,iNatm
-            rakSolarAngle(iX) = raAtmLoop(iX)
-        END DO
+      write(kStdWarn,*) '  Resetting raSolZen for looping'
+      write(kStdErr,*)  '  Resetting raSolZen for looping'
+      rakSolarAngle = raAtmLoop
 
     ELSEIF (iAtmLoop == 5) THEN
-        write(kStdWarn,*) '  Offsetting Emissivity for looping, refl -> (1-emis)/pi'
-        write(kStdErr,*)  '  Offsetting Emissivity for looping, refl -> (1-emis)/pi'
-        DO iX = 1,iNatm
-            DO iY = 1,kEmsRegions
-                raaaSetEmissivity(iX,iY,2) = raaaSetEmissivity(iX,iY,2) + raAtmLoop(iX)
-                raaaSetSolarRefl(iX,iY,2)  = (1-raaaSetEmissivity(iX,iY,2))/kPi
-            END DO
+      write(kStdWarn,*) '  Offsetting Emissivity for looping, refl -> (1-emis)/pi'
+      write(kStdErr,*)  '  Offsetting Emissivity for looping, refl -> (1-emis)/pi'
+      DO iX = 1,iNatm
+        DO iY = 1,kEmsRegions
+          raaaSetEmissivity(iX,iY,2) = raaaSetEmissivity(iX,iY,2) + raAtmLoop(iX)
+          raaaSetSolarRefl(iX,iY,2)  = (1-raaaSetEmissivity(iX,iY,2))/kPi
         END DO
+      END DO
 
     ELSEIF (iAtmLoop == 10) THEN
-        write(kStdWarn,*) '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
-        write(kStdErr,*)  '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
+      write(kStdWarn,*) '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
+      write(kStdErr,*)  '  TwoSlab Cloudy Atm(s) : nothing special for clear sky duplication'
 
     ELSEIF (iAtmLoop == 100) THEN
-        write(kStdWarn,*) '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
-        write(kStdErr,*)  '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
+      write(kStdWarn,*) '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
+      write(kStdErr,*)  '  100 Layer Cloudy Atm(s) : nothing special for clear sky duplication'
 
     ELSE
-        write(kStdErr,*) 'Dont know what to do with iAtmLoop = ',iAtmLoop
-        Call DoStop
+      write(kStdErr,*) 'Dont know what to do with iAtmLoop = ',iAtmLoop
+      Call DoStop
     END IF
 
     IF (iAtmLoop <= 2) THEN
-        CALL Reset_IaaRadLayer(iNatm,raaPrBdry,iaNumLayer,iaaRadLayer, &
+      CALL Reset_IaaRadLayer(iNatm,raaPrBdry,iaNumLayer,iaaRadLayer, &
         iProfileLayers,iaMPSetForRad, &
         raSatHeight,raSatAngle,raPressStart,raPressStop, &
         raFracTop,raFracBot,raPressLevels,raLayerHeight, &
@@ -334,51 +328,51 @@ CONTAINS
     iDebug = -1
     IF (iDebug > 0) THEN
 
+      print *,' '
+      print *,'INITIAL Clouds Before duplications'
+      print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+
+      print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+      print *,'ctype1,ctype2 = ',ctype1,ctype2
+      print *,'iNclouds = ',iNclouds
+
+      print *,'showing iaCloudNumAtm(iX) : '
+      print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+      print *,' '
+
+      print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
+      DO iY = 1,iNclouds
+        print *,'Cloud ',iY
+        print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
+        print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
+      END DO
+      print *,' '
+
+      !! iaaScatTable sounds like a waste of space, but it actually associates a cscat filename
+      print *,'showing iaaScatTable'
+      DO iY = 1,iNclouds
+        print *,'Cloud ',iY
+        print *,(iaaScatTable(iY,iX),iX=1,kCloudLayers)
         print *,' '
-        print *,'INITIAL Clouds Before duplications'
-        print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+      END DO
+      print *,' '
 
-        print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
-        print *,'ctype1,ctype2 = ',ctype1,ctype2
-        print *,'iNclouds = ',iNclouds
-
-        print *,'showing iaCloudNumAtm(iX) : '
-        print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+      print *,'raaaCloudParams (cloud loading, and <dme>) pCldTop,pCldBot'
+      DO iY = 1,iNclouds
+        print *,'Cloud ',iY
+        print *,(raaaCloudParams(iY,iX,1),iX=1,kCloudLayers)
+        print *,(raaaCloudParams(iY,iX,2),iX=1,kCloudLayers)
+        print *,(raaPCloudTop(iY,iX),iX=1,kCloudLayers)
+        print *,(raaPCloudBot(iY,iX),iX=1,kCloudLayers)   !!is this a waste?
         print *,' '
+      END DO
 
-        print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
-        DO iY = 1,iNclouds
-            print *,'Cloud ',iY
-            print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
-            print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
-        END DO
-        print *,' '
-
-    !! iaaScatTable sounds like a waste of space, but it actually associates a cscat filename
-        print *,'showing iaaScatTable'
-        DO iY = 1,iNclouds
-            print *,'Cloud ',iY
-            print *,(iaaScatTable(iY,iX),iX=1,kCloudLayers)
-            print *,' '
-        END DO
-        print *,' '
-
-        print *,'raaaCloudParams (cloud loading, and <dme>) pCldTop,pCldBot'
-        DO iY = 1,iNclouds
-            print *,'Cloud ',iY
-            print *,(raaaCloudParams(iY,iX,1),iX=1,kCloudLayers)
-            print *,(raaaCloudParams(iY,iX,2),iX=1,kCloudLayers)
-            print *,(raaPCloudTop(iY,iX),iX=1,kCloudLayers)
-            print *,(raaPCloudBot(iY,iX),iX=1,kCloudLayers)   !!is this a waste?
-            print *,' '
-        END DO
-
-        print *,' '
-        IF (iCldProfile > 0) THEN
-            print*,'iCldProfile'
-            print *,iCldProfile,(iaCldTypes(iX),iX=1,iNclouds)
-            print *,(raaKlayersCldAmt(iX,1),iX=1,kProfLayer)
-        END IF
+      print *,' '
+      IF (iCldProfile > 0) THEN
+        print*,'iCldProfile'
+        print *,iCldProfile,(iaCldTypes(iX),iX=1,iNclouds)
+        print *,(raaKlayersCldAmt(iX,1),iX=1,kProfLayer)
+      END IF
     END IF
 
 !************************************************************************
@@ -398,14 +392,14 @@ CONTAINS
 !!!  IN OTHER WORDS no need to sweat anything if iNclouds ===== 1 YAYAYAYAYAYAYAYAYAYAYAYA
 
     IF (iCldProfile > 0) THEN
-        write(kStdErr,*) 'Ooops can only duplicate clouds slabs, not profiles'
-        CALL DoStop
+      write(kStdErr,*) 'Ooops can only duplicate clouds slabs, not profiles'
+      CALL DoStop
     END IF
 
     IF (iNclouds == 1) THEN
-        write(kStdWarn,*) 'iNclouds == 1, so really no need to duplicate cloud fields at all!'
-    !!! just duplicate the clear fields
-        CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
+      write(kStdWarn,*) 'iNclouds == 1, so really no need to duplicate cloud fields at all!'
+      !!! just duplicate the clear fields
+      CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
         iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
         iaSetEms,raaaSetEmissivity,raSetEmissivity, &
         iaSetSolarRefl,raaaSetSolarRefl, &
@@ -415,28 +409,26 @@ CONTAINS
         raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
 
     ELSEIF ((iNclouds > 2) .OR. (iNclouds <= 0)) THEN
-        write(kStdErr,*) 'iNclouds = ',iNclouds ,' huh?? cant duplicate this !!!'
-        CALL DoStop
+      write(kStdErr,*) 'iNclouds = ',iNclouds ,' huh?? cant duplicate this !!!'
+      CALL DoStop
     ELSEIF (iNclouds == 2) THEN
-        DO iX = 1,iNclouds
-            iaCloudNumAtm(iX) = 2
-        END DO
+      iaCloudNumAtm = 2
 
-    ! no need to upgrade iaaCloudWhichLayers
-    ! no need to upgrade iaaScatTable
+      ! no need to upgrade iaaCloudWhichLayers
+      ! no need to upgrade iaaScatTable
 
-    ! need to upgrade iaaCloudWhichAtm
-        iY = 1
-        iaaCloudWhichAtm(iY,2) = 2   !! this means cloud #1 is also going to be used in atm #2
+      ! need to upgrade iaaCloudWhichAtm
+      iY = 1
+      iaaCloudWhichAtm(iY,2) = 2   !! this means cloud #1 is also going to be used in atm #2
                 
-        iY = 2
-        iaaCloudWhichAtm(iY,2) = 3   !! this means cloud #1 is also going to be used in atm #3
+      iY = 2
+      iaaCloudWhichAtm(iY,2) = 3   !! this means cloud #1 is also going to be used in atm #3
 
-    ! no need to upgrade raaPCloudTop,raaPCloudbot
-    ! no need to upgrade raaaCloudParams (cloud loading and <dme>)
+      ! no need to upgrade raaPCloudTop,raaPCloudbot
+      ! no need to upgrade raaaCloudParams (cloud loading and <dme>)
               
-    !!! finally duplicate the clear fields
-        CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
+      !!! finally duplicate the clear fields
+      CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
         iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
         iaSetEms,raaaSetEmissivity,raSetEmissivity, &
         iaSetSolarRefl,raaaSetSolarRefl, &
@@ -448,26 +440,26 @@ CONTAINS
 
     iDebug = -1
     IF (iDebug > 0) THEN
-        print *,' '
-        print *,'FINAL CLOUD after duplications'
+      print *,' '
+      print *,'FINAL CLOUD after duplications'
 
-        print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+      print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
 
-        print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
-        print *,'ctype1,ctype2 = ',ctype1,ctype2
-        print *,'iNclouds = ',iNclouds
+      print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+      print *,'ctype1,ctype2 = ',ctype1,ctype2
+      print *,'iNclouds = ',iNclouds
 
-        print *,'showing iaCloudNumAtm(iX) : '
-        print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
-        print *,' '
+      print *,'showing iaCloudNumAtm(iX) : '
+      print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+      print *,' '
 
-        print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
-        DO iY = 1,iNclouds
-            print *,'Cloud ',iY
-            print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
-            print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
-        END DO
-        print *,' '
+      print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
+      DO iY = 1,iNclouds
+        print *,'Cloud ',iY
+        print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
+        print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
+      END DO
+      print *,' '
     END IF
 
     RETURN
@@ -567,51 +559,51 @@ CONTAINS
     iDebug = -1
     IF (iDebug > 0) THEN
 
-        print *,' '
-        print *,'INITIAL Clouds Before duplications'
-        print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
+      print *,' '
+      print *,'INITIAL Clouds Before duplications'
+      print *,'kMaxClouds,kCloudLayers = ',kMaxClouds,kCloudLayers
 
-        print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
-        print *,'ctype1,ctype2 = ',ctype1,ctype2
-        print *,'iNclouds = ',iNclouds
+      print *,'cngwat1,cngwat2,cfrac12,cfrac1,cfrac2 = ',cngwat1,cngwat2,cfrac12,cfrac1,cfrac2
+      print *,'ctype1,ctype2 = ',ctype1,ctype2
+      print *,'iNclouds = ',iNclouds
 
-        print *,'showing iaCloudNumAtm(iX) : '
-        print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
-        print *,' '
+      print *,'showing iaCloudNumAtm(iX) : '
+      print *,(iaCloudNumAtm(iX),iX = 1,iNclouds)
+      print *,' '
 
-        print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
-        DO iY = 1,iNclouds
-            print *,'Cloud ',iY
-            print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
-            print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
-        END DO
-        print *,' '
+      print *,'showing iaaCloudWhichAtm and iaaCloudWhichLayers'
+      DO iY = 1,iNclouds
+        print *,'Cloud ',iY
+        print *,(iaaCloudWhichAtm(iY,iX),iX=1,kMaxAtm)
+        print *,(iaaCloudWhichLayers(iY,iX),iX=1,kCloudLayers)
+      END DO
+      print *,' '
 
     !! iaaScatTable sounds like a waste of space, but it actually associates a cscat filename
-        print *,'showing iaaScatTable'
-        DO iY = 1,iNclouds
-            print *,'Cloud ',iY
-            print *,(iaaScatTable(iY,iX),iX=1,kCloudLayers)
-            print *,' '
-        END DO
+      print *,'showing iaaScatTable'
+      DO iY = 1,iNclouds
+        print *,'Cloud ',iY
+        print *,(iaaScatTable(iY,iX),iX=1,kCloudLayers)
         print *,' '
+      END DO
+      print *,' '
 
-        print *,'raaaCloudParams (cloud loading, and <dme>) pCldTop,pCldBot'
-        DO iY = 1,iNclouds
-            print *,'Cloud ',iY
-            print *,(raaaCloudParams(iY,iX,1),iX=1,kCloudLayers)
-            print *,(raaaCloudParams(iY,iX,2),iX=1,kCloudLayers)
-            print *,(raaPCloudTop(iY,iX),iX=1,kCloudLayers)
-            print *,(raaPCloudBot(iY,iX),iX=1,kCloudLayers)   !!is this a waste?
-            print *,' '
-        END DO
-
+      print *,'raaaCloudParams (cloud loading, and <dme>) pCldTop,pCldBot'
+      DO iY = 1,iNclouds
+        print *,'Cloud ',iY
+        print *,(raaaCloudParams(iY,iX,1),iX=1,kCloudLayers)
+        print *,(raaaCloudParams(iY,iX,2),iX=1,kCloudLayers)
+        print *,(raaPCloudTop(iY,iX),iX=1,kCloudLayers)
+        print *,(raaPCloudBot(iY,iX),iX=1,kCloudLayers)   !!is this a waste?
         print *,' '
-        IF (iCldProfile > 0) THEN
-            print*,'iCldProfile'
-            print *,iCldProfile,(iaCldTypes(iX),iX=1,iNclouds)
-            print *,(raaKlayersCldAmt(iX,1),iX=1,kProfLayer)
-        END IF
+      END DO
+
+      print *,' '
+      IF (iCldProfile > 0) THEN
+        print*,'iCldProfile'
+        print *,iCldProfile,(iaCldTypes(iX),iX=1,iNclouds)
+        print *,(raaKlayersCldAmt(iX,1),iX=1,kProfLayer)
+      END IF
     END IF
 
 !************************************************************************
@@ -620,20 +612,20 @@ CONTAINS
 !!!   just do one 100 layer ice/water cloud and one clear calc
 
     IF (iCldProfile < 0) THEN
-        write(kStdErr,*) 'Ooops can only duplicate 100 layer cloud profiles, not slabs'
-        CALL DoStop
+      write(kStdErr,*) 'Ooops can only duplicate 100 layer cloud profiles, not slabs'
+      CALL DoStop
     END IF
 
     write(kStdWarn,*) 'iNclouds == 1, so really no need to duplicate cloud fields at all!'
 !!! just duplicate the clear fields
     CALL duplicate_clearsky_atm(iAtmLoop,raAtmLoop, &
-    iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
-    iaSetEms,raaaSetEmissivity,raSetEmissivity, &
-    iaSetSolarRefl,raaaSetSolarRefl, &
-    iaKSolar,rakSolarAngle,rakSolarRefl, &
-    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
-    raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
-    raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
+      iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
+      iaSetEms,raaaSetEmissivity,raSetEmissivity, &
+      iaSetSolarRefl,raaaSetSolarRefl, &
+      iaKSolar,rakSolarAngle,rakSolarRefl, &
+      iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+      raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raPressStart,raPressStop, &
+      raTSpace,raTSurf,iaaRadLayer,iaNumLayer,iProfileLayers)
 
     RETURN
     end SUBROUTINE duplicate_cloudsky100slabs_atm
@@ -660,45 +652,45 @@ CONTAINS
     REAL :: raaPrBdry(kMaxAtm,2),raPressLevels(kProfLayer+1)
 
     INTEGER :: iC,iX,iStart,iStop,iNlay,iDirection,iInt
+    INTEGER, DIMENSION (kProfLayer) :: iaInt
+
+    iaInt = (/ (iInt, iInt = 1, kProfLayer) /)
 
     DO iC = 1,iNAtm
-        CALL StartStopMP(iaMPSetForRad(iC),raPressStart(iC),raPressStop(iC),iC, &
+      CALL StartStopMP(iaMPSetForRad(iC),raPressStart(iC),raPressStop(iC),iC, &
         raPressLevels,iProfileLayers, &
         raFracTop,raFracBot,raaPrBdry,iStart,iStop)
 
-        IF (iStop >= iStart) THEN
-            iNlay = (iStop-iStart+1)
-            iDirection = +1                           !down look instr
-        ELSE IF (iStop <= iStart) THEN
-            iNlay = (iStart-iStop+1)
-            iDirection = -1                           !up look instr
-        END IF
-        IF (iNLay > kProfLayer) THEN
-            write(kStdErr,*)'Error for atm # ',iC
-            write(kStdErr,*)'number of layers/atm must be <= ',kProfLayer
-            CALL DoSTOP
-        END IF
-        iaNumlayer(iC) = iNlay
+      IF (iStop >= iStart) THEN
+        iNlay = (iStop-iStart+1)
+        iDirection = +1                           !down look instr
+      ELSE IF (iStop <= iStart) THEN
+        iNlay = (iStart-iStop+1)
+        iDirection = -1                           !up look instr
+      END IF
+      IF (iNLay > kProfLayer) THEN
+        write(kStdErr,*)'Error for atm # ',iC
+        write(kStdErr,*)'number of layers/atm must be <= ',kProfLayer
+        CALL DoSTOP
+      END IF
+      iaNumlayer(iC) = iNlay
 
-        DO iInt = 1,iNlay
-            iaaRadLayer(iC,iInt) = iStart+iDirection*(iInt-1)
-        END DO
+      iaaRadLayer(iC,1:iNlay) = iStart + iDirection * (iaInt(1:iNlay)-1)
 
-        write(kStdWarn,*) ' Atm#, Press Start/Stop, iStart,iStop, Nlay = ', &
+      write(kStdWarn,*) ' Atm#, Press Start/Stop, iStart,iStop, Nlay = ', &
         iC,raPressStart(iC),raPressStop(iC),iStart,iStop,iNlay
 
     END DO
 
     IF (iaLimb(1) > 0) THEN
-    !! this is limb sounder, do the angle etc
-        DO iC = 1,iNatm
-            raSatAngle(iC) = LimbViewScanAng(iC,raPressStart,raSatHeight, &
-            iaaRadLayer,raPressLevels,raLayerHeight)
-            IF (iaKsolar(iC) >= 0) THEN
-                rakSolarAngle(iC) = raSatAngle(iC)  !! this is scanang at TOA instr
-                rakSolarAngle(iC) = 89.9            !! this is sol zenith at "surface"
-            END IF
-        END DO
+      !! this is limb sounder, do the angle etc
+      DO iC = 1,iNatm
+        raSatAngle(iC) = LimbViewScanAng(iC,raPressStart,raSatHeight,iaaRadLayer,raPressLevels,raLayerHeight)
+        IF (iaKsolar(iC) >= 0) THEN
+          rakSolarAngle(iC) = raSatAngle(iC)  !! this is scanang at TOA instr
+          rakSolarAngle(iC) = 89.9            !! this is sol zenith at "surface"
+        END IF
+      END DO
     END IF
           
     RETURN

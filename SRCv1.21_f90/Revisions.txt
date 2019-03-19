@@ -605,6 +605,9 @@ v1.21
                << rad_common.f90 >> needs a lot of vectorized implied do looping work
                << rad_diff_and_quad.f90 >> needs lot of vectorziation because FindDiffusiveAngleExp is scalar, not vector
 
+               namelist nm_scatter : raCloudFrac(kMaxClouds,3) has been changed to raaCloudFrac(kMaxClouds,3)
+               this should be a mostly transperent change since we typically drive clouds from rtp
+
 v1.20
 -----
 2/25/2019      [rad,jac,w] = readkcPCLSAM_coljac(radfile,jacfile);
