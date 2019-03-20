@@ -40,32 +40,32 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iBeta,iBetaP1,iVaryVary
-    REAL :: rBeta,rTT,rZeta,rBooga,radtot,rad1
     INTEGER :: iRTSPEC
-    REAL :: planck1,planck0,del,gwak,tau0,trans
+    REAL :: raBeta(kMaxPts),raTT(kMaxPts),raZeta(kMaxPts),rBooga
+    REAL :: raPlanck1(kMaxPts),raPlanck0(kMaxPts),raDel(kMaxPts),raTau0(kMaxPts),raTrans(kMaxPts),gwak
 
     iVaryVary = iVary
 
     IF (rFrac < 0) THEN
-        write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileUPWELL, reset to > 0'
-        rFrac = abs(rFrac)
+      write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileUPWELL, reset to > 0'
+      rFrac = abs(rFrac)
     END IF
 
     iBeta = MOD(iL,kProfLayer)
     IF (iBeta == 0) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iL == kProfLayer+1) THEN
-        iBeta = kProfLayer+1
+      iBeta = kProfLayer+1
     END IF
 
     IF ((iBeta >= kProfLayer-15) .AND. (iVaryVary >= 2)) THEN
-    !!!! if we use RTSPEC, we get junky results close to TOA because of
-    !!!! real vs double precision
-        iVaryVary = -1
-    !!!! but i've changed this so it mimics GASRT2 tau->0 approx
-        iVaryVary = iVary
+      !!!! if we use RTSPEC, we get junky results close to TOA because of
+      !!!! real vs double precision
+      iVaryVary = -1
+      !!!! but i've changed this so it mimics GASRT2 tau->0 approx
+      iVaryVary = iVary
     END IF
 
 !!! model the variation as B(x) = Bo exp(rBooga x)
@@ -75,73 +75,64 @@ CONTAINS
 !!!
 !!!!this is how temperature in layer varies with tau
     IF (iVaryVary == +1) THEN        !!!!exponential in tau dependance of T
-        rBooga = log(TEMP(iBeta+1)/TEMP(iBeta))
+      rBooga = log(TEMP(iBeta+1)/TEMP(iBeta))
     ELSEIF (iVaryVary >= 2) THEN       !!!!linear in tau dependance of T
-        rBooga = 0.0
+      rBooga = 0.0
     ELSEIF (iVaryVary == -1) THEN       !!!!no tau dependance of T
-        rBooga = 0.0
+      rBooga = 0.0
     END IF
 
     IF (iVaryVary >= 2) THEN
-        iRTSPEC = 1
+      iRTSPEC = 1
     ELSE
-        iRTSPEC = -1    !!!RTSPEC does a simple "exponential in rad" way
+      iRTSPEC = -1    !!!RTSPEC does a simple "exponential in rad" way
     END IF
 
     IF (iVary == -2) THEN
-    !!!NO LAYER EMISSION csun debug!!!
-        DO iFr=1,kMaxPts
-            raInten(iFr) = raInten(iFr)*exp(-raaAbs(iFr,iL)/rCos)
-        END DO
+      !!!NO LAYER EMISSION csun debug!!!
+      raInten = raInten*exp(-raaAbs(:,iL)/rCos)
 
     ELSEIF ((iVary > -1) .AND. (iRTSPEC < 0)) THEN
-    !!!either exp temperature dependance or none; rBooga carries this info
-    !!! >>>>>>>>>>>>>>> this is basically exp in tau <<<<<<<<<<<<<<<<<<<<<<
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rbeta = 1/raaAbs(iFr,iL) * rBooga
-                rTT   = ttorad(raFreq(iFr),TEMP(iBeta))/(1 + rbeta*rCos)
-                rZeta = (raInten(iFr) - rTT) * exp(-raaAbs(iFr,iL)/rCos)
-                raInten(iFr) = rZeta + rTT * exp(raaAbs(iFr,iL) * rbeta)
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rbeta = 1/(raaAbs(iFr,iL)*rFrac) * rBooga
-                rTT   = ttorad(raFreq(iFr),TEMP(iBeta))/(1 + rbeta*rCos)
-                rZeta = (raInten(iFr) - rTT) * exp(-raaAbs(iFr,iL)*rFrac/rCos)
-                raInten(iFr) = rZeta + rTT * exp(raaAbs(iFr,iL)*rFrac * rbeta)
-            END DO
-        END IF
+      !!!either exp temperature dependance or none; rBooga carries this info
+      !!! >>>>>>>>>>>>>>> this is basically exp in tau <<<<<<<<<<<<<<<<<<<<<<
+      IF (rFrac >= 0.9999) THEN
+        raBeta = 1/raaAbs(:,iL) * rBooga
+        raTT   = rattorad(raFreq,TEMP(iBeta))/(1 + raBeta*rCos)
+        raZeta = (raInten - raTT) * exp(-raaAbs(:,iL)/rCos)
+        raInten = raZeta + raTT * exp(raaAbs(:,iL) * raBeta)
+      ELSE
+        raBeta = 1/(raaAbs(:,iL)*rFrac) * rBooga
+        raTT   = rattorad(raFreq,TEMP(iBeta))/(1 + raBeta*rCos)
+        raZeta = (raInten - raTT) * exp(-raaAbs(:,iL)*rFrac/rCos)
+        raInten = raZeta + raTT * exp(raaAbs(:,iL)*rFrac * raBeta)
+      END IF
 
     ELSEIF ((iVary > -1) .AND. (iRTSPEC >= 0)) THEN
-    !!!!do the RTSPEC way  .... see GASRT2 in RTSPEC
-        IF (rFrac >= 0.9999) THEN !!!full layer
-            gwak = 1.0
-            iBetaP1 = iBeta + 1
-        ELSE IF (rFrac < 0.9999) THEN !!!partial layer
-            gwak = rFrac
-            IF ((TEMP(iBeta+1) < 150) .OR. (TEMP(iBeta+1) > 350)) THEN
-                iBetaP1 = ibeta
-            ELSE
-                iBetaP1 = ibeta + 1
-            END IF
+      !!!!do the RTSPEC way  .... see GASRT2 in RTSPEC
+      IF (rFrac >= 0.9999) THEN !!!full layer
+        gwak = 1.0
+        iBetaP1 = iBeta + 1
+      ELSE IF (rFrac < 0.9999) THEN !!!partial layer
+        gwak = rFrac
+        IF ((TEMP(iBeta+1) < 150) .OR. (TEMP(iBeta+1) > 350)) THEN
+          iBetaP1 = ibeta
+        ELSE
+          iBetaP1 = ibeta + 1
         END IF
-        IF (rFrac >= 1.0000) gwak = 1.0
-        IF (rFrac < 0.9999) gwak = rFrac
-        rad1=raInten(1)
-        DO iFr=1,kMaxPts
-            planck1 = ttorad(raFreq(iFr),TEMP(iBeta))
-            planck0 = ttorad(raFreq(iFr),TEMP(iBetaP1))
-            tau0 = (raaAbs(iFr,iL)*gwak)/rCos
-            IF (tau0 < 0.001) THEN
-                raInten(iFr) = raInten(iFr)*(1-tau0) + tau0*0.5*(PLANCK0+PLANCK1)
-            ELSE
-                del = (planck1-planck0)/tau0
-                trans = exp(-tau0)
-                raInten(iFr) = raInten(iFr)*trans + (planck0+del &
-                - trans*(planck0+del*(1.0+tau0)))
-            END IF
-        END DO
+      END IF
+      IF (rFrac >= 1.0000) gwak = 1.0
+      IF (rFrac < 0.9999) gwak = rFrac
+
+      raPlanck1 = rattorad(raFreq,TEMP(iBeta))
+      raPlanck0 = rattorad(raFreq,TEMP(iBetaP1))
+      raTau0 = (raaAbs(:,iL)*gwak)/rCos
+      WHERE (ratau0 < 0.001)
+        raInten = raInten*(1-raTau0) + ratau0*0.5*(raPLANCK0+raPLANCK1)
+      ELSEWHERE (raTau0 >= 0.001)
+        raDel = (raPlanck1-raPlanck0)/raTau0
+        raTrans = exp(-raTau0)
+        raInten = raInten*raTrans + (raPlanck0 + raDel - raTrans*(raPlanck0+raDel*(1.0+raTau0)))
+      ENDWHERE
 
     END IF
 
@@ -172,93 +163,87 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iBeta,iBetaM1
-    REAL :: rBeta,rTT,rZeta,rBooga,mu
+    REAL :: mu
     INTEGER :: iRTSPEC
-    REAL :: planck1,planck0,del,gwak,tau0,trans
+    REAL :: raBeta(kMaxPts),raTT(kMaxPts),raZeta(kMaxPts),rBooga
+    REAL :: raPlanck1(kMaxPts),raPlanck0(kMaxPts),raDel(kMaxPts),raTau0(kMaxPts),raTrans(kMaxPts),gwak
 
     IF (rFrac < 0) THEN
-        write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL, reset to > 0'
-        rFrac = abs(rFrac)
+      write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL, reset to > 0'
+      rFrac = abs(rFrac)
     END IF
 
     iBeta = MOD(iL,kProfLayer)
     IF (iBeta == 0) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iL == kProfLayer+1) THEN
-        iBeta = kProfLayer+1
+      iBeta = kProfLayer+1
     END IF
 
 !!!!this is how temperature in layer varies with tau
     IF (iVary == +1) THEN          !!!!exponential in tau dependance of T
-        rBooga = log(TEMP(iBeta+1)/TEMP(iBeta))
+      rBooga = log(TEMP(iBeta+1)/TEMP(iBeta))
     ELSEIF (iVary >= 2) THEN       !!!!linear in tau dependance of T
-        rBooga = 0.0
+      rBooga = 0.0
     ELSEIF (iVary == -1) THEN       !!!!no tau dependance of T
-        rBooga = 0.0
+      rBooga = 0.0
     END IF
 
     IF (iVary >= 2) THEN
-        iRTSPEC = 1             !!!RTSPEC does a simple "linear in tau" way
+      iRTSPEC = 1             !!!RTSPEC does a simple "linear in tau" way
     ELSE
-        iRTSPEC = -1
+      iRTSPEC = -1
     END IF
 
     mu = abs(rCos)
 
     IF (iVary == -2) THEN
-    !!!NO LAYER EMISSION csun debug!!!
-        DO iFr=1,kMaxPts
-            raInten(iFr) = raInten(iFr)*exp(-raaAbs(iFr,iL)/rCos)
-        END DO
+      !!!NO LAYER EMISSION csun debug!!!
+      raInten(iFr) = raInten(iFr)*exp(-raaAbs(iFr,iL)/rCos)
     ELSEIF ((iVary >= -1) .AND. (iRTSPEC < 0)) THEN
-    !!!either exp temperature dependace or none; rBooga carries this info
-        IF (rFrac >= 0.9999) THEN
-            DO iFr=1,kMaxPts
-                rbeta = 1/raaAbs(iFr,iL) * rBooga
-                rTT   = ttorad(raFreq(iFr),TEMP(iBeta))/(rbeta*mu - 1)
-                rZeta = exp(-raaAbs(iFr,iL)/mu) * exp(rBeta*raaAbs(iFr,iL)) - 1.0
-                raInten(iFr) = raInten(iFr)* exp(-raaAbs(iFr,iL)/mu) + rTT*rZeta
-            END DO
-        ELSE
-            DO iFr=1,kMaxPts
-                rbeta = 1/(raaAbs(iFr,iL)*rFrac) * rBooga
-                rTT   = ttorad(raFreq(iFr),TEMP(iBeta))/(rbeta*mu - 1)
-                rZeta = &
-                exp(-raaAbs(iFr,iL)*rFrac/mu)*exp(rBeta*raaAbs(iFr,iL)*rFrac)-1.0
-                raInten(iFr) = raInten(iFr)*exp(-raaAbs(iFr,iL)*rFrac/mu)+rTT*rZeta
-            END DO
-        END IF
+      !!!either exp temperature dependace or none; rBooga carries this info
+      IF (rFrac >= 0.9999) THEN
+        raBeta = 1/raaAbs(:,iL) * rBooga
+        raTT   = rattorad(raFreq,TEMP(iBeta))/(raBeta*mu - 1)
+        raZeta = exp(-raaAbs(:,iL)/mu) * exp(raBeta*raaAbs(:,iL)) - 1.0
+        raInten = raInten*exp(-raaAbs(:,iL)/mu) + raTT*raZeta
+      ELSE
+        raBeta = 1/(raaAbs(:,iL)*rFrac) * rBooga
+        raTT   = rattorad(raFreq,TEMP(iBeta))/(raBeta*mu - 1)
+        raZeta = exp(-raaAbs(:,iL)*rFrac/mu) * exp(raBeta*raaAbs(:,iL)*rFrac) - 1.0
+        raInten = raInten*exp(-raaAbs(:,iL)*rFrac/mu) + raTT*raZeta
+     END IF
 
     ELSEIF ((iVary >= -1) .AND. (iRTSPEC >= 0)) THEN
-    !!!!do the RTSPEC way  .... see GASRT2 in RTSPEC
-        IF (rFrac >= 0.9999) THEN !!!full layer
-            gwak = 1.0
-            iBetaM1 = iBeta - 1
-        ELSE IF (rFrac > 0.0) THEN !!!partial layer
-            gwak = rFrac
-            IF ((TEMP(iBeta-1) < 150) .OR. (TEMP(iBeta-1) > 350)) THEN
-                iBetaM1 = ibeta
-            ELSE
-                iBetaM1 = ibeta - 1
-            END IF
+      !!!!do the RTSPEC way  .... see GASRT2 in RTSPEC
+      IF (rFrac >= 0.9999) THEN !!!full layer
+        gwak = 1.0
+        iBetaM1 = iBeta - 1
+      ELSE IF (rFrac > 0.0) THEN !!!partial layer
+        gwak = rFrac
+        IF ((TEMP(iBeta-1) < 150) .OR. (TEMP(iBeta-1) > 350)) THEN
+          iBetaM1 = ibeta
+        ELSE
+          iBetaM1 = ibeta - 1
         END IF
-        DO iFr=1,kMaxPts
-            planck0 = ttorad(raFreq(iFr),TEMP(iBeta))
-            planck1 = ttorad(raFreq(iFr),TEMP(iBetaM1))
-            tau0 = (raaAbs(iFr,iL)*gwak)/rCos
-            IF (tau0 < 0.001) THEN
-                raInten(iFr) = raInten(iFr)*(1-tau0) + tau0*0.5*(PLANCK0+PLANCK1)
-            ELSE
-                del = (planck1-planck0)/tau0
-                trans = exp(-tau0)
-                raInten(iFr) = raInten(iFr)*trans + (PLANCK1-DEL &
-                - TRANS*(PLANCK1-DEL*(1.0+tau0)))
-            END IF
-        END DO
-    END IF
+      END IF
 
+      IF (rFrac >= 1.0000) gwak = 1.0
+      IF (rFrac < 0.9999) gwak = rFrac
+
+      raPlanck1 = rattorad(raFreq,TEMP(iBeta))
+      raPlanck0 = rattorad(raFreq,TEMP(iBetaM1))
+      raTau0 = (raaAbs(:,iL)*gwak)/rCos
+      WHERE (ratau0 < 0.001)
+        raInten = raInten*(1-raTau0) + ratau0*0.5*(raPLANCK0+raPLANCK1)
+      ELSEWHERE (raTau0 >= 0.001)
+        raDel = (raPlanck1-raPlanck0)/raTau0
+        raTrans = exp(-raTau0)
+        raInten = raInten*raTrans + (raPlanck1 - raDel - raTrans*(raPlanck1-raDel*(1.0+raTau0)))
+      ENDWHERE
+    END IF
 
     RETURN
     end SUBROUTINE RT_ProfileDNWELL
@@ -306,226 +291,165 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iBeta,iBetaP1
-    REAL :: rBeff,rFcn
+    REAL :: rBeff,raFcn(kMaxPts)
     REAL :: raIntenP(kMaxPts),raIntenP1(kMaxPts),raIntenP0(kMaxPts)
     REAL :: raIntenAvg(kMaxPts)
-    REAL :: rZeta,rZeta2,rAbs,rTrans
+    REAL :: raZeta(kMaxPts),raZeta2(kMaxPts),raAbs(kMaxPts),raTrans(kMaxPts),raCos(kMaxPts)
+
+    raCos = rCos
 
     IF (iVary < 2) THEN
-        write(kStdErr,*) 'this is upwell for linear in tau .. need iVary = 2 or 3 or 4'
-        CALL DoStop
+      write(kStdErr,*) 'this is upwell for linear in tau .. need iVary = 2 or 3 or 4'
+      CALL DoStop
+    END IF
+
+    IF (rFrac < 0) THEN
+      write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileUPWELL_LINTAU, reset to > 0'
+      rFrac = abs(rFrac)
     END IF
 
     IF (iVary == 41) iVary = 43     !!! have debugged 04, 42, 43 for small tau O(tau^2)
           
-    IF (rFrac < 0) THEN
-        write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileUPWELL_LINTAU, reset to > 0'
-        rFrac = abs(rFrac)
-    END IF
-
     iBeta = MOD(iL,kProfLayer)
     IF (iBeta == 0) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iL == kProfLayer+1) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
-    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
+    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this we want XXXXX
     CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
-!! (which is NOT necessarily average of above 2)
+    !! (which is NOT necessarily average of above 2)
     IF (kOuterLoop == 1) THEN
-        write(kStdWarn,2345) iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+      write(kStdWarn,2345) iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
     END IF
           
-    1234 FORMAT(I3,3(' ',F10.3))
-    2345 FORMAT('up [iLDN=iL iLay iLUP=iLp1]',I3,3(' ',F10.3))
+ 1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('up [iLDN=iL iLay iLUP=iLp1]',I3,3(' ',F10.3))
      
-!      IF (iVary .EQ. 4) THEN
-!        ! new option
-!        DO iFr = 1,kMaxPts
-!          raIntenAvg(iFr) = 0.5 * (raIntenP(iFr) + raIntenP1(iFr))
-!        END DO
-!      END IF
-
     IF (iVary == 2) THEN
-    !!! lim tau --> 0 , rFcn --> 0
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + &
-                rFcn*rCos*exp(-rAbs/rCos)
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + &
-                rFcn*rCos*exp(-rAbs/rCos)
-            END DO
-        END IF
+      !!! lim tau --> 0 , rFcn --> 0
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = (raIntenP1 - raIntenP0 + 1.0e-10)/(raAbs + 1.0e-10)
+      raInten = raInten * exp(-raAbs/raCos) + raIntenP0 * (1 - exp(-raAbs/raCos))
+      WHERE (raAbs >= 0.001) 
+        raInten = raInten + raFcn*raCos*(raAbs/raCos-1) + raFcn*raCos*exp(-raAbs/raCos)
+      END WHERE
 
     ELSEIF (iVary == +3) THEN
-    !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                rFcn * (1 - exp(-rAbs/rCos))
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                rFcn * (1 - exp(-rAbs/rCos))
-            END DO
-        END IF
+      !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = 1.0
+      WHERE (raAbs >= 0.001)
+        raFcn = exp(-raAbs/rCos)
+        raFcn = raCos/raAbs - raFcn/(1-raFcn)
+      END WHERE
+      raFcn = raIntenP1 + 2*(raIntenAvg-raIntenP1)*raFcn
+      raInten = raInten * exp(-raAbs/raCos) + raFcn * (1 - exp(-raAbs/raCos))
 
     ELSEIF (iVary == +40) THEN
-    !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
-    !        print *,iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP1(iFr)*(1-rTrans) + (raIntenP(iFr) - raIntenP1(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + rZeta
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP1(iFr)*(1-rTrans) + (raIntenP(iFr) - raIntenP1(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr)*exp(-rAbs/rCos) + rZeta
-            END DO
-        END IF
+      !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = 1.0
+      raTrans = 1.0
+      WHERE (raAbs >= 0.0001)
+        raTrans = exp(-raAbs/raCos)
+        raFcn = raCos/raAbs * (1 - raTrans)
+      END WHERE
+      raZeta = raIntenP1*(1-raTrans) + (raIntenP - raIntenP1)*(raFcn - raTrans)
+      raInten = raInten * exp(-raAbs/raCos) + raZeta
 
     ELSEIF (iVary == +41) THEN
-    !        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! PADE APPROX, two term (combo of GENLN2 and LBLRTM)
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rTrans = exp(-rAbs)
-            rZeta = 0.2*rAbs    !! pade one
-            rFcn = (raIntenAvg(iFr) + rZeta*raIntenP1(iFr))/(1+rZeta)
-            rZeta = 0.193*rAbs    !! pade two
-            rZeta2 = 0.013*rAbs*rAbs    !! pade two
-            rFcn = (raIntenAvg(iFr) + (rZeta + rZeta2)*raIntenP1(iFr))/(1+rZeta+rZeta2)
-            rFcn = (1-rTrans)*rFcn
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! PADE APPROX, two term (combo of GENLN2 and LBLRTM)
+      raAbs = raaAbs(:,iL)/raCos*rFrac
+      raTrans = exp(-raAbs)
+      raZeta = 0.2*raAbs             !! pade one
+      raFcn = (raIntenAvg + raZeta*raIntenP1)/(1+raZeta)
+      raZeta = 0.193*raAbs           !! pade two
+      raZeta2 = 0.013*raAbs*raAbs    !! pade two
+      raFcn = (raIntenAvg + (raZeta + raZeta2)*raIntenP1)/(1+raZeta+raZeta2)
+      raFcn = (1-raTrans)*raFcn
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +42) THEN
-    !        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, GENLN2 style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP1(iFr))
-            IF (rAbs >= 0.05) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP1(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs
-                rFcn = rAbs*raIntenP1(iFr) + rZeta*(1-rAbs/2) - rTrans * rZeta
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!!      print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+      !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, GENLN2 style
+      raAbs = raaAbs(:,iL)/raCos*rFrac
+      raZeta = 2*(raIntenAvg-raIntenP1)
+      WHERE (raAbs >= 0.05) 
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP1 + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs
+        raFcn = raAbs*raIntenP1 + raZeta*(1-raAbs/2) - raTrans * raZeta
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +43) THEN
-    !         http://www.wolframalpha.com/input/?i=1-2*%281%2Fx-exp%28-x%29%2F%281-exp%28-x%29%29%29
-    !        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = raIntenP1(iFr) - raIntenAvg(iFr)
-            IF (rAbs >= 0.06) THEN
-                rTrans = exp(-rAbs)
-                rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            ELSE
-                rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
-                rZeta2 = rAbs/6.0 - (rAbs**3)/360.0 + (rAbs**5)/15120.0   !! mathematica
-                rZeta2 = rAbs/6.0
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!!         http://www.wolframalpha.com/input/?i=1-2*%281%2Fx-exp%28-x%29%2F%281-exp%28-x%29%29%29
+      !!!        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
+      !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
+      raAbs = raaAbs(:,iL)/raCos*rFrac
+      raZeta = raIntenP1 - raIntenAvg
+      WHERE (raAbs >= 0.06) 
+        raTrans = exp(-raAbs)
+        raZeta2 = 1.0 - 2.0*(1/raAbs - raTrans/(1-raTrans))
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*(raAbs * raAbs)
+        raZeta2 = raAbs/6.0 - (raAbs**3)/360.0 + (raAbs**5)/15120.0   !! mathematica
+        raZeta2 = raAbs/6.0
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
-    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
-    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
-    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+    !y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+    !y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+    !y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+
     ELSEIF (iVary == +4) THEN
-    !        print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, MY style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP1(iFr))
-            IF (rAbs > 0.1) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP1(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs + 0.5*rAbs**2
-                rZeta2 = rZeta*(rAbs/2-(rAbs**2)/3+(rAbs**3)/6)
-                rFcn   = (1-rTrans)*raIntenP1(iFr) + rZeta2
-            END IF
-        !          IF (iFr .EQ. 1) THEN
-        !            print *,'<<up>>',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, MY style
+      raAbs = raaAbs(:,iL)/raCos*rFrac
+      raZeta = 2*(raIntenAvg-raIntenP1)
+      WHERE (raAbs > 0.1) 
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP1 + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*raAbs**2
+        raZeta2 = raZeta*(raAbs/2-(raAbs**2)/3+(raAbs**3)/6)
+        raFcn   = (1-raTrans)*raIntenP1 + raZeta2
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     END IF
 
@@ -575,233 +499,174 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iBeta,iBetaP1
-    REAL :: rBeff,rFcn
+    REAL :: rBeff,raFcn(kMaxPts)
     REAL :: raIntenP(kMaxPts),raIntenP1(kMaxPts),raIntenP0(kMaxPts)
     REAL :: raIntenAvg(kMaxPts)
-    REAL :: rZeta,rZeta2,rAbs,rTrans
+    REAL :: raZeta(kMaxPts),raZeta2(kMaxPts),raAbs(kMaxPts),raTrans(kMaxPts)
 
     IF (iVary < 2) THEN
-        write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
-        CALL DoStop
+      write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
+      CALL DoStop
     END IF
 
     IF (rFrac < 0) THEN
-        write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
-        rFrac = abs(rFrac)
+      write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
+      rFrac = abs(rFrac)
     END IF
 
     IF (iVary == 41) iVary = 43     !!! have debugged 04, 42, 43 for small tau O(tau^2)
 
     iBeta = MOD(iL,kProfLayer)
     IF (iBeta == 0) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iL == kProfLayer+1) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iVary < 4) THEN
-        IF (iBeta > 1) THEN
-            CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta-1),raIntenP1)
-        ELSEIF (iBeta == 1) THEN
-            CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
-        END IF
-        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
+      IF (iBeta > 1) THEN
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta-1),raIntenP1)
+      ELSEIF (iBeta == 1) THEN
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
+      END IF
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
     END IF
 
     IF (iVary >= 4) THEN
-    !! new option
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX this is the one we want XXXXX
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
-        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
-    !! (which is NOT necessarily average of above 2)
+      !! new option
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX what we want XXXXX
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+      !! (which is NOT necessarily average of above 2)
 
-        IF (kOuterLoop == 1) THEN
-            write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
-        END IF
+      IF (kOuterLoop == 1) THEN
+        write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+      END IF
     END IF
           
-    1234 FORMAT(I3,3(' ',F10.3))
-    2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
+ 1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
      
     IF (iVary == 2) THEN
-    !!! lim tau --> 0 , rFcn --> 0
-        write(kStdErr,*) 'huh iVary = 2 is a little buggy'
-        CALL DoStop
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + &
-                rFcn*rCos*exp(-rAbs/rCos)
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + &
-                rFcn*rCos*exp(-rAbs/rCos)
-            END DO
-        END IF
+      !!! lim tau --> 0 , rFcn --> 0
+      write(kStdErr,*) 'huh iVary = 2 is a little buggy'
+      CALL DoStop
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = (raIntenP1 - raIntenP0 + 1.0e-10)/(raAbs + 1.0e-10)
+      raInten = raInten * exp(-raAbs/rCos) + raIntenP0 * (1 - exp(-raAbs/rCos))
+      WHERE (raAbs >= 0.001)
+          raInten = raInten + raFcn*rCos*(raAbs/rCos-1) + raFcn*rCos*exp(-raAbs/rCos)
+      END WHERE
 
     ELSEIF (iVary == +3) THEN
-    !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                rFcn * (1 - exp(-rAbs/rCos))
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                rFcn * (1 - exp(-rAbs/rCos))
-            END DO
-        END IF
+      !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL) * rFrac
+      END IF
+      raFcn = 1.0
+      WHERE (raAbs >= 0.001) 
+        raFcn = exp(-raAbs/rCos)
+        raFcn = rCos/raAbs - raFcn/(1-raFcn)
+      END WHERE
+      raFcn = raIntenP1 + 2*(raIntenAvg-raIntenP1)*raFcn
+      raInten = raInten * exp(-raAbs/rCos) + raFcn * (1 - exp(-raAbs/rCos))
 
     ELSEIF (iVary == +40) THEN
-    !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + rZeta
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + rZeta
-            END DO
-        END IF
+      !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = 1.0
+      raTrans = 1.0
+      WHERE (raAbs >= 0.0001) 
+        raTrans = exp(-raAbs/rCos)
+        raFcn = rCos/raAbs * (1 - raTrans)
+      END WHERE
+      raZeta = raIntenP*(1-raTrans) + (raIntenP1 - raIntenP)*(raFcn - raTrans)
+      raInten = raInten * exp(-raAbs/rCos) + raZeta
 
     ELSEIF (iVary == +41) THEN
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rTrans = exp(-rAbs)
-            rZeta = 0.2*rAbs    !! pade one
-            rFcn = (raIntenAvg(iFr) + rZeta*raIntenP(iFr))/(1+rZeta)
-            rZeta = 0.193*rAbs    !! pade two
-            rZeta2 = 0.013*rAbs*rAbs    !! pade two
-            rFcn = (raIntenAvg(iFr) + (rZeta + rZeta2)*raIntenP(iFr))/(1+rZeta+rZeta2)
-            rFcn = (1-rTrans)*rFcn
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raTrans = exp(-raAbs)
+      raZeta = 0.2*raAbs             !! pade one
+      raFcn = (raIntenAvg + raZeta*raIntenP)/(1+raZeta)
+      raZeta = 0.193*raAbs           !! pade two
+      raZeta2 = 0.013*raAbs*raAbs    !! pade two
+      raFcn = (raIntenAvg + (raZeta + raZeta2)*raIntenP)/(1+raZeta+raZeta2)
+      raFcn = (1-raTrans)*raFcn
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +42) THEN
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, GENLN2 style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
-            IF (rAbs >= 0.05) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs
-                rFcn = rAbs*raIntenP(iFr) + rZeta*(1-rAbs/2) - rTrans * rZeta
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'down',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, GENLN2 style
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raZeta = 2*(raIntenAvg-raIntenP)
+      WHERE (raAbs >= 0.05) 
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs
+        raFcn = raAbs*raIntenP + raZeta*(1-raAbs/2) - raTrans * raZeta
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +43) THEN
-    !        print *,'dn flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = raIntenP(iFr) - raIntenAvg(iFr)
-            IF (rAbs >= 0.06) THEN
-                rTrans = exp(-rAbs)
-                rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            ELSE
-                rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
-                rZeta2 = rAbs/6.0 - (rAbs**3)/360.0 + (rAbs**5)/15120.0  !! mathematica
-                rZeta2 = rAbs/6.0
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raZeta = raIntenP - raIntenAvg
+      WHERE (raAbs >= 0.06)
+        raTrans = exp(-raAbs)
+        raZeta2 = 1.0 - 2.0*(1/raAbs - raTrans/(1-raTrans))
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*(raAbs * raAbs)
+        raZeta2 = raAbs/6.0 - (raAbs**3)/360.0 + (raAbs**5)/15120.0  !! mathematica
+        raZeta2 = raAbs/6.0
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      END WHERE
+      raInten = raInten*raTrans + raFcn
               
     !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+
     ELSEIF (iVary == +4) THEN
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, MY style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
-            IF (rAbs > 0.1) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs + 0.5*rAbs**2
-                rZeta2 = rZeta*(rAbs/2-(rAbs**2)/3+(rAbs**3)/6)
-                rFcn   = (1-rTrans)*raIntenP(iFr) + rZeta2
-            END IF
-        !          IF (iFr .EQ. 1) THEN
-        !            print *,'>>down<<',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, MY style
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raZeta = 2*(raIntenAvg - raIntenP)
+      WHERE (raAbs > 0.1)
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*raAbs**2
+        raZeta2 = raZeta*(raAbs/2-(raAbs**2)/3+(raAbs**3)/6)
+        raFcn   = (1-raTrans)*raIntenP + raZeta2
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     END IF
           
@@ -865,246 +730,173 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iBeta,iBetaP1
-    REAL :: rBeff,rFcn
+    REAL :: rBeff,raFcn(kMaxPts)
     REAL :: raIntenP(kMaxPts),raIntenP1(kMaxPts),raIntenP0(kMaxPts)
     REAL :: raIntenAvg(kMaxPts)
-    REAL :: rZeta,rZeta2,rAbs,rTrans
+    REAL :: raZeta(kMaxPts),raZeta2(kMaxPts),raAbs(kMaxPts),raTrans(kMaxPts)
 
     IF (iVary < 2) THEN
-        write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
-        CALL DoStop
+      write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
+      CALL DoStop
     END IF
 
     IF (rFrac < 0) THEN
-        write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
-        rFrac = abs(rFrac)
+      write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
+      rFrac = abs(rFrac)
     END IF
 
     IF (iVary == 41) iVary = 43     !!! have debugged 04, 42, 43 for small tau O(tau^2)
 
     iBeta = MOD(iL,kProfLayer)
     IF (iBeta == 0) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iL == kProfLayer+1) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iVary < 4) THEN
-        IF (iBeta > 1) THEN
-            CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
-        ELSEIF (iBeta == 1) THEN
-            CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
-        END IF
-        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
+      IF (iBeta > 1) THEN
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
+      ELSEIF (iBeta == 1) THEN
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
+      END IF
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
     END IF
-
-! RT_ProfileUPWELL_LINEAR_IN_TAU
-!     iBeta = MOD(iL,kProfLayer)
-!     IF (iBeta .EQ. 0) THEN
-!       iBeta = kProfLayer
-!     END IF
-!     IF (iL .EQ. kProfLayer+1) THEN
-!      iBeta = kProfLayer
-!    END IF
-!    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level
-!    CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this is the one we want XXXXX
-!    CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
                                                                  
     IF (iVary >= 4) THEN
-    !! new option
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level
-        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
-    !! (which is NOT necessarily average of above 2)
-        IF (kOuterLoop == 1) THEN
-            write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
-        END IF
+      !! new option
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX what we want XXXXXXXX
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1) !! ttorad of upper level
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)  !! ttorad of Tlayer
+      !! (which is NOT necessarily average of above 2)
+      IF (kOuterLoop == 1) THEN
+        write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+      END IF
     END IF
           
-    1234 FORMAT(I3,3(' ',F10.3))
-    2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
-          
+ 1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
+
     IF (iVary == 2) THEN
-    !!! lim tau --> 0 , rFcn --> 0
-        write(kStdErr,*) 'huh iVary = 2 is a little buggy'
-        CALL DoStop
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + &
-                rFcn*rCos*exp(-rAbs/rCos)
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/rCos))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*rCos*(rAbs/rCos-1) + &
-                rFcn*rCos*exp(-rAbs/rCos)
-            END DO
-        END IF
+      !!! lim tau --> 0 , rFcn --> 0
+      write(kStdErr,*) 'huh iVary = 2 is a little buggy'
+      CALL DoStop
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = (raIntenP1 - raIntenP0 + 1.0e-10)/(raAbs + 1.0e-10)
+      raInten = raInten * exp(-raAbs/rCos) + raIntenP0 * (1 - exp(-raAbs/rCos))
+      WHERE (raAbs >= 0.001)
+          raInten = raInten + raFcn*rCos*(raAbs/rCos-1) + raFcn*rCos*exp(-raAbs/rCos)
+      END WHERE
 
     ELSEIF (iVary == +3) THEN
-    !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                rFcn * (1 - exp(-rAbs/rCos))
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + &
-                rFcn * (1 - exp(-rAbs/rCos))
-            END DO
-        END IF
+      !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL) * rFrac
+      END IF
+      raFcn = 1.0
+      WHERE (raAbs >= 0.001) 
+        raFcn = exp(-raAbs/rCos)
+        raFcn = rCos/raAbs - raFcn/(1-raFcn)
+      END WHERE
+      raFcn = raIntenP1 + 2*(raIntenAvg-raIntenP1)*raFcn
+      raInten = raInten * exp(-raAbs/rCos) + raFcn * (1 - exp(-raAbs/rCos))
 
     ELSEIF (iVary == +40) THEN
-    !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + rZeta
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/rCos)
-                    rFcn = rCos/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/rCos) + rZeta
-            END DO
-        END IF
+      !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = 1.0
+      raTrans = 1.0
+      WHERE (raAbs >= 0.0001) 
+        raTrans = exp(-raAbs/rCos)
+        raFcn = rCos/raAbs * (1 - raTrans)
+      END WHERE
+      raZeta = raIntenP*(1-raTrans) + (raIntenP1 - raIntenP)*(raFcn - raTrans)
+      raInten = raInten * exp(-raAbs/rCos) + raZeta
 
     ELSEIF (iVary == +41) THEN
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rTrans = exp(-rAbs)
-            rZeta = 0.2*rAbs    !! pade one
-            rFcn = (raIntenAvg(iFr) + rZeta*raIntenP(iFr))/(1+rZeta)
-            rZeta = 0.193*rAbs    !! pade two
-            rZeta2 = 0.013*rAbs*rAbs    !! pade two
-            rFcn = (raIntenAvg(iFr) + (rZeta + rZeta2)*raIntenP(iFr))/(1+rZeta+rZeta2)
-            rFcn = (1-rTrans)*rFcn
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raTrans = exp(-raAbs)
+      raZeta = 0.2*raAbs             !! pade one
+      raFcn = (raIntenAvg + raZeta*raIntenP)/(1+raZeta)
+      raZeta = 0.193*raAbs           !! pade two
+      raZeta2 = 0.013*raAbs*raAbs    !! pade two
+      raFcn = (raIntenAvg + (raZeta + raZeta2)*raIntenP)/(1+raZeta+raZeta2)
+      raFcn = (1-raTrans)*raFcn
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +42) THEN
-    !        print *,'fluxybuyxy down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta-1)
-    !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, GENLN2 style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
-            IF (rAbs >= 0.05) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs
-                rFcn = rAbs*raIntenP(iFr) + rZeta*(1-rAbs/2) - rTrans * rZeta
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'down',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, GENLN2 style
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raZeta = 2*(raIntenAvg-raIntenP)
+      WHERE (raAbs >= 0.05) 
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs
+        raFcn = raAbs*raIntenP + raZeta*(1-raAbs/2) - raTrans * raZeta
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +43) THEN
-    !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = raIntenP(iFr) - raIntenAvg(iFr)
-            IF (rAbs >= 0.06) THEN
-                rTrans = exp(-rAbs)
-                rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            ELSE
-                rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
-                rZeta2 = rAbs/6.0 - (rAbs**3)/360.0 + (rAbs**5)/15120.0  !! mathematica
-                rZeta2 = rAbs/6.0
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            !          print *,rAbs,rTrans,(1-rTrans),raIntenAvg(iFr),rZeta,rZeta2,rFcn,rCos,rFrac
-            !          call dostop
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'up',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
-    !        print *,'dn flux ',iL,iBeta,rFrac,raaAbs(1,iL),rAbs,rTrans,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1),rFcn,raInten(1)
+      !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raZeta = raIntenP - raIntenAvg
+      WHERE (raAbs >= 0.06)
+        raTrans = exp(-raAbs)
+        raZeta2 = 1.0 - 2.0*(1/raAbs - raTrans/(1-raTrans))
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*(raAbs * raAbs)
+        raZeta2 = raAbs/6.0 - (raAbs**3)/360.0 + (raAbs**5)/15120.0  !! mathematica
+        raZeta2 = raAbs/6.0
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      END WHERE
+      raInten = raInten*raTrans + raFcn
+              
+    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
 
-    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
-    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
-    !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     ELSEIF (iVary == +4) THEN
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, MY style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/rCos*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
-            IF (rAbs > 0.1) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs + 0.5*rAbs**2
-                rZeta2 = rZeta*(rAbs/2-(rAbs**2)/3+(rAbs**3)/6)
-                rFcn   = (1-rTrans)*raIntenP(iFr) + rZeta2
-            END IF
-        !          IF (iFr .EQ. 1) THEN
-        !            print *,'>>down<<',iL,iBeta,rCos,rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, MY style
+      raAbs = raaAbs(:,iL)/rCos*rFrac
+      raZeta = 2*(raIntenAvg - raIntenP)
+      WHERE (raAbs > 0.1)
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*raAbs**2
+        raZeta2 = raZeta*(raAbs/2-(raAbs**2)/3+(raAbs**3)/6)
+        raFcn   = (1-raTrans)*raIntenP + raZeta2
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     END IF
           
@@ -1168,39 +960,39 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iBeta,iBetaP1
-    REAL :: rBeff,rFcn
+    REAL :: rBeff,raFcn(kMaxPts)
     REAL :: raIntenP(kMaxPts),raIntenP1(kMaxPts),raIntenP0(kMaxPts)
     REAL :: raIntenAvg(kMaxPts)
-    REAL :: rZeta,rZeta2,rAbs,rTrans
+    REAL :: raZeta(kMaxPts),raZeta2(kMaxPts),raAbs(kMaxPts),raTrans(kMaxPts)
 
     IF (iVary < 2) THEN
-        write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
-        CALL DoStop
+      write(kStdErr,*) 'this is downwell for linear in tau .. need iVary = 2 or 3 or 4'
+      CALL DoStop
     END IF
 
     IF (rFrac < 0) THEN
-        write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
-        rFrac = abs(rFrac)
+      write(kStdErr,*) 'Warning rFrac < 0 in RT_ProfileDNWELL_LINTAU, reset to > 0'
+      rFrac = abs(rFrac)
     END IF
 
     IF (iVary == 41) iVary = 43     !!! have debugged 04, 42, 43 for small tau O(tau^2)
 
     iBeta = MOD(iL,kProfLayer)
     IF (iBeta == 0) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iL == kProfLayer+1) THEN
-        iBeta = kProfLayer
+      iBeta = kProfLayer
     END IF
 
     IF (iVary < 4) THEN
-        IF (iBeta > 1) THEN
-            CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
-        ELSEIF (iBeta == 1) THEN
-            CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
-        END IF
-        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
+      IF (iBeta > 1) THEN
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)
+      ELSEIF (iBeta == 1) THEN
+        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP1)
+      END IF
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)
     END IF
 
 ! RT_ProfileUPWELL_LINEAR_IN_TAU
@@ -1216,198 +1008,136 @@ CONTAINS
 !    CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
                                                                  
     IF (iVary >= 4) THEN
-    !! new option
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level
-        CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
-    !! (which is NOT necessarily average of above 2)
-        IF (kOuterLoop == 1) THEN
-            write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
-        END IF
+      !! new option
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+      !! (which is NOT necessarily average of above 2)
+      IF (kOuterLoop == 1) THEN
+        write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
+      END IF
     END IF
           
-    1234 FORMAT(I3,3(' ',F10.3))
-    2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
+ 1234 FORMAT(I3,3(' ',F10.3))
+ 2345 FORMAT('dn [iLUP=iLp1 iLay=iL iLDN=iL]',I3,3(' ',F10.3))
      
     IF (iVary == 2) THEN
-    !!! lim tau --> 0 , rFcn --> 0
-        write(kStdErr,*) 'huh iVary = 2 is a little buggy'
-        CALL DoStop
-        CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/raCos(iFr)) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/raCos(iFr)))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*raCos(iFr)*(rAbs/raCos(iFr)-1) + &
-                rFcn*raCos(iFr)*exp(-rAbs/raCos(iFr))
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = (raIntenP1(iFr) - raIntenP0(iFr) + 1.0e-10)/(rAbs + 1.0e-10)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/raCos(iFr)) + &
-                raIntenP0(iFr) * (1 - exp(-rAbs/raCos(iFr)))
-                IF (rAbs >= 0.001) &
-                raInten(iFr) = raInten(iFr) + rFcn*raCos(iFr)*(rAbs/raCos(iFr)-1) + &
-                rFcn*raCos(iFr)*exp(-rAbs/raCos(iFr))
-            END DO
-        END IF
+      !!! lim tau --> 0 , rFcn --> 0
+      write(kStdErr,*) 'huh iVary = 2 is a little buggy'
+      CALL DoStop
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP0)
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = (raIntenP1 - raIntenP0 + 1.0e-10)/(raAbs + 1.0e-10)
+      raInten = raInten * exp(-raAbs/raCos) + raIntenP0 * (1 - exp(-raAbs/raCos))
+      WHERE (raAbs >= 0.001)
+        raInten = raInten + raFcn*raCos*(raAbs/raCos-1) + raFcn*raCos*exp(-raAbs/raCos)
+      END WHERE
 
     ELSEIF (iVary == +3) THEN
-    !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/raCos(iFr))
-                    rFcn = raCos(iFr)/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/raCos(iFr)) + &
-                rFcn * (1 - exp(-rAbs/raCos(iFr)))
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                rFcn = 1.0
-                IF (rAbs >= 0.001) THEN
-                    rFcn = exp(-rAbs/raCos(iFr))
-                    rFcn = raCos(iFr)/rAbs - rFcn/(1-rFcn)
-                END IF
-                rFcn = raIntenP1(iFr) + 2*(raIntenAvg(iFr)-raIntenP1(iFr))*rFcn
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/raCos(iFr)) + &
-                rFcn * (1 - exp(-rAbs/raCos(iFr)))
-            END DO
-        END IF
+      !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 13
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL)*rFrac
+      END IF
+      raFcn = 1.0
+      WHERE (raAbs >= 0.001)
+        raFcn = exp(-raAbs/raCos)
+        raFcn = raCos/raAbs - raFcn/(1-raFcn)
+      END WHERE
+      raFcn = raIntenP1 + 2*(raIntenAvg - raIntenP1)*raFcn
+      raInten = raInten * exp(-raAbs/raCos) + raFcn * (1 - exp(-raAbs/raCos))
 
     ELSEIF (iVary == +40) THEN
-    !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
-    !!! lim tau --> 0 , rFcn --> 1
-        IF (rFrac >= 0.9999) THEN
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/raCos(iFr))
-                    rFcn = raCos(iFr)/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/raCos(iFr)) + rZeta
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                rAbs = raaAbs(iFr,iL)*rFrac
-                IF (rAbs >= 0.0001) THEN
-                    rTrans = exp(-rAbs/raCos(iFr))
-                    rFcn = raCos(iFr)/rAbs * (1 - rTrans)
-                ELSE
-                    rFcn = 1.0
-                    rTrans = 1.0
-                END IF
-                rZeta = raIntenP(iFr)*(1-rTrans) + (raIntenP1(iFr) - raIntenP(iFr))*(rFcn - rTrans)
-                raInten(iFr) = raInten(iFr) * exp(-rAbs/raCos(iFr)) + rZeta
-            END DO
-        END IF
+      !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 9
+      !!! lim tau --> 0 , rFcn --> 1
+      IF (rFrac >= 0.9999) THEN
+        raAbs = raaAbs(:,iL)
+      ELSE
+        raAbs = raaAbs(:,iL) * rFrac
+      END IF
+      raFcn = 1.0
+      raTrans = 1.0
+      WHERE (raAbs >= 0.0001)
+        raTrans = exp(-raAbs/raCos)
+        raFcn = raCos/rAabs * (1 - raTrans)
+     END WHERE
+     raZeta = raIntenP*(1-raTrans) + (raIntenP1 - raIntenP)*(raFcn - raTrans)
+     raInten = raInten * exp(-raAbs/raCos) + raZeta
 
     ELSEIF (iVary == +41) THEN
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/raCos(iFr)*rFrac
-            rTrans = exp(-rAbs)
-            rZeta = 0.2*rAbs    !! pade one
-            rFcn = (raIntenAvg(iFr) + rZeta*raIntenP(iFr))/(1+rZeta)
-            rZeta = 0.193*rAbs    !! pade two
-            rZeta2 = 0.013*rAbs*rAbs    !! pade two
-            rFcn = (raIntenAvg(iFr) + (rZeta + rZeta2)*raIntenP(iFr))/(1+rZeta+rZeta2)
-            rFcn = (1-rTrans)*rFcn
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
+      raAbs = raaAbs(iFr,iL)/raCos(iFr)*rFrac
+      raTrans = exp(-raAbs)
+      raZeta = 0.2*raAbs             !! pade one
+      raFcn = (raIntenAvg + raZeta*raIntenP)/(1+raZeta)
+      raZeta = 0.193*raAbs           !! pade two
+      raZeta2 = 0.013*raAbs*raAbs    !! pade two
+      raFcn = (raIntenAvg + (raZeta + raZeta2)*raIntenP)/(1+raZeta+raZeta2)
+      raFcn = (1-raTrans)*raFcn
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +42) THEN
-    !        print *,'fluxybuyxy down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta-1)
-    !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, GENLN2 style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/raCos(iFr)*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
-            IF (rAbs >= 0.05) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs
-                rFcn = rAbs*raIntenP(iFr) + rZeta*(1-rAbs/2) - rTrans * rZeta
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'down',iL,iBeta,raCos(iFr),rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, GENLN2 style
+      raAbs = raaAbs(:,iL)/raCos*rFrac
+      raZeta = 2*(raIntenAvg-raIntenP)
+      WHERE (raAbs >= 0.05)
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs
+        raFcn = raAbs*raIntenP + raZeta*(1-raAbs/2) - raTrans * raZeta
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     ELSEIF (iVary == +43) THEN
-    !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/raCos(iFr)*rFrac
-            rZeta = raIntenP(iFr) - raIntenAvg(iFr)
-            IF (rAbs >= 0.06) THEN
-                rTrans = exp(-rAbs)
-                rZeta2 = 1.0 - 2.0*(1/rAbs - rTrans/(1-rTrans))
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            ELSE
-                rTrans = 1 - rAbs + 0.5*(rAbs * rAbs)
-                rZeta2 = rAbs/6.0 - (rAbs**3)/360.0 + (rAbs**5)/15120.0  !! mathematica
-                rZeta2 = rAbs/6.0
-                rFcn = (1-rTrans)*(raIntenAvg(iFr) + rZeta * rZeta2)
-            !          print *,rAbs,rTrans,(1-rTrans),raIntenAvg(iFr),rZeta,rZeta2,rFcn,raCos(iFr),rFrac
-            !          call dostop
-            END IF
-        !          if (iFr .EQ. 1) THEN
-        !            print *,'up',iL,iBeta,raCos(iFr),rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
-    !        print *,'dn flux ',iL,iBeta,rFrac,raaAbs(1,iL),rAbs,rTrans,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1),rFcn,raInten(1)
+      !!! this was done on jan 2016 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, LBLRTM style, where for small OD (x)  means the function --> x/6
+      raAbs = raaAbs(:,iL)/raCos*rFrac
+      raZeta = raIntenP - raIntenAvg
+      WHERE (raAbs >= 0.06) 
+        raTrans = exp(-raAbs)
+        raZeta2 = 1.0 - 2.0*(1/raAbs - raTrans/(1-raTrans))
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*(raAbs * raAbs)
+        raZeta2 = raAbs/6.0 - (raAbs**3)/360.0 + (raAbs**5)/15120.0  !! mathematica
+        raZeta2 = raAbs/6.0
+        raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     !  y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     ELSEIF (iVary == +4) THEN
-    !        print *,'down flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
-    !!! this was done Oct 2015 .. looking at Clough et al, JGR 1992 v97
-    !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
-    !!! LINEAR IN TAU, MY style
-        DO iFr = 1,kMaxPts
-            rAbs = raaAbs(iFr,iL)/raCos(iFr)*rFrac
-            rZeta = 2*(raIntenAvg(iFr)-raIntenP(iFr))
-            IF (rAbs > 0.1) THEN
-                rTrans = exp(-rAbs)
-                rFcn = (1-rTrans)*(raIntenP(iFr) + rZeta/rAbs) - rTrans * rZeta
-            ELSE
-                rTrans = 1 - rAbs + 0.5*rAbs**2
-                rZeta2 = rZeta*(rAbs/2-(rAbs**2)/3+(rAbs**3)/6)
-                rFcn   = (1-rTrans)*raIntenP(iFr) + rZeta2
-            END IF
-        !          IF (iFr .EQ. 1) THEN
-        !            print *,'>>down<<',iL,iBeta,raCos(iFr),rAbs,rTrans,rZeta,rFcn,raInten(iFr)
-        !          end if
-            raInten(iFr) = raInten(iFr)*rTrans + rFcn
-        END DO
+      !!! this was done Oct 2015 .. looking at Clough et al, JGR 1992 v97
+      !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
+      !!! LINEAR IN TAU, MY style
+      raAbs = raaAbs(:,iL)/raCos*rFrac
+      raZeta = 2*(raIntenAvg-raIntenP)
+      WHERE (raAbs > 0.1) 
+        raTrans = exp(-raAbs)
+        raFcn = (1-raTrans)*(raIntenP + raZeta/raAbs) - raTrans * raZeta
+      ELSEWHERE
+        raTrans = 1 - raAbs + 0.5*raAbs**2
+        raZeta2 = raZeta*(raAbs/2-(raAbs**2)/3+(raAbs**3)/6)
+        raFcn   = (1-raTrans)*raIntenP + raZeta2
+      END WHERE
+      raInten = raInten*raTrans + raFcn
 
     END IF
           
@@ -1462,64 +1192,45 @@ CONTAINS
 
 ! have to recompute what the user specified pressure was!!
     IF (iTopORBot == 1) THEN          !top frac of layer
-    ! ressure specified by user
-        rP=raPressLevels(ip1)+rFrac*(raPressLevels(i0)-raPressLevels(ip1))
+      !pressure specified by user
+      rP = raPressLevels(ip1)+rFrac*(raPressLevels(i0)-raPressLevels(ip1))
     ELSE                                !bot frac of layer
-    ! ressure specified by user
-        rP=-rFrac*(raPressLevels(i0)-raPressLevels(ip1))+raPressLevels(i0)
+      !pressure specified by user
+      rP = -rFrac*(raPressLevels(i0)-raPressLevels(ip1))+raPressLevels(i0)
     END IF
 
 ! compute the average pressure of the fractional layer
     IF (iTopOrBot == 1) THEN
-        IF (abs(rP-raPressLevels(ip1)) >= delta) THEN
-            rPavg=(rP-raPressLevels(ip1))/alog(rP/raPressLevels(ip1))
-        ELSE
-            rPavg=rP
-        END IF
+      IF (abs(rP-raPressLevels(ip1)) >= delta) THEN
+        rPavg = (rP-raPressLevels(ip1))/alog(rP/raPressLevels(ip1))
+      ELSE
+        rPavg = rP
+      END IF
     ELSE
-        IF (abs(rP-raPressLevels(i0)) >= delta) THEN
-            rPavg=(raPressLevels(i0)-rP)/alog(raPressLevels(i0)/rP)
-        ELSE
-            rPavg=rP
-        END IF
+      IF (abs(rP-raPressLevels(i0)) >= delta) THEN
+        rPavg = (raPressLevels(i0)-rP)/alog(raPressLevels(i0)/rP)
+      ELSE
+        rPavg = rP
+      END IF
     END IF
 
 ! avg press,temperature of layer i0
-    rP0=(raPressLevels(i0)-raPressLevels(ip1))/ &
-    alog(raPressLevels(i0)/raPressLevels(ip1))
-    rT0=raVTemp(i0+(iW-1)*kProfLayer)
+    rP0 = (raPressLevels(i0)-raPressLevels(ip1))/alog(raPressLevels(i0)/raPressLevels(ip1))
+    rT0 = raVTemp(i0+(iW-1)*kProfLayer)
 ! avg press, temperature of layer i0+1
-    rPp1=(raPressLevels(ip1)-raPressLevels(ip1+1))/ &
-    alog(raPressLevels(ip1)/raPressLevels(ip1+1))
-    rTp1=raVTemp(ip1+(iW-1)*kProfLayer)
+    rPp1 = (raPressLevels(ip1)-raPressLevels(ip1+1))/alog(raPressLevels(ip1)/raPressLevels(ip1+1))
+    rTp1 = raVTemp(ip1+(iW-1)*kProfLayer)
 ! surface parameters
-    rPm1 = rSurfPress
+    rPm1 =  rSurfPress
     rTm1 = rSurfTemp
 
 ! now compute the fit for rT(n) = ax(n)^2 + bx(n) + c where x(n) = alog(P(n))
     rPavg = alog(rPavg)
 
-    rP0=alog(rP0)
-    rPp1=alog(rPp1)
-    rPm1=alog(rPm1)
+    rP0  = alog(rP0)
+    rPp1 = alog(rPp1)
+    rPm1 = alog(rPm1)
            
-!      rDp1=rTp1-rT0
-!      rDm1=rTm1-rT0
-
-!      rp1=rPp1-rP0
-!      rp1sqr=(rPp1-rP0)*(rPp1+rP0)
-!      rm1=rPm1-rP0
-!      rm1sqr=(rPm1-rP0)*(rPm1+rP0)
-
-!      rA=(rDm1-rDp1*rm1/rp1)/(rm1sqr-rp1sqr*rm1/rp1)
-!      rB=rDp1/rp1-rA*(rp1sqr/rp1)
-!      rC=rT0-rA*rP0*rP0-rB*rP0
-
-! finally compute rT
-!      rT=rA*alog(rPavg)*alog(rPavg)+rB*alog(rPavg)+rC
-!      print *,'rPavg,rT = ',rPavg,rT
-
-! use rSpl
     xa(1) = rPp1
     xa(2) = rP0
     xa(3) = rPm1
@@ -1528,7 +1239,6 @@ CONTAINS
     ya(3) = rTm1
      
     CALL rspl_one(xa,ya,3,rPavg,rT,1)
-!      print *,'rPavg,rT = ',exp(rPavg),rT
 
     InterpTempSurf=rT
     RETURN
@@ -1552,44 +1262,48 @@ CONTAINS
     CHARACTER(80) :: fname,caLine
     REAL :: raW(kMaxPts),raR(kMaxPts),r1,r2,r3,r4,r5,raTemp(kMaxPts)
 
+    INTEGER, DIMENSION(:), ALLOCATABLE :: iaIndexAlloc
+    INTEGER :: AllocateStatus,DeAllocateStatus
+
 ! name = sun view d(phi) windspeed
     fname = '/home/sergio/SBDART/V2.4/rho_22.12_23.86_212.97_7.3'
     iIOUN = kTempUnit
+ 1010 FORMAT('ERROR! number ',I5,' openning data file:',/,A80)
     OPEN(UNIT = iIOUN,FILE=fname,STATUS='OLD',FORM='FORMATTED',IOSTAT = iL)
     IF (IL /= 0) THEN
-        WRITE(kStdErr,1010) IL, FNAME
-        1010 FORMAT('ERROR! number ',I5,' openning data file:',/,A80)
-        CALL DoSTOP
+      WRITE(kStdErr,1010) IL, FNAME
+      CALL DoSTOP
     ENDIF
 
     iL = 0
     kTempUnitOpen = +1
-    20 READ(iIOUN,5020,END=777) caLine
+ 20 READ(iIOUN,5020,END=777) caLine
     iL = iL + 1
     READ(caLine,*) r1,r2,r3,r4,r5   !!wavenumber sun satellite d(phi) rho
     raW(iL) = r1
     raR(iL) = r5
     GOTO 20
 
-    777 CONTINUE
+ 777 CONTINUE
     CLOSE(iIOUN)
     kTempUnitOpen = -1
 
     iFlip = -1    !!assume everything ordered correctly
     IF ((raW(iL-1) > raW(iL)) .OR. (raW(iL-2) > raW(iL-1))) THEN
-        iFlip = +1
-        DO iI = 1,iL
-            raTemp(iL-iI+1) = raW(iI)
-        END DO
-        DO iI = 1,iL
-            raW(iI) = raTemp(iI)
-        END DO
-        DO iI = 1,iL
-            raTemp(iL-iI+1) = raR(iI)
-        END DO
-        DO iI = 1,iL
-            raR(iI) = raTemp(iI)
-        END DO
+      iFlip = +1
+
+      ALLOCATE ( iaIndexAlloc(iL), STAT = AllocateStatus)
+      IF (AllocateStatus /= 0) STOP "*** Not enough memory for iaIndexAlloc ***"      
+      iaIndexAlloc = (/ (iI, iI = 1, iL) /)
+
+      raTemp(iL-iaIndexAlloc+1) = raW(1:iL)
+      raW(1:iL) = raTemp(1:iL)
+      raTemp(iL-iaIndexAlloc+1) = raR(1:iL)
+
+      DEALLOCATE (iaIndexAlloc, STAT = DeAllocateStatus)
+      IF (DeAllocateStatus /= 0) STOP "*** Error while deallocating iaIndexAlloc ***"
+
+      raR(1:iL) = raTemp(1:iL)
     END IF
 
     CALL rspl(raW,raR,iL, raFreq,raSpecularRefl,kMaxPts)
@@ -1645,28 +1359,22 @@ CONTAINS
 
 !!! raSun will be in units of mW/m2/sr/cm-1 with NO sun solidangle correction
     IF (iDoSolar == 0) THEN
+      write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
+      rSunTemp = kSunTemp
+      !compute the Plank radiation from the sun
+      raSun = rattorad(raFreq,rSunTemp)
+    ELSEIF (iDoSolar == 1) THEN
+      IF (raFreq(1) >= 605) THEN
+        write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
+        !read in data from file
+        CALL ReadSolarData(raFreq,raSun,iTag)
+      ELSEIF (raFreq(1) < 605) THEN
+        !! solar contribution is so small at these wavenumbers
         write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
         rSunTemp = kSunTemp
-        DO iFr=1,kMaxPts
-        ! ompute the Plank radiation from the sun
-            rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0
-            raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-        END DO
-    ELSEIF (iDoSolar == 1) THEN
-        IF (raFreq(1) >= 605) THEN
-            write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
-        ! ead in data from file
-            CALL ReadSolarData(raFreq,raSun,iTag)
-        ELSEIF (raFreq(1) < 605) THEN
-        !! who cares, solar contribution is so small
-            write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
-            rSunTemp = kSunTemp
-            DO iFr=1,kMaxPts
-            ! compute the Plank radiation from the sun
-                rPlanck=exp(r2*raFreq(iFr)/rSunTemp)-1.0
-                raSun(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-            END DO
-        END IF
+        !compute the Plank radiation from the sun
+        raSun = rattorad(raFreq,rSunTemp)
+      END IF
     END IF
 
 !! now do the solid angle correction
@@ -1678,112 +1386,87 @@ CONTAINS
     rCos      = cos(rSunAngle)
            
 ! now adjust raSun by cos(rSunAngle) * rSolidAngle
-    DO iFr=1,kMaxPts
-        raSun(iFr) = raSun(iFr)*rCos*rOmegaSun      !!!!this is correct
-        raKAbs(iFr) = 0.0
-    END DO
+    raSun = raSun*rCos*rOmegaSun      !!!!this is correct
+    raKAbs = 0.0
 
     CALL AddUppermostLayers(iaRadLayer,iNumLayer,rFracTop, &
-    iaRadLayerTemp,iT,iExtraSun,raExtraSun)
+      iaRadLayerTemp,iT,iExtraSun,raExtraSun)
       
 ! now bring down to surface, using layer_to_space
     IF (iExtraSun < 0) THEN
-    ! the current defined atmosphere used all Gnd-100 layers
-        DO iLay = iNumLayer,2,-1
-            iL = iaRadLayer(iLay)
-            rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-            DO iFr=1,kMaxPts
-            !!!!this is wrong!! raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)
-                raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-            END DO
-        END DO
-        DO iLay=1,1
-            iL = iaRadLayer(iLay)
-            rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-            DO iFr=1,kMaxPts
-                raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)*rFracBot/rCos
-                raSun(iFr) = raSun(iFr)*exp(-raKAbs(iFr))
-            END DO
-        END DO
-        DO iFr=1,kMaxPts
-            raExtraSun(iFr) = 0.0
-        END DO
+      ! the current defined atmosphere used all Gnd-100 layers
+      DO iLay = iNumLayer,2,-1
+        iL = iaRadLayer(iLay)
+        rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+        raKAbs = raKAbs+raaAbs(:,iL)/rCos
+      END DO
+      DO iLay=1,1
+        iL = iaRadLayer(iLay)
+        rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+        raKAbs = raKAbs+raaAbs(:,iL)*rFracBot/rCos
+        raSun = raSun*exp(-raKAbs)
+      END DO
+      raExtraSun = 0.0
 
     ELSE IF (iExtraSun > 0) THEN
-    ! all upper layers not used eg instrument could be on a low flying aircraft
-        IF ((iT == iNumLayer) .AND. rFracTop <= (1.0-0.001)) THEN
-            write(kStdWarn,*)'In solar, uppermost layer = kProfLayer '
-            write(kStdWarn,*)'but posn of instrument is at middle of '
-            write(kStdWarn,*)'layer ==> need to add extra term'
+      ! all upper layers not used eg instrument could be on a low flying aircraft
+      IF ((iT == iNumLayer) .AND. rFracTop <= (1.0-0.001)) THEN
+        write(kStdWarn,*)'In solar, uppermost layer = kProfLayer '
+        write(kStdWarn,*)'but posn of instrument is at middle of '
+        write(kStdWarn,*)'layer ==> need to add extra term'
 
-        ! irst do the highest layer .. make it "full"
-            iI = iNumLayer
-            write(kStdWarn,*)'iI,rFracTop=',iI,rFracTop
-            DO iLay = iNumLayer,iNumLayer
-                iL = iaRadLayer(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                    raExtraSun(iFr) = raSun(iFr)*exp(-rakAbs(iFr))
-                END DO
-            END DO
-        ! ow do remaining layers, all the way to the ground-1
-            DO iLay = iNumLayer-1,2,-1
-                iL = iaRadLayer(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                END DO
-            END DO
-            DO iLay=1,1
-                iL = iaRadLayer(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKAbs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)*rFracBot/rCos
-                    raSun(iFr) = raSun(iFr)*exp(-raKAbs(iFr))
-                END DO
-            END DO
-
-        END IF
+        !first do the highest layer .. make it "full"
+        iI = iNumLayer
+        write(kStdWarn,*)'iI,rFracTop=',iI,rFracTop
+        DO iLay = iNumLayer,iNumLayer
+          iL = iaRadLayer(iLay)
+          rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raKabs = raKAbs+raaAbs(:,iL)/rCos
+          raExtraSun = raSun*exp(-rakAbs)
+        END DO
+        !now do remaining layers, all the way to the ground-1
+        DO iLay = iNumLayer-1,2,-1
+          iL = iaRadLayer(iLay)
+          rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raKAbs = raKAbs+raaAbs(:,iL)/rCos
+        END DO
+        DO iLay=1,1
+          iL = iaRadLayer(iLay)
+          rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raKAbs = raKAbs+raaAbs(:,iL)*rFracBot/rCos
+          raSun = raSun*exp(-raKAbs)
+        END DO
+      END IF
          
-        IF (iT > iNumLayer) THEN
-            write(kStdWarn,*)'need to do the upper layers as well!!'
-        ! ow do top layers, all the way to the instrument
-            DO iLay = iT,iNumLayer+1,-1
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                END DO
-            END DO
-        ! ow do the layer instrument is in
-            DO iLay = iNumLayer,iNumLayer
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                    raExtraSun(iFr) = raSun(iFr)*(exp(-raKabs(iFr)))
-                END DO
-            END DO
-        ! ow do all the way to the ground-1
-            DO iLay = iNumLayer-1,2,-1
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)/rCos
-                END DO
-            END DO
-        ! ow do ground
-            DO iLay=1,1
-                iL = iaRadLayerTemp(iLay)
-                rCos=cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    raKabs(iFr) = raKAbs(iFr)+raaAbs(iFr,iL)*rFracBot/rCos
-                    raSun(iFr) = raSun(iFr)*exp(-raKAbs(iFr))
-                END DO
-            END DO
-        END IF
-         
+      IF (iT > iNumLayer) THEN
+        write(kStdWarn,*)'need to do the upper layers as well!!'
+        !now do top layers, all the way to the instrument
+        DO iLay = iT,iNumLayer+1,-1
+          iL = iaRadLayerTemp(iLay)
+          rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raKabs = raKAbs+raaAbs(:,iL)/rCos
+        END DO
+        !now do the layer instrument is in
+        DO iLay = iNumLayer,iNumLayer
+          iL = iaRadLayerTemp(iLay)
+          rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raKabs = raKAbs+raaAbs(:,iL)/rCos
+          raExtraSun = raSun*(exp(-raKabs))
+        END DO
+        !now do all the way to the ground-1
+        DO iLay = iNumLayer-1,2,-1
+          iL = iaRadLayerTemp(iLay)
+          rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raKabs = raKAbs+raaAbs(:,iL)/rCos
+        END DO
+        !now do ground
+        DO iLay=1,1
+          iL = iaRadLayerTemp(iLay)
+          rCos = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raKabs = raKAbs+raaAbs(:,iL)*rFracBot/rCos
+          raSun = raSun*exp(-raKAbs)
+        END DO
+      END IF         
     END IF
 
     RETURN
@@ -1811,37 +1494,38 @@ CONTAINS
     INTEGER :: iIOUN,iL,iU,iFr
     DOUBLE PRECISION :: fs,fe,df,daSun(kMaxPts)
 
+ 1010 FORMAT('ERROR! number ',I5,' openning data file:',/,A80)
+
     iIOUN = kTempUnit
     CALL GetSolarFileName(fname,raFreq(1))
     write(kStdWarn,*) 'solar data file = ',fname
     OPEN(UNIT = iIOUN,FILE=fname,STATUS='OLD',FORM='UNFORMATTED',IOSTAT = iL)
     IF (IL /= 0) THEN
-        WRITE(kStdErr,1010) IL, FNAME
-        1010 FORMAT('ERROR! number ',I5,' openning data file:',/,A80)
-        CALL DoSTOP
+      WRITE(kStdErr,1010) IL, FNAME
+      CALL DoSTOP
     ENDIF
 
     READ(iIOUN) fs,fe,df
 
     IF (abs(fs - raFreq(1)) >= kaFrStep(iTag)/10) THEN
-        WRITE(kStdErr,1011) fs,raFreq(1)
-        1011 FORMAT('ERROR! solar data file has start freq ',f10.5,' while the &
+      WRITE(kStdErr,1011) fs,raFreq(1)
+ 1011 FORMAT('ERROR! solar data file has start freq ',f10.5,' while the &
         start wavenumber of current kCompressed chunk is ',f10.5)
-        CALL DoStop
+      CALL DoStop
     END IF
 
     IF (abs(fe - raFreq(kMaxPts)) >= kaFrStep(iTag)/10) THEN
-        WRITE(kStdErr,1012) fe,raFreq(kMaxPts)
-        1012 FORMAT('ERROR! solar data file has stop freq ',f10.5,' while the &
+      WRITE(kStdErr,1012) fe,raFreq(kMaxPts)
+ 1012 FORMAT('ERROR! solar data file has stop freq ',f10.5,' while the &
         stop wavenumber of current kCompressed chunk is ',f10.5)
-        CALL DoStop
+      CALL DoStop
     END IF
 
     IF (abs(df - kaFrStep(iTag)) >= kaFrStep(iTag)/10) THEN
-        WRITE(kStdErr,1013) df,kaFrStep(iTag)
-        1013 FORMAT('ERROR! solar data file has delta freq ',f10.5,' while the &
+      WRITE(kStdErr,1013) df,kaFrStep(iTag)
+ 1013 FORMAT('ERROR! solar data file has delta freq ',f10.5,' while the &
         wavenumber spacing of current kCompressed chunk is ',f10.5)
-        CALL DoStop
+      CALL DoStop
     END IF
 
 ! now map the data
@@ -1855,12 +1539,9 @@ CONTAINS
 
 !!! data files units of W cm-2 sr-1
 !!! so need to multiply by 1000 to change to mW/m2/sr/cm-1
-    DO iFr=1,kMaxPts
-        raSun(iFr) = daSun(iFr)*1000.0
-    !        write (6,2000) iFr,raFreq(iFr),raSun(iFr)
-    END DO
+    raSun = daSun*1000.0
 
-    2000 FORMAT(I6,' ',f10.5,' ',e10.5)
+ 2000 FORMAT(I6,' ',f10.5,' ',e10.5)
     RETURN
     end SUBROUTINE ReadSolarData
 
@@ -1887,30 +1568,30 @@ CONTAINS
 ! local variables
     INTEGER :: iDpC
 
-    iDp=-1                   !assume nothing to be output
+    iDp = -1                   !assume nothing to be output
 
     IF (iNp < 0) THEN
-    ! easy ! print the radiance at the end of this layer
-        iDp=1
-        raOutFrac(iDp)=1.0
+      ! easy ! print the radiance at the end of this layer
+      iDp = 1
+      raOutFrac(iDp) = 1.0
     END IF
 
     IF (iNp > 0) THEN
-        iDp=0
-    ! actually have to go thru list to see if this layer is to be output
-        iDpC=1
-        101 CONTINUE
-        IF (iaOp(iDpC) == iLay) THEN
-            iDp = iDp+1
-            raOutFrac(iDp) = raaOp(iOutNum,iDpc)
-        END IF
-        IF (iDpc < iNp) THEN
-            iDpc = iDpc+1
-            GO TO 101
-        END IF
-        IF (iDp == 0) THEN   !to make things oki doki, set no output to -1
-            iDp = -1
-        END IF
+      iDp = 0
+      ! actually have to go thru list to see if this layer is to be output
+      iDpC = 1
+  101 CONTINUE
+      IF (iaOp(iDpC) == iLay) THEN
+        iDp = iDp+1
+        raOutFrac(iDp) = raaOp(iOutNum,iDpc)
+      END IF
+      IF (iDpc < iNp) THEN
+        iDpc = iDpc+1
+        GO TO 101
+      END IF
+      IF (iDp == 0) THEN   !to make things oki doki, set no output to -1
+        iDp = -1
+      END IF
     END IF
 
     RETURN
@@ -1954,11 +1635,11 @@ CONTAINS
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
 
     IF (iDir < 0) THEN            !radiance going down to instr on gnd
-        CALL UpLookInstrInterp(raInten2,iDir,rFrac,raFreq,raVTemp,rCos, &
+      CALL UpLookInstrInterp(raInten2,iDir,rFrac,raFreq,raVTemp,rCos, &
         iLay,iaRadLayer,raaAbs,raInten,raSun,iSun, &
         iNumLayer,rFracTop,rFracBot,iProfileLayers,raPressLevels)
     ELSE                             !radiance going up to instr in space
-        CALL DownLookInstrInterp(raInten2,iDir,rFrac,raFreq,raVTemp,rCos, &
+      CALL DownLookInstrInterp(raInten2,iDir,rFrac,raFreq,raVTemp,rCos, &
         iLay,iaRadLayer,raaAbs,raInten,raSun,iSun, &
         iNumLayer,rFracTop,rFracBot,iProfileLayers,raPressLevels, &
         iNLTEStart,raaPlanckCoeff)
@@ -2007,18 +1688,18 @@ CONTAINS
     REAL :: raPressLevels(kProfLayer+1)
           
     INTEGER :: iFr,iL
-    REAL :: rPlanck,rTrans,rEmis,rT,rFrac_k,rFrac_T
+    REAL :: raPlanck(kMaxPts),raTrans(kMaxPts),raEmis(kMaxPts),rT,rFrac_k,rFrac_T
      
 ! iDir < 0  !radiance going down to instr on earth surface
 
 ! n all layers except bottommost layer, rFrac_k == rFrac_T
-    rFrac_k=0.0            !use this much in k interpolation
-    rFrac_T=0.0            !use this much in T interpolation
+    rFrac_k = 0.0            !use this much in k interpolation
+    rFrac_T = 0.0            !use this much in T interpolation
 
     iL = iaRadLayer(iLay)
     IF ((iLay > 1) .AND. (iLay < iNumLayer)) THEN
-        rFrac_k = rFrac
-        rFrac_T = rFrac
+      rFrac_k = rFrac
+      rFrac_T = rFrac
     ELSE IF (iLay == 1) THEN !!!topmost layer
     
     !====================== presslev(i1+1)
@@ -2029,63 +1710,57 @@ CONTAINS
     ! /////////////////////
     ! /////////////////////                        fraction rFrac of full layer
     !====================== presslev(i1)
-        write(kStdWarn,*) 'recomputing fraction for top layer ...'
-        rFrac_k = rFracTop-rFrac
-    !!!!!!!see diagram above - thus if rFacTop = rFrac ie instrument is
-    !!!!!!!at surface, then we don't have to interpolate anything
-        rFrac_T=(rFrac+rFracTop)/2.0  !!sort of do an average
-        IF (rFrac/rFracTop > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracTop
-            write(kStdErr,*)'Cannot output radiance at such low'
-            write(kStdErr,*)'pressure (topmost layer)'
-            CALL DoStop
-        END IF
+      write(kStdWarn,*) 'recomputing fraction for top layer ...'
+      rFrac_k = rFracTop-rFrac
+      !!!!!!!see diagram above - thus if rFacTop = rFrac ie instrument is
+      !!!!!!!at surface, then we don't have to interpolate anything
+      rFrac_T=(rFrac+rFracTop)/2.0  !!sort of do an average
+      IF (rFrac/rFracTop > (1.0+1000*delta)) THEN
+        write(kStdErr,*) rFrac,rFracTop
+        write(kStdErr,*)'Cannot output radiance at such low'
+        write(kStdErr,*)'pressure (topmost layer)'
+        CALL DoStop
+      END IF
     ELSE IF (iLay == iNumLayer) THEN !problem!!bottommost layer
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-        IF (rFrac/rFracBot > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracBot
-            write(kStdErr,*)'Cannot output radiance at such high'
-            write(kStdErr,*)'pressure (bottommost layer)'
-            CALL DoStop
-        END IF
+      rFrac_k = rFrac
+      rFrac_T = rFrac
+      IF (rFrac/rFracBot > (1.0+1000*delta)) THEN
+        write(kStdErr,*) rFrac,rFracBot
+        write(kStdErr,*)'Cannot output radiance at such high'
+        write(kStdErr,*)'pressure (bottommost layer)'
+        CALL DoStop
+      END IF
     ELSE
-        write(kStdErr,*)'Cannot output radiance at this layer; not'
-        write(kStdErr,*)'within atmosphere defined by user!!'
-        CALL DoSTOP
+      write(kStdErr,*)'Cannot output radiance at this layer; not'
+      write(kStdErr,*)'within atmosphere defined by user!!'
+      CALL DoSTOP
     END IF
 
     IF (rFrac_k < 100*delta) THEN
-        rFrac_k=0.00
+      rFrac_k=0.00
     END IF
             
     write(kStdWarn,*) 'need to interpolate ',rFrac_k,' for radiance'
 
     IF (rFrac_k <= delta) THEN     !no need to interpolate
-        DO iFr=1,kMaxPts
-            raInten2(iFr) = raInten(iFr)
-        END DO
+      raInten2 = raInten
     ELSE                           !interpolate
-        IF (iLay /= 1) THEN
-        ! op part of most layers
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,1,iL)
-        ELSE
-        ! ottom  part of top layer
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,-1,iL)
-        END IF
-        write(kStdWarn,*)'MixTemp, Interp Temp=',raVTemp(iL),rT
-        DO iFr=1,kMaxPts
-            rPlanck = ttorad(raFreq(iFr),rT)
-            rTrans=exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-            rEmis=(1.0-rTrans)*rPlanck
-            raInten2(iFr) = rEmis+raInten(iFr)*rTrans
-        END DO
-        IF (iSun >= 0) THEN
-            DO iFr=1,kMaxPts
-                rTrans=exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-                raInten2(iFr) = raInten2(iFr)+raSun(iFr)*rTrans
-            END DO
-        END IF
+      IF (iLay /= 1) THEN
+        !top part of most layers
+        rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,1,iL)
+      ELSE
+        !bottom  part of top layer
+        rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,-1,iL)
+      END IF
+      write(kStdWarn,*)'MixTemp, Interp Temp=',raVTemp(iL),rT
+      raPlanck = rattorad(raFreq,rT)
+      raTrans  = exp(-raaAbs(:,iL)*rFrac_k/rCos)
+      raEmis   = (1.0-raTrans)*raPlanck
+      raInten2 = raEmis+raInten*raTrans
+      IF (iSun >= 0) THEN
+        raTrans = exp(-raaAbs(:,iL)*rFrac_k/rCos)
+        raInten2 = raInten2+raSun*raTrans
+      END IF
     END IF
 
     RETURN
@@ -2131,7 +1806,7 @@ CONTAINS
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
 
     INTEGER :: iFr,iL
-    REAL :: rPlanck,rTrans,rEmis,rT,rFrac_k,rFrac_T
+    REAL :: raPlanck(kMaxPts),raTrans(kMaxPts),raEmis(kMaxPts),rT,rFrac_k,rFrac_T
 
 ! iDir > 0  !radiance going up to instr in space
      
@@ -2142,10 +1817,10 @@ CONTAINS
     iL = iaRadLayer(iLay)
 
     IF ((iLay > 1) .AND. (iLay < iNumLayer)) THEN
-    ! o problem; full layer in mixtable
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-    ELSE IF (iLay == 1) THEN !!!bottommost layer
+      !no problem; full layer in mixtable
+      rFrac_k = rFrac
+      rFrac_T = rFrac
+    ELSEIF (iLay == 1) THEN !!!bottommost layer
     
     !====================== presslev(i1+1)
     ! XXXXXXXXXXXXXXXXXXXXX                         fraction rFrac of full layer
@@ -2156,71 +1831,65 @@ CONTAINS
     
     
     !====================== presslev(i1)
-        write(kStdWarn,*)'recomputing fraction for bottom layer ...'
+      write(kStdWarn,*)'recomputing fraction for bottom layer ...'
     ! ->> this is old
     ! ->>        rFrac_k = rFracBot-rFrac
     !!!!!!!see diagram above - thus if rFacTop = rFrac ie instrument is
     !!!!!!!at surface, then we don't have to interpolate anything
     ! ->>        rFrac_T = (rFrac+rFracBot)/2.0  !!sort of do an average
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-        IF (rFrac/rFracBot > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracBot
-            write(kStdErr,*)'Cannot output radiance at such high'
-            write(kStdErr,*)'pressure (bottommost layer)'
-            CALL DoStop
-        END IF
+      rFrac_k = rFrac
+      rFrac_T = rFrac
+      IF (rFrac/rFracBot > (1.0+1000*delta)) THEN
+        write(kStdErr,*) rFrac,rFracBot
+        write(kStdErr,*)'Cannot output radiance at such high'
+        write(kStdErr,*)'pressure (bottommost layer)'
+        CALL DoStop
+      END IF
     ELSE IF (iLay == iNumLayer) THEN !problem!!top most layer
-        rFrac_k = rFrac
-        rFrac_T = rFrac
-        IF (rFrac/rFracTop > (1.0+1000*delta)) THEN
-            write(kStdErr,*) rFrac,rFracTop
-            write(kStdErr,*)'Cannot output radiance at such low'
-            write(kStdErr,*)'pressure (topmost layer)'
-            CALL DoStop
-        END IF
+      rFrac_k = rFrac
+      rFrac_T = rFrac
+      IF (rFrac/rFracTop > (1.0+1000*delta)) THEN
+        write(kStdErr,*) rFrac,rFracTop
+        write(kStdErr,*)'Cannot output radiance at such low'
+        write(kStdErr,*)'pressure (topmost layer)'
+        CALL DoStop
+      END IF
     ELSE
-        write(kStdErr,*)'Cannot output radiance at this layer; not'
-        write(kStdErr,*)'within atmosphere defined by user!!'
-        CALL DoSTOP
+      write(kStdErr,*)'Cannot output radiance at this layer; not'
+      write(kStdErr,*)'within atmosphere defined by user!!'
+      CALL DoSTOP
     END IF
 
     IF (rFrac_k < 100*delta) THEN
-        rFrac_k = 0.00
+      rFrac_k = 0.00
     END IF
             
     write(kStdWarn,*) 'need to interpolate ',rFrac_k,' for radiance'
 
     IF (rFrac_k <= delta) THEN     !no need to interpolate
-        DO iFr=1,kMaxPts
-            raInten2(iFr) = raInten(iFr)
-        END DO
+      raInten2 = raInten
     ELSE                           !interpolate
-        IF (iLay /= 1) THEN
-        ! ottom part of most layers
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,-1,iL)
-        ELSE
-        ! op part of bottom layer
-            rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,1,iL)
-        END IF
-        write(kStdWarn,*)'MixTemp, Interp Temp=',raVTemp(iL),rT
-    ! note iNLTEStart = kProfLayer + 1, unless NLTE computations done!
-    ! so usually only the usual LTE computations are done!!
-        IF (iNLTEStart > kProfLayer) THEN    !!!normal, no emission stuff
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rT)
-                rTrans = exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-                rEmis  = (1.0-rTrans)*rPlanck
-                raInten2(iFr) = rEmis+raInten(iFr)*rTrans
-            END DO
-        ELSE IF (iNLTEStart <= kProfLayer) THEN
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rT)
-                rTrans=exp(-raaAbs(iFr,iL)*rFrac_k/rCos)
-                rEmis=(1.0-rTrans)*rPlanck*raaPlanckCoeff(iFr,iL)
-                raInten2(iFr) = rEmis+raInten(iFr)*rTrans
-            END DO
-        END IF
+      IF (iLay /= 1) THEN
+        !bottom part of most layers
+        rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,-1,iL)
+      ELSE
+        !top part of bottom layer
+        rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,1,iL)
+      END IF
+      write(kStdWarn,*)'MixTemp, Interp Temp=',raVTemp(iL),rT
+      ! note iNLTEStart = kProfLayer + 1, unless NLTE computations done!
+      ! so usually only the usual LTE computations are done!!
+      IF (iNLTEStart > kProfLayer) THEN    !!!normal, no emission stuff
+        raPlanck = rattorad(raFreq,rT)
+        raTrans = exp(-raaAbs(:,iL)*rFrac_k/rCos)
+        raEmis  = (1.0-raTrans)*raPlanck
+        raInten2 = raEmis + raInten*raTrans
+      ELSE IF (iNLTEStart <= kProfLayer) THEN
+        raPlanck = rattorad(raFreq,rT)
+        raTrans = exp(-raaAbs(:,iL)*rFrac_k/rCos)
+        raEmis = (1.0-raTrans)*raPlanck*raaPlanckCoeff(:,iL)
+        raInten2 = raEmis + raInten*raTrans
+      END IF
     END IF
 
     RETURN
@@ -2305,28 +1974,23 @@ CONTAINS
     FNCOFN = kSartaNLTE
     iIOUN = kTempUnit
 
-    OPEN(UNIT=iIOUN,FILE=FNCOFN,FORM='UNFORMATTED',STATUS='OLD', &
-    IOSTAT=IERR)
+    OPEN(UNIT=iIOUN,FILE=FNCOFN,FORM='UNFORMATTED',STATUS='OLD',IOSTAT=IERR)
     IF (IERR /= 0) THEN
-        WRITE(kStdErr,*) 'error reading SARTA NLTE coeffs file',IERR, FNCOFN
-        CALL DoStop
+      WRITE(kStdErr,*) 'error reading SARTA NLTE coeffs file',IERR, FNCOFN
+      CALL DoStop
     ENDIF
 
     kTempUnitOpen = +1
     iJ=1
     DO iI=1,MXCNTE
-    !       Read data for this frequency/channel
-        READ(iIOUN) ICHAN, FRQCHN, (COEFN(IC,iJ),IC=1,NNCOEF)
-        raFrad(iI) = FRQCHN
-        iJ = iJ + 1
+      ! Read data for this frequency/channel
+      READ(iIOUN) ICHAN, FRQCHN, (COEFN(IC,iJ),IC=1,NNCOEF)
+      raFrad(iI) = FRQCHN
+      iJ = iJ + 1
     ENDDO
     NCHNTE = iJ - 1
     CLOSE(iIOUN)
     kTempUnitOpen = -1
-
-!      print *,kSartaNLTE
-!      print *,MXCNTE,NCHNTE,NNCOEF
-!      call dostop
 
     CO2TOP = kCO2ppmv      !! this is the expected CO2 at TOA
     CO2TOP = rCO2MixRatio  !! better to use this, as it comes from profile
@@ -2335,7 +1999,7 @@ CONTAINS
 ! ote we assume the freqs raFrad are SORTED so we don't have problems
 ! oing the spline interpolation onto kCARTA freqs
     DO iI = 1,NCHNTE
-        raDrad(iI)=( COEFN(1,iI)*PRED1 ) + &
+      raDrad(iI)=( COEFN(1,iI)*PRED1 ) + &
         ( COEFN(2,iI)*PRED2 ) + &
         ( COEFN(3,iI)*PRED3 ) + &
         ( COEFN(4,iI)*PRED4 ) + &
@@ -2347,23 +2011,18 @@ CONTAINS
     !       Adjust DRAD for CO2 mixing ratio
     !       DRAD=DRAD*(COEFN(7,I)*(CO2TOP - CO2NTE) + 1.0)
                 
-        raDrad(iI) = raDrad(iI)*(COEFN(7,iI)*(CO2TOP - CO2NTE) + 1.0)
+      raDrad(iI) = raDrad(iI)*(COEFN(7,iI)*(CO2TOP - CO2NTE) + 1.0)
     !       print *,iI,raFrad(iI),raDrad(iI)
     END DO
-
-!      print *,'sarta nlte oops'
-!      print *,'sartanlte pred : ',PRED1,PRED2,PRED3,PRED4,PRED5,PRED6,COEFN(7,iI-1),rCO2MixRatio,CO2TOP,CO2NTE
-!      CALL DoStop
 
     CALL rspl(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts)    !! too dangerous,   small 4 um lte rads, wiggly NLTE correction
     CALL rlinear(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts) !! hopefully safer, small 4 um lte rads, straightline NLTE correction
     DO iI = 1,kMaxPts
-        IF ((raFreq(iI) < raFrad(1)) .OR. (raFreq(iI) > raFrad(NCHNTE))) THEN
-            raDkcarta(iI) = 0.0
-        END IF
-    !       print *,iI,raFreq(iI),raDkcarta(iI),raInten(iI)
-    !! LTE rad is raInten(iI); NLTE correction raDkcarta(iI) should be positive; if negative then just stick to the LTE rad
-        raInten(iI) = max(raInten(iI) + raDkcarta(iI),raInten(iI))
+      IF ((raFreq(iI) < raFrad(1)) .OR. (raFreq(iI) > raFrad(NCHNTE))) THEN
+        raDkcarta(iI) = 0.0
+      END IF
+      !! LTE rad is raInten(iI); NLTE correction raDkcarta(iI) should be positive; if negative then just stick to the LTE rad
+      raInten(iI) = max(raInten(iI) + raDkcarta(iI),raInten(iI))
     END DO
 
     RETURN
@@ -2407,49 +2066,47 @@ CONTAINS
 ! fractionally weighted due to the posn of instr at top layer being within
 ! the layer, not on top of it
 
-    DO iFr=1,kMaxPts
-        raExtra(iFr) = 0.0
-    END DO
+    raExtra = 0.0
      
     IF ((iI == 0) .AND. (abs(rFracTop-1.0) <= 1.0e-4))THEN
-    ! current defined atmosphere has all g-100 layers, 100th layer had frac 1.0
-        iExtra=-1
+      ! current defined atmosphere has all g-100 layers, 100th layer had frac 1.0
+      iExtra=-1
          
     ELSE IF ((iI == 0) .AND. (abs(rFracTop-1.0) >= 1.0e-4)) THEN
-    ! even though the current defined atmosphere has all g-100 layers,
-    ! 100th layer had frac 0 < f < 1
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-        write(kStdWarn,*) 'top most layer is fractional layer. Some'
-        write(kStdWarn,*) 'portion needed above instrument to calculate'
-        write(kStdWarn,*) ' thermal/solar'
+      ! even though the current defined atmosphere has all g-100 layers,
+      ! 100th layer had frac 0 < f < 1
+      iExtra=1
+      ! extend the defined atmosphere so it includes all upper layers
+      ! copy the currently defined atmosphere
+      iT = 0
+      DO iI=1,iNumLayer
+        iT = iT+1
+        iaRadLayerTemp(iI) = iaRadLayer(iI)
+      END DO
+      write(kStdWarn,*) 'top most layer is fractional layer. Some'
+      write(kStdWarn,*) 'portion needed above instrument to calculate'
+      write(kStdWarn,*) ' thermal/solar'
          
     ELSE IF ((iI /= 0)) THEN
-    ! current defined atmosphere does not have all g-100 layers
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-    ! now add on upper layers till we get MOD(iaRadLayerTemp(iT),kProfLayer) = 0
-        15 CONTINUE
-        IF (MOD(iaRadLayerTemp(iT),kProfLayer) /= 0) THEN
-            iT = iT+1
-            iaRadLayerTemp(iT) = iaRadLayerTemp(iT-1)+1
-            write(kStdWarn,*) 'added on layer',iT,iaRadLayerTemp(iT)
-            GO TO 15
-        END IF
-        write(kStdWarn,*)'added ',iT-iNumLayer,' layers'
-        write(kStdWarn,*)'above instrument to calculate th/solar/flux'
+      ! current defined atmosphere does not have all g-100 layers
+      iExtra=1
+      ! extend the defined atmosphere so it includes all upper layers
+      ! copy the currently defined atmosphere
+      iT = 0
+      DO iI=1,iNumLayer
+        iT = iT+1
+        iaRadLayerTemp(iI) = iaRadLayer(iI)
+      END DO
+      ! now add on upper layers till we get MOD(iaRadLayerTemp(iT),kProfLayer) = 0
+ 15   CONTINUE
+      IF (MOD(iaRadLayerTemp(iT),kProfLayer) /= 0) THEN
+        iT = iT+1
+        iaRadLayerTemp(iT) = iaRadLayerTemp(iT-1)+1
+        write(kStdWarn,*) 'added on layer',iT,iaRadLayerTemp(iT)
+        GO TO 15
+      END IF
+      write(kStdWarn,*)'added ',iT-iNumLayer,' layers'
+      write(kStdWarn,*)'above instrument to calculate th/solar/flux'
     END IF
      
     RETURN
@@ -2480,7 +2137,7 @@ CONTAINS
      
     INTEGER :: iI,iFr
      
-    iExtra=-1
+    iExtra = -1
      
 ! check to see the posn of the instrument (defined by layers i1,i2,..iN),
 ! relative to physical top of atmosphere, as defined by 100 layers
@@ -2491,49 +2148,47 @@ CONTAINS
 ! fractionally weighted due to the posn of instr at top layer being within
 ! the layer, not on top of it
 
-    DO iFr=1,kMaxPts
-        raExtra(iFr) = 0.0
-    END DO
+    raExtra = 0.0
      
     IF ((iI == 0) .AND. (abs(rFracTop-1.0) <= 1.0e-4))THEN
-    ! current defined atmosphere has all g-100 layers, 100th layer had frac 1.0
-        iExtra=-1
+      ! current defined atmosphere has all g-100 layers, 100th layer had frac 1.0
+      iExtra = -1
          
     ELSE IF ((iI == 0) .AND. (abs(rFracTop-1.0) >= 1.0e-4))THEN
-    ! even though the current defined atmosphere has all g-100 layers,
-    ! 100th layer had frac 0 < f < 1
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-    !        write(kStdWarn,*) 'top most layer is fractional layer. Some'
-    !        write(kStdWarn,*) 'portion needed above instrument to calculate'
-    !        write(kStdWarn,*) ' thermal/solar'
+      ! even though the current defined atmosphere has all g-100 layers,
+      ! 100th layer had frac 0 < f < 1
+      iExtra = 1
+      ! extend the defined atmosphere so it includes all upper layers
+      ! copy the currently defined atmosphere
+      iT = 0
+      DO iI=1,iNumLayer
+        iT = iT+1
+        iaRadLayerTemp(iI) = iaRadLayer(iI)
+      END DO
+      !        write(kStdWarn,*) 'top most layer is fractional layer. Some'
+      !        write(kStdWarn,*) 'portion needed above instrument to calculate'
+      !        write(kStdWarn,*) ' thermal/solar'
          
     ELSE IF ((iI /= 0)) THEN
-    ! current defined atmosphere does not have all g-100 layers
-        iExtra=1
-    ! extend the defined atmosphere so it includes all upper layers
-    ! copy the currently defined atmosphere
-        iT=0
-        DO iI=1,iNumLayer
-            iT = iT+1
-            iaRadLayerTemp(iI) = iaRadLayer(iI)
-        END DO
-    ! now add on upper layers till we get MOD(iaRadLayerTemp(iT),kProfLayer) = 0
-        15 CONTINUE
-        IF (MOD(iaRadLayerTemp(iT),kProfLayer) /= 0) THEN
-            iT = iT+1
-            iaRadLayerTemp(iT) = iaRadLayerTemp(iT-1)+1
-        !          write(kStdWarn,*) 'added on layer',iT,iaRadLayerTemp(iT)
-            GO TO 15
-        END IF
-    !        write(kStdWarn,*)'added ',iT-iNumLayer,' layers'
-    !        write(kStdWarn,*)'above instrument to calculate th/solar/flux'
+      ! current defined atmosphere does not have all g-100 layers
+      iExtra = 1
+      ! extend the defined atmosphere so it includes all upper layers
+      ! copy the currently defined atmosphere
+      iT = 0
+      DO iI=1,iNumLayer
+        iT = iT+1
+        iaRadLayerTemp(iI) = iaRadLayer(iI)
+      END DO
+      ! now add on upper layers till we get MOD(iaRadLayerTemp(iT),kProfLayer) = 0
+ 15   CONTINUE
+      IF (MOD(iaRadLayerTemp(iT),kProfLayer) /= 0) THEN
+        iT = iT+1
+        iaRadLayerTemp(iT) = iaRadLayerTemp(iT-1)+1
+        !write(kStdWarn,*) 'added on layer',iT,iaRadLayerTemp(iT)
+        GO TO 15
+      END IF
+      ! write(kStdWarn,*)'added ',iT-iNumLayer,' layers'
+      ! write(kStdWarn,*)'above instrument to calculate th/solar/flux'
     END IF
      
     RETURN
@@ -2588,11 +2243,11 @@ CONTAINS
     I = 1
 
     CALL READ_SSCATTAB_BINARY(SCATFILE,   & !!!!!!MAXTAB, MAXGRID,
-    caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-    NWAVETAB(I), WAVETAB(1,I), &
-    MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-    TABPHI1UP(1,I), TABPHI1DN(1,I), &
-    TABPHI2UP(1,I), TABPHI2DN(1,I))
+      caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
+     NWAVETAB(I), WAVETAB(1,I), &
+       MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
+      TABPHI1UP(1,I), TABPHI1DN(1,I), &
+      TABPHI2UP(1,I), TABPHI2DN(1,I))
 
 !       !!!get rid of delta scaling
 !      CALL UnScaleMie(
@@ -2600,73 +2255,73 @@ CONTAINS
 !     $        ndme(i)*nwavetab(i))
                  
     DO iF = 1,kMaxPts
-        waveno = raFreq(iF)
-    !  here we only need the simpler first choice as we are not messing
-    !  around with the phase functions
-        CALL INTERP_SCAT_TABLE2 (WAVENO, DME, ee, aa, gg, &
+      waveno = raFreq(iF)
+      !  here we only need the simpler first choice as we are not messing
+      !  around with the phase functions
+      CALL INTERP_SCAT_TABLE2 (WAVENO, DME, ee, aa, gg, &
         NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
         TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
-        EXTINCT(iF) = ee * iwp/1000.0
-        ABSC(iF)    = ee * iwp/1000.0 * (1.0 - aa)
-        ASYM(iF)    = gg
+      EXTINCT(iF) = ee * iwp/1000.0
+      ABSC(iF)    = ee * iwp/1000.0 * (1.0 - aa)
+      ASYM(iF)    = gg
     END DO
-
+  
 !     figure out what AIRS layers the cloud is in between
 
 ! do the top layer --------------------------------->
     iL = 1
-    10 CONTINUE
+ 10 CONTINUE
     IF (raPLevels(iL) <= 1.0e-3) THEN
-        iL = iL + 1
-        GOTO 10
+      iL = iL + 1
+      GOTO 10
     END IF
 
     IF (pT > raPLevels(iL)) THEN
-        write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too large!!!'
-        CALL DoStop
+      write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too large!!!'
+      CALL DoStop
     END IF
     IF (pT < raPLevels(kProfLayer+1)) THEN
-        write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too small!!!'
-        CALL DoStop
+      write(kStdErr,*) 'cloud top pressure (',pT,' mb) is too small!!!'
+      CALL DoStop
     END IF
 
     iL = 1
-    20 CONTINUE
+ 20 CONTINUE
     IF ((pT <= raPLevels(iL)) .AND. (pT >= raPLevels(iL+1))) THEN
-        GOTO 30
+      GOTO 30
     ELSE
-        iL = iL + 1
-        GOTO 20
+      iL = iL + 1
+      GOTO 20
     END IF
           
     30 CONTINUE
 
     IF ((iL < 1) .OR. (iL > kProfLayer)) THEN
-        write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
-        CALL DoStop
+      write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
+      CALL DoStop
     END IF
 
 !!!now see how this can be put into iaRadLayer
 ! figure out maximum Mixed Path Layer in the atmosphere
     IF (iaRadlayer(1) > iaRadLAyer(iNumLayer)) THEN
-        iS = iaRadlayer(1)
+      iS = iaRadlayer(1)
     ELSE
-        iS = iaRadLAyer(iNumLayer)
+      iS = iaRadLAyer(iNumLayer)
     END IF
     iMod = 1
-    40 CONTINUE
+ 40 CONTINUE
     IF ((iMod * kProfLayer) < iS) THEN
-        iMod = iMod + 1
-        GOTO 40
+      iMod = iMod + 1
+      GOTO 40
     END IF
 !!!so, this is the Mixed Path Layer with Cloud in it
     iL = (iMod-1)*kProfLayer + iL
 !!!now see which iaRadLayer this corresponds to
     iS = 1
-    50 CONTINUE
+ 50 CONTINUE
     IF ((iaRadLayer(iS) /= iL) .AND. (iS <= iNumLayer)) THEN
-        iS = iS + 1
-        GOTO 50
+      iS = iS + 1
+      GOTO 50
     END IF
 
     iL = iS
@@ -2683,58 +2338,58 @@ CONTAINS
 
 ! do the bottom layer --------------------------------->
     iL = 1
-    15 CONTINUE
+ 15 CONTINUE
     IF (raPLevels(iL) <= 1.0e-3) THEN
-        iL = iL + 1
-        GOTO 15
+      iL = iL + 1
+      GOTO 15
     END IF
 
     IF (pB > raPLevels(iL)) THEN
-        write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too large!!!'
-        CALL DoStop
+      write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too large!!!'
+      CALL DoStop
     END IF
     IF (pB < raPLevels(kProfLayer+1)) THEN
-        write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too small!!!'
-        CALL DoStop
+      write(kStdErr,*) 'cloud bot pressure (',pB,' mb) is too small!!!'
+      CALL DoStop
     END IF
 
     iL = 1
-    25 CONTINUE
+ 25 CONTINUE
     IF ((pB <= raPLevels(iL)) .AND. (pB >= raPLevels(iL+1))) THEN
-        GOTO 35
+      GOTO 35
     ELSE
-        iL = iL + 1
-        GOTO 25
+      iL = iL + 1
+      GOTO 25
     END IF
           
-    35 CONTINUE
+ 35 CONTINUE
 
     IF ((iL < 1) .OR. (iL > kProfLayer)) THEN
-        write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
-        CALL DoStop
+      write(kStdErr,*) 'iL = ',iL,' ... out of range!!!'
+      CALL DoStop
     END IF
 
 !!!now see how this can be put into iaRadLayer
 ! figure out maximum Mixed Path Layer in the atmosphere
     IF (iaRadlayer(1) > iaRadLAyer(iNumLayer)) THEN
-        iS = iaRadlayer(1)
+      iS = iaRadlayer(1)
     ELSE
-        iS = iaRadLAyer(iNumLayer)
+      iS = iaRadLAyer(iNumLayer)
     END IF
     iMod = 1
-    45 CONTINUE
+ 45 CONTINUE
     IF ((iMod * kProfLayer) < iS) THEN
-        iMod = iMod + 1
-        GOTO 45
+      iMod = iMod + 1
+      GOTO 45
     END IF
 !!!so, this is the Mixed Path Layer with Cloud in it
     iL = (iMod-1)*kProfLayer + iL
 !!!now see which iaRadLayer this corresponds to
     iS = 1
-    55 CONTINUE
+ 55 CONTINUE
     IF ((iaRadLayer(iS) /= iL) .AND. (iS <= iNumLayer)) THEN
-        iS = iS + 1
-        GOTO 55
+      iS = iS + 1
+      GOTO 55
     END IF
 
     iL = iS
@@ -2751,18 +2406,18 @@ CONTAINS
 
 ! see if the layers make sense
     IF (iLB > iLT) THEN
-        write(kStdErr,*) 'oops in FIND_ABS_ASY_EXT iLB > iLT',iLB,iLT
-        CALL DOStop
+      write(kStdErr,*) 'oops in FIND_ABS_ASY_EXT iLB > iLT',iLB,iLT
+      CALL DOStop
     END IF
 
 ! see if we need to adjust the individual cloud opt depths
     IF (iLB /= iLT) THEN
-        write(kStdWarn,*) 'adjusting the cld abs depths for each layer'
-        DO iF = 1,kMaxPts
-            EXTINCT(iF) = EXTINCT(iF)/(iLT-iLB+1)
-            ABSC(iF)    = ABSC(iF)/(iLT-iLB+1)
-            ASYM(iF)    = ASYM(iF)
-        END DO
+      write(kStdWarn,*) 'adjusting the cld abs depths for each layer'
+      DO iF = 1,kMaxPts
+        EXTINCT(iF) = EXTINCT(iF)/(iLT-iLB+1)
+        ABSC(iF)    = ABSC(iF)/(iLT-iLB+1)
+        ASYM(iF)    = ASYM(iF)
+      END DO
     END IF
 
     RETURN
@@ -2810,79 +2465,75 @@ CONTAINS
     iw1 = nwave
     olddme = -10.0
           
-!         Check that parameter are in range of table
+    ! Check that parameter are in range of table
     IF (WAVENO < WAVETAB(1) .OR. WAVENO > WAVETAB(NWAVE)) THEN
-        write(kStdErr,*) WAVENO,' outside ',WAVETAB(1),':',WAVETAB(NWAVE)
-        write(kStdErr,*) 'INTERP_SCAT_TABLE: wavenumber out of range ... RESET'
-        IF (WAVENO < WAVETAB(1)) THEN
-            WAVENO = WAVETAB(1)
-        ELSEIF (WAVENO > WAVETAB(NWAVE)) THEN
-            WAVENO = WAVETAB(NWAVE)
-        END IF
-    ! ALL DoStop
+      write(kStdErr,*) WAVENO,' outside ',WAVETAB(1),':',WAVETAB(NWAVE)
+      write(kStdErr,*) 'INTERP_SCAT_TABLE: wavenumber out of range ... RESET'
+      IF (WAVENO < WAVETAB(1)) THEN
+        WAVENO = WAVETAB(1)
+      ELSEIF (WAVENO > WAVETAB(NWAVE)) THEN
+        WAVENO = WAVETAB(NWAVE)
+      END IF
     END IF
     IF (DME < DMETAB(1) .OR. DME > DMETAB(NDME)) THEN
-        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
-        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
-        IF (DME < DMETAB(1)) THEN
-            DME = DMETAB(1)
-        ELSEIF (DME > DMETAB(NDME)) THEN
-            DME = DMETAB(NDME)
-        END IF
-    ! ALL DoStop
+      write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
+      write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
+      IF (DME < DMETAB(1)) THEN
+        DME = DMETAB(1)
+      ELSEIF (DME > DMETAB(NDME)) THEN
+        DME = DMETAB(NDME)
+      END IF
     END IF
 
-!         See if wavenumber is within last wavenumber grid, otherwise
-!           find the grid location and interpolation factor for WAVENO
+    ! See if wavenumber is within last wavenumber grid, otherwise
+    ! find the grid location and interpolation factor for WAVENO
     NEWIW = .FALSE. 
-!      IF (WAVENO .LT. WAVETAB(IW0) .OR. WAVENO .GT. WAVETAB(IW1)) THEN
+    ! IF (WAVENO .LT. WAVETAB(IW0) .OR. WAVENO .GT. WAVETAB(IW1)) THEN
     IF (WAVENO >= WAVETAB(IW0) .AND. WAVENO <= WAVETAB(IW1)) THEN
-        IL=1
-        IU=NWAVE
-        DO WHILE (IU-IL > 1)
-            IM = (IU+IL)/2
-            IF (WAVENO >= WAVETAB(IM)) THEN
-                IL = IM
-            ELSE
-                IU = IM
-            ENDIF
-        ENDDO
-        IW0 = MAX(IL,1)
-        IW1 = IW0+1
-        NEWIW = .TRUE. 
+      IL = 1
+      IU = NWAVE
+      DO WHILE (IU-IL > 1)
+        IM = (IU+IL)/2
+        IF (WAVENO >= WAVETAB(IM)) THEN
+          IL = IM
+        ELSE
+          IU = IM
+        ENDIF
+      ENDDO
+      IW0 = MAX(IL,1)
+      IW1 = IW0+1
+      NEWIW = .TRUE. 
     ENDIF
 
     IF (DME /= OLDDME) THEN
-    !         Find the grid location and interpolation factor for DME
-        IL=1
-        IU=NDME
-        DO WHILE (IU-IL > 1)
-            IM = (IU+IL)/2
-            IF (DME >= DMETAB(IM)) THEN
-                IL = IM
-            ELSE
-                IU = IM
-            ENDIF
-        ENDDO
-        ID = MAX(IL,1)
-        FDME = (DME-DMETAB(ID))/(DMETAB(ID+1)-DMETAB(ID))
-        FLDME = LOG(DME/DMETAB(ID))/LOG(DMETAB(ID+1)/DMETAB(ID))
+      !Find the grid location and interpolation factor for DME
+      IL = 1
+      IU = NDME
+      DO WHILE (IU-IL > 1)
+        IM = (IU+IL)/2
+        IF (DME >= DMETAB(IM)) THEN
+          IL = IM
+        ELSE
+          IU = IM
+        ENDIF
+      ENDDO
+      ID = MAX(IL,1)
+      FDME = (DME-DMETAB(ID))/(DMETAB(ID+1)-DMETAB(ID))
+      FLDME = LOG(DME/DMETAB(ID))/LOG(DMETAB(ID+1)/DMETAB(ID))
     ENDIF
 
     IF (DME /= OLDDME .OR. NEWIW) THEN
-    !         If not the same Dme or a new wavenumber grid, then
-    !           linearly interpolate omega and g and log interpolate extinction
-        EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
-        EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
-        ALB0 = (1-FDME)*TABSSALB(IW0,ID) + FDME*TABSSALB(IW0,ID+1)
-        ALB1 = (1-FDME)*TABSSALB(IW1,ID) + FDME*TABSSALB(IW1,ID+1)
-        ASYM0 = (1-FDME)*TABASYM(IW0,ID) + FDME*TABASYM(IW0,ID+1)
-        ASYM1 = (1-FDME)*TABASYM(IW1,ID) + FDME*TABASYM(IW1,ID+1)
+      ! If not the same Dme or a new wavenumber grid, then
+      ! linearly interpolate omega and g and log interpolate extinction
+      EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
+      EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
+      ALB0 = (1-FDME)*TABSSALB(IW0,ID) + FDME*TABSSALB(IW0,ID+1)
+      ALB1 = (1-FDME)*TABSSALB(IW1,ID) + FDME*TABSSALB(IW1,ID+1)
+      ASYM0 = (1-FDME)*TABASYM(IW0,ID) + FDME*TABASYM(IW0,ID+1)
+      ASYM1 = (1-FDME)*TABASYM(IW1,ID) + FDME*TABASYM(IW1,ID+1)
     ENDIF
 
-!         Linearly interpolate the scattering properties in wavenumber
+    ! Linearly interpolate the scattering properties in wavenumber
     FWAV    = (WAVENO-WAVETAB(IW0))/(WAVETAB(IW1)-WAVETAB(IW0))
     F       = 1-FWAV
     EXTINCT = F*EXT0 + FWAV*EXT1
@@ -2918,26 +2569,24 @@ CONTAINS
 
     iLowest = kProfLayer - iProfileLayers + 1
 
-    DO iLay=1,MAXNZ
-        Temp1(iLay) = -10.0
-        Temp(iLay)  = -10.0
-    END DO
+    Temp1 = -10.0
+    Temp(1:kProfLayer) = -10.0
 
     DO iLay = iLowest,kProfLayer
-        pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
-        pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
+      pavg(iLay) = raPressLevels(iLay+1)-raPressLevels(iLay)
+      pavg(iLay) = pavg(iLay)/log(raPressLevels(iLay+1)/raPressLevels(iLay))
     END DO
 
 ! now set iaRadLayerTemp the same as  iaRadLayer if downlook instr
 !     set iaRadLayerTemp flipped from iaRadLayer if uplook   instr
     IF (iDownWard == 1) THEN      !!!!keep everything the same
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iLay)
-        END DO
+      DO iLay = 1,iNumLayer
+        iaRadLayerTemp(iLay) = iaRadLayer(iLay)
+      END DO
     ELSE            !!!gotta do a bit of reverse logic for uplook instr
-        DO iLay = 1,iNumLayer
-            iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
-        END DO
+      DO iLay = 1,iNumLayer
+        iaRadLayerTemp(iLay) = iaRadLayer(iNumLayer-iLay+1)
+      END DO
     END IF
 
 ! see which set of Mixed Paths the current atmosphere occupies eg
@@ -2947,96 +2596,94 @@ CONTAINS
 ! assume each atmosphere has at least 25 layers in it!!!
     iM = idiv(iaRadLayerTemp(25),kProfLayer)+1
     DO iLay=1,kProfLayer
-        raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
+      raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
     END DO
 
     DO iLay=1,iNumLayer
-        iL = iaRadLayerTemp(iLay)
-    ! ap this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
-        iL = iL-idiv(iL,kProfLayer)*kProfLayer
-        IF (iL == 0) THEN
-            iL = kProfLayer
-        END IF
-        rP=raPressLevels(iL+1)-10000*delta
-        if (rp < raPressLevels(kProfLayer+1)) then
-            rp = raPressLevels(kProfLayer+1)+10000*delta
-        end if
-        TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
-        raPressLevels,iProfileLayers)
+      iL = iaRadLayerTemp(iLay)
+      !map this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
+      iL = iL-idiv(iL,kProfLayer)*kProfLayer
+      IF (iL == 0) THEN
+        iL = kProfLayer
+      END IF
+      rP=raPressLevels(iL+1)-10000*delta
+      if (rp < raPressLevels(kProfLayer+1)) then
+        rp = raPressLevels(kProfLayer+1)+10000*delta
+      end if
+      TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp,raPressLevels,iProfileLayers)
     END DO
 
     rP = raPressLevels(iLowest)
     rP = DISORTsurfPress          !!!from scatterparam.f90
-    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp, &
-    raPressLevels,iProfileLayers)
+    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp,raPressLevels,iProfileLayers)
 
     IF (iDownWard == 1) THEN
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1(iLay)
-        END DO
+      DO iLay=1,iNumLayer+1
+        temp(iLay) = temp1(iLay)
+      END DO
     ELSE
-        DO iLay=1,iNumLayer+1
-            temp(iLay) = temp1((iNumLayer+1)-iLay+1)
-        END DO
+      DO iLay=1,iNumLayer+1
+        temp(iLay) = temp1((iNumLayer+1)-iLay+1)
+      END DO
     END IF
 
     IF (iDownWard == -1) THEN
-    !!!suppose atm is in kCARTA layers 5 -- 100 (96 layers ==> 97 levels)
-    !!!this is same as RTSPEC levels 1 -- 97 ...
-    !!!   so temp(iI) is filled from levels 1 ..97
-    !!!so push it up so that it occupies KLAYERS levels 5 ... 101
+      !!!suppose atm is in kCARTA layers 5 -- 100 (96 layers ==> 97 levels)
+      !!!this is same as RTSPEC levels 1 -- 97 ...
+      !!!   so temp(iI) is filled from levels 1 ..97
+      !!!so push it up so that it occupies KLAYERS levels 5 ... 101
+ 
+      !!!set up the temp1 array
+      DO iLay=1,kProfLayer+1
+        temp1(iLay) = temp(iLay)
+        temp(iLay)  = -10.0
+      END DO
 
-    !!!set up the temp1 array
-        DO iLay=1,kProfLayer+1
-            temp1(iLay) = temp(iLay)
-            temp(iLay)  = -10.0
-        END DO
-
-    !!!push up the stuff so it occupies kLAYERS levels 5 .. 80
-        iOffSet = (iaRadLayer(iNumLayer) - 1) - (iM-1)*kProfLayer
-        DO iLay = 1,iNumLayer+1
-            temp(iLay+iOffSet) = temp1(iLay)
-        END DO
+      !!!push up the stuff so it occupies kLAYERS levels 5 .. 80
+      iOffSet = (iaRadLayer(iNumLayer) - 1) - (iM-1)*kProfLayer
+      DO iLay = 1,iNumLayer+1
+        temp(iLay+iOffSet) = temp1(iLay)
+      END DO
     END IF
 
     IF (iDownWard == 1) THEN
-    !!!suppose atm is in kCARTA layers 5 -- 79 (75 layers ==> 76 levels)
-    !!!this is same as RTSPEC levels 1 -- 76 ...
-    !!!   so temp(iI) is filled from levels 1 ..76
-    !!!so now push this down so it fills RTSPEC levels 26 .. 101
-    !!!then flip it so it occupies KLAYERS levels 1 ... 76
-    !!!and then push it up so it occupies KLAYERS levels 5 -- 80
-    !!!   (which is same as KLAYERS layers  5-79!!!!)
+      !!!suppose atm is in kCARTA layers 5 -- 79 (75 layers ==> 76 levels)
+      !!!this is same as RTSPEC levels 1 -- 76 ...
+      !!!   so temp(iI) is filled from levels 1 ..76
+      !!!so now push this down so it fills RTSPEC levels 26 .. 101
+      !!!then flip it so it occupies KLAYERS levels 1 ... 76
+      !!!and then push it up so it occupies KLAYERS levels 5 -- 80
+      !!!   (which is same as KLAYERS layers  5-79!!!!)
 
-    !!!set up the temp1 array
-        DO iLay=1,kProfLayer+1
-            temp1(iLay) = temp(iLay)
-            temp(iLay)  = -10.0
-        END DO
+      !!!set up the temp1 array
+      DO iLay=1,kProfLayer+1
+        temp1(iLay) = temp(iLay)
+        temp(iLay)  = -10.0
+      END DO
 
-    !!!push it down so it occupies RTSPEC levels 26 .. 101
-        iOffSet = kProfLayer-iNumLayer
-        DO iLay=1,iNumLayer+1
-            temp(iLay+iOffSet) = temp1(iLay)
-        END DO
+      !!!push it down so it occupies RTSPEC levels 26 .. 101
+      iOffSet = kProfLayer-iNumLayer
+      DO iLay=1,iNumLayer+1
+        temp(iLay+iOffSet) = temp1(iLay)
+      END DO
 
-    !!!now flip it so it occupies KLAYERS levels 1 ..76
-        DO iLay = 1,kProfLayer + 1
-            TEMP1(iLay) = TEMP(iLay)
-        END DO
-        DO iLay = 1,kProfLayer + 1
-            TEMP(iLay) = TEMP1((kProfLayer+1)-iLay+1)
-        END DO
-        DO iLay=1,kProfLayer+1
-            temp1(iLay) = temp(iLay)
-            temp(iLay)  = -10.0
-        END DO
+      !!!now flip it so it occupies KLAYERS levels 1 ..76
+      DO iLay = 1,kProfLayer + 1
+        TEMP1(iLay) = TEMP(iLay)
+      END DO
+      DO iLay = 1,kProfLayer + 1
+        TEMP(iLay) = TEMP1((kProfLayer+1)-iLay+1)
+      END DO
+      DO iLay=1,kProfLayer+1
+        temp1(iLay) = temp(iLay)
+        temp(iLay)  = -10.0
+      END DO
 
-    !!!push up the stuff sp it occupies kLAYERS levels 5 .. 80
-        iOffSet = iaRadLayer(1) - 1 - (iM-1)*kProfLayer
-        DO iLay = 1,iNumLayer+1
-            temp(iLay+iOffSet) = temp1(iLay)
-        END DO
+      !!!push up the stuff sp it occupies kLAYERS levels 5 .. 80
+      iOffSet = iaRadLayer(1) - 1 - (iM-1)*kProfLayer
+      DO iLay = 1,iNumLayer+1
+        temp(iLay+iOffSet) = temp1(iLay)
+      END DO
     END IF
 
     RETURN
@@ -3067,11 +2714,11 @@ CONTAINS
     REAL :: TEMP1(MAXNZ)
 
     DO iii = 1,iNumLayer
-        iaRadLayer(iii) = iaaRadLayer(iAtm,iii)
+      iaRadLayer(iii) = iaaRadLayer(iAtm,iii)
     END DO
 
     CALL SetTWOSTRTemp(TEMP,iaRadLayer,raVTemp,iNumLayer, &
-    iDownWard,iProfileLayers,raPressLevels)
+      iDownWard,iProfileLayers,raPressLevels)
 
     RETURN
     end SUBROUTINE ResetTemp_Twostream
@@ -3113,118 +2760,111 @@ CONTAINS
     iLowest = kProfLayer-iProfileLayers+1
 
     IF (rP >= raPressLevels(iLowest)) THEN
-    ! his is WHOLE of the bottom layer
-        i1=iLowest
+      !this is WHOLE of the bottom layer
+      i1 = iLowest
     ELSE IF (rP <= raPressLevels(kProfLayer+1)) THEN
-    ! his is ludicrous
-        write(kStdErr,*) rP,raPressLevels(kProfLayer+1)
-        write(kStdErr,*) 'Pressure of lower boundary is TOO LOW!!!'
-        CALL DoStop
+      !this is ludicrous
+      write(kStdErr,*) rP,raPressLevels(kProfLayer+1)
+      write(kStdErr,*) 'Pressure of lower boundary is TOO LOW!!!'
+      CALL DoStop
 
     ELSE
-    ! first find the AIRS layer within which it lies
-        iFound=-1
-        i1 = iLowest
-        i2 = iLowest+1
-        10 CONTINUE
-        IF ((rP <= raPressLevels(i1)) .AND. (rP > raPressLevels(i2))) THEN
-            iFound=1
+      ! first find the AIRS layer within which it lies
+      iFound = -1
+      i1 = iLowest
+      i2 = iLowest+1
+      10 CONTINUE
+      IF ((rP <= raPressLevels(i1)) .AND. (rP > raPressLevels(i2))) THEN
+        iFound=1
+      END IF
+      IF ((iFound < 0) .AND. (i1 < kProfLayer)) THEN
+        i1 = i1+1
+        i2 = i2+1
+        GOTO 10
+      END IF
+      IF ((iFound < 0)) THEN
+        IF (abs(rP-raPressLevels(kProfLayer+1)) <= delta) THEN
+          i1 = kProfLayer
+          iFound = 1
+        ELSE
+          write(kStdErr,*) 'could not find pressure ',rP
+          write(kStdErr,*) 'within AIRS pressure levels. Please check'
+          write(kStdErr,*) '*RADNCE and *OUTPUT sections'
+          CALL DoSTOP
         END IF
-        IF ((iFound < 0) .AND. (i1 < kProfLayer)) THEN
-            i1=i1+1
-            i2=i2+1
-	    GOTO 10
-        END IF
-        IF ((iFound < 0)) THEN
-            IF (abs(rP-raPressLevels(kProfLayer+1)) <= delta) THEN
-                i1=kProfLayer
-                iFound=1
-            ELSE
-                write(kStdErr,*) 'could not find pressure ',rP
-                write(kStdErr,*) 'within AIRS pressure levels. Please check'
-                write(kStdErr,*) '*RADNCE and *OUTPUT sections'
-                CALL DoSTOP
-            END IF
-        END IF
+      END IF
     END IF
 
     IF ((i1 > kProfLayer) .OR. (i1 < iLowest)) THEN
-        write(kStdErr,*) 'sorry : cannot find surface temp for '
-        write(kStdErr,*) 'layers outside ',iLowest,' and ',kProfLayer
-        write(kStdErr,*) 'Allowed Pressure ranges are from : ', &
+      write(kStdErr,*) 'sorry : cannot find surface temp for '
+      write(kStdErr,*) 'layers outside ',iLowest,' and ',kProfLayer
+      write(kStdErr,*) 'Allowed Pressure ranges are from : ',&
         raPressLevels(iLowest),' to  ',raPressLevels(kProfLayer+1),' mb'
-        write(kStdErr,*) 'Surface Pressure is ',rP,' mb'
-        call DoStop
+      write(kStdErr,*) 'Surface Pressure is ',rP,' mb'
+      call DoStop
     END IF
               
 ! now find the temperature
     IF (i1 == iLowest) THEN          !do linear interp
-        i1 = iLowest
-        i2 = iLowest+1
-        i3 = iLowest+2
-        rP1 = (raPressLevels(i2)-raPressLevels(i1))/ &
-        log(raPressLevels(i2)/raPressLevels(i1))
-        rP2 = (raPressLevels(i3)-raPressLevels(i2))/ &
-        log(raPressLevels(i3)/raPressLevels(i2))
-        T1 = raProfileTemp(i1)
-        T2 = raProfileTemp(i2)
-        IF (iLog == -1) THEN
-            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)           !!linear in P
-        ELSE
-            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1)) !!log(P)
-        END IF
+      i1 = iLowest
+      i2 = iLowest+1
+      i3 = iLowest+2
+      rP1 = (raPressLevels(i2)-raPressLevels(i1))/log(raPressLevels(i2)/raPressLevels(i1))
+      rP2 = (raPressLevels(i3)-raPressLevels(i2))/log(raPressLevels(i3)/raPressLevels(i2))
+      T1 = raProfileTemp(i1)
+      T2 = raProfileTemp(i2)
+      IF (iLog == -1) THEN
+        rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)           !!linear in P
+      ELSE
+        rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1)) !!log(P)
+      END IF
 
     ELSEIF (i1 >= (kProfLayer-1)) THEN          !do linear interp
-        rP1 = (raPressLevels(kProfLayer)-raPressLevels(kProfLayer-1))/ &
-        log(raPressLevels(kProfLayer)/raPressLevels(kProfLayer-1))
-        rP2 = (raPressLevels(kProfLayer+1)-raPressLevels(kProfLayer))/ &
-        log(raPressLevels(kProfLayer+1)/raPressLevels(kProfLayer))
-        T1 = raProfileTemp(kProfLayer-1)
-        T2 = raProfileTemp(kProfLayer)
-        IF (iLog == -1) THEN
-            rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)            !!linear in P
-        ELSE
-            rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1))  !!log(P)
-        END IF
+      rP1 = (raPressLevels(kProfLayer)-raPressLevels(kProfLayer-1))/log(raPressLevels(kProfLayer)/raPressLevels(kProfLayer-1))
+      rP2 = (raPressLevels(kProfLayer+1)-raPressLevels(kProfLayer))/log(raPressLevels(kProfLayer+1)/raPressLevels(kProfLayer))
+      T1 = raProfileTemp(kProfLayer-1)
+      T2 = raProfileTemp(kProfLayer)
+      IF (iLog == -1) THEN
+        rT = T2-(rP2-rP)*(T2-T1)/(rP2-rP1)            !!linear in P
+      ELSE
+        rT = T2-(log(rP2/rP))*(T2-T1)/(log(rP2/rP1))  !!log(P)
+      END IF
 	
     ELSE
-         !do spline ... note that the pressures have to
-	 !be in ascENDing order for good interpolation
-			     
-        rP1 = (raPressLevels(i1)-raPressLevels(i1-1))/ &
-        log(raPressLevels(i1)/raPressLevels(i1-1))
-        raP(3) = rP1
-        rP1 = (raPressLevels(i1+1)-raPressLevels(i1))/ &
-        log(raPressLevels(i1+1)/raPressLevels(i1))
-        raP(2) = rP1
-        rP1 = (raPressLevels(i1+2)-raPressLevels(i1+1))/ &
-        log(raPressLevels(i1+2)/raPressLevels(i1+1))
-        raP(1) = rP1
+      !do spline ... note that the pressures have to
+      !be in ascENDing order for good interpolation
+      		     
+      rP1 = (raPressLevels(i1)-raPressLevels(i1-1))/log(raPressLevels(i1)/raPressLevels(i1-1))
+      raP(3) = rP1
+      rP1 = (raPressLevels(i1+1)-raPressLevels(i1))/log(raPressLevels(i1+1)/raPressLevels(i1))
+      raP(2) = rP1
+      rP1 = (raPressLevels(i1+2)-raPressLevels(i1+1))/log(raPressLevels(i1+2)/raPressLevels(i1+1))
+      raP(1) = rP1
+      IF (iLog == +1) THEN
+        DO iJ = 1,3
+          raLogP(iJ) = log(raP(iJ))
+        END DO
+      END IF
+
+      raT(3) = raProfileTemp(i1-1)
+      raT(2) = raProfileTemp(i1)
+      raT(1) = raProfileTemp(i1+1)
+
+      yp1 = 1.0e30
+      ypn = 1.0e30
+      IF (iSpline == +1) THEN
         IF (iLog == +1) THEN
-            DO iJ = 1,3
-                raLogP(iJ) = log(raP(iJ))
-            END DO
+          CALL rspl_one(raLogP,raT,3,log(rP),rT,1)
+        ELSE
+          CALL rspl_one(raP,raT,3,rP,rT,1)
         END IF
-
-        raT(3) = raProfileTemp(i1-1)
-        raT(2) = raProfileTemp(i1)
-        raT(1) = raProfileTemp(i1+1)
-
-        yp1=1.0e30
-        ypn=1.0e30
-        IF (iSpline == +1) THEN
-            IF (iLog == +1) THEN
-                CALL rspl_one(raLogP,raT,3,log(rP),rT,1)
-            ELSE
-                CALL rspl_one(raP,raT,3,rP,rT,1)
-            END IF
-        ELSEIF (iSpline == -1) THEN
-            IF (iLog == +1) THEN
-                CALL rlinear_one(raP,raT,3,rP,rT,1)
-            ELSE
-                CALL rlinear_one(raLogP,raT,3,log(rP),rT,1)
-            END IF
+      ELSEIF (iSpline == -1) THEN
+        IF (iLog == +1) THEN
+          CALL rlinear_one(raP,raT,3,rP,rT,1)
+        ELSE
+          CALL rlinear_one(raLogP,raT,3,log(rP),rT,1)
         END IF
+      END IF
     END IF
 
     FindBottomTemp = rT
@@ -3257,51 +2897,33 @@ CONTAINS
           
 ! this ORIGINAL code, allowed user to add in an offset
     IF ((kSurfTemp > 0) .AND. ((kRTP == -1) .OR. (kRTP == 0))) THEN
-    ! ave to adjust temperature .. do this for down AND up look instr
-        IF (rPressStart > rPressStop) THEN  ! for down looking instr
-            rT = FindBottomTemp(rPressStart,raProfileTemp, &
-            raPressLevels,iProfileLayers)
-            rT = rT+rTSurf
-        ELSEIF (rPressStart < rPressStop) THEN  ! for up looking instr
-            rT = FindBottomTemp(rPressStop,raProfileTemp, &
-            raPressLevels,iProfileLayers)
-            rT = rT+rTSurf
-        END IF
+      !have to adjust temperature .. do this for down AND up look instr
+      IF (rPressStart > rPressStop) THEN  ! for down looking instr
+        rT = FindBottomTemp(rPressStart,raProfileTemp,raPressLevels,iProfileLayers)
+        rT = rT+rTSurf
+      ELSEIF (rPressStart < rPressStop) THEN  ! for up looking instr
+        rT = FindBottomTemp(rPressStop,raProfileTemp,raPressLevels,iProfileLayers)
+        rT = rT+rTSurf
+      END IF
     END IF
-!      ELSEIF ((kSurfTemp .gt. 0) .AND. ((kRTP .EQ. -5) .OR. (kRTP .EQ. -6))) THEN
-!        !just state this has already been taken care of in subr radnce4
-!       write(kStdWarn,*) 'kSurfTemp > 0 and kRTP = -5 or -6'
-!       write(kStdWarn,*) 'so we already added in raTSurf offset to stemp from TAPE5/6'
-!        rT = rT
-!        END IF
-!      END IF
-
-! this was the code in Dec 2016, get rid of it
-! this was the code in Dec 2016, get rid of it
-! this was the code in Dec 2016, get rid of it
-! why make life complicated, just directly give USER defined STEMP
-!      IF ((kSurfTemp .gt. 0) .AND. ((kRTP .GE. -6) .AND. (kRTP .LE. 0))) THEN
-!        rT = rTSurf
-!      END IF
-! replace with this why make life complicated, just directly give USER defined STEMP
     IF ((kSurfTemp > 0) .AND. ((kRTP >= -6) .AND. (kRTP <= -5))) THEN
-        rT = rTSurf
+      rT = rTSurf
     END IF
 
     FindSurfaceTemp = rT
             
     IF (rT < 190.0) THEN
-        write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
-        write(kStdErr,*)'brrrrrrrrrrrrrrrrrrrrrrrrrr!!!!!!!'
-        write(kStdErr,*)'kCARTA allows surface temps between 190 and 350K'
-        CALL DoSTOP
+      write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
+      write(kStdErr,*)'brrrrrrrrrrrrrrrrrrrrrrrrrr!!!!!!!'
+      write(kStdErr,*)'kCARTA allows surface temps between 190 and 350K'
+      CALL DoSTOP
     END IF
 
     IF (rT > 350.0) THEN
-        write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
-        write(kStdErr,*)'whew!!!!! bloody hot!!!!!!!'
-        write(kStdErr,*)'kCARTA allows temps between 210 and 350K'
-        CALL DoSTOP
+      write(kStdErr,*)'Surface Temperature = ',rT-273,' deg C (',rT,' K)'
+      write(kStdErr,*)'whew!!!!! bloody hot!!!!!!!'
+      write(kStdErr,*)'kCARTA allows temps between 210 and 350K'
+      CALL DoSTOP
     END IF
             
     RETURN
@@ -3357,104 +2979,92 @@ CONTAINS
     iLogOrLinear = -1    !! do log for w,g    and log for e; default SARTA
     iLogOrLinear = iaaOverrideDefault(1,7)
     IF (abs(iLogOrLinear) /= 1) THEN
-        write(kStdErr,*) 'invalid iLogOrLinear = ',iLogOrLinear
-        CALL DoStop
+      write(kStdErr,*) 'invalid iLogOrLinear = ',iLogOrLinear
+      CALL DoStop
     END IF
     IF ((iDefault /= iLogOrLinear) .AND. (kOuterLoop == 1)) THEN
-        write (kStdErr,*) 'in INTERP_SCAT_TABLE2'
-        write (kStdErr,*)  'iDefault,iLogOrLinear = ',iDefault,iLogOrLinear
+      write (kStdErr,*) 'in INTERP_SCAT_TABLE2'
+      write (kStdErr,*)  'iDefault,iLogOrLinear = ',iDefault,iLogOrLinear
     END IF
 
-!         Check that parameter are in range of table
+    ! Check that parameter are in range of table
     IF (WAVENO < WAVETAB(1) .OR. WAVENO > WAVETAB(NWAVE)) THEN
-        write(kStdErr,*) WAVENO,' outside ',WAVETAB(1),':',WAVETAB(NWAVE)
-        write(kStdErr,*) 'INTERP_SCAT_TABLE: wavenumber out of range ... RESET'
-        IF (WAVENO < WAVETAB(1)) THEN
-            WAVENO = WAVETAB(1)
-        ELSEIF (WAVENO > WAVETAB(NWAVE)) THEN
-            WAVENO = WAVETAB(NWAVE)
-        END IF
-    ! ALL DoStop
+      write(kStdErr,*) WAVENO,' outside ',WAVETAB(1),':',WAVETAB(NWAVE)
+      write(kStdErr,*) 'INTERP_SCAT_TABLE: wavenumber out of range ... RESET'
+      IF (WAVENO < WAVETAB(1)) THEN
+        WAVENO = WAVETAB(1)
+      ELSEIF (WAVENO > WAVETAB(NWAVE)) THEN
+        WAVENO = WAVETAB(NWAVE)
+      END IF
     END IF
     IF (DME < DMETAB(1) .OR. DME > DMETAB(NDME)) THEN
-    !        write(kStdErr,*) DME,' outside ',DMETAB(1),':',DMETAB(NDME)
-    !        write(kStdErr,*) 'INTERP_SCAT_TABLE: particle Dme out of range ... RESET'
-        IF (DME < DMETAB(1)) THEN
-            DME = DMETAB(1)
-        ELSEIF (DME > DMETAB(NDME)) THEN
-            DME = DMETAB(NDME)
-        END IF
-    ! ALL DoStop
+      IF (DME < DMETAB(1)) THEN
+        DME = DMETAB(1)
+      ELSEIF (DME > DMETAB(NDME)) THEN
+        DME = DMETAB(NDME)
+      END IF
     END IF
 
-!         See if wavenumber is within last wavenumber grid, otherwise
-!           find the grid location and interpolation factor for WAVENO
+    ! See if wavenumber is within last wavenumber grid, otherwise
+    !   find the grid location and interpolation factor for WAVENO
     NEWIW = .FALSE. 
-!      IF (WAVENO .LT. WAVETAB(IW0) .OR. WAVENO .GT. WAVETAB(IW1)) THEN
+    !IF (WAVENO .LT. WAVETAB(IW0) .OR. WAVENO .GT. WAVETAB(IW1)) THEN
     IF (WAVENO >= WAVETAB(IW0) .AND. WAVENO <= WAVETAB(IW1)) THEN
-        IL=1
-        IU=NWAVE
-        DO WHILE (IU-IL > 1)
-            IM = (IU+IL)/2
-            IF (WAVENO >= WAVETAB(IM)) THEN
-                IL = IM
-            ELSE
-                IU = IM
-            ENDIF
-        ENDDO
-        IW0 = MAX(IL,1)
-        IW1 = IW0+1
-        NEWIW = .TRUE. 
+      IL = 1
+      IU = NWAVE
+      DO WHILE (IU-IL > 1)
+        IM = (IU+IL)/2
+        IF (WAVENO >= WAVETAB(IM)) THEN
+          IL = IM
+        ELSE
+          IU = IM
+        ENDIF
+      ENDDO
+      IW0 = MAX(IL,1)
+      IW1 = IW0+1
+      NEWIW = .TRUE. 
     ENDIF
 
     IF (DME /= OLDDME) THEN
-    !         Find the grid location and interpolation factor for DME
-        IL=1
-        IU=NDME
-        DO WHILE (IU-IL > 1)
-            IM = (IU+IL)/2
-            IF (DME >= DMETAB(IM)) THEN
-                IL = IM
-            ELSE
-                IU = IM
-            ENDIF
-        ENDDO
-        ID = MAX(IL,1)
-        FDME = (DME-DMETAB(ID))/(DMETAB(ID+1)-DMETAB(ID))
-        FLDME = LOG(DME/DMETAB(ID))/LOG(DMETAB(ID+1)/DMETAB(ID))
+      !Find the grid location and interpolation factor for DME
+      IL = 1
+      IU = NDME
+      DO WHILE (IU-IL > 1)
+        IM = (IU+IL)/2
+        IF (DME >= DMETAB(IM)) THEN
+          IL = IM
+        ELSE
+          IU = IM
+        ENDIF
+      ENDDO
+      ID = MAX(IL,1)
+      FDME = (DME-DMETAB(ID))/(DMETAB(ID+1)-DMETAB(ID))
+      FLDME = LOG(DME/DMETAB(ID))/LOG(DMETAB(ID+1)/DMETAB(ID))
     ENDIF
 
     IF ((DME /= OLDDME .OR. NEWIW) .AND. (iLogOrLinear == +1)) THEN
-    !         If not the same Dme or a new wavenumber grid, then
-    !           linearly interpolate omega and g and log interpolate extinction
-        EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
-        EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
-        ALB0 = (1-FDME)*TABSSALB(IW0,ID) + FDME*TABSSALB(IW0,ID+1)
-        ALB1 = (1-FDME)*TABSSALB(IW1,ID) + FDME*TABSSALB(IW1,ID+1)
-        ASYM0 = (1-FDME)*TABASYM(IW0,ID) + FDME*TABASYM(IW0,ID+1)
-        ASYM1 = (1-FDME)*TABASYM(IW1,ID) + FDME*TABASYM(IW1,ID+1)
+      !If not the same Dme or a new wavenumber grid, then
+      !  linearly interpolate omega and g and log interpolate extinction
+      EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
+      EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
+      ALB0 = (1-FDME)*TABSSALB(IW0,ID) + FDME*TABSSALB(IW0,ID+1)
+      ALB1 = (1-FDME)*TABSSALB(IW1,ID) + FDME*TABSSALB(IW1,ID+1)
+      ASYM0 = (1-FDME)*TABASYM(IW0,ID) + FDME*TABASYM(IW0,ID+1)
+      ASYM1 = (1-FDME)*TABASYM(IW1,ID) + FDME*TABASYM(IW1,ID+1)
 
-    ! looking at sarta code, Scott Hannon ALWAYS does a log interp
+      ! looking at sarta code, Scott Hannon ALWAYS does a log interp
     ELSEIF ((DME /= OLDDME .OR. NEWIW) .AND. (iLogOrLinear == -1)) THEN
-    !         If not the same Dme or a new wavenumber grid, then
-    !           linearly interpolate omega and g and log interpolate extinction
-        EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
-        EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) &
-        + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
-        ALB0 = EXP( (1-FLDME)*LOG(TABSSALB(IW0,ID)) &
-        + FLDME*LOG(TABSSALB(IW0,ID+1)) )
-        ALB1 = EXP( (1-FLDME)*LOG(TABSSALB(IW1,ID)) &
-        + FLDME*LOG(TABSSALB(IW1,ID+1)) )
-        ASYM0 = EXP( (1-FLDME)*LOG(TABASYM(IW0,ID)) &
-        + FLDME*LOG(TABASYM(IW0,ID+1)) )
-        ASYM1 = EXP( (1-FLDME)*LOG(TABASYM(IW1,ID)) &
-        + FLDME*LOG(TABASYM(IW1,ID+1)) )
+      !If not the same Dme or a new wavenumber grid, then
+      !  linearly interpolate omega and g and log interpolate extinction
+      EXT0 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW0,ID)) + FLDME*LOG(TABEXTINCT(IW0,ID+1)) )
+      EXT1 = EXP( (1-FLDME)*LOG(TABEXTINCT(IW1,ID)) + FLDME*LOG(TABEXTINCT(IW1,ID+1)) )
+      ALB0 = EXP( (1-FLDME)*LOG(TABSSALB(IW0,ID))   + FLDME*LOG(TABSSALB(IW0,ID+1)) )
+      ALB1 = EXP( (1-FLDME)*LOG(TABSSALB(IW1,ID))   + FLDME*LOG(TABSSALB(IW1,ID+1)) )
+      ASYM0 = EXP( (1-FLDME)*LOG(TABASYM(IW0,ID))   + FLDME*LOG(TABASYM(IW0,ID+1)) )
+      ASYM1 = EXP( (1-FLDME)*LOG(TABASYM(IW1,ID))   + FLDME*LOG(TABASYM(IW1,ID+1)) )
     ENDIF
 
-!         Linearly interpolate the scattering properties in wavenumber
+    ! Linearly interpolate the scattering properties in wavenumber
     FWAV    = (WAVENO-WAVETAB(IW0))/(WAVETAB(IW1)-WAVETAB(IW0))
     F       = 1-FWAV
     EXTINCT = F*EXT0 + FWAV*EXT1
@@ -3511,13 +3121,12 @@ CONTAINS
     INTEGER :: IERR
     CHARACTER cScale
 
-    OPEN (UNIT = kTempUnit, STATUS='OLD', FORM='UNFORMATTED', &
-    FILE=SCATFILE, IOSTAT=IERR)
+    OPEN (UNIT = kTempUnit, STATUS='OLD', FORM='UNFORMATTED', FILE=SCATFILE, IOSTAT=IERR)
     IF (IERR /= 0) THEN
-        WRITE(kStdErr,1010) IERR, SCATFILE
-        CALL DoSTOP
+      WRITE(kStdErr,1010) IERR, SCATFILE
+      CALL DoSTOP
     ENDIF
-    1010 FORMAT('ERROR! number ',I5,' opening scatter data file:',/,A120)
+ 1010 FORMAT('ERROR! number ',I5,' opening scatter data file:',/,A120)
 
     kTempUnitOpen=1
     READ(kTempUnit) NMUOBS
@@ -3525,41 +3134,38 @@ CONTAINS
     READ(kTempUnit) NWAVE
 
     IF (MAX(NMUOBS,NDME,NWAVE) > MAXGRID) THEN
-        write(kStdErr,*) '(MAX(NMUOBS,NDME,NWAVE) > MAXGRID) '
-        write(kStdErr,*)  NMUOBS,NDME,NWAVE,MAXGRID
-        write(kStdErr,*) 'READ_SSCATTAB_BINARY: MAXGRID exceeded'
-        CALL DoStop
+      write(kStdErr,*) '(MAX(NMUOBS,NDME,NWAVE) > MAXGRID) '
+      write(kStdErr,*)  NMUOBS,NDME,NWAVE,MAXGRID
+      write(kStdErr,*) 'READ_SSCATTAB_BINARY: MAXGRID exceeded'
+      CALL DoStop
     END IF
     IF (NMUOBS*NDME*NWAVE > MAXTAB) THEN
-        write(kStdErr,*) '(NMUOBS*NDME*NWAVE > MAXTAB)'
-        write(kStdErr,*)  NMUOBS,NDME,NWAVE,MAXTAB
-        write(kStdErr,*) 'READ_SSCATTAB_BINARY: MAXTAB exceeded'
-        CALL DoStop
+      write(kStdErr,*) '(NMUOBS*NDME*NWAVE > MAXTAB)'
+      write(kStdErr,*)  NMUOBS,NDME,NWAVE,MAXTAB
+      write(kStdErr,*) 'READ_SSCATTAB_BINARY: MAXTAB exceeded'
+      CALL DoStop
     END IF
 
     READ(kTempUnit) MUINC(1), MUINC(2)
     READ(kTempUnit) cScale
     READ(kTempUnit) (MUTAB(IMU), IMU = 1, NMUOBS)
-
-!      print *,NMUOBS,NDME,NWAVE
-!      print *,MUINC(1),MUINC(2)
-!      print *,cScale
-!      print *,(MUTAB(IMU), IMU = 1, NMUOBS)
+ 
+    !print *,NMUOBS,NDME,NWAVE
+    !print *,MUINC(1),MUINC(2)
+    !print *,cScale
+    !print *,(MUTAB(IMU), IMU = 1, NMUOBS)
 
     DO IW = 1, NWAVE
-        DO ID = 1, NDME
-            K2 = IW-1 + NWAVE*(ID-1)
-            K3 = NMUOBS*K2
-        !          print *,IW,ID,K2,K3
-            READ(kTempUnit) DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1), &
-            TABSSALB(K2+1), TABASYM(K2+1)
-        !          print *,K2,DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1),
-        !     $       TABSSALB(K2+1), TABASYM(K2+1)
-            READ(kTempUnit) (TABPHI1UP(IMU+K3), IMU = 1, NMUOBS)
-            READ(kTempUnit) (TABPHI2UP(IMU+K3), IMU = 1, NMUOBS)
-            READ(kTempUnit) (TABPHI1DN(IMU+K3), IMU = 1, NMUOBS)
-            READ(kTempUnit) (TABPHI2DN(IMU+K3), IMU = 1, NMUOBS)
-        ENDDO
+      DO ID = 1, NDME
+        K2 = IW-1 + NWAVE*(ID-1)
+        K3 = NMUOBS*K2
+        READ(kTempUnit) DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1), &
+        TABSSALB(K2+1), TABASYM(K2+1)
+        READ(kTempUnit) (TABPHI1UP(IMU+K3), IMU = 1, NMUOBS)
+        READ(kTempUnit) (TABPHI2UP(IMU+K3), IMU = 1, NMUOBS)
+        READ(kTempUnit) (TABPHI1DN(IMU+K3), IMU = 1, NMUOBS)
+        READ(kTempUnit) (TABPHI2DN(IMU+K3), IMU = 1, NMUOBS)
+      ENDDO
     ENDDO
           
     CLOSE (kTempUnit)
@@ -3568,8 +3174,6 @@ CONTAINS
     write(kStdWarn,*)'success : read in binary scattr data from file = '
     write(kStdWarn,1020) scatfile
 
-!      call dostop
-          
     1020 FORMAT(A70)
 
     RETURN
@@ -3637,21 +3241,20 @@ CONTAINS
     READ (2,*)
     READ (2,*) (MUTAB(IMU), IMU = 1, NMUOBS)
     DO IW = 1, NWAVE
-        DO ID = 1, NDME
-            K2 = IW-1 + NWAVE*(ID-1)
-            K3 = NMUOBS*K2
-            READ(2,*)
-            READ(2,*)
-            READ(2,*) DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1), &
-            TABSSALB(K2+1), TABASYM(K2+1)
-            READ(2,*) (TABPHI1UP(IMU+K3), IMU = 1, NMUOBS)
-            READ(2,*) (TABPHI2UP(IMU+K3), IMU = 1, NMUOBS)
-            READ(2,*) (TABPHI1DN(IMU+K3), IMU = 1, NMUOBS)
-            READ(2,*) (TABPHI2DN(IMU+K3), IMU = 1, NMUOBS)
-        ENDDO
+      DO ID = 1, NDME
+        K2 = IW-1 + NWAVE*(ID-1)
+        K3 = NMUOBS*K2
+        READ(2,*)
+        READ(2,*)
+        READ(2,*) DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1),TABSSALB(K2+1), TABASYM(K2+1)
+        READ(2,*) (TABPHI1UP(IMU+K3), IMU = 1, NMUOBS)
+        READ(2,*) (TABPHI2UP(IMU+K3), IMU = 1, NMUOBS)
+        READ(2,*) (TABPHI1DN(IMU+K3), IMU = 1, NMUOBS)
+        READ(2,*) (TABPHI2DN(IMU+K3), IMU = 1, NMUOBS)
+      ENDDO
     ENDDO
 
-    30 FORMAT(A80)
+ 30 FORMAT(A80)
 
     CLOSE (UNIT=2)
      
@@ -3713,27 +3316,22 @@ CONTAINS
     READ (2,*)
     READ (2,*) NDME
     READ (2,*) NWAVE
-    IF (MAX(NMUOBS,NDME,NWAVE) > MAXGRID) &
-    STOP 'READ_SSCATTAB_SPECIAL: MAXGRID exceeded'
-    IF (NMUOBS*NDME*NWAVE > MAXTAB) &
-    STOP 'READ_SSCATTAB_SPECIAL: MAXTAB exceeded'
+    IF (MAX(NMUOBS,NDME,NWAVE) > MAXGRID) STOP 'READ_SSCATTAB_SPECIAL: MAXGRID exceeded'
+    IF (NMUOBS*NDME*NWAVE > MAXTAB) STOP 'READ_SSCATTAB_SPECIAL: MAXTAB exceeded'
     READ (2,*)
     READ (2,*)
     READ (2,*)
     READ (2,*)
 
     DO IW = 1, NWAVE
-        DO ID = 1, NDME
-            K2 = IW-1 + NWAVE*(ID-1)
-            READ(2,*) DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1), &
-            TABSSALB(K2+1), TABASYM(K2+1)
-            TABEXTINCT(K2+1) = TABEXTINCT(K2+1) * 1000.0   !!!to be like sscatmie
-        !          write(kStdWarn,*) DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1),
-        !     $       TABSSALB(K2+1), TABASYM(K2+1)
-        ENDDO
+      DO ID = 1, NDME
+        K2 = IW-1 + NWAVE*(ID-1)
+        READ(2,*) DMETAB(ID), WAVETAB(IW), TABEXTINCT(K2+1), TABSSALB(K2+1), TABASYM(K2+1)
+        TABEXTINCT(K2+1) = TABEXTINCT(K2+1) * 1000.0   !!!to be like sscatmie
+      ENDDO
     ENDDO
 
-    30 FORMAT(A80)
+ 30 FORMAT(A80)
 
     CLOSE (UNIT=2)
 
@@ -3759,27 +3357,27 @@ CONTAINS
     iI = 1
     10 CONTINUE
     IF (caLine(iI:iI) == ' ') THEN
-        iI = iI + 1
+      iI = iI + 1
     ELSE
-        iFound = 1
-        cScale = caLine(iI:iI)
+      iFound = 1
+      cScale = caLine(iI:iI)
     END IF
     IF ((iI <= 80) .AND. (iFound < 0)) THEN
-        GOTO 10
+      GOTO 10
     END IF
             
     IF ((caLine(iI:iI) /= 'N') .AND. (caLine(iI:iI) /= 'Y') .AND. &
-    (caLine(iI:iI) /= 'G') .AND. (caLine(iI:iI) /= 'H')) THEN
-        iFound = -1
-        iI = iI + 1
-        GOTO 10
+      (caLine(iI:iI) /= 'G') .AND. (caLine(iI:iI) /= 'H')) THEN
+      iFound = -1
+      iI = iI + 1
+      GOTO 10
     END IF
             
     IF ((iI == 80) .AND. (iFound < 0)) THEN
-        write (kStdErr,*) 'never found scaling parameter (n,y,g,h)!!!!'
-        CALL DoSTOP
+      write (kStdErr,*) 'never found scaling parameter (n,y,g,h)!!!!'
+      CALL DoSTOP
     ELSE
-        write (kStdWarn,*) 'scaling parameter in Mie Tables = ',cScale
+      write (kStdWarn,*) 'scaling parameter in Mie Tables = ',cScale
     END IF
      
     RETURN
@@ -3816,89 +3414,76 @@ CONTAINS
 
 ! local variables
     INTEGER :: iFr,iL,iIOUN
-    REAL :: rEmission,rTrans,rMu,raInten0(kMaxPts)
-    DOUBLE PRECISION :: daInten(kMaxPts),dTrans,dEmission
+    REAL :: raEmission(kMaxPts),raTrans(kMaxPts),rMu,raInten0(kMaxPts)
+    DOUBLE PRECISION :: daInten(kMaxPts),daTrans(kMaxPts),daEmission(kMaxPts)
     CHARACTER(80) :: caOutName
 
     caOutName = 'DumDum'
     iIOUN = kNLTEOutUA
       
     IF (iDoUpperAtmNLTE <= 0) THEN
-        write (kStdErr,*) 'huh? why doing the UA nlte radiance?????'
-        CALL DoStop
+      write (kStdErr,*) 'huh? why doing the UA nlte radiance?????'
+      CALL DoStop
     ELSE
-        write(kStdWarn,*) 'Doing UA (NLTE) radtransfer at 0.0025 cm-1 '
+      write(kStdWarn,*) 'Doing UA (NLTE) radtransfer at 0.0025 cm-1 '
     END IF
 
 ! compute radiance intensity thru NEW uppermost layers of atm
-    DO iFr = 1,kMaxPts
-        raInten0(iFr) = raInten(iFr)
-        daInten(iFr)  = dble(raInten(iFr))
-    END DO
+    raInten0 = raInten
+    daInten  = dble(raInten)
 
     iL = 0
     IF (kNLTEOutUAOpen > 0) THEN
-        write(kStdWarn,*) 'dumping out 0.005 mb UA rads iL = ',0
-    ! always dump out the 0.005 mb TOA radiance if the UA file is open
-        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+      write(kStdWarn,*) 'dumping out 0.005 mb UA rads iL = ',0
+      ! always dump out the 0.005 mb TOA radiance if the UA file is open
+      CALL wrtout(iIOUN,caOutName,raFreq,raInten)
     END IF
 
     rMu = cos(rSatAngle*kPi/180.0)
 
     DO iL = 1,iUpper - 1
 
-        DO iFr = 1,kMaxPts
-            rTrans = raaUpperSumNLTEGasAbCoeff(iFr,iL)/rMu
-            rTrans = exp(-rTrans)
-            rEmission = (1.0 - rTrans) * raaUpperPlanckCoeff(iFr,iL) * &
-            ttorad(raFreq(iFr),raUpperTemp(iL))
-            raInten(iFr) = rEmission + raInten(iFr)*rTrans
+      raTrans = raaUpperSumNLTEGasAbCoeff(:,iL)/rMu
+      raTrans = exp(-raTrans)
+      raEmission = (1.0 - raTrans) * raaUpperPlanckCoeff(:,iL) * rattorad(raFreq,raUpperTemp(iL))
+      raInten = raEmission + raInten*raTrans
 
-            dTrans = (raaUpperSumNLTEGasAbCoeff(iFr,iL)*1.0d0/(rMu*1.0d0))
-            dTrans = exp(-dTrans)
-            dEmission = (raaUpperPlanckCoeff(iFr,iL)*1.0d0) * &
-            (ttorad(raFreq(iFr),raUpperTemp(iL))*1.0d0)* &
-            (1.0d0 - dTrans)
-            daInten(iFr) = dEmission + daInten(iFr)*dTrans
+      daTrans = (raaUpperSumNLTEGasAbCoeff(:,iL)*1.0d0/(rMu*1.0d0))
+      daTrans = exp(-daTrans)
+      daEmission = (raaUpperPlanckCoeff(:,iL)*1.0d0) * dble(rattorad(raFreq,raUpperTemp(iL))*1.0d0)*(1.0d0 - daTrans)
+      daInten = daEmission + daInten*daTrans
 
-            raInten(iFr) = sngl(daInten(iFr))
-        END DO
+      raInten = sngl(daInten)
 
-        IF ((iDumpAllUARads > 0) .AND. (kNLTEOutUAOpen > 0)) THEN
-            write(kStdWarn,*) 'dumping out UA rads at iL = ',iL
+      IF ((iDumpAllUARads > 0) .AND. (kNLTEOutUAOpen > 0)) THEN
+        write(kStdWarn,*) 'dumping out UA rads at iL = ',iL
         ! dump out the radiance at this HIGH pressure level
-            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-        END IF
+        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+      END IF
 
     END DO
 
     DO iL = iUpper,iUpper
-        DO iFr = 1,kMaxPts
-            rTrans = raaUpperSumNLTEGasAbCoeff(iFr,iL)/rMu
-            rTrans = exp(-rTrans)
-            rEmission = (1.0 - rTrans) * raaUpperPlanckCoeff(iFr,iL) * &
-            ttorad(raFreq(iFr),raUpperTemp(iL))
-            raInten(iFr) = rEmission + raInten(iFr)*rTrans
+      raTrans = raaUpperSumNLTEGasAbCoeff(:,iL)/rMu
+      raTrans = exp(-raTrans)
+      raEmission = (1.0 - raTrans) * raaUpperPlanckCoeff(:,iL) * rattorad(raFreq,raUpperTemp(iL))
+      raInten = raEmission + raInten*raTrans
 
-            dTrans = dble(raaUpperSumNLTEGasAbCoeff(iFr,iL)*1.0d0/(rMu*1.0d0))
-            dTrans = exp(-dTrans)
-            dEmission = dble(raaUpperPlanckCoeff(iFr,iL)*1.0d0) * &
-            dble(ttorad(raFreq(iFr),raUpperTemp(iL))*1.0d0)* &
-            (1.0d0 - dTrans)
-            daInten(iFr) = dEmission + daInten(iFr)*dTrans
-            raInten(iFr) = sngl(daInten(iFr))
+      daTrans = dble(raaUpperSumNLTEGasAbCoeff(:,iL)*1.0d0/(rMu*1.0d0))
+      daTrans = exp(-daTrans)
+      daEmission = dble(raaUpperPlanckCoeff(:,iL)*1.0d0) * dble(rattorad(raFreq,raUpperTemp(iL))*1.0d0)*(1.0d0 - daTrans)
+      daInten = daEmission + daInten*daTrans
+      raInten = sngl(daInten)
 
-        END DO
-
-        IF (kNLTEOutUAOpen > 0) THEN
+      IF (kNLTEOutUAOpen > 0) THEN
         ! always dump out the 0.000025 mb TOA radiance if the UA file is open
-            write(kStdWarn,*) 'dumping out 0.000025 mb UA rads iL = ',iL
-            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-        END IF
+        write(kStdWarn,*) 'dumping out 0.000025 mb UA rads iL = ',iL
+        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+      END IF
 
     END DO
 
-    3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
+ 3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
 
     RETURN
     end SUBROUTINE UpperAtmRadTrans

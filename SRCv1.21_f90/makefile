@@ -3,72 +3,72 @@
 $(info IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB, if you do things by hand)
 
 400_H16_default_f90:
-	make -f Makefile_v120_Intelf90 datafix400_H2016
+	make -f Makefile_v121_Intelf90 datafix400_H2016
 	cp_param_files_to_f90.sc
-	make -f Makefile_v120_Intelf90 basic
-	make -f Makefile_v120_Intelf90 basicTXT	
-	make -f Makefile_v120_Intelf90 scat
-	make -f Makefile_v120_Intelf90 parallel	
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 basicTXT	
+	make -f Makefile_v121_Intelf90 scat
+	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H16
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16
 	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16
 
 400_H16_g110_f90:
-	make -f Makefile_v120_Intelf90 datafix400_H2016_g110
+	make -f Makefile_v121_Intelf90 datafix400_H2016_g110
 	cp_param_files_to_f90.sc
-	make -f Makefile_v120_Intelf90 basic
-	make -f Makefile_v120_Intelf90 basicTXT	
-	make -f Makefile_v120_Intelf90 scat
-	make -f Makefile_v120_Intelf90 parallel	
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 basicTXT	
+	make -f Makefile_v121_Intelf90 scat
+	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H16_g110
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H16_g110
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16_g110
 	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16_g110
 
 400_G15_NLTEH16_f90:
-	make -f Makefile_v120_Intelf90 datafix400_G2015_NLTEH2016
+	make -f Makefile_v121_Intelf90 datafix400_G2015_NLTEH2016
 	cp_param_files_to_f90.sc
-	make -f Makefile_v120_Intelf90 basic
-	make -f Makefile_v120_Intelf90 basicTXT	
-	make -f Makefile_v120_Intelf90 scat
-	make -f Makefile_v120_Intelf90 parallel	
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 basicTXT	
+	make -f Makefile_v121_Intelf90 scat
+	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_G15
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_G15
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_G15
 	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_G15
 
 400_H16_NLTEH08_f90:
-	make -f Makefile_v120_Intelf90 datafix400_H2016_NLTEH2008
+	make -f Makefile_v121_Intelf90 datafix400_H2016_NLTEH2008
 	cp_param_files_to_f90.sc
-	make -f Makefile_v120_Intelf90 basic
-	make -f Makefile_v120_Intelf90 basicTXT	
-	make -f Makefile_v120_Intelf90 scat
-	make -f Makefile_v120_Intelf90 parallel	
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 basicTXT	
+	make -f Makefile_v121_Intelf90 scat
+	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H16_NLTE08
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H16_NLTE08
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16_NLTE08
 	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16_NLTE08
-	
+
 400_H16_NLTEH04_f90:
-	make -f Makefile_v120_Intelf90 datafix400_H2016_NLTEH2004
+	make -f Makefile_v121_Intelf90 datafix400_H2016_NLTEH2004
 	cp_param_files_to_f90.sc
-	make -f Makefile_v120_Intelf90 basic
-	make -f Makefile_v120_Intelf90 basicTXT	
-	make -f Makefile_v120_Intelf90 scat
-	make -f Makefile_v120_Intelf90 parallel	
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 basicTXT	
+	make -f Makefile_v121_Intelf90 scat
+	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H16_NLTE04
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H16_NLTE04
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H16_NLTE04
 	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_400ppmv_H16_NLTE04
-	
+
 400_H12_default_f90:
-	make -f Makefile_v120_Intelf90 datafix400_H2012
+	make -f Makefile_v121_Intelf90 datafix400_H2012
 	cp_param_files_to_f90.sc
-	make -f Makefile_v120_Intelf90 basic
-	make -f Makefile_v120_Intelf90 basicTXT		
-	make -f Makefile_v120_Intelf90 scat
-	make -f Makefile_v120_Intelf90 parallel	
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 basicTXT		
+	make -f Makefile_v121_Intelf90 scat
+	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_400ppmv_H12
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_400ppmv_H12
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_400ppmv_H12
@@ -110,5 +110,4 @@ $(info IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doin
 
 clean: 
 	rm *.optrpt *genmod.* *.o *.mod *~ 2> /dev/null || true
-	
 ########################################################################

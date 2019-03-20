@@ -202,8 +202,8 @@ CONTAINS
 
     ! %%%%%%%%%%%%% GRAY CLOUDS %%%%%%%%%%%%%%%%%%%%
     IF (kWhichScatterCode == 7) THEN
-        write(kStdWarn,*) ' ---> GRAY EMISSIVE Cloud(s) Computations...'
-        CALL doscatter_graycloud( &
+      write(kStdWarn,*) ' ---> GRAY EMISSIVE Cloud(s) Computations...'
+      CALL doscatter_graycloud( &
         raFreq,raaSumAbCoeff,raMixVertTemp, &
         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
         rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -221,43 +221,43 @@ CONTAINS
         cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis)
         CALL PrintPound
           
-        IF (kFlux > 0) THEN
-            write(kStdWarn,*) ' ---> GRAYCLOUD Flux Computations ...'
-            write(kStdWarn,*) ' --> ERROR : this feature is  off < --'
-            CALL DoStop
-        END IF
+      IF (kFlux > 0) THEN
+        write(kStdWarn,*) ' ---> GRAYCLOUD Flux Computations ...'
+        write(kStdWarn,*) ' --> ERROR : this feature is  off < --'
+        CALL DoStop
+      END IF
 
-        IF (kJacobian >= 0) THEN
-            write(kStdWarn,*) ' ---> GRAYCLOUD JAC Computations ...'
-            CALL DoStop
-        END IF
+      IF (kJacobian >= 0) THEN
+        write(kStdWarn,*) ' ---> GRAYCLOUD JAC Computations ...'
+        CALL DoStop
+      END IF
 
     ! %%%%%%%%%%%%% SO CALLED RAYLEIGH CLOUDS %%%%%%%%%%%%%%%%%%%%
     ELSEIF (kWhichScatterCode == 6) THEN
-        write(kStdWarn,*) ' ---> RAYLEIGH Scattering Computations...'
-        write(kStdWarn,*) 'Temporarily commented out'
-        CALL DoStop
-    !x        CALL doscatter_rayleigh(
-    !x     $         raFreq,raaSumAbCoeff,raMixVertTemp,
-    !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
-    !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-    !x     $         rSatAngle,rFracTop,rFracBot,
-    !x     $         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
-    !x     $         raSurface,raSun,raThermal,raSunRefl,
-    !x     $         raLayAngles,raSunAngles,
-    !x     $         raThickness,raPressLevels,iProfileLayers,pProf,
-    !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-    !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
-    !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
-    !x     $         iNLTEStart,raaPlanckCoeff,
-    !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
-    !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
-    !x     $         iCldProfile,iaCldTypes,raaKlayersCldAmt)
-    !x        CALL PrintPound
+      write(kStdWarn,*) ' ---> RAYLEIGH Scattering Computations...'
+      write(kStdWarn,*) 'Temporarily commented out'
+      CALL DoStop
+      !x        CALL doscatter_rayleigh(
+      !x     $         raFreq,raaSumAbCoeff,raMixVertTemp,
+      !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
+      !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,
+      !x     $         rSatAngle,rFracTop,rFracBot,
+      !x     $         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
+      !x     $         raSurface,raSun,raThermal,raSunRefl,
+      !x     $         raLayAngles,raSunAngles,
+      !x     $         raThickness,raPressLevels,iProfileLayers,pProf,
+      !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
+      !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
+      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
+      !x     $         iNLTEStart,raaPlanckCoeff,
+      !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
+      !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
+      !x     $         iCldProfile,iaCldTypes,raaKlayersCldAmt)
+      !x        CALL PrintPound
           
-        IF (kFlux > 0) THEN
-            write(kStdErr,*) 'Have not done Rayleigh Flux yet'
-            CALL DoStop
+      IF (kFlux > 0) THEN
+        write(kStdErr,*) 'Have not done Rayleigh Flux yet'
+        CALL DoStop
         !x          write(kStdWarn,*) ' ---> RAYLEIGH Flux Computations ...'
         !x          CALL scatterfluxes_rayleigh(
         !x     $           raFreq,raaSumAbCoeff,raMixVertTemp,caOutName,
@@ -274,11 +274,11 @@ CONTAINS
         !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iTag,
         !x     $           iCldProfile,iaCldTypes,raaKlayersCldAmt)
         !x          CALL PrintPound
-        END IF
+      END IF
 
-        IF (kJacobian >= 0) THEN
-            write(kStdErr,*) 'Have not done Rayleigh Jac yet'
-            CALL DoStop
+      IF (kJacobian >= 0) THEN
+        write(kStdErr,*) 'Have not done Rayleigh Jac yet'
+        CALL DoStop
         !x          write(kStdWarn,*) ' ---> Doing RAYLEIGH Scattering Jacobians'
         !x          CALL find_jacobians_rayleigh(raFreq,iFileID,caJacobFile,
         !x     $           rTSpace,rTSurf,rSurfPress,raUseEmissivity,
@@ -296,85 +296,62 @@ CONTAINS
         !x     $           iNLTEStart,raaPlanckCoeff,
         !x     $           iCldProfile,iaCldTypes,raaKlayersCldAmt)
         !x          CALL PrintPound
-        END IF
+      END IF
 
     ! %%%%%%%%%%%%% CLOUDY SKY  %%%%%% PCLSAM  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ELSEIF (kWhichScatterCode == 5) THEN
 
-        IF (k100layerCLoud < 0) THEN
-            write(kStdWarn,*) ' ---> PCLSAM 2slab Scattering Computations ...'
-        ELSEIF (k100layerCLoud == 1) THEN
-            write(kStdWarn,*) ' ---> PCLSAM 100layer Scattering Computations cloud cc(i) = 1 or clr cc(i) = 0...'
-        ELSEIF (k100layerCLoud == 100) THEN
-            write(kStdWarn,*) ' ---> PCLSAM 100layer Scattering Computations 0 < cc(i) < 1 ...'
-        END IF
+      IF (k100layerCLoud < 0) THEN
+        write(kStdWarn,*) ' ---> PCLSAM 2slab Scattering Computations ...'
+      ELSEIF (k100layerCLoud == 1) THEN
+        write(kStdWarn,*) ' ---> PCLSAM 100layer Scattering Computations cloud cc(i) = 1 or clr cc(i) = 0...'
+      ELSEIF (k100layerCLoud == 100) THEN
+        write(kStdWarn,*) ' ---> PCLSAM 100layer Scattering Computations 0 < cc(i) < 1 ...'
+      END IF
               
-        IF (iAtm == 1) THEN
-            DO iL = 1,kProfLayer
-                DO iFr = 1,kMaxPts
-                    raaRads5(iFr,iL) = 0.0
-                    raaRadsX(iFr,iL) = 0.0
-                END DO
-            END DO
-            DO iL = 1,2*kProfLayer
-                DO iFr = 1,kMaxPts
-                    raaFluxX(iFr,iL) = 0.0
-                    raaFlux5(iFr,iL) = 0.0
-                END DO
-            END DO
+      IF (iAtm == 1) THEN
+        raaRads5(iFr,iL) = 0.0
+        raaRadsX(iFr,iL) = 0.0
+        raaFluxX(iFr,iL) = 0.0
+        raaFlux5(iFr,iL) = 0.0
 
-            !! initialize T and Q jacs, also need to do wgt functions and surface jacs UGH
-            DO iL = 1,kProfLayerJac
-              DO iFr = 1,kMaxPtsJac
-                DO iJ = 1,kMaxDQ
-                  raaaAllDQ5(iJ,iFr,iL) = 0.0
-                END DO
-              END DO
-            END DO
-            DO iL = 1,kProfLayerJac
-              DO iFr = 1,kMaxPtsJac
-                raaAllDT5(iFr,iL) = 0.0
-                raaAllWgtOut5(iFr,iL) = 0.0
-              END DO
-            END DO
-            DO iL = 1,4
-              DO iFr = 1,kMaxPtsJac
-                raaAllSurfOut(iFr,iL) = 0.0
-                raaAllSurfOut5(iFr,iL) = 0.0
-              END DO
-            END DO
-
-        END IF
+        !! initialize T and Q jacs, also need to do wgt functions and surface jacs UGH
+        raaaAllDQ5 = 0.0
+        raaAllDT5(iFr,iL) = 0.0
+        raaAllWgtOut5(iFr,iL) = 0.0
+        raaAllSurfOut(iFr,iL) = 0.0
+        raaAllSurfOut5(iFr,iL) = 0.0
+      END IF
 	
-        iDoPCLSAM = -1    !! assume no need to do PCLSAM scatter calc
+      iDoPCLSAM = -1    !! assume no need to do PCLSAM scatter calc
 
-        IF ((ctype2 > 10) .AND. (iAtm <= 4) .AND. (k100layerCloud < 0)) THEN
-            iDoPCLSAM = +1    !! do PCLSAM scatter calc, one of r12, r1,r2 or rclr
-        ELSEIF ((ctype2 <= 10) .AND. (iAtm <= 2) .AND. (k100layerCloud < 0)) THEN
-            iDoPCLSAM = +1    !! do PCLSAM scatter calc, one of r1 or rclr
-        ELSEIF ((k100layerCloud == 1) .AND. (iAtm <= 2)) THEN
-            iDoPCLSAM = +1    !! do PCLSAM 100 layer scatter calc, one of r1 or rclr
-        ELSEIF ((k100layerCloud == 100) .AND. (iAtm == 1)) THEN
-            iDoPCLSAM = +100  !! do PCLSAM 100 layer scatter calc, one of r1 or rclr
-        END IF
+      IF ((ctype2 > 10) .AND. (iAtm <= 4) .AND. (k100layerCloud < 0)) THEN
+        iDoPCLSAM = +1    !! do PCLSAM scatter calc, one of r12, r1,r2 or rclr
+      ELSEIF ((ctype2 <= 10) .AND. (iAtm <= 2) .AND. (k100layerCloud < 0)) THEN
+        iDoPCLSAM = +1    !! do PCLSAM scatter calc, one of r1 or rclr
+      ELSEIF ((k100layerCloud == 1) .AND. (iAtm <= 2)) THEN
+        iDoPCLSAM = +1    !! do PCLSAM 100 layer scatter calc, one of r1 or rclr
+      ELSEIF ((k100layerCloud == 100) .AND. (iAtm == 1)) THEN
+        iDoPCLSAM = +100  !! do PCLSAM 100 layer scatter calc, one of r1 or rclr
+      END IF
                
-        1010 FORMAT(' Add PCLSAM contribution to total radiance : iAtm,Frac = ',I4,F10.5)
-        1011 FORMAT(' Add PCLSAM contribution to total flux     : iAtm,Frac = ',I4,F10.5)
-        1012 FORMAT(A31,I4,F10.5)
+ 1010 FORMAT(' Add PCLSAM contribution to total radiance : iAtm,Frac = ',I4,F10.5)
+ 1011 FORMAT(' Add PCLSAM contribution to total flux     : iAtm,Frac = ',I4,F10.5)
+ 1012 FORMAT(A31,I4,F10.5)
 
-        write(kStdWarn,*) ' '
-	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'
-	write(kStdWarn,*) '  Cloudy Calcs, iAtm = ',iAtm   
-	write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'	
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) '  Cloudy Calcs, iAtm = ',iAtm   
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'	
 
-        IF (iDoPCLSAM > 0) THEN
-          !! this internally figures out 100 layer (cc = 0,1) or 100 layer (0 < cc < 1)
-          !! versus vs 2Slab
+      IF (iDoPCLSAM > 0) THEN
+        !! this internally figures out 100 layer (cc = 0,1) or 100 layer (0 < cc < 1)
+        !! versus vs 2Slab
 
-            rFracX = 0.0
-            rFracX = 1.0
+        rFracX = 0.0
+        rFracX = 1.0
 
-            CALL doscatter_pclsam( &
+        CALL doscatter_pclsam( &
             +1,raFreq,raaSumAbCoeff,raMixVertTemp, &
             caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
             rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -398,113 +375,113 @@ CONTAINS
             raTPressLevels,iKnowTP, &
             raaRadsX,iNumOutX,-1,rFracX)
 
-            IF (iNumOutX > kProfLayer) THEN
-                write(kStdErr,*) 'Ooops : user has asked for >= kProfLayer radiance outputs'
-                write(kStdErr,*) 'so if -check array bounds is off, you will not see this error'
-                write(kStdErr,*) ' : HALTING'
-                CALL DoStop
-            END IF
+        IF (iNumOutX > kProfLayer) THEN
+          write(kStdErr,*) 'Ooops : user has asked for >= kProfLayer radiance outputs'
+          write(kStdErr,*) 'so if -check array bounds is off, you will not see this error'
+          write(kStdErr,*) ' : HALTING'
+          CALL DoStop
+        END IF
 
-            IF ((ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
-            !!! keep acumulating for one cloud case
-                IF ((cfrac12 > 0) .OR. (cfrac2 > 0)) THEN
-                    write(kStdErr,*) 'Huh : expecting only ONE cloud!!!! ctype1, ctype2 = ',ctype1,ctype2
-                    write(kStdErr,*) '  cfrac2,cfrac12 > 0 : cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
-                    CALL DoSTOP
-                END IF
-                IF (iAtm == 1) THEN
-                    write(kStdWarn,*) '  doing OneSlab 1 of 3 : frac = c1'
-                    rFracX = cfrac1       !! FOV fraction filled by cloud one ALONE
-                ELSEIF (iAtm == 2) THEN
-                    write(kStdWarn,*) '  doing OneSlab 2 of 3 : clear : frac = 1-c1'
-                    rFracX = 1 - cfrac1   !! FOV fraction that is CLR
-                END IF
-                write(kStdWarn,1012) 'One Cloud Case : iAtm,rFracX = ',iAtm,rFracX
-                DO iL = 1,iNumOutX
-                   raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
-                END DO
-
-            ELSEIF (k100layerCloud == 100) THEN
-                write(kStdWarn,*) '100 layer clouds, k100layerCloud = 100'
-                          
-            ELSEIF (k100layerCloud == 1) THEN
-            !!! keep acumulating for one cloud case
-            !! need to compute tcc
-                rFracX = cfrac1 + cfrac2 - cfrac12
-                IF (iAtm == 1) THEN
-                    write(kStdWarn,*) '100 layer clouds : tcc = cfrac1 + cfrac2 - cfrac12, doing cloud case'
-                    rFracX = rFracX
-                ELSEIF (iAtm == 2) THEN
-                    write(kStdWarn,*) '100 layer clouds : tcc = cfrac1 + cfrac2 - cfrac12, doing clear case'
-                    rFracX = 1 - rFracX   !! FOV fraction that is CLR
-                END IF
-                write(kStdWarn,1012) '100 Cloud case : iAtm,rFracX = ',iAtm,rFracX
-                DO iL = 1,iNumOutX
-                   raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
-                END DO
-
-            ELSEIF ((ctype2 > 10) .AND. (k100layerCloud < 0)) THEN
-            !!! keep acumulating for two cloud case
-                IF (iAtm == 1) THEN
-                    write(kStdWarn,*) '  doing TwoSlab 1 of 5 : two clouds : frac = c12'
-                    rFracX = cfrac12                !! FOV fraction filled by BOTH
-                ELSEIF (iAtm == 2) THEN
-                    write(kStdWarn,*) '  doing TwoSlab 2 of 5 : cloud 1 : frac = c1-c12'
-                    rFracX = cfrac1 - cfrac12       !! FOV fraction filled by cloud one ALONE
-                ELSEIF (iAtm == 3) THEN
-                    write(kStdWarn,*) '  doing TwoSlab 3 of 5 : cloud 2 : frac = c2-c12'
-                    rFracX = cfrac2 - cfrac12       !! FOV fraction filled by cloud two ALONE
-                ELSEIF (iAtm == 4) THEN
-                    write(kStdWarn,*) '  doing TwoSlab 4 of 5 : clear : frac = 1 - (c1+c2-c12)'
-                    rFracX = 1 - cfrac1 - cfrac2 + cfrac12  !! FOV fraction that is CLR
-                END IF
-                write(kStdWarn,1012) 'Two Cloud case : iAtm,rFracX = ',iAtm,rFracX
-                DO iL = 1,iNumOutX
-                  raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
-                END DO
-            END IF
-
-        ELSEIF (iDoPCLSAM < 0) THEN
-            IF ((iAtm == 5) .AND. (ctype2 > 0) .AND. (k100layerCloud < 0)) THEN
-                write(kStdWarn,*) 'Add PCLSAM two cloud case : writing out linear combo of rads'
-            ELSEIF ((iAtm == 3) .AND. (ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
-                write(kStdWarn,*) 'Add PCLSAM one cloud case : writing out linear combo of rads'
-            ELSEIF ((iAtm == 3) .AND. (k100layerCloud == 1)) THEN
-                write(kStdWarn,*) 'Add PCLSAM 100 layer cloud case : writing out linear combo of rads'
-            END IF
-            iIOUNX = kStdkCarta
-
-            DO iL = 1,iNumOutX
-              raRadsX = raaRads5(:,iL)
-              CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
-            END DO
-            write(kStdWarn,*) 'PCLSAM Clouds : wrote out linear combo of rads'            
-
-        END IF    !! iDoPCLSAM > 0
-
-        CALL PrintPound
-          
-        IF (kFlux > 0) THEN
-          write(kStdWarn,*) ' ---> PCLSAM Flux Computations ...'
-          IF ((kFlux == 1) .OR. (kFlux == 3)) THEN
-            !! up flux at each level, or down flux at each level
-            iLayPrintFlux = (iNumLayer+1)
-          ELSEIF (kFlux == 2) THEN
-            !! heating rate at each level
-            iLayPrintFlux = (iNumLayer+1)
-          ELSEIF (kFlux == 4) THEN
-            !! only OLR at TOA
-            iLayPrintFlux = 1
-          ELSEIF (kFlux == 5) THEN
-            !! only OLR at TOA and trop, and ILR at gnd
-            iLayPrintFlux = 3
-          ELSEIF (kFlux == 6) THEN
-            !! up and down flux at all levels
-            iLayPrintFlux = 2*(iNumLayer+1)
+        IF ((ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
+          !!! keep acumulating for one cloud case
+          IF ((cfrac12 > 0) .OR. (cfrac2 > 0)) THEN
+            write(kStdErr,*) 'Huh : expecting only ONE cloud!!!! ctype1, ctype2 = ',ctype1,ctype2
+            write(kStdErr,*) '  cfrac2,cfrac12 > 0 : cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
+            CALL DoSTOP
           END IF
+          IF (iAtm == 1) THEN
+            write(kStdWarn,*) '  doing OneSlab 1 of 3 : frac = c1'
+            rFracX = cfrac1       !! FOV fraction filled by cloud one ALONE
+          ELSEIF (iAtm == 2) THEN
+            write(kStdWarn,*) '  doing OneSlab 2 of 3 : clear : frac = 1-c1'
+            rFracX = 1 - cfrac1   !! FOV fraction that is CLR
+          END IF
+          write(kStdWarn,1012) 'One Cloud Case : iAtm,rFracX = ',iAtm,rFracX
+          DO iL = 1,iNumOutX
+             raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
+          END DO
+
+        ELSEIF (k100layerCloud == 100) THEN
+          write(kStdWarn,*) '100 layer clouds, k100layerCloud = 100'
+                          
+        ELSEIF (k100layerCloud == 1) THEN
+          !!! keep acumulating for one cloud case
+          !! need to compute tcc
+          rFracX = cfrac1 + cfrac2 - cfrac12
+          IF (iAtm == 1) THEN
+            write(kStdWarn,*) '100 layer clouds : tcc = cfrac1 + cfrac2 - cfrac12, doing cloud case'
+            rFracX = rFracX
+          ELSEIF (iAtm == 2) THEN
+            write(kStdWarn,*) '100 layer clouds : tcc = cfrac1 + cfrac2 - cfrac12, doing clear case'
+            rFracX = 1 - rFracX   !! FOV fraction that is CLR
+          END IF
+          write(kStdWarn,1012) '100 Cloud case : iAtm,rFracX = ',iAtm,rFracX
+          DO iL = 1,iNumOutX
+            raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
+          END DO
+
+        ELSEIF ((ctype2 > 10) .AND. (k100layerCloud < 0)) THEN
+          !!! keep acumulating for two cloud case
+          IF (iAtm == 1) THEN
+            write(kStdWarn,*) '  doing TwoSlab 1 of 5 : two clouds : frac = c12'
+            rFracX = cfrac12                !! FOV fraction filled by BOTH
+          ELSEIF (iAtm == 2) THEN
+            write(kStdWarn,*) '  doing TwoSlab 2 of 5 : cloud 1 : frac = c1-c12'
+            rFracX = cfrac1 - cfrac12       !! FOV fraction filled by cloud one ALONE
+          ELSEIF (iAtm == 3) THEN
+            write(kStdWarn,*) '  doing TwoSlab 3 of 5 : cloud 2 : frac = c2-c12'
+            rFracX = cfrac2 - cfrac12       !! FOV fraction filled by cloud two ALONE
+          ELSEIF (iAtm == 4) THEN
+            write(kStdWarn,*) '  doing TwoSlab 4 of 5 : clear : frac = 1 - (c1+c2-c12)'
+            rFracX = 1 - cfrac1 - cfrac2 + cfrac12  !! FOV fraction that is CLR
+          END IF
+          write(kStdWarn,1012) 'Two Cloud case : iAtm,rFracX = ',iAtm,rFracX
+          DO iL = 1,iNumOutX
+            raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
+          END DO
+        END IF
+
+      ELSEIF (iDoPCLSAM < 0) THEN
+        IF ((iAtm == 5) .AND. (ctype2 > 0) .AND. (k100layerCloud < 0)) THEN
+          write(kStdWarn,*) 'Add PCLSAM two cloud case : writing out linear combo of rads'
+        ELSEIF ((iAtm == 3) .AND. (ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
+          write(kStdWarn,*) 'Add PCLSAM one cloud case : writing out linear combo of rads'
+        ELSEIF ((iAtm == 3) .AND. (k100layerCloud == 1)) THEN
+          write(kStdWarn,*) 'Add PCLSAM 100 layer cloud case : writing out linear combo of rads'
+        END IF
+        iIOUNX = kStdkCarta
+
+        DO iL = 1,iNumOutX
+          raRadsX = raaRads5(:,iL)
+          CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
+        END DO
+        write(kStdWarn,*) 'PCLSAM Clouds : wrote out linear combo of rads'            
+
+      END IF    !! iDoPCLSAM > 0
+
+      CALL PrintPound
+          
+      IF (kFlux > 0) THEN
+        write(kStdWarn,*) ' ---> PCLSAM Flux Computations ...'
+        IF ((kFlux == 1) .OR. (kFlux == 3)) THEN
+          !! up flux at each level, or down flux at each level
+          iLayPrintFlux = (iNumLayer+1)
+        ELSEIF (kFlux == 2) THEN
+          !! heating rate at each level
+          iLayPrintFlux = (iNumLayer+1)
+        ELSEIF (kFlux == 4) THEN
+          !! only OLR at TOA
+          iLayPrintFlux = 1
+        ELSEIF (kFlux == 5) THEN
+          !! only OLR at TOA and trop, and ILR at gnd
+          iLayPrintFlux = 3
+        ELSEIF (kFlux == 6) THEN
+          !! up and down flux at all levels
+          iLayPrintFlux = 2*(iNumLayer+1)
+        END IF
                     
-          IF (iDoPCLSAM > 0) THEN
-            CALL scatterfluxes_pclsam( &
+        IF (iDoPCLSAM > 0) THEN
+          CALL scatterfluxes_pclsam( &
                 raFreq,raaSumAbCoeff,raMixVertTemp,caOutName, &
                 iOutNum,iAtm,iNumLayer,iaaRadLayer, &
                 rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -521,154 +498,127 @@ CONTAINS
                 iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
                 iCldProfile,iaCldTypes,raaKlayersCldAmt, &
                 iLayPrintFlux,raaFluxX)
-            write(kStdWarn,1011) iAtm,rFracX
-            DO iL = 1,iLayPrintFlux
-              DO iFr = 1,kMaxPts
-                raaFlux5(iFr,iL) = raaFlux5(iFr,iL) + rFracX * raaFluxX(iFr,iL)
-              END DO
-            END DO
-            CALL PrintPound
-
-          ELSEIF (iDoPCLSAM < 0) THEN
-            IF ((iAtm == 5) .AND. (ctype2 > 0) .AND. (k100layerCloud < 0)) THEN
-              write(kStdWarn,*) 'Add PCLSAM two cloud case : doing linear combo of rads'
-            ELSEIF ((iAtm == 3) .AND. (ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
-              write(kStdWarn,*) 'Add PCLSAM one cloud case : doing linear combo of rads'
-            ELSEIF ((iAtm == 3) .AND. (k100layerCloud == 1)) THEN
-              write(kStdWarn,*) 'Add PCLSAM 100 layer cloud case : doing linear combo of rads'
-            END IF
-            iIOUNX = kStdFlux
-            CALL wrtout_head(iIOUNX,caFluxFile,raFreq(1),raFreq(kMaxPts),real(kaFrStep(iTag)),iAtm,1,iLayPrintFlux)
-            DO iL = 1,iLayPrintFlux
-              DO iFr = 1,kMaxPts
-                raRadsX(iFr) = raaFlux5(iFr,iL)
-              END DO
-              CALL wrtout(iIOUNX,caFluxFile,raFreq,raRadsX)
-            END DO
-          END IF     !!! IF (iDoPCLSAM > 0) THEN
-          CALL PrintPound	    
-        END IF       !!! kFlux > 0
-              
-        IF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. iDoPCLSAM > 0) THEN
-          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians 100 layers Q/T/Wgt/Surf Jacs'
-          CALL find_jacobians_pclsam(raFreq,iTag,iActualTag, &
-              iFileID,caJacobFile, &
-              rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
-              rSatAngle,raMixVertTemp,ctype2,rFracx,&
-  	      iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
-              raaaAllDQ,raaAllDT,raaSumAbCoeff,raaAmt,raInten, &
-              raSurface,raSun,raThermal, &
-              rFracTop,rFracBot, &
-              iaJacob,iJacob,raaMix,raSunRefl, &
-              raLayAngles,raSunAngles, &
-              raSatAzimuth,raSolAzimuth, &
-              kaFrStep(iTag), &
-              raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
-              iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-              raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-              iaCloudNumAtm,iaaCloudWhichAtm,iNpmix, &
-              iNLTEStart,raaPlanckCoeff, &
-              iCldProfile,iaCldTypes,raaKlayersCldAmt, &
-              iPrintAllPCLSAMJacs, &
-              raaaAllJacQOut,raaAllJacTOut,raaAllWgtOut,raaAllSurfOut)
+          write(kStdWarn,1011) iAtm,rFracX
+          DO iL = 1,iLayPrintFlux
+            raaFlux5(:,iL) = raaFlux5(:,iL) + rFracX * raaFluxX(:,iL)
+          END DO
           CALL PrintPound
-            
-          !! no need to multiply raaAllDT by rFracX as this is done in find_jacobians_pclsam
-          !! no need to multiply raaAllWgtOut by rFracX as this is done in find_jacobians_pclsam
-          !! no multiply raaAllDQ by rFracX as this is done in find_jacobians_pclsam
-          !! no multiply raaAllSurfOut  by rFracX as this is done in find_jacobians_pclsam
-          DO iL = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-              raaAllDT5(iFr,iL)  = raaAllDT5(iFr,iL)  + raaAllJacTout(iFr,iL)  
-              raaAllWgtOut5(iFr,iL) = raaAllWgtOut5(iFr,iL) + raaAllWgtOut(iFr,iL) 
-            END DO
-          END DO
-          DO iL = 1,kProfLayerJac
-            DO iFr = 1,kMaxPtsJac
-              DO iJ = 1,kMaxDQ
-                raaaAllDQ5(iJ,iFr,iL) = raaaAllDQ5(iJ,iFr,iL) + raaaAllJacQOut(iJ,iFr,iL) 
-              END DO
-            END DO
-          END DO
-          DO iL = 1,4
-            DO iFr = 1,kMaxPtsJac
-              raaAllSurfOut5(iFr,iL)  = raaAllSurfOut5(iFr,iL)  + raaAllSurfOut(iFr,iL)  
-            END DO
-          END DO
-!        print *,iAtm,raaAllDT(6100,1),raaAllWgtOut(6100,1),raaaAllDQ(6100,1,1), &
-!                     raaAllDT5(6100,1),raaAllWgtOut5(6100,1),raaaAllDQ5(6100,1,1)
 
-        ELSEIF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. iDoPCLSAM < 0) THEN
-          rDelta = real(kaFrStep(iTag))
-          !!! print all of them
-          iIOUNX = kStdJacob
-          iJ = 0
-          DO iG = 1,iNumGases
-            iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
-            IF (iGasJacList > 0) THEN
-              iJ = iJ + 1
-!              print *,'wrtout head G in scat_in',iG,iaGases(iG),iNumLayer
-              CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1), &
+        ELSEIF (iDoPCLSAM < 0) THEN
+          IF ((iAtm == 5) .AND. (ctype2 > 0) .AND. (k100layerCloud < 0)) THEN
+            write(kStdWarn,*) 'Add PCLSAM two cloud case : doing linear combo of rads'
+          ELSEIF ((iAtm == 3) .AND. (ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
+            write(kStdWarn,*) 'Add PCLSAM one cloud case : doing linear combo of rads'
+          ELSEIF ((iAtm == 3) .AND. (k100layerCloud == 1)) THEN
+            write(kStdWarn,*) 'Add PCLSAM 100 layer cloud case : doing linear combo of rads'
+          END IF
+          iIOUNX = kStdFlux
+          CALL wrtout_head(iIOUNX,caFluxFile,raFreq(1),raFreq(kMaxPts),real(kaFrStep(iTag)),iAtm,1,iLayPrintFlux)
+          DO iL = 1,iLayPrintFlux
+            raRadsX(:) = raaFlux5(:,iL)
+            CALL wrtout(iIOUNX,caFluxFile,raFreq,raRadsX)
+          END DO
+        END IF     !!! IF (iDoPCLSAM > 0) THEN
+        CALL PrintPound	    
+      END IF       !!! kFlux > 0
+              
+      IF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. iDoPCLSAM > 0) THEN
+        write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians 100 layers Q/T/Wgt/Surf Jacs'
+        CALL find_jacobians_pclsam(raFreq,iTag,iActualTag, &
+            iFileID,caJacobFile, &
+            rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
+            rSatAngle,raMixVertTemp,ctype2,rFracx,&
+	      iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
+            raaaAllDQ,raaAllDT,raaSumAbCoeff,raaAmt,raInten, &
+            raSurface,raSun,raThermal, &
+            rFracTop,rFracBot, &
+            iaJacob,iJacob,raaMix,raSunRefl, &
+            raLayAngles,raSunAngles, &
+            raSatAzimuth,raSolAzimuth, &
+            kaFrStep(iTag), &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+            raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+            iaCloudNumAtm,iaaCloudWhichAtm,iNpmix, &
+            iNLTEStart,raaPlanckCoeff, &
+            iCldProfile,iaCldTypes,raaKlayersCldAmt, &
+            iPrintAllPCLSAMJacs, &
+            raaaAllJacQOut,raaAllJacTOut,raaAllWgtOut,raaAllSurfOut)
+        CALL PrintPound
+          
+        !! no need to multiply raaAllDT by rFracX as this is done in find_jacobians_pclsam
+        !! no need to multiply raaAllWgtOut by rFracX as this is done in find_jacobians_pclsam
+        !! no multiply raaAllDQ by rFracX as this is done in find_jacobians_pclsam
+        !! no multiply raaAllSurfOut  by rFracX as this is done in find_jacobians_pclsam
+        DO iL = 1,kProfLayerJac
+          raaAllDT5(:,iL)  = raaAllDT5(:,iL)  + raaAllJacTout(:,iL)  
+          raaAllWgtOut5(:,iL) = raaAllWgtOut5(:,iL) + raaAllWgtOut(:,iL) 
+        END DO
+        DO iL = 1,kProfLayerJac
+          DO iJ = 1,kMaxDQ
+            raaaAllDQ5(iJ,iFr,iL) = raaaAllDQ5(iJ,iFr,iL) + raaaAllJacQOut(iJ,iFr,iL) 
+          END DO
+        END DO
+        DO iL = 1,4
+            raaAllSurfOut5(:,iL)  = raaAllSurfOut5(:,iL)  + raaAllSurfOut(:,iL)  
+          END DO
+
+      ELSEIF (kJacobian >= 0 .AND. kActualJacs < 100 .AND. iDoPCLSAM < 0) THEN
+        rDelta = real(kaFrStep(iTag))
+        !!! print all of them
+        iIOUNX = kStdJacob
+        iJ = 0
+        DO iG = 1,iNumGases
+          iGasJacList=DoGasJacob(iaGases(iG),iaJacob,iJacob)
+          IF (iGasJacList > 0) THEN
+            iJ = iJ + 1
+            CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1), &
                                raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
-              DO iL = 1,iNumLayer
-                DO iFr = 1,kMaxPtsJac
-                  raRadsX(iFr) = raaaAllDQ5(iJ,iFr,iL)
-                END DO
-                CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
-              END DO
-            END IF
-          END DO
+            DO iL = 1,iNumLayer
+              raRadsX(:) = raaaAllDQ5(iJ,:,iL)
+              CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
+            END DO
+          END IF
+        END DO
 
-          DO iG = iNumGases+1,iNumGases+2
-            iGasJacList=DoGasJacob(iaGasesTemp(iG),iaJacob,iJacob)
-            IF (iGasJacList > 0) THEN
-              iJ = iJ + 1
-!              print *,'wrtout head G 101/102 in scat_in',iG,iaGasesTemp(iG),iNumLayer
-              CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1), &
+        DO iG = iNumGases+1,iNumGases+2
+          iGasJacList=DoGasJacob(iaGasesTemp(iG),iaJacob,iJacob)
+          IF (iGasJacList > 0) THEN
+            iJ = iJ + 1
+            CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1), &
                                raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
-              DO iL = 1,iNumLayer
-                DO iFr = 1,kMaxPtsJac
-                  raRadsX(iFr) = 0.0
-                  raRadsX(iFr) = raaaAllDQ5(iJ,iFr,iL)
-                END DO
-                CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
-              END DO
-            END IF
-          END DO
+            DO iL = 1,iNumLayer
+              raRadsX(:) = 0.0
+              raRadsX(:) = raaaAllDQ5(iJ,:,iL)
+              CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
+            END DO
+          END IF
+        END DO
 
-!          print *,'wrtout head T in scat_in',iNumLayer
-          CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
+        CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
                    rDelta,iAtm,0,iNumLayer)
-          DO iL = 1,iNumLayer
-            DO iFr = 1,kMaxPtsJac
-              raRadsX(iFr) = raaAllDT5(iFr,iL)
-            END DO
-            CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
-          END DO
+        DO iL = 1,iNumLayer
+          raRadsX(:) = raaAllDT5(:,iL)
+          CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
+        END DO
 
-!          print *,'wrtout head WGT in scat_in',iNumLayer
-          CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
+        CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
                 rDelta,iAtm,-10,iNumLayer)
-          DO iL = 1,iNumLayer
-            DO iFr = 1,kMaxPtsJac
-              raRadsX(iFr) = raaAllWgtOut5(iFr,iL)
-            END DO
-            CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
-          END DO
+        DO iL = 1,iNumLayer
+          raRadsX(:) = raaAllWgtOut5(:,iL)
+          CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
+        END DO
 
-!          print *,'wrtout head Surf in scat_in',4
-          CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
+        CALL wrtout_head(iIOUNX,caJacobFile,raFreq(1),raFreq(kMaxPts), &
                   rDelta,iAtm,-20,4)
-          DO iL = 1,4
-            DO iFr = 1,kMaxPtsJac
-              raRadsX(iFr) = raaAllSurfOut5(iFr,iL)
-            END DO
-            CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
-          END DO
+        DO iL = 1,4
+          raRadsX(:) = raaAllSurfOut5(:,iL)
+          CALL wrtout(iIOUNX,caJacobFile,raFreq,raRadsX)
+        END DO
 
-       ELSEIF (kJacobian >= 0 .AND. ((kActualJacs == 100) .OR. (kActualJacs == 102))) THEN
-          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Column Jacobians for iAtm = ',iAtm
-          CALL doscatter_pclsam( &
+      ELSEIF (kJacobian >= 0 .AND. ((kActualJacs == 100) .OR. (kActualJacs == 102))) THEN
+        write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Column Jacobians for iAtm = ',iAtm
+        CALL doscatter_pclsam( &
             -1,raFreq,raaSumAbCoeff,raMixVertTemp, &
             caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
             rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -694,62 +644,59 @@ CONTAINS
             CALL PrintPound
 
           !! note : raaAllDT5  by rFracX as this is NOT done in doscatter_pclsam
-!          DO iL = 1,kProfLayerJac
-!            raaAllDT5(:,iL)  = raaAllDT5(:,iL)  + rFracX*raaRadsX(:,iL)
-!          END DO
-        END IF
+      END IF
 
     ! %%%%%%%%%%%%% CLOUDY SKY  %%%%%% FIRST ORDER PERTURBATION %%%%%%%%%%%%%%%
     ELSEIF (kWhichScatterCode == 4) THEN
-        write(kStdWarn,*) ' ---> PERTURB Scattering Computations...'
-        write(kStdErr,*) 'Cannot do PERTURB algorithm yet'
-        CALL DoStop
-    !x        CALL doscatter_perturb(raFreq,raaSumAbCoeff,raMixVertTemp,
-    !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
-    !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-    !x     $         rSatAngle,rFracTop,rFracBot,
-    !x     $         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
-    !x     $         raSurface,raSun,raThermal,raSunRefl,
-    !x     $         raLayAngles,raSunAngles,
-    !x     $         raThickness,raPressLevels,iProfileLayers,pProf,
-    !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-    !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
-    !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
-    !x     $         iNLTEStart,raaPlanckCoeff,
-    !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
-    !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
-    !x        CALL PrintPound
+      write(kStdWarn,*) ' ---> PERTURB Scattering Computations...'
+      write(kStdErr,*) 'Cannot do PERTURB algorithm yet'
+      CALL DoStop
+      !x        CALL doscatter_perturb(raFreq,raaSumAbCoeff,raMixVertTemp,
+      !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
+      !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,
+      !x     $         rSatAngle,rFracTop,rFracBot,
+      !x     $         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
+      !x     $         raSurface,raSun,raThermal,raSunRefl,
+      !x     $         raLayAngles,raSunAngles,
+      !x     $         raThickness,raPressLevels,iProfileLayers,pProf,
+      !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
+      !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
+      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
+      !x     $         iNLTEStart,raaPlanckCoeff,
+      !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
+      !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
+      !x        CALL PrintPound
           
-        IF (kFlux > 0) THEN
-            write(kStdWarn,*) ' ---> PERTURB Flux Computations ...'
-            write(kStdWarn,*) ' --> ERROR : this feature is  off < --'
-            CALL DoStop
-        END IF
+      IF (kFlux > 0) THEN
+        write(kStdWarn,*) ' ---> PERTURB Flux Computations ...'
+        write(kStdWarn,*) ' --> ERROR : this feature is  off < --'
+        CALL DoStop
+      END IF
 
     ! %%%%%%%%%%%%% CLOUDY SKY  %%%%%% DISORT %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ELSEIF (kWhichScatterCode == 3) THEN
-        write(kStdWarn,*) ' ---> DISORT Scattering Computations ...'
+      write(kStdWarn,*) ' ---> DISORT Scattering Computations ...'
+      write(kStdErr,*) 'Temporarily commented out'
+      CALL DoStop
+      iDoFLux = -1
+      !x        CALL doscatter_disort(raFreq,
+      !x     $          raaSumAbCoeff,raMixVertTemp,caOutName,
+      !x     $          iOutNum,iAtm,iNumLayer,iaaRadLayer,
+      !x     $          rTSpace,rTSurf,rSurfPress,raUseEmissivity,
+      !x     $          rSatAngle,rFracTop,rFracBot,
+      !x     $          iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
+      !x     $          raSurface,raSun,raThermal,raSunRefl,
+      !x     $          raLayAngles,raSunAngles,
+      !x     $          raThickness,raPressLevels,iProfileLayers,pProf,
+      !x     $          iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
+      !x     $          raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
+      !x     $          iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,iDoFlux)
+      !x        CALL PrintPound
+          
+      IF (kFlux > 0) THEN
+        write(kStdWarn,*) ' ---> DISORT Flux Computations ...'
         write(kStdErr,*) 'Temporarily commented out'
         CALL DoStop
-        iDoFLux = -1
-    !x        CALL doscatter_disort(raFreq,
-    !x     $          raaSumAbCoeff,raMixVertTemp,caOutName,
-    !x     $          iOutNum,iAtm,iNumLayer,iaaRadLayer,
-    !x     $          rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-    !x     $          rSatAngle,rFracTop,rFracBot,
-    !x     $          iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
-    !x     $          raSurface,raSun,raThermal,raSunRefl,
-    !x     $          raLayAngles,raSunAngles,
-    !x     $          raThickness,raPressLevels,iProfileLayers,pProf,
-    !x     $          iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-    !x     $          raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
-    !x     $          iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,iDoFlux)
-    !x        CALL PrintPound
-          
-        IF (kFlux > 0) THEN
-            write(kStdWarn,*) ' ---> DISORT Flux Computations ...'
-            write(kStdErr,*) 'Temporarily commented out'
-            CALL DoStop
         !x          CALL scatterfluxes_disort(raFreq,
         !x     $           raaSumAbCoeff,raMixVertTemp,caOutName,
         !x     $           iOutNum,iAtm,iNumLayer,iaaRadLayer,
@@ -763,12 +710,12 @@ CONTAINS
         !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
         !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity)
         !x          CALL PrintPound
-        END IF
+      END IF
 
-        IF (kJacobian >= 0) THEN
-            write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians'
-            write(kStdErr,*) 'Temporarily commented out'
-            CALL DoStop
+      IF (kJacobian >= 0) THEN
+        write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians'
+        write(kStdErr,*) 'Temporarily commented out'
+        CALL DoStop
         !x          CALL find_jacobians_pclsam(raFreq,iTag,iActualTag,
         !x     $           iFileID,caJacobFile,
         !x     $           rTSpace,rTSurf,rSurfPress,raUseEmissivity,
@@ -788,18 +735,18 @@ CONTAINS
         !x     $           iNLTEStart,raaPlanckCoeff,
         !x     $           iCldProfile,iaCldTypes,raaKlayersCldAmt)
         !x          CALL PrintPound
-        END IF
+      END IF
 
     ! %%%%%%%%%%%%% CLOUDY SKY  %%%%%% RTSPEC  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ELSE IF (kWhichScatterCode == 2) THEN
-        IF (iScatBinaryFile == 0) THEN
-            write(kStdErr,*) 'currently cannot do RTSPEC with'
-            write(kStdErr,*) 'iScatBinaryFile = 0 (only +/- 1 ok)'
-            CALL DoStop
-        END IF
+      IF (iScatBinaryFile == 0) THEN
+        write(kStdErr,*) 'currently cannot do RTSPEC with'
+        write(kStdErr,*) 'iScatBinaryFile = 0 (only +/- 1 ok)'
+        CALL DoStop
+      END IF
 
-        write(kStdWarn,*) ' ---> RTSPEC Scattering Computations ...'
-        CALL doscatter_rtspec(raFreq, &
+      write(kStdWarn,*) ' ---> RTSPEC Scattering Computations ...'
+      CALL doscatter_rtspec(raFreq, &
         raaSumAbCoeff,raMixVertTemp,caOutName, &
         iOutNum,iAtm,iNumLayer,iaaRadLayer, &
         rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -813,9 +760,9 @@ CONTAINS
         iaCloudNumAtm,iaaCloudWhichAtm,iTag)
         CALL PrintPound
 
-        IF (kFlux > 0) THEN
-            write(kStdWarn,*) ' ---> RTSPEC Flux Computations ...'
-            CALL scatterfluxes_rtspec(raFreq, &
+      IF (kFlux > 0) THEN
+        write(kStdWarn,*) ' ---> RTSPEC Flux Computations ...'
+        CALL scatterfluxes_rtspec(raFreq, &
             raaSumAbCoeff,raMixVertTemp,caOutName, &
             iOutNum,iAtm,iNumLayer,iaaRadLayer, &
             rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -827,12 +774,12 @@ CONTAINS
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
             raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
             iaCloudNumAtm,iaaCloudWhichAtm,iTag)
-            CALL PrintPound
-        END IF
+        CALL PrintPound
+      END IF
                         
-        IF (kJacobian >= 0) THEN
-            write(kStdWarn,*) ' ---> Doing RTSPEC Scattering Jacobians'
-	    CALL DoStop
+      IF (kJacobian >= 0) THEN
+        write(kStdWarn,*) ' ---> Doing RTSPEC Scattering Jacobians'
+        CALL DoStop
 !            CALL find_jacobians_rtspec(raFreq,iTag,iActualTag, &
 !            iFileID,caJacobFile, &
 !            rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -851,69 +798,69 @@ CONTAINS
 !            iaCloudNumAtm,iaaCloudWhichAtm,iNpmix, &
 !            iNLTEStart,raaPlanckCoeff, &
 !            iCldProfile,iaCldTypes,raaKlayersCldAmt)
-            CALL PrintPound
-        END IF
+        CALL PrintPound
+      END IF
 
     ! %%%%%%%%%%%%% CLOUDY SKY  %%%%%% TWOSTREAM  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ELSE IF (kWhichScatterCode == 1) THEN
-        write(kStdWarn,*) ' ---> 2STREAM Scattering Computations...'
-        write(kStdErr,*) 'this has been commented out'
-        CALL DoStop
-    !x        CALL doscatter_twostream(raFreq,raaSumAbCoeff,raMixVertTemp,
-    !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
-    !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-    !x     $         rSatAngle,rFracTop,rFracBot,
-    !x     $         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
-    !x     $         raSurface,raSun,raThermal,raSunRefl,
-    !x     $         raLayAngles,raSunAngles,
-    !x     $         raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
-    !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-    !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
-    !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
-    !x     $         iNLTEStart,raaPlanckCoeff,
-    !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
-    !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
-    !x        CALL PrintPound
+      write(kStdWarn,*) ' ---> 2STREAM Scattering Computations...'
+      write(kStdErr,*) 'this has been commented out'
+      CALL DoStop
+      !x        CALL doscatter_twostream(raFreq,raaSumAbCoeff,raMixVertTemp,
+      !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
+      !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,
+      !x     $         rSatAngle,rFracTop,rFracBot,
+      !x     $         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
+      !x     $         raSurface,raSun,raThermal,raSunRefl,
+      !x     $         raLayAngles,raSunAngles,
+      !x     $         raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
+      !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
+      !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
+      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
+      !x     $         iNLTEStart,raaPlanckCoeff,
+      !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
+      !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
+      !x        CALL PrintPound
           
-    !x        IF (kFlux .GT. 0) THEN
-    !x          write(kStdWarn,*) ' ---> 2STREAM Flux Computations ...'
-    !x          CALL scatterfluxes_twostream(
-    !x     $           raFreq,raaSumAbCoeff,raMixVertTemp,caOutName,
-    !x     $           iOutNum,iAtm,iNumLayer,iaaRadLayer,
-    !x     $           rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-    !x     $           rSatAngle,rFracTop,rFracBot,
-    !x     $           iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,
-    !x     $           raSurface,raSun,raThermal,raSunRefl,
-    !x     $           raLayAngles,raSunAngles,
-    !x     $           raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
-    !x     $           iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-    !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
-    !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iTag)
-    !x          CALL PrintPound
-    !x        END IF
+      !x        IF (kFlux .GT. 0) THEN
+      !x          write(kStdWarn,*) ' ---> 2STREAM Flux Computations ...'
+      !x          CALL scatterfluxes_twostream(
+      !x     $           raFreq,raaSumAbCoeff,raMixVertTemp,caOutName,
+      !x     $           iOutNum,iAtm,iNumLayer,iaaRadLayer,
+      !x     $           rTSpace,rTSurf,rSurfPress,raUseEmissivity,
+      !x     $           rSatAngle,rFracTop,rFracBot,
+      !x     $           iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,
+      !x     $           raSurface,raSun,raThermal,raSunRefl,
+      !x     $           raLayAngles,raSunAngles,
+      !x     $           raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
+      !x     $           iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
+      !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
+      !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iTag)
+      !x          CALL PrintPound
+      !x        END IF
 
-    !x        IF (kJacobian .GE. 0) THEN
-    !x          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians'
-    !x          CALL find_jacobians_pclsam(raFreq,iTag,iActualTag,
-    !x     $           iFileID,caJacobFile,
-    !x     $           rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-    !x     $           rSatAngle,raMixVertTemp,ctype2,rFracx,
-    !x     $           iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer,
-    !x     $           raaaAllDQ,raaAllDT,raaSumAbCoeff,raaAmt,raInten,
-    !x     $           raSurface,raSun,raThermal,
-    !x     $           rFracTop,rFracBot,
-    !x     $           iaJacob,iJacob,raaMix,raSunRefl,
-    !x     $           raLayAngles,raSunAngles,
-    !x     $           raSatAzimuth,raSolAzimuth,
-    !x     $           kaFrStep(iTag),
-    !x     $           raThickness,raPressLevels,iProfileLayers,pProf,
-    !x     $           iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-    !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
-    !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iNpmix,
-    !x     $           iNLTEStart,raaPlanckCoeff,
-    !x     $           iCldProfile,iaCldTypes,raaKlayersCldAmt)
-    !x          CALL PrintPound
-    !x        END IF
+      !x        IF (kJacobian .GE. 0) THEN
+      !x          write(kStdWarn,*) ' ---> Doing PCLSAM Scattering Jacobians'
+      !x          CALL find_jacobians_pclsam(raFreq,iTag,iActualTag,
+      !x     $           iFileID,caJacobFile,
+      !x     $           rTSpace,rTSurf,rSurfPress,raUseEmissivity,
+      !x     $           rSatAngle,raMixVertTemp,ctype2,rFracx,
+      !x     $           iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer,
+      !x     $           raaaAllDQ,raaAllDT,raaSumAbCoeff,raaAmt,raInten,
+      !x     $           raSurface,raSun,raThermal,
+      !x     $           rFracTop,rFracBot,
+      !x     $           iaJacob,iJacob,raaMix,raSunRefl,
+      !x     $           raLayAngles,raSunAngles,
+      !x     $           raSatAzimuth,raSolAzimuth,
+      !x     $           kaFrStep(iTag),
+      !x     $           raThickness,raPressLevels,iProfileLayers,pProf,
+      !x     $           iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
+      !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
+      !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iNpmix,
+      !x     $           iNLTEStart,raaPlanckCoeff,
+      !x     $           iCldProfile,iaCldTypes,raaKlayersCldAmt)
+      !x          CALL PrintPound
+      !x        END IF
     END IF
 
     RETURN
@@ -1085,28 +1032,28 @@ CONTAINS
 
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
-    ! radiation travelling upwards to instrument ==> sat looking down
-    ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = 1
-        i1 = iFloor(iaaRadLayer(iAtm,1) * 1.0/kProfLayer)
-        i2 = iaaRadLayer(iAtm,iNumLayer)-1
-        i2 = iFloor(i2*1.0/kProfLayer)
-        IF (rTSpace > 5.0) THEN
-            write(kStdErr,*) 'you want satellite to be downward looking'
-            write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
-            write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
-            write(kStdErr,*) 'Please retry'
-            CALL DoSTOP
-        END IF
+      ! radiation travelling upwards to instrument ==> sat looking down
+      ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = 1
+      i1 = iFloor(iaaRadLayer(iAtm,1) * 1.0/kProfLayer)
+      i2 = iaaRadLayer(iAtm,iNumLayer)-1
+      i2 = iFloor(i2*1.0/kProfLayer)
+      IF (rTSpace > 5.0) THEN
+        write(kStdErr,*) 'you want satellite to be downward looking'
+        write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
+        write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
+        write(kStdErr,*) 'Please retry'
+        CALL DoSTOP
+      END IF
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
-    ! radiation travelling downwards to instrument ==> sat looking up
-    ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = -1
-        i1 = iaaRadLayer(iAtm,1)-1
-        i1 = iFloor(i1*1.0/(1.0*kProfLayer))
-        i2 = iFloor(iaaRadLayer(iAtm,iNumLayer) * 1.0/(1.0*kProfLayer))
+      ! radiation travelling downwards to instrument ==> sat looking up
+      ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = -1
+      i1 = iaaRadLayer(iAtm,1)-1
+      i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+      i2 = iFloor(iaaRadLayer(iAtm,iNumLayer) * 1.0/(1.0*kProfLayer))
     END IF
     write(kStdWarn,*) 'have set iDownWard = ',iDownWard
 
@@ -1114,19 +1061,18 @@ CONTAINS
 ! eg iUpper=90,iLower = 1 is acceptable
 ! eg iUpper=140,iLower=90 is NOT acceptable
     IF (i1 /= i2) THEN
-        write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
-        write(kStdErr,*) 'to have come from same set of 100 mixed paths'
-        write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer), &
-        i1,i2
-        CALL DoSTOP
+      write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
+      write(kStdErr,*) 'to have come from same set of 100 mixed paths'
+      write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer),i1,i2
+      CALL DoSTOP
     END IF
 
 ! check to see that the radiating atmosphere has <= 100 layers
 ! actually, this is technically done above)
     i1=abs(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer)) + 1
     IF (i1 > kProfLayer) THEN
-        write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
-        CALL DoSTOP
+      write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
+      CALL DoSTOP
     END IF
 
     write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
@@ -1134,15 +1080,15 @@ CONTAINS
     iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
     IF (iDownward == 1) THEN
-        rAngle = rSatAngle
+      rAngle = rSatAngle
     ELSE
-        rAngle=-rSatAngle
+      rAngle=-rSatAngle
     END IF
 
     WRITE (kStdWarn,*) 'Jacobians for PCLSAM radiative transfer code'
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        CALL SetMieTables_RTSPEC(raFreq, &
+      CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
@@ -1157,7 +1103,7 @@ CONTAINS
         IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
         iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA)
     ELSE
-        CALL SetMieTables_RTSPEC_100layer(raFreq, &
+      CALL SetMieTables_RTSPEC_100layer(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable, &
@@ -1176,24 +1122,22 @@ CONTAINS
     END IF
 
     CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
-    iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rTSurface,rSurfPress, &
-    ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
-    ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
-    iProfileLayers,raPressLevels)
+      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rTSurface,rSurfPress, &
+      ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
+      ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
+      iProfileLayers,raPressLevels)
 
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
-    iDownWard,rTSurface,iProfileLayers,raPressLevels)
+      iDownWard,rTSurface,iProfileLayers,raPressLevels)
 
     CALL CopyRaaExt_twostream(raaAbs,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-    iaaRadLayer,iAtm,iNumlayer)
+      iaaRadLayer,iAtm,iNumlayer)
 
-    DO iI = 1,MAXNZ
-        iwpMAX(iI) = 0.0
-    END DO
+    iwpMAX(iI) = 0.0
      
     IF (iDownWard == 1) THEN
-        IF (iaCloudNumLayers(1) < iNumLayer) THEN
-            CALL AddCloud_pclsam_Jacob_downlook(raFreq,raLayAngles,raSunAngles, &
+      IF (iaCloudNumLayers(1) < iNumLayer) THEN
+        CALL AddCloud_pclsam_Jacob_downlook(raFreq,raLayAngles,raSunAngles, &
             raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             raaExtJacobIWP,raaSSAlbJacobIWP,raaAsymJacobIWP, &
             raaExtJacobDME,raaSSAlbJacobDME,raaAsymJacobDME, &
@@ -1207,17 +1151,15 @@ CONTAINS
             TABEXTINCT, TABSSALB, TABASYM, &
             TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
 
-            DO N = 1,kProfLayer
-                iwpMAX(N) = 0.0
-            END DO
-            DO N = ICLDTOP,kProfLayer
-                L  = N-ICLDTOP+1
-                iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
-                iwpMAX(iI) = IWP(L)
-            END DO
+        iwpMAX = 0.0
+        DO N = ICLDTOP,kProfLayer
+          L  = N-ICLDTOP+1
+          iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
+          iwpMAX(iI) = IWP(L)
+        END DO
 
-        ELSE
-            CALL AddCloud_pclsam_Jacob_downlook_SunShine( &
+      ELSE
+        CALL AddCloud_pclsam_Jacob_downlook_SunShine( &
             raFreq,raLayAngles,raSunAngles, &
             raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             raaExtJacobIWP,raaSSAlbJacobIWP,raaAsymJacobIWP, &
@@ -1233,33 +1175,31 @@ CONTAINS
             TABEXTINCT, TABSSALB, TABASYM, &
             TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
 
-            DO iI = 1,MAXNZ
-                iwpMAX(iI) = 0.0
-            END DO
-            DO iG = 1,iNClouds
-                DO N = 1,iNumLayer
-                    L  = N-ICLDTOP+1
-                    iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
-                    rDummy = raaIWP(L,iG)
-                    IF (rDummy > iwpMAX(iI)) THEN
-                        iwpMAX(iI) = rDummy
-                    END IF
-                END DO
-            END DO
+        iwpMAX = 0.0
+        DO iG = 1,iNClouds
+          DO N = 1,iNumLayer
+            L  = N-ICLDTOP+1
+            iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
+            rDummy = raaIWP(L,iG)
+            IF (rDummy > iwpMAX(iI)) THEN
+              iwpMAX(iI) = rDummy
+            END IF
+          END DO
+        END DO
 
-            iSwap = iCldBotkCarta
-            iCldBotkCarta = iCldTopkCarta
-            iCldTopkCarta = iSwap
+        iSwap = iCldBotkCarta
+        iCldBotkCarta = iCldTopkCarta
+        iCldTopkCarta = iSwap
 
-        END IF
+      END IF
 
-        CALL find_surface_backgnd_radiances(raFreq,raaExtTemp,raVTemp, &
+      CALL find_surface_backgnd_radiances(raFreq,raaExtTemp,raVTemp, &
         iAtm,iNumLayer,iaaRadLayer,rFracTop,rFracBot,iNpmix, &
         rTSpace,rTSurface,raUseEmissivity, &
         iProfileLayers,raPressLevels,raTPressLevels, &
         raSurface,raThermal)
 
-        CALL DownWardJacobian_ScatPCLSAM(raFreq,iProfileLayers,raPressLevels, &
+      CALL DownWardJacobian_ScatPCLSAM(raFreq,iProfileLayers,raPressLevels, &
         iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
         rSatAngle,raLayAngles,raSunAngles,raVTemp,ctype2,rFracx, &
         iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
@@ -1274,9 +1214,9 @@ CONTAINS
         iNLTEStart,raaPlanckCoeff, &
         raaaAllJacQOut,raaAllJacTOut,raaAllWgtOut,raaAllSurfOut)
 
-    ELSE IF (iDownWard == -1) THEN
-        IF (iaCloudNumLayers(1) < iNumLayer) THEN
-            CALL AddCloud_pclsam_Jacob_uplook(raFreq,raLayAngles,raSunAngles, &
+    ELSEIF (iDownWard == -1) THEN
+      IF (iaCloudNumLayers(1) < iNumLayer) THEN
+        CALL AddCloud_pclsam_Jacob_uplook(raFreq,raLayAngles,raSunAngles, &
             raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             raaExtJacobIWP,raaSSAlbJacobIWP,raaAsymJacobIWP, &
             raaExtJacobDME,raaSSAlbJacobDME,raaAsymJacobDME, &
@@ -1289,8 +1229,8 @@ CONTAINS
             NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, &
             TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
-        ELSE
-            CALL AddCloud_pclsam_Jacob_uplook_SunShine( &
+      ELSE
+        CALL AddCloud_pclsam_Jacob_uplook_SunShine( &
             raFreq,raLayAngles,raSunAngles, &
             raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             raaExtJacobIWP,raaSSAlbJacobIWP,raaAsymJacobIWP, &
@@ -1305,9 +1245,9 @@ CONTAINS
             NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, &
             TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
-        END IF
+      END IF
 
-        CALL UpWardJacobian_ScatPCLSAM(raFreq,iProfileLayers,raPressLevels, &
+      CALL UpWardJacobian_ScatPCLSAM(raFreq,iProfileLayers,raPressLevels, &
         iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
         rSatAngle,raLayAngles,raSunAngles,raVTemp,ctype2,rFracx, &
         iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
@@ -1465,28 +1405,28 @@ CONTAINS
 
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
-    ! radiation travelling upwards to instrument ==> sat looking down
-    ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = 1
-        i1 = iFloor(iaaRadLayer(iAtm,1) * 1.0/kProfLayer)
-        i2 = iaaRadLayer(iAtm,iNumLayer)-1
-        i2 = iFloor(i2*1.0/kProfLayer)
-        IF (rTSpace > 5.0) THEN
-            write(kStdErr,*) 'you want satellite to be downward looking'
-            write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
-            write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
-            write(kStdErr,*) 'Please retry'
-            CALL DoSTOP
-        END IF
+      ! radiation travelling upwards to instrument ==> sat looking down
+      ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = 1
+      i1 = iFloor(iaaRadLayer(iAtm,1) * 1.0/kProfLayer)
+      i2 = iaaRadLayer(iAtm,iNumLayer)-1
+      i2 = iFloor(i2*1.0/kProfLayer)
+      IF (rTSpace > 5.0) THEN
+        write(kStdErr,*) 'you want satellite to be downward looking'
+        write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
+        write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
+        write(kStdErr,*) 'Please retry'
+        CALL DoSTOP
+      END IF
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
-    ! radiation travelling downwards to instrument ==> sat looking up
-    ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = -1
-        i1 = iaaRadLayer(iAtm,1)-1
-        i1 = iFloor(i1*1.0/(1.0*kProfLayer))
-        i2 = iFloor(iaaRadLayer(iAtm,iNumLayer) * 1.0/(1.0*kProfLayer))
+      ! radiation travelling downwards to instrument ==> sat looking up
+      ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = -1
+      i1 = iaaRadLayer(iAtm,1)-1
+      i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+      i2 = iFloor(iaaRadLayer(iAtm,iNumLayer) * 1.0/(1.0*kProfLayer))
     END IF
     write(kStdWarn,*) 'have set iDownWard = ',iDownWard
 
@@ -1494,19 +1434,18 @@ CONTAINS
 ! eg iUpper=90,iLower=1 is acceptable
 ! eg iUpper=140,iLower=90 is NOT acceptable
     IF (i1 /= i2) THEN
-        write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
-        write(kStdErr,*) 'to have come from same set of 100 mixed paths'
-        write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer), &
-        i1,i2
-        CALL DoSTOP
+      write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
+      write(kStdErr,*) 'to have come from same set of 100 mixed paths'
+      write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer),i1,i2
+      CALL DoSTOP
     END IF
 
 ! check to see that the radiating atmosphere has <= 100 layers
 ! actually, this is technically done above)
     i1=abs(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer)) + 1
     IF (i1 > kProfLayer) THEN
-        write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
-        CALL DoSTOP
+      write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
+      CALL DoSTOP
     END IF
 
     write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
@@ -1514,16 +1453,16 @@ CONTAINS
     iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
     IF (iDownward == 1) THEN
-        rAngle = rSatAngle
+      rAngle = rSatAngle
     ELSE
-        rAngle=-rSatAngle
+      rAngle=-rSatAngle
     END IF
 
 ! now these are the first few lines of interface_simple
     WRITE (kStdWarn,*) 'Jacobians for SIMPLE SCATTER radiative transfer code'
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        CALL SetMieTables_RTSPEC(raFreq, &
+      CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
@@ -1538,7 +1477,7 @@ CONTAINS
         IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
         iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA)
     ELSE
-        CALL SetMieTables_RTSPEC_100layer(raFreq, &
+      CALL SetMieTables_RTSPEC_100layer(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable, &
@@ -1559,29 +1498,29 @@ CONTAINS
     CALL CopyRaaAbs(raaAbs,raaAbsTemp,iaaRadLayer,iAtm,iNumlayer)
 
     CALL AddCloud_Absorbonly(raFreq,raaAbsTemp,iaaRadLayer,iAtm,iNumlayer, &
-    ICLDTOPKCARTA, ICLDBOTKCARTA, &
-    NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
-    NSCATTAB, MUINC, &
-    NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
-    TABEXTINCT, TABSSALB, TABASYM, &
-    TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
+      ICLDTOPKCARTA, ICLDBOTKCARTA, &
+      NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+      NSCATTAB, MUINC, &
+      NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
+      TABEXTINCT, TABSSALB, TABASYM, &
+      TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
 
     CALL find_surface_backgnd_radiances(raFreq,raaAbsTemp,raVTemp, &
-    iAtm,iNumLayer,iaaRadLayer,rFracTop,rFracBot,iNpmix, &
-    rTSpace,rTSurface,raUseEmissivity, &
-    iProfileLayers,raPressLevels,raTPresslevels, &
-    raSurface,raThermal)
+      iAtm,iNumLayer,iaaRadLayer,rFracTop,rFracBot,iNpmix, &
+      rTSpace,rTSurface,raUseEmissivity, &
+      iProfileLayers,raPressLevels,raTPresslevels, &
+      raSurface,raThermal)
 
     CALL find_jacobians(raFreq, iTag, iActualTag, &
-    iFileID,caJacobFile,rTSpace,rTSurface, &
-    raUseEmissivity,rSatAngle,raVTemp, &
-    iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
-    raaaAllDQ,raaAllDT,raaAbsTemp,raaAmt,raInten, &
-    raSurface,raSun,raThermal,rFracTop,rFracBot, &
-    iaJacob,iJacob,raaMix,raSunRefl, &
-    raLayAngles,raSunAngles,rDelta, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
-    iNLTEStart,raaPlanckCoeff)
+      iFileID,caJacobFile,rTSpace,rTSurface, &
+      raUseEmissivity,rSatAngle,raVTemp, &
+      iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
+      raaaAllDQ,raaAllDT,raaAbsTemp,raaAmt,raInten, &
+      raSurface,raSun,raThermal,rFracTop,rFracBot, &
+      iaJacob,iJacob,raaMix,raSunRefl, &
+      raLayAngles,raSunAngles,rDelta, &
+      raThickness,raPressLevels,iProfileLayers,pProf, &
+      iNLTEStart,raaPlanckCoeff)
 
     RETURN
     end SUBROUTINE find_jacobians_scat

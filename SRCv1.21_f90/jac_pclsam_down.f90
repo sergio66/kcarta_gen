@@ -169,7 +169,7 @@ CONTAINS
     iWhichJac = kActualJacs
 
     IF (iDefault /= iWhichJac) THEN
-        print *,'iDefault,iWhichJac = ',iDefault,iWhichJac
+      print *,'iDefault,iWhichJac = ',iDefault,iWhichJac
     END IF
 
     rSunAngle = raSunAngles(MP2Lay(iaaRadLayer(1,iAtm)))
@@ -184,19 +184,13 @@ CONTAINS
       ! use 5700K
       write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
       rSunTemp = kSunTemp
-      DO iFr = 1,kMaxPts
-        ! compute the Plank radiation from the sun
-        rPlanck       = exp(r2*raFreq(iFr)/rSunTemp)-1.0
-        raSunTOA(iFr) = r1*((raFreq(iFr))**3)/rPlanck
-        raSunTOA(iFr) = raSunTOA(iFr)*rOmegaSun*muSun
-      END DO
+      ! compute the Plank radiation from the sun
+      raSunTOA = rattorad(raFreq,rSunTemp)*rOmegaSun*muSun
     ELSEIF (iDoSolar == 1) THEN
       write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
       ! read in data from file
       CALL ReadSolarData(raFreq,raSunTOA,iTag)
-      DO iFr = 1,kMaxPts
-        raSunTOA(iFr) = raSunTOA(iFr)*rOmegaSun*muSun
-      END DO
+      raSunTOA = raSunTOA*rOmegaSun*muSun
     END IF
 
     iIOUN = kStdJacob
@@ -205,13 +199,13 @@ CONTAINS
     iLowest = MOD(iLowest,kProfLayer)
 
     DO iLay = 1,kProfLayer
-        iaCldLayer(iLay) = 0
-        iaCldLayerIWPDME(iLay) = 0
+      iaCldLayer(iLay) = 0
+      iaCldLayerIWPDME(iLay) = 0
     END DO
 
     iNumGasesTemp = iNumGases
     DO iLay = 1,iNumGases
-        iaGasesTemp(iLay) = iaGases(iLay)
+      iaGasesTemp(iLay) = iaGases(iLay)
     END DO
 
     iNumGasesTemp = iNumGasesTemp + 1
@@ -223,74 +217,64 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
-        iL = iaRadLayer(iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+     iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
+     iL = iaRadLayer(iLay)
+     IF (iaRadLayer(iLay) > iNpmix) THEN
+       write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+       write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+       write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+       CALL DoSTOP
+     END IF
+     IF (iaRadLayer(iLay) < 1) THEN
+       write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+       write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+       CALL DoSTOP
+     END IF
     END DO
 
 ! cccccccccccccccccc set these all important variables ****************
     IF (iaRadLayer(1) < kProfLayer) THEN
-        iLocalCldTop = iCldTopkCarta - iaRadLayer(1) + 1
-        iLocalCldBot = iCldBotkCarta - iaRadLayer(1) + 1
-        iiDiv = 0
+      iLocalCldTop = iCldTopkCarta - iaRadLayer(1) + 1
+      iLocalCldBot = iCldBotkCarta - iaRadLayer(1) + 1
+      iiDiv = 0
     ELSE
-    ! essentially do mod(iaRadLayer(1),kProfLayer)
-        iiDiv = 1
-        1010 CONTINUE
-        IF (iaRadLayer(1) > kProfLayer*iiDiv) THEN
-            iiDiv = iiDiv + 1
-            GOTO 1010
-        END IF
-        iiDiv = iiDiv - 1
-        iLay = iiDiv
-        iiDiv = iaRadLayer(1) - (kProfLayer*iiDiv)
-        iLocalCldTop = iCldTopkCarta - iiDiv + 1
-        iLocalCldBot = iCldBotkCarta - iiDiv + 1
-        iiDiv = iLay
+      ! essentially do mod(iaRadLayer(1),kProfLayer)
+      iiDiv = 1
+      1010 CONTINUE
+      IF (iaRadLayer(1) > kProfLayer*iiDiv) THEN
+        iiDiv = iiDiv + 1
+        GOTO 1010
+      END IF
+      iiDiv = iiDiv - 1
+      iLay = iiDiv
+      iiDiv = iaRadLayer(1) - (kProfLayer*iiDiv)
+      iLocalCldTop = iCldTopkCarta - iiDiv + 1
+      iLocalCldBot = iCldBotkCarta - iiDiv + 1
+      iiDiv = iLay
     END IF
 
     iOffSet = (kProfLayer-iNumLayer)
-!      DO iLay = iCldBotkCarta-1,iCldTopkCarta-1
+    !DO iLay = iCldBotkCarta-1,iCldTopkCarta-1
     DO iLay = iCldBotkCarta,iCldTopkCarta
-    !!! this is for d/dq, d/dT
-        iaCldLayer(iLay) = 1
-    !!!this is for d/d(DME), d/d(IWP)
-        iaCldLayerIWPDME(iLay - (kProfLayer-iNumLayer)) = 1
+      !!! this is for d/dq, d/dT
+      iaCldLayer(iLay) = 1
+      !!!this is for d/d(DME), d/d(IWP)
+      iaCldLayerIWPDME(iLay - (kProfLayer-iNumLayer)) = 1
     END DO
 
     IF (kSolar >= 0) THEN
-        iSolarRadOrJac = +1
-        CALL SolarScatterIntensity_Downlook( &
+      iSolarRadOrJac = +1
+      CALL SolarScatterIntensity_Downlook( &
         iDoSolar,raFreq,iaCldLayer, &
         raSunAngles,raLayAngles,0.0,0.0, &
         iNumLayer,iaRadLayer, &
         raaExtTemp,raaSSAlbTemp,raaAsymTemp,rFracTop,rFracBot, &
         iTag,iSolarRadOrJac,raaSolarScatter1Lay)
-
-    !        DO iLay = 1,iNumLayer
-    !          iL = iaRadlayer(iLay)
-    !          print *,'<<<<<>>>>',iLay,iL,iaCldLayer(iL),iaCldLayerIWPDME(iL),
-    !     $            raSunAngles(iL),raLayAngles(iL),
-    !     $            raaExtTemp(1,iL),raaSSAlbTemp(1,iL),raaAsymTemp(1,iL),
-    !     $            raaSolarScatter1Lay(1,iL),
-    !     $            raaPhaseJacobASYM(1,iL),raaExtJacobIWP(1,iL),
-    !     $            raaExtJacobDME(1,iL)
-    !          END DO
 
     END IF
 
@@ -298,24 +282,24 @@ CONTAINS
 
 ! initialise the layer-to-space matrix
     CALL AtmosLayer2Space(raaLay2Sp, &
-    rSatAngle,raaExtTemp,iAtm,iNumLayer,iaaRadLayer,raLayAngles)
+      rSatAngle,raaExtTemp,iAtm,iNumLayer,iaaRadLayer,raLayAngles)
 
     write(kStdWarn,*)'initializing Jac radiances/d/dT(radiances) ...'
     CALL DoPlanck_LookDown(raVTemp,rFracTop,rFracBot,raFreq, &
-    iAtm,iNumLayer,iaaRadLayer, &
-    rSatAngle,raLayAngles,raaExtTemp, &
-    raaRad,raaRadDT,raaOneMinusTau,raaTau, &
-    raaLay2Gnd,iProfileLayers,raPressLevels)
+      iAtm,iNumLayer,iaaRadLayer, &
+      rSatAngle,raLayAngles,raaExtTemp, &
+      raaRad,raaRadDT,raaOneMinusTau,raaTau, &
+      raaLay2Gnd,iProfileLayers,raPressLevels)
 
     write(kStdWarn,*)'initializing Jacobian loops ...'
     CALL Loop_LookDown(iaaRadLayer, &
-    iAtm,iNumLayer,rSatAngle,raLayAngles,raSunRefl, &
-    raUseEmissivity,raSurface,raSun,raSunAngles,raThermal, &
-    raaOneMinusTau,raaLay2Sp,raaRad,raaGeneral)
+      iAtm,iNumLayer,rSatAngle,raLayAngles,raSunRefl, &
+      raUseEmissivity,raSurface,raSun,raSunAngles,raThermal, &
+      raaOneMinusTau,raaLay2Sp,raaRad,raaGeneral)
 
     IF ((kThermal >= 0) .AND. (kThermalJacob > 0)) THEN
-        write(kStdWarn,*)'initializing Jacobian thermal loops ...'
-        CALL Loop_thermaldown(raaRad,rSatAngle,raLayAngles, &
+      write(kStdWarn,*)'initializing Jacobian thermal loops ...'
+      CALL Loop_thermaldown(raaRad,rSatAngle,raLayAngles, &
         iProfileLayers,raPressLevels, &
         iaaRadLayer,iAtm,iNumLayer,raaExtTemp, &
         raaOneMinusTauTh,raaLay2Gnd,raaGeneralTh,raFreq)
@@ -333,18 +317,16 @@ CONTAINS
 
       IF (kSolar >= 0) THEN
         ! compute the Solar contribution
-        iM=1
+        iM = 1
         ! remember that raSun is that at the gnd -- we have to propagate this back
         ! up to the top of the atmosphere
         ! note that here we are calculating the SOLAR contribution
-        DO iG=1,kMaxPts
-          radSolardT(iG) = raUseEmissivity(iG)* &
-          raaLay2Sp(iG,iM)*raSun(iG)
+        DO iG = 1,kMaxPts
+          radSolardT(iG) = raUseEmissivity(iG)*raaLay2Sp(iG,iM)*raSun(iG)
         END DO
       END IF
 
-      CALL Find_BT_rad(raInten,radBTdr,raFreq, &
-        radBackgndThermdT,radSolardT)
+      CALL Find_BT_rad(raInten,radBTdr,raFreq,radBackgndThermdT,radSolardT)
     END IF
 
     IF ((iWhichJac == -1) .OR. (iWhichJac == -2) .OR. (iWhichJac == 20)) THEN
@@ -357,7 +339,6 @@ CONTAINS
           iJ = iJ + 1
           iGasPosn = WhichGasPosn(iaGasesTemp(iG),iaGasesTemp,iNumGasesTemp)
           IF (iPrintAllPCLSAMJacs > 0) THEN
-!            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
             CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                            raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
           END IF
@@ -394,9 +375,6 @@ CONTAINS
                                  raResults,radBTdr,raaAmt,raInten,iaGasesTemp(iG),iM,iGasPosn)
               raaaAllJacQOut(iJ,:,iM) = raResults
             ELSE
-              DO iFr = 1,kMaxPts
-                raResults(iFr) = 0.0
-              END DO
               raResults = 0.0
             END IF
             IF (iPrintAllPCLSAMJacs > 0) THEN
@@ -406,9 +384,7 @@ CONTAINS
         END IF       !!! if iGasList > 0
       END DO         !!! iG=1,iNumGases
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = 0.0
-      END DO
+      raResults = 0.0
       iJ = 0
       DO iG=1,iNumGases
         ! for each of the iNumGases whose ID's <= kMaxDQ
@@ -418,7 +394,6 @@ CONTAINS
           iGasPosn=WhichGasPosn(iaGases(iG),iaGases,iNumGases)
           iJ = iJ + 1
           IF (iPrintAllPCLSAMJacs > 0) THEN
-!            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
             CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                 raFreq(kMaxPts),rDelta,iAtm,iaGases(iG),iNumLayer)
             DO iLay = 1,iNumLayer
@@ -445,7 +420,6 @@ CONTAINS
             iIWPorDME = -1
           END IF
           IF (iPrintAllPCLSAMJacs > 0) THEN
-!            print *,'wrtout head',iG,iaGasesTemp(iG),iNumLayer
             CALL wrtout_head(iIOUN,caJacobFile,raFreq(1), &
                 raFreq(kMaxPts),rDelta,iAtm,iaGasesTemp(iG),iNumLayer)
           END IF
@@ -464,9 +438,7 @@ CONTAINS
             ! it mimics T(z)!!!!!
             IF (iaCldLayerIWPDME(iM) == 0) THEN
               ! no cloud here, so indpt of cloud params!!!
-              DO iFr = 1,kMaxPts
-                raResults(iFr) = 0.0
-              END DO
+              raResults = 0.0
               raaaAllJacQOut(iJ,:,iM) = raResults
             ELSE
               CALL JacobCloudAmtFM1(raFreq,raaRad,raaRadDT, &
@@ -502,9 +474,7 @@ CONTAINS
         END IF
       END DO         !!! iG=1,iNumGases
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = 0.0
-      END DO
+      raResults = 0.0
       DO iG=iNumGases+1,iNumGases+2
         ! for each of the iNumGases whose ID's <= kMaxDQ
         ! have to do all the iNumLayer radiances
@@ -571,9 +541,7 @@ CONTAINS
       END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
       IF (iPrintAllPCLSAMJacs > 0) THEN
-        DO iFr = 1,kMaxPts
-          raResults(iFr) = 0.0
-        END DO
+        raResults = 0.0
         DO iLay = 1,iNumLayer
            raaAllJacTOut(:,iLay) = raResults        
           CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
@@ -600,9 +568,7 @@ CONTAINS
         END IF
       END DO
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
-      DO iFr = 1,kMaxPts
-        raResults(iFr) = 0.0
-      END DO
+      raResults = 0.0
       DO iM = 1,iNumLayer
         raaAllWgtOut(:,iM) = raResults
         IF (iPrintAllPCLSAMJacs > 0) THEN
@@ -705,86 +671,73 @@ CONTAINS
 ! local vars
     INTEGER :: iL,iLay,iFr,iDoSolar
     REAL :: muSun,muSat,muSunSat,raTemp(kMaxPts),raTemp1(kMaxPts)
-    REAL :: rFac,rX,rY,rZ,rT,raLMp1_toSpace(kMaxPts)
+    REAL :: rFac,rX,raY(kMaxPts),raZ(kMaxPts),raT(kMaxPts),raLMp1_toSpace(kMaxPts)
     REAL :: rEps   !! so that if w == 0, rz is finite
 
     rEps = 1.0e-10
 
     CALL InitSomeSunScat( &
-    iM,iLM,raLayAngles,raSunAngles,raaLay2Sp,iaCldLayer, &
-    raaSolarScatter1Lay,iaRadLayer, &
-    raTemp,raTemp1,rFac,raLMp1_toSpace,muSun,muSat)
+      iM,iLM,raLayAngles,raSunAngles,raaLay2Sp,iaCldLayer, &
+      raaSolarScatter1Lay,iaRadLayer, &
+      raTemp,raTemp1,rFac,raLMp1_toSpace,muSun,muSat)
 
 ! adjust for change in scattered radn from this layer, if cloudy
     IF (iIWPorDME == +1) THEN
-    !! this is IWP jacobian
-        IF (iaCldLayer(iLM) == 1) THEN
-            muSunSat = (muSun * muSat)/(muSun + muSat)
-            DO iFr = 1,kMaxPts
-            ! this is the transmission
-                rT = exp(-raaExtTemp(iFr,iLM)/muSunSat)
+      !! this is IWP jacobian
+      IF (iaCldLayer(iLM) == 1) THEN
+        muSunSat = (muSun * muSat)/(muSun + muSat)
+        ! this is the transmission
+        raT = exp(-raaExtTemp(:,iLM)/muSunSat)
 
-            ! this is the change in ssalb wrt iwp
-                rY = raaSSAlbJacobIWP(iFr,iLM)*(1.0-rT)/(raaExtJacobIWP(iFr,iLM)+rEps)
+        ! this is the change in ssalb wrt iwp
+        raY = raaSSAlbJacobIWP(:,iLM)*(1.0-raT)/(raaExtJacobIWP(:,iLM)+rEps)
 
-            ! this is the change in optical depths wrt iwp
-                rZ = raaSSAlbTemp(iFr,iLM)*((1/muSunSat+1/muSun)*rT - 1/muSun)
-                rZ = rZ + rEps
+        ! this is the change in optical depths wrt iwp
+        raZ = raaSSAlbTemp(:,iLM)*((1/muSunSat+1/muSun)*raT - 1/muSun)
+        raZ = raZ + rEps
 
-            !! now add rZ and rY and divide by alpha_j
-            !! to get (1/alpha_j) d(alpha_j))
-                rZ = (rY + rZ)/((raaSSAlbTemp(iFr,iLM)+rEps)*(1-rT+rEps))
+        !! now add rZ and rY and divide by alpha_j
+        !! to get (1/alpha_j) d(alpha_j))
+        raZ = (raY + raZ)/((raaSSAlbTemp(:,iLM)+rEps)*(1-raT+rEps))
 
-                rT = exp(-raaExtTemp(iFr,iLM)/muSun)
-                raTemp1(iFr) = rZ*raaSolarScatter1Lay(iFr,iLM)*raLMp1_toSpace(iFr)
+        raT = exp(-raaExtTemp(:,iLM)/muSun)
+        raTemp1 = raZ*raaSolarScatter1Lay(:,iLM)*raLMp1_toSpace
 
-            END DO
-        END IF
+      END IF
 
-        DO iFr = 1,kMaxPts
-            raTemp(iFr) = raTemp(iFr) + raTemp1(iFr)
-        ! un          raResults(iFr) = raTemp(iFr)*raaExtJacobIWP(iFr,iLM)
-            raResults(iFr) = raResults(iFr) + raTemp(iFr)*raaExtJacobIWP(iFr,iLM)
-        END DO
+      raTemp = raTemp + raTemp1
+      !sun          raResults = raTemp*raaExtJacobIWP(:,iLM)
+      raResults = raResults + raTemp*raaExtJacobIWP(:,iLM)
 
     ELSEIF (iIWPorDME == -1) THEN
-    !! this is DME jacobian
-        IF (iaCldLayer(iLM) == 1) THEN
-            muSunSat = (muSun * muSat)/(muSun + muSat)
-            DO iFr = 1,kMaxPts
-            ! this is the transmission
-                rT = exp(-raaExtTemp(iFr,iLM)/muSunSat)
+      !! this is DME jacobian
+      IF (iaCldLayer(iLM) == 1) THEN
+        muSunSat = (muSun * muSat)/(muSun + muSat)
+        ! this is the transmission
+        raT = exp(-raaExtTemp(:,iLM)/muSunSat)
 
-            ! this is the change in ssalb wrt dme
-                rY = raaSSAlbJacobDME(iFr,iLM)*(1.0-rT)/ &
-                (raaExtJacobDME(iFr,iLM)+rEps)
+        ! this is the change in ssalb wrt dme
+        raY = raaSSAlbJacobDME(:,iLM)*(1.0-raT)/(raaExtJacobDME(:,iLM)+rEps)
 
-            ! this is the change in optical depths wrt dme
-                rZ = raaSSAlbTemp(iFr,iLM)*((1/muSunSat+1/muSun)*rT - 1/muSun)
-                rZ = rZ + rEps
+        ! this is the change in optical depths wrt dme
+        raZ = raaSSAlbTemp(:,iLM)*((1/muSunSat+1/muSun)*raT - 1/muSun)
+        raZ = raZ + rEps
 
-            !! now add rZ and rY and divide by alpha_j
-            !! to get (1/alpha_j) d(alpha_j))
-                rZ = (rY + rZ)/((raaSSAlbTemp(iFr,iLM)+rEps)*(1-rT+rEps))
-                  
-                raTemp1(iFr) = rZ*raaSolarScatter1Lay(iFr,iLM)*raLMp1_toSpace(iFr)
-            END DO
+        !! now add rZ and rY and divide by alpha_j
+        !! to get (1/alpha_j) d(alpha_j))
+        raZ = (raY + raZ)/((raaSSAlbTemp(:,iLM)+rEps)*(1-raT+rEps))
+              
+        raTemp1 = raZ*raaSolarScatter1Lay(:,iLM)*raLMp1_toSpace
 
         ! also add on the d(hg)/d(dme) contribution!!!!
-            DO iFr = 1,kMaxPts
-                rZ = 1/hg2_real(-muSun,muSat,raaAsymTemp(iFr,iLM))* &
-                raaPhaseJacobASYM(iFr,iLM)
-                rZ = rZ*raaAsymJacobDME(iFr,iLM)/(raaExtJacobDME(iFr,iLM)+rEps)
-                raTemp1(iFr) = raTemp1(iFr) + &
-                rZ*raaSolarScatter1Lay(iFr,iLM)*raLMp1_toSpace(iFr)
-            END DO
-        END IF
+        raZ = 1/rahg2_real(-muSun,muSat,raaAsymTemp(:,iLM))*raaPhaseJacobASYM(:,iLM)
+        raZ = raZ*raaAsymJacobDME(:,iLM)/(raaExtJacobDME(:,iLM)+rEps)
+        raTemp1 = raTemp1 + raZ*raaSolarScatter1Lay(:,iLM)*raLMp1_toSpace
+      END IF
 
-        DO iFr = 1,kMaxPts
-            raTemp(iFr) = raTemp(iFr) + raTemp1(iFr)
-        ! un          raResults(iFr) = raTemp(iFr)*raaExtJacobDME(iFr,iLM)
-            raResults(iFr) = raResults(iFr) + raTemp(iFr)*raaExtJacobDME(iFr,iLM)
-        END DO
+      raTemp = raTemp + raTemp1
+      !sun          raResults(iFr) = raTemp(iFr)*raaExtJacobDME(iFr,iLM)
+      raResults = raResults + raTemp*raaExtJacobDME(:,iLM)
     END IF
 
     RETURN
@@ -821,48 +774,43 @@ CONTAINS
 ! local vars
     INTEGER :: iL,iLay,iFr,iDoSolar
     REAL :: muSun,muSat,muSunSat,raTemp(kMaxPts),raTemp1(kMaxPts)
-    REAL :: rFac,rX,rY,rZ,rT,raLMp1_toSpace(kMaxPts)
+    REAL :: rFac,raX(kMaxPts),raY(kMaxPts),raZ(kMaxPts),raT(kMaxPts),raLMp1_toSpace(kMaxPts)
     REAL :: rEps   !! so that if w == 0, rz is finite
 
     rEps = 1.0-10
           
     CALL InitSomeSunScat( &
-    iM,iLM,raLayAngles,raSunAngles,raaLay2Sp,iaCldLayer, &
-    raaSolarScatter1Lay,iaRadLayer, &
-    raTemp,raTemp1,rFac,raLMp1_toSpace,muSun,muSat)
+      iM,iLM,raLayAngles,raSunAngles,raaLay2Sp,iaCldLayer, &
+      raaSolarScatter1Lay,iaRadLayer, &
+      raTemp,raTemp1,rFac,raLMp1_toSpace,muSun,muSat)
 
 ! adjust for change in scattered radn from this layer, if cloudy
     IF (iaCldLayer(iLM) == 1) THEN
-        muSunSat = (muSun * muSat)/(muSun + muSat)
-        DO iFr = 1,kMaxPts
-        ! this is the transmission
-            rT = exp(-raaExtTemp(iFr,iLM)/muSunSat)
+      muSunSat = (muSun * muSat)/(muSun + muSat)
+      ! this is the transmission
+      raT = exp(-raaExtTemp(:,iLM)/muSunSat)
 
-        ! this is the change in ssalb wrt gas temperature
-            rY = (1 + raaAsymTemp(iFr,iLM))/2.0
-            rY = -raaSSAlbTemp(iFr,iLM)*(1-raaSSAlbTemp(iFr,iLM)*rY)
-            rY = (1.0-rT)*rY/raaExtTemp(iFr,iLM)
+      ! this is the change in ssalb wrt gas temperature
+      raY = (1 + raaAsymTemp(:,iLM))/2.0
+      raY = -raaSSAlbTemp(:,iLM)*(1-raaSSAlbTemp(:,iLM)*raY)
+      raY = (1.0-raT)*raY/raaExtTemp(:,iLM)
 
-        ! this is the change in optical depths wrt temperature
-            rZ = raaSSAlbTemp(iFr,iLM)*((1/muSunSat+1/muSun)*rT - 1/muSun)
-            rZ = rZ + rEps
+      ! this is the change in optical depths wrt temperature
+      raZ = raaSSAlbTemp(:,iLM)*((1/muSunSat+1/muSun)*raT - 1/muSun)
+      raZ = raZ + rEps
 
-        !! now add rZ and rY and divide by alpha_j
-        !! to get (1/alpha_j) d(alpha_j))
-            rZ = (rY + rZ)/((raaSSAlbTemp(iFr,iLM)+rEps)*(1-rT+rEps))
+      !! now add rZ and rY and divide by alpha_j
+      !! to get (1/alpha_j) d(alpha_j))
+      raZ = (raY + raZ)/((raaSSAlbTemp(:,iLM)+rEps)*(1-raT+rEps))
 
-            raTemp1(iFr) = rZ*raaSolarScatter1Lay(iFr,iLM)*raLMp1_toSpace(iFr)
-
-        END DO
+      raTemp1 = raZ*raaSolarScatter1Lay(:,iLM)*raLMp1_toSpace
 
     END IF
 
 ! add on to the raResults tally
-    DO iFr = 1,kMaxPts
-        raTemp(iFr) = raTemp(iFr) + raTemp1(iFr)
-    ! un        raResults(iFr) = raTemp(iFr)*raaAllDT(iFr,iLM)
-        raResults(iFr) = raResults(iFr) + raTemp(iFr)*raaAllDT(iFr,iLM)
-    END DO
+    raTemp = raTemp + raTemp1
+    !sun        raResults = raTemp*raaAllDT(:,iLM)
+    raResults = raResults + raTemp*raaAllDT(:,iLM)
 
     RETURN
     end SUBROUTINE SolarScatterTemperatureJacobian
@@ -898,53 +846,43 @@ CONTAINS
 ! local vars
     INTEGER :: iL,iLay,iFr,iDoSolar
     REAL :: muSun,muSat,muSunSat,raTemp(kMaxPts),raTemp1(kMaxPts)
-    REAL :: rFac,rX,rY,rZ,rT,raLMp1_toSpace(kMaxPts)
+    REAL :: rFac,raX(kMaxPts),raY(kMaxPts),raZ(kMaxPts),raT(kMaxPts),raLMp1_toSpace(kMaxPts)
     REAL :: rEps   !! so that if w == 0, rz is finite
 
     rEps = 1.0e-10
 
     CALL InitSomeSunScat( &
-    iM,iLM,raLayAngles,raSunAngles,raaLay2Sp,iaCldLayer, &
-    raaSolarScatter1Lay,iaRadLayer, &
-    raTemp,raTemp1,rFac,raLMp1_toSpace,muSun,muSat)
+      iM,iLM,raLayAngles,raSunAngles,raaLay2Sp,iaCldLayer, &
+      raaSolarScatter1Lay,iaRadLayer, &
+      raTemp,raTemp1,rFac,raLMp1_toSpace,muSun,muSat)
 
 ! adjust for change in scattered radn from this layer, if cloudy
     IF (iaCldLayer(iLM) == 1) THEN
-        muSunSat = (muSun * muSat)/(muSun + muSat)
-        DO iFr = 1,kMaxPts
-        ! this is the transmission
-            rT = exp(-raaExtTemp(iFr,iLM)/muSunSat)
+      muSunSat = (muSun * muSat)/(muSun + muSat)
+      ! this is the transmission
+      raT = exp(-raaExtTemp(:,iLM)/muSunSat)
 
-        ! this is the change in ssalb wrt gas amount
-            rY = (1 + raaAsymTemp(iFr,iLM))/2.0
-            rY = -raaSSAlbTemp(iFr,iLM)*(1-raaSSAlbTemp(iFr,iLM)*rY)
-            rY = (1.0-rT)*rY/raaExtTemp(iFr,iLM)
+      ! this is the change in ssalb wrt gas amount
+      raY = (1 + raaAsymTemp(:,iLM))/2.0
+      raY = -raaSSAlbTemp(:,iLM)*(1-raaSSAlbTemp(:,iLM)*raY)
+      raY = (1.0-raT)*raY/raaExtTemp(:,iLM)
 
-        ! this is the change in optical depths wrt gas amount
-            rZ = raaSSAlbTemp(iFr,iLM)*((1/muSunSat+1/muSun)*rT - 1/muSun)
-            rZ = rZ + rEps
+      ! this is the change in optical depths wrt gas amount
+      raZ = raaSSAlbTemp(:,iLM)*((1/muSunSat+1/muSun)*raT - 1/muSun)
+      raZ = raZ + rEps
 
-        !! now add rZ and rY and divide by alpha_j to get
-        !! (1/alpha_j) d(alpha_j))
-            rZ = (rY + rZ)/((raaSSAlbTemp(iFr,iLM)+rEps)*(1-rT+rEps))
+      !! now add rZ and rY and divide by alpha_j to get
+      !! (1/alpha_j) d(alpha_j))
+      raZ = (raY + raZ)/((raaSSAlbTemp(:,iLM)+rEps)*(1-raT+rEps))
 
-            raTemp1(iFr) = rZ*raaSolarScatter1Lay(iFr,iLM)*raLMp1_toSpace(iFr)
+      raTemp1 = raZ*raaSolarScatter1Lay(:,iLM)*raLMp1_toSpace
              
-        END DO
     END IF
 
-!      IF (raaSSAlbTemp(iFr,iLM) .LT. rEps) THEN
-!        DO iFr = 1,kMaxPts
-!          raTemp1(iFr) = 0.0
-!          END DO
-!        END IF
-
 ! add on to the raResults tally
-    DO iFr = 1,kMaxPts
-        raTemp(iFr) = raTemp(iFr) + raTemp1(iFr)
-    ! un        raResults(iFr) = raTemp(iFr)*raaaAllDQ(iG,iFr,iLM)
-        raResults(iFr) = raResults(iFr) + raTemp(iFr)*raaaAllDQ(iG,iFr,iLM)
-    END DO
+    raTemp = raTemp + raTemp1
+    !sun        raResults = raTemp*raaaAllDQ(iG,iFr,iLM)
+    raResults = raResults + raTemp*raaaAllDQ(iG,:,iLM)
 
     RETURN
     end SUBROUTINE SolarScatterGasJacobian
@@ -974,9 +912,7 @@ CONTAINS
     REAL :: rX
 
 ! iLM = iaRadLayer(iM)
-    DO iFr = 1,kMaxPts
-        raTemp1(iFr) = 0.0
-    END DO
+    raTemp1(iFr) = 0.0
 
 ! stuff on Jan 5, 2006
     muSat = cos(raLayAngles(iLM) * kPi/180)
@@ -985,20 +921,18 @@ CONTAINS
 
     rX = (-1/muSat)*(1+muSat/muSun)
 !!! oh boy is this wrong? i think it is fine 1/12/06
-    DO iFr = 1,kMaxPts
-        raTemp(iFr) = 0.0
-    END DO
+    raTemp(iFr) = 0.0
     DO iJ = 1,iM-1
-        iLJ = iaRadLayer(iJ)
-        IF (iaCldLayer(iLJ) == 1) THEN
-        ! uSat = cos(raLayAngles(iLJ) * kPi/180)
-        ! uSun = cos(raSunAngles(iLJ) * kPi/180)
-        ! X = (-1/muSat)*(1+muSat/muSun)
-            DO iFr = 1,kMaxPts
-                raTemp(iFr) = raTemp(iFr) + &
-                raaSolarScatter1Lay(iFr,iLJ)*raaLay2Sp(iFr,iJ+1)*rX
-            END DO
-        END IF
+      iLJ = iaRadLayer(iJ)
+      IF (iaCldLayer(iLJ) == 1) THEN
+        ! muSat = cos(raLayAngles(iLJ) * kPi/180)
+        ! muSun = cos(raSunAngles(iLJ) * kPi/180)
+        ! mX = (-1/muSat)*(1+muSat/muSun)
+        DO iFr = 1,kMaxPts
+          raTemp(iFr) = raTemp(iFr) + &
+          raaSolarScatter1Lay(iFr,iLJ)*raaLay2Sp(iFr,iJ+1)*rX
+        END DO
+      END IF
     END DO
 
 ! output these vars for the rest of the routine
@@ -1007,13 +941,13 @@ CONTAINS
     rFac = 1.0 + muSat/muSun
 
     IF (iLM == kProfLayer) THEN
-        DO iFr = 1,kMaxPts
-            raLMp1_toSpace(iFr) = 1.0
-        END DO
+      DO iFr = 1,kMaxPts
+        raLMp1_toSpace(iFr) = 1.0
+      END DO
     ELSE
-        DO iFr = 1,kMaxPts
-            raLMp1_toSpace(iFr) = raaLay2Sp(iFr,iM+1)
-        END DO
+      DO iFr = 1,kMaxPts
+        raLMp1_toSpace(iFr) = raaLay2Sp(iFr,iM+1)
+     END DO
     END IF
 
     RETURN
@@ -1097,45 +1031,43 @@ CONTAINS
     rCos = 1.0/cos(raLayAngles(MP2Lay(iM1))*kPi/180.0)
 
 ! read the appropriate layer from general results
-    DO iFr=1,kMaxPts
-        raResults(iFr) = raaGeneral(iFr,iLay)
-    END DO
+    raResults = raaGeneral(:,iLay)
 
 ! note that      iLay + iOffset === iaRadlayer(iLay)
 ! set the constant factor we have to multiply results with
     IF (iIWPorDME == 1) THEN
-        DO iFr=1,kMaxPts
-            raTemp(iFr) = raaExtJacobIWP(iFr,iLay+iOffSet)
-        END DO
+      DO iFr=1,kMaxPts
+        raTemp(iFr) = raaExtJacobIWP(iFr,iLay+iOffSet)
+      END DO
     ELSEIF (iIWPorDME == -1) THEN
-        DO iFr=1,kMaxPts
-            raTemp(iFr) = raaExtJacobDME(iFr,iLay+iOffSet)
-        END DO
+      DO iFr=1,kMaxPts
+        raTemp(iFr) = raaExtJacobDME(iFr,iLay+iOffSet)
+      END DO
     END IF
     CALL MinusOne(raTemp,raResults)
 
 ! add on the the derivatives wrt radiating layer
     IF (iLay < iNumLayer) THEN
-    ! this is not the topmost layer
-        iJ1 = iLay
-        DO iFr=1,kMaxPts
-            raResults(iFr) = raResults(iFr)+ &
-            raTemp(iFr)*raaRad(iFr,iJ1)*raaLay2Sp(iFr,iJ1)
-        END DO
+      ! this is not the topmost layer
+      iJ1 = iLay
+      DO iFr=1,kMaxPts
+        raResults(iFr) = raResults(iFr)+ &
+        raTemp(iFr)*raaRad(iFr,iJ1)*raaLay2Sp(iFr,iJ1)
+      END DO
     ELSE IF (iLay == iNumLayer) THEN
-    ! do the topmost layer correctly
-        iJ1 = iLay
-        DO iFr=1,kMaxPts
-            raResults(iFr) = raResults(iFr)+ &
-            raTemp(iFr)*raaTau(iFr,iJ1)*raaRad(iFr,iJ1)
-        END DO
+      ! do the topmost layer correctly
+      iJ1 = iLay
+      DO iFr=1,kMaxPts
+        raResults(iFr) = raResults(iFr)+ &
+        raTemp(iFr)*raaTau(iFr,iJ1)*raaRad(iFr,iJ1)
+      END DO
     END IF
 
 ! now multiply results by the 1/cos(viewing angle) factor
     IF (abs(rCos-1.0000000) >= 1.0E-5) THEN
-        DO iFr=1,kMaxPts
-            raResults(iFr) = raResults(iFr)*rCos
-        END DO
+      DO iFr=1,kMaxPts
+        raResults(iFr) = raResults(iFr)*rCos
+      END DO
     END IF
 
 ! see if we have to include thermal backgnd

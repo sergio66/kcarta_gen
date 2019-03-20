@@ -156,28 +156,28 @@ CONTAINS
 
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
-    ! radiation travelling upwards to instrument ==> sat looking down
-    ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = 1
-        i1=iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
-        i2=iaaRadLayer(iAtm,iNumLayer)-1
-        i2=iFloor(i2*1.0/kProfLayer)
-        IF (rTSpace > 5.0) THEN
-            write(kStdErr,*) 'you want satellite to be downward looking'
-            write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
-            write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
-            write(kStdErr,*) 'Please retry'
-            CALL DoSTOP
-        END IF
+      ! radiation travelling upwards to instrument ==> sat looking down
+      ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = 1
+      i1 = iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
+      i2 = iaaRadLayer(iAtm,iNumLayer)-1
+      i2 = iFloor(i2*1.0/kProfLayer)
+      IF (rTSpace > 5.0) THEN
+        write(kStdErr,*) 'you want satellite to be downward looking'
+        write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
+        write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
+        write(kStdErr,*) 'Please retry'
+        CALL DoSTOP
+      END IF
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
-    ! radiation travelling downwards to instrument ==> sat looking up
-    ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = -1
-        i1=iaaRadLayer(iAtm,1)-1
-        i1=iFloor(i1*1.0/(1.0*kProfLayer))
-        i2=iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
+      ! radiation travelling downwards to instrument ==> sat looking up
+      ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = -1
+      i1 = iaaRadLayer(iAtm,1)-1
+      i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+      i2 = iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
     END IF
     write(kStdWarn,*) 'have set iDownWard = ',iDownWard
 
@@ -185,30 +185,29 @@ CONTAINS
 ! eg iUpper=90,iLower=1 is acceptable
 ! eg iUpper=140,iLower=90 is NOT acceptable
     IF (i1 /= i2) THEN
-        write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
-        write(kStdErr,*) 'to have come from same set of 100 mixed paths'
-        write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer),i1,i2
-        CALL DoSTOP
+      write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
+      write(kStdErr,*) 'to have come from same set of 100 mixed paths'
+      write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer),i1,i2
+      CALL DoSTOP
     END IF
 
 ! check to see that the radiating atmosphere has <= 100 layers
 ! actually, this is technically done above)
     i1=abs(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer))+1
     IF (i1 > kProfLayer) THEN
-        write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
-        CALL DoSTOP
+      write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
+      CALL DoSTOP
     END IF
 
     write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
-    write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=', &
-    iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
+    write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=',iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
     IF (iDownward == 1) THEN
-        rAngle=rSatAngle
+      rAngle=rSatAngle
     ELSE
-        rAngle=-rSatAngle
-        write(kStdErr,*) 'Cannot do pclsam flux for "uplook" instr!'
-        CALL DoStop
+      rAngle=-rSatAngle
+      write(kStdErr,*) 'Cannot do pclsam flux for "uplook" instr!'
+      CALL DoStop
     END IF
 
     iDefault = 2
@@ -218,12 +217,12 @@ CONTAINS
 !!! and varies T with layer. yep the whole shebang
 
     IF (iDefault /= iAccOrLoopFlux) THEN
-        print *,'pclsam iDefault,iAccOrLoopFlux = ',iDefault,iAccOrLoopFlux
+      print *,'pclsam iDefault,iAccOrLoopFlux = ',iDefault,iAccOrLoopFlux
     END IF
 
     IF (iAccOrLoopFlux == -1) THEN
-    !!!loop over angles
-        CALL flux_pclsam_slowloop(raFreq,raVTemp, &
+      !!!loop over angles
+      CALL flux_pclsam_slowloop(raFreq,raVTemp, &
         raaAbs,rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
         rAngle,rFracTop,rFracBot, &
         iNp,iaOp,raaOp,iNpmix,iFileID, &
@@ -238,8 +237,8 @@ CONTAINS
         iCldProfile,iaCldTypes,raaKlayersCldAmt, &
         iLayPrintFlux,raaFluxOut)
     ELSEIF (iAccOrLoopFlux == +1) THEN
-    !!!use expint3; accurate as it uses rad as function of cos(theta)
-        CALL flux_pclsam_fastloop(raFreq,raVTemp, &
+      !!!use expint3; accurate as it uses rad as function of cos(theta)
+      CALL flux_pclsam_fastloop(raFreq,raVTemp, &
         raaAbs,rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
         rAngle,rFracTop,rFracBot, &
         iNp,iaOp,raaOp,iNpmix,iFileID, &
@@ -254,8 +253,8 @@ CONTAINS
         iCldProfile,iaCldTypes,raaKlayersCldAmt, &
         iLayPrintFlux,raaFluxOut)
     ELSEIF (iAccOrLoopFlux == +2) THEN
-    !!!use linear in tau layer temp, gauss quadraure
-        CALL flux_pclsam_fastloop_LinearVaryT(raFreq,raVTemp, &
+      !!!use linear in tau layer temp, gauss quadraure
+      CALL flux_pclsam_fastloop_LinearVaryT(raFreq,raVTemp, &
         raaAbs,rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
         rAngle,rFracTop,rFracBot, &
         iNp,iaOp,raaOp,iNpmix,iFileID, &
@@ -478,8 +477,8 @@ CONTAINS
     iGaussPts = 10 !!!!default, good enough for clear sky
 
     IF (iGaussPts > kGauss) THEN
-        write(kStdErr,*) 'need iGaussPts < kGauss'
-        CALL DoStop
+      write(kStdErr,*) 'need iGaussPts < kGauss'
+      CALL DoStop
     END IF
     CALL FindGauss(iGaussPts,daGaussPt,daGaussWt)
     muSat = cos(rSatAngle*kPi/180)
@@ -496,51 +495,49 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
 
     IF (iDownWard == 1) THEN   !no big deal
-        DO iLay=1,iNumLayer
-            iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iLay) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iLay) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iLay) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iLay) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+      END DO
     ELSEIF (iDownWard == -1) THEN   !ooops ... gotta flip things!!!
-        DO iLay=1,iNumLayer
-            iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ', &
+          iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ', &
+          iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+      END DO
     END IF
 
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1 = raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
     raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -553,18 +550,18 @@ CONTAINS
     write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
     IF (kFlux == 5) THEN
-        troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN
-        CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
+      CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
         rSurfPress,raPressLevels, &
         raThickness,raDensityX,raDensity0,raDeltaPressure,rFracTop,rFracBot)
     END IF
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        CALL SetMieTables_RTSPEC(raFreq, &
-    !!!!!!!!!!!!!!!!!these are the input variables
+      CALL SetMieTables_RTSPEC(raFreq, &
+        !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
         iaPhase,raPhasePoints,raComputedPhase, &
@@ -578,7 +575,7 @@ CONTAINS
         IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
         iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA)
     ELSE
-        CALL SetMieTables_RTSPEC_100layer(raFreq, &
+      CALL SetMieTables_RTSPEC_100layer(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable, &
@@ -598,31 +595,26 @@ CONTAINS
 
 ! if CloudySky > 0 then go ahead with PCLSAM!
     IF (iCloudySky < 0) THEN
-        write(kStdErr,*) 'Cannot do flux for clear sky with scatter_pclsam'
-        CALL DoStop
+      write(kStdErr,*) 'Cannot do flux for clear sky with scatter_pclsam'
+      CALL DoStop
     END IF
-
-!      IF(abs(iCldtop - iCldBot) .GT. 1) THEN
-!        write(kStdErr,*) 'Cannot do flux for more than one cloud layer'
-!        CALL DoStop
-!      END IF
 
 !!!!!!! we bloody well need the temperature profile in terms of the
 !!!!!!! pressure layers, so we need to fill in the array TEMP
     CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
-    iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
-    ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
-    ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
-    iProfileLayers,raPressLevels)
+      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
+      ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
+      ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
+      iProfileLayers,raPressLevels)
 
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
-    iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
+      iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
 
     CALL CopyRaaExt_twostream(raaAbs,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-    iaaRadLayer,iAtm,iNumlayer)
+      iaaRadLayer,iAtm,iNumlayer)
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        CALL AddCloud_pclsam( &
+      CALL AddCloud_pclsam( &
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -632,10 +624,8 @@ CONTAINS
         TABEXTINCT, TABSSALB, TABASYM, &
         TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     ELSE
-        DO iLay = 1,kProfLayer
-            raCC(iLay) = 1.0
-        END DO
-        CALL AddCloud_pclsam_SunShine_100layerclouds( &
+      raCC(iLay) = 1.0
+      CALL AddCloud_pclsam_SunShine_100layerclouds( &
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -646,23 +636,17 @@ CONTAINS
         TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     END IF
 
-    DO iFr=1,kMaxPts
-        DO iLay=1,kProfLayer+1
-            raaDownFlux(iFr,iLay) = 0.0
-            raaUpFlux(iFr,iLay)   = 0.0
-        END DO
-    END DO
+    raaDownFlux(iFr,iLay) = 0.0
+    raaUpFlux(iFr,iLay)   = 0.0
 
     DO iAngle = 1,iGaussPts
-        rAngle       =  acos(sngl(daGaussPt(iAngle)))*180.0D0/kPi
-        rGaussWeight =  sngl(daGaussWt(iAngle))
+      rAngle       =  acos(sngl(daGaussPt(iAngle)))*180.0D0/kPi
+      rGaussWeight =  sngl(daGaussWt(iAngle))
 
-        DO iFr = 1,kProfLayer
-            raLayAngles(iFr) = rAngle
-        END DO
+      raLayAngles = rAngle
 
-    !!! UPWARD flux
-        CALL all_radiances_pclsam( &
+      !!! UPWARD flux
+      CALL all_radiances_pclsam( &
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaPhase(iAtm),raPhasePoints,raComputedPhase, &
         ICLDTOPKCARTA, ICLDBOTKCARTA,raVTemp, &
@@ -674,13 +658,13 @@ CONTAINS
         raLayAngles,raSunAngles,iTag, &
         raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
         +1,rGaussWeight,raaUpFlux)
-    !     $         iNLTEStart,raaPlanckCoeff,
-    !     $         iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
-    !     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
+      !     $         iNLTEStart,raaPlanckCoeff,
+      !     $         iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
+      !     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
 
-        IF (kFlux <= 3 .OR. kFlux == 5) THEN
+      IF (kFlux <= 3 .OR. kFlux == 5) THEN
         !!! DOWNWARD flux
-            CALL all_radiances_pclsam( &
+        CALL all_radiances_pclsam( &
             raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             iaPhase(iAtm),raPhasePoints,raComputedPhase, &
             ICLDTOPKCARTA, ICLDBOTKCARTA,raVTemp, &
@@ -695,16 +679,16 @@ CONTAINS
         !     $         iNLTEStart,raaPlanckCoeff,
         !     $         iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
         !     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
-        END IF
+      END IF
     END DO
 
     rDelta = kaFrStep(iTag)
     CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
-    raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
-    raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
+      raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
+      raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
     CALL fill_raaFluxOut(raaDownFlux,raaUpFlux,raPressLevels, &
-    troplayer,iaRadLayer,iNumLayer,raaFluxOut)
+      troplayer,iaRadLayer,iNumLayer,raaFluxOut)
 
     RETURN
     end SUBROUTINE flux_pclsam_slowloop
@@ -799,47 +783,46 @@ CONTAINS
 
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
-    ! radiation travelling upwards to instrument ==> sat looking down
-    ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = 1
-        i1=iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
-        i2=iaaRadLayer(iAtm,iNumLayer)-1
-        i2=iFloor(i2*1.0/kProfLayer)
-        IF (rTSpace > 5.0) THEN
-            write(kStdErr,*) 'you want satellite to be downward looking'
-            write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
-            write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
-            write(kStdErr,*) 'Please retry'
-            CALL DoSTOP
-        END IF
+      ! radiation travelling upwards to instrument ==> sat looking down
+      ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = 1
+      i1 = iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
+      i2 = iaaRadLayer(iAtm,iNumLayer)-1
+      i2 = iFloor(i2*1.0/kProfLayer)
+      IF (rTSpace > 5.0) THEN
+        write(kStdErr,*) 'you want satellite to be downward looking'
+        write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
+        write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
+        write(kStdErr,*) 'Please retry'
+        CALL DoSTOP
+      END IF
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
-    ! radiation travelling downwards to instrument ==> sat looking up
-    ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
-    ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = -1
-        i1=iaaRadLayer(iAtm,1)-1
-        i1=iFloor(i1*1.0/(1.0*kProfLayer))
-        i2=iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
+      ! radiation travelling downwards to instrument ==> sat looking up
+      ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
+      ! set down to 99,199, ... and so the FLOOR routine will not be too confused
+      iDownWard = -1
+      i1 = iaaRadLayer(iAtm,1)-1
+      i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+      i2 = iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
     END IF
-!      write(kStdWarn,*) 'have set iDownWard = ',iDownWard
 
 ! check to see that lower/upper layers are from the same 100 mixed path bunch
 ! eg iUpper=90,iLower=1 is acceptable
 ! eg iUpper=140,iLower=90 is NOT acceptable
     IF (i1 /= i2) THEN
-        write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
-        write(kStdErr,*) 'to have come from same set of 100 mixed paths'
-        write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer),i1,i2
-        CALL DoSTOP
+      write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
+      write(kStdErr,*) 'to have come from same set of 100 mixed paths'
+      write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer),i1,i2
+      CALL DoSTOP
     END IF
 
 ! check to see that the radiating atmosphere has <= 100 layers
 ! actually, this is technically done above)
     i1=abs(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer))+1
     IF (i1 > kProfLayer) THEN
-        write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
-        CALL DoSTOP
+      write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
+      CALL DoSTOP
     END IF
 
 ! using the fast forward model, compute the radiances emanating upto satellite
@@ -847,12 +830,11 @@ CONTAINS
 ! pgs 1605-1608 "On the effect of surface emissivity on temperature
 ! retrievals."
     write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
-    write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=', &
-    iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
+    write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=',iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
     IF (iDirection == +1) THEN
-    !!!instrument looks down, so it measures UPWARD flux
-        CALL flux_UP_pclsam_all_layers( &
+      !!!instrument looks down, so it measures UPWARD flux
+      CALL flux_UP_pclsam_all_layers( &
         raFreq,raaTempX,rGaussWeight,raVTemp,raaExt,raaSSAlb,raaAsym, &
         iPhase,raPhasePoints,raComputedPhase, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -863,12 +845,12 @@ CONTAINS
         raSurface,raSun,raThermal,raSunRefl, &
         raLayAngles,raSunAngles,iTag, &
         raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf)
-    !     $              iNLTEStart,raaPlanckCoeff,
-    !     $              iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
-    !     $              raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
+      !     $              iNLTEStart,raaPlanckCoeff,
+      !     $              iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
+      !     $              raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
     ELSEIF (iDirection == -1) THEN
-    !!!instrument looks up, so it measures DOWNWARD flux
-        CALL flux_DOWN_pclsam_all_layers( &
+      !!!instrument looks up, so it measures DOWNWARD flux
+      CALL flux_DOWN_pclsam_all_layers( &
         raFreq,raaTempX,rGaussWeight,raVTemp,raaExt,raaSSAlb,raaAsym, &
         iPhase,raPhasePoints,raComputedPhase, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -879,9 +861,9 @@ CONTAINS
         raSurface,raSun,raThermal,raSunRefl, &
         raLayAngles,raSunAngles,iTag, &
         raThickness,raPressLevels,iProfileLayers,pProf)
-    !     $              iNLTEStart,raaPlanckCoeff,
-    !     $              iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
-    !     $              raUpperPress,raUpperTemp)
+      !     $              iNLTEStart,raaPlanckCoeff,
+      !     $              iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
+      !     $              raUpperPress,raUpperTemp)
     END IF
 
     RETURN
@@ -1003,50 +985,49 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-        iL = iaRadLayer(iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+      iL = iaRadLayer(iLay)
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
 
 ! cccccccccccccccccc set these all important variables ****************
     IF (iaRadLayer(1) < kProfLayer) THEN
-        iLocalCldTop = iCldTopkCarta - iaRadLayer(1) + 1
-        iLocalCldBot = iCldBotkCarta - iaRadLayer(1) + 1
-        iiDiv = 0
+      iLocalCldTop = iCldTopkCarta - iaRadLayer(1) + 1
+      iLocalCldBot = iCldBotkCarta - iaRadLayer(1) + 1
+      iiDiv = 0
     ELSE
-    ! essentially do mod(iaRadLayer(1),kProfLayer)
-        iiDiv = 1
-        1010 CONTINUE
-        IF (iaRadLayer(1) > kProfLayer*iiDiv) THEN
-            iiDiv = iiDiv + 1
-            GOTO 1010
-        END IF
-        iiDiv = iiDiv - 1
-        iLay = iiDiv
-        iiDiv = iaRadLayer(1) - (kProfLayer*iiDiv)
-        iLocalCldTop = iCldTopkCarta - iiDiv + 1
-        iLocalCldBot = iCldBotkCarta - iiDiv + 1
-        iiDiv = iLay
+      ! essentially do mod(iaRadLayer(1),kProfLayer)
+      iiDiv = 1
+ 1010 CONTINUE
+      IF (iaRadLayer(1) > kProfLayer*iiDiv) THEN
+        iiDiv = iiDiv + 1
+        GOTO 1010
+      END IF
+      iiDiv = iiDiv - 1
+      iLay = iiDiv
+      iiDiv = iaRadLayer(1) - (kProfLayer*iiDiv)
+      iLocalCldTop = iCldTopkCarta - iiDiv + 1
+      iLocalCldBot = iCldBotkCarta - iiDiv + 1
+      iiDiv = iLay
     END IF
      
-!      DO iLay = iCldBotkCarta-1,iCldTopkCarta-1   !!! old and bad
     DO iLay = iCldBotkCarta,iCldTopkCarta
-        iaCldLayer(iLay) = 1
+      iaCldLayer(iLay) = 1
     END DO
      
 ! cccccccccccccccccc set these all important variables ****************
@@ -1054,9 +1035,7 @@ CONTAINS
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1 = raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
     raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -1065,8 +1044,7 @@ CONTAINS
 ! this is hardly going to affect thermal/solar contributions (using this temp
 ! instead of temp of full layer at 100 km height!!!!!!
     iL=iaRadLayer(iNumLayer)
-    raVT1(iL) = &
-    InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
      
 ! find the highest layer that we need to output radiances for
     iHigh = iNumLayer
@@ -1077,137 +1055,102 @@ CONTAINS
 ! note while computing downward solar/ thermal radiation, have to be careful
 ! for the BOTTOMMOST layer!!!!!!!!!!!
     DO iLay=1,1
-        iL=iaRadLayer(iLay)
-        muSat=cos(rSatAngle*kPi/180.0)
-        DO iFr=1,kMaxPts
-            raaLayTrans(iFr,iLay)=exp(-raaExt(iFr,iL)*rFracBot/muSat)
-            raaEmission(iFr,iLay)=0.0
-        END DO
+      iL=iaRadLayer(iLay)
+      muSat=cos(rSatAngle*kPi/180.0)
+      raaLayTrans(:,iLay)=exp(-raaExt(:,iL)*rFracBot/muSat)
+      raaEmission(:,iLay)=0.0
     END DO
     DO iLay=2,iNumLayer-1
-        iL=iaRadLayer(iLay)
-        muSat=cos(rSatAngle*kPi/180.0)
-        DO iFr=1,kMaxPts
-            raaLayTrans(iFr,iLay)=exp(-raaExt(iFr,iL)/muSat)
-            raaEmission(iFr,iLay)=0.0
-        END DO
+      iL=iaRadLayer(iLay)
+      muSat=cos(rSatAngle*kPi/180.0)
+      raaLayTrans(:,iLay)=exp(-raaExt(:,iL)/muSat)
+      raaEmission(:,iLay)=0.0
     END DO
     DO iLay=iNumLayer,iNumLayer
-        iL=iaRadLayer(iLay)
-        muSat=cos(rSatAngle*kPi/180.0)
-        DO iFr=1,kMaxPts
-            raaLayTrans(iFr,iLay)=exp(-raaExt(iFr,iL)*rFracTop/muSat)
-            raaEmission(iFr,iLay)=0.0
-        END DO
+      iL=iaRadLayer(iLay)
+      muSat=cos(rSatAngle*kPi/180.0)
+      raaLayTrans(:,iLay)=exp(-raaExt(:,iL)*rFracTop/muSat)
+      raaEmission(:,iLay)=0.0
     END DO
 
-    DO iFr=1,kMaxPts
     ! initialize the solar and thermal contribution to 0
-        raSun(iFr)     = 0.0
-        raThermal(iFr) = 0.0
+    raSun     = 0.0
+    raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        raInten(iFr)   = ttorad(raFreq(iFr),rTSurf)
-        raSurface(iFr) = raInten(iFr)
-    END DO
+    raInten   = rattorad(raFreq,rTSurf)
+    raSurface = raInten
 
     CALL DoEmissionLinearInTau_Downlook( &
-    iNumLayer,iaRadLayer,rFracTop,rFracBot, &
-    raLayAngles,raVT1,temp,raFreq,raaLayTrans, &
-    iaCldLayer,raaExt,raaEmission)
+      iNumLayer,iaRadLayer,rFracTop,rFracBot, &
+      raLayAngles,raVT1,temp,raFreq,raaLayTrans, &
+      iaCldLayer,raaExt,raaEmission)
 
 ! now go from top of atmosphere down to the surface to compute the total
 ! radiation from top of layer down to the surface
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
 
 ! see if we have to add on the solar contribution
     IF (iDoSolar >= 0) THEN
-    ! his figures out the solar intensity at the ground, for reflection up
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      !this figures out the solar intensity at the ground, for reflection up
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,iTag)
-    ! his figures backscattered solar intensity
-        CALL SolarScatterIntensity_Downlook( &
+      !this figures backscattered solar intensity
+      CALL SolarScatterIntensity_Downlook( &
         iDoSolar,raFreq,iaCldLayer, &
 	raSunAngles,raLayAngles,0.0,0.0, &
         iNumLayer,iaRadLayer,raaExt,raaSSAlb,raaAsym,rFracTop,rFracBot, &
         iTag,+1,raaSolarScatter1Lay)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
-        DO iLay = 1,kProfLayer
-            DO iFr = 1,kMaxPts
-                raaSolarScatter1Lay(iFr,iLay) = 0.0
-            END DO
-        END DO
+      write(kStdWarn,*) 'no solar backgnd to calculate'
+      raaSolarScatter1Lay = 0.0
     END IF
 
-    DO iFr=1,kMaxPts
-        raInten(iFr)=raSurface(iFr)*raUseEmissivity(iFr)+ &
-        raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-        raSun(iFr)*raSunRefl(iFr)
-    END DO
+    raInten=raSurface*raUseEmissivity+ &
+        raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+        raSun*raSunRefl
 
     iLay = 0
     iPutLay = 1
-    DO iFr = 1,kMaxPts
-        raaTempX(iFr,iPutLay) = raaTempX(iFr,iPutLay) + &
-        raInten(iFr)*rGaussWeight*muSat
-    END DO
-
-!      print *,iLay,-1,iPutLay,rGaussWeight,rSatAngle,raInten(1),
-!     $        raaTempX(1,iPutLay)
+    raaTempX(:,iPutLay) = raaTempX(:,iPutLay) + raInten*rGaussWeight*muSat
 
 ! first do the bottommost layer (could be fractional)
     iLay = 1
-    iL=iaRadLayer(iLay)
+    iL = iaRadLayer(iLay)
     iPutLay = iLay + 1
-    muSat=cos(rSatAngle*kPi/180.0)
-    rMPTemp=raVT1(iL)
-    DO iFr=1,kMaxPts
-        raInten(iFr) = raaEmission(iFr,iLay) + &
-        raInten(iFr)*raaLayTrans(iFr,iLay) + &
-        raaSolarScatter1Lay(iFr,iL)
-        raaTempX(iFr,iPutLay) = raaTempX(iFr,iPutLay) + &
-        raInten(iFr)*rGaussWeight*muSat
-    END DO
+    muSat = cos(rSatAngle*kPi/180.0)
+    rMPTemp = raVT1(iL)
+    raInten = raaEmission(:,iLay) + raInten*raaLayTrans(:,iLay) + &
+                   raaSolarScatter1Lay(:,iL)
+    raaTempX(:,iPutLay) = raaTempX(:,iPutLay) + raInten*rGaussWeight*muSat
          
 ! then do the rest of the layers till the last but one(all will be full)
     DO iLay=2,iHigh-1
-        iPutLay = iLay + 1
-        iL=iaRadLayer(iLay)
-        muSat=cos(rSatAngle*kPi/180.0)
-        rMPTemp=raVT1(iL)
-        DO iFr=1,kMaxPts
-            raInten(iFr) = raaEmission(iFr,iLay) + &
-            raInten(iFr)*raaLayTrans(iFr,iLay) + &
-            raaSolarScatter1Lay(iFr,iL)
-            raaTempX(iFr,iPutLay) = raaTempX(iFr,iPutLay) + &
-            raInten(iFr)*rGaussWeight*muSat
-        END DO
+      iPutLay = iLay + 1
+      iL = iaRadLayer(iLay)
+      muSat = cos(rSatAngle*kPi/180.0)
+      rMPTemp=raVT1(iL)
+      raInten = raaEmission(:,iLay) + raInten*raaLayTrans(:,iLay) + &
+                     raaSolarScatter1Lay(:,iL)
+      raaTempX(:,iPutLay) = raaTempX(:,iPutLay) + raInten*rGaussWeight*muSat
     END DO
 
 ! then do the topmost layer (could be fractional)
     iLay = iHigh
-    iL=iaRadLayer(iLay)
+    iL = iaRadLayer(iLay)
     iPutLay = iLay + 1
-    muSat=cos(rSatAngle*kPi/180.0)
-    rMPTemp=raVT1(iL)
+    muSat = cos(rSatAngle*kPi/180.0)
+    rMPTemp = raVT1(iL)
       
-    DO iFr=1,kMaxPts
-        raInten(iFr) = raaEmission(iFr,iLay) + &
-        raaSolarScatter1Lay(iFr,iL) + &
-        raInten(iFr)*raaLayTrans(iFr,iLay)
-        raaTempX(iFr,iPutLay) = raaTempX(iFr,iPutLay) + &
-        raInten(iFr)*rGaussWeight*muSat
-    END DO
-!      print *,iLay,iL,iPutLay,rGaussWeight,rSatAngle,raInten(1),
-!     $        raaTempX(1,iPutLay)
+    raInten = raaEmission(:,iLay) + raaSolarScatter1Lay(:,iL) + raInten*raaLayTrans(:,iLay)
+    raaTempX(:,iPutLay) = raaTempX(:,iPutLay) + raInten*rGaussWeight*muSat
 
     RETURN
     end SUBROUTINE flux_UP_pclsam_all_layers
@@ -1302,7 +1245,7 @@ CONTAINS
     INTEGER :: N,iI,iLocalCldTop,iLocalCldBot,iRepeat
     INTEGER :: iaCldLayer(kProfLayer),iSimple
     INTEGER :: iCloudLayerTop,iCloudLayerBot,iiDiv,iLow,iPutLay
-    REAL :: rAngleTrans,rSolarScatter,rNoScale
+    REAL :: raAngleTrans(kMaxPts),raSolarScatter(kMaxPts),raNoScale(kMaxPts)
 
 ! calculate cos(SatAngle)
     muSat=cos(rSatAngle*kPi/180.0)
@@ -1313,11 +1256,11 @@ CONTAINS
     iSimple = nint(kProfLayer/2.0)
     iDoSolar = kSolar
     IF (kSolar >= 0) THEN
-        rSunAngle = raSunAngles(iSimple)
-        IF (abs(abs(rSatAngle)-abs(rSunAngle)) <= 1.0e-2) THEN
+      rSunAngle = raSunAngles(iSimple)
+      IF (abs(abs(rSatAngle)-abs(rSunAngle)) <= 1.0e-2) THEN
         !!!do not want divergences in the code
-            rSunAngle = rSunAngle + 0.1
-        END IF
+        rSunAngle = rSunAngle + 0.1
+      END IF
     END IF
 
     iDoSolar = kSolar
@@ -1325,16 +1268,16 @@ CONTAINS
 ! as we are never directly loooking at the sun, there is a geometry factor
     rOmegaSun = kOmegaSun
     IF (iDoSolar >= 0) THEN
-        rSunTemp = kSunTemp
-        write(kStdWarn,*) 'upward looking instrument .. daytime'
+      rSunTemp = kSunTemp
+      write(kStdWarn,*) 'upward looking instrument .. daytime'
     ELSE IF (iDoSolar < 0) THEN
-        rSunTemp=0.0
-        write(kStdWarn,*)'upward looking instrument .. nitetime'
+      rSunTemp = 0.0
+      write(kStdWarn,*)'upward looking instrument .. nitetime'
     END IF
      
     muSun = 1.0       !!!default
     IF (iDoSolar >= 0) THEN
-        muSun = cos(rSunAngle*kPi/180.0)
+      muSun = cos(rSunAngle*kPi/180.0)
     END IF
       
 !      write(kStdWarn,*) 'using ',iNumLayer,' layers to build atm #',iAtm
@@ -1344,52 +1287,49 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     DO iLay=1,iNumLayer
-    !------>!!!! iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay) !!!flip <-----------------
-        iaRadLayer(iLay)=iaaRadLayer(iAtm,iNumLayer-iLay+1)
-    !------>!!!! iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay) !!!flip <-----------------
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*)'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*)'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*)'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      !------>!!!! iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay) !!!flip <-----------------
+      iaRadLayer(iLay)=iaaRadLayer(iAtm,iNumLayer-iLay+1)
+      !------>!!!! iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay) !!!flip <-----------------
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*)'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*)'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*)'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
       
 ! cccccccccccccccccc set these all important variables ****************
-    DO iLay = 1,kProfLayer
-        iaCldLayer(iLay) = -1
-    END DO
+    iaCldLayer = -1
 
     iCloudLayerTop = -1
     iCloudLayerBot = -1
     IF (iaRadLayer(1) < kProfLayer) THEN
-        iLocalCldTop = iaRadlayer(1) - iCldTopkCarta + 1
-        iLocalCldBot = iaRadlayer(1) - iCldBotkCarta + 1
-        iiDiv = 0
+      iLocalCldTop = iaRadlayer(1) - iCldTopkCarta + 1
+      iLocalCldBot = iaRadlayer(1) - iCldBotkCarta + 1
+      iiDiv = 0
     ELSE
-    ! essentially do mod(iaRadLayer(1),kProfLayer)
-        iiDiv = 1
-        1010 CONTINUE
-        IF (iaRadLayer(1) > kProfLayer*iiDiv) THEN
-            iiDiv = iiDiv + 1
-            GOTO 1010
-        END IF
-        iiDiv = iiDiv - 1
-        iLay = iiDiv
-        iiDiv = iaRadLayer(1) - (kProfLayer*iiDiv)
-        iLocalCldTop = iiDiv - iCldTopkCarta + 1
-        iLocalCldBot = iiDiv - iCldBotkCarta + 1
-        iiDiv = iLay
+      ! essentially do mod(iaRadLayer(1),kProfLayer)
+      iiDiv = 1
+ 1010 CONTINUE
+      IF (iaRadLayer(1) > kProfLayer*iiDiv) THEN
+        iiDiv = iiDiv + 1
+        GOTO 1010
+      END IF
+      iiDiv = iiDiv - 1
+      iLay = iiDiv
+      iiDiv = iaRadLayer(1) - (kProfLayer*iiDiv)
+      iLocalCldTop = iiDiv - iCldTopkCarta + 1
+      iLocalCldBot = iiDiv - iCldBotkCarta + 1
+      iiDiv = iLay
     END IF
      
-!      DO iLay = iCldBotkCarta-1,iCldTopkCarta-1
     DO iLay = iCldBotkCarta,iCldTopkCarta
-        iaCldLayer(kProfLayer-iLay+1) = 1
+      iaCldLayer(kProfLayer-iLay+1) = 1
     END DO
      
 ! cccccccccccccccccc set these all important variables ****************
@@ -1397,9 +1337,7 @@ CONTAINS
     iLow    = iNumLayer
       
 ! set the temperature of the bottommost layer correctly
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1 = raVTemp
      
 ! if the bottom layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(iNumLayer)
@@ -1411,96 +1349,75 @@ CONTAINS
     write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
       
     IF (iDoSolar > 0) THEN
-        IF (rSunTemp > 0) THEN
-            DO iFr=1,kMaxPts
-            ! NOTE!no geometry factor (rOmegaSun=1.0),only need cos(rSunAngle) eventually
-            ! compute the Plank radiation from the sun
-                raSun(iFr) = ttorad(raFreq(iFr),rSunTemp)
-            END DO
-        ELSE
-            CALL ReadSolarData(raFreq,raSun,iTag)
-        END IF
+      IF (rSunTemp > 0) THEN
+        ! NOTE!no geometry factor (rOmegaSun=1.0),only need cos(rSunAngle) eventually
+        ! compute the Plank radiation from the sun
+        raSun = rattorad(raFreq,rSunTemp)
+      ELSE
+        CALL ReadSolarData(raFreq,raSun,iTag)
+      END IF
     ELSE
-        DO iFr=1,kMaxPts
-            raSun(iFr)=0.0
-        END DO
+      raSun = 0.0
     END IF
 
-    DO iFr=1,kMaxPts
     ! initialize the diffuse downward contribution to 0
     ! INTIALIZE the emission seen at satellite to 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        raSurface(iFr) = ttorad(raFreq(iFr),rTSurf)
-        raSun(iFr)     = raSun(iFr) * rOmegaSun
-    END DO
+    raSurface = rattorad(raFreq,rTSurf)
+    raSun     = raSun * rOmegaSun
 
     iLay = 0
     iPutLay = iNumLayer + 1
 
-    DO iFr=1,kMaxPts
     ! compute emission from the top of atm == eqn 4.26 of Genln2 manual
     ! initialize the cumulative thermal radiation
-        raThermal(iFr) = ttorad(raFreq(iFr),sngl(kTSpace))
-        raaTempX(iFr,iPutLay) = raThermal(iFr)*rGaussWeight*muSat + &
-        raaTempX(iFr,iPutLay)
-    END DO
+    raThermal = rattorad(raFreq,sngl(kTSpace))
+    raaTempX(:,iPutLay) = raThermal*rGaussWeight*muSat + raaTempX(:,iPutLay)
 
     DO iLay = 1,iLow
-        iPutLay = iNumLayer - iLay + 1
-        iL      = iaRadLayer(iLay)
-        muSat   = cos(rSatAngle*kPi/180.0)
-        rMPTemp = raVT1(iL)
+      iPutLay = iNumLayer - iLay + 1
+      iL      = iaRadLayer(iLay)
+      muSat   = cos(rSatAngle*kPi/180.0)
+      rMPTemp = raVT1(iL)
 
-    ! now do the complete radiative transfer thru this layer
-        CALL DoEmissionLinearInTau_Uplook(-1, &
+      ! now do the complete radiative transfer thru this layer
+      CALL DoEmissionLinearInTau_Uplook(-1, &
         iLay,iNumLayer,iaRadLayer,rFracTop,rFracBot, &
         raLayAngles,raVT1,temp,raFreq, &
         iaCldLayer,raaExt,raThermal)
 
-    ! see if we have to add on the solar contribution to do transmission thru atm
-        IF (iDoSolar > 0) THEN
+      ! see if we have to add on the solar contribution to do transmission thru atm
+      IF (iDoSolar > 0) THEN
         ! note that the angle is the solar angle = satellite angle
-            IF (iLay == 1) THEN
-                muSun = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    rAngleTrans = exp(-raaExt(iFr,iL)*rFracTop/muSun)
-                    raSun(iFr)  = raSun(iFr)*rAngleTrans
-                    raTau(iFr)  = raaExt(iFr,iL)*rFracTop
-                END DO
-            ELSE IF (iLay == iNumLayer) THEN
-                muSun = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    rAngleTrans = exp(-raaExt(iFr,iL)*rFracBot/muSun)
-                    raSun(iFr)  = raSun(iFr)*rAngleTrans
-                    raTau(iFr)  = raaExt(iFr,iL)*rFracBot
-                END DO
-            ELSE
-                muSun = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
-                DO iFr=1,kMaxPts
-                    rAngleTrans = exp(-raaExt(iFr,iL)/muSun)
-                    raSun(iFr)  = raSun(iFr)*rAngleTrans
-                    raTau(iFr)  = raaExt(iFr,iL)
-                END DO
-            END IF
-
-        !!! now see if we need the solar scatter term
-            IF (iaCldLayer(iLay) == 1) THEN
-                rNoScale = 1.0  !!! before Feb 2, 2006
-                DO iFr = 1,kMaxPts
-                    rNoScale = 1.0/(1.0 - raaSSAlb(iFr,iL)/2*(1.0+raaAsym(iFr,iL)))
-                    rSolarScatter  = hg2_real(-muSun,-muSat,raaAsym(iFr,iL)) * &
-                    (exp(-rNoScale*raTau(iFr)/muSat) - &
-                    exp(-rNoScale*raTau(iFr)/muSun))
-                    rSolarScatter  = raaSSAlb(iFr,iL)*raSun(iFr)/2.0 * rSolarScatter
-                    raThermal(iFr) = raThermal(iFr) + rSolarScatter
-                END DO
-            END IF
+        IF (iLay == 1) THEN
+          muSun = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raAngleTrans = exp(-raaExt(:,iL)*rFracTop/muSun)
+          raSun  = raSun*raAngleTrans
+          raTau  = raaExt(:,iL)*rFracTop
+        ELSE IF (iLay == iNumLayer) THEN
+          muSun = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raAngleTrans = exp(-raaExt(:,iL)*rFracBot/muSun)
+          raSun  = raSun*raAngleTrans
+          raTau  = raaExt(:,iL)*rFracBot
+        ELSE
+          muSun = cos(raSunAngles(MP2Lay(iL))*kPi/180.0)
+          raAngleTrans = exp(-raaExt(:,iL)/muSun)
+          raSun  = raSun*raAngleTrans
+          raTau  = raaExt(:,iL)
         END IF
 
-        DO iFr = 1,kMaxPts
-            raaTempX(iFr,iPutLay) = raThermal(iFr)*rGaussWeight*muSat + &
-            raaTempX(iFr,iPutLay)
-        END DO
+        !!! now see if we need the solar scatter term
+        IF (iaCldLayer(iLay) == 1) THEN
+          raNoScale = 1.0  !!! before Feb 2, 2006
+          raNoScale = 1.0/(1.0 - raaSSAlb(:,iL)/2*(1.0+raaAsym(:,iL)))
+          raSolarScatter  = rahg2_real(-muSun,-muSat,raaAsym(:,iL)) * &
+            (exp(-raNoScale*raTau/muSat) - exp(-raNoScale*raTau/muSun))
+          raSolarScatter  = raaSSAlb(:,iL)*raSun/2.0 * raSolarScatter
+          raThermal = raThermal + raSolarScatter
+        END IF
+      END IF
+
+      raaTempX(:,iPutLay) = raThermal*rGaussWeight*muSat + raaTempX(:,iPutLay)
 
     END DO
 
@@ -1737,51 +1654,47 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
 
     IF (iDownWard == 1) THEN   !no big deal
-        DO iLay=1,iNumLayer
-            iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iLay) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iLay) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iLay) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iLay) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+      END DO
     ELSEIF (iDownWard == -1) THEN   !ooops ... gotta flip things!!!
-        DO iLay=1,iNumLayer
-            iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+      END DO
     END IF
 
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1=raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
     raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -1794,26 +1707,24 @@ CONTAINS
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
     IF (kFlux == 5) THEN
-        troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
-        iL      = iaRadLayer(iLay)
-        rMPTemp = raVT1(iL)
-        DO iFr = 1,kMaxPts
-            raaRad(iFr,iL) = ttorad(raFreq(iFr),rMPTemp)
-        END DO
+      iL      = iaRadLayer(iLay)
+      rMPTemp = raVT1(iL)
+      raaRad(:,iL) = rattorad(raFreq,rMPTemp)
     END DO
 
     IF (kFlux == 2) THEN
-        CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
+      CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
         rSurfPress,raPressLevels,raThickness,raDensityX,raDensity0, &
         raDeltaPressure,rFracTop,rFracBot)
     END IF
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        write(kStdWarn,*) '  >> Setting cloud params for TwoSlab PCLSAM flux'
-        CALL SetMieTables_RTSPEC(raFreq, &
+      write(kStdWarn,*) '  >> Setting cloud params for TwoSlab PCLSAM flux'
+      CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
@@ -1828,8 +1739,8 @@ CONTAINS
         IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
         iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA)
     ELSE
-        write(kStdWarn,*) '  >> Setting cloud params for 100 layer PCLSAM flux'
-        CALL SetMieTables_RTSPEC_100layer(raFreq, &
+      write(kStdWarn,*) '  >> Setting cloud params for 100 layer PCLSAM flux'
+      CALL SetMieTables_RTSPEC_100layer(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable, &
@@ -1849,26 +1760,26 @@ CONTAINS
 
 ! if CloudySky > 0 then go ahead with PCLSAM!
     IF (iCloudySky < 0) THEN
-        write(kStdErr,*) 'Cannot do flux for clear sky with scatter_pclsam'
-        CALL DoStop
+      write(kStdErr,*) 'Cannot do flux for clear sky with scatter_pclsam'
+      CALL DoStop
     END IF
 
 !!!!!!! we bloody well need the temperature profile in terms of the
 !!!!!!! pressure layers, so we need to fill in the array TEMP
     CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
-    iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
-    ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
-    ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
-    iProfileLayers,raPressLevels)
+      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
+      ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
+      ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
+      iProfileLayers,raPressLevels)
 
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
-    iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
+      iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
 
     CALL CopyRaaExt_twostream(raaAbs,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-    iaaRadLayer,iAtm,iNumlayer)
+      iaaRadLayer,iAtm,iNumlayer)
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        CALL AddCloud_pclsam(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+      CALL AddCloud_pclsam(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
         NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
@@ -1877,10 +1788,8 @@ CONTAINS
         TABEXTINCT, TABSSALB, TABASYM, &
         TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     ELSE
-        DO iLay = 1,kProfLayer
-            raCC(iLay) = 1.0
-        END DO
-        CALL AddCloud_pclsam_SunShine_100layerclouds( &
+      raCC = 1.0
+      CALL AddCloud_pclsam_SunShine_100layerclouds( &
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -1891,12 +1800,8 @@ CONTAINS
         TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     END IF
 
-    DO iFr=1,kMaxPts
-        DO iLay=1,kProfLayer+1
-            raaDownFlux(iFr,iLay) = 0.0
-            raaUpFlux(iFr,iLay)   = 0.0
-        END DO
-    END DO
+    raaDownFlux = 0.0
+    raaUpFlux   = 0.0
 
 ! highest layer that we need to output radiances for = iNumLayer
     iHigh=iNumLayer
@@ -1904,13 +1809,11 @@ CONTAINS
     write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
     write(kStdWarn,*) 'topindex in atmlist where flux required =',iHigh
            
-    DO iFr=1,kMaxPts
     ! initialize the solar and thermal contribution to 0
-        raSun(iFr)     = 0.0
-        raThermal(iFr) = 0.0
+    raSun     = 0.0
+    raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
-    END DO
+    raUp = rattorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -1918,91 +1821,73 @@ CONTAINS
 ! if rEmsty=1, then intensity need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
      
 ! see if we have to add on the solar contribution
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,iTag)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
+      write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
      
 ! now we have the total upwelling radiation at the surface, indpt of angle!!!!
 ! this is the STARTING radiation that will go upwards
-    DO iFr=1,kMaxPts
-        raUp(iFr)=raUp(iFr)*raUseEmissivity(iFr)+ &
-        raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-        raSun(iFr)*raSunRefl(iFr)
-    END DO
+    raUp = raUp*raUseEmissivity+ &
+        raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+        raSun*raSunRefl
 
 !^^^^^^^^^^^^^^^^^^^^ compute downgoing radiation at TOA ^^^^^^^^^^^^^^^^
 ! this is the background thermal down to instrument
-    DO iFr = 1,kMaxPts
-        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
-    END DO
+    raDown = rattorad(raFreq,rTSpace)
 
 ! this is the solar down to instrument
     IF (iDoSolar >= 0) THEN
-    ! angle the sun subtends at the earth = area of sun/(dist to sun)^2
-        rOmegaSun = kOmegaSun
-        rSunTemp  = kSunTemp
-        rSunAngle = kSolarAngle !instead of rSunAngle, use lowest layer angle
-        rSunAngle = raSunAngles(MP2Lay(1))
-    ! change to radians
-        rSunAngle = (rSunAngle*kPi/180.0)
-        rCos      = cos(rSunAngle)
+      ! angle the sun subtends at the earth = area of sun/(dist to sun)^2
+      rOmegaSun = kOmegaSun
+      rSunTemp  = kSunTemp
+      rSunAngle = kSolarAngle !instead of rSunAngle, use lowest layer angle
+      rSunAngle = raSunAngles(MP2Lay(1))
+      ! change to radians
+      rSunAngle = (rSunAngle*kPi/180.0)
+      rCos      = cos(rSunAngle)
     END IF
 
     IF (kFlux == 4) THEN
-        iComputeAll = -1  !!! only compute flux at boundaries (OLR)
+      iComputeAll = -1  !!! only compute flux at boundaries (OLR)
     ELSE
-        iComputeAll = +1  !!! compute flux at all layers
+      iComputeAll = +1  !!! compute flux at all layers
     END IF
 
     iDefault = +1     !!! compute flux at all layers
-
-!      IF (iDefault .NE. iComputeAll) THEN
-!        write (KstdMain,*) 'in subroutine pclsam_flux_accurate (cloudysky)'
-!        write (KstdMain,*) 'correct fluxes ONLY at top/bottom levels!!!'
-!      END IF
 
 !^^^^^^^^^ compute downward flux, at bottom of each layer  ^^^^^^^^^^^^^^^^
 ! ^^^^^^^^ if we only want OLR, we do not need the downward flux!! ^^^^^^^^
 
     IF (kFlux <= 3 .OR. kFLux == 5) THEN !!do up and down flux
-        write(kStdWarn,*) 'downward flux, with exp integrals'
-        rCosAngle = 1.0
+      write(kStdWarn,*) 'downward flux, with exp integrals'
+      rCosAngle = 1.0
 
-        DO iLay=1,kProfLayer
-            DO iFr=1,kMaxPts
-                raaCumSum(iFr,iLay) = 0.0
-            END DO
-        END DO
+      raaCumSum = 0.0
          
-    ! first do the pressure level boundary at the very top of atmosphere
-    ! ie where instrument is
-        iLay=iNumLayer+1
-        DO iFr=1,kMaxPts
-            raaDownFlux(iFr,iLay) = raDown(iFr)*0.5
-        END DO
+      ! first do the pressure level boundary at the very top of atmosphere
+      ! ie where instrument is
+      iLay = iNumLayer+1
+      raaDownFlux(:,iLay) = raDown*0.5
          
-    ! then loop over the atmosphere, down to ground
-        DO iLay = iNumLayer,1,-1
-            iL = iaRadLayer(iLay)
-            CALL cumulativelayer_expint3(raFreq,raaExtTemp,raaRad,raVT1,raDown, &
+      ! then loop over the atmosphere, down to ground
+      DO iLay = iNumLayer,1,-1
+        iL = iaRadLayer(iLay)
+        CALL cumulativelayer_expint3(raFreq,raaExtTemp,raaRad,raVT1,raDown, &
             iLay,iL,iNumLayer,-1,iComputeAll, &
             raaCumSum,raTemp,raY,troplayer)
-            DO iFr=1,kMaxPts
-                raaDownFlux(iFr,iLay) = raTemp(iFr) - raaRad(iFr,iL)*raY(iFr) + &
-                raaRad(iFr,iL)/2.0
-            END DO
-        END DO
+        raaDownFlux(:,iLay) = raTemp - raaRad(:,iL)*raY + raaRad(:,iL)/2.0
+      END DO
     END IF
      
 
@@ -2012,39 +1897,30 @@ CONTAINS
     write(kStdWarn,*) 'upward flux, with exp integrals'
     rCosAngle = 1.0
      
-    DO iLay=1,kProfLayer
-        DO iFr=1,kMaxPts
-            raaCumSum(iFr,iLay) = 0.0
-        END DO
-    END DO
+    raaCumSum = 0.0
      
 ! first do the pressure level boundary at the very bottom of atmosphere
 ! ie where ground is
     iLay=1
-    DO iFr=1,kMaxPts
-        raaUpFlux(iFr,iLay) = raUp(iFr)*0.5
-    END DO
+    raaUpFlux(:,iLay) = raUp*0.5
      
 ! then loop over the atrmosphere, up to the top
     DO iLay = 1,iNumLayer
-        iL=iaRadLayer(iLay)
-        CALL cumulativelayer_expint3(raFreq,raaExtTemp,raaRad,raVT1,raUp, &
+      iL=iaRadLayer(iLay)
+      CALL cumulativelayer_expint3(raFreq,raaExtTemp,raaRad,raVT1,raUp, &
         iLay,iL,iNumLayer,+1,iComputeAll, &
         raaCumSum,raTemp,raY,troplayer)
-        DO iFr=1,kMaxPts
-            raaUpFlux(iFr,iLay+1) = raTemp(iFr) - raaRad(iFr,iL)*raY(iFr) + &
-            raaRad(iFr,iL)/2.0
-        END DO
+      raaUpFlux(:,iLay+1) = raTemp - raaRad(:,iL)*raY + raaRad(:,iL)/2.0
     END DO
      
 !------------------------------------------------------------------------
     rDelta = kaFrStep(iTag)
     CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
-    raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
-    raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
+      raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
+      raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
     CALL fill_raaFluxOut(raaDownFlux,raaUpFlux,raPressLevels, &
-    troplayer,iaRadLayer,iNumLayer,raaFluxOut)
+      troplayer,iaRadLayer,iNumLayer,raaFluxOut)
 
     RETURN
     end SUBROUTINE flux_pclsam_fastloop
@@ -2255,8 +2131,8 @@ CONTAINS
 !!! this is a COMPILE time variable
     iDefault = +43
     IF (iDefault /= iVary) THEN
-        write(kStdErr,*) 'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
-        write(kStdWarn,*)'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
+      write(kStdErr,*) 'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
+      write(kStdWarn,*)'iDefault, iVary in flux_moment_slowloopLinearVaryT ',iDefault,iVary
     END IF
           
     write(kStdWarn,*) '  '
@@ -2271,13 +2147,13 @@ CONTAINS
 
     iDefault = 3           !!!RRTM,LBLRTM do 3 gauss points
     IF (iDefault /= iGaussPts) THEN
-        write(kStdErr,*) 'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
-        write(kStdWarn,*)'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
+      write(kStdErr,*) 'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
+      write(kStdWarn,*)'iDefault, iGaussPts in flux_moment_slowloopLinearVaryT ',iDefault,iGaussPts
     END IF
 
     IF (iGaussPts > kGauss) THEN
-        write(kStdErr,*) 'need iGaussPts < kGauss'
-        CALL DoStop
+      write(kStdErr,*) 'need iGaussPts < kGauss'
+      CALL DoStop
     END IF
     CALL FindGauss2(iGaussPts,daGaussPt,daGaussWt)
           
@@ -2295,51 +2171,48 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
 
     IF (iDownWard == 1) THEN   !no big deal
-        DO iLay=1,iNumLayer
-            iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iLay) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iLay) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iLay) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iLay) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+      END DO
     ELSEIF (iDownWard == -1) THEN   !ooops ... gotta flip things!!!
-        DO iLay=1,iNumLayer
-            iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+      END DO
     END IF
 
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1 = raVTemp
+
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
     raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -2353,7 +2226,7 @@ CONTAINS
 
 !!!do default stuff; set temperatures at layers
     DO iLay = 1,kProfLayer
-        raVT2(iLay) = raVTemp(iLay)
+      raVT2(iLay) = raVTemp(iLay)
     END DO
     iL = iaRadLayer(iNumLayer)
     raVt2(iL) = raVT1(iL)    !!!!set fractional bot layer tempr correctly
@@ -2362,26 +2235,24 @@ CONTAINS
     raVt2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
 
     IF (kFlux == 5) THEN
-        troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
-        iL      = iaRadLayer(iLay)
-        rMPTemp = raVT1(iL)
-        DO iFr = 1,kMaxPts
-            raaRad(iFr,iL) = ttorad(raFreq(iFr),rMPTemp)
-        END DO
+      iL      = iaRadLayer(iLay)
+      rMPTemp = raVT1(iL)
+      raaRad(:,iL) = rattorad(raFreq,rMPTemp)
     END DO
 
     IF (kFlux == 2) THEN
-        CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
+      CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
         rSurfPress,raPressLevels,raThickness,raDensityX,raDensity0, &
         raDeltaPressure,rFracTop,rFracBot)
     END IF
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        write(kStdWarn,*) '  >> Setting cloud params for TwoSlab PCLSAM flux'
-        CALL SetMieTables_RTSPEC(raFreq, &
+      write(kStdWarn,*) '  >> Setting cloud params for TwoSlab PCLSAM flux'
+      CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
@@ -2396,8 +2267,8 @@ CONTAINS
         IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
         iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA)
     ELSE
-        write(kStdWarn,*) '  >> Setting cloud params for 100 layer PCLSAM flux'
-        CALL SetMieTables_RTSPEC_100layer(raFreq, &
+      write(kStdWarn,*) '  >> Setting cloud params for 100 layer PCLSAM flux'
+      CALL SetMieTables_RTSPEC_100layer(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable, &
@@ -2417,27 +2288,26 @@ CONTAINS
 
 ! if CloudySky > 0 then go ahead with PCLSAM!
     IF (iCloudySky < 0) THEN
-        write(kStdErr,*) 'Should not do flux for clear sky with scatter_pclsam'
-        write(kStdErr,*) 'but will let this happen because it is the CLEAR SKY contribution'
-    !        CALL DoStop
+      write(kStdErr,*) 'Should not do flux for clear sky with scatter_pclsam'
+      write(kStdErr,*) 'but will let this happen because it is the CLEAR SKY contribution'
     END IF
 
 !!!!!!! we bloody well need the temperature profile in terms of the
 !!!!!!! pressure layers, so we need to fill in the array TEMP
     CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
-    iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
-    ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
-    ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
-    iProfileLayers,raPressLevels)
+      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
+      ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
+      ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
+      iProfileLayers,raPressLevels)
 
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
-    iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
+      iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
 
     CALL CopyRaaExt_twostream(raaAbs,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-    iaaRadLayer,iAtm,iNumlayer)
+      iaaRadLayer,iAtm,iNumlayer)
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        CALL AddCloud_pclsam(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+      CALL AddCloud_pclsam(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
         NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
@@ -2446,10 +2316,8 @@ CONTAINS
         TABEXTINCT, TABSSALB, TABASYM, &
         TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     ELSE
-        DO iLay = 1,kProfLayer
-            raCC(iLay) = 1.0
-        END DO
-        CALL AddCloud_pclsam_SunShine_100layerclouds( &
+      raCC = 1.0
+      CALL AddCloud_pclsam_SunShine_100layerclouds( &
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -2460,12 +2328,8 @@ CONTAINS
         TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     END IF
 
-    DO iFr=1,kMaxPts
-        DO iLay=1,kProfLayer+1
-            raaDownFlux(iFr,iLay) = 0.0
-            raaUpFlux(iFr,iLay)   = 0.0
-        END DO
-    END DO
+    raaDownFlux = 0.0
+    raaUpFlux   = 0.0
 
 ! highest layer that we need to output radiances for = iNumLayer
     iHigh=iNumLayer
@@ -2473,13 +2337,11 @@ CONTAINS
     write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
     write(kStdWarn,*) 'topindex in atmlist where flux required =',iHigh
            
-    DO iFr=1,kMaxPts
     ! initialize the solar and thermal contribution to 0
-        raSun(iFr)     = 0.0
-        raThermal(iFr) = 0.0
+    raSun     = 0.0
+    raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        raUp(iFr) = ttorad(raFreq(iFr),rTSurf)
-    END DO
+    raUp = rattorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -2487,203 +2349,166 @@ CONTAINS
 ! if rEmsty=1, then intensity need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
      
 ! see if we have to add on the solar contribution
     iDoSolar = kSolar
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,iTag)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
+      write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
      
 ! now we have the total upwelling radiation at the surface, indpt of angle!!!!
 ! this is the STARTING radiation that will go upwards
-    DO iFr=1,kMaxPts
-        raUp(iFr)=raUp(iFr)*raUseEmissivity(iFr)+ &
-        raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-        raSun(iFr)*raSunRefl(iFr)
-    END DO
+    raUp = raUp*raUseEmissivity+ &
+        raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+        raSun*raSunRefl
 
 !^^^^^^^^^^^^^^^^^^^^ compute downgoing radiation at TOA ^^^^^^^^^^^^^^^^
 ! this is the background thermal down to instrument
-    DO iFr = 1,kMaxPts
-        raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
-    END DO
+    raDown = rattorad(raFreq,rTSpace)
 
 ! this is the solar down to instrument
     IF (iDoSolar >= 0) THEN
-    ! angle the sun subtends at the earth = area of sun/(dist to sun)^2
-        rOmegaSun = kOmegaSun
-        rSunTemp  = kSunTemp
-        rSunAngle = kSolarAngle !instead of rSunAngle, use lowest layer angle
-        rSunAngle = raSunAngles(MP2Lay(1))
-    ! change to radians
-        rSunAngle = (rSunAngle*kPi/180.0)
-        rCos      = cos(rSunAngle)
+      ! angle the sun subtends at the earth = area of sun/(dist to sun)^2
+      rOmegaSun = kOmegaSun
+      rSunTemp  = kSunTemp
+      rSunAngle = kSolarAngle !instead of rSunAngle, use lowest layer angle
+      rSunAngle = raSunAngles(MP2Lay(1))
+      ! change to radians
+      rSunAngle = (rSunAngle*kPi/180.0)
+      rCos      = cos(rSunAngle)
     END IF
 
     IF (kFlux == 4) THEN
-        iComputeAll = -1  !!! only compute flux at boundaries (OLR)
+      iComputeAll = -1  !!! only compute flux at boundaries (OLR)
     ELSE
-        iComputeAll = +1  !!! compute flux at all layers
+      iComputeAll = +1  !!! compute flux at all layers
     END IF
 
     iDefault = +1     !!! compute flux at all layers
 
-!      IF (iDefault .NE. iComputeAll) THEN
-!        write (KstdMain,*) 'in subroutine pclsam_flux_accurate (cloudysky)'
-!        write (KstdMain,*) 'correct fluxes ONLY at top/bottom levels!!!'
-!      END IF
-
 ! >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
 ! >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
 ! >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
-
 
 !^^^^^^^^^ compute downward flux, at bottom of each layer  ^^^^^^^^^^^^^^^^
 ! ^^^^^^^^ if we only want OLR, we do not need the downward flux!! ^^^^^^^^
 ! loop over angles for downward flux
 
     IF (kFlux <= 3 .OR. kFLux >= 5) THEN
-    !!!do down and up going fluxes
-        DO iAngle  =  1,iGausspts
-            write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
+      !!!do down and up going fluxes
+      DO iAngle  =  1,iGausspts
+        write(kStdWarn,*) 'downward flux, angular index  =  ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
         ! remember the mu's are already defined by the Gaussian pts cosine(theta)
-            rCosAngle = SNGL(daGaussPt(iAngle))
+        rCosAngle = SNGL(daGaussPt(iAngle))
         ! initialize the radiation to that at the top of the atmosphere
-            DO iFr = 1,kMaxPts
-                raTemp(iFr) = raDown(iFr)
-            END DO
+        raTemp = raDown
 
         ! now loop over the layers, for the particular angle
 
         ! first do the pressure level boundary at the very top of atmosphere
         ! ie where instrument is
-            iLay = iNumLayer+1
-            DO iFr = 1,kMaxPts
-                raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+ &
-                raTemp(iFr)*SNGL(daGaussWt(iAngle))
-            END DO
+        iLay = iNumLayer+1
+        raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
 
         ! then do the bottom of this layer
-            DO iLay = iNumLayer,iNumLayer
-                iL = iaRadLayer(iLay)
-            !            CALL RT_ProfileDNWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
-                CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+        DO iLay = iNumLayer,iNumLayer
+          iL = iaRadLayer(iLay)
+          !CALL RT_ProfileDNWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
+          CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
                 rCosAngle,rFracTop, &
                 iVary,raTemp)
-                DO iFr = 1,kMaxPts
-                    raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+ &
-                    raTemp(iFr)*SNGL(daGaussWt(iAngle))
-                END DO
-            END DO
+          raaDownFlux(:,iLay) = raaDownFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
+        END DO
+
         ! then continue upto top of ground layer
-            DO iLay = iNumLayer-1,2,-1
-                iL = iaRadLayer(iLay)
-            !            CALL RT_ProfileDNWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
-                CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
-                rCosAngle,1.0, &
-                iVary,raTemp)
-                DO iFr = 1,kMaxPts
-                    raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+ &
-                    raTemp(iFr)*SNGL(daGaussWt(iAngle))
-                END DO
-            END DO
+        DO iLay = iNumLayer-1,2,-1
+          iL = iaRadLayer(iLay)
+          !CALL RT_ProfileDNWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
+          CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+            rCosAngle,1.0, &
+            iVary,raTemp)
+          raaDownFlux(:,iLay) = raaDownFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
+        END DO
         ! do very bottom of bottom layer ie ground!!!
-            DO iLay = 1,1
-                iL = iaRadLayer(iLay)
-            !            CALL RT_ProfileDNWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
-                CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+        DO iLay = 1,1
+          iL = iaRadLayer(iLay)
+          !CALL RT_ProfileDNWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
+          CALL RT_ProfileDNWELL_LINEAR_IN_TAU_FORFLUX(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
                 rCosAngle,rFracBot, &
                 iVary,raTemp)
-                DO iFr = 1,kMaxPts
-                    raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+ &
-                    raTemp(iFr)*SNGL(daGaussWt(iAngle))
-                END DO
-            END DO
+           raaDownFlux(:,iLay) = raaDownFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
         END DO
+      END DO
     END IF
 
 !^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
 ! loop over angles for upward flux
 
     DO iAngle = 1,iGaussPts
-        write(kStdWarn,*) 'upward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
-    ! remember the mu's are already defined by the Gaussian pts cosine(theta)
-        rCosAngle = SNGL(daGaussPt(iAngle))
-    ! initialize the radiation to that at the bottom of the atmosphere
-        DO iFr = 1,kMaxPts
-            raTemp(iFr) = raUp(iFr)
-        END DO
+      write(kStdWarn,*) 'upward flux, angular index = ',iAngle, ' cos(angle) = ',SNGL(daGaussPt(iAngle))
+      ! remember the mu's are already defined by the Gaussian pts cosine(theta)
+      rCosAngle = SNGL(daGaussPt(iAngle))
+      ! initialize the radiation to that at the bottom of the atmosphere
+      raTemp = raUp
+    END DO
               
     ! now loop over the layers, for the particular angle
 
     ! first do the pressure level boundary at the very bottom of atmosphere
     ! ie where ground is
-        iLay = 1
-        DO iFr = 1,kMaxPts
-            raaUpFlux(iFr,iLay) = raaUpFlux(iFr,iLay)+ &
-            raTemp(iFr)*SNGL(daGaussWt(iAngle))
-        END DO
+    iLay = 1
+    raaUpFlux(:,iLay) = raaUpFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
+
     ! then do the top of this layer
-        DO iLay = 1,1
-            iL = iaRadLayer(iLay)
-            rMPTemp = ravt2(iL)
-        !          CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
-            CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
-            rCosAngle,rFracBot, &
-            iVary,raTemp)
-            DO iFr = 1,kMaxPts
-                raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
-                raTemp(iFr)*SNGL(daGaussWt(iAngle))
-            END DO
-        END DO
+    DO iLay = 1,1
+      iL = iaRadLayer(iLay)
+      rMPTemp = ravt2(iL)
+      !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
+      CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+        rCosAngle,rFracBot, &
+        iVary,raTemp)
+      raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
+    END DO
     ! then continue upto bottom of top layer
-        DO iLay = 2,iNumLayer-1
-            iL = iaRadLayer(iLay)
-            rMPTemp = ravt2(iL)
-        !          CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
-            CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
-            rCosAngle,1.0, &
-            iVary,raTemp)
-        !          print *,iL,'+',raTemp(1),rMPTemp,rCosAngle
-            DO iFr = 1,kMaxPts
-                raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
-                raTemp(iFr)*SNGL(daGaussWt(iAngle))
-            END DO
-        END DO
+    DO iLay = 2,iNumLayer-1
+      iL = iaRadLayer(iLay)
+      rMPTemp = ravt2(iL)
+      !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
+      CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+        rCosAngle,1.0, &
+        iVary,raTemp)
+      raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
+    END DO
     ! do very top of top layer ie where instrument is!!!
-        DO iLay = iNumLayer,iNumLayer
-            iL = iaRadLayer(iLay)
-            rMPTemp = ravt2(iL)
-        !          CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
-            CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
-            rCosAngle,rFracTop, &
-            iVary,raTemp)
-            DO iFr = 1,kMaxPts
-                raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
-                raTemp(iFr)*SNGL(daGaussWt(iAngle))
-            END DO
-        END DO
+    DO iLay = iNumLayer,iNumLayer
+      iL = iaRadLayer(iLay)
+      rMPTemp = ravt2(iL)
+      !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
+      CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+        rCosAngle,rFracTop, &
+        iVary,raTemp)
+      raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
     END DO
 
 !------------------------------------------------------------------------
 
     rDelta = kaFrStep(iTag)
     CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
-    raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
-    raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
+      raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
+      raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
     CALL fill_raaFluxOut(raaDownFlux,raaUpFlux,raPressLevels, &
-    troplayer,iaRadLayer,iNumLayer,raaFluxOut)
-          
+      troplayer,iaRadLayer,iNumLayer,raaFluxOut)
+
     RETURN
     end SUBROUTINE flux_pclsam_fastloop_LinearVaryT
 
@@ -2701,79 +2526,54 @@ CONTAINS
     REAL :: raPressLevels(kProfLayer+1)
     INTEGER :: iaRadLayer(kProfLayer),iNumLayer,troplayer
 ! output
-    REAL :: raaFluxOut(kMaxPts,2*(kProfLayer+1))
+    REAL :: raaFluxOut(kMaxPts,2*(kProfLayer+1)),raJunk(kProfLayer+1)
 
 ! local
     INTEGER :: iL,iLay,iFr
           
     IF (kFlux == 1) THEN
-        DO iL = 1,iNumLayer+1
-            DO iFr = 1,kMaxPts
-                raaFluxOut(iFr,iL) = raaDownFlux(iFr,iL) * 2.0 * kPi
-            END DO
-        END DO
+      DO iL = 1,iNumLayer+1
+        raaFluxOut(:,IL) = raaDownFlux(:,IL) * 2.0 * kPi
+      END DO
     ELSEIF (kFlux == 3) THEN
-        DO iL = 1,iNumLayer+1
-            DO iFr = 1,kMaxPts
-                raaFluxOut(iFr,iL) = raaUpFlux(iFr,iL) * 2.0 * kPi
-            END DO
-        END DO
+      DO iL = 1,iNumLayer+1
+        raaFluxOut(:,IL) = raaUpFlux(:,IL) * 2.0 * kPi
+      END DO
     ELSEIF (kFlux == 2) THEN
-    !! net flux at each level = up - down
-        DO iL = 1,iNumLayer+1
-            DO iFr = 1,kMaxPts
-                raaUpFlux(iFr,iL) = raaUpFlux(iFr,iL)-raaDownFlux(iFr,iL)
-            END DO
-        END DO
-    !! divergence of flux, and of pressure
-        iL = iNumLayer + 1
-        DO iFr = 1,kMaxPts
-            raaFluxOut(iFr,iL) = 0.0
-        END DO
-        DO iL = 1,iNumLayer
-            iLay = iaRadLayer(iL)
-            raaDownFlux(1,iL) = raPressLevels(iLay+1)-raPressLevels(iLay)
-            DO iFr = 1,kMaxPts
-                raaFluxOut(iFr,iL) = raaUpFlux(iFr,iL+1)-raaUpFlux(iFr,iL)
-            END DO
-        END DO
-    !! heating rate = div(flux)/div p
-        DO iL = 1,iNumLayer
-            DO iFr = 1,kMaxPts
-                raaFluxOut(iFr,iL) = raaFluxOut(iFr,iL)/raaDownFlux(1,iL) * 8.4438/1000.0 * 2 * kPi
-            END DO
-        END DO
+      !! net flux at each level = up - down
+      raaUpFlux = raaUpFlux - raaDownFlux
+      !! divergence of flux, and of pressure
+      iL = iNumLayer + 1
+      raaFluxOut(:,iL) = 0.0
+      DO iL = 1,iNumLayer
+        iLay = iaRadLayer(iL)
+        raJunK(iL) = raPressLevels(iLay+1)-raPressLevels(iLay)
+        raaFluxOut(:,iL) = raaUpFlux(:,iL+1)-raaUpFlux(:,iL)
+      END DO
+      !! heating rate = div(flux)/div p
+      DO iL = 1,iNumLayer
+        raaFluxOut(:,iL) = raaFluxOut(:,iL)/raJunk(iL) * 8.4438/1000.0 * 2 * kPi
+      END DO
+
     ELSEIF (kFlux == 4) THEN
-    !! already multiplied by 2.0 * kPi
-        iL = 1
-        DO iFr = 1,kMaxPts
-            raaFluxOut(iFr,iL) = raaUpFlux(iFr,iNumLayer+1)
-        END DO
+      !! already multiplied by 2.0 * kPi
+      iL = 1
+      raaFluxOut(:,iL) = raaUpFlux(:,iNumLayer+1)
     ELSEIF (kFlux == 5) THEN
-    !! already multiplied by 2.0 * kPi
-        iL = 1
-        DO iFr = 1,kMaxPts
-            raaFluxOut(iFr,1) = raaDownFlux(iFr,iL)
-        END DO
-        iL = troplayer
-        DO iFr = 1,kMaxPts
-            raaFluxOut(iFr,2) = raaUpFlux(iFr,iL)
-        END DO
-        iL = iNumLayer + 1
-        DO iFr = 1,kMaxPts
-            raaFluxOut(iFr,3) = raaUpFlux(iFr,iL)
-        END DO
+      !! already multiplied by 2.0 * kPi
+      iL = 1
+      raaFluxOut(:,1) = raaDownFlux(:,iL)
+      iL = troplayer
+      raaFluxOut(:,2) = raaUpFlux(:,iL)
+      iL = iNumLayer + 1
+      raaFluxOut(:,3) = raaUpFlux(:,iL)
     ELSEIF (kFlux == 6) THEN
-        DO iL = 1,iNumLayer+1
-            DO iFr = 1,kMaxPts
-                raaFluxOut(iFr,iL) = raaUpFlux(iFr,iL)
-            END DO
-        END DO
-        DO iL = 1,iNumLayer+1
-            DO iFr = 1,kMaxPts
-                raaFluxOut(iFr,iL+iNumLayer+1) = raaDownFlux(iFr,iL)
-            END DO
-        END DO
+      DO iL = 1,iNumLayer+1
+         raaFluxOut(:,iL) = raaUpFlux(:,iL)
+      END DO
+      DO iL = 1,iNumLayer+1
+        raaFluxOut(:,iL+iNumLayer+1) = raaDownFlux(:,iL)
+      END DO
     END IF
 
     RETURN
