@@ -4697,7 +4697,7 @@ CONTAINS
     write(kStdWarn,*) '  numpoints regressed for LBLRTM higres = ',iNumPointsInChunk,' npred = ',iNpred
     write(kStdWarn,*) '  maxDBT,minDBT,meanDBT = ',maxDBT,minDBT,meanDBT
           
-    CALL ttorad_array(raFreq,raBT0,raNewR)
+    CALL ttorad_array_lblrtmfix(raFreq,raBT0,raNewR)
     DO iFr = 1,iNumPointsInChunk
       raInten(iaIndices(iFr)) = raNewR(iaIndices(iFr))
     END DO

@@ -593,6 +593,9 @@ v1.21
 3/20/19        Have f90ized most of the main files (readers/writers and then
                rads, jacs, fluxes for clear sky and PCLSAM
                Have ignored the NLTE and the other scattering codes (RTSPEC,DISORT,etc)
+
+               Right now there is a bug in clear sky up welling flux
+                                        in PCLSAM TwoSlab T/Q/Wgt jacobians
  
 3/12/2019      Started modifying .f90 files to take advantage of Matlab-like looping
                http://www.pcc.qub.ac.uk/tec/courses/f90/stu-notes/F90_notesMIF_5.html

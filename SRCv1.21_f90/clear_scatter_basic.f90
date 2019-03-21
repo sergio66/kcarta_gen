@@ -201,7 +201,7 @@ CONTAINS
 
     IF (iVary == -2) THEN
       !!!NO LAYER EMISSION csun debug!!!
-      raInten(iFr) = raInten(iFr)*exp(-raaAbs(iFr,iL)/rCos)
+      raInten = raInten*exp(-raaAbs(:,iL)/rCos)
     ELSEIF ((iVary >= -1) .AND. (iRTSPEC < 0)) THEN
       !!!either exp temperature dependace or none; rBooga carries this info
       IF (rFrac >= 0.9999) THEN
@@ -1077,7 +1077,7 @@ CONTAINS
       !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
       !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
       !!! PADE APPROX two term (combo of GENLN2 and LBLRTM)
-      raAbs = raaAbs(iFr,iL)/raCos(iFr)*rFrac
+      raAbs = raaAbs(:,iL)/raCos*rFrac
       raTrans = exp(-raAbs)
       raZeta = 0.2*raAbs             !! pade one
       raFcn = (raIntenAvg + raZeta*raIntenP)/(1+raZeta)

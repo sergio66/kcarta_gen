@@ -1903,9 +1903,7 @@ CONTAINS
           Call DoStop
         END IF
 
-        raAtmLoop(1) = 1.0
-        raAtmLoop(2) = 1.0
-        raAtmLoop(3) = 1.0
+        raAtmLoop(1:iNatm) = 1.0
 
         CALL duplicate_cloudsky100slabs_atm(iAtmLoop,raAtmLoop, &
             iNatm,iaMPSetForRad,raFracTop,raFracBot,raPressLevels, &
@@ -1943,9 +1941,10 @@ CONTAINS
           IF (kMaxAtm < 5) THEN
             write(kStdErr,*) 'trying to duplicate 5 atm but kMaxAtm = ',kMaxAtm
             Call DoStop
+          ELSE
+            raAtmLoop(1:iNatm) = 1.0		
           END IF
-          raAtmLoop = 1.0
-		
+
         ELSEIF ((cngwat2 <= 0) .AND. (cfrac2 <= 0) .AND. (iaCloudScatType(2) <= 0))  THEN
           iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
                           
@@ -1960,12 +1959,12 @@ CONTAINS
           write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=3'
                     
           IF (kMaxAtm < 3) THEN
-              write(kStdErr,*) 'trying to duplicate 3 atm but kMaxAtm = ',kMaxAtm
-              Call DoStop
+            write(kStdErr,*) 'trying to duplicate 3 atm but kMaxAtm = ',kMaxAtm
+            Call DoStop
+          ELSE
+            raAtmLoop(1:iNatm) = 1.0		
           END IF
-          raAtmLoop(1) = 1.0
-          raAtmLoop(2) = 1.0
-          raAtmLoop(3) = 1.0
+
         ELSE
           write(kStdErr,*) 'Something wrong with (PCLSAM) clouds, cfrac12 = ',cfrac12
           write(kStdErr,*) 'iNatm has remained ',iNatm

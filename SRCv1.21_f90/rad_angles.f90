@@ -636,84 +636,84 @@ CONTAINS
 
 ! ---------- these are for x < 0  ------------------------------------------
     IF (iNeg >= 1) THEN
-        iN = 1  !calculating E1(x)
+      iN = 1  !calculating E1(x)
 
-        DO iK = 1,iNeg
-            iFr = iaNegative(iK)
-            daX(iFr)  = raX(iFr)*1.0d0
-            am2(iFr)  = 0.0D0
-            bm2(iFr)  = 1.0D0
-            am1(iFr)  = 1.0D0
-            bm1(iFr)  = daX(iFr)
-            f(iFr)    = am1(iFr)/bm1(iFr)
-            oldf(iFr) = 1.0D100
-        END DO
+      DO iK = 1,iNeg
+        iFr = iaNegative(iK)
+        daX(iFr)  = raX(iFr)*1.0d0
+        am2(iFr)  = 0.0D0
+        bm2(iFr)  = 1.0D0
+        am1(iFr)  = 1.0D0
+        bm1(iFr)  = daX(iFr)
+        f(iFr)    = am1(iFr)/bm1(iFr)
+        oldf(iFr) = 1.0D100
+      END DO
 
-        iJ = 2
-        20 CONTINUE
+      iJ = 2
+   20 CONTINUE
 
-    ! calculate the coefficients of the recursion formulas for j even
-        alpha = iN - 1+(iJ/2) ! note: beta= 1
+      ! calculate the coefficients of the recursion formulas for j even
+      alpha = iN - 1+(iJ/2) ! note: beta= 1
 
-        DO iK = 1,iNeg
-            iFr = iaNegative(iK)
-                
-        ! alculate A(j), B(j), and f(j)
-            a = am1(iFr) + alpha * am2(iFr)
-            b = bm1(iFr) + alpha * bm2(iFr)
-               
+      DO iK = 1,iNeg
+        iFr = iaNegative(iK)
+            
+       !calculate A(j), B(j), and f(j)
+        a = am1(iFr) + alpha * am2(iFr)
+        b = bm1(iFr) + alpha * bm2(iFr)
+           
         ! save new normalized variables for next pass through the loop
         !  note: normalization to avoid overflow or underflow
-            am2(iFr) = am1(iFr) / b
-            bm2(iFr) = bm1(iFr) / b
-            am1(iFr) = a / b
-            bm1(iFr) = 1.0D0
-                
-            oldf(iFr) =f(iFr)
-            f(iFr) = am1(iFr)
-        END DO
+        am2(iFr) = am1(iFr) / b
+        bm2(iFr) = bm1(iFr) / b
+        am1(iFr) = a / b
+        bm1(iFr) = 1.0D0
+            
+        oldf(iFr) =f(iFr)
+        f(iFr) = am1(iFr)
+      END DO
 
-        iJ = iJ+1
+      iJ = iJ+1
 
-    ! calculate the coefficients for j odd
-        alpha = (iJ-1)/2
-        DO iK = 1,iNeg
-            iFr = iaNegative(iK)
-            beta = daX(iFr)
-            a = beta * am1(iFr) + alpha * am2(iFr)
-            b = beta * bm1(iFr) + alpha * bm2(iFr)
-            am2(iFr) = am1(iFr) / b
-            bm2(iFr) = bm1(iFr) / b
-            am1(iFr) = a / b
-            bm1(iFr) = 1.0D0
-            oldf(iFr) = f(iFr)
-            f(iFr) = am1(iFr)
-        END DO
+      ! calculate the coefficients for j odd
+      alpha = (iJ-1)/2
+      DO iK = 1,iNeg
+        iFr = iaNegative(iK)
+        beta = daX(iFr)
+        a = beta * am1(iFr) + alpha * am2(iFr)
+        b = beta * bm1(iFr) + alpha * bm2(iFr)
+        am2(iFr) = am1(iFr) / b
+        bm2(iFr) = bm1(iFr) / b
+        am1(iFr) = a / b
+        bm1(iFr) = 1.0D0
+        oldf(iFr) = f(iFr)
+        f(iFr) = am1(iFr)
+      END DO
 
-        iJ = iJ+1
+      iJ = iJ+1
            
-    ! check for convergence
-        iFound = -1
-        DO iK = 1,iNeg
-            iFr = iaNegative(iK)
-            IF (abs(f(iFr)-oldf(iFr)) > 1.0d-14*abs(f(iFr))) THEN
-                iFound = +1
-                GOTO 21
-            END IF
-        END DO
-        21 CONTINUE
-
-        IF (iFound > 0) THEN
-            GOTO 20
+      ! check for convergence
+      iFound = -1
+      DO iK = 1,iNeg
+        iFr = iaNegative(iK)
+        IF (abs(f(iFr)-oldf(iFr)) > 1.0d-14*abs(f(iFr))) THEN
+          iFound = +1
+          GOTO 21
         END IF
+      END DO
+  21 CONTINUE
 
-        DO iK = 1,iNeg
-            iFr = iaNegative(iK)
-            daY(iFr) =  exp(-daX(iFr)) * f(iFr)
-        !!! daY is really complex, but ignore the imag part :
-        !!!     - i*pi*((real(xk)<0)&(imag(xk)==0))
-            raY(iFr) = sngl(daY(iFr))
-        END DO
+    IF (iFound > 0) THEN
+      GOTO 20
+    END IF
+
+    DO iK = 1,iNeg
+      iFr = iaNegative(iK)
+      daY(iFr) =  exp(-daX(iFr)) * f(iFr)
+     !!! daY is really complex, but ignore the imag part :
+      !!!     - i*pi*((real(xk)<0)&(imag(xk)==0))
+      raY(iFr) = sngl(daY(iFr))
+    END DO
 
     END IF
 

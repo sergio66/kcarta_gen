@@ -639,7 +639,7 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine changes the brightness temperatures to intensities
-! for one array point
+! for one BT point
     SUBROUTINE ttorad_oneBT2array(raF,rBT,raInten)
 ! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
 
@@ -651,7 +651,7 @@ CONTAINS
     REAL :: raF(kmaxPts),raInten(kMaxPts),rBT
 
 ! local variables
-    REAL :: r1,r2,rPlanck
+    REAL :: r1,r2,raPlanck(kMaxPts)
     INTEGER :: iFr
      
     r1 = sngl(kPlanck1)
@@ -660,22 +660,20 @@ CONTAINS
 !! 10^10 = e^23.03
 !! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
 !! 10^38  = 87.49
-    DO iFr = 1,kMaxPts
-        rPlanck = r2*raF(iFr)/rBT
-        IF (rPlanck > 87.49) THEN
-            rPlanck = 1.0e38
-        ELSE
-            rPlanck = exp(rPlanck) - 1.0
-        END IF
-        raInten(iFr) = r1*(raF(iFr)**3)/rPlanck
-    END DO
+    raPlanck = r2*raF/rBT
+    WHERE (raPlanck > 87.49)
+      raPlanck = 1.0e38
+    ELSEWHERE
+      raPlanck = exp(raPlanck) - 1.0
+    END WHERE
+    raInten = r1*(raF**3)/raPlanck
 
     RETURN
     end SUBROUTINE ttorad_oneBT2array
 
 !************************************************************************
 ! this subroutine changes the brightness temperatures to intensities for array
-    SUBROUTINE ttorad_array(raF,raBT,raInten)
+    SUBROUTINE ttorad_array_lblrtmfix(raF,raBT,raInten)
 ! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
 
     IMPLICIT NONE
@@ -686,7 +684,7 @@ CONTAINS
     REAL :: raF(kmaxPts),raInten(kMaxPts),raBT(kMaxPts)
 
 ! local variables
-    REAL :: r1,r2,rPlanck
+    REAL :: r1,r2,raPlanck(kMaxPts)
     INTEGER :: iFr
      
     r1 = sngl(kPlanck1)
@@ -695,18 +693,16 @@ CONTAINS
 !! 10^10 = e^23.03
 !! 10^100 = e^233.03 !!! assume 64 bits dangerous hahaha
 !! 10^38  = 87.49
-    DO iFr = 1,kMaxPts
-        rPlanck = r2*raF(iFr)/raBT(iFr)
-        IF (rPlanck > 87.49) THEN
-            rPlanck = 1.0e38
-        ELSE
-            rPlanck = exp(rPlanck) - 1.0
-        END IF
-        raInten(iFr) = r1*(raF(iFr)**3)/rPlanck
-    END DO
+    raPlanck = r2*raF/raBT
+    WHERE (raPlanck > 87.49)
+      raPlanck = 1.0e38
+    ELSEWHERE
+      raPlanck = exp(raPlanck) - 1.0
+    END WHERE
+    raInten = r1*(raF**3)/raPlanck
 
     RETURN
-    end SUBROUTINE ttorad_array
+    end SUBROUTINE ttorad_array_lblrtmfix
 
 !************************************************************************
 ! this subroutine changes the brightness temperatures to intensities
@@ -1001,40 +997,30 @@ CONTAINS
     REAL :: radBackgndThermdT(kMaxPtsJac),radSolardT(kMaxPtsJac)
           
     INTEGER :: iFr
-    REAL :: r1,r2,r3,r4
+    REAL :: r1,r2,ra3(kMaxPts),ra4(kMaxPts)
 
 !! need these for derivatives of Planck
     r1 = sngl(kPlanck1)
     r2 = sngl(kPlanck2)
 
-    DO iFr = 1,kMaxPts
-        r3 = r1*r2 * (raFreq(iFr)**4)/(raInten(iFr)**2)
-        r4 = 1.0+r1 * (raFreq(iFr)**3)/raInten(iFr)
-        radBTdr(iFr) = r3/r4/(alog(r4)**2)
-    END DO
+    ra3 = r1*r2 * (raFreq**4)/(raInten**2)
+    ra4 = 1.0 + r1 * (raFreq**3)/raInten
+    radBTdr = ra3/ra4/(alog(ra4)**2)
 
     IF (kThermal < 0) THEN
-        DO iFr = 1,kMaxPts
-            radBackgndThermdT(iFr) = 0.0
-        END DO
+      radBackgndThermdT = 0.0
     ELSE
-        DO iFr = 1,kMaxPts
-            r3 = r1*r2 * (raFreq(iFr)**4)/(radBackgndThermdT(iFr)**2)
-            r4 = 1.0+r1 * (raFreq(iFr)**3)/radBackGndThermdT(iFr)
-            radBackgndThermdT(iFr) = r3/r4/(alog(r4)**2)
-        END DO
+      ra3 = r1*r2 * (raFreq**4)/(radBackgndThermdT**2)
+      ra4 = 1.0 + r1 * (raFreq**3)/radBackGndThermdT
+      radBackgndThermdT = ra3/ra4/(alog(ra4)**2)
     END IF
 
     IF (kSolar < 0) THEN
-        DO iFr = 1,kMaxPts
-            radSolardT(iFr) = 0.0
-        END DO
+      radSolardT = 0.0
     ELSE
-        DO iFr = 1,kMaxPts
-            r3 = r1*r2 * (raFreq(iFr)**4)/(radSolardT(iFr)**2)
-            r4 = 1.0+r1 * (raFreq(iFr)**3)/radSolardT(iFr)
-            radSolardT(iFr) = r3/r4/(alog(r4)**2)
-        END DO
+      ra3 = r1*r2 * (raFreq**4)/(radSolardT**2)
+      ra4 = 1.0 + r1 * (raFreq**3)/radSolardT
+      radSolardT = ra3/ra4/(alog(ra4)**2)
     END IF
 
     RETURN
@@ -1061,17 +1047,10 @@ CONTAINS
     INTEGER :: iL,iM
     REAL :: raTemp(kMaxPtsJac),raaLay2Sp(kMaxPtsJac,kProfLayerJac)
 
-! local variables
-    INTEGER :: iFr
-
     IF (iL > iM) THEN
-        DO iFr = 1,kMaxPts
-            raTemp(iFr) = 0.0
-        END DO
+      raTemp = 0.0
     ELSE
-        DO iFr = 1,kMaxPts
-            raTemp(iFr) = raaLay2Sp(iFr,iL)
-        END DO
+      raTemp = raaLay2Sp(:,iL)
     END IF
 
     RETURN
@@ -1091,11 +1070,7 @@ CONTAINS
     REAL :: raTorQ(kMaxPtsJac)
     REAL :: raResults(kMaxPtsJac)
 
-    INTEGER :: iFr
-     
-    DO iFr = 1,kMaxPts
-        raResults(iFr) = -raResults(iFr) * raTorQ(iFr)
-    END DO
+    raResults = -raResults * raTorQ
      
     RETURN
     end SUBROUTINE MinusOne

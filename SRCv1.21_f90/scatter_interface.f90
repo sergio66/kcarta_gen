@@ -310,17 +310,17 @@ CONTAINS
       END IF
               
       IF (iAtm == 1) THEN
-        raaRads5(iFr,iL) = 0.0
-        raaRadsX(iFr,iL) = 0.0
-        raaFluxX(iFr,iL) = 0.0
-        raaFlux5(iFr,iL) = 0.0
+        raaRads5 = 0.0
+        raaRadsX = 0.0
+        raaFluxX = 0.0
+        raaFlux5 = 0.0
 
         !! initialize T and Q jacs, also need to do wgt functions and surface jacs UGH
         raaaAllDQ5 = 0.0
-        raaAllDT5(iFr,iL) = 0.0
-        raaAllWgtOut5(iFr,iL) = 0.0
-        raaAllSurfOut(iFr,iL) = 0.0
-        raaAllSurfOut5(iFr,iL) = 0.0
+        raaAllDT5 = 0.0
+        raaAllWgtOut5 = 0.0
+        raaAllSurfOut = 0.0
+        raaAllSurfOut5 = 0.0
       END IF
 	
       iDoPCLSAM = -1    !! assume no need to do PCLSAM scatter calc
@@ -439,6 +439,7 @@ CONTAINS
           DO iL = 1,iNumOutX
             raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
           END DO
+          print *,'individual',iAtm,raFreq(1),rFracX,raaRadsX(1,1),raaRads5(1,1)
         END IF
 
       ELSEIF (iDoPCLSAM < 0) THEN
@@ -455,6 +456,7 @@ CONTAINS
           raRadsX = raaRads5(:,iL)
           CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
         END DO
+        print *,'final',iAtm,raFreq(1),raaRads5(1,1)
         write(kStdWarn,*) 'PCLSAM Clouds : wrote out linear combo of rads'            
 
       END IF    !! iDoPCLSAM > 0

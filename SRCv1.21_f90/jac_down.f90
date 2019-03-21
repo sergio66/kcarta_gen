@@ -641,7 +641,7 @@ CONTAINS
 ! cdebug === this aids in turn off surface term for both DB/DT amd D(tau)/DT
 ! c      IF (kTempJac .NE. 0) THEN
 ! c        DO iFr=1,kMaxPts
-! c          raaSurfLoop(iFr,iLyr) = raaGeneral(iFr,iLyr)
+! c          raaSurfLoop(:,iLyr) = raaGeneral(:,iLyr)
 ! c          END DO
 ! c        END IF
 
@@ -671,7 +671,7 @@ CONTAINS
       ! cdebug === this aids in turn off surface term for both DB/DT amd D(tau)/DT
       ! c        IF (kTempJac .NE. 0) THEN
       ! c          DO iFr=1,kMaxPts
-      ! c            raaSurfLoop(iFr,iLyr) = raaGeneral(iFr,iLyr)
+      ! c            raaSurfLoop(:,iLyr) = raaGeneral(:,iLyr)
       ! c            END DO
       ! c          END IF
 
@@ -739,7 +739,7 @@ CONTAINS
 
 ! set the contribution of the upper layers to 0
 !*** if we want to correctly loop over all 100 layers, set iB = iNumLayer *****
-    raaGeneralTh(iFr,iB+1:iNumLayer) = 0.0
+    raaGeneralTh(:,iB+1:iNumLayer) = 0.0
 
 ! this is "hard" part of the thermal, where we loop over lower layers
 ! that contribute
@@ -945,13 +945,13 @@ CONTAINS
 ! this includes all the surface terms
 !      IF (kTempJac .EQ. 0) THEN
 !        DO iFr=1,kMaxPts
-!          raResults(iFr) = raaGeneral(iFr,iLay)
+!          raResults(:) = raaGeneral(:,iLay)
 !          END DO
 !       ELSE
 !c this turns off the surface terms if we only want to check DB/DT or D(tau)/DT
 !c this way we only have the loop over the layers contributing
 !        DO iFr=1,kMaxPts
-!          raResults(iFr) = raaGeneral(iFr,iLay)-raaSurfLoop(iFr,iLay)
+!          raResults(:) = raaGeneral(:,iLay)-raaSurfLoop(:,iLay)
 !          END DO
 !        END IF
 

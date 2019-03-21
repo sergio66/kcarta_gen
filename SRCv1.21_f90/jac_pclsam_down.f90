@@ -736,7 +736,7 @@ CONTAINS
       END IF
 
       raTemp = raTemp + raTemp1
-      !sun          raResults(iFr) = raTemp(iFr)*raaExtJacobDME(iFr,iLM)
+      !sun          raResults = raTemp*raaExtJacobDME(:,iLM)
       raResults = raResults + raTemp*raaExtJacobDME(:,iLM)
     END IF
 
@@ -912,7 +912,7 @@ CONTAINS
     REAL :: rX
 
 ! iLM = iaRadLayer(iM)
-    raTemp1(iFr) = 0.0
+    raTemp1 = 0.0
 
 ! stuff on Jan 5, 2006
     muSat = cos(raLayAngles(iLM) * kPi/180)
@@ -921,17 +921,14 @@ CONTAINS
 
     rX = (-1/muSat)*(1+muSat/muSun)
 !!! oh boy is this wrong? i think it is fine 1/12/06
-    raTemp(iFr) = 0.0
+    raTemp = 0.0
     DO iJ = 1,iM-1
       iLJ = iaRadLayer(iJ)
       IF (iaCldLayer(iLJ) == 1) THEN
         ! muSat = cos(raLayAngles(iLJ) * kPi/180)
         ! muSun = cos(raSunAngles(iLJ) * kPi/180)
         ! mX = (-1/muSat)*(1+muSat/muSun)
-        DO iFr = 1,kMaxPts
-          raTemp(iFr) = raTemp(iFr) + &
-          raaSolarScatter1Lay(iFr,iLJ)*raaLay2Sp(iFr,iJ+1)*rX
-        END DO
+        raTemp = raTemp + raaSolarScatter1Lay(:,iLJ)*raaLay2Sp(:,iJ+1)*rX
       END IF
     END DO
 
@@ -941,13 +938,9 @@ CONTAINS
     rFac = 1.0 + muSat/muSun
 
     IF (iLM == kProfLayer) THEN
-      DO iFr = 1,kMaxPts
-        raLMp1_toSpace(iFr) = 1.0
-      END DO
+      raLMp1_toSpace = 1.0
     ELSE
-      DO iFr = 1,kMaxPts
-        raLMp1_toSpace(iFr) = raaLay2Sp(iFr,iM+1)
-     END DO
+      raLMp1_toSpace = raaLay2Sp(:,iM+1)
     END IF
 
     RETURN
@@ -1036,13 +1029,9 @@ CONTAINS
 ! note that      iLay + iOffset === iaRadlayer(iLay)
 ! set the constant factor we have to multiply results with
     IF (iIWPorDME == 1) THEN
-      DO iFr=1,kMaxPts
-        raTemp(iFr) = raaExtJacobIWP(iFr,iLay+iOffSet)
-      END DO
+      raTemp = raaExtJacobIWP(:,iLay+iOffSet)
     ELSEIF (iIWPorDME == -1) THEN
-      DO iFr=1,kMaxPts
-        raTemp(iFr) = raaExtJacobDME(iFr,iLay+iOffSet)
-      END DO
+      raTemp = raaExtJacobDME(:,iLay+iOffSet)
     END IF
     CALL MinusOne(raTemp,raResults)
 
@@ -1050,38 +1039,17 @@ CONTAINS
     IF (iLay < iNumLayer) THEN
       ! this is not the topmost layer
       iJ1 = iLay
-      DO iFr=1,kMaxPts
-        raResults(iFr) = raResults(iFr)+ &
-        raTemp(iFr)*raaRad(iFr,iJ1)*raaLay2Sp(iFr,iJ1)
-      END DO
+      raResults = raResults+raTemp*raaRad(:,iJ1)*raaLay2Sp(:,iJ1)
     ELSE IF (iLay == iNumLayer) THEN
       ! do the topmost layer correctly
       iJ1 = iLay
-      DO iFr=1,kMaxPts
-        raResults(iFr) = raResults(iFr)+ &
-        raTemp(iFr)*raaTau(iFr,iJ1)*raaRad(iFr,iJ1)
-      END DO
+      raResults = raResults+raTemp*raaTau(:,iJ1)*raaRad(:,iJ1)
     END IF
 
 ! now multiply results by the 1/cos(viewing angle) factor
     IF (abs(rCos-1.0000000) >= 1.0E-5) THEN
-      DO iFr=1,kMaxPts
-        raResults(iFr) = raResults(iFr)*rCos
-      END DO
+      raResults = raResults*rCos
     END IF
-
-! see if we have to include thermal backgnd
-! ignore for now
-!      IF ((kThermal .GE. 0) .AND. (kThermalJacob .GT. 0)) THEN
-!        CALL JacobTHERMALAmtFM1(raFreq,raaRad,
-!     $       iLay,iNumGasesTemp,iaaRadLayer,iAtm,iNumLayer,
-!     $       raUseEmissivity,raTemp,raaLay2Sp,
-!     $       raResultsTh,raaLay2Gnd,raaGeneralTh,raaOneMinusTauTh)
-!c now add on the effects to raResults
-!        DO iFr=1,kMaxPts
-!          raResults(iFr) = raResultsTh(iFr)+raResults(iFr)
-!          END DO
-!        END IF
 
     RETURN
     end SUBROUTINE JacobCloudAmtFM1
