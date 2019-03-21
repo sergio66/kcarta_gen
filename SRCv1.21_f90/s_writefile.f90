@@ -206,11 +206,12 @@ CONTAINS
 ! radBTdr is the d(brightness temp)/d(Radiance) array
     INTEGER :: iGasID,iM,iLowest,iGasPosn
     REAL :: raFreq(kMaxPts),raResults(kMaxPtsJac)
-    REAL :: raInten(kMaxPts)
+    REAL :: raInten(kMaxPts),raResults0(kMaxPts)
     REAL :: raaAmt(kProfLayerJac,kGasStore),radBTdr(kMaxPtsJac)
 
     INTEGER :: iFr,iM1
 
+    raResults0 = raResults
     IF ((iGasID == 101) .OR. (iGasID == 102) .OR. (iGasID == 103)) THEN
       iGasPosn  = 1   !!!! corresponds to water
     END IF
@@ -256,6 +257,10 @@ CONTAINS
       END IF
 
     END IF   !IF (kJacobOutput /= -1) THEN !oh well, do this
+
+!!!! sergio debug
+!    print *,kJacobOutput,iM,iM1,radBTdr(1),raResults0(1),raaAmt(iM1,iGasPosn),raResults(1)
+!print *,raResults(1)
 
     RETURN
     end SUBROUTINE doJacobOutput

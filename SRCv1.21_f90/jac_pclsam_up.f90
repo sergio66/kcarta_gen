@@ -314,13 +314,9 @@ CONTAINS
     DO iLay = 1,iNumLayer
       iL = iaRadlayer(iLay)
       IF (iLay == iNumLayer) THEN
-        DO iFr = 1,1
-          raLMm1_toGnd(iFr) = 1.0
-        END DO
+        raLMm1_toGnd = 1.0
       ELSE
-        DO iFr = 1,1
-          raLMm1_toGnd(iFr) = raaLay2Gnd(iFr,iLay+1)
-        END DO
+        raLMm1_toGnd = raaLay2Gnd(:,iLay+1)
       END IF
     END DO
 
@@ -835,8 +831,8 @@ CONTAINS
 
 ! add on to the raResults tally
     raTemp = raTemp + raTemp1
-    !sun        raResults = raTemp*raaaAllDQ(iG,iFr,iLM)
-    raResults = raResults + raTemp*raaaAllDQ(iG,iFr,iLM)
+    !sun        raResults = raTemp*raaaAllDQ(iG,:,iLM)
+    raResults = raResults + raTemp*raaaAllDQ(iG,:,iLM)
 
     RETURN
     end SUBROUTINE SolarScatterGasJacobianUp

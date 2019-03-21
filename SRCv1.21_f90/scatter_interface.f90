@@ -439,7 +439,6 @@ CONTAINS
           DO iL = 1,iNumOutX
             raaRads5(:,iL) = raaRads5(:,iL) + rFracX * raaRadsX(:,iL)
           END DO
-          print *,'individual',iAtm,raFreq(1),rFracX,raaRadsX(1,1),raaRads5(1,1)
         END IF
 
       ELSEIF (iDoPCLSAM < 0) THEN
@@ -456,7 +455,6 @@ CONTAINS
           raRadsX = raaRads5(:,iL)
           CALL wrtout(iIOUNX,caOutName,raFreq,raRadsX)
         END DO
-        print *,'final',iAtm,raFreq(1),raaRads5(1,1)
         write(kStdWarn,*) 'PCLSAM Clouds : wrote out linear combo of rads'            
 
       END IF    !! iDoPCLSAM > 0
@@ -558,7 +556,7 @@ CONTAINS
         END DO
         DO iL = 1,kProfLayerJac
           DO iJ = 1,kMaxDQ
-            raaaAllDQ5(iJ,iFr,iL) = raaaAllDQ5(iJ,iFr,iL) + raaaAllJacQOut(iJ,iFr,iL) 
+            raaaAllDQ5(iJ,:,iL) = raaaAllDQ5(iJ,:,iL) + raaaAllJacQOut(iJ,:,iL) 
           END DO
         END DO
         DO iL = 1,4

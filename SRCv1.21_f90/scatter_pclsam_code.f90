@@ -435,14 +435,10 @@ CONTAINS
           iI = iaaRadLayer(iAtm,iL)
           IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
             write(kStdWarn,FMT) 'Q(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-            DO iFr = 1,kMaxPts
-              raaTemp(iFr,iI) = raaExt(iFr,iI) + rDefaultColMult*raaaColDQ(iJ,iFr,iI)
-            END DO
+            raaTemp(:,iI) = raaExt(:,iI) + rDefaultColMult*raaaColDQ(iJ,:,iI)
           ELSE
             ! write(kStdWarn,*) 'not perturbing gas layer ',iI
-            DO iFr = 1,kMaxPts
-              raaTemp(iFr,iI) = raaExt(iFr,iI)
-            END DO
+            raaTemp(:,iI) = raaExt(:,iI)
           END IF
         END DO
 

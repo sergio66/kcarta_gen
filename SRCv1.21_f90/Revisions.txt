@@ -594,9 +594,10 @@ v1.21
                rads, jacs, fluxes for clear sky and PCLSAM
                Have ignored the NLTE and the other scattering codes (RTSPEC,DISORT,etc)
 
-               Right now there is a bug in clear sky up welling flux
-                                        in PCLSAM TwoSlab T/Q/Wgt jacobians
- 
+               Right now there is a small bug in clear sky upwelling flux
+                                    major bug in PCLSAM TwoSlab upwelling flux
+               after comparison to v1.20
+
 3/12/2019      Started modifying .f90 files to take advantage of Matlab-like looping
                http://www.pcc.qub.ac.uk/tec/courses/f90/stu-notes/F90_notesMIF_5.html
                Mostly of the type   raX = raX = raY*raaA(:,iL) instead of older

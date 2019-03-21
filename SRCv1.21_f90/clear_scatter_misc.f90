@@ -1367,8 +1367,8 @@ CONTAINS
 
 ! now set up the abs coeffs
 ! initialize array to all zeroes
-   DO iFr=1,kMaxPts
-     DO iLay = iNumLayer+1,kProfLayer
+   DO iLay = iNumLayer+1,kProfLayer
+      DO iFr = 1,kMaxPts
         absprof(iLay,iFr) = 0.0
       END DO
     END DO
@@ -1382,8 +1382,8 @@ CONTAINS
         ELSE IF (iLay == iNumLayer) THEN
           nu=rFracTop
         END IF
-        DO iFr=1,kMaxPts
-          ! bsprof wants level 1 == TOA, level iNumLayer= gnd
+        DO iFr = 1,kMaxPts
+          !absprof wants level 1 == TOA, level iNumLayer= gnd
           absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
         END DO
       END DO
@@ -1396,10 +1396,10 @@ CONTAINS
         ELSE IF (iLay == 1) THEN
           nu=rFracTop
         END IF
-        DO iFr=1,kMaxPts
-          ! bsprof wants level 1 == TOA, level iNumLayer= gnd
-          absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
-        END DO
+        DO iFr = 1,kMaxPts
+          !absprof wants level 1 == TOA, level iNumLayer= gnd
+           absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
+         END DO
       END DO
     END IF
 
@@ -3350,17 +3350,15 @@ CONTAINS
         I  = iaaSCATTAB(L,iG)
         iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
         !          print *,iG,N,L,iI,raaIWP(L,iG),raaDME(L,iG),raE(1),raW(1),raG(1)
-        DO iFr = 1,kMaxPts
-          !  Compute the optical depth of cloud layer, including gas
-          raaEAll(iG,iFr,iI) = raE(iFr)*raaIWP(L,iG)*raCC(iI)  !! include raCC????
-          raaEAll(iG,iFr,iI) = raE(iFr)*raaIWP(L,iG)           !! ignore  raCC????
-          raaWAll(iG,iFr,iI) = raW(iFr)
-          IF (raaIWP(L,iG) >= 1.0e-10) THEN
-              raaGAll(iG,iFr,iI) = raG(iFr)
-          ELSE
-              raaGAll(iG,iFr,iI) = 0.0
-          END IF
-        END DO    !loop over freqs
+        !  Compute the optical depth of cloud layer, including gas
+        raaEAll(iG,:,iI) = raE*raaIWP(L,iG)*raCC(iI)  !! include raCC????
+        raaEAll(iG,:,iI) = raE*raaIWP(L,iG)           !! ignore  raCC????
+        raaWAll(iG,:,iI) = raW
+        IF (raaIWP(L,iG) >= 1.0e-10) THEN
+            raaGAll(iG,:,iI) = raG
+        ELSE
+            raaGAll(iG,:,iI) = 0.0
+        END IF
       END DO      !loop over cloud layers
     END DO        !loop over clouds
 
@@ -3392,7 +3390,7 @@ CONTAINS
     DO iG = 1,iNclouds
       DO iI = 1,iNumLayer
         iL = iaaRadLayer(iAtm,iI)
-        raX = raaGAll(iG,iFr,iL)*raaWAll(iG,:,iL)*raaEAll(iG,:,iL)
+        raX = raaGAll(iG,:,iL)*raaWAll(iG,:,iL)*raaEAll(iG,:,iL)
         raY = raaExtTemp(:,iL)*raaScatTemp(:,iL)
         raaAsymTemp(:,iL) = raaAsymTemp(:,iL)+(raX)/(raY+1.0e-16)
       END DO
@@ -3589,7 +3587,6 @@ CONTAINS
       L  = N-ICLDTOP+1
       iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
       iL = iaaRadLayer(iAtm,iG)
-      ! raaEall(1,iFr,iI) = raaExtTemp(iFr,iL)
       iwp(iI)      = iwpX(iG)
       dme(iI)      = dmeX(iG)
       iscattab(iI) = iscattabX(iG)

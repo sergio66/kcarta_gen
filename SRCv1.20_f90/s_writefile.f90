@@ -274,6 +274,10 @@ CONTAINS
 
     END IF   !IF (kJacobOutput /= -1) THEN !oh well, do this
 
+!!! sergio debug
+!    print *,kJacobOutput,iM,iM1,radBTdr(1),raResults0(1),raaAmt(iM1,iGasPosn),raResults(1)
+!print *,raResults(1)
+
     RETURN
     end SUBROUTINE doJacobOutput
 

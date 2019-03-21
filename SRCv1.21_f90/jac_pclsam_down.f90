@@ -371,6 +371,10 @@ CONTAINS
                             raResults)
               END IF
 	      CALL scale_raResults(raResults,rFracx)
+
+!!!!!!sergio debug
+!!!!              print *,rFracx,radBTdr(1),raInten(1),raResults(1)
+
               CALL doJacobOutput(iLowest,raFreq, &
                                  raResults,radBTdr,raaAmt,raInten,iaGasesTemp(iG),iM,iGasPosn)
               raaaAllJacQOut(iJ,:,iM) = raResults
@@ -381,6 +385,9 @@ CONTAINS
               CALL wrtout(iIOUN,caJacobFile,raFreq,raResults)
             END IF
           END DO       !!! iM=1,iNumLayer
+!!!!! sergio 
+!!    stop
+
         END IF       !!! if iGasList > 0
       END DO         !!! iG=1,iNumGases
     ELSE  !!dump out zeros as the matlab/f77 readers expect SOMETHING!
@@ -881,7 +888,7 @@ CONTAINS
 
 ! add on to the raResults tally
     raTemp = raTemp + raTemp1
-    !sun        raResults = raTemp*raaaAllDQ(iG,iFr,iLM)
+    !sun        raResults = raTemp*raaaAllDQ(iG,:,iLM)
     raResults = raResults + raTemp*raaaAllDQ(iG,:,iLM)
 
     RETURN
