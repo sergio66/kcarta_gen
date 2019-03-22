@@ -46,6 +46,7 @@
 *.x
 *.a
 *.o
+*.mod
 *.so
 
 # backup files
