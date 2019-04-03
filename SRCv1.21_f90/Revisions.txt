@@ -618,6 +618,9 @@ v1.21
 
 v1.20
 -----
+4/3/2019       Found a small bug in lowest layer of a background thermal calc 
+               (it was not using raaAbs(:,IL)*rFracBot) 
+
 2/25/2019      [rad,jac,w] = readkcPCLSAM_coljac(radfile,jacfile);
                is a new reader that reeads in the radfile, figures out number of pixels
                and from that figures out number of column jacs (Q(1),Q(2), ...Q(n),T,stemp)

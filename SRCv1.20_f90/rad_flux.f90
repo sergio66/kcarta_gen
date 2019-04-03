@@ -5489,6 +5489,8 @@ CONTAINS
         raDown(iFr) = ttorad(raFreq(iFr),rTSpace)
     END DO
 
+!    print *,'0Y',raFreq(1),raThermal(1),raUseEmissivity(1),raUp(1),raDown(1)    
+
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
 ! don't really need iT from AddUppermostLayers so use it here
@@ -5589,6 +5591,8 @@ CONTAINS
             raDown(iFr) = raDown(iFr)+raSun(iFr)
         END DO
     END IF
+
+!    print *,'1Y',raFreq(1),raUp(1),raDown(1)    
 
 ! >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
 ! >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<

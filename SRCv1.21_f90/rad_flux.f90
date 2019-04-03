@@ -2426,7 +2426,7 @@ CONTAINS
 
       ! add solar onto backgrnd thermal
       ! this is the starting radiation that will go downwards
-      raDown = raDown+raSun
+      raDown = raDown + raSun
       END IF
     END IF
 
@@ -2758,7 +2758,7 @@ CONTAINS
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
 !!!do default stuff; set temperatures at layers
-    raVT2(1:kProfLayer+1) = raVTemp(1:kProfLayer+1)
+    raVT2(1:kProfLayer) = raVTemp(1:kProfLayer)
     iL = iaRadLayer(iNumLayer)
     raVt2(iL) = raVT1(iL)    !!!!set fractional bot layer tempr correctly
     iL = iaRadLayer(1)
@@ -3279,7 +3279,7 @@ CONTAINS
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
 !!!do default stuff; set temperatures at layers
-    raVT2(1:kProfLayer+1) = raVTemp(1:kProfLayer+1)
+    raVT2(1:kProfLayer) = raVTemp(1:kProfLayer)
     iL = iaRadLayer(iNumLayer)
     raVt2(iL) = raVT1(iL)    !!!!set fractional bot layer tempr correctly
     iL = iaRadLayer(1)
@@ -3446,7 +3446,7 @@ CONTAINS
 
       !add solar onto backgrnd thermal
       !this is the starting radiation that will go downwards
-      raDown = raDown+raSun
+      raDown = raDown + raSun
 
     END IF
 
@@ -4763,7 +4763,7 @@ CONTAINS
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
 !!!do default stuff; set temperatures at layers
-    raVT2(1:kProfLayer+1) = raVTemp(1:kProfLayer+1)
+    raVT2(1:kProfLayer) = raVTemp(1:kProfLayer)
     iL = iaRadLayer(iNumLayer)
     raVt2(iL) = raVT1(iL)    !!!!set fractional bot layer tempr correctly
     iL = iaRadLayer(1)
@@ -4835,6 +4835,8 @@ CONTAINS
 
 ! this is the background thermal down to ground
     raDown = rattorad(raFreq,rTSpace)
+
+!    print *,'0X',raFreq(1),raThermal(1),raUseEmissivity(1),raUp(1),raDown(1)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -4924,6 +4926,8 @@ CONTAINS
       !add solar onto backgrnd thermal
       raDown = raDown+raSun
     END IF
+
+!    print *,'1X',raFreq(1),raUp(1),raDown(1)
 
 ! >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<
 ! >>>>>>>>>>>>>>>> now we have BC at TOA and GND so start flux <<<<<<<<<<<<

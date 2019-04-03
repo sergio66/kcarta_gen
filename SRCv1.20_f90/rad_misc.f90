@@ -522,7 +522,7 @@ CONTAINS
             rMPTemp = raVT1(iL)
             DO iFr=1,kMaxPts
                 rAngleTrans    = raaAbs(iFr,iL)*rFracBot
-                rAngleTrans    = exp(-raaAbs(iFr,iL)/cos(raFreqAngle(iFr)))
+                rAngleTrans    = exp(-rAngleTrans/cos(raFreqAngle(iFr)))
                 rPlanck        = exp(r2*raFreq(iFr)/rMPTemp)-1.0
                 rPlanck        = r1*((raFreq(iFr)**3))/rPlanck
                 rAngleEmission = (1.0-rAngleTrans)*rPlanck
