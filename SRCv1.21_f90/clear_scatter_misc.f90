@@ -670,8 +670,8 @@ CONTAINS
     INTEGER :: iLay,iSTep
 
 ! local variables
-    REAL :: y1,y2,x1,x2,m,c,sf
-    INTEGER :: iJ,iI,jNU1,jNU2,iFr,iFr1,iFr2
+    REAL :: y1,y2,x1,x2,m,c,sf,raSF(kMaxPts)
+    INTEGER :: iJ,iI,jNU1,jNU2,iFr,iX1,iX2
 
     jNU1 = 1
     jNU2 = kMaxPts
@@ -679,24 +679,24 @@ CONTAINS
 
     DO iI = jNU1, jNU2, iStep
       iJ = iJ + 1
-      iFr1 = jNU1 + iStep*(iJ-1)
-      iFr2 = iFr1 + iStep
+      iX1 = jNU1 + iStep*(iJ-1)
+      iX2 = iX1 + iStep
 
-      IF (iFr2 > kMaxPts) GOTO 210
+      IF (iX2 > kMaxPts) GOTO 210
 
       !compute the scale factors
-      y1 = raaFlux(iFr1,iLay)/raKC(iFr1)
-      y2 = raaFlux(iFr2,iLay)/raKC(iFr2)
+      y1 = raaFlux(iX1,iLay)/raKC(iX1)
+      y2 = raaFlux(iX2,iLay)/raKC(iX2)
 
-      x2 = raFreq(iFr2)
-      x1 = raFreq(iFr1)
+      x2 = raFreq(iX2)
+      x1 = raFreq(iX1)
 
      !compute the slope and intercept
      m = (y2 - y1)/(x2 - x1)
      c = y2 - m*x2
 
       !now interpolate raKC linearly, with this scale factor!!!
-      DO iFr = iFr1,iFr2
+      DO iFr = iX1,iX2
         sf = m*(raFreq(iFr)-x1) + y1
         raaFlux(iFr,iLay) = sf*raKC(iFr)
       END DO
@@ -704,20 +704,19 @@ CONTAINS
 
     210 CONTINUE
 ! do the last chunk, upto the 10000th point
-    iFr2 = kMaxPts
+    iX2 = kMaxPts
 ! compute the scale factors
-    y1 = raaFlux(iFr1,iLay)/raKC(iFr1)
-    y2 = raaFlux(iFr2,iLay)/raKC(iFr2)
-    x2 = raFreq(iFr2)
-    x1 = raFreq(iFr1)
+    y1 = raaFlux(iX1,iLay)/raKC(iX1)
+    y2 = raaFlux(iX2,iLay)/raKC(iX2)
+    x2 = raFreq(iX2)
+    x1 = raFreq(iX1)
 ! compute the slope and intercept
     m = (y2 - y1)/(x2 - x1)
     c = y2 - m*x2
+
 ! now interpolate linearly!!!
-    DO iFr = iFr1,iFr2
-      sf = m*(raFreq(iFr)-x1) + y1
-      raaFlux(iFr,iLay) = sf*raKC(iFr)
-    END DO
+    raSF(iX1:iX2) = m*(raFreq(iX1:iX2)-x1) + y1
+    raaFlux(iX1:iX2,iLay) = sf*raKC(iX1:iX2)
      
     RETURN
     end SUBROUTINE InterpolateFlux
@@ -1382,8 +1381,8 @@ CONTAINS
         ELSE IF (iLay == iNumLayer) THEN
           nu=rFracTop
         END IF
+        !absprof wants level 1 == TOA, level iNumLayer= gnd
         DO iFr = 1,kMaxPts
-          !absprof wants level 1 == TOA, level iNumLayer= gnd
           absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
         END DO
       END DO
@@ -1396,10 +1395,10 @@ CONTAINS
         ELSE IF (iLay == 1) THEN
           nu=rFracTop
         END IF
+        !absprof wants level 1 == TOA, level iNumLayer= gnd
         DO iFr = 1,kMaxPts
-          !absprof wants level 1 == TOA, level iNumLayer= gnd
-           absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
-         END DO
+          absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
+        END DO
       END DO
     END IF
 
@@ -2132,17 +2131,13 @@ CONTAINS
       iKcCldBot = IFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
 
       !now get the optical properties for the cloud layers
-      DO iI = 1,kProfLayerJac
-        DO iFr = 1,kMaxPts
-          raaPhaseJacobASYM(iFr,iI) = 0.0
-          raaExtJacobIWP(iFr,iI)    = 0.0
-          raaSSAlbJacobIWP(iFr,iI)  = 0.0
-          raaAsymJacobIWP(iFr,iI)   = 0.0
-          raaExtJacobDME(iFr,iI)    = 0.0
-          raaSSAlbJacobDME(iFr,iI)  = 0.0
-          raaAsymJacobDME(iFr,iI)   = 0.0
-        END DO
-      END DO
+      raaPhaseJacobASYM = 0.0
+      raaExtJacobIWP    = 0.0
+      raaSSAlbJacobIWP  = 0.0
+      raaAsymJacobIWP   = 0.0
+      raaExtJacobDME    = 0.0
+      raaSSAlbJacobDME  = 0.0
+      raaAsymJacobDME   = 0.0
 
       DO N = ICLDTOP, ICLDBOT-1
         L  = N-ICLDTOP+1
@@ -2317,17 +2312,13 @@ CONTAINS
       iKcCldBot = IFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
 
       !now get the optical properties for the cloud layers
-      DO iI = 1,kMixFilRows
-        DO iFr = 1,kMaxPts
-          raaPhaseJacobASYM(iFr,iI) = 0.0
-          raaExtJacobIWP(iFr,iI)    = 0.0
-          raaSSAlbJacobIWP(iFr,iI)  = 0.0
-          raaAsymJacobIWP(iFr,iI)   = 0.0
-          raaExtJacobDME(iFr,iI)    = 0.0
-          raaSSAlbJacobDME(iFr,iI)  = 0.0
-          raaAsymJacobDME(iFr,iI)   = 0.0
-        END DO
-      END DO
+      raaPhaseJacobASYM = 0.0
+      raaExtJacobIWP    = 0.0
+      raaSSAlbJacobIWP  = 0.0
+      raaAsymJacobIWP   = 0.0
+      raaExtJacobDME    = 0.0
+      raaSSAlbJacobDME  = 0.0
+      raaAsymJacobDME   = 0.0
 
       DO N = ICLDTOP, ICLDBOT-1
         L  = N-ICLDTOP+1
@@ -3594,17 +3585,13 @@ CONTAINS
     END DO
 
 ! ow get the optical properties for the cloud layers
-    DO iI = 1,kProfLayerJac
-      DO iFr = 1,kMaxPts
-        raaPhaseJacobASYM(iFr,iI) = 0.0
-        raaExtJacobIWP(iFr,iI)    = 0.0
-        raaSSAlbJacobIWP(iFr,iI)  = 0.0
-        raaAsymJacobIWP(iFr,iI)   = 0.0
-        raaExtJacobDME(iFr,iI)    = 0.0
-        raaSSAlbJacobDME(iFr,iI)  = 0.0
-        raaAsymJacobDME(iFr,iI)   = 0.0
-      END DO
-    END DO
+    raaPhaseJacobASYM = 0.0
+    raaExtJacobIWP    = 0.0
+    raaSSAlbJacobIWP  = 0.0
+    raaAsymJacobIWP   = 0.0
+    raaExtJacobDME    = 0.0
+    raaSSAlbJacobDME  = 0.0
+    raaAsymJacobDME   = 0.0
 
     DO iG = 1,iNumLayer
       N  = iG
@@ -3810,17 +3797,13 @@ CONTAINS
       END DO
 
       !now get the optical properties for the cloud layers
-      DO iI = 1,kMixFilRows
-        DO iFr = 1,kMaxPts
-          raaPhaseJacobASYM(iFr,iI) = 0.0
-          raaExtJacobIWP(iFr,iI)    = 0.0
-          raaSSAlbJacobIWP(iFr,iI)  = 0.0
-          raaAsymJacobIWP(iFr,iI)   = 0.0
-          raaExtJacobDME(iFr,iI)    = 0.0
-          raaSSAlbJacobDME(iFr,iI)  = 0.0
-          raaAsymJacobDME(iFr,iI)   = 0.0
-        END DO
-      END DO
+      raaPhaseJacobASYM = 0.0
+      raaExtJacobIWP    = 0.0
+      raaSSAlbJacobIWP  = 0.0
+      raaAsymJacobIWP   = 0.0
+      raaExtJacobDME    = 0.0
+      raaSSAlbJacobDME  = 0.0
+      raaAsymJacobDME   = 0.0
 
       DO N = 1,iNumLayer
         L  = N-ICLDTOP+1

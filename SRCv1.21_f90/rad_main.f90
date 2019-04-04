@@ -459,9 +459,8 @@ CONTAINS
       IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
         !! remember we perturb layers WRT surface, so use iL in this if-then comparison
         write(kStdWarn,FMT) 'dOD(z)/dT pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-        !! recall deltaT = 1 K (ie technically need to multiply raaAllDt(iFr,iI) by deltaT)
+        !! recall deltaT = 1 K (ie technically need to multiply raaAllDt(:,iI) by deltaT)
         raaTemp(:,iI) = raaSumAbCoeff(:,iI) + raaAllDt(:,iI)
-        !! print *,iFr,iL,iI,raaTemp(iFr,iI),raaSumAbCoeff(iFr,iI),raaAllDt(iFr,iI),raVTemp2(iI),raVTemp(iI)
       ELSE
         ! no need to perturb layer
         raaTemp(:,iI) = raaSumAbCoeff(:,iI)
@@ -993,7 +992,7 @@ CONTAINS
     REAL :: raVT1(kMixFilRows)
     INTEGER :: iIOUN
     REAL :: bt2rad,t2s
-    INTEGER :: iFr1
+    INTEGER :: iFr1,iPr
     INTEGER :: iCloudLayerTop,iCloudLayerBot
 
 ! for specular reflection
@@ -1248,8 +1247,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -1274,8 +1273,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -1302,8 +1301,8 @@ CONTAINS
           CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
           IF (iDp > 0) THEN
             write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-            DO iFr=1,iDp
-              CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+            DO iPr=1,iDp
+              CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
@@ -1312,11 +1311,6 @@ CONTAINS
             END DO
           END IF
 
-        !c no need to do radiative transfer thru this layer
-        !c        DO iFr=1,kMaxPts
-        !c          raInten(iFr) = raaEmission(iFr,iLay)+
-        !c     $        raInten(iFr)*raaLayTrans(iFr,iLay)
-        !c        END DO
       END DO
     END IF
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1413,7 +1407,7 @@ CONTAINS
 
 ! local variables
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
     REAL :: raaLayTrans(kMaxPts,kProfLayer),raPlanck(kMaxPts),rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
@@ -1650,14 +1644,10 @@ CONTAINS
     write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1), &
     raSunRefl(1)
 
-!      DO iFr=1,kMaxPts
-!        print *,iFr,raUseEmissivity(iFr),raSunRefl(iFr),raSun(iFr)
-!      END DO
-
     IF (iSpecular > 0) THEN
       write(kStdErr,*) 'doing specular refl in rad_trans_SAT_LOOK_DOWN'
       CALL loadspecular(raFreq,raSpecularRefl)
-      !raSpecularRefl(iFr) = 0.0272   !!! smooth water
+      !raSpecularRefl = 0.0272   !!! smooth water
       raInten = raSurface*raUseEmissivity+ &
             raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
             raSun*(raSpecularRefl + raSunRefl)
@@ -1684,8 +1674,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -1713,8 +1703,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
         write(kStdWarn,*) 'youtput',iDp,' rads at',iLay,' th rad layer'
-        DO iFr = 1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr = 1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -1741,21 +1731,15 @@ CONTAINS
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 0) THEN
           write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-          DO iFr=1,iDp
-            CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+          DO iPr=1,iDp
+            CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
                     iNLTEStart,raaPlanckCoeff)
             CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-            !            print *,'final',raFreq(1),raInten2(1)
           END DO
         END IF
-        !c no need to do radiative transfer thru this layer
-        !c        DO iFr=1,kMaxPts
-        !c          raInten(iFr) = raaEmission(iFr,iLay)+
-        !c     $        raInten(iFr)*raaLayTrans(iFr,iLay)
-        !c        END DO
       END DO
     END IF
 
@@ -1843,7 +1827,7 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iLow
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iLow
     REAL :: raPlanck(kMaxPts),rMPTemp,raOutFrac(kProfLayer)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer)
            
@@ -1997,8 +1981,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(-1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raThermal,raInten2, &
                 raSun,iDoSolar,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -2161,7 +2145,7 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
     REAL :: raaLayTrans(kMaxPts,kProfLayer),raPlanck(kMaxPts),rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
@@ -2367,8 +2351,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -2397,8 +2381,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -2453,8 +2437,8 @@ CONTAINS
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
           IF (iDp > 0) THEN
             write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-            DO iFr=1,iDp
-              CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+            DO iPr=1,iDp
+              CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
@@ -2463,14 +2447,6 @@ CONTAINS
             END DO
           END IF
         END IF
-
-      !c no need to do radiative transfer thru this layer
-      !c        CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,TEMP,rCos,+1.0,iVaryIN,raInten)
-      !c        DO iFr=1,kMaxPts
-      !c          raInten(iFr) = raaEmission(iFr,iLay)+
-      !c     $        raInten(iFr)*raaLayTrans(iFr,iLay)
-      !c        END DO
-
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2584,7 +2560,7 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary,iDefault
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary,iDefault
     REAL :: raaLayTrans(kMaxPts,kProfLayer),raPlanck(kMaxPts),rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2Junk(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
@@ -2638,8 +2614,8 @@ CONTAINS
         write(kStdWarn,*)'input TOA   from LBLRTM TAPE5/6 is ',kLBLRTM_toa,' mb'
         write(kStdWarn,*)'raPlevs TOA from LBLRTM TAPE5/6 is ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
         write(kStdWarn,*) '  hmm need to zero ODS from iLay = ',iLBLRTMZero,' which corresponds to '
-        iFr = iaaRadLayer(iAtm,iLBLRTMZero)
-        write(kStdWarn,*) '  radiating layer ',iFr,'at pBot = ',raPressLevels(iFr),' mb'
+        iPr = iaaRadLayer(iAtm,iLBLRTMZero)
+        write(kStdWarn,*) '  radiating layer ',iPr,'at pBot = ',raPressLevels(iPr),' mb'
         write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at pBot = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
         write(kStdWarn,*) '                                         at pTop = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
       ELSEIF ((kLBLRTM_toa > 0) .AND. (kLBLRTM_toa < raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
@@ -2757,10 +2733,8 @@ CONTAINS
 
 ! NEW NEW NEW NEW NEW NEW
     IF (kRTP == -5) THEN
-      DO iFr = 1,kMaxLayer
-        raVT1(iFr) = kLBLRTM_layerTavg(iFr)
-        raVT2(iFr) = kLBLRTM_layerTavg(iFr)
-      END DO
+      raVT1(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
+      raVT2(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
       raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
     END IF
           
@@ -2878,8 +2852,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 1) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -2918,8 +2892,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 1) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -2983,8 +2957,8 @@ CONTAINS
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 1) THEN
           write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-          DO iFr=1,iDp
-            CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+          DO iPr=1,iDp
+            CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
@@ -3121,7 +3095,7 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
     REAL :: raaLayTrans(kMaxPts,kProfLayer),raPlanck(kMaxPts),rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2Junk(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
@@ -3172,8 +3146,8 @@ CONTAINS
       write(kStdWarn,*)'input TOA   from LBLRTM TAPE5/6 is ',kLBLRTM_toa,' mb'
       write(kStdWarn,*)'raPlevs TOA from LBLRTM TAPE5/6 is ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
       write(kStdWarn,*) '  hmm need to zero ODS from iLay = ',iLBLRTMZero,' which corresponds to '
-      iFr = iaaRadLayer(iAtm,iLBLRTMZero)
-      write(kStdWarn,*) '  radiating layer ',iFr,'at pBot = ',raPressLevels(iFr),' mb'
+      iPr = iaaRadLayer(iAtm,iLBLRTMZero)
+      write(kStdWarn,*) '  radiating layer ',iPr,'at pBot = ',raPressLevels(iPr),' mb'
       write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at pBot = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
       write(kStdWarn,*) '                                         at pTop = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
     ELSEIF ((kLBLRTM_toa > 0) .AND. (kLBLRTM_toa < raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
@@ -3287,10 +3261,8 @@ CONTAINS
 
 ! NEW NEW NEW NEW NEW NEW
     IF (kRTP == -5) THEN
-      DO iFr = 1,kMaxLayer
-          raVT1(iFr) = kLBLRTM_layerTavg(iFr)
-          raVT2(iFr) = kLBLRTM_layerTavg(iFr)
-      END DO
+      raVT1(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
+      raVT2(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
       raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
     END IF
           
@@ -3409,8 +3381,8 @@ CONTAINS
         CALL DoSTOP
       ENDIF
       kTempUnitOpen = +1
-      DO iFr = 1,kMaxPts
-          write(iIOUN1,4321) iFr,raFreq(iFr),raThermal(iFr),exp(-raG2S(iFr))
+      DO iPr = 1,kMaxPts
+          write(iIOUN1,4321) iPr,raFreq(iPr),raThermal(iPr),exp(-raG2S(iPr))
       END DO
  1010 FORMAT(I5,' ',A80)
  4321 FORMAT(I5,' ',3(F15.9,' '))
@@ -3468,8 +3440,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 1) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -3508,8 +3480,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 1) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -3573,8 +3545,8 @@ CONTAINS
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
           IF (iDp > 1) THEN
             write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-            DO iFr=1,iDp
-              CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+            DO iPr=1,iDp
+              CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
@@ -3708,7 +3680,7 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iVary
     REAL :: raaLayTrans(kMaxPts,kProfLayer),raPlanck(kMaxPts),rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2Junk(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rDum1,rDum2
@@ -3745,8 +3717,8 @@ CONTAINS
       write(kStdWarn,*)'input TOA   from LBLRTM TAPE5/6 is ',kLBLRTM_toa,' mb'
       write(kStdWarn,*)'raPlevs TOA from LBLRTM TAPE5/6 is ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
       write(kStdWarn,*) '  hmm need to zero ODS from iLay = ',iLBLRTMZero,' which corresponds to '
-      iFr = iaaRadLayer(iAtm,iLBLRTMZero)
-      write(kStdWarn,*) '  radiating layer ',iFr,'at pBot = ',raPressLevels(iFr),' mb'
+      iPr = iaaRadLayer(iAtm,iLBLRTMZero)
+      write(kStdWarn,*) '  radiating layer ',iPr,'at pBot = ',raPressLevels(iPr),' mb'
       write(kStdWarn,*) '  all the way to TOA at lay ',iNumLayer,'at pBot = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)),' mb'
       write(kStdWarn,*) '                                         at pTop = ',raPressLevels(iaaRadLayer(iAtm,iNumLayer)+1),' mb'
     ELSEIF ((kLBLRTM_toa > 0) .AND. (kLBLRTM_toa < raPressLevels(iaaRadLayer(iAtm,iNumLayer)))) THEN
@@ -3866,10 +3838,8 @@ CONTAINS
 
 ! NEW NEW NEW NEW NEW NEW
     IF (kRTP == -5) THEN
-      DO iFr = 1,kMaxLayer
-        raVT1(iFr) = kLBLRTM_layerTavg(iFr)
-        raVT2(iFr) = kLBLRTM_layerTavg(iFr)
-      END DO
+      raVT1(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
+      raVT2(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
       raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
     END IF
           
@@ -3985,8 +3955,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 1) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -4024,8 +3994,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 1) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -4088,8 +4058,8 @@ CONTAINS
         CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
         IF (iDp > 1) THEN
           write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-          DO iFr=1,iDp
-            CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+          DO iPr=1,iDp
+            CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raInten,raInten2Junk, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
@@ -4194,7 +4164,7 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iLow
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iLow
     REAL :: rPlanck,rMPTemp,raOutFrac(kProfLayer)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer)
            
@@ -4355,10 +4325,8 @@ CONTAINS
 
 ! NEW NEW NEW NEW NEW NEW
     IF (kRTP == -5) THEN
-      DO iFr = 1,kMaxLayer
-        raVT1(iFr) = kLBLRTM_layerTavg(iFr)
-        raVT2(iFr) = kLBLRTM_layerTavg(iFr)
-      END DO
+      raVT1(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
+      raVT2(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
       raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
     END IF
 
@@ -4412,8 +4380,8 @@ CONTAINS
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 1) THEN
         write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-        DO iFr=1,iDp
-          CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(-1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs_LBLRTM_zeroUA,raThermal,raInten2, &
                 raSun,iDoSolar,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
@@ -4496,7 +4464,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),raInten(kMaxPts)
           
     REAL :: raBT0(kMaxPts),raDBT(kMaxPts),raNewR(kMaxPts)
-    INTEGER :: iIOUN,iErr,iNumChunk,iFr,iLenD,iLenX,iFound,iNumPointsInChunk,iWhichChunk
+    INTEGER :: iIOUN,iErr,iNumChunk,iFr,iPr,iLenD,iLenX,iFound,iNumPointsInChunk,iWhichChunk
     INTEGER :: iX,iXmax,iY,iTest
     CHARACTER(3) :: ca3
     CHARACTER(4) :: ca4
@@ -4545,8 +4513,8 @@ CONTAINS
     kTempUnitOpen = 1
     READ(iIOUN) iNumChunk
     READ(iIOUN) iNpred      !! should be 26 or 28
-    READ(iIOUN) (iaWhichChunk(iFr),iFr=1,iNumChunk)
-    READ(iIOUN) (iaNumPtsPerChunk(iFr),iFr=1,iNumChunk)
+    READ(iIOUN) (iaWhichChunk(iPr),iPr=1,iNumChunk)
+    READ(iIOUN) (iaNumPtsPerChunk(iPr),iPr=1,iNumChunk)
           
     CLOSE(iIOUN)
     kTempUnitOpen = -1
@@ -4608,12 +4576,12 @@ CONTAINS
     END IF
     READ(iIOUN) iNumT,iNumOD
           
-    READ(iIOUN) (iaLayT(iFr),iFr=1,iNumT)                     !! layT indexes
-    READ(iIOUN) (iaLayOD(iFr),iFr=1,iNumOD)                   !! layOD indices
-    READ(iIOUN) (raWavenumbers(iFr),iFr=1,iNumPointsInChunk)  !! wavenumbers we need to fix in this chunk
-    READ(iIOUN) (iaIndices(iFr),iFr=1,iNumPointsInChunk)      !! indices of points we need to fix in this chunk
-    DO iFr = 1,iNumPointsInChunk
-      READ(iIOUN) (raaCoeff(iFr,iX),iX=1,iNpredX)              !! fixing coeffs
+    READ(iIOUN) (iaLayT(iPr),iPr=1,iNumT)                     !! layT indexes
+    READ(iIOUN) (iaLayOD(iPr),iPr=1,iNumOD)                   !! layOD indices
+    READ(iIOUN) (raWavenumbers(iPr),iPr=1,iNumPointsInChunk)  !! wavenumbers we need to fix in this chunk
+    READ(iIOUN) (iaIndices(iPr),iPr=1,iNumPointsInChunk)      !! indices of points we need to fix in this chunk
+    DO iPr = 1,iNumPointsInChunk
+      READ(iIOUN) (raaCoeff(iPr,iX),iX=1,iNpredX)              !! fixing coeffs
     END DO
           
     CLOSE(iIOUN)
@@ -4659,28 +4627,9 @@ CONTAINS
     DO iFr = 1,iNumPointsInChunk
       raDBT(iaIndices(iFr)) = 0.0
       DO iX = 1,iXmax
-        !        print *,iFr,iX,iaIndices(iFr),raaCoeff(iFr,iX),raaPredData(iaIndices(iFr),iX)
         raDBT(iaIndices(iFr)) = raDBT(iaIndices(iFr)) + raaCoeff(iFr,iX) * raaPredData(iaIndices(iFr),iX)
       END DO
-      !       print *,iFr,iaIndices(iFr),raDBT(iaIndices(iFr))
-      !       call dostop
     END DO
-
-    iTest = -1
-    if ((raFreq(1) < 655) .AND. (raFreq(kMaxPts) > 630) .AND. (iTest > 0)) then
-      print *,(iaLayOD(iFr),iFr=1,iNumOD)
-      iFr = 8774
-      iY = 1
-  111 continue
-      do while ((abs(raWavenumbers(iY)-raFreq(iFr)) > 0.0001) .AND. (iY < iNumPointsInChunk))
-        iY = iY + 1
-        goto 111
-      end do
-      print *,iY,iNumPointsInChunk,raWavenumbers(iY),raFreq(iFr),raDBT(iaIndices(iY))
-      do iX = 1,iXmax
-        print *,iX,raaPredData(iFr,iX),raaCoeff(iY,iX)
-      end do
-    end if
 
     maxDBT = -1.0
     minDBT = +1.0
@@ -5068,10 +5017,8 @@ CONTAINS
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    DO iFr = 1,kMixFilRows
-      raVT1(iFr) = raVTemp(iFr)
-      daVT1(iFr) = dble(raVTemp(iFr))
-    END DO
+    raVT1 = raVTemp
+    daVT1 = dble(raVTemp)
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
     raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)

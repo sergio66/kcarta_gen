@@ -393,12 +393,12 @@ CONTAINS
     REAL :: rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! local variables
-    INTEGER :: iFr,iLay
+    INTEGER :: iFr,iLay,iI
 
     iErr = -1
 
-    DO iFr = 1,80
-      kcaAltComprDirs(iFr:iFr) = ' '
+    DO iI = 1,80
+      kcaAltComprDirs(iI:iI) = ' '
     END DO
     kcaAltComprDirs = caaAltComprDirs(iNewIN)
     write(kStdWarn,*) '>>> substituting caCompressedDataPath for gasID ',iGasID

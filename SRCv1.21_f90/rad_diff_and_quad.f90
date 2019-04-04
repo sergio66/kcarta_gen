@@ -1382,10 +1382,8 @@ CONTAINS
 
 ! NEW NEW NEW NEW NEW NEW
     IF (kRTP == -5) THEN
-      DO iFr = 1,kMaxLayer
-        raVT1(iFr) = kLBLRTM_layerTavg(iFr)
-        raVT2(iFr) = kLBLRTM_layerTavg(iFr)
-      END DO
+      raVT1(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
+      raVT2(1:kMaxLayer) = kLBLRTM_layerTavg(1:kMaxLayer)
       raVT2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
     END IF
           
@@ -2013,27 +2011,27 @@ CONTAINS
 ! initialize to space blackbdy radiation
     IF (iExtraThermal < 0) THEN
       ! do rad tranfer from TOP of atmosphere down to gnd
-      raThermal(iFr) = raIntenAtmos(iFr)
+      raThermal = raIntenAtmos
       CALL ExactL2GDiffusiveApprox(iNumLayer,iNumLayer,1,iaRadLayer, &
         raVT1,raFreq,raaAbs, &
         raThermal,rFracTop,rFracBot,iDefinedTopLayer)
     ELSE IF (iExtraThermal > 0) THEN
       ! do rad tranfer from TOP of atmosphere down to instrument
-      raExtraThermal(iFr) = raIntenAtmos(iFr)
+      raExtraThermal = raIntenAtmos
       CALL ExactL2GDiffusiveApprox(iT,iT,iNumLayer+1,iaRadLayerTemp, &
         raVT1,raFreq,raaAbs, &
         raExtraThermal,rFracTop,rFracBot,iDefinedTopLayer)
-      raThermal(iFr) = raExtraThermal(iFr)
+      raThermal = raExtraThermal
       CALL ExactL2GDiffusiveApprox(iT,iNumLayer,1,iaRadLayerTemp, &
         raVT1,raFreq,raaAbs, &
         raThermal,rFracTop,rFracBot,iDefinedTopLayer)
     END IF
 
 ! this is the thermal diffusive approx ==> multiply by 0.5
-    raThermal(iFr) = raThermal(iFr)*0.5
+    raThermal = raThermal*0.5
 
     IF ((iExtraThermal > 0) .AND. (kJacobian > 0)) THEN
-      raExtraThermal(iFr) = 0.5*raExtraThermal(iFr)
+      raExtraThermal = 0.5*raExtraThermal
     END IF
 
     RETURN
@@ -2165,7 +2163,7 @@ CONTAINS
       raAngleTr           = exp(-raL2G/raAngleTr)
               
       raPlanck            = rattorad(raFreq,rMPTemp)
-      raTemp              = raTemp+raPlanck*(raAngleTr_m1-raAngleTr(iFr))
+      raTemp              = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
     END IF
 
     write(kStdWarn,*) 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
