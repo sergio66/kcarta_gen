@@ -5700,6 +5700,7 @@ CONTAINS
                 raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
                 raTemp(iFr)*SNGL(daGaussWt(iAngle))
             END DO
+            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
         END DO
     ! then continue upto bottom of top layer
         DO iLay = 2,iNumLayer-1
@@ -5714,6 +5715,7 @@ CONTAINS
                 raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
                 raTemp(iFr)*SNGL(daGaussWt(iAngle))
             END DO
+            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
         END DO
     ! do very top of top layer ie where instrument is!!!
         DO iLay = iNumLayer,iNumLayer
@@ -5727,6 +5729,7 @@ CONTAINS
                 raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
                 raTemp(iFr)*SNGL(daGaussWt(iAngle))
             END DO
+            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
         END DO
     END DO
 
