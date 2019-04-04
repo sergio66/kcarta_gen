@@ -90,3 +90,8 @@ SRC_PLAYSANDBOX
 SRCv1.07/scatter_*.f
 SRCv1.10/scatter_*.f
 
+#junk stuff
+F77toF90/
+IP_PROFILES/
+LIB/libblas.a.ifort_threadsmaybe
+
