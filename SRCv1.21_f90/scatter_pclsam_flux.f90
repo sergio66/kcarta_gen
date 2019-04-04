@@ -636,8 +636,8 @@ CONTAINS
         TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     END IF
 
-    raaDownFlux(iFr,iLay) = 0.0
-    raaUpFlux(iFr,iLay)   = 0.0
+    raaDownFlux = 0.0
+    raaUpFlux   = 0.0
 
     DO iAngle = 1,iGaussPts
       rAngle       =  acos(sngl(daGaussPt(iAngle)))*180.0D0/kPi
@@ -978,9 +978,7 @@ CONTAINS
 !      write(kStdWarn,*)'iNumLayer,rTSpace,rTSurf,1/cos(SatAng),rFracTop'
 !      write(kStdWarn,*) iNumLayer,rTSpace,rTSurf,1/muSat,rFracTop
      
-    DO iLay = 1,kProfLayer
-        iaCldLayer(iLay) = -1   !!assume no cld
-    END DO
+    iaCldLayer(1:kProfLayer) = -1   !!assume no cld
              
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
@@ -1026,9 +1024,8 @@ CONTAINS
       iiDiv = iLay
     END IF
      
-    DO iLay = iCldBotkCarta,iCldTopkCarta
-      iaCldLayer(iLay) = 1
-    END DO
+
+    iaCldLayer(iCldBotkCarta:iCldTopkCarta) = 1
      
 ! cccccccccccccccccc set these all important variables ****************
 
@@ -2141,7 +2138,7 @@ CONTAINS
 
     rThermalRefl=1.0/kPi
 
-    iGaussPts = 4  !!! "slightly" better than iGaussPts = 3 (tic)
+    iGaussPts = 4  !!! "slightly" better than iGaussPts = 3
     iGaussPts = 1  !!! haha not too bad at all ....
     iGaussPts = 3  !!! LBLRTM uses this
 
@@ -2417,7 +2414,7 @@ CONTAINS
         ! first do the pressure level boundary at the very top of atmosphere
         ! ie where instrument is
         iLay = iNumLayer+1
-        raaDownFlux(iFr,iLay) = raaDownFlux(iFr,iLay)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
+        raaDownFlux(:,iLay) = raaDownFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
 
         ! then do the bottom of this layer
         DO iLay = iNumLayer,iNumLayer
@@ -2459,46 +2456,45 @@ CONTAINS
       rCosAngle = SNGL(daGaussPt(iAngle))
       ! initialize the radiation to that at the bottom of the atmosphere
       raTemp = raUp
-    END DO
               
-    ! now loop over the layers, for the particular angle
+      ! now loop over the layers, for the particular angle
 
-    ! first do the pressure level boundary at the very bottom of atmosphere
-    ! ie where ground is
-    iLay = 1
-    raaUpFlux(:,iLay) = raaUpFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
+      ! first do the pressure level boundary at the very bottom of atmosphere
+      ! ie where ground is
+      iLay = 1
+      raaUpFlux(:,iLay) = raaUpFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
 
-    ! then do the top of this layer
-    DO iLay = 1,1
-      iL = iaRadLayer(iLay)
-      rMPTemp = ravt2(iL)
-      !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
-      CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
-        rCosAngle,rFracBot, &
-        iVary,raTemp)
-      raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
+      ! then do the top of this layer
+      DO iLay = 1,1
+        iL = iaRadLayer(iLay)
+        rMPTemp = ravt2(iL)
+        !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracBot,+1,raTemp)
+        CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+          rCosAngle,rFracBot, &
+          iVary,raTemp)
+        raaUpFlux(:,iLay+1) = raaUpFlux(:,iLay+1)+raTemp*SNGL(daGaussWt(iAngle))          
+      END DO
+      ! then continue upto bottom of top layer
+      DO iLay = 2,iNumLayer-1
+        iL = iaRadLayer(iLay)
+        rMPTemp = ravt2(iL)
+        !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
+        CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+          rCosAngle,1.0, &
+          iVary,raTemp)
+        raaUpFlux(:,iLay+1) = raaUpFlux(:,iLay+1)+raTemp*SNGL(daGaussWt(iAngle))
+      END DO
+      ! do very top of top layer ie where instrument is!!!
+      DO iLay = iNumLayer,iNumLayer
+        iL = iaRadLayer(iLay)
+        rMPTemp = ravt2(iL)
+        !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
+        CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
+          rCosAngle,rFracTop, &
+          iVary,raTemp)
+        raaUpFlux(:,iLay+1) = raaUpFlux(:,iLay+1)+raTemp*SNGL(daGaussWt(iAngle))
+      END DO
     END DO
-    ! then continue upto bottom of top layer
-    DO iLay = 2,iNumLayer-1
-      iL = iaRadLayer(iLay)
-      rMPTemp = ravt2(iL)
-      !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,+1.0,+1,raTemp)
-      CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
-        rCosAngle,1.0, &
-        iVary,raTemp)
-      raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
-    END DO
-    ! do very top of top layer ie where instrument is!!!
-    DO iLay = iNumLayer,iNumLayer
-      iL = iaRadLayer(iLay)
-      rMPTemp = ravt2(iL)
-      !CALL RT_ProfileUPWELL(raFreq,raaExtTemp,iL,ravt2,rCosAngle,rFracTop,+1,raTemp)
-      CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaExtTemp,iL,raTPressLevels,raVT1, &
-        rCosAngle,rFracTop, &
-        iVary,raTemp)
-      raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+raTemp(iFr)*SNGL(daGaussWt(iAngle))
-    END DO
-
 !------------------------------------------------------------------------
 
     rDelta = kaFrStep(iTag)
