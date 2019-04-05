@@ -5473,11 +5473,13 @@ CONTAINS
 
 ! now we have the total upwelling radiation at the surface, indpt of angle!!!!
 ! this is the radiation that will go upwards
+!    write(*,'(I3,F10.4,F20.10,ES20.10,ES20.10)'),-2,raFreq(4),rTSurf,raThermal(4),raUp(4)
     DO iFr = 1,kMaxPts
         raUp(iFr) = raUp(iFr)*raUseEmissivity(iFr)+ &
         raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
         raSun(iFr)*raSunRefl(iFr)
     END DO
+!    write(*,'(I3,F10.4,ES20.10,ES20.10)'),-1,raFreq(4),raThermal(4),raUp(4)
 
 !^^^^^^^^^^^^^^^compute down going radiation where instrument is ^^^^^^^^^^^^^^
 ! let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
@@ -5683,11 +5685,14 @@ CONTAINS
 
     ! first do the pressure level boundary at the very bottom of atmosphere
     ! ie where ground is
+!BAH DIFF
+!        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,999,raFreq(4),raaUpFlux(4,iLay),raUp(4)
         iLay = 1
         DO iFr = 1,kMaxPts
             raaUpFlux(iFr,iLay) = raaUpFlux(iFr,iLay)+ &
             raTemp(iFr)*SNGL(daGaussWt(iAngle))
         END DO
+!        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,0,raFreq(4),raaUpFlux(4,iLay),raTemp(4)
     ! then do the top of this layer
         DO iLay = 1,1
             iL = iaRadLayer(iLay)
@@ -5700,7 +5705,7 @@ CONTAINS
                 raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
                 raTemp(iFr)*SNGL(daGaussWt(iAngle))
             END DO
-            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
+!            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(4),raaUpFlux(4,iLay+1),raTemp(4)
         END DO
     ! then continue upto bottom of top layer
         DO iLay = 2,iNumLayer-1
@@ -5710,12 +5715,11 @@ CONTAINS
             CALL RT_ProfileUPWELL_LINEAR_IN_TAU(raFreq,raaAbs,iL,raTPressLevels,raVT1, &
             rCosAngle,1.0, &
             iVary,raTemp)
-        !          print *,iL,'+',raTemp(1),rMPTemp,rCosAngle
             DO iFr = 1,kMaxPts
                 raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
                 raTemp(iFr)*SNGL(daGaussWt(iAngle))
             END DO
-            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
+!            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(4),raaUpFlux(4,iLay+1),raTemp(4)
         END DO
     ! do very top of top layer ie where instrument is!!!
         DO iLay = iNumLayer,iNumLayer
@@ -5729,7 +5733,7 @@ CONTAINS
                 raaUpFlux(iFr,iLay+1) = raaUpFlux(iFr,iLay+1)+ &
                 raTemp(iFr)*SNGL(daGaussWt(iAngle))
             END DO
-            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
+!            write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(4),raaUpFlux(4,iLay+1),raTemp(4)
         END DO
     END DO
 

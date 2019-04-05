@@ -4824,9 +4824,11 @@ CONTAINS
 
 ! now we have the total upwelling radiation at the surface, indpt of angle!!!!
 ! this is the radiation that will go upwards
+!    write(*,'(I3,F10.4,F20.10,ES20.10,ES20.10)'),-2,raFreq(4),rTSurf,raThermal(4),raUp(4)
     raUp = raUp*raUseEmissivity+ &
         raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
         raSun*raSunRefl
+!    write(*,'(I3,F10.4,ES20.10,ES20.10)'),-1,raFreq(4),raThermal(4),raUp(4)
 
 !^^^^^^^^^^^^^^^compute down going radiation where instrument is ^^^^^^^^^^^^^^
 ! let us compute total downwelling radiation at TopOfAtmosphere, indpt of angle
@@ -5002,8 +5004,11 @@ CONTAINS
 
       ! first do the pressure level boundary at the very bottom of atmosphere
       ! ie where ground is
+!BAH DIFF
+!      write(*,'(I3,F10.4,ES20.10,ES20.10)') ,999,raFreq(4),raaUpFlux(4,iLay),raUp(4)
       iLay = 1
       raaUpFlux(:,iLay) = raaUpFlux(:,iLay)+raTemp*SNGL(daGaussWt(iAngle))
+!      write(*,'(I3,F10.4,ES20.10,ES20.10)') ,0,raFreq(4),raaUpFlux(4,iLay),raTemp(4)
 
       ! then do the top of this layer
       DO iLay = 1,1
@@ -5014,7 +5019,7 @@ CONTAINS
             rCosAngle,rFracBot, &
             iVary,raTemp)
         raaUpFlux(:,iLay+1) = raaUpFlux(:,iLay+1)+raTemp*SNGL(daGaussWt(iAngle))
-        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
+!        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(4),raaUpFlux(4,iLay+1),raTemp(4)
       END DO
       ! then continue upto bottom of top layer
       DO iLay = 2,iNumLayer-1
@@ -5025,7 +5030,7 @@ CONTAINS
             rCosAngle,1.0, &
             iVary,raTemp)
         raaUpFlux(:,iLay+1) = raaUpFlux(:,iLay+1)+raTemp*SNGL(daGaussWt(iAngle))
-        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
+!        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(4),raaUpFlux(4,iLay+1),raTemp(4)
       END DO
       ! do very top of top layer ie where instrument is!!!
       DO iLay = iNumLayer,iNumLayer
@@ -5036,7 +5041,7 @@ CONTAINS
             rCosAngle,rFracTop, &
             iVary,raTemp)
         raaUpFlux(:,iLay+1) = raaUpFlux(:,iLay+1)+raTemp*SNGL(daGaussWt(iAngle))
-        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(1),raaUpFlux(1,iLay+1),raTemp(1)
+!        write(*,'(I3,F10.4,ES20.10,ES20.10)') ,iLay,raFreq(4),raaUpFlux(4,iLay+1),raTemp(4)
       END DO
     END DO
 !------------------------------------------------------------------------

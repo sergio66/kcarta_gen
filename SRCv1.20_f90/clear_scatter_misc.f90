@@ -843,6 +843,9 @@ CONTAINS
      
 ! nitialise all scattering info to null
 
+    iB = -kProfLayer
+    iT = kMixFilRows+1
+
     iiDiv = 0
     555 CONTINUE
     IF (iiDiv*kProfLayer < iaaRadLayer(iAtm,3)) THEN

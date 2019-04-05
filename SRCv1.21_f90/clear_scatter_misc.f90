@@ -821,6 +821,8 @@ CONTAINS
     CHARACTER(1) :: caScale(MAXSCAT)
      
 ! nitialise all scattering info to null
+    iB = -kProfLayer
+    iT = kMixFilRows+1
 
     iiDiv = 0
     555 CONTINUE

@@ -1185,7 +1185,7 @@
         ! LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
         ! LOOP OVER THE ATMOSPHERE B.C. set in *RADFIL
         ! kWhichScatterCode = 0,2,3,5 for ABS, RTSPEC, DISORT, PCLSAM type clouds
-            IF (((kWhichScatterCode == 5) .OR. (kWhichScatterCode == 3)) .AND. (iAtm >= 1)) THEN
+            IF (((kWhichScatterCode == 5) .OR. (kWhichScatterCode == 3)) .AND. (iNatm >= 1)) THEN
                 DO iFr = 1,kMaxPts
                     DO iAtm = 1,kProfLayer
                         raaRadsX(iFr,iAtm) = 0.0

@@ -1133,7 +1133,7 @@ CONTAINS
     CALL CopyRaaExt_twostream(raaAbs,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
       iaaRadLayer,iAtm,iNumlayer)
 
-    iwpMAX(iI) = 0.0
+    iwpMAX = 0.0
      
     IF (iDownWard == 1) THEN
       IF (iaCloudNumLayers(1) < iNumLayer) THEN

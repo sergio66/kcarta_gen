@@ -2621,6 +2621,7 @@ CONTAINS
             raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
         END DO
 
+        iIOUN_Cloud = kTempUnit
         OPEN(UNIT=iIOUN_Cloud,FILE=caFCloudName,FORM='FORMATTED',STATUS='NEW', &
         IOSTAT=iFileErr)
         IF (iFileErr /= 0) THEN

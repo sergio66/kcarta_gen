@@ -640,7 +640,7 @@ CONTAINS
                      
           day2 = daaCKD(iL,iaF) + daFrDelta*(daaCKD(iL,iaF+1)-daaCKD(iL,iaF))/df                              
           daaCon(:,iLay) = day2    !this is temp dependance!
-          daaDT(iFr,iLay) = 0.0d0  !this is temp jacobian! 
+          daaDT(:,iLay) = 0.0d0  !this is temp jacobian! 
         END DO
       END IF
     END IF
@@ -837,6 +837,204 @@ CONTAINS
 
     RETURN
     end SUBROUTINE ComputeCKD_SlowSpline
+
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!**  this is the old code (cross sections and continuum gateway calls) **
+!************************************************************************
+!************************************************************************
+!************************************************************************
+! this subroutine is the gateway call to XSEC/calxsc
+! which is now REDUNDANT (stored in CONTINUUM_BLOCKDATA_AND_OLDXSEC)
+! compute the contribution of Gases 29-63 (if present)
+    SUBROUTINE CrossSectionOLD(iCount,iGasID,iRefLayer,iL,iU,kFrStep, &
+    daaTemp,raVTemp,iVTSet,raFreq,iErr,caXsecName, &
+    raTAmt,raTTemp,raTPress,raTPart,iaCont, &
+    daaDQ,daaDT,iDoDQ)
+     
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+     
+! iCount    = which of the iNumGases is being processed
+! iGasID    = iaGasID(iCount) = gas ID of current gas
+! iRefLayer = number of layers in the reference profiles (=kProfLayer)
+! iL,iU     = min/max layer number for each gas profile (=1,kProfLayer)
+! iaCont    = whether or not to do continuum calculation .. iaCont(iCount)
+! caXecF    = file name of cross section data
+! daaTemp   = matrix containing the uncompressed k-spectra
+! raVtemp   = vertical temperature profile for the Mixed paths
+! iVTSet    = has the vertical temp been set, to check current temp profile
+! raFreq    = wavenumber array
+! daaDQ     = analytic jacobian wrt gas amount
+! daaDT     = analytic jacobian wrt temperature
+! iErr      = errors (mainly associated with file I/O)
+! iDoDQ     = -2 if no amt,temp jacs, -1 if no amt jacs, > 0 if amt,temp jacs
+! kFrStep  = kFreqStep
+    INTEGER :: iaCont(kMaxGas),iDoDQ
+    CHARACTER(80) :: caXsecName
+    DOUBLE PRECISION :: daaTemp(kMaxPts,kProfLayer)
+    INTEGER :: iGasID,iL,iU,iErr,iRefLayer,iCount,iVTSet
+    REAL :: raTPress(kProfLayer),raTPart(kProfLayer),kFrStep
+    REAL :: raTAmt(kProfLayer),raTTemp(kProfLayer)
+    REAL :: raFreq(kMaxPts),raVTemp(kProfLayer)
+    DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
+    DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
+     
+! local variables
+    REAL :: raXamnt(kProfLayer),raAdjustProf(kProfLayer),rMin
+    REAL :: raaXsec(kMaxPts,kProfLayer),rFStep,rCheckTemp
+    INTEGER :: iNmol, iaMolid(MXXMOL),iLay,iFr,iWhichUsed
+     
+! used in d/dq, d/dT if kSpline = 1
+    REAL :: raaSplineDQ(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaSplineDT(kMaxPtsJac,kProfLayerJac)
+    INTEGER :: idQT
+     
+    REAL :: AVOG
+    DATA AVOG/6.022045E+26/
+     
+! to see if all the abs coefficients are less than zero ...tau=exp(-abs) <=1
+    REAL :: rEC,rECCount
+     
+! first check to see if exact calculations of d/dq,d/dT should be enabled
+    IF (kJacobian > 0) THEN
+        idQT=1
+    ELSE
+        idQT=-1
+    END IF
+
+    iLay = kProfLayer
+    iFr = kMaxPts
+    rFStep = kFrStep
+     
+! only calculate the current gas cross-section
+    iaMolid = 0
+    iNmol=1
+    iaMolid(1)=iGasID
+     
+    iLay = kProfLayer
+     
+    IF (iErr <= 0) THEN
+      ! set the vertical temperature profile if iCount=1 (first profile read)
+      IF ((iVTSet < 0) .AND. (iGasID <= kGasComp)) THEN
+        write(kStdWarn,*) 'Setting vertical temp profile ...'
+        raVTemp = raTTemp
+      END IF
+      ! if previous profiles have been read in, check to make sure the
+      ! temperature profiles are the same!!!!
+      IF ((iVTSet > 0) .AND. (iGasID <= kGasComp)) THEN
+        write(kStdWarn,*) 'Checking the vertical temp profile ...'
+        DO iLay=1,kProfLayer
+          rCheckTemp=raTTemp(iLay)-raVTemp(iLay)
+          IF (abs(rCheckTemp) >= 1.0e-3) THEN
+            write(kStdWarn,*) 'Warning!!Temp profiles do not match!!!'
+            write(kStdWarn,*) 'Gas#,layer, gastemp, vertical temp = '
+            write(kStdWarn,*) iCount,iLay,raTTemp(iLay),raVTemp(iLay)
+            write(kStdErr,*) 'Warning!!Temp profiles do not match!!!'
+            write(kStdErr,*) 'Gas#,layer, gastemp, vertical temp = '
+            write(kStdErr,*) iCount,iLay,raTTemp(iLay),raVTemp(iLay)
+          END IF
+        END DO
+      END IF
+    END IF
+     
+    IF (iErr < 0) THEN
+      ! convert amount from k.moles/cm^2 to molecules/cm^2
+      raXamnt = raTAmt*AVOG
+      raAdjustProf = raTTemp
+         
+      ! make sure that the relevant area in the cross section matrix is zeroed
+      raaXsec = 0.0
+         
+      ! if we need to do jacobian calculations using splines,
+      ! initialize the matrices here
+      IF (kJacobian > 0) THEN
+        IF (iDoDQ > 0) THEN
+          raaSplineDQ = 0.0
+          raaSplineDT = 0.0
+        ELSE IF (iDoDQ < 0) THEN
+           raaSplineDT = 0.0
+        END IF
+      END IF
+         
+         
+      ! this call calculates ONLY the cross sections
+      !            OR
+      ! as idQT=1 this call calculates the cross sections, AND d/dq,d/dT!!!, saving
+      ! them in raaSplineDQ ,raaSplineDT respectively
+
+      iLay = kProfLayer
+      iFr = kMaxPts
+      rFStep = kFrStep
+
+      write(kStdErr,*) 'CALXSC no longer supported!!!!'
+      CALL DoStop
+      ! cccc        CALL CALXSC(caXsecName,iFr,raFreq,rFStep,
+      ! cccc     $      iLay, raAdjustProf,raXamnt,iNmol,iaMolid,
+      ! cccc     $      raaXsec,iWhichUsed,
+      ! cccc     $      idQT, raaSplineDQ ,raaSplineDT, iGasID, iDoDQ)
+         
+      ! since CALXSC computed the cross-section and saved it in a 3d matrix,
+      ! pull out the relevant cross section data into a 2d matrix and add it to
+      ! the cumulative abscoeff matrix daaTemp
+      ! first check whether the CALXSC routine actually found a matching
+      ! gas+wavenumber region
+      rMin=1.0e10
+      rEC=0.0
+      rECCount=0.0
+      IF ((iWhichUsed > 0) .AND. (iWhichUsed <= iNmol)) THEN
+        WRITE(kStdWarn,1000) iCount,iGasID
+ 1000   FORMAT('adding on cross section for GAS(',I2,') = ',I2)
+        DO iLay=1,kProfLayer
+          DO iFr=1,kMaxPts
+            IF (raaXsec(iFr,iLay) < 0.0) THEN
+              ! flag this error, as the cross section values should all be > 0
+              iErr=1
+              rEC=rEC+raaXsec(iFr,iLay)
+              rECCount=rECCount+1
+              IF (raaXsec(iFr,iLay) < rMin) THEN
+                  rMin = raaXsec(iFr,iLay)
+              END IF
+              raaXsec(iFr,iLay)=0.0
+            END IF
+            daaTemp(iFr,iLay)=raaXsec(iFr,iLay)
+          END DO
+        END DO
+      ELSE
+        WRITE(kStdWarn,1010) iCount,iGasID
+ 1010   FORMAT ('no XSEC contribution due to GAS(',I2,') = ',I2)
+      END IF
+      IF (rECCount > 0.5) THEN
+        rEC=rEC/rECCount
+        write(kStdWarn,*) 'Error in XSEC data!!! Some values negative!'
+        write(kStdWarn,*) 'and reset to 0.0'
+        write(kStdWarn,*) 'rECCount values have avg value ',rEC
+        write(kStdWarn,*) 'min negative value in 10000*100 = ',rMin
+        IF (abs(rMin) > 1.0e-7) THEN
+          iErr=1
+          CALL DoSTOP
+        END IF
+      END IF
+      ! end main if statement
+    END IF
+     
+! do the inclusion of the exact derivatives here
+    IF (kJacobian > 0) THEN
+      ! exact calculations have already been performed in calXSC,calq ...
+      ! so apart from the avog factor in raaDQ, no need to do much here!!!
+      IF (iDoDQ > 0) THEN
+        daaDQ = raaSplineDQ * avog
+        daaDT = raaSplineDT
+      ELSE IF (iDoDQ < 0) THEN
+        daaDT = raaSplineDT
+      END IF
+    END IF
+             
+    RETURN
+    end SUBROUTINE CrossSectionOLD
+     
 
 !************************************************************************
 END MODULE kcont_xsec

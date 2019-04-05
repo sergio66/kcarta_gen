@@ -979,7 +979,7 @@ CONTAINS
 
 ! do initializations ...
 
-    iaInputOrder(iNpath) = -1
+    iaInputOrder = -1
 
     iErr = 1
     DO iNpath = 1,kMaxGas

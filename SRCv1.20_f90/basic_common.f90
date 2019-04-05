@@ -720,7 +720,7 @@ CONTAINS
     include '../INCLUDE/kcartaparam.f90'
 
 ! rf = wavenumber, rI = intensity, rBT = brightness temp
-    REAL :: rf,rI,rBT
+    REAL :: rf,rX,rY,rBT
 
 ! local variables
     REAL :: r1,r2,rPlanck
@@ -734,15 +734,26 @@ CONTAINS
 !! 10^38  = 87.49
           
     rPlanck = r2*rf/rBT
+!if (abs(rf-880.000) < 0.0001) write(*,'(ES20.10,ES20.10)') rBT,rPlanck
     IF (rPlanck > 87.49) THEN
         rPlanck = 1.0e38
     ELSE
         rPlanck = exp(rPlanck) - 1
     END IF
+!if (abs(rf-880.000) < 0.0001) write(*,'(ES20.10,ES20.10)') rBT,rPlanck
 
-    rI = r1*(rf**3)/rPlanck
+    rX = r1*rf
+    rY = rf*rf
+    rX = rX*rY
+    rX = rX/rPlanck
 
-    ttorad = rI
+    rX = r1*(rf**3)/rPlanck
+
+
+!if (abs(rf-880.000) < 0.0001) write(*,'(ES20.10,ES20.10,ES20.10,ES20.10,ES20.10)') r1,rf,rf**3,rBT,rX
+!if (abs(rf-880.000) < 0.0001) write(*,'(ES20.10,ES20.10,ES20.10,ES20.10,ES20.10)') rf,rBT,rPlanck,rY,rX
+
+    ttorad = rX
 
     RETURN
     end function ttorad

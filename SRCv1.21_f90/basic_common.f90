@@ -772,7 +772,7 @@ CONTAINS
 
 ! raf = wavenumber, rBT = brightness temp
     REAL :: raf(kMaxPts),rBT
-    REAL :: raX(kMaxPts)
+    REAL :: raX(kMaxPts),raY(kMaxPts)
     REAL :: rattorad(kMaxPts)
 
 ! local variables
@@ -787,6 +787,8 @@ CONTAINS
 !! 10^38  = 87.49
           
     raPlanck = r2*raf/rBT
+!write(*,'(ES20.10,ES20.10)') rBT,raPlanck(1)
+
     DO iInt = 1,kMaxPts
       IF (raPlanck(iInt) > 87.49) THEN
         raPlanck(iInt) = 1.0e38
@@ -794,8 +796,17 @@ CONTAINS
         raPlanck(iInt) = exp(raPlanck(iInt)) - 1
       END IF
     END DO
+!write(*,'(ES20.10,ES20.10)') rBT,raPlanck(1)
+
+    raX = r1*raf
+    raY = raf*raf
+    raX = raX*raY
+    raX = raX/raPlanck
 
     raX = r1*(raf**3)/raPlanck
+
+!write(*,'(ES20.10,ES20.10,ES20.10,ES20.10,ES20.10)') r1,raf(1),raf(1)**3,rBT,raX(1)
+!write(*,'(ES20.10,ES20.10,ES20.10,ES20.10,ES20.10)') raf(1),rBT,raPlanck(1),raY(1),raX(1)
 
     rattorad = raX
 
