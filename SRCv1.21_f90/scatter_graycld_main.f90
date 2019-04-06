@@ -390,7 +390,7 @@ CONTAINS
         write(kStdWarn,*) ' '
         write(kStdWarn,*) ' >>> Gray CLD RTA : doing CLD1'
         rSpresX = ctop1
-        CALL r_sort_logspl_one(raXlays,raXtemp,iNumLayer,rSpresX,rStempX)
+        CALL r_sort_logspl(raXlays,raXtemp,iNumLayer,rSpresX,rStempX)
         DO iFr = 1,kMaxPts
             raEmissX(iFr) = raCemis(1)
         END DO
@@ -437,7 +437,7 @@ CONTAINS
         write(kStdWarn,*) ' '
         write(kStdWarn,*) ' >>> Gray CLD RTA : doing CLD2'
         rSpresX = ctop2
-        CALL r_sort_logspl_one(raXlays,raXtemp,iNumLayer,rSpresX,rStempX)
+        CALL r_sort_logspl(raXlays,raXtemp,iNumLayer,rSpresX,rStempX)
         DO iFr = 1,kMaxPts
             raEmissX(iFr) = raCemis(2)
         END DO

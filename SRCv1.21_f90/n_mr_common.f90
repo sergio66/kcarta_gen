@@ -830,12 +830,12 @@ CONTAINS
         DO iL = 1,iNumLevs
           raX(iL) = raaG_VMR(iL,iG)
         END DO
-        CALL r_sort_loglinear1(raP,raX,iNumLevs,rPRefMin,rX)
+        CALL r_sort_loglinear(raP,raX,iNumLevs,rPRefMin,rX)
         raaG_VMR(iNumLevs,iG) = rX
       END DO
 
       !!! interpolate T(z) last point to rPRefMin
-      CALL r_sort_loglinear1(raP,raT,iNumLevs,rPRefMin,rX)
+      CALL r_sort_loglinear(raP,raT,iNumLevs,rPRefMin,rX)
       raT(iNumLevs) = rX
               
       !!! set last point to 0.005 mb
@@ -851,12 +851,12 @@ CONTAINS
         DO iL = 1,iNumLevs
           raX(iL) = raaG_VMR(iL,iG)
         END DO
-        CALL r_sort_loglinear1(raP,raX,iNumLevs,rPRefMinAugmented,rX)
+        CALL r_sort_loglinear(raP,raX,iNumLevs,rPRefMinAugmented,rX)
         raaG_VMR(iNumLevs,iG) = rX
       END DO
 
       !!! interpolate T(z) last point to rPRefMin
-      CALL r_sort_loglinear1(raP,raT,iNumLevs,rPRefMinAugmented,rX)
+      CALL r_sort_loglinear(raP,raT,iNumLevs,rPRefMinAugmented,rX)
       raT(iNumLevs) = rX
               
       !!! set last point to 0.00275 mb
@@ -1897,7 +1897,7 @@ CONTAINS
     iNumLevs + (iRefLevels-iAbove+1)
           
 ! now do linear interpolation from iAbove pressure, down to min(raP)
-    Call r_sort_loglinear1(raR100Press,raR100Temp,iRefLevels,rPMin*100.0,rJunk)
+    Call r_sort_loglinear(raR100Press,raR100Temp,iRefLevels,rPMin*100.0,rJunk)
     rToffset = raT(iNumLevs) - rJunk
     FMT = '(A,I3,A,I3)'
     write(kStdWarn,FMT)'tacking on info from kCARTA Pav Dtabase, layers ',iAbove,' to ',iRefLevels
@@ -1908,7 +1908,7 @@ CONTAINS
       DO iL = 1,iRefLevels
         raJunk(iL) = raaR100MR(iL,iG)
       END DO
-      Call r_sort_loglinear1(raR100Press,raJunk,iRefLevels,rPMin*100.0,rJunk)
+      Call r_sort_loglinear(raR100Press,raJunk,iRefLevels,rPMin*100.0,rJunk)
       !! need to do a CHANGE OF UNITS to ppmv!!!!!
       raoffset(iG) = raaG_VMR(iNumLevs,iG)/rJunk
       IF (raoffset(iG) < 0) THEN
@@ -2257,14 +2257,14 @@ CONTAINS
       write(kSTdWarn,*) 'Replace profile values (done with spline) with linear interp, between',iHigh,' to ',iNumUse
       DO iL = iHigh,iNumUse
         rInJunk = raPX(iL)
-        Call r_sort_loglinear1(raP,raT,iNumLevs,rInJunk,rOutJunk)
+        Call r_sort_loglinear(raP,raT,iNumLevs,rInJunk,rOutJunk)
         raTX(iL) = rOutJunk
 
         DO iG = 1,iNumGases
           DO iX = 1,iNumLevs
             raTemp(iX) = raaG_VMR(iX,iG)
           END DO
-          Call r_sort_loglinear1(raP,raTemp,iNumLevs,rInJunk,rOutJunk)
+          Call r_sort_loglinear(raP,raTemp,iNumLevs,rInJunk,rOutJunk)
           raaG_VMRX(iL,iG) = rOutJunk
         END DO
       END DO
@@ -2401,7 +2401,7 @@ CONTAINS
       !!! >>>>>>  this is starting out at         rP = PLEV_KCARTADATABASE_AIRS(iL)        rT = rTSurfx  >>>>>>>>
       rP = PLEV_KCARTADATABASE_AIRS(iL)
       rP = rP/100.0    !!! change N/m2 to mb
-      CALL r_sort_loglinear1(raXYZPress,raXYZTemp,iUpperLev,rP,rT)
+      CALL r_sort_loglinear(raXYZPress,raXYZTemp,iUpperLev,rP,rT)
 
       !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = log(a/c)
       dlnp = log(PLEV_KCARTADATABASE_AIRS(iL)) - log(PLEV_KCARTADATABASE_AIRS(iL+1))
@@ -2411,13 +2411,13 @@ CONTAINS
       rP_n = rP                             !! current sublev press
       rT_n = rT                             !! current sublev temp
       rMR_water_n = raXYZ_VMRwater(1)       !! current water MR
-      CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP,rMR_water_n) !! current water MR
+      CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP,rMR_water_n) !! current water MR
 
       !! information for next (sub)level
       rP_np1 = log(rP_n) - dlnp
       rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
-      CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-      CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)  !! next sublev MRw
+      CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+      CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)  !! next sublev MRw
 
       IF ((rP_n <= rPSurf) .AND. (iWoo < 0)) THEN
         iWoo = +1
@@ -2460,8 +2460,8 @@ CONTAINS
           DO iCnt = 1,iUpperLev
             raJunk(iCnt) = raaXYZ_VMR(iCnt,iG)
           END DO
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
           raaQout(iL,iG) = raaQout(iL,iG) + damount * (rMR_n + rMR_np1)/2 * rConvertQ
         END DO
 
@@ -2474,8 +2474,8 @@ CONTAINS
 
         rP_np1 = log(rP_n) - dlnp
         rP_np1 = exp(rP_np1)                                                               !! next sublev pressure
-        CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-        CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
+        CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+        CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
 
         IF ((rP_n <= rPSurf) .AND. (iWoo < 0)) THEN
           iWoo = +1
@@ -2536,8 +2536,8 @@ CONTAINS
       !! information for next (sub)level
       rP_np1 = log(rP_n) - dlnp
       rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
-      CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-      CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
+      CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+      CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
 
       DO iLoop = 1,iNFine
 
@@ -2574,8 +2574,8 @@ CONTAINS
           DO iCnt = 1,iUpperLev
               raJunk(iCnt) = raaXYZ_VMR(iCnt,iG)
           END DO
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
           raaQout(iL,iG) = raaQout(iL,iG) + damount * (rMR_n + rMR_np1)/2 * rConvertQ
           ! q_n   = rP_n  /rT_n  /kMGC * dz * rMR_n
           ! q_np1 = rP_np1/rT_np1/kMGC * dz * rMR_np1
@@ -2591,8 +2591,8 @@ CONTAINS
 
         rP_np1 = log(rP_n) - dlnp
         rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
-        CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-        CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
+        CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+        CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
 
       END DO
 
@@ -2686,7 +2686,7 @@ CONTAINS
           raJunk(iL-iLowestLev+1) = raZout(iL)
           raJunk2(iL-iLowestLev+1) = raPout(iL)
         END DO
-        CALL r_sort_linear1(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo)
+        CALL r_sort_linear(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo)
         write(kStdWarn,*)'LBLRTM output height of ',raRTP_TxtInput(4),' km corresponds to ',zWoo,' N/m2'
         raRTP_TxtInput(6) = zWoo/100.0  !! mb
       ELSEIF (raRTP_TxtInput(6) < 0) THEN
@@ -2804,7 +2804,7 @@ CONTAINS
       !!! >>>>>>  this is starting out at         rP = raPBnd(iL)        rT = rTSurfx  >>>>>>>>
       rP = raPBnd(iL)
       rP = rP/100.0    !!! change N/m2 to mb
-      CALL r_sort_loglinear1(raXYZPress,raXYZTemp,iUpperLev,rP,rT)
+      CALL r_sort_loglinear(raXYZPress,raXYZTemp,iUpperLev,rP,rT)
 
       !! no need to divide by 100 since it cancels   log(a/c)-log(b/c) = log(a/c/b/c) = loag(a/c)
       dlnp = log(raPBnd(iL)) - log(raPBnd(iL+1))
@@ -2814,13 +2814,13 @@ CONTAINS
       rP_n = rP                             !! current sublev press
       rT_n = rT                             !! current sublev temp
       rMR_water_n = raXYZ_VMRwater(1)        !! current water MR
-      CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP,rMR_water_n) !! current water MR
+      CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP,rMR_water_n) !! current water MR
 
       !! information for next (sub)level
       rP_np1 = log(rP_n) - dlnp
       rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
-      CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-      CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
+      CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+      CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
 
       IF ((rP_n <= rPSurf) .AND. (iWoo < 0)) THEN
         iWoo = +1
@@ -2863,8 +2863,8 @@ CONTAINS
           DO iCnt = 1,iUpperLev
             raJunk(iCnt) = raaXYZ_VMR(iCnt,iG)
           END DO
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
           raaQout(iL+iOffSet,iG) = raaQout(iL+iOffSet,iG) + damount * (rMR_n + rMR_np1)/2 * rConvertQ
         END DO
 
@@ -2877,8 +2877,8 @@ CONTAINS
 
         rP_np1 = log(rP_n) - dlnp
         rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
-        CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-        CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
+        CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+        CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
 
         IF ((rP_n <= rPSurf) .AND. (iWoo < 0)) THEN
           iWoo = +1
@@ -2934,8 +2934,8 @@ CONTAINS
       !! information for next (sub)level
       rP_np1 = log(rP_n) - dlnp
       rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
-      CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-      CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
+      CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+      CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
 
       DO iLoop = 1,iNFine
 
@@ -2972,8 +2972,8 @@ CONTAINS
           DO iCnt = 1,iUpperLev
             raJunk(iCnt) = raaXYZ_VMR(iCnt,iG)
           END DO
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
-          CALL r_sort_loglinear1(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_n,  rMR_n  )
+          CALL r_sort_loglinear(raXYZPress,raJunk,iUpperLev,rP_np1,rMR_np1)
           raaQout(iL+iOffSet,iG) = raaQout(iL+iOffSet,iG) + damount * (rMR_n + rMR_np1)/2 * rConvertQ
           ! q_n   = rP_n  /rT_n  /kMGC * dz * rMR_n
           ! q_np1 = rP_np1/rT_np1/kMGC * dz * rMR_np1
@@ -2989,8 +2989,8 @@ CONTAINS
 
         rP_np1 = log(rP_n) - dlnp
         rP_np1 = exp(rP_np1)                                                                !! next sublev pressure
-        CALL r_sort_loglinear1(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
-        CALL r_sort_loglinear1(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
+        CALL r_sort_loglinear(raXYZPress,raXYZTemp,    iUpperLev,rP_np1,rT_np1        )   !! next sublev temp
+        CALL r_sort_loglinear(raXYZPress,raXYZ_VMRwater,iUpperLev,rP_np1,rMR_water_np1)   !! next sublev MRw
 
       END DO
 
@@ -3081,7 +3081,7 @@ CONTAINS
           raJunk(iL-iLowestLev+1) = raZout(iL)
           raJunk2(iL-iLowestLev+1) = raPout(iL)
         END DO
-        CALL r_sort_linear1(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo)
+        CALL r_sort_linear(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo)
         write(kStdWarn,*)'LBLRTM output height of ',raRTP_TxtInput(4),' km corresponds to ',zWoo,' N/m2'
         raRTP_TxtInput(6) = zWoo/100.0  !! mb
       ELSEIF (raRTP_TxtInput(6) < 0) THEN
@@ -3215,7 +3215,7 @@ CONTAINS
           raJunk(iL-iLowestLev+1) = raZout(iL)
           raJunk2(iL-iLowestLev+1) = raPout(iL)
         END DO
-        CALL r_sort_linear1(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo)
+        CALL r_sort_linear(raJunk,raJunk2,kProfLayer-iLowestLev+1,raRTP_TxtInput(4)*1000,zWoo)
         write(kStdWarn,*)'LBLRTM output height of ',raRTP_TxtInput(4),' km corresponds to ',zWoo,' N/m2'
         !raRTP_TxtInput(6) = zWoo/100.0  !! mb
         raRTP_TxtInput(6) = zWoo        !! keep in mb
@@ -3520,14 +3520,14 @@ CONTAINS
       write(kSTdWarn,*) 'Replace profile values (done with spline) with linear interp, between',iHigh,' to ',iNumUse
       DO iL = iHigh,iNumUse
         rInJunk = raPX(iL)
-        Call r_sort_loglinear1(raP,raT,iNumLevs,rInJunk,rOutJunk)
+        Call r_sort_loglinear(raP,raT,iNumLevs,rInJunk,rOutJunk)
         raTX(iL) = rOutJunk
 
         DO iG = 1,iNumGases
           DO iX = 1,iNumLevs
             raTemp(iX) = raaG_VMR(iX,iG)
           END DO
-          Call r_sort_loglinear1(raP,raTemp,iNumLevs,rInJunk,rOutJunk)
+          Call r_sort_loglinear(raP,raTemp,iNumLevs,rInJunk,rOutJunk)
           raaG_VMRX(iL,iG) = rOutJunk
         END DO
       END DO

@@ -541,8 +541,8 @@ CONTAINS
         raTAmt(iI)    = raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
         raTAmt(iI)    = raTAmt(iI)/1e9/MGC/raTTemp(iI)
 
-        CALL r_sort_logspl_one(raUA_refP,raUA_refT, kMaxLayer,raTPress(iI),raTUA_ref(iI))
-        CALL r_sort_logspl_one(raUA_refP,raUA_refMR,kMaxLayer,raTPress(iI),raMixRatioUA_ref(iI))
+        CALL r_sort_logspl(raUA_refP,raUA_refT, kMaxLayer,raTPress(iI),raTUA_ref(iI))
+        CALL r_sort_logspl(raUA_refP,raUA_refMR,kMaxLayer,raTPress(iI),raMixRatioUA_ref(iI))
 
         IF ((iBand == 1) .AND. &
           (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &
@@ -706,8 +706,8 @@ CONTAINS
         raTAmt(iI)       = raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
         raTAmt(iI)       = raTAmt(iI)/1e9/MGC/raTTemp(iI)
 	
-        CALL r_sort_logspl_one(raUA_refP,raUA_refT, kMaxLayer,raTPress(iI),raTUA_ref(iI))
-        CALL r_sort_logspl_one(raUA_refP,raUA_refMR,kMaxLayer,raTPress(iI),raMixRatioUA_ref(iI))
+        CALL r_sort_logspl(raUA_refP,raUA_refT, kMaxLayer,raTPress(iI),raTUA_ref(iI))
+        CALL r_sort_logspl(raUA_refP,raUA_refMR,kMaxLayer,raTPress(iI),raMixRatioUA_ref(iI))
 
         IF ((iBand == 1) .AND. &
           (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &

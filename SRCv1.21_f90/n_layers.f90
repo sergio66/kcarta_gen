@@ -16,8 +16,6 @@ CONTAINS
 
 ! this file deals with a simple layers
 ! does everything in terms of LINEAR interps, not SPLINE
-! DO NOT USE        Call r_sort_logspl(raTempP,raTempMR,i1-i2+1,raP,raTempMRX,iNumLevs)
-! DO     USE        Call r_sort_loglinear(raTempP,raTempMR,i1-i2+1,raP,raTempMRX,iNumLevs)
 
 ! assumes WV is in "wet air", other gases in dry air VMR (klayers unit 12)
 ! code

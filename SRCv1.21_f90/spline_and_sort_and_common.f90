@@ -35,13 +35,41 @@ interface linear_one
   module procedure dlinear_one
 end interface
 
-public :: spl,linear,linear_one,splin,sply2
+!! http://www.mathcs.emory.edu/~cheung/Courses/561/Syllabus/6-Fortran/overloading.html
+!!  When the F90 compiler translates a function/subroutine name that
+!!  matches the name of an interface , it replaces the invocation with
+!!  one of the function/subroutine in the interface depending on the
+!!  number and type of parameters
+
+!! note different number of arguments, blah1 has one less than blahN
+interface r_sort_spl
+  module procedure r_sort_splN
+  module procedure r_sort_spl1
+end interface
+
+!! note different number of arguments, blah1 has one less than blahN
+interface r_sort_logspl
+  module procedure r_sort_logsplN
+  module procedure r_sort_logspl1
+end interface
+
+!! note different number of arguments, blah1 has one less than blahN
+interface r_sort_linear
+  module procedure r_sort_linearN
+  module procedure r_sort_linear1
+end interface
+
+!! note different number of arguments, blah1 has one less than blahN
+interface r_sort_loglinear
+  module procedure r_sort_loglinearN
+  module procedure r_sort_loglinear1
+end interface
+
+public :: spl,splin,sply2,linear,linear_one,r_sort_spl,r_sort_logspl,r_sort_linear,r_sort_loglinear
 public :: inset,idiv,iimod,NumericalRecipesIndexer,DoSort,DoSortPress,DoSortReal,DoSort2Real
 public :: DoUniqueReal,BinarySearch,SequentialSearch
-public :: r_sort_spl,r_sort_logspl,r_sort_spl_one,r_sort_logspl_one
 public :: rsplin,rSPLY2,logrspl,rspl_one
 public :: dsplin,dSPLY2,dLINEAR_SMART_ONE,dlinear_smart
-public :: r_sort_linear,r_sort_loglinear,r_sort_linear1,r_sort_loglinear1
 public :: p2h,DoOutputLayer
 
 CONTAINS
@@ -693,10 +721,12 @@ CONTAINS
 
 !************************************************************************
 !                     SPLINES
-!    SUBROUTINE r_sort_spl(XA,YA,N,XOUT,YOUT,NOUT)
-!    SUBROUTINE r_sort_logspl(XA,YA,N,XOUT,YOUT,NOUT)
-!    SUBROUTINE r_sort_spl_one(XA,YA,N,XOUT,YOUT)
-!    SUBROUTINE r_sort_logspl_one(XA,YA,N,XOUT,YOUT)
+
+! OVERLOAD
+!    SUBROUTINE r_sort_splN(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE r_sort_spl1(XA,YA,N,XOUT,YOUT)
+!    SUBROUTINE r_sort_logsplN(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE r_sort_logspl1(XA,YA,N,XOUT,YOUT)
 
 !    SUBROUTINE logrspl(XA,YA,N,XOUT,YOUT,NOUT)   -- changes input to log, sorts, then calls rSPLY2 then rsplin
 !    SUBROUTINE rspl_one(XA,YA,N,XOUT,YOUT)       -- wraps the call the rSPLY2 then rsplin for NOUT = 1 output
@@ -718,13 +748,14 @@ CONTAINS
 !    SUBROUTINE dLINEAR_SMART_ONE(NSMART_LO,NSMART_HI,XA,YA,N,X,Y)
 !    SUBROUTINE dlinear_smart(XA,YA,N,XOUT,YOUT,NOUT)
 
-!    SUBROUTINE r_sort_linear(XA,YA,N,XOUT,YOUT,NOUT)
-!    SUBROUTINE r_sort_loglinear(XA,YA,N,XOUT,YOUT,NOUT)
+! OVERLOAD
+!    SUBROUTINE r_sort_linearN(XA,YA,N,XOUT,YOUT,NOUT)
 !    SUBROUTINE r_sort_linear1(XA,YA,N,XOUT,YOUT)
+!    SUBROUTINE r_sort_loglinearN(XA,YA,N,XOUT,YOUT,NOUT)
 !    SUBROUTINE r_sort_loglinear1(XA,YA,N,XOUT,YOUT)
 !************************************************************************
 ! this subroutine first sorts, then splines
-    SUBROUTINE r_sort_spl(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE r_sort_splN(XA,YA,N,XOUT,YOUT,NOUT)
 
     IMPLICIT NONE
 
@@ -743,12 +774,12 @@ CONTAINS
     CALL rspl(XAA,YAA,N,XOUT,YOUT,NOUT)
 
     RETURN
-    end SUBROUTINE r_sort_spl
+    end SUBROUTINE r_sort_splN
 
 !************************************************************************
 ! this subroutine first sorts, then splines
 ! changes input X, output XOUT, to log(X) and log(XOUT)
-    SUBROUTINE r_sort_logspl(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE r_sort_logsplN(XA,YA,N,XOUT,YOUT,NOUT)
 
     IMPLICIT NONE
 
@@ -770,12 +801,12 @@ CONTAINS
     CALL rspl(XAA,YAA,N,XBB,YOUT,NOUT)
 
     RETURN
-    end SUBROUTINE r_sort_logspl
+    end SUBROUTINE r_sort_logsplN
 
 !************************************************************************
 ! this subroutine first sorts, then splines
 ! changes input X, output XOUT, to log(X) and log(XOUT)
-    SUBROUTINE r_sort_spl_one(XA,YA,N,XOUT,YOUT)
+    SUBROUTINE r_sort_spl1(XA,YA,N,XOUT,YOUT)
 
     IMPLICIT NONE
 
@@ -797,12 +828,12 @@ CONTAINS
     CALL rspl_one(XAA,YAA,N,XBB,YOUT)
 
     RETURN
-    end SUBROUTINE r_sort_spl_one
+    end SUBROUTINE r_sort_spl1
 
 !************************************************************************
 ! this subroutine first sorts, then splines
 ! changes input X, output XOUT, to log(X) and log(XOUT)
-    SUBROUTINE r_sort_logspl_one(XA,YA,N,XOUT,YOUT)
+    SUBROUTINE r_sort_logspl1(XA,YA,N,XOUT,YOUT)
 
     IMPLICIT NONE
 
@@ -824,7 +855,7 @@ CONTAINS
     CALL rspl_one(XAA,YAA,N,XBB,YOUT)
 
     RETURN
-    end SUBROUTINE r_sort_logspl_one
+    end SUBROUTINE r_sort_logspl1
 
 !************************************************************************
 ! this subroutine directly calls rsply2 and then rspline
@@ -1591,7 +1622,7 @@ CONTAINS
      
 !************************************************************************
 ! this subroutine first sorts, then interps
-    SUBROUTINE r_sort_linear(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE r_sort_linearN(XA,YA,N,XOUT,YOUT,NOUT)
 
     IMPLICIT NONE
 
@@ -1611,12 +1642,12 @@ CONTAINS
     CALL rlinear(XAA,YAA,N,XOUT,YOUT,NOUT)
 
     RETURN
-    end SUBROUTINE r_sort_linear
+    end SUBROUTINE r_sort_linearN
 
 !************************************************************************
 ! this subroutine first sorts, then linearines
 ! changes input X, output XOUT, to log(X) and log(XOUT)
-    SUBROUTINE r_sort_loglinear(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE r_sort_loglinearN(XA,YA,N,XOUT,YOUT,NOUT)
 
     IMPLICIT NONE
 
@@ -1638,7 +1669,7 @@ CONTAINS
     CALL rlinear(XAA,YAA,N,XBB,YOUT,NOUT)
 
     RETURN
-    end SUBROUTINE r_sort_loglinear
+    end SUBROUTINE r_sort_loglinearN
 
 !************************************************************************
 ! this subroutine first sorts, then interps

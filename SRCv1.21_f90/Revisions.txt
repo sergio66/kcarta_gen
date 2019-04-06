@@ -590,9 +590,9 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
-4/5/19         Overloaded the planck functions radtot and ttorad
-               Probably will not overload the spline functions since they
-               are bread and butter of uncompression
+4/6/19         Overloaded the planck functions (real, double, scalar freq or array freq)
+                   radtot and ttorad
+               Have overloaded most of the spline and sort functions (read, double)
 
 4/3/19         Fixed the clear sky and PCLSAM allsky flux bugs
                (a) clear sky flux bug was actually in v1.20 (see comment)
