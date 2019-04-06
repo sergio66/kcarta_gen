@@ -5,6 +5,7 @@
 MODULE scatter_pclsam_code
 
 USE basic_common
+USE ttorad_common
 USE jac_main
 USE jac_pclsam_up
 USE jac_pclsam_down
@@ -852,7 +853,7 @@ CONTAINS
     IF (iDoSolar == 0) THEN
       ! NOTE!no geometry factor (rOmegaSun=1.0),only need cos(rSunAngle) eventually
       ! compute the Plank radiation from the sun
-      raSunScatter = rattorad(raFreq,rSunTemp)
+      raSunScatter = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       CALL ReadSolarData(raFreq,raSunScatter,iTag)
     ELSE
@@ -865,13 +866,13 @@ CONTAINS
     ! INTIALIZE the emission seen at satellite to 0.0
     raInten        = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-    raSurface = rattorad(raFreq,rTSurf)
+    raSurface = ttorad(raFreq,rTSurf)
     raSunScatter = raSunScatter * rOmegaSun * muSun
     raSunDirect = raSunScatter
 
     ! compute emission from the top of atm == eqn 4.26 of Genln2 manual
     ! initialize the cumulative thermal radiation
-    raThermal = rattorad(raFreq,sngl(kTSpace))
+    raThermal = ttorad(raFreq,sngl(kTSpace))
     raRad1    = raThermal
 
 ! using Dave Turner's thesis ideas
@@ -966,7 +967,7 @@ CONTAINS
       rMPTemp = raVT1(iL)
 
       !!! simple radtrans
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raRad1 = raRad1 * exp(-raaExt(:,iL)/muSat) + &
             (1-exp(-raaExt(:,iL)/muSat))*raPlanck
     END DO
@@ -993,7 +994,7 @@ CONTAINS
       rMPTemp = raVT1(iL)
 
       !!! simple radtrans
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raRad1 = raRad1 * exp(-raaExt(:,iL)/muSat) + &
             (1-exp(-raaExt(:,iL)/muSat))*raPlanck
     END DO
@@ -1203,16 +1204,16 @@ CONTAINS
       !normal, no LTE emission stuff
 
       IF (iaCldLayer(iLay) == -1) THEN
-        raPlanck = rattorad(raFreq,rMPTemp)
+        raPlanck = ttorad(raFreq,rMPTemp)
         raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
       ELSEIF (iaCldLayer(iLay) == 1) THEN
         IF (iDebugScatterJacobian == -1) THEN
           !optical depth varies linearly with radiance
 
           !lower level radiance
-          rabup = rattorad(raFreq,rdn)
+          rabup = ttorad(raFreq,rdn)
           !upper level radiance
-          rabdn = rattorad(raFreq,rup)
+          rabdn = ttorad(raFreq,rup)
 
           radb = rabup - rabdn
           ra0 = raaExt(:,iL)*rFrac/muSat
@@ -1230,7 +1231,7 @@ CONTAINS
           END WHERE
 
         ELSEIF (iDebugScatterJacobian == +1) THEN
-          raPlanck = rattorad(raFreq,rMPTemp)
+          raPlanck = ttorad(raFreq,rMPTemp)
           raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
         END IF
 
@@ -1284,7 +1285,7 @@ CONTAINS
       ELSE
         raAngleTrans    = exp(-raaExt(:,iL)/muSat)
       END IF
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raAngleEmission = (1.0-raAngleTrans)*raPlanck
       !sun            rAngleEmission = 0.0
       raThermal = raThermal*raAngleTrans + raAngleEmission
@@ -1305,10 +1306,10 @@ CONTAINS
       IF (iDebugScatterJacobian == -1) THEN
         !! do the PCLSAM variation in radiance with optical depth
         !lower level radiance
-        rabup = rattorad(raFreq,rdn)
+        rabup = ttorad(raFreq,rdn)
 
         !upper level radiance
-        rabdn = rattorad(raFreq,rup)
+        rabdn = ttorad(raFreq,rup)
 
         radb = rabup - rabdn
         ra0 = raaExt(:,iL)*rFrac/muSat
@@ -1330,7 +1331,7 @@ CONTAINS
 
       ELSEIF (iDebugScatterJacobian == +1) THEN
         !do variation
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleTrans    = exp(-raaExt(:,iL)/muSat)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         !sun              rAngleEmission = 0.0
@@ -1639,7 +1640,7 @@ CONTAINS
     ! initialize the solar and thermal contribution to 0
     raSun     = 0.0
     raThermal = 0.0
-    raInten   = rattorad(raFreq,rTSurf)
+    raInten   = ttorad(raFreq,rTSurf)
     raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
@@ -2081,7 +2082,7 @@ CONTAINS
     raThermal = 0.0
     raSunGasOnly     = 0.0
     raThermalGasOnly = 0.0
-    raInten   = rattorad(raFreq,rTSurf)
+    raInten   = ttorad(raFreq,rTSurf)
     raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer

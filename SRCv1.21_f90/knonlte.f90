@@ -5,6 +5,7 @@
 MODULE knonlte
 
 USE basic_common
+USE ttorad_common
 USE spline_and_sort_and_common
 use klineshapes
 use kvoigt_cousin
@@ -294,8 +295,8 @@ CONTAINS
     iLTEIn = -1
           
     IF (iNLTE_SlowORFast == +1) THEN
-        write(kStdWarn,'(A,I2,A,I5)') 'seeing if we need to do slow LBL NLTE for gid ',iaGases(iGas), ' chunk ',nint(raFreq(1))
-        CALL NLTE_SLOW_LBL( &
+      write(kStdWarn,'(A,I2,A,I5)') 'seeing if we need to do slow LBL NLTE for gid ',iaGases(iGas), ' chunk ',nint(raFreq(1))
+      CALL NLTE_SLOW_LBL( &
         iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
         iSetBloat,iaNLTEChunks,iaaNLTEChunks,raNLTEstrength, &
         iTag,iActualTag,iProfileLayers,iL_low,iL_high,rCO2mult, &
@@ -326,8 +327,8 @@ CONTAINS
         daaUpperPlanckCoeffBloat, &
         daaUpperNLTEGasAbCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat)
     ELSEIF (iNLTE_SlowORFast == -2) THEN
-        write(kStdWarn,*) 'seeing if we do fast kCompressed NLTE for ',iaGases(iGas), ' for chunk ',raFreq(1)    
-        CALL NLTE_Fast_Compressed( &
+      write(kStdWarn,*) 'seeing if we do fast kCompressed NLTE for ',iaGases(iGas), ' for chunk ',raFreq(1)    
+      CALL NLTE_Fast_Compressed( &
         iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
         iSetBloat,iaNLTEChunks,iaaNLTEChunks,raNLTEstrength, &
         iTag,iActualTag,iProfileLayers,iL_low,iL_high,rCO2mult, &
@@ -364,9 +365,9 @@ CONTAINS
         iaQ11,iaQ12,raQ11,raQ12, &
         iaQ21,iaQ22,raQ21,raQ22)
     ELSE
-        write(kStdErr,*) 'hmm NLTE Driver neediNLTE_SlowORFast = +1,-2'
-        write(kStdErr,*) 'not ',iNLTE_SlowORFast
-        CALL DoStop
+      write(kStdErr,*) 'hmm NLTE Driver neediNLTE_SlowORFast = +1,-2'
+      write(kStdErr,*) 'not ',iNLTE_SlowORFast
+      CALL DoStop
     ENDIF
 
     RETURN
@@ -553,136 +554,120 @@ CONTAINS
     iLTEIn = OutsideSpectra(iaGases(iGas),iNumNLTEGases,iaNLTEGasID,iJunkNum,iaJunk,raFreq(1),605.0,2830.0,20)
 
     IF (iLTEIn > 0) THEN
-        CALL LowerAtmNLTERefs(raRPressX,raRPPressX,raRTempx,raRAmtx)
-    !        DO iL = 1, kProfLayer
-    !          print *,iL,raRTemp(iL)-raRTempx(iL),raRAmt(iL)/raRAmtX(iL)
-    !        END DO
-    !      call dostop
+      CALL LowerAtmNLTERefs(raRPressX,raRPPressX,raRTempx,raRAmtx)
+      ! DO iL = 1, kProfLayer
+      !   print *,iL,raRTemp(iL)-raRTempx(iL),raRAmt(iL)/raRAmtX(iL)
+      ! END DO
+      ! call dostop
     END IF
 
     iBand = 2350
     iBand = 1
     IF ((iDoUpperAtmNLTE > 0) .AND. (iLTEIn > 0)) THEN
-    !! read in alt/press/temp/upper mix ratio from caaUpperMixRatio
-    !!  into raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs
-    !!
-    !! this is DIFFERENT from the UA NLTE compressed database!
-    !! which is read in and saved into raUpper*_Std(iI=1,iiUpperStd_Num)
-        CALL MixRatio(iaGases(iGas),rCO2mult,iLTEIn,caaUpperMixRatio, &
+      !! read in alt/press/temp/upper mix ratio from caaUpperMixRatio
+      !!  into raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs
+      !!
+      !! this is DIFFERENT from the UA NLTE compressed database!
+      !! which is read in and saved into raUpper*_Std(iI=1,iiUpperStd_Num)
+      CALL MixRatio(iaGases(iGas),rCO2mult,iLTEIn,caaUpperMixRatio, &
         raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
         raUpperPress_Std,raUpperMixRatio_Std,raUpperDZ_Std, &
         raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
 
-    !! this reads in the GENLN2 style actual NLTE vib temp profiles
-    !! for the diffferent CO2 bands, as stored in caaNLTETemp
-    !! results stored raUpper*(iI=1,iUpper)
-        CALL read_upperatm_lte_temperature( &
+      !! this reads in the GENLN2 style actual NLTE vib temp profiles
+      !! for the diffferent CO2 bands, as stored in caaNLTETemp
+      !! results stored raUpper*(iI=1,iUpper)
+      CALL read_upperatm_lte_temperature( &
         iaGases(iGas),iNLTEStart,iLTEin,iBand,caaNLTETemp, &
         raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
         pProf,raPresslevels,raLayerHeight,raThickness, &
         iUpper,raUpperTemp,raUpperGasAmt,raUpperPress,raUpperPartPress, &
         raUpperPressLevels,raUpperThickness)
 
-    !        DO iL = 1,iNumMixRatioLevs
-    !          print *,iL,raUpper_Pres(iL),raUpper_MixRatio(iL)
-    !        END DO
-    !        print *,' '
-    !        DO iL = 1,iUpperStd_Num
-    !          print *,iL,raUpperPress_std(iL),raUpperMixRatio_std(iL)
-    !        END DO
-    !        print *,' '
-    !        DO iL = 1,iUpper
-    !          print *,iL,raUpperPress(iL),raUpperTemp(iL)
-    !        END DO
-    !        CALL DOSTOP
-         
-        IF (iDoUpperAtmNLTE > 0) THEN
-            rMult0 = 0.8      !!        modify the Planck coeffs
-            rMult0 = 0.7275   !!        modify the Planck coeffs
-            rMult0 = 0.775    !!        modify the Planck coeffs
-            rMult0 = 1.0000   !! do not modify the Planck coeffs
-            rMult0 = 0.75     !!        modify the Planck coeffs
+      IF (iDoUpperAtmNLTE > 0) THEN
+        rMult0 = 0.8      !!        modify the Planck coeffs
+        rMult0 = 0.7275   !!        modify the Planck coeffs
+        rMult0 = 0.775    !!        modify the Planck coeffs
+        rMult0 = 1.0000   !! do not modify the Planck coeffs
+        rMult0 = 0.75     !!        modify the Planck coeffs
 
         ! need to interp1 (raUpperPress,raUpperTemp) onto (raUpperPress_Std)
-            DO iL = 1,iUpper
-                raUpperPress1013(iL) = raUpperPress(iL)*1013.25
-            END DO
+        DO iL = 1,iUpper
+          raUpperPress1013(iL) = raUpperPress(iL)*1013.25
+        END DO
 
-            iZeroPlanck = iUpperStd_Num + 1
-            IF (raUpperPress_Std(iUpperStd_Num) < raUpperPress1013(iUpper))THEN
-            !! need to turn off the Planck function else we may get bad results
-                iZeroPlanck = 1
-                10 CONTINUE
-                IF (raUpperPress_Std(iZeroPlanck) > raUpperPress1013(iUpper) .AND. &
-                iZeroPlanck < iUpperStd_Num) THEN
-                    iZeroPlanck = iZeroPlanck + 1
-                    GOTO 10
-                END IF
-            END IF
+        iZeroPlanck = iUpperStd_Num + 1
+        IF (raUpperPress_Std(iUpperStd_Num) < raUpperPress1013(iUpper))THEN
+          !! need to turn off the Planck function else we may get bad results
+          iZeroPlanck = 1
+ 10       CONTINUE
+          IF (raUpperPress_Std(iZeroPlanck) > raUpperPress1013(iUpper) .AND. iZeroPlanck < iUpperStd_Num) THEN
+            iZeroPlanck = iZeroPlanck + 1
+            GOTO 10
+          END IF
+        END IF
 
-            IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-            (abs(kLongOrShort) <= 1)) THEN
-                write(kStdWarn,*) 'wil reduce UA Planckcoeffs in successive layers by factor of ',rMult0
-                write(kStdWarn,*) 'User Profile : n,minP(TOA_UA) = ',iUpper,raUpperPress1013(iUpper)
-                write(kStdWarn,*) 'US Std Prof  : n,minP(TOA_UA) = ',iUpperStd_Num,raUpperPress_Std(iUpperStd_Num)
-                write(kStdWarn,*) ' '
-                IF (iZeroPlanck < (iUpperStd_Num + 1)) THEN
-                    write(kStdWarn,*) 'will zero out UA Planck coeffs from layer ',iZeroPlanck
-                END IF
-            END IF
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+          write(kStdWarn,*) 'wil reduce UA Planckcoeffs in successive layers by factor of ',rMult0
+          write(kStdWarn,*) 'User Profile : n,minP(TOA_UA) = ',iUpper,raUpperPress1013(iUpper)
+          write(kStdWarn,*) 'US Std Prof  : n,minP(TOA_UA) = ',iUpperStd_Num,raUpperPress_Std(iUpperStd_Num)
+          write(kStdWarn,*) ' '
+          IF (iZeroPlanck < (iUpperStd_Num + 1)) THEN
+            write(kStdWarn,*) 'will zero out UA Planck coeffs from layer ',iZeroPlanck
+          END IF
+        END IF
 
-            CALL logrspl(raUpperPress1013,raUpperTemp,iUpper,raUpperPress_Std,raInterpTempUA,iUpperStd_Num)
-            iUpper = iUpperStd_Num
+        CALL logrspl(raUpperPress1013,raUpperTemp,iUpper,raUpperPress_Std,raInterpTempUA,iUpperStd_Num)
+        iUpper = iUpperStd_Num
         !! thus we have mapped raUpperPress1013,raUpperTemp,iUpper  ----->>>>
         !!                     raUpperPress_Std,raInterpTempUA,iUpperStd_Num
 
-            IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-            (abs(kLongOrShort) <= 1)) THEN
-                write(kStdWarn,*) 'UPPER ATM Profile for kCompressed (use default MixRatios in UA)'
-                write(kStdWarn,*) ' iL     StdPress    StdTemp   StdCO2Amt  UserTemp  User-Std'
-                write(kStdWarn,*) '          mb          K       kmol/cm2      K        K'
-                write(kStdWarn,*) '------------------------------------------------------------'
-                DO iL = 1,iUpperStd_Num
-                    write(kStdWarn,*) iL,raUpperPress_Std(iL),raUpperTemp_Std(iL),raUpperCO2Amt_Std(iL), &
-                    raInterpTempUA(iL),raInterpTempUA(iL)-raUpperTemp_Std(iL)
-                    IF (iL+1 == iZeroPlanck) THEN
-                        write(kStdWarn,*) '------------------------------------------------------------'
-                    END IF
-                END DO
+        IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+          write(kStdWarn,*) 'UPPER ATM Profile for kCompressed (use default MixRatios in UA)'
+          write(kStdWarn,*) ' iL     StdPress    StdTemp   StdCO2Amt  UserTemp  User-Std'
+          write(kStdWarn,*) '          mb          K       kmol/cm2      K        K'
+          write(kStdWarn,*) '------------------------------------------------------------'
+          DO iL = 1,iUpperStd_Num
+            write(kStdWarn,*) iL,raUpperPress_Std(iL),raUpperTemp_Std(iL),raUpperCO2Amt_Std(iL), &
+            raInterpTempUA(iL),raInterpTempUA(iL)-raUpperTemp_Std(iL)
+            IF (iL+1 == iZeroPlanck) THEN
+              write(kStdWarn,*) '------------------------------------------------------------'
             END IF
+          END DO
         END IF
+      END IF
 
-        IF (kNLTEOutUAOpen == -1) THEN
+      IF (kNLTEOutUAOpen == -1) THEN
         !!! open the output file etc
-            iType = +1
-            CALL OpenUAFile(iType,iUpper,caOutUAFile,rFreqStart,rFreqEnd, &
-            iDumpAllUASpectra,iDumpAllUARads, &
-            iFileIDLo,iFileIDHi,iTag, &
-            iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
-            IF (iDumpAllUARads > 0) THEN
-                iNumberUA_NLTEOut = 1 + iUpper
-            ELSEIF (iDumpAllUARads <= 0) THEN
-                iNumberUA_NLTEOut = 1 + 1
-            END IF
+        iType = +1
+        CALL OpenUAFile(iType,iUpper,caOutUAFile,rFreqStart,rFreqEnd, &
+        iDumpAllUASpectra,iDumpAllUARads, &
+        iFileIDLo,iFileIDHi,iTag, &
+        iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
+        IF (iDumpAllUARads > 0) THEN
+          iNumberUA_NLTEOut = 1 + iUpper
+        ELSEIF (iDumpAllUARads <= 0) THEN
+          iNumberUA_NLTEOut = 1 + 1
         END IF
+      END IF
 
     END IF
 
     IF (rSolzen >= 00.0 .AND. rSolzen < 40.0) THEN
-        rSolzenX = 00.0
-        rSolzenY = 40.0
+      rSolzenX = 00.0
+      rSolzenY = 40.0
     ELSEIF (rSolzen >= 40.0 .AND. rSolzen < 60.0) THEN
-        rSolzenX = 40.0
-        rSolzenY = 60.0
+      rSolzenX = 40.0
+      rSolzenY = 60.0
     ELSEIF (rSolzen >= 60.0 .AND. rSolzen < 80.0) THEN
-        rSolzenX = 60.0
-        rSolzenY = 80.0
+      rSolzenX = 60.0
+      rSolzenY = 80.0
     ELSEIF (rSolzen >= 80.0 .AND. rSolzen < 85.0) THEN
-        rSolzenX = 80.0
-        rSolzenY = 85.0
+      rSolzenX = 80.0
+      rSolzenY = 85.0
     ELSEIF (rSolzen >= 85.0 .AND. rSolzen <= 90.0) THEN
-        rSolzenX = 85.0
-        rSolzenY = 90.0
+      rSolzenX = 85.0
+      rSolzenY = 90.0
     END IF
 
     kFrStep = kaFrStep(iTag)
@@ -690,24 +675,24 @@ CONTAINS
 !! modifiers all the way thru the atm
 
     IF (iLTEIn > 0) THEN
-    ! read in the NON LTE temperatures amd Vibrational Partition Fcns
-        iBand = 1
-        iGasID = iaGases(iGas)
-        CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
+      ! read in the NON LTE temperatures amd Vibrational Partition Fcns
+      iBand = 1
+      iGasID = iaGases(iGas)
+      CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
         iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift, &
         daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
 
-        CALL read_nonlte_temperature(iGasID,iISO,iLTEin,iBand,caaNLTETemp, &
+      CALL read_nonlte_temperature(iGasID,iISO,iLTEin,iBand,caaNLTETemp, &
         pProf,raPressLevels,raLayerHeight,raThickness,iProfileLayers, &
         raTPress,raTPartPress,raTTemp,raTAmt,daJL,daJU, &
         iaJ_UorL,raLTETemp,raNLTETemp,raVibQFT,iAllLayersLTE,dVibCenter)
 
-        iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
+      iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
 
-        IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2)) THEN
+      IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2)) THEN
         ! uncompress lower atm ODs
-          i_NLTEFile_TYPE = 100 + nint(rSolzenX)
-          CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
+        i_NLTEFile_TYPE = 100 + nint(rSolzenX)
+        CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
             kProfLayer,iL_low,iL_high, &
             raTAmt,raRAmtx,raTTemp,raRTempx, &
             iErr,iDoDQ,pProf,iProfileLayers, &
@@ -719,8 +704,8 @@ CONTAINS
             iaQ21,iaQ22,raQ21,raQ22)
 
         ! uncompress lower atm planck
-          i_NLTEFile_TYPE = 200 + nint(rSolzenX)
-          CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
+        i_NLTEFile_TYPE = 200 + nint(rSolzenX)
+        CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
             kProfLayer,iL_low,iL_high, &
             raTAmt,raRAmtx,raTTemp,raRTempx, &
             iErr,iDoDQ,pProf,iProfileLayers, &
@@ -732,112 +717,89 @@ CONTAINS
             iaQ21,iaQ22,raQ21,raQ22)
 
 
-          IF (kJacobian >= 0) THEN
-            ! T dependance in both abs coeffs and planck
-            ! q dependance only in abs coeffs
-            DO iL = 1,kProfLayer
-              DO iFr = 1,kMaxPts
-                daaDT(iFr,iL) = daaDT(iFr,iL) + daaDTp(iFr,iL)
-              END DO
-            END DO
-          END IF
+        IF (kJacobian >= 0) THEN
+          ! T dependance in both abs coeffs and planck
+          ! q dependance only in abs coeffs
+          daaDT = daaDT + daaDTp
+        END IF
 
         !!!now do the stuff ABOVE the kCARTA TOA (above 0.005 mb)
-            IF (iDoUpperAtmNLTE > 0) THEN
-                write(kStdWarn,*) ' '
-                write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>----------------------->>>>>>>>>>>>>>>'
+        IF (iDoUpperAtmNLTE > 0) THEN
+          write(kStdWarn,*) ' '
+          write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>----------------------->>>>>>>>>>>>>>>'
 
-                write(kStdWarn,*) 'Doing stratosphere NLTE abs coeff ....'
-                write(kStdWarn,*) 'upper atm NLTE abs coeffs ...'
+          write(kStdWarn,*) 'Doing stratosphere NLTE abs coeff ....'
+          write(kStdWarn,*) 'upper atm NLTE abs coeffs ...'
 
-                DO iFr = 1,iUpper
-                !! these are pressures in mb
-                    pProfNLTE_upatm(iFr)      = raUpperPress(iFr)*kAtm2mb
-                    pProfNLTE_upatm(iFr)      = raUpperPress_Std(iFr)*kAtm2mb
-                    raUpperPartPress_Std(iFr) = raUpperPress_Std(iFr) * kCO2ppmv * 1e-6
-                END DO
+          DO iFr = 1,iUpper
+            !! these are pressures in mb
+             pProfNLTE_upatm(iFr)      = raUpperPress(iFr)*kAtm2mb
+             pProfNLTE_upatm(iFr)      = raUpperPress_Std(iFr)*kAtm2mb
+             raUpperPartPress_Std(iFr) = raUpperPress_Std(iFr) * kCO2ppmv * 1e-6
+          END DO
 
-                CALL read_std_optdepths_upper_UA( &
-                iaGases(iGas),iSplineType,raUpperPressLevels, &
-                pProfNLTE_upatm,iUpper, &
-                rFileStartFr,iTag,iActualTag, &
-                iaGases(iGas),raFreq, &
-                raUpperCO2Amt_Std,raInterpTempUA,raUpperPress_Std, &
-                raUpperPartPress_Std, &
-                iUpper,daaWeakOptDepth)
+          CALL read_std_optdepths_upper_UA( &
+            iaGases(iGas),iSplineType,raUpperPressLevels, &
+            pProfNLTE_upatm,iUpper, &
+            rFileStartFr,iTag,iActualTag, &
+            iaGases(iGas),raFreq, &
+            raUpperCO2Amt_Std,raInterpTempUA,raUpperPress_Std, &
+            raUpperPartPress_Std, &
+            iUpper,daaWeakOptDepth)
 
-            ! uncompress upper atm ODs ... no jacs possible ..
-            ! so use daaDQp,daaDTp
-                i_NLTEFile_TYPE = 300 + nint(rSolzenX)
-                CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
-                kProfLayer,1,iUpperStd_Num, &
-                raUpperCO2Amt_Std,raUpperCO2Amt_Std,raInterpTempUA,raUpperTemp_Std, &
-                iErr,iDoDQ,raUpperPress_Std,iUpperStd_Num, &
-                daaDQp,daaDTp,daaUpperNLTEGasAbCoeff,iSplineType,i_NLTEFile_TYPE, &
-                iaP1,iaP2,raP1,raP2, &
-                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
-                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
-                iaQ11,iaQ12,raQ11,raQ12, &
-                iaQ21,iaQ22,raQ21,raQ22)
+          ! uncompress upper atm ODs ... no jacs possible ..
+          ! so use daaDQp,daaDTp
+          i_NLTEFile_TYPE = 300 + nint(rSolzenX)
+          CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
+            kProfLayer,1,iUpperStd_Num, &
+            raUpperCO2Amt_Std,raUpperCO2Amt_Std,raInterpTempUA,raUpperTemp_Std, &
+            iErr,iDoDQ,raUpperPress_Std,iUpperStd_Num, &
+            daaDQp,daaDTp,daaUpperNLTEGasAbCoeff,iSplineType,i_NLTEFile_TYPE, &
+            iaP1,iaP2,raP1,raP2, &
+            iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
+            iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
+            iaQ11,iaQ12,raQ11,raQ12, &
+            iaQ21,iaQ22,raQ21,raQ22)
 
-            ! uncompress upper atm planck ... no jacs possible
-                i_NLTEFile_TYPE = 400 + nint(rSolzenX)
-                CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
-                kProfLayer,1,iUpperStd_Num, &
-                raUpperCO2Amt_Std,raUpperCO2Amt_Std,raInterpTempUA,raUpperTemp_Std, &
-                iErr,iDoDQ,raUpperPress_Std,iUpperStd_Num, &
-                daaDQp,daaDTp,daaUpperPlanckCoeff,iSplineType,i_NLTEFile_TYPE, &
-                iaP1,iaP2,raP1,raP2, &
-                iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
-                iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
-                iaQ11,iaQ12,raQ11,raQ12, &
-                iaQ21,iaQ22,raQ21,raQ22)
+          ! uncompress upper atm planck ... no jacs possible
+          i_NLTEFile_TYPE = 400 + nint(rSolzenX)
+          CALL compressedNLTE(iaGases(iGas),rFileStartFr,iTag,iActualTag, &
+            kProfLayer,1,iUpperStd_Num, &
+            raUpperCO2Amt_Std,raUpperCO2Amt_Std,raInterpTempUA,raUpperTemp_Std, &
+            iErr,iDoDQ,raUpperPress_Std,iUpperStd_Num, &
+            daaDQp,daaDTp,daaUpperPlanckCoeff,iSplineType,i_NLTEFile_TYPE, &
+            iaP1,iaP2,raP1,raP2, &
+            iaT11,iaT12,raT11,raT12,raJT11,raJT12, &
+            iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
+            iaQ11,iaQ12,raQ11,raQ12, &
+            iaQ21,iaQ22,raQ21,raQ22)
 
-                rMult = 1.0
-                DO iL = 1,iZeroPlanck-1
-                !              print *,'mwah',iL,daaWeakOptDepth(1,iL),daaUpperNLTEGasAbCoeff(1,iL),daaUpperPlanckCoeff(1,iL)
-                    DO iFr = 1,kMaxPts
-                        daaUpperPlanckCoeff(iFr,iL) = daaUpperPlanckCoeff(iFr,iL) * rMult
-                    END DO
-                    rMult = rMult * rMult0
-                END DO
+          rMult = 1.0
+          DO iL = 1,iZeroPlanck-1
+            !print *,'mwah',iL,daaWeakOptDepth(1,iL),daaUpperNLTEGasAbCoeff(1,iL),daaUpperPlanckCoeff(1,iL)
+            daaUpperPlanckCoeff(:,iL) = daaUpperPlanckCoeff(:,iL) * rMult
+            rMult = rMult * rMult0
+          END DO
 
-                DO iL = iZeroPlanck,kProfLayer
-                    DO iFr = 1,kMaxPts
-                        daaUpperPlanckCoeff(iFr,iL) = 0.0d0
-                    END DO
-                END DO
+          daaUpperPlanckCoeff(:,iZeroPlanck:kProfLayer) = 0.0d0
+          daaUpperSumNLTEGasAbCoeff = daaUpperNLTEGasAbCoeff
 
-                DO iL = 1,kProfLayer
-                    DO iFr = 1,kMaxPts
-                        daaUpperSumNLTEGasAbCoeff(iFr,iL) = daaUpperNLTEGasAbCoeff(iFr,iL)
-                    END DO
-                END DO
-
-                IF (iDumpAllUASpectra > 0) THEN
-                ! dump out the UA spectra, iUpper paths worth of them!
-                    CALL wrtout_head_uafile(caOutUAFile, &
+          IF (iDumpAllUASpectra > 0) THEN
+            ! dump out the UA spectra, iUpper paths worth of them!
+            CALL wrtout_head_uafile(caOutUAFile, &
                     raFreq(1),raFreq(kMaxPts),raFreq,iTag,1,iUpper)
                     caOutName = 'DumDum'
-                    iIOUN = kNLTEOutUA
-                    DO iL = 1,iUpper
-                        rjunk = sngl(daaUpperSumNLTEGasAbCoeff(1,iL))
-                        write(kStdWarn,*) 'dump out UA ODs : gid, layer, amt, OD = ', &
-                        iaGases(iGas),iL,raUpperCO2Amt_Std(iL),rJunk
-                        DO iFr = 1,kMaxPts
-                            raX(iFr) = sngl(daaUpperSumNLTEGasAbCoeff(iFr,iL))
-                        END DO
-                        CALL wrtout(iIOUN,caOutName,raFreq,raX)
-                    END DO
-                END IF
-
-            !             do iL = 1,kProfLayer
-            !               print *,'place A',iaGases(iGas),iL,daaGasAbCoeff(1,iL),daaPlanckCoeff(1,iL),
-            !     $                    daaUpperNLTEGasAbCoeff(1,iL),daaUpperPlanckCoeff(1,iL)
-            !             end do
-
-            END IF
+            iIOUN = kNLTEOutUA
+            DO iL = 1,iUpper
+              rjunk = sngl(daaUpperSumNLTEGasAbCoeff(1,iL))
+              write(kStdWarn,*) 'dump out UA ODs : gid, layer, amt, OD = ', &
+                iaGases(iGas),iL,raUpperCO2Amt_Std(iL),rJunk
+              raX = sngl(daaUpperSumNLTEGasAbCoeff(:,iL))
+              CALL wrtout(iIOUN,caOutName,raFreq,raX)
+            END DO
+          END IF
         END IF
+      END IF
     END IF
 
     RETURN
@@ -1010,47 +972,41 @@ CONTAINS
     END IF
     
     IF (iLTEIn > 0) THEN
-        iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
+      iWhichChunk = NewDataChunk(iLTEIn,iaNLTEChunks,iaaNLTEChunks,rFileStartFr)
 
-        IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) &
-         .AND. (abs(raNLTEstrength(iLTEIn)-1.0) <= 0.01))  THEN
-            raNLTEstrength(iLTEIn) = rCO2mult
+      IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) .AND. (abs(raNLTEstrength(iLTEIn)-1.0) <= 0.01))  THEN
+        raNLTEstrength(iLTEIn) = rCO2mult
         !! change the coeffs to coeff*rCO2mult, because all the coeffs
         !! that are computed, have this factor
-            write(kStdWarn,'(A,I5,A,I3,A,F7.2)') '  ',nint(raFreq(1)),' is a NLTE chunk,',iaGases(iGas),' is NLTE gas, use mult',rCO2mult
-            iDoNLTE = +1
-            DO iL = 1,kProfLayer
-                DO iFr = 1,kMaxPts
-                    daaGasAbCoeff(iFr,iL) = daaGasAbCoeff(iFr,iL) * rCO2mult
-                END DO
-            END DO
-        END IF
+        write(kStdWarn,'(A,I5,A,I3,A,F7.2)') '  ',nint(raFreq(1)),' is a NLTE chunk,',iaGases(iGas),' is NLTE gas, use mult',rCO2mult
+        iDoNLTE = +1
+        daaGasAbCoeff = daaGasAbCoeff * rCO2mult
+      END IF
 
-        IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) &
-         .AND. (raNLTEstrength(iLTEIn) < 0))  THEN
-            IF (iSetBloat > 0) THEN
-                write(kStdErr,*) 'Cannot bloat up H92 database calculations'
-                write(kStdErr,*) 'used with GENLN2 (Cousin)'
-                CALL DoStop
-            END IF
+      IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2)  .AND. (raNLTEstrength(iLTEIn) < 0))  THEN
+        IF (iSetBloat > 0) THEN
+          write(kStdErr,*) 'Cannot bloat up H92 database calculations'
+          write(kStdErr,*) 'used with GENLN2 (Cousin)'
+          CALL DoStop
+        END IF
         !!! do a computation where you change the linemix spectra to
         !!! cousin spectra, using old kCARTA database
-            write(kStdWarn,*) 'Replacing kCARTA database CO2 optical depths '
-            write(kStdWarn,*) 'with GENLN2 cousin CO2 optical depths'
-            CALL CousinContribution(iaGases(iGas), &
+        write(kStdWarn,*) 'Replacing kCARTA database CO2 optical depths '
+        write(kStdWarn,*) 'with GENLN2 cousin CO2 optical depths'
+        CALL CousinContribution(iaGases(iGas), &
             rFileStartFr,iTag,iActualTag,iProfileLayers,iL_low,iL_high, &
             raTAmt,raRAmt,raTTemp,raRTemp,pProf, &
             raNLTEstrength(iLTEIn),iaNLTEStart(iLTEin), &
             iUpper,daaGasAbCoeff,iSplineType)
             iFunnyCousin = +1
 
-        ELSEIF (iWhichChunk > 0) THEN
+      ELSEIF (iWhichChunk > 0) THEN
         !!!first compute LTE background optical depths
-            IF ((iUseWeakBackGnd > 0) .AND. (iDoWeakBackGndLA > 0)) THEN
-                write(kStdWarn,*) 'Replacing kCARTA database optical depths with backgnd'
-                write(kStdWarn,*) 'LTE abs coeffs in upper layers (of standard 100 layers) ....'
-             ! use pProfNLTE or pProf??????
-                CALL lte_spectra(iTag,iActualTag,iLTEin,iaNLTEStart(iLTEin),raFreq, &
+        IF ((iUseWeakBackGnd > 0) .AND. (iDoWeakBackGndLA > 0)) THEN
+          write(kStdWarn,*) 'Replacing kCARTA database optical depths with backgnd'
+          write(kStdWarn,*) 'LTE abs coeffs in upper layers (of standard 100 layers) ....'
+          ! use pProfNLTE or pProf??????
+          CALL lte_spectra(iTag,iActualTag,iLTEin,iaNLTEStart(iLTEin),raFreq, &
                 iaNLTEBands,caaaNLTEBands,caaNLTETemp,caaStrongLines, &
                 pProfNLTE,raPressLevels,raLayerHeight,raThickness, &
                 raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
@@ -1061,36 +1017,36 @@ CONTAINS
                 iDoUpperAtmNLTE,iAllLayersLTE,iUseWeakBackGnd, &
                 dLineStrenMin,dDeltaFreqNLTE, &
                 iDoVoigtChi,raNLTEstrength(iLTEIn))
-                CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
-                iaNLTEStart(iLTEin),-1)  !!! -1 means replace daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=weak backgnd in relevant layers
-            ELSE
-                CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
-                iaNLTEStart(iLTEin),0)   !!! 0 means replace daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=0.0 in relevant layers
-            END IF
+          !!! -1 means replace daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=weak backgnd in relevant layers
+          CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff,iaNLTEStart(iLTEin),-1)  
+        ELSE
+          !!! 0 means replace daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=0.0 in relevant layers
+          CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff,iaNLTEStart(iLTEin),0)
+        END IF
 
-            IF (iSetBloat > 0) THEN
-            !!!! initialize the bloated matrices to LTE stuff
-            ! use pProfNLTE or pProf??????
-                CALL BloatCoeffsDriver(iTag,iActualTag, &
-                rFileStartFr,raFreq,daaGasAbCoeff, &
-                raaRestOfLTEGases,raaCO2_LTE, &
-                daaNLTEGasAbCoeff,daaSumNLTEGasAbCoeff,daaPlanckCoeff, &
-                daFreqBloat,iaNLTEStart(iLTEin),raNLTEstrength(iLTEIn), &
-                daaNLTEGasAbCoeffBloat,daaSumNLTEGasAbCoeffBloat, &
-                daaPlanckCoeffBloat, &
-                iGas,iaGases(iGas),iL_low,iL_high,iUseWeakBackGnd, &
-                raRAmt,raRTemp,raRPress,raRPartPress, &
-                pProfNLTE,iProfileLayers, &
-                raTAmt,raTTemp,raTPress,raTPartPress,iSplineType)
-            END IF
+        IF (iSetBloat > 0) THEN
+          !!!! initialize the bloated matrices to LTE stuff
+          ! use pProfNLTE or pProf??????
+          CALL BloatCoeffsDriver(iTag,iActualTag, &
+            rFileStartFr,raFreq,daaGasAbCoeff, &
+            raaRestOfLTEGases,raaCO2_LTE, &
+            daaNLTEGasAbCoeff,daaSumNLTEGasAbCoeff,daaPlanckCoeff, &
+            daFreqBloat,iaNLTEStart(iLTEin),raNLTEstrength(iLTEIn), &
+            daaNLTEGasAbCoeffBloat,daaSumNLTEGasAbCoeffBloat, &
+            daaPlanckCoeffBloat, &
+            iGas,iaGases(iGas),iL_low,iL_high,iUseWeakBackGnd, &
+            raRAmt,raRTemp,raRPress,raRPartPress, &
+            pProfNLTE,iProfileLayers, &
+            raTAmt,raTTemp,raTPress,raTPartPress,iSplineType)
+        END IF
 	    
         !!!!compute the line shapes for the LineMix bands
         !!!!some of which are in LTE, some in NLTE
         !!!!also find contribution for numerator in beta (planck coeff)
-	    IF (iDoLBL_LA > 0) THEN
-              write(kStdWarn,*) 'Adding in NLTE upper layers abs coeff (for standard 100 layers) ....'
+        IF (iDoLBL_LA > 0) THEN
+          write(kStdWarn,*) 'Adding in NLTE upper layers abs coeff (for standard 100 layers) ....'
           ! use pProfNLTE or pProf??????
-              CALL nonlte_spectra(iTag,iActualTag,iLTEin, &
+          CALL nonlte_spectra(iTag,iActualTag,iLTEin, &
               iaNLTEStart(iLTEin),iaNLTEStart2350(iLTEin),raFreq, &
               iaNLTEBands,caaaNLTEBands,caaNLTETemp, &
               pProfNLTE,raPressLevels,raLayerHeight, &
@@ -1102,26 +1058,25 @@ CONTAINS
               iSetBloat,daaSumNLTEGasAbCoeffBloat,daaNLTEGasAbCoeffBloat, &
               daaPlanckCoeffBloat,daFreqBloat)
 
-        !!!update at which layer NONLTE starts
-              iNLTEStart = min(iNLTEStart,iaNLTEStart(iLTEin))
-              iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
+          !!!update at which layer NONLTE starts
+          iNLTEStart = min(iNLTEStart,iaNLTEStart(iLTEin))
+          iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
 
-              CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff, &
-              iNLTEStart,+1)  !!! +1 means add daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=weak backgnd in relevant layers
-	                      !!! for some reason was set to -1 which is replace, instead of add ... wierd!!!!
-            END IF
+          !!! +1 means add daaGasAbCoeff=orig kcomp data with daaNLTEGasAbCoeff=weak backgnd in relevant layers
+          CALL AddNLTECoeffs(daaGasAbCoeff,daaNLTEGasAbCoeff,iNLTEStart,+1)  
+        END IF
 
-              iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
+        iNLTEStart = min(iNLTEStart,iaNLTEStart2350(iLTEin))
 	      
         !!!now do the stuff ABOVE the kCARTA TOA (above 0.005 mb)
-            IF ((iDoUpperAtmNLTE > 0) .AND. ((iDoLBL_UA > 0) .OR. (iDoWeakBackGndUA > 0))) THEN
-                write(kStdWarn,*) ' '
-                write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>----------------------->>>>>>>>>>>>>>>'
-                write(kStdWarn,*) 'Doing stratosphere NLTE abs coeff ....'
-                write(kStdWarn,*) 'upper atm NLTE abs coeffs ...'
-                IF ((iUseWeakBackGnd > 0) .AND. (iDoWeakBackGndUA > 0)) THEN
-                    write(kStdWarn,*) 'backgrnd upper atm LTE abs coeffs ...'
-                    CALL lte_spectra_upper( &
+        IF ((iDoUpperAtmNLTE > 0) .AND. ((iDoLBL_UA > 0) .OR. (iDoWeakBackGndUA > 0))) THEN
+          write(kStdWarn,*) ' '
+          write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>----------------------->>>>>>>>>>>>>>>'
+          write(kStdWarn,*) 'Doing stratosphere NLTE abs coeff ....'
+          write(kStdWarn,*) 'upper atm NLTE abs coeffs ...'
+          IF ((iUseWeakBackGnd > 0) .AND. (iDoWeakBackGndUA > 0)) THEN
+            write(kStdWarn,*) 'backgrnd upper atm LTE abs coeffs ...'
+            CALL lte_spectra_upper( &
                     iTag,iActualTag, &
                     rFileStartFr,iaNLTEStart(iLTEIn),rCO2mult,raFreq, &
                     iaGases(iGas),iLTEIn,iaNLTEBands,caaStrongLines, &
@@ -1144,10 +1099,10 @@ CONTAINS
                     caOutUAFile,caOutUABloatFile)
                 !! have already put abs coeffs into daaUpperNLTEGasAbCoeff,
                 !! and ignore other gases, so just forget about AddNLTECoeffs
-                END IF
+          END IF
 
-                IF (iDoLBL_UA > 0) THEN
-                  CALL UpHigh_Nonlte_Spectra(iTag,iActualTag,iaNLTEStart(iLTEIn), &
+          IF (iDoLBL_UA > 0) THEN
+            CALL UpHigh_Nonlte_Spectra(iTag,iActualTag,iaNLTEStart(iLTEIn), &
                   raFreq,iaGases(iGas),iLTEIn,iaNLTEBands, &
                   caaaNLTEBands,caaNLTETemp,caaUpperMixRatio,rCO2mult, &
                   pProfNLTE,raPressLevels,raLayerHeight,raThickness, &
@@ -1166,33 +1121,26 @@ CONTAINS
                   iDumpAllUASpectra,iDumpAllUARads,iFileIDLo,iFileIDHi, &
                   iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks, &
                   caOutUAFile,caOutUABloatFile)
-		END IF !IF iDoLBL_UA > 0
-            END IF     !IF (iDoUpperAtmNLTE > 0) THEN
-        END IF         !IF ((iWhichChunk > 0) .AND. 
-    !      (raNLTEstrength(iLTEIn) .LT. 0)
+	  END IF !IF iDoLBL_UA > 0
+        END IF     !IF (iDoUpperAtmNLTE > 0) THEN
+      END IF         !IF ((iWhichChunk > 0) .AND. (raNLTEstrength(iLTEIn) .LT. 0)
     END IF       !IF (iLTEIn > 0) THEN
 
-    IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) &
-     .AND. (iDONLTE > 0))  THEN
-        raNLTEstrength(iLTEIn) = rCO2mult
-    !! change the coeffs to coeff*rCO2mult, because all the coeffs
-    !! that are computed, have this factor
-        DO iL = 1,kProfLayer
-            DO iFr = 1,kMaxPts
-                daaGasAbCoeff(iFr,iL) = daaGasAbCoeff(iFr,iL)/rCO2mult
-            END DO
-        END DO
+    IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) .AND. (iDONLTE > 0))  THEN
+      raNLTEstrength(iLTEIn) = rCO2mult
+      !! change the coeffs to coeff*rCO2mult, because all the coeffs
+      !! that are computed, have this factor
+      daaGasAbCoeff = daaGasAbCoeff/rCO2mult
     END IF
 
     IF (iLTEIn > 0) THEN
-        IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) &
-         .AND. (raNLTEstrength(iLTEIn) < 0))  THEN
-            iLTEIn = -1
-            write (kStdWarn,*) 'using the linemix CO2 database from GENLN2'
-        ELSEIF ((iWhichChunk < 0) .OR. (raNLTEstrength(iLTEIn) < 0)) THEN
-            iLTEIn = -1
-            write (kStdWarn,*) 'this is NLTE gas, but is NOT a NLTE chunk!'
-        END IF
+      IF ((iWhichChunk > 0) .AND. (iaGases(iGas) == 2) .AND. (raNLTEstrength(iLTEIn) < 0))  THEN
+        iLTEIn = -1
+        write (kStdWarn,*) 'using the linemix CO2 database from GENLN2'
+      ELSEIF ((iWhichChunk < 0) .OR. (raNLTEstrength(iLTEIn) < 0)) THEN
+        iLTEIn = -1
+        write (kStdWarn,*) 'this is NLTE gas, but is NOT a NLTE chunk!'
+      END IF
     END IF
 
     RETURN
@@ -1323,85 +1271,67 @@ CONTAINS
     10 CONTINUE
 
     IF ((iChunk_DoNLTE == 1) .OR. (iChunk_DoNLTE == 3)) THEN
-        DO iL = 1,kProfLayer
-            DO iFr = 1,kMaxPts
-            !!! do the kCARTA 100 AIRS layers
-                daaSumNLTEGasAbCoeff(iFr,iL) = 0.0d0
-                daaNLTEGasAbCoeff(iFr,iL)    = 0.0d0
-                daaPlanckCoeff(iFr,iL)       = 0.0d0
-            END DO
-        END DO
+      !!! do the kCARTA 100 AIRS layers
+      daaSumNLTEGasAbCoeff = 0.0d0
+      daaNLTEGasAbCoeff    = 0.0d0
+      daaPlanckCoeff       = 0.0d0
     END IF
 
-    IF (((iChunk_DoNLTE == 1) .OR. (iChunk_DoNLTE == 3)) .AND. &
-    (iDoUpperAtmNLTE == 1)) THEN
-        DO iL = 1,kProfLayer
-            DO iFr = 1,kMaxPts
-            !!! do the upper atm layers
-                daaUpperSumNLTEGasAbCoeff(iFr,iL) = 0.0d0
-                daaUpperNLTEGasAbCoeff(iFr,iL)    = 0.0d0
-                daaUpperPlanckCoeff(iFr,iL)       = 0.0d0
-            END DO
-        END DO
+    IF (((iChunk_DoNLTE == 1) .OR. (iChunk_DoNLTE == 3)) .AND. (iDoUpperAtmNLTE == 1)) THEN
+      !!! do the upper atm layers
+      daaUpperSumNLTEGasAbCoeff = 0.0d0
+      daaUpperNLTEGasAbCoeff    = 0.0d0
+      daaUpperPlanckCoeff       = 0.0d0
     END IF
 
 ! set up the high res wavenumber array
     IF ((iChunk_DoNLTE == 1) .AND. (iSetBloat == 1)) THEN
-        iJump = iFloor(kBoxCarUse*1.0/2)
-        dfFine = kaFineFrStep(iTag)
-        dTemp1 = rStartBlock*1.0d0
-        DO iFr = 1,kMaxPts*kBoxCarUse-iJump
+      iJump = iFloor(kBoxCarUse*1.0/2)
+      dfFine = kaFineFrStep(iTag)
+      dTemp1 = rStartBlock*1.0d0
+      DO iFr = 1,kMaxPts*kBoxCarUse-iJump
         ! do the bulk of the points
-            daFreqBloat(iFr+iJump) = dTemp1 + (iFr-1)*dfFine
-        END DO
-        DO iFr = 1,iJump
+        daFreqBloat(iFr+iJump) = dTemp1 + (iFr-1)*dfFine
+      END DO
+      DO iFr = 1,iJump
         ! do the end points
-            daFreqBloat(iFr) = dTemp1 - (3-iFr)*dfFine
-        END DO
-        DO iL = 1,kProfLayer
-            DO iFr = 1,kBloatPts
-            !!! do the kCARTA 100 AIRS layers
-                daaSumNLTEGasAbCoeffBloat(iFr,iL) = 0.0d0
-                daaNLTEGasAbCoeffBloat(iFr,iL)    = 0.0d0
-                daaPlanckCoeffBloat(iFr,iL)       = 0.0d0
-                daaUpperPlanckCoeffBloat(iFr,iL)       = 0.0d0
-                daaUpperSumNLTEGasAbCoeffBloat(iFr,iL) = 0.0d0
-                daaUpperNLTEGasAbCoeffBloat(iFr,iL)    = 0.0d0
-            END DO
-        END DO
+        daFreqBloat(iFr) = dTemp1 - (3-iFr)*dfFine
+      END DO
+      !!! do the kCARTA 100 AIRS layers
+      daaSumNLTEGasAbCoeffBloat = 0.0d0
+      daaNLTEGasAbCoeffBloat    = 0.0d0
+      daaPlanckCoeffBloat       = 0.0d0
+      daaUpperPlanckCoeffBloat       = 0.0d0
+      daaUpperSumNLTEGasAbCoeffBloat = 0.0d0
+      daaUpperNLTEGasAbCoeffBloat    = 0.0d0
 
-        DO iL = 1,kProfLayer
-            DO iFr = 1,kMaxPts
-            !!! do the kCARTA 100 AIRS layers
-                raaRestOfLTEGases(iFr,iL) = 0.0
-                raaCO2_LTE(iFr,iL)        = 0.0
-            END DO
-        END DO
+      !!! do the kCARTA 100 AIRS layers
+      raaRestOfLTEGases = 0.0
+      raaCO2_LTE        = 0.0
     END IF
 
 !!! BLOATING can only be done by iNLTE_SlowORFast == +1 or equivalently
 !!!                              iChunk_DoNLTE    == +1
     IF ((iChunk_DoNLTE == 1) .AND. (kBloatOutOpen < 0)) THEN
-        IF (iSetBloat == 1) THEN
-            iType = +1
-            CALL OpenOutputBloatFile( &
+      IF (iSetBloat == 1) THEN
+        iType = +1
+        CALL OpenOutputBloatFile( &
             iType,iNumLayers,caOutBloatFile,rFrLow,rFrHigh, &
             iFileIDLo,iFileIDHi,iTag,iTotalStuff, &
             iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
-        END IF
+      END IF
     END IF
 
 !!! kPlanckOut is set by parameter kFlux in nm_params section
 !!! if set to 0, then subroutine in s_writefile turns on planck writing
-    IF ((iChunk_DoNLTE == 1) .AND. (kBloatPlanckOpen < 0) &
-     .AND. (kPlanckOut == 0)) THEN
-        IF (iSetBloat == 1) THEN
-            iType = -1
-            CALL OpenOutputBloatFile( &
+    IF ((iChunk_DoNLTE == 1) .AND. (kBloatPlanckOpen < 0) .AND. (kPlanckOut == 0)) THEN
+      IF (iSetBloat == 1) THEN
+        iType = -1
+        CALL OpenOutputBloatFile( &
             iType,iNumLayers,caPlanckBloatFile,rFrLow,rFrHigh, &
             iFileIDLo,iFileIDHi,iTag,iTotalStuff, &
             iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
-        END IF
+      END IF
     END IF
 
     RETURN
@@ -1435,34 +1365,28 @@ CONTAINS
     rX = 1.0   !!since now ALL the subroutines use raNLTEstrength(iLTEIn)
 
     IF (iAdd > 0) THEN
-    ! ou are adding daaUpdate + daaAdd in the relevant layers
-    ! his could be eg you already have the weak background from run7co2,
-    ! nd now you are adding on the nonLTE contribution
-        DO iL = iStart,kProfLayer
-            DO iFr = 1,kMaxPts
-                daaUpdate(iFr,iL) = max(daaUpdate(iFr,iL)+daaAdd(iFr,iL)*rX,0.0d0)
-            END DO
-        END DO
+      ! you are adding daaUpdate + daaAdd in the relevant layers
+      ! this could be eg you already have the weak background from run7co2,
+      ! and now you are adding on the nonLTE contribution
+      daaUpdate(:,iStart:kProfLayer) = daaUpdate(:,iStart:kProfLayer)+daaAdd(:,iStart:kProfLayer)*rX
+      WHERE (daaUpdate < 0)
+        daaUpdate = 0.0
+      END WHERE
     END IF
 
     IF (iAdd < 0) THEN
-    ! ou are replacing daa with daaAdd in the relevant layers
-    ! his could be eg you have uncompressed the kCARTA database, but now
-    ! ou need to know the background abs coeffs in LTE
-        DO iL = iStart,kProfLayer
-            DO iFr = 1,kMaxPts
-                daaUpdate(iFr,iL) = max(daaAdd(iFr,iL)*rX,0.0d0)
-            END DO
-        END DO
+      ! you are replacing daa with daaAdd in the relevant layers
+      ! this could be eg you have uncompressed the kCARTA database, but now
+      ! you need to know the background abs coeffs in LTE
+      daaUpdate(:,iStart:kProfLayer) = daaAdd(:,iStart:kProfLayer)*rX
+      WHERE (daaUpdate < 0)
+        daaUpdate = 0.0
+      END WHERE
     END IF
 
     IF (iAdd == 0) THEN
-    ! ou are replacing daaUpdate with 0.0 in the relevant layers
-        DO iL = iStart,kProfLayer
-            DO iFr = 1,kMaxPts
-                daaUpdate(iFr,iL) = 0.0d0
-            END DO
-        END DO
+      !you are replacing daaUpdate with 0.0 in the relevant layers
+      daaUpdate(:,iStart:kProfLayer) = 0.0d0
     END IF
 
     RETURN
@@ -1485,11 +1409,7 @@ CONTAINS
 ! local variables
     INTEGER :: iL,iFr
 
-    DO iL = 1,kProfLayer
-        DO iFr = 1,kMaxPts
-            raaPlanckCoeff(iFr,iL) = 1.00000
-        END DO
-    END DO
+    raaPlanckCoeff = 1.00000
 
     RETURN
     end SUBROUTINE SetPlanckCoeff_Cousin
@@ -1523,23 +1443,19 @@ CONTAINS
     INTEGER :: iFr,iL,iM,iA
 
 ! initialize to 1.0!!!!
-    DO iL = 1,kProfLayer
-        DO iFr = 1,kMaxPts
-            raaPlanckCoeff(iFr,iL) = 1.0
-        END DO
-    END DO
+    raaPlanckCoeff = 1.0
 
     iA = 1    !!!asuume current atmospher uses mixed path layers 1-100
     iM = iaaRadLayer(iAtm,1)
           
 ! ind which set of Mixed Paths current atm uses eg 1-100, 101-200 etc
     DO iL = 1,kProfLayer
-        IF (iM <= kProfLayer*iL) THEN
-            iA = iL
-            GOTO 10
-        END IF
+      IF (iM <= kProfLayer*iL) THEN
+        iA = iL
+        GOTO 10
+      END IF
     END DO
-    10 CONTINUE
+ 10 CONTINUE
           
 ! recall raaSumAbCoeff(iFr,iM) is the CUMULATIVE abscoeff=sum(LTE) + sum(NLTE)
 ! where sum(LTE) = all gases that are in LTE, plus CO2 in LTE plus CO2 in NLTE
@@ -1548,29 +1464,27 @@ CONTAINS
 !                            Eqn 16 of the JGR D. Edwards paper appropriately
 ! by finding numerator of (Eqn 20 kopra or Eqn 16, JGR); denom = raaSumAbCoeff
     IF (iChunk_DoNLTE == 1) THEN
-    !! actually computed this using LBL
-        DO iL = iNLTEStart,kProfLayer
-            iM = iL + (iA-1)*kProfLayer
-            DO iFr = 1,kMaxPts
-            !!!raaSumAbCoeff = raaSumLTE + raaSumNLTE
-                dTemp = raaSumAbCoeff(iFr,iM)*1.0d0-daaSumNLTEGasAbCoeff(iFr,iL)
-            ! dTemp is thus the LTE component of numerator (beta = 1.0);
-            ! add on the NLTE component (where beta is some other number)
-                dTemp = max(dTemp + daaPlanckCoeff(iFr,iL),0.0d0)
-            ! normalise by raaSumAbCoeff
-                dTemp  = dTemp + dDeltaNLTE
-                dTemp1 = raaSumAbCoeff(iFr,iM)*1.0d0 + dDeltaNLTE
-                raaPlanckCoeff(iFr,iL) = sngl(dTemp/dTemp1)
-            END DO
+      !! actually computed this using LBL
+      DO iL = iNLTEStart,kProfLayer
+        iM = iL + (iA-1)*kProfLayer
+        DO iFr = 1,kMaxPts
+          !!!raaSumAbCoeff = raaSumLTE + raaSumNLTE
+          dTemp = raaSumAbCoeff(iFr,iM)*1.0d0-daaSumNLTEGasAbCoeff(iFr,iL)
+          ! dTemp is thus the LTE component of numerator (beta = 1.0);
+          ! add on the NLTE component (where beta is some other number)
+          dTemp = max(dTemp + daaPlanckCoeff(iFr,iL),0.0d0)
+          ! normalise by raaSumAbCoeff
+          dTemp  = dTemp + dDeltaNLTE
+          dTemp1 = raaSumAbCoeff(iFr,iM)*1.0d0 + dDeltaNLTE
+          raaPlanckCoeff(iFr,iL) = sngl(dTemp/dTemp1)
         END DO
+      END DO
     ELSEIF (iChunk_DoNLTE == 3) THEN
-    !! simply used compressed tables
-        DO iL = iNLTEStart,kProfLayer
-            iM = iL + (iA-1)*kProfLayer
-            DO iFr = 1,kMaxPts
-                raaPlanckCoeff(iFr,iL) = max(sngl(daaPlanckCoeff(iFr,iL)),0.0)
-            END DO
-        END DO
+      !! simply used compressed tables
+      DO iL = iNLTEStart,kProfLayer
+        iM = iL + (iA-1)*kProfLayer
+        raaPlanckCoeff(:,iL) = max(sngl(daaPlanckCoeff(:,iL)),0.0)
+      END DO
     END IF
        
     RETURN
@@ -1609,103 +1523,92 @@ CONTAINS
     INTEGER :: iFr,iL,iMethod
 
     IF (iChunk_DoNLTE == +3) THEN
-        iMethod = -3    !!! we get necessary stuff from kCompressed NLTE files
+      iMethod = -3    !!! we get necessary stuff from kCompressed NLTE files
     ELSE
-        iMethod = -1    !!! assume only the NLTE components of CO2 added in
-        iMethod = +1    !!! assume NLTE components of CO2, plus (LTE CO2, others)
+      iMethod = -1    !!! assume only the NLTE components of CO2 added in
+      iMethod = +1    !!! assume NLTE components of CO2, plus (LTE CO2, others)
     END IF
 
 ! initialize to 1.0!!!!
-    DO iL = 1,kProfLayer
-        DO iFr = 1,kMaxPts
-            raaUpperPlanckCoeff(iFr,iL) = 1.0
-        END DO
-    END DO
+    raaUpperPlanckCoeff = 1.0
       
     IF (iMethod == -3) THEN
-    !! we get stuff direct from the kCompressed Files
-        DO iL = 1,iUpper
-            DO iFr = 1,kMaxPts
-                raaUpperSumNLTEGasAbCoeff(iFr,iL) = sngl(daaUpperNLTEGasAbCoeff(iFr,iL))
-                raaUpperPlanckCoeff(iFr,iL)       = sngl(daaUpperPlanckCoeff(iFr,iL))
-            END DO
-        END DO
+      !! we get stuff direct from the kCompressed Files
+      raaUpperSumNLTEGasAbCoeff(:,1:iUpper) = sngl(daaUpperNLTEGasAbCoeff(:,1:iUpper))
+      raaUpperPlanckCoeff(:,1:iUpper)       = sngl(daaUpperPlanckCoeff(:,1:iUpper))
               
-    ! recall raaSumAbCoeff(iFr,iM) is the CUMULATIVE abscoeff=sum(LTE) + sum(NLTE)
-    ! where sum(LTE) = all gases that are in LTE, plus CO2 in LTE plus CO2 in NLTE
-    !       sum(NLTE) = CO2 in NLTE
-    ! thus we need to break down Eqn 20 of the KOPRA paper appropriately
-    !                            Eqn 16 of the JGR D. Edwards paper appropriately
-    ! by finding numerator of (Eqn 20 kopra or Eqn 16, JGR); denom = raaSumAbCoeff
+      ! recall raaSumAbCoeff(iFr,iM) is the CUMULATIVE abscoeff=sum(LTE) + sum(NLTE)
+      ! where sum(LTE) = all gases that are in LTE, plus CO2 in LTE plus CO2 in NLTE
+      !       sum(NLTE) = CO2 in NLTE
+      ! thus we need to break down Eqn 20 of the KOPRA paper appropriately
+      !                            Eqn 16 of the JGR D. Edwards paper appropriately
+      ! by finding numerator of (Eqn 20 kopra or Eqn 16, JGR); denom = raaSumAbCoeff
 
     ELSEIF (iMethod == +1) THEN
-    !! have NLTE(CO2) plus (LTE CO2 and other gases)
-    ! regular 0.0025 cm-1
+      !! have NLTE(CO2) plus (LTE CO2 and other gases)
+      ! regular 0.0025 cm-1
+      DO iL = 1,iUpper
+        DO iFr = 1,kMaxPts
+          !!!raaSumAbCoeff = raaSumLTE + raaSumNLTE
+          dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL) - daaUpperNLTEGasAbCoeff(iFr,iL)
+          ! dTemp is thus the LTE component of numerator (beta = 1.0);
+          ! add on the NLTE component (where beta is some other number)
+          dTemp = max(dTemp + daaUpperPlanckCoeff(iFr,iL),0.0d0) + dDeltaNLTE
+          ! normalise by raaSumAbCoeff
+          dTemp = dTemp/(daaUpperSumNLTEGasAbCoeff(iFr,iL) + dDeltaNLTE)
+          raaUpperPlanckCoeff(iFr,iL)    = real(dTemp)
+          dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL)
+          raaUpperSumNLTEGasAbCoeff(iFr,iL) = real(dTemp)
+        END DO
+      END DO
+
+      ! bloated 0.0005 cm-1
+      IF (iSetBloat > 0) THEN
         DO iL = 1,iUpper
-            DO iFr = 1,kMaxPts
+          DO iFr = 1,kBloatPts
             !!!raaSumAbCoeff = raaSumLTE + raaSumNLTE
-                dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL) - &
-                daaUpperNLTEGasAbCoeff(iFr,iL)
+            dTemp = daaUpperSumNLTEGasAbCoeffBloat(iFr,iL) - daaUpperNLTEGasAbCoeffBloat(iFr,iL)
             ! dTemp is thus the LTE component of numerator (beta = 1.0);
             ! add on the NLTE component (where beta is some other number)
-                dTemp = max(dTemp + daaUpperPlanckCoeff(iFr,iL),0.0d0) + dDeltaNLTE
+            dTemp = max(dTemp + daaUpperPlanckCoeffBloat(iFr,iL),0.0d0) + dDeltaNLTE
             ! normalise by raaSumAbCoeff
-                dTemp = dTemp/(daaUpperSumNLTEGasAbCoeff(iFr,iL) + dDeltaNLTE)
-                raaUpperPlanckCoeff(iFr,iL)    = real(dTemp)
-                dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL)
-                raaUpperSumNLTEGasAbCoeff(iFr,iL) = real(dTemp)
-            END DO
+            dTemp = dTemp/(daaUpperSumNLTEGasAbCoeffBloat(iFr,iL)+dDeltaNLTE)
+            daaUpperPlanckCoeffBloat(iFr,iL)    = real(dTemp)
+            !              dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL)
+            !              raaUpperNLTEGasAbCoeff(iFr,iL) = real(dTemp)
+          END DO
         END DO
-
-    ! bloated 0.0005 cm-1
-        IF (iSetBloat > 0) THEN
-            DO iL = 1,iUpper
-                DO iFr = 1,kBloatPts
-                !!!raaSumAbCoeff = raaSumLTE + raaSumNLTE
-                    dTemp = daaUpperSumNLTEGasAbCoeffBloat(iFr,iL) - &
-                    daaUpperNLTEGasAbCoeffBloat(iFr,iL)
-                ! dTemp is thus the LTE component of numerator (beta = 1.0);
-                ! add on the NLTE component (where beta is some other number)
-                    dTemp = max(dTemp + daaUpperPlanckCoeffBloat(iFr,iL),0.0d0) &
-                    + dDeltaNLTE
-                ! normalise by raaSumAbCoeff
-                    dTemp = dTemp/(daaUpperSumNLTEGasAbCoeffBloat(iFr,iL)+dDeltaNLTE)
-                    daaUpperPlanckCoeffBloat(iFr,iL)    = real(dTemp)
-                !              dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL)
-                !              raaUpperNLTEGasAbCoeff(iFr,iL) = real(dTemp)
-                END DO
-            END DO
-        END IF
+      END IF
                    
     ELSEIF (iMethod == -1) THEN
-    ! don't worry about the LTE parts of CO2 and other gases
-    ! regular 0.0025 cm-1
-        DO iL = 1,iUpper
-            DO iFr = 1,kMaxPts
-                dTemp = max(daaUpperPlanckCoeff(iFr,iL),0.0d0)
-                dTemp = dTemp + dDeltaNLTE
-            ! normalise by raaSumAbCoeff
-                dTemp = dTemp/(daaUpperSumNLTEGasAbCoeff(iFr,iL) + dDeltaNLTE)
-                raaUpperPlanckCoeff(iFr,iL)   = sngl(dTemp)
-                dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL) + dDeltaNLTE
-                raaUpperSumNLTEGasAbCoeff(iFr,iL)= sngl(dTemp)
-            END DO
+      ! don't worry about the LTE parts of CO2 and other gases
+      ! regular 0.0025 cm-1
+      DO iL = 1,iUpper
+        DO iFr = 1,kMaxPts
+          dTemp = max(daaUpperPlanckCoeff(iFr,iL),0.0d0)
+          dTemp = dTemp + dDeltaNLTE
+          ! normalise by raaSumAbCoeff
+          dTemp = dTemp/(daaUpperSumNLTEGasAbCoeff(iFr,iL) + dDeltaNLTE)
+          raaUpperPlanckCoeff(iFr,iL)   = sngl(dTemp)
+          dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL) + dDeltaNLTE
+          raaUpperSumNLTEGasAbCoeff(iFr,iL)= sngl(dTemp)
         END DO
+      END DO
 
-    ! bloated 0.0005 cm-1
-        IF (iSetBloat > 0) THEN
-            DO iL = 1,iUpper
-                DO iFr = 1,kBloatPts
-                    dTemp = max(daaUpperPlanckCoeffBloat(iFr,iL),0.0d0)
-                    dTemp = dTemp + dDeltaNLTE
-                ! normalise by raaSumAbCoeff
-                    dTemp = dTemp/(daaUpperSumNLTEGasAbCoeffBloat(iFr,iL)+dDeltaNLTE)
-                    daaUpperPlanckCoeffBloat(iFr,iL)   = dTemp
-                !             dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL)
-                !             raaUpperNLTEGasAbCoeff(iFr,iL)= real(dTemp)
-                END DO
-            END DO
-        END IF
+      ! bloated 0.0005 cm-1
+      IF (iSetBloat > 0) THEN
+        DO iL = 1,iUpper
+          DO iFr = 1,kBloatPts
+            dTemp = max(daaUpperPlanckCoeffBloat(iFr,iL),0.0d0)
+            dTemp = dTemp + dDeltaNLTE
+            ! normalise by raaSumAbCoeff
+            dTemp = dTemp/(daaUpperSumNLTEGasAbCoeffBloat(iFr,iL)+dDeltaNLTE)
+            daaUpperPlanckCoeffBloat(iFr,iL)   = dTemp
+            !             dTemp = daaUpperSumNLTEGasAbCoeff(iFr,iL)
+            !             raaUpperNLTEGasAbCoeff(iFr,iL)= real(dTemp)
+          END DO
+        END DO
+      END IF
     END IF
 
     RETURN
@@ -1814,31 +1717,26 @@ CONTAINS
     END IF
 ! compute lineshapes, using lineparameters, at layers blah..kProflayer
     IF (iUseWeakBackGnd == 1) THEN
-        write(kStdWarn,*) 'Adding in LTE contribution of strong lines ...'
-        DO iL = iStart,kProfLayer   !!!loop over layers
-            dLTE  = raTTemp(iL)*1.0d0
-            IF (iNum > 0) THEN
-!                write (kStdWarn,*) 'LBL for Strong BackGnd (LTE) Lines : iL,Tlte,Q = ',iL,sngl(dLTE),raTamt(iL)
-                write (kStdWarn,123) iL,sngl(dLTE),raTamt(iL)		
-                CALL compute_lte_spectra_fast(iTag,iActualTag, &
-                daK,raFreq,iGasID,iNum,daIso, &
-                daElower,daLineCenter,daJL,daJU,daPshift, &
-                daStren296,daW_For,daW_self,daW_temp,dLTE,iLineMixBand, &
-                iL,raTAmt,raTTemp,raTPress,raTPartPress, &
-                dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength)
-            ELSE
-                write(kStdWarn,*) '   no Strong Bands are in LTE!!! -----> ',iL
-                DO iFr = 1,kMaxPts
-                    daK(iFr) = 0.0d0
-                END DO
-            END IF
-            DO iFr = 1,kMaxPts
-                dK = daK(iFr) * dble(rNLTEStrength)
-                daaPlanckCoeff(iFr,iL)       = dK
-                daaNLTEGasAbCoeff(iFr,iL)    = dK
-                daaSumNLTEGasAbCoeff(iFr,iL) = dK
-            END DO    !loop over layers
-        END DO
+      write(kStdWarn,*) 'Adding in LTE contribution of strong lines ...'
+      DO iL = iStart,kProfLayer   !!!loop over layers
+        dLTE  = raTTemp(iL)*1.0d0
+        IF (iNum > 0) THEN
+          !write (kStdWarn,*) 'LBL for Strong BackGnd (LTE) Lines : iL,Tlte,Q = ',iL,sngl(dLTE),raTamt(iL)
+          write (kStdWarn,123) iL,sngl(dLTE),raTamt(iL)		
+          CALL compute_lte_spectra_fast(iTag,iActualTag, &
+            daK,raFreq,iGasID,iNum,daIso, &
+            daElower,daLineCenter,daJL,daJU,daPshift, &
+            daStren296,daW_For,daW_self,daW_temp,dLTE,iLineMixBand, &
+            iL,raTAmt,raTTemp,raTPress,raTPartPress, &
+            dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength)
+        ELSE
+          write(kStdWarn,*) '   no Strong Bands are in LTE!!! -----> ',iL
+          daK = 0.0d0
+        END IF
+        daaPlanckCoeff(:,iL)       = daK * dble(rNLTEStrength)
+        daaNLTEGasAbCoeff(:,iL)    = daK * dble(rNLTEStrength)
+        daaSumNLTEGasAbCoeff(:,iL) = daK * dble(rNLTEStrength)
+      END DO      !loop over layers
     END IF        !IF (iUseWeakBackGnd == 1) THEN
     
  123 FORMAT('LBL for Strong BackGnd (LTE) Lines : iL,Tlte,Q = ',I3,F10.4,E10.4) 
@@ -1847,27 +1745,24 @@ CONTAINS
 ! //////////////----> then read in optical depths of the weaker lines
 ! compute lineshapes, using lineparameters, at layers blah..kProflayer
     IF (iUseWeakBackGnd == 1) THEN
-    !!! read in optical depths for the weak LTE lines
-        write(kStdWarn,*) 'Adding in LTE contribution of weak background LA lines ...'
-    !--> this set computed at the US Standard profile plus 10 T
-    !--> offsets, so it is literally a compressed database
-        iUnCompressType = -2  !!! usual AIRS layers weak CO2 backgnd
-        iLowerOrUpper = -1    !!! usual kLAYERS layers
-        CALL read_std_optdepths_new(iGasID,raFreq,iStart, &
+      !!! read in optical depths for the weak LTE lines
+      write(kStdWarn,*) 'Adding in LTE contribution of weak background LA lines ...'
+      !--> this set computed at the US Standard profile plus 10 T
+      !--> offsets, so it is literally a compressed database
+      iUnCompressType = -2  !!! usual AIRS layers weak CO2 backgnd
+      iLowerOrUpper = -1    !!! usual kLAYERS layers
+      CALL read_std_optdepths_new(iGasID,raFreq,iStart, &
         raTAmt,raTTemp,raTPress,raTPartPress, &
         raRAmt,raRTemp,raRPress,raRPartPress,iL_low,iL_high, &
         iProfileLayers,iSplineType,pProf, &
         raVertTemp,iVertTempSet,rFileStartFr, &
         iTag,iActualTag,iUnCompressType, &
         iLowerOrUpper,daaWeakOptDepth)
-        DO iL = iStart,kProfLayer   !!!loop over layers
-            DO iFr = 1,kMaxPts
-                dK = daaWeakOptDepth(iFr,iL) * dble(rNLTEStrength)
-                daaPlanckCoeff(iFr,iL)       = daaPlanckCoeff(iFr,iL)       + dK
-                daaNLTEGasAbCoeff(iFr,iL)    = daaNLTEGasAbCoeff(iFr,iL)    + dK
-                daaSumNLTEGasAbCoeff(iFr,iL) = daaSumNLTEGasAbCoeff(iFr,iL) + dK
-            END DO    !loop over layers
-        END DO
+      DO iL = iStart,kProfLayer   !!!loop over layers
+        daaPlanckCoeff(:,iL)       = daaPlanckCoeff(:,iL)       + daaWeakOptDepth(:,iL) * dble(rNLTEStrength)
+        daaNLTEGasAbCoeff(:,iL)    = daaNLTEGasAbCoeff(:,iL)    + daaWeakOptDepth(:,iL) * dble(rNLTEStrength)
+        daaSumNLTEGasAbCoeff(:,iL) = daaSumNLTEGasAbCoeff(:,iL) + daaWeakOptDepth(:,iL) * dble(rNLTEStrength)
+      END DO    !loop over layers
     END IF        !IF (iUseWeakBackGnd == 1) THEN
 
 !**** therefore, at the end of this routine
@@ -1998,50 +1893,47 @@ CONTAINS
     iBand = 2350
     iBand = 1
     CALL read_upperatm_lte_temperature( &
-    iGasID,iNLTEStart,iLTEin,iBand,caaNLTETemp, &
-    raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
-    pProf,raPresslevels,raLayerHeight,raThickness, &
-    iUpper,raUpperTemp,raUpperGasAmt,raUpperPress,raUpperPartPress, &
-    raUpperPressLevels,raUpperThickness)
+      iGasID,iNLTEStart,iLTEin,iBand,caaNLTETemp, &
+      raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
+      pProf,raPresslevels,raLayerHeight,raThickness, &
+      iUpper,raUpperTemp,raUpperGasAmt,raUpperPress,raUpperPartPress, &
+      raUpperPressLevels,raUpperThickness)
 
     IF (kNLTEOutUAOpen == -1) THEN
-    !!! open the output file etc
-        iType = +1
-        CALL OpenUAFile(iType,iUpper,caOutUAFile,rFrLow,rFrHigh, &
+      !!! open the output file etc
+      iType = +1
+      CALL OpenUAFile(iType,iUpper,caOutUAFile,rFrLow,rFrHigh, &
         iDumpAllUASpectra,iDumpAllUARads, &
         iFileIDLo,iFileIDHi,iTag, &
         iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
-        IF (iDumpAllUARads > 0) THEN
-            iNumberUA_NLTEOut = 1 + iUpper
-        ELSEIF (iDumpAllUARads <= 0) THEN
-            iNumberUA_NLTEOut = 1 + 1
-        END IF
+      IF (iDumpAllUARads > 0) THEN
+        iNumberUA_NLTEOut = 1 + iUpper
+      ELSEIF (iDumpAllUARads <= 0) THEN
+        iNumberUA_NLTEOut = 1 + 1
+      END IF
 
-        IF ((iSetBloat > 0) .AND. (kBloatNLTEOutUAOpen == -1)) THEN
-            CALL OpenBloatUAFile( &
+      IF ((iSetBloat > 0) .AND. (kBloatNLTEOutUAOpen == -1)) THEN
+        CALL OpenBloatUAFile( &
             iType,iUpper,caOutUABloatFile,rFrLow,rFrHigh, &
             iDumpAllUARads, &
             iFileIDLo,iFileIDHi,iTag, &
             iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
-        END IF
+      END IF
     END IF
 
-    IF   (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-    (abs(kLongOrShort) <= 1)) THEN
-        write(kStdWarn,*) 'Upper atmosphere pressure levels'
-        write(kStdWarn,*) '  iL       P(iL)         P(iL+1)           Pav'
-        write(kStdWarn,*) '-----------------------------------------------'
+    IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR.(abs(kLongOrShort) <= 1)) THEN
+      write(kStdWarn,*) 'Upper atmosphere pressure levels'
+      write(kStdWarn,*) '  iL       P(iL)         P(iL+1)           Pav'
+      write(kStdWarn,*) '-----------------------------------------------'
     END IF
 
     DO iL = 1,iUpper
-        rX = raUpperPressLevels(iL) - raUpperPressLevels(iL+1)
-        rY = log(raUpperPressLevels(iL)/raUpperPressLevels(iL+1))
-        pProfNLTE_upatm(iL) = rX/rY
-        IF   (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-        (abs(kLongOrShort) <= 1)) THEN
-            write(kStdWarn,*) iL,raUpperPressLevels(iL),raUpperPressLevels(iL+1), &
-            pProfNLTE_upatm(iL)
-        END IF
+      rX = raUpperPressLevels(iL) - raUpperPressLevels(iL+1)
+      rY = log(raUpperPressLevels(iL)/raUpperPressLevels(iL+1))
+      pProfNLTE_upatm(iL) = rX/rY
+      IF   (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
+        write(kStdWarn,*) iL,raUpperPressLevels(iL),raUpperPressLevels(iL+1),pProfNLTE_upatm(iL)
+      END IF
     END DO
 
     write(kStdWarn,*) '-----------------------------------------------'
@@ -2052,45 +1944,40 @@ CONTAINS
 !!! read in line params for the strong lines that are NOT in NLTE; so
 !!! the default assumption is that they are in LTE
     CALL read_stronglineLTE_lineparameters( &
-    iGasID,caaaNLTEBands,iaNLTEBands,iLTEin,dLineStrenMin,caStrong, &
-    iNum,daIso,daElower,daLineCenter,daJL,daJU,daPshift, &
-    daStren296,daW_For,daW_self,daW_temp)
+      iGasID,caaaNLTEBands,iaNLTEBands,iLTEin,dLineStrenMin,caStrong, &
+      iNum,daIso,daElower,daLineCenter,daJL,daJU,daPshift, &
+      daStren296,daW_For,daW_self,daW_temp)
 
     IF (iGasID == 2) THEN
-    !!!use cousin for these strong bands in LTE,
-    !!!don't get fancy with linemix/birnbaum right now
-        iLineMixBand = +1
+      !!!use cousin for these strong bands in LTE,
+      !!!don't get fancy with linemix/birnbaum right now
+      iLineMixBand = +1
     ELSE
-        iLineMixBand = -1
+      iLineMixBand = -1
     END IF
 ! compute lineshapes, using lineparameters, at layers 1 .. iUpper
     iDo = iUseWeakBackGnd
     IF (iDo > 0) THEN
-        write(kStdWarn,*) 'Adding in LTE contribution of strong lines ...'
-        DO iL = 1,iUpper   !!!loop over layers
-            IF (iNum > 0) THEN
-                dLTE  = raUpperTemp(iL)*1.0d0
-                write (kStdWarn,'(A,I3,4X,ES12.6,4X,F10.4,4X,ES12.6)') 'LBL for UA Strong BackGnd (LTE) Lines : iL,P,T,Q = ', &
+      write(kStdWarn,*) 'Adding in LTE contribution of strong lines ...'
+      DO iL = 1,iUpper   !!!loop over layers
+        IF (iNum > 0) THEN
+          dLTE  = raUpperTemp(iL)*1.0d0
+          write (kStdWarn,'(A,I3,4X,ES12.6,4X,F10.4,4X,ES12.6)') 'LBL for UA Strong BackGnd (LTE) Lines : iL,P,T,Q = ', &
 		                 iL,raUpperPress(iL)*kAtm2mb,sngl(dLTE),raUpperGasAmt(iL)
-                CALL compute_lte_spectra_fast(iTag,iActualTag, &
+          CALL compute_lte_spectra_fast(iTag,iActualTag, &
                 daK,raFreq,iGasID,iNum,daIso, &
                 daElower,daLineCenter,daJL,daJU,daPshift, &
                 daStren296,daW_For,daW_self,daW_temp,dLTE,iLineMixBand, &
                 iL,raUpperGasAmt,raUpperTemp,raUpperPress,raUpperPartPress, &
                 dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength)
-            ELSE
-                write(kStdWarn,*) '   no Strong Bands are in LTE!!! -----> ',iL
-                DO iFr = 1,kMaxPts
-                    daK(iFr) = 0.0d0
-                END DO
-            END IF
-            DO iFr = 1,kMaxPts
-                dK = daK(iFr) * dble(rNLTEStrength)
-                daaUpperNLTEGasAbCoeff(iFr,iL)    = 0.0  !!! currently doing LTE
-                daaUpperSumNLTEGasAbCoeff(iFr,iL) = dK   !!! but accumulate opt dep
-                daaUpperPlanckCoeff(iFr,iL)       = dK
-            END DO
-        END DO    !loop over layers
+        ELSE
+          write(kStdWarn,*) '   no Strong Bands are in LTE!!! -----> ',iL
+          daK = 0.0d0
+        END IF
+        daaUpperNLTEGasAbCoeff(:,iL)    = 0.0  !!! currently doing LTE
+        daaUpperSumNLTEGasAbCoeff(:,iL) = daK * dble(rNLTEStrength)   !!! but accumulate opt dep
+        daaUpperPlanckCoeff(:,iL)       = daK * dble(rNLTEStrength)
+      END DO    !loop over layers
     END IF
 
     write(kStdWarn,*) ' '
@@ -2104,28 +1991,24 @@ CONTAINS
     iDo = iUseWeakBackGnd
 
     IF (iDo > 0) THEN
-    !!! read in optical depths for the weak LTE lines
-        write(kStdWarn,*) 'Adding in LTE contribution of UA weak lines ...'
-        CALL read_std_optdepths_upper_UA( &
+      !!! read in optical depths for the weak LTE lines
+      write(kStdWarn,*) 'Adding in LTE contribution of UA weak lines ...'
+      CALL read_std_optdepths_upper_UA( &
         iGas,iSplineType,raUpperPressLevels, &
         pProfNLTE_upatm,iUpper, &
         rFileStartFr,iTag,iActualTag, &
         iGasID,raFreq, &
         raUpperGasAmt,raUpperTemp,raUpperPress,raUpperPartPress, &
         iUpper,daaWeakOptDepth)
-        DO iL = 1,iUpper   !!!loop over layers
-            DO iFr = 1,kMaxPts
-                dK = daaWeakOptDepth(iFr,iL) * dble(rNLTEStrength)
-                daaUpperNLTEGasAbCoeff(iFr,iL) = daaUpperNLTEGasAbCoeff(iFr,iL)+dK
-                daaUpperSumNLTEGasAbCoeff(iFr,iL) = &
-                daaUpperSumNLTEGasAbCoeff(iFr,iL)+dK
-                daaUpperPlanckCoeff(iFr,iL)    = daaUpperPlanckCoeff(iFr,iL) + dK
-            END DO    !loop over layers
-        END DO
+      DO iL = 1,iUpper   !!!loop over layers
+        daaUpperNLTEGasAbCoeff(:,iL) = daaUpperNLTEGasAbCoeff(:,iL) + daaWeakOptDepth(:,iL) * dble(rNLTEStrength)
+        daaUpperSumNLTEGasAbCoeff(:,iL) = daaUpperSumNLTEGasAbCoeff(:,iL)+daaWeakOptDepth(:,iL) * dble(rNLTEStrength)
+        daaUpperPlanckCoeff(:,iL)    = daaUpperPlanckCoeff(:,iL) + daaWeakOptDepth(:,iL) * dble(rNLTEStrength)
+      END DO    !loop over layers
     END IF
 
     IF (iSetBloat > 0) THEN
-        CALL bloatUAstuff(daaUpperNLTEGasAbCoeff,daaUpperPlanckCoeff,iUpper, &
+      CALL bloatUAstuff(daaUpperNLTEGasAbCoeff,daaUpperPlanckCoeff,iUpper, &
         raFreq,daFreqBloat, &
         daaUpperPlanckCoeffBloat,daaUpperNLTEGasAbCoeffBloat, &
         daaUpperSumNLTEGasAbCoeffBloat)
@@ -2206,44 +2089,40 @@ CONTAINS
 ! this is for bloating
     DOUBLE PRECISION :: daKBloat(kBloatPts),daPBloat(kBloatPts),d1,d2,d3
 
-    DO iL = 1,kProfLayer
-        raVibQFT(iL) = 1.0
-    END DO
+    raVibQFT = 1.0
 
     DO iBand = 1,iaNLTEBands(iLTEIn)
-    ! read in the lineshape parameters for the band
-        CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
+      ! read in the lineshape parameters for the band
+      CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
         iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift, &
         daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
 
-    ! read in the NON LTE temperatures amd Vibrational Partition Fcns
-        CALL read_nonlte_temperature(iGasID,iISO,iLTEin,iBand,caaNLTETemp, &
+      ! read in the NON LTE temperatures amd Vibrational Partition Fcns
+      CALL read_nonlte_temperature(iGasID,iISO,iLTEin,iBand,caaNLTETemp, &
         pProf,raPressLevels,raLayerHeight,raThickness,iProfileLayers, &
         raTPress,raTPartPress,raTTemp,raTAmt,daJL,daJU, &
         iaJ_UorL,raLTETemp,raNLTETemp,raVibQFT,iAllLayersLTE,dVibCenter)
 
-        IF ((iGasID == 2) .AND. (iISO == 1) .AND. &
-        (nint(daJU(1)) == 9)) THEN
-            iStartUse = iStart2350
-            write(kStdWarn,*) ' .. strongest nlte band, istart = ',iStartUse
-        ELSE
-            iStartUse = iStart
-            write(kStdWarn,*) ' .. weaker nlte band, istart = ',iStartUse
-        ENDIF
+      IF ((iGasID == 2) .AND. (iISO == 1) .AND. (nint(daJU(1)) == 9)) THEN
+        iStartUse = iStart2350
+        write(kStdWarn,*) ' .. strongest nlte band, istart = ',iStartUse
+      ELSE
+        iStartUse = iStart
+        write(kStdWarn,*) ' .. weaker nlte band, istart = ',iStartUse
+      ENDIF
 
-    ! compute lineshapes, using lineparameters, at layers blah..kProflayer
-        DO iL = iStartUse,kProfLayer
+      ! compute lineshapes, using lineparameters, at layers blah..kProflayer
+      DO iL = iStartUse,kProfLayer
         ! loop over layers
 
-            IF ((iBand == 1 .AND. iL == iStartUse) .AND. &
-            (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+        IF ((iBand == 1 .AND. iL == iStartUse) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
             (abs(kLongOrShort) <= 1))) THEN
-                iPrintTalk = +1
-            ELSE
-                iPrintTalk = -1
-            END IF
+          iPrintTalk = +1
+        ELSE
+          iPrintTalk = -1
+        END IF
 
-            CALL compute_nlte_spectra_planck_fast(iBand, &
+        CALL compute_nlte_spectra_planck_fast(iBand, &
             iPrintTalk,iTag,iActualTag,daK,daPlanck,raFreq, &
             iGasID,iNum,iISO,daElower,daLineCenter, &
             daJL,daJU,iaJ_UorL,daPshift, &
@@ -2254,24 +2133,17 @@ CONTAINS
             dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength, &
             iSetBloat,daKBloat,daPBloat,daFreqBloat)
 
-            DO iFr = 1,kMaxPts
-                daaSumNLTEGasAbCoeff(iFr,iL)= daK(iFr)+daaSumNLTEGasAbCoeff(iFr,iL)
-                daaNLTEGasAbCoeff(iFr,iL)   = daK(iFr) + daaNLTEGasAbCoeff(iFr,iL)
-                daaPlanckCoeff(iFr,iL)      = daPlanck(iFr)+daaPlanckCoeff(iFr,iL)
-            END DO
+        daaSumNLTEGasAbCoeff(:,iL)= daK + daaSumNLTEGasAbCoeff(:,iL)
+        daaNLTEGasAbCoeff(:,iL)   = daK + daaNLTEGasAbCoeff(:,iL)
+        daaPlanckCoeff(:,iL)      = daPlanck + daaPlanckCoeff(:,iL)
 
-            IF (iSetBloat > 0) THEN
-                DO iFr = 1,kBloatPts
-                    daaSumNLTEGasAbCoeffBloat(iFr,iL) = daKBloat(iFr) + &
-                    daaSumNLTEGasAbCoeffBloat(iFr,iL)
-                    daaNLTEGasAbCoeffBloat(iFr,iL) = daKBloat(iFr) + &
-                    daaNLTEGasAbCoeffBloat(iFr,iL)
-                    daaPlanckCoeffBloat(iFr,iL)    = daPBloat(iFr) + &
-                    daaPlanckCoeffBloat(iFr,iL)
-                END DO
-            END IF
+        IF (iSetBloat > 0) THEN
+          daaSumNLTEGasAbCoeffBloat(:,iL) = daKBloat + daaSumNLTEGasAbCoeffBloat(:,iL)
+          daaNLTEGasAbCoeffBloat(:,iL) = daKBloat +    daaNLTEGasAbCoeffBloat(:,iL)
+          daaPlanckCoeffBloat(:,iL)    = daPBloat +    daaPlanckCoeffBloat(:,iL)
+        END IF
                        
-        END DO    !loop over layers iL = iStart,kProfLayer
+      END DO    !loop over layers iL = iStart,kProfLayer
     END DO      !loop over bands
 
     RETURN
@@ -2385,57 +2257,55 @@ CONTAINS
     REAL :: raUpperTemp_Std(kProfLayer),rJunk
     INTEGER :: iUpperStd_Num
 
-    DO iL = 1,kProfLayer
-        raVibQFT(iL) = 1.0
-    END DO
+    raVibQFT = 1.0
 
 ! the file really should have been opened in SUBROUTINE nonlte_spectra
     IF (kNLTEOutUAOpen == -1) THEN
-    !!! open the output file etc
-        iType = +1
-        CALL OpenUAFile(iType,iUpper,caOutUAFile,rFrLow,rFrHigh, &
+      !!! open the output file etc
+      iType = +1
+      CALL OpenUAFile(iType,iUpper,caOutUAFile,rFrLow,rFrHigh, &
         iDumpAllUASpectra,iDumpAllUARads, &
         iFileIDLo,iFileIDHi,iTag, &
         iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
-        IF (iDumpAllUARads > 0) THEN
-            iNumberUA_NLTEOut = 1 + iUpper
-        ELSEIF (iDumpAllUARads <= 0) THEN
-            iNumberUA_NLTEOut = 1 + 1
-        END IF
+      IF (iDumpAllUARads > 0) THEN
+        iNumberUA_NLTEOut = 1 + iUpper
+      ELSEIF (iDumpAllUARads <= 0) THEN
+        iNumberUA_NLTEOut = 1 + 1
+      END IF
 
-        IF ((iSetBloat > 0) .AND. (kBloatNLTEOutUAOpen == -1)) THEN
-            CALL OpenBloatUAFile( &
-            iType,iUpper,caOutUABloatFile,rFrLow,rFrHigh, &
-            iDumpAllUARads, &
-            iFileIDLo,iFileIDHi,iTag, &
-            iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
-        END IF
+      IF ((iSetBloat > 0) .AND. (kBloatNLTEOutUAOpen == -1)) THEN
+        CALL OpenBloatUAFile( &
+          iType,iUpper,caOutUABloatFile,rFrLow,rFrHigh, &
+          iDumpAllUARads, &
+          iFileIDLo,iFileIDHi,iTag, &
+          iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
+      END IF
     END IF
 
     IF (iGasID /= 2) THEN
-        write(kStdWarn,*) 'Currently kCARTA has no info above 0.005 mb'
-        write(kStdWarn,*) 'for GASID = ',iGasID
-        CALL DoStop
+      write(kStdWarn,*) 'Currently kCARTA has no info above 0.005 mb'
+      write(kStdWarn,*) 'for GASID = ',iGasID
+      CALL DoStop
     ELSEIF ((iGasID == 2) .AND. (iDoUpperAtmNLTE > 0)) THEN
-    !! read in the mixing ratios (from files supplied by eg glatm.dat
-    !! read in alt/press/temp/upper mix ratio from caaUpperMixRatio
-    !!  into raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs
-    !!
-    !! this is DIFFERENT from the UA NLTE compressed database!
-    !! which is saved into raUpper*_Std
-        CALL MixRatio(iGasID,rCO2mult,iLTEIn,caaUpperMixRatio, &
+      !! read in the mixing ratios (from files supplied by eg glatm.dat
+      !! read in alt/press/temp/upper mix ratio from caaUpperMixRatio
+      !!  into raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs
+      !!
+      !! this is DIFFERENT from the UA NLTE compressed database!
+      !! which is saved into raUpper*_Std
+      CALL MixRatio(iGasID,rCO2mult,iLTEIn,caaUpperMixRatio, &
         raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
         raUpperPress_Std,raUpperMixRatio_Std,raUpperDZ_Std, &
         raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
 
-        DO iBand = 1,iaNLTEBands(iLTEIn)
+      DO iBand = 1,iaNLTEBands(iLTEIn)
         ! do a ***dummy*** read to get the iL,iU gas quantum numbers
-            CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
+        CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
             iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift, &
             daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
 
         ! read in the upper atm NLTE temperatures
-            CALL read_upperatm_nonlte_temperature( &
+        CALL read_upperatm_nonlte_temperature( &
             iGasID,iISO,iNLTEStart,iLTEin,iBand,caaNLTETemp, &
             raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
             pProf,raPresslevels,raLayerHeight,raThickness, &
@@ -2446,24 +2316,23 @@ CONTAINS
             raUpperPress_Std,raUpperMixRatio_Std,raUpperDZ_Std, &
             raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
 
-            IF ((iUpper >= 1) .AND. (iDoUpperAtmNLTE > 0)) THEN
-            ! read in the lineshape parameters
-                CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
+        IF ((iUpper >= 1) .AND. (iDoUpperAtmNLTE > 0)) THEN
+          ! read in the lineshape parameters
+          CALL read_lineparameters(iLTEin,iBand,caaaNLTEBands, &
                 iGasID,iNum,iISO,daElower,daLineCenter,daJL,daJU,daPshift, &
                 daStren296,daW_For,daW_self,daW_temp,daJLowerQuantumRot,caJPQR,iLineMixBand,iDoVoigtChi)
-            ! compute lineshapes, using lineparameters,
-            ! at layers kProflayer+1 .. kProfLayer+iUpper
-                DO iL = 1,iUpper
+          ! compute lineshapes, using lineparameters,
+          ! at layers kProflayer+1 .. kProfLayer+iUpper
+          DO iL = 1,iUpper
 
-                    IF  ((iBand == 1 .AND. iL == 1) .AND. &
-                    (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-                    (abs(kLongOrShort) <= 1))) THEN
-                        iPrintTalk = +1
-                    ELSE
-                        iPrintTalk = -1
-                    END IF
+            IF  ((iBand == 1 .AND. iL == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+                (abs(kLongOrShort) <= 1))) THEN
+              iPrintTalk = +1
+            ELSE
+              iPrintTalk = -1
+            END IF
 
-                    CALL compute_nlte_spectra_planck_fast(iBand, &
+            CALL compute_nlte_spectra_planck_fast(iBand, &
                     iPrintTalk,iTag,iActualTag,daK,daPlanck,raFreq, &
                     iGasID,iNum,iISO,daElower,daLineCenter, &
                     daJL,daJU,iaJ_UorL,daPshift, &
@@ -2474,45 +2343,34 @@ CONTAINS
                     iAllLayersLTE,dDeltaFreqNLTE,iDoVoigtChi,rNLTEstrength, &
                     iSetBloat,daKBloat,daPBloat,daFreqBloat)
 
-                    DO iFr = 1,kMaxPts
-                        daaUpperNLTEGasAbCoeff(iFr,iL) = &
-                        daK(iFr) + daaUpperNLTEGasAbCoeff(iFr,iL)
-                        daaUpperSumNLTEGasAbCoeff(iFr,iL) = &
-                        daK(iFr) + daaUpperSumNLTEGasAbCoeff(iFr,iL)
-                        daaUpperPlanckCoeff(iFr,iL)   = &
-                        daPlanck(iFr) + daaUpperPlanckCoeff(iFr,iL)
-                    END DO
-
-                    IF (iSetBloat > 0) THEN
-                        DO iFr = 1,kBloatPts
-                            daaUpperSumNLTEGasAbCoeffBloat(iFr,iL) = daKBloat(iFr) + &
-                            daaUpperSumNLTEGasAbCoeffBloat(iFr,iL)
-                            daaUpperNLTEGasAbCoeffBloat(iFr,iL) = daKBloat(iFr) + &
-                            daaUpperNLTEGasAbCoeffBloat(iFr,iL)
-                            daaUpperPlanckCoeffBloat(iFr,iL) = daPBloat(iFr) + &
-                            daaUpperPlanckCoeffBloat(iFr,iL)
-                        END DO
-                    END IF
-
-                END DO    !loop over layers
-            END IF      !if iUpper >= 1
-        END DO
+            daaUpperNLTEGasAbCoeff(:,iL)    =  daK + daaUpperNLTEGasAbCoeff(:,iL)
+            daaUpperSumNLTEGasAbCoeff(:,iL) =  daK + daaUpperSumNLTEGasAbCoeff(:,iL)
+            daaUpperPlanckCoeff(:,iL)       =  daPlanck + daaUpperPlanckCoeff(:,iL)
+ 
+            IF (iSetBloat > 0) THEN
+              daaUpperSumNLTEGasAbCoeffBloat(:,iL) = daKBloat + daaUpperSumNLTEGasAbCoeffBloat(:,iL)
+              daaUpperNLTEGasAbCoeffBloat(:,iL)    = daKBloat + daaUpperNLTEGasAbCoeffBloat(:,iL)
+              daaUpperPlanckCoeffBloat(:,iL)       = daPBloat + daaUpperPlanckCoeffBloat(:,iL)
+            END IF
+           END DO    !loop over layers
+        END IF      !if iUpper >= 1
+      END DO
     END IF
 
     IF (iDumpAllUASpectra > 0) THEN
-    ! dump out the UA spectra, iUpper paths worth of them!
-        CALL wrtout_head_uafile(caOutUAFile, &
+      ! dump out the UA spectra, iUpper paths worth of them!
+      CALL wrtout_head_uafile(caOutUAFile, &
         raFreq(1),raFreq(kMaxPts),raFreq,iTag,1,iUpper)
-        caOutName = 'DumDum'
-        iIOUN = kNLTEOutUA
-        DO iL = 1,iUpper
-            rjunk = sngl(daaUpperSumNLTEGasAbCoeff(1,iL))
-            write(kStdWarn,*) 'dump out UA ODs : gid, layer, amt, OD = ',iGasID,iL,raUpperGasAmt(iL),rJunk
-            DO iFr = 1,kMaxPts
-                raX(iFr) = sngl(daaUpperSumNLTEGasAbCoeff(iFr,iL))
-            END DO
-            CALL wrtout(iIOUN,caOutName,raFreq,raX)
+      caOutName = 'DumDum'
+      iIOUN = kNLTEOutUA
+      DO iL = 1,iUpper
+        rjunk = sngl(daaUpperSumNLTEGasAbCoeff(1,iL))
+        write(kStdWarn,*) 'dump out UA ODs : gid, layer, amt, OD = ',iGasID,iL,raUpperGasAmt(iL),rJunk
+        DO iFr = 1,kMaxPts
+          raX(iFr) = sngl(daaUpperSumNLTEGasAbCoeff(iFr,iL))
         END DO
+        CALL wrtout(iIOUN,caOutName,raFreq,raX)
+      END DO
     END IF
 
     RETURN
@@ -2551,16 +2409,14 @@ CONTAINS
     dXMedium  = 2.0d0
     dXCoarse  = 1.0d2
 
-    DO iFr = 1,kHITRAN
-        iaClose(iFr)  = +1
-    END DO
+    iaClose  = +1
 
     IF (dDeltaFreqNLTE < 0) THEN
-        df = kaFrStep(iTag)
-        dfFine = kaFineFrStep(iTag)
+      df = kaFrStep(iTag)
+      dfFine = kaFineFrStep(iTag)
     ELSE
-        df = dDeltaFreqNLTE
-        dfFine = df/(kBoxCarUse*1.0d0)
+      df = dDeltaFreqNLTE
+      dfFine = df/(kBoxCarUse*1.0d0)
     END IF
 
 !!!for the fine mesh
@@ -2585,27 +2441,25 @@ CONTAINS
     iNWide = nint(raFreq(kMaxPts)-raFreq(1))
 
     IF (dDeltaFreqNLTE < 0.0d0) THEN
-        df = 1.0d0 * kaFrStep(iTag)      !!!!use default
-        iOneCmFine = 400                 !!!! 1 cm-1 = 400 pts at 0.0025 cm-1
-        iOneCmFine = nint(1.0d0/df)
+      df = 1.0d0 * kaFrStep(iTag)      !!!!use default
+      iOneCmFine = 400                 !!!! 1 cm-1 = 400 pts at 0.0025 cm-1
+      iOneCmFine = nint(1.0d0/df)
     ELSE
-        df = dDeltaFreqNLTE
-        iOneCmFine = nint(1.0d0/df)
-    ! OneCmFine = 1000
+      df = dDeltaFreqNLTE
+      iOneCmFine = nint(1.0d0/df)
+      ! OneCmFine = 1000
     END IF
 
     f0 = raFreq(1)*1.0d0
     DO iFr = 1,kMaxPts
-        daK(iFr)      = 0.0d0      !!!!!! ---------> initialise <------
-        daPlanck(iFr) = 0.0d0      !!!!!! ---------> initialise <------
-        daFreq(iFr)   = f0 + (iFr-1)*df
+      daK(iFr)      = 0.0d0      !!!!!! ---------> initialise <------
+      daPlanck(iFr) = 0.0d0      !!!!!! ---------> initialise <------
+      daFreq(iFr)   = f0 + (iFr-1)*df
     END DO
 
     IF (iSetBloat > 0) THEN
-        DO iFr = 1,kBloatPts
-            daKBloat(iFr) = 0.0d0      !!!!!! ---------> initialise <------
-            daPBloat(iFr) = 0.0d0      !!!!!! ---------> initialise <------
-        END DO
+      daKBloat = 0.0d0      !!!!!! ---------> initialise <------
+      daPBloat = 0.0d0      !!!!!! ---------> initialise <------
     END IF
 
     RETURN
@@ -2650,16 +2504,16 @@ CONTAINS
     DOUBLE PRECISION :: daFine(kMaxPtsBox)
 
     IF (iDoFine < 0) THEN
-        write(kStdErr,*) 'Wow .. you have iDoFine = -1!!!'
-        CALL DoStop
+      write(kStdErr,*) 'Wow .. you have iDoFine = -1!!!'
+      CALL DoStop
     END IF
 
     IF (iDoMedium < 0) THEN
-        write(kStdWarn,*) 'Wow .. you have iDoMed = -1!!!'
+      write(kStdWarn,*) 'Wow .. you have iDoMed = -1!!!'
     END IF
 
     IF (iDoCoarse < 0) THEN
-        write(kStdWarn,*) 'Wow .. you have iDoCoarse = -1!!!'
+      write(kStdWarn,*) 'Wow .. you have iDoCoarse = -1!!!'
     END IF
 
 ! this is always done, as we ALWAYS do the fine stuff
@@ -2671,52 +2525,49 @@ CONTAINS
     d2 = dX2 + dXnear
      
     IF (iDoMedium > 0) THEN   !!!run7lbl style
-    !!!find the lines that are slightly further away from dX1,dX2
-        d3 = dX1 - dXMedium
-        d4 = dX2 + dXMedium
+      !!!find the lines that are slightly further away from dX1,dX2
+      d3 = dX1 - dXMedium
+      d4 = dX2 + dXMedium
 
-    !!!find the lines that are even further away from dX1,dX2
-        d5 = dX1 - dXCoarse
-        d6 = dX2 + dXCoarse
+      !!!find the lines that are even further away from dX1,dX2
+      d5 = dX1 - dXCoarse
+      d6 = dX2 + dXCoarse
 
     ELSE   !!!GENLN2 style, no medium strength bins
-    !!!find the lines that are slightly further away from dX1,dX2
-        d3 = dX1 + dXMedium
-        d4 = dX2 - dXMedium
+      !!!find the lines that are slightly further away from dX1,dX2
+      d3 = dX1 + dXMedium
+      d4 = dX2 - dXMedium
 
-    !!!find the lines that are even further away from dX1,dX2
-        d5 = dX1 - dXCoarse
-        d6 = dX2 + dXCoarse
+      !!!find the lines that are even further away from dX1,dX2
+      d5 = dX1 - dXCoarse
+      d6 = dX2 + dXCoarse
     END IF
 
     iCounter10 = 0
     iCounter25 = 0
     iCounter100 = 0
     DO iLines = 1,iNum
-        IF ((daLineShift(iLines) >= d1) .AND. &
-        (daLineShift(iLines) <= d2)) THEN
+      IF ((daLineShift(iLines) >= d1) .AND. (daLineShift(iLines) <= d2)) THEN
         !!!this line center lies within +/- dXNear of current 1cm-1 chunk
         !!! these are the CLOSE lines
-            iaClose(iLines) = +1
-            iCounter10 = iCounter10 + 1
-        ELSEIF ((daLineShift(iLines) >= d3) .AND. &
-            (daLineShift(iLines) < d1)) THEN
+        iaClose(iLines) = +1
+        iCounter10 = iCounter10 + 1
+      ELSEIF ((daLineShift(iLines) >= d3) .AND.(daLineShift(iLines) < d1)) THEN
         !!!this line center lies just outside current kCARTA chunk
         !!! these are the MEDIUM lines
-            iaClose(iLines) = 0
-            iCounter25 = iCounter25 + 1
-        ELSEIF ((daLineShift(iLines) > d2) .AND. &
-            (daLineShift(iLines) <= d4)) THEN
+        iaClose(iLines) = 0
+        iCounter25 = iCounter25 + 1
+      ELSEIF ((daLineShift(iLines) > d2) .AND. (daLineShift(iLines) <= d4)) THEN
         !!!this line center lies just outside current kCARTA chunk
         !!! these are the MEDIUM lines
-            iaClose(iLines) = 0
-            iCounter25 = iCounter25 + 1
-        ELSE
+        iaClose(iLines) = 0
+        iCounter25 = iCounter25 + 1
+      ELSE
         !!!this line center lies outside the current kCARTA chunk
         !!! these are the FAR lines
-            iaClose(iLines) = -1
-            iCounter100 = iCounter100 + 1
-        END IF
+        iaClose(iLines) = -1
+        iCounter100 = iCounter100 + 1
+      END IF
     END DO
 
     iFr = 3
@@ -2726,34 +2577,33 @@ CONTAINS
 
 !!!! set the fine, medium and coarse grids up
     DO iFr = 1,iFineMeshBoxPts
-        daFreqFineMesh(iFr) = nint(dX1)*1.0d0 + (iFr-3)*dfFine
-        daFine(iFr)         = daFreqFineMesh(iFr)
-        daTempClose(iFr)    = 0.0d0
+      daFreqFineMesh(iFr) = nint(dX1)*1.0d0 + (iFr-3)*dfFine
+      daFine(iFr)         = daFreqFineMesh(iFr)
+      daTempClose(iFr)    = 0.0d0
     END DO
     DO iFr = 1,iMediumMeshBoxPts
-        daMedium(iFr)       = nint(dX1)*1.0d0 +(iFr-1)*kaMediumFrStep(iTag)
-        daTempMedium(iFr)   = 0.0d0
+      daMedium(iFr)       = nint(dX1)*1.0d0 +(iFr-1)*kaMediumFrStep(iTag)
+      daTempMedium(iFr)   = 0.0d0
     END DO
     DO iFr = 1,iCoarseMeshBoxPts
-        daCoarse(iFr)       = nint(dX1)*1.0d0 +(iFr-1)*kaCoarseFrStep(iTag)
-        daTempCoarse(iFr)   = 0.0d0
+      daCoarse(iFr)       = nint(dX1)*1.0d0 +(iFr-1)*kaCoarseFrStep(iTag)
+      daTempCoarse(iFr)   = 0.0d0
     END DO
 !!!set the current output mesh
     DO iFr = i1,i2
-        daFreqOutMesh(iFr-i1+1) = daFreq(iFr)
+      daFreqOutMesh(iFr-i1+1) = daFreq(iFr)
     END DO
 
-    IF ((nint(sngl(dJU)) == 9) .AND. (iISO == 1) .AND. &
-    (iDoVoigtChi > 0)) THEN
-    ! oh oh check to see if we need to adjust the linemix to bring it
-    ! approximately equal to UMBC-LBL
-    ! this parameter set in kcartamain/kcartabasic
-        iN = kMaxPts
-        IF ((daFreq(1) <= 2505.0d0) .AND. (daFreq(iN) >= 2355.0d0)) THEN
-            CALL co2_4um_nlte_fudge(daFine,   daFudgeF, iFineMeshBoxPts)
-            CALL co2_4um_nlte_fudge(daMedium, daFudgeM, iMediumMeshBoxPts)
-            CALL co2_4um_nlte_fudge(daCoarse, daFudgeC, iCoarseMeshBoxPts)
-        END IF
+    IF ((nint(sngl(dJU)) == 9) .AND. (iISO == 1) .AND. (iDoVoigtChi > 0)) THEN
+      ! oh oh check to see if we need to adjust the linemix to bring it
+      ! approximately equal to UMBC-LBL
+      ! this parameter set in kcartamain/kcartabasic
+      iN = kMaxPts
+      IF ((daFreq(1) <= 2505.0d0) .AND. (daFreq(iN) >= 2355.0d0)) THEN
+        CALL co2_4um_nlte_fudge(daFine,   daFudgeF, iFineMeshBoxPts)
+        CALL co2_4um_nlte_fudge(daMedium, daFudgeM, iMediumMeshBoxPts)
+        CALL co2_4um_nlte_fudge(daCoarse, daFudgeC, iCoarseMeshBoxPts)
+      END IF
     END IF
       
     RETURN
@@ -2871,7 +2721,7 @@ CONTAINS
     iNoPressureShiftCO2 = +1
 
     IF (iNoPressureShiftCO2 /= iDefault) THEN
-        print *,'iNoPressureShiftCO2,iDefault = ',iNoPressureShiftCO2,iDefault
+      print *,'iNoPressureShiftCO2,iDefault = ',iNoPressureShiftCO2,iDefault
     END IF
 
 !!!these are from kLAYERS
@@ -2882,50 +2732,44 @@ CONTAINS
 
 !!! these are from the VT files
     IF (iAllLayersLTE == -1) THEN
-        dLTEr1r2 = raLTEtemp(iL)*1.0d0     !!local kinetic temp, from VT file
-        dNLTE    = raNLTEtemp(iL)*1.0d0    !!band vib temp, from VT file
+      dLTEr1r2 = raLTEtemp(iL)*1.0d0     !!local kinetic temp, from VT file
+      dNLTE    = raNLTEtemp(iL)*1.0d0    !!band vib temp, from VT file
     ELSEIF (iAllLayersLTE == +1) THEN
-    ! before March 3, 2005
-        dLTEr1r2 = raTtemp(iL)*1.0d0       !!KLAYERS local kinetic temperature
-        dNLTE    = raTtemp(iL)*1.0d0       !!KLAYERS local kinetic temperature
-    ! after March 3, 2005
-        dLTEr1r2 = raLTEtemp(iL)*1.0d0     !!local kinetic temp, from VT file
-        dNLTE    = raLTEtemp(iL)*1.0d0     !!local kinetic temp, from VT file
+      ! before March 3, 2005
+      dLTEr1r2 = raTtemp(iL)*1.0d0       !!KLAYERS local kinetic temperature
+      dNLTE    = raTtemp(iL)*1.0d0       !!KLAYERS local kinetic temperature
+      ! after March 3, 2005
+      dLTEr1r2 = raLTEtemp(iL)*1.0d0     !!local kinetic temp, from VT file
+      dNLTE    = raLTEtemp(iL)*1.0d0     !!local kinetic temp, from VT file
     END IF
     dVibQFT = raVibQFT(iL)*1.0d0
 
     IF (iGasID /= 2) THEN
-    ! find the shifted line centers
-        DO iLines = 1, iNum
-            daLineShift(iLines) = daLineCenter(iLines) + dP*daPshift(iLines)
-        END DO
+      ! find the shifted line centers
+      daLineShift(1:iNum) = daLineCenter(1:iNum) + dP*daPshift(1:iNum)
     ELSEIF ((iGasID == 2) .AND. (iNoPressureShiftCO2 == -1)) THEN
-    ! find the shifted line centers
-        DO iLines = 1, iNum
-            daLineShift(iLines) = daLineCenter(iLines) + dP*daPshift(iLines)
-        END DO
+      ! find the shifted line centers
+      daLineShift(1:iNum) = daLineCenter(1:iNum) + dP*daPshift(1:iNum)
     ELSEIF ((iGasID == 2) .AND. (iNoPressureShiftCO2 == +1)) THEN
-    ! no pressure shifts for line centers
-        DO iLines = 1, iNum
-            daLineShift(iLines) = daLineCenter(iLines)
-        END DO
+      ! no pressure shifts for line centers
+      daLineShift(1:iNum) = daLineCenter(1:iNum)
     END IF
 
     CALL InitRunningMesh(iTag,raFreq,dDeltaFreqNLTE, &
-    dXNear,dXMedium,dXCoarse,iaClose,df,dfFine, &
-    iOneCmFine,iFineMeshBoxPts,iOneCmMedium,iMediumMeshBoxPts, &
-    iOneCmCoarse,iCoarseMeshBoxPts,iNWide,daK,daPlanck,daFreq, &
-    iSetBloat,daKBloat,daPBloat)
+      dXNear,dXMedium,dXCoarse,iaClose,df,dfFine, &
+      iOneCmFine,iFineMeshBoxPts,iOneCmMedium,iMediumMeshBoxPts, &
+      iOneCmCoarse,iCoarseMeshBoxPts,iNWide,daK,daPlanck,daFreq, &
+      iSetBloat,daKBloat,daPBloat)
 
     iUpdateSumNLTE = -1   !!! assume the band is in LTE
     IF (abs(dLTE - dNLTE) >= 5.0d-2) THEN
-        iUpdateSumNLTE = +1
+      iUpdateSumNLTE = +1
     END IF
 
     DO iFr = 1,kHITRAN
-        daRTop(iFr)   = 1.0d0
-        daRBot(iFr)   = 1.0d0
-        iaClose(iFr)  = +1
+      daRTop(iFr)   = 1.0d0
+      daRBot(iFr)   = 1.0d0
+      iaClose(iFr)  = +1
     END DO
 
 ! find the qfcn for this GAS,ISOTOPE combination at LTE
@@ -2935,40 +2779,39 @@ CONTAINS
     CALL qfcn(dLTE,iGasID,iISO,dPartitionFcn,dMass)
 
 !!!find the broadening coefficient
-    CALL Broad(iGasID,iNum,daLineShift, &
-    daW_For,daW_Self,daW_temp,dP,dPP,dLTE,daBroad)
+    CALL Broad(iGasID,iNum,daLineShift,daW_For,daW_Self,daW_temp,dP,dPP,dLTE,daBroad)
 
 !!! check to see if we use Cousin or LineMix/Birnbaum or Nothing
     IF (iLineMixBand == 2) THEN
-    !!!! check if we need Birn+Linemix or Cousin
-    !!!! individual lines are done either with first order linemix, or with
-    !!!! cousin. The reason is that eg P branch for 2350 band, gives sucky
-    !!!! results if linemixing is used, while the R branch works fine!
-        CALL CousinVsMix(iaLineMix,iLineMixBand, &
+      !!!! check if we need Birn+Linemix or Cousin
+      !!!! individual lines are done either with first order linemix, or with
+      !!!! cousin. The reason is that eg P branch for 2350 band, gives sucky
+      !!!! results if linemixing is used, while the R branch works fine!
+      CALL CousinVsMix(iaLineMix,iLineMixBand, &
         int(daJL(1)),int(daJU(1)),iISO,daFreq, &
         daLineShift,daStren296,dVibCenter,iNum)
-        CALL birnbaum_coarse(chiBirn,xBirn,iNptsBirn,dLTE,tau2_birn(dP,dPP))
-    !      print *,'doing birnbaum_coarse ',iLineMixBand,int(daJL(1)),int(daJU(1)),iISO,daFreq(1)
+      CALL birnbaum_coarse(chiBirn,xBirn,iNptsBirn,dLTE,tau2_birn(dP,dPP))
+      !      print *,'doing birnbaum_coarse ',iLineMixBand,int(daJL(1)),int(daJU(1)),iISO,daFreq(1)
     ELSE
-        DO i1 = 1,iNum
-            iaLineMix(i1) = iLineMixBand  !!stick to Cousin or nothing
-        END DO
+      DO i1 = 1,iNum
+        iaLineMix(i1) = iLineMixBand  !!stick to Cousin or nothing
+      END DO
     END IF
 
 ! find the line strengths at *** LTE *****
 ! also find QTIPS modifier due to vibration partition function at NLTE
     CALL Strengths_nlte_vibpartfcn( &
-    iL,iNum,iGasID,iISO, &
-    dGasAmt,dPartitionFcn,dLTE,dNLTE,dVibQFT, &
-    daLineShift,daELower,daStren296,daStrenNLTE,daQtipsFactor)
+      iL,iNum,iGasID,iISO, &
+      dGasAmt,dPartitionFcn,dLTE,dNLTE,dVibQFT, &
+      daLineShift,daELower,daStren296,daStrenNLTE,daQtipsFactor)
 
 ! find the ratios of upper and lower level populations, at
 ! the local temperature, and the non local vibrational temperature
 ! this is so that we can find the modification to the Planck function
     CALL NLTEPopulationRatios( &
-    iL,iNum,dP,dLTE,dLTEr1r2,dNLTE,dVibCenter, &
-    daElower,daLineShift,iaJ_UorL, &
-    daRTop,daRBot,daCFactor,daKFactor)
+      iL,iNum,dP,dLTE,dLTEr1r2,dNLTE,dVibCenter, &
+      daElower,daLineShift,iaJ_UorL, &
+      daRTop,daRBot,daCFactor,daKFactor)
 
 ! divide lines into FINE,MEDIUM,COARSE meshes
 ! lines to use. take [f3 f4] as the limits of the current wide mesh
@@ -2984,18 +2827,18 @@ CONTAINS
 ! used to be 2317.2
     iOneLine = -1
     IF (iOneLine > 0) THEN
-        print *,'iOneline = 2324.97'
-        DO iLines = 1,iNum
-            IF (dabs(daLineShift(iLines)-2324.97) > 0.5d0) THEN
-                daStrenNLTE(iLines) = 0.0d0
-            END IF
-        END DO
+      print *,'iOneline = 2324.97'
+      DO iLines = 1,iNum
+        IF (dabs(daLineShift(iLines)-2324.97) > 0.5d0) THEN
+          daStrenNLTE(iLines) = 0.0d0
+        END IF
+      END DO
     END IF
 
     i1 = 1
     i2 = iOneCmFine
     DO iWideMeshLoop = 1,iNWide
-        CALL SetRunningMesh(iWideMeshloop,daFreq,dXNear,dXMedium,dXCoarse, &
+      CALL SetRunningMesh(iWideMeshloop,daFreq,dXNear,dXMedium,dXCoarse, &
         iNum,daLineShift,i1,i2,iTag,iActualTag,dfFine, &
         iFineMeshBoxPts,iMediumMeshBoxPts,iCoarseMeshBoxPts, &
         iDoFine,iDoMedium,iDoCoarse, &
@@ -3004,171 +2847,164 @@ CONTAINS
         daFreqFineMesh,daTempClose,daTempMedium,daTempCoarse, &
         iISO,daJU(1),daFudgeF,daFudgeM,daFudgeC,iDoVoigtChi)
 
-        DO iFr = 1,iFineMeshBoxPts
-            daPlanckClose(iFr) = 0.0d0
-        END DO
-        DO iFr = 1,iMediumMeshBoxPts
-            daPlanckMedium(iFr) = 0.0d0
-        END DO
-        DO iFr = 1,iCoarseMeshBoxPts
-            daPlanckCoarse(iFr) = 0.0d0
-        END DO
+      DO iFr = 1,iFineMeshBoxPts
+        daPlanckClose(iFr) = 0.0d0
+      END DO
+      DO iFr = 1,iMediumMeshBoxPts
+        daPlanckMedium(iFr) = 0.0d0
+      END DO
+      DO iFr = 1,iCoarseMeshBoxPts
+        daPlanckCoarse(iFr) = 0.0d0
+      END DO
 
-    ! now loop over the close lines to get the optical depths!
-        IF (iDoFine > 0) THEN
-            iTooFarX = +10000
-            iTrue = -1
-            DO iLines = 1,iNum
-                IF (iaClose(iLines) > 0) THEN
-                ! do the "close" lines
-                    iTrue = +1
-                    CALL AlphaBeta_Factors( &
+      ! now loop over the close lines to get the optical depths!
+      IF (iDoFine > 0) THEN
+        iTooFarX = +10000
+        iTrue = -1
+        DO iLines = 1,iNum
+          IF (iaClose(iLines) > 0) THEN
+            ! do the "close" lines
+            iTrue = +1
+            CALL AlphaBeta_Factors( &
                     iLines,iUpdateSUMNLTE,rNLTEstrength,daRTop,daRBot, &
                     daCFactor,daKFactor,dAlpha,dBeta)
-                    CALL voigt_chi( &
+            CALL voigt_chi( &
                     daFreqFineMesh,iFineMeshBoxPts,daLineShift(iLines), &
                     dLTE,dMass,daBroad(iLines),iaLineMix(iLines),dP,dPP, &
                     daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines),iISO,dVibCenter, &
                     xBirn,chiBirn,iNptsBirn,daTempClose1,daFudgeF,iDoVoigtChi,iTooFar)
-                    IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
-                        iTooFarX = iTooFar
-                    END IF
-                    DO iFr = 1,iFineMeshBoxPts
-                        daTempClose(iFr) = daTempClose(iFr) + &
-                        dAlpha*daStrenNLTE(iLines)*daTempClose1(iFr)
-                        daPlanckClose(iFr) = daPlanckClose(iFr) + &
-                        dBeta*daStrenNLTE(iLines)*daTempClose1(iFr)
-                    END DO
-                END IF
+            IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
+              iTooFarX = iTooFar
+            END IF
+            DO iFr = 1,iFineMeshBoxPts
+              daTempClose(iFr) = daTempClose(iFr) + dAlpha*daStrenNLTE(iLines)*daTempClose1(iFr)
+              daPlanckClose(iFr) = daPlanckClose(iFr) + dBeta*daStrenNLTE(iLines)*daTempClose1(iFr)
             END DO
-            IF (iTooFarX < 100) THEN
-                print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
-                print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            END IF
-        !!!! now do the boxcar
-            IF (iTrue > 0) THEN
-                CALL DoBoxCar(daTempClose,iFineMeshBoxPts,i1,i2,daK)
-                CALL DoBoxCar(daPlanckClose,iFineMeshBoxPts,i1,i2,daPlanck)
-            END IF
+          END IF
+        END DO
 
-            IF (iSetBloat > 0) THEN
-                CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts, &
-                daMedium      ,daTempMedium,iCount, &
-                iWideMeshLoop,i1,i2,1,daKBloat)
-                CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts, &
-                daMedium      ,daPlanckMedium,iCount, &
-                iWideMeshLoop,i1,i2,1,daPBloat)
-            END IF
+        IF (iTooFarX < 100) THEN
+          print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+          print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+        ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
+          print *,' compute_nlte_spectra_planck_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+          print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+        END IF
+        !!!! now do the boxcar
+        IF (iTrue > 0) THEN
+          CALL DoBoxCar(daTempClose,iFineMeshBoxPts,i1,i2,daK)
+          CALL DoBoxCar(daPlanckClose,iFineMeshBoxPts,i1,i2,daPlanck)
         END IF
 
-        IF (iDoMedium > 0) THEN
+        IF (iSetBloat > 0) THEN
+          CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts, &
+            daMedium      ,daTempMedium,iCount, &
+            iWideMeshLoop,i1,i2,1,daKBloat)
+          CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts, &
+            daMedium      ,daPlanckMedium,iCount, &
+            iWideMeshLoop,i1,i2,1,daPBloat)
+        END IF
+      END IF
+
+      IF (iDoMedium > 0) THEN
         ! ah well; bite the bullet and do the med lines, even though they
         ! probably contribute nuthin!
-            iTooFarX = +10000
-            iCount = iMediumMeshBoxPts
-            DO iLines = 1,iNum
-                IF (iaClose(iLines) == 0) THEN
-                ! do the "med" lines
-                    CALL AlphaBeta_Factors( &
-                    iLines,iUpdateSUMNLTE,rNLTEstrength,daRTop,daRBot, &
-                    daCFactor,daKFactor,dAlpha,dBeta)
-                    CALL voigt_chi( &
-                    daMedium,iCount,daLineShift(iLines),dLTE,dMass, &
-                    daBroad(iLines),iaLineMix(iLines),dP,dPP, &
-                    daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines), &
-                    iISO,dVibCenter, &
-                    xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi,iTooFar)
-                    IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
-                        iTooFarX = iTooFar
-                    END IF
-                    DO iFr = 1,iCount
-                        daTempMedium(iFr) = daTempMedium(iFr) + &
-                        dAlpha*daStrenNLTE(iLines)*yaMedium(iFr)
-                        daPlanckMedium(iFr) = daPlanckMedium(iFr) + &
-                        dBeta*daStrenNLTE(iLines)*yaMedium(iFr)
-                    END DO
-                END IF
-            END DO
-            IF (iTooFarX < 100) THEN
-                print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
-                print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+        iTooFarX = +10000
+        iCount = iMediumMeshBoxPts
+        DO iLines = 1,iNum
+          IF (iaClose(iLines) == 0) THEN
+            ! do the "med" lines
+            CALL AlphaBeta_Factors( &
+              iLines,iUpdateSUMNLTE,rNLTEstrength,daRTop,daRBot, &
+              daCFactor,daKFactor,dAlpha,dBeta)
+            CALL voigt_chi( &
+              daMedium,iCount,daLineShift(iLines),dLTE,dMass, &
+              daBroad(iLines),iaLineMix(iLines),dP,dPP, &
+              daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines), &
+              iISO,dVibCenter, &
+              xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi,iTooFar)
+            IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
+              iTooFarX = iTooFar
             END IF
+            DO iFr = 1,iCount
+              daTempMedium(iFr) = daTempMedium(iFr) + dAlpha*daStrenNLTE(iLines)*yaMedium(iFr)
+              daPlanckMedium(iFr) = daPlanckMedium(iFr) + dBeta*daStrenNLTE(iLines)*yaMedium(iFr)
+            END DO
+          END IF
+        END DO
+        IF (iTooFarX < 100) THEN
+          print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+          print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+        ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
+          print *,' compute_nlte_spectra_planck_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+          print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+        END IF
         !!!interpolate the med lines sum onto the near lines
-            CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
-            CALL dspl(daMedium,daPlanckMedium,iCount,daFreqOutMesh, &
-            daTempP,i2-i1+1)
+        CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+        CALL dspl(daMedium,daPlanckMedium,iCount,daFreqOutMesh,daTempP,i2-i1+1)
         !!!add on the med lines to the near lines
-            DO iFr = i1,i2
-                daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
-                daPlanck(iFr) = daPlanck(iFr) + daTempP(iFr-i1+1)
-            END DO
-            IF (iSetBloat > 0) THEN
-                CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts, &
-                daMedium      ,daTempMedium,iCount, &
-                iWideMeshLoop,i1,i2,-1,daKBloat)
-                CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts, &
-                daMedium      ,daPlanckMedium,iCount, &
-                iWideMeshLoop,i1,i2,-1,daPBloat)
-            END IF
+        DO iFr = i1,i2
+          daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
+          daPlanck(iFr) = daPlanck(iFr) + daTempP(iFr-i1+1)
+        END DO
+        IF (iSetBloat > 0) THEN
+          CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts, &
+            daMedium      ,daTempMedium,iCount, &
+            iWideMeshLoop,i1,i2,-1,daKBloat)
+          CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts, &
+            daMedium      ,daPlanckMedium,iCount, &
+            iWideMeshLoop,i1,i2,-1,daPBloat)
+          END IF
         END IF
 
         IF (iDoCoarse > 0) THEN
-        ! ah well; bite the bullet and do the far lines, even though they
-        ! probably contribute nuthin!
-            iTooFarX = +10000
-            iCount = iCoarseMeshBoxPts
-            DO iLines = 1,iNum
-                IF (iaClose(iLines) < 0) THEN
-                ! do the "far" lines
-                    CALL AlphaBeta_Factors( &
-                    iLines,iUpdateSUMNLTE,rNLTEstrength,daRTop,daRBot, &
-                    daCFactor,daKFactor,dAlpha,dBeta)
-                    CALL voigt_chi( &
-                    daCoarse,iCount,daLineShift(iLines),dLTE,dMass, &
-                    daBroad(iLines),iaLineMix(iLines), &
-                    dP,dPP,daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines),iISO,dVibCenter, &
-                    xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi,iTooFar)
-                    IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
-                        iTooFarX = iTooFar
-                    END IF
-                    DO iFr = 1,iCount
-                        daTempCoarse(iFr) = daTempCoarse(iFr) + &
-                        dAlpha*daStrenNLTE(iLines)*yaCoarse(iFr)
-                        daPlanckCoarse(iFr) = daPlanckCoarse(iFr) + &
-                        dBeta*daStrenNLTE(iLines)*yaCoarse(iFr)
-                    END DO
-                END IF
-            END DO
-            IF (iTooFarX < 100) THEN
-                print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
-                print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          ! ah well; bite the bullet and do the far lines, even though they
+          ! probably contribute nuthin!
+          iTooFarX = +10000
+          iCount = iCoarseMeshBoxPts
+          DO iLines = 1,iNum
+            IF (iaClose(iLines) < 0) THEN
+              ! do the "far" lines
+              CALL AlphaBeta_Factors( &
+                iLines,iUpdateSUMNLTE,rNLTEstrength,daRTop,daRBot, &
+                daCFactor,daKFactor,dAlpha,dBeta)
+              CALL voigt_chi( &
+                daCoarse,iCount,daLineShift(iLines),dLTE,dMass, &
+                daBroad(iLines),iaLineMix(iLines), &
+                dP,dPP,daJL(iLines),daJU(iLines),daJLowerQuantumRot(iLines),iISO,dVibCenter, &
+                xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi,iTooFar)
+              IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
+                iTooFarX = iTooFar
+              END IF
+              DO iFr = 1,iCount
+                daTempCoarse(iFr) = daTempCoarse(iFr) +   dAlpha*daStrenNLTE(iLines)*yaCoarse(iFr)
+                daPlanckCoarse(iFr) = daPlanckCoarse(iFr) + dBeta*daStrenNLTE(iLines)*yaCoarse(iFr)
+              END DO
             END IF
-        !!!interpolate the far lines sum onto the near lines
-            CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
-            CALL dspl(daCoarse,daPlanckCoarse,iCount,daFreqOutMesh, &
-            daTempP,i2-i1+1)
-        !!!add on the far lines to the near lines
-            DO iFr = i1,i2
-                daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
-                daPlanck(iFr) = daPlanck(iFr) + daTempP(iFr-i1+1)
-            END DO
-            IF (iSetBloat > 0) THEN
-                CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts, &
-                daCoarse      ,daTempCoarse,iCount, &
-                iWideMeshLoop,i1,i2,-1,daKBloat)
-                CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts, &
-                daCoarse      ,daPlanckCoarse,iCount, &
-                iWideMeshLoop,i1,i2,-1,daPBloat)
-            END IF
+          END DO
+          IF (iTooFarX < 100) THEN
+            print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+            print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
+            print *,' compute_nlte_spectra_planck_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+            print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          END IF
+          !!!interpolate the far lines sum onto the near lines
+          CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+          CALL dspl(daCoarse,daPlanckCoarse,iCount,daFreqOutMesh,daTempP,i2-i1+1)
+          !!!add on the far lines to the near lines
+          DO iFr = i1,i2
+            daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
+            daPlanck(iFr) = daPlanck(iFr) + daTempP(iFr-i1+1)
+          END DO
+          IF (iSetBloat > 0) THEN
+            CALL AccumulateBloat(daFreqFineMesh,daTempClose,iFineMeshBoxPts, &
+              daCoarse      ,daTempCoarse,iCount, &
+              iWideMeshLoop,i1,i2,-1,daKBloat)
+            CALL AccumulateBloat(daFreqFineMesh,daPlanckClose,iFineMeshBoxPts, &
+              daCoarse      ,daPlanckCoarse,iCount, &
+              iWideMeshLoop,i1,i2,-1,daPBloat)
+          END IF
         END IF
 
         i1 = i1 + iOneCmFine
@@ -3177,47 +3013,46 @@ CONTAINS
 
 ! now make sure everything > 0
     DO iFr = 1,kMaxPts
-        daK(iFr)      = max(0.0d0,daK(iFr))
-        daPlanck(iFr) = max(0.0d0,daPlanck(iFr))
+      daK(iFr)      = max(0.0d0,daK(iFr))
+      daPlanck(iFr) = max(0.0d0,daPlanck(iFr))
     END DO
 
     IF (iSetBloat > 0) THEN
-        DO iFr = 1,kBloatPts
-            daKBloat(iFr)      = max(0.0d0,daKBloat(iFr))
-            daPBloat(iFr)      = max(0.0d0,daPBloat(iFr))
-        END DO
+      DO iFr = 1,kBloatPts
+        daKBloat(iFr)      = max(0.0d0,daKBloat(iFr))
+        daPBloat(iFr)      = max(0.0d0,daPBloat(iFr))
+      END DO
     END IF
 
-    IF ((iBand == 1) .AND. &
-    ( ((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-    (abs(kLongOrShort) <= 1))) THEN
-        iTalk = +1
+    IF ((iBand == 1) .AND. ( ((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+     (abs(kLongOrShort) <= 1))) THEN
+      iTalk = +1
     ELSE
-        iTalk = -1
+      iTalk = -1
     END IF
 
     IF (iPrintTalk > 0) THEN
-        write(kStdWarn,*)'doing LBL for Strong NLTE Lines :'
-        write(kStdWarn,*)'lay Band   Line C/B  v0         r1         r2            Kfac    1-Cfac/Kfac'
-        write(kStdWarn,*)'   center  indx      '
-        write(kStdWarn,*)'------------------------------------------------------------------------------'
-        DO iLines = 1,iNum
-            IF (iaLineMix(iLines) == 1) THEN        !cousin
-                cCousOrBirn = 'C'
-            ELSEIF (iaLineMix(iLines) == 2) THEN    !linemix * birn
-                cCousOrBirn = 'B'
-            ELSEIF (iaLineMix(iLines) < 0) THEN    !nothing ... plain voigt
-                cCousOrBirn = 'V'
-            ELSE
-                write(kStdErr,*) 'error in ialineMix',iLines,iaLineMix(iLines)
-                CALL DoStop
-            END IF
-            IF (iLines == 1) THEN
-                write(kStdWarn,1010) iL,dVibCenter,iLines,cCousOrBirn,daLineShift(iLines), &
-                daRBot(iLines),daRTop(iLines),daKFactor(iLines), &
-                &          1.0d0 - daCFactor(iLines)/daKFactor(iLines)
-            END IF
-        END DO
+      write(kStdWarn,*)'doing LBL for Strong NLTE Lines :'
+      write(kStdWarn,*)'lay Band   Line C/B  v0         r1         r2            Kfac    1-Cfac/Kfac'
+      write(kStdWarn,*)'   center  indx      '
+      write(kStdWarn,*)'------------------------------------------------------------------------------'
+      DO iLines = 1,iNum
+        IF (iaLineMix(iLines) == 1) THEN        !cousin
+          cCousOrBirn = 'C'
+        ELSEIF (iaLineMix(iLines) == 2) THEN    !linemix * birn
+          cCousOrBirn = 'B'
+        ELSEIF (iaLineMix(iLines) < 0) THEN    !nothing ... plain voigt
+          cCousOrBirn = 'V'
+        ELSE
+          write(kStdErr,*) 'error in ialineMix',iLines,iaLineMix(iLines)
+          CALL DoStop
+        END IF
+        IF (iLines == 1) THEN
+          write(kStdWarn,1010) iL,dVibCenter,iLines,cCousOrBirn,daLineShift(iLines), &
+            daRBot(iLines),daRTop(iLines),daKFactor(iLines), &
+            &          1.0d0 - daCFactor(iLines)/daKFactor(iLines)
+        END IF
+      END DO
     END IF
           
     1010 FORMAT(I3,' ',D12.6,' ',I4,' ',A1,' ',1(D12.6,' '),5(D12.6,' '))
@@ -3310,7 +3145,7 @@ CONTAINS
     iNoPressureShiftCO2 = +1
 
     IF (iNoPressureShiftCO2 /= iDefault) THEN
-        print *,'iNoPressureShiftCO2,iDefault = ',iNoPressureShiftCO2,iDefault
+      print *,'iNoPressureShiftCO2,iDefault = ',iNoPressureShiftCO2,iDefault
     END IF
 
     dP  = raTPress(iL)*1.0d0
@@ -3319,27 +3154,21 @@ CONTAINS
     dLTE     = raTtemp(iL)*1.0d0             !!local kinetic temperature
 
     IF (iGasID /= 2) THEN
-    ! find the shifted line centers
-        DO iLines = 1, iNum
-            daLineShift(iLines) = daLineCenter(iLines) + dP*daPshift(iLines)
-        END DO
+      ! find the shifted line centers
+      daLineShift(1:iNum) = daLineCenter(1:iNum) + dP*daPshift(1:iNum)
     ELSEIF ((iGasID == 2) .AND. (iNoPressureShiftCO2 == -1)) THEN
-    ! find the shifted line centers
-        DO iLines = 1, iNum
-            daLineShift(iLines) = daLineCenter(iLines) + dP*daPshift(iLines)
-        END DO
+      ! find the shifted line centers
+      daLineShift(1:iNum) = daLineCenter(1:iNum) + dP*daPshift(1:iNum)
     ELSEIF ((iGasID == 2) .AND. (iNoPressureShiftCO2 == +1)) THEN
-    ! no pressure shifts for line centers
-        DO iLines = 1, iNum
-            daLineShift(iLines) = daLineCenter(iLines)
-        END DO
+      ! no pressure shifts for line centers
+      daLineShift(1:iNum) = daLineCenter(1:iNum)
     END IF
 
     CALL InitRunningMesh(iTag,raFreq,dDeltaFreqNLTE, &
-    dXNear,dXMedium,dXCoarse,iaClose,df,dfFine, &
-    iOneCmFine,iFineMeshBoxPts,iOneCmMedium,iMediumMeshBoxPts, &
-    iOneCmCoarse,iCoarseMeshBoxPts,iNWide,daK,daPlanck,daFreq, &
-    iZZZBloat,daKBloat,daPBloat)
+      dXNear,dXMedium,dXCoarse,iaClose,df,dfFine, &
+      iOneCmFine,iFineMeshBoxPts,iOneCmMedium,iMediumMeshBoxPts, &
+      iOneCmCoarse,iCoarseMeshBoxPts,iNWide,daK,daPlanck,daFreq, &
+      iZZZBloat,daKBloat,daPBloat)
 
     dP  = raTPress(iL)*1.0d0
     dPP = raTPartPress(iL)*1.0d0
@@ -3348,29 +3177,28 @@ CONTAINS
 
 ! find the shifted line centers and loop over lines, for this layer
     DO iLines = 1, iNum
-    ! find the qfcn for this GAS,ISOTOPE combination at LTE
-        CALL qfcn(dLTE,iGasID,int(daISO(iLines)),dPartitionFcn,daMass(iLines))
+      ! find the qfcn for this GAS,ISOTOPE combination at LTE
+      CALL qfcn(dLTE,iGasID,int(daISO(iLines)),dPartitionFcn,daMass(iLines))
         daPartitionFcn(iLines) = dPartitionFcn
     END DO
 
 ! find the line strengths at *** LTE *****
 ! daQtipsFactor(iN) = 1.0
     CALL Strengths_lte_only(iNum,iGasID,dGasAmt,daPartitionFcn,dLTE, &
-    daLineShift,daELower,daStren296,daStrenLTE,daQtipsFactor)
+      daLineShift,daELower,daStren296,daStrenLTE,daQtipsFactor)
 
     iOneLine = -1
     IF (iOneLine > 0) THEN
-        print *,'iOneline = 2324.97'
-        DO iLines = 1,iNum
-            IF (dabs(daLineShift(iLines)-2324.97) > 0.5d0) THEN
-                daStrenLTE(iLines) = 0.0d0
-            END IF
-        END DO
+      print *,'iOneline = 2324.97'
+      DO iLines = 1,iNum
+        IF (dabs(daLineShift(iLines)-2324.97) > 0.5d0) THEN
+          daStrenLTE(iLines) = 0.0d0
+        END IF
+      END DO
     END IF
 
 !!!find the broadening coefficients
-    CALL Broad(iGasID,iNum,daLineShift, &
-    daW_For,daW_Self,daW_temp,dP,dPP,dLTE,daBroad)
+    CALL Broad(iGasID,iNum,daLineShift,daW_For,daW_Self,daW_temp,dP,dPP,dLTE,daBroad)
 
 ! divide lines into FINE,MEDIUM,COARSE meshes
 ! lines to use. take [f3 f4] as the limits of the current wide mesh
@@ -3386,7 +3214,7 @@ CONTAINS
     i1 = 1
     i2 = iOneCmFine
     DO iWideMeshLoop = 1,iNWide
-        CALL SetRunningMesh(iWideMeshloop,daFreq,dXNear,dXMedium,dXCoarse, &
+      CALL SetRunningMesh(iWideMeshloop,daFreq,dXNear,dXMedium,dXCoarse, &
         iNum,daLineShift,i1,i2,iTag,iActualTag,dfFine, &
         iFineMeshBoxPts,iMediumMeshBoxPts,iCoarseMeshBoxPts, &
         iDoFine,iDoMedium,iDoCoarse, &
@@ -3395,119 +3223,118 @@ CONTAINS
         daFreqFineMesh,daTempClose,daTempMedium,daTempCoarse, &
         int(daISO(iLines)),dAJU(1),daFudgeF,daFudgeM,daFudgeC,iDoVoigtChi)
 
-    ! now loop over the close lines to get the optical depths!
-        IF (iDoFine > 0) THEN
-            iTrue = -1
-            iTooFarX = +10000
-            DO iLines = 1,iNum
-                IF (iaClose(iLines) > 0) THEN
-                ! do the "close" lines
-                    iTrue = +1
-                    CALL voigt_chi( &
-                    daFreqFineMesh,iFineMeshBoxPts,daLineShift(iLines), &
-                    dLTE,daMass(iLines),daBroad(iLines),iLineMixBand, &
-                    dP,dPP,daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter, &
-                    xBirn,chiBirn,iNptsBirn,daTempClose1,daFudgeF,iDoVoigtChi,iTooFar)
-                    IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
-                        iTooFarX = iTooFar
-                    END IF
-                    DO iFr = 1,iFineMeshBoxPts
-                        daTempClose(iFr) = daTempClose(iFr) + &
-                        daStrenLTE(iLines)*daTempClose1(iFr)
-                    END DO
-                END IF
+      ! now loop over the close lines to get the optical depths!
+      IF (iDoFine > 0) THEN
+        iTrue = -1
+        iTooFarX = +10000
+        DO iLines = 1,iNum
+          IF (iaClose(iLines) > 0) THEN
+            ! do the "close" lines
+            iTrue = +1
+            CALL voigt_chi( &
+              daFreqFineMesh,iFineMeshBoxPts,daLineShift(iLines), &
+              dLTE,daMass(iLines),daBroad(iLines),iLineMixBand, &
+              dP,dPP,daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter, &
+              xBirn,chiBirn,iNptsBirn,daTempClose1,daFudgeF,iDoVoigtChi,iTooFar)
+            IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
+              iTooFarX = iTooFar
+            END IF
+            DO iFr = 1,iFineMeshBoxPts
+              daTempClose(iFr) = daTempClose(iFr) + &
+              daStrenLTE(iLines)*daTempClose1(iFr)
             END DO
-            IF (iTooFarX < 100) THEN
-                iISO = int(daISO(1))
-                print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
-                iISO = int(daISO(1))
-                print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            END IF
-        !!!! now do the boxcar
-            IF (iTrue > 0) THEN
-                CALL DoBoxCar(daTempClose,iFineMeshBoxPts,i1,i2,daK)
-            END IF
+          END IF
+        END DO
+        IF (iTooFarX < 100) THEN
+          iISO = int(daISO(1))
+          print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+          print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+        ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
+          iISO = int(daISO(1))
+          print *,' compute_lte_spectra_fast FINE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+          print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
         END IF
+        !!!! now do the boxcar
+        IF (iTrue > 0) THEN
+          CALL DoBoxCar(daTempClose,iFineMeshBoxPts,i1,i2,daK)
+        END IF
+      END IF
 
         IF (iDoMedium > 0) THEN
-        ! ah well; bite the bullet and do the med lines, even though they
-        ! probably contribute nuthin!
-            iTooFarX = +10000
-            iCount = iMediumMeshBoxPts
-            DO iLines = 1,iNum
-                IF (iaClose(iLines) == 0) THEN
-                ! do the "med" lines
-                    CALL voigt_chi( &
-                    daMedium,iCount,daLineShift(iLines),dLTE, &
-                    daMass(iLines),daBroad(iLines),iLineMixBand,dP,dPP, &
-                    daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter, &
-                    xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi,iTooFar)
-                    IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
-                        iTooFarX = iTooFar
-                    END IF
-                    DO iFr = 1,iCount
-                        daTempMedium(iFr) = daTempMedium(iFr) + &
-                        daStrenLTE(iLines)*yaMedium(iFr)
-                    END DO
+          ! ah well; bite the bullet and do the med lines, even though they
+          ! probably contribute nuthin!
+          iTooFarX = +10000
+          iCount = iMediumMeshBoxPts
+          DO iLines = 1,iNum
+            IF (iaClose(iLines) == 0) THEN
+              ! do the "med" lines
+              CALL voigt_chi( &
+                daMedium,iCount,daLineShift(iLines),dLTE, &
+                daMass(iLines),daBroad(iLines),iLineMixBand,dP,dPP, &
+                daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter, &
+                xBirn,chiBirn,iNptsBirn,yaMedium,daFudgeM,iDoVoigtChi,iTooFar)
+                IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
+                    iTooFarX = iTooFar
                 END IF
-            END DO
-            IF (iTooFarX < 100) THEN
-                iISO = int(daISO(1))
-                print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
-                iISO = int(daISO(1))
-                print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+              DO iFr = 1,iCount
+                daTempMedium(iFr) = daTempMedium(iFr) + &
+                daStrenLTE(iLines)*yaMedium(iFr)
+              END DO
             END IF
-        !!!interpolate the med lines sum onto the near lines
-            CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
-        !!!add on the med lines to the near lines
-            DO iFr = i1,i2
-                daK(iFr) = daK(iFr) + daTemp(iFr-i1+1)
-            END DO
+          END DO
+          IF (iTooFarX < 100) THEN
+            iISO = int(daISO(1))
+            print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+            print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
+            iISO = int(daISO(1))
+            print *,' compute_lte_spectra_fast MEDIUM lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+            print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          END IF
+          !!!interpolate the med lines sum onto the near lines
+          CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+          !!!add on the med lines to the near lines
+          DO iFr = i1,i2
+            daK(iFr) = daK(iFr) + daTemp(iFr-i1+1)
+          END DO
         END IF
 
         IF (iDoCoarse > 0) THEN
-        ! ah well; bite the bullet and do the far lines, even though they
-        ! probably contribute nuthin!
-            iTooFarX = +10000
-            iCount = iCoarseMeshBoxPts
-            DO iLines = 1,iNum
-                IF (iaClose(iLines) < 0) THEN
-                ! do the "far" lines
-                    CALL voigt_chi( &
-                    daCoarse,iCount,daLineShift(iLines),dLTE, &
-                    daMass(iLines),daBroad(iLines),iLineMixBand,dP,dPP, &
-                    daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter, &
-                    xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi,iTooFar)
-                    IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
-                        iTooFarX = iTooFar
-                    END IF
-                    DO iFr = 1,iCount
-                        daTempCoarse(iFr) = daTempCoarse(iFr) + &
-                        daStrenLTE(iLines)*yaCoarse(iFr)
-                    END DO
-                END IF
-            END DO
-            IF (iTooFarX < 100) THEN
-                iISO = int(daISO(1))
-                print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
-            ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
-                iISO = int(daISO(1))
-                print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
-                print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          ! ah well; bite the bullet and do the far lines, even though they
+          ! probably contribute nuthin!
+          iTooFarX = +10000
+          iCount = iCoarseMeshBoxPts
+          DO iLines = 1,iNum
+            IF (iaClose(iLines) < 0) THEN
+              ! do the "far" lines
+              CALL voigt_chi( &
+                daCoarse,iCount,daLineShift(iLines),dLTE, &
+                daMass(iLines),daBroad(iLines),iLineMixBand,dP,dPP, &
+                daJL(iLines),daJU(iLines),-1.0d0,int(daISO(iLines)),dVibCenter, &
+                xBirn,chiBirn,iNptsBirn,yaCoarse,daFudgeC,iDoVoigtChi,iTooFar)
+              IF ((iTooFar > 0) .AND. (iTooFar < iTooFarX)) THEN
+                iTooFarX = iTooFar
+              END IF
+              DO iFr = 1,iCount
+                daTempCoarse(iFr) = daTempCoarse(iFr) + daStrenLTE(iLines)*yaCoarse(iFr)
+              END DO
             END IF
-        !!!interpolate the far lines sum onto the near lines
-            CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
-        !!!add on the far lines to the near lines
-            DO iFr = i1,i2
-                daK(iFr) = daK(iFr) + daTemp(iFr-i1+1)
-            END DO
+          END DO
+          IF (iTooFarX < 100) THEN
+            iISO = int(daISO(1))
+            print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- bad lines Jrotatation(iTooFar) = ',iTooFarX
+            print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          ELSEIF ((iTooFarX >= 100) .AND. (iTooFarX /= 10000)) THEN
+            iISO = int(daISO(1))
+            print *,' compute_lte_spectra_fast COARSE lines dVibCenter ---- OK lines Jrotatation(iTooFar) = ',iTooFarX
+            print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
+          END IF
+          !!!interpolate the far lines sum onto the near lines
+          CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+          !!!add on the far lines to the near lines
+          DO iFr = i1,i2
+            daK(iFr) = daK(iFr) + daTemp(iFr-i1+1)
+          END DO
         END IF
 
         i1 = i1 + iOneCmFine
@@ -3515,9 +3342,7 @@ CONTAINS
     ENDDO
 
 ! now make sure everything > 0
-    DO iFr = 1,kMaxPts
-        daK(iFr) = max(0.0d0,daK(iFr))
-    END DO
+    daK = max(0.0d0,daK)
 
     RETURN
     end SUBROUTINE compute_lte_spectra_fast
@@ -3617,7 +3442,7 @@ CONTAINS
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
 
 ! local variables
-    INTEGER :: iFr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
+    INTEGER :: iFr,iPr,iLay,iDp,iL,iaRadLayer(kProfLayer),iHigh,iLmodKProfLayer
     REAL :: raaLayTrans(kMaxPts,kProfLayer),rPlanck,rMPTemp
     REAL :: raaEmission(kMaxPts,kProfLayer),rCos,raInten2(kMaxPts)
     REAL :: raaLay2Sp(kMaxPts,kProfLayer),rCO2
@@ -3663,44 +3488,41 @@ CONTAINS
         CALL DoSTOP
     END IF
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-        iL = iaRadLayer(iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+      iL = iaRadLayer(iLay)
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
 
     iCloudLayerTop = -1
     iCloudLayerBot = -1
     IF (raaScatterPressure(iAtm,1) > 0) THEN
-        write(kStdWarn,*) 'add absorptive cloud >- ',raaScatterPressure(iAtm,1)
-        write(kStdWarn,*) 'add absorptive cloud <- ',raaScatterPressure(iAtm,2)
-        write(kStdWarn,*) 'cloud params dme,iwp = ',raScatterDME(iAtm), &
-        raScatterIWP(iAtm)
-        CALL FIND_ABS_ASY_EXT(caaScatter(iAtm),raScatterDME(iAtm), &
+      write(kStdWarn,*) 'add absorptive cloud >- ',raaScatterPressure(iAtm,1)
+      write(kStdWarn,*) 'add absorptive cloud <- ',raaScatterPressure(iAtm,2)
+      write(kStdWarn,*) 'cloud params dme,iwp = ',raScatterDME(iAtm),raScatterIWP(iAtm)
+      CALL FIND_ABS_ASY_EXT(caaScatter(iAtm),raScatterDME(iAtm), &
         raScatterIWP(iAtm), &
         raaScatterPressure(iAtm,1),raaScatterPressure(iAtm,2), &
         raPressLevels,raFreq,iaRadLayer,iNumLayer, &
         raExtinct,raAbsCloud,raAsym,iCloudLayerTop,iCLoudLayerBot)
-        write(kStdWarn,*) 'first five cloud extinctions depths are : '
-        write(kStdWarn,*) (raExtinct(iL),iL=1,5)
+      write(kStdWarn,*) 'first five cloud extinctions depths are : '
+      write(kStdWarn,*) (raExtinct(iL),iL=1,5)
     END IF
 
 ! note raVT1 is the array that has the interpolated bottom and top temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
 
-    DO iFr=1,kMixFilRows
-        raVT1(iFr)=raVTemp(iFr)
-    END DO
+    raVT1 = raVTemp
 
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL=iaRadLayer(1)
@@ -3719,9 +3541,9 @@ CONTAINS
 ! find the highest layer that we need to output radiances for
     iHigh = -1
     DO iLay=1,iNp
-        IF (iaOp(iLay) > iHigh) THEN
-            iHigh=iaOp(iLay)
-        END IF
+      IF (iaOp(iLay) > iHigh) THEN
+        iHigh=iaOp(iLay)
+      END IF
     END DO
     write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
     write(kStdWarn,*) 'from',iaRadLayer(1),' to',iaRadLayer(iNumLayer)
@@ -3730,115 +3552,96 @@ CONTAINS
 ! note while computing downward solar/ thermal radiation, have to be careful
 ! for the BOTTOMMOST layer!!!!!!!!!!!
     DO iLay = 1,1
-        iL   = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = raaAbs(iFr,iL)*rFracBot + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracBot + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay) = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)*rFracBot/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL   = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracBot + raExtinct
+        !raaLayTrans(:,iLay)= raaAbs(:,iL)*rFracBot + raAbsCloud
+        raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay) = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracBot/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
 
     DO iLay = 2,iNumLayer-1
-        iL   = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay)  = raaAbs(iFr,iL) + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay) = raaAbs(iFr,iL) + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay)  = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay)  = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL   = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay)  = raaAbs(:,iL) + raExtinct
+        !raaLayTrans(:,iLay) = raaAbs(:,iL) + raAbsCloud
+        raaLayTrans(:,iLay)  = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay)  = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
 
     DO iLay = iNumLayer,iNumLayer
-        iL = iaRadLayer(iLay)
-        rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = raaAbs(iFr,iL)*rFracTop + raExtinct(iFr)
-            !             raaLayTrans(iFr,iLay)= raaAbs(iFr,iL)*rFracTop + raAbsCloud(iFr)
-                raaLayTrans(iFr,iLay) = exp(-raaLayTrans(iFr,iLay)/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        ELSE
-            DO iFr = 1,kMaxPts
-                raaLayTrans(iFr,iLay) = exp(-raaAbs(iFr,iL)*rFracTop/rCos)
-                raaEmission(iFr,iLay) = 0.0
-            END DO
-        END IF
+      iL = iaRadLayer(iLay)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracTop + raExtinct
+        !raaLayTrans(:,iLay)= raaAbs(:,iL)*rFracTop + raAbsCloud
+        raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
+        raaEmission(:,iLay) = 0.0
+      ELSE
+        raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracTop/rCos)
+        raaEmission(:,iLay) = 0.0
+      END IF
     END DO
           
-    DO iFr=1,kMaxPts
     ! initialize the solar and thermal contribution to 0
-        raSun(iFr)     = 0.0
-        raThermal(iFr) = 0.0
-        raInten(iFr)   = ttorad(raFreq(iFr),rTSurf)
-        raSurface(iFr) = raInten(iFr)
-    END DO
+    raSun     = 0.0
+    raThermal = 0.0
+    raInten   = ttorad(raFreq,rTSurf)
+    raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
 ! note iNLTEStart = kProfLayer + 1, unless NLTE computations done!
 ! so usually only the usual LTE computations are done!!
     IF (iNLTEStart > kProfLayer) THEN
-        iSTopNormalRadTransfer = iNumLayer  !!!normal rad transfer everywhere
-        write (kStdErr,*) 'Normal rad transfer .... no NLTE'
-        write (kStdErr,*) 'stop normal radtransfer at',iSTopNormalRadTransfer
-        write (kStdErr,*) 'should be calling rad_trans_SAT_LOOK_DOWN'
-        CALL DoStop
+      iSTopNormalRadTransfer = iNumLayer  !!!normal rad transfer everywhere
+      write (kStdErr,*) 'Normal rad transfer .... no NLTE'
+      write (kStdErr,*) 'stop normal radtransfer at',iSTopNormalRadTransfer
+      write (kStdErr,*) 'should be calling rad_trans_SAT_LOOK_DOWN'
+      CALL DoStop
     ELSE
-        iLay = 1
-        987 CONTINUE
-        iL=iaRadLayer(iLay)
-        iLModKprofLayer = mod(iL,kProfLayer)
-        IF (iLModKprofLayer == 0) THEN
-            iLModKprofLayer = kProfLayer
-        END IF
-        IF ((iLModKprofLayer < iNLTEStart) .AND. (iLay < iNumLayer)) THEN
-            iLay = iLay + 1
-            GOTO 987
-        END IF
-        iSTopNormalRadTransfer = iLay
-        write (kStdWarn,*) 'normal rad transfer only in lower atm.. then NLTE'
-        write (kStdWarn,*) 'stop normal radtransfer at ',iStopNormalRadTransfer
+      iLay = 1
+   987 CONTINUE
+      iL=iaRadLayer(iLay)
+      iLModKprofLayer = mod(iL,kProfLayer)
+      IF (iLModKprofLayer == 0) THEN
+        iLModKprofLayer = kProfLayer
+      END IF
+      IF ((iLModKprofLayer < iNLTEStart) .AND. (iLay < iNumLayer)) THEN
+        iLay = iLay + 1
+        GOTO 987
+      END IF
+      iSTopNormalRadTransfer = iLay
+      write (kStdWarn,*) 'normal rad transfer only in lower atm.. then NLTE'
+      write (kStdWarn,*) 'stop normal radtransfer at ',iStopNormalRadTransfer
     END IF
 
     DO iLay=1,iNumLayer
-        iL=iaRadLayer(iLay)
-    ! first get the Mixed Path temperature for this radiating layer
-        rMPTemp=raVT1(iL)
-        iLModKprofLayer = mod(iL,kProfLayer)
-        IF (iLModKprofLayer == 0) THEN
-            iLModKprofLayer = kProfLayer
-        END IF
-        IF (iLModKprofLayer < iNLTEStart) THEN
-        ! ormal, no LTE emission stuff
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rMPTemp)
-                raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
-            END DO
-        ELSEIF (iLModKprofLayer >= iNLTEStart) THEN
-        ! ew; LTE emission stuff
-            DO iFr=1,kMaxPts
-                rPlanck = ttorad(raFreq(iFr),rMPTemp) * raaPlanckCoeff(iFr,iL)
-                raaEmission(iFr,iLay) = (1.0-raaLayTrans(iFr,iLay))*rPlanck
-            END DO
-        END IF
+      iL=iaRadLayer(iLay)
+      ! first get the Mixed Path temperature for this radiating layer
+      rMPTemp=raVT1(iL)
+      iLModKprofLayer = mod(iL,kProfLayer)
+      IF (iLModKprofLayer == 0) THEN
+        iLModKprofLayer = kProfLayer
+      END IF
+      IF (iLModKprofLayer < iNLTEStart) THEN
+        ! normal, no LTE emission stuff
+        raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*ttorad(raFreq,rMPTemp)
+      ELSEIF (iLModKprofLayer >= iNLTEStart) THEN
+        ! new; LTE emission stuff
+        raaEmission(:,iLay) = ttorad(raFreq,rMPTemp) * raaPlanckCoeff(:,iL)
+        raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raaEmission(:,iLay)
+      END IF
     END DO
 
 ! now go from top of atmosphere down to the surface to compute the total
@@ -3846,17 +3649,17 @@ CONTAINS
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels,iNumLayer, &
         iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
 
 ! see if we have to add on the solar contribution
 ! this figures out the solar intensity at the ground
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
     ELSE
         write(kStdWarn,*) 'no solar backgnd to calculate'
@@ -3865,11 +3668,8 @@ CONTAINS
     write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1), &
     raSunRefl(1)
 
-    DO iFr=1,kMaxPts
-        raInten(iFr)=raSurface(iFr)*raUseEmissivity(iFr)+ &
-        raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-        raSun(iFr)*raSunRefl(iFr)
-    END DO
+    raInten = raSurface*raUseEmissivity+raThermal*(1.0-raUseEmissivity)*rThermalRefl+ &
+                 raSun*raSunRefl
 
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
@@ -3878,101 +3678,93 @@ CONTAINS
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! first do the bottommost layer (could be fractional)
     DO iLay=1,1
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL=iaRadLayer(iLay)
+      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp=raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
-                CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this bottom layer
-        DO iFr=1,kMaxPts
-            raInten(iFr)=raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
+          CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
         END DO
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      END IF
+
+      ! now do the radiative transfer thru this bottom layer
+      raInten=raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
+      !IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
     DO iLay=2,iHigh-1
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
-    ! see if this mixed path layer is in the list iaOp to be output
-    ! since we might have to do fractions!
-        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-        IF (iDp > 0) THEN
-            write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-            DO iFr=1,iDp
-                CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+      iL=iaRadLayer(iLay)
+      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp=raVT1(iL)
+      ! see if this mixed path layer is in the list iaOp to be output
+      ! since we might have to do fractions!
+      CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+      IF (iDp > 0) THEN
+        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+        DO iPr=1,iDp
+          CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                 raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                 raSun,-1,iNumLayer,rFracTop,rFracBot, &
                 iProfileLayers,raPressLevels, &
                 iNLTEStart,raaPlanckCoeff)
                 CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-            END DO
-        END IF
-
-    ! now do the radiative transfer thru this complete layer
-        DO iFr=1,kMaxPts
-            raInten(iFr)=raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
         END DO
+      END IF
 
-    !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
+      ! now do the radiative transfer thru this complete layer
+      raInten=raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
+      !        IF (iLay .EQ. iSTopNormalRadTransfer) GOTO 777
 
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the topmost layer (could be fractional)
-    777 CONTINUE
+  777 CONTINUE
     DO iLay=iHigh,iHigh
-        iL=iaRadLayer(iLay)
-        rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-        rMPTemp=raVT1(iL)
+      iL=iaRadLayer(iLay)
+      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp=raVT1(iL)
 
-        IF (iUpper >= 1) THEN
+      IF (iUpper >= 1) THEN
         !!! need to compute stuff at extra layers (100-200 km)
-            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-            IF (iDp >= 1) THEN
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+        IF (iDp >= 1) THEN
 
-                write(kStdWarn,*) 'Should output',iDp,' rad at',iLay,' rad layer'
-                write(kStdWarn,*) 'This is the top of the usual AIRS atmosphere'
-                write(kStdWarn,*) '   you have iDoUpperATM > 0'
-                write(kStdWarn,*) 'kCARTA will compute rad thru stratosphere'
-                write(kStdWarn,*) 'and output stuff into the blah_UA file'
-                write(kStdWarn,*) 'Finally kCARTA will output stuff at the TOP of'
-                write(kStdWarn,*) 'stratosphere into both this and the UA file'
+          write(kStdWarn,*) 'Should output',iDp,' rad at',iLay,' rad layer'
+          write(kStdWarn,*) 'This is the top of the usual AIRS atmosphere'
+          write(kStdWarn,*) '   you have iDoUpperATM > 0'
+          write(kStdWarn,*) 'kCARTA will compute rad thru stratosphere'
+          write(kStdWarn,*) 'and output stuff into the blah_UA file'
+          write(kStdWarn,*) 'Finally kCARTA will output stuff at the TOP of'
+          write(kStdWarn,*) 'stratosphere into both this and the UA file'
 
-            ! o radiative transfer thru this layer
-                DO iFr=1,kMaxPts
-                    raInten(iFr) = &
-                    raaEmission(iFr,iLay)+raInten(iFr)*raaLayTrans(iFr,iLay)
-                END DO
+          !do radiative transfer thru this layer
+          raInten = raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
 
-            ! ow do complete rad transfer thru upper part of atmosphere
-                CALL UpperAtmRadTrans(raInten,raFreq,raLayAngles(MP2Lay(iL)), &
+          !now do complete rad transfer thru upper part of atmosphere
+          CALL UpperAtmRadTrans(raInten,raFreq,raLayAngles(MP2Lay(iL)), &
                 iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
                 raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iDumpAllUARads)
-            !!! forget about interpolation thru the layers, just dump out the
-            !!! radiance at the top of stratosphere (120-200 km)
+          !!! forget about interpolation thru the layers, just dump out the
+          !!! radiance at the top of stratosphere (120-200 km)
 
-                write(kStdWarn,*) 'finally outputting radiances at TOTAL Complete TOA into'
-                write(kStdWarn,*) 'usual binary file (iLay = ',iLay,')'
+           write(kStdWarn,*) 'finally outputting radiances at TOTAL Complete TOA into'
+           write(kStdWarn,*) 'usual binary file (iLay = ',iLay,')'
 
-                DO iFr=1,iDp
-                    CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-                END DO
-            END IF
+           DO iPr=1,iDp
+             CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+           END DO
+          END IF
         END IF
 
         IF (iUpper < 1) THEN
@@ -3980,19 +3772,19 @@ CONTAINS
         !!! so just do usual stuff
         !!! see if this mixed path layer is in the list iaOp to be output
         !!! since we might have to do fractions!
-            CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
-            IF (iDp > 0) THEN
-                write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
-                DO iFr=1,iDp
-                    CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
+        CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
+        IF (iDp > 0) THEN
+          write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer'
+          DO iPr=1,iDp
+            CALL RadianceInterPolate(1,raOutFrac(iPr),raFreq, &
                     raVTemp,rCos,iLay,iaRadLayer,raaAbs,raInten,raInten2, &
                     raSun,-1,iNumLayer,rFracTop,rFracBot, &
                     iProfileLayers,raPressLevels, &
                     iNLTEStart,raaPlanckCoeff)
-                    CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
-                END DO
-            END IF
+            CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
+          END DO
         END IF
+      END IF
 
     !c no need to do radiative transfer thru this layer
     !c        DO iFr=1,kMaxPts
@@ -4077,55 +3869,53 @@ CONTAINS
 
 ! iUAirLA = -1 for usual lower atm (so can do jacs), +1 for extra upper atm (so no jacs)
     IF (i_NLTEFile_TYPE < 300) THEN
-        iUAoriLA = -1   !! lower atm
+      iUAoriLA = -1   !! lower atm
     ELSEIF (i_NLTEFile_TYPE >= 300) THEN
-        iUAoriLA = +1   !! upper atm
+      iUAoriLA = +1   !! upper atm
     END IF
 
     iIOUN = kCompUnit
     CALL CompFileName(i_NLTEFile_TYPE,iGasID,rFileStartFr,iTag,iActualTag,caFName)
     CALL rdcomp(caFName,iIOUN,iFileGasID,dSfreq,dFStep,iNPts,iNLay, &
-    iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
-    daaaKX,daaUX)
+      iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
+      daaaKX,daaUX)
 
 ! check that the file has the data for the correct gas
     IF (iFileGasID /= iGasID) THEN
-        iErr=1
-        WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        1000 FORMAT('Error! file : ',/,A120,/, &
-        'contains data for GasID ',I3,' not desired GasID ',I3)
-        CALL DoSTOP
+      iErr=1
+      WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
+ 1000 FORMAT('Error! file : ',/,A120,/, 'contains data for GasID ',I3,' not desired GasID ',I3)
+      CALL DoSTOP
     END IF
 
 ! check that the data file has the right number of layers
     IF (iNLay /= kMaxLayer) THEN
-        iErr=1
-        WRITE(kStdWarn,1010) caFName,iNLay,kMaxLayer
-        1010 FORMAT('WARNING NLTE FastComp file : ',/,A120,/, &
-        'contains data for ',i3,' layers but kMaxLayer = ',I3)
+      iErr=1
+      WRITE(kStdWarn,1010) caFName,iNLay,kMaxLayer
+ 1010 FORMAT('WARNING NLTE FastComp file : ',/,A120,/, 'contains data for ',i3,' layers but kMaxLayer = ',I3)
     !        CALL DoSTOP
     END IF
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF ((kJacobian >= 0) .AND. (iUAoriLA == -1)) THEN
-    !! can do jacs for usual 100 LA layers, with default CO2 profile
-        CALL GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+      !! can do jacs for usual 100 LA layers, with default CO2 profile
+      CALL GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn, &
         daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers,iSPlinetype)
     ELSEIF ((kJacobian >= 0) .AND. (iUAoriLA == +1)) THEN
-    !! cannot do jacs for UA, so just do this
-        iLowerOrUpper = +2
-        CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+      !! cannot do jacs for UA, so just do this
+      iLowerOrUpper = +2
+      CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
         pProf,iProfileLayers,iSplineType,iLowerOrUpper)
     ELSEIF ((kJacobian < 0) .AND. (iUAoriLA == -1)) THEN
-    !! no jacs, usual LA
-        iLowerOrUpper = -1
-        iLowerOrUpper = +3
-    !        CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx,
-    !     $         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,
-    !     $         pProf,iProfileLayers,iSplineType,iLowerOrUpper)
-        CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+      !! no jacs, usual LA
+      iLowerOrUpper = -1
+      iLowerOrUpper = +3
+      !CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx,
+      ! $         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,
+      ! $         pProf,iProfileLayers,iSplineType,iLowerOrUpper)
+      CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
         pProf,iProfileLayers,iSplineType,iLowerOrUpper, &
         iaP1,iaP2,raP1,raP2, &
@@ -4134,30 +3924,30 @@ CONTAINS
         iaQ11,iaQ12,raQ11,raQ12, &
         iaQ21,iaQ22,raQ21,raQ22)
     ELSEIF ((kJacobian < 0) .AND. (iUAoriLA == +1)) THEN
-    !! no jacs, UA
-        iLowerOrUpper = +2
-        CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
+      !! no jacs, UA
+      iLowerOrUpper = +2
+      CALL GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
         raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
         pProf,iProfileLayers,iSplineType,iLowerOrUpper)
     END IF
 
 ! because of the iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
     IF (kJacobian >= 0) THEN
-        IF (iDoDQ > 0) THEN
-            IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-                CALL FinalAmtDeriv(daaDQ,iKtype)
-            END IF
+      IF (iDoDQ > 0) THEN
+        IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
+          CALL FinalAmtDeriv(daaDQ,iKtype)
         END IF
-        IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. &
+      END IF
+      IF ((kActualJacs == -1) .OR. (kActualJacs == 30) .OR. & 
         (kActualJacs == 32) .OR. &
         (kActualJacs == 100) .OR. (kActualJacs == 102)) THEN
-            CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
-        END IF
+        CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
+      END IF
     END IF
 
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
-        CALL RaisePower(daaAbsCoeff)
+      CALL RaisePower(daaAbsCoeff)
     END IF
 
 ! now compute
@@ -4165,18 +3955,15 @@ CONTAINS
 !    planck coeff  = ref    gas amount * abs coeff
 
     IF ((i_NLTEFile_TYPE >= 100) .AND. (i_NLTEFile_TYPE < 200)) THEN
-        CALL AmtScale(daaAbsCoeff,raPAmt)
+      CALL AmtScale(daaAbsCoeff,raPAmt)
     ELSEIF ((i_NLTEFile_TYPE >= 300) .AND. (i_NLTEFile_TYPE < 400)) THEN
-        CALL AmtScale(daaAbsCoeff,raPAmt)
+      CALL AmtScale(daaAbsCoeff,raPAmt)
     ELSEIF ((i_NLTEFile_TYPE >= 200) .AND. (i_NLTEFile_TYPE < 300)) THEN
-        CALL AmtScale(daaAbsCoeff,raRAmt)
+      CALL AmtScale(daaAbsCoeff,raRAmt)
     ELSEIF ((i_NLTEFile_TYPE >= 400) .AND. (i_NLTEFile_TYPE < 500)) THEN
-        CALL AmtScale(daaAbsCoeff,raRAmt)
+      CALL AmtScale(daaAbsCoeff,raRAmt)
     END IF
 
-!      do iJ = 1,kProfLayer
-!        print *,i_NLTEFile_TYPE,iJ,raPAmt(iJ),raRAmt(iJ),raPAmt(iJ)/raRAmt(iJ)
-!      end do
 
 ! NOTE I have not added the co2 chi functions here as they *should* be in
 ! the kCompressed Database produced by running kCARTA with these chi fcns on

@@ -5,6 +5,7 @@
 MODULE rad_flux
 
 USE basic_common
+USE ttorad_common
 USE spline_and_sort_and_common
 USE clear_scatter_basic
 USE rad_angles
@@ -553,7 +554,7 @@ CONTAINS
 ! initialize the solar and thermal contribution to 0
     raSun     = 0.0
     raThermal = 0.0
-    raUp      = rattorad(raFreq,rTSurf)
+    raUp      = ttorad(raFreq,rTSurf)
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
@@ -601,7 +602,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to instrument
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -621,7 +622,7 @@ CONTAINS
           rCos = 3.0/5.0
           rMPTemp = raVT1(iL)
           raAngleTrans    = exp(-raaAbs(:,iL)*(1-rFracTop)/rCos)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raDown = raAngleEmission+raDown*raAngleTrans
         END DO
@@ -635,7 +636,7 @@ CONTAINS
           rCos = 3.0/5.0
           rMPTemp = raVT1(iL)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCos)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raDown = raAngleEmission+raDown*raAngleTrans
         END DO
@@ -645,7 +646,7 @@ CONTAINS
           rCos = 3.0/5.0
           rMPTemp = raVT1(iL)
           raAngleTrans    = exp(-raaAbs(:,iL)*(1-rFracTop)/rCos)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raDown = raAngleEmission+raDown*raAngleTrans
         END DO
@@ -730,7 +731,7 @@ CONTAINS
         DO iLay = iNumLayer,iNumLayer
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracTop/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp = raAngleEmission+raTemp*raAngleTrans
@@ -740,7 +741,7 @@ CONTAINS
         DO iLay = iNumLayer-1,2,-1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp = raAngleEmission+raTemp*raAngleTrans
@@ -750,7 +751,7 @@ CONTAINS
         DO iLay = 1,1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp = raAngleEmission+raTemp*raAngleTrans
@@ -780,7 +781,7 @@ CONTAINS
       DO iLay = 1,1
         iL = iaRadLayer(iLay)
         rMPTemp = raVT1(iL)
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp = raAngleEmission+raTemp*raAngleTrans
@@ -790,7 +791,7 @@ CONTAINS
       DO iLay = 2,iNumLayer-1
         iL = iaRadLayer(iLay)
         rMPTemp = raVT1(iL)
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp = raAngleEmission+raTemp*raAngleTrans
@@ -800,7 +801,7 @@ CONTAINS
       DO iLay = iNumLayer,iNumLayer
         iL = iaRadLayer(iLay)
         rMPTemp = raVT1(iL)
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleTrans    = exp(-raaAbs(:,iL)*rFracTop/rCosAngle)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp = raAngleEmission+raTemp*raAngleTrans
@@ -1073,7 +1074,7 @@ CONTAINS
     DO iLay = 1,iNumLayer
       iL      = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
-      raaRad(:,iL) = rattorad(raFreq,rMPTemp)
+      raaRad(:,iL) = ttorad(raFreq,rMPTemp)
     END DO
 
     IF (kFlux == 2) THEN
@@ -1090,7 +1091,7 @@ CONTAINS
     ! initialize the solar and thermal contribution to 0
     raSun = 0.0
     raThermal = 0.0
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -1125,7 +1126,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to instrument
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -1797,7 +1798,7 @@ CONTAINS
     raSun = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -1833,7 +1834,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to ground
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -2276,7 +2277,7 @@ CONTAINS
     DO iLay = 1,iNumLayer
       iL      = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
-      raaRad(:,iL) = rattorad(raFreq,rMPTemp)
+      raaRad(:,iL) = ttorad(raFreq,rMPTemp)
     END DO
 
     IF (kFlux == 2) THEN
@@ -2294,7 +2295,7 @@ CONTAINS
     raSun = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone  =  =  eqn 4.26 of Genln2 manual
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -2329,7 +2330,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to instrument
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -2786,7 +2787,7 @@ CONTAINS
     ! initialize the solar and thermal contribution to 0
     raSun = 0.0
     raThermal = 0.0
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -2822,7 +2823,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to ground
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -3296,7 +3297,7 @@ CONTAINS
     DO iLay = 1,iNumLayer
       iL      = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
-      raaRad(:,iL) = rattorad(raFreq,rMPTemp)
+      raaRad(:,iL) = ttorad(raFreq,rMPTemp)
     END DO
 
     IF (kFlux == 2) THEN
@@ -3314,7 +3315,7 @@ CONTAINS
     raSun = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone  =  =  eqn 4.26 of Genln2 manual
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
  
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -3349,7 +3350,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to instrument
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
           
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -4198,7 +4199,7 @@ CONTAINS
     raSun = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -4234,7 +4235,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to instrument
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -4254,7 +4255,7 @@ CONTAINS
           rCos = 3.0/5.0
           rMPTemp = raVT1(iL)
           raAngleTrans = exp(-raaAbs(:,iL)*(1-rFracTop)/rCos)
-          raPlanck = rattorad(raFreq,rMPTemp)
+          raPlanck = ttorad(raFreq,rMPTemp)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raDown = raAngleEmission+raDown*raAngleTrans
         END DO
@@ -4267,7 +4268,7 @@ CONTAINS
             rCos = 3.0/5.0
             rMPTemp = raVT1(iL)
             raAngleTrans = exp(-raaAbs(:,iL)/rCos)
-            raPlanck = rattorad(raFreq,rMPTemp)
+            raPlanck = ttorad(raFreq,rMPTemp)
             raAngleEmission = (1.0-raAngleTrans)*raPlanck
             raDown = raAngleEmission+raDown*raAngleTrans
           END DO
@@ -4277,7 +4278,7 @@ CONTAINS
             rCos = 3.0/5.0
             rMPTemp = raVT1(iL)
             raAngleTrans = exp(-raaAbs(:,iL)*(1-rFracTop)/rCos)
-            raPlanck = rattorad(raFreq,rMPTemp)
+            raPlanck = ttorad(raFreq,rMPTemp)
             raAngleEmission = (1.0-raAngleTrans)*raPlanck
             raDown = raAngleEmission+raDown*raAngleTrans
           END DO
@@ -4363,7 +4364,7 @@ CONTAINS
         DO iLay = iNumLayer,iNumLayer
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracTop/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -4374,7 +4375,7 @@ CONTAINS
         DO iLay = iNumLayer-1,2,-1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -4384,7 +4385,7 @@ CONTAINS
         DO iLay = 1,1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -4414,7 +4415,7 @@ CONTAINS
       DO iLay = 1,1
         iL = iaRadLayer(iLay)
         rMPTemp = raVT1(iL)
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -4424,7 +4425,7 @@ CONTAINS
       DO iLay = 2,iNumLayer-1
         iL = iaRadLayer(iLay)
         rMPTemp = raVT1(iL)
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -4434,7 +4435,7 @@ CONTAINS
       DO iLay = iNumLayer,iNumLayer
         iL = iaRadLayer(iLay)
         rMPTemp = raVT1(iL)
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleTrans    = exp(-raaAbs(:,iL)*rFracTop/rCosAngle)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -4799,7 +4800,7 @@ CONTAINS
     raSun = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone = =  eqn 4.26 of Genln2 manual
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -4836,7 +4837,7 @@ CONTAINS
       iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to ground
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 !    print *,'0X',raFreq(1),raThermal(1),raUseEmissivity(1),raUp(1),raDown(1)
 

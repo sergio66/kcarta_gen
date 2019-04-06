@@ -5,6 +5,7 @@
 MODULE rad_misc
 
 USE basic_common
+USE ttorad_common
 USE rad_angles
 USE spline_and_sort_and_common
 USE clear_scatter_basic
@@ -345,7 +346,7 @@ CONTAINS
       write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
       rSunTemp = kSunTemp
       !compute the Plank radiation from the sun
-      raSun = rattorad(raFreq,rSunTemp)
+      raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       IF (raFreq(1) >= 605) THEN
         write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
@@ -356,7 +357,7 @@ CONTAINS
         write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
         rSunTemp = kSunTemp
         ! compute the Plank radiation from the sun
-        raSun = rattorad(raFreq,rSunTemp)
+        raSun = ttorad(raFreq,rSunTemp)
       END IF
     END IF
 
@@ -450,7 +451,7 @@ CONTAINS
         rMPTemp = raVT1(iL)
         raAngleTrans    = raaAbs(:,iL)*rFracBot
         raAngleTrans    = exp(-raAngleTrans/cos(raFreqAngle))
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp          = raAngleEmission + raTemp*raAngleTrans
       END DO
@@ -458,7 +459,7 @@ CONTAINS
         iL = iaRadLayer(iLay)
         rMPTemp = raVT1(iL)
         raAngleTrans    = exp(-raaAbs(:,iL)/cos(raFreqAngle))
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp          = raAngleEmission + raTemp*raAngleTrans
       END DO
@@ -468,7 +469,7 @@ CONTAINS
         rMPTemp = raVT1(iL)
         raAngleTrans    = raaAbs(:,iL)
         raAngleTrans    = exp(-raAngleTrans/cos(raFreqAngle))
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp          = raAngleEmission + raTemp*raAngleTrans
       END DO
@@ -477,7 +478,7 @@ CONTAINS
         rMPTemp = raVT1(iL)
         raAngleTrans    = raaAbs(:,iL)*rFracBot
         raAngleTrans    = exp(-raAngleTrans/cos(raFreqAngle))
-        raPlanck        = rattorad(raFreq,rMPTemp)
+        raPlanck        = ttorad(raFreq,rMPTemp)
         raAngleEmission = (1.0-raAngleTrans)*raPlanck
         raTemp          = raAngleEmission + raTemp*raAngleTrans
       END DO

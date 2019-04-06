@@ -5,6 +5,7 @@
 MODULE clear_scatter_basic
 
 USE basic_common
+USE ttorad_common
 USE spline_and_sort_and_common
 USE s_writefile
 USE s_misc
@@ -97,12 +98,12 @@ CONTAINS
       !!! >>>>>>>>>>>>>>> this is basically exp in tau <<<<<<<<<<<<<<<<<<<<<<
       IF (rFrac >= 0.9999) THEN
         raBeta = 1/raaAbs(:,iL) * rBooga
-        raTT   = rattorad(raFreq,TEMP(iBeta))/(1 + raBeta*rCos)
+        raTT   = ttorad(raFreq,TEMP(iBeta))/(1 + raBeta*rCos)
         raZeta = (raInten - raTT) * exp(-raaAbs(:,iL)/rCos)
         raInten = raZeta + raTT * exp(raaAbs(:,iL) * raBeta)
       ELSE
         raBeta = 1/(raaAbs(:,iL)*rFrac) * rBooga
-        raTT   = rattorad(raFreq,TEMP(iBeta))/(1 + raBeta*rCos)
+        raTT   = ttorad(raFreq,TEMP(iBeta))/(1 + raBeta*rCos)
         raZeta = (raInten - raTT) * exp(-raaAbs(:,iL)*rFrac/rCos)
         raInten = raZeta + raTT * exp(raaAbs(:,iL)*rFrac * raBeta)
       END IF
@@ -123,8 +124,8 @@ CONTAINS
       IF (rFrac >= 1.0000) gwak = 1.0
       IF (rFrac < 0.9999) gwak = rFrac
 
-      raPlanck1 = rattorad(raFreq,TEMP(iBeta))
-      raPlanck0 = rattorad(raFreq,TEMP(iBetaP1))
+      raPlanck1 = ttorad(raFreq,TEMP(iBeta))
+      raPlanck0 = ttorad(raFreq,TEMP(iBetaP1))
       raTau0 = (raaAbs(:,iL)*gwak)/rCos
       WHERE (ratau0 < 0.001)
         raInten = raInten*(1-raTau0) + ratau0*0.5*(raPLANCK0+raPLANCK1)
@@ -206,12 +207,12 @@ CONTAINS
       !!!either exp temperature dependace or none; rBooga carries this info
       IF (rFrac >= 0.9999) THEN
         raBeta = 1/raaAbs(:,iL) * rBooga
-        raTT   = rattorad(raFreq,TEMP(iBeta))/(raBeta*mu - 1)
+        raTT   = ttorad(raFreq,TEMP(iBeta))/(raBeta*mu - 1)
         raZeta = exp(-raaAbs(:,iL)/mu) * exp(raBeta*raaAbs(:,iL)) - 1.0
         raInten = raInten*exp(-raaAbs(:,iL)/mu) + raTT*raZeta
       ELSE
         raBeta = 1/(raaAbs(:,iL)*rFrac) * rBooga
-        raTT   = rattorad(raFreq,TEMP(iBeta))/(raBeta*mu - 1)
+        raTT   = ttorad(raFreq,TEMP(iBeta))/(raBeta*mu - 1)
         raZeta = exp(-raaAbs(:,iL)*rFrac/mu) * exp(raBeta*raaAbs(:,iL)*rFrac) - 1.0
         raInten = raInten*exp(-raaAbs(:,iL)*rFrac/mu) + raTT*raZeta
      END IF
@@ -233,8 +234,8 @@ CONTAINS
       IF (rFrac >= 1.0000) gwak = 1.0
       IF (rFrac < 0.9999) gwak = rFrac
 
-      raPlanck1 = rattorad(raFreq,TEMP(iBeta))
-      raPlanck0 = rattorad(raFreq,TEMP(iBetaM1))
+      raPlanck1 = ttorad(raFreq,TEMP(iBeta))
+      raPlanck0 = ttorad(raFreq,TEMP(iBetaM1))
       raTau0 = (raaAbs(:,iL)*gwak)/rCos
       WHERE (ratau0 < 0.001)
         raInten = raInten*(1-raTau0) + ratau0*0.5*(raPLANCK0+raPLANCK1)
@@ -1362,7 +1363,7 @@ CONTAINS
       write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
       rSunTemp = kSunTemp
       !compute the Plank radiation from the sun
-      raSun = rattorad(raFreq,rSunTemp)
+      raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       IF (raFreq(1) >= 605) THEN
         write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
@@ -1373,7 +1374,7 @@ CONTAINS
         write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
         rSunTemp = kSunTemp
         !compute the Plank radiation from the sun
-        raSun = rattorad(raFreq,rSunTemp)
+        raSun = ttorad(raFreq,rSunTemp)
       END IF
     END IF
 
@@ -1753,7 +1754,7 @@ CONTAINS
         rT = interpTemp(iProfileLayers,raPressLevels,raVTemp,rFrac_T,-1,iL)
       END IF
       write(kStdWarn,*)'MixTemp, Interp Temp=',raVTemp(iL),rT
-      raPlanck = rattorad(raFreq,rT)
+      raPlanck = ttorad(raFreq,rT)
       raTrans  = exp(-raaAbs(:,iL)*rFrac_k/rCos)
       raEmis   = (1.0-raTrans)*raPlanck
       raInten2 = raEmis+raInten*raTrans
@@ -1880,12 +1881,12 @@ CONTAINS
       ! note iNLTEStart = kProfLayer + 1, unless NLTE computations done!
       ! so usually only the usual LTE computations are done!!
       IF (iNLTEStart > kProfLayer) THEN    !!!normal, no emission stuff
-        raPlanck = rattorad(raFreq,rT)
+        raPlanck = ttorad(raFreq,rT)
         raTrans = exp(-raaAbs(:,iL)*rFrac_k/rCos)
         raEmis  = (1.0-raTrans)*raPlanck
         raInten2 = raEmis + raInten*raTrans
       ELSE IF (iNLTEStart <= kProfLayer) THEN
-        raPlanck = rattorad(raFreq,rT)
+        raPlanck = ttorad(raFreq,rT)
         raTrans = exp(-raaAbs(:,iL)*rFrac_k/rCos)
         raEmis = (1.0-raTrans)*raPlanck*raaPlanckCoeff(:,iL)
         raInten2 = raEmis + raInten*raTrans
@@ -3445,12 +3446,12 @@ CONTAINS
 
       raTrans = raaUpperSumNLTEGasAbCoeff(:,iL)/rMu
       raTrans = exp(-raTrans)
-      raEmission = (1.0 - raTrans) * raaUpperPlanckCoeff(:,iL) * rattorad(raFreq,raUpperTemp(iL))
+      raEmission = (1.0 - raTrans) * raaUpperPlanckCoeff(:,iL) * ttorad(raFreq,raUpperTemp(iL))
       raInten = raEmission + raInten*raTrans
 
       daTrans = (raaUpperSumNLTEGasAbCoeff(:,iL)*1.0d0/(rMu*1.0d0))
       daTrans = exp(-daTrans)
-      daEmission = (raaUpperPlanckCoeff(:,iL)*1.0d0) * dble(rattorad(raFreq,raUpperTemp(iL))*1.0d0)*(1.0d0 - daTrans)
+      daEmission = (raaUpperPlanckCoeff(:,iL)*1.0d0) * dble(ttorad(raFreq,raUpperTemp(iL))*1.0d0)*(1.0d0 - daTrans)
       daInten = daEmission + daInten*daTrans
 
       raInten = sngl(daInten)
@@ -3466,12 +3467,12 @@ CONTAINS
     DO iL = iUpper,iUpper
       raTrans = raaUpperSumNLTEGasAbCoeff(:,iL)/rMu
       raTrans = exp(-raTrans)
-      raEmission = (1.0 - raTrans) * raaUpperPlanckCoeff(:,iL) * rattorad(raFreq,raUpperTemp(iL))
+      raEmission = (1.0 - raTrans) * raaUpperPlanckCoeff(:,iL) * ttorad(raFreq,raUpperTemp(iL))
       raInten = raEmission + raInten*raTrans
 
       daTrans = dble(raaUpperSumNLTEGasAbCoeff(:,iL)*1.0d0/(rMu*1.0d0))
       daTrans = exp(-daTrans)
-      daEmission = dble(raaUpperPlanckCoeff(:,iL)*1.0d0) * dble(rattorad(raFreq,raUpperTemp(iL))*1.0d0)*(1.0d0 - daTrans)
+      daEmission = dble(raaUpperPlanckCoeff(:,iL)*1.0d0) * dble(ttorad(raFreq,raUpperTemp(iL))*1.0d0)*(1.0d0 - daTrans)
       daInten = daEmission + daInten*daTrans
       raInten = sngl(daInten)
 

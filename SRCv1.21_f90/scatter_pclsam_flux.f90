@@ -5,6 +5,7 @@
 MODULE scatter_pclsam_flux
 
 USE basic_common
+USE ttorad_common
 USE spline_and_sort_and_common
 USE clear_scatter_basic
 USE rad_angles
@@ -1074,7 +1075,7 @@ CONTAINS
     raSun     = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-    raInten   = rattorad(raFreq,rTSurf)
+    raInten   = ttorad(raFreq,rTSurf)
     raSurface = raInten
 
     CALL DoEmissionLinearInTau_Downlook( &
@@ -1349,7 +1350,7 @@ CONTAINS
       IF (rSunTemp > 0) THEN
         ! NOTE!no geometry factor (rOmegaSun=1.0),only need cos(rSunAngle) eventually
         ! compute the Plank radiation from the sun
-        raSun = rattorad(raFreq,rSunTemp)
+        raSun = ttorad(raFreq,rSunTemp)
       ELSE
         CALL ReadSolarData(raFreq,raSun,iTag)
       END IF
@@ -1360,7 +1361,7 @@ CONTAINS
     ! initialize the diffuse downward contribution to 0
     ! INTIALIZE the emission seen at satellite to 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-    raSurface = rattorad(raFreq,rTSurf)
+    raSurface = ttorad(raFreq,rTSurf)
     raSun     = raSun * rOmegaSun
 
     iLay = 0
@@ -1368,7 +1369,7 @@ CONTAINS
 
     ! compute emission from the top of atm == eqn 4.26 of Genln2 manual
     ! initialize the cumulative thermal radiation
-    raThermal = rattorad(raFreq,sngl(kTSpace))
+    raThermal = ttorad(raFreq,sngl(kTSpace))
     raaTempX(:,iPutLay) = raThermal*rGaussWeight*muSat + raaTempX(:,iPutLay)
 
     DO iLay = 1,iLow
@@ -1710,7 +1711,7 @@ CONTAINS
     DO iLay = 1,iNumLayer
       iL      = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
-      raaRad(:,iL) = rattorad(raFreq,rMPTemp)
+      raaRad(:,iL) = ttorad(raFreq,rMPTemp)
     END DO
 
     IF (kFlux == 2) THEN
@@ -1810,7 +1811,7 @@ CONTAINS
     raSun     = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -1841,7 +1842,7 @@ CONTAINS
 
 !^^^^^^^^^^^^^^^^^^^^ compute downgoing radiation at TOA ^^^^^^^^^^^^^^^^
 ! this is the background thermal down to instrument
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! this is the solar down to instrument
     IF (iDoSolar >= 0) THEN
@@ -2238,7 +2239,7 @@ CONTAINS
     DO iLay = 1,iNumLayer
       iL      = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
-      raaRad(:,iL) = rattorad(raFreq,rMPTemp)
+      raaRad(:,iL) = ttorad(raFreq,rMPTemp)
     END DO
 
     IF (kFlux == 2) THEN
@@ -2338,7 +2339,7 @@ CONTAINS
     raSun     = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-    raUp = rattorad(raFreq,rTSurf)
+    raUp = ttorad(raFreq,rTSurf)
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing radiation at earth surface ^^^^^^^^^^^^^
 ! now go from top of atmosphere down to the surface to compute the total
@@ -2370,7 +2371,7 @@ CONTAINS
 
 !^^^^^^^^^^^^^^^^^^^^ compute downgoing radiation at TOA ^^^^^^^^^^^^^^^^
 ! this is the background thermal down to instrument
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! this is the solar down to instrument
     IF (iDoSolar >= 0) THEN

@@ -30,6 +30,7 @@
 MODULE jac_pclsam_down
 
 USE basic_common
+USE ttorad_common
 use jac_up
 use jac_down
 use jac_main
@@ -185,7 +186,7 @@ CONTAINS
       write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
       rSunTemp = kSunTemp
       ! compute the Plank radiation from the sun
-      raSunTOA = rattorad(raFreq,rSunTemp)*rOmegaSun*muSun
+      raSunTOA = ttorad(raFreq,rSunTemp)*rOmegaSun*muSun
     ELSEIF (iDoSolar == 1) THEN
       write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
       ! read in data from file

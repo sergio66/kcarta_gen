@@ -5,6 +5,7 @@
 MODULE clear_scatter_misc
 
 USE basic_common
+USE ttorad_common
 USE kcoeff_common
 USE spline_and_sort_and_common
 USE rad_diff_and_quad
@@ -586,7 +587,7 @@ CONTAINS
 ! fractionally weighted due to the posn of instr at top layer being within
 ! the layer, not on top of it
 
-    raExtra = rattorad(raFreq,sngl(kTSpace))
+    raExtra = ttorad(raFreq,sngl(kTSpace))
     raExtra = 0.0
      
     IF ((iI == 0) .AND. (abs(rFracTop-1.0) <= 1.0e-4))THEN
@@ -632,18 +633,18 @@ CONTAINS
 ! ccccccccccc this is new .. where subroutine differs from AddUpperMostLayers
     IF (iExtra > 0) THEN
       MUDOWN = 3.0/5.0
-      raExtra = rattorad(raFreq,sngl(kTSpace))
+      raExtra = ttorad(raFreq,sngl(kTSpace))
       DO iI = iT,iNumLayer+1,-1
         iJ = iaRadLayerTemp(iI)
         rak =raaAbs(:,iJ)
-        raRad = rattorad(raFreq,raVTemp(iJ))
+        raRad = ttorad(raFreq,raVTemp(iJ))
         raExtra = raExtra*exp(-rak/MUDOWN)+raRad*(1-exp(-rak/MUDOWN))
       END DO
 
       DO iI = iNumLayer,iNumLayer
         iJ = iaRadLayerTemp(iI)
         rak =raaAbs(:,iJ)*(1-rFracTop)
-        raRad = rattorad(raFreq,raVTemp(iJ))
+        raRad = ttorad(raFreq,raVTemp(iJ))
         raExtra = raExtra*exp(-rak/MUDOWN)+raRad*(1-exp(-rak/MUDOWN))
       END DO
     ELSE
@@ -1489,7 +1490,7 @@ CONTAINS
     IF (iDoSolar == 0) THEN
       !use 5700K
       rSunTemp = kSunTemp
-      raSun = rattorad(raFreq,rSunTemp)
+      raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       !read in data from file
       CALL ReadSolarData(raFreq,raSun,iTag)

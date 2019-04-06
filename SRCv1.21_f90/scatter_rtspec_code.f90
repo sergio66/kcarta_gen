@@ -5,6 +5,7 @@
 MODULE scatter_rtspec_code
 
 USE basic_common
+USE ttorad_common
 USE jac_main
 !USE jac_pclsam_up
 !USE jac_pclsam_down

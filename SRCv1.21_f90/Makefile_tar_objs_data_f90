@@ -39,7 +39,7 @@ PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makef
 ###### OBJSMAIN           for all features : jacobians, scatter, flux
 ###### OBJSMAIN_BASIC     for none of kCARTA features
 
-OBS_BASIC_COMMON = basic_common.o spline_and_sort_and_common.o  freqfile.o s_misc.o            s_writefile.o
+OBS_BASIC_COMMON = basic_common.o ttorad_common.o spline_and_sort_and_common.o  freqfile.o s_misc.o            s_writefile.o
 
 OBJSRTP        = rtp_interface_f90.o
 
@@ -59,7 +59,8 @@ OBJSMAIN_JPL      = kcartamisc.o kcartajpl.o
 OBJSMAIN_BASIC    = kcartamisc.o kcartabasic.o
 OBJSMAIN_PARALLEL = kcartamisc.o kcartaparallel.o
 
-MOBS_BASIC_COMMON = basic_common.mod     spline_and_sort_and_common.mod   freqfile.mod s_misc.mod  s_writefile.mod
+MOBS_BASIC_COMMON = basic_common.mod  ttorad_common.mod spline_and_sort_and_common.mod \
+		    freqfile.mod s_misc.mod  s_writefile.mod
 
 MOBJSRTP        = rtp_interface_f90.mod
 
@@ -304,6 +305,9 @@ kcartajplTXT.mod kcartajplTXT.o : kcartajpl.f90 $(PARAMS)
 ###### lte routines
 basic_common.mod basic_common.o : basic_common.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) basic_common.f90
+
+ttorad_common.mod ttorad_common.o : ttorad_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) ttorad_common.f90
 
 kcartamisc.mod kcartamisc.o : kcartamisc.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamisc.f90

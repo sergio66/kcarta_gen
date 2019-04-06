@@ -590,6 +590,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
+4/5/19         Overloaded the planck functions radtot and ttorad
+               Probably will not overload the spline functions since they
+               are bread and butter of uncompression
+
 4/3/19         Fixed the clear sky and PCLSAM allsky flux bugs
                (a) clear sky flux bug was actually in v1.20 (see comment)
                (b) allsky PCLSAM flux bug was forgetting raaFlux(:,iLay) amd

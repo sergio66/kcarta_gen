@@ -5,6 +5,7 @@
 MODULE rad_diff_and_quad
 
 USE basic_common
+USE ttorad_common
 USE spline_and_sort_and_common
 USE rad_misc
 USE rad_angles
@@ -305,7 +306,7 @@ CONTAINS
         raAngleTr_m1  = exp(-raL2Gm1/rCosDiff)
         raAngleTr     = exp(-raL2G/rCosDiff)
         ! Planckian emissions
-        raPlanck = rattorad(raFreq,rMPTemp)
+        raPlanck = ttorad(raFreq,rMPTemp)
         raTemp   = raTemp + raPlanck*(raAngleTr_m1-raAngleTr)
         ! get ready for the layer beneath
         raL2G   = raL2Gm1
@@ -353,7 +354,7 @@ CONTAINS
             raAngleTr         = exp(-raL2G/raAngleTr)
                           
             ! Planckian emissions
-            raPlanck = rattorad(raFreq,rMPTemp)
+            raPlanck = ttorad(raFreq,rMPTemp)
             raTemp   = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
             ! get ready for the layer beneath
             raL2G       = raL2Gm1
@@ -374,7 +375,7 @@ CONTAINS
             raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + sum(raAngleTr)
             raAngleTr    = exp(-raL2G/raAngleTr)
                           
-            raPlanck  = rattorad(raFreq,rMPTemp)
+            raPlanck  = ttorad(raFreq,rMPTemp)
             raTemp    = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
           END DO
           ! print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
@@ -669,7 +670,7 @@ CONTAINS
 ! iWeightFactor === 1. All the factors of "0.5" are taken care of in
 ! call DoDiffusivityApprox******
 
-    raIntenAtmos = rattorad(raFreq,rTSpace)
+    raIntenAtmos = ttorad(raFreq,rTSpace)
 
 ! ORIG CODE : at ALL layers 1 .. iNumLayer, use ONE diffusivity angle for
 ! entire wavenumber spread (acos(3/5) at each layer)
@@ -751,7 +752,7 @@ CONTAINS
 ! this is the diffusivity approx angle, in radians
     rThetaEff = kThermalAngle*kPi/180.0
           
-    raIntenAtmos = rattorad(raFreq,rTSpace)
+    raIntenAtmos = ttorad(raFreq,rTSpace)
 
 ! select diffusivity angles, depending on frequency and layers
 ! (acos(3/5) at top layers, diffusivity parametrization at bottom layers)
@@ -828,7 +829,7 @@ CONTAINS
 ! this is the diffusivity approx angle, in radians
     rThetaEff = kThermalAngle*kPi/180.0
 
-    raIntenAtmos = rattorad(raFreq,rTSpace)
+    raIntenAtmos = ttorad(raFreq,rTSpace)
           
 ! select diffusivity angles, depending on frequency and layers
 ! (acos(3/5) at top layers, diffusivity parametrization at bottom layers)
@@ -1396,7 +1397,7 @@ CONTAINS
     iaRadLayerTemp,iT,iExtraSun,raSun)
 
 ! this is the background thermal down to ground
-    raDown = rattorad(raFreq,rTSpace)
+    raDown = ttorad(raFreq,rTSpace)
 
 ! propagate this down to instrument(defined by rFracTop, iaRadLayer(iNumLayer)
 ! first come from TOA to layer above instrument
@@ -1697,7 +1698,7 @@ CONTAINS
     iGaussPts = kGauss
     CALL FindGauss(iGaussPts,daGaussPt,daGaussWt)
 
-    raIntenAtmos = rattorad(raFreq,rTSpace)
+    raIntenAtmos = ttorad(raFreq,rTSpace)
 
     IF (iExtraThermal < 0) THEN
       ! do the entire atmosphere ... use ENTIRE layers apart from bottom layer
@@ -1711,7 +1712,7 @@ CONTAINS
         DO iLay = iNumLayer,iNumLayer
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission + raTemp*raAngleTrans
@@ -1719,7 +1720,7 @@ CONTAINS
         DO iLay = iNumLayer-1,2,-1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1727,7 +1728,7 @@ CONTAINS
         DO iLay = 1,1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1752,7 +1753,7 @@ CONTAINS
         DO iLay = iT,iNumLayer+1,-1
           iL = iaRadLayerTemp(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1766,7 +1767,7 @@ CONTAINS
         DO iLay = iNumLayer,2,-1
           iL = iaRadLayerTemp(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1775,7 +1776,7 @@ CONTAINS
         DO iLay = 1,1
           iL = iaRadLayerTemp(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1865,7 +1866,7 @@ CONTAINS
 
     CALL FindGauss2(iGaussPts,daGaussPt,daGaussWt)
           
-    raIntenAtmos = rattorad(raFreq,rTSpace)
+    raIntenAtmos = ttorad(raFreq,rTSpace)
 
     IF (iExtraThermal < 0) THEN
       ! do the entire atmosphere ... use ENTIRE layers apart from bottom layer
@@ -1879,7 +1880,7 @@ CONTAINS
         DO iLay = iNumLayer,iNumLayer
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1887,7 +1888,7 @@ CONTAINS
         DO iLay = iNumLayer-1,2,-1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1895,7 +1896,7 @@ CONTAINS
         DO iLay = 1,1
           iL = iaRadLayer(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1921,7 +1922,7 @@ CONTAINS
         DO iLay = iT,iNumLayer+1,-1
           iL = iaRadLayerTemp(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1935,7 +1936,7 @@ CONTAINS
         DO iLay = iNumLayer,2,-1
           iL = iaRadLayerTemp(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp          = raAngleEmission+raTemp*raAngleTrans
@@ -1944,7 +1945,7 @@ CONTAINS
         DO iLay = 1,1
           iL = iaRadLayerTemp(iLay)
           rMPTemp = raVT1(iL)
-          raPlanck        = rattorad(raFreq,rMPTemp)
+          raPlanck        = ttorad(raFreq,rMPTemp)
           raAngleTrans    = exp(-raaAbs(:,iL)*rFracBot/rCosAngle)
           raAngleEmission = (1.0-raAngleTrans)*raPlanck
           raTemp    = raAngleEmission+raTemp*raAngleTrans
@@ -2005,7 +2006,7 @@ CONTAINS
 
 ! compute the emission from the top of atm == eqn 4.26 of Genln2 manual
 
-    raIntenAtmos = rattorad(raFreq,rTSpace)
+    raIntenAtmos = ttorad(raFreq,rTSpace)
 
 ! select diffusivity angles, depending on frequency and layers
 ! initialize to space blackbdy radiation
@@ -2142,7 +2143,7 @@ CONTAINS
       raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + sum(raAngleTr)
       raAngleTr              = exp(-raL2G/raAngleTr)
                     
-      raPlanck     = rattorad(raFreq,rMPTemp)
+      raPlanck     = ttorad(raFreq,rMPTemp)
       raTemp = raTemp + raPlanck*(raAngleTr_m1-raAngleTr)
              
       !get ready for the layer beneath
@@ -2162,7 +2163,7 @@ CONTAINS
       raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + sum(raAngleTr)
       raAngleTr           = exp(-raL2G/raAngleTr)
               
-      raPlanck            = rattorad(raFreq,rMPTemp)
+      raPlanck            = ttorad(raFreq,rMPTemp)
       raTemp              = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
     END IF
 
@@ -2401,7 +2402,7 @@ CONTAINS
     REAL :: raTemp(kMaxPts),raTemp2(kMaxPts),raFreqAngle(kMaxPts),rAngle
     REAL :: rPlanck,raIntenAtmos(kMaxPts),rDelta,r1,r2
 
-    raIntenAtmos = rattorad(raFreq,rTSpace)
+    raIntenAtmos = ttorad(raFreq,rTSpace)
 
 ! do actual integration over (0,pi)
     iPi    = 20
@@ -2500,7 +2501,7 @@ CONTAINS
     r1 = sngl(kPlanck1)
     r2 = sngl(kPlanck2)
 
-    raSurface = rattorad(raFreq,rTSurface)
+    raSurface = ttorad(raFreq,rTSurface)
 
 ! if iDoThermal = -1 ==> thermal contribution = 0
 ! if iDoThermal = +1 ==> do actual integration over angles

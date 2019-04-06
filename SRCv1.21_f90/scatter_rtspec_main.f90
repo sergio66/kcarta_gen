@@ -5,6 +5,7 @@
 MODULE scatter_rtspec_main
 
 USE basic_common
+USE ttorad_common
 USE jac_main
 USE clear_scatter_basic
 USE clear_scatter_misc

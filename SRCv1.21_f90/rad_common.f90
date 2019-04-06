@@ -7,6 +7,7 @@ MODULE rad_common
 USE rad_diff_and_quad
 USE clear_scatter_basic
 USE basic_common
+USE ttorad_common
 USE spline_and_sort_and_common
 USE s_writefile
 USE s_misc
@@ -177,7 +178,7 @@ CONTAINS
     raSun     = 0.0
     raThermal = 0.0
     ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-    raInten   = rattorad(raFreq,rTSurf)
+    raInten   = ttorad(raFreq,rTSurf)
     raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
@@ -259,7 +260,7 @@ CONTAINS
 
       ! now do the radiative transfer thru this bottom layer
       raT = exp(-raaAbs(:,iL)*rFracBot/rCos)
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -287,7 +288,7 @@ CONTAINS
 
       ! now do the radiative transfer thru this complete layer
       raT = exp(-raaAbs(:,iL)/rCos)
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 
@@ -329,7 +330,7 @@ CONTAINS
             vsec1  = 1/cos(vsec1*kPi/180.0)
 
             raT = exp(-raaAbs(:,iL)/rCos)
-            raPlanck = rattorad(raFreq,rMPTemp)
+            raPlanck = ttorad(raFreq,rMPTemp)
             raInten2 = raPlanck*(1-raT) + raInten*raT
                                
             CALL Sarta_NLTE(raFreq,raVTemp,suncos,scos1,vsec1, &
@@ -526,7 +527,7 @@ CONTAINS
     rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
     rMPTemp = sngl(kTSpace)
     raT = exp(-raaAbs(:,iL)*rFracBot/rCos)
-    raInten = rattorad(raFreq,rMPTemp)
+    raInten = ttorad(raFreq,rMPTemp)
 
 ! now we can compute the downwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
@@ -558,7 +559,7 @@ CONTAINS
 
       ! now do the radiative transfer thru this bottom layer
       raT = exp(-raaAbs(:,iL)*rFracTop/rCos)
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -586,7 +587,7 @@ CONTAINS
 
       ! now do the radiative transfer thru this complete layer
       raT = exp(-raaAbs(:,iL)/rCos)
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raInten = raPlanck*(1-raT) + raInten*raT
     END DO
 
@@ -867,7 +868,7 @@ CONTAINS
     ! initialize the solar and thermal contribution to 0
     raSun     = 0.0
     raThermal = 0.0
-    raInten   = rattorad(raFreq,rTSurf)
+    raInten   = ttorad(raFreq,rTSurf)
     raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
@@ -907,11 +908,11 @@ CONTAINS
       END IF
       IF (iLModKprofLayer < iNLTEStart) THEN
         ! normal, no LTE emission stuff
-        raPlanck = rattorad(raFreq,rMPTemp)
+        raPlanck = ttorad(raFreq,rMPTemp)
         raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
       ELSEIF (iLModKprofLayer >= iNLTEStart) THEN
         !new; LTE emission stuff
-        raPlanck = rattorad(raFreq,rMPTemp) * raaPlanckCoeff(:,iL)
+        raPlanck = ttorad(raFreq,rMPTemp) * raaPlanckCoeff(:,iL)
         raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
       END IF
     END DO
@@ -1316,7 +1317,7 @@ CONTAINS
     ! initialize the solar and thermal contribution to 0
     raSun     = 0.0
     raThermal = 0.0
-    raInten   = rattorad(raFreq,rTSurf)
+    raInten   = ttorad(raFreq,rTSurf)
     raSurface = raInten
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
@@ -1337,7 +1338,7 @@ CONTAINS
       iL=iaRadLayer(iLay)
       ! first get the Mixed Path temperature for this radiating layer
       rMPTemp=raVT1(iL)
-      raPlanck = rattorad(raFreq,rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
     END DO
 

@@ -2,6 +2,7 @@ MODULE singlescatter
 
 USE clear_scatter_misc
 USE basic_common
+USE ttorad_common
 
 IMPLICIT NONE
 
@@ -67,7 +68,7 @@ CONTAINS
       !use 5700K
       write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
       rSunTemp = kSunTemp
-      raSun = rattorad(raFreq,rSunTemp)
+      raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
       !read in data from file
@@ -365,7 +366,7 @@ CONTAINS
       !use 5700K
       write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
       rSunTemp = kSunTemp
-      raSun = rattorad(raFreq,rSunTemp)
+      raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
       !read in data from file
@@ -482,7 +483,7 @@ CONTAINS
       !use 5700K
       write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
       rSunTemp = kSunTemp
-      raSun = rattorad(raFreq,rSunTemp)
+      raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
       !read in data from file
@@ -613,7 +614,7 @@ CONTAINS
       !use 5700K
       write(kStdWarn,*) 'Setting Sun Temperature = 5700 K'
       rSunTemp = kSunTemp
-      raSun = rattorad(raFreq,rSunTemp)
+      raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
       !read in data from file
