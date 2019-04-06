@@ -2940,8 +2940,8 @@ CONTAINS
           print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
         END IF
         !!!interpolate the med lines sum onto the near lines
-        CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
-        CALL dspl(daMedium,daPlanckMedium,iCount,daFreqOutMesh,daTempP,i2-i1+1)
+        call spl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+        call spl(daMedium,daPlanckMedium,iCount,daFreqOutMesh,daTempP,i2-i1+1)
         !!!add on the med lines to the near lines
         DO iFr = i1,i2
           daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
@@ -2990,8 +2990,8 @@ CONTAINS
             print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           END IF
           !!!interpolate the far lines sum onto the near lines
-          CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
-          CALL dspl(daCoarse,daPlanckCoarse,iCount,daFreqOutMesh,daTempP,i2-i1+1)
+          call spl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+          call spl(daCoarse,daPlanckCoarse,iCount,daFreqOutMesh,daTempP,i2-i1+1)
           !!!add on the far lines to the near lines
           DO iFr = i1,i2
             daK(iFr)      = daK(iFr)      + daTemp(iFr-i1+1)
@@ -3292,7 +3292,7 @@ CONTAINS
             print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           END IF
           !!!interpolate the med lines sum onto the near lines
-          CALL dspl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+          call spl(daMedium,daTempMedium,iCount,daFreqOutMesh,daTemp,i2-i1+1)
           !!!add on the med lines to the near lines
           DO iFr = i1,i2
             daK(iFr) = daK(iFr) + daTemp(iFr-i1+1)
@@ -3330,7 +3330,7 @@ CONTAINS
             print *,'   iNumLines  : vibctr,JL,JU,iISO = ',iNum,dVibCenter,int(daJL(1)),int(daJU(1)),iISO
           END IF
           !!!interpolate the far lines sum onto the near lines
-          CALL dspl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
+          call spl(daCoarse,daTempCoarse,iCount,daFreqOutMesh,daTemp,i2-i1+1)
           !!!add on the far lines to the near lines
           DO iFr = i1,i2
             daK(iFr) = daK(iFr) + daTemp(iFr-i1+1)

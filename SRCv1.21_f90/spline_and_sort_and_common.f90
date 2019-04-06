@@ -8,6 +8,42 @@ USE basic_common
 
 IMPLICIT NONE
 
+private
+
+interface spl
+  module procedure rspl
+  module procedure dspl
+end interface
+
+interface splin
+  module procedure rsplin
+  module procedure dsplin
+end interface
+
+interface sply2
+  module procedure rsply2
+  module procedure dsply2
+end interface
+
+interface linear
+  module procedure rlinear
+  module procedure dlinear
+end interface
+
+interface linear_one
+  module procedure rlinear_one
+  module procedure dlinear_one
+end interface
+
+public :: spl,linear,linear_one,splin,sply2
+public :: inset,idiv,iimod,NumericalRecipesIndexer,DoSort,DoSortPress,DoSortReal,DoSort2Real
+public :: DoUniqueReal,BinarySearch,SequentialSearch
+public :: r_sort_spl,r_sort_logspl,r_sort_spl_one,r_sort_logspl_one
+public :: rsplin,rSPLY2,logrspl,rspl_one
+public :: dsplin,dSPLY2,dLINEAR_SMART_ONE,dlinear_smart
+public :: r_sort_linear,r_sort_loglinear,r_sort_linear1,r_sort_loglinear1
+public :: p2h,DoOutputLayer
+
 CONTAINS
 
 !************************************************************************
@@ -664,17 +700,21 @@ CONTAINS
 
 !    SUBROUTINE logrspl(XA,YA,N,XOUT,YOUT,NOUT)   -- changes input to log, sorts, then calls rSPLY2 then rsplin
 !    SUBROUTINE rspl_one(XA,YA,N,XOUT,YOUT)       -- wraps the call the rSPLY2 then rsplin for NOUT = 1 output
+
+! OVERLOAD
+!    SUBROUTINE dspl(dXA,dYA,N,dXOUT,dYOUT,NOUT)  -- wraps the call to dSPLY2 then dSPLIN for NOUT >=1 outputs
 !    SUBROUTINE rspl(XA,YA,N,XOUT,YOUT,NOUT)      -- wraps the calls to rSPLY2 then rsplin for NOUT >= 1 outputs
 !    SUBROUTINE rsplin(XA,YA,Y2A,N,X,Y)
-!    SUBROUTINE rSPLY2(XA,YA,N,YP1,YPN,Y2A,WORK)
-!    SUBROUTINE dspl(dXA,dYA,N,dXOUT,dYOUT,NOUT)  -- wraps the call to dSPLY2 then dSPLIN for NOUT >=1 outputs
 !    SUBROUTINE dSPLIN(XA,YA,Y2A,N,X,Y)
+!    SUBROUTINE rSPLY2(XA,YA,N,YP1,YPN,Y2A,WORK)
 !    SUBROUTINE dSPLY2(XA,YA,N,YP1,YPN,Y2A,WORK)
 
+! OVERLOAD
 !    SUBROUTINE RLINEAR_ONE(XA,YA,N,X,Y)
-!    SUBROUTINE rlinear(XA,YA,N,XOUT,YOUT,NOUT)
 !    SUBROUTINE dLINEAR_ONE(XA,YA,N,X,Y)
+!    SUBROUTINE rlinear(XA,YA,N,XOUT,YOUT,NOUT)
 !    SUBROUTINE dlinear(XA,YA,N,XOUT,YOUT,NOUT)
+
 !    SUBROUTINE dLINEAR_SMART_ONE(NSMART_LO,NSMART_HI,XA,YA,N,X,Y)
 !    SUBROUTINE dlinear_smart(XA,YA,N,XOUT,YOUT,NOUT)
 

@@ -576,15 +576,14 @@ CONTAINS
 
 !!!fill lower layers with some "realistic" increasing values
     DO iI = kProfLayer-iNumLayers,1,-1
-        raLayPress(iI) = raLayPress(kProfLayer-iNumLayers+1) + &
-        &                    10*abs(iI-(kProfLayer-iNumLayers+1))
+       raLayPress(iI) = raLayPress(kProfLayer-iNumLayers+1) + 10*abs(iI-(kProfLayer-iNumLayers+1))
     END DO
 
 !!!interpolate the kintic temps (logarithmically) onto the AIRS levels
     CALL logrspl(raLayPress,raTemp,kProfLayer,raAirsLevels,raAirsTemps,iAirsMax)
-    DO iI = 1,iAirsMax
-        print *,iI,raAirsLevels(iI),raAirsTemps(iI)
-    END DO
+!    DO iI = 1,iAirsMax
+!        print *,iI,raAirsLevels(iI),raAirsTemps(iI)
+!    END DO
             
     CALL DoStop
 

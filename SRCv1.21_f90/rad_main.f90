@@ -5123,7 +5123,7 @@ CONTAINS
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-      CALL rspl(raFreq,raThermal,kMaxPts,raFreqBloat, &
+      call spl(raFreq,raThermal,kMaxPts,raFreqBloat, &
         raThermalBloat,kBloatPts)
     ELSE
       raThermalBloat = 0.0
@@ -5133,15 +5133,15 @@ CONTAINS
 ! see if we have to add on the solar contribution
 ! this figures out the solar intensity at the ground
     IF (iDoSolar >= 0) THEN
-      CALL rspl(raFreq,raSun,kMaxPts,raFreqBloat,raSunBloat,kBloatPts)
-      CALL rspl(raFreq,raSunRefl,kMaxPts,raFreqBloat,raSunReflBloat,kBloatPts)
+      call spl(raFreq,raSun,kMaxPts,raFreqBloat,raSunBloat,kBloatPts)
+      call spl(raFreq,raSunRefl,kMaxPts,raFreqBloat,raSunReflBloat,kBloatPts)
     ELSE
       raSunBloat = 0.0
       write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
 
-    CALL rlinear(raFreq,raSurface,kMaxPts,raFreqBloat,raSurfaceBloat,kBloatPts)
-    CALL rlinear(raFreq,raUseEmissivity,kMaxPts,raFreqBloat,raEmissivityBloat,kBloatPts)
+    CALL linear(raFreq,raSurface,kMaxPts,raFreqBloat,raSurfaceBloat,kBloatPts)
+    CALL linear(raFreq,raUseEmissivity,kMaxPts,raFreqBloat,raEmissivityBloat,kBloatPts)
 
     raIntenBloat=raSurfaceBloat*raEmissivityBloat+ &
         raThermalBloat*(1.0-raEmissivityBloat)*rThermalRefl+ &

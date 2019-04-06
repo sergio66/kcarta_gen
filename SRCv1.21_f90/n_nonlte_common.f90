@@ -1100,7 +1100,7 @@ CONTAINS
           raX(iI)  = log10(raPressRegr(iI))
           raY1(iI) = raaaCoef(iI,iA,iP)
         END DO
-        CALL rspl(raX,raY1,iNumPressPts,raZin,raZout,iNumPts3)
+        call spl(raX,raY1,iNumPressPts,raZin,raZout,iNumPts3)
         DO iI = 1,iNumPts3
           raaP1(iI,iP) = raZout(iI)
         END DO
@@ -1123,11 +1123,11 @@ CONTAINS
          raY1(iI) = raaaCoef(iI,iA,iP)
          raY2(iI) = raaaCoef(iI,iB,iP)
        END DO
-       CALL rspl(raX,raY1,iNumPressPts,raZin,raZout,iNumPts3)
+       call spl(raX,raY1,iNumPressPts,raZin,raZout,iNumPts3)
        DO iI = 1,iNumPts3
          raaP1(iI,iP) = raZout(iI)
        END DO
-       CALL rspl(raX,raY2,iNumPressPts,raZin,raZout,iNumPts3)
+       call spl(raX,raY2,iNumPressPts,raZin,raZout,iNumPts3)
        DO iI = 1,iNumPts3
          raaP2(iI,iP) = raZout(iI)
        END DO

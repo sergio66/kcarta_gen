@@ -831,7 +831,7 @@ CONTAINS
       kTempUnitOpen=-1
 
       !! get the abs coeff in cm-1, normalized by (rho)^2 Xco2 Xwv
-      CALL rspl(raFChi,raChi,iNumPts,raFreq,raX,kMaxPts)
+      call spl(raFChi,raChi,iNumPts,raFreq,raX,kMaxPts)
       
       raXWV  = raaPartPress(:,1)/raPress                               ! fraction of WV
       raXCO2 = raaPartPress(:,2)/raPress                               ! fraction of CO2
@@ -1533,16 +1533,16 @@ CONTAINS
 !   Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
     rYP1 = 1.0E+16
     rYPN = 1.0E+16
-    CALL rsply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
+    CALL sply2(raXgivenP,raYgivenP,kMaxLayer,rYP1,rYPN,raY2P,raWorkP)
     
     raRTemp(1:iStart) = +999.999
     DO iI = iStart+1,kProfLayer
       rxpt = log(raaPress(iI,iGas))
       rxpt = raaPress(iI,iGas)
       IF (iSplineType == +1) THEN
-        CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
+        CALL splin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
       ELSE
-        CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r)
+        CALL linear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r)
       END IF
       raRTemp(iI) = r
     END DO

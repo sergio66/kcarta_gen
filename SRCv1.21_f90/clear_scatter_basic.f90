@@ -1307,7 +1307,7 @@ CONTAINS
       raR(1:iL) = raTemp(1:iL)
     END IF
 
-    CALL rspl(raW,raR,iL, raFreq,raSpecularRefl,kMaxPts)
+    call spl(raW,raR,iL, raFreq,raSpecularRefl,kMaxPts)
     write(kStdWarn,*) 'specular refl (1) = ',raFreq(1),raSpecularRefl(1)
     write(kStdWarn,*) 'for mu_angles ',r2*180/kPi,r3*180/kPi,r4*180/kPi
 
@@ -2016,8 +2016,8 @@ CONTAINS
     !       print *,iI,raFrad(iI),raDrad(iI)
     END DO
 
-    CALL rspl(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts)    !! too dangerous,   small 4 um lte rads, wiggly NLTE correction
-    CALL rlinear(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts) !! hopefully safer, small 4 um lte rads, straightline NLTE correction
+    call spl(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts)    !! too dangerous,   small 4 um lte rads, wiggly NLTE correction
+    CALL linear(raFrad,raDrad,NCHNTE,raFreq,raDkcarta,kMaxPts) !! hopefully safer, small 4 um lte rads, straightline NLTE correction
     DO iI = 1,kMaxPts
       IF ((raFreq(iI) < raFrad(1)) .OR. (raFreq(iI) > raFrad(NCHNTE))) THEN
         raDkcarta(iI) = 0.0
@@ -2861,9 +2861,9 @@ CONTAINS
         END IF
       ELSEIF (iSpline == -1) THEN
         IF (iLog == +1) THEN
-          CALL rlinear_one(raP,raT,3,rP,rT)
+          CALL linear_one(raP,raT,3,rP,rT)
         ELSE
-          CALL rlinear_one(raLogP,raT,3,log(rP),rT)
+          CALL linear_one(raLogP,raT,3,log(rP),rT)
         END IF
       END IF
     END IF

@@ -216,7 +216,7 @@ CONTAINS
 !!!! all 48 profiles have the same pressure layering
 !!!! so interpolate the kCARTA (pressure,temp) profile on the regression
 !!!! profile grid so we can do the comparisons
-    CALL rspl(raLayPress,raTemp,kProfLayer,raX,raT,kMaxLayer)
+    call spl(raLayPress,raTemp,kProfLayer,raX,raT,kMaxLayer)
 
 !!!!do the comparisons
     rMin = 1.0e10

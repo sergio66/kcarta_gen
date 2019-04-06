@@ -1528,7 +1528,7 @@ CONTAINS
         raFreq(iFr) = rFileStartFr*1.0 + (iFr-1)*0.0025
       END DO
 
-      call rspl(raF,raChi,2378,raFreq,raChi2,kMaxPts)
+      call spl(raF,raChi,2378,raFreq,raChi2,kMaxPts)
 
       DO iLay=1,kProfLayer
         daaAbsCoeff(:,iLay)=daaAbsCoeff(:,iLay)*(raChi2*1.0d0)

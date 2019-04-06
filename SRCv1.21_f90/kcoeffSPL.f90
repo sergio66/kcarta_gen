@@ -354,11 +354,11 @@ CONTAINS
               daXgivenP(iK) = log(pAvgUse(iE))*1.0d0
               daYgivenP(iK) = daaaKx(iI,iJ,iE)/(daOrig100A(iE)**0.25)
             END DO
-            CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN,daY2P,daWorkP)
+            CALL sply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN,daY2P,daWorkP)
             !do the new set of layers ..need AIRS layers interpolations
             DO iK=iLowest,iHighest
               dxpt = log(pProf(iK))*1.0d0
-              CALL dsplin(daXgivenP,daYgivenP,daY2P,kMaxLayer,dxpt,d)
+              CALL splin(daXgivenP,daYgivenP,daY2P,kMaxLayer,dxpt,d)
               daaaKxNew(iI,iJ,iK) = d
             END DO
           END DO
@@ -373,11 +373,11 @@ CONTAINS
               daXgivenP(iK) = pAvgUse(iE)*1.0d0
               daYgivenP(iK) = daaaKx(iI,iJ,iE)/(daOrig100A(iE)**0.25)
             END DO
-            CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN,daY2P,daWorkP)
+            CALL sply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN,daY2P,daWorkP)
             !do the new set of layers ..need AIRS layers interpolations
             DO iK=iLowest,iHighest
               dxpt = (pProf(iK))*1.0d0
-              CALL DLINEAR_ONE(daXgivenP,daYgivenP,kMaxLayer,dXPT,d)
+              CALL LINEAR_ONE(daXgivenP,daYgivenP,kMaxLayer,dXPT,d)
               daaaKxNew(iI,iJ,iK) = d
             END DO
           END DO
@@ -412,11 +412,11 @@ CONTAINS
               daXgivenP(iK) = log(pAvgUse(iE))*1.0d0
               daYgivenP(iK) = daaaKx(iI,iJ,iE)/(daOrig100A(iE)**0.25)
             END DO
-            CALL dsply2(daXgivenP,daYgivenP,iHighest,dYP1,dYPN,daY2P,daWorkP)
+            CALL sply2(daXgivenP,daYgivenP,iHighest,dYP1,dYPN,daY2P,daWorkP)
               !do the new set of layers ..need AIRS layers interpolations
               DO iK=iLowest,iHighest
                 dxpt = log(pProf(iK))*1.0d0
-                CALL dsplin(daXgivenP,daYgivenP,daY2P,iHighest,dxpt,d)
+                CALL splin(daXgivenP,daYgivenP,daY2P,iHighest,dxpt,d)
                 daaaKxNew(iI,iJ,iK) = d
               END DO
             END DO
@@ -431,11 +431,11 @@ CONTAINS
                 daXgivenP(iK) = pAvgUse(iE)*1.0d0
                 daYgivenP(iK) = daaaKx(iI,iJ,iE)/(daOrig100A(iE)**0.25)
               END DO
-              CALL dsply2(daXgivenP,daYgivenP,iHighest,dYP1,dYPN,daY2P,daWorkP)
+              CALL sply2(daXgivenP,daYgivenP,iHighest,dYP1,dYPN,daY2P,daWorkP)
               !do the new set of layers ..need AIRS layers interpolations
               DO iK=iLowest,iHighest
                 dxpt = (pProf(iK))*1.0d0
-                CALL DLINEAR_ONE(daXgivenP,daYgivenP,iHighest,dXPT,d)
+                CALL LINEAR_ONE(daXgivenP,daYgivenP,iHighest,dXPT,d)
                 daaaKxNew(iI,iJ,iK) = d
               END DO
             END DO
@@ -468,10 +468,10 @@ CONTAINS
             DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
               daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
             ENDDO
-            CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
+            CALL SPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
             ! subtract the ref temp from the profile temperature
             dXPT = (raPtemp(iK) - raRTemp(iK))*1.0d0
-            CALL DSPLIN(daXgiven,daYgiven,daY2,iKm,dXPT,daaKpro(iI,iK))
+            CALL SPLIN(daXgiven,daYgiven,daY2,iKm,dXPT,daaKpro(iI,iK))
           ENDDO
         ENDDO
       ELSEIF (iSplineType < 0) THEN
@@ -481,10 +481,10 @@ CONTAINS
             DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
               daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
             ENDDO
-            CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
+            CALL SPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
             ! subtract the ref temp from the profile temperature
             dXPT = (raPtemp(iK) - raRTemp(iK))*1.0d0
-            CALL DLINEAR_ONE(daXgiven,daYgiven,iKm,dXPT,daaKpro(iI,iK))
+            CALL LINEAR_ONE(daXgiven,daYgiven,iKm,dXPT,daaKpro(iI,iK))
           ENDDO
       ENDDO
     END IF
@@ -636,7 +636,7 @@ CONTAINS
           daYgiven(3)=daaA3(iI,iK)
           daYgiven(4)=daaA4(iI,iK)
           daYgiven(5)=daaA5(iI,iK)
-          CALL DSPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
+          CALL SPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
 
           ! directly take the PartPress amount in the actual profile
           ! as the X point
@@ -647,7 +647,7 @@ CONTAINS
           IF (dXPT > daXgiven(5)) THEN
             dXPT=daXgiven(5)
           END IF
-          CALL DSPLIN(daXgiven,daYgiven,daY2,KMaxWater,dXPT,d)
+          CALL SPLIN(daXgiven,daYgiven,daY2,KMaxWater,dXPT,d)
           daaKpro(iI,iK)=d
         ENDDO
       ENDDO
@@ -666,7 +666,7 @@ CONTAINS
          daYgiven(3)=daaA3(iI,iK)
          daYgiven(4)=daaA4(iI,iK)
          daYgiven(5)=daaA5(iI,iK)
-         CALL DSPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
+         CALL SPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
 
          ! directly take the PartPress amount in the actual profile
          ! as the X point
@@ -677,7 +677,7 @@ CONTAINS
          IF (dXPT > daXgiven(5)) THEN
            dXPT=daXgiven(5)
          END IF
-         CALL DLINEAR_ONE(daXgiven,daYgiven,kMaxWater,dXPT,d)
+         CALL LINEAR_ONE(daXgiven,daYgiven,kMaxWater,dXPT,d)
          daaKpro(iI,iK)=d
 
         ENDDO

@@ -1000,11 +1000,11 @@ CONTAINS
 
     !!!now interpolate the Dave Edwards NLTE profiles to the KCARTA profile
     ! for all bands specified by user
-        CALL rlinear(raPress1Swap,raLTETemp1Swap,iNumVibLevels,pProf, &
+        CALL linear(raPress1Swap,raLTETemp1Swap,iNumVibLevels,pProf, &
         raLTETemp,kProfLayer)
-        CALL rlinear(raPress1Swap,raNLTETemp1Swap,iNumVibLevels,pProf, &
+        CALL linear(raPress1Swap,raNLTETemp1Swap,iNumVibLevels,pProf, &
         raNLTETemp,kProfLayer)
-        CALL rlinear(raPress1Swap,raQTips1Swap,iNumVibLevels,pProf, &
+        CALL linear(raPress1Swap,raQTips1Swap,iNumVibLevels,pProf, &
         raVibQFT,kProfLayer)
 
         DO iI = 1,kProflayer
@@ -1024,9 +1024,9 @@ CONTAINS
 
     !!!now interpolate the Dave Edwards NLTE profiles to the KCARTA profile
     ! for all bands specified by user
-        CALL rlinear(raPress1Swap,raLTETemp1Swap,iNumVibLevels,pProf,raLTETemp,kProfLayer)
-        CALL rspl(raPress1Swap,raNLTETemp1Swap,iNumVibLevels,pProf,raNLTETemp,kProfLayer)
-        CALL rspl(raPress1Swap,raQTips1Swap,iNumVibLevels,pProf,raVibQFT,kProfLayer)
+        CALL linear(raPress1Swap,raLTETemp1Swap,iNumVibLevels,pProf,raLTETemp,kProfLayer)
+        call spl(raPress1Swap,raNLTETemp1Swap,iNumVibLevels,pProf,raNLTETemp,kProfLayer)
+        call spl(raPress1Swap,raQTips1Swap,iNumVibLevels,pProf,raVibQFT,kProfLayer)
 
     ! -------------------------------------------------->
     ELSEIF (iLogOrLinear == 0) THEN

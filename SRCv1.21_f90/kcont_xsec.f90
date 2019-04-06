@@ -829,9 +829,9 @@ CONTAINS
       DO iL=1,kTempCKD
         daC(iL)=daaCKD(iL,iF) + daFrDelta(iFr)*(daaCKD(iL,iF+1)-daaCKD(iL,iF))/df
       END DO
-      CALL DSPLY2(daTemprt,daC,kTempCKD,dYP1,dYPN,daY2,daWork)
+      CALL SPLY2(daTemprt,daC,kTempCKD,dYP1,dYPN,daY2,daWork)
       DO iL=iMin,iMax
-        CALL DSPLIN(daTemprt,daC,daY2,kTempCKD,dble(raTemp(iL)),daaCon(iFr,iL))
+        CALL SPLIN(daTemprt,daC,daY2,kTempCKD,dble(raTemp(iL)),daaCon(iFr,iL))
       END DO
     END DO
 

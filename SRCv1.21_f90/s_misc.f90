@@ -1139,7 +1139,7 @@ CONTAINS
     CLOSE(iIOUN)
     kTempUnitOpen = -1
      
-    Call rlinear(raXadj,raYadj,iFr,raFreq,raMystery,kMaxPts)
+    Call linear(raXadj,raYadj,iFr,raFreq,raMystery,kMaxPts)
 
     RETURN
     end SUBROUTINE FindMysteryFactor

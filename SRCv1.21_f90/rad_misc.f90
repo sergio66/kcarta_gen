@@ -117,9 +117,9 @@ CONTAINS
     END IF
 
 ! this was before 09/22/08
-    CALL rspl(raX,raY,iaSetSolarRefl(iAtm),raFreq,raSunRefl,kMaxPts)
+    call spl(raX,raY,iaSetSolarRefl(iAtm),raFreq,raSunRefl,kMaxPts)
 ! this was after 09/22/08
-    CALL rlinear(raX,raY,iaSetSolarRefl(iAtm),raFreq,raSunRefl,kMaxPts)
+    CALL linear(raX,raY,iaSetSolarRefl(iAtm),raFreq,raSunRefl,kMaxPts)
 
 ! if raaaSetSolarRefl(iAtm,iJ,1) does not span the current wavenumber chunk,
 ! see if we need to set the constant emissivities, depending on

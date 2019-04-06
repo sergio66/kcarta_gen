@@ -4652,7 +4652,7 @@ CONTAINS
 
     IF (iZbnd > 0) THEN
       ! need to convert the user heights to user defined pressure levels
-      CALL rspl(raAlt,raP,iNumLevs,raZbnd,raPbnd,iZbnd)
+      call spl(raAlt,raP,iNumLevs,raZbnd,raPbnd,iZbnd)
       DO iJ = 1,iZbnd
         raPbnd(iJ) = raPbnd(iJ) * 100.0  !! change from mb to N/m2, as Psurf is finally in N/m2
       END DO

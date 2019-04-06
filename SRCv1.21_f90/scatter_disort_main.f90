@@ -1621,7 +1621,7 @@
     IF ((kScatter >= 2) .AND. (iDownWard == -1)) THEN
       !!!first interpolate in k
       DO iF = 1,kMaxPts
-        CALL rLINEAR_ONE(raKSTEP,raIntenStep,iStepPts,raCorrelatedK(iF),raInten(iF))
+        CALL LINEAR_ONE(raKSTEP,raIntenStep,iStepPts,raCorrelatedK(iF),raInten(iF))
       END DO
 
     ELSEIF ((kScatter >= 2) .AND. (iDownWard == 1)) THEN

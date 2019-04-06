@@ -1405,7 +1405,7 @@
     ! ********************* warning .. use rspl if the variables are real
     !!!compute mu0 = cos ofangle between the two
         mu0 = mu1*mu2 + sqrt(1-mu1*mu1)*sqrt(1-mu2*mu2)
-        CALL dSpl(raPhasePoints,raComputedPhase,MaxPhase,mu0,yexactNew,1)
+        CALL spl(raPhasePoints,raComputedPhase,MaxPhase,mu0,yexactNew,1)
     ! ********************* warning .. use rspl if the variables are reals
         hg2 = yexactNew
     END IF

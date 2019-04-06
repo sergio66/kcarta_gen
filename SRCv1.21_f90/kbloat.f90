@@ -436,9 +436,9 @@ CONTAINS
             daTemp(iFr)  = daaNLTEGasAbCoeff(iFr,iL)
         END DO
         IF (iLinearOrSpline == 1) THEN
-            CALL dlinear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            CALL linear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         ELSE
-            CALL dspl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            call spl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         END IF
         DO iFr = 1,kMaxPtsBox
             dK = max(daY(iFr),0.0d0)
@@ -452,9 +452,9 @@ CONTAINS
             daTemp(iFr)  = daaPlanckCoeff(iFr,iL)
         END DO
         IF (iLinearOrSpline == 1) THEN
-            CALL dlinear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            CALL linear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         ELSE
-            CALL dspl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            call spl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         END IF
         DO iFr = 1,kMaxPtsBox
             daaPlanckCoeffBloat(iFr,iL) = max(daY(iFr),0.0d0)
@@ -473,9 +473,9 @@ CONTAINS
             daTemp(iFr)  = daaGasAbCoeff(iFr,iL)
         END DO
         IF (iLinearOrSpline == 1) THEN
-            CALL dlinear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            CALL linear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         ELSE
-            CALL dspl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            call spl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         END IF
         DO iFr = 1,kMaxPtsBox
             dK = max(daY(iFr),0.0d0)
@@ -535,9 +535,9 @@ CONTAINS
             daTemp(iFr)  = daaUpperNLTEGasAbCoeff(iFr,iL)
         END DO
         IF (iLinearOrSpline == 1) THEN
-            CALL dlinear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            CALL linear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         ELSE
-            CALL dspl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            call spl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         END IF
         DO iFr = 1,kMaxPtsBox
             dK = max(daY(iFr),0.0d0)
@@ -551,9 +551,9 @@ CONTAINS
             daTemp(iFr)  = daaUpperPlanckCoeff(iFr,iL)
         END DO
         IF (iLinearOrSpline == 1) THEN
-            CALL dlinear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            CALL linear(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         ELSE
-            CALL dspl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
+            call spl(daFreqT,daTemp,kMaxPts,daFreqBloat,daY,kBloatPts)
         END IF
         DO iFr = 1,kMaxPtsBox
             dK = max(daY(iFr),0.0d0)

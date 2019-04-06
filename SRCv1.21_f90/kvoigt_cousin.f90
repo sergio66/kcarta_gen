@@ -454,7 +454,7 @@ CONTAINS
         CLOSE(iIOUN)
         kTempUnitOpen = -1
 
-        CALL dspl(daF,daChi,kMaxPts,daFreq,daFudge,iN)
+        call spl(daF,daChi,kMaxPts,daFreq,daFudge,iN)
     END IF
 
     RETURN

@@ -537,17 +537,12 @@ CONTAINS
 
     duration_self = dur(1)
 
-!      CALL dspl(ratio,dur,4,(dP-dPP)/dP,tau2,1)
-!      print *,'in tau2_birn : ',dPP,dP,(dP-dPP)/dP,tau2,(ratio(iFr),iFr=1,4)
-!      tau2_birn = tau2
-
 ! this is for ifort compiler
     junk1(1) = (dP-dPP)/dP
     junk1(2) = (dP-dPP)/dP*1.0001
     junk2(1) = tau2
     junk2(2) = tau2
-    CALL dspl(ratio,dur,4,junk1,junk2,2)
-!      print *,'in tau2_birn : ',dPP,dP,(dP-dPP)/dP,tau2,(ratio(iFr),iFr=1,4)
+    CALL spl(ratio,dur,4,junk1,junk2,2)
     tau2_birn = junk2(1)
           
     RETURN

@@ -1124,8 +1124,8 @@ CONTAINS
       END DO
     END IF
 
-    CALL rspl(raTPress1,raTTemp1,iNumVibLevels,raPavg,raLTE,kProfLayer)
-    CALL rspl(raTPress1,raNLTEtemp1,iNumVibLevels,raPavg,raNLTE,kProfLayer)
+    call spl(raTPress1,raTTemp1,iNumVibLevels,raPavg,raLTE,kProfLayer)
+    call spl(raTPress1,raNLTEtemp1,iNumVibLevels,raPavg,raNLTE,kProfLayer)
 
     raDeltaT   = raNLTE - raLTE
     raDeltaUse(1:kProfLayer) = raNLTE(1:kProfLayer) - raaTemp(1:kProfLayer,iG)
@@ -1273,14 +1273,14 @@ CONTAINS
 !     Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
     rYP1 = 1.0E+16
     rYPN = 1.0E+16
-    CALL rsply2(raLogTPress1,raTX1,iNumVibLevels,rYP1,rYPN,raY2P1,raWorkP1)
-    CALL rsply2(raLogTPress1,raTX2,iNumVibLevels,rYP1,rYPN,raY2P2,raWorkP2)    
+    CALL sply2(raLogTPress1,raTX1,iNumVibLevels,rYP1,rYPN,raY2P1,raWorkP1)
+    CALL sply2(raLogTPress1,raTX2,iNumVibLevels,rYP1,rYPN,raY2P2,raWorkP2)    
     
     DO iI = iStart,kProfLayer
       rX = log(raPAvg(iI))
-      CALL rsplin(raLogTPress1,raTX1,raY2P1,iNumVibLevels,rX,rY)
+      CALL splin(raLogTPress1,raTX1,raY2P1,iNumVibLevels,rX,rY)
       raNLTE_STD(iI) = rY
-      CALL rsplin(raLogTPress1,raTX2,raY2P2,iNumVibLevels,rX,rY)
+      CALL splin(raLogTPress1,raTX2,raY2P2,iNumVibLevels,rX,rY)
       raLTE_STD(iI) = rY
       IF (iI == iStart) then
         write(kStdWarn,*) 115,raLogTPress1(115),raTX2(115),raTX1(115)

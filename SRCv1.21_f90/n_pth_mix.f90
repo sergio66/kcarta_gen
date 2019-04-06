@@ -122,11 +122,11 @@ CONTAINS
           IF (iInterpType == +1) THEN
             CALL rspl_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
           ELSE
-            CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
+            CALL linear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
           END IF
         ELSE
           !! couple or so points at the top or bottom boundaries
-          CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
+          CALL linear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
         END IF
         raTPressLevels(iI) = rY
       ELSE

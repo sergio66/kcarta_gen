@@ -180,12 +180,12 @@ CONTAINS
             ! is being changed to raw (abs coeff)^(1/4)
             daYgivenP(iK) = daaaKx(iI,iJ,iE)/(raOrig100A(iE)**0.25)
           END DO
-          CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN,daY2P,daWorkP)
+          CALL sply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN,daY2P,daWorkP)
 
           !  do the new set of layers ..need AIRS layers interpolations
           DO iK=iLowest,kProfLayer
             dxpt = log(pProf(iK))*1.0d0
-            CALL dsplin(daXgivenP,daYgivenP,daY2P,kMaxLayer,dxpt,d)
+            CALL splin(daXgivenP,daYgivenP,daY2P,kMaxLayer,dxpt,d)
             daaaKxNew(iI,iJ,iK) = d
           END DO
         END DO
@@ -207,13 +207,13 @@ CONTAINS
             ! is being changed to raw (abs coeff)^(1/4)
             daYgivenP(iK) = daaaKx(iI,iJ,iE)/(raOrig100A(iE)**0.25)
           END DO
-          CALL dsply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN, &
+          CALL sply2(daXgivenP,daYgivenP,kMaxLayer,dYP1,dYPN, &
                 daY2P,daWorkP)
 
           !  do the new set of layers ..need AIRS layers interpolations
           DO iK=iLowest,kProfLayer
             dxpt = (pProf(iK))*1.0d0
-            CALL DLINEAR_ONE(daXgivenP,daYgivenP,kMaxLayer,dXPT,d)
+            CALL LINEAR_ONE(daXgivenP,daYgivenP,kMaxLayer,dXPT,d)
             daaaKxNew(iI,iJ,iK) = d
           END DO
         END DO
@@ -245,10 +245,10 @@ CONTAINS
           DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
             daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
           ENDDO
-          CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
+          CALL SPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
           ! subtract the ref temp from the profile temperature
           dXPT=raPtemp(iK) - raRTemp(iK)
-          CALL DSPLIN(daXgiven,daYgiven,daY2,iKm,dXPT,daaKpro(iI,iK))
+          CALL SPLIN(daXgiven,daYgiven,daY2,iKm,dXPT,daaKpro(iI,iK))
           IF ((kJacobian > 0) .AND. (iActuallydoDT > 0)) THEN
             daaT(iI,iK) = FirstDeriv(dXPT,daXgiven,daYgiven,daY2,iKm)
           END IF
@@ -261,10 +261,10 @@ CONTAINS
           DO iJ=1,iKm      !Interpolate KX across iKm for the profile temp
             daYgiven(iJ) = daaaKxNew(iI, iaTsort(iJ), iK)
           ENDDO
-          CALL DSPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
+          CALL SPLY2(daXgiven,daYgiven,iKm,dYP1,dYPN,daY2,daWork)
           ! subtract the ref temp from the profile temperature
           dXPT = raPtemp(iK) - raRTemp(iK)
-          CALL DLINEAR_ONE(daXgiven,daYgiven,iKm,dXPT,daaKpro(iI,iK))
+          CALL LINEAR_ONE(daXgiven,daYgiven,iKm,dXPT,daaKpro(iI,iK))
           IF ((kJacobian > 0) .AND. (iActuallydoDT > 0)) THEN
             daaT(iI,iK) = FirstDeriv(dXPT,daXgiven,daYgiven,daY2,iKm)
           END IF
@@ -534,7 +534,7 @@ CONTAINS
         daYgiven(3)=daaA3(iI,iL)
         daYgiven(4)=daaA4(iI,iL)
         daYgiven(5)=daaA5(iI,iL)
-        CALL DSPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
+        CALL SPLY2(daXgiven,daYgiven,kMaxWater,dYP1,dYPN,daY2,daWork)
 
         ! directly take the Part Press amount in the actual profile as the X point
         dXPT=raPPart(iL)
@@ -544,7 +544,7 @@ CONTAINS
         IF (dXPT > daXgiven(5)) THEN
           dXPT=daXgiven(5)
         END IF
-        CALL DSPLIN(daXgiven,daYgiven,daY2,KMaxWater,dXPT,daaKpro(iI,iL))
+        CALL SPLIN(daXgiven,daYgiven,daY2,KMaxWater,dXPT,daaKpro(iI,iL))
 
       ENDDO
     ENDDO
@@ -619,8 +619,8 @@ CONTAINS
           dXPT=daXgiven(5)
         END IF
 
-        CALL DSPLY2(daXgiven,daYgiven,5,dYP1,dYPN,daY2,daWork)
-        CALL DSPLIN(daXgiven,daYgiven,daY2,5,dXPT,d)  !d is just a dummy
+        CALL SPLY2(daXgiven,daYgiven,5,dYP1,dYPN,daY2,daWork)
+        CALL SPLIN(daXgiven,daYgiven,daY2,5,dXPT,d)  !d is just a dummy
             daaT(iI,iL)=FirstDeriv(dXPT,daXgiven,daYgiven,daY2,5)
 
       ENDDO
