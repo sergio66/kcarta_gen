@@ -479,8 +479,7 @@ CONTAINS
     ! thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
     ! thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
-                     raTPress(iI),rMixRatio,1)
+        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,raTPress(iI),rMixRatio)
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raTPartPress(iI)=raTPress(iI)*rMixRatio/(1.0e6+rMixRatio) !atm
         raTAmt(iI) = raThick1(iJ) * 100.0           !!! in cm
@@ -534,8 +533,7 @@ CONTAINS
     ! thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
     ! thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
-                      raTPress(iI),rMixRatio,1)
+        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,raTPress(iI),rMixRatio)
         raUAMixRatio(iI)     = rMixRatio		      
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raTPartPress(iI) = raTPress(iI)*rMixRatio/(1.0e6+rMixRatio) !!atm
@@ -700,8 +698,7 @@ CONTAINS
     ! thus ppmv = N(g)/N(a) = p(g)/p(a) = p(g)/(p(total) - p(g)) * 1e6
     ! thus p(g) = (p(total)/(1e6+ppmv) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
-        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs, &
-                      raTPress(iI),rMixRatio,1)
+        CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,raTPress(iI),rMixRatio)
         raUAMixRatio(iI) = rMixRatio
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raTPartPress(iI) = raTPress(iI) * rMixRatio/(1.0e6 + rMixRatio) !!! atm
@@ -1027,12 +1024,9 @@ CONTAINS
 
     !!!now interpolate the Dave Edwards NLTE profiles to the KCARTA profile
     ! for all bands specified by user
-        CALL rlinear(raPress1Swap,raLTETemp1Swap,iNumVibLevels,pProf, &
-        raLTETemp,kProfLayer)
-        CALL rspl(raPress1Swap,raNLTETemp1Swap,iNumVibLevels,pProf, &
-        raNLTETemp,kProfLayer)
-        CALL rspl(raPress1Swap,raQTips1Swap,iNumVibLevels,pProf, &
-        raVibQFT,kProfLayer)
+        CALL rlinear(raPress1Swap,raLTETemp1Swap,iNumVibLevels,pProf,raLTETemp,kProfLayer)
+        CALL rspl(raPress1Swap,raNLTETemp1Swap,iNumVibLevels,pProf,raNLTETemp,kProfLayer)
+        CALL rspl(raPress1Swap,raQTips1Swap,iNumVibLevels,pProf,raVibQFT,kProfLayer)
 
     ! -------------------------------------------------->
     ELSEIF (iLogOrLinear == 0) THEN

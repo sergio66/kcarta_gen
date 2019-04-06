@@ -1540,9 +1540,9 @@ CONTAINS
       rxpt = log(raaPress(iI,iGas))
       rxpt = raaPress(iI,iGas)
       IF (iSplineType == +1) THEN
-        CALL rsplin_need_2nd_deriv(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
+        CALL rsplin(raXgivenP,raYgivenP,raY2P,kMaxLayer,rxpt,r)
       ELSE
-        CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r,1)
+        CALL rlinear_one(raXgivenP,raYgivenP,kMaxLayer,rxpt,r)
       END IF
       raRTemp(iI) = r
     END DO

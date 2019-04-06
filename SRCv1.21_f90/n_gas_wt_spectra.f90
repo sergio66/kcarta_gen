@@ -1278,9 +1278,9 @@ CONTAINS
     
     DO iI = iStart,kProfLayer
       rX = log(raPAvg(iI))
-      CALL rsplin_need_2nd_deriv(raLogTPress1,raTX1,raY2P1,iNumVibLevels,rX,rY)
+      CALL rsplin(raLogTPress1,raTX1,raY2P1,iNumVibLevels,rX,rY)
       raNLTE_STD(iI) = rY
-      CALL rsplin_need_2nd_deriv(raLogTPress1,raTX2,raY2P2,iNumVibLevels,rX,rY)
+      CALL rsplin(raLogTPress1,raTX2,raY2P2,iNumVibLevels,rX,rY)
       raLTE_STD(iI) = rY
       IF (iI == iStart) then
         write(kStdWarn,*) 115,raLogTPress1(115),raTX2(115),raTX1(115)

@@ -181,7 +181,7 @@ CONTAINS
                 DO iK = 1,MXXTMP    !!!scan over the 6 solar angles
                     ra6(iK) = raaaVibPartFcn(iK,iJ,iI)
                 END DO
-                CALL rspl_one(raSolAngles,ra6,6,rSolarAngle,rT,1)
+                CALL rspl_one(raSolAngles,ra6,6,rSolarAngle,rT)
                 raaVibPartFcn(iJ,iI) =  rT
             END DO
         END DO
@@ -191,7 +191,7 @@ CONTAINS
                 DO iK = 1,MXXTMP          !!!scan over the 6 solar angles
                     ra6(iK) = raaaVibTemp(iK,iJ,iI)
                 END DO
-                CALL rspl_one(raSolAngles,ra6,6,rSolarAngle,rT,1)
+                CALL rspl_one(raSolAngles,ra6,6,rSolarAngle,rT)
                 raaVibTemp(iJ,iI) =  rT
             END DO
         END DO
@@ -581,8 +581,7 @@ CONTAINS
     END DO
 
 !!!interpolate the kintic temps (logarithmically) onto the AIRS levels
-    CALL logrspl(raLayPress,raTemp,kProfLayer, &
-    raAirsLevels,raAirsTemps,iAirsMax)
+    CALL logrspl(raLayPress,raTemp,kProfLayer,raAirsLevels,raAirsTemps,iAirsMax)
     DO iI = 1,iAirsMax
         print *,iI,raAirsLevels(iI),raAirsTemps(iI)
     END DO

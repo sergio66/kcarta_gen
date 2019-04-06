@@ -657,11 +657,32 @@ CONTAINS
 
 !************************************************************************
 !                     SPLINES
-!       SUBROUTINE rspl(rXA,rYA,N,rXOUT,rYOUT,NOUT)
-!       SUBROUTINE logrspl(rXA,rYA,N,rXOUT,rYOUT,NOUT)
-!       SUBROUTINE dspl(dXA,dYA,N,dXOUT,dYOUT,NOUT)
-!************************************************************************
+!    SUBROUTINE r_sort_spl(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE r_sort_logspl(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE r_sort_spl_one(XA,YA,N,XOUT,YOUT)
+!    SUBROUTINE r_sort_logspl_one(XA,YA,N,XOUT,YOUT)
 
+!    SUBROUTINE logrspl(XA,YA,N,XOUT,YOUT,NOUT)   -- changes input to log, sorts, then calls rSPLY2 then rsplin
+!    SUBROUTINE rspl_one(XA,YA,N,XOUT,YOUT)       -- wraps the call the rSPLY2 then rsplin for NOUT = 1 output
+!    SUBROUTINE rspl(XA,YA,N,XOUT,YOUT,NOUT)      -- wraps the calls to rSPLY2 then rsplin for NOUT >= 1 outputs
+!    SUBROUTINE rsplin(XA,YA,Y2A,N,X,Y)
+!    SUBROUTINE rSPLY2(XA,YA,N,YP1,YPN,Y2A,WORK)
+!    SUBROUTINE dspl(dXA,dYA,N,dXOUT,dYOUT,NOUT)  -- wraps the call to dSPLY2 then dSPLIN for NOUT >=1 outputs
+!    SUBROUTINE dSPLIN(XA,YA,Y2A,N,X,Y)
+!    SUBROUTINE dSPLY2(XA,YA,N,YP1,YPN,Y2A,WORK)
+
+!    SUBROUTINE RLINEAR_ONE(XA,YA,N,X,Y)
+!    SUBROUTINE rlinear(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE dLINEAR_ONE(XA,YA,N,X,Y)
+!    SUBROUTINE dlinear(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE dLINEAR_SMART_ONE(NSMART_LO,NSMART_HI,XA,YA,N,X,Y)
+!    SUBROUTINE dlinear_smart(XA,YA,N,XOUT,YOUT,NOUT)
+
+!    SUBROUTINE r_sort_linear(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE r_sort_loglinear(XA,YA,N,XOUT,YOUT,NOUT)
+!    SUBROUTINE r_sort_linear1(XA,YA,N,XOUT,YOUT)
+!    SUBROUTINE r_sort_loglinear1(XA,YA,N,XOUT,YOUT)
+!************************************************************************
 ! this subroutine first sorts, then splines
     SUBROUTINE r_sort_spl(XA,YA,N,XOUT,YOUT,NOUT)
 
@@ -725,17 +746,15 @@ CONTAINS
     INTEGER :: N
 
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB
-    INTEGER :: iI,NOUT
+    INTEGER :: iI
 
-    NOUT = 1
-    
     XAA(1:N) = XA(1:N)
     YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
     XBB = XOUT
 
-    CALL rspl_one(XAA,YAA,N,XBB,YOUT,NOUT)
+    CALL rspl_one(XAA,YAA,N,XBB,YOUT)
 
     RETURN
     end SUBROUTINE r_sort_spl_one
@@ -754,24 +773,22 @@ CONTAINS
     INTEGER :: N
 
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB
-    INTEGER :: iI,NOUT
+    INTEGER :: iI
 
-    NOUT = 1
-    
     XAA(1:N) = log(XA(1:N))
     YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
     XBB = log(XOUT)
 
-    CALL rspl_one(XAA,YAA,N,XBB,YOUT,NOUT)
+    CALL rspl_one(XAA,YAA,N,XBB,YOUT)
 
     RETURN
     end SUBROUTINE r_sort_logspl_one
 
 !************************************************************************
 ! this subroutine directly calls rsply2 and then rspline
-    SUBROUTINE rspl_one(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE rspl_one(XA,YA,N,XOUT,YOUT)
      
     IMPLICIT NONE
 
@@ -790,30 +807,25 @@ CONTAINS
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT,YOUT
-    INTEGER :: N,NOUT
+    INTEGER :: N
 
     REAL :: Y2A(kMaxPtsBox),work(kMaxPtsBox),Yp1,yPn
     INTEGER :: I
 
-    IF (NOUT /= 1) THEN
-      write(kStdErr,*) 'rspl_one assumes you only want 1 calc'
-      CALL DoStop
-    END IF
-           
     yp1 = 1.0e16
     ypn = 1.0e16
 
     CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
-    CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT,YOUT)
+    CALL rsplin(XA,YA,Y2A,N,XOUT,YOUT)
      
     RETURN
     end SUBROUTINE rspl_one
      
 !************************************************************************
 ! this subroutine directly calls rsply2 and then rspline
-! different than SUBROUTINE rsplin_need_2nd_deriv(XA,YA,Y2A,N,X,Y) because that only does calcs for
+! different than SUBROUTINE rsplin(XA,YA,Y2A,N,X,Y) because that only does calcs for
 ! one point ie NOUT = 1, and that also needs prior call to rSPLY2 for the 2nd deriv
-! IN FACT THIS ROUTINE CALLS rsplin_need_2nd_deriv() 
+! IN FACT THIS ROUTINE CALLS rsplin() 
     SUBROUTINE rspl(XA,YA,N,XOUT,YOUT,NOUT)
      
     IMPLICIT NONE
@@ -843,7 +855,7 @@ CONTAINS
 
     CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
     DO I=1,NOUT
-      CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))
+      CALL rsplin(XA,YA,Y2A,N,XOUT(I),YOUT(I))
     END DO
      
     RETURN
@@ -928,55 +940,17 @@ CONTAINS
 
     CALL rSPLY2(logxa,raY,N,Yp1,Ypn,Y2A,work)
     DO I = iStart,NOUT
-      CALL rsplin_need_2nd_deriv(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))
+      CALL rsplin(logxa,raY,Y2A,N,logXOUT(I),YOUT(I))
     END DO
 
     RETURN
     end SUBROUTINE logrspl
      
 !************************************************************************
-! this subroutine directly calls rsply2 and then rspline
-! same as SUBROUTINE rspl except yp1,ypn are set differently
-    SUBROUTINE rspl_diffyp1n(XA,YA,N,XOUT,YOUT,NOUT)
-     
-    IMPLICIT NONE
-
-    include '../INCLUDE/kcartaparam.f90'
-     
-! real version
-!      -----------------------------------------------------------------
-!      Uses Y2A from SPLY2 to do spline interpolation at X to get Y
-!      XA  : I  : DOUB arr : x array(N) in increasing order  IN
-!      YA  : I  : DOUB arr : y array(N)                      IN
-!      N   : I  : INT      : number of points in arrays
-!      XOUT   : I  : DOUB ARR     : x points at which to evaluate spline
-!      YOUT   : O  : DOUB ARR     : y points from spline interpolation
-!      NOUT   : I  : INT          : number of points at which to spline
-!      -----------------------------------------------------------------
-
-!      Parameters
-    REAL :: XA(*),YA(*),XOUT(*),YOUT(*)
-    INTEGER :: N,NOUT
-     
-    REAL :: Y2A(kMaxPtsBox),work(kMaxPtsBox),Yp1,yPn
-    INTEGER :: I
-
-    yp1 = 1.0
-    ypn = 1.0
-
-    CALL rSPLY2(XA,YA,N,Yp1,Ypn,Y2A,work)
-    DO I = 1,NOUT
-      CALL rsplin_need_2nd_deriv(XA,YA,Y2A,N,XOUT(I),YOUT(I))
-    END DO
-     
-    RETURN
-    end SUBROUTINE rspl_diffyp1n
-     
-!************************************************************************
 ! this subroutine NEEDS a PRIOR CALL TO rsply2 BEFORE IT CAN DO rspline
 ! different than SUBROUTINE rSPL(XA,YA,N,XOUT,YOUT,NOUT) because that does calcs for
 ! many points ie NOUT > 1 AND THIS ONE ALSO EXPECTS Y2A (2nd deriv) AS ADDITIONAL INPUT
-    SUBROUTINE rsplin_need_2nd_deriv(XA,YA,Y2A,N,X,Y)
+    SUBROUTINE rsplin(XA,YA,Y2A,N,X,Y)
 
     IMPLICIT NONE
 
@@ -1029,11 +1003,9 @@ CONTAINS
     B = (X - XA(KLO))/H
 
     Y = A*YA(KLO) + B*YA(KHI) + ( Y2A(KLO)*(A**3 - A) + Y2A(KHI)*(B**3 - B) )*(H**2)/6.0
-
- 50 FORMAT(A4,4(' ',I3),2(' ',F15.7),A4,2(' ',F15.7))
  
     RETURN
-    end SUBROUTINE rSPLIN_need_2nd_deriv
+    end SUBROUTINE rsplin
 
 !************************************************************************
     SUBROUTINE rSPLY2(XA,YA,N,YP1,YPN,Y2A,WORK)
@@ -1111,7 +1083,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-! this subroutine directly calls dsply2 and then dspline
+! this directly calls dsply2 and then dspline
 
     include '../INCLUDE/kcartaparam.f90'
      
@@ -1145,6 +1117,7 @@ CONTAINS
     end SUBROUTINE dspl
      
 !************************************************************************
+! THIS ONE ALSO EXPECTS Y2A (2nd deriv) AS ADDITIONAL INPUT
     SUBROUTINE dSPLIN(XA,YA,Y2A,N,X,Y)
 
     IMPLICIT NONE
@@ -1277,7 +1250,7 @@ CONTAINS
 !                       linear interps
 !************************************************************************
 ! real linear interpolator for ONE "x" point
-    SUBROUTINE RLINEAR_ONE(XA,YA,N,X,Y,NOUT)
+    SUBROUTINE RLINEAR_ONE(XA,YA,N,X,Y)
 
     IMPLICIT NONE
 
@@ -1295,16 +1268,11 @@ CONTAINS
 
 !      Parameters
     REAL :: XA(*),YA(*),X,Y
-    INTEGER :: N,NOUT
+    INTEGER :: N
 
 !      Local Variables
     INTEGER :: K,KLO,KHI
     REAL :: A,B,H
-
-    IF (NOUT /= 1) THEN
-      write(kStdErr,*) 'RLINEAR_ONE only gives one output'
-      CALL DoStop
-    END IF
 
 !      -----------------------------------------------------------------
 
@@ -1340,7 +1308,7 @@ CONTAINS
     END SUBROUTINE RLINEAR_ONE
 
 !************************************************************************
-! this subroutine directly calls rlinear, for MANY "x" points
+! this subroutine directly calls rlinear_one, for MANY "x" points
     SUBROUTINE rlinear(XA,YA,N,XOUT,YOUT,NOUT)
      
     IMPLICIT NONE
@@ -1365,7 +1333,7 @@ CONTAINS
     INTEGER :: I
      
     DO I = 1,NOUT
-      CALL RLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I),1)
+      CALL RLINEAR_ONE(XA,YA,N,XOUT(I),YOUT(I))
     END DO
 
     RETURN
@@ -1634,7 +1602,7 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine first sorts, then interps
-    SUBROUTINE r_sort_linear1(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE r_sort_linear1(XA,YA,N,XOUT,YOUT)
 
     IMPLICIT NONE
 
@@ -1642,21 +1610,16 @@ CONTAINS
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT,YOUT
-    INTEGER :: N,NOUT
+    INTEGER :: N
 
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox)
     INTEGER :: iI
 
-    IF (NOUT /= 1) THEN
-      write(kStdErr,*) 'r_sort_linear1 is only for 1 point'
-      CALL DoStop
-    END IF
-           
     XAA(1:N) = XA(1:N)
     YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
-    CALL rlinear_one(XAA,YAA,N,XOUT,YOUT,NOUT)
+    CALL rlinear_one(XAA,YAA,N,XOUT,YOUT)
 
     RETURN
     end SUBROUTINE r_sort_linear1
@@ -1664,7 +1627,7 @@ CONTAINS
 !************************************************************************
 ! this subroutine first sorts, then linearines
 ! changes input X, output XOUT, to log(X) and log(XOUT)
-    SUBROUTINE r_sort_loglinear1(XA,YA,N,XOUT,YOUT,NOUT)
+    SUBROUTINE r_sort_loglinear1(XA,YA,N,XOUT,YOUT)
 
     IMPLICIT NONE
 
@@ -1672,25 +1635,18 @@ CONTAINS
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT,YOUT
-    INTEGER :: N,NOUT
+    INTEGER :: N
 
     REAL :: XAA(kMaxPtsBox),YAA(kMaxPtsBox),XBB
     INTEGER :: iI
-
-    IF (NOUT /= 1) THEN
-      write(kStdErr,*) 'r_sort_loglinear1 is only for 1 point'
-      CALL DoStop
-    END IF
 
     XAA(1:N) = log(XA(1:N))
     YAA(1:N) = YA(1:N)
     CALL DoSort2Real(XAA,YAA,N,1)
 
-    DO iI = 1,NOUT
-      XBB = log(XOUT)
-    END DO
+    XBB = log(XOUT)
 
-    CALL rlinear_one(XAA,YAA,N,XBB,YOUT,NOUT)
+    CALL rlinear_one(XAA,YAA,N,XBB,YOUT)
 
     RETURN
     end SUBROUTINE r_sort_loglinear1
@@ -1747,7 +1703,7 @@ CONTAINS
     ELSEIF (p <= DATABASELEV(kMaxLayer+1)) THEN
       rH = DatabaseHEIGHT(kMaxLayer)
     ELSE
-      CALL rspl_one(logpavg,raHgt,kMaxLayer,log(p),rH,1)
+      CALL rspl_one(logpavg,raHgt,kMaxLayer,log(p),rH)
     END IF
 
     p2h = rH

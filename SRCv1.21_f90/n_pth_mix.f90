@@ -120,14 +120,13 @@ CONTAINS
         IF ((log(raPressLevels(iI)) >= rPmin) .AND. (log(raPressLevels(iI)) <= rPmax)) THEN
           !! most of the points
           IF (iInterpType == +1) THEN
-            CALL rspl_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
-            !CALL rspl_diffyp1n(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+            CALL rspl_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
           ELSE
-            CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+            CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
           END IF
         ELSE
           !! couple or so points at the top or bottom boundaries
-          CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY,1)
+          CALL rlinear_one(logP,raT,iProfileLayers,log(raPressLevels(iI)),rY)
         END IF
         raTPressLevels(iI) = rY
       ELSE
@@ -198,7 +197,7 @@ CONTAINS
       DO iJ = 2,9
         raPX(iJ) = exp(log(raPX(01)) + (iJ-1)*dx) 
         !write(kStdWarn,*), 'XAXA',iI,iJ,raPX(iJ)	    
-        CALL rspl_one(logP,raT,iProfileLayers,log(raPX(iJ)),rY,1)
+        CALL rspl_one(logP,raT,iProfileLayers,log(raPX(iJ)),rY)
         raTX(iJ) = rY
         !write(kStdWarn,*), 'YAYA',iI,iJ,raPX(iJ),raTX(iJ)	    	    
       END DO
