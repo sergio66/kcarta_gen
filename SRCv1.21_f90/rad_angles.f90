@@ -488,20 +488,23 @@ CONTAINS
     REAL :: raY(kMaxPts)
 
 ! local vars
-    INTEGER :: iI
+    INTEGER :: iI,iaPos(kMaxPts),npos
+    REAL :: eps
+
+    eps = 1.0e-28
 
     CALL expint(raX,raY)               !do y = expint(x)
-    DO iI = 1,kMaxPts
-      IF (raX(iI) < 1.0e-28) THEN
-        raY(iI) = 0.5
-      ELSEIF (raX(iI) < 0.0) THEN
-        write(kStdErr,*) 'in expint3 iI,raX(iI) = ',iI,raX(iI)
-        write(kStdErr,*) 'cannot have negative values!'
-        CALL DoStop
-      ELSE
-        raY(iI) = (exp(-raX(iI))*(1-raX(iI)) + (raX(iI)**2)*raY(iI))/2.0
-      END IF
-    END DO
+
+    CALL FindInVector(kMaxPts,raX < eps,npos,iaPos)
+    IF (npos > 0) THEN
+      raY(iaPos(1:npos)) = 0.5
+    END IF
+
+    CALL FindInVector(kMaxPts,raX >= eps,npos,iaPos)
+    IF (npos > 0) THEN
+      raY(iaPos(1:npos)) = (exp(-raX(iaPos(1:npos)))*(1-raX(iaPos(1:npos))) + (raX(iaPos(1:npos))**2)*raY(iaPos(1:npos)))/2.0
+    END IF
+
 
     RETURN
     end SUBROUTINE expint3
@@ -520,20 +523,22 @@ CONTAINS
     REAL :: raY(kMaxPts)
 
 ! local vars
-    INTEGER :: iI
+    INTEGER :: iI,iaPos(kMaxPts),npos
+    REAL :: eps
+
+    eps = 1.0e-28
 
     CALL expint(raX,raY)               !do y = expint(x)
-    DO iI = 1,kMaxPts
-      IF (raX(iI) < 1.0e-28) THEN
-        raY(iI) = 1.0
-      ELSEIF (raX(iI) < 0.0) THEN
-        write(kStdErr,*) 'in expint2 iI,raX(iI) = ',iI,raX(iI)
-        write(kStdErr,*) 'cannot have negative values!'
-        CALL DoStop
-      ELSE
-        raY(iI) = exp(-raX(iI)) - raX(iI)*raY(iI)
-      END IF
-    END DO
+
+    CALL FindInVector(kMaxPts,raX < eps,npos,iaPos)
+    IF (npos > 0) THEN
+      raY(iaPos(1:npos)) = 1.0
+    END IF
+
+    CALL FindInVector(kMaxPts,raX >= eps,npos,iaPos)
+    IF (npos > 0) THEN
+      raY(iaPos(1:npos)) = exp(-raX(iaPos(1:npos))) - raX(iaPos(1:npos))*raY(iaPos(1:npos))
+    END IF
 
     RETURN
     end SUBROUTINE expint2
@@ -560,19 +565,21 @@ CONTAINS
     COMPLEX*16 daZ(kMaxPts)
     DOUBLE PRECISION :: daPterm(kMaxPts),daTerm(kMaxPts)
     DOUBLE PRECISION :: am2(kMaxPts),am1(kMaxPts),bm2(kMaxPts),bm1(kMaxPts)
-    DOUBLE PRECISION :: f(kMaxPts),oldf(kMaxPts),alpha,beta,a,b
+    DOUBLE PRECISION :: f(kMaxPts),oldf(kMaxPts),alpha
+
+    REAL, DIMENSION(:), ALLOCATABLE :: raBeta,raA,raB
+    INTEGER :: AllocateStatus,DeAllocateStatus
+    INTEGER :: iaPos(kMaxPts),npos
 
     DATA (P(iJ),iJ=1,9)/ &
     -3.602693626336023d-09, -4.819538452140960d-07, -2.569498322115933d-05, &
     -6.973790859534190d-04, -1.019573529845792d-02, -7.811863559248197d-02, &
     -3.012432892762715d-01, -7.773807325735529d-01,  8.267661952366478d+00/
 
-    DO iFr = 1,kMaxPts
-      daY(iFr) = 0.0D0
-      DO iJ = 1,9
-        iI = 9-iJ
-        daY(iFr) = daY(iFr) + p(iJ)*((raX(iFr)*1.0D0)**iI)
-      END DO
+    daY = 0.0d0
+    DO iJ = 1,9
+      iI = 9-iJ
+      daY = daY + p(iJ)*((raX*1.0D0)**iI)
     END DO
 
 ! polyv = polyval(p,real(x))
@@ -593,127 +600,130 @@ CONTAINS
 ! ---------- these are for x >= 0 ------------------------------------------
     IF (iPos >= 1) THEN
       egamma = 5.7721566490153286061D-1
-      DO iK = 1,iPos
-        iFr = iaPositive(iK)
-        daX(iFr) = raX(iFr)*1.0d0
-        daZ(iFr) = -egamma - cdlog(dcmplx(daX(iFr),0.0D0))
-        daPterm(iFr) = daX(iFr)
-        daterm(iFr)  = daX(iFr)
-      END DO
+      daX(iaPositive(1:iPos)) = raX(iaPositive(1:iPos))*1.0d0
+      daZ(iaPositive(1:iPos)) = -egamma - cdlog(dcmplx(daX(iaPositive(1:iPos)),0.0D0))
+      daPterm(iaPositive(1:iPos)) = daX(iaPositive(1:iPos))
+      daterm(iaPositive(1:iPos))  = daX(iaPositive(1:iPos))
 
       iJ = 1
 
  10   CONTINUE
       iJ = iJ + 1
 
-      DO iK = 1,iPos
-        iFr = iaPositive(iK)
-        daZ(iFr) = daZ(iFr) + daTerm(iFr)
-        daPterm(iFr) = -daX(iFr) * daPterm(iFr)/iJ
-        daTerm(iFr)  = daPterm(iFr)/iJ
-      END DO
+      daZ(iaPositive(1:iPos)) = daZ(iaPositive(1:iPos)) + daTerm(iaPositive(1:iPos))
+      daPterm(iaPositive(1:iPos)) = -daX(iaPositive(1:iPos)) * daPterm(iaPositive(1:iPos))/iJ
+      daTerm(iaPositive(1:iPos))  = daPterm(iaPositive(1:iPos))/iJ
 
-      ! check for convergence
+      ! check for convergence : any of the terms fail then go back to 10
       iFound = -1
-      DO iK = 1,iPos
-        iFr = iaPositive(iK)
-        IF (abs(daTerm(iFr)) > 1.0d-16*cdabs(daZ(iFr))) THEN
-          iFound = +1
-          GOTO 11
-        END IF
-      END DO
+      CALL FindInVector(iPos,abs(daTerm(iaPositive(1:iPos))) > 1.0d-16*cdabs(daZ(iaPositive(1:iPos))),npos,iaPos)
+      IF (npos > 0) THEN
+        iFound = +1
+        GOTO 11
+      END IF
+!      DO iK = 1,iPos
+!        iFr = iaPositive(iK)
+!        IF (abs(daTerm(iFr)) > 1.0d-16*cdabs(daZ(iFr))) THEN
+!          iFound = +1
+!          GOTO 11
+!        END IF
+!      END DO
  11   CONTINUE
 
       IF (iFound > 0) THEN
         GOTO 10
       END IF
 
-      DO iK = 1,iPos
-        iFr = iaPositive(iK)
-        raY(iFr) = sngl(dreal(daZ(iFr)))
-      END DO
+      raY(iaPositive(1:iPos)) = sngl(dreal(daZ(iaPositive(1:iPos))))
     END IF
 
 ! ---------- these are for x < 0  ------------------------------------------
     IF (iNeg >= 1) THEN
+
+      ALLOCATE ( raBeta(iNeg), STAT = AllocateStatus)
+      IF (AllocateStatus /= 0) STOP "*** Not enough memory for raBeta ***"      
+      ALLOCATE ( raA(iNeg), STAT = AllocateStatus)
+      IF (AllocateStatus /= 0) STOP "*** Not enough memory for raA ***"      
+      ALLOCATE ( raB(iNeg), STAT = AllocateStatus)
+      IF (AllocateStatus /= 0) STOP "*** Not enough memory for raB ***"      
+
       iN = 1  !calculating E1(x)
 
-      DO iK = 1,iNeg
-        iFr = iaNegative(iK)
-        daX(iFr)  = raX(iFr)*1.0d0
-        am2(iFr)  = 0.0D0
-        bm2(iFr)  = 1.0D0
-        am1(iFr)  = 1.0D0
-        bm1(iFr)  = daX(iFr)
-        f(iFr)    = am1(iFr)/bm1(iFr)
-        oldf(iFr) = 1.0D100
-      END DO
+      daX(iaNegative(1:iNeg))  = raX(iaNegative(1:iNeg))*1.0d0
+      am2(iaNegative(1:iNeg))  = 0.0D0
+      bm2(iaNegative(1:iNeg))  = 1.0D0
+      am1(iaNegative(1:iNeg))  = 1.0D0
+      bm1(iaNegative(1:iNeg))  = daX(iaNegative(1:iNeg))
+      f(iaNegative(1:iNeg))    = am1(iaNegative(1:iNeg))/bm1(iaNegative(1:iNeg))
+      oldf(iaNegative(1:iNeg)) = 1.0D100
 
       iJ = 2
    20 CONTINUE
 
       ! calculate the coefficients of the recursion formulas for j even
-      alpha = iN - 1+(iJ/2) ! note: beta= 1
+      alpha = iN - 1+(iJ/2) ! note: beta = 1
 
-      DO iK = 1,iNeg
-        iFr = iaNegative(iK)
-            
-       !calculate A(j), B(j), and f(j)
-        a = am1(iFr) + alpha * am2(iFr)
-        b = bm1(iFr) + alpha * bm2(iFr)
-           
-        ! save new normalized variables for next pass through the loop
-        !  note: normalization to avoid overflow or underflow
-        am2(iFr) = am1(iFr) / b
-        bm2(iFr) = bm1(iFr) / b
-        am1(iFr) = a / b
-        bm1(iFr) = 1.0D0
-            
-        oldf(iFr) =f(iFr)
-        f(iFr) = am1(iFr)
-      END DO
+      !calculate A(j), B(j), and f(j)
+      raA = am1(iaNegative(1:iNeg)) + alpha * am2(iaNegative(1:iNeg))
+      raB = bm1(iaNegative(1:iNeg)) + alpha * bm2(iaNegative(1:iNeg))
+         
+      ! save new normalized variables for next pass through the loop
+      !  note: normalization to avoid overflow or underflow
+      am2(iaNegative(1:iNeg)) = am1(iaNegative(1:iNeg)) / raB
+      bm2(iaNegative(1:iNeg)) = bm1(iaNegative(1:iNeg)) / raB
+      am1(iaNegative(1:iNeg)) = raA / raB
+      bm1(iaNegative(1:iNeg)) = 1.0D0
+          
+      oldf(iaNegative(1:iNeg)) =f(iaNegative(1:iNeg))
+      f(iaNegative(1:iNeg)) = am1(iaNegative(1:iNeg))
 
       iJ = iJ+1
 
       ! calculate the coefficients for j odd
       alpha = (iJ-1)/2
-      DO iK = 1,iNeg
-        iFr = iaNegative(iK)
-        beta = daX(iFr)
-        a = beta * am1(iFr) + alpha * am2(iFr)
-        b = beta * bm1(iFr) + alpha * bm2(iFr)
-        am2(iFr) = am1(iFr) / b
-        bm2(iFr) = bm1(iFr) / b
-        am1(iFr) = a / b
-        bm1(iFr) = 1.0D0
-        oldf(iFr) = f(iFr)
-        f(iFr) = am1(iFr)
-      END DO
+      raBeta = daX(iaNegative(1:iNeg))
+      raA = raBeta * am1(iaNegative(1:iNeg)) + alpha * am2(iaNegative(1:iNeg))
+      raB = raBeta * bm1(iaNegative(1:iNeg)) + alpha * bm2(iaNegative(1:iNeg))
+      am2(iaNegative(1:iNeg)) = am1(iaNegative(1:iNeg)) / raB
+      bm2(iaNegative(1:iNeg)) = bm1(iaNegative(1:iNeg)) / raB
+      am1(iaNegative(1:iNeg)) = raA / raB
+      bm1(iaNegative(1:iNeg)) = 1.0D0
+      oldf(iaNegative(1:iNeg)) = f(iaNegative(1:iNeg))
+      f(iaNegative(1:iNeg)) = am1(iaNegative(1:iNeg))
 
       iJ = iJ+1
            
-      ! check for convergence
+      ! check for convergence, any fails go back to 20
       iFound = -1
-      DO iK = 1,iNeg
-        iFr = iaNegative(iK)
-        IF (abs(f(iFr)-oldf(iFr)) > 1.0d-14*abs(f(iFr))) THEN
-          iFound = +1
-          GOTO 21
-        END IF
-      END DO
-  21 CONTINUE
+      CALL FindInVector(iNeg,abs(f(iaNegative(1:iNeg))-oldf(iaNegative(1:iNeg))) > 1.0d-14*abs(f(iaNegative(1:iNeg))),npos,iaPos)
+      IF (npos > 0) THEN
+        iFound = +1
+        GOTO 21
+      END IF
+!      DO iK = 1,iNeg
+!        iFr = iaNegative(iK)
+!        IF (abs(f(iFr)-oldf(iFr)) > 1.0d-14*abs(f(iFr))) THEN
+!          iFound = +1
+!          GOTO 21
+!        END IF
+!      END DO
+  21  CONTINUE
 
-    IF (iFound > 0) THEN
-      GOTO 20
-    END IF
+      IF (iFound > 0) THEN
+        GOTO 20
+      END IF
 
-    DO iK = 1,iNeg
-      iFr = iaNegative(iK)
-      daY(iFr) =  exp(-daX(iFr)) * f(iFr)
-     !!! daY is really complex, but ignore the imag part :
+      daY(iaNegative(1:iNeg)) =  exp(-daX(iaNegative(1:iNeg))) * f(iaNegative(1:iNeg))
+      !!! daY is really complex, but ignore the imag part :
       !!!     - i*pi*((real(xk)<0)&(imag(xk)==0))
-      raY(iFr) = sngl(daY(iFr))
-    END DO
+      raY(iaNegative(1:iNeg)) = sngl(daY(iaNegative(1:iNeg)))
+
+      DEALLOCATE (raBeta, STAT = DeAllocateStatus)
+      IF (DeAllocateStatus /= 0) STOP "*** Error while deallocating raBeta ***"
+      DEALLOCATE (raA, STAT = DeAllocateStatus)
+      IF (DeAllocateStatus /= 0) STOP "*** Error while deallocating raA ***"
+      DEALLOCATE (raB, STAT = DeAllocateStatus)
+      IF (DeAllocateStatus /= 0) STOP "*** Error while deallocating raB ***"
 
     END IF
 
@@ -736,25 +746,24 @@ CONTAINS
 
 ! local vars
     INTEGER :: iI
+    INTEGER :: iaPos(kMaxPts),npos
 
-    DO iI = 1,kMaxPts
-      IF (raX(iI) < 0.0) THEN
-        write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
-        write(kStdErr,*) 'cannot have negative values!'
-        CALL DoStop
-      ELSE
-        raY(iI) = fastExpint(3,raX(iI))
-      END IF
-    END DO
+    CALL FindInVector(kMaxPts,raX < 0,npos,iaPos)
+    IF (npos > 0) THEN
+      write(kStdWarn,'(I5)') 'found ',npos,' elements less than zero in expintfast3, reset to 0 '
+      raX(iaPos(1:npos)) = 0.0
+    END IF
+
+    raY = rafastExpint(3,raX)
 
     RETURN
     end SUBROUTINE expintfast3
 
 !************************************************************************
 ! this is fast exponential integrals, from Numerical recipes
-! called by SUBROUTINE expintfast3(n,raX)
+! called by eg SUBROUTINE expintfast3(n,raX)
 
-    REAL FUNCTION fastExpint(n,x)
+    FUNCTION rafastExpint(n,raX)
 
     IMPLICIT NONE
 
@@ -762,73 +771,107 @@ CONTAINS
 
 ! input vars
     INTEGER :: n
-    REAL :: x
+    REAL :: raX(kMaxPts)
+! output vars
+    REAL :: rafastExpint(kMaxPts)
 
 ! local vars
     INTEGER :: MaxIT
-    REAL :: Euler,FPmin,Eps
+    REAL :: Euler,FPmin
 
-    INTEGER :: i,ii,nm1
-    REAL :: r,fact,del,psi,a,b,c,d,h
+    INTEGER :: i,ii,nm1,iStop
+    REAL :: r(kMaxPts),fact(kMaxPts),del(kMaxPts),psi(kMaxPts),a(kMaxPts),b(kMaxPts),c(kMaxPts),d(kMaxPts),h(kMaxPts)
+    INTEGER :: iaPos(kMaxPts),npos,iaPosx(kMaxPts),nposx
+    REAL :: eps
+
+    eps = 1.0e-28
        
     r      = 0.0
+
     MaxIT = 100
     Euler = 0.5772156649
     FPMin = 1.0e-30
-    Eps   = 1.0e-7
+!    Eps   = 1.0e-7
 
     nm1 = n-1
     IF (n == 0) THEN
-      r = exp(-x)/x
-    ELSEIF (x <= Eps) THEN
-      r = 1.0/nm1
-    ELSEIF (x > 1.0) THEN
-      b = x + n
-      c = 1/FPmin
-      d = 1.0/b
-      h = d
-      DO i = 1,MAXIT
-        a = -i*(nm1+i)
-        b = b + 2.0
-        d = 1/(a*d+b)
-        c = b + a/c
-        del = c*d
-        h = h*del
-        IF (abs(del-1) <= eps) THEN
-          r = h*exp(-x)
-          GOTO 10
-        END IF
-      END DO
-
-    ELSEIF ((x >= Eps) .AND. (x <= 1.0)) THEN
-      !get first term ... wow
-      IF (nm1 /= 0) THEN
-        r = 1.0/nm1
-      ELSE
-        r = -log(x) - Euler
+      r = 1.0e28
+      CALL FindInVector(kMaxPts,raX > eps,npos,iaPos)
+      IF (npos > 0) THEN
+        r(iaPos(1:npos)) = exp(-raX(iaPos(1:npos)))/raX(iaPos(1:npos))
       END IF
-      fact = 1.0
-      DO i = 1,MaxIT
-        fact = fact * (-x/i)
-        IF (i /= nm1) THEN
-          del = -fact/(i-nm1)
+    ELSEIF (n > 0) THEN
+      CALL FindInVector(kMaxPts,raX < eps,npos,iaPos)
+      IF (npos > 0) THEN
+        r(iaPos(1:npos)) = 1.0/nm1
+      END IF     !! raX < eps
+
+      CALL FindInVector(kMaxPts,raX > 1.0,npos,iaPos)
+      IF (npos > 0) THEN
+        b(iaPos(1:nPos)) = raX(iaPos(1:nPos)) + n
+        c(iaPos(1:nPos)) = 1/FPmin
+        d(iaPos(1:nPos)) = 1.0/b(iaPos(1:nPos))
+        h(iaPos(1:nPos)) = d(iaPos(1:nPos))
+        iStop = -1
+        i = 0
+        DO WHILE ((i < MAXIT) .AND. (iStop < 0))
+          i = i + 1
+          a(iaPos(1:nPos)) = -i*(nm1+i)
+          b(iaPos(1:nPos)) = b(iaPos(1:nPos)) + 2.0
+          d(iaPos(1:nPos)) = 1/(a(iaPos(1:nPos))*d(iaPos(1:nPos))+b(iaPos(1:nPos)))
+          c(iaPos(1:nPos)) = b(iaPos(1:nPos)) + a(iaPos(1:nPos))/c(iaPos(1:nPos))
+          del(iaPos(1:nPos)) = c(iaPos(1:nPos))*d(iaPos(1:nPos))
+          h(iaPos(1:nPos)) = h(iaPos(1:nPos))*del(iaPos(1:nPos))
+
+          CALL FindInVector(npos,abs(del(iaPos(1:nPos))-1) < eps,nposx,iaPosx)
+          IF (nposx == npos) THEN
+            !! all done
+            r(iaPos(1:nPos)) = h(iaPos(1:nPos))*exp(-raX(iaPos(1:nPos)))
+            iStop = +1
+          END IF
+        END DO
+      END IF      !! raX > 1.0
+
+      CALL FindInVector(kMaxPts,(raX > eps .AND. raX <= 1.0),npos,iaPos)
+      IF (npos > 0) THEN
+        !get first term ... wow
+        IF (nm1 /= 0) THEN
+          r(iaPos(1:nPos)) = 1.0/nm1
         ELSE
-          psi = -euler
-          DO ii = 1,nm1
-            psi = psi + 1.0/ii
-          END DO
-          del = fact*(-log(x) + psi)
+          r(iaPos(1:nPos)) = -log(raX(iaPos(1:nPos))) - Euler
         END IF
-        r = r + del
-        IF (abs(del) < abs(r)*Eps) GOTO 10
-      END DO
-    END IF
+
+        fact(iaPos(1:nPos)) = 1.0
+        iStop = -1
+        i = 0
+        DO WHILE ((i < MAXIT) .AND. (iStop < 0))
+          i = i + 1
+          fact(iaPos(1:nPos)) = fact(iaPos(1:nPos)) * (-raX(iaPos(1:nPos))/i)
+          IF (i /= nm1) THEN
+            del(iaPos(1:nPos)) = -fact(iaPos(1:nPos))/(i-nm1)
+          ELSE
+            psi(iaPos(1:nPos)) = -euler
+            DO ii = 1,nm1
+              psi(iaPos(1:nPos)) = psi(iaPos(1:nPos)) + 1.0/ii
+            END DO
+            del(iaPos(1:nPos)) = fact*(-log(raX(iaPos(1:nPos))) + psi(iaPos(1:nPos)))
+          END IF
+          r(iaPos(1:nPos)) = r(iaPos(1:nPos)) + del(iaPos(1:nPos))
+
+          CALL FindInVector(npos,abs(del(iaPos(1:nPos))) < eps*abs(r(iaPos(1:nPos))),nposx,iaPosx)
+          IF (nposx == npos) THEN
+            !! all done
+            iStop = +1
+          END IF
+
+        END DO
+      END IF    !! raX > eps .AND. raX <= 1.0
+    END IF      !! if n == 0
       
- 10 CONTINUE
-    fastExpint = r
+    rafastExpint = r
 
     RETURN
-    end FUNCTION fastExpint
+    end FUNCTION rafastExpint
 
 !************************************************************************
 ! does expintegral raY = E3(raX), using fifth order polynom fits to expint3
@@ -846,6 +889,7 @@ CONTAINS
 ! local vars
     INTEGER :: iI,i,j,iWhich
     REAL :: raaPout(5,6)
+    INTEGER :: iaPos(kMaxPts),npos,iaPosx(kMaxPts),nposx
 
 ! this is for x > 0.00 and x <= 0.10
     DATA ((raaPout(i,j),j=1,6),i=1,1)/ &
@@ -872,45 +916,61 @@ CONTAINS
     &    3.360502391024836e-05,  9.969795018873142e-01, -2.884279567510683e+00, &
     &    9.510785069482322e+00, -2.619205947978609e+01,  3.863540676528253e+01/
 
-    DO iI = 1,kMaxPts
-      raY(iI) = 0.0
-      IF (raX(iI) < 0.0) THEN
-        write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
-        write(kStdErr,*) 'cannot have negative values!'
-        CALL DoStop
-      ELSEIF (raX(iI) <= 0.1) THEN
-        iWhich = 1
-        DO j = 1,6
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-        END DO
-      ELSEIF (raX(iI) <= 1.0) THEN
-        iWhich = 2
-        DO j = 1,6
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-        END DO
-      ELSEIF (raX(iI) <= 6.0) THEN
-        iWhich = 3
-        DO j = 1,6
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raX(iI))
-      ELSEIF (raX(iI) <= 10.0) THEN
-        iWhich = 4
-        DO j = 1,6
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raX(iI))
-      ELSEIF (raX(iI) <= 20.0) THEN
-        iWhich = 5
-        DO j = 1,6
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raX(iI))
-      ELSE !!   expint3(x) <= 1e-10 for x >= 20
-        iWhich = 6
-        raY(iI) = 0.0
-      END IF
-    END DO
+    raY = 0.0
+
+    IF (minval(raX) < 0.0) THEN
+      write(kStdErr,*) 'in expintsuperfast3_6 found minval(raX) < 0'
+      write(kStdErr,*) 'cannot have negative values, resetting to 0!'
+      WHERE (raX < 0)
+        raX = 0.0
+      END WHERE
+    END IF
+
+    CALL FindInVector(kMaxPts,raX <= 0.1,npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 1
+      DO j = 1,6
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)*(raX(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 0.1 .AND. raX <= 1.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 2
+      DO j = 1,6
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)*(raX(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 1.0 .AND. raX <= 6.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 3
+      DO j = 1,6
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)/(rax(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 6.0 .AND. raX <= 10.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 4
+      DO j = 1,6
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)/(rax(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 10.0 .AND. raX <= 20.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 5
+      DO j = 1,6
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)/(rax(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 20.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 6
+      raY(iaPos(1:npos)) = 0.0
+    END IF
 
     RETURN
     end SUBROUTINE expintsuperfast3_6
@@ -931,6 +991,7 @@ CONTAINS
 ! local vars
     INTEGER :: iI,i,j,iWhich,iaMax(5),iCnt
     REAL :: raaPout(5,6)
+    INTEGER :: iaPos(kMaxPts),npos,iaPosx(kMaxPts),nposx
 
     DATA (iaMax(i),i=1,5) /3, 6, 6, 3, 3/
 
@@ -956,50 +1017,66 @@ CONTAINS
     DATA ((raaPout(i,j),j=1,3),i=5,5)/ &
     &   1.873706336320716e-03,   9.115323790575932e-01, -1.489123902774130e+00/
 
-    DO iI = 1,kMaxPts
-      raY(iI) = 0.0
-      IF (raX(iI) < 0.0) THEN
-        write(kStdErr,*) 'in expint iI,raX(iI) = ',iI,raX(iI)
-        write(kStdErr,*) 'cannot have negative values!'
-        CALL DoStop
-      ELSEIF (raX(iI) <= 0.1) THEN
-        iWhich = 1
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-        END DO
-      ELSEIF (raX(iI) <= 1.0) THEN
-        iWhich = 2
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raX(iI)**(j-1))
-        END DO
-      ELSEIF (raX(iI) <= 6.0) THEN
-        iWhich = 3
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raX(iI))
-      ELSEIF (raX(iI) <= 10.0) THEN
-        iWhich = 4
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raX(iI))
-      ELSEIF (raX(iI) <= 20.0) THEN
-        iWhich = 5
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raX(iI))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raX(iI))
-      ELSE !!   expint3(x) <= 1e-10 for x >= 20
-        iWhich = 6
-        raY(iI) = 0.0
-      END IF
-    END DO
+    raY = 0.0
+
+    IF (minval(raX) < 0.0) THEN
+      write(kStdErr,*) 'in expintsuperfast3 found minval(raX) < 0'
+      write(kStdErr,*) 'cannot have negative values, resetting to 0!'
+      WHERE (raX < 0)
+        raX = 0.0
+      END WHERE
+    END IF
+
+    CALL FindInVector(kMaxPts,raX <= 0.1,npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 1
+      iCnt = iaMax(iWhich)
+      do j = 1,iCnt
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)*(raX(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 0.1 .AND. raX <= 1.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 2
+      iCnt = iaMax(iWhich)
+      do j = 1,iCnt
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)*(raX(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 1.0 .AND. raX <= 6.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 3
+      iCnt = iaMax(iWhich)
+      do j = 1,iCnt
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)/(rax(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 6.0 .AND. raX <= 10.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 4
+      iCnt = iaMax(iWhich)
+      do j = 1,iCnt
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)/(rax(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 10.0 .AND. raX <= 20.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 5
+      iCnt = iaMax(iWhich)
+      do j = 1,iCnt
+          raY(iaPos(1:npos)) = raY(iaPos(1:npos)) + raaPout(iWhich,j)/(rax(iaPos(1:npos))**(j-1))
+      END DO
+    END IF
+
+    CALL FindInVector(kMaxPts,(raX > 20.0),npos,iaPos)
+    IF (npos >= 1) THEN
+      iWhich = 6
+      raY(iaPos(1:npos)) = 0.0
+    END IF
 
     RETURN
     end SUBROUTINE expintsuperfast3
@@ -1019,77 +1096,11 @@ CONTAINS
     REAL :: raY(kMaxPts)
 
 ! local vars
-    INTEGER :: iI,i,j,iWhich,iaMax(5),iCnt
-    REAL :: raaPout(5,6)
+    REAL :: raX(kMaxPts)
 
-    DATA (iaMax(i),i=1,5) /3, 6, 6, 3, 3/
-
-! this is for x > 0.00 and x <= 0.10
-    DATA ((raaPout(i,j),j=1,3),i=1,1)/ &
-    &   4.999958864847588e-01, -9.704714999886551e-01,  1.357944294418206e+00/
-
-! this is for x > 0.10 and x <= 1.00
-    DATA ((raaPout(i,j),j=1,6),i=2,2)/ &
-    &   4.964930888860016e-01,  -9.002236958326287e-01,  1.058882468914909e+00, &
-    -9.590227134465121e-01,   5.595049802866501e-01, -1.460130149043994e-01/
-
-! this is for x > 1.00 and x <= 6.00
-    DATA ((raaPout(i,j),j=1,6),i=3,3)/ &
-    &   9.348983139232728e-03,   8.153540216831002e-01, -1.318262705075364e+00, &
-    &   1.507590471592263e+00,  -9.895617788618024e-01,  2.739113519528383e-01/
-
-! this is for x > 6.00 and x <= 10.00
-    DATA ((raaPout(i,j),j=1,3),i=4,4)/ &
-    &   6.850600578733759e-03,   8.121694943009118e-01, -9.875485935560442e-01/
-
-! this is for x > 10.00 and x <= 20.00
-    DATA ((raaPout(i,j),j=1,3),i=5,5)/ &
-    &   1.873706336320716e-03,   9.115323790575932e-01, -1.489123902774130e+00/
-
-    DO iI = 1,kMaxPts
-      raY(iI) = 0.0
-      IF (raaX(iI,iL) < 0.0) THEN
-        write(kStdErr,*) 'in expint iI,raaX(iI,iL) = ',iI,raaX(iI,iL)
-        write(kStdErr,*) 'cannot have negative values!'
-        CALL DoStop
-      ELSEIF (raaX(iI,iL) <= 0.1) THEN
-        iWhich = 1
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-            raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
-        END DO
-      ELSEIF (raaX(iI,iL) <= 1.0) THEN
-        iWhich = 2
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*(raaX(iI,iL)**(j-1))
-        END DO
-      ELSEIF (raaX(iI,iL) <= 6.0) THEN
-        iWhich = 3
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raaX(iI,iL))
-      ELSEIF (raaX(iI,iL) <= 10.0) THEN
-        iWhich = 4
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raaX(iI,iL))
-      ELSEIF (raaX(iI,iL) <= 20.0) THEN
-        iWhich = 5
-        iCnt = iaMax(iWhich)
-        DO j = 1,iCnt
-          raY(iI) = raY(iI) + raaPout(iWhich,j)*((1.0/raaX(iI,iL))**(j-1))
-        END DO
-        raY(iI) = raY(iI)*exp(-raaX(iI,iL))
-      ELSE !!   expint3(x) <= 1e-10 for x >= 20
-        iWhich = 6
-        raY(iI) = 0.0
-      END IF
-    END DO
+    raX = raaX(:,iL)
+    raY = 0.0
+    CALL expintsuperfast3(raX,raY)
 
     RETURN
     end SUBROUTINE expintsuperfast3matrix

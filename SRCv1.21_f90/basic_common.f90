@@ -68,6 +68,41 @@ IMPLICIT NONE
 CONTAINS
 
 !************************************************************************
+! see https://stackoverflow.com/questions/11691925/fortran-equivalent-to-matlab-find-application-to-slicing-matrix-without-memory
+! example usage
+!     REAL*8 A(8)
+!     INTEGER n, npos, pos(8)
+!     n=8
+!     A = (/ 19, 20, 21, 22, 23, 24, 25, 26 /)
+!     ! Find the positions of vector A that is equal to 22 
+!     CALL FindInVector(n,A==22,npos,pos)
+!     WRITE(*,*) pos(1:npos)
+!
+!     ! Find the positions of vector A that contains even numbers 
+!     CALL FindInVector(n,ABS(A/2.d0-INT(A/2.d0))<1.d-2,npos,pos)
+!     WRITE(*,*) pos(1:npos)
+
+     SUBROUTINE FindInVector(n,TF,npos,pos)
+    ! Inlet variables
+    INTEGER,INTENT(IN):: n      ! Dimension of logical vector
+    LOGICAL,INTENT(IN):: TF(n)  ! Logical vector (True or False)
+
+    ! Outlet variables
+    INTEGER npos                ! number of "true" conditions
+    INTEGER pos(n)              ! position of "true" conditions
+
+    ! Internal variables
+    INTEGER i                   ! counter
+    INTEGER v(n)                ! vector of all positions
+
+    pos = 0                     ! Initialize pos
+    FORALL(i=1:n)   v(i) = i    ! Enumerate all positions
+    npos  = COUNT(TF)           ! Count the elements of TF that are .True.
+    pos(1:npos)= pack(v, TF)    ! With Pack function, verify position of true conditions
+
+    END SUBROUTINE FindInVector
+
+!************************************************************************
 ! this integer function is "floor" -- assume rX > 0
     INTEGER FUNCTION iFloor(rX)
      
