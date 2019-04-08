@@ -329,16 +329,16 @@ CONTAINS
       !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
       raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
       IF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
-        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
-        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
+        write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
+        write(kStdWarn,'(A90)') '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox            '
+        write(kStdErr,'(A90)')  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
+        write(kStdErr,'(A90)')  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox            '
         raKThermalAngle(iC) = +53.13
       ELSEIF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary == 43)) THEN
-        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
-        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+        write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary == 43'
+        write(kStdWarn,'(A90)') '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox           '
+        write(kStdErr,'(A90)')  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary == 43'
+        write(kStdErr,'(A90)')  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox            '
         raKThermalAngle(iC) = +53.13
         kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
         kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc

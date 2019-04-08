@@ -593,6 +593,8 @@ v1.21
 4/6/19         Overloaded the planck functions (real, double, scalar freq or array freq)
                    radtot and ttorad
                Have overloaded most of the spline and sort functions (read, double)
+               Have also used equivalent of vectorized Matlab "find" for the different regimes of
+               background thermal (depending on OD, the expint3 is solved differently)
 
 4/3/19         Fixed the clear sky and PCLSAM allsky flux bugs
                (a) clear sky flux bug was actually in v1.20 (see comment)

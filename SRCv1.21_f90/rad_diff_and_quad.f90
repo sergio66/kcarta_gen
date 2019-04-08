@@ -141,10 +141,10 @@ CONTAINS
         iNumLayer,iaRadLayer, &
         raaAbsCoeff,rFracTop,rFracBot,iaRadLayerTemp,iT, &
         iExtraThermal,raExtraThermal,iDoAcos35)
-    ! else if we do not want thermal term
     ELSE IF (iDoThermal < 0) THEN
-    ! do nothing!! since raThermal has already been initialised to zero
-        write(kStdWarn,*) 'no thermal approx to include!'
+      ! else if we do not want thermal term
+      ! do nothing!! since raThermal has already been initialised to zero
+      write(kStdWarn,*) 'no thermal approx to include!'
     END IF
 
 ! whether we did gaussian quadrature or diffusive approx, we now need the 2pi
@@ -343,24 +343,24 @@ CONTAINS
           ELSE
             rW = 1.0
           END IF
-          DO iFr=1,kMaxPts
-            ! find the diffusive angles for the layer beneath
-            raAngleTr_m1   = raFindDiffusiveAngleExp(raL2Gm1)
-            raFreqAngle_m1 = rAangleTr_m1
-            raAngleTr_m1   = exp(-raL2Gm1/raAngleTr_m1)
+
+          ! find the diffusive angles for the layer beneath
+          raAngleTr_m1   = raFindDiffusiveAngleExp(raL2Gm1)
+          raFreqAngle_m1 = raAngleTr_m1
+          raAngleTr_m1   = exp(-raL2Gm1/raAngleTr_m1)
                           
-            raAngleTr         = raFreqAngle
-            raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + sum(raAngleTr)
-            raAngleTr         = exp(-raL2G/raAngleTr)
+          raAngleTr         = raFreqAngle
+          raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + sum(raAngleTr)
+          raAngleTr         = exp(-raL2G/raAngleTr)
                           
-            ! Planckian emissions
-            raPlanck = ttorad(raFreq,rMPTemp)
-            raTemp   = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
-            ! get ready for the layer beneath
-            raL2G       = raL2Gm1
-            raL2Gm1     = raL2Gm1-raaOrigAbsCoeff(:,iLm1)*rW
-            raFreqAngle = raFreqAngle_m1
-          END DO
+          ! Planckian emissions
+          raPlanck = ttorad(raFreq,rMPTemp)
+          raTemp   = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
+          ! get ready for the layer beneath
+          raL2G       = raL2Gm1
+          raL2Gm1     = raL2Gm1-raaOrigAbsCoeff(:,iLm1)*rW
+          raFreqAngle = raFreqAngle_m1
+
           ! print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
         END DO
 
@@ -369,15 +369,14 @@ CONTAINS
           iL          = iaRadLayer(1)
           rMPTemp     = raVT1(iL)
           raAngleTr_m1 = 1.0
-          DO iFr=1,kMaxPts
                         
-            raAngleTr    = raFreqAngle
-            raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + sum(raAngleTr)
-            raAngleTr    = exp(-raL2G/raAngleTr)
+          raAngleTr    = raFreqAngle
+          raAvgAnglePerLayer(iL) = raAvgAnglePerLayer(iL) + sum(raAngleTr)
+          raAngleTr    = exp(-raL2G/raAngleTr)
                           
-            raPlanck  = ttorad(raFreq,rMPTemp)
-            raTemp    = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
-          END DO
+          raPlanck  = ttorad(raFreq,rMPTemp)
+          raTemp    = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
+
           ! print *,iLay,raFreq(1),raTemp(1),raAngleTr_m1(1),raAngleTr(1),raVT1(iL),rCosDiff,raL2G(1)
         END IF
     END IF
@@ -1293,18 +1292,6 @@ CONTAINS
 ! if iDoSolar = 1, then include solar contribution
 ! if iDoSolar = -1, then solar contribution = 0
     iDoSolar = kSolar
-! comment this out in v1.10+ as this is already set in n_rad_jac_scat.f
-!      IF (iDoSolar .GE. 0) THEN    !set the solar reflectivity
-!        IF (kSolarRefl .LT. 0.0) THEN
-!          DO iFr = 1,kMaxPts
-!            raSunRefl(iFr) = (1.0-raUseEmissivity(iFr))/kPi
-!          END DO
-!        ELSE
-!          DO iFr = 1,kMaxPts
-!            raSunRefl(iFr) = kSolarRefl
-!          END DO
-!        END IF
-!      END IF
 
 ! if iDoThermal = -1 ==> thermal contribution = 0
 ! if iDoThermal = +1 ==> do actual integration over angles

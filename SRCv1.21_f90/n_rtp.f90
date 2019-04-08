@@ -2317,37 +2317,26 @@ CONTAINS
     END IF
           
     IF ((abs(raKThermalAngle(iC) - +1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
-      write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-      write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
-      write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-      write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox'
+      write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
+      write(kStdWarn,'(A90)') '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox in n_rtp   '
+      write(kStdErr,'(A90)')  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
+      write(kStdErr,'(A90)')  '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox  in n_rtp   '
       raKThermalAngle(iC) = +53.13
       raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)
       kSetThermalAngle = +1   !use acos(3/5)
     ELSEIF ((abs(raKThermalAngle(iC) - +1.0) <= 0.000001) .AND. (kTemperVary == 43)) THEN
-      write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-      write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
-      write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-      write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
+      write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary == 43'
+      write(kStdWarn,'(A90)') '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox in n_rtp   '
+      write(kStdErr,'(A90)')  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary == 43'
+      write(kStdErr,'(A90)')  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox in n_rtp   '
       raKThermalAngle(iC) = +53.13
       raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)
       kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
       kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
-    !      ELSEIF ((abs(raKThermalAngle(iC) - -2.0) .LE. 0.000001) .AND. (kTemperVary .EQ. 43)) THEN
-    !        write(kStdWarn,*) '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-    !        write(kStdWarn,*) '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
-    !        write(kStdErr,*)  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers'
-    !        write(kStdErr,*)  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox'
-    !        raKThermalAngle(iC) = +53.13
-    !       raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)
-    !        kThermal = -2           !use accurate angles lower down in atm, linear in tau temp variation, one angle calc
-    !        kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation, one angle calc
     END IF
 
-!      print *,'kSetThermalAngle = ',kSetThermalAngle
-
     iakThermalJacob(iC) = 1
-! use the solar on/off, thermal on/off etc.
+    ! use the solar on/off, thermal on/off etc.
     kSolar        = iaKSolar(iC)
     IF (abs(raKSolarAngle(iC) - 90.0) <= 1.0e-5) then
       write(kStdWarn,*) 'resetting solar angle = 90 to 89.9, iAtm = ',iC
@@ -2359,6 +2348,9 @@ CONTAINS
     kThermalAngle = raKThermalAngle(iC)
     kThermalJacob = iakThermalJacob(iC)
 
+    FMT = '(A,4(I3,1X),F8.3)'
+    write(kStdWarn,FMT) '(1) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
+
     IF (kThermalAngle  < 0) THEN
       kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
       IF ((kFlux > 0) .OR. (kTemperVary >= 4)) THEN
@@ -2369,9 +2361,9 @@ CONTAINS
     ELSE
       kSetThermalAngle = +1   !use user specified angle everywhere
     END IF
-    
-    FMT = '(A,3(I3,1X))'
-    write(kStdWarn,FMT) 'in rtp_interface.f --> kFlux,kTemperVary,kSetThermalAngle = ',kFlux,kTemperVary,kSetThermalAngle
+
+    FMT = '(A,4(I3,1X),F8.3)'
+    write(kStdWarn,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
 
     IF (iDirection > 0) THEN
       ! check things make sense for downlook in
