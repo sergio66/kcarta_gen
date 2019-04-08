@@ -653,11 +653,11 @@ CONTAINS
           
 !!! >>>>>>>>>>>>> uncomment this if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
 ! kTemperVary = +43
-! F (iTemperVary .NE. kTemperVary) THEN
+! IF (iTemperVary .NE. kTemperVary) THEN
 !  write(kStdWarn,*) 'Looks like you want to override kTemperVary from ',kTemperVary,' to ',iTemperVary
 !  write(kStdErr,*) 'Looks like you want to override kTemperVary from ',kTemperVary,' to ',iTemperVary
 !  kTemperVary = iTemperVary
-! ND IF
+! END IF
 !!! >>>>>>>>>>>>> uncomment this if you want RT to do what LBLRTM does <<<<<<<<<<<<<<<<<<<<<<
                 
     IF (kTemperVary == -1) THEN

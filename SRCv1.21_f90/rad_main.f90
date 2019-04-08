@@ -794,7 +794,7 @@ CONTAINS
         IF (kOuterLoop == 1) THEN
                 write(kStdErr,*) 'upwelling radiances, linear in tau, vary local angle with layer'
         END IF
-        write(kStdWarn,*) 'upwelling radiances, linear in tau, vary local angle with layer'
+        write(kStdWarn,*) 'upwelling radiances, linear in tau, vary local angle with layer',iVary,kTemperVary
         CALL rad_trans_SAT_LOOK_DOWN_LINEAR_IN_TAU_VARY_LAYER_ANGLE(iVary,raFreq, &
             raInten,raVTemp, &
             raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
@@ -2877,8 +2877,6 @@ CONTAINS
         CALL wrtout(iIOUN,caOutName,raFreq,raInten)
       END IF
               
-      !      rJunk = rJunk * exp(-raaAbs_LBLRTM_zeroUA(1,iL)/rCos) + ttorad(raFreq(1),rMPTemp)*(1-exp(-raaAbs_LBLRTM_zeroUA(1,iL)/rCos))
-      !      print *,iLay,raPressLevels(iL),rMPTemp,raInten(1),rJunk
     END DO
           
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^

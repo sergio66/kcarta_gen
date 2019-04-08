@@ -123,19 +123,19 @@ CONTAINS
           
 ! now do the radiative transfer!!!
     IF ((kSetThermalAngle == 2) .OR. (iDothermal == 2)) THEN
-      write(kStdWarn,*) 'doing background thermal using LINEAR-in-tau slow/accurate integration over zenith angles'
-      write(kStdWarn,*) '  this is the LBLRTM 3angle style'
+      write(kStdWarn,'(A)') 'doing background thermal using LINEAR-in-tau slow/accurate integration over zenith angles'
+      write(kStdWarn,'(A)') '  this is the LBLRTM 3angle style'
       CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq, &
         raPressLevels,raTPressLevels, &
         raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop, &
         rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
     ELSEIF (iDoThermal == 1) THEN
-      write(kStdWarn,*) 'doing background thermal using CONST-in-tau slow/accurate integration over zenith angles'
+      write(kStdWarn,'(A)') 'doing background thermal using CONST-in-tau slow/accurate integration over zenith angles'
       CALL IntegrateOverAngles(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop, &
         rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
     ELSE IF (iDoThermal == 0) THEN
-      write(kStdWarn,*) 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
+      write(kStdWarn,'(A)') 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
       CALL DoDiffusivityApprox(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer, &
