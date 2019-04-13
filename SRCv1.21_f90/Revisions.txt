@@ -195,7 +195,7 @@ Future plans
   -------------------------------------------------------------------------- 
   | Test and run  NLTE Compressed ODs                                      |
   -------------------------------------------------------------------------- 
-v1.21   f90 version, using implied do loops!
+v1.21   f90 version, using implied do loops, function/subroutine overloads!
 
 v1.20   f90 version! The Modules meant a lot of subroutines/files got rerranged
         This may get cleaned up further along the line
@@ -590,6 +590,13 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
+4/13/19        Trying to bring back the limb view calcs
+               (a) using rtp file
+                   look at n_rtp : if you set [nemis = 1, emis > 1], 
+                   then this tells the code you are doing limb view
+               (b) or you can try to use nm_radnce, set 
+                      [raPressStart = 150 mb (example), raSatAngle >= 80, raSetEmis > 1]
+
 4/6/19         Overloaded the planck functions (real, double, scalar freq or array freq)
                    radtot and ttorad
                Have overloaded most of the spline and sort functions (read, double)

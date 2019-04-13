@@ -14,7 +14,10 @@
     use kcoeffmain         ! uncompression routines
     use knonlte            ! nonlte routines
     use scatter_interface  ! scattering
-    
+
+    use rad_limb           ! limb radiances
+    use jac_limb           ! limb jacobians
+        
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
 !   kcartaparam.f90  : parameter declarations (for the array sizes)
@@ -1293,34 +1296,34 @@
             ELSEIF ((kWhichScatterCode == 0) .AND. (iaLimb(iAtm) > 0)) THEN
               ! %%%%%%%%%%%%% CLEAR SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               write(kStdWarn,*) ' ---> Clear Sky LIMB Computations ...'
-  	      write(kStdWarn,*) ' oops turned this off!!!'
-              write(kStdErr,*) ' ---> Clear Sky LIMB Computations ...'
-  	      write(kStdErr,*) ' oops turned this off!!!'
-  	      CALL DoStop
-!              CALL InterfaceClearSkyLimb( &
-!                   raFreq, &
-!                   raaSumAbCoeff,raMixVertTemp,caOutName, &
-!                   iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
-!                   raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
-!                   raSatAngle,raFracTop,raFracBot, &
-!                   iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-!                   raSurface,raSun,raThermal,raSunRefl, &
-!                   raLayAngles,raSunAngles,iTag,iActualTag, &
-!                   raThickness,raPressLevels,iProfileLayers,pProf, &
-!                   raTPressLevels,iKnowTP, &
-!                   rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
-!                   iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
-!                   raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
-!                   caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-!                   iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
-!                   daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
-!                   daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
-!                   daaUpperNLTEGasAbCoeffBloat, &
-!                   caOutUAFile,caOutBloatFile, &
-!                   caFLuxFile, &
-!                   caJacobFile,caJacobFile2, &
-!                   iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
-!                   iaJacob,iJacob)
+!  	      write(kStdWarn,*) ' oops turned this off!!!'
+!              write(kStdErr,*) ' ---> Clear Sky LIMB Computations ...'
+!  	      write(kStdErr,*) ' oops turned this off!!!'
+!  	      CALL DoStop
+              CALL InterfaceClearSkyLimb( &
+                   raFreq, &
+                  raaSumAbCoeff,raMixVertTemp,caOutName, &
+                   iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
+                   raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
+                   raSatAngle,raFracTop,raFracBot, &
+                   iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
+                   raSurface,raSun,raThermal,raSunRefl, &
+                   raLayAngles,raSunAngles,iTag,iActualTag, &
+                   raThickness,raPressLevels,iProfileLayers,pProf, &
+                   raTPressLevels,iKnowTP, &
+                   rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
+                   iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
+                   raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
+                   caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
+                   iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut, &
+                   daFreqBloat,daaSumNLTEGasAbCoeffBloat,daaPlanckCoeffBloat, &
+                   daaUpperPlanckCoeffBloat,daaUpperSumNLTEGasAbCoeffBloat, &
+                   daaUpperNLTEGasAbCoeffBloat, &
+                   caOutUAFile,caOutBloatFile, &
+                   caFLuxFile, &
+                   caJacobFile,caJacobFile2, &
+                   iNatm,iNumGases,iaGases,raaaAllDQ,raaaColDQ,raaAllDT,raaAmt, &
+                   iaJacob,iJacob)
 
             ELSE IF ((abs(kWhichScatterCode) /= 0) .AND. (iaLimb(iAtm) < 0)) THEN
               ! %%%%%%%%%%%%% CLOUDY SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

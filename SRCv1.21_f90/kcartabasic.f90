@@ -15,6 +15,9 @@
     use n_main           ! main reader for namelist
     use kcoeffmain       ! uncompression routines
     use knonlte          ! nonlte routines
+
+    use rad_limb           ! limb radiances
+    use jac_limb           ! limb jacobians
     
 !************************************************************************
 ! THIS IS THE MAIN FILE .. associated with it are the following files
