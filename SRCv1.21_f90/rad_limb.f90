@@ -11,11 +11,11 @@ USE ttorad_common
 USE spline_and_sort_and_common
 USE s_writefile
 USE clear_scatter_basic
-!USE jac_limb
+USE jac_limb
 !USE rad_flux
 !USE kbloat
 
-! GEOMETRY
+! 1D GEOMETRY
 !
 ! The ray comes from S to T then to A
 ! At S, radiation is Planck Cosmic Background (2.7 K) 
@@ -38,7 +38,40 @@ USE clear_scatter_basic
 !         ^                              |                             ^
 !
 !
-
+!
+!
+! 2D GEOMETRY
+!
+! The ray comes from S to T then to A
+! At S, radiation is Planck Cosmic Background (2.7 K) 
+! Then radiation propagetes "down" through atmosphere at steep angles till it gets to
+!   tangent point T (at which point the [satellite] zenith angle is basically 90 deg)
+! This is effectively the "surface" which "reflects" the radiation from ST, using refl = 1.0
+! And now radiation starts going "up" through the atmosphere; note emissivity = 0.0 (no surface term)
+!   till it gets to satellite point A
+!
+!  satellite                        tangent point               deep space
+!   A                                    T                                 S
+!   <------
+!          ------
+!                 -----
+!                      ------
+!                            -----
+!                                 -------|
+!                                        |------
+!                                        |      ------
+!                                        |             -------
+!                                        |                    -------
+!                                        |                            ---------
+!                                        |
+!                                 -      |     -
+!                           -            |           -
+!                     -           ^      |     ^            -
+!               -           ^            |           ^            -
+!         -           ^                  |                 ^            -
+!               ^                        |                       ^ 
+!         ^                              |                             ^
+!
 
 IMPLICIT NONE
 
@@ -243,19 +276,17 @@ CONTAINS
 ! already been read in
     IF (kJacobian > 0 .AND. kActualJacs < 100) THEN
       write(kStdWarn,*) ' ---> Doing Jacobian Computations ...'
-      print *,'hmm commenting this out since I have not done .mod depenedancy correctly'
-      CALL dostop
-!      CALL find_jacobians_limb(raFreq,iTag,iActualTag,iFileID,caJacobFile, &
-!        raTSpace(iAtm),raTSurf(iAtm),raUseEmissivity, &
-!        raSatAngle(iAtm),raMixVertTemp,iNumGases,iaGases, &
-!        iAtm,iNatm,iaNumLayer(iAtm),iaaRadLayer, &
-!        raaaAllDQ,raaAllDT,raaSumAbCoeff,raaAmt,raInten, &
-!        raSurface,raSun,raThermal, &
-!        raFracTop(iAtm),raFracBot(iAtm), &
-!        iaJacob,iJacob,raaMix,raSunRefl, &
-!        raLayAngles,raSunAngles,kaFrStep(iTag), &
-!        raThickness,raPressLevels,iProfileLayers,pProf, &
-!        iNLTEStart,raaPlanckCoeff)
+      CALL find_jacobians_limb(raFreq,iTag,iActualTag,iFileID,caJacobFile, &
+        raTSpace(iAtm),raTSurf(iAtm),raUseEmissivity, &
+        raSatAngle(iAtm),raMixVertTemp,iNumGases,iaGases, &
+        iAtm,iNatm,iaNumLayer(iAtm),iaaRadLayer, &
+        raaaAllDQ,raaAllDT,raaSumAbCoeff,raaAmt,raInten, &
+        raSurface,raSun,raThermal, &
+        raFracTop(iAtm),raFracBot(iAtm), &
+        iaJacob,iJacob,raaMix,raSunRefl, &
+        raLayAngles,raSunAngles,kaFrStep(iTag), &
+        raThickness,raPressLevels,iProfileLayers,pProf, &
+        iNLTEStart,raaPlanckCoeff)
       CALL PrintPound
     END IF
 
@@ -933,7 +964,7 @@ CONTAINS
 ! note raVT1 is the array that has the interpolated bottom and top layer temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    raVT1(:) = raVTemp(:)
+    raVT1 = raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
     raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -967,8 +998,8 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp,iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
 ! find the highest layer that we need to output radiances for
-    iHigh=-1
-    DO iLay=1,iNp
+    iHigh = -1
+    DO iLay = 1,iNp
       IF (iaOp(iLay) > iHigh) THEN
         iHigh = iaOp(iLay)
       END IF
@@ -981,30 +1012,30 @@ CONTAINS
 ! for the BOTTOMMOST layer!!!!!!!!!!!
     DO iLay=1,1
       iL = iaRadLayer(iLay)
-      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-      raaLayTrans(:,iLay)=exp(-raaAbs(:,iL)*rFracBot/rCos)
-      raaEmission(:,iLay)=0.0
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracBot/rCos)
+      raaEmission(:,iLay) = 0.0
     END DO
-    DO iLay=2,iNumLayer-1
+    DO iLay = 2,iNumLayer-1
       iL = iaRadLayer(iLay)
-      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-      raaLayTrans(:,iLay)=exp(-raaAbs(:,iL)/rCos)
-      raaEmission(:,iLay)=0.0
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)/rCos)
+      raaEmission(:,iLay) = 0.0
     END DO
     DO iLay = iNumLayer,iNumLayer
       iL = iaRadLayer(iLay)
-      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
-      raaLayTrans(:,iLay)=exp(-raaAbs(:,iL)*rFracTop/rCos)
-      raaEmission(:,iLay)=0.0
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      raaLayTrans(:,iLay) = exp(-raaAbs(:,iL)*rFracTop/rCos)
+      raaEmission(:,iLay) = 0.0
     END DO
 
     rMPTemp = rTspace
     ! initialize the solar and thermal contribution to 0
-    raSun(:)=0.0
-    raThermal(:)=0.0
+    raSun = 0.0
+    raThermal = 0.0
     ! and also surface!!!
-    raSurface(:) = 0.0
-    raInten(:) = ttorad(raFreq(:),rMPTemp)
+    raSurface = 0.0
+    raInten = ttorad(raFreq,rMPTemp)
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
@@ -1015,11 +1046,11 @@ CONTAINS
       ! first get the Mixed Path temperature for this radiating layer
       rMPTemp = raVT1(iL)
       IF (iL < iNLTEStart) THEN
-        raPlanck =ttorad(raFreq(:),rMPTemp)
-        raaEmission(:,iLay)=(1.0-raaLayTrans(:,iLay))*raPlanck
+        raPlanck = ttorad(raFreq,rMPTemp)
+        raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
       ELSEIF (iL >= iNLTEStart) THEN
-        raPlanck =ttorad(raFreq(:),rMPTemp) * raaPlanckCoeff(:,iL)
-        raaEmission(:,iLay)=(1.0-raaLayTrans(:,iLay))*raPlanck
+        raPlanck = ttorad(raFreq,rMPTemp) * raaPlanckCoeff(:,iL)
+        raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
       END IF
     END DO
 
@@ -1029,7 +1060,7 @@ CONTAINS
     DO iLay = iNumLayer,1,-1
       iL = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
-      raInten(:) = raInten(:)*raaLayTrans(:,iLay) + raaEmission(:,iLay)*(1-raaLayTrans(:,iLay))
+      raInten = raInten*raaLayTrans(:,iLay) + raaEmission(:,iLay)*(1-raaLayTrans(:,iLay))
     END DO
 
 ! see if we have to add on the solar contribution
@@ -1043,8 +1074,8 @@ CONTAINS
 
   1234 CONTINUE      !! start from here if you are going from TANGENT POINT to INSTR
 
-    raInten(:) = raInten(:) + raSun(:)
-    raLimbTangentRad(:) = raInten(:)
+    raInten = raInten + raSun
+    raLimbTangentRad = raInten
 
     IF (iMode == -1) GOTO 777   !! from TOA to TANGENT POINT, skip all else
 
@@ -1056,7 +1087,7 @@ CONTAINS
 ! first do the bottommost layer (could be fractional)
     DO iLay=1,1
       iL = iaRadLayer(iLay)
-      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
 
       ! see if this mixed path layer is in the list iaOp to be output
@@ -1076,9 +1107,6 @@ CONTAINS
 
       ! now do the radiative transfer thru this bottom layer
       IF (iVary == 1) THEN
-        ! CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,TEMP,rCos,rFracBot,iVary,raInten)
-        ! CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,raTPressLevels,rCos,rFracBot,
-        !     $                      iVary,raInten)
         CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCos,rFracBot,iVary,raInten)
       ELSE
         CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCos,rFracBot,iVary,raInten)
@@ -1087,9 +1115,9 @@ CONTAINS
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
-    DO iLay=2,iHigh-1
+    DO iLay = 2,iHigh-1
       iL = iaRadLayer(iLay)
-      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
 
       ! see if this mixed path layer is in the list iaOp to be output
@@ -1108,11 +1136,10 @@ CONTAINS
       END IF
 
       IF (iVary == 1) THEN
-        !          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,TEMP,rCos,+1.0,iVary,raInten)
-        !          CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,raTPressLevels,rCos,rFracBot,
-        !     $                      iVary,raInten)
+        !! exponential in tau
         CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCos,+1.0,iVary,raInten)
       ELSE
+        !! well there are other options
         CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCos,+1.0,iVary,raInten)
       END IF
     END DO
@@ -1123,7 +1150,7 @@ CONTAINS
 
     DO iLay = iHigh,iHigh
       iL = iaRadLayer(iLay)
-      rCos=cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
 
       IF (iUpper >= 1) THEN
@@ -1136,7 +1163,7 @@ CONTAINS
           write(kStdWarn,*) 'and output everything at the top of this'
           write(kStdWarn,*) 'stratosphere'
           ! do radiative transfer thru this layer, but do not output here
-          raInten(:) = raaEmission(:,iLay)+raInten(:)*raaLayTrans(:,iLay)
+          raInten = raaEmission(:,iLay)+raInten*raaLayTrans(:,iLay)
           !now do complete rad transfer thru upper part of atmosphere
           CALL UpperAtmRadTrans(raInten,raFreq,raLayAngles(MP2Lay(iL)), &
                   iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
@@ -1359,7 +1386,7 @@ CONTAINS
 ! note raVT1 is the array that has the interpolated bottom and top layer temps
 ! set the vertical temperatures of the atmosphere
 ! this has to be the array used for BackGndThermal and Solar
-    raVT1(:) = raVTemp(:)
+    raVT1 = raVTemp
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
     raVT1(iL)=interpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
@@ -1391,8 +1418,8 @@ CONTAINS
       rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
         !print *,'bottom',iLay,iL,iCloudLayerBot,iCloudLayerTop
-        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracBot + raExtinct(:)
-        !raaLayTrans(:,iLay)= raaAbs(:,iL)*rFracBot + raAbsCloud(:)
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracBot + raExtinct
+        !raaLayTrans(:,iLay)= raaAbs(:,iL)*rFracBot + raAbsCloud
         raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
         raaEmission(:,iLay) = 0.0
       ELSE
@@ -1407,8 +1434,8 @@ CONTAINS
       rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
         ! print *,'mid ',iLay,iL,iCloudLayerBot,iCloudLayerTop
-        raaLayTrans(:,iLay)  = raaAbs(:,iL) + raExtinct(:)
-        ! raaLayTrans(:,iLay) = raaAbs(:,iL) + raAbsCloud(:)
+        raaLayTrans(:,iLay)  = raaAbs(:,iL) + raExtinct
+        ! raaLayTrans(:,iLay) = raaAbs(:,iL) + raAbsCloud
         raaLayTrans(:,iLay)  = exp(-raaLayTrans(:,iLay)/rCos)
         raaEmission(:,iLay)  = 0.0
       ELSE
@@ -1422,8 +1449,8 @@ CONTAINS
       iL = iaRadLayer(iLay)
       rCos = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       IF ((iL >= iCloudLayerBot) .AND. (iL <= iCloudLayerTop)) THEN
-        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracTop + raExtinct(:)
-        !raaLayTrans(:,iLay)= raaAbs(:,iL)*rFracTop + raAbsCloud(:)
+        raaLayTrans(:,iLay) = raaAbs(:,iL)*rFracTop + raExtinct
+        !raaLayTrans(:,iLay)= raaAbs(:,iL)*rFracTop + raAbsCloud
         raaLayTrans(:,iLay) = exp(-raaLayTrans(:,iLay)/rCos)
         raaEmission(:,iLay) = 0.0
       ELSE
@@ -1435,11 +1462,11 @@ CONTAINS
 
     rMPTemp = rTspace
     ! initialize the solar and thermal contribution to 0
-    raSun(:)=0.0
-    raThermal(:) = 0.0
+    raSun=0.0
+    raThermal = 0.0
     ! and also surface!!!
-    raSurface(:) = 0.0
-    raInten(:)   = ttorad(raFreq(:),rMPTemp)
+    raSurface = 0.0
+    raInten   = ttorad(raFreq,rMPTemp)
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
@@ -1456,7 +1483,7 @@ CONTAINS
       rMPTemp = raVT1(iL)
       iLModKprofLayer = mod(iL,kProfLayer)
       !normal, no LTE emission stuff
-      raPlanck = ttorad(raFreq(:),rMPTemp)
+      raPlanck = ttorad(raFreq,rMPTemp)
       raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
     END DO
 
@@ -1466,7 +1493,7 @@ CONTAINS
     DO iLay = iNumLayer,1,-1
       iL = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
-      raInten(:) = raInten(:)*raaLayTrans(:,iLay) + raaEmission(:,iLay)*(1-raaLayTrans(:,iLay))
+      raInten = raInten*raaLayTrans(:,iLay) + raaEmission(:,iLay)*(1-raaLayTrans(:,iLay))
     END DO
 
 ! see if we have to add on the solar contribution
@@ -1480,13 +1507,15 @@ CONTAINS
 
     1234 CONTINUE      !! start from here if you are going from TANGENT POINT to INSTR
 
-    raInten(:) = raInten(:) + raSun(:)
-    raLimbTangentRad(:) = raInten(:)
+    raInten = raInten + raSun
+    raLimbTangentRad = raInten
 
     IF (iMode == -1) GOTO 777   !! from TOA to TANGENT POINT, skip all else
 
     r0 = raInten(1)
 ! now we can compute the upwelling radiation!!!!!
+! no need to worry about "surface" emission
+
 ! compute the total emission using the fast forward model, only looping
 ! upto iHigh ccccc      DO iLay=1,NumLayer -->  DO iLay=1,1 + DO ILay=2,iHigh
 
@@ -1513,7 +1542,7 @@ CONTAINS
       END IF
 
       ! now do the radiative transfer thru this bottom layer
-      raInten(:) = raaEmission(:,iLay) + raInten(:)*raaLayTrans(:,iLay)
+      raInten = raaEmission(:,iLay) + raInten*raaLayTrans(:,iLay)
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
@@ -1539,7 +1568,7 @@ CONTAINS
 
     ! now do the radiative transfer thru this complete layer
         r0 = raInten(1)
-        raInten(:) = raaEmission(:,iLay) + raInten(:)*raaLayTrans(:,iLay)
+        raInten = raaEmission(:,iLay) + raInten*raaLayTrans(:,iLay)
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^

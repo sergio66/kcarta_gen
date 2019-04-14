@@ -82,11 +82,13 @@ MOBJSMAIN_PARALLEL = kcartamisc.mod kcartaparallel.mod
 
 #######################################################################
 
-OBSRAD       = rad_angles.o rad_misc.o rad_diff_and_quad.o rad_common.o rad_limb.o\
-               jac_up.o jac_down.o jac_main.o rad_flux.o rad_main.o jac_limb.o
+OBSRAD       = rad_angles.o rad_misc.o rad_diff_and_quad.o rad_common.o\
+               jac_up.o jac_down.o jac_main.o jac_limb.o\
+               rad_flux.o rad_main.o rad_limb.o
 
-MOBSRAD       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_common.mod rad_limb.mod\
-                jac_up.mod jac_down.mod jac_main.mod rad_flux.mod rad_main.mod jac_limb.mod
+MOBSRAD       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_common.mod\
+	        jac_up.mod jac_down.mod jac_main.mod jac_limb.mod\
+		rad_flux.mod rad_main.mod rad_limb.mod
 
 OBSJAC_CLR   = 
 
