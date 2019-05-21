@@ -2087,7 +2087,7 @@ CONTAINS
     END IF
 
     rAngle      = prof%scanang     ! -------> ignore satzen,satazi
-    rHeight     = prof%zobs        ! -------> use raSatHeight(iC) in m (changed in July 2013)
+    rHeight     = prof%zobs        ! -------> use raSatHeight(iC) in rtp (changed in July 2013)
 
     IF ((iOKscanang == -1) .AND. (iOKsatzen == -1) .AND. (iOKzobs == -1)) THEN
       write(kStdWarn,*) 'scanang,satzen,zobs do not make sense!'
@@ -2245,16 +2245,27 @@ CONTAINS
       CALL DoStop
     END IF
     rSatHeightCom = raSatHeight(iC)    !!! this is part of comBlockAtmLoop
-          
+
+! this does cause grief for me when raAtmLoop == 3 and want to do multiple angles for one profile
+! but it has been like this for years
+! and namelist for SARTA has been used like this for years
     IF (abs(rAngle) <= 1.0e-4) THEN !nadir view
-      rHeight = -1.0
-      raSatHeight(iC) = -1.0
-      write(kStdErr,*) '>>>>>>>>>>>>>>>'
-      write(kStdErr,*) '>>>>>>>>>>>>>>>'
-      write(kStdErr,*) 'Living dangerously : angle = 0 so satHeight = 0 for raAtmLoop ==>  no ray trace'
-      write(kStdErr,*) '>>>>>>>>>>>>>>>'
-      write(kStdErr,*) '>>>>>>>>>>>>>>>'
-      rSatHeightCom = raSatHeight(iC)    !!! this is part of comBlockAtmLoop
+!      rHeight = -1.0
+!      raSatHeight(iC) = -1.0
+!      rSatHeightCom = raSatHeight(iC)    !!! this is part of comBlockAtmLoop
+
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) 'Living dangerously : angle = 0 so satHeight = 0 for raAtmLoop ==>  no ray trace'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) 'Living dangerously : angle = 0 so satHeight = 0 for raAtmLoop ==>  no ray trace'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>'
+
     END IF
           
     raSatAzimuth(iC) = prof%satazi

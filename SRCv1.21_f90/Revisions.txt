@@ -591,6 +591,25 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
+5/21/19        Made iAtmLoop = 3 more consistent with other code;
+               now it assumes the angle == scanag for downlook
+
+               Also fixed SUBR FindLayerAngles so that the raytracing angle is
+               computed at BOTTOM of layer for downlook instr, rather than top
+
+5/20/19        Have noticed in nm_radnce that if iAtmLoop == 3 then
+               the code duplicates atmospheres, but assumes the angle == satzen
+               for either uplook or downlook instrument; it then changes this
+               to scanang for downlok instr
+
+               This is inconsistent with raSatAngle = scanang for downlook instr
+                                         raSatAngle = satzen for uplook instr
+
+               So now we make it consistent and change the code so that
+                 if iAtmLoop == 3 then the code duplicates atmospheres, and
+               assumes the angle == scanang for downlook
+                                    satzen  for uplook
+
 4/13/19        Brought back the v1.18 1D limb view calcs
                (a) using rtp file
                    look at n_rtp : if you set [nemis = 1, emis > 1], 
@@ -971,8 +990,8 @@ c          real*4     clwc(MAXLEV)         ! cloud liq water content
 
 6/2/16          If you use an rtp file to set the atmosphere and want to
                 turn OFF ray tracing when raAtmLoop = 3. then set raSatHeight = -1.
-		See thefollowing comment in rtp_inrerface.f
- Living dangerously : angle = 0 so satHeight = 0 fir raAtmLoop no ray trace
+		See thefollowing comment in rtp_interface.f
+ Living dangerously : angle = 0 so satHeight = 0 for raAtmLoop no ray trace
 
 5/3/16          If kCO2Path includes 'lblrtm' or 'LBLRTM' then you tune off
                 chi fcn by setting kCO2_UMBCorHARTMAN = -1 in kcarta.param

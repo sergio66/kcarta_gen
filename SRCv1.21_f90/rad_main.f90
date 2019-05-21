@@ -1463,8 +1463,10 @@ CONTAINS
     iJunk = kProfLayer - iNumLayer +1
     rJunk1 = cos(raLayAngles(kProfLayer)*kPi/180.0)
     rJunk2 = cos(raLayAngles(iJunk)*kPi/180.0)
-    write(kStdWarn,999) 1/rCos,1.0/rJunk1,1.0/rJunk2
-    999 FORMAT('1/cos(angle) : sat(scanang),TOA,GND : ',3(1X,F10.6))
+    write(kStdWarn,998) rSatAngle,raLayAngles(kProfLayer),raLayAngles(iJunk),iJunk
+    write(kStdWarn,999) 1/rCos,1.0/rJunk1,1.0/rJunk2,iJunk
+  998 FORMAT('angle        : sat(scanang),TOA,GND,gndlay : ',3(1X,F10.6),I5)
+  999 FORMAT('1/cos(angle) : sat(scanang),TOA,GND,gndlay : ',3(1X,F10.6),I5)
      
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!

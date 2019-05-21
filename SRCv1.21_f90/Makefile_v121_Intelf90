@@ -36,6 +36,8 @@ SHELL = /bin/sh
 # STYLE=DEBUG
 STYLE=USUAL
 
+$(info    Makefile_v121_Intelf90 is using flags for $(STYLE))
+
 ############################################################################
 ## set up the appropriate compiler and its options                        ##
 ## NOTE 1) only SGI F77 and Absoft have been tested with the autodoubling ##
@@ -86,7 +88,7 @@ FORTRANX = ifort   ## GENERIC should always work since .bashrc automatically loa
 ### basic_common.o: In function `dostop':
 ###/umbc/xfs2/strow/asl/s1/sergio/home/KCARTA/SRCv1.20_f90/basic_common.f90:302: relocation truncated to fit: R_X86_64_PC32 against symbol `ob1' defined in COMMON section in basic_common.o if you forget to use -mcmodel=medium or large
 DEBUG_FLAGSA = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
-DEBUG_FLAGS=DEBUG_FLAGSA
+DEBUG_FLAGS=$(DEBUG_FLAGSA)
 
 # >>>>>>>>>>>>>>>>>>> DEFAULT Intel parallelization >>>>>>>>>>>>>>>>>>>>>>>>>
 # DEBUG TOO MUCH INFO BUT EXCELLENT: see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/

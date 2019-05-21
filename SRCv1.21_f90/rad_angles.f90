@@ -143,9 +143,12 @@ CONTAINS
     REAL :: raNumberDensity(kProfLayer)
 
     REAL :: raLayAnglesSnell(kProfLayer),raLayAnglesNoSnell(kProfLayer)
-    INTEGER :: iI,iaRadLayer(kProfLayer),iMin,iMax,iX,iDefault,iUseSnell
+    INTEGER :: iI,iaRadLayer(kProfLayer),iMin,iMax,iX,iDefault,iUseSnell,iStartLayer
 
 ! as default, set all angles to be the satellite view angle
+
+    write(kStdWarn,*) 'FindLayerAngles : iAtm,rSatAngle,rSatHeight = ',iAtm,rSatAngle,rSatHeight
+
     raLayAngles      = rSatAngle
     raLayAnglesSnell = rSatAngle
 
@@ -161,8 +164,8 @@ CONTAINS
       CALL DoStop
     END IF
     if ((iDefault /= iUseSnell) .AND. (kOuterLoop == 1)) THEN
-      write(kStdWarn,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
-      write(kStdErr,*) 'not/using Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
+      write(kStdWarn,*) 'not(-1)/using(+1) Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
+      write(kStdErr,*)  'not(-1)/using(+1) Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
     END IF
           
     iMin = +1000000
@@ -180,7 +183,10 @@ CONTAINS
 ! orig/traced angle  <<< --------- >>> scanang(at satellite)/satzen(local angle)
 ! orig/traced angle  <<< --------- >>> scanang(at satellite)/satzen(local angle)
 
+    !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DOWNLOOK INSTR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     IF ((rSatHeight > 0.0) .AND. (abs(rSatAngle) > 1.0e-4) .AND. (abs(iUseSnell) == 0)) THEN
+      iStartLayer = iaRadLayer(1)
+      !! no  Snell, no  layer curvature
       DO iI=1,kProfLayer
         raLayAnglesNoSnell(iI) = abs(rSatAngle)
         raLayAnglesSnell(iI) = abs(rSatAngle)
@@ -201,21 +207,25 @@ CONTAINS
                 &  1.0/cos(raLayAngles(iI)*kPi/180.0)
         END IF      !! if kOuterLoop == 1
       END DO
+
     ELSEIF ((rSatHeight > 0.0) .AND. (abs(rSatAngle) > 1.0e-4) .AND. (abs(iUseSnell) == 1)) THEN
-      !have to find layer dependent angles
+
+      !have to find layer dependent angles as there is layer curvature
       IF (rPrBdry1 > rPrBdry2) THEN !downward looking instr
+        iStartLayer = iaRadLayer(1)
         DO iI=1,kProfLayer
           ! print *,iI,rSatHeight,raLayHgt(iI)
           IF (rSatHeight > raLayHgt(iI)) THEN
-            raLayAnglesNoSnell(iI) = vaconv(abs(rSatAngle),raLayHgt(iI)/1000,rSatHeight/1000)
-            raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),raLayHgt(iI)/1000,rSatHeight/1000,raNumberDensity(iI))
+            raLayAnglesNoSnell(iI) = vaconv(abs(rSatAngle),raLayHgt(iI)/1000-raLayHgt(iStartLayer)/1000,rSatHeight/1000)
+            raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),raLayHgt(iI)/1000-raLayHgt(iStartLayer)/1000, &
+                                                rSatHeight/1000,raNumberDensity(iI))
             ! diff between Snell and noSnell is less than 2e-2
             !              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAnglesNoSnell(iI)-raLayAnglesSnell(iI)
             ! but Scott/SARTA uses NoSnell
             IF (iUseSnell == 1) THEN
-              raLayAngles(iI) = raLayAnglesSnell(iI)    !!! sergio
+              raLayAngles(iI) = raLayAnglesSnell(iI)    !!! sergio, use layer curvature+Snell
             ELSEIF (iUseSnell == -1) THEN
-              raLayAngles(iI) = raLayAnglesNoSnell(iI)      !!! scott
+              raLayAngles(iI) = raLayAnglesNoSnell(iI)  !!! scott/SARTA, only use layer curvature
             END IF
             IF (rSatAngle < 0.0) raLayAngles(iI) = -raLayAngles(iI)
             IF (kOuterLoop == 1) THEN
@@ -249,7 +259,9 @@ CONTAINS
         END DO
       END IF
 
+      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UPLOOK INSTR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       IF ((rPrBdry2 > rPrBdry1) .AND. (abs(iUseSnell) == 0)) THEN !upward looking instr
+        iStartLayer = iaRadLayer(kProfLayer)
         DO iI=1,kProfLayer
           raLayAnglesNoSnell(iI) = abs(rSatAngle)
           raLayAngles(iI) = raLayAnglesSnell(iI)
@@ -270,6 +282,7 @@ CONTAINS
       ELSEIF ((rPrBdry2 > rPrBdry1) .AND. (abs(iUseSnell) == 1)) THEN !upward looking instr
         !          print *,'FindLayerAngles',iMin,iMax,iAtm,rSatHeight,iaNumLayer(iAtm),
         !     $               raLayHgt(iaaRadLayer(iAtm,iaNumLayer(iAtm)))/1000
+        iStartLayer = iaRadLayer(kProfLayer)
         DO iI=1,kProfLayer
           IF (rSatHeight > raLayHgt(iI)) THEN
             raLayAnglesNoSnell(iI) = saconv_sun(abs(rSatAngle), &

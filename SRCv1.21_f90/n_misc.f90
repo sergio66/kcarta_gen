@@ -724,8 +724,8 @@ CONTAINS
 !! SURFALT < ALT ==> ratio in front of sin(LSZA) < 1
 !!   ==> local angles get "smaller" the higher you go
 
-    if (rX > 0.99999) rX = 0.99999
-    if (rX < 0.00000) rX = 0.00000
+    if (rX > 1.00000) rX = 1.00000000
+    if (rX < 0.00000) rX = 0.00000000
 
     SACONV_SUN = ASIN(rX) * 180/rPi
 
@@ -798,6 +798,7 @@ CONTAINS
 !      ------------------
 !      CONV = pi/180 = degrees to radians conversion factor
       CONV=1.7453292E-02
+      CONV = 0.017453292519943
 
 !      RE = radius of the Earth (in km)
 !      RE=6.37E+03
@@ -854,6 +855,8 @@ CONTAINS
 
 !      CONV = pi/180 = degrees to radians conversion factor
     CONV = 1.7453292E-02
+    CONV = 0.017453292519943
+
     theta = sva*conv
 
 !      RE = radius of the Earth (in km)
@@ -872,11 +875,13 @@ CONTAINS
 !      -----------------
 
     rBoink =  (RS/RA) * SIN(CONV*SVA)
-    IF (abs(rBoink) > 1.0) rBoink = 0.9999
+    IF (abs(rBoink) > 1.0) rBoink = 1.00000000
            
     RTEMP=ASIN(rBoink)
 
 ! change back to degrees
+
+!   write(kSTdWarn,*) 'miaow',RE,ALT,SALT,sva,RTEMP/conv
     VACONV = RTEMP/conv
             
     RETURN
@@ -923,6 +928,7 @@ CONTAINS
 
 !      CONV = pi/180 = degrees to radians conversion factor
     CONV = 1.7453292E-02
+    CONV = 0.017453292519943
     theta = sva*conv
 
 !      RE = radius of the Earth (in km)
@@ -955,7 +961,7 @@ CONTAINS
 !      -----------------
 
     rBoink =  abs((RS/RA) * SIN(CONV*SVA)/ref_ind)
-    if (abs(rBoink) > 1.0) rBoink = 0.9999
+    if (abs(rBoink) > 1.0) rBoink = 1.00000000
 
     RTEMP = ASIN(rBoink)
            

@@ -599,6 +599,8 @@ CONTAINS
       END IF
     END DO
 
+    write(kStdWarn,*) 'here0 ',raSatHeight(1),iAtmLoop
+
     raAtmLoopCom        = raAtmLoop      !!! this is part of comBlockAtmLoop
     raAtmLoop1          = raAtmLoop
 
@@ -1463,6 +1465,8 @@ CONTAINS
       Call DoStop
     END IF
 
+    write(kStdWarn,*) 'debug here1 ',raSatHeight(1),iAtmLoop
+
 #IF (TXTsetting)
     CALL radnceNMLonly(iRTP,caPFname,iMPSetForRadRTP, &
       iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
@@ -1492,6 +1496,8 @@ CONTAINS
       cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 #ENDIF
+
+    write(kStdWarn,*) 'debug here1A ',raSatHeight(1),iAtmLoop
 
     iaKeyword(8) = 1
 

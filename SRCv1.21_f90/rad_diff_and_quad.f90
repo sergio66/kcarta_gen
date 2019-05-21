@@ -135,7 +135,7 @@ CONTAINS
         raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop, &
         rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
     ELSE IF (iDoThermal == 0) THEN
-      write(kStdWarn,'(A)') 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
+      write(kStdWarn,'(A,I2)') 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
       CALL DoDiffusivityApprox(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer, &

@@ -163,37 +163,23 @@ CONTAINS
       raaPrBdry(:,2)  = raAtmLoop
 
     ELSEIF (iAtmLoop == 3) THEN
-      write(kStdWarn,*) '  Resetting raSatZen for looping (so need to compute scanang)'
-      write(kStdErr,*)  '  Resetting raSatZen for looping (so need to compute scanang)'
+      IF (raPressStart(1) > raPressStop(1)) THEN
+        write(kStdWarn,*) '  raPressStart(1) > raPressStop(1) ==> downlook instr, raSatAngle == raScanAng'
+        write(kStdErr,*)  '  raPressStart(1) > raPressStop(1) ==> downlook instr, raSatAngle == raScanAng'
+      ELSE
+        write(kStdWarn,*) '  raPressStart(1) < raPressStop(1) ==> uplook instr, raSatAngle == raSatzen'
+        write(kStdErr,*)  '  raPressStart(1) < raPressStop(1) ==> uplook instr, raSatAngle == raSatzen'
+      END IF
       IF (iaLimb(1) > 0) THEN
         write(kStdErr,*) 'Atm 1 set up for Limb sounding'
         write(kStdErr,*) '  so cannot willy nilly reset scanang'
         write(kStdErr,*) 'Go and reset raStartPress instead'
         CALL DoStop
       ELSE
-        write(kStdWarn,*) '  changing user input SatZen (angle at gnd)  to       Instr ScanAng '
-        write(kStdWarn,*) '  raAtmLoop(iX) --> raSatAngle(iX)     GNDsecant  --> SATELLITEsecant'
-
-        IF (rSatHeightCom < 0) THEN
-          write(kStdWarn,*) '  WARNING : raSatHeight == -1 so kCARTA uses SATELLITEsecant!!!!'
-          DO iX = 1,iNatm
-            raSatAngle(iX) = raAtmLoop(iX)
-            rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
-            rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
-            write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
-          END DO
-        ELSE
-          DO iX = 1,iNatm
-            raSatAngle(iX) = raAtmLoop(iX)
-            !!!! positive number so this is genuine input angle that will vary with layer height
-            raSatAngle(iX) = SACONV_SUN(raAtmLoop(iX),0.0,705.0)
-            rJunk1 = 1.0/cos(raAtmLoop(iX)*kPi/180)
-            rJunk2 = 1.0/cos(raSatAngle(iX)*kPi/180)
-            write(kStdWarn,111) raAtmLoop(iX),raSatAngle(iX),rJunk1,rJunk2
-          END DO
-        END IF
+        DO iX = 1,iNatm
+          raSatAngle(iX) = raAtmLoop(iX)
+        END DO
       END IF
-  111 FORMAT('   ',F10.5,' ---> ',F10.5,'   +++   ',F10.5,' ---> ',F10.5)
               
     ELSEIF (iAtmLoop == 4) THEN
       write(kStdWarn,*) '  Resetting raSolZen for looping'
