@@ -465,6 +465,10 @@ CONTAINS
 
     END DO
 
+    ! set kSurfAlt to 
+    kSurfAlt = -9.9e10
+    write(kStdWarn,*) 'Set kSurfAlt to -9.9e10 in radnce4, this should reset to a sane value'
+
     RETURN
     end SUBROUTINE radnce4
 

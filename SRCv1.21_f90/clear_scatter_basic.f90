@@ -1246,6 +1246,64 @@ CONTAINS
     end FUNCTION InterpTempSurf
 
 !************************************************************************
+! this function does a temperature interpolation on a fractional layer
+! this uses modified Scott Hannon's method of doing a quad fit to the layer,
+! layer above, layer below  of the form
+!     T = a (ln P(avg))^2 + b (ln P(avg)) + c
+
+! this is almost the same as REAL FUNCTION InterpTemp, but it tries to
+! account for large temperature difference between surface and air temp
+! of the lowest layer, by using the surface parameters
+    REAL FUNCTION InterpAltSurf(iProfileLayers,raPressLevels,raLayerHeight,rSurfPress)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! raLayerHeight  = array containing the original layer heights
+! rFrac          = frac of layer that we need
+! iTopORBot      = do we need top or bottom of layer (+1/-1)
+! iL             = which of the mixed paths
+
+! for a down looking instrument, we need bottom frac
+! for a   up looking instrument, we need top frac
+! for bottommost layer, we need top frac
+    REAL :: raPressLevels(kProfLayer+1)
+    REAL :: raLayerHeight(kProfLayer)
+    REAL :: rSurfPress
+    INTEGER :: iProfileLayers
+
+    REAL :: raLayPress(kProfLayer),raJunk1(kProfLayer),raJunk2(kProfLayer)
+    REAL :: rT         !user specfd pressure, temp calculated at this press
+    INTEGER :: iI,iLowest
+
+    iLowest = kProfLayer - iProfileLayers + 1
+
+    raJunk1 = raPressLevels(2:kProfLayer+1)-raPressLevels(1:kProfLayer)
+    raJunk2 = log(raPressLevels(2:kProfLayer+1)/raPressLevels(1:kProfLayer))
+    raLayPress = raJunk1/raJunk2
+
+!    DO iI = 1,kProfLayer
+!      write(kStdErr,*) iI,raLayPress(iI),rSurfPress,raLayerHeight(iI)
+!    END DO
+!    print *,iLowest,iProfileLayers,kProfLayer
+
+!    CALL r_sort_spl(log(raLayPress(iLowest:kProfLayer)),raLayerHeight(iLowest:kProfLayer), &
+!                    iProfileLayers,log(rSurfPress+200),rT)
+!    print *,rSurfPress+200,rT
+
+!    CALL r_sort_spl(log(raLayPress(iLowest:kProfLayer)),raLayerHeight(iLowest:kProfLayer), &
+!                    iProfileLayers,log(rSurfPress+50),rT)
+!    print *,rSurfPress+50,rT
+
+    CALL r_sort_spl(log(raLayPress(iLowest:kProfLayer)),raLayerHeight(iLowest:kProfLayer), &
+                    iProfileLayers,log(rSurfPress),rT)
+    InterpAltSurf = rT
+
+    RETURN
+    end FUNCTION InterpAltSurf
+
+!************************************************************************
 ! this function loads in the specular reflection file
     SUBROUTINE loadspecular(raFreq,raSpecularRefl)
 

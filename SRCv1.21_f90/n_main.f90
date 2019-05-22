@@ -599,8 +599,6 @@ CONTAINS
       END IF
     END DO
 
-    write(kStdWarn,*) 'here0 ',raSatHeight(1),iAtmLoop
-
     raAtmLoopCom        = raAtmLoop      !!! this is part of comBlockAtmLoop
     raAtmLoop1          = raAtmLoop
 
@@ -1465,8 +1463,7 @@ CONTAINS
       Call DoStop
     END IF
 
-    write(kStdWarn,*) 'debug here1 ',raSatHeight(1),iAtmLoop
-
+    kSurfAlt = -9.9e10
 #IF (TXTsetting)
     CALL radnceNMLonly(iRTP,caPFname,iMPSetForRadRTP, &
       iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
@@ -1497,7 +1494,17 @@ CONTAINS
       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 #ENDIF
 
-    write(kStdWarn,*) 'debug here1A ',raSatHeight(1),iAtmLoop
+    IF (kSurfAlt < -1.0e3) THEN
+      kSurfAlt = raLayerHeight(iaaRadLayer(1,1))
+      write(kStdWarn,*) 'reset kSurfAlt to a (1) sane initial value of ',kSurfAlt
+
+      IF (raaPrBdry(1,1) > raaPrBdry(1,2)) THEN
+        kSurfAlt = InterpAltSurf(iProfileLayers,raPressLevels,raLayerHeight,raaPrBdry(1,1))
+      ELSEIF (raaPrBdry(1,1) < raaPrBdry(1,2)) THEN
+        kSurfAlt = InterpAltSurf(iProfileLayers,raPressLevels,raLayerHeight,raaPrBdry(1,2))
+      END IF
+      write(kStdWarn,*) 'reset kSurfAlt to a (2) sane initial value of ',kSurfAlt      
+    END IF
 
     iaKeyword(8) = 1
 

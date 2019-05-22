@@ -219,6 +219,17 @@ CONTAINS
             raLayAnglesNoSnell(iI) = vaconv(abs(rSatAngle),raLayHgt(iI)/1000-raLayHgt(iStartLayer)/1000,rSatHeight/1000)
             raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),raLayHgt(iI)/1000-raLayHgt(iStartLayer)/1000, &
                                                 rSatHeight/1000,raNumberDensity(iI))
+
+            
+            IF (iI == 1) THEN
+              raLayAnglesNoSnell(iI) = vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
+              raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),kSurfAlt/1000, &
+                                                  rSatHeight/1000,raNumberDensity(iI))
+            ELSE
+              raLayAnglesNoSnell(iI) = vaconv(abs(rSatAngle),raLayHgt(iI-1)/1000,rSatHeight/1000)
+              raLayAnglesSnell(iI) = vaconv_Snell(abs(rSatAngle),raLayHgt(iI-1)/1000, &
+                                                  rSatHeight/1000,raNumberDensity(iI))
+            END IF
             ! diff between Snell and noSnell is less than 2e-2
             !              print *,iI,raLayAnglesSnell(iI),raLayAnglesNoSnell(iI),raLayAnglesNoSnell(iI)-raLayAnglesSnell(iI)
             ! but Scott/SARTA uses NoSnell
