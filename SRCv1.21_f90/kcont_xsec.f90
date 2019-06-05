@@ -105,6 +105,7 @@ CONTAINS
       CALL f_by_T_CKDfilereader(iGasID,iTag,iMin,iMax,iDoDQ, &
         rFStep,raFreq,kFrStep, &
         raTemp,daaDQ,daaDT,daaCon)
+
     ELSEIF (iMethod == 1) THEN
       ! reads the Compressed Style lookup fcn(fr,T)
       ! new style, since Sept 2011
@@ -338,7 +339,7 @@ CONTAINS
 
     raOne = 1.0
     DO iLay = 1,kProfLayer
-      raa2DAmt(:,kProfLayer) = raOne * raAmt(iLay)
+      raa2DAmt(:,iLay) = raOne * raAmt(iLay)
     END DO
 
 ! raAmt(iLay) is in kmoles/cm2   pressures are in atm, CKD coeffs are in (molecules/cm2 1/cm-1)-1 1/atm
@@ -607,8 +608,7 @@ CONTAINS
       ELSEIF (iGasID == kNewGasHi) THEN
         !foreign continuum has no temp dependance
         DO iLay = iMin,iMax
-          iL = iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)
-                     
+          iL = iaTempIndex(iLay)  !closest temp index lower than raTemp(iLay)                     
           day2 = daaCKD(iL,iaF) + daFrDelta*(daaCKD(iL,iaF+1)-daaCKD(iL,iaF))/df                              
           daaCon(:,iLay) = day2    !this is temp dependance!
         END DO
