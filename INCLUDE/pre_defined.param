@@ -248,11 +248,14 @@ c these next few parameters are set in *RADNCE and *JACOBN
 c rtp file azimuths used in Mie Scattering and Ocean Refl
 c rtp file also may give latitude and month (via rtime)
       INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
-      REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult
+      REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult,kDefaultToffset
       REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
 c this is LBLRTM TPAPE5 toa, and LBLRTM level temps
       REAL kLBLRTM_toa,kLBLRTM_levelT(kMaxLayer+1),kLBLRTM_layerTavg(kMaxLayer)
-      PARAMETER (kDefaultColMult = 0.1)
+c      PARAMETER (kDefaultColMult = 0.1)  !!! till June 2019
+c      PARAMETER (kDefaultToffset = 1.00) !!! till June 2019
+      PARAMETER (kDefaultColMult = 0.001) !!! after June 2019
+      PARAMETER (kDefaultToffset = 0.01) !!! after June 2019
       COMMON/ComBlock4/kSolar,kThermal,kThermalJacob,kJacobian,
      c                 kSetThermalAngle,kTemperVary
       COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,

@@ -467,7 +467,8 @@ CONTAINS
       IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
         !! remember we perturb layers WRT surface, so use iL in this if-then comparison
         write(kStdWarn,*) 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-        raMixVertTemp2(iI) = raMixVertTemp(iI) + 1.0
+        raMixVertTemp2(iI) = raMixVertTemp(iI) + 1.0  !! before June 2019
+        raMixVertTemp2(iI) = raMixVertTemp(iI) + kDefaultToffset !! after June 2019
       ELSE
         ! for need to perturb layer
         raMixVertTemp2(iI) = raMixVertTemp(iI)
@@ -518,7 +519,7 @@ CONTAINS
     CALL find_radiances_limb(raFreq,-1, &
       raaSumAbCoeff,raMixVertTemp,caJacobFile2, &
       iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &
-      raTSpace(iAtm),raTSurf(iAtm)+1.0,rSurfPress,raUseEmissivity, &
+      raTSpace(iAtm),raTSurf(iAtm)+kDefaultToffset,rSurfPress,raUseEmissivity, &
       raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
       iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
       raSurface,raSun,raThermal,raSunRefl, &

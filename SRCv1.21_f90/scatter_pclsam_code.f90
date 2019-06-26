@@ -493,7 +493,8 @@ CONTAINS
         !IF ((iI .GE. kActualJacsB) .AND. (iI .LE. kActualJacsT)) THEN
         IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
           write(kStdWarn,FMT) 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
-          raMixVertTemp2(iI) = raVTemp(iI) + 1.0
+!          raMixVertTemp2(iI) = raVTemp(iI) + 1.0             ! till June 2019
+          raMixVertTemp2(iI) = raVTemp(iI) + kDefaultToffset  ! after June 2019
         ELSE
           ! write(kStdWarn,*) 'not perturbing tempr layer ',iI
           raMixVertTemp2(iI) = raVTemp(iI)
@@ -542,7 +543,7 @@ CONTAINS
             raInten,raVTemp,raaExt,raaSSAlb,raaAsym, &
             iPhase,raPhasePoints,raComputedPhase, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
-            rTSpace,rSurfaceTemp+1,rSurfPress,raUseEmissivity, &
+            rTSpace,rSurfaceTemp+kDefaultToffset,rSurfPress,raUseEmissivity, &
             rSatAngle,rFracTop,rFracBot,TEMP, &
             iNp,iaOp,raaOp,iNpmix,iFileID, &
             caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
@@ -558,7 +559,7 @@ CONTAINS
             raInten,raVTemp,raaExt,raaSSAlb,raaAsym, &
             iPhase,raPhasePoints,raComputedPhase, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
-            rTSpace,rSurfaceTemp+1,rSurfPress,raUseEmissivity, &
+            rTSpace,rSurfaceTemp+kDefaultToffset,rSurfPress,raUseEmissivity, &
             rSatAngle,rFracTop,rFracBot,TEMP, &
             iNp,iaOp,raaOp,iNpmix,iFileID, &
             caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
