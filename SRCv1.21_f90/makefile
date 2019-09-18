@@ -1,6 +1,11 @@
 #echo "IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB"
 
-$(info IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB, if you do things by hand)
+$(info   )
+$(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
+$(info IMPORTANT (1) -- try to build on oldest nodes rather than taki2 so it runs on every node)
+$(info IMPORTANT (2) -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB, if you do things by hand)
+$(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
+$(info   )
 
 400_H16_default_f90:
 	make -f Makefile_v121_Intelf90 datafix400_H2016

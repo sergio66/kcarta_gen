@@ -412,8 +412,10 @@
 !!! very very pleasant to everyone, 4 is better (but still limits to about one processor)
 !!! default on new machines ie without having line before, is 32 threads or 32 processors
 !
-!!! setting 4 threads seems to limit to one processor
-    call mkl_set_num_threads(4)     
+!!! setting 4 threads seems to limit to one processor, not really
+!    call mkl_set_num_threads(4)     
+!!! setting 1 threads seems to limit to one processor
+    call mkl_set_num_threads(1)     
 !!! setting 32 threads seems to limit to 32 processors haha
 !    call mkl_set_num_threads(32)     
     
