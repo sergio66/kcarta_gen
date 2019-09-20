@@ -2,11 +2,11 @@
 sed -e "s/.param/param.f90/g" ../INCLUDE/xscatterparam.f90 > ../INCLUDE/scatterparam.f90; rm ../INCLUDE/xscatterparam.f90 ../INCLUDE/xscatterparam.f
 
 /bin/cp ../INCLUDE/kcarta.param  ../INCLUDE/xkcartaparam.f;   fixcon ../INCLUDE/xkcartaparam.f ../INCLUDE/xkcartaparam.f90
-sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/post_definedparam.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartaparam.f90; rm ../INCLUDE/xkcartaparam.f90	../INCLUDE/xkcartaparam.f
+sed -e "s/pre_definedHIGHRES_IR.param/pre_definedHIGHRES_IRparam.f90/g" -e "s/post_defined.param/post_definedparam.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartaparam.f90; rm ../INCLUDE/xkcartaparam.f90	../INCLUDE/xkcartaparam.f
 
-#/bin/cp ../INCLUDE/pre_definedHIGHRES_IR.param   ../INCLUDE/pre_definedHIGHRES_IRparam.f;  fixcon ../INCLUDE/pre_definedHIGHRES_IRparam.f  ../INCLUDE/pre_definedHIGHRES_IRparam.f90; rm ../INCLUDE/pre_definedHIGHRES_IRparam.f
+/bin/cp ../INCLUDE/pre_definedHIGHRES_IR.param   ../INCLUDE/pre_definedHIGHRES_IRparam.f;  fixcon ../INCLUDE/pre_definedHIGHRES_IRparam.f  ../INCLUDE/pre_definedHIGHRES_IRparam.f90; rm ../INCLUDE/pre_definedHIGHRES_IRparam.f
 
-/bin/cp ../INCLUDE/pre_defined.param             ../INCLUDE/pre_definedparam.f;            fixcon ../INCLUDE/pre_definedparam.f            ../INCLUDE/pre_definedparam.f90;           rm ../INCLUDE/pre_definedparam.f
+#/bin/cp ../INCLUDE/pre_defined.param             ../INCLUDE/pre_definedparam.f;            fixcon ../INCLUDE/pre_definedparam.f            ../INCLUDE/pre_definedparam.f90;           rm ../INCLUDE/pre_definedparam.f
 
 /bin/cp ../INCLUDE/post_defined.param            ../INCLUDE/post_definedparam.f;           fixcon ../INCLUDE/post_definedparam.f           ../INCLUDE/post_definedparam.f90;           rm ../INCLUDE/post_definedparam.f
 

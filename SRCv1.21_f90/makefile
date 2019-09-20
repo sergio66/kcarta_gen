@@ -79,6 +79,19 @@ $(info   )
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H12
 	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_H12
 
+400_H12p8_highres605_1205:
+	make -f Makefile_v121_Intelf90 datafix400_H2016_highres
+	cp_param_files_to_f90HIGHRES.sc
+	echo "CO2 is from LBLRTM12.8"
+	read -p "Press [Enter] key to continue ..."
+	make -f Makefile clean	
+	make -f Makefile
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 scat
+	mv ../BIN/bkcarta.x90 ../BIN/bkcarta.x_highres605_1205_12p8
+	mv ../BIN/kcarta.x90 ../BIN/kcarta.x_highres605_1205_12p8	
+
+
 ########################################################################
 ### these are basically "old" SRCv1.18
 385_H12_default:

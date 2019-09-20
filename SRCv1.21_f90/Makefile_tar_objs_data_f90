@@ -529,7 +529,17 @@ datafix400_H2016:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
+
+datafix400_H2016_highres:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_HIGHRES_IR.param > ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
 
 datafix400_H2016_g110:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2016_WVg110.param > \
@@ -540,7 +550,7 @@ datafix400_H2016_g110:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
 
 datafix400_G2015_NLTEH2016:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_G2015_NLTEH2016.param > \
@@ -551,7 +561,7 @@ datafix400_G2015_NLTEH2016:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
 
 datafix400_H2016_NLTEH2008:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2008.param > \
@@ -562,7 +572,7 @@ datafix400_H2016_NLTEH2008:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
 
 datafix400_H2016_NLTEH2004:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2004.param > \
@@ -573,7 +583,7 @@ datafix400_H2016_NLTEH2004:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
 
 datafix400_H2012:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2012_NLTEH2008.param > \
@@ -584,7 +594,7 @@ datafix400_H2012:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
 
 datafix385_H2012_LBLRTM:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_LBLRTM_NLTEH2008.param > \
@@ -595,7 +605,7 @@ datafix385_H2012_LBLRTM:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
 
 datafix385_H2012:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_NLTEH2008.param > \
@@ -606,7 +616,7 @@ datafix385_H2012:
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
-      cd ../SRCv1.20_f90
+      cd ../SRCv1.21_f90
 
 ################### DISTRIBUTIONS ########################################
 #### 1) to make the distributions, go to /home/sergio and look for kcartaV1xx
@@ -616,7 +626,7 @@ datafix385_H2012:
 #### 4) make new symbolic link      ln -s  kcartaV120 KCARTA 
 #### 5) cd to this dir              cd KCARTA
 #### 6) rm old symbolic link SRC    rm SRC
-#### 7) make new symbolic link SRC  ln -s SRCv1.20_f90 SRC
+#### 7) make new symbolic link SRC  ln -s SRCv1.21_f90 SRC
 #### 8) cd to this dir              cd SRC 
 #### 9) make whatever distribution you want! eg make dist 
 
@@ -640,8 +650,8 @@ dist:
 		kcartaV120/MATLAB		\
 		kcartaV120/README.1ST		\
 		kcartaV120/SCRIPTS		\
-		kcartaV120/SRCv1.20_f90/*.f90         \
-		kcartaV120/SRCv1.20_f90/Makefile    \
+		kcartaV120/SRCv1.21_f90/*.f90         \
+		kcartaV120/SRCv1.21_f90/Makefile    \
 		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
 		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
 		kcartaV120/UTILITY;		\
@@ -653,11 +663,11 @@ bugfix:
 	tar -cf $(KTARBUG)			\
 		kcartaV120/README.1ST		\
 		kcartaV120/INCLUDE		\
-		kcartaV120/DOC/kcarta1.20_f90*	\
-		kcartaV120/SRCv1.20_f90/Makefile    \
+		kcartaV120/DOC/kcarta1.21_f90*	\
+		kcartaV120/SRCv1.21_f90/Makefile    \
 		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
 		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
-		kcartaV120/SRCv1.20_f90/*.f90;        \
+		kcartaV120/SRCv1.21_f90/*.f90;        \
 	chmod 664 $(KTARBUG)
 
 ##############################
@@ -718,16 +728,16 @@ giveout:
 		KCARTA/README.1ST		\
 		KCARTA/SCRIPTS		\
                 KCARTA/INCLUDE/*.param      \
-                KCARTA/SRCv1.20_f90/freqfile.f90  \
-                KCARTA/SRCv1.20_f90/j*.f90        \
-                KCARTA/SRCv1.20_f90/k*.f90        \
-                KCARTA/SRCv1.20_f90/n*.f90        \
-                KCARTA/SRCv1.20_f90/r*.f90        \
-                KCARTA/SRCv1.20_f90/s_*.f90       \
-                KCARTA/SRCv1.20_f90/spline_*.f90  \
-                KCARTA/SRCv1.20_f90/clear_scatter_misc.f90  \
-                KCARTA/SRCv1.20_f90/singlescatter.f90       \
-                KCARTA/SRCv1.20_f90/Makefile    \
+                KCARTA/SRCv1.21_f90/freqfile.f90  \
+                KCARTA/SRCv1.21_f90/j*.f90        \
+                KCARTA/SRCv1.21_f90/k*.f90        \
+                KCARTA/SRCv1.21_f90/n*.f90        \
+                KCARTA/SRCv1.21_f90/r*.f90        \
+                KCARTA/SRCv1.21_f90/s_*.f90       \
+                KCARTA/SRCv1.21_f90/spline_*.f90  \
+                KCARTA/SRCv1.21_f90/clear_scatter_misc.f90  \
+                KCARTA/SRCv1.21_f90/singlescatter.f90       \
+                KCARTA/SRCv1.21_f90/Makefile    \
 		KCARTA/UTILITY;		\
 	chmod 664 $(KGIVEOUT)
 
@@ -738,17 +748,17 @@ giveout_bugfix:
 		KCARTA/README.1ST		         \
 		KCARTA/INCLUDE		         \
 		KCARTA/DOC/kcarta1.18*	         \
-		KCARTA/SRCv1.20_f90/Makefile             \
-                KCARTA/SRCv1.20_f90/freqfile.f90           \
-                KCARTA/SRCv1.20_f90/j*.f90                 \
-                KCARTA/SRCv1.20_f90/k*.f90                 \
-                KCARTA/SRCv1.20_f90/n*.f90                 \
-                KCARTA/SRCv1.20_f90/r*.f90                 \
-                KCARTA/SRCv1.20_f90/s_*.f90                \
-                KCARTA/SRCv1.20_f90/spline_*.f90           \
-                KCARTA/SRCv1.20_f90/clear_scatter_misc.f90 \
-                KCARTA/SRCv1.20_f90/singlescatter.f90      \
-                KCARTA/SRCv1.20_f90/*akefile*;            \
+		KCARTA/SRCv1.21_f90/Makefile             \
+                KCARTA/SRCv1.21_f90/freqfile.f90           \
+                KCARTA/SRCv1.21_f90/j*.f90                 \
+                KCARTA/SRCv1.21_f90/k*.f90                 \
+                KCARTA/SRCv1.21_f90/n*.f90                 \
+                KCARTA/SRCv1.21_f90/r*.f90                 \
+                KCARTA/SRCv1.21_f90/s_*.f90                \
+                KCARTA/SRCv1.21_f90/spline_*.f90           \
+                KCARTA/SRCv1.21_f90/clear_scatter_misc.f90 \
+                KCARTA/SRCv1.21_f90/singlescatter.f90      \
+                KCARTA/SRCv1.21_f90/*akefile*;            \
 	chmod 664 $(KTARBUGGIVEOUT)
 
 giveout_aux:
@@ -761,7 +771,7 @@ giveout_aux:
 		KCARTA/TEST/t*                  \
 		KCARTA/TEST/*.m                 \
 		KCARTA/TEST/*.sc                \
-		KCARTA/TEST/COMPARISON_v1.20_f90    \
+		KCARTA/TEST/COMPARISON_v1.21_f90    \
 		KCARTA/DOC                  \
 		KCARTA/MATLAB               \
 		KCARTA/README.1ST           \
