@@ -25,8 +25,11 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!! compressed files for gases 1,3 are currently span 605-1205 cm-1
 c!! at a chunk spacing of 5 cm-1
+c!!
 c!! /asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for WV,O3
 c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for CO2
+c!!
+c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for WV,CO2,O3
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!! to run this code first go to SRC, type
@@ -110,8 +113,8 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le using lner.m <<<<<
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
-      PARAMETER (kWaterPath      = '^/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
-      PARAMETER (kCompPath       = '^/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+      PARAMETER (kWaterPath      = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+      PARAMETER (kCompPath       = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
       PARAMETER (kCKDPath        = '^/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '^/KCDATA/General/CKDieee_le/Compr/')
 
@@ -124,16 +127,16 @@ c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER*80 kWaterIsotopePath
 c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
-      PARAMETER (kWaterIsotopePath = '^/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+ccc      PARAMETER (kWaterIsotopePath = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
-      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
-      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
+ccc      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
+ccc      PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
 c for testing; this will turn off new part of code and just use usual database
 c for testing; this will turn off new part of code and just use usual database
-c      PARAMETER (kWaterIsotopePath = kWaterPath)
-c      PARAMETER (kWaterIsobandStart1 = 2905, kWaterIsobandStop1 = 3355)
-c      PARAMETER (kWaterIsobandStart2 = 3905, kWaterIsobandStop2 = 3355)
+      PARAMETER (kWaterIsotopePath = kWaterPath)
+      PARAMETER (kWaterIsobandStart1 = 2905, kWaterIsobandStop1 = 3355)
+      PARAMETER (kWaterIsobandStart2 = 3905, kWaterIsobandStop2 = 3355)
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
@@ -388,7 +391,7 @@ c kBoxCarUse tells the code how many points to bloat things by
 c to do stuff at 0.0005 cm-1 spacing, need to "bloat" optical depths
 c if kBloatPts == 1, then cannot bloat up stuff!!
       INTEGER kBloatPts
-c high res mode; 0.0005 cm-1 spacing 
+c hi res mode; 0.0005 cm-1 spacing 
       PARAMETER (kBloatPts=kMaxPts*kBoxCarUse) 
 c space saver; everything at 0.0025 cm-01
 c      PARAMETER (kBloatPts=1)     

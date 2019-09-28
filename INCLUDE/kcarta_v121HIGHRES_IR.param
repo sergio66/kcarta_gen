@@ -25,8 +25,13 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!! compressed files for gases 1,3 are currently span 605-1205 cm-1
 c!! at a chunk spacing of 5 cm-1
+c!!
+c!! Sept 19. 2019
 c!! /asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for WV,O3
 c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for CO2
+c!!
+c!! Sept 19. 2019
+c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for WV,CO2,O3
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!! to run this code first go to SRC, type
@@ -110,8 +115,10 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le using lner.m <<<<<
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
-      PARAMETER (kWaterPath      = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
-      PARAMETER (kCompPath       = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+c      PARAMETER (kWaterPath      = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+c      PARAMETER (kCompPath       = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+      PARAMETER (kWaterPath      = '/asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+      PARAMETER (kCompPath       = '/asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
       PARAMETER (kCKDPath        = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '/asl/data/kcarta_sergio/KCDATA/General/CKDieee_le/Compr/')
 
@@ -124,7 +131,8 @@ c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER*80 kWaterIsotopePath
 c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
-      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
       PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
