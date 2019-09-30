@@ -349,6 +349,9 @@ CONTAINS
     NAMELIST /nm_endinp/namecomment
 
 ! variation of layer temp
+! note : kTemperVary can be set in nm_params
+!        iTemperVary can be set in nm_radnce
+!        they could conflict ugh
     kTemperVary  = -1          !assume const-in-tau temperature variation
 
 ! presume no Limb calcs, AIRS satellite hgts
@@ -494,7 +497,8 @@ CONTAINS
     iaaOverrideOrig = iaaOverrideDefault
     IF (iaaOverride(2,1) /= iaaOverrideDefault(2,1)) THEN
       write(kStdWarn,*) 'kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
-      write(kStdWarn,*) 'UserSet         iaaOverride(2,1) = ',iaaOverride(2,1)
+      write(kStdWarn,*) '  nml file : user set    iaaOverride(2,1) = ',iaaOverride(2,1)
+      write(kStdWarn,'(A,I2,A)') '  setting kTemperVary = iaaOverride(2,1) = ',iaaOverride(2,1),' ... '
       kTemperVary = iaaOverride(2,1)
     END IF
     iaaOverrideDefault = iaaOverride
@@ -558,8 +562,8 @@ CONTAINS
     namecomment = '******* RADNCE section *******'
     iAtmLoop     = -1
     !iTemperVary  = -1          !assume const-in-tau temperature variation
-    iTemperVary  = kTemperVary !assume const-in-tau temperature variation
-          
+    iTemperVary  = kTemperVary 
+
     rSatHeightCom = -1.0  !!! this is in pre_defined.param, comblockAtmLoop
     rAtmLoopCom   = -1.0  !!! this is in pre_defined.param, comblockAtmLoop
     raAtmLoopCom = -9999.0      !!! this is in pre_defined.param, comblockAtmLoop
@@ -893,6 +897,7 @@ CONTAINS
       write(kStdWarn,*) 'UserSet         iaaOverride(2,1) = ',iaaOverride(2,1)
       kTemperVary = iaaOverride(2,1)
     END IF
+
     iaaOverrideDefault = iaaOverride
     write(kStdWarn,*) 'input | output | diff override params'
     write(kStdWarn,*) '---------------------------------------'
@@ -1456,12 +1461,14 @@ CONTAINS
       raProfileTemp = raaTemp(:,1)
     END IF
 
+    !write(kStdWarn,*) 'kTemperVary at location 10 = ',kTemperVary
     IF ((iTemperVary == -1) .OR. (iTemperVary == +43)) THEN
       CALL SetkTemperVary(iTemperVary)
     ELSE
       write(kStdErr,*) 'Can only do kTemperVary = -1 or +43, not ',iTemperVary
       Call DoStop
     END IF
+    !write(kStdWarn,*) 'kTemperVary at location 10 = ',kTemperVary
 
     kSurfAlt = -9.9e10
 #IF (TXTsetting)

@@ -426,10 +426,24 @@ CONTAINS
         raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
       ELSEWHERE
         raTrans = 1 - raAbs + 0.5*(raAbs * raAbs)
+        raZeta2 = raAbs/6.0                                           !! LBLRTM
         raZeta2 = raAbs/6.0 - (raAbs**3)/360.0 + (raAbs**5)/15120.0   !! mathematica
-        raZeta2 = raAbs/6.0
         raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
       END WHERE
+!!! quick debug set 43 == 42
+!!! quick debug set 43 == 42
+!!! quick debug set 43 == 42
+!      raZeta = 2*(raIntenAvg-raIntenP1)
+!      WHERE (raAbs >= 0.05) 
+!        raTrans = exp(-raAbs)
+!        raFcn = (1-raTrans)*(raIntenP1 + raZeta/raAbs) - raTrans * raZeta
+!      ELSEWHERE
+!        raTrans = 1 - raAbs
+!        raFcn = raAbs*raIntenP1 + raZeta*(1-raAbs/2) - raTrans * raZeta
+!      END WHERE
+!!! quick debug set 43 == 42
+!!! quick debug set 43 == 42
+!!! quick debug set 43 == 42
       raInten = raInten*raTrans + raFcn
 
     !y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
