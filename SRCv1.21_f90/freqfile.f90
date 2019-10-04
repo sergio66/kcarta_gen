@@ -286,6 +286,7 @@ CONTAINS
       CALL DoStop
     END IF
 
+! kW is set in pre_definedVERYHIGHRES_IR.param (or pre_definedVERYHIGHRES_IR.param.f90)
     DO iJ = 1,kW
       rF = kMaxPts*kaFrStep(iJ)
       rG = kaBlSize(iJ)
@@ -300,7 +301,7 @@ CONTAINS
         write(kStdErr,*) 'iJ = ',iJ
         write(kStdErr,*) 'kcartaparam.f90 says that the number of '
         write(kStdErr,*) 'kCompressed files = kaNumKComp(iJ) = ',kaNumKComp(iJ)
-        write(kStdErr,*) 'based on following parameters, there should be iI = ',iI
+        write(kStdErr,*) 'but based on following parameters, there should be iI = ',iI
         write(kStdErr,*) kaMinFr(iJ),kaMaxFr(iJ),kaFrStep(iJ),kMaxPts
         write(kStdErr,*) 'iI = iNT((kMaxFreq-kMinFreq)/(kMaxPts*kFreqStep))'
         CALL DoSTOP

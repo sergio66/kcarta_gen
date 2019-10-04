@@ -346,9 +346,9 @@ c
 ccc!                       <-----------FIR------------------><IR><SWIR> <---- NIR --><VIS><UV>
 ccc! <<<<<<<<<<<<<<< ----------- cut here and replace with dump_kaTag_for_predefined.param ---------->>>>>>
 
-      PARAMETER (kNumkCompT =  736) 
+      PARAMETER (kNumkCompT =  2516) 
       DATA kaTag        /  02,  04,  06,  08,  10,  12,  15,  20,  25,  30,  35,  40,  50,  55  / 
-      DATA kaNumkComp   /  30,  20,  20,  28,  34,  21,  07,  445, 30,  21,  19,  16,  26,  19  / 
+      DATA kaNumkComp   /  30,  20,  20,  28,  34,  21,  07,  2225, 30,  21,  19,  16,  26,  19  / 
       DATA kaCTag       / 'f', 'g', 'h', 'j', 'k', 'p', 'q', 'y', 's', 'm', 'n', 'o', 'v', 'u'  / 
       DATA kaMinFr        /   15.0000,   30.0000,   50.0000,   80.0000,
      $                    140.0000,  300.0000,  500.0000,  605.0000,
