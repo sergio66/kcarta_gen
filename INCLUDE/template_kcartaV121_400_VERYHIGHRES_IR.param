@@ -27,6 +27,7 @@ c!! compressed files for gases 1,3 are currently span 605-1205 cm-1
 c!! at a chunk spacing of 5 cm-1
 c!!
 c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/ for WV,CO2,O3
+c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/ for WV,CO2,O3
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!! to run this code first go to SRC, type
@@ -110,8 +111,11 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le using lner.m <<<<<
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
-      PARAMETER (kWaterPath      = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
-      PARAMETER (kCompPath       = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+c
+c      PARAMETER (kWaterPath      = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+c      PARAMETER (kCompPath       = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+      PARAMETER (kWaterPath      = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/')
+      PARAMETER (kCompPath       = '#/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/')
       PARAMETER (kCKDPath        = '^/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '^/KCDATA/General/CKDieee_le/Compr/')
 
@@ -296,7 +300,8 @@ c      PARAMETER (kCO2Path = '^/H2012.ieee-le/IR605/etc.ieee-le/linemixUMBC/') !
 c      PARAMETER (kCO2Path = '^/H2012.ieee-le/IR605/etc.ieee-le/hartmann/') !! hmm a new try of Hartmann
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 
-      PARAMETER (kCO2Path = '/asl/data/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+c      PARAMETER (kCO2Path = '/asl/data/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+      PARAMETER (kCO2Path = '/asl/data/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/')
       PARAMETER (kCO2_UMBCorHARTMAN = -1)
 c--->
 c      Am pretty sure this is 385 ppmv

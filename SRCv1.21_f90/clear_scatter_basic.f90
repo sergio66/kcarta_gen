@@ -291,7 +291,7 @@ CONTAINS
 ! utput : intensity at top of layer
 
 ! local variables
-    INTEGER :: iFr,iBeta,iBetaP1
+    INTEGER :: iFr,iBeta,iBetaP1,iPade,iPade2Final
     REAL :: rBeff,raFcn(kMaxPts)
     REAL :: raIntenP(kMaxPts),raIntenP1(kMaxPts),raIntenP0(kMaxPts)
     REAL :: raIntenAvg(kMaxPts)
@@ -330,6 +330,8 @@ CONTAINS
           
  1234 FORMAT(I3,3(' ',F10.3))
  2345 FORMAT('up [iLDN=iL iLay iLUP=iLp1]',I3,3(' ',F10.3))
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      
     IF (iVary == 2) THEN
       !!! lim tau --> 0 , rFcn --> 0
@@ -344,6 +346,8 @@ CONTAINS
       WHERE (raAbs >= 0.001) 
         raInten = raInten + raFcn*raCos*(raAbs/raCos-1) + raFcn*raCos*exp(-raAbs/raCos)
       END WHERE
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ELSEIF (iVary == +3) THEN
       !!! this was done on June 24, 2013 .. looking at Clough et al, JGR 1992 v97
@@ -361,6 +365,8 @@ CONTAINS
       END WHERE
       raFcn = raIntenP1 + 2*(raIntenAvg-raIntenP1)*raFcn
       raInten = raInten * exp(-raAbs/raCos) + raFcn * (1 - exp(-raAbs/raCos))
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ELSEIF (iVary == +40) THEN
       !!! orig code uptil Oct 2015, buggy as it used raIntenP instead of raIntenAvg
@@ -381,20 +387,45 @@ CONTAINS
       raZeta = raIntenP1*(1-raTrans) + (raIntenP - raIntenP1)*(raFcn - raTrans)
       raInten = raInten * exp(-raAbs/raCos) + raZeta
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     ELSEIF (iVary == +41) THEN
+   
       !!! print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
       !!! this was done on Nov 04, 2014 .. looking at Clough et al, JGR 1992 v97
       !!! pg 15761, LBL calcs of atmospheric fluxed and cooling rates, Eqn 12
       !!! PADE APPROX, two term (combo of GENLN2 and LBLRTM)
       raAbs = raaAbs(:,iL)/raCos*rFrac
       raTrans = exp(-raAbs)
-      raZeta = 0.2*raAbs             !! pade one
-      raFcn = (raIntenAvg + raZeta*raIntenP1)/(1+raZeta)
-      raZeta = 0.193*raAbs           !! pade two
-      raZeta2 = 0.013*raAbs*raAbs    !! pade two
-      raFcn = (raIntenAvg + (raZeta + raZeta2)*raIntenP1)/(1+raZeta+raZeta2)
-      raFcn = (1-raTrans)*raFcn
-      raInten = raInten*raTrans + raFcn
+
+      iPade = 1
+      iPade = 2
+      if (iPade == 1) then
+        !!! pade ONE
+        raZeta = 0.2*raAbs             !! pade one
+        raFcn = (raIntenAvg + raZeta*raIntenP1)/(1+raZeta)  !!! Eqn 15 JGR 1992
+      elseif (iPade == 2) then
+        !!! pade TWO
+        raZeta = 0.193*raAbs           !! pade two
+        raZeta2 = 0.013*raAbs*raAbs    !! pade two
+        raFcn = (raIntenAvg + (raZeta + raZeta2)*raIntenP1)/(1+raZeta+raZeta2)   !!! Eqn 16 JGR 1992
+      endif
+
+      iPade2Final = +1
+      iPade2Final = -1
+      if (iPade2Final == -1) then
+        !! final answer      
+        !! this is what Eli Mlawer directly does in RRTM JGR 1997 paper
+        raInten = raInten + (raFcn-raInten)*(1-raTrans)   !!!! WHOA THIS IS NEW, based on Eli Mlawer RRTM JGR1997 paper
+                                                        !!!! which makes sense; r -> r + (rEmiss-r)(1-T) -> rT + rEmiss(1-T)
+   
+      elseif (iPade2Final == +1) then
+        !!!!! this is the more usual way : note raFcn is multiplied by (1-raTrans)
+        raFcn = raFcn*(1-raTrans)
+        raInten = raInten*raTrans + raFcn
+      end if
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ELSEIF (iVary == +42) THEN
       !!!      print *,'up flux ',iL,iBeta,rFrac,raaAbs(1,iL),TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
@@ -411,6 +442,8 @@ CONTAINS
         raFcn = raAbs*raIntenP1 + raZeta*(1-raAbs/2) - raTrans * raZeta
       END WHERE
       raInten = raInten*raTrans + raFcn
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ELSEIF (iVary == +43) THEN
       !!!         http://www.wolframalpha.com/input/?i=1-2*%281%2Fx-exp%28-x%29%2F%281-exp%28-x%29%29%29
@@ -430,9 +463,9 @@ CONTAINS
         raZeta2 = raAbs/6.0 - (raAbs**3)/360.0 + (raAbs**5)/15120.0   !! mathematica
         raFcn = (1-raTrans)*(raIntenAvg + raZeta * raZeta2)
       END WHERE
-!!! quick debug set 43 == 42
-!!! quick debug set 43 == 42
-!!! quick debug set 43 == 42
+!!! quick debug set 43 --> 42 GENLN2
+!!! quick debug set 43 --> 42 GENLN2
+!!! quick debug set 43 --> 42 GENLN2
 !      raZeta = 2*(raIntenAvg-raIntenP1)
 !      WHERE (raAbs >= 0.05) 
 !        raTrans = exp(-raAbs)
@@ -441,14 +474,47 @@ CONTAINS
 !        raTrans = 1 - raAbs
 !        raFcn = raAbs*raIntenP1 + raZeta*(1-raAbs/2) - raTrans * raZeta
 !      END WHERE
-!!! quick debug set 43 == 42
-!!! quick debug set 43 == 42
-!!! quick debug set 43 == 42
-      raInten = raInten*raTrans + raFcn
+!!! quick debug set 43 --> 42 GENLN2
+!!! quick debug set 43 --> 42 GENLN2
+!!! quick debug set 43 --> 42 GENLN2
 
+!!! quick debug set 43 --> 41 = pade one
+!!! quick debug set 43 --> 41 = pade one
+!!! quick debug set 43 --> 41 = pade one
+!      raAbs = raaAbs(:,iL)/raCos*rFrac
+!      raTrans = exp(-raAbs)
+!      iPade = 1
+!      iPade = 2
+!      if (iPade == 1) then
+!        print *,'pade oneA'
+!        raZeta = 0.2*raAbs             !! pade one
+!        raFcn = (raIntenAvg + raZeta*raIntenP1)/(1+raZeta)
+!      elseif (iPade == 2) then
+!      print *,'pade twoA'
+!        raZeta = 0.193*raAbs           !! pade two
+!        raZeta2 = 0.013*raAbs*raAbs    !! pade two
+!        raFcn = (raIntenAvg + (raZeta + raZeta2)*raIntenP1)/(1+raZeta+raZeta2)   !!! Eqn 16 JGR 1992
+!      end if
+!!! now note in usual case iVary = 43, we multiply raFcn by (1-rTrans) so so it here also to use same generic code
+!!! see iPade2Final above
+!    raFcn = raFcn * (1-raTrans)
+!! so no more need to do this special case ... just use generic case
+!!  raInten = raInten + (raFcn-raInten)*(1-raTrans)    !!!! WHOA THIS IS NEW, based on Eli Mlawer RRTM JGR1997 paper
+!!                                                     !!!! which makes sense; r = r + (rEmiss-r)(1-T) = rT + rEmiss(1-T)
+!!! quick debug set 43 --> 41 = pade one
+!!! quick debug set 43 --> 41 = pade one
+!!! quick debug set 43 --> 41 = pade one
+
+!!  GENERIC raInten at top of layer       !!  GENERIC raInten at top of layer   !!  GENERIC raInten at top of layer
+    raInten = raInten*raTrans + raFcn     !!  GENERIC raInten at top of layer   !!  GENERIC raInten at top of layer
+!!  GENERIC raInten at top of layer       !!  GENERIC raInten at top of layer   !!  GENERIC raInten at top of layer
+
+!!! check out Pade approximants; also see MATLAB/pade_vs_exact.m
     !y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     !y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
     !y=1e-3; x = y : y : 250*y; T = exp(-x); plot(x,(1-T).*(1./x-T./(1-T)),'b.-',x,x.*(1/2-2*x/6+x.*x/6),'r',x,x/2,'k')
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ELSEIF (iVary == +4) THEN
       !!! this was done on Oct 2015 .. looking at Clough et al, JGR 1992 v97
@@ -465,6 +531,8 @@ CONTAINS
         raFcn   = (1-raTrans)*raIntenP1 + raZeta2
       END WHERE
       raInten = raInten*raTrans + raFcn
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     END IF
 
