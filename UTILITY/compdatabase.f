@@ -111,7 +111,8 @@ c      print *,caStr
         CALL process(caStr,raaArrP,iCntP,10.0) !10000.0*0.0010
         END IF
       IF (caStr(1:1).EQ. 'q') THEN
-        CALL process(caStr,raaArrQ,iCntQ,15.0) !10000.0*0.0015
+        !CALL process(caStr,raaArrQ,iCntQ,15.0) !10000.0*0.0015
+        CALL process(caStr,raaArrQ,iCntQ,05.0) !10000.0*0.0005
         END IF
       IF (caStr(1:1).EQ. 'r') THEN
         CALL process(caStr,raaArrR,iCntR,25.0) !10000.0*0.0025
@@ -181,7 +182,7 @@ c then sort array raaArr according to iGasID
       IF (iCntQ .GT. 0) THEN
         CALL dosort(raaArrQ,iCntQ,2)
         CALL dosort(raaArrQ,iCntQ,1)
-        iTag = 15        !! spacing = 0.0015 cm-1
+        iTag = 15        !! spacing = 0.0015 cm-1, changed to 0.0005 cm-1 in Oct 2019
         END IF 
 
       IF (iCntR .GT. 0) THEN

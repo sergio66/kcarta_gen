@@ -133,6 +133,15 @@ RTPLIBS =
 #RTPFLAGS = -e -fast -w
 #RTPLIBS = 
 
+## ------------------------ ifort --------------------------
+F77 = ifort
+FLAGS = -extend-source 132 -check bounds -O2
+LIBS = 
+RTPF77 = ifort
+RTPFLAGS = -extend-source 132 -check bounds -O2
+RTPLIBS = 
+
+########################################################################
 # EXECS defines the set of all programs to be compiled
 # BASIC defines the set of core programs to be compiled
 BASIC = readkcarta.x readkcBasic.x compdatabase.x makeRTPfile.x

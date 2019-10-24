@@ -489,8 +489,8 @@ CONTAINS
     namecomment = '******* PARAMS section *******'
     read (iIOUN,nml = nm_params)
     write (kStdWarn,*) 'successfully read in params .....'
-! hese are global variables and so need to be checked
-! set overrides
+! these are global variables and so need to be checked
+! tset overrides
     caNMLReset_param_spectra1 = caNMLReset_param_spectra   !! if caaNMLReset was defined here
     caaTextOverride1 = caaTextOverride   !! if caaTextOverride was defined here
     caaTextOverrideDefault = caaTextOverride

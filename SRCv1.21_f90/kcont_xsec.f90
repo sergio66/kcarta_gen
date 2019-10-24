@@ -227,6 +227,8 @@ CONTAINS
     kTempUnitOpen=1
     READ(iIOUN) d1,d2,df       !read start/stop freq, df
     IF (d1 > raFreq(1)) THEN
+      write(kStdErr,*) caFName
+      write(kStdErr,*) d1,d2,df,iTag,kCKD
       write(kStdErr,*) 'CKD file has freqs that start too high!'
       CALL DoStop
     END IF
