@@ -554,7 +554,32 @@ CONTAINS
     ELSEIF (kaTag(iTag) == 15) THEN
       !! -------> 500-605 cm-1  <---------------------   'q' prefix
       IF (iGasID == 1) THEN
-        caDir = kWaterPathq
+        IF (rFileStartFr+1.0 < kWaterIsobandStart1) THEN
+          !! usual water : all isotopes 1 2 3 4 5 6   f< 1105 cm-1
+          caDir = kWaterPathq
+        ELSEIF ((rFileStartFr+1 >= kWaterIsobandStart1) .AND. (rFileStartFr+1 <= kWaterIsobandStop1)) THEN
+          !! special water : isotopes 1 2 3   5 6   1105 < f < 1705 cm-1
+          caDir = kWaterIsotopePath
+          caDir = kWaterPathq
+        ELSEIF ((rFileStartFr+1 >= kWaterIsobandStop1) .AND. (rFileStartFr+1 <= kWaterIsobandStart2)) THEN
+          !! usual water : all isotopes 1 2 3 4 5 6   1730 < f <= 2405 cm-1
+          caDir = kWaterPath
+          caDir = kWaterPathq
+        ELSEIF ((rFileStartFr+1 >= kWaterIsobandStart2) .AND. (rFileStartFr+1 <= kWaterIsobandStop2)) THEN
+          !! special water : isotopes 1 2 3   5 6   2405 < f < 3305 cm-1
+          caDir = kWaterIsotopePath
+          caDir = kWaterPathq
+        END IF
+      ELSEIF (iGasID == 103) THEN
+        IF ((rFileStartFr+1 >= kWaterIsobandStart1) .AND. (rFileStartFr+1 <= kWaterIsobandStop1)) THEN
+          !! heavy water : isotope 4
+          caDir = kWaterIsotopePath
+          caDir = kWaterPathq
+        ELSEIF ((rFileStartFr+1 >= kWaterIsobandStart2) .AND. (rFileStartFr+1 <= kWaterIsobandStop2)) THEN
+          !! heavy water : isotope 4
+          caDir = kWaterIsotopePath
+          caDir = kWaterPathq
+        END IF
       ELSE
         caDir = kCompPathq
       END IF

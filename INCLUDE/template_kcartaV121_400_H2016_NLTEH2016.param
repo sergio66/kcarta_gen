@@ -14,7 +14,7 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
-      include '../INCLUDE/pre_defined_orig605_805res.param'           !!!
+      include '../INCLUDE/pre_defined.param'                          !!!
 c template file : template_kcartaV120_400_H2016.param                 !!!
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -82,7 +82,8 @@ c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       PARAMETER (kWaterIsotopePath = '#/H2016.ieee-le/IR605/hdo.ieee-le/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
-      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
+c      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
+      PARAMETER (kWaterIsobandStart1 = 0500, kWaterIsobandStop1 = 1955)
       PARAMETER (kWaterIsobandStart2 = 1955, kWaterIsobandStop2 = 3355)
 c for testing; this will turn off new part of code and just use usual database
 c for testing; this will turn off new part of code and just use usual database
@@ -292,10 +293,15 @@ c !!! p = 300_510 cm-1, at 0.0010 cm-1 spacing (= 10 cm-1 chunk span)
       PARAMETER (kCKDPathp   = '^/H2012.ieee-le/FIR300_510/etc.ieee-le/')
 
 c !!! q = 500_605 cm-1, at 0.0015 cm-1 spacing (= 15 cm-1 chunk span)
+!      CHARACTER*80 kWaterPathq,kCompPathq,kCKDPathq
+!      PARAMETER (kWaterPathq = '^/H2012.ieee-le/FIR500_605/h2o.ieee-le/')
+!      PARAMETER (kCompPathq  = '^/H2012.ieee-le/FIR500_605/etc.ieee-le/')
+!      PARAMETER (kCKDPathq   = '^/H2012.ieee-le/FIR500_605/etc.ieee-le/')
+c !!! q = 500_605 cm-1, at 0.0015 cm-1 spacing (= 15 cm-1 chunk span)
       CHARACTER*80 kWaterPathq,kCompPathq,kCKDPathq
-      PARAMETER (kWaterPathq = '^/H2012.ieee-le/FIR500_605/h2o.ieee-le/')
-      PARAMETER (kCompPathq  = '^/H2012.ieee-le/FIR500_605/etc.ieee-le/')
-      PARAMETER (kCKDPathq   = '^/H2012.ieee-le/FIR500_605/etc.ieee-le/')
+      PARAMETER (kWaterPathq = '/asl/data/kcarta/H2016.ieee-le/FIR500_805/hdo.ieee-le/')
+      PARAMETER (kCompPathq  = '/asl/data/kcarta/H2016.ieee-le/FIR500_805/etc.ieee-le/')
+      PARAMETER (kCKDPathq   = '^/KCDATA/General/CKDieee_le/')
 
 c !!! s = 2830-3380 cm-1, at 0.0025 cm-1 spacing (= 25 cm-1 chunk span)
 c !!! note we link to hdo.ieee-le instead of h2o_ALLISO.ieee-le

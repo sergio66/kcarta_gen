@@ -198,6 +198,20 @@ Future plans
 v1.21   f90 version, using implied do loops, function/subroutine overloads!
         Brought back the basic 1D limb view calcs
 
+        Before 500-605 cm-1 was 0.0015 cm-1 res, 605-2830 cm-1 was 0.0025 cm-1 res
+        Now    500-605 cm-1 is  0.0005 cm-1 res, 805-2830 cm-1 is  0.0025 cm-1 res
+
+        template_kcartaV121_400_H2016_NLTEH2016.param family is new
+          uses ../INCLUDE/pre_defined.param
+        template_kcartaV120_400_H2016_NLTEH2016.param family is old
+          uses ../INCLUDE/pre_defined_orig605_805res.param
+
+        This means there are major changes to DATAFIX400* and to the makefile
+        and a new file cp_param_files_to_f90_v120.sc has been made (which deals
+        with the orig resolution)
+
+        kTemperVary = +43 = linear in tau is now default (changed from 1 == const layer T)
+
 v1.20   f90 version! The Modules meant a lot of subroutines/files got rerranged
         This may get cleaned up further along the line
 	In addition we got rid of (a) limb viewing routines

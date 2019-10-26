@@ -29,6 +29,8 @@ c      DATA kaFrStep  /1.500000e-3,  2.500000e-3,   1.000000e-2,  1.500000e-2,
 c     $                 2.500000e-2,  5.000000e-2,   2.500000e-3,
 c     $                 0.500000e-3,  1.000000e-3/
 
+c Oct 2019 : changed 'q' to be 500 to 880  at 0.0005 cm-1 res
+c Oct 2019 : changed 'r' to be 805 to 2830 at 0.0025 cm-1 res
 
 ccccc check n_gas_wt_spectra.f for allowed gases <<<<<<<<<<<<<<-------------
 c  check to see the following reference profiles exist : 1,2,3,4,5,6,7,8,9 

@@ -352,7 +352,8 @@ CONTAINS
 ! note : kTemperVary can be set in nm_params
 !        iTemperVary can be set in nm_radnce
 !        they could conflict ugh
-    kTemperVary  = -1          !assume const-in-tau temperature variation
+    kTemperVary  = -1          !assume const-in-tau temperature variation  till Oct 2019
+    kTemperVary  = +43         !assume linear-in-tau temperature variation after Oct 2019
 
 ! presume no Limb calcs, AIRS satellite hgts
     iaLimb = -1
