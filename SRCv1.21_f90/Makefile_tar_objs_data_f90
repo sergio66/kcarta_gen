@@ -521,6 +521,11 @@ clean:
 
 #########################################################################
 ### new res : 500-805 cm-1 at 0.0005 cm-1, 805-2830 cm-1 at 0.0025 cm-1
+
+# executables live in ../BIN; note you need to set the DISTDIR
+DISTDIR    = /asl/data/kcarta
+DISTDIRGEN = /asl/data/kcarta_sergio
+
 datafix400_v121_H2016:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v120.param; \
@@ -653,10 +658,6 @@ datafix385_v120_H2012:
 #### 7) make new symbolic link SRC  ln -s SRCv1.21_f90 SRC
 #### 8) cd to this dir              cd SRC 
 #### 9) make whatever distribution you want! eg make dist 
-
-# executables live in ../BIN; note you need to set the DISTDIR
-DISTDIR    = /asl/data/kcarta
-DISTDIRGEN = /asl/data/kcarta_sergio
 
 #### (A) : this has ALL the source code 
 ####       clear sky rad transfer, clear sky jacobians, scatter, nlte and

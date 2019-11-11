@@ -452,8 +452,7 @@ CONTAINS
 ! also has to add on the DIRECTORY
 ! only worry about linemixing/COUSIN/NLTE for CO2 in the 605-2830 cm-1 tag
 ! (iTag=2,prefix='r')
-    SUBROUTINE CompFileName(iLineMix,iGasID,rFileStartFr, &
-    iTag,iActualTag,caFName)
+    SUBROUTINE CompFileName(iLineMix,iGasID,rFileStartFr,iTag,iActualTag,caFName)
 
     IMPLICIT NONE
 

@@ -1,0 +1,2 @@
+cat PARAM_HT2008/comp_fir15_30.param  PARAM_HT2008/comp_fir30_50.param PARAM_HT2008/comp_fir50_80.param PARAM_HT2008/comp_fir80_150.param PARAM_HT2008/comp_fir140_310.param PARAM_HT2008/comp_fir300_510.param PARAM_HT2016/comp_ir605_2830.param PARAM_HT2008/comp_nir2830_3330.param PARAM_HT2008/comp_nir3550_5550.param PARAM_HT2008/comp_nir5550_8200.param PARAM_HT2008/comp_nir8250_12250.param PARAM_HT2008/comp_vis12000_25000.param PARAM_HT2008/comp_uv25000_45000.param > all_15_450000.param
+
