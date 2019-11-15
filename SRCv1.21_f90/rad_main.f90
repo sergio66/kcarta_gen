@@ -661,10 +661,11 @@ CONTAINS
     write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
     write(kStdWarn,*) 'iaaRadLayer(1),iaaRadlayer(end)=',iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
-    iDefault = -1          !!!temperature in layer constant USE THIS FOR RT !!!!
+    iDefault = -1          !!!temperature in layer constant         USE THIS FOR RT !!!!
+    iDefault = 43          !!!linear temperature in layer variation USE THIS FOR RT !!!!
     iVary = kTemperVary    !!! see "SomeMoreInits" in kcartamisc.f
     IF ((iDefault /= iVary) .AND. (kOuterLoop == 1)) THEN
-      write(kStdErr,*)'iDefault, iVary (kTempervary) in rad_main',iDefault,iVary
+      write(kStdErr,*) 'iDefault, iVary (kTempervary) in rad_main',iDefault,iVary
       write(kStdWarn,*)'iDefault, iVary (kTemperVary) in rad_main',iDefault,iVary
     END IF
 
