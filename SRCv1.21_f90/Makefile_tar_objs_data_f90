@@ -4,26 +4,18 @@
 # the tarfile created by "make dist", and KFTP is the machine and
 # path to the FTP archive.
 
-KTAR     = /salsify/scratch4/kcarta120.tar
-KTARBUG  = /salsify/scratch4/kcarta_bugfix120.tar
-KTARBUGGIVEOUT  = /salsify/scratch4/kcarta_bugfix_giveout120.tar
-KGIVEOUT = /salsify/scratch4/kcartagiveout120.tar
-KDATA    = /salsify/scratch4/kcartaDATA.tar
-KMATLAB  = /salsify/scratch4/kcartaMATLAB.tar
-KFTP     = kale:/usr/local/ftp/pub/kcarta
-
-KTAR     = /asl/ftp/pub/packages/kcarta120.tar
-KTARBUG  = /asl/ftp/pub/packages/kcarta_bugfix120.tar
-KTARBUGGIVEOUT  = /asl/ftp/pub/packages/kcarta_bugfix_giveout120.tar
-KGIVEOUT = /asl/ftp/pub/packages/kcartagiveout120.tar
+KTAR     = /asl/ftp/pub/packages/kcarta121.tar
+KTARBUG  = /asl/ftp/pub/packages/kcarta_bugfix121.tar
+KTARBUGGIVEOUT  = /asl/ftp/pub/packages/kcarta_bugfix_giveout121.tar
+KGIVEOUT = /asl/ftp/pub/packages/kcartagiveout121.tar
 KDATA    = /asl/ftp/pub/packages/kcartaDATA.tar
 KMATLAB  = /asl/ftp/pub/packages/kcartaMATLAB.tar
 KFTP     = /asl/ftp/pub/packages/kcarta
 
-KTAR     = /asl/packages/kcarta120.tar
-KTARBUG  = /asl/packages/kcarta_bugfix120.tar
-KTARBUGGIVEOUT  = /asl/packages/kcarta_bugfix_giveout120.tar
-KGIVEOUT = /asl/packages/kcartagiveout120.tar
+KTAR     = /asl/packages/kcarta121.tar
+KTARBUG  = /asl/packages/kcarta_bugfix121.tar
+KTARBUGGIVEOUT  = /asl/packages/kcarta_bugfix_giveout121.tar
+KGIVEOUT = /asl/packages/kcartagiveout121.tar
 KDATA    = /asl/packages/kcartaDATA.tar
 KMATLAB  = /asl/packages/kcartaMATLAB.tar
 KCWRAP   = /asl/packages/kcwrap.tar
@@ -528,30 +520,30 @@ DISTDIRGEN = /asl/data/kcarta_sergio
 
 datafix400_v121_H2016:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2016.param > \
-      ../INCLUDE/kcarta_v120.param; \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
 datafix400_v121_H2016_highres:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_HIGHRES_IR.param > ../INCLUDE/kcarta_v120.param; \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_HIGHRES_IR.param > ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
 datafix400_v121_H2016_veryhighres:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_VERYHIGHRES_IR.param > ../INCLUDE/kcarta_v120.param; \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_VERYHIGHRES_IR.param > ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
@@ -570,78 +562,78 @@ datafix400_v120_H2016:
       cd ../; \
       cd ../SRCv1.21_f90
 
-datafix400_v120_H2016_g110:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2016_WVg110.param > \
-      ../INCLUDE/kcarta_v120.param; \
+datafix400_v121_H2016_g110:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2016_WVg110.param > \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
-datafix400_v120_G2015_NLTEH2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_G2015_NLTEH2016.param > \
-      ../INCLUDE/kcarta_v120.param; \
+datafix400_v121_G2015_NLTEH2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_G2015_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
-datafix400_v120_H2016_NLTEH2008:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2008.param > \
-      ../INCLUDE/kcarta_v120.param; \
+datafix400_v121_H2016_NLTEH2008:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
-datafix400_v120_H2016_NLTEH2004:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2004.param > \
-      ../INCLUDE/kcarta_v120.param; \
+datafix400_v121_H2016_NLTEH2004:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2004.param > \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
-datafix400_v120_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2012_NLTEH2008.param > \
-      ../INCLUDE/kcarta_v120.param; \
+datafix400_v121_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2012_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
-datafix385_v120_H2012_LBLRTM:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_LBLRTM_NLTEH2008.param > \
-      ../INCLUDE/kcarta_v120.param; \
+datafix385_v121_H2012_LBLRTM:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_385_H2012_LBLRTM_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
       cd ../SRCv1.21_f90
 
-datafix385_v120_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_NLTEH2008.param > \
-      ../INCLUDE/kcarta_v120.param; \
+datafix385_v121_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_385_H2012_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v120.param kcarta.param; \
+      ln -s kcarta_v121.param kcarta.param; \
       cd EARTH_database_params; \
       ./lner_EARTH_database_params.sc ;\
       cd ../; \
@@ -650,9 +642,9 @@ datafix385_v120_H2012:
 ################### DISTRIBUTIONS ########################################
 #### 1) to make the distributions, go to /home/sergio and look for kcartaV1xx
 #### 2) since all the KCARTA directories are under kcartaV1xx, rename this to 
-####    kcartaV120 eg               mv kcartaV110 kcartaV120
+####    kcartaV121 eg               mv kcartaV110 kcartaV121
 #### 3) rm old sybolic link         rm KCARTA 
-#### 4) make new symbolic link      ln -s  kcartaV120 KCARTA 
+#### 4) make new symbolic link      ln -s  kcartaV121 KCARTA 
 #### 5) cd to this dir              cd KCARTA
 #### 6) rm old symbolic link SRC    rm SRC
 #### 7) make new symbolic link SRC  ln -s SRCv1.21_f90 SRC
@@ -666,33 +658,33 @@ dist:
 	cd ../.. ;				\
 	rm $(KTAR) 2> /dev/null || true;	\
 	tar -cf $(KTAR)				\
-		kcartaV120/BIN/kcarta.x90		\
-		kcartaV120/BIN/bkcarta.x90	\
-		kcartaV120/LIB                  \
-		kcartaV120/INCLUDE 		\
-		kcartaV120/SCATTERCODE          \
-		kcartaV120/DOC			\
-		kcartaV120/MATLAB		\
-		kcartaV120/README.1ST		\
-		kcartaV120/SCRIPTS		\
-		kcartaV120/SRCv1.21_f90/*.f90         \
-		kcartaV120/SRCv1.21_f90/Makefile    \
+		kcartaV121/BIN/kcarta.x90		\
+		kcartaV121/BIN/bkcarta.x90	\
+		kcartaV121/LIB                  \
+		kcartaV121/INCLUDE 		\
+		kcartaV121/SCATTERCODE          \
+		kcartaV121/DOC			\
+		kcartaV121/MATLAB		\
+		kcartaV121/README.1ST		\
+		kcartaV121/SCRIPTS		\
+		kcartaV121/SRCv1.21_f90/*.f90         \
+		kcartaV121/SRCv1.21_f90/Makefile    \
 		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
 		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
-		kcartaV120/UTILITY;		\
+		kcartaV121/UTILITY;		\
 	chmod 664 $(KTAR)
 
 bugfix:
 	cd ../.. ;				\
 	rm $(KTARBUG) 2> /dev/null || true;	\
 	tar -cf $(KTARBUG)			\
-		kcartaV120/README.1ST		\
-		kcartaV120/INCLUDE		\
-		kcartaV120/DOC/kcarta1.21_f90*	\
-		kcartaV120/SRCv1.21_f90/Makefile    \
+		kcartaV121/README.1ST		\
+		kcartaV121/INCLUDE		\
+		kcartaV121/DOC/kcarta1.21_f90*	\
+		kcartaV121/SRCv1.21_f90/Makefile    \
 		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
 		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
-		kcartaV120/SRCv1.21_f90/*.f90;        \
+		kcartaV121/SRCv1.21_f90/*.f90;        \
 	chmod 664 $(KTARBUG)
 
 ##############################
@@ -701,7 +693,7 @@ matlab:
 	cd ../.. ;				\
 	rm $(KMATLAB) 2> /dev/null || true;     \
 	tar -cf $(KMATLAB)			\
-		kcartaV120/MATLAB;		\
+		kcartaV121/MATLAB;		\
 	chmod 664 $(KMATLAB)
 
 data:
@@ -724,7 +716,7 @@ kcwrap:
 		/asl/matlab/sconv		\
 		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
 		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
-		kcartaV120/SCRIPTS;		\
+		kcartaV121/SCRIPTS;		\
 	chmod 664 $(KCWRAP)
 
 ftp: $(KTAR)
