@@ -239,6 +239,7 @@ CONTAINS
 !      Call DoStop
 
     troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+    troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
 
 ! find the highest layer that we need to output radiances for
     iMax = -1

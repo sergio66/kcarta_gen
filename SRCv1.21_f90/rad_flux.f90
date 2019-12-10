@@ -59,7 +59,7 @@ CONTAINS
     iNpmix,iFileID,iNp,iaOp,raaOp,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles,rDelta,iTag, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     raTPressLevels,iKnowTP, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
@@ -92,6 +92,8 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 ! raTPressLevels,iKnowTP are for temperatures at the LEVELS : LEVEL TEMPERATURES
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers,iKnowTP
     REAL :: pProf(kProfLayer),raThickness(kProfLayer)
     REAL :: raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -197,7 +199,7 @@ CONTAINS
           CALL flux_slowloopConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
                 raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
                 caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
                 caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         ELSEIF (iAccOrLoopFlux == 1) THEN
           !!!use expint3; accurate as it uses rad as function of cos(theta)
@@ -205,7 +207,7 @@ CONTAINS
           CALL flux_fastConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
                 raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
                 caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
                 caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         END IF
       ELSEIF (iVary == +1) THEN
@@ -216,7 +218,7 @@ CONTAINS
           CALL flux_slowloopExpVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
                 raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
                 caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
                 caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         ELSEIF (iAccOrLoopFlux == 1) THEN
           write(kStdWarn,*) 'doing flux_fastExpVaryT'
@@ -224,7 +226,7 @@ CONTAINS
           CALL flux_fastExpVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
                 raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
                 caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
                 caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         END IF
       ELSEIF (iVary == +3) THEN
@@ -235,7 +237,7 @@ CONTAINS
           CALL flux_slowloopLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
                 raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
                 caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-                raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP, &
+                raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight,raTPressLevels,iKnowTP, &
                 caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         ELSEIF (iAccOrLoopFlux == 1) THEN
           !!!use expint3; accurate as it uses rad as function of cos(theta)
@@ -243,7 +245,7 @@ CONTAINS
           CALL flux_fastLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
                 raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
                 caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-                raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP, &
+                raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight,raTPressLevels,iKnowTP, &
                 caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
         END IF
       ELSE
@@ -258,7 +260,7 @@ CONTAINS
         CALL flux_moment_slowloopConstT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
             raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
             caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
       ELSEIF (((iVary == +3) .OR. (iVary == 4) .OR. (iVary == 41) .OR. (iVary == 42) .OR. (iVary == 43)) &
              .AND. (iAccOrLoopFlux == -1)) THEN
@@ -267,7 +269,7 @@ CONTAINS
         CALL flux_moment_slowloopLinearVaryT(raFreq,raVTemp,raaAbs,rTSpace,rSurfaceTemp,rSurfPress, &
             raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
             caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,iKnowTP, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight,iKnowTP, &
             caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
       ELSE
         write(kStdErr,*) 'not coded up these clear sky flux routines'
@@ -319,7 +321,7 @@ CONTAINS
     SUBROUTINE flux_slowloopConstT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -347,6 +349,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -537,7 +541,8 @@ CONTAINS
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
     IF (kFlux == 5) THEN
-      troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN
@@ -858,7 +863,7 @@ CONTAINS
     SUBROUTINE flux_fastConstT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSUnRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -886,6 +891,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -1069,6 +1076,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer  =  find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
@@ -1549,7 +1557,7 @@ CONTAINS
     SUBROUTINE flux_slowloopExpVaryT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -1577,6 +1585,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -1781,6 +1791,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN
@@ -2060,7 +2071,7 @@ CONTAINS
     SUBROUTINE flux_fastExpVaryT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSUnRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -2088,6 +2099,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
     REAL :: pProf(kProfLayer),raThickness(kProfLayer),raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rDelta,rSurfPress
@@ -2272,6 +2285,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
@@ -2538,7 +2552,7 @@ CONTAINS
     rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight,raTPressLevels,iKnowTP, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -2566,6 +2580,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers,iKnowTP
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -2771,6 +2787,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN
@@ -3068,7 +3085,7 @@ CONTAINS
     SUBROUTINE flux_fastLinearVaryT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSUnRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,iProfileLayers,pProf,raTPressLevels,iKnowTP, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight,raTPressLevels,iKnowTP, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -3096,6 +3113,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers,iKnowTP
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -3292,6 +3311,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
@@ -3973,7 +3993,7 @@ CONTAINS
     SUBROUTINE flux_moment_slowloopConstT(raFreq,raVTemp,raaAbs0,rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -4001,6 +4021,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -4180,7 +4202,8 @@ CONTAINS
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
     IF (kFlux == 5) THEN
-      troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN
@@ -4492,7 +4515,7 @@ CONTAINS
     rTSpace,rTSurf,rSurfPress, &
     raUseEmissivity,raSunRefl,rFracTop,rFracBot,iNpmix,iFileID, &
     caFluxFile,iAtm,iNumLayer,iaaRadLayer,raaMix,rDelta,iDownWard,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,iKnowTP, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight,iKnowTP, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IMPLICIT NONE
@@ -4520,6 +4543,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers,iKnowTP
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -4783,6 +4808,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN

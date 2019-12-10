@@ -620,7 +620,7 @@ CONTAINS
     INTEGER :: iNumLayer
 
 ! local vars
-    REAL :: raT(kMixFilRows),rX,rJunk
+    REAL :: raT(kMixFilRows),rX,rJunk,radTdz(kProfLayer)
     INTEGER :: iI,iL,i400mb,i50mb,iJL,iJ
 
 ! if        iaRadLayer = 001..100, everything ok
@@ -652,7 +652,7 @@ CONTAINS
     DO iI = 1,iNumLayer
         iL = iaRadLayer(iI)
         raT(iL) = raTemp(iL)   !!note storing into raT(iL) instead of raT(iI)
-    !        print *,iI,iL,raPress(iL),raT(iL)
+        ! print *,iI,iL,raPress(iL),raT(iL),raThickness(iL),radTdz(iL)
     END DO
 
 !! find i400mb
@@ -702,11 +702,209 @@ CONTAINS
     END DO
 
     10 CONTINUE
-    write(kStdWarn,*) 'this is in atmosphere layer (iaRadLayer) ',iI
+    write(kStdWarn,*) 'old tropopause (T = Tmin) is in atmosphere layer (iaRadLayer) ',iL
+    write(kStdWarn,*) '    which is pressure = ',raPress(iaRadLayer(iL))
+
     find_tropopause = iI
           
     RETURN
     end FUNCTION find_tropopause
+
+!************************************************************************
+
+! Tropopause altitude determination from temperature profile measurements of reduced vertical resolution
+! Nils König, Peter Braesicke, and Thomas von Clarmann, AMT 
+! Accepted: 26 Jun 2019 – Published: 29 Jul 2019
+!
+! The tropopause constitutes a vertical separation in the atmosphere
+! that segregates the lower weather active region, viz., the
+! troposphere, from an upper, steadier region, the
+! stratosphere. High-altitude temperature soundings that became possible
+! at the end of the 19th century showed an – at that time – unexpected
+! temperature behavior, where temperatures would stagnate or even
+! increase with height (see Hoinka, 1997, for a historical
+! overview). Once it was established that this observation was no
+! measurement error, and that above the troposphere another region of
+! the atmosphere exists, namely the stratosphere, an unambiguous
+! definition for the height of the boundary, the tropopause, had to be
+! agreed on. The earliest comprehensive definition provided by the
+! British Meteorological Office was based on either the existence of a
+! temperature inversion or an abrupt transition to a temperature
+! gradient below 2 K km−1. If the first two criteria were not met, a
+! more general vertical temperature gradient criterion was applied: “at
+! the point where the mean fall of temperature for the kilometer next
+! above is 2 K or less provided that it does not exceed 2 K for any
+! subsequent kilometer” (Dines, 1919, cited after Hoinka, 1997). A
+! similar definition, focusing solely on the lapse rate of 2 K km−1 was
+! adapted by the World Meteorological Organization (WMO) in later years
+! (World Meteorological Organization, 1957). Since then additional
+! definitions of the tropopause have emerged, focusing on the behavior
+! of dynamical quantities (e.g., Hoerling et al., 1991) or of trace gas
+! changes (e.g., Pan et al., 2004). However, the most commonly used
+! method to define the position of the tropopause is still the WMO
+! criterion.
+
+! This subroutine finds the tropopause by looking for the first cold point
+! modelled on Scott Hannon's code tropopause_rtp.m which looks for the
+! layer within the 50-400 mb range which has the lowest temp
+    INTEGER FUNCTION find_tropopauseNew(raTemp,raPress,raThickness,raLayerHeight,iaRadLayer,iNumLayer)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! input params
+    REAL :: raThickNess(kProfLayer),raLayerHeight(kProfLayer)
+    REAL :: raTemp(kMixFilRows)         !! temperature structure
+    REAL :: raPress(kProfLayer+1) !! pressure levels
+    INTEGER :: iaRadLayer(kProfLayer)   !! which are the radiating layers
+    INTEGER :: iNumLayer
+
+! local vars
+    REAL :: raT(kMixFilRows),rX,rJunk,pProf(kProfLayer),pN(kProfLayer),pD(kProfLayer)
+    REAL :: raZalts(kProfLayer+1),raZCenterAlts(kProfLayer+1),rH
+    INTEGER :: iI,iL,i400mb,i50mb,iJL,iJ
+
+    REAL :: radTdz(kProfLayer),r2Kperkm,r2Kperkm_press,rStretch,rTotal
+    INTEGER i2km,iK,iStillOK,iFound,iTempInversion
+
+! if        iaRadLayer = 001..100, everything ok
+! but if eg iaRadLayer = 201..300, everything not ok with raPress
+
+! check that thicknesses are making sense
+    iI = iaRadLayer(1)+2
+    if (raThickness(iI) < 0) then
+      write(kSTdErr,*) 'in find_tropopauseNew looks like layer thickness are wrong'
+      write(kStdErr,*) raThickness
+      call doStop
+    end if
+
+    pN = raPress(1:kProfLayer)-raPress(2:kProfLayer+1)
+    pD = log(raPress(1:kProfLayer)/raPress(2:kProfLayer+1))
+    pProf = pN/pD
+    
+    raZalts = 0.0
+    raZAlts(1:kProfLayer) = raLayerHeight(1:kProfLayer)
+    raZCenterAlts(1:kProfLayer) = raZalts(1:kProfLayer) + 0.5*(raZalts(2:kProfLayer+1)-raZalts(1:kProfLayer))
+
+    iI  = 1
+    iL  = iaRadLayer(iI)
+    iI  = iNumLayer
+    iJL = iaRadLayer(iI)
+    iL = max(iL,iJL)
+    iJ = 0
+    IF (iL > kProfLayer) THEN
+      iJ = 1
+    4 CONTINUE
+      IF ((iJ+1)*kProfLayer >= iL) THEN
+        GOTO 5
+      ELSE
+        iJ = iJ + 1
+        GOTO 4
+      END IF
+    END IF
+
+    5 CONTINUE
+    iJ = iJ*kProfLayer
+
+    DO iI = 1,kProfLayer
+      raT(iI) = 0.0
+    END DO
+
+    DO iI = 1,iNumLayer
+      iL = iaRadLayer(iI)
+      raT(iL) = raTemp(iL)   !!note storing into raT(iL) instead of raT(iI)
+      radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raThickness(iL))/1000.0)
+      radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raZCenterAlts(iL)-raZCenterAlts(iL-1))/1000.0)
+      !!!! OLD write(*,'(2(I4,1x),4(F12.5,1x))') ,iI,iL,raPress(iL),raT(iL),raThickness(iL),radTdz(iL)
+      write(*,'(2(I4,1x),4(F12.5,1x))') ,iI,iL,pProf(iL),raZCenterAlts(iL),raT(iL),radTdz(iL)
+    END DO
+
+    !! check to see if there is a surface inversion
+    iFound = -1
+    iI = 1
+    iTempInversion = 1
+    do while ((iFound < 0) .and. (iI < iNumLayer))
+      iL = iaRadLayer(iI)
+      if (radTdz(iL) > 0.2) then
+        i2Km = 0
+        rStretch = raThickness(iL)/1000.0
+        !! see how many layers we have to go to stretch to 2 km above this one
+ 18     continue
+        rStretch = rStretch  + raThickness(iL+i2Km)/1000.0
+        if ( (rStretch < 2.0) .and. (iI + i2Km < iNumLayer)) then
+!          print *,i2km,iL,iL+i2Km,raThickness(iL),rStretch
+          i2Km = i2Km + 1
+          goto 18
+        end if
+      
+        iStillOK = 0        
+        do iK = 0,i2Km
+          if (radTdz(iL + iK) > 0.2) then
+             iStillOK = iStillOK + 1
+           end if
+        end do
+        IF (iStillOK .EQ. i2km+1) THEN
+          iFound = +1 
+          iTempInversion = iI                 
+!          print *,'yay invers',iI
+        else
+          iI = iI + 1
+        end if
+      else
+        iI = iI + 1
+      end if
+    end do
+
+    if (iTempInversion > 1) write(kStdWarn,*) 'tempinversion till iL = ',iTempInversion,' hgt = ',raZCenterAlts(iL),' km'
+
+!    TROPOPAUSE Determines the tropopause height The WMO definition of the
+!    tropopause: "The lowest level at which the lapse rate decreases to
+!    2 C/km or less, provided that the average lapse rate between this
+!    level and all higher levels within 2 km does not exceed 2 C/km."
+    iFound = -1
+    iI = iTempInversion+1  !! make sure you avoid first few km in case there is a temp inversion above surface
+    iI = iTempInversion+2  !! make sure you avoid first few km in case there is a temp inversion above surface
+    do while ((iFound < 0) .and. (iI < iNumLayer))
+      iL = iaRadLayer(iI)
+      if (radTdz(iL) < 2.0) then
+        i2Km = 0
+        rStretch = raThickness(iL)/1000.0
+        !! see how many layers we have to go to strecth to 2 km above this one
+ 19     continue
+        rStretch = rStretch  + raThickness(iL+i2Km)/1000.0
+        if ( (rStretch < 2.0) .and. (iI + i2Km < iNumLayer)) then
+!          print *,i2km,iL,iL+i2Km,raThickness(iL),rStretch
+          i2Km = i2Km + 1
+          goto 19
+        end if
+      
+        iStillOK = 0        
+        do iK = 0,i2Km
+          if (radTdz(iL + iK) < 2.0) then
+             iStillOK = iStillOK + 1
+           end if
+        end do
+        IF (iStillOK .EQ. i2km+1) THEN
+          iFound = +1                  
+          r2Kperkm = radTdz(iL)
+          r2Kperkm_press = pProf(iL)
+!          print *,'yay ',iI,iL,r2Kperkm_press
+        else
+          iI = iI + 1
+        end if
+      else
+        iI = iI + 1
+      end if
+    end do
+
+    write(kStdWarn,'(A,I3)') 'new tropopause (dT/dz < 2 K/km) is in atmosphere layer iI,iaRadLayer(iI) ',iI,iL
+    write(kStdWarn,'(A,F12.5,A,F12.5,A)') '    which is layer avg pressure = ',pProf(iaRadLayer(iI)), &
+                                        ' mb; altitude ',raZCenteralts(iaRadLayer(iI))/1000,' km'
+    find_tropopauseNew = iL
+          
+    RETURN
+    end FUNCTION find_tropopauseNew
 
 !************************************************************************
 ! this subroutine computes d(Brightness Temp)/d(Rad) for jacobian output

@@ -30,7 +30,7 @@ CONTAINS
     raFreq,raaSumAbCoeff,raMixVertTemp,raNumberDensity, &
     raaAmt,raaaAllDQ,raaaColDQ,raaAllDT,iaJacob,iJacob, &
     iNumGases,iaGases,iNatm, &
-    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
+    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,raLayerHeight,&
     rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
     rSatAngle,rFracTop,rFracBot, &
     iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
@@ -79,6 +79,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers,iActualTag,ctype1,ctype2,iKnowTP
@@ -86,7 +88,6 @@ CONTAINS
     REAL :: raMixVertTemp(kMixFilRows)
     REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm)
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
-    REAL :: raLayerHeight(kProfLayer)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaSumAbCoeff(kMaxPts,kMixFilRows)
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSurfPress,rTSurf

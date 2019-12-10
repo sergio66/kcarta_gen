@@ -1235,7 +1235,7 @@ CONTAINS
 
     REAL :: rCosAngle,raTemp(kMaxPts)
     REAL :: InterpTemp
-    INTEGER :: iIOUN,iAngle,iGaussPts,find_tropopause,troplayer,iVary,iDefault
+    INTEGER :: iIOUN,iAngle,iGaussPts,troplayer,iVary,iDefault
 
 ! to do the local absorptive cloud
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)

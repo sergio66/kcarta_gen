@@ -605,6 +605,9 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
+12/8/19        Changed tropopause from where T(z) is min, to where dT/dz < 2 K/km, and
+               dT/dz remains < 2 K/km for at least 2 km
+
 6/25/19        Changed the column jac mult    from 0.1 to 0.001
                Changed the column temp offset from 1.0 to 0.01
 

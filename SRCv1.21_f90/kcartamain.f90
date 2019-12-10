@@ -481,6 +481,14 @@
     iDoUpperAtmNLTE,caaUpperMixRatio,caPlanckUAfile,caOutUAfile, &
     caOutName)
 
+    !! so at this point raaPress is layer avg press (play) in atm. raPressLevels (plevs) is in mb
+    !! raLayerheight,raThickness are in meters
+    !! raPressLevels(iDummy) and raLayerheight(iDummy) are exactly from p.plevs,p.palts in rtp
+    !do iDummy = 1,kProfLayer
+    !  print *,'abc 0 kcartamain',iDummy,raaPress(iDummy,1)*1013.25,raPressLevels(iDummy),&
+    !    raLayerheight(iDummy),raThickness(iDummy)
+    !end do
+
     iDefault  = -1
     iSARTAChi = +3     !!        use Scott's tuning coeffs for SARTA CRiS
     iSARTAChi = +2     !!        use Scott's tuning coeffs for SARTA IASI
@@ -1273,13 +1281,13 @@
               CALL InterfaceClearSky( &
                   raFreq, &
                   raaSumAbCoeff,raMixVertTemp,caOutName, &
-                  iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
+                  iOutNum,iAtm,iaNumLayer,iaaRadLayer,&
                   raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
                   raSatAngle,raFracTop,raFracBot, &
                   iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
                   raSurface,raSun,raThermal,raSunRefl, &
                   raLayAngles,raSunAngles,iTag,iActualTag, &
-                  raThickness,raPressLevels,iProfileLayers,pProf, &
+                  raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
                   raTPressLevels,iKnowTP, &
                   rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
                   iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
@@ -1305,13 +1313,13 @@
               CALL InterfaceClearSkyLimb( &
                    raFreq, &
                   raaSumAbCoeff,raMixVertTemp,caOutName, &
-                   iOutNum,iAtm,iaNumLayer,iaaRadLayer, &
+                   iOutNum,iAtm,iaNumLayer,iaaRadLayer,&
                    raTSpace,raTSurf,rSurfPress,raUseEmissivity, &
                    raSatAngle,raFracTop,raFracBot, &
                    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
                    raSurface,raSun,raThermal,raSunRefl, &
                    raLayAngles,raSunAngles,iTag,iActualTag, &
-                   raThickness,raPressLevels,iProfileLayers,pProf, &
+                   raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
                    raTPressLevels,iKnowTP, &
                    rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
                    iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
@@ -1334,7 +1342,7 @@
                   raFreq,raaSumAbCoeff,raMixVertTemp,raNumberDensity, &
                   raaAmt,raaaAllDQ,raaaColDQ,raaAllDT,iaJacob,iJacob, &
                   iNumGases,iaGases,iNatm, &
-                  caOutName,iOutNum,iAtm,iaNumLayer(iAtm),iaaRadLayer, &
+                  caOutName,iOutNum,iAtm,iaNumLayer(iAtm),iaaRadLayer,raLayerHeight, &
                   raTSpace(iAtm),raTSurf(iAtm),rSurfPress,raUseEmissivity, &
                   raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
                   iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &

@@ -3378,7 +3378,7 @@ CONTAINS
     rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
     caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles, &
-    iTag,raThickness,raPressLevels,iProfileLayers,pProf, &
+    iTag,raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     raTPressLevels,iKnowTP, &
     rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
     iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
@@ -3413,6 +3413,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSatAngle
@@ -3537,6 +3539,7 @@ CONTAINS
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
     troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+    troplayer = find_tropopausenew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
 
 ! find the highest layer that we need to output radiances for
     iHigh = -1

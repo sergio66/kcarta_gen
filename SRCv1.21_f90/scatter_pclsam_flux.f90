@@ -552,6 +552,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN
@@ -1706,6 +1707,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
@@ -2234,6 +2236,7 @@ CONTAINS
 
     IF (kFlux == 5) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer

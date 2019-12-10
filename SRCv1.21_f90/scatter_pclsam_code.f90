@@ -41,7 +41,7 @@ CONTAINS
     iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -81,6 +81,8 @@ CONTAINS
 !                   user specified value if positive
 ! TEMP        = tempertaure profile in terms of pressure levels
 ! rFracX : weighting of column jacobian radiance
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: rSatAzimuth,rSolAzimuth
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
@@ -224,7 +226,7 @@ CONTAINS
         caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
         raSurface,raSun,raThermal,raSunRefl, &
         raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-        raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+        raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
         caJacobFile,caJacobFile2, &
         iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
         iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
@@ -243,7 +245,7 @@ CONTAINS
             caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -260,7 +262,7 @@ CONTAINS
             caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -277,7 +279,7 @@ CONTAINS
             caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -293,7 +295,7 @@ CONTAINS
             caOutName,iIOUN_IN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp, &
@@ -322,7 +324,7 @@ CONTAINS
     caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     caJacobFile,caJacobFile2, &
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
@@ -356,6 +358,8 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 ! rFracX : weighting of column jacobian radiance
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac),rFracX
     REAL :: rSatAzimuth,rSolAzimuth,raaSumAbCoeff(kMaxPts,kMixFilRows)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
@@ -454,7 +458,7 @@ CONTAINS
                 caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
                 raSurface,raSun,raThermal,raSunRefl, &
                 raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+                raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
                 iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
                 iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
                 raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -470,7 +474,7 @@ CONTAINS
                 caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
                 raSurface,raSun,raThermal,raSunRefl, &
                 raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-                raThickness,raPressLevels,iProfileLayers,pProf, &
+                raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
                 iNLTEStart,raaPlanckCoeff, &
                 iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
                 raUpperPress,raUpperTemp, &
@@ -511,7 +515,7 @@ CONTAINS
             caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -527,7 +531,7 @@ CONTAINS
             caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp, &
@@ -549,7 +553,7 @@ CONTAINS
             caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -565,7 +569,7 @@ CONTAINS
             caOutName,iIOUN_USE,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-            raThickness,raPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iNLTEStart,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp, &
@@ -622,7 +626,7 @@ CONTAINS
     caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iNLTEStart,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp, &
@@ -657,6 +661,8 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 !rFracX : mostly used for col jac radiance calcs
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: rSatAzimuth,rSolAzimuth,rFracX
     REAL :: raSurFace(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunScatter(kMaxPts),raSun(kMaxPts)
@@ -1418,7 +1424,7 @@ CONTAINS
     caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -1453,6 +1459,8 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 !rFracX : mostly used for col jac radiance calcs
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: rSatAzimuth,rSolAzimuth,rFracX
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
@@ -1841,7 +1849,7 @@ CONTAINS
     caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -1875,6 +1883,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: rSatAzimuth,rSolAzimuth
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
@@ -2307,7 +2317,7 @@ CONTAINS
     caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -2341,6 +2351,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: rSatAzimuth,rSolAzimuth
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
@@ -2424,7 +2436,7 @@ CONTAINS
         rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
         caOutName,kStdkCarta,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
         raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf, &
+        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
         raTPressLevels,iKnowTP,rCO2MixRatio, &
         raaRadsX,iNumOutX,-1)
       raWeightedRadiance = raWeightedRadiance + rClrfrac*raInten
@@ -2459,7 +2471,7 @@ CONTAINS
         rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
         caOutName,kStdkCarta,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
         raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf, &
+        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
         raTPressLevels,iKnowTP,rCO2MixRatio, &
         raaRadsX,iNumOutX,-1)
       raWeightedRadiance = raWeightedRadiance + raCfrac(iCldSubPixel)*raInten

@@ -94,7 +94,7 @@ CONTAINS
     raSurface,raSun,raThermal,rFracTop,rFracBot, &
     iaJacob,iJacob,raaMix,raSunRefl, &
     raLayAngles,raSunAngles,rDelta, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iNLTEStart,raaPlanckCoeff)
 
     IMPLICIT NONE
@@ -126,6 +126,9 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl = (1-ems)/pi if kSolarRefl < 0, else it is = kSolarRefl
 ! raaMix is the mixing table
+
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
 
 ! these are to do with the arbitrary pressure layers
     REAL :: raPresslevels(kProfLayer+1),raThickness(kProfLayer)

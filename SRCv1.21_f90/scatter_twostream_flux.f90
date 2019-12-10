@@ -345,7 +345,7 @@
     INTEGER :: iaTable(kMaxClouds*kCloudLayers)
     CHARACTER(80) :: caName
 
-    INTEGER :: iGaussPts,iCloudySky,iAngle,troplayer,find_tropopause
+    INTEGER :: iGaussPts,iCloudySky,iAngle,troplayer
     REAL :: rSurfaceTemp,rDelta,raLayerTemp(kProfLayer),rAngle,rWeight
     REAL :: raaDebugFlux(kMaxPts,kProfLayer+1)
 
@@ -562,9 +562,10 @@
     troplayer = 25
     IF (kFlux == 5) THEN
         troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+        troplayer  =  find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
     END IF
     CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
-    raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
+      raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0,raThickness,raDeltaPressure)
 
     RETURN
     end SUBROUTINE flux_twostream

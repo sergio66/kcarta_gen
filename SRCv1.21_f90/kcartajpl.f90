@@ -1011,7 +1011,7 @@
                         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
                         raSurface,raSun,raThermal,raSunRefl, &
                         raLayAngles,raSunAngles,iTag,iActualTag, &
-                        raThickness,raPressLevels,iProfileLayers,pProf, &
+                        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
                         raTPressLevels,iKnowTP, &
                         rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
                         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
@@ -1039,7 +1039,7 @@
                         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
                         raSurface,raSun,raThermal,raSunRefl, &
                         raLayAngles,raSunAngles,iTag,iActualTag, &
-                        raThickness,raPressLevels,iProfileLayers,pProf, &
+                        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
                         raTPressLevels,iKnowTP, &
                         rCo2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
                         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &

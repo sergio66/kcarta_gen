@@ -54,7 +54,7 @@ CONTAINS
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
     raSatAzimuth,raSolAzimuth, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
@@ -99,6 +99,8 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 ! usual stuff
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),rFracX
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
     pProf(kProfLayer)
@@ -235,7 +237,7 @@ CONTAINS
       raSurface,raSun,raThermal,raSunRefl, &
       raLayAngles,raSunAngles, &
       rSatAzimuth,rSolAzimuth, &
-      raThickness,raPressLevels,iProfileLayers,pProf, &
+      raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
       iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
       raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
       iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
@@ -286,7 +288,7 @@ CONTAINS
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
     rSatAzimuth,rSolAzimuth, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
 ! then the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
@@ -337,6 +339,8 @@ CONTAINS
 !             -1 ==> upward looking instrument
 !iColJacobOrRad_IOUN = -1 typically ie this is a radiance calc, so dump out to kStdKCARTA
 !                    = +1 if this is for column jacobians, so has to dump out to kStdJacob
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iNumOutX,iColJacobOrRad_IOUN
     REAL :: raTPressLevels(kProfLayer+1)
     INTEGER :: iKnowTP
@@ -538,7 +542,7 @@ CONTAINS
             rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
             caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-            raThickness,raPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             raTPressLevels,iKnowTP,rCO2MixRatio, &
             raaRadsX,iNumOutX,+1)
       ELSE
@@ -548,7 +552,7 @@ CONTAINS
             rFracTop,rFracBot,iNp,iaOp,raaOp,iNpmix,iFileID, &
             caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
             raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-            raThickness,raPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             raTPressLevels,iKnowTP, &
             raaRadsX,iNumOutX,+1)
             write(kStdErr,*) 'In pclsam, found clear sky uplook .. need to debug quick_clear_radtrans_up'
@@ -618,7 +622,7 @@ CONTAINS
         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
         raSurface,raSun,raThermal,raSunRefl, &
         raLayAngles,raSunAngles,rSatAzimuth,rSolAzimuth,iTag, &
-        raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+        raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
         iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
         iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
         raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
