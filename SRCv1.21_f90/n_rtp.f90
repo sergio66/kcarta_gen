@@ -1347,7 +1347,7 @@ CONTAINS
 
     kProfileUnitOpen = -1
 
-! ow see if there is a cloud to be used with this atmosphere
+! now see if there is a cloud to be used with this atmosphere
     IF ((prof%cfrac > 0.0) .OR. (prof%cfrac2 > 0)) THEN
       IF ((prof%cfrac <= 0) .AND. (cfrac1 > 0)) THEN
         write(kStdWarn,*) 'Looks like prof%cfrac = ',prof%cfrac,' while cfrac1 = ',cfrac1
@@ -1444,6 +1444,8 @@ CONTAINS
       kcRTPTop   = kProfLayer
     ELSE
       !layers are from GND to the top
+      !but klayers NEVER does this :  whether plevs are from 1 to 1000 mb or 1000 to 1 mb
+      !the output is always from 0.005 to 1000 mb!!!!!
       iDownWard = +1
       kcRTP_pTop = prof%plevs(prof%nlevs)
       kcRTP_pBot  = prof%plevs(1)
@@ -2969,7 +2971,7 @@ CONTAINS
     REAL :: raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
     REAL :: raaPartPress(kProfLayer,kGasStore)
     CHARACTER(80) :: caPfname
-    REAL :: rCC, raCC(kProfLayer)
+    REAL :: rCC, raCC(kProfLayer),raJunk(kProfLayer+1)
 
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
@@ -3006,13 +3008,8 @@ CONTAINS
 
     MGC = kMGC
 
-    DO i = 1,kProfLayer
-      pProf(i) = 0.0
-    END DO
-
-    DO i = 1,3
-      iaCld100Read(i) = -1
-    END DO
+    pProf = 0.0
+    iaCld100Read = -1
 
     fname(1:80) = caPFName(1:80)
 
@@ -3057,6 +3054,8 @@ CONTAINS
       kRTPTop   = kProfLayer
     ELSE
       !layers are from GND to the top
+      !but klayers NEVER does this :  whether plevs are from 1 to 1000 mb or 1000 to 1 mb
+      !the output is always from 0.005 to 1000 mb!!!!!
       iDownWard = +1
       kRTP_pTop = prof.plevs(prof.nlevs)
       kRTP_pBot  = prof.plevs(1)
@@ -3098,11 +3097,15 @@ CONTAINS
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
       raHeight(j) = prof.palts(i)                     !!!! in meters
       raPressLevels(j) = prof.plevs(i)                !!!! in mb
+      raJunk(j)  = prof.ptemp(j)                      !!!! junk T
     END DO
 
     DO i = 1,prof.nlevs-1
-      pProf(i) = raPressLevels(i) - raPressLevels(i+1)
-      pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+      !j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
+      !pProf(j) = raPressLevels(i) - raPressLevels(i+1)
+      !pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+       pProf(i) = raPressLevels(i) - raPressLevels(i+1)
+       pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
     END DO
 
 ! check that spres lies withn plevs(nlevs) and plevs(nlevs-1)
@@ -3141,9 +3144,9 @@ CONTAINS
       END DO
     END IF
 
-    DO i = 1,kProfLayer
+    DO i = 1,prof.nlevs
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100
+      write(kStdWarn,*) 'i,height,thickness,T',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN
         write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
         write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
@@ -3238,8 +3241,15 @@ CONTAINS
             !!!note "i"!!!
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0)
           END IF
-          rH   = prof.palts(i)
-          if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+          IF (iDownWard == -1) THEN
+            !! toa = 1, gnd = Nlevs-1,Nlevs
+            rH   = prof.palts(i)
+            if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+          ELSEIF (iDownWard == +1) THEN
+            !! toa = Nlevs, gnd = 2,1
+            rH   = prof.palts(i+1)
+            if (i == 1) rHm1 = prof.palts(1)
+          END IF
 
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
           CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
@@ -3253,8 +3263,13 @@ CONTAINS
               raaTemp(j,iGasIndex)      = rT
               raaPress(j,iGasIndex)     = rP
               raaPartPress(j,iGasIndex) = rPP
-              raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
-              if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              IF (iDownWard == -1) THEN
+                raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
+                if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              ELSEIF (iDownWard == +1) THEN
+                raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
+                if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              END IF
               iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
@@ -3491,7 +3506,7 @@ CONTAINS
     REAL :: raaPartPress(kProfLayer,kGasStore)
     CHARACTER(80) :: caPfname
 
-    REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
+    REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1,raJunk(kProfLayer+1)
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
     REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT
     CHARACTER(130) :: caStr
@@ -3526,13 +3541,8 @@ CONTAINS
 
     MGC = kMGC
 
-    DO i = 1,kProfLayer
-        pProf(i) = 0.0
-    END DO
-
-    DO i = 1,3
-        iaCld100Read(i) = -1
-    END DO
+    pProf = 0.0
+    iaCld100Read = -1
 
     fname(1:80) = caPFName(1:80)
 
@@ -3576,7 +3586,9 @@ CONTAINS
       kRTPBot   = kProfLayer - (prof.nlevs-1) + 1
       kRTPTop   = kProfLayer
     ELSE
-      ! ayers are from GND to the top
+      ! layers are from GND to the top
+      !but klayers NEVER does this :  whether plevs are from 1 to 1000 mb or 1000 to 1 mb
+      !the output is always from 0.005 to 1000 mb!!!!!
       iDownWard = +1
       kRTP_pTop = prof.plevs(prof.nlevs)
       kRTP_pBot  = prof.plevs(1)
@@ -3626,12 +3638,16 @@ CONTAINS
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
       raHeight(j) = prof.palts(i)                     !!!! in meters
       raPressLevels(j) = prof.plevs(i)                !!!! in mb
-      print *,i,j,raHeight(j),raPressLevels(j)
+      raJunk(j)  = prof.ptemp(j)                      !!!! junk T
     END DO
-    
+        
     DO i = 1,prof.nlevs-1
-      pProf(i) = raPressLevels(i) - raPressLevels(i+1)
-      pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+!      j = iFindJ(kProfLayer+1,I,iDownWard)
+!      pProf(j) = raPressLevels(i) - raPressLevels(i+1)
+!      pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+!      print *,i,j,iDownWard,raHeight(j),raPressLevels(j),pProf(j)
+       pProf(i) = raPressLevels(i) - raPressLevels(i+1)
+       pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
     END DO
 
     IF (iDownWard == -1) THEN
@@ -3642,7 +3658,7 @@ CONTAINS
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
-        print *,i,j,raHeight(j),raPressLevels(j),-1         
+!        print *,i,j,raHeight(j),raPressLevels(j),-1         
       END DO
     ELSE
       !!!add on dummy stuff
@@ -3656,9 +3672,9 @@ CONTAINS
       END DO
     END IF
 
-    DO i = 1,kProfLayer
+    DO i = 1,prof.nlevs
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100
+      write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN
         write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
         write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
@@ -3753,8 +3769,15 @@ CONTAINS
             !!!note "i"!!!
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0)
           END IF
-          rH   = prof.palts(i)
-          if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+          IF (iDownWard == -1) THEN
+            !! toa = 1, gnd = Nlevs-1,Nlevs
+            rH   = prof.palts(i)
+            if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+          ELSEIF (iDownWard == +1) THEN
+            !! toa = Nlevs, gnd = 2,1
+            rH   = prof.palts(i+1)
+            if (i == 1) rHm1 = prof.palts(1)
+          END IF
 
           ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
           CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
@@ -3768,8 +3791,13 @@ CONTAINS
               raaTemp(j,iGasIndex)      = rT
               raaPress(j,iGasIndex)     = rP
               raaPartPress(j,iGasIndex) = rPP
-              raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
-              if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              IF (iDownWard == -1) THEN
+                raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
+                if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              ELSEIF (iDownWard == +1) THEN
+                raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
+                if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              END IF
               iaWhichGasRead(iIDgas) = 1
             END IF
           END IF
@@ -3794,6 +3822,7 @@ CONTAINS
 	 rP   = PLEV_KCARTADATABASE_AIRS(j)/kAtm2mb
          rPP  = 0.0
          rH   = raHeight(j)
+
          ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
          CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
          ! set the relevant variables, after checking to see that the gas has been
@@ -4018,7 +4047,7 @@ CONTAINS
 
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
-    REAL :: rAmt,rT,rP,rPP,rH,rdP,rdT
+    REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT
     CHARACTER(130) :: caStr
     CHARACTER(7) :: caWord
     INTEGER :: iNumLinesRead,iNpath,iaNpathcounter(kProfLayer)
@@ -4034,7 +4063,7 @@ CONTAINS
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
     integer :: i,j,k,iG,iPtype,LBOT
-    REAL :: raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer)
+    REAL :: raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer),raJunk(kProfLayer+1)
     REAL :: raActualLayTemps(kProfLayer),TSURFA
 
     integer :: rtpopen, rtpread, rtpwrite, rtpclose
@@ -4049,9 +4078,7 @@ CONTAINS
 
     MGC = kMGC
 
-    DO i = 1,kProfLayer
-      pProf(i) = 0.0
-    END DO
+    pProf = 0.0
 
     fname(1:80) = caPFName(1:80)
 
@@ -4116,6 +4143,8 @@ CONTAINS
         plays(i) = PAVG_KCARTADATABASE_AIRS(i)
       END DO
       !layers are from GND to the top
+      !but klayers NEVER does this :  whether plevs are from 1 to 1000 mb or 1000 to 1 mb
+      !the output is always from 0.005 to 1000 mb!!!!!
       iDownWard = +1
       kRTP_pTop = prof.plevs(prof.nlevs)
       kRTP_pBot  = prof.plevs(1)
@@ -4157,11 +4186,15 @@ CONTAINS
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
       raHeight(j) = prof.palts(i)                     !!!!in meters
       raPressLevels(j) = prof.plevs(i)                !!!!in mb
+      raJunk(j)  = prof.ptemp(j)                      !!!! junk T
     END DO
 
     DO i = 1,prof.nlevs-1
-      pProf(i) = raPressLevels(i) - raPressLevels(i+1)
-      pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+!      j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
+!      pProf(j) = raPressLevels(i) - raPressLevels(i+1)
+!      pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+       pProf(i) = raPressLevels(i) - raPressLevels(i+1)
+       pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
     END DO
 
     IF (iDownWard == -1) THEN
@@ -4184,9 +4217,9 @@ CONTAINS
       END DO
     END IF
 
-    DO i = 1,kProfLayer
+    DO i = 1,prof.nlevs
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100
+      write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN
         write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
         write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
@@ -4300,7 +4333,16 @@ CONTAINS
             !!!note "i"!!!
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0)
           END IF
-          rH   = prof.palts(i)
+          IF (iDownWard == -1) THEN
+            !! toa = 1, gnd = Nlevs-1,Nlevs
+            rH   = prof.palts(i)
+            if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+          ELSEIF (iDownWard == +1) THEN
+            !! toa = Nlevs, gnd = 2,1
+            rH   = prof.palts(i+1)
+            if (i == 1) rHm1 = prof.palts(1)
+          END IF
+
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
           CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
           ! set the relevant variables, after checking to see that the gas has been
@@ -4313,7 +4355,13 @@ CONTAINS
               raaTemp(j,iGasIndex)      = rT
               raaPress(j,iGasIndex)     = rP
               raaPartPress(j,iGasIndex) = rPP
-              raaHeight(j,iGasIndex)    = rH       !lalready in meters
+              IF (iDownWard == -1) THEN
+                raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
+                if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              ELSEIF (iDownWard == +1) THEN
+                raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
+                if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+              END IF
               iaWhichGasRead(iIDgas)    = 1
             END IF
           END IF

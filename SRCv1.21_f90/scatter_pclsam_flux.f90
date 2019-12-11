@@ -550,9 +550,9 @@ CONTAINS
     raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
-      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN
@@ -1705,9 +1705,9 @@ CONTAINS
     raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top layer temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
-      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
@@ -1869,7 +1869,7 @@ CONTAINS
 !^^^^^^^^^ compute downward flux, at bottom of each layer  ^^^^^^^^^^^^^^^^
 ! ^^^^^^^^ if we only want OLR, we do not need the downward flux!! ^^^^^^^^
 
-    IF (kFlux <= 3 .OR. kFLux == 5) THEN !!do up and down flux
+    IF (kFlux <= 3 .OR. kFLux >= 5) THEN !!do up and down flux
       write(kStdWarn,*) 'downward flux, with exp integrals'
       rCosAngle = 1.0
 
@@ -2234,9 +2234,9 @@ CONTAINS
     raVt2(iL) = raVT1(iL)    !!!!set fractional top layer tempr correctly
     raVt2(kProfLayer+1) = raVt2(kProfLayer) !!!need MAXNZ pts
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
-      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     DO iLay = 1,iNumLayer
@@ -2574,6 +2574,22 @@ CONTAINS
       DO iL = 1,iNumLayer+1
         raaFluxOut(:,iL+iNumLayer+1) = raaDownFlux(:,iL)
       END DO
+    ELSEIF (kFlux == 7) THEN
+      !! already multiplied by 2.0 * kPi
+      iL = 1
+      raaFluxOut(:,1) = raaDownFlux(:,iL)
+      iL = troplayer
+      raaFluxOut(:,2) = raaDownFlux(:,iL)
+      iL = iNumLayer + 1
+      raaFluxOut(:,3) = raaDownFlux(:,iL)
+
+      iL = 1
+      raaFluxOut(:,4) = raaUpFlux(:,iL)
+      iL = troplayer
+      raaFluxOut(:,5) = raaUpFlux(:,iL)
+      iL = iNumLayer + 1
+      raaFluxOut(:,6) = raaUpFlux(:,iL)
+
     END IF
 
     RETURN

@@ -833,7 +833,7 @@ CONTAINS
           !set top (stop) level as kProfLayer
           rPressStop = raPressLevels(kProfLayer+1)
           !set top (stop) level as kProfLayer
-          write(kStdWarn,*) 'Reset pressure of top level to ',rPressStop
+          write(kStdWarn,*) 'downlook instr : Reset pressure of top level to ',rPressStop
         END IF
         IF (rPressStart > raPressLevels(iLowest)) THEN
           !radiation going below Dead Sea
@@ -841,7 +841,7 @@ CONTAINS
           !set bottom (start) level as iLowest
           rPressStart = raPressLevels(iLowest)
           !set bottom (start) level as iLowest
-          write(kStdWarn,*) 'Reset pressure of bot level to',rPressStart
+          write(kStdWarn,*) 'downlook instr : Reset pressure of bot level to',rPressStart
         END IF
       END IF
 
@@ -853,7 +853,7 @@ CONTAINS
           !set top (start) level as kProfLayer
           rPressStart = raPressLevels(kProfLayer+1)
           !set top (start) level as kProfLayer
-          write(kStdWarn,*)'Reset pressure of top level to ',rPressStart
+          write(kStdWarn,*)'uplook instr : Reset pressure of top level to ',rPressStart
         END IF
         IF (rPressStop > raPressLevels(iLowest)) THEN
           !radiation going below Dead Sea
@@ -861,13 +861,13 @@ CONTAINS
           !set bottom (stop) level as iLowest
           rPressStop = raPressLevels(iLowest)
           !set bottom (stop) level as iLowest
-          write(kStdWarn,*)'Reset press of bottom level to ',rPressStop
+          write(kStdWarn,*)'uplook instr : Reset press of bottom level to ',rPressStop
         END IF
       END IF
 
     ELSE
       !!!using the usual RTP stuff
-      IF (iProfileLayers /= (kRTPTop+1-kRTPBot)) THEN
+      IF (iProfileLayers /= abs(kRTPTop-kRTPBot)+1) THEN
         write (kStdErr,*) 'In StartStopMP, there is discrepancy between'
         write (kStdErr,*) 'kRTPTop,kRTPBot and iProfileLayers'
         write (kStdErr,*) kRTPTop,kRTPBot,iProfileLayers
@@ -876,38 +876,42 @@ CONTAINS
 
       IF (rPressStart >= rPressStop) THEN
         IF (rPressStop < raPressLevels(kRTPTop+1)) THEN
+          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStop,raPressLevels(kRTPTop+1),kRTPTop+1 = ',rPressStop,raPressLevels(kRTPTop+1),kRTPTop+1
           !radiation going UPTO top of atmos
           rPressStop = raPressLevels(kRTPTop+1)+delta
           !set top (stop) level as kProfLayer
           rPressStop = raPressLevels(kRTPTop+1)
           !set top (stop) level as kProfLayer
-          write(kStdWarn,*) 'Reset pressure of top level to ',rPressStop
+          write(kStdWarn,*) 'rtp : downlook instr : Reset pressure of top level to ',rPressStop
         END IF
         IF (rPressStart > raPressLevels(kRTPBot)) THEN
+          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1 = ',rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1
           !rad going below Dead Sea
           rPressStart = raPressLevels(kRTPBot)-delta !set bottom (start) level
           rPressStart = raPressLevels(kRTPBot)       !set bottom (start) level
-          write(kStdWarn,*) 'Reset pressure of bot level to',rPressStart
+          write(kStdWarn,*) 'rtp : downlook instr : Reset pressure of bot level to',rPressStart
         END IF
       END IF
 
       ! the next two IF statements assume instrument looks up
       IF (rPressStart <= rPressStop) THEN
         IF (rPressStart < raPressLevels(kRTPTop+1)) THEN
+          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStart,raPressLevels(kRTPTop+1),kRTPTop+1 = ',rPressStart,raPressLevels(kRTPTop+1),kRTPTop+1
           !radiation going DOWN from atmtop
           rPressStart = raPressLevels(kRTPTop+1)+delta
           !set top (start) level as kProfLayer
           rPressStart = raPressLevels(kRTPTop+1)
           !set top (start) level as kProfLayer
-          write(kStdWarn,*)'Reset pressure of top level to ',rPressStart
+          write(kStdWarn,*)'rtp : uplook instr : Reset pressure of top level to ',rPressStart
         END IF
         IF (rPressStop > raPressLevels(iLowest)) THEN
+          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStop,raPressLevels(iLowest),iLowest = ',rPressStop,raPressLevels(iLowest),iLowest
           !radiation going below Dead Sea
           rPressStop = raPressLevels(kRTPBot)-delta
           !set bottom (stop) level as iLowest
           rPressStop = raPressLevels(kRTPBot)
           !set bottom (stop) level as iLowest
-          write(kStdWarn,*)'Reset press of bottom level to ',rPressStop
+          write(kStdWarn,*)'rtp : uplook instr : Reset press of bottom level to ',rPressStop
           END IF
         END IF
 
@@ -934,8 +938,11 @@ CONTAINS
         iStart = iG
         iTemp = 1
       ELSE
-        write(kStdErr,*)'Could not change specified start pressure to'
-        write(kStdErr,*)'layer#. Start pressure = ',rPressStart
+        write(kStdErr,*)'Could not change specified start pressure to layer #'
+        write(kStdErr,*)'Start pressure = ',rPressStart
+        !do iG = 1,kProfLayer+1
+        !  print *,iG,raPressLevels(iG),rPressStart,iLowest
+        !end do
         CALL DoSTOP
       END IF
     END IF
@@ -961,8 +968,8 @@ CONTAINS
         iStop = iG
         iTemp = 1
       ELSE
-        write(kStdErr,*)'Could not change specified stop pressure to '
-        write(kStdErr,*)'layer#. Stop pressure = ',rPressStop
+        write(kStdErr,*)'Could not change specified stop pressure to layer #'
+        write(kStdErr,*)'Stop pressure = ',rPressStop
         CALL DoSTOP
       END IF
     END IF

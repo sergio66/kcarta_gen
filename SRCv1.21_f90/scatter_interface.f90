@@ -212,7 +212,7 @@ CONTAINS
         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
         raSurface,raSun,raThermal,raSunRefl, &
         raLayAngles,raSunAngles, &
-        raThickness,raPressLevels,iProfileLayers,pProf, &
+        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
@@ -361,7 +361,7 @@ CONTAINS
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles, &
             raSatAzimuth,raSolAzimuth, &
-            raThickness,raPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
             raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
             iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
@@ -628,7 +628,7 @@ CONTAINS
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles, &
             raSatAzimuth,raSolAzimuth, &
-            raThickness,raPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
             raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
             iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
@@ -771,7 +771,7 @@ CONTAINS
             iNpmix,iFileID,iNp,iaOp,raaOp,raaMix, &
             raSurface,raSun,raThermal,raSunRefl, &
             raLayAngles,raSunAngles, &
-            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+            raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
             raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
             iaCloudNumAtm,iaaCloudWhichAtm,iTag)
@@ -1282,7 +1282,7 @@ CONTAINS
     raSurface,raSun,raThermal,rFracTop,rFracBot, &
     iaJacob,iJacob,raaMix,raSunRefl, &
     raLayAngles,raSunAngles,rDelta, &
-    raThickness,raPressLevels,raTPresslevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPresslevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag,iNpmix, &
@@ -1317,6 +1317,9 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl = (1-ems)/pi if kSolarRefl < 0, else it is = kSolarRefl
 ! raaMix is the mixing table
+
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
 
 ! these are to do with the arbitrary pressure layering
     REAL :: raThickness(kProfLayer),pProf(kProfLayer)
@@ -1520,7 +1523,7 @@ CONTAINS
       raSurface,raSun,raThermal,rFracTop,rFracBot, &
       iaJacob,iJacob,raaMix,raSunRefl, &
       raLayAngles,raSunAngles,rDelta, &
-      raThickness,raPressLevels,iProfileLayers,pProf, &
+      raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
       iNLTEStart,raaPlanckCoeff)
 
     RETURN

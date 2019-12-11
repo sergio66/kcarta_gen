@@ -817,7 +817,7 @@ CONTAINS
       radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raThickness(iL))/1000.0)
       radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raZCenterAlts(iL)-raZCenterAlts(iL-1))/1000.0)
       !!!! OLD write(*,'(2(I4,1x),4(F12.5,1x))') ,iI,iL,raPress(iL),raT(iL),raThickness(iL),radTdz(iL)
-      write(*,'(2(I4,1x),4(F12.5,1x))') ,iI,iL,pProf(iL),raZCenterAlts(iL),raT(iL),radTdz(iL)
+!      write(*,'(2(I4,1x),4(F12.5,1x))') ,iI,iL,pProf(iL),raZCenterAlts(iL),raT(iL),radTdz(iL)
     END DO
 
     !! check to see if there is a surface inversion
@@ -898,7 +898,7 @@ CONTAINS
       end if
     end do
 
-    write(kStdWarn,'(A,I3)') 'new tropopause (dT/dz < 2 K/km) is in atmosphere layer iI,iaRadLayer(iI) ',iI,iL
+    write(kStdWarn,'(A,I3,I3)') 'new tropopause (dT/dz < 2 K/km) is in atmosphere layer iI,iaRadLayer(iI) ',iI,iL
     write(kStdWarn,'(A,F12.5,A,F12.5,A)') '    which is layer avg pressure = ',pProf(iaRadLayer(iI)), &
                                         ' mb; altitude ',raZCenteralts(iaRadLayer(iI))/1000,' km'
     find_tropopauseNew = iL

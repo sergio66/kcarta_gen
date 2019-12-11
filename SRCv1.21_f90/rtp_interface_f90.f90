@@ -114,6 +114,9 @@ CONTAINS
         END DO
 
         DO i = 1,prof%nlevs-1
+!            j = iFindJ(kMaxLayer+1,I,iDownWard)        !!!!notice the kProf+1
+!            pProf(j) = raPressLevels(i) - raPressLevels(i+1)
+!            pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
             pProf(i) = raPressLevels(i) - raPressLevels(i+1)
             pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
         END DO

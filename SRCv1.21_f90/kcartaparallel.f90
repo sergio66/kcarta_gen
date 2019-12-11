@@ -1434,7 +1434,7 @@
                         raFreq,raaSumAbCoeff,raMixVertTemp,raNumberDensity, &
                         raaAmt,raaaAllDQ,raaaColDQ,raaAllDT,iaJacob,iJacob, &
                         iNumGases,iaGases,iNatm, &
-                        caOutName,iOutNum,iAtm,iaNumLayer(iAtm),iaaRadLayer, &
+                        caOutName,iOutNum,iAtm,iaNumLayer(iAtm),iaaRadLayer,raLayerHeight, &
                         raTSpace(iAtm),raTSurf(iAtm),rSurfPress,raUseEmissivity, &
                         raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
                         iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &

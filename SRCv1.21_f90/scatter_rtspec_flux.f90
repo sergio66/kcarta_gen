@@ -46,7 +46,7 @@ CONTAINS
     iNpmix,iFileID,iNp,iaOp,raaOp,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag)
@@ -78,6 +78,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
     REAL :: pProf(kProfLayer)
     INTEGER :: iProfileLayers,iaCldTypes(kMaxClouds)
@@ -175,7 +177,7 @@ CONTAINS
     caFluxFile,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag)
@@ -236,7 +238,7 @@ CONTAINS
     caFluxFile,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
 ! hen the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
@@ -273,6 +275,8 @@ CONTAINS
 !                   user specified value if positive
 ! iDownward = +1 ==> downward looking instrument
 !             -1 ==> upward looking instrument
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
     REAL :: pProf(kProfLayer)
     INTEGER :: iProfileLayers,iaCldTypes(kMaxClouds)
@@ -961,7 +965,7 @@ CONTAINS
     troplayer = 25
     IF (kFlux == 5) THEN
         troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
-        troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,iaRadlayer,iNumLayer)
+        troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
 
     IF (kFlux == 2) THEN

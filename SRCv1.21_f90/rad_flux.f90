@@ -540,7 +540,7 @@ CONTAINS
     raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -1074,7 +1074,7 @@ CONTAINS
     raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer  =  find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -1310,7 +1310,7 @@ CONTAINS
     INTEGER :: iNumLayer                 !!number of layers in atm
     INTEGER :: iUD                       !!flux going up or down
     INTEGER :: iComputeAll               !!compute at all layers, or only BCs
-    INTEGER :: troplayer                 !!where is tropopause (for kFlux == 5)
+    INTEGER :: troplayer                 !!where is tropopause (for kFlux == 5,7)
     REAL :: raFreq(kMaxPts)              !!wavenumber array
     REAL :: raaAbs(kMaxPts,kMixFilRows)  !!optical depths
     REAL :: raaRad(kMaxPts,kProfLayer)   !!rads at layer temperatures
@@ -1358,7 +1358,7 @@ CONTAINS
     INTEGER :: iNumLayer                 !!number of layers in atm
     INTEGER :: iUD                       !!flux going up or down
     INTEGER :: iComputeAll               !!compute at all layers, or only BCs
-    INTEGER :: troplayer                 !!where is the tropopause (kFlux == 5)
+    INTEGER :: troplayer                 !!where is the tropopause (kFlux == 5,7)
     REAL :: raFreq(kMaxPts)              !!wavenumber array
     REAL :: raaAbs(kMaxPts,kMixFilRows)  !!optical depths
     REAL :: raaRad(kMaxPts,kProfLayer)   !!rads at layer temperatures
@@ -1445,7 +1445,7 @@ CONTAINS
     INTEGER :: iNumLayer                 !!number of layers in atm
     INTEGER :: iUD                       !!flux going up or down
     INTEGER :: iComputeAll               !!compute at all layers, or only BCs
-    INTEGER :: troplayer                 !!where is the tropopause (kFlux == 5)
+    INTEGER :: troplayer                 !!where is the tropopause (kFlux == 5,7)
     REAL :: raFreq(kMaxPts)              !!wavenumber array
     REAL :: raaAbs(kMaxPts,kMixFilRows)  !!optical depths
     REAL :: raaRad(kMaxPts,kProfLayer)   !!rads at layer temperatures
@@ -1789,7 +1789,7 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -2283,7 +2283,7 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -2785,7 +2785,7 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -3309,7 +3309,7 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -3586,6 +3586,9 @@ CONTAINS
       !! plus UPwell at GND,               downwell at TOA
         CALL PrintFlux6(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
           raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
+    ELSEIF (kFlux == 7) THEN  !!do ILR and OLR at gnd/trop/toa
+      CALL PrintFlux7(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
+        raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
     ELSE
       write(kStdErr,*) 'Unrecognized option in printfluxOrig ',kFlux
       CALL DoStop
@@ -3835,6 +3838,69 @@ CONTAINS
     end SUBROUTINE PrintFlux6
 
 !************************************************************************
+! this is for TOA trop gnd ILR/OLR
+    SUBROUTINE PrintFlux7(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
+    raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+! ressures in mb, thicknesses in meters
+! input
+    REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
+    REAL :: raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
+    INTEGER :: iIOUN,iNumLayer,troplayer,iAtm
+    CHARACTER(80) :: caFluxFile
+
+! local
+    INTEGER :: iL,iLay,iFr,i1,i2
+    REAL :: raTemp(kMaxPts)
+
+! do the integral over z axis (2pi)
+    iLay = 1
+    raaDownFlux(:,iLay) = raaDownFlux(:,iLay)*2*kPi
+    raaUpFlux(:,iLay)   = raaUpFlux(:,iLay)*2*kPi
+
+    iLay = troplayer
+    raaDownFlux(:,iLay) = raaDownFlux(:,iLay)*2*kPi
+    raaUpFlux(:,iLay)   = raaUpFlux(:,iLay)*2*kPi
+
+    iLay = iNumLayer+1
+    raaDownFlux(:,iLay) = raaDownFlux(:,iLay)*2*kPi
+    raaUpFlux(:,iLay)   = raaUpFlux(:,iLay)*2*kPi
+          
+    CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,6)
+
+    iLay = 1
+    raTemp = raaDownFlux(:,iLay)
+    CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
+
+    iLay = troplayer
+    raTemp = raaDownFlux(:,iLay)
+    CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
+
+    iLay = iNumLayer+1
+    raTemp = raaDownFlux(:,iLay)
+    CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
+
+    iLay = 1
+    raTemp = raaUpFlux(:,iLay)
+    CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
+
+    iLay = troplayer
+    raTemp = raaUpFlux(:,iLay)
+    CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
+
+    iLay = iNumLayer+1
+    raTemp = raaUpFlux(:,iLay)
+    CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
+
+    RETURN
+    end SUBROUTINE PrintFlux7
+
+!************************************************************************
+
     SUBROUTINE Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
     rSurfPress,raPressLevels,raThickness,raDensityX,raDensity0,raDeltaPressure, &
     rFracTop,rFracBot)
@@ -4201,7 +4267,7 @@ CONTAINS
     raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -4806,7 +4872,7 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
-    IF (kFlux == 5) THEN
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF

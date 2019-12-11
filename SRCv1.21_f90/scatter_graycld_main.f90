@@ -52,7 +52,7 @@ CONTAINS
     iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
@@ -90,7 +90,8 @@ CONTAINS
 !              surface,solar and backgrn thermal at the surface
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
-
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
     INTEGER :: ctype1,ctype2
     REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,raCemis(kMaxClouds)
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
@@ -203,7 +204,7 @@ CONTAINS
     caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
@@ -247,7 +248,7 @@ CONTAINS
     caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
 ! hen the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
@@ -289,6 +290,8 @@ CONTAINS
 !                   user specified value if positive
 ! iDownward = +1 ==> downward looking instrument
 !             -1 ==> upward looking instrument
+! raLayerHeight = individual pressure level heights
+    REAL :: raLayerHeight(kProfLayer)
 
     INTEGER :: ctype1,ctype2
     REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,raCemis(kMaxClouds)
@@ -383,7 +386,7 @@ CONTAINS
         rFracTop,rFracBot,iNp,iaOpX,raaOp,iNpmix,iFileID, &
         caOutName,iIOUN,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
         raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf)
+        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight)
     END IF
             
     IF (CFRAC1 > 0) THEN
@@ -430,7 +433,7 @@ CONTAINS
         rFracTop,rFracBotX,iNp,iaOpX,raaOp,iNpmix,iFileID, &
         caOutName,iIOUN,iOutNum,iAtmX,iNumLayerX,iaaRadLayerX,raaMix, &
         raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf)
+        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight)
     END IF
 
     IF (CFRAC2 > 0) THEN
@@ -471,7 +474,7 @@ CONTAINS
         rFracTop,rFracBotX,iNp,iaOpX,raaOp,iNpmix,iFileID, &
         caOutName,iIOUN,iOutNum,iAtmX,iNumLayerX,iaaRadLayerX,raaMix, &
         raSurface,raSun,raThermal,raSunRefl,raLayAngles,raSunAngles,iTag, &
-        raThickness,raPressLevels,iProfileLayers,pProf)
+        raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight)
     END IF
           
     DO iL = 1,iNp

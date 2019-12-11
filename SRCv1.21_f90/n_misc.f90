@@ -516,10 +516,10 @@ CONTAINS
       CALL DoSTOP
     END IF
 
-    IF ((kFlux < -1) .OR. (kFlux >  6)) THEN
-      write(kStdErr,*) 'In *PARAMS, program needs kFlux =-1 OR 1,2,3,4,5,6'
+    IF ((kFlux < -1) .OR. (kFlux >  7)) THEN
+      write(kStdErr,*) 'In *PARAMS, program needs kFlux = -1 OR 1,2,3,4,5,6,7'
       write(kStdErr,*) 'where kFlux = do/do not compute fluxes'
-      write(kStdErr,*) 'OR         program needs kFlux =-1,+1,2,3,4,5,6 OR 0'
+      write(kStdErr,*) 'OR         program needs kFlux = -1,+1,2,3,4,5,6,7 OR 0'
       write(kStdErr,*) 'where kFlux = do not/do  output NLTE Planck'
       write(kStdErr,*) 'Please reset and retry'
       CALL DoSTOP

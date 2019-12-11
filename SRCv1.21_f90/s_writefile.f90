@@ -1850,6 +1850,8 @@ CONTAINS
       caFluxFile(iInt+1:iInt+5) = '_OLR3'   !! upwelling flux at TOA, tropopause,dnwell at gnd
     ELSEIF (kFLux == 6) THEN
       caFluxFile(iInt+1:iInt+4) = '_ALL'    !! up,down welling flux at all tops/bottoms of each layer
+    ELSEIF (kFLux == 7) THEN
+      caFluxFile(iInt+1:iInt+6) = '_IOLR3'    !! up,down welling flux at gnd,trop,toa so 6 output
     ELSE
       write(kStdErr,*) 'Unknown option for kFlux = ',kFlux
       Call DoStop
@@ -2997,7 +2999,7 @@ CONTAINS
         write(iIOUN_Flux) iTotal,iNatmJac,iImportant
         write(iIOUN_Flux) (iaLayerFLux(iI),iI=1,iNatmJac)
 
-      ELSEIF (kFLux == 5) THEN   !!! outputting only OLR/ILR at TOA/GND/TRPause
+      ELSEIF (kFLux == 5) THEN   !!! outputting only OLR at TOA/TRPause and ILR at GND
         DO iI = 1,iNatmJac
           iaLayerFlux(iI) = 3
         END DO
@@ -3031,6 +3033,25 @@ CONTAINS
         ! for each atmosphere, dump OLR AND ILR
         write(iIOUN_Flux) iTotal,iNatmJac,iImportant
         write(iIOUN_Flux) (iaJunkFLux(iI),iI=1,iNatmJac)
+
+      ELSEIF (kFLux == 7) THEN   !!! outputting only OLR/ILR at TOA/GND/TRPause
+        DO iI = 1,iNatmJac
+          iaLayerFlux(iI) = 6
+        END DO
+
+        WRITE(iIOUN_Flux) iNatmJac
+        WRITE(iIOUN_Flux) (iaLayerFlux(iI),iI=1,iNatmJac)
+
+        write(kStdWarn,*)'had',iNatmJac,' out of',iNatm,' atm to output'
+        write(kStdWarn,*) (iaLayerFlux(iI),iI=1,iNatmJac)
+
+        ! no need to dump out gas amounts, temperatures; so now tell the reader how
+        ! many things to expect :
+        ! total num kcomp files, total number of output options=iNatm,number of fluxes
+        ! for each atmosphere, dump OLR AND ILR
+        write(iIOUN_Flux) iTotal,iNatmJac,iImportant
+        write(iIOUN_Flux) (iaLayerFLux(iI),iI=1,iNatmJac)
+
       END IF
 
     END IF

@@ -605,6 +605,18 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
+12/10/19        kCARTA can output a file containing the Planck modifiers.
+                This file is in the same output format as the flux file
+                Control for turning this on/off is at run time; go to
+                nm_params and set kFlux = -1,1..7, with filenames appended as
+                1 = '_DOWN'  = dngoing flux at each level                          
+                2 = '_HEAT'  = up-dn heating rate at each layer
+                3 = '_UP'    = upgoing flux at each level
+                4 = '_OLR'   = OLR at TOA
+                5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+                6 = '_ALL'   = up/dn flux at each level
+                7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
+
 12/8/19        Changed tropopause from where T(z) is min, to where dT/dz < 2 K/km, and
                dT/dz remains < 2 K/km for at least 2 km
 
