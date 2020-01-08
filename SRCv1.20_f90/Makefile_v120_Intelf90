@@ -103,9 +103,17 @@ FLAGS = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check boun
 ### happy and you know it, use the preprocessor >>>>>>>>>>>>>>>>>>
 ### happy and you know it, use the preprocessor, Note that -O2/-O3 are paralleliization UGH, so -O1 is safer; also cut out any threads
 FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -nothreads -noreentrancy
-FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291
+FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared_intel
 ### happy and you know it, use the preprocessor
 ### happy and you know it, use the preprocessor>>>>>>>>>>>>>>>>>>>
+
+#basic_common.f90:(.text+0x1c59): relocation truncated to fit: R_X86_64_PC32 against symbol `ob1' defined in COMMON section in basic_common.o
+#basic_common.f90:(.text+0x1c66): additional relocation overflows omitted from the output
+#ld: failed to convert GOTPCREL relocation; relink with --no-relax
+# with new f90 implicit, getting error ld: failed to convert GOTPCREL relocation; relink with --no-relax
+#
+#OR
+# use -mcmodel=medium -shared_intel
 
 #UFLAG = 
 LIBS  = -lblas -mkl

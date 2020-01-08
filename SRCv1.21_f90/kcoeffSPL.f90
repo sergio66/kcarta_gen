@@ -785,7 +785,7 @@ CONTAINS
 
     GOTO 777
 
-    100 write(kStdErr,*) 'Error reading UpperMixRatio info : filename = '
+    100 write(kStdErr,*) 'Error reading LowerAtm xRatio info : caLA_US_STD filename = '
     WRITE(kStdErr,1070) iErr, caFName
     CALL DoStop
 
