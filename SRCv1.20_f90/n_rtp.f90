@@ -3532,7 +3532,7 @@ CONTAINS
     REAL :: raaPartPress(kProfLayer,kGasStore)
     CHARACTER(80) :: caPfname
 
-    REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
+    REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1,raJunk(kProfLayer+1)
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
     REAL :: rAmt,rT,rP,rPP,rH,rdP,rdT
     CHARACTER(130) :: caStr
@@ -3634,6 +3634,9 @@ CONTAINS
         write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
         write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
         CALL DoStop
+    ELSE
+      write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
+      write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
     END IF
      
     write(kStdWarn,*) 'Reading profile from RTP file... '
@@ -3667,6 +3670,7 @@ CONTAINS
         j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
         raHeight(j) = prof.palts(i)                     !!!!in meters
         raPressLevels(j) = prof.plevs(i)                !!!!in mb
+        raJunk(j)  = prof.ptemp(j)                      !!!! junk T
     END DO
     
     DO i = 1,prof.nlevs-1
@@ -3696,7 +3700,7 @@ CONTAINS
 
     DO i = 1,kProfLayer
         raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-        write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100
+        write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
         IF (raThickness(i) <= 100.00) THEN
             write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
             write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
@@ -3840,8 +3844,7 @@ CONTAINS
                     Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder, &
                     iFound,iGasIndex)
                     IF (iFound > 0) THEN
-                        write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0 and rP = ',iIDGas, &
-                        'gindx,layer ',iGasIndex,i,rP
+                        write(kStdWarn,'(A,I3,A,I3,A,I3,F12.5)') 'empty layer i ',i,' set rAmt = 0 for gasID = ',iIDGas,' gindex, rP = ',iGasIndex,rP
                         raaAmt(j,iGasIndex)       = rAmt
                         raaTemp(j,iGasIndex)      = rT
                         raaPress(j,iGasIndex)     = rP

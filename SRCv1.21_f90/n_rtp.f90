@@ -2975,7 +2975,7 @@ CONTAINS
 
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
-    REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT
+    REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT,rZ
     CHARACTER(130) :: caStr
     CHARACTER(7) :: caWord
     INTEGER :: iNumLinesRead,iNpath,iaNpathcounter(kMaxProfLayer)
@@ -3144,7 +3144,8 @@ CONTAINS
       END DO
     END IF
 
-    DO i = 1,prof.nlevs
+!    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
+     DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
       write(kStdWarn,*) 'i,height,thickness,T',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN
@@ -3234,11 +3235,13 @@ CONTAINS
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "j"!!!
+            rZ = raThickness(j)
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(j)*kAtm2mb*100.0)
           ELSE
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "i"!!!
+            rZ = raThickness(i)
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0)
           END IF
           IF (iDownWard == -1) THEN
@@ -3252,7 +3255,7 @@ CONTAINS
           END IF
 
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-          CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
+          CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iaNpathCounter(iIDgas))
           ! set the relevant variables, after checking to see that the gas has been
           ! allocated in GASFIL or XSCFIL
           IF (iaGases(iIDgas) > 0) THEN
@@ -3284,10 +3287,12 @@ CONTAINS
               delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
+              rZ = 1000.0
             ELSE
               delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
               rT   = prof.ptemp(prof.nlevs-1) + delta1*j
               rT   = 300.0
+              rZ = 1000.0
             END IF
             rAmt = 0.0
             rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
@@ -3295,7 +3300,7 @@ CONTAINS
             rPP  = 0.0
             rH   = raHeight(j)
             ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-            CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
+            CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iaNpathCounter(iIDgas))
             ! set the relevant variables, after checking to see that the gas has been
             ! allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) > 0) THEN
@@ -3357,15 +3362,17 @@ CONTAINS
               !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
               !!!note "j"!!!
                rPP  = 0
+               rZ = 1000.0
             ELSE
               !!! this automatically puts partial pressure in ATM, assuming
               !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
               !!!note "i"!!!
               rPP  = 0
+              rZ = 1000.0
             END IF
             rH   = prof.palts(i)
             ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-            CALL FindError(rAmt,rT,rP,rPP,iIDgas,iNpathCounterJunk)
+            CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iNpathCounterJunk)
             ! set the relevant variables, after checking to see that the gas has been
             ! allocated in GASFIL or XSCFIL
             iGasIndex = iIDgas-kNewCloudLo+1
@@ -3508,7 +3515,7 @@ CONTAINS
 
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1,raJunk(kProfLayer+1)
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
-    REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT
+    REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT,rZ
     CHARACTER(130) :: caStr
     CHARACTER(7) :: caWord
     INTEGER :: iNumLinesRead,iNpath,iaNpathcounter(kMaxProfLayer)
@@ -3605,6 +3612,9 @@ CONTAINS
       write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
       write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
       CALL DoStop
+    ELSE
+      write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
+      write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
     END IF
      
     write(kStdWarn,*) 'Reading profile from RTP file... '
@@ -3614,13 +3624,13 @@ CONTAINS
 
 !!!now check if this agrees with iL1,iGasInRTPFile above
     IF ((kProfLayer /= iL1) .AND. (iDownWard == -1)) THEN
-      write (kStdWarn,*) 'Profile has ',iGasInRTPFile,' gases in atm'
+      write (kStdWarn,*) 'iDownWard == -1 : Profile has ',iGasInRTPFile,' gases in atm'
       write (kStdWarn,*) 'Profile has ',iL1,' layers in atm'
       write (kStdWarn,*) 'Compiled kCARTA had kProfLayer = ',kProfLayer
       write (kStdWarn,*) 'Will add on dummy info to LOWER layers'
     END IF
     IF ((kProfLayer /= iL1) .AND. (iDownWard == +1)) THEN
-      write (kStdWarn,*) 'Profile has ',iGasInRTPFile,' gases in atm'
+      write (kStdWarn,*) 'iDownWard == +1 : Profile has ',iGasInRTPFile,' gases in atm'
       write (kStdWarn,*) 'Profile has ',iL1,' layers in atm'
       write (kStdWarn,*) 'Compiled kCARTA had kProfLayer = ',kProfLayer
       write (kStdWarn,*) 'Will add on dummy info to UPPER layers'
@@ -3632,6 +3642,7 @@ CONTAINS
       raHeight(j) = prof.palts(i)                     !!!! in meters
       raPressLevels(j) = prof.plevs(i)                !!!! in mb
       raPressLevels(j) = 0.0                          !!!! in mb, safer !!!!		
+      raJunk(j)  = 0.0                                !!!! junk T
     END DO
 
     DO i = 1,prof.nlevs
@@ -3639,6 +3650,8 @@ CONTAINS
       raHeight(j) = prof.palts(i)                     !!!! in meters
       raPressLevels(j) = prof.plevs(i)                !!!! in mb
       raJunk(j)  = prof.ptemp(j)                      !!!! junk T
+      write(kStdWarn,'(A,I3,A,I3,1X,I3,A,3(F12.5,1X))') 'iDownward = ',iDownward,' i,j = ',i,j,' hgt p T = ', &
+         raHeight(j),raPressLevels(j),raJunk(j)
     END DO
         
     DO i = 1,prof.nlevs-1
@@ -3672,9 +3685,10 @@ CONTAINS
       END DO
     END IF
 
-    DO i = 1,prof.nlevs
+!    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
+    DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100,raJunk(i)
+      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN
         write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
         write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
@@ -3762,11 +3776,13 @@ CONTAINS
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "j"!!!
+            rZ   = raThickness(j)
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(j)*kAtm2mb*100.0)
           ELSE
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "i"!!!
+            rZ   = raThickness(i)
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0)
           END IF
           IF (iDownWard == -1) THEN
@@ -3780,7 +3796,7 @@ CONTAINS
           END IF
 
           ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-          CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
+          CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iaNpathCounter(iIDgas))
           ! set the relevant variables, after checking to see that the gas has been
           ! allocated in GASFIL or XSCFIL
           IF (iaGases(iIDgas) > 0) THEN
@@ -3812,10 +3828,12 @@ CONTAINS
            delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
            rT   = 300.0  + delta1*j
            rT = 300.0
+           rZ = 1000.0
          ELSE
            delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
            rT   = prof.ptemp(prof.nlevs-1) + delta1*j
            rT   = 300.0
+           rZ = 1000.0
          END IF
          rAmt = 0.0
          rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
@@ -3824,13 +3842,13 @@ CONTAINS
          rH   = raHeight(j)
 
          ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-         CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
+         CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iaNpathCounter(iIDgas))
          ! set the relevant variables, after checking to see that the gas has been
          ! allocated in GASFIL or XSCFIL
          IF (iaGases(iIDgas) > 0) THEN
            Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
            IF (iFound > 0) THEN
-             write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0 and rP = ',iIDGas,'gindx,layer ',iGasIndex,i,rP
+             write(kStdWarn,'(A,I3,A,I3,A,I3,F12.5)') 'empty layer i ',i,' set rAmt = 0 for gasID = ',iIDGas,' gindex, rP = ',iGasIndex,rP
              raaAmt(j,iGasIndex)       = rAmt
              raaTemp(j,iGasIndex)      = rT
              raaPress(j,iGasIndex)     = rP
@@ -3882,17 +3900,19 @@ CONTAINS
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "j"!!!
-            rPP  = 0
+            rPP  = 0.0
+            rZ = 1000.0
           ELSE
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "i"!!!
-             rPP  = 0
+             rPP  = 0.0
+             rZ = 1000.0
            END IF
            rH   = prof.palts(i)
 
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-          CALL FindError(rAmt,rT,rP,rPP,iIDgas,iNpathCounterJunk)
+          CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iNpathCounterJunk)
           ! set the relevant variables, after checking to see that the gas has been
           ! allocated in GASFIL or XSCFIL
           iGasIndex = iIDgas-kNewCloudLo+1
@@ -4047,7 +4067,7 @@ CONTAINS
 
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
-    REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT
+    REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT,rZ
     CHARACTER(130) :: caStr
     CHARACTER(7) :: caWord
     INTEGER :: iNumLinesRead,iNpath,iaNpathcounter(kProfLayer)
@@ -4217,7 +4237,8 @@ CONTAINS
       END DO
     END IF
 
-    DO i = 1,prof.nlevs
+!    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
+    DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
       write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN
@@ -4326,11 +4347,13 @@ CONTAINS
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "j"!!!
-            rPP  = rAmt*1.0e9*MGC*rT / (raThickness(j)*kAtm2mb*100.0)
+            rZ  = raThickness(j)
+            rPP = rAmt*1.0e9*MGC*rT / (raThickness(j)*kAtm2mb*100.0)
           ELSE
             !!! this automatically puts partial pressure in ATM, assuming
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin
             !!!note "i"!!!
+            rZ  = raThickness(i)
             rPP  = rAmt*1.0e9*MGC*rT / (raThickness(i)*kAtm2mb*100.0)
           END IF
           IF (iDownWard == -1) THEN
@@ -4344,7 +4367,7 @@ CONTAINS
           END IF
 
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-          CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
+          CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iaNpathCounter(iIDgas))
           ! set the relevant variables, after checking to see that the gas has been
           ! allocated in GASFIL or XSCFIL
           IF (iaGases(iIDgas) > 0) THEN
@@ -4376,10 +4399,12 @@ CONTAINS
             delta1=(300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
             rT   = 300.0  + delta1*j
             rT = 300.0
+            rZ   = 1000.0
           ELSE
             delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
             rT   = prof.ptemp(prof.nlevs-1) + delta1*j
             rT   = 300.0
+            rZ   = 1000.0
           END IF
             rAmt = 0.0
             rP   = pProf(j)/kAtm2mb  !!even if wrong, not needed as rAmt = 0
@@ -4387,7 +4412,7 @@ CONTAINS
             rPP  = 0.0
             rH   = raHeight(j)
             ! EAD (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
-            CALL FindError(rAmt,rT,rP,rPP,iIDgas,iaNpathCounter(iIDgas))
+            CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iaNpathCounter(iIDgas))
             ! set the relevant variables, after checking to see that the gas has been
             ! allocated in GASFIL or XSCFIL
             IF (iaGases(iIDgas) > 0) THEN
@@ -4479,14 +4504,14 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine prints out error messages
-    SUBROUTINE FindError(rAmt,rT,rP,rPP,iIDgas,iCnt)
+    SUBROUTINE FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iCnt)
 
     IMPLICIT NONE
 
     include '../INCLUDE/kcartaparam.f90'
 
 ! input variables, to process
-    REAL :: rAmt,rT,rP,rPP
+    REAL :: rAmt,rT,rP,rPP,rZ
     INTEGER :: iIDGas,iCnt
 
 ! local vars
@@ -4527,7 +4552,7 @@ CONTAINS
 
     IF ((rPP < 0.0) .OR. (rPP > 1.0e5)) THEN
       WRITE(kStdWarn,1083)
-      WRITE(kStdWarn,1111) iIDgas,iCnt,rPP
+      WRITE(kStdWarn,1112) iIDgas,iCnt,rPP,rP,rT,rZ,rAmt
       !	if (iIDgas .EQ. 2) print *,'wah',rAmt,rAmt0,rPP0
       iError = 2
       rPP = 0.0
@@ -4546,6 +4571,7 @@ CONTAINS
     END IF
             
  1111 FORMAT('gasID, layer = ',I5,I5,F12.5)
+ 1112 FORMAT('gasID, layer,rPP,rP,rT,rZ,rAmt = ',I5,I5,5(F12.5,1X))
  1080 FORMAT('negative or bad gas amount in PRFILE profile file')
  1081 FORMAT('negative or bad gas temp in PRFILE profile file')
  1082 FORMAT('negative or bad layer pressure in PRFILE profile file')

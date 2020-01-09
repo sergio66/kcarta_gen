@@ -358,8 +358,8 @@ c this is how many layers are in the user profile
 !      PARAMETER (KProfLayer=115)  !!fine lower layers - temperature inversiom
 !      PARAMETER (KProfLayer=43)   !!testing Dave Edwards NLTE
 !      PARAMETER (KProfLayer=97)   !!testing Dave Edwards NLTE
-!      PARAMETER (KProfLayer=119)   !!NLTE levs = 120, so layers = 119 so all layers <= 1.25 km thick
-      PARAMETER (KProfLayer=100)  !!regular AIRS layers
+      PARAMETER (KProfLayer=119)   !!NLTE levs = 120, so layers = 119 so all layers <= 1.25 km thick
+!      PARAMETER (KProfLayer=100)  !!regular AIRS layers
 
 c now keep in mind kMaxLayer = 100
 c so this is used when kProfLayer ~= 100 !!!!!!
