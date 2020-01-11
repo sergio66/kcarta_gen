@@ -71,6 +71,9 @@ RTPLIB = -L$(RTPHOME)/lib -lrtp90
 ### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
 #
 ### 16 gases rtpV201 with ifort
-RTPINC = -I/home/sergio/maya_home/git/rtp/rtpV201/include
-RTPDEFS_FILE = /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90
+#RTPINC = -I/home/sergio/maya_home/git/rtp/rtpV201/include
+#RTPDEFS_FILE = /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90
+#
+RTPINC = -I/home/sergio/git/rtp/rtpV201/include
+RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f90
 #
