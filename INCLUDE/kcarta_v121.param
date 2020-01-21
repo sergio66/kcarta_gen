@@ -15,10 +15,10 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
       include '../INCLUDE/pre_defined.param'                          !!!
-c template file : template_kcartaV120_400_H2016.param                 !!!
+c template file : template_kcartaV120_385_H2016.param                 !!!
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-      PARAMETER(caVersion='v1.21 19-11-11 template_kcartaV121_400_H2016_NLTEH2016.param')      !!!
+      PARAMETER(caVersion='v1.21 20-01-06 template_kcartaV121_385_H2016_NLTEH2016.param')      !!!
 c!!!                       v     YY MM DD template_kcartaV121_PPM_H20XY_NLTEH20AB.param')      !!!
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
@@ -34,7 +34,7 @@ c kOrigRefPath == path to original 100 layers reference profiles
 c              == these profiles were used in making the kCARTA database
       CHARACTER*80 kOrigRefPath
       PARAMETER (kOrigRefPath = 
-     $          '/asl/data/kcarta_sergio/KCDATA/RefProf_July2010.For.v115up_CO2ppmv400/')
+     $          '/asl/data/kcarta_sergio/KCDATA/RefProf_July2010.For.v115up_CO2ppmv385/')
 
 c need paths to comp.param and xsec.param == files that detail what gasID's
 c and frequency combinations are in the compressed/crosssection databases
@@ -115,7 +115,7 @@ c kCO2Path        == path to main linemix CO2 compressed data files (gasID 2)
 c ---------->     kCO2_UMBCorHARTMAN tells us linemixing = +1 for UMBC, -1 for Hartmann
       INTEGER kCO2_UMBCorHARTMAN
 c NEW versions, first is what was used, tried and tested in SARTA from 2004-2012
-      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv400.ieee-le/')  !! default UMBC best
+      PARAMETER (kCO2Path = '/asl/data/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')  !! default UMBC best
       PARAMETER (kCO2_UMBCorHARTMAN = +1)
 
 c kCO2ppmvFile      == file that has the CO2 amounts used in the LTE kCARTA database
@@ -126,10 +126,10 @@ c                         UA LTE kCARTA database, alyers 101 - 120
 c kCO2ppmv       == CO2 ppmv used in the kCARTA database, for LTE 1 .. 100 layers
       CHARACTER*80 kCO2ppmvFile,kCO2ppmvFileBack,kCO2ppmvFileBackUA
       INTEGER      kCO2ppmv
-      PARAMETER (kCO2ppmv           = 400)
-      PARAMETER (kCO2ppmvFile       = '/asl/data/kcarta_sergio/KCDATA/General/refgas2_400ppmv')
-      PARAMETER (kCO2ppmvFileBack   = '/asl/data/kcarta_sergio/KCDATA/General/refgas2Back_400ppmv')
-      PARAMETER (kCO2ppmvFileBackUA = '/asl/data/kcarta_sergio/KCDATA/General/refgas2BackUA_400ppmv')
+      PARAMETER (kCO2ppmv           = 385)
+      PARAMETER (kCO2ppmvFile       = '/asl/data/kcarta_sergio/KCDATA/General/refgas2_385ppmv')
+      PARAMETER (kCO2ppmvFileBack   = '/asl/data/kcarta_sergio/KCDATA/General/refgas2Back_385ppmv')
+      PARAMETER (kCO2ppmvFileBackUA = '/asl/data/kcarta_sergio/KCDATA/General/refgas2BackUA_385ppmv')
 
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 c this is for the NLTE files 
@@ -183,17 +183,17 @@ c this name should be self consistent with "caaStrongLines" in nm_nonlte of name
 c these compressed background OD files have 19 NLTE bands removed
 c this is where we have lower atm weakline database
       CHARACTER*80 caWeakCO2Path,caWeakUpperAtmCO2Path
-      PARAMETER (caWeakCO2Path = '/asl/data/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/400ppmv_H16/')
+      PARAMETER (caWeakCO2Path = '/asl/data/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/385ppmv_H16/')
 c this is where the upper atm weakline database lies
       PARAMETER (caWeakUpperAtmCO2Path =
-     $   '/asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/400ppmv_H16/')
-c older H2008? exists /asl/data/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/400ppmv/
-c older H2008? exists /asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/400ppmv/     
+     $   '/asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv_H16/')
+c older H2008? exists /asl/data/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/385ppmv/
+c older H2008? exists /asl/data/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/     
 
 c this is where the strong band linemix strengths are ... files made by SPECTRA/CO2_COMMON/y1s.m
 c see /home/sergio/KCARTA/SRC/NONLTE/M_Files_for_kcarta_NLTE_LBL_runs/ReadmeBlog
       CHARACTER*120 caLineMixDir
-      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H16_400/')
+      PARAMETER (caLineMixDir='/asl/data/kcarta_sergio/KCDATA/NLTE/AIRSCO2/LINEMIX_H16_385/')
 
 c*************************
 c caUA_US_STD_400ppmv has the US STD profile (for 400 ppmv) for UA CO2
@@ -202,8 +202,8 @@ c this is useful when doing LBL NLTE calcs
 c these were originally caUA_US_STD_385ppmv and caLA_US_STD_385ppmv, all in 
 c SRCV1.20_f90/kreadVTprofiles.f or in SRCv1.18/kreadVTprofiles.f
       CHARACTER*80 caUA_US_STD,caLA_US_STD
-      PARAMETER (caUA_US_STD = '/asl/data/kcarta_sergio/KCDATA/NLTE/UA/us_std_prof_ua_400ppmv')
-      PARAMETER (caLA_US_STD = '/asl/data/kcarta_sergio/KCDATA/NLTE/LA/us_std_prof_la_400ppmv')
+      PARAMETER (caUA_US_STD = '/asl/data/kcarta_sergio/KCDATA/NLTE/UA/us_std_prof_ua_385ppmv')
+      PARAMETER (caLA_US_STD = '/asl/data/kcarta_sergio/KCDATA/NLTE/LA/us_std_prof_la_385ppmv')
 
 c************************
 c this tells the code how many layers/levels to expect in the NLTE profile

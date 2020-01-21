@@ -481,10 +481,10 @@ CONTAINS
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
         CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,raTPress(iI),rMixRatio)
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
-        raTPartPress(iI)=raTPress(iI)*rMixRatio/(1.0e6+rMixRatio) !atm
-        raTAmt(iI) = raThick1(iJ) * 100.0           !!! in cm
-        raTAmt(iI)=raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
-        raTAmt(iI) = raTAmt(iI)/1e9/MGC/raTTemp(iI)
+        raTPartPress(iI) = raTPress(iI)*rMixRatio/(1.0e6+rMixRatio) !atm
+        raTAmt(iI)       = raThick1(iJ) * 100.0           !!! in cm
+        raTAmt(iI)       = raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
+        raTAmt(iI)       = raTAmt(iI)/1e9/MGC/raTTemp(iI)
 
         IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
         (abs(kLongOrShort) <= 1))) THEN
@@ -534,12 +534,12 @@ CONTAINS
     ! thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         rAvgHgt = (raLayTop1(iJ)+raLayBot1(iJ))/2.0
         CALL rspl_one(raUpper_Pres,raUpper_MixRatio,iNumMixRatioLevs,raTPress(iI),rMixRatio)
-        raUAMixRatio(iI)     = rMixRatio		      
+        raUAMixRatio(iI) = rMixRatio		      
         raTPress(iI)     = raPavg1(iJ)/kAtm2mb      !!! in atm
         raTPartPress(iI) = raTPress(iI)*rMixRatio/(1.0e6+rMixRatio) !!atm
-        raTAmt(iI)    = raThick1(iJ) * 100.0           !!! in cm
-        raTAmt(iI)    = raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
-        raTAmt(iI)    = raTAmt(iI)/1e9/MGC/raTTemp(iI)
+        raTAmt(iI)       = raThick1(iJ) * 100.0           !!! in cm
+        raTAmt(iI)       = raTAmt(iI)*kAtm2mb*100.0*raTPartPress(iI)
+        raTAmt(iI)       = raTAmt(iI)/1e9/MGC/raTTemp(iI)
 
         CALL r_sort_logspl(raUA_refP,raUA_refT, kMaxLayer,raTPress(iI),raTUA_ref(iI))
         CALL r_sort_logspl(raUA_refP,raUA_refMR,kMaxLayer,raTPress(iI),raMixRatioUA_ref(iI))
@@ -881,10 +881,10 @@ CONTAINS
 !! doing NLTE ie running 2205-2405 cm-1
     IF ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
     (abs(kLongOrShort) <= 1))) THEN
-        write(kStdWarn,120) '        klayers                            ||        vibtemp file               |  '
-        write(kStdWarn,120) 'iI     pavg      dz        q         T(iI) || Tlte      dT   |     Tnlte     dT |  MixRatio'
-        write(kStdWarn,120) '       mb        m       kmol/cm2          ||       K        |         K        |    ppmv'
-        write(kStdWarn,120) '-------------------------------------------------------------------------------------------'
+        write(kStdWarn,'(A)') '        klayers                            ||        vibtemp file               |  '
+        write(kStdWarn,'(A)') 'iI     pavg      dz        q         T(iI) || Tlte      dT   |     Tnlte     dT |  MixRatio'
+        write(kStdWarn,'(A)') '       mb        m       kmol/cm2          ||       K        |         K        |    ppmv'
+        write(kStdWarn,'(A)') '-------------------------------------------------------------------------------------------'
         iStart = (kProfLayer-iProfileLayers+1)	
         DO iI = iStart,kProfLayer
             IF (raLTETemp(iI) < 100.0) THEN
@@ -898,7 +898,9 @@ CONTAINS
         END DO
 
         write(kStdWarn,*) '  '
-        write(kStdWarn,*) '  Comparing NLTE profile to US STD Profile, 2350 Band  '
+        write(kStdWarn,'(A)') 'Comparing NLTE profile to US STD Profile, 2350 Band in kreadVTprofiles.f90 '
+        write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
+        write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
         write(kStdWarn,*) '  '
 
         ca1 = 'iI   Pavg    Tk(klayers) | Tk(VibT)          dT  |     Tv           dT '
@@ -906,6 +908,7 @@ CONTAINS
 
         IF (iBand == 1) THEN
             CALL GetUSSTD_2350(pProf,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
+            write(kStdWarn,*) 'BAND 1 : IStart,kProflLayer = ',iStart, kProfLayer
             write(kStdWarn,*) ca1
             write(kStdWarn,*) ca2
             DO iI = iStart, kProfLayer

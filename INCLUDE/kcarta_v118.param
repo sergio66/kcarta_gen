@@ -268,8 +268,8 @@ c this is how many layers are in the user profile
 !      PARAMETER (KProfLayer=115)  !!fine lower layers - temperature inversiom
 !      PARAMETER (KProfLayer=43)   !!testing Dave Edwards NLTE
 !      PARAMETER (KProfLayer=97)   !!testing Dave Edwards NLTE
-!      PARAMETER (KProfLayer=120)   !!NLTE so all layers <= 1.25 km thick
-      PARAMETER (KProfLayer=100)  !!regular AIRS layers
+      PARAMETER (KProfLayer=119)   !!NLTE so all layers <= 1.25 km thick
+!      PARAMETER (KProfLayer=100)  !!regular AIRS layers
 
 c now keep in mind kMaxLayer = 100
 c so this is used when kProfLayer ~= 100 !!!!!!
@@ -297,9 +297,9 @@ c kProfLayerJac = kProfLayer if Jacobians on, 1 otherwise
 c kMaxPtsJac    = kMaxPts=10000 if Jacobians on, 1 otherwise
       INTEGER kMaxDQ,kProfLayerJac,kMaxPtsJac
 c this is for normal everyday use
-c      PARAMETER (kMaxDQ=2,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
-c this is souped up
-      PARAMETER (kMaxDQ=8,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
+      PARAMETER (kMaxDQ=2,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
+c this is souped up for kCARTA jacobians
+c      PARAMETER (kMaxDQ=8,kProfLayerJac=kProfLayer,kMaxPtsJac=kMaxPts)
 c when kProfLayerJac,kMaxPtsJac are set to 1, this is "space saver" mode
 c      PARAMETER (kMaxDQ=1,kProfLayerJac=1,kMaxPtsJac=1)
 

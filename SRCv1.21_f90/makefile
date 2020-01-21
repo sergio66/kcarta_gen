@@ -13,11 +13,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H16
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H16
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_H16
 
 385_H16_default_f90:
 	make -f Makefile_v121_Intelf90 datafix385_v121_H2016
@@ -25,11 +23,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_385ppmv_H16
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_385ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_385ppmv_H16
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_385ppmv_H16
 
 400_H12p8_highres605_1205:
 	make -f Makefile_v121_Intelf90 datafix400_v121_H2016_highres_orig605_805res
@@ -64,11 +60,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H16_orig605_805res
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H16_orig605_805res
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H16_orig605_805res
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_H16_orig605_805res
 
 400_H16_g110_f90_orig605_805res:
 	make -f Makefile_v121_Intelf90 datafix400_v120_H2016_g110
@@ -76,11 +70,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H16_g110
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H16_g110
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H16_g110
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_H16_g110
 
 400_G15_NLTEH16_f90_orig605_805res:
 	make -f Makefile_v121_Intelf90 datafix400_v120_G2015_NLTEH2016
@@ -88,11 +80,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_G15
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_G15
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_G15
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_G15
 
 400_H16_NLTEH08_f90_orig605_805res:
 	make -f Makefile_v121_Intelf90 datafix400_v120_H2016_NLTEH2008
@@ -100,11 +90,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H16_NLTE08
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H16_NLTE08
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H16_NLTE08
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_H16_NLTE08
 
 400_H16_NLTEH04_f90_orig605_805res:
 	make -f Makefile_v121_Intelf90 datafix400_v120_H2016_NLTEH2004
@@ -112,11 +100,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H16_NLTE04
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H16_NLTE04
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H16_NLTE04
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_H16_NLTE04
 
 400_H12_default_f90_orig605_805res:
 	make -f Makefile_v121_Intelf90 datafix400_v120_H2012
@@ -124,11 +110,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT		
 	make -f Makefile_v121_Intelf90 scat
-	make -f Makefile_v121_Intelf90 parallel	
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H12
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H12
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H12
-	mv ../BIN/kcartaparallel.x90 ../BIN/kcartaparallel.x_f90_121_400ppmv_H12
 
 ########################################################################
 ### these are basically "old" SRCv1.18

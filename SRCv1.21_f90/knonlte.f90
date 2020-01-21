@@ -1721,8 +1721,8 @@ CONTAINS
       DO iL = iStart,kProfLayer   !!!loop over layers
         dLTE  = raTTemp(iL)*1.0d0
         IF (iNum > 0) THEN
-          !write (kStdWarn,*) 'LBL for Strong BackGnd (LTE) Lines : iL,Tlte,Q = ',iL,sngl(dLTE),raTamt(iL)
-          write (kStdWarn,123) iL,sngl(dLTE),raTamt(iL)		
+          write (kStdWarn,'(A,I3,F10.4,E10.4)') 'LBL for Strong BackGnd (LTE) Lines : iL,Tlte,Q = ',iL,sngl(dLTE),raTamt(iL)
+          !write (kStdWarn,123) iL,sngl(dLTE),raTamt(iL)		
           CALL compute_lte_spectra_fast(iTag,iActualTag, &
             daK,raFreq,iGasID,iNum,daIso, &
             daElower,daLineCenter,daJL,daJU,daPshift, &
