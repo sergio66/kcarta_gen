@@ -397,7 +397,7 @@ CONTAINS
     INTEGER :: iNumMixRatioLevs
 ! output params
     INTEGER :: iUpper             !!how many layers above kPROFLAYER are added
-    REAL :: raTTemp(kProfLayer),raTAmt(kProfLayer)
+    REAL :: raTTemp(kProfLayer),raTAmt(kProfLayer),raNLTTemp(kProfLayer)
     REAL :: raTPress(kProfLayer),raTPartPress(kProfLayer)
 ! this tells the pressure levels and layer thicknesses for upper atm
     REAL :: raUpperPressLevels(kProfLayer+1),raUpperThickness(kProfLayer)
@@ -407,9 +407,8 @@ CONTAINS
     REAL :: rMixRatio,MGC,rAvgHgt,raUAMixRatio(kNLTEProfLayer)
     REAL :: raLayTop1(kNLTEProfLayer),raLayBot1(kNLTEProfLayer)
     REAL :: raThick1(kNLTEProfLayer)
-    REAL :: raPavg1(kNLTEProfLayer),raTavg1(kNLTEProfLayer), &
-    raNLTavg1(kNLTEProfLayer)
-    REAL ::    rDummyVibEnergy
+    REAL :: raPavg1(kNLTEProfLayer),raTavg1(kNLTEProfLayer),raNLTavg1(kNLTEProfLayer)
+    REAL :: rDummyVibEnergy
     REAL :: raQtips1(kNLTEProfLayer),raQTipsAvg1(kNLTEProfLayer)
 
     INTEGER :: iI,iErr,iIOUN,iLay,iFound,iJ,iUpper0,iVibs,iVibs0
@@ -461,9 +460,9 @@ CONTAINS
     (abs(kLongOrShort) <= 1))) THEN
         write(kStdWarn,*) 'LOWER atm LTE temperatures, gas amounts ....'
         write(kStdWarn,*) 'read in direct from GENLN2 NLTE profile file ',caFName
-        write(kStdWarn,*) ' this part is for jollies, not really used ....'
-        write(kStdWarn,*) 'iI     pavg   dz   q        T(iI)  '
-        write(kStdWarn,*) '       (mb)   (m) (mol/cm2)  (K)'
+        write(kStdWarn,*) ' this LA part is for jollies, not really used ....'
+        write(kStdWarn,*) ' iI     pavg          dz   q        Tk(iI)  Tnlte(iI)'
+        write(kStdWarn,*) '        (mb)          (m) (mol/cm2)   (K)      (K)'
         write(kStdWarn,*) '---------------------------------------------------'
     END IF
 
@@ -472,7 +471,8 @@ CONTAINS
         iJ = iI
         raUpperThickness(iI) = raThick1(iJ)  !!! in m
         raTPress(iI)     = raPavg1(iJ)   !!! in mb
-        raTTemp(iI)      = raTavg1(iJ)
+        raTTemp(iI)      = raTavg1(iJ)   !!! LTE temp (kinetic)
+        raNLTTemp(iI)    = raNLTavg1(iJ) !!! NLTE temp (bibrational)
     ! ppmv = (number of gas molecules)/(number of air molecules) * 1e6
     ! pV = NRT ==> N(g) = p(g) V(a)/RT(g),  N(a) = p(a) V(a)/ RT(a)
     ! now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
@@ -489,7 +489,7 @@ CONTAINS
         IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
         (abs(kLongOrShort) <= 1))) THEN
             write(kStdWarn,6543) iI,raTPress(iI)*kAtm2mb,raUpperThickness(iI), &
-            raTAmt(iI),raTTemp(iI)
+            raTAmt(iI),raTTemp(iI),raNLTTemp(iI)
         END IF
     END DO
 
@@ -499,7 +499,8 @@ CONTAINS
         raTPress(iI)     = 0.0
         raTPartPress(iI) = 0.0
         raTTemp(iI)      = 0.0
-        raTAmt(iI)    = 0.0
+        raNLTTemp(iI)    = 0.0
+        raTAmt(iI)       = 0.0
     END DO
 
     IF  ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
@@ -511,15 +512,12 @@ CONTAINS
 	write(kStdWarn,*) ' >>> NOTE if the CO2 mix ratios do not agree, this routine'
 	write(kStdWarn,*) ' >>> will modify the input MR so they are same as US STd by end of this subr'
 	write(kStdWarn,*) ' '
-        ca120B = &
-        ' |                    VT profile                                   | US STd UA reference     |           '
-        ca120C = &
-        ' lay    p (mb)         pp(mb)        T(K)      Q(mol/cm2)  CO2 ppm |  Tstd(K)   CO2Std(ppm)  | CO2Std/CO2'
-        ca120D = &
-        '---------------------------------------------------------------------------------------------------------'
-        write(kStdWarn,120) ca120B
-        write(kStdWarn,120) ca120C
-        write(kStdWarn,120) ca120D      
+        ca120B = '|                profile                                                       |   US STd UA reference   |            |'
+        ca120C = '|lay    p (mb)         pp(mb)         Tk(K)    TNLTE(k)   Q(mol/cm2)   CO2 ppm |  Tstd(K)   CO2Std(ppm)  | CO2Std/CO2 |'
+        ca120D = '-----------------------------------------------------------------------------------------------------------------------'
+        write(kStdWarn,'(A)') ca120B
+        write(kStdWarn,'(A)') ca120C
+        write(kStdWarn,'(A)') ca120D      
     END IF
      
     DO iI = 1,iUpper
@@ -527,6 +525,7 @@ CONTAINS
         raUpperThickness(iI) = raThick1(iJ)  !!! in m
         raTPress(iI)     = raPavg1(iJ)   !!! in mb
         raTTemp(iI)      = raTavg1(iJ)
+        raNLTTemp(iI)    = raNLTavg1(iJ)
     ! ppmv = (number of gas molecules)/(number of air molecules) * 1e6
     ! pV = NRT ==> N(g) = p(g) V(a)/RT(g),  N(a) = p(a) V(a)/ RT(a)
     ! now V(g) == V(a), T(g) == T(a) and p(total) = p(a) + p(g)
@@ -548,7 +547,7 @@ CONTAINS
           (((abs(kLongOrShort) == 2) .AND. (kOuterLoop <= 2)) .OR. &
           (abs(kLongOrShort) <= 1))) THEN
           write(kStdWarn,1080) kProfLayer+iI,raTPress(iI)*kAtm2mb, &
-                  raTPartPress(iI)*kAtm2mb,raTTemp(iI),raTamt(iI),rMixRatio, &
+                  raTPartPress(iI)*kAtm2mb,raTTemp(iI),raNLTTemp(iI),raTamt(iI),rMixRatio, &
                   raTUA_ref(iI),raMixRatioUA_ref(iI),raMixRatioUA_ref(iI)/rMixRatio
         END IF
 	raTPartPress(iI) = raTPartPress(iI) * raMixRatioUA_ref(iI)/rMixRatio
@@ -558,8 +557,8 @@ CONTAINS
     END DO
 
     1070 FORMAT('ERROR! number ',I5,' opening upper atm NONLTE profile:',/,A80)
-    1080 FORMAT(I4,' ',2(ES12.5,'  '),1(F10.4,'  '),ES12.5,F10.4,'|',2(F10.4,'  '),F10.5)    
-    6543 FORMAT(I4,' ',1(E9.4,' '),1(F9.3,' '),1(E9.4,' '),1(F8.3,' '))
+    1080 FORMAT(I4,' ',2(ES12.5,2X),2(F10.4,2X),ES12.5,F10.4,'|',2(F10.4,2X),F10.5)    
+    6543 FORMAT(I4,' ',1(E9.4,1X),1(F9.3,1X),1(E9.4,1X),2(F8.3,1X))
     120  FORMAT(A120)    
 
     RETURN
@@ -881,9 +880,9 @@ CONTAINS
 !! doing NLTE ie running 2205-2405 cm-1
     IF ((iBand == 1) .AND. (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
     (abs(kLongOrShort) <= 1))) THEN
-        write(kStdWarn,'(A)') '        klayers                            ||        vibtemp file               |  '
-        write(kStdWarn,'(A)') 'iI     pavg      dz        q         T(iI) || Tlte      dT   |     Tnlte     dT |  MixRatio'
-        write(kStdWarn,'(A)') '       mb        m       kmol/cm2          ||       K        |         K        |    ppmv'
+        write(kStdWarn,'(A)') '         klayers                            ||        vibtemp file               |  '
+        write(kStdWarn,'(A)') ' iI     pavg      dz        q         T(iI) || Tlte      dT   |     Tnlte     dT |  MixRatio'
+        write(kStdWarn,'(A)') '        mb        m       kmol/cm2          ||       K        |         K        |    ppmv'
         write(kStdWarn,'(A)') '-------------------------------------------------------------------------------------------'
         iStart = (kProfLayer-iProfileLayers+1)	
         DO iI = iStart,kProfLayer
@@ -897,20 +896,13 @@ CONTAINS
             raMixRatio(iI)
         END DO
 
-        write(kStdWarn,*) '  '
-        write(kStdWarn,'(A)') 'Comparing NLTE profile to US STD Profile, 2350 Band in kreadVTprofiles.f90 '
-        write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
-        write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
-        write(kStdWarn,*) '  '
-
         ca1 = 'iI   Pavg    Tk(klayers) | Tk(VibT)          dT  |     Tv           dT '
         ca2 = '-------------------------|-----------------------|----------------------'
 
         IF (iBand == 1) THEN
-            CALL GetUSSTD_2350(pProf,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
             write(kStdWarn,*) 'BAND 1 : IStart,kProflLayer = ',iStart, kProfLayer
-            write(kStdWarn,*) ca1
-            write(kStdWarn,*) ca2
+            write(kStdWarn,'(A)') ca1
+            write(kStdWarn,'(A)') ca2
             DO iI = iStart, kProfLayer
                 write(kStdWarn,1234) iI,pProf(iI),raLTETemp(iI),'|', &
                 raTTemp(iI), raTTemp(iI)-raLTETemp(iI),'|', &
@@ -919,13 +911,19 @@ CONTAINS
         END iF
 
         IF (iBand == 1) THEN
+            CALL GetUSSTD_2350(pProf,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
+
+            write(kStdWarn,*) '  '
+            write(kStdWarn,'(A)') 'Comparing current NLTE profile to US STD Profile, 2350 Band in kreadVTprofiles.f90 '
+            write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
+            write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
             write(kStdWarn,*) ' '
             write(kStdWarn,*) ' Comparisons of Tk,tNLTE vs USSTD : '
-            ca1 = 'iI   Pavg    Tk(klayers)      TStd         dT  |     Tv      TvSTD      dTv'
-            ca2 = '-----------------------------------------------|------------------------------'
+            ca1 = ' iI   Pavg    Tk(klayers)      TStd         dT  |     Tv      TvSTD      dTv'
+            ca2 = '------------------------------------------------|------------------------------'
 
-            write(kStdWarn,*) ca1
-            write(kStdWarn,*) ca2
+            write(kStdWarn,'(A)') ca1
+            write(kStdWarn,'(A)') ca2
             DO iI = iStart, kProfLayer
                 write(kStdWarn,1250) iI,pProf(iI),raLTETemp(iI),raLTE_STD(iI),raLTETemp(iI)-raLTE_STD(iI),'|', &
                 raNLTETemp(iI), raNLTE_STD(iI),raNLTETemp(iI)-raNLTE_STD(iI)

@@ -1184,19 +1184,13 @@ CONTAINS
       rH = rH0
     END IF
 
-    write(kSTdWarn,*) 'Checking US Std NLTE profile in n_gas_wt_spectra.f90'
-    write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
-    write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
-    write(kStdWarn,'(A,F12.5,A,F12.5,A)') 'Start NLTE at (user supplied VS 2350[T-Tvib]) height = ',rH0/1000,' vs ',rH/1000,' km'
-
     ca1 = 'iI   Pavg    Tk(klayers) | Tk(VibT)          dT  |     Tv           dT '
     ca2 = '-------------------------|-----------------------|----------------------'
 
     IF (iBand == 1) THEN
-      CALL GetUSSTD_2350(raPavg,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
-      write(kStdWarn,*) 'BAND 1 : IStart,kProflLayer = ',iStart, kProfLayer
-      write(kStdWarn,*) ca1
-      write(kStdWarn,*) ca2
+      write(kStdWarn,*) 'BAND 1 : Current LTE/NLTE profiles IStart,kProflLayer = ',iStart, kProfLayer
+      write(kStdWarn,'(A)') ca1
+      write(kStdWarn,'(A)') ca2
       DO iI = iStart, kProfLayer
         write(kStdWarn,1234) iI,raPavg(iI),raaTemp(iI,1),'|', &
           raLTE(iI), raLTE(iI)-raaTemp(iI,1),'|', &
@@ -1205,14 +1199,20 @@ CONTAINS
     END iF
 
     IF (iBand == 1) THEN
+      CALL GetUSSTD_2350(raPavg,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
+
+      write(kSTdWarn,'(A)') 'Checking current (klayers) profile against US Std NLTE profile in n_gas_wt_spectra.f90'
+      write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
+      write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
+      write(kStdWarn,'(A,F12.5,A,F12.5,A)') 'Start NLTE at (user supplied VS 2350[T-Tvib]) height = ',rH0/1000,' vs ',rH/1000,' km'
 
       write(kStdWarn,*) ' '
       write(kStdWarn,*) ' Comparisons of Tk,tNLTE vs USSTD : '
-      ca1 = 'iI   Pavg    Tk(klayers)      TStd         dT  |     Tv      TvSTD      dTv'
-      ca2 = '-----------------------------------------------|----------------------------'
+      ca1 = ' iI   Pavg    Tk(klayers)      TStd         dT  |     Tv      TvSTD      dTv'
+      ca2 = '-----------------------------------------------------|----------------------------'
 
-      write(kStdWarn,*) ca1
-      write(kStdWarn,*) ca2
+      write(kStdWarn,'(A)') ca1
+      write(kStdWarn,'(A)') ca2
       DO iI = iStart, kProfLayer
         write(kStdWarn,1250) iI,raPavg(iI),raaTemp(iI,1),raLTE_STD(iI),raaTemp(iI,1)-raLTE_STD(iI),'|', &
            raNLTE(iI), raNLTE_STD(iI),raNLTE(iI)-raNLTE_STD(iI)
