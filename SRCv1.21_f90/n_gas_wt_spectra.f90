@@ -511,6 +511,10 @@ CONTAINS
     CHARACTER(80) :: caaaNLTEBandsOrig(kGasStore,kNumkCompT)
     INTEGER :: iJunkNum,iaJunk(kGasStore)
 
+    DO iJunkNum = 1,iNumNLTEGases
+      CALL print_band_energy2(iaNLTEGasID(iJunkNum))
+    END DO
+    write(kStdWarn,*) 'Calling NLTEBandMapper'
     CALL NLTEBandMapper(iNumNLTEGases,iaNLTEGasID,iaNLTEBands,caaaNLTEBands)
 
     IF (abs(iSetBloat) /= 1) THEN
@@ -1409,7 +1413,7 @@ CONTAINS
 
          CALL ConcatCA80(caStrongLineParams,caY)
          caaaNLTEBands(iI,iJ) = caY
-         write(kStdWarn,*) iI,iJ,'-> NLTE : iISO,iLSGQ,iUSGQ,UMBC-LBL iD: ',iISO,iLSGQ,iUSGQ,iUMBC_LBL
+         write(kStdWarn,'(2(I3,1X),A,4(I5,1X))') iI,iJ,'-> NLTE : iISO,iLSGQ,iUSGQ,UMBC-LBL iD: ',iISO,iLSGQ,iUSGQ,iUMBC_LBL
 
          IF (iCount == 1) THEN
            iaBandID(iCount) = iUMBC_LBL

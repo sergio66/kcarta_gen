@@ -511,8 +511,78 @@ CONTAINS
 
 !************************************************************************
 ! this function matches up CO2 band center energies with ISO and HITRAIN id
+    SUBROUTINE print_band_energy2(iGID)
+
+! also see REAL FUNCTION match_band_energy2(iGID,iISO,iHITRAN) below
+! see  NONLTE/driver_make_nlte_prof.m
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+    INTEGER iGID
+
+    if (iGID == 2) then
+      write(kStdWarn,*) 'See SUBROUTINE print_band_energy2'      
+      write(kStdWarn,'(A)') 'IL  MOL   IDMOL   ISO   IDISO  LEVEL   IDAFGL  ENERGY(cm-1)'
+      write(kStdWarn,'(A)') ' 1 CO2       2    626      1     1101      2     667.38000'
+      write(kStdWarn,'(A)') ' 2 CO2       2    626      1    10002      3    1285.40900'
+      write(kStdWarn,'(A)') ' 3 CO2       2    626      1     2201      4    1335.13200'
+      write(kStdWarn,'(A)') ' 4 CO2       2    626      1    10001      5    1388.18500'
+      write(kStdWarn,'(A)') ' 5 CO2       2    626      1    11102      6    1932.47000'
+      write(kStdWarn,'(A)') ' 6 CO2       2    626      1     3301      7    2003.24600'
+      write(kStdWarn,'(A)') ' 7 CO2       2    626      1    11101      8    2076.85600'
+      write(kStdWarn,'(A)') ' 8 CO2       2    626      1       11      9    2349.14300'
+      write(kStdWarn,'(A)') ' 9 CO2       2    626      1    20003     10    2548.36700'
+      write(kStdWarn,'(A)') '10 CO2       2    626      1    12202     11    2585.02200'
+      write(kStdWarn,'(A)') '11 CO2       2    626      1    20002     12    2671.14300'
+      write(kStdWarn,'(A)') '12 CO2       2    626      1     4401     13    2671.71700'
+      write(kStdWarn,'(A)') '13 CO2       2    626      1    12201     14    2760.72500'
+      write(kStdWarn,'(A)') '14 CO2       2    626      1    20001     15    2797.13600'
+      write(kStdWarn,'(A)') '15 CO2       2    626      1     1111     16    3004.01200'
+      write(kStdWarn,'(A)') '16 CO2       2    626      1    10012     23    3612.84200'
+      write(kStdWarn,'(A)') '17 CO2       2    626      1     2211     24    3659.27300'
+      write(kStdWarn,'(A)') '18 CO2       2    626      1    10011     25    3714.78300'
+      write(kStdWarn,'(A)') '19 CO2       2    636      2     1101      2     648.47802'
+      write(kStdWarn,'(A)') '20 CO2       2    636      2    10002      3    1265.82800'
+      write(kStdWarn,'(A)') '21 CO2       2    636      2     2201      4    1297.26400'
+      write(kStdWarn,'(A)') '22 CO2       2    636      2    10001      5    1370.06300'
+      write(kStdWarn,'(A)') '23 CO2       2    636      2       11      9    2283.48800'
+      write(kStdWarn,'(A)') '24 CO2       2    636      2     1111     16    2920.23900'
+      write(kStdWarn,'(A)') '25 CO2       2    636      2    10012     23    3527.73800'
+      write(kStdWarn,'(A)') '26 CO2       2    636      2     2211     24    3580.75000'
+      write(kStdWarn,'(A)') '27 CO2       2    636      2    10011     25    3632.91000'
+      write(kStdWarn,'(A)') '28 CO2       2    628      3     1101      2     662.37300'
+      write(kStdWarn,'(A)') '29 CO2       2    628      3    10002      3    1259.42600'
+      write(kStdWarn,'(A)') '30 CO2       2    628      3     2201      4    1325.14100'
+      write(kStdWarn,'(A)') '31 CO2       2    628      3    10001      5    1365.84400'
+      write(kStdWarn,'(A)') '32 CO2       2    628      3    11102      6    1901.73700'
+      write(kStdWarn,'(A)') '33 CO2       2    628      3     3301      7    1988.32800'
+      write(kStdWarn,'(A)') '34 CO2       2    628      3    11101      8    2049.33910'
+      write(kStdWarn,'(A)') '35 CO2       2    628      3       11      9    2332.11300'
+      write(kStdWarn,'(A)') '36 CO2       2    627      4     1101      2     664.72900'
+      write(kStdWarn,'(A)') '37 CO2       2    627      4    10002      3    1272.28700'
+      write(kStdWarn,'(A)') '38 CO2       2    627      4     2201      4    1329.84300'
+      write(kStdWarn,'(A)') '39 CO2       2    627      4    10001      5    1376.02700'
+      write(kStdWarn,'(A)') '40 CO2       2    627      4    11102      6    1916.69500'
+      write(kStdWarn,'(A)') '41 CO2       2    627      4     3301      7    1995.35200'
+      write(kStdWarn,'(A)') '42 CO2       2    627      4    11101      8    2062.09910'
+      write(kStdWarn,'(A)') '43 CO2       2    627      4       11      9    2340.01400'
+      write(kStdWarn,'(A)') '44 CO2       2    626      1    11112     36    4247.70500'
+      write(kStdWarn,'(A)') '45 CO2       2    626      1     3311     37    4314.91300'
+      write(kStdWarn,'(A)') '46 CO2       2    626      1    11111     38    4390.62900'
+      write(kStdWarn,'(A)') '47 CO2       2    628      3     1111     16    2982.11200'
+    end if
+
+    RETURN
+    END
+
+!************************************************************************
+
+! this function matches up CO2 band center energies with ISO and HITRAIN id
     REAL FUNCTION match_band_energy2(iGID,iISO,iHITRAN)
 
+!also see     SUBRTOUINE print_band_energy2(iGID,iHITRAN)
 ! see  NONLTE/driver_make_nlte_prof.m
 !   IL    MOL   IDMOL  ISO   IDISO  LEVEL   IDAFGL  ENERGY(cm-1)
 !    1 CO2       2    626      1     1101      2     667.38000

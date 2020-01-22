@@ -3513,7 +3513,7 @@ CONTAINS
     REAL :: raaPartPress(kProfLayer,kGasStore)
     CHARACTER(80) :: caPfname
 
-    REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1,raJunk(kProfLayer+1)
+    REAL :: raaHeight(kProfLayer+1,kGasStore),MGC,delta1,raJunk(kProfLayer+1)
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
     REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT,rZ
     CHARACTER(130) :: caStr
