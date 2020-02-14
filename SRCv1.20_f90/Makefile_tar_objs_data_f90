@@ -508,7 +508,7 @@ clean:
 	rm *.o *~ 2> /dev/null || true
 
 #########################################################################
-datafix400_H2016:
+datafix400_v120_H2016:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
@@ -519,7 +519,7 @@ datafix400_H2016:
       cd ../; \
       cd ../SRCv1.20_f90
 
-datafix400_H2016_g110:
+datafix400_v120_H2016_g110:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2016_WVg110.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
@@ -541,7 +541,7 @@ datafix400_G2015_NLTEH2016:
       cd ../; \
       cd ../SRCv1.20_f90
 
-datafix400_H2016_NLTEH2008:
+datafix400_v120_H2016_NLTEH2008:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
@@ -552,7 +552,7 @@ datafix400_H2016_NLTEH2008:
       cd ../; \
       cd ../SRCv1.20_f90
 
-datafix400_H2016_NLTEH2004:
+datafix400_v120_H2016_NLTEH2004:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2004.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
@@ -563,7 +563,7 @@ datafix400_H2016_NLTEH2004:
       cd ../; \
       cd ../SRCv1.20_f90
 
-datafix400_H2012:
+datafix400_v120_H2012:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
@@ -574,7 +574,7 @@ datafix400_H2012:
       cd ../; \
       cd ../SRCv1.20_f90
 
-datafix385_H2012_LBLRTM:
+datafix385_v120_H2012_LBLRTM:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_LBLRTM_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
@@ -585,7 +585,7 @@ datafix385_H2012_LBLRTM:
       cd ../; \
       cd ../SRCv1.20_f90
 
-datafix385_H2012:
+datafix385_v120_H2012:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_385_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \

@@ -1,5 +1,12 @@
 function [data, wnums, plevs, hgt, hr] = readkcflux(kfile, plevsIN, dfile)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% YOU DO NOT NEED eg readkcstd_twoslabclds.m AS LAST ROW OF data IN
+%%%   [data, wnums] = readkcflux(kfile)
+%%% is output by kCARTA with the addition already done!!!!
+%% ie look at data(lastcol,:,:) for final result !!!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % function [data, wnums, plevs, hgt, hr] = readkcflux(kfile, plevsIN, dfile)
 %
 % readkcflux is a simple reader & unchunker for kcarta flux output files
@@ -326,7 +333,8 @@ for aa = 1 : iNumAtm
   plot_heatingrates
   if iNumAtm > 1
     fprintf(1,'showing heating rate/fluxes for atmosphere %2i of %2i \n',aa,iNumAtm);
-    disp('ret'); pause
+    %disp('ret'); pause
+    pause(0.1)
   end
 end
 

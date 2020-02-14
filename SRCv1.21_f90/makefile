@@ -4,6 +4,7 @@ $(info   )
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
 $(info IMPORTANT (1) -- try to build on oldest nodes rather than taki2 so it runs on every node)
 $(info IMPORTANT (2) -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB, if you do things by hand)
+$(info IMPORTANT (3) -- since this is 500-880,805-2830 cm-1 res use cp_param_files_to_f90.sc and not cp_param_files_to_f90_v120.sc)
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
 $(info   )
 

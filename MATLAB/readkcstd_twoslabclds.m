@@ -1,25 +1,27 @@
-function [data, wnums, caVersion] = readkcstd(kfile, dfile)
+function [finaldata, wnums, data, caVersion] = readkcstd(kfile, cldparamfile, dfile)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% YOU DO NOT NEED eg readkcstd_twoslabclds.m AS LAST COLUMN OF data IN
+%%% NOTE YOU DO NOT NEED THIS ROUTINE SINCE THE LAST COLUMN OF data IN
 %%%   [data, wnums] = = readkcstd(kfile)
 %%% is output by kCARTA with the addition already done!!!!
 %% ie look at data(:,lastcol) for final result !!!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% function [data, wnums, caVersion] = readkcstd(kfile, dfile)
+% function [data, wnums, caVersion] = readkcstd(kfile, cldparamfile, [dfile])
 %
 % readkc is a simple reader & unchunker for kcarta output files
 %
 % INPUTS
 %
-%   kfile  - kcarta output file
-%   dfile  - readkc output file (optional)
+%   kfile        - kcarta output file
+%   cldparamfile - tells you what the cloud fractions are
+%   dfile        - readkc output file (optional)
 %
 % OUTPUTS
 %
-%   data   - a w by n array of data from kcarta
-%   wnums  - a w by 1 vector of data wavenumbers
+%   finaldata - a w by n array of data from kcarta (should be same as data(5,:) below)
+%   wnums     - a w by 1 vector of data wavenumbers
+%   data      - a w by n-1 array of rads (clr,cld1,cld2,cld12) an d final wgtrad data from kcarta
 %   caVersion - descriptive  string set in kcarta.param at compile time,
 %               CKD vers and nml comment (in nm_outout)
 %
@@ -47,6 +49,43 @@ function [data, wnums, caVersion] = readkcstd(kfile, dfile)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+cldwgts = load(cldparamfile);
+%{
+this is an example
+ % TWO SLAB CLOUD
+ % rows 1-7 are ctype(101/201/301=W/I/A),cprtop(mb),cprbot(mb)
+ % cngwat(g/m2),cpsize(um),cfrac and cfrac12
+ % cols 1-4 are CLOUD 1 (old/new) and CLOUD 2 (old/new)
+ % typ    201.0000       201.0000       101.0000       101.0000
+ % ctop   169.8952       160.4959       589.6504       575.5248
+ % cbot   289.3771       286.2617       707.9984       729.8857
+ % cng    26.19143       26.19143       53.46710       53.46710
+ % csz    109.5353       109.5353       21.29881       21.29881
+ % frac  0.4871168      0.4871168      0.3388034      0.3388034
+ % fr12  0.1278465      0.1278465      0.1278465      0.1278465
+   201.0000       201.0000       101.0000       101.0000
+   169.8952       160.4959       589.6504       575.5248
+   289.3771       286.2617       707.9984       729.8857
+   26.19143       26.19143       53.46710       53.46710
+   109.5353       109.5353       21.29881       21.29881
+  0.4871168      0.4871168      0.3388034      0.3388034
+  0.1278465      0.1278465      0.1278465      0.1278465
+%}
+
+[mm,nn] = size(cldwgts);
+if nn == 4
+  ifrac = cldwgts(6,1);
+  wfrac = cldwgts(6,3);
+  bfrac = cldwgts(7,1);
+  xifrac = ifrac-bfrac;
+  xwfrac = wfrac-bfrac;
+  clrfrac = 1-(xifrac+xwfrac+bfrac);
+else
+  ifrac = cldwgts(6,1);
+  clrfrac = 1-ifrac;
+end
+% flux = clrfrac*xflux(1,:) + xwfrac*xflux(2,:) + xifrac*xflux(3,:) + bfrac*xflux(4,:);
 
 [fin,msg] = fopen(kfile, 'r');
 if fin == -1
@@ -417,7 +456,7 @@ noutrow = nchunk * 10000;       % number of output rows
 noutcol = sum(nODBrows);        % number of output columns
 ODBrowdat = zeros(10000, 1);    % ODB row data buffer
 
-if nargin == 1
+if nargin == 2
  
   % initialize output arrays
   data = zeros(noutrow, noutcol);
@@ -495,7 +534,7 @@ for chunk = 1:nchunk
       end
       flen2 = fread(fin, 1, 'integer*4');
 
-      if nargin == 1
+      if nargin == 2
 
         % write ODBrowdat to the data array
         outrows = (chunk-1) * 10000 + 1 : chunk * 10000;
@@ -526,7 +565,7 @@ end % loop on chunks
 
 fclose(fin);
 
-if nargin == 2 
+if nargin == 3 
   fclose (fout);
 end
 
@@ -538,3 +577,9 @@ if (max(diff(wnums)) - min(diff(wnums))) > 0.0001
   end
 ilen = 1 : length(wnums);
 wnums = floor(wnums(1)) + (ilen-1)*dvx;
+
+if nn == 4
+  finaldata = bfrac*data(:,1)   + xifrac*data(:,2) + xwfrac*data(:,3) + clrfrac*data(:,4);
+else
+  finaldata = xifrac*data(:,1) + clrfrac*data(:,2);
+end

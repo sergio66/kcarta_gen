@@ -1,5 +1,12 @@
 function [data, wnums, plevs, hgt, hr] = readkcfluxFAST(kfile, plevsIN, dfile, versionlength)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% YOU DO NOT NEED eg readkcstd_twoslabclds.m AS LAST ROW OF data IN
+%%%   [data, wnums] = readkcflux(kfile)
+%%% is output by kCARTA with the addition already done!!!!
+%% ie look at data(lastcol,:,:) for final result !!!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % function [data, wnums, plevs, hgt, hr] = readkcfluxFAST(kfile, plevsIN, dfile)
 %
 % readkcflux is a simple reader & unchunker for kcarta flux output files
