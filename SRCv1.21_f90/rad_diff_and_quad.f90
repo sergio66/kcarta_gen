@@ -1285,6 +1285,7 @@ CONTAINS
     write(kStdWarn,*) '  '
 
     rThermalRefl = 1.0/kPi
+    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
           
     raaUpFlux = 0.0
     raaDownFlux = 0.0

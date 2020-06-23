@@ -473,7 +473,8 @@ CONTAINS
     write(kStdWarn,*) 'Computing pclsam slowloop fluxes (with cloud) ..............'
     write(kStdWarn,*) '  '
 
-    rThermalRefl=1.0/kPi
+    rThermalRefl = 1.0/kPi
+    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
 
     iGaussPts = 10 !!!!default, good enough for clear sky
 
@@ -961,7 +962,8 @@ CONTAINS
     INTEGER :: iSTopNormalRadTransfer
     REAL :: rFrac,rL,rU,r0,raInten(kMaxPts),rNoScale
 
-    rThermalRefl=1.0/kPi
+    rThermalRefl = 1.0/kPi
+    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
 
 ! calculate cos(SatAngle)
     muSat=cos(rSatAngle*kPi/180.0)
@@ -1631,7 +1633,8 @@ CONTAINS
     write(kStdWarn,*) 'Computing pclsam fastloop fluxes (with cloud) ..............'
     write(kStdWarn,*) '  '
 
-    rThermalRefl=1.0/kPi
+    rThermalRefl = 1.0/kPi
+    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
 
     iGaussPts = 10
     IF (iGaussPts > kGauss) THEN
@@ -2139,7 +2142,8 @@ CONTAINS
     write(kStdWarn,*) 'Computing pclsam fastloop LinearInTau fluxes (with cloud) ..............'
     write(kStdWarn,*) '  '
 
-    rThermalRefl=1.0/kPi
+    rThermalRefl = 1.0/kPi
+    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
 
     iGaussPts = 4  !!! "slightly" better than iGaussPts = 3
     iGaussPts = 1  !!! haha not too bad at all ....

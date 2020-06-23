@@ -351,7 +351,8 @@
 
     iRepeat = 0
 
-    rThermalRefl=1.0/kPi
+    rThermalRefl = 1.0/kPi
+    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
 
 ! calculate cos(SatAngle)
     muSat = cos(rSatAngle*kPi/180.0)
@@ -1069,6 +1070,7 @@
     iIOUN = kStdkCarta
 
     rThermalRefl = 1.0/kPi
+    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
                  
 ! calculate cos(SatAngle)
     muSat = cos(rSatAngle*kPi/180.0)

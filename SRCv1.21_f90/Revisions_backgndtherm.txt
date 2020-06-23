@@ -5,8 +5,9 @@ from n_misc.f90
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 so for example Nick Nalli says refl therm needs to be done at satzen
+see eg KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/template_Qrad0_NalliEmiss.nml
   kThermalAngle = p.satzen(ii)
-  iaaOverrideDefault(2,4) = +1
+  iaaOverride(2,4) = +2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
