@@ -542,7 +542,7 @@
     write(kStdWarn,*) '  '
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
            
     DO iFr=1,kMaxPts
         DO iLay=1,kProfLayer

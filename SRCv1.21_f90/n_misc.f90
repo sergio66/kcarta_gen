@@ -269,6 +269,9 @@ CONTAINS
 !!! iDothermal = kThermal; if iDoThermal = -1, no backgnd thermal computed
 !!!                                      =  0, backgndthermal with diffusive approx << DEFAULT >>
 !!!                                            --->>> control further with iaaOverrideDefault(2,4) <<<---
+!!!                                     = +10 backgndthermal with diffusive approx [NEW]
+!!!                                       constant angle (typicall acos(3/5)) in all layers, but refl th = (1-e) [Nick Nalli] NEW
+!!!                                            --->>> control further with iaaOverrideDefault(2,4) <<<---
 !!!                                      = +1, use integration over angles, const-in-tau  layer T
 !!!                                            --->>> control further with iaaOverrideDefault(2,5) <<<---
 !!!                                      = +2, use integration over angles, linear-in-tau layer T
@@ -286,7 +289,6 @@ CONTAINS
 !!!                               = +1 for constant angle (typically acos(3/5)) in all layers
 !!!                               = -2     same as -1, except linear-in-tau T variation
 !!!                               = +2     LBLRTM style 3 exponential gauss quad, not yet implemented
-!!!                               = +3 for constant angle (typicall acos(3/5)) in all layers, but refl th = (1-e) [Nick Nalli] NEW
 !!! SUBR DoDiffusivityApprox in rad_diff.f uses this info
 !!!   iDiffMethod = kSetThermalAngle
 !!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
@@ -298,7 +300,6 @@ CONTAINS
 !!!           so in nm_params : set iaaOverride(2,4) = 1, kThermalAngle = 50.0 and thay works!!!
 !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
 !!!     = +2 diffusive background using LBLRTM style 3 exponetial gauss quad, not yet implemented
-!!!     = +3 for constant angle (typicall acos(3/5)) in all layers, but refl th = (1-e) [Nick Nalli] NEW
     iaaOverrideDefault(2,5) = 0     !!! SUBR IntegrateOverAngles in rad_quad.f, called by SUBR BackGndThermal
 !!!   iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
 !!!                    0 for accurate diffusivity                   (AT ALL LAYERS << DEFAULT >>)
@@ -684,8 +685,6 @@ CONTAINS
       CALL DoStop
     END IF
 
-    print *,kTemperVary
-call dostop
     iaaOverrideDefault(2,1) = kTemperVary
           
     RETURN

@@ -107,7 +107,7 @@ CONTAINS
     iNumOutX = 0
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos=cos(rSatAngle*kPi/180.0)
@@ -445,7 +445,7 @@ CONTAINS
     iNumOutX = 0
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)
@@ -748,7 +748,7 @@ CONTAINS
     iIOUN = iIOUN_IN
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)
@@ -1202,7 +1202,7 @@ CONTAINS
     iIOUN = iIOUN_IN
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)

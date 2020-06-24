@@ -1043,7 +1043,7 @@ CONTAINS
     caDumpEmiss(i1+1:i1+4) = c4(1:4)
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos=cos(rSatAngle*kPi/180.0)
@@ -1457,7 +1457,7 @@ CONTAINS
     iIOUN = iIOUN_IN
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)
@@ -2210,7 +2210,7 @@ CONTAINS
     END DO
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos=cos(rSatAngle*kPi/180.0)
@@ -2698,7 +2698,7 @@ CONTAINS
     END DO
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)
@@ -2857,6 +2857,8 @@ CONTAINS
 
     write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1),raSunRefl(1)
           
+!    if (abs(raFreq(1)-905) < 0.1) print *,'nana',iDoThermal,raFreq(1),raThermal(1),raUseEmissivity(1),rThermalRefl
+
     raInten = raInten*raUseEmissivity+&
         raThermal*(1.0-raUseEmissivity)*rThermalRefl+raSun*raSunRefl
     rJunk = raInten(1)
@@ -3234,7 +3236,7 @@ CONTAINS
     END DO
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)
@@ -3808,7 +3810,7 @@ CONTAINS
     END DO
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)
@@ -5003,9 +5005,9 @@ CONTAINS
     iIOUN = kBloatNLTEOut
 
     rThermalRefl=1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
     dThermalRefl=1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) dThermalRefl = 1.0d0 !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) dThermalRefl = 1.0d0 !! nick nalli
           
     raFreqBloat = sngl(daFreqBloat)
 

@@ -5,9 +5,17 @@ from n_misc.f90
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 so for example Nick Nalli says refl therm needs to be done at satzen
-see eg KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/template_Qrad0_NalliEmiss.nml
+see eg KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/template_Qrad0_NalliEmiss.nm
+lthese settings will use rth = (1-e)/pi rdownwell where rdownwell is computes at p.satzen
   kThermalAngle = p.satzen(ii)
   iaaOverride(2,4) = +2
+
+these settings will use rth = (1-e) rdownwell where rdownwell is computed at p.satzen
+  kThermalAngle = p.satzen(ii)
+  kThermalAngle = p.satzen(ii)  .. this is done automatically in n_rtp.f90
+                                   if following two are set
+  iaaOverride(2,4) = +2
+  iaaOverride(2,3) = 10
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -182,13 +190,14 @@ look at ../TEST/REFL_BACKGND_THERMAL/template_iaaOverride_backthermal.nml
  iaaOverride(2,6) = -2
 
  !! iDoThermal = -1 : no background thermal
- !!            =  0 : backgndthermal with diffusive approx <DEFAULT> .. further control with iaaOverrideDefault(2,4)
- !!            = +1 : backgndthermal with integration over angles    .. further control with iaaOverrideDefault(2,5)
- !!            = +2 : backgndthermal with integration over angles, linear-in-tau temperature variation
+ !!            =  0  : backgndthermal with diffusive approx <DEFAULT> 1/pi .. further control with iaaOverrideDefault(2,4)
+ !!            = +10 : backgndthermal with diffusive approx <DEFAULT> 1/1  .. further control with iaaOverrideDefault(2,4)
+ !!            = +1 : backgndthermal with integration over angles     1/pi .. further control with iaaOverrideDefault(2,5)
+ !!            = +2 : backgndthermal with integration over angles,    1/pi .. linear-in-tau temperature variation
  iaaOverride(2,3) = AB
 
  !! iSetThermalAngle = -1 acos(3/5) at upper layers, accurate angle lower down, const layer T  <DEFAULT>
- !!                  = +1 acos(3/5) at all layers
+ !!                  = +1 acos(x) at all layers, where x is user set in kThermalAngle or rakThermalAngle
  !!                  = -2 acos(3/5) at upper layers, accurate angle lower down, linear-in-tau layer T
  iaaOverride(2,4) = CD
 

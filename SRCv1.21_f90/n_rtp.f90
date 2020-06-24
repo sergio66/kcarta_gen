@@ -2328,7 +2328,21 @@ CONTAINS
     IF (iaaOverrideDefault(2,4) == 1) THEN
       kThermalAngle = abs(kThermalAngle)
     END IF
-          
+
+    IF ((iaaOverrideDefault(2,4) == 1) .AND. (iaaOverrideDefault(2,3) == 10)) THEN
+      kThermalAngle = abs(kThermalAngle)
+      kThermalAngle = abs(prof%satzen)
+      raKThermalAngle(iC) = abs(prof%satzen)
+      kSetThermalAngle = +1     !use acos(3/5)
+      kThermal = +1             !use accurate angles lower down in atm, constant in tau temp variation, 3 angle calc
+      kThermal = +2             !use accurate angles lower down in atm, linear   in tau temp variation, 3 angle calc
+      iaKThermal(iC) = kThermal
+      write(kStdWarn,*) 'setting kThermalAngle = p.satzen = ',kThermalAngle
+      write(kStdWarn,*) '  as we are doing Nick Nalli ocean approx for refl them'
+      write(kStdErr,*)  'setting kThermalAngle = p.satzen = ',kThermalAngle
+      write(kStdErr,*)  '  as we are doing Nick Nalli ocean approx for refl them'
+    END IF
+
     IF ((abs(raKThermalAngle(iC) - +1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
       write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
       write(kStdWarn,'(A90)') '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox in n_rtp   '
@@ -2344,8 +2358,9 @@ CONTAINS
       write(kStdErr,'(A90)')  '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox in n_rtp   '
       raKThermalAngle(iC) = +53.13
       raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)
-      kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
-      kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+      kThermal = +2              ! use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+      kSetThermalAngle = +2      ! use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+      iaKThermal(iC) = kThermal  ! this is new June 20, 2020
     END IF
 
     iakThermalJacob(iC) = 1
@@ -2377,6 +2392,7 @@ CONTAINS
 
     FMT = '(A,4(I3,1X),F8.3)'
     write(kStdWarn,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
+!    write(kStdErr,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',kFlux,kTemperVary!,kThermal,kSetThermalAngle,kThermalAngle
 
     IF (iDirection > 0) THEN
       ! check things make sense for downlook in

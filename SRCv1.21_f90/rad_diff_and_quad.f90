@@ -79,8 +79,8 @@ CONTAINS
     IF (iDoThermal /= iaaOverrideDefault(2,3)) THEN
       IF (kOuterLoop == 1)  THEN
         FMT = '(A,I3,I3)'
-        write(kStdErr,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
-        write(kStdWarn,FMT) 'in SUBR BackGndThermal, iDoThermal, iaaOverrideDefault(2,3) = ',iDoThermal,iaaOverrideDefault(2,3)
+        write(kStdErr,FMT) 'in SUBR BackGndThermal, reset iDoThermal<-iaaOverrideDefault(2,3)',iDoThermal,iaaOverrideDefault(2,3)
+        write(kStdWarn,FMT) 'in SUBR BackGndThermal,reset iDoThermal<-iaaOverrideDefault(2,3)',iDoThermal,iaaOverrideDefault(2,3)
 	write(kStdErr,*) ' '	
 	write(kStdWarn,*) ' '	
         END IF
@@ -947,13 +947,22 @@ CONTAINS
     iDefault = -1
     iDiffmethod = kSetThermalAngle
     IF (kSetThermalAngle /= iaaOverrideDefault(2,4)) THEN
-      write(kStdErr,*) 'OOPS kSetThermalAngle,iaaOverrideDefault(2,4) = ',kSetThermalAngle,iaaOverrideDefault(2,4)
-      write(kStdErr,*) 'in sub DoDiffusivityApprox, probably mis-set in radnce4rtp'
-      CALL DoStop
+      IF (iaaOverrideDefault(2,4) /= 3) THEN
+        write(kStdErr,*) 'OOPS kSetThermalAngle,iaaOverrideDefault(2,4) = ',kSetThermalAngle,iaaOverrideDefault(2,4)
+        write(kStdErr,*) 'in sub DoDiffusivityApprox, probably mis-set in n_rtp'
+        CALL DoStop
+      ELSEIF (iaaOverrideDefault(2,4) == 3) THEN
+        write(kStdWarn,*) 'OOPS kSetThermalAngle,iaaOverrideDefault(2,4) = ',kSetThermalAngle,iaaOverrideDefault(2,4)
+        write(kStdWarn,*) 'in sub DoDiffusivityApprox, going to do refltherm = (1-e)rdown instead of (1-e)/pi*rdown'
+        IF (kOuterLoop == 1) THEN
+          write(kStdErr,*)  'in sub DoDiffusivityApprox, going to do refltherm = (1-e)rdown instead of (1-e)/pi*rdown'
+        END IF
+      END IF
     END IF
+
     iDiffMethod = iaaOverrideDefault(2,4)
-    IF ((abs(iDiffmethod) /= 1) .AND. abs(iDiffmethod) /= 2) THEN
-      write(kStdErr,*) 'need iDefault = -2,-1,+1,+2 in DoDiffusivityApprox, not ',iDiffMethod
+    IF ((abs(iDiffmethod) /= 1) .AND. abs(iDiffmethod) /= 2 .AND. iDiffMethod /= 3) THEN
+      write(kStdErr,*) 'need iDefault = -2,-1,+1,+2,+3 in DoDiffusivityApprox, not ',iDiffMethod
       CALL DoStop
     END IF
     IF ((iDiffMethod /= iDefault)  .AND. (kOuterLoop == 1)) THEN
@@ -1285,7 +1294,7 @@ CONTAINS
     write(kStdWarn,*) '  '
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
           
     raaUpFlux = 0.0
     raaDownFlux = 0.0

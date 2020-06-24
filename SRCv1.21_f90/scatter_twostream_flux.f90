@@ -366,7 +366,7 @@
     write(kStdWarn,*) '  '
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
 
     iGaussPts = 10
     IF (iGaussPts > kGauss) THEN
@@ -878,7 +878,7 @@
     iRepeat = 0
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
 
 ! calculate cos(SatAngle)
     rCos=cos(rSatAngle*kPi/180.0)
@@ -1496,7 +1496,7 @@
     iVary = kTemperVary
 
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,4) == 3) rThermalRefl = 1.0   !! nick nalli
+    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
                  
 ! calculate cos(SatAngle)
     rCos=cos(rSatAngle*kPi/180.0)
