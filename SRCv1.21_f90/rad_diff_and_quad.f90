@@ -98,7 +98,7 @@ CONTAINS
   	  write(kStdErr,*) ' '	  	  
 	  write(kStdWarn,*) ' '	  	  
         END IF
-        IF (iDoThermal == 0 ) THEN
+        IF ((iDoThermal == 0) .OR. (iDoThermal == 10)) THEN
           FMT = '(A,I3,A)'
           write(kStdErr,FMT)  '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
           write(kStdWarn,FMT) '  use fast diffusivity angle = ',kSetThermalAngle,' for backgnd therm'
@@ -120,9 +120,16 @@ CONTAINS
         END IF
       END IF
     END IF
-          
+      
 ! now do the radiative transfer!!!
-    IF ((kSetThermalAngle == 2) .OR. (iDothermal == 2)) THEN
+    IF ((kSetThermalAngle == 2) .AND. (iDothermal > 0)) THEN
+      write(kStdWarn,'(A)') 'doing background thermal using LINEAR-in-tau slow/accurate integration over zenith angles'
+      write(kStdWarn,'(A)') '  this is the LBLRTM 3angle style'
+      CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq, &
+        raPressLevels,raTPressLevels, &
+        raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop, &
+        rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
+    ELSEIF (iDothermal == 2) THEN
       write(kStdWarn,'(A)') 'doing background thermal using LINEAR-in-tau slow/accurate integration over zenith angles'
       write(kStdWarn,'(A)') '  this is the LBLRTM 3angle style'
       CALL IntegrateOverAngles_LinearInTau(raThermal,raVT1,rTSpace,raFreq, &
@@ -134,7 +141,7 @@ CONTAINS
       CALL IntegrateOverAngles(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop, &
         rFracBot,iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
-    ELSE IF (iDoThermal == 0) THEN
+    ELSE IF ((iDoThermal == 0) .OR. (iDoThermal == 10)) THEN
       write(kStdWarn,'(A,I2)') 'doing background thermal using diffusivity approx : kSetThermalAngle = ',kSetThermalAngle
       CALL DoDiffusivityApprox(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
