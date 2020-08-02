@@ -300,8 +300,8 @@ c !!! q = 500_605 cm-1, at 0.0015 cm-1 spacing (= 15 cm-1 chunk span)
 !      PARAMETER (kCKDPathq   = '^/H2012.ieee-le/FIR500_605/etc.ieee-le/')
 c !!! q = 500_605 cm-1, at 0.0015 cm-1 spacing (= 15 cm-1 chunk span)
       CHARACTER*80 kWaterPathq,kCompPathq,kCKDPathq
-      PARAMETER (kWaterPathq = '/asl/data/kcarta/H2016.ieee-le/FIR500_805/hdo.ieee-le/')
-      PARAMETER (kCompPathq  = '/asl/data/kcarta/H2016.ieee-le/FIR500_805/etc.ieee-le/')
+      PARAMETER (kWaterPathq = '#/H2016.ieee-le/FIR500_805/hdo.ieee-le/')
+      PARAMETER (kCompPathq  = '#/H2016.ieee-le/FIR500_805/etc.ieee-le/')
       PARAMETER (kCKDPathq   = '^/KCDATA/General/CKDieee_le/')
 
 c !!! s = 2830-3380 cm-1, at 0.0025 cm-1 spacing (= 25 cm-1 chunk span)

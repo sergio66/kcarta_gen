@@ -515,8 +515,10 @@ clean:
 ### new res : 500-805 cm-1 at 0.0005 cm-1, 805-2830 cm-1 at 0.0025 cm-1
 
 # executables live in ../BIN; note you need to set the DISTDIR
-DISTDIR    = /asl/data/kcarta
-DISTDIRGEN = /asl/data/kcarta_sergio
+#DISTDIR    = /asl/data/kcarta
+#DISTDIRGEN = /asl/data/kcarta_sergio
+DISTDIR    = /asl/rta/kcarta
+DISTDIRGEN = /asl/rta/kcarta_sergio
 
 datafix400_v121_H2016:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2016.param > \

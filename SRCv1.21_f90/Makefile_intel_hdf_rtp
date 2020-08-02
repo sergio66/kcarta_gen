@@ -27,6 +27,7 @@ HDFLIB1   = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz       ## -lmfhdf
 
 # more libs
 HDF_INSTALL2 = /usr/cluster/contrib/szip2/szip2.1
+HDF_INSTALL2 = /usr/ebuild/software/Szip/2.1.1-GCCcore-6.4.0
 HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
 
 HDFLIB = $(HDFLIB1) $(HDFLIB2)
