@@ -3666,6 +3666,7 @@ CONTAINS
       raHeight(j) = prof.palts(i)                     !!!! in meters
       raPressLevels(j) = prof.plevs(i)                !!!! in mb
       raJunk(j)  = prof.ptemp(j)                      !!!! junk T
+      raJunk(j)  = prof.ptemp(i)                      !!!! junk T
       write(kStdWarn,'(A,I3,A,I3,1X,I3,A,3(F12.5,1X))') 'iDownward = ',iDownward,' i,j = ',i,j,' hgt p T = ', &
          raHeight(j),raPressLevels(j),raJunk(j)
     END DO

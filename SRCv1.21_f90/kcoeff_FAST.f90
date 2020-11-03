@@ -316,7 +316,7 @@ CONTAINS
         rX2 = raT12(iL)
         rX3 = raQ12(iL)
       END IF
-      write(kStdWarn,100) iL,rP,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
+      write(kStdWarn,100) iL,rP*1013.25,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
     END DO
 
     iL = (kProfLayer-iLowest+1)

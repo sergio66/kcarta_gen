@@ -1,8 +1,17 @@
-function [rad,jac,w] = readkcPCLSAM_coljac(radfile,jacfile);
+function [rad,jac,w] = readkcPCLSAM_coljac(radfile,jacfile,kLongOrShort);
 
 addpath /home/sergio/KCARTA/MATLAB
 
-[rad,w]  = readkcstd(radfile);
+if nargin == 2
+  kLongOrShort = 0;
+end
+
+if kLongOrShort == 0
+  [rad,w]  = readkcstd(radfile);
+else
+  [rad,w]  = readkcBasic(radfile);
+end
+
 [xjac,w] = readkcBasic(jacfile);
 
 [mm, nn]  = size(rad);  %% assuming TOA output, this will give number of subpxels+1

@@ -1270,7 +1270,8 @@ CONTAINS
     rW = 0.0
     rW = sum(raaMix(50,1:iNumGases))
 
-    IF (rW <= 0.00001) THEN
+!    IF (rW <= 1.0e-5) THEN
+    IF (rW < 1.0e-8) THEN
       write(kStdErr,*) 'arbitrarily tested LAYER 50, mixed path weights = 0 .. perhaps you have nm_weight wrong???'
       write(kStdErr,*) 'eg caaMixFileLines(1) = 1   -1    0.0    -1   is NOT propoer input!!!'
       CALL DoStop
@@ -1293,7 +1294,8 @@ CONTAINS
           rW = rW+raaMix(iI,iJ)
         END DO
         rT = rT/rW
-        IF (rW <= 0.00001) THEN
+!       IF (rW <= 1.0e-5) THEN
+        IF (rW < 1.0e-8) THEN
           iBad = iBad + 1
           write(kStdErr,*) 'hmm, mixed path weight = 0 in GetMixVertTemp for layer ',iI
         END IF
