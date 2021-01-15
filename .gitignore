@@ -6,6 +6,8 @@
 # File types can be added back in subdirectory .gitignore files as
 # needed
 
+# to see why things are ignored do eg    git check-ignore -v WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/*.m
+
 # data & misc
 *.h5
 *.dat
@@ -62,10 +64,10 @@ SCRIPTS_TARO
 SCATTERCODE
 TEST
 TMPBIN 
-WORK
 WORKS_*
 NONLTE
 NONLTE2
+WORK
 
 # symlinks
 NLTE_CONV
@@ -95,3 +97,4 @@ F77toF90/
 IP_PROFILES/
 LIB/libblas.a.ifort_threadsmaybe
 
+########################################################################
