@@ -4,23 +4,24 @@
 # the tarfile created by "make dist", and KFTP is the machine and
 # path to the FTP archive.
 
-KTAR     = /asl/ftp/pub/packages/kcarta121.tar
-KTARBUG  = /asl/ftp/pub/packages/kcarta_bugfix121.tar
-KTARBUGGIVEOUT  = /asl/ftp/pub/packages/kcarta_bugfix_giveout121.tar
-KGIVEOUT = /asl/ftp/pub/packages/kcartagiveout121.tar
-KDATA    = /asl/ftp/pub/packages/kcartaDATA.tar
-KMATLAB  = /asl/ftp/pub/packages/kcartaMATLAB.tar
-KFTP     = /asl/ftp/pub/packages/kcarta
+KTAR           = /asl/packages/kcarta121.tar
+KTARBUG        = /asl/packages/kcarta_bugfix121.tar
+KTARBUGGIVEOUT = /asl/packages/kcarta_bugfix_giveout121.tar
+KGIVEOUT       = /asl/packages/kcartagiveout121.tar
+KDATA          = /asl/packages/kcartaDATA.tar
+KMATLAB        = /asl/packages/kcartaMATLAB.tar
+KCWRAP         = /asl/packages/kcwrap.tar
+KFTP           = /asl/packages/kcarta
+KTARAUX        = /asl/packages/kcarta/kcarta_aux.tar 
 
-KTAR     = /asl/packages/kcarta121.tar
-KTARBUG  = /asl/packages/kcarta_bugfix121.tar
-KTARBUGGIVEOUT  = /asl/packages/kcarta_bugfix_giveout121.tar
-KGIVEOUT = /asl/packages/kcartagiveout121.tar
-KDATA    = /asl/packages/kcartaDATA.tar
-KMATLAB  = /asl/packages/kcartaMATLAB.tar
-KCWRAP   = /asl/packages/kcwrap.tar
-KFTP     = /asl/packages/kcarta
-KTARAUX  = /asl/packages/kcarta/kcarta_aux.tar 
+KTAR             = /asl/ftp/pub/packages/kcarta121.tar
+KTARBUG          = /asl/ftp/pub/packages/kcarta_bugfix121.tar
+KTARBUGGIVEOUT   = /asl/ftp/pub/packages/kcarta_bugfix_giveout121.tar
+KGIVEOUT         = /asl/ftp/pub/packages/kcartagiveout121.tar
+KDATA            = /asl/ftp/pub/packages/kcartaDATA.tar
+KCOMPDATA_H2016  = /asl/ftp/pub/packages/water_hdo_etc_H2016_IR_v1.ieee-le.tar
+KMATLAB          = /asl/ftp/pub/packages/kcartaMATLAB.tar
+KFTP             = /asl/ftp/pub/packages/kcarta
 
 PARAMS     = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data_f90 Makefile_intel_hdf_rtp
 
@@ -739,6 +740,9 @@ data:
 	tar -cf $(KDATA)			\
 		/asl/data/kcarta/KCARTADATA;	\
 	chmod 664 $(KDATA)
+
+kcompdata:
+	./tarrer_kcompdata.sc
 
 ##############################
 ### (C) this is the very useful wrapper that Howard Motteler wrote
