@@ -1,21 +1,42 @@
 #!/bin/bash
 KCOMPDATA_H2016='/asl/ftp/pub/packages/water_hdo_etc_H2016_IR_v1.ieee-le.tar'
+KCOMPDATA_LBLRTM12p8='/asl/ftp/pub/packages/co2_ch4_lblrtm12p8.tar'
 
 touch $KCOMPDATA_H2016
-
 #rm ${KCOMPDATA_H2016} 2> /dev/null || true;	\
-echo "tar -cf ${KCOMPDATA_H2016}			\
+echo "tar -cvf ${KCOMPDATA_H2016}			\
   /asl/rta/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/*.dat	   \
   /asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/*.dat    \
   /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*.dat   \
-  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*32.bin \ 
-  /asl/rta/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/*.dat    \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*32.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*25.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin" 
+tar -cf ${KCOMPDATA_H2016}			\
+  /asl/rta/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/*.dat	   \
+  /asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/*.dat    \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*.dat   \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CT-N2*  \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*32.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*25.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin 
+
+touch $KCOMPDATA_LBLRTM12p8
+#rm ${KCOMPDATA_LBLRTM12p8} 2> /dev/null || true;	\
+echo "tar -cvf ${KCOMPDATA_LBLRTM12p8}			\
   /asl/rta/kcarta_sergio/KCDATA/General/ChiFile            \
   /asl/rta/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv400.ieee-le        \
   /asl/rta/kcarta_sergio/KCDATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat      \
   /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv \
   /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/*g6.dat"
-#chmod 664 ${KCOMPDATA_H2016}
+tar -cf ${KCOMPDATA_LBLRTM12p8}			\
+  /asl/rta/kcarta_sergio/KCDATA/General/ChiFile            \
+  /asl/rta/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv400.ieee-le        \
+  /asl/rta/kcarta_sergio/KCDATA/NLTE/SARTA_COEFS/nonLTE7_m150.le.dat      \
+  /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv \
+  /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/*g6.dat
+#chmod 664 ${KCOMPDATA_LBLRTM12p8}
 
 # just use MT CKD3.2 its the latest, and no need for the compressed CKD files ....
 #  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*25.bin \ 
