@@ -262,6 +262,9 @@ CONTAINS
                                     !!!   so the file can be 5 times larger than needed (ice/water/both/clear/total) HUGE! SAD!
 
 ! RadTrans
+! see n_main.f90
+!    kTemperVary  = -1          !assume const-in-tau temperature variation  till Oct 2019
+!    kTemperVary  = +43         !assume linear-in-tau temperature variation after Oct 2019
     iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
     iaaOverrideDefault(2,2) = +3    !!! THIS IS LBLRTM STYLE iGaussPts = 3 for flux and downwell gauss quad
 !!!   see SUBR IntegrateOverAngles_LinearInTau in rad_quad.f
