@@ -234,11 +234,13 @@ CONTAINS
 
 ! 2016
 ! allow nm_params to define defaults
-!   GENERAL iaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi  iMatlabORf77   iWhichScatterCode iMethod
-!   RT      iaDefaults(2,:) = iGaussPts iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
-!   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
+!   GENERAL      iaaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi  iMatlabORf77   iWhichScatterCode iMethod
+!   RT/BackTherm iaaDefaults(2,:) = iGaussPts iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
+!   Misc         iaaDefaults(3,:) = mix table --> klayers, dump debug info to text etc
+! not done
+!   NLTE         iaaDefaults(4,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
 !                             iLinearOrSpline iDoCO2Continuum iMethod
-!   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
+!   TAPE5/6     iaaDefaults(4,:) = iReplaceZeroProf iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
 !      INTEGER iaaOverrideDefault(4,10)
 !      COMMON/comBlockDefault/iaaOverrideDefault
     iaaOverrideDefault = -9999
@@ -328,6 +330,8 @@ CONTAINS
     iaaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration
     iaaOverrideDefault(3,2) = +1    !!! iReplaceZeroProf = +1 to add in profiles TAPE5 does not have
     iaaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
+    iaaOverrideDefault(3,4) = -1    !!! dump out surface terms (downwell therm, emiss, rho)
+
 !!!   in n_pth_mix.f
 
     RETURN

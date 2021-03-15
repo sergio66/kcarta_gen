@@ -292,12 +292,15 @@ c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 aft
 c 2016
 c allow nm_params to define defaults
 c see SUBR SetDefaultParams in kcartamisc.f
-c   GENERAL iaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi iMatlabORf77   iWhichScatterCode iMethod
-c   RT      iaDefaults(2,:) = iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
-c   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
+c   GENERAL      iaaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi iMatlabORf77   iWhichScatterCode iMethod
+c   RT/BackTherm iaaDefaults(2,:) = iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
+c   Misc         iaaDefaults(3,:) = mix table --> klayers,  dump debug info to text etc
+c
+c not done!!!!!!
+c   NLTE         iaaDefaults(4,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
 c                             iLinearOrSpline iDoCO2Continuum iMethod
-cxx not done  COLUMN JACS iaDefaults(4,:) = iColJac iLogOrLinear
-cxx not done  TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iCONTN iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
+cxx not done  COLUMN JACS iaaDefaults(4,:) = iColJac iLogOrLinear
+cxx not done  TAPE5/6     iaaDefaults(4,:) = iReplaceZeroProf iCONTN iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
 c   caaOverrideDefault : can have a secreret text file floating around
       INTEGER iaaOverrideDefault(4,10)
       CHARACTER*80 caaTextOverrideDefault

@@ -605,6 +605,13 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
+3/15/21         iaaOverrideDefault(3,4) = -1 default
+                iaaOverrideDefault(3,4) = +1 allows rad_main debug surface radiation printout to StdErr
+    if (iaaOverrideDefault(3,4) == +1) then
+      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 5',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+                          raSurface(1),raThermal(1),raSun(1),raInten(1)
+    end if
+
 6/23/20         Added in options for refected thermal from ocean surface ala Nick Nalli
                   rth = (1-e) rdownwell where rdownwell is computed at p.satzen
                   kThermalAngle = p.satzen(ii)  .. this is done automatically in n_rtp.f90
