@@ -167,7 +167,7 @@
 ! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
 ! rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
-    CHARACTER(80) :: caaAltComprDirs(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs(kGasStore)
     REAL ::          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! this is for nonLTE

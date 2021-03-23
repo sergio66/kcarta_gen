@@ -164,7 +164,7 @@
 ! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
 !                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
-    CHARACTER(80) :: caaAltComprDirs(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs(kGasStore)
     REAL ::          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! this is for nonLTE

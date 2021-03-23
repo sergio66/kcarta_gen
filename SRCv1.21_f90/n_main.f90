@@ -261,8 +261,8 @@ CONTAINS
     REAL :: raAltComprDirsScale(kGasStore),raAltComprDirsScale1(kGasStore)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     INTEGER :: iaAltComprDirs1(kGasStore),iNumAltComprDirs1
-    CHARACTER(80) :: caaAltComprDirs(kGasStore)
-    CHARACTER(80) :: caaAltComprDirs1(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs1(kGasStore)
     REAL :: rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
 
 ! this is for nm_NONLTE
@@ -844,8 +844,8 @@ CONTAINS
     REAL :: raAltComprDirsScale(kGasStore),raAltComprDirsScale1(kGasStore)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     INTEGER :: iaAltComprDirs1(kGasStore),iNumAltComprDirs1
-    CHARACTER(80) :: caaAltComprDirs(kGasStore)
-    CHARACTER(80) :: caaAltComprDirs1(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs1(kGasStore)
     REAL :: rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
 
 ! define the namelists!!!!!!!!
@@ -1196,7 +1196,7 @@ CONTAINS
 ! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
 !                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
-    CHARACTER(80) :: caaAltComprDirs(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs(kGasStore)
     REAL ::          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! this is for nonLTE

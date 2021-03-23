@@ -62,7 +62,7 @@ CONTAINS
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
     CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
-    CHARACTER(80) :: caaAltComprDirs(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs(kGasStore)
     INTEGER :: iGas,iaGases(kMaxGas)
     INTEGER :: iProfileLayers,iVertTempSet,iError,iDoDQ
     INTEGER :: iSplineType,iL_low,iL_high,iTag,iActualTag
@@ -389,7 +389,7 @@ CONTAINS
     raQ21(kProfLayer),raQ22(kProfLayer)
 ! the alt database
     INTEGER :: iNewIN,iNumAltComprDirs,iaAltComprDirs(kGasStore)
-    CHARACTER(80) :: caaAltComprDirs(kGasStore)
+    CHARACTER(120) :: caaAltComprDirs(kGasStore)
     REAL :: rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! local variables

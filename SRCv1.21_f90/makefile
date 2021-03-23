@@ -29,7 +29,7 @@ $(info   )
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_385ppmv_H16
 
 400_H12p8_highres605_1205:
-	make -f Makefile_v121_Intelf90 datafix400_v121_H2016_highres_orig605_805res
+	make -f Makefile_v121_Intelf90 datafix400_v121_H2016_highres
 	cp_param_files_to_f90HIGHRES.sc
 	echo "CO2 is from LBLRTM12.8"
 	read -p "Press [Enter] key to continue ..."
@@ -41,7 +41,7 @@ $(info   )
 	mv ../BIN/kcarta.x90 ../BIN/kcarta.x_highres605_1205_12p8	
 
 400_H12p8_veryhighres605_1205:
-	make -f Makefile_v121_Intelf90 datafix400_v121_H2016_veryhighres_orig605_805res
+	make -f Makefile_v121_Intelf90 datafix400_v121_H2016_veryhighres
 	cp_param_files_to_f90VERYHIGHRES.sc
 	echo "CO2 is from LBLRTM12.8"
 	read -p "Press [Enter] key to continue ..."
