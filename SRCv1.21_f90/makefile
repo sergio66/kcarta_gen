@@ -56,6 +56,16 @@ $(info   )
 ## these uses ../INCLUDE/pre_defined_orig605_805res.param which is
 ##   500-605 cm-1 at 0.0015 cm-1 res, 605-2830 cm-1 at 0.0025 cm-1
 400_H16_default_f90_orig605_805res:
+	make -f Makefile_v121_Intelf90 datafix400_v121origres_H2016
+	cp_param_files_to_f90_v120.sc
+	make -f Makefile_v121_Intelf90 basic
+	make -f Makefile_v121_Intelf90 basicTXT	
+	make -f Makefile_v121_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H16_orig605_805res
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H16_orig605_805res
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H16_orig605_805res
+
+400_H16_default_f90_orig605_805res_v120:
 	make -f Makefile_v121_Intelf90 datafix400_v120origres_H2016
 	cp_param_files_to_f90_v120.sc
 	make -f Makefile_v121_Intelf90 basic

@@ -307,21 +307,21 @@ c !!! note we link to hdo.ieee-le instead of h2o_ALLISO.ieee-le
 
 c !!! m = 3550-5550 cm-1, at 0.01 cm-1 spacing (= 100 cm-1 chunk span)
       CHARACTER*80 kWaterPathm,kCompPathm,kCKDPathm
-      PARAMETER (kWaterPathm = '^/H2012.ieee-le/OTHERBANDS/NIR3550_5550/h2o.ieee-le/')
-      PARAMETER (kCompPathm  = '^/H2012.ieee-le/OTHERBANDS/NIR3550_5550/etc.ieee-le/')
-      PARAMETER (kCKDPathm   = '^/H2012.ieee-le/OTHERBANDS/NIR3550_5550/etc.ieee-le/')
+      PARAMETER (kWaterPathm = '^/H2012.ieee-le/NIR3550_5580/h2o.ieee-le/')
+      PARAMETER (kCompPathm  = '^/H2012.ieee-le/NIR3550_5580/etc.ieee-le/')
+      PARAMETER (kCKDPathm   = '^/H2012.ieee-le/NIR3550_5580/etc.ieee-le/')
 
 c !!! n = 5550-8350 cm-1, at 0.015 cm-1 spacing (= 150 cm-1 chunk span)
       CHARACTER*80 kWaterPathn,kCompPathn,kCKDPathn
-      PARAMETER (kWaterPathn = '^/H2012.ieee-le/OTHERBANDS/NIR5550_8200/h2o.ieee-le/')
-      PARAMETER (kCompPathn  = '^/H2012.ieee-le/OTHERBANDS/NIR5550_8200/etc.ieee-le/')
-      PARAMETER (kCKDPathn   = '^/H2012.ieee-le/OTHERBANDS/NIR5550_8200/etc.ieee-le/')
+      PARAMETER (kWaterPathn = '^/H2012.ieee-le/NIR5550_8200/h2o.ieee-le/')
+      PARAMETER (kCompPathn  = '^/H2012.ieee-le/NIR5550_8200/etc.ieee-le/')
+      PARAMETER (kCKDPathn   = '^/H2012.ieee-le/NIR5550_8200/etc.ieee-le/')
 
 c !!! o = 8250-12250 cm-1, at 0.025 cm-1 spacing (= 250 cm-1 chunk span)
       CHARACTER*80 kWaterPatho,kCompPatho,kCKDPatho
-      PARAMETER (kWaterPatho = '^/H2012.ieee-le/OTHERBANDS/NIR8250_12250/h2o.ieee-le/')
-      PARAMETER (kCompPatho  = '^/H2012.ieee-le/OTHERBANDS/NIR8250_12250/etc.ieee-le/')
-      PARAMETER (kCKDPatho   = '^/H2012.ieee-le/OTHERBANDS/NIR8250_12250/etc.ieee-le/')
+      PARAMETER (kWaterPatho = '^/H2012.ieee-le/NIR8250_12250/h2o.ieee-le/')
+      PARAMETER (kCompPatho  = '^/H2012.ieee-le/NIR8250_12250/etc.ieee-le/')
+      PARAMETER (kCKDPatho   = '^/H2012.ieee-le/NIR8250_12250/etc.ieee-le/')
 
 c !!! v = 12000-25000 cm-1, at 0.0500 cm-1 spacing (= 500 cm-1 chunk span)
       CHARACTER*80 kWaterPathv,kCompPathv,kCKDPathv
