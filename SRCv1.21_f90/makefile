@@ -71,9 +71,9 @@ $(info   )
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
 	make -f Makefile_v121_Intelf90 scat
-	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_121_400ppmv_H16_orig605_805res
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_121_400ppmv_H16_orig605_805res
-	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_121_400ppmv_H16_orig605_805res
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_120_400ppmv_H16_orig605_805res
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_120_400ppmv_H16_orig605_805res
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_120_400ppmv_H16_orig605_805res
 
 400_H12_default_f90_orig605_805res:
 	make -f Makefile_v121_Intelf90 datafix400_v120origres_H2012

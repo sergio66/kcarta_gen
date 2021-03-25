@@ -1668,11 +1668,6 @@ CONTAINS
     write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1), &
     raSunRefl(1)
 
-    if (iaaOverrideDefault(3,4) == +1) then
-      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 2',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
-                          raSurface(1),raThermal(1),raSun(1),raInten(1)
-    end if
-
     IF (iSpecular > 0) THEN
       write(kStdErr,*) 'doing specular refl in rad_trans_SAT_LOOK_DOWN'
       CALL loadspecular(raFreq,raSpecularRefl)
@@ -1681,10 +1676,13 @@ CONTAINS
             raThermal*(1.0-raUseEmissivity)*rThermalRefl + &
             raSun*(raSpecularRefl + raSunRefl)
     ELSE
-      raInten = raSurface*raUseEmissivity + &
-            raThermal*(1.0-raUseEmissivity)*rThermalRefl + &
-            raSun*raSunRefl
+      raInten = raSurface*raUseEmissivity + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
     END IF
+
+    if (iaaOverrideDefault(3,4) == +1) then
+      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 2',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+                          raSurface(1),raThermal(1),raSun(1),raInten(1)
+    end if
 
     r0 = raInten(1)
 ! now we can compute the upwelling radiation!!!!!
@@ -2869,14 +2867,15 @@ CONTAINS
           
 !    if (abs(raFreq(1)-905) < 0.1) print *,'nana',iDoThermal,raFreq(1),raThermal(1),raUseEmissivity(1),rThermalRefl
 
+!    raInten = raInten*raUseEmissivity + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
+!    have set raInten = raSurface a few lines above so this is the same as
+    raInten = raSurface*raUseEmissivity + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
+    rJunk = raInten(1)
+
     if (iaaOverrideDefault(3,4) == +1) then
       write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 3',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
-
-    raInten = raInten*raUseEmissivity+&
-        raThermal*(1.0-raUseEmissivity)*rThermalRefl+raSun*raSunRefl
-    rJunk = raInten(1)
 
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
@@ -3461,16 +3460,19 @@ CONTAINS
       GOTO 999
     END IF
 
+! turn off surface term
+!    write(kStdWarn,*) 'only doing atmospheric emission (linear-in-tau layer T), no surface term'
+!    raInten = raInten*raUseEmissivity*0.0 + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
+!    have set raInten = raSurface a few lines above so this is the same as
+!    raInten = raSurface*raUseEmissivity*0.0 + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
+! keep surface
+    raInten = raSurface*raUseEmissivity + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
+    rJunk = raInten(1)
+
     if (iaaOverrideDefault(3,4) == +1) then
       write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 4',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
-
-    write(kStdWarn,*) 'only doing atmospheric emission (linear-in-tau layer T), no surface term'
-!! turn off solar term
-    raInten = raInten*raUseEmissivity*0.0 + &
-        raThermal*(1.0-raUseEmissivity)*rThermalRefl+raSun*raSunRefl
-    rJunk = raInten(1)
 
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
@@ -3988,14 +3990,15 @@ CONTAINS
 
     write (kStdWarn,*) 'Freq,Emiss,Reflect = ',raFreq(1),raUseEmissivity(1),raSunRefl(1)
           
+!    raInten = raInten*raUseEmissivity + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
+!    have set raInten = raSurface a few lines above so this is the same as
+    raInten = raSurface*raUseEmissivity + raThermal*(1.0-raUseEmissivity)*rThermalRefl + raSun*raSunRefl
+    rJunk = raInten(1)
+
     if (iaaOverrideDefault(3,4) == +1) then
       write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 5',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
-
-    raInten = raInten*raUseEmissivity+ &
-        raThermal*(1.0-raUseEmissivity)*rThermalRefl+raSun*raSunRefl
-    rJunk = raInten(1)
           
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping

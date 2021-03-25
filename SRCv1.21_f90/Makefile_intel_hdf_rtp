@@ -51,7 +51,8 @@ HDFLIB = $(HDFLIB1) $(HDFLIB2)
 ### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
 #
 ### rtpV201 on compiled with ifort
-RTPHOME = /home/sergio/maya_home/git/rtp/rtpV201
+#RTPHOME = /home/sergio/maya_home/git/rtp/rtpV201
+RTPHOME = /home/sergio/OTHERSTUFF/git/rtp/rtpV201
 RTPLIB = -L$(RTPHOME)/lib -lrtp90
 #
 
