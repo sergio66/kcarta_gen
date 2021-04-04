@@ -521,6 +521,7 @@ clean:
 DISTDIR    = /asl/rta/kcarta
 DISTDIRGEN = /asl/rta/kcarta_sergio
 
+###      $(warning "datafix400_v121_H2016 looks similar to datafix400_v121origres_H2016")
 datafix400_v121_H2016:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v121.param; \
@@ -565,6 +566,7 @@ datafix400_v121_H2016_veryhighres:
 
 #########################################################################
 ### orig res : 500-605 cm-1 at 0.0015 cm-1, 605-2830 cm-1 at 0.0025 cm-1
+###      $(warning "datafix400_v121_H2016 looks similar to datafix400_v121origres_H2016")
 datafix400_v121origres_H2016:
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV121_400_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v121.param; \

@@ -1099,9 +1099,9 @@ CONTAINS
     caFName = caaNLTETemp(iLTEIn)
 
     CALL ReadGENLN2_NLTE_Profile(caFName,daJL,daJU,iaJ_UorL,iStrongGasID,iStrongISO,+1, &
-      iNumVibLevels,raTPress1,raTTemp1,raQtips1,raNLTEtemp1,dVibCenter)
+                                 iNumVibLevels,raTPress1,raTTemp1,raQtips1,raNLTEtemp1,dVibCenter)
 
-    write(kStdWarn,*) 'iGASID,ISO,iLSGQ,iUSGQ,vibcntr = ',iStrongGasID,iStrongISO,iStrongJL,iStrongJU,dVibCenter
+    write(kStdWarn,'(A,A,I4,I4,I4,I4,F12.5)') 'caFname,iGASID,ISO,iLSGQ,iUSGQ,vibcntr = ',caFName,iStrongGasID,iStrongISO,iStrongJL,iStrongJU,dVibCenter
 
 ! wap so pressures are increasing
     IF (raTPress1(1) > raTPress1(iNumVibLevels)) THEN
@@ -1205,7 +1205,7 @@ CONTAINS
     IF (iBand == 1) THEN
       CALL GetUSSTD_2350(raPavg,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
 
-      write(kSTdWarn,'(A)') 'Checking current (klayers) profile against US Std NLTE profile in n_gas_wt_spectra.f90'
+      write(kSTdWarn,'(A)') 'Checking current (klayers) profile against US Std NLTE 2350 Band profile in n_gas_wt_spectra.f90'
       write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
       write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
       write(kStdWarn,'(A,F12.5,A,F12.5,A)') 'Start NLTE at (user supplied VS 2350[T-Tvib]) height = ',rH0/1000,' vs ',rH/1000,' km'
@@ -1257,12 +1257,13 @@ CONTAINS
 
     caFName = 'xnlte_1_1_1_6_sol_0.genln2'
     CALL concatCA80(caAuxNLTERefsPath,caFName)
+    write(kStdWarn,'(A,A)') 'in GetUSSTD_2350, reading in ',caFName
 
     iStrongGasID = 2
     iStrongISO = 1
     CALL ReadGENLN2_NLTE_Profile(caFName,daJL,daJU,iaJ_UorL, &
-    iStrongGasID,iStrongISO,+1, &
-    iNumVibLevels,raTPress1,raTTemp1,raQtips1,raNLTEtemp1,dVibCenter)
+                                 iStrongGasID,iStrongISO,+1, &
+                                 iNumVibLevels,raTPress1,raTTemp1,raQtips1,raNLTEtemp1,dVibCenter)
 
     DO iI = 1,iNumVibLevels
       raLogTPress1(iI) = log(raTPress1(iI))

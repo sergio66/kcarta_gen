@@ -332,8 +332,8 @@ CONTAINS
 
     iInputJU = nint(daJU(1))
     iInputJL = nint(daJL(1))
-    write(kStdWarn,*) ' try to get NLTE profile for gid,iso,JL,JU = ',iGASID,iISO,iInPutJL,iInputJU
-    write(kStdWarn,*) ' from user supplied profile(s) in ',caFName
+    write(kStdWarn,'(A,I3,I3,I3,I3)') ' try to get NLTE profile for gid,iso,JL,JU = ',iGASID,iISO,iInPutJL,iInputJU
+    write(kStdWarn,'(A,A)')           ' from user supplied profile(s) in ',caFName
          
 !! Dave Edwards info does start GND = 1, TOA = 120 so things are fine
     123 FORMAT(A80)
@@ -436,7 +436,7 @@ CONTAINS
     IF (iMatchTry == 1) THEN      !!!trying to match upper quantum numbers
       IF ((iGASID == iDummyGasID) .AND. (iDummyQuantum == iInputJU) &
        .AND. (iISO == iDummyISO)) THEN
-        write(kStdWarn,*) 'matched upper quantum number'
+        write(kStdWarn,*) '    success ... matched upper quantum number'
         DO iI = 1,kHitran
           iaJ_UorL(iI) = +1         !!!matched the upper quantum number
         END DO
@@ -449,7 +449,7 @@ CONTAINS
     IF (iMatchTry == 2) THEN      !!!trying to match lower quantum numbers
       IF ((iGASID == iDummyGasID) .AND. (iDummyQuantum == iInputJL) &
          .AND. (iISO == iDummyISO)) THEN
-        write(kStdWarn,*) 'matched lower quantum number'
+        write(kStdWarn,*) '    success ... matched lower quantum number'
         DO iI = 1,kHitran
           iaJ_UorL(iI) = -1         !!!matched the lower quantum number
         END DO

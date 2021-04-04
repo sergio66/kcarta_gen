@@ -592,12 +592,18 @@ CONTAINS
           
     iNatm1 = iNatm
     FMT = '(A,I3,A,F10.3,A)'
+
     DO iI  =  1,kMaxAtm
       IF (raSatHeight(iI) < 0) THEN
         write(kStdWarn,FMT) 'atm# ',iI,' raAtmLoop raSatHeight = ',raSatHeight(iI), 'reset to 705 km'
         raSatHeight(iI) = 705000.0
       END IF
 
+      IF ((raKSolarAngle(iI) < -90.0) .AND. (raKSolarAngle(iI) >=  -120)) THEN
+        write(kStdWarn,'(A,I2,A,F10.4,A)') ' probably iNumNLTEGases = 1 : profile ',iI,' resetting solar angle from ',raKSolarAngle(iI),' to 89.9'
+        raKSolarAngle(iI) = 89.9
+      END IF
+ 
       IF (abs(raKSolarAngle(iI) - 90.0) <= 1.0e-5) THEN
         write(kStdWarn,*) 'resetting solar angle = 90 to 89.9',iI
         raKSolarAngle(iI) = 89.9
@@ -1499,7 +1505,7 @@ CONTAINS
       iaNumLayer,iaaRadLayer,raProfileTemp, &
       raSatAzimuth,raSolAzimuth,raWindSpeed, &
       cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
-      raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+      raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype,iNumNLTEGases)
 #ENDIF
 
     IF (kSurfAlt < -1.0e3) THEN
@@ -2360,9 +2366,9 @@ CONTAINS
 
     DO iI = 1,iNatm
       IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. (rakSolarAngle(iI) <= 90.0))) THEN
-        write(kStdWarn,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+        write(kStdWarn,'(A,I3,I3,F10.3)') 'n_main.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
             iI,iaKsolar(iI),rakSolarAngle(iI)
-        write(kStdErr,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+        write(kStdErr,'(A,I3,I3,F10.3)') 'n_main.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
             iI,iaKsolar(iI),rakSolarAngle(iI)
         CALL DoStop
         END IF

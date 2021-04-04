@@ -10,6 +10,7 @@ $(info   )
 
 400_H16_default_f90:
 	make -f Makefile_v121_Intelf90 datafix400_v121_H2016
+	echo "this datafix400_v121_H2016 looks suspiciously similar to datafix400_v121_H2016_orig605_805res"
 	cp_param_files_to_f90.sc
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	
@@ -57,6 +58,7 @@ $(info   )
 ##   500-605 cm-1 at 0.0015 cm-1 res, 605-2830 cm-1 at 0.0025 cm-1
 400_H16_default_f90_orig605_805res:
 	make -f Makefile_v121_Intelf90 datafix400_v121origres_H2016
+	echo "this datafix400_v121_H2016 looks suspiciously similar to datafix400_v121_H2016_orig605_805res"
 	cp_param_files_to_f90_v120.sc
 	make -f Makefile_v121_Intelf90 basic
 	make -f Makefile_v121_Intelf90 basicTXT	

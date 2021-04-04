@@ -258,7 +258,7 @@ CONTAINS
     iGasID,iISO,iAllOrSome, &
     iNumVibLevels,raTPress1,raTTemp1,raQtips1,raNLTETemp1,dVibCenter)
 
-    write(kStdWarn,*) 'UA (p < 0.005 mb) : iGASID,ISO,iLSGQ,iUSGQ,vibcntr = ', &
+    write(kStdWarn,'(A,I4,I4,I4,I4,F12.5)') 'UA (p < 0.005 mb) : iGASID,ISO,iLSGQ,iUSGQ,vibcntr = ', &
     iGasID,iISO,int(daJL(1)),int(daJU(1)),dVibCenter
 
     DO iI = 1,kNLTEProfLayer
@@ -914,7 +914,7 @@ CONTAINS
             CALL GetUSSTD_2350(pProf,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
 
             write(kStdWarn,*) '  '
-            write(kStdWarn,'(A)') 'Comparing current NLTE profile to US STD Profile, 2350 Band in kreadVTprofiles.f90 '
+            write(kStdWarn,'(A)') 'Comparing current NLTE profile to US STD NLTE 2350 Band Profile in kreadVTprofiles.f90 '
             write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
             write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
             write(kStdWarn,*) ' '

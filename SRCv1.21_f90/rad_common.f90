@@ -1396,6 +1396,11 @@ CONTAINS
             raSun*raSunRefl
     END IF
 
+    if (iaaOverrideDefault(3,4) == +1) then
+      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF NLTE FAST',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+                          raSurface(1),raThermal(1),raSun(1),raInten(1)
+    end if
+
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
 ! upto iHigh ccccc      DO iLay=1,NumLayer -->  DO iLay=1,1 + DO ILay=2,iHigh

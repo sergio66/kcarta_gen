@@ -111,7 +111,7 @@ CONTAINS
     iaNumLayer,iaaRadLayer,raProfileTemp, &
     raSatAzimuth,raSolAzimuth,raWindSpeed, &
     cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
-    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype,iNumNLTEGases)
 
     IMPLICIT NONE
 
@@ -172,7 +172,7 @@ CONTAINS
     INTEGER :: iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iNatm
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
     REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
-    INTEGER :: iRTP
+    INTEGER :: iRTP,iNumNLTEGases
     CHARACTER(80) :: caPFName
 
     INTEGER :: iI
@@ -220,7 +220,7 @@ CONTAINS
         iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
         iaNumLayer,iaaRadLayer,raProfileTemp, &
         cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
-        raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+        raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype,iNumNLTEGases)
     END IF
 
     IF ((raPresslevels(kProfLayer+1) > 10.00) .AND. (iNatm >= 1)) THEN
@@ -232,12 +232,11 @@ CONTAINS
     END IF
 
     DO iI = 1,iNatm
-      IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. &
-        (rakSolarAngle(iI) <= 90.0))) THEN
-        write(kStdWarn,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
-          iI,iaKsolar(iI),rakSolarAngle(iI)
-        write(kStdErr,*) 'Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
-          iI,iaKsolar(iI),rakSolarAngle(iI)
+      IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. (rakSolarAngle(iI) <= 90.0))) THEN
+        write(kStdWarn,'(A,I3,I3,F10.3)') 'n_rtp.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+            iI,iaKsolar(iI),rakSolarAngle(iI)
+        write(kStdErr,'(A,I3,I3,F10.3)') 'n_rtp.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+            iI,iaKsolar(iI),rakSolarAngle(iI)
         CALL DoStop
       END IF
     END DO
@@ -1770,7 +1769,6 @@ CONTAINS
     END SUBROUTINE READRTP_CLD100LAYER
 
 !************************************************************************
-
 ! this subroutine deals with the 'RADNCE' keyword, but for new .rtp files
     SUBROUTINE radnce4RTP(iRTP,caPFName,iMPSetForRadRTP, &
     iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
@@ -1784,7 +1782,8 @@ CONTAINS
     iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
     iaNumLayer,iaaRadLayer,raProfileTemp, &
     cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
-    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype, &
+    iNumNLTEGases)
 
     IMPLICIT NONE
 
@@ -1845,7 +1844,8 @@ CONTAINS
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
     REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
     REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
-    INTEGER :: iRTP     !!!tells which profile info, radiance info, to read
+    INTEGER :: iRTP          !!!tells which profile info, radiance info, to read
+    INTEGER :: iNumNLTEGases !! tells the future ... are you doing NLTE (because 0-90 is day, but Manuel also gave NLTE from 90-120)
     CHARACTER(80) ::  caPFName !!!tells which profile
 
 ! local variables
@@ -2366,10 +2366,18 @@ CONTAINS
     iakThermalJacob(iC) = 1
     ! use the solar on/off, thermal on/off etc.
     kSolar        = iaKSolar(iC)
+
+    IF ((raKSolarAngle(iC) > 90.0) .AND. (raKSolarAngle(iC) <= 120) .AND. (iNumNLTEGases > 0)) THEN
+      write(kStdWarn,'(A,I2,A,I2,A,F10.4,A)') 'iNumNLTEGases = ',iNumNLTEGases,' : profile ',iC,' resetting solar angle from ',raKSolarAngle(iC),' to 89.9'
+      raKSolarAngle(iC) = 89.9
+      iaKSolar(iC)      = +1
+      kSolar            = iaKSolar(iC)      
+    END IF
     IF (abs(raKSolarAngle(iC) - 90.0) <= 1.0e-5) then
       write(kStdWarn,*) 'resetting solar angle = 90 to 89.9, iAtm = ',iC
       raKSolarAngle(iC) = 89.9
     END IF
+
     kSolarAngle   = raKSolarAngle(iC)
     kSolarRefl    = raKSolarRefl(iC)
     kThermal      = iaKThermal(iC)

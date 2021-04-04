@@ -605,6 +605,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.21
 -----
+
+4/4/21          fixed code so if we were working with new M.Lopez-Puertas profiles (solzen 90-120), then
+                if iNumNLTEGases > 0, kCARTA radnce4rtp resets solar zenith to 89.9 and therefore can 
+                still do NLTE LBL calcs
+
 3/15/21         iaaOverrideDefault(3,4) = -1 default
                 iaaOverrideDefault(3,4) = +1 allows rad_main debug surface radiation printout to StdErr
     if (iaaOverrideDefault(3,4) == +1) then

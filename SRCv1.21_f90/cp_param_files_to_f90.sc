@@ -6,6 +6,8 @@ sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/pos
 
 #/bin/cp ../INCLUDE/pre_definedHIGHRES_IR.param   ../INCLUDE/pre_definedHIGHRES_IRparam.f;  fixcon ../INCLUDE/pre_definedHIGHRES_IRparam.f  ../INCLUDE/pre_definedHIGHRES_IRparam.f90; rm ../INCLUDE/pre_definedHIGHRES_IRparam.f
 
+/bin/cp ../INCLUDE/pre_defined_orig605_805res.param             ../INCLUDE/pre_definedparam_orig605_805res.f;            fixcon ../INCLUDE/pre_definedparam_orig605_805res.f            ../INCLUDE/pre_definedparam_orig605_805res.f90;           rm ../INCLUDE/pre_definedparam_orig605_805res.f
+
 /bin/cp ../INCLUDE/pre_defined.param             ../INCLUDE/pre_definedparam.f;            fixcon ../INCLUDE/pre_definedparam.f            ../INCLUDE/pre_definedparam.f90;           rm ../INCLUDE/pre_definedparam.f
 
 /bin/cp ../INCLUDE/post_defined.param            ../INCLUDE/post_definedparam.f;           fixcon ../INCLUDE/post_definedparam.f           ../INCLUDE/post_definedparam.f90;           rm ../INCLUDE/post_definedparam.f
