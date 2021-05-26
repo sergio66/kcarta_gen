@@ -10,7 +10,9 @@ for ix = 1 : iNumFullBlocks
   xarr = xarr(1:5);
   iaInd = (ix-1)*5+ (1:5);
   raX(iaInd) = xarr';
+  %fprintf(1,'%3i : %15.9f %15.9f %15.9f %15.9f %15.9f : %3i \n',ix,raX(iaInd),mm);
 end
+%disp('ret to cont'); pause
 
 if iLeftover == 0
   return

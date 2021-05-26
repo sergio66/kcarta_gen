@@ -1461,9 +1461,16 @@ CONTAINS
           
     iIOUN = iIOUN_IN
 
+! kCARTA background thermal calcs are (assumed) integrals over all angles 
+! so radiance x angle = mW/m2/cm-1/sr * sr becames flux mW/m2/cm-1; 
+! hence I divide by pi (fourth column, rThermalRefl = 1/pi) to turn it back into a radiance
     rThermalRefl = 1.0/kPi
-    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
-          
+! same thing for NickNalli .. do calc at ONE angle, but then (for internal consistency sake at this point) 
+! I multiply by pi
+! so radiance x angle = mW/m2/cm-1/sr * sr becames flux mW/m2/cm-1; 
+! hence I need to divide by pi (fourth column, rThermalRefl = 1/pi) to turn it back into a radiance
+!    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0/pi   !! also for nick nalli
+         
 ! calculate cos(SatAngle)
     rCos = cos(rSatAngle*kPi/180.0)
 

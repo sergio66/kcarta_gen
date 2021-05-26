@@ -606,6 +606,17 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.21
 -----
 
+4/11/21         fixing rThermalRefl in rad_main.f90 for Nick Nalli Emiss model
+                ! kCARTA background thermal calcs are (assumed) integrals over all angles 
+                ! so radiance x angle = mW/m2/cm-1/sr * sr becames flux mW/m2/cm-1; 
+                ! hence I divide by pi (fourth column, rThermalRefl = 1/pi) to turn it back into a radiance
+                    rThermalRefl = 1.0/kPi
+                ! same thing for NickNalli .. do calc at ONE angle, but then (for internal consistency sake at this point) 
+                ! I multiply by pi
+                ! so radiance x angle = mW/m2/cm-1/sr * sr becames flux mW/m2/cm-1; 
+                ! hence I need to divide by pi (fourth column, rThermalRefl = 1/pi) to turn it back into a radiance
+                !    IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0/pi   !! also for nick nalli
+                
 4/4/21          fixed code so if we were working with new M.Lopez-Puertas profiles (solzen 90-120), then
                 if iNumNLTEGases > 0, kCARTA radnce4rtp resets solar zenith to 89.9 and therefore can 
                 still do NLTE LBL calcs
