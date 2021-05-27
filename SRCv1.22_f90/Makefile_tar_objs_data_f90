@@ -1,0 +1,866 @@
+###### want to change this to /asl/www/pub/kcarta
+# The following variables are used by "make dist" and "make ftp", to
+# bundle up a kcarta distribution.  KTAR is a path and filename for
+# the tarfile created by "make dist", and KFTP is the machine and
+# path to the FTP archive.
+
+KTAR           = /asl/packages/kcarta121.tar
+KTARBUG        = /asl/packages/kcarta_bugfix121.tar
+KTARBUGGIVEOUT = /asl/packages/kcarta_bugfix_giveout121.tar
+KGIVEOUT       = /asl/packages/kcartagiveout121.tar
+KDATA          = /asl/packages/kcartaDATA.tar
+KMATLAB        = /asl/packages/kcartaMATLAB.tar
+KCWRAP         = /asl/packages/kcwrap.tar
+KFTP           = /asl/packages/kcarta
+KTARAUX        = /asl/packages/kcarta/kcarta_aux.tar 
+
+KTAR             = /asl/ftp/pub/packages/kcarta121.tar
+KTARBUG          = /asl/ftp/pub/packages/kcarta_bugfix121.tar
+KTARBUGGIVEOUT   = /asl/ftp/pub/packages/kcarta_bugfix_giveout121.tar
+KGIVEOUT         = /asl/ftp/pub/packages/kcartagiveout121.tar
+KDATA            = /asl/ftp/pub/packages/kcartaDATA.tar
+KCOMPDATA_H2016  = /asl/ftp/pub/packages/water_hdo_etc_H2016_IR_v1.ieee-le.tar
+KMATLAB          = /asl/ftp/pub/packages/kcartaMATLAB.tar
+KFTP             = /asl/ftp/pub/packages/kcarta
+
+PARAMS     = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data_f90 Makefile_intel_hdf_rtp
+
+PARAMS_RTP = ../INCLUDE/kcarta.param ../INCLUDE/pre_defined.param Makefile Makefile_tar_objs_data_f90 Makefile_intel_hdf_rtp
+
+###### OBJSMAIN_PARALLEL  for all features : jacobians, scatter, flux, but as stand alone JPL exec
+###### OBJSMAIN_JPL       for all features : jacobians, scatter, flux, but as stand alone JPL exec
+###### OBJSMAIN           for all features : jacobians, scatter, flux
+###### OBJSMAIN_BASIC     for none of kCARTA features
+
+OBS_BASIC_COMMON = basic_common.o ttorad_common.o spline_and_sort_and_common.o  freqfile.o s_misc.o            s_writefile.o
+
+OBJSRTP        = rtp_interface_f90.o
+
+OBJSSTRING     = kcoeff_common.o         clear_scatter_basic.o   n_nonlte_common.o   n_mr_common.o \
+                 n_gas_wt_spectra.o      n_pth_mix.o             n_rad_jac_scat.o    n_output.o \
+                 n_layers.o              n_layers_lblrtm.o       n_misc.o            n_rtp.o    \
+		 n_duplicate_sky.o       n_main.o\
+ 
+OBS_LTE_OPTDPH  = kcoeffSPL.o               kcoeffSPLJAC.o        kcoeff_FAST_details.o \
+                  kcoeff_FAST_details2.o    kcoeff_FAST.o         kcont_xsec.o           kcoeffMAIN.o
+
+OBS_NLTE_OPTDPH = klineshapes.o      kcousin.o          klinemix.o      kvoigt_cousin.o\
+                  kreadVTprofiles.o  kbloat.o           kpredictVT.o    knonlte.o
+
+OBJSMAIN          = kcartamisc.o kcartamain.o        
+OBJSMAIN_JPL      = kcartamisc.o kcartajpl.o
+OBJSMAIN_BASIC    = kcartamisc.o kcartabasic.o
+OBJSMAIN_PARALLEL = kcartamisc.o kcartaparallel.o
+
+MOBS_BASIC_COMMON = basic_common.mod  ttorad_common.mod spline_and_sort_and_common.mod \
+		    freqfile.mod s_misc.mod  s_writefile.mod
+
+MOBJSRTP        = rtp_interface_f90.mod
+
+MOBJSSTRING     = kcoeff_common.mod       clear_scatter_basic.mod  n_nonlte_common.mod      n_mr_common.mod \
+                  n_gas_wt_spectra.mod    n_pth_mix.mod            n_rad_jac_scat.mod       n_output.mod \
+                  n_layers.mod            n_layers_lblrtm.mod      n_misc.mod               n_rtp.mod    \
+		  n_duplicate_sky.mod     n_main.mod
+
+MOBS_LTE_OPTDPH  = kcoeffSPL.mod              kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
+                   kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
+
+MOBS_NLTE_OPTDPH = klineshapes.mod      kcousin.mod          klinemix.mod         kvoigt_cousin.mod\
+                   kreadVTprofiles.mod  kbloat.mod           kpredictVT.mod       knonlte.mod
+
+MOBJSMAIN          = kcartamisc.mod kcartamain.mod
+MOBJSMAIN_JPL      = kcartamisc.mod kcartajpl.mod
+MOBJSMAIN_BASIC    = kcartamisc.mod kcartabasic.mod
+MOBJSMAIN_PARALLEL = kcartamisc.mod kcartaparallel.mod
+
+#######################################################################
+
+OBSRAD       = rad_angles.o rad_misc.o rad_diff_and_quad.o rad_common.o\
+               jac_up.o jac_down.o jac_main.o jac_limb.o\
+               rad_flux.o rad_main.o rad_limb.o
+
+MOBSRAD       = rad_angles.mod rad_misc.mod rad_diff_and_quad.mod rad_common.mod\
+	        jac_up.mod jac_down.mod jac_main.mod jac_limb.mod\
+		rad_flux.mod rad_main.mod rad_limb.mod
+
+OBSJAC_CLR   = 
+
+MOBSJAC_CLR   = 
+
+OBSJAC_CLD   = singlescatter.o jac_pclsam_up.o jac_pclsam_down.o
+
+MOBSJAC_CLD   = singlescatter.mod jac_pclsam_up.mod jac_pclsam_down.mod
+
+##########################################################################
+###   this is to set up your favorite scattering routine package       ###
+########## these are codes that have been tested                   #######
+###   RTSPEC    : fast but does not include solar beam                 ###
+###   DISORT    : slow, computes the whole kit and caboodle            ###
+########## these are codes that have not been tested yet           #######
+###   PCLSAM    : param cloud lw scattering for atmopspheric modelling ###
+##########################################################################
+## set up the appropriate scattering packages                           ##
+## NOTE 1) kcarta.x can include one or more of DISORT (slow, with       ##
+##         solar) RTSPEC (fast, no solar), PCLSAM (fast with solar)     ##          
+##      2) bkcarta only has clear sky radiances, fluxes, jacobians      ##
+##########################################################################
+
+PARAMS_SCAT = ../INCLUDE/kcartaparam.f90 ../INCLUDE/scatterparam.f90 \
+	      ../INCLUDE/pre_definedparam.f90 ../INCLUDE/gaussparam.f90 Makefile
+
+OBSSCAT_COMMON    = clear_scatter_misc.o
+MOBSSCAT_COMMON    = clear_scatter_misc.mod
+
+OBSSCAT_RTSPEC = scatter_rtspec_code.o scatter_rtspec_main.o scatter_rtspec_flux.o
+MOBSSCAT_RTSPEC = scatter_rtspec_code.mod scatter_rtspec_main.mod scatter_rtspec_flux.mod
+
+OBSSCAT_DISORT = scatter_disort_main.o scatter_disort_code.o \
+                 scatter_disort_flux.o scatter_disort_misc.o
+MOBSSCAT_DISORT = scatter_disort_main.mod scatter_disort_code.mod \
+                 scatter_disort_flux.mod scatter_disort_misc.mod
+
+OBSSCAT_GRAYCLD = scatter_graycld_code.o scatter_graycld_main.o
+MOBSSCAT_GRAYCLD = scatter_graycld_code.mod scatter_graycld_main.mod
+
+OBSSCAT_PCLSAM  = scatter_pclsam_code.o scatter_pclsam_main.o scatter_pclsam_flux.o 
+MOBSSCAT_PCLSAM  = scatter_pclsam_code.mod scatter_pclsam_main.mod scatter_pclsam_flux.mod 
+
+OBSSCAT5 = $(OBSSCAT_RTSPEC)    $(OBSSCAT_PCLSAM) $(OBSSCAT_GRAYCLD)    scatter_interface.o
+MOBSSCAT5 = $(MOBSSCAT_RTSPEC)  $(MOBSSCAT_PCLSAM) $(MOBSSCAT_GRAYCLD)    scatter_interface.mod
+
+########################################################################
+### this is for the whole kit and caboodle
+### choose one of the above 5 options
+###
+### default is to turn on ALL scattering packages (DISORT,RTSPEC,TWOSTREAM)
+### in addition, you get clear sky radiance, jacobian, flux code compiled
+SCATTER_ALL = $(OBSSCAT5)
+MSCATTER_ALL = $(MOBSSCAT5)
+
+OBJS = $(OBS_BASIC_COMMON) $(OBJSSTRING) $(OBS_LTE_OPTDPH) \
+       $(OBSRAD) $(OBSSCAT_COMMON) $(OBS_NLTE_OPTDPH) $(OBSJAC_CLD) $(SCATTER_ALL) $(OBJSMAIN) 
+MOBJS = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
+        $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) $(MOBSJAC_CLD) $(MSCATTER_ALL) $(MOBJSMAIN) 
+
+### for TXT scattering whole kit and caboodle (kcartaTXT.x), here we are!!!!!!!!
+OBJSTXT = $(OBJS)
+MOBJSTXT = $(MOBJS)		
+
+#########################
+
+### for BASIC clear sky package (bkcarta.x), here we are!!!!!!!!
+OBJSBASIC = $(OBS_BASIC_COMMON) $(OBJSSTRING) $(OBS_LTE_OPTDPH) \
+            $(OBSRAD) $(OBSJAC_CLR) $(OBSSCAT_COMMON) $(OBS_NLTE_OPTDPH) $(OBJSMAIN_BASIC) 
+MOBJSBASIC = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
+             $(MOBSRAD) $(MOBSJAC_CLR) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) $(MOBJSMAIN_BASIC)
+
+### for TXT clear sky package (bkcartaTXT.x), here we are!!!!!!!!
+OBJSBASICTXT = $(OBJSBASIC)
+MOBJSBASICTXT = $(MOBJSBASIC)		
+
+#########################
+
+### this is for the parallel version, whole kit and caboodle
+OBJSPARALLEL = $(OBS_BASIC_COMMON) $(OBJSSTRING) $(OBS_LTE_OPTDPH) \
+       $(OBSRAD) $(OBSSCAT_COMMON) $(OBS_NLTE_OPTDPH) $(OBSJAC_CLD) $(SCATTER_ALL) $(OBJSMAIN_PARALLEL) 
+MOBJSPARALLEL = $(MOBS_BASIC_COMMON) $(MOBJSSTRING) $(MOBS_LTE_OPTDPH) \
+        $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBS_NLTE_OPTDPH) $(MOBSJAC_CLD) $(MSCATTER_ALL) $(MOBJSMAIN_PARALLEL) 
+
+#########################
+
+### this is for the (JPL) stand alone version -- NOT YET DONE IN F90
+OBJSJPL = $(OBS_BASIC_COMMON) $(OBJSMAIN_JPL) $(OBS_LTE_OPTDPH) $(OBS_NLTE_OPTDPH) \
+          $(OBSRAD) $(OBSSCAT_COMMON) $(OBSJAC_CLD) $(OBJSSTRING) 
+MOBJSJPL = $(MOBS_BASIC_COMMON) $(MOBJSMAIN_JPL) $(MOBS_LTE_OPTDPH) $(MOBS_NLTE_OPTDPH) \
+           $(MOBSRAD) $(MOBSSCAT_COMMON) $(MOBSJAC_CLD) $(MOBJSSTRING)
+
+########################################################################
+################## MAIN PART OF MAKEFILE ###############################
+########################################################################
+## this just updates the cource code
+##https://genomeek.wordpress.com/2012/02/16/using-fortran-preprocessor-1/
+
+#EXECS = basic scat basicTXT scatTXT
+
+## uncomment this for basic (rad+jac) RTP stuff
+#TXTRTPFLAG=
+#EXECS = basic
+
+## uncomment this basic (rad+jac) TXT stuff
+#TXTRTPFLAG= -DTXTsetting
+#EXECS = basicTXT
+
+## uncomment this for all (rad+jac+scat+flux) RTP stuff
+TXTRTPFLAG=
+EXECS = scat
+
+## uncomment this for all (rad+jac+scat+flux) TXT stuff
+#TXTRTPFLAG= -DTXTsetting
+#EXECS = scatTXT
+
+## uncomment this for all (rad+jac+scat+flux) PARALLEL stuff
+#TXTRTPFLAG=
+#EXECS = parallel
+
+all : $(EXECS)
+
+## to check hidden characters and tabs https://stackoverflow.com/questions/16931770/makefile4-missing-separator-stop
+## cat -e -t -v  Makefile_tar_objs_data_f90 | more
+
+## use this for example to print out EXECS above as
+##   make -f Makefile_tar_objs_data_f90 print-EXECS
+## use this for example to print out MOBJSBASICTXT above as
+##   make -f Makefile_tar_objs_data_f90 print-MOBJSBASICTXT
+print-%  : ; @echo $* = $($*)
+
+############## the five executables ##################################
+##### (1) basic kcarta (easy on memory) with no jacobs, fluxes or scattering
+ALLBASICMOD = $(MOBJSBASIC) $(MOBJSRTP)
+
+basic: bkcarta.x90 
+	mv bkcarta.x90 ../BIN/bkcarta.x90
+
+bkcarta.x90 : $(ALLBASICMOD) $(OBJSBASIC) $(OBJSRTP)
+	$(FORTRANX) -o bkcarta.x90 $(FLAGS) $(OBJSBASIC) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB) 
+
+kcartabasic.mod kcartabasic.o : kcartabasic.f90 $(PARAMS) $(ALLBASICMOD)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f90
+
+##### (2) basic kcarta (easy on memory) with no jacobs, fluxes or scattering, TEXT levels/layers input
+ALLBASICMODTXT = $(MOBJSBASICTXT) $(MOBJSRTP)
+
+basicTXT: bkcartaTXT.x90
+	mv bkcartaTXT.x90 ../BIN/bkcartaTXT.x90
+
+bkcartaTXT.x90 : $(ALLBASICMODTXT) $(OBJSBASICTXT)
+	echo $(TXTRTPFLAG)
+	$(FORTRANX) -o bkcartaTXT.x90 $(FLAGS) $(OBJSBASICTXT) $(LIBS) $(RTPLIB) $(HDFLIB) 
+
+kcartabasicTXT.mod kcartabasicTXT.o : kcartabasic.f90 $(PARAMS) $(ALLBASICMODTXT)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartabasic.f90
+
+##### (3) complete kcarta (memory hog) with jacobians, all scattering codes
+ALLMOD = $(MOBJS) $(MOBJSRTP)
+
+scat: kcarta.x90
+	mv kcarta.x90 ../BIN/kcarta.x90
+
+kcarta.x90 : $(ALLMOD) $(OBJS) $(OBJSRTP)
+	$(FORTRANX) -o kcarta.x90 $(FLAGS) $(OBJS) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
+
+kcartamain.mod kcartamain.o : kcartamain.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamain.f90
+
+##### (4) complete kcarta (memory hog) with jacobians, all scattering codes, TEXT levels/layers input
+ALLMODTXT = $(MOBJSTXT) $(MOBJSRTP)
+
+scatTXT: kcartaTXT.x90
+	mv kcartaTXT.x90 ../BIN/kcartaTXT.x90
+
+kcartaTXT.mod kcartaTXT.x90 : $(ALLMODTXT) $(OBJSTXT)
+	echo $(TXTRTPFLAG)
+	$(FORTRANX) -o kcartaTXT.x90 $(FLAGS) $(OBJSTXT) $(LIBS) $(RTPLIB) $(HDFLIB)
+
+kcartamainTXT.mod kcartamainTXT.o : kcartamain.f90 $(PARAMS) $(ALLMODTXT)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamain.f90
+
+##### (5) complete kcarta (memory hog) with jacobians, all scattering codes
+parallel: kcartaparallel.x90
+	mv kcartaparallel.x90 ../BIN/kcartaparallel.x90
+
+kcartaparallel.x90 : $(ALLMOD) $(OBJSPARALLEL) $(OBJSRTP)
+	$(FORTRANX) -o kcartaparallel.x90 $(FLAGS) $(OBJSPARALLEL) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
+
+kcartaparallel.mod kcartaparallel.o : kcartaparallel.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartaparallel.f90
+
+##### (6) complete kcarta (memory hog) with jacobians, [all scattering codes], but as standalone
+jpl: jpl.x90
+	mv jpl.x90 ../BIN/jpl.x90
+
+jpl.x90 : $(OBJSJPL) $(OBJSRTP)
+	$(FORTRANX) -o jpl.x90 $(FLAGS) $(OBJSJPL) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)
+
+kcartajpl.mod kcartajpl.o : kcartajpl.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f90
+
+##### (7) complete kcarta (memory hog) with jacobians, a[ll scattering codes], but as standalone
+#####  TEXT levels/layers input
+jplTXT: jplTXT.x90
+	mv jplTXT.x90 ../BIN/jplTXT.x90
+
+jplTXT.x90 : $(OBJSJPL) $(OBJSBASICTXT)
+	echo $(TXTRTPFLAG)
+	$(FORTRANX) -o jplTXT.x90 $(FLAGS) $(OBJSJPL) $(LIBS) $(RTPLIB) $(HDFLIB) $(OBJSBASICTXT)
+
+kcartajplTXT.mod kcartajplTXT.o : kcartajpl.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartajpl.f90
+
+################ OPTICAL DEPTHS (LTE and NLTE) ###########################
+###### lte routines
+basic_common.mod basic_common.o : basic_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) basic_common.f90
+
+ttorad_common.mod ttorad_common.o : ttorad_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) ttorad_common.f90
+
+kcartamisc.mod kcartamisc.o : kcartamisc.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcartamisc.f90
+
+spline_and_sort_and_common.mod spline_and_sort_and_common.o : spline_and_sort_and_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) spline_and_sort_and_common.f90
+
+freqfile.mod freqfile.o : freqfile.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) freqfile.f90
+
+### kCompressed Database uncompression routines, continuum and
+### old xsec routines
+kcoeffMAIN.mod kcoeffMAIN.o : kcoeffMAIN.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffMAIN.f90
+
+kcont_xsec.mod kcont_xsec.o : kcont_xsec.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcont_xsec.f90
+
+kcoeffSPL.mod kcoeffSPL.o : kcoeffSPL.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffSPL.f90
+
+kcoeffSPLJAC.mod kcoeffSPLJAC.o : kcoeffSPLJAC.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeffSPLJAC.f90
+
+kcoeff_common.mod kcoeff_common.o : kcoeff_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_common.f90
+
+kcoeff_FAST.mod kcoeff_FAST.o : kcoeff_FAST.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST.f90
+
+kcoeff_FAST_details.mod kcoeff_FAST_details.o : kcoeff_FAST_details.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST_details.f90
+
+kcoeff_FAST_details2.mod kcoeff_FAST_details2.o : kcoeff_FAST_details2.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcoeff_FAST_details2.f90
+
+##### nonlte routines
+knonlte.mod knonlte.o : knonlte.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) knonlte.f90
+
+kbloat.mod kbloat.o : kbloat.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kbloat.f90
+
+klineshapes.mod klineshapes.o : klineshapes.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) klineshapes.f90
+
+kreadVTprofiles.mod kreadVTprofiles.o : kreadVTprofiles.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kreadVTprofiles.f90
+
+kpredictVT.mod kpredictVT.o : kpredictVT.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kpredictVT.f90
+
+kcousin.mod kcousin.o : kcousin.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kcousin.f90
+
+kvoigt_cousin.mod kvoigt_cousin.o : kvoigt_cousin.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) kvoigt_cousin.f90
+
+klinemix.mod klinemix.o : klinemix.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) klinemix.f90
+
+###########  NON SCATTERING RADIATIVE TRANSFER CODE ######################
+rad_main.mod rad_main.o : rad_main.f90 $(PARAMS) 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_main.f90
+
+rad_misc.mod rad_misc.o : rad_misc.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_misc.f90
+
+rad_angles.mod rad_angles.o : rad_angles.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_angles.f90
+
+rad_diff_and_quad.mod rad_diff_and_quad.o : rad_diff_and_quad.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_diff_and_quad.f90
+
+rad_flux.mod rad_flux.o : rad_flux.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_flux.f90
+
+rad_common.mod rad_common.o : rad_common.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_common.f90
+
+rad_limb.mod rad_limb.o : rad_limb.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_limb.f90
+
+###########  SCATTERING RADIATIVE TRANSFER CODE ###########################
+#### many of the routines in here are common to all scattering codes 
+clear_scatter_basic.mod clear_scatter_basic.o : clear_scatter_basic.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) clear_scatter_basic.f90 
+
+clear_scatter_misc.mod clear_scatter_misc.o : clear_scatter_misc.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) clear_scatter_misc.f90 
+
+singlescatter.mod singlescatter.o : singlescatter.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) singlescatter.f90 
+
+#### this is the inteface to all scattering codes 
+scatter_interface.mod scatter_interface.o : scatter_interface.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_interface.f90 
+
+#### this is Frank Evans RTSPEC
+scatter_rtspec_main.mod scatter_rtspec_main.o : scatter_rtspec_main.f90  $(PARAMS_SCAT) 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rtspec_main.f90
+
+scatter_rtspec_code.mod scatter_rtspec_code.o : scatter_rtspec_code.f90  $(PARAMS_SCAT) 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rtspec_code.f90
+
+scatter_rtspec_flux.mod scatter_rtspec_flux.o : scatter_rtspec_flux.f90 $(PARAMS_SCAT)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rtspec_flux.f90
+
+#### this is Kurt Stamnes DISORT
+scatter_disort_main.mod scatter_disort_main.o : scatter_disort_main.f90  $(PARAMS_SCAT) 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_main.f90
+
+scatter_disort_flux.mod scatter_disort_flux.o : scatter_disort_flux.f90  $(PARAMS_SCAT) 
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_flux.f90
+
+scatter_disort_code.mod scatter_disort_code.o : scatter_disort_code.f90  $(PARAMS_SCAT) 
+	$(FORTRANX) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_code.f90
+
+scatter_disort_misc.mod scatter_disort_misc.o : scatter_disort_misc.f90  $(PARAMS_SCAT) 
+	$(FORTRANX) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_misc.f90
+
+### this is essentially Scott Hannon black/gray cloud
+scatter_graycld_main.mod scatter_graycld_main.o : scatter_graycld_main.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_graycld_main.f90 
+ 
+scatter_graycld_code.mod scatter_graycld_code.o : scatter_graycld_code.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_graycld_code.f90 
+
+### this is Chou, Lee, Tsay, Fu's PCLSAM radtransfer code 
+scatter_pclsam_main.mod scatter_pclsam_main.o : scatter_pclsam_main.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_pclsam_main.f90 
+ 
+scatter_pclsam_code.mod scatter_pclsam_code.o : scatter_pclsam_code.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_pclsam_code.f90 
+ 
+scatter_pclsam_flux.mod scatter_pclsam_flux.o : scatter_pclsam_flux.f90  $(PARAMS_SCAT)  
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_pclsam_flux.f90 
+ 
+########################## Jacobian code ################################
+jac_main.mod jac_main.o : jac_main.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_main.f90
+
+jac_up.mod jac_up.o : jac_up.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_up.f90
+
+jac_down.mod jac_down.o : jac_down.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_down.f90
+
+jac_pclsam_up.mod jac_pclsam_up.o : jac_pclsam_up.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_pclsam_up.f90
+
+jac_pclsam_down.mod jac_pclsam_down.o : jac_pclsam_down.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_pclsam_down.f90
+
+jac_limb.mod jac_limb.o : jac_limb.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) jac_limb.f90
+
+############################## misc and I/O routines #####################
+s_writefile.mod s_writefile.o : s_writefile.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) s_writefile.f90
+
+s_misc.mod s_misc.o : s_misc.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) s_misc.f90
+
+n_misc.mod n_misc.o : n_misc.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_misc.f90
+
+n_duplicate_sky.mod n_duplicate_sky.o : n_duplicate_sky.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_duplicate_sky.f90
+
+n_main.mod n_main.o : n_main.f90 $(PARAMS)
+	$(FORTRANX) -c -fpp $(FLAGS) $(UFLAG) $(TXTRTPFLAG) n_main.f90
+
+n_mainTXT.mod n_mainTXT.o : n_mainTXT.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_mainTXT.f90
+
+n_pth_mix.mod n_pth_mix.o : n_pth_mix.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_pth_mix.f90
+
+n_layers.mod n_layers.o : n_layers.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_layers.f90
+
+n_layers_lblrtm.mod n_layers_lblrtm.o : n_layers_lblrtm.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_layers_lblrtm.f90
+
+n_nonlte_common.mod n_nonlte_common.o : n_nonlte_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_nonlte_common.f90
+
+n_mr_common.mod n_mr_common.o : n_mr_common.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_mr_common.f90
+
+n_gas_wt_spectra.mod n_gas_wt_spectra.o : n_gas_wt_spectra.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_gas_wt_spectra.f90
+
+n_rad_jac_scat.mod n_rad_jac_scat.o : n_rad_jac_scat.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_rad_jac_scat.f90
+
+n_output.mod n_output.o : n_output.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_output.f90
+
+n_rtp.mod n_rtp.o : n_rtp.f90 $(PARAMS_RTP) $(RTPDEFS_FILE)
+	$(FORTRANX) -c $(RTPINC) $(FLAGS) $(UFLAG) n_rtp.f90
+
+rtp_interface_f90.mod rtp_interface_f90.o : rtp_interface_f90.f90 $(PARAMS_RTP) $(RTPDEFS_FILE)
+	$(FORTRANX) -c $(RTPINC) $(FLAGS) $(UFLAG) rtp_interface_f90.f90
+
+clean: 
+	rm *.o *~ 2> /dev/null || true
+
+#########################################################################
+### new res : 500-805 cm-1 at 0.0005 cm-1, 805-2830 cm-1 at 0.0025 cm-1
+
+# executables live in ../BIN; note you need to set the DISTDIR
+#DISTDIR    = /asl/data/kcarta
+#DISTDIRGEN = /asl/data/kcarta_sergio
+DISTDIR    = /asl/rta/kcarta
+DISTDIRGEN = /asl/rta/kcarta_sergio
+
+###      $(warning "datafix400_v122_H2016 looks similar to datafix400_v122origres_H2016")
+datafix400_v122_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+mars_datafix400_v122_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016_mars.param > \
+      ../INCLUDE/kcarta_v122_mars.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122_mars.param kcarta.param; \
+      cd MARS_database_params; \
+      ./lner_MARS_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix385_v122_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_385_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v122_H2016_highres:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_HIGHRES_IR.param > ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v122_H2016_veryhighres:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_VERYHIGHRES_IR.param > ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+#########################################################################
+### orig res : 500-605 cm-1 at 0.0015 cm-1, 605-2830 cm-1 at 0.0025 cm-1
+###      $(warning "datafix400_v122_H2016 looks similar to datafix400_v122origres_H2016")
+datafix400_v122origres_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v120origres_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v120origres_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2012_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v120origres_H2008:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2008_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+########################################################################
+### others
+datafix400_v122_H2016_g110:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016_WVg110.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v122_G2015_NLTEH2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_G2015_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v122_H2016_NLTEH2008:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v122_H2016_NLTEH2004:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2004.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix400_v122_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2012_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix385_v122_H2012_LBLRTM:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_385_H2012_LBLRTM_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+datafix385_v122_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_385_H2012_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v122.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v122.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.22_f90
+
+################### DISTRIBUTIONS ########################################
+#### 1) to make the distributions, go to /home/sergio and look for kcartaV1xx
+#### 2) since all the KCARTA directories are under kcartaV1xx, rename this to 
+####    kcartaV122 eg               mv kcartaV110 kcartaV122
+#### 3) rm old sybolic link         rm KCARTA 
+#### 4) make new symbolic link      ln -s  kcartaV122 KCARTA 
+#### 5) cd to this dir              cd KCARTA
+#### 6) rm old symbolic link SRC    rm SRC
+#### 7) make new symbolic link SRC  ln -s SRCv1.22_f90 SRC
+#### 8) cd to this dir              cd SRC 
+#### 9) make whatever distribution you want! eg make dist 
+
+#### (A) : this has ALL the source code 
+####       clear sky rad transfer, clear sky jacobians, scatter, nlte and
+####       the nlte profiles
+dist:
+	cd ../.. ;				\
+	rm $(KTAR) 2> /dev/null || true;	\
+	tar -cf $(KTAR)				\
+		kcartaV122/BIN/kcarta.x90		\
+		kcartaV122/BIN/bkcarta.x90	\
+		kcartaV122/LIB                  \
+		kcartaV122/INCLUDE 		\
+		kcartaV122/SCATTERCODE          \
+		kcartaV122/DOC			\
+		kcartaV122/MATLAB		\
+		kcartaV122/README.1ST		\
+		kcartaV122/SCRIPTS		\
+		kcartaV122/SRCv1.22_f90/*.f90         \
+		kcartaV122/SRCv1.22_f90/Makefile    \
+		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
+		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
+		kcartaV122/UTILITY;		\
+	chmod 664 $(KTAR)
+
+bugfix:
+	cd ../.. ;				\
+	rm $(KTARBUG) 2> /dev/null || true;	\
+	tar -cf $(KTARBUG)			\
+		kcartaV122/README.1ST		\
+		kcartaV122/INCLUDE		\
+		kcartaV122/DOC/kcarta1.21_f90*	\
+		kcartaV122/SRCv1.22_f90/Makefile    \
+		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
+		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
+		kcartaV122/SRCv1.22_f90/*.f90;        \
+	chmod 664 $(KTARBUG)
+
+##############################
+#### (B) this is the MATLAB directory, for reading in binary kCARTA output
+matlab:
+	cd ../.. ;				\
+	rm $(KMATLAB) 2> /dev/null || true;     \
+	tar -cf $(KMATLAB)			\
+		kcartaV122/MATLAB;		\
+	chmod 664 $(KMATLAB)
+
+data:
+	cd ../.. ;				\
+	rm $(KDATA) 2> /dev/null || true;	\
+	tar -cf $(KDATA)			\
+		/asl/data/kcarta/KCARTADATA;	\
+	chmod 664 $(KDATA)
+
+kcompdata:
+	./tarrer_kcompdata.sc
+
+##############################
+### (C) this is the very useful wrapper that Howard Motteler wrote
+###     the main version would be in /home/motteler/radtrans/kcwrap/kcwrap
+###     some copies would exist in the KCARTA/SCRIPTS directory
+kcwrap:
+	cd ../.. ;				\
+	rm $(KCWRAP) 2> /dev/null || true;	\
+	tar -cf $(KCWRAP)			\
+		/asl/matlab/rtptools		\
+		/asl/matlab/h4tools		\
+		/asl/matlab/sconv		\
+		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
+		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
+		kcartaV122/SCRIPTS;		\
+	chmod 664 $(KCWRAP)
+
+ftp: $(KTAR)
+	scp $(KTAR) $(KFTP)
+
+##############################
+#### (D) these are the basic files we give out : 
+####     clear sky radtransfer and jacobians, as well as nlte source code
+
+#these are the files for the basic kCARTA package
+# the c* and h* files have been moved to OLD_CONT_BLOCKDATA_AND_XSEC
+#   as they are no longer needed
+#kc1 = j*.f90 kcarta*.f90 kcoeff*.f90 n*.f90 \
+#      r*.f90 s_*.f90  INCLUDE/*.param Makefile
+
+giveout:
+	cd ../.. ;				\
+	rm $(KGIVEOUT) 2> /dev/null || true;	\
+	tar -cf $(KGIVEOUT)			\
+		KCARTA/BIN/kcarta.x90	\
+		KCARTA/BIN/bkcarta.x90	\
+		KCARTA/LIB                  \
+		KCARTA/INCLUDE 		\
+		KCARTA/DOC			\
+		KCARTA/MATLAB		\
+		KCARTA/README.1ST		\
+		KCARTA/SCRIPTS		\
+                KCARTA/INCLUDE/*.param      \
+                KCARTA/SRCv1.22_f90/freqfile.f90  \
+                KCARTA/SRCv1.22_f90/j*.f90        \
+                KCARTA/SRCv1.22_f90/k*.f90        \
+                KCARTA/SRCv1.22_f90/n*.f90        \
+                KCARTA/SRCv1.22_f90/r*.f90        \
+                KCARTA/SRCv1.22_f90/s_*.f90       \
+                KCARTA/SRCv1.22_f90/spline_*.f90  \
+                KCARTA/SRCv1.22_f90/clear_scatter_misc.f90  \
+                KCARTA/SRCv1.22_f90/singlescatter.f90       \
+                KCARTA/SRCv1.22_f90/Makefile    \
+		KCARTA/UTILITY;		\
+	chmod 664 $(KGIVEOUT)
+
+giveout_bugfix:
+	cd ../.. ;				         \
+	rm $(KTARBUGGIVEOUT) 2> /dev/null || true;	 \
+	tar -cf $(KTARBUGGIVEOUT)			 \
+		KCARTA/README.1ST		         \
+		KCARTA/INCLUDE		         \
+		KCARTA/DOC/kcarta1.18*	         \
+		KCARTA/SRCv1.22_f90/Makefile             \
+                KCARTA/SRCv1.22_f90/freqfile.f90           \
+                KCARTA/SRCv1.22_f90/j*.f90                 \
+                KCARTA/SRCv1.22_f90/k*.f90                 \
+                KCARTA/SRCv1.22_f90/n*.f90                 \
+                KCARTA/SRCv1.22_f90/r*.f90                 \
+                KCARTA/SRCv1.22_f90/s_*.f90                \
+                KCARTA/SRCv1.22_f90/spline_*.f90           \
+                KCARTA/SRCv1.22_f90/clear_scatter_misc.f90 \
+                KCARTA/SRCv1.22_f90/singlescatter.f90      \
+                KCARTA/SRCv1.22_f90/*akefile*;            \
+	chmod 664 $(KTARBUGGIVEOUT)
+
+giveout_aux:
+	cd ../.. ;                              \
+	rm $(KTARAUX) 2> /dev/null || true;     \
+	tar -cf $(KTARAUX)                      \
+		KCARTA/INCLUDE                  \
+		KCARTA/TEST/R*		     \
+		KCARTA/TEST/b*                  \
+		KCARTA/TEST/t*                  \
+		KCARTA/TEST/*.m                 \
+		KCARTA/TEST/*.sc                \
+		KCARTA/TEST/COMPARISON_v1.22_f90    \
+		KCARTA/DOC                  \
+		KCARTA/MATLAB               \
+		KCARTA/README.1ST           \
+		KCARTA/SCRIPTS              \
+		KCARTA/INCLUDE/*.param      \
+		KCARTA/INCLUDE/*.m          \
+		KCARTA/UTILITY;             \
+	chmod 664 $(KTARAUX) 
+
+################### DISTRIBUTIONS ########################################

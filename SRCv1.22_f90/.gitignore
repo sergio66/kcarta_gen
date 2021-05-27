@@ -1,0 +1,5 @@
+*.mod
+*.o
+WORKS_*
+RayTrace
+ugh*

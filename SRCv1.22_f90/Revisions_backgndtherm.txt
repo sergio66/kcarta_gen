@@ -1,0 +1,551 @@
+from n_misc.f90
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+so for example Nick Nalli says refl therm needs to be done at satzen
+see eg KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/template_Qrad0_NalliEmiss.nm
+lthese settings will use rth = (1-e)/pi rdownwell where rdownwell is computes at p.satzen
+  kThermalAngle = p.satzen(ii)
+  iaaOverride(2,4) = +2
+
+these settings will use rth = (1-e) rdownwell where rdownwell is computed at p.satzen
+  kThermalAngle = p.satzen(ii)
+  kThermalAngle = p.satzen(ii)  .. this is done automatically in n_rtp.f90
+                                   if following two are set
+  iaaOverride(2,4) = +2
+  iaaOverride(2,3) = 10
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+also look at 
+[sergio@strow-interact SRCv1.21_f90]$ more ../TEST/REFL_BACKGND_THERMAL/test_iaaOverride.m
+%% kcarta = '/home/sergio/KCARTA/SRC/bkcarta.x'; %% testing
+kcarta = '/home/sergio/KCARTA/BIN/bkcarta.x_f90_121_400ppmv_H16';
+kcarta = '/home/sergio/KCARTA/BIN/bkcarta.x';
+kcarta = '/home/sergio/KCARTA/BIN/bkcarta.x_f90_400ppmv_H16';
+
+iRunKC = -1;  %% already have done the runs
+iRunKC = +1;  %% need to run KCARTA
+
+%% ia = -1 : no bkg gnd therm
+%%    =  0 : fast thermal, acos(3/5) uppper layers, accurate angle lower down DEFAULT KC
+%%    =  1 : fast thermal, acos(3/5) everywhere
+%%    =  2 : fast thermal, acos(3/5) uppper layers, linear-in-tau NOT YET CODED so put NAN
+%%    =  3 : fast thermal, accurate angle at ALL Layers
+%%    =  4 : regular     quadrature angles go 0:10:90
+%%    =  5 : gaussnewton quadrature angles go according to gauss newton, sum using weights
+%%    =  6 : expgaussnewton quadrature angles go according to exp gauss newton, sum using weights
+
+%% ia = -1        0         1            2      3         4       5    6
+%% no bkth   <--------------------- backgnd them included ---------------->
+
+iaP = [1 2 3 4 5 49];
+iaP = [1 2 3 4 5 49 6]; %% profile 6 is very hot and humid
+
+iaA = [-1 0 1 2 3 4 5 6];
+iaA = [0];   %% default
+
+if iRunKC > 0
+  make_toa_and_bkgntherm
+end
+
+>>>>>>>>>>>>>>>>>>>>>>>>>
+
+also look at ../TEST/REFL_BACKGND_THERMAL/make_toa_and_bkgntherm.m
+%% generate the kCARTA TOA rads, and background thermal, for set of profiles
+
+rmer = ['!/bin/rm  NEW/data_bkgthm1*; /bin/rm  NEW/data_toa1*; /bin/rm *.log'];
+eval(rmer);
+
+iRunKC = 1
+if iRunKC > 0
+  %% just background thermal
+  for ppp = 1:length(iaP)
+    pp = iaP(ppp);
+    fprintf(1,'backgnd thermal profile %3i of 7 \n',ppp)
+    for iaa = 1 : length(iaA)
+      ia = iaA(iaa);
+      GH = num2str(ia+1);
+      outnml = ['NEW/outnml_bkgthm' GH '_prof_' num2str(pp) '.nml'];
+      outfile = ['NEW/data_bkgthm'  GH '_prof_' num2str(pp) '.dat'];
+
+      %% default
+      AB = 0;    %% iaaOverrideDefault(2,3)
+      CD = -1;   %% iaaOverrideDefault(2,4)
+      EF = 0;    %% iaaOverrideDefault(2,5)
+      if ia == -1
+        AB = -1;   %% no thermal
+      elseif ia == 0
+       AB = 0;   %% fast thermal, acos(3/5) uppper layers, accurate angle lower down DEFAULT kCARTA ******
+       sedderx = ['!sed ''/654654/!d'' out' num2str(GH) '.log > l2g_out' num2str(pp) 'a.log'];
+      elseif ia == 1
+        AB = 0;   %% fast thermal
+        CD = 1;   %% acos(3/5) everywhere
+      elseif ia == 2
+        AB = 0;   %% fast thermal
+        CD = -2;  %% acos(3/5) upper layers, accurate angle lower down, linear-in-tau
+      elseif ia == 3
+        AB = 1;  %% integrate
+        EF = 0;  %% use accurate diffusive angle at ALL Layers (so this is not really integration)
+      elseif ia == 4
+        AB = 1;  %% integrate
+        EF = -1; %% newton quad
+      elseif ia == 5
+        AB = 1;  %% integrate
+        EF = +1; %% gaussian quad
+      elseif ia == 6
+        AB = 1;  %% integrate
+        EF = +2; %% exponential gaussian quad ala LBLRTM, const T across layer?
+      end
+  
+      sedder = ['!sed -e "s/AB/' num2str(AB) '/g"  -e "s/CD/' num2str(CD) '/g" -e "s/EF/' num2str(EF) '/g"'];
+      sedder = [sedder ' -e "s/GH/'  GH '/g"'];
+      sedder = [sedder ' -e "s/PP/'  num2str(pp) '/g"'];        
+      sedder = [sedder ' template_iaaOverride_backthermal.nml  > ' outnml];    
+      eval(sedder)
+
+      kcartaer = ['!time ' kcarta ' ' outnml ' ' outfile];
+      fprintf(1,'%s \n',kcartaer)
+      eval(kcartaer);
+   
+      if ia == 0
+        eval(sedderx)
+        %disp('ret to continue'); pause
+      end
+    end
+  end
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %% TOA rad including background thermal
+  for ppp = 1:length(iaP)
+    pp = iaP(ppp);
+    fprintf(1,'TOA rad profile %3i of 7 \n',ppp)
+    for iaa = 1 : length(iaA)
+      ia = iaA(iaa);
+      GH = num2str(ia+1);
+      outnml = ['NEW/outnml_toa' GH '_prof_' num2str(pp) '.nml'];
+      outfile = ['NEW/data_toa'  GH '_prof_' num2str(pp) '.dat'];
+
+      %% default
+      AB = 0;    %% iaaOverrideDefault(2,3)
+      CD = -1;   %% iaaOverrideDefault(2,4)
+      EF = 0;    %% iaaOverrideDefault(2,5)
+      if ia == -1
+        AB = -1;   %% no thermal
+      elseif ia == 0
+       AB = 0;   %% fast thermal, acos(3/5) uppper layers, accurate angle lower down DEFAULT kCARTA ******
+       sedderx = ['!sed ''/987987/!d'' out' num2str(GH) '.log > l2s_out' num2str(pp) 'a.log'];
+       sedderx = ['!sed ''/654654/!d'' out' num2str(GH) '.log > l2s_out' num2str(pp) 'ax.log'];
+      elseif ia == 1
+        AB = 0;   %% fast thermal
+        CD = 1;   %% acos(3/5) everywhere
+      elseif ia == 2
+        AB = 0;   %% fast thermal
+        CD = -2;  %% acos(3/5) upper layers, accurate angle lower down, linear-in-tau
+      elseif ia == 3
+        AB = 1;  %% integrate
+        EF = 0;  %% use accurate diffusive angle at ALL Layers (so this is not really integration)
+      elseif ia == 4
+        AB = 1;  %% integrate
+        EF = -1;  %% newton quad
+      elseif ia == 5
+        AB = 1;  %% integrate
+        EF = +1;  %% gaussian quad
+      elseif ia == 6
+        AB = 1;  %% integrate
+        EF = +2; %% exponential gaussian quad ala LBLRTM, const T across layer?
+      end
+  
+      sedder = ['!sed -e "s/AB/' num2str(AB) '/g"  -e "s/CD/' num2str(CD) '/g" -e "s/EF/' num2str(EF) '/g"'];
+      sedder = [sedder ' -e "s/GH/'  GH '/g"'];
+      sedder = [sedder ' -e "s/PP/'  num2str(pp) '/g"'];              
+      sedder = [sedder ' template_iaaOverride_toarad.nml  > ' outnml];    
+      eval(sedder)
+
+      kcartaer = ['!time ' kcarta ' ' outnml ' ' outfile];
+      eval(kcartaer);
+
+      if ia == 0
+        eval(sedderx)
+        %disp('ret to continue'); pause
+      end
+
+    end
+  end
+end
+
+>>>>>>>>>>>>>>>>>>>>>>>>>
+look at ../TEST/REFL_BACKGND_THERMAL/template_iaaOverride_backthermal.nml
+ $nm_params
+ namecomment    =  '******* PARAMS section *******'
+
+ !! ktempervary
+ iaaOverride(2,1) = -1
+
+ !! just want thermal background
+ iaaOverride(2,6) = -2
+
+ !! iDoThermal = -1 : no background thermal
+ !!            =  0  : backgndthermal with diffusive approx <DEFAULT> 1/pi .. further control with iaaOverrideDefault(2,4)
+ !!            = +10 : backgndthermal with diffusive approx <DEFAULT> 1/1  .. further control with iaaOverrideDefault(2,4)
+ !!            = +1 : backgndthermal with integration over angles     1/pi .. further control with iaaOverrideDefault(2,5)
+ !!            = +2 : backgndthermal with integration over angles,    1/pi .. linear-in-tau temperature variation
+ iaaOverride(2,3) = AB
+
+ !! iSetThermalAngle = -1 acos(3/5) at upper layers, accurate angle lower down, const layer T  <DEFAULT>
+ !!                  = +1 acos(x) at all layers, where x is user set in kThermalAngle or rakThermalAngle
+ !!                  = -2 acos(3/5) at upper layers, accurate angle lower down, linear-in-tau layer T
+ iaaOverride(2,4) = CD
+
+ !! iGaussQuad = 0  default ??
+ !!            = -1 newton quad
+ !!            = +1 gauss quad
+ iaaOverride(2,5) = EF
+
+ $end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+! Copyright 2000
+! University of Maryland Baltimore County
+! All Rights Reserved
+
+!! use must precede IMPLICIT and INCLUDE statements
+
+MODULE n_misc
+
+USE basic_common
+USE freqfile
+USE spline_and_sort_and_common
+USE s_misc
+USE n_rad_jac_scat
+
+IMPLICIT NONE
+
+CONTAINS
+
+!************************************************************************
+! set the default parameter values, for those that are not set in *PARAM
+! read the parameter file to set parameters that have optional values
+    SUBROUTINE SetDefaultParams
+
+! NOTE !!!! also double check subroutine EXTRAPAR in strings2.f
+! NOTE !!!! also double check subroutine SETDEFAULTPARAMS in misc.f
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/kcartaparam.f90'
+
+    INTEGER :: iI,iJ
+
+! acos(3/5) * 180/kPi
+    kThermalAngle = 53.1313010235415598
+          
+! set default values here
+! kLayer2Sp
+!     -2     Layer transmittance            t(i)=exp(-k(i))
+!     -1     Layer Optical depth            k(i)
+!      1     Layer-to-Space Optical Depth   k2s(i)=sum(j=i,n)(k(j))
+!      2     Layer-to-Space transmittance   t2s(i)=sum(j=i,n)exp(-k(j))
+!      3     Layer-to-Ground Optical Depth  k2s(i)=sum(j=1,i)(k(j))
+!      4     Layer-to-Ground transmittance  t2s(i)=sum(j=1,i)exp(-k(j))
+    kLayer2Sp    = -1
+
+! kCKD      == -1,00,21,23,24 sets which continuum version calculation to do
+!              -1 : no continuum
+! ----------------------------------------------------------------------------
+! AER-CKD      01 : self, foreign   is by CKD and modified by Mlawer/Tobin
+!                                 ... this is the MT_CKD version of Dec 2002
+!       AIRS   02 : version 02    ... this is the MT_CKD version of Dec 2002,
+!                                     but CS modified by Scott Hannon Aug 2003
+!       AIRS   03 : version 03    ... this is the MT_CKD version of Dec 2002,
+!                                     but CS modified by Scott Hannon Jan 2004
+!       AIRS   04 : version 04    ... this is the MT_CKD version of Dec 2002,
+!                                     CS,CF modified by Scott Hannon Jan 2004
+!       AIRS   05 : version 05    ... this is the MT_CKD version of Dec 2002,
+!                                     CS,CF modified by Scott Hannon Jan 2004
+!                                     (so far it looks like CKD v4)
+!                                     On top of that it puts Dave Tobin's cs,cf
+!                                     between 1300-1800 cm-1
+!       AIRS   06 : version 06    ... this is the MT_CKD version of Dec 2002,
+!                                     CS,CF modified by Scott Hannon Jan 2004
+!                                     extremely similar to CKD 4, except have
+!                                     fixed the problem at 850 cm-1 which is
+!                                     really HNO3 and not a continuum problem
+! In asl:/carrot/s1/strow/Tobin/Tobin_radish/NISTdata2/New/, use
+! cs0_tsl0_hr.mat and cf0_tsl0_hr.mat.  makecons.m with flag=7
+! looks like it should load things in correctly.
+! ----------------------------------------------------------------------------
+! AER-STD      25 : self, foreign   is by CKD and modified by Mlawer/Tobin
+!                                 ... this is the MT_CKD 2.5 version of Sep 2011
+! ----------------------------------------------------------------------------
+! AER-STD      27 : self, foreign   is by CKD and modified by Mlawer/Tobin
+!                                 ... this is the MT_CKD 2.5 version of Feb 2016
+! AER-STD      32 : self, foreign   is by CKD and modified by Mlawer/Alvarado
+!                                 ... this is the MT_CKD 3.2 version of Feb 2017
+! ----------------------------------------------------------------------------
+! old versions of AER CKD
+! AER-CKD      00 : version 00
+! AER-CKD      21 : version 2.1
+! AER-CKD      23 : version 2.3
+! AER-CKD      24 : version 2.4
+! ----------------------------------------------------------------------------
+! ----------------------------------------------------------------------------
+! ----------------------------------------------------------------------------
+! these were our interim versions (made by us, basically MT_CKD 1)
+! no longer in use!
+
+!    RAL       12 : self = version 2.4, foreign = blend of 0.0 and 2.4
+!                                       from 0-1575, 1625-3000, use v2.4
+!                                       from 1575-1625 linearly blend v2.4,0.0
+!                                       using a triangle
+!    RAL       13 : self = version 2.3, foreign = dave tobin's v2.3
+!    RAL       90 : self = version 2.4, foreign = blend of 2.4,Tobin's thesis
+!                                       from 0-1300, 1900-3000, use v2.4
+!                                       from 1300-1900 use Tobins thesis
+!    RAL       50 : self, foreign       blend of 2.4, RAL data
+!                                       from 0-1300, 1900-3000, use v2.4
+!                                       from 1300-1900 use RAL data
+!                                       mst50.m used linear tempr interpolation
+!    RAL       51 : self, foreign       blend of 2.4, RAL data
+!                                       from 0-1300, 1900-3000, use v2.4
+!                                       from 1300-1900 use RAL data
+!                                       mst51.m used power tempr interpolation
+!                                       Need to be careful ... I put in Dave
+!                                       Tobin's fixes for CS in the 600-1100
+!                                       cm-1 range; see mst51_tobin.m in
+!                                       the SPECTRA directory (~0.9*ckd24)
+!    RAL       52 : self, foreign       blend of 2.4, RAL data
+!                                       from 0-1300, 1900-3000, use v2.4
+!                                       from 1300-1900 use RAL data
+!                                       mst52.m used power tempr interpolation
+!                                       and says CF(296)=CF(243); so use the
+!                                       foreign broadened 243 data to get CS243
+!    RAL       55 : self, foreign       same as 51 above, but uses
+!                                a) CS fudge factor of 0.87 for v <= 1137 cm-1
+!                                b) CS fudge factor of 3.20 for v >= 2394 cm-1
+!                                c) some fudge factors for CF in 1400-1700 cm-1
+!                                d) CKD 2.4 used upto 1400 cm-1
+!    RAL       56 : self, foreign       same as 51 above, but uses
+!                                a) John Taylor fudge between 600-1200 cm-1
+!                                   instead of Dave Tobin fudge
+!                                b) CS fudge factor of 3.20 for v >= 2394 cm-1
+!                                c) some fudge factors for CF in 1400-1700 cm-1
+!                                   these are better than the above fudges
+!                                d) CKD 2.4 used upto 1400 cm-1
+!    RAL       60 : self, foreign     is a hybrid of 51,55 done by scott
+!                                     so that bias errors are reduced, as
+!                                     a function of water column amount.
+!                                     eventually will include tuning coeffs
+! ----------------------------------------------------------------------------
+! now we only allow
+! %% this is new list
+! %% 0,21,23,24 are the 1990s CKD
+! %% 1,25       are new MT-CKD
+! %% 4 6        are derived from MT-CKD1 (cant remember how to derived 2,3,5)
+! %%            are derived from MT-CKD25
+
+! origCKD = [0 21 23 24];
+! MTCKD1  = [ [1] [4 6]];
+! MTCKD25 = [ [25 32]  ];
+! allowedCKD = [origCKD MTCKD1 MTCKD25];
+! ----------------------------------------------------------------------------
+
+    kCKD = 25
+
+! kGasTemp  ==  1 if we use the CO2 profile temperatures (if present)
+!              -1 if we just do the weighted average to find the MixVertTemps
+    kGasTemp = -1
+
+! kLongOrShort == whether the user wants to save ALL header info (+1) or
+!                 just a portion (-1) or output just the basic results (0)
+    kLongOrShort = 1
+
+! kActualJacs = -1 if we compute and output ALL profile(z) jacs
+!               20 if we compute only Q(z) jacs, output 0's everywhere else
+!               30 if we compute only T(z) jacs, output 0's everywhere else
+!               40 if we compute only W(z) jacs, output 0's everywhere else
+!               50 if we compute only S(z) jacs, output 0's everywhere else
+!              100 if we compute only stemp and column gas jacs
+! for the following the d/dT only uses gases in iaJacob{}
+! kActualJacs = -2 if we compute and output ALL profile(z) jacs
+!               32 if we compute only T(z) jacs, output 0's everywhere else
+!              102 if we compute only stemp and column gas jacs
+    kActualJacs = -1    !!! default
+
+! kActualJacsT = -1, kActualJacsB = -1
+! if we set kActualJacs = 100, then we can also set the layers of the column
+! that we want to perturb; default = -1/-1 means all layers (kActualJacs = 100)
+! else kActualJacsABCXYZ sets these as kActualJacsT=ABC, kActualJacsB=XYZ
+    kActualJacsT = -1
+    kActualJacsB = -1
+
+! kJacobOutput == -1 if we output d(radiance)/dq,d(radiance)/dT
+!                  0 if we output d(radiance)/dq * q, d(radiance)/dT
+!                  1 if we output d(BT)/dq * q, d(BT)/dT
+    kJacobOutput = 1
+
+! kFlux == -1 if we do not want flux/OLR computations or output NLTE
+!                                                        Planck modifiers
+!       ==  1 if we want DNWELL flux at every layer      units = mW m-2
+!       ==  2 if we want flux computations : output      units = kelvin day-1
+!       ==  3 if we want UPWELL flux at every layer      units = mW m-2
+!       ==  4 if we want outgoing OLR only at TOA,       units = mW m-2
+!       ==  5 if we want outgoing OLR at TOA, ILR at GND units = mW m-2
+!       ==  6 if we want DNWELL and UPWELL flux at each layer units = mW m-2
+!   --> ==  0 if we want to output NLTE Planck modifiers
+    kFlux = -1
+
+! kPlanckOut == -1 if we do not want to output Planck modifiers, 1 if we do
+    kPlanckOut = -1
+
+! only effective in following cases
+! if kRTP = -1 (text input from nm_radnce, profile input from text file)
+! if kRTP =  0 (text input from nm_radnce, profile input from rtp file)
+! kSurfTemp = -1 == want to use user supplied surface temp in *RADNCE
+!              1 == want to use user supplied surface temp in *RADNCE as
+!                     an offset to pressure interpolated temperature
+! so in above RTP cases if kSurfTemp < 0 : use raTSurf(iI)
+!                          kSurfTemp > 0 : use raTSurf(iI) + InterpedTemp
+    kSurfTemp = -1
+
+! kRTP = -5  : read LBLRTM style LAYERS profile (edited TAPE 6); set atm from namelist
+! kRTP = -6  : read LBLRTM style LEVELS profile (       TAPE 5); set atm from namelist
+! kRTP = -10 : read TEXT style LEVELS   profile; set atm from namelist
+! kRTP = -2  : read GENLN4 style LAYERS profile; set atm from namelist
+! kRTP = -1  : read old style kLAYERS   profile; set atm from namelist
+! kRTP =  0  : read RTP style kLAYERS   profile; set atm from namelist
+! kRTP = +1  : read RTP style kLAYERS   profile; set atm from RTP file
+! kRTP = +2  : use JPL/NOAA style LAYERS profile; set atm from namelist
+    kRTP = 1
+
+! kTempJac == -2 if we only want d/dT(planck) in temperature jacobian
+!             -1 if we only want d/dT((1-tau)(tau->sp)) in temp jacobian
+!              0 if we want complete d/dT(planck) + d/dT(tau) in temp jac
+    kTempJac = 0
+
+! the following cannot be controlled by the user using *PARAMS
+! all the radiance parameters and the Jacobian parameter
+! kJacobian ==  1 if analytic Jacobians are to be computed
+!              -1 if we do the standard Genln2 computations w/o Jacobians
+    kSolar        = 1     !turn on solar
+    kSolarAngle   = 0.0   !solar angle
+    kSolarRefl    = -1.0  !use (1-ems)/pi
+    kThermal      = 0     !use fast diffusive approx
+    kThermalAngle = -1.0  !use acos(3/5) in upper layers
+    kThermalJacob = 1     !use thermal backgnd in Jacobians
+
+    kJacobian = -1        !do not do Jacobians
+    kScatter  = -1        !do not do scattering computations
+
+    k100layerCloud = -1   !assume rtp file does NOT have 100 layer cloud
+
+! 2016
+! allow nm_params to define defaults
+!   GENERAL iaDefaults(1,:) = iSARTAChi   iSPlineType iCO2Chi  iMatlabORf77   iWhichScatterCode iMethod
+!   RT      iaDefaults(2,:) = iGaussPts iGaussQuad  iSnell      iInterpType  iWhichRT  (kTemperVary set in mn_radnce)
+!   NLTE    iaDefaults(3,:) = iCurrent    iTalk       iTestGenln2  iNoPressureShiftCO2 iQtips_H98
+!                             iLinearOrSpline iDoCO2Continuum iMethod
+!   TAPE5/6     iaDefaults(5,:) = iReplaceZeroProf iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
+!      INTEGER iaaOverrideDefault(4,10)
+!      COMMON/comBlockDefault/iaaOverrideDefault
+    iaaOverrideDefault = -9999
+          
+! GENERAL
+    caaTextOverrideDefault  = 'notset'
+          
+    iaaOverrideDefault(1,1) = -1    !!! iSARTAChi = -1  for no tuning, see kcartabasic/kcartamain/kcartajpl
+                                    !!!                 kcartaparallel and finally used in kcoeffMAIN.f
+    iaaOverrideDefault(1,2) = +1    !!! iSplinetype = +1 for SUBR iSetSplineType in kcartamisc.f
+    iaaOverrideDefault(1,3) = +2    !!! iCO2Chi = +2     for SUBR multiply_co2_chi_functions in kcoeffMAIN.f
+    iaaOverrideDefault(1,4) = +1    !!! iMatlabORf77 = +1  use Maltab style uncompression,  kcoeffMAIN.f
+    iaaOverrideDefault(1,5) = +5    !!! iWHichScatterCode = 5 for PCLSAM in rtp_interface.f
+    iaaOverrideDefault(1,6) = +1    !!! iReadP = 1 when assuming GENLN2 style profile in n_pth_mix.f
+    iaaOverrideDefault(1,7) = -1    !!! iLogOrLinear = -1 when interp scat tables SUBR INTERP_SCAT_TABLE2
+                                    !!!   in clear_scatter_misc.f
+    iaaOverrideDefault(1,8) = -1    !!! -1 to keep h.vcmin/h.vcmax as read in from RTPfile, +1 to override with rf1,rf2
+    iaaOverrideDefault(1,9) =  0    !!! iCO2WVCA = +2 will turn it on for SUBR add_co2_wv_n2_continuum in kcoeffMAIN.f/kcoeff_common.f90
+! new for cloudy jacs
+    iaaOverrideDefault(1,10) =  -1  !!! output only final jacobian (ie wieghted sum); if you set +1, it will output all jacobians
+                                    !!!   so the file can be 5 times larger than needed (ice/water/both/clear/total) HUGE! SAD!
+
+! RadTrans
+    iaaOverrideDefault(2,1) = kTemperVary !!! kTemperVary .... can be reset in nm_radnce, and then subr SetkTemperVary
+    iaaOverrideDefault(2,2) = +3    !!! THIS IS LBLRTM STYLE iGaussPts = 3 for flux and downwell gauss quad
+!!!   see SUBR IntegrateOverAngles_LinearInTau in rad_quad.f
+    iaaOverrideDefault(2,3) = 0     !!! SUBR BackGndThermal in rad_diff.f
+!!! iDothermal = kThermal; if iDoThermal = -1, no backgnd thermal computed
+!!!                                      =  0, backgndthermal with diffusive approx << DEFAULT >>
+!!!                                            --->>> control further with iaaOverrideDefault(2,4) <<<---
+!!!                                      = +1, use integration over angles, const-in-tau  layer T
+!!!                                            --->>> control further with iaaOverrideDefault(2,5) <<<---
+!!!                                      = +2, use integration over angles, linear-in-tau layer T
+!!!   this is the main routine, called by all downwelling RT routines in rad_main.
+!!!   all of them have -1 for iDoAcos35
+!!!     calls IntegrateOverAngles_LinearInTau (iDoThermal = 2)
+!!!     calls IntegrateOverAngles             (iDoThermal = 1) -- also can set iaaOverrideDefault(2,5)
+!!!     calls DoDiffusivityApprox             (iDoThermal = 0) << DEFAULT >>
+    iaaOverrideDefault(2,4) = -1    !!! SUBR radnce4RTP in rtp_interface.f
+!!!   raKThermalAngle(iC) = iaaOverrideDefault(2,4) in rtp_interface.f
+!!!     = -1, fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+!!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 (acos(3/5))
+!!!
+!!!   this sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+!!!                               = +1 for constant angle (typically acos(3/5)) in all layers
+!!!                               = -2 for same as -1, except linear-in-tau T variation
+!!! SUBR DoDiffusivityApprox in rad_diff.f uses this info
+!!!   iDiffMethod = kSetThermalAngle
+!!!     = -1 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
+!!!          differs from iaaOverrideDefault(2,5) = 0 since here, upper layers use acos(3/5) lower layers are accurate
+!!!                                                   while there, use layer-varying accurate acos(rDiffusive)
+!!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 = acos(3/5) << DEFAULT >>
+!!!           this can be controlled by kThermalAngle, either in nm_params for kRTP = +1
+!!!                                                   or rakThermalAngle() for kRTP = 0,-1
+!!!           so in nm_params : set iaaOverride(2,4) = 1, kThermalAngle = 50.0 and thay works!!!
+!!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
+!!!     = +2 diffusive background using LBLRTM style 3 exponetial gauss quad, not yet implemented
+    iaaOverrideDefault(2,5) = 0     !!! SUBR IntegrateOverAngles in rad_quad.f, called by SUBR BackGndThermal
+!!!   iGaussQuad =    -1 for integrate using newton quad 0:90/20:90 (VERY SLOW)
+!!!                    0 for accurate diffusivity                   (AT ALL LAYERS << DEFAULT >>)
+!!!                      so this differs from iaaOverrideDefault(2,3) = 0,iaaOverrideDefault(2,4) = -1
+!!!                      where acos(3/5) is used in upper ayers, and accurate diffusive angle in lower layers
+!!!                   +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
+    iaaOverrideDefault(2,6) = +1    !!! iUsualUpwell = +1 for upwell RT with surface term, << DEFAULT >>
+!!!                -1 with no surface,
+!!!                -2 to only dump downwelling backgnd
+!!!   see SUBR find_radiances in rad_main.f
+    iaaOverrideDefault(2,7) = -1    !!! iUseSnell = -1 for No  Snell law raytrace plus layer curvature effects, similar to SARTA (default)
+!!!           = +1 for Yes Snell law raytrace plus layer curvature effects
+!!!           = 0  for No  Snell law raytrace NO   layer curvature effects
+!!!   see SUBR FindLayerAngles in rad_angles.f
+    iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
+!!!   see SUBR Get_Temp_Plevs in n_pth_mix.f
+    iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
+!!!   see SUBR rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS in rad_main.f
+    iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = 5 for PCLSAM (Default)
+!!!   0 for ABS clouds, 2 for RTPSEC, 3 for DISORT
+      
+! n_layers_lblrtm.f and n_pth_mix.f  TAPE5/6
+    iaaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration
+    iaaOverrideDefault(3,2) = +1    !!! iReplaceZeroProf = +1 to add in profiles TAPE5 does not have
+    iaaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
+!!!   in n_pth_mix.f
+
+    RETURN
+    end SUBROUTINE SetDefaultParams
+
+!************************************************************************
