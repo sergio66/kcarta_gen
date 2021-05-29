@@ -6,7 +6,7 @@ c and those of kCARTA
 c this file does the interfacing between Stamnes et al DISORT array dimensions,
 c and those of kCARTA
 
-      include '../INCLUDE/kcarta.param'
+      include '../INCLUDE/TempF90/kcarta.param'
 
 cccccccccccccccccccccc ORIGINAL rtspec variables ccccccccccccccccccccc
 cc

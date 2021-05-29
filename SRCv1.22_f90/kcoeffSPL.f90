@@ -18,11 +18,11 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
-!      include '../INCLUDE/kcartaparam.f90'
-!      include '../INCLUDE/airsheights_upperparam.f90'
-!      include '../INCLUDE/airslevels_upperparam.f90'
-!      include '../INCLUDE/airslevelheights_upperparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+!      include '../INCLUDE/TempF90/kcartaparam.f90'
+!      include '../INCLUDE/TempF90/airsheights_upperparam.f90'
+!      include '../INCLUDE/TempF90/airslevels_upperparam.f90'
+!      include '../INCLUDE/TempF90/airslevelheights_upperparam.f90'
 !      include '/home/sergio/KCARTADATA/NLTE/UA/airslevels_upperparam.f90'
 !      include '/home/sergio/KCARTADATA/NLTE/UA/airslevelheights_upperparam.f90'
 
@@ -87,7 +87,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iLDA,iLDB,iLDC,iM,iN,iK,iUm,iUn
     DOUBLE PRECISION :: dAlpha,dBeta
@@ -117,7 +117,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -176,9 +176,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daakPro     = final temperature interpolated matrix, in ABS COEFF
@@ -501,7 +501,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -592,7 +592,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaA1..5   = the matrices that will be interpolated in partial pressure
 ! raP/Rpart  = actual/rerefence water partial pressures
@@ -694,7 +694,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is if we want to see what a std US profile looks like about 0.005 mb
 ! it assumes the lower atm has CO2 ~ 385 ppmv
@@ -770,7 +770,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output
     REAL :: raRPressX(kMaxLayer),raRAmtx(kMaxLayer),raRTempx(kMaxLayer)

@@ -1,6 +1,10 @@
 c from KCARTADATA/General/NLTE 
 c the heights of the pressure levels for the kCARTA DATABASE 
 c this is for the upper atm 
+
+      INTEGER iXPlanet5
+      DATA iXPlanet5 /03/
+
        REAL DATABASELEVHEIGHTS(101) 
 C      ------------------------------------------------------------ 
 C PLEV with the AIRS layer boundary pressure heights (in km) 

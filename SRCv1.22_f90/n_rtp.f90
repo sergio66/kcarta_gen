@@ -31,7 +31,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
 
 ! output
@@ -115,7 +115,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNpmix     = number of mixed paths read in from mixfile
 ! iaMPSetForRad = array telling which MP set to associate with which atm
@@ -259,7 +259,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iAFGLProf  = which AFGL prof to use? 1 .. 6
 ! caPFName = character*80 profile name
@@ -542,7 +542,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input params
     INTEGER :: iakSolar(kMaxAtm),ctype1,ctype2
@@ -1110,14 +1110,14 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
     INTEGER :: inatm   ! Added ESM
     INTEGER :: iProfilelayers2   ! Added ESM
           
     REAL :: raaPrBdry(kMaxAtm,2)    ! Added ESM
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! input params ---------------------------------------------------->
 !   raaTemp/Press  = current gas profile parameters
@@ -1787,7 +1787,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
 
 ! caSetEmissivity= array that gives name of emissivity files (if any)
@@ -2868,10 +2868,10 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -2929,6 +2929,7 @@ CONTAINS
       write(kStdWarn,*) 'Expecting ',iNumGases,' gases in rtp profile'
       IF (head.ngas >= iNumGases) THEN
         ! read in rtp profile; hope all gas profiles are there
+        write(kStdWarn,*) 'Calling READRTP_1A since all expected gas profiles should be in rtp profile ...'
         CALL READRTP_1A(raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iaCld100Read,raaCld100Amt, &
@@ -2936,6 +2937,7 @@ CONTAINS
             iProfileLayers,raPresslevels,raThickness)
       ELSEIF (head.ngas < iNumGases) THEN
         ! read in rtp profile; augment profiles using US Std
+        write(kStdWarn,*) 'Calling READRTP_1B since not all expected gas profiles are in rtp profile ...'
         CALL READRTP_1B(raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iaCld100Read,raaCld100Amt, &
@@ -2973,10 +2975,10 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -3457,13 +3459,9 @@ CONTAINS
     END DO
 
 ! change layer thickness to meters, because this is what rad_* routines need
-    DO i = 1,kProfLayer
-      raThickness(i) = raThickness(i)/100
-      raH1(i) = raThickness(i)/1000         !!!dump out info in km
-    END DO
-    DO i = 1,kProfLayer+1
-      raP1(i) = raPresslevels(i)
-    END DO
+    raThickness = raThickness/100          !!! from cm to meteres
+    raH1        = raThickness/1000         !!!dump out info in km
+    raP1        = raPresslevels
 
     i = prof.nlevs - 1     !!!!!!number of layers in RTP file
     i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
@@ -3471,10 +3469,8 @@ CONTAINS
     write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'
     write (kStdWarn,*) '-----------------------------------------------'
     write (kStdWarn,*) 'Number of layers = ',iProfileLayers
-    write (kStdWarn,*) 'Lowest  layer : press levels (mb) = ', &
-    raP1(i),raP1(i+1)
-    write (kStdWarn,*) 'Highest layer : press levels (mb) = ', &
-    raP1(kProfLayer),raP1(kProfLayer+1)
+    write (kStdWarn,*) 'Lowest  layer : press levels (mb) = ',raP1(i),raP1(i+1)
+    write (kStdWarn,*) 'Highest layer : press levels (mb) = ',raP1(kProfLayer),raP1(kProfLayer+1)
     write (kStdWarn,*) '2 Lowest layers thickness (km) = ',raH1(i),raH1(i+1)
     write (kStdWarn,*) '2 Highest layers thickness (km) = ', &
     raH1(kProfLayer-1),raH1(kProfLayer)
@@ -3514,10 +3510,10 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -4005,10 +4001,9 @@ CONTAINS
     END DO
 
 ! change layer thickness to meters, because this is what rad_* routines need
-    DO i = 1,kProfLayer
-      raThickness(i) = raThickness(i)/100
-      raH1(i) = raThickness(i)/1000         !!!dump out info in km
-    END DO
+    raThickness = raThickness/100          !!! from cm to meteres
+    raH1        = raThickness/1000         !!!dump out info in km
+    raP1        = raPresslevels
 
     i = prof.nlevs - 1     !!!!!!number of layers in RTP file
     i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
@@ -4016,10 +4011,8 @@ CONTAINS
     write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'
     write (kStdWarn,*) '-----------------------------------------------'
     write (kStdWarn,*) 'Number of layers = ',iProfileLayers
-    write (kStdWarn,*) 'Lowest  layer : press levels (mb) = ', &
-    raP1(i),raP1(i+1)
-    write (kStdWarn,*) 'Highest layer : press levels (mb) = ', &
-    raP1(kProfLayer),raP1(kProfLayer+1)
+    write (kStdWarn,*) 'Lowest  layer : press levels (mb) = ',raP1(i),raP1(i+1)
+    write (kStdWarn,*) 'Highest layer : press levels (mb) = ',raP1(kProfLayer),raP1(kProfLayer+1)
     write (kStdWarn,*) '2 Lowest layers thickness (km) = ',raH1(i),raH1(i+1)
     write (kStdWarn,*) '2 Highest layers thickness (km) = ', &
     raH1(kProfLayer-1),raH1(kProfLayer)
@@ -4066,11 +4059,11 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -4533,7 +4526,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables, to process
     REAL :: rAmt,rT,rP,rPP,rZ
@@ -4559,39 +4552,78 @@ CONTAINS
       ! CALL DoStop
     END IF
 
-    IF ((rT < 140.0) .OR. (rT > 400.0)) THEN
-      WRITE(kStdWarn,1081)
-      WRITE(kStdWarn,1111) iIDgas,iCnt,rT
-      iError = 1
-      rT = 0.0
-      ! CALL DoStop
+    IF (kPlanet == 03) THEN 
+      IF ((rT < 140.0) .OR. (rT > 400.0)) THEN
+        WRITE(kStdWarn,1081)
+        WRITE(kStdWarn,1111) iIDgas,iCnt,rT
+        iError = 1
+        rT = 0.0
+        ! CALL DoStop
+      END IF
+
+      IF ((rP < 0.0) .OR. (rP > 1100 * 100.0)) THEN
+        WRITE(kStdWarn,1082)
+        WRITE(kStdWarn,1111) iIDgas,iCnt,rP
+        iError = 1
+        rP = 0.0
+        ! CALL DoStop
+      END IF
+  
+      IF ((rPP < 0.0) .OR. (rPP > 1100 * 100.0)) THEN
+        WRITE(kStdWarn,1083)
+        WRITE(kStdWarn,1112) iIDgas,iCnt,rPP,rP,rT,rZ,rAmt
+        !	if (iIDgas .EQ. 2) print *,'wah',rAmt,rAmt0,rPP0
+        iError = 2
+        rPP = 0.0
+        rAmt = 0.0
+        ! CALL DoStop
+      END IF
+  
+    ELSEIF (kPlanet == 04) THEN 
+      IF ((rT < 100.0) .OR. (rT > 300.0)) THEN
+        WRITE(kStdWarn,1081)
+        WRITE(kStdWarn,1111) iIDgas,iCnt,rT
+        iError = 1
+        rT = 0.0
+        ! CALL DoStop
+      END IF              
+
+      IF ((rP < 0.0) .OR. (rP > 13.0 * 100.0)) THEN
+        WRITE(kStdWarn,1082)
+        WRITE(kStdWarn,1111) iIDgas,iCnt,rP
+        iError = 1
+        rP = 0.0
+        ! CALL DoStop
+      END IF
+  
+      IF ((rPP < 0.0) .OR. (rPP > 13.0 * 100.0)) THEN
+        WRITE(kStdWarn,1083)
+        WRITE(kStdWarn,1112) iIDgas,iCnt,rPP,rP,rT,rZ,rAmt
+        !	if (iIDgas .EQ. 2) print *,'wah',rAmt,rAmt0,rPP0
+        iError = 2
+        rPP = 0.0
+        rAmt = 0.0
+        ! CALL DoStop
+      END IF
+  
     END IF
 
-    IF ((rP < 0.0) .OR. (rP > 1.0e5)) THEN
-      WRITE(kStdWarn,1082)
-      WRITE(kStdWarn,1111) iIDgas,iCnt,rP
-      iError = 1
-      rP = 0.0
-      ! CALL DoStop
-    END IF
-
-    IF ((rPP < 0.0) .OR. (rPP > 1.0e5)) THEN
-      WRITE(kStdWarn,1083)
-      WRITE(kStdWarn,1112) iIDgas,iCnt,rPP,rP,rT,rZ,rAmt
-      !	if (iIDgas .EQ. 2) print *,'wah',rAmt,rAmt0,rPP0
-      iError = 2
-      rPP = 0.0
-      rAmt = 0.0
-      ! CALL DoStop
-    END IF
 
     IF (iError == 1) THEN
       write(kStdWarn,4320) iIDGas,iCnt,rAmt0,rT0,rP0,rPP0
-      rP = 1.0e3
-      rT = 300.0	
-      rPP = 1.0e-3
-      rPP = 0.0	
-      rAmt = 0.000000
+      IF (kPlanet == 03) THEN
+        rP = 1.0e3
+        rT = 300.0	
+        rPP = 1.0e-3
+        rPP = 0.0	
+        rAmt = 0.000000
+      ELSEIF (kPlanet == 04) THEN
+        rP = 10.0
+        rT = 250.0	
+        rPP = 1.0e-3
+        rPP = 0.0	
+        rAmt = 0.000000
+      END IF
       write(kStdWarn,4321) iIDGas,iCnt,rAmt,rT,rP,rPP
     END IF
             
@@ -4601,8 +4633,8 @@ CONTAINS
  1081 FORMAT('negative or bad gas temp in PRFILE profile file')
  1082 FORMAT('negative or bad layer pressure in PRFILE profile file')
  1083 FORMAT('negative or bad gas partial press in PRFILE profile file')
- 4320 FORMAT('Orig  RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
- 4321 FORMAT('Reset RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
+ 4320 FORMAT('Orig  RTP gID # rA/T/P/PP ',I3,' ',I3,' ',1(ES10.4,' '),1(F10.5,' '),2(ES10.4,' '))
+ 4321 FORMAT('Reset RTP gID # rA/T/P/PP ',I3,' ',I3,' ',1(ES10.4,' '),1(F10.5,' '),2(ES10.4,' '))
 
     RETURN
     end SUBROUTINE FindError

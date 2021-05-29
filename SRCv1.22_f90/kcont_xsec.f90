@@ -30,7 +30,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaDQ     = analytic Jacobian wrt gas amount
 ! daaDT     = analytic Jacobian wrt temperature
@@ -136,7 +136,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: raAmt(kProfLayer),kFrStep
@@ -182,7 +182,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iGasID,iTag,iDoDQ
@@ -315,7 +315,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iMin,Imax tell over what layers to do the CKD calcs (where gasamt nonzero!)
 ! input
@@ -416,7 +416,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaCon    = output continuum coeffs (normalised)
 ! daaDQ     = analytic Jacobian wrt gas amount
@@ -553,7 +553,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaCon    = output continuum coeffs (normalised)
 ! daaDQ     = analytic Jacobian wrt gas amount
@@ -659,7 +659,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaCon    = output continuum coeffs (normalised)
 ! daaDQ     = analytic Jacobian wrt gas amount
@@ -792,7 +792,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaCon    = output continuum coeffs (normalised)
 ! daaDQ     = analytic Jacobian wrt gas amount
@@ -857,7 +857,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! iCount    = which of the iNumGases is being processed
 ! iGasID    = iaGasID(iCount) = gas ID of current gas

@@ -29,7 +29,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: raaPress(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
@@ -245,8 +245,8 @@ CONTAINS
 
     INTEGER :: iPLEV
           
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -609,9 +609,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! parameters
     CHARACTER(80) :: caPFname
@@ -879,7 +879,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaMix     = final mixing table
 ! iNpmix     = number of mixed paths that are read in = kProfLayer*Sets of MPs
@@ -951,7 +951,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! caStr130     = current line to be processed. If not enough info found in it,
 !                additional lines will be read in as necessary
@@ -1094,7 +1094,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! INPUT PARAMS
 ! caaM   = input array of character strings to be parsed
@@ -1177,7 +1177,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -1610,9 +1610,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! parameters
     CHARACTER(80) :: caPFname
@@ -1875,8 +1875,8 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER :: iplev
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! input
     CHARACTER(80) :: caPfName
@@ -2064,7 +2064,7 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -2253,7 +2253,7 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -2405,7 +2405,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iaCont(kMaxGas),iIDGas
                    
@@ -2430,7 +2430,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
@@ -2479,7 +2479,7 @@ CONTAINS
     SUBROUTINE getAFGL(iProfileNum,iIDgas,raPX,raPPX,raTX,raQX)
 
     implicit none
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     INTEGER :: iIDgas,iProfileNum
@@ -2639,7 +2639,7 @@ end
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -2812,7 +2812,7 @@ end
     SUBROUTINE get_us_std(iIDgas,raPX,raPPX,raTX,raQX)
 
     implicit none
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     INTEGER :: iIDgas
@@ -2937,7 +2937,7 @@ end
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables
     INTEGER :: iID,iNumGases        !current gasID, number gases from MOL/XSC

@@ -47,7 +47,7 @@
 !************************************************************************
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
     include 'kcarta_jplparam.f90'
 
     INTEGER :: MAXLAY,MXEMIS,MXCHAN
@@ -113,7 +113,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
     include 'kcarta_jplparam.f90'
 
     INTEGER :: MAXLAY,MXEMIS,MXCHAN
@@ -1169,7 +1169,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: MAXLAY,MXEMIS,MXCHAN
     PARAMETER(MAXLAY=kProfLayer)
@@ -2235,9 +2235,9 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airslevelsparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/airslevelsparam.f90'
+    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
 
     INTEGER :: iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
 
@@ -2602,7 +2602,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
     include 'kcarta_jplparam.f90'
 
     INTEGER :: MAXLAY,MXEMIS,MXCHAN

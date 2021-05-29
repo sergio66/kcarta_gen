@@ -71,7 +71,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
@@ -308,7 +308,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
@@ -643,7 +643,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! input var
     INTEGER :: iNumLayer
 ! output vars
@@ -747,7 +747,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     INTEGER :: iNumLayer            !! out of 100 layers, only eg 97 are used
@@ -827,7 +827,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     INTEGER :: iEstimate                                   !! rough guess about how many cloud lays there are ==> double that

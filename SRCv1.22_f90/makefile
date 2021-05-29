@@ -22,12 +22,12 @@ $(info   )
 mars_H16_default_f90:
 	make -f Makefile_v122_Intelf90 mars_datafix400_v122_H2016
 	cp_param_files_to_f90_mars.sc
-	make -f Makefile_v122_Intelf90 basic_mars
-	make -f Makefile_v122_Intelf90 basicTXT_mars	
-	make -f Makefile_v122_Intelf90 scat_mars
-	mv ../BIN/bkcarta_mars.x90        ../BIN/bkcarta_mars.x_f90_122_400ppmv_H16
-	mv ../BIN/bkcartaTXT_mars.x90     ../BIN/bkcartaTXT_mars.x_f90_122_400ppmv_H16
-	mv ../BIN/kcarta_mars.x90         ../BIN/kcarta_mars.x_f90_122_400ppmv_H16
+	make -f Makefile_v122_Intelf90 basic
+	make -f Makefile_v122_Intelf90 basicTXT
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta_mars.x_f90_122_400ppmv_H16
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT_mars.x_f90_122_400ppmv_H16
+	mv ../BIN/kcarta.x90         ../BIN/kcarta_mars.x_f90_122_400ppmv_H16
 
 385_H16_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2016

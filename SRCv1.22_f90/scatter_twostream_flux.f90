@@ -34,7 +34,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
@@ -225,7 +225,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
@@ -591,7 +591,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raLayAngles   = array containijng layer dependent sun angles
@@ -792,7 +792,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -1405,7 +1405,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles

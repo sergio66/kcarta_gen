@@ -52,7 +52,7 @@ CONTAINS
 
     IMPLICIT NONE
           
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
@@ -895,7 +895,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! rDelta is the kComp file Step
 ! raLayAngles are the layer dependent satellite view angles
@@ -1290,7 +1290,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! rDelta is the kComp file Step
 ! raLayAngles are the layer dependent satellite view angles

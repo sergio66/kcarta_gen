@@ -36,7 +36,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -116,7 +116,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -217,9 +217,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -383,9 +383,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -587,9 +587,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daakPro     = final temperature interpolated matrix, in ABS COEFF
@@ -792,9 +792,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iPlev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iDoDT       = do we actually do d/dT (as this is called 5 useless times
@@ -930,7 +930,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -1058,7 +1058,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -1228,7 +1228,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -1307,7 +1307,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -1410,9 +1410,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daakPro     = final temperature interpolated matrix, in ABS COEFF
@@ -1575,9 +1575,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iPlev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iDoDT       = do we actually do d/dT (as this is called 5 useless times

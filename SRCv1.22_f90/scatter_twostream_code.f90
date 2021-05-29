@@ -29,7 +29,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raLayAngles   = array containijng layer dependent sun angles
@@ -253,7 +253,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -975,7 +975,7 @@
     raUpperPress,raUpperTemp)
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -1611,7 +1611,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     INTEGER :: iLocalCldTop,iLocalCldBot    !where cloud is wrt kCARTA layers
@@ -1665,7 +1665,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     INTEGER :: iLocalCldTop,iLocalCldBot    !where cloud is wrt kCARTA layers
@@ -1728,7 +1728,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: rTopOfCld                       !temperature of highest cloud layer
@@ -1956,7 +1956,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: rBotOfCld                       !temperature of lowest cloud layer
@@ -2172,7 +2172,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output parameters
     REAL :: raInten(kMaxPts)
@@ -2206,7 +2206,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output parameters
     DOUBLE PRECISION :: raInten(kMaxPts)
@@ -2250,7 +2250,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output parameters
     REAL :: raInten(kMaxPts)
@@ -2284,7 +2284,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output parameters
     DOUBLE PRECISION :: raInten(kMaxPts)
@@ -2323,7 +2323,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -2415,7 +2415,7 @@
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! radSolarCld = solar radiance at top of cloud
 ! iLocalCldTop,iLocalCldBot = where the cloud is
@@ -2500,7 +2500,7 @@
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! radSolarCld = solar radiance at top of cloud
 ! iLocalCldTop,iLocalCldBot = where the cloud is
@@ -2608,7 +2608,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rTSpace      = blackbody temperature of space
 ! rFracTop   = is the highest layer multiplied by a fraction, because
@@ -2699,7 +2699,7 @@
      
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height

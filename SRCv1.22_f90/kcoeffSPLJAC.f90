@@ -23,7 +23,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daXgiven   == x ordinates (known)
 ! daYgiven   == y(x)        (known)
@@ -82,9 +82,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iPlev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iDoDT       = do we actually do d/dT (as this is called 5 useless times
@@ -289,7 +289,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -370,7 +370,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! daaAbsCoeff = abs coeff matrix, after the temperature interpolations
@@ -491,7 +491,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaA1..5   = the matrices that will be interpolated in partial pressure
 ! raP/Rpart  = actual/rerefence water partial pressures
@@ -563,7 +563,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! these are the five matrices that will be splined to give final d/dT
     DOUBLE PRECISION :: daaT1(kMaxK,kProfLayer),daaT2(kMaxK,kProfLayer)

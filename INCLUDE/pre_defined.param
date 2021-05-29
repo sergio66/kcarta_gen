@@ -101,7 +101,7 @@ c note kPlanck1=1.1911E-5 ==> units in mW; kPlanck1=1.1911E-8 ==> units in W
       DOUBLE PRECISION kPi,kSunTemp,kTSpace,kAvog,kBoltzmann,kMGC
       DOUBLE PRECISION kPlanck1,kPlanck2,kAtm2mb
       PARAMETER (kPi=3.1415926535898d0,kSunTemp=5800.0d0,
-     c    kTSpace=2.7d0,kAvog=6.022045d26,kBoltzmann=1.380658d-23)
+     $    kTSpace=2.7d0,kAvog=6.022045d26,kBoltzmann=1.380658d-23)
       PARAMETER (kPlanck1=1.1911D-5,kPlanck2=1.4387863d0)
       PARAMETER (kAtm2mb=1013.25,kMGC=8.314674269981136)
 

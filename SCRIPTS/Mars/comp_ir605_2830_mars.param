@@ -1,0 +1,16 @@
+!! copied from ~/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param
+!! remember Earth gas  1 == Mars gas 1 (WV)
+!! remember Earth gas  2 == Mars gas 2 (CO2)
+!! remember Earth gas 22 == Mars gas 3 (N2)
+!! remember Earth gas  7 == Mars gas 4 (O2)
+!! remember Earth gas  5 == Mars gas 5 (CO)
+!! remember Earth gas  8 == Mars gas 6 (NO)
+  1      605.000000      2830.000000      20
+  2      605.000000      1130.000000      20
+  2     1180.000000      1430.000000      20
+  2     1780.000000      2680.000000      20
+  2     2705.000000      2805.000000      20
+  3     1855.000000      2755.000000      20
+  4     1330.000000      1755.000000      20
+  5     1805.000000      2330.000000      20
+  6      605.000000      2855.000000      20

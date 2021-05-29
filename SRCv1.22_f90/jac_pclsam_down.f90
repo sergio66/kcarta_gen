@@ -63,7 +63,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! rDelta is the wavenumber step size
 ! iJacob,iaJacob tell which gases to do d/dq for
@@ -654,7 +654,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     INTEGER :: iTag,iM,iLM,iIWPorDME
@@ -763,7 +763,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iTag,iM,iLM,iaCldLayer(kProfLayer),iaRadLayer(kProfLayer)
@@ -835,7 +835,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iTag,iM,iLM,iG,iaCldLayer(kProfLayer),iaRadLayer(kProfLayer)
@@ -904,7 +904,7 @@ CONTAINS
     raaSolarScatter1Lay,iaRadLayer, &
     raTemp,raTemp1,rFac,raLMp1_toSpace,muSun,muSat)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iLM,iM,iaCldLayer(kProfLayer),iaRadLayer(kProfLayer)
@@ -969,7 +969,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rSatAngle is the satellite viewing angle
 ! iNumLayer is the number of layers in the atmosphere

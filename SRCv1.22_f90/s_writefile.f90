@@ -22,7 +22,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iIOUN      = unit file number
 ! caOutName  = binary output file name
@@ -66,7 +66,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -137,7 +137,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iIOUN      = unit file number
 ! raInten    = array containing computed data (radiances,spectra,jacobians ..)
@@ -163,7 +163,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     REAL ::         raFreqBloat(kBloatPts),raIntenBloat(kBloatPts)
@@ -193,7 +193,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLowest is the lowest layer in the atmosphere (modulo kProfLayer)
 ! raFreq are the frequency wavenumbers
@@ -274,7 +274,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables
     INTEGER :: iAtm,iUpper
@@ -309,7 +309,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iAtm
@@ -350,7 +350,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iAtm
@@ -390,7 +390,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables
     INTEGER :: iAtm,iUpper
@@ -429,7 +429,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! iaaOp       = list of paths/MP/layers to be output for each print option
 ! iRow        = which row to be checked
 ! iNumLay     = number of elements to be checked in the iRow th row of iaaOp
@@ -465,7 +465,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iaaOp       = list of layers to be output
 ! iJ          = print output option number being considered
@@ -529,7 +529,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -616,7 +616,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iFound,iPrinter,iNpmix,iFileID,iNp,iaOp(kPathsOut)
@@ -717,7 +717,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -787,7 +787,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -892,7 +892,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -997,7 +997,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -1102,7 +1102,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -1203,7 +1203,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -1245,7 +1245,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -1283,7 +1283,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay      = current layer number
 ! raaGasAbs = matrix containing the raw abs coeffs
@@ -1311,7 +1311,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay      = current layer number
 ! raaGasAbs = matrix containing the raw abs coeffs
@@ -1341,7 +1341,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay      = current layer number
 ! raaGasAbs = matrix containing the raw abs coeffs
@@ -1369,7 +1369,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay      = current layer number
 ! raaGasAbs = matrix containing the raw abs coeffs
@@ -1399,7 +1399,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iIpMix    = current mixed path number
 ! iNpMix    = total number of mixed paths
@@ -1456,7 +1456,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iIpMix    = current mixed path number
 ! iNpMix    = total number of mixed paths
@@ -1511,7 +1511,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iIpMix    = current mixed path number
 ! iNpMix    = total number of mixed paths
@@ -1568,7 +1568,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iIpMix    =  current mixed path number
 ! iNpMix    = total number of mixed paths
@@ -1789,7 +1789,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caJacobFile,caJacobFile2
      
@@ -1818,7 +1818,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caOutName,caFluxFile
      
@@ -1917,7 +1917,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
           
 ! raPressLevels, iProfileLayers = actual number of pressure layers
 ! iOutFileName = does caOutName exist, or is stuff dumped to screen? for fluxes
@@ -2008,7 +2008,7 @@ CONTAINS
     
     CHARACTER(120) :: caStr1,caStr2,caStr3
           
-    include '../INCLUDE/gasIDnameparam.f90'
+    include '../INCLUDE/TempF90/gasIDnameparam.f90'
           
     DO iI = 1, kMaxGas
       raSumTotalGasAmt(iI) = 0.0
@@ -3176,7 +3176,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caUAFile
     REAL :: rFrLow,rFrHigh
@@ -3325,7 +3325,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caOutUABloatFile
     REAL :: rFrLow,rFrHigh
@@ -3464,7 +3464,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! caOutUAFile  = binary output file name
 ! rFrLow     = lowest wavenumber to be output

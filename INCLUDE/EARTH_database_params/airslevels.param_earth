@@ -1,5 +1,8 @@
 c 101 pressure levels for the DEFINITION of the kCARTA database
 
+      INTEGER iXPlanet2
+      DATA iXPlanet2 /03/
+
        REAL DATABASELEV(101)
        INTEGER IPLEV
 

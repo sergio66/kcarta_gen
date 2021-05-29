@@ -1,5 +1,7 @@
 c 100 layer heights for the DEFINITION of the kCARTA database
 
+      INTEGER iXPlanet3
+      DATA iXPlanet3 /03/
 C
        REAL DatabaseHeight(kMaxLayer)
        INTEGER IPHEIGHT

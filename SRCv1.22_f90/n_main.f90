@@ -79,7 +79,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the driver file name
     CHARACTER(80) :: caDriverName
@@ -817,7 +817,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the driver file name
     CHARACTER(80) :: caNMLReset_param_spectra
@@ -1012,7 +1012,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! main output filename
     CHARACTER(80) :: caOutName
@@ -2147,7 +2147,7 @@ CONTAINS
       
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
       
 ! iaKeyWord     = array that tracked which keywords had been found
 ! iaAllowedGas  = array that tracks which gases read in from GASFIL/XSCFIL
@@ -2258,7 +2258,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNpmix     = number of mixed paths read in from mixfile
 ! iaMPSetForRad = array telling which MP set to associate with which atm
@@ -2392,7 +2392,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iAFGLProf  = which AFGL prof to use? 1 .. 6
 ! caPFName = character*80 profile name

@@ -607,13 +607,25 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22
 -----
-5/26/21         Developing the Mars suite
+5/29/21         Developing the Mars suite
+                Recall kPlanet is set in eg 
+                  /home/sergio/KCARTA/INCLUDE/template_kcartaV122_400_H2016_NLTEH2016.param       kPlanet = 03
+                  /home/sergio/KCARTA/INCLUDE/template_kcartaV122_400_H2016_NLTEH2016_mars.param  kPlanet = 04
+
                 Initial work in ../INCLUDE/MARS_database_params_2014 was done using code
-                in /home/sergio/HITRAN2UMBCLBL/MARS_MAKEIR/Develop_2014/
+                in /home/sergio/HITRAN2UMBCLBL/MARS_MAKEIR/Develop_2014/produce_kcarta_paramfiles.m
 
                 Now making params files for ../INCLUDE/MARS_database_params_2021 using code
-                in /home/sergio/HITRAN2UMBCLBL/MARS_MAKEIR/Develop_2021/ and then
-                ln -s INCLUDE/MARS_database_params_2021 INCLUDE/MARS_database_params
+                in /home/sergio/HITRAN2UMBCLBL/MARS_MAKEIR/Develop_2021/produce_kcarta_paramfiles_2021.m 
+                which calls eg
+                  make_KCARTA_database
+                
+                  make_kcarta_airslevelheights
+                  make_kcarta_airslevels
+                  make_kcarta_airsheights
+
+                After that go to /home/sergio/KCARTA/INCLUDE and
+                  ln -s MARS_database_params_2021 MARS_database_params
                
                 See also /home/sergio/OTHERSTUFF/klayersV205_Mars/Readme
                 MODEL 1 : SERGIO will have 6 MOLGAS and no XSCGAS
@@ -628,6 +640,9 @@ v1.22
                   /home/sergio/OTHERSTUFF/klayersV205_Mars/Data/mars_sergio_rtp.m
                 and the refgas breakouts are saved in
                   /home/sergio/OTHERSTUFF/klayersV205_Mars/Data/RefgasMars/refgasX  X=1-6
+                copied to
+                  /asl/data/kcarta_sergio/KCDATA/RefProf_Mars
+
                 So information in 
                    n_mr_common.f90      : look for kPlanet and fix as needed
                    n_gas_wt_spectra.f90 : look for kPlanet and fix as needed
@@ -636,7 +651,14 @@ v1.22
                    freqfile.f90         : iCheckCompDataBase,iCheckXsecDataBase should
                                           automatically use kcarta.param and look for 
                                           correct kXsecParamFile,kCompParamFile
-                and "solar" will have to be fixed
+                "solar" fixed in INCLUDE/template_kcartaV122_400_H2016_NLTEH2016_mars.param
+                
+                Now, does it implicitly keep reading USStd ??? .. if so that has to be fixed !!!!
+
+                When happy try eg
+                  fin=/home/sergio/OTHERSTUFF/klayersV205_Mars/Data/mars_sergio_rtp.op.rtp
+
+5/28/21         Allow comment lines (starting with '!' in kXsecParamFile,kCompParamFile)
 
 v1.21
 -----

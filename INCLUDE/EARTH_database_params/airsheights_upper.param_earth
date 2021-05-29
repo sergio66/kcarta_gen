@@ -1,6 +1,10 @@
 c from KCARTADATA/General/NLTE 
 c 100 layer heights for the DEFINITION of the kCARTA database 
 c this is for the upper atm 
+
+      INTEGER iXPlanet7
+      DATA iXPlanet7 /03/
+
        REAL DatabaseHeight(kMaxLayer) 
        INTEGER IPHEIGHT 
 c note program expects heights in km, so these numbers will have 

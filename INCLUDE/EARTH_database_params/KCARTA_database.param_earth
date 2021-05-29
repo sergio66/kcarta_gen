@@ -9,6 +9,9 @@ c  1,  8.9448E-06,  291.953,  1.456, 1.0712E+00, 2.8703E-02, 9.3318E-03,etc
       !! 1.100E+03 - 1.071E+03 are in mb, while the avg layer pressure, 
       !!1.0712E+00 is is ATM = 1.08519E3 mb = (log(a)-log(b))/log(a/b)
 
+      INTEGER iXPlanet0
+      DATA iXPlanet0 /03/
+
       REAL PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)  
       REAL PAVG_KCARTADATABASE_AIRS(kMaxLayer)
 

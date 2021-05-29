@@ -26,7 +26,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iGasID,iISO
@@ -67,7 +67,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iGasID,iNum
@@ -115,7 +115,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iNum,iGasID
@@ -179,7 +179,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iNum,iGasID,iISO,iL
@@ -268,7 +268,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iNum,iL
@@ -404,7 +404,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iLines          !!!which line we are looking at
@@ -456,7 +456,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters self explanatory .. the arrays contain the current profile
     INTEGER :: iUnCompressType !! -2,-3 for weak backgnd CO2; see CompFileName
@@ -555,9 +555,9 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airslevels_upperparam.f90'
-    include '../INCLUDE/airslevelheights_upperparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/airslevels_upperparam.f90'
+    include '../INCLUDE/TempF90/airslevelheights_upperparam.f90'
 
 ! input parameters self explanatory .. the arrays contain the current profile
     INTEGER :: iTag,iActualTag,iGasID,iGas,iSplineType
@@ -694,7 +694,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: pProf(kProfLayer)       !!! this is the layers profile
@@ -749,7 +749,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
 ! caStrong tells us the name of the file that has the weak bkgnd line params
@@ -1063,7 +1063,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iGasID,iISO
@@ -1188,7 +1188,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iGasID,iISO

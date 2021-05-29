@@ -59,7 +59,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles

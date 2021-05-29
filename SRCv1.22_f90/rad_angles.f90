@@ -47,7 +47,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rSatHeight = tells us if we need to do ray tracing (> 0) or not (< 0)
 ! raLayHgt   = height of individual layers, read in from profile, in meters
@@ -123,7 +123,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rSatHeight = satellite height in meters
 !   (from spec : http://asl.umbc.edu/pub/motteler/hdf/rtpV105/doc/rtpspec.html)
@@ -332,7 +332,7 @@ CONTAINS
            
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: nn
     DOUBLE PRECISION :: daX(kGauss),daW(kGauss)
@@ -409,7 +409,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: nn
     DOUBLE PRECISION :: daX(kGauss),daW(kGauss)
@@ -456,7 +456,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: nn,ii
     DOUBLE PRECISION :: daX(kGauss),daW(kGauss)
@@ -504,7 +504,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raX(kMaxPts)
@@ -539,7 +539,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raX(kMaxPts)
@@ -575,7 +575,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raX(kMaxPts)
@@ -761,7 +761,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raX(kMaxPts)
@@ -791,7 +791,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     INTEGER :: n
@@ -903,7 +903,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raX(kMaxPts)
@@ -1005,7 +1005,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raX(kMaxPts)
@@ -1111,7 +1111,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raaX(kMaxPts,*)

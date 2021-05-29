@@ -42,7 +42,7 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
 
 ! the 48 regression profile kinetic temperatures
@@ -158,7 +158,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: raTempIn(kProfLayer)         !!!input kinetic temp profile

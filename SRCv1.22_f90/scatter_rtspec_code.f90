@@ -29,7 +29,7 @@ CONTAINS
 !       Merritt Deeter (single scattering layer routines)
 
 ! modifications by Sergio De Souza-Machado
-! 1) all subroutines now call include '../INCLUDE/scatterparam.f90'
+! 1) all subroutines now call include '../INCLUDE/TempF90/scatterparam.f90'
 ! 2) gasRT1 now has surface emissivity passed in, so it can be used
 ! 3) nlev ---> nlev - 1 whenever we are using optical depths
 !    ie there are nlev lavels and so there are nlev-1 layers.
@@ -109,7 +109,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: NLEV, IOBS,iiDiv
     INTEGER :: NCLDLAY, ICLDTOP, ICLDBOT, ISCATTAB(MAXNZ)
@@ -452,7 +452,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
          
     REAL ::    MUOBS, TTOP, TBOT, WAVENO, MUINC(2)
     REAL ::    IBNDRYUP(2), IBNDRYDN(2), I0UPOBS, IUPOBS
@@ -552,7 +552,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
           
     REAL ::    MUOBS, TTOP, TBOT
     REAL ::    WAVENO, FLUXUP,FLUXDN
@@ -690,7 +690,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL ::    MUOBS, TTOP, TBOT
     REAL ::    WAVENO, TAUTOT
@@ -903,7 +903,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER ::   NLAYER
     REAL ::      TEMPS(NLAYER+1)
@@ -1032,7 +1032,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: N
     REAL*8 ::  LOWER(*), DIAG(*), UPPER(*), RHS(*)
@@ -1109,7 +1109,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: NLEV, ICLDTOP, ICLDBOT, NCLDLAY, iiDiv
     REAL ::    MU, WAVENO, SFCTEMP, SFCEMIS
@@ -1276,7 +1276,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: NLEV, ICLD, IOBS, iiDiv
     REAL ::    WAVENO, TEMP(KPROFLAYER+1), TAU(KPROFLAYER), MU, RAD
@@ -1364,7 +1364,7 @@ CONTAINS
 !     reflectivity equal to one minus emissivity, and this is the initial
 !     condition when integrating gas incident on bottom of cloud.
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: NLEV, ICLDTOP, ICLDBOT, NCLDLAY,ibdry, iiDiv
     REAL ::    MU, WAVENO, SFCTEMP, SFCEMIS

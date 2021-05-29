@@ -24,7 +24,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     INTEGER :: iDir                         !up or down looking instr
@@ -232,7 +232,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iHG,iArbHG
     REAL :: raW0(kMaxPts)
@@ -282,7 +282,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input params
     REAL :: raE(kMaxPts),raF(kMaxPts)            !!the up/down emission
@@ -324,7 +324,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! really we do not need raA or raB, so we do not really need RadBb or RadBt
 ! so we do not need to compute rho or theta
@@ -571,7 +571,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: muSat,muSun,raTau(kMaxPts)   !view,solar angle and extinction
@@ -716,7 +716,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: muSat,muSun,raTau(kMaxPts)  !view,solar angle and extinction
@@ -868,7 +868,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output params
     REAL :: raT1(kMaxPts),raT1star(kMaxPts)    !transmissions
@@ -1011,7 +1011,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
 !! layer stuff for the arb angles, layer n
@@ -1155,7 +1155,7 @@
          
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
 !! layer stuff for the stream angles, layer n
@@ -1221,7 +1221,7 @@
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! stream angle stuff
     REAL :: raT2(kMaxPts),raT2star(kMaxPts)
@@ -1263,7 +1263,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! arbitrary angle stuff
     REAL :: raTauNew(kMaxPts),raTauOld(kMaxPts)
@@ -1303,7 +1303,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     REAL :: rFrac                 !full or fractional layer
@@ -1358,7 +1358,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     INTEGER :: iDo                 !1 to add on raX to raCumSum, -1 if not
@@ -1387,7 +1387,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL :: mu1,mu2,g       !mu1,mu2 are the two angles, g is the asymmetry
     INTEGER :: iPhase       !use supplied phase fcn, or HG
@@ -1419,7 +1419,7 @@
     SUBROUTINE FindTheFrac(iUpDown,iL,iaRadLayer,iNumLayer, &
     rFracTop,rFracBot,rFrac)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iUpDown                !!up or down look instr
@@ -1458,7 +1458,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL :: TEMP(MAXNZ)                     !temperature profile (levels)
     REAL :: raFreq(kMaxPts)                 !wavenumbers
@@ -1555,7 +1555,7 @@
      
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars which determine how to use this subroutine
     INTEGER :: iLay                         !which mixed path layer

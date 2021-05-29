@@ -1,6 +1,10 @@
 c from KCARTADATA/General/NLTE 
 c 101 pressure levels for the DEFINITION of the kCARTA database 
 c this is for the upper atm 
+
+      INTEGER iXPlanet6
+      DATA iXPlanet6 /03/
+
        REAL DATABASELEV(101) 
        INTEGER IPLEV 
 C      ------------------------------------------------------------ 

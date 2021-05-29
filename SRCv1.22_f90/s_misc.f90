@@ -52,7 +52,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(130) :: caName
 
@@ -98,7 +98,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(130) :: caName
 
@@ -125,7 +125,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     write(kStdWarn,*) &
     '**********************************************************************'
@@ -138,7 +138,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     write(kStdWarn,*) &
     '######################################################################'
@@ -152,7 +152,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER*(*) caStrOut
     CHARACTER(2) :: caStr
@@ -197,7 +197,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: ca1,ca2
     INTEGER :: iGasID
@@ -238,7 +238,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID      = current ID of gas to be processed (101=self,102=foreign)
 ! caFName     = name of file that contains CKD data
@@ -358,7 +358,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLowerOrUpper  = open lower atm AIRS (100 layer) file (-1)
 !                   or  upper atm AIRS (100 layer) file (+1)
@@ -456,7 +456,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID   = ID of gas to be processed
 ! rFileStartFr  = start freq of file
@@ -818,7 +818,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID   = ID of gas to be processed
 ! rFileStartFr  = start freq of file
@@ -959,7 +959,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(120) :: caFile    !!!input and output parameter
 
@@ -992,7 +992,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: fname
     REAL :: rFileStartFr
@@ -1044,7 +1044,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caWeak,caWeakFr
     REAL :: raWaves(kMaxPts)
@@ -1118,7 +1118,7 @@ CONTAINS
     SUBROUTINE FindMysteryFactor(raFreq,raMystery,iWhichGas)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: raFreq(kMaxPts)
@@ -1177,7 +1177,7 @@ CONTAINS
     INTEGER FUNCTION iLeftjust_lenstr(caStr,iSizeStr)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iL,iSizeStr
     CHARACTER*(*) caStr
@@ -1198,7 +1198,7 @@ CONTAINS
     SUBROUTINE blankstr(caStr,iSizeStr)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
          
     INTEGER :: iSizeStr
     CHARACTER*(*) caStr
@@ -1219,7 +1219,7 @@ CONTAINS
 !!   caTemp5 = adjustl(caString5)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER*(*) caStr
     CHARACTER*(*) caStrOut
@@ -1272,7 +1272,7 @@ CONTAINS
     SUBROUTINE adjustleftstr_length(caStr,caStrX,lenX)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
           
 ! input
     CHARACTER*(*) caStr
@@ -1310,7 +1310,7 @@ CONTAINS
     INTEGER FUNCTION strfind(caStr1,caStr2)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     CHARACTER*(*) caStr1,caStr2

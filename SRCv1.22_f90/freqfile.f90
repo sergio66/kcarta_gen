@@ -21,7 +21,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID = GAS ID to be searched for in the database
 ! rL,rH  = freq start/stop points
@@ -55,6 +55,8 @@ CONTAINS
               
       ! read file util GASID, freq bounds match found or EOF
  20   READ(iIOUN,5020,END=777) caLine
+      IF (caLine(1:1) .EQ. '!') GOTO 20
+ 
       READ(caLine,*) iLine,iID,iNpts,iTemps,rLower,rHigher
 
       IF ((iID == iGasID) .AND. (rL < 0) .AND. (rH < 0)) THEN
@@ -120,7 +122,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID = GAS ID to be searched for in the database
 ! rL,rH  = freq start/stop points
@@ -149,7 +151,9 @@ CONTAINS
     kTempUnitOpen = 1
 
 ! read file until GASID, freq bounds match found or EOF
- 20 READ(iIOUN,5020,END=777) caLine
+ 20   READ(iIOUN,5020,END=777) caLine
+      IF (caLine(1:1) .EQ. '!') GOTO 20
+
  5020 FORMAT(A80)
     READ(caLine,*) iID,rLower,rHigher,iTag
 
@@ -185,7 +189,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID   = GAS ID to be searched for in CompDataBase or XsecDataBase
 ! raFreq   = wavenumber array that contains present chunk of 25 cm-1
@@ -272,7 +276,7 @@ CONTAINS
     SUBROUTINE Check_kaNum_ka100layerCloudType
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iI,iJ
     REAL :: rF,rG
@@ -338,7 +342,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFrLow    = lower frequency bound
 ! rFrHigh   = upper frequency bound
@@ -473,7 +477,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rL,rH     = from namelist file, these are the lower and upper wavenumber
 !             bounds : could be reset here
@@ -653,7 +657,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rl,rH are the lower and upper limits the user sends in; this subroutine
 !                       can change them
@@ -692,7 +696,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! INPUT
 ! rL         = user set lower bound
@@ -757,7 +761,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! INPUT
 ! rH         = user set lower bound
@@ -829,7 +833,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! OUTPUT
 ! iFileIDLo     = final iFileIDLo
@@ -980,7 +984,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! OUTPUT
 ! iFileIDHi     = final iFileIDHi

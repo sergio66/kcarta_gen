@@ -18,7 +18,7 @@ CONTAINS
 ! so watch out for this later on!
     SUBROUTINE FindLineMixFiles(dLTE,dJU,iISO,caFName1,caFName2,dT1,dT2)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     DOUBLE PRECISION :: dLTE,dJU      !local kinetic temp, upper state quantum
@@ -145,7 +145,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     DOUBLE PRECISION :: dLineShift   !line center
@@ -297,7 +297,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     DOUBLE PRECISION :: dLineShift   !line center
@@ -497,7 +497,7 @@ CONTAINS
 ! this just figures out "tau" for birnbaum
     DOUBLE PRECISION FUNCTION tau2_birn(dP,dPP)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     DOUBLE PRECISION :: dP,dPP
 
@@ -581,7 +581,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     DOUBLE PRECISION :: v(kMaxPtsBox),v0,T_in,tau2,w_tot
@@ -806,7 +806,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     DOUBLE PRECISION :: T_in,tau2
@@ -993,7 +993,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params : input wavenumber array, linecenter
     INTEGER :: n_in

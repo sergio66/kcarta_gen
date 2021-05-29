@@ -33,7 +33,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     CHARACTER(80) :: caaUpperMixRatio(kGasStore)
@@ -194,7 +194,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL :: pProf(kProfLayer),raPressLevels(kProfLayer+1)
@@ -379,7 +379,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
 ! read file from caaNLTETemp(iLTEin)
@@ -581,7 +581,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
 ! read file from caaNLTETemp(iLTEin)
@@ -792,7 +792,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
 ! read file from caaNLTETemp(iLTEin)
@@ -950,7 +950,7 @@ CONTAINS
 
     IMPLICIT NONE
       
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input vars
     INTEGER :: iLogOrLinear                   !!! what method to use for map

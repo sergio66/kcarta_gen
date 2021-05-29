@@ -24,7 +24,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output params
     REAL :: raDatabaseHeight(kMaxLayer)
@@ -52,10 +52,10 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airsheightsparam.f90'
-    include '../INCLUDE/airslevelsparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/airsheightsparam.f90'
+    include '../INCLUDE/TempF90/airslevelsparam.f90'
+    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
 
 ! output params
     REAL :: raDatabaseHeight(kMaxLayer)
@@ -87,10 +87,10 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airsheights_upperparam.f90'
-    include '../INCLUDE/airslevels_upperparam.f90'
-    include '../INCLUDE/airslevelheights_upperparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/airsheights_upperparam.f90'
+    include '../INCLUDE/TempF90/airslevels_upperparam.f90'
+    include '../INCLUDE/TempF90/airslevelheights_upperparam.f90'
 
 ! output params
     REAL :: raDatabaseHeight(kMaxLayer)
@@ -126,7 +126,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Calling parameters
 ! fnam     = name of relevant file that contains compressed database
@@ -291,7 +291,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! fnam     = name of relevant file that contains compressed database
 ! iiIOUN    = file IOUNIT number
 ! IDGAS    = GAS ID
@@ -454,7 +454,7 @@ CONTAINS
 
     IMPLICIT NONE
           
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaGasAbsCoeff = uncompressed, scaled gas abs coeffs
     DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
@@ -474,7 +474,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaAbsCoeff = uncompressed gas abs coeffs, for reference profile
 ! raP/RAmt    = actual/reference gas amount profiles
@@ -501,7 +501,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iKtype      = compression type (power = 1 or 4)
 ! daaAbsCoeff = uncompressed gas abs coeffs
@@ -538,7 +538,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaDT   = d/dT
 ! iType   = compression type
@@ -560,7 +560,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iKtype      = compression type (power = 1 or 4)
 ! daaAbsCoeff = uncompressed gas abs coeffs
@@ -601,7 +601,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: rFileStartFr
@@ -709,7 +709,7 @@ CONTAINS
     
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iGasID,iDoDQ,iDoWVjac
@@ -751,7 +751,7 @@ CONTAINS
     
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iGasID,iDoDQ,iDoWVjac
@@ -896,7 +896,7 @@ CONTAINS
     
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iGasID,iDoDQ,iDoWVjac
@@ -1104,7 +1104,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 
@@ -1209,7 +1209,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID       tells current gasID
 ! iNumNewGases tells how many new gases to use
@@ -1285,7 +1285,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNewIn        tells which NewSpectra set this gas corresponds to
 ! iaNewData     tells how many new data sets were read in for this set
@@ -1321,7 +1321,7 @@ CONTAINS
     SUBROUTINE Co2_4um_fudge(daaAbsCoeff,rFileStartFr, &
     iCO2Chi,iaChiChunks,iChiChunks)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iCO2Chi is for the following :
 ! the blah.txt  files are the orig,      done in late june/early july 2002
@@ -1437,10 +1437,10 @@ CONTAINS
 
     INTEGER :: iPLEV
           
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! comment out these other include files, since we need to set them according to iLowerOrUpper
-!    include '../INCLUDE/KCARTA_databaseparam.f90'
-!    include '../INCLUDE/airslevelheightsparam.f90'
+!    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
+!    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
           
 !  kCARTA levels include P(1)=0.005, P(101) = 1100, P(38)=300
 !  P(x)=(ax^2+bx+c)7/2 formula, with the above 3 b.c.
@@ -1653,7 +1653,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
       INTEGER iLowerOrUpper,iGAsID

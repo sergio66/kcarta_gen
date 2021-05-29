@@ -1,0 +1,42 @@
+c see DOC/gasids_H2012
+
+      !! names of gIDs
+      CHARACTER*20 caGID(kMaxGas)
+
+c ID  name     common name
+c---- -------- -----------------
+c MOLGASES
+c ========
+      caGID( 1) = ' H2O'      ! water
+      caGID( 2) = ' CO2'      ! carbon dioxide
+      caGID( 3) = '  N2   '   ! (diatmoic) nitrogen
+      caGID( 4) = '  O2'      ! (diatomic) oxygen
+      caGID( 5) = ' CO '      ! carbon monoxide
+      caGID( 6) = '  NO'      ! nitric oxide
+c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++        
+c%%%
+c  7-50, 51-100 not in use
+c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+c%%%
+c 101 kCARTA H2O self-broadened continuum
+c 102 kCARTA H2O foreign-broadened continuum
+c 102 kCARTA HDO
+c%%%
+      caGID(101) = '  self continuum'
+      caGID(102) = '  forn continuum'
+      caGID(103) = '  HDO'
+
+c 104-200 not in use
+c%%%
+c 201 cloud1 ice/water/whatever amount
+c 202 cloud2 ice/water/whatever amount
+c 203 cloud3 ice/water/whatever amount
+c%%%
+c 204-300 not in use
+c%%%
+c 301 cloud1 particle size
+c 302 cloud2 particle size
+c 303 cloud3 particle size
+c%%%
+cNo numbers past 303 are in use
+c---end of file---

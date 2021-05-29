@@ -65,7 +65,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells the wavenumber spacing of current block
 ! rDelta        = kComp File Step (typically 0.0025 cm-1)
@@ -326,7 +326,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 
@@ -869,7 +869,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 
@@ -1305,7 +1305,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iL,iLay                   !!iLay = loop cnt; iL=iaRadLayer(iLay)
@@ -1353,7 +1353,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iL,iLay                   !!iLay = loop cnt; iL=iaRadLayer(iLay)
@@ -1440,7 +1440,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iL,iLay                   !!iLay = loop cnt; iL=iaRadLayer(iLay)
@@ -1564,7 +1564,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! ressures in mb, thicknesses in meters
 
@@ -2079,7 +2079,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! ressures in mb, thicknesses in meters
 
@@ -2561,7 +2561,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! ressures in mb, thicknesses in meters
 
@@ -3095,7 +3095,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! ressures in mb, thicknesses in meters
 
@@ -3553,7 +3553,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 ! input
@@ -3610,7 +3610,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 ! input
@@ -3680,7 +3680,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 ! input
@@ -3731,7 +3731,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 ! input
@@ -3778,7 +3778,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 ! input
@@ -3850,7 +3850,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 ! input
@@ -3913,7 +3913,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: pProf(kProfLayer),raThickness(kProfLayer),raPressLevels(kProfLayer+1)
@@ -4070,7 +4070,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! ressures in mb, thicknesses in meters
 
@@ -4593,7 +4593,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! ressures in mb, thicknesses in meters
 

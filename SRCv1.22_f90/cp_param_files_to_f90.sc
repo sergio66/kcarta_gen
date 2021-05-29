@@ -1,37 +1,42 @@
-/bin/cp ../INCLUDE/scatter.param  ../INCLUDE/xscatterparam.f; fixcon ../INCLUDE/xscatterparam.f ../INCLUDE/xscatterparam.f90
-sed -e "s/.param/param.f90/g" ../INCLUDE/xscatterparam.f90 > ../INCLUDE/scatterparam.f90; rm ../INCLUDE/xscatterparam.f90 ../INCLUDE/xscatterparam.f
+/bin/rm ../INCLUDE/TempF90/*.f90 ../INCLUDE/TempF90/*.param
 
-/bin/cp ../INCLUDE/kcarta.param  ../INCLUDE/xkcartaparam.f;   fixcon ../INCLUDE/xkcartaparam.f ../INCLUDE/xkcartaparam.f90
-sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/post_definedparam.f90/g" ../INCLUDE/xkcartaparam.f90 > ../INCLUDE/kcartaparam.f90; rm ../INCLUDE/xkcartaparam.f90	../INCLUDE/xkcartaparam.f
+/bin/cp ../INCLUDE/scatter.param  ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f; fixcon ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f90
+sed -e "s/.param/param.f90/g" ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f90 > ../INCLUDE/TempF90/scatterparam.f90; rm ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f90 ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f
 
-#/bin/cp ../INCLUDE/pre_definedHIGHRES_IR.param   ../INCLUDE/pre_definedHIGHRES_IRparam.f;  fixcon ../INCLUDE/pre_definedHIGHRES_IRparam.f  ../INCLUDE/pre_definedHIGHRES_IRparam.f90; rm ../INCLUDE/pre_definedHIGHRES_IRparam.f
+/bin/cp ../INCLUDE/kcarta.param  ../INCLUDE/TempF90/JunkTempDir/xkcartaparam.f;   fixcon ../INCLUDE/TempF90/JunkTempDir/xkcartaparam.f ../INCLUDE/TempF90/JunkTempDir/xkcartaparam.f90
+sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/post_definedparam.f90/g" ../INCLUDE/TempF90/JunkTempDir/xkcartaparam.f90 > ../INCLUDE/TempF90/kcartaparam.f90; rm ../INCLUDE/TempF90/JunkTempDir/xkcartaparam.f90	../INCLUDE/TempF90/JunkTempDir/xkcartaparam.f
 
-/bin/cp ../INCLUDE/pre_defined_orig605_805res.param  ../INCLUDE/pre_definedparam_orig605_805res.f;   fixcon ../INCLUDE/pre_definedparam_orig605_805res.f  ../INCLUDE/pre_definedparam_orig605_805res.f90; rm ../INCLUDE/pre_definedparam_orig605_805res.f
+#########################
+#/bin/cp ../INCLUDE/pre_definedHIGHRES_IR.param   ../INCLUDE/TempF90/JunkTempDir/pre_definedHIGHRES_IRparam.f;  fixcon ../INCLUDE/TempF90/JunkTempDir/pre_definedHIGHRES_IRparam.f  ../INCLUDE/TempF90/pre_definedHIGHRES_IRparam.f90; rm ../INCLUDE/TempF90/JunkTempDir/pre_definedHIGHRES_IRparam.f
 
-/bin/cp ../INCLUDE/pre_defined.param             ../INCLUDE/pre_definedparam.f;            fixcon ../INCLUDE/pre_definedparam.f            ../INCLUDE/pre_definedparam.f90;           rm ../INCLUDE/pre_definedparam.f
+/bin/cp ../INCLUDE/pre_defined_orig605_805res.param  ../INCLUDE/TempF90/JunkTempDir/pre_definedparam_orig605_805res.f;   fixcon ../INCLUDE/TempF90/JunkTempDir/pre_definedparam_orig605_805res.f  ../INCLUDE/TempF90/pre_definedparam_orig605_805res.f90; rm ../INCLUDE/TempF90/JunkTempDir/pre_definedparam_orig605_805res.f
 
-/bin/cp ../INCLUDE/post_defined.param            ../INCLUDE/post_definedparam.f;           fixcon ../INCLUDE/post_definedparam.f           ../INCLUDE/post_definedparam.f90;           rm ../INCLUDE/post_definedparam.f
+/bin/cp ../INCLUDE/pre_defined.param             ../INCLUDE/TempF90/JunkTempDir/pre_definedparam.f;            fixcon ../INCLUDE/TempF90/JunkTempDir/pre_definedparam.f            ../INCLUDE/TempF90/pre_definedparam.f90;           rm ../INCLUDE/TempF90/JunkTempDir/pre_definedparam.f
 
-/bin/cp ../INCLUDE/airsheights.param             ../INCLUDE/airsheightsparam.f;            fixcon ../INCLUDE/airsheightsparam.f            ../INCLUDE/airsheightsparam.f90;            rm ../INCLUDE/airsheightsparam.f
+/bin/cp ../INCLUDE/post_defined.param            ../INCLUDE/TempF90/JunkTempDir/post_definedparam.f;           fixcon ../INCLUDE/TempF90/JunkTempDir/post_definedparam.f           ../INCLUDE/TempF90/post_definedparam.f90;           rm ../INCLUDE/TempF90/JunkTempDir/post_definedparam.f
 
-/bin/cp ../INCLUDE/airslevels.param              ../INCLUDE/airslevelsparam.f;             fixcon ../INCLUDE/airslevelsparam.f             ../INCLUDE/airslevelsparam.f90;             rm ../INCLUDE/airslevelsparam.f
+#########################
 
-/bin/cp ../INCLUDE/airslevelheights.param        ../INCLUDE/airslevelheightsparam.f;       fixcon ../INCLUDE/airslevelheightsparam.f       ../INCLUDE/airslevelheightsparam.f90;       rm ../INCLUDE/airslevelheightsparam.f
+/bin/cp ../INCLUDE/TempF90/Earth/airsheights.param             ../INCLUDE/TempF90/JunkTempDir/airsheightsparam_earth.f;            fixcon ../INCLUDE/TempF90/JunkTempDir/airsheightsparam_earth.f            ../INCLUDE/TempF90/airsheightsparam.f90;             rm ../INCLUDE/TempF90/JunkTempDir/airsheightsparam_earth.f
 
-/bin/cp ../INCLUDE/airsheights_upper.param       ../INCLUDE/airsheights_upperparam.f;      fixcon ../INCLUDE/airsheights_upperparam.f      ../INCLUDE/airsheights_upperparam.f90;      rm ../INCLUDE/airsheights_upperparam.f
+/bin/cp ../INCLUDE/TempF90/Earth/airslevels.param              ../INCLUDE/TempF90/JunkTempDir/airslevelsparam_earth.f;             fixcon ../INCLUDE/TempF90/JunkTempDir/airslevelsparam_earth.f             ../INCLUDE/TempF90/airslevelsparam.f90;              rm ../INCLUDE/TempF90/JunkTempDir/airslevelsparam_earth.f
 
-/bin/cp ../INCLUDE/airslevels_upper.param        ../INCLUDE/airslevels_upperparam.f;       fixcon ../INCLUDE/airslevels_upperparam.f        ../INCLUDE/airslevels_upperparam.f90;      rm ../INCLUDE/airslevels_upperparam.f
+/bin/cp ../INCLUDE/TempF90/Earth/airslevelheights.param        ../INCLUDE/TempF90/JunkTempDir/airslevelheightsparam_earth.f;       fixcon ../INCLUDE/TempF90/JunkTempDir/airslevelheightsparam_earth.f       ../INCLUDE/TempF90/airslevelheightsparam.f90;        rm ../INCLUDE/TempF90/JunkTempDir/airslevelheightsparam_earth.f
 
-/bin/cp ../INCLUDE/airslevelheights_upper.param  ../INCLUDE/airslevelheights_upperparam.f; fixcon ../INCLUDE/airslevelheights_upperparam.f ../INCLUDE/airslevelheights_upperparam.f90; rm ../INCLUDE/airslevelheights_upperparam.f
+/bin/cp ../INCLUDE/TempF90/Earth/airsheights_upper.param       ../INCLUDE/TempF90/JunkTempDir/airsheights_upperparam_earth.f;      fixcon ../INCLUDE/TempF90/JunkTempDir/airsheights_upperparam_earth.f      ../INCLUDE/TempF90/airsheights_upperparam.f90;       rm ../INCLUDE/TempF90/JunkTempDir/airsheights_upperparam_earth.f
 
-/bin/cp ../INCLUDE/kcarta_jpl.param              ../INCLUDE/kcarta_jplparam.f;             fixcon ../INCLUDE/kcarta_jplparam.f             ../INCLUDE/kcarta_jplparam.f90;             rm ../INCLUDE/kcarta_jplparam.f
+/bin/cp ../INCLUDE/TempF90/Earth/airslevels_upper.param        ../INCLUDE/TempF90/JunkTempDir/airslevels_upperparam_earth.f;       fixcon ../INCLUDE/TempF90/JunkTempDir/airslevels_upperparam_earth.f       ../INCLUDE/TempF90/airslevels_upperparam.f90;        rm ../INCLUDE/TempF90/JunkTempDir/airslevels_upperparam_earth.f
 
-/bin/cp ../INCLUDE/KCARTA_database.param         ../INCLUDE/KCARTA_databaseparam.f;        fixcon ../INCLUDE/KCARTA_databaseparam.f        ../INCLUDE/KCARTA_databaseparam.f90;        rm ../INCLUDE/KCARTA_databaseparam.f
+/bin/cp ../INCLUDE/TempF90/Earth/airslevelheights_upper.param  ../INCLUDE/TempF90/JunkTempDir/airslevelheights_upperparam_earth.f; fixcon ../INCLUDE/TempF90/JunkTempDir/airslevelheights_upperparam_earth.f ../INCLUDE/TempF90/airslevelheights_upperparam.f90;  rm ../INCLUDE/TempF90/JunkTempDir/airslevelheights_upperparam_earth.f
 
-/bin/cp ../INCLUDE/gasIDname.param               ../INCLUDE/gasIDnameparam.f;              fixcon ../INCLUDE/gasIDnameparam.f              ../INCLUDE/gasIDnameparam.f90;              rm ../INCLUDE/gasIDnameparam.f
+###
+/bin/cp ../INCLUDE/EARTH_database_params/KCARTA_database.param_earth   ../INCLUDE/TempF90/JunkTempDir/KCARTA_databaseparam.f;        fixcon ../INCLUDE/TempF90/JunkTempDir/KCARTA_databaseparam.f        ../INCLUDE/TempF90/KCARTA_databaseparam.f90;     rm ../INCLUDE/TempF90/JunkTempDir/KCARTA_databaseparam.f
 
-/bin/cp ../INCLUDE/gauss.param                   ../INCLUDE/gaussparam.f;                  fixcon ../INCLUDE/gaussparam.f                  ../INCLUDE/gaussparam.f90;                  rm ../INCLUDE/gaussparam.f
+/bin/cp ../INCLUDE/EARTH_database_params/gasIDname.param_earth               ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f;              fixcon ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f              ../INCLUDE/TempF90/gasIDnameparam.f90;              rm ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f
 
+/bin/cp ../INCLUDE/gauss.param                   ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f;                  fixcon ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f                  ../INCLUDE/TempF90/gaussparam.f90;                   rm ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f
+
+########################################################################
 
 
 

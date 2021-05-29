@@ -51,7 +51,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
 ! raLayAngles   = array containing layer dependent sun angles
@@ -211,7 +211,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
@@ -545,7 +545,7 @@ CONTAINS
     REAL FUNCTION backgnd(raaAbs,waveno,raVTemp,iaaRadLayer,iNumLayer, &
     iNpmix,iAtm,rFracTop,j)
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL :: raaAbs(kMaxPts,kMixFilRows),rFracTop,raVTemp(kMixFilRows),waveno
     INTEGER :: iAtm,j,iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iNpmix
@@ -620,7 +620,7 @@ CONTAINS
     end FUNCTION backgnd
 !************************************************************************
 ! include Evans code here
-! cccc      include '../INCLUDE/scatter_rtspec.f'   this is compiled separately
+! cccc      include '../INCLUDE/TempF90/scatter_rtspec.f'   this is compiled separately
 
 !      PROGRAM RTSPEC   NEW!!!!!!!!!!!!!!! for up and down look!!!!!!
 !       Program for computing thermal atmospheric radiative transfer with

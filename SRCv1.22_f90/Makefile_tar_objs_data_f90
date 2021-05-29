@@ -105,8 +105,8 @@ MOBSJAC_CLD   = singlescatter.mod jac_pclsam_up.mod jac_pclsam_down.mod
 ##      2) bkcarta only has clear sky radiances, fluxes, jacobians      ##
 ##########################################################################
 
-PARAMS_SCAT = ../INCLUDE/kcartaparam.f90 ../INCLUDE/scatterparam.f90 \
-	      ../INCLUDE/pre_definedparam.f90 ../INCLUDE/gaussparam.f90 Makefile
+PARAMS_SCAT = ../INCLUDE/TempF90/kcartaparam.f90 ../INCLUDE/TempF90/scatterparam.f90 \
+	      ../INCLUDE/TempF90/pre_definedparam.f90 ../INCLUDE/TempF90/gaussparam.f90 Makefile
 
 OBSSCAT_COMMON    = clear_scatter_misc.o
 MOBSSCAT_COMMON    = clear_scatter_misc.mod
@@ -377,10 +377,10 @@ rad_angles.mod rad_angles.o : rad_angles.f90 $(PARAMS)
 rad_diff_and_quad.mod rad_diff_and_quad.o : rad_diff_and_quad.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_diff_and_quad.f90
 
-rad_flux.mod rad_flux.o : rad_flux.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
+rad_flux.mod rad_flux.o : rad_flux.f90 $(PARAMS) ../INCLUDE/TempF90/gaussparam.f90
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_flux.f90
 
-rad_common.mod rad_common.o : rad_common.f90 $(PARAMS) ../INCLUDE/gaussparam.f90
+rad_common.mod rad_common.o : rad_common.f90 $(PARAMS) ../INCLUDE/TempF90/gaussparam.f90
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) rad_common.f90
 
 rad_limb.mod rad_limb.o : rad_limb.f90 $(PARAMS)
@@ -523,7 +523,7 @@ DISTDIRGEN = /asl/rta/kcarta_sergio
 
 ###      $(warning "datafix400_v122_H2016 looks similar to datafix400_v122origres_H2016")
 datafix400_v122_H2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -534,7 +534,7 @@ datafix400_v122_H2016:
       cd ../SRCv1.22_f90
 
 mars_datafix400_v122_H2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016_mars.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122_Mars/template_kcartaV122_400_H2016_NLTEH2016_mars.param > \
       ../INCLUDE/kcarta_v122_mars.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -545,7 +545,7 @@ mars_datafix400_v122_H2016:
       cd ../SRCv1.22_f90
 
 datafix385_v122_H2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_385_H2016_NLTEH2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_385_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -556,7 +556,7 @@ datafix385_v122_H2016:
       cd ../SRCv1.22_f90
 
 datafix400_v122_H2016_highres:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_HIGHRES_IR.param > ../INCLUDE/kcarta_v122.param; \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_HIGHRES_IR.param > ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
       ln -s kcarta_v122.param kcarta.param; \
@@ -566,7 +566,7 @@ datafix400_v122_H2016_highres:
       cd ../SRCv1.22_f90
 
 datafix400_v122_H2016_veryhighres:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_VERYHIGHRES_IR.param > ../INCLUDE/kcarta_v122.param; \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_VERYHIGHRES_IR.param > ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
       ln -s kcarta_v122.param kcarta.param; \
@@ -579,7 +579,7 @@ datafix400_v122_H2016_veryhighres:
 ### orig res : 500-605 cm-1 at 0.0015 cm-1, 605-2830 cm-1 at 0.0025 cm-1
 ###      $(warning "datafix400_v122_H2016 looks similar to datafix400_v122origres_H2016")
 datafix400_v122origres_H2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -590,7 +590,7 @@ datafix400_v122origres_H2016:
       cd ../SRCv1.22_f90
 
 datafix400_v120origres_H2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2016_NLTEH2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV120_400_H2016_NLTEH2016.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -601,7 +601,7 @@ datafix400_v120origres_H2016:
       cd ../SRCv1.22_f90
 
 datafix400_v120origres_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2012_NLTEH2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV120_400_H2012_NLTEH2016.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -612,7 +612,7 @@ datafix400_v120origres_H2012:
       cd ../SRCv1.22_f90
 
 datafix400_v120origres_H2008:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV120_400_H2008_NLTEH2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV120_400_H2008_NLTEH2016.param > \
       ../INCLUDE/kcarta_v120.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -625,7 +625,7 @@ datafix400_v120origres_H2008:
 ########################################################################
 ### others
 datafix400_v122_H2016_g110:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2016_WVg110.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2016_NLTEH2016_WVg110.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -636,7 +636,7 @@ datafix400_v122_H2016_g110:
       cd ../SRCv1.22_f90
 
 datafix400_v122_G2015_NLTEH2016:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_G2015_NLTEH2016.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_G2015_NLTEH2016.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -647,7 +647,7 @@ datafix400_v122_G2015_NLTEH2016:
       cd ../SRCv1.22_f90
 
 datafix400_v122_H2016_NLTEH2008:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2008.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2016_NLTEH2008.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -658,7 +658,7 @@ datafix400_v122_H2016_NLTEH2008:
       cd ../SRCv1.22_f90
 
 datafix400_v122_H2016_NLTEH2004:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2016_NLTEH2004.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2016_NLTEH2004.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -669,7 +669,7 @@ datafix400_v122_H2016_NLTEH2004:
       cd ../SRCv1.22_f90
 
 datafix400_v122_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_400_H2012_NLTEH2008.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -680,7 +680,7 @@ datafix400_v122_H2012:
       cd ../SRCv1.22_f90
 
 datafix385_v122_H2012_LBLRTM:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_385_H2012_LBLRTM_NLTEH2008.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_385_H2012_LBLRTM_NLTEH2008.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
@@ -691,7 +691,7 @@ datafix385_v122_H2012_LBLRTM:
       cd ../SRCv1.22_f90
 
 datafix385_v122_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/template_kcartaV122_385_H2012_NLTEH2008.param > \
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_385_H2012_NLTEH2008.param > \
       ../INCLUDE/kcarta_v122.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \

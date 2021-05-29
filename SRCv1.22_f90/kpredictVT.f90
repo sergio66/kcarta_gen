@@ -20,7 +20,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL :: rSolarAngle            !!!solar angle for atm #1
@@ -216,7 +216,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input vars
     CHARACTER(80) :: caFname                          !i/o file name
@@ -326,7 +326,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input vars
     CHARACTER(80) :: caFname                          !i/o file name
@@ -515,7 +515,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: raTemp(kProfLayer)           !!!kinetic temp profile

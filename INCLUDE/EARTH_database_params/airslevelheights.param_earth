@@ -1,5 +1,9 @@
 c from KCARTADATA/RefProf.For.v107up/mypref.op.new
 c the heights of the pressure levels for the kCARTA DATABASE
+
+      INTEGER iXPlanet1
+      DATA iXPlanet1 /03/
+
        REAL DATABASELEVHEIGHTS(101)
   
 C-----------------------------------------------------------

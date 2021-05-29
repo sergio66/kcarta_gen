@@ -82,9 +82,9 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! input vars
     REAL :: raPressLevels(kProfLayer+1)
@@ -200,7 +200,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
 ! raaMix     = mixing table info from *MIXFIL
@@ -422,7 +422,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iNumGases    !number of gases
     INTEGER :: iNpMix       !number of mix paths
@@ -476,7 +476,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iMixFileLines,iVertTempSet,iNpmix
     REAL :: raaMix(kMixFilRows,kGasStore)       !mixing table
@@ -536,7 +536,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! set up file unit numbers so at run time they default to STDIN,STDOUT,STDOUT
     kStdDriver = 5
@@ -577,7 +577,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the driver file name from the command line arguments
     CHARACTER(80) :: caDriverName
@@ -643,7 +643,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the printing switch,atmosphere# to print,# of layers to print,
 !   list of layers/paths to print (limited to kProfLayer for now) , and the
@@ -680,7 +680,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
     INTEGER :: iCo2              !which gas used to mimic CO2 temps
     INTEGER :: iNumGases         !how many gases
@@ -739,7 +739,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! caDriverName is the name of the driver file to be processed
     CHARACTER(80) :: caDriverName
@@ -832,7 +832,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the gasnumber (not gasID!!!!!!!!!!!!!!)
     INTEGER :: iGas
@@ -888,7 +888,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the gasnumber (not gasID!!!!!!!!!!!!!!)
     INTEGER :: iGas
@@ -916,7 +916,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
           
     INTEGER :: iNumGases,iaGases(kMaxGas),iaList(kNumkCompT)
     REAL :: raFiles(kNumkCompT)
@@ -1072,7 +1072,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raaAb(kMaxPts,kProfLayer)
 
@@ -1090,7 +1090,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raaAb(kMaxPts,kMixFilRows)
     INTEGER :: iNpMix
@@ -1110,7 +1110,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     DOUBLE PRECISION :: daaAb(kMaxPts,kProfLayer)
 
@@ -1126,7 +1126,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     DOUBLE PRECISION :: daaAb(kMaxPtsJac,kProfLayerJac)
 
@@ -1143,7 +1143,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iCount     = which of the iNumGases are being processed
 ! daaGasAb   = double precision abs coeffs, from the uncompression
@@ -1170,7 +1170,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaGasAb   = double precision abs coeffs, from the uncompression
 ! raaaGasAbs = 3d matrix that save ALL abs coeffs for current 25 cm-1 chunk
@@ -1188,7 +1188,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaGasAbs = 2d matrix that save ALL abs coeffs for current 25 cm-1 chunk
     REAL :: raaGasAbCoeff(kMaxPts,kProfLayer)
@@ -1206,7 +1206,33 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/airslevelsparam.f90'
+    include '../INCLUDE/TempF90/airsheightsparam.f90'
+    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
+
+    write(kStdWarn,*) 'checking ../INCLUDE/TempF90/airsHeightsLevels*aparam.f90 are for kPlanet = ',kPlanet
+    write(kStdWarn,*) '  '
+
+    IF (kPlanet /= iXPlanet0) THEN
+      write(kStdErr,*) 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet0',iXPlanet0
+      Call DoStop
+    END IF
+
+    IF (kPlanet /= iXPlanet1) THEN
+      write(kStdErr,*) 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet1',iXPlanet1
+      Call DoStop
+    END IF
+    IF (kPlanet /= iXPlanet2) THEN
+      write(kStdErr,*) 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet2',iXPlanet2
+      Call DoStop
+    END IF
+    IF (kPlanet /= iXPlanet3) THEN
+      write(kStdErr,*) 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet3',iXPlanet3
+      Call DoStop
+    END IF
 
     write(kStdWarn,*) 'checking parameters in kcartaparam.f90'
     write(kStdWarn,*) '  '
@@ -1243,7 +1269,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNumGases   = number of gases read in from *GASFIL + *XSCFIL
 ! iNpMix      = number of mixed paths read in from *MIXFIL
@@ -1319,7 +1345,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raPressLevels(kProfLayer+1),pProf(kProfLayer)
     INTEGER :: iProfileLayers
@@ -1348,7 +1374,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input variables
     INTEGER :: iLowerOrUpper   !!upper or lower atm
@@ -1500,7 +1526,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iJax                   !! when testing jacobians
@@ -1615,7 +1641,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iNumLayer
@@ -1675,52 +1701,56 @@ CONTAINS
     write(kStdWarn,*)'avg rCO2Mix = ',rX,' ppmv'
 
 ! >>>>>>>>>>>>>>>>>>>>>>>>>
-    iBot = 40  !! assume profile has started from here!!!!
-    iTop = 70
-    write(kStdWarn,*) 'O3 : Compute lower trop <ppmv> between lays ',iBot,iTop
-
-    rX = 0.0
-    iCount = 0
-    DO iI = iBot,iTop
-      iCount = iCount + 1
-      rX = rX + raaPartPress(iI,3)/(raaPress(iI,2)-raaPartPress(iI,1))   !! wrt dry air
-    END DO
-    rX = rX * 1.0e6/iCount
-    write(kStdWarn,*)'avg rO3Mix = ',rX,' ppmv'
-
-! Conversion factor
-! Note: a Dobson unit is 10^-5 meters at 1 atm and 273.15 K
-! cfac = (1/loschmidt) * (1000 du/cm)
-! Loschmidt (molecules per cm^3 at 1 atm and 273.15 K)
-    cfac=1000/2.6867775E+19
-
-    iLowestLay = kProfLayer - iNumLayer + 1
-    rX = 0.0
-    iCount = 0
-    DO iI = iLowestLay,kProfLayer
-      rF = 1.0
-      IF (iI == iLowestLay) rF = rFracBot
-      iCount = iCount + 1
-      rX = rX + raaAmt(iI,3) * rF
-    END DO
-    rX = rX * cfac * (kAvog) !! remember rAmt is in kmol/cm2 so need to change to molecules/cm2
-    write(kStdWarn,*)' column amount ozone = ',rX,' du'
+    IF (kPlanet == 03) THEN
+      iBot = 40  !! assume profile has started from here!!!!
+      iTop = 70
+      write(kStdWarn,*) 'O3 : Compute lower trop <ppmv> between lays ',iBot,iTop
+  
+      rX = 0.0
+      iCount = 0
+      DO iI = iBot,iTop
+        iCount = iCount + 1
+        rX = rX + raaPartPress(iI,3)/(raaPress(iI,2)-raaPartPress(iI,1))   !! wrt dry air
+      END DO
+      rX = rX * 1.0e6/iCount
+      write(kStdWarn,*)'avg rO3Mix = ',rX,' ppmv'
+  
+  ! Conversion factor
+  ! Note: a Dobson unit is 10^-5 meters at 1 atm and 273.15 K
+  ! cfac = (1/loschmidt) * (1000 du/cm)
+  ! Loschmidt (molecules per cm^3 at 1 atm and 273.15 K)
+      cfac=1000/2.6867775E+19
+  
+      iLowestLay = kProfLayer - iNumLayer + 1
+      rX = 0.0
+      iCount = 0
+      DO iI = iLowestLay,kProfLayer
+        rF = 1.0
+        IF (iI == iLowestLay) rF = rFracBot
+        iCount = iCount + 1
+        rX = rX + raaAmt(iI,3) * rF
+      END DO
+      rX = rX * cfac * (kAvog) !! remember rAmt is in kmol/cm2 so need to change to molecules/cm2
+      write(kStdWarn,*)' column amount ozone = ',rX,' du'
+    END IF
 
 ! >>>>>>>>>>>>>>>>>>>>>>>>>
-    iBot = 20                              !! assume profile has started from here !!!!
-    iBot = max(20,kProfLayer-iNumLayer+5)  !! account for p.spres being in Antartic!!!
-    iTop = kProfLayer - iBot
-    write(kStdWarn,*) 'N2O/CO/CH4 : Compute lower trop <ppmv> between lays ',iBot,iTop
-
-    rX = 0.0
-    iCount = 0
-    DO iI = iBot,iTop
-      iCount = iCount + 1
-      rX = rX + raaPartPress(iI,4)/(raaPress(iI,4)-raaPartPress(iI,1))   !! wrt dry air
-    END DO
-    rX = rX * 1.0e6/iCount
-    write(kStdWarn,*)'avg rN2OMix = ',rX,' ppmv'
-
+    IF (kPlanet == 03) THEN
+      iBot = 20                              !! assume profile has started from here !!!!
+      iBot = max(20,kProfLayer-iNumLayer+5)  !! account for p.spres being in Antartic!!!
+      iTop = kProfLayer - iBot
+      write(kStdWarn,*) 'N2O/CO/CH4 : Compute lower trop <ppmv> between lays ',iBot,iTop
+  
+      rX = 0.0
+      iCount = 0
+      DO iI = iBot,iTop
+        iCount = iCount + 1
+        rX = rX + raaPartPress(iI,4)/(raaPress(iI,4)-raaPartPress(iI,1))   !! wrt dry air
+      END DO
+      rX = rX * 1.0e6/iCount
+      write(kStdWarn,*)'avg rN2OMix = ',rX,' ppmv'
+    END IF
+  
     rX = 0.0
     iCount = 0
     DO iI = iBot,iTop
@@ -1730,15 +1760,17 @@ CONTAINS
     rX = rX * 1.0e6/iCount
     write(kStdWarn,*)'avg rCOMix = ',rX,' ppmv'
 
-    rX = 0.0
-    iCount = 0
-    DO iI = iBot,iTop
-      iCount = iCount + 1
-      rX = rX + raaPartPress(iI,6)/(raaPress(iI,6)-raaPartPress(iI,1))   !! wrt dry air
-    END DO
-    rX = rX * 1.0e6/iCount
-    write(kStdWarn,*)'avg rCH4Mix = ',rX,' ppmv'
-
+    IF (kPlanet == 03) THEN  
+      rX = 0.0
+      iCount = 0
+      DO iI = iBot,iTop
+        iCount = iCount + 1
+        rX = rX + raaPartPress(iI,6)/(raaPress(iI,6)-raaPartPress(iI,1))   !! wrt dry air
+      END DO
+      rX = rX * 1.0e6/iCount
+      write(kStdWarn,*)'avg rCH4Mix = ',rX,' ppmv'
+    END IF
+  
     write(kStdWarn,*) 'assumed fracBot = ',rFracBot,max(min(rFracBot,1.0),0.0)
     write(kStdWarn,*) ' '
 
@@ -1756,7 +1788,7 @@ CONTAINS
 
    SUBROUTINE DateTime(callname)
    IMPLICIT   NONE
-   INCLUDE '../INCLUDE/kcartaparam.f90'
+   include '../INCLUDE/TempF90/kcartaparam.f90'
    
    CHARACTER*(*) :: callname
    CHARACTER(LEN = 8)  :: DateINFO                 ! ccyymmdd

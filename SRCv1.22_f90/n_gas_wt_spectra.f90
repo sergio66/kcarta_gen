@@ -31,7 +31,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNGas     = number of gases stored in this namelist
 ! iaGasesNL = gasIDs stored in this namelist
@@ -99,6 +99,8 @@ CONTAINS
       CALL DoStop
     END IF
             
+    write(kStdWarn,'(A,I3,A,I3,A)') 'kPlanet = ',kPlanet,' : molgas4 looking for ',iNgas,' gases'
+
     RETURN
     end SUBROUTINE molgas4
 
@@ -112,7 +114,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNXSec     = number of gases stored in this namelist
 ! iaLXGasesNL = gasIDs stored in this namelist
@@ -165,7 +167,7 @@ CONTAINS
       CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! add all xsec gases
     ELSEIF (((iNxsec == -5) .OR. (iNXsec == -6)) .AND. (kPlanet == 03)) THEN
       CALL add_xsecgas(iNXsec,iaLXsecNL,iaXSCgases)  !! add LBLRTM xsec gases
-    ELSEIF (kPlanet ~= 03)
+    ELSEIF (kPlanet /= 03) THEN
       write(kStdWarn,*) 'kPlanet = ',kPlanet,' (not Earth) does not need xsec gases'
       write(kStdErr,*) 'kPlanet = ',kPlanet,' (not Earth) does not need xsec gases'
     ELSE
@@ -174,6 +176,8 @@ CONTAINS
       CALL DoStop
     END IF
 
+    IF (iNXsec < 0) iNXsec = 0
+    write(kStdWarn,'(A,I3,A,I3,A)') 'kPlanet = ',kPlanet,' : xscgas4 looking for ',iNXsec,' gases'
     RETURN
     end SUBROUTINE xscgas4
 
@@ -185,7 +189,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNumNewGases   tells number of new gases
 ! iaNewGasID     tells which gases we want to update spectroscopy
@@ -261,7 +265,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (-1/-2) model
@@ -368,7 +372,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (+1) model
@@ -450,7 +454,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (-1/-2) model
@@ -832,7 +836,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (-1/-2) model
@@ -1034,7 +1038,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     CHARACTER(80) :: caaNLTETemp(kGasStore)
@@ -1238,7 +1242,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caFname                !!! file to read
     DOUBLE PRECISION :: daJL(kHITRAN),daJU(kHITRAN) !!! quantum numbers
@@ -1311,7 +1315,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iNumNLTEGases,iaNLTEGasID(kGasStore)
@@ -1451,7 +1455,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input/output
     INTEGER :: iNgas
@@ -1649,13 +1653,13 @@ CONTAINS
 
     DO iInt = kNewGasLo,kNewGasHi
       IF (iaMOLgases(iInt) > 0) THEN
-        write(kStdWarn,*) '     going to use new continuum gas ',iInt
+        write(kStdWarn,*) '     going to use new continuum gas       ',iInt
       END IF
     END DO
 
     iInt = kNewGasHi+1
     IF (iaMOLgases(iInt) > 0) THEN
-      write(kStdWarn,*) '     going to use new heavy water gas ',iInt
+      write(kStdWarn,*) '     going to use new heavy water gas     ',iInt
     END IF
 
     IF (kCKD >= 0) THEN
@@ -1677,7 +1681,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input/output
     INTEGER :: iNXsec
@@ -1716,7 +1720,7 @@ CONTAINS
         END IF
       END DO
 
-    ELSE IF (((iWhichXSC == -5) .OR. (iWhichXSC == -6)) .AND (kPlanet == 03)) THEN
+    ELSE IF (((iWhichXSC == -5) .OR. (iWhichXSC == -6)) .AND. (kPlanet == 03)) THEN
       iKLBLRTMgases = 63
       write(kStdWarn,*) 'including LBLRTM Earth Atmosphere xsc gases from ',kGasXsecLo,' to ',iKLBLRTMgases
       ! use all gases in the xsec database
@@ -1812,7 +1816,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iGasID
 
