@@ -348,6 +348,10 @@ CONTAINS
     iaGPMPAtm,iaNp,iaaOp,raaOp
     NAMELIST /nm_endinp/namecomment
 
+! variation of Sun-Planet distance ( planet orbit changes (ie planet-sun distance))
+! this would affect solar insolation at TOA .. use rad2bt(v,5800)*pi(rS/eSP)^2*kOrbitalSolFac
+    kOrbitalSolFac = 1.00
+
 ! variation of layer temp
 ! note : kTemperVary can be set in nm_params
 !        iTemperVary can be set in nm_radnce
@@ -512,6 +516,7 @@ CONTAINS
       END DO
       write(kStdWarn,*) '---------------------------------------'
     END DO
+    CALL Check_iaaOverrideDefault
     kTemperVary = iaaOverrideDefault(2,1)
     CALL CheckParams
     CALL printstar
@@ -917,6 +922,7 @@ CONTAINS
     END DO
     kTemperVary = iaaOverrideDefault(2,1)
     CALL CheckParams
+    CALL Check_iaaOverrideDefault
     CALL printstar
 
     namecomment = '******* SPECTRA section *******'
@@ -1347,7 +1353,8 @@ CONTAINS
     END IF
     FMT = '(A,I3,I3,I3)'
     write(kStdWarn,FMT) 'kActualJacs,kActualJacsB,kActualJacsT = ', &
-    kActualJacs,kActualJacsB,kActualJacsT
+      kActualJacs,kActualJacsB,kActualJacsT
+    CALL Check_iaaOverrideDefault
     CALL printstar
 
 ! ******** FRQNCY section

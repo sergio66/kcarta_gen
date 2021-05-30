@@ -323,19 +323,246 @@ CONTAINS
 !!!   see SUBR Get_Temp_Plevs in n_pth_mix.f
     iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
 !!!   see SUBR rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS in rad_main.f
-    iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = 5 for PCLSAM (Default)
 !!!   0 for ABS clouds, 2 for RTPSEC, 3 for DISORT
+!!!    iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = 5 for PCLSAM (Default)   TILL MAY 2021
+    iaaOverrideDefault(2,10) = -1   !!! if kPlanet == 3, then adjust Planet/Sun dist (=1 no,, default, +1 yes)
       
-! n_layers_lblrtm.f and n_pth_mix.f  TAPE5/6
+! n_layers_lblrtm.f and n_pth_mix.f  TAPE5/6 
     iaaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration
     iaaOverrideDefault(3,2) = +1    !!! iReplaceZeroProf = +1 to add in profiles TAPE5 does not have
     iaaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
+! plus EXTRA THINGS
     iaaOverrideDefault(3,4) = -1    !!! dump out surface terms (downwell therm, emiss, rho)
-
-!!!   in n_pth_mix.f
 
     RETURN
     end SUBROUTINE SetDefaultParams
+
+!************************************************************************
+    SUBROUTINE Check_iaaOverrideDefault
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+    INTEGER :: iI,iJ,iTemp
+
+!   iaaOverrideDefault(1:4,1:10)
+
+    !************************************************************************    
+    iI = 1
+    iJ = 0
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,1)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF ((abs(iTemp) /= 1) .AND. (iTemp /= 2) .AND. (itemp /= 3)) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iSartaChi : need iaaOverrideDefault(',iI,',',iJ,') = -1,+1,2,3 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,2)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF ((abs(iTemp) /= 1) .AND. (abs(iTemp) /= 2)) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iSplineType : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1,2 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,3)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (iTemp < 0 .OR. iTemp > 2) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iCO2Chi : need iaaOverrideDefault(',iI,',',iJ,') = 0,1,2 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,4)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) .NE. 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iMatlabORf77 : need iaaOverrideDefault(',iI,',',iJ,') = -1,+1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,5)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (iTemp < 0 .OR.  iTemp > 6) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iWhichScatterCode : need iaaOverrideDefault(',iI,',',iJ,') = 0..6 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,6)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iReadRP : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,7)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iLogOrLinear : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,8)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'rfmin/rfmax : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,9)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (iTemp .NE. 0 .and. iTemp .NE. 2 .and. iTemp .NE. 4 .and. iTemp .NE. 6) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'CO2 N2 WV CIA : need iaaOverrideDefault(',iI,',',iJ,') = 0,2,4,6,8 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(1,10)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'size of cloudy jac file : all or just weighted sum  : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    !************************************************************************    
+    iI = 2
+    iJ = 0
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,1)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (iTemp /= 1 .AND. iTemp /= 2 .AND. iTemp /= 42 .AND. iTemp /= 43) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'kTemperVary : need iaaOverrideDefault(',iI,',',iJ,') = 1,2,42,43 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,2)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (iTemp /= 1 .AND. iTemp /= 2 .AND. iTemp /= 3 .AND. iTemp /= 4) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iNumGaussPts : need iaaOverrideDefault(',iI,',',iJ,') = 1..4 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,3)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF ((iTemp < -1 .AND. iTemp > 2) .AND. (iTemp /= 10)) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iDoThermalBackGnd : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,1,2,10 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,4)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iraKThermalAngle : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,5)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) > 0) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iGaussQuad : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,+1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,6)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iUpwell : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,-2 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,7)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) > 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iSnell : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,+1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,8)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iInterpType : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,9)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iEstimateHighRes : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+!    iJ = iJ+1
+!    iTemp = iaaOverrideDefault(2,10)
+!    iTemp = iaaOverrideDefault(iI,iJ)
+!odd looks like iaaOverrideDefault(1,5)
+!    IF (iTemp < 0 .OR. iTemp > 5) THEN
+!      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iWhichScatterCode : need iaaOverrideDefault(',iI,',',iJ,') = 0..5 not ',iaaOverrideDefault(iI,iJ)
+!      CALL DoStop
+!    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(2,10)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAdjust Sun-Planet Distance : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    !************************************************************************    
+    iI = 3
+    iJ = 0
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(3,1)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAIRS101_or_LBL_levels : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(3,2)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iReplaceXeroProf for LBLRTM : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(3,3)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAddLBLRTM missing profile : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(3,4)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'Dump out surface terms (upwell radiation) : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    RETURN
+    end SUBROUTINE Check_iaaOverrideDefault
 
 !************************************************************************
 ! now check parameters in *PARAM

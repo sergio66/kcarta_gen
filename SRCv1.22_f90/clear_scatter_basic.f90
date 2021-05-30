@@ -1610,6 +1610,8 @@ CONTAINS
       END IF         
     END IF
 
+    raSun = raSun * kOrbitalSolFac
+
     RETURN
     end SUBROUTINE Solar
       

@@ -1851,7 +1851,7 @@ CONTAINS
 ! local variables
     CHARACTER(7) :: caWord
     INTEGER :: iNlay,iStart,iStop,iErr
-    REAL :: rTbdy,rTSurf,rAngle,rPressStart,rPressStop,rHeight,rT
+    REAL :: rTbdy,rTSurf,rAngle,rPressStart,rPressStop,rHeight,rT,rTimeOfObs
     INTEGER :: iDirection,iW,iInt
     INTEGER :: iC,iNumLinesRead
     REAL :: rSize1,rSize2
@@ -2290,6 +2290,10 @@ CONTAINS
     IF (kMonth > 12) kMonth = 12
 
     kLatitude = prof%rlat
+    IF (kPlanet == 03 .AND. iaaOverrideDefault(2,10) == +1) THEN
+      rTimeOfObs = prof%rtime
+      kOrbitalSolFac = find_sol_insolation_factor(kLatitude,rTimeOfObs)
+    END IF
 
     iaNumLayer(iC) = iNlay
 
@@ -4640,5 +4644,17 @@ CONTAINS
     end SUBROUTINE FindError
 
 !************************************************************************
+!! determines the adjustment to the solar insolation at TOA
+      REAL Function find_sol_insolation_factor(rlat,rTimeOfObs)
 
+      include '../INCLUDE/TempF90/kcartaparam.f90'
+
+      REAL rlat,rTimeOfObs,rJunk
+
+      rJunk = 1.0000     !!!! 
+      find_sol_insolation_factor = rJunk
+
+      RETURN
+      END
+!************************************************************************
 END MODULE n_rtp

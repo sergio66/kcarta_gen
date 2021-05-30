@@ -231,6 +231,8 @@
     iDoUpperAtmNLTE,caaUpperMixRatio,caPlanckUAfile,caOutUAFile, &
     caOutName)
 
+    CALL Check_iaaOverrideDefault
+
     iDefault  = -1
     iSARTAChi = +3     !!        use Scott's tuning coeffs for SARTA CRiS
     iSARTAChi = +2     !!        use Scott's tuning coeffs for SARTA IASI
