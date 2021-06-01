@@ -1786,7 +1786,7 @@ CONTAINS
 !  the use of concatenation operator // and substring
 ! ----------------------------------------------------------------
 
-   SUBROUTINE DateTime(callname)
+   SUBROUTINE DateTimeX(callname)
    IMPLICIT   NONE
    include '../INCLUDE/TempF90/kcartaparam.f90'
    
@@ -1843,7 +1843,7 @@ CONTAINS
    WRITE (kStdErr,*) callname,' run ended ',Year,'/',Month,'/',Day,' at ',PrettyTime   
    
    RETURN
-   END SUBROUTINE DateTime
+   END SUBROUTINE DateTimeX
 !************************************************************************
 
 END MODULE kcartamisc

@@ -18,6 +18,8 @@ USE freqfile
 USE n_rad_jac_scat
 USE n_pth_mix
 USE n_misc
+USE solar_insolation
+!!USE datetime_module, only: datetime, timedelta, clock
 
 IMPLICIT NONE
 
@@ -2289,10 +2291,11 @@ CONTAINS
     IF (kMonth < 1)  kMonth = 1
     IF (kMonth > 12) kMonth = 12
 
-    kLatitude = prof%rlat
+    kLatitude  = prof%rlat
+    kLongitude = prof%rlon
     IF (kPlanet == 03 .AND. iaaOverrideDefault(2,10) == +1) THEN
       rTimeOfObs = prof%rtime
-      kOrbitalSolFac = find_sol_insolation_factor(kLatitude,rTimeOfObs)
+      kOrbitalSolFac = find_sol_insolation_factor(kLatitude,kLongitude,rTimeOfObs)
     END IF
 
     iaNumLayer(iC) = iNlay
@@ -4645,16 +4648,198 @@ CONTAINS
 
 !************************************************************************
 !! determines the adjustment to the solar insolation at TOA
-      REAL Function find_sol_insolation_factor(rlat,rTimeOfObs)
+      REAL Function find_sol_insolation_factor(rlat,rlon,rTimeOfObs)
+
+!!      USE datetime_module, only: datetime, timedelta, clock
 
       include '../INCLUDE/TempF90/kcartaparam.f90'
 
-      REAL rlat,rTimeOfObs,rJunk
+      REAL rlat,rlon,rTimeOfObs,rJunk,rHH
+      INTEGER iYY,iMM,iDD,iHH,iMinMin,iSS
+
+! if you succeed in using datetime_module
+!      INTEGER getYear,getMonth,getDay,getHour,getMinute,getSecond
+!      iYY = getYear(rTimeOfObs)
+!      iMM = getMonth(rTimeOfObs)
+!      iDD = getDay(rTimeOfObs)
+!      iHH = getHour(rTimeOfObs)
+!      iMinMin = getMinute(rTimeOfObs)
+!      iSS = getSecond(rTimeOfObs)
+!     write(kStdErr,'(A,ES12.6,A,I2,A,I2,A,I2,A,F10.4)') 'rTimeOfObs = ',rTimeOfObs,' --> ',iYY,'/',iMM,'/',iDD,':',iHH+iMinMin/60.0
+
+      CALL getYY_MM_DD_HH(rTimeOfObs,1958,iYY,iMM,iDD,rHH)
+      write(kStdErr,'(A,ES12.6,A,I4,A,I2,A,I2,A,F10.4)') 'rTimeOfObs = ',rTimeOfObs,' --> ',iYY,'/',iMM,'/',iDD,' : ',rHH
+      CALL DoStop
 
       rJunk = 1.0000     !!!! 
+      CALL GetSolarInsolation(iYY,iMM,iDD,rlat,rlon,rJUNK)
+
       find_sol_insolation_factor = rJunk
 
       RETURN
       END
 !************************************************************************
+! this is equivalent of tai2utcSergio : see /home/sergio/MATLABCODE/compare_tai2utc_v2.m
+! this code will barf for robs time 1958+100 = 2058 ...... since I only allocate space for 100 years ...
+
+      SUBROUTINE getYY_MM_DD_HH(rtime,iY0,iYY,iMM,iDD,rHH)
+
+      IMPLICIT NONE
+      include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! input
+      REAL rtime
+      INTEGER iY0  !! expected to be 1958
+! output
+      REAL rHH
+      INTEGER iYY,iMM,iDD
+
+! local
+      REAL     rtimeY,rtime1,mtime1,htime1
+      INTEGER  yy1,ymax,iI,iMax,iMax4,daysINyear(100),daysINmonth(12)
+      INTEGER  yytemp(100),yyleap(25),accumulated_seconds_each_year,accumulated_seconds_each_month
+      INTEGER  iIndexYear,iIndexMonth,iN1,iN2
+      integer                          :: iaResult(100)
+      integer, dimension(size(yytemp)) :: keep1
+      integer, dimension(size(yyleap)) :: keep2
+
+!     assume p.rtime in the rtp file is seconds since 1958
+      IF (iY0 /= 1958) THEN
+        write(kStdErr,*) 'I could code this up for make 1958 variable, but we assume p.rtime is seconds from 01/01/1958'      
+        CALL DoStop
+      END IF
+
+      rtimeY = rtime/(86400*365.25) !! estimate year
+      yy1 = 1958 + floor(rtimeY)      
+      ymax = yy1 + 2                !! create arrays that go upto here, 2 years past the max, to be safe
+
+      iMax = ymax-1958
+      iMax4 = ceiling(iMax/4.0)
+      yytemp = 1957 + (/(iI,iI = 1,iMax)/)     !! I start from 1957 because iI = 1,iMax
+      yyleap = 1956 + 4*(/(iI,iI = 1,iMax4)/)  !! I start from 1959 because iI = 1,iMax4
+
+!print *,'yytemp is ...'
+!  print *,yytemp(1:iMax)
+!print *,'yyleap is ...'
+!  print *,yyleap(1:iMax4)
+
+      daysINyear = 365
+      call intersectI(yyleap(1:iMax4),yytemp(1:iMax),iaResult,keep1,keep2,iN1,iN2)
+      daysINyear(keep2(1:iN2)) = 366;
+!print *,'daysINyear is ...'
+!print *,daysINyear(1:iMax)
+
+      iIndexYear = 0
+      accumulated_seconds_each_year = 0
+      DO WHILE ((iIndexYear <= 100) .AND. (accumulated_seconds_each_year <= rtime))
+        iIndexYear = iIndexYear + 1
+        accumulated_seconds_each_year = accumulated_seconds_each_year + daysINyear(iIndexYear) * 86400
+      END DO
+      accumulated_seconds_each_year = accumulated_seconds_each_year - daysINyear(iIndexYear) * 86400
+      iYY = yytemp(iIndexYear)
+      
+      rtime1 = rtime - accumulated_seconds_each_year;
+      IF (mod(iYY,4) /= 0) THEN
+        daysINmonth = (/31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/)
+      ELSE
+        daysINmonth = (/31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/)
+      END IF
+!print *,'daysINmonth is ...',rtime1
+! print *,daysINmonth
+
+      iIndexMonth = 0
+      accumulated_seconds_each_month = 0
+      DO WHILE ((iIndexMonth <= 100) .AND. (accumulated_seconds_each_month <= rtime1))
+        iIndexMonth = iIndexMonth + 1
+        accumulated_seconds_each_month = accumulated_seconds_each_month + daysINmonth(iIndexMonth) * 86400
+      END DO
+      accumulated_seconds_each_month = accumulated_seconds_each_month - daysINmonth(iIndexMonth) * 86400
+      iMM = iIndexMonth
+      
+      mtime1 = rtime1 - accumulated_seconds_each_month;
+      iDD = 1 + floor(mtime1/86400);
+      
+      htime1 = mtime1 - (iDD-1)*86400;
+      rHH = htime1/86400*24;
+
+      RETURN
+      END SUBROUTINE getYY_MM_DD_HH
+  
+!************************************************************************
+      SUBROUTINE intersectI(ia1,ia2,iaResult,keep1,keep2,iN1,iN2)
+! this is like Matlab [iaResult,keep1,keep2] = intersect(ia1,ia2)
+! see https://comp.lang.fortran.narkive.com/6kgRtCnI/arrays-intersection
+
+      IMPLICIT NONE      
+
+!      subroutine intersect( ia1, ia2, iaResult )
+      integer, dimension(:) :: ia1, ia2
+      integer, dimension(max(size(ia1),size(ia2))) :: iaResult       
+
+      integer, dimension(size(ia1)) :: keep1
+      integer, dimension(size(ia2)) :: keep2
+      integer iN1,iN2
+ 
+      integer i,j
+       
+!      keep1 = (/ (any(ia1(i) == ia2, i=1,size(ia1))) /)
+!      keep2 = (/ (any(ia2(i) == ia1, i=1,size(ia2))) /)
+      keep1 = -1
+      keep2 = -1
+      iN1 = 0
+      iN2 = 0
+      DO i = 1,size(ia1)
+        IF (any(ia1(i) == ia2)) THEN 
+          iN1 = iN1 + 1
+          keep1(iN1) = i
+          iaResult(iN1) = ia1(i)
+        END IF
+      END DO
+
+      DO i = 1,size(ia2)
+        IF (any(ia2(i) == ia1)) THEN 
+          iN2 = iN2 + 1
+          keep2(iN2) = i
+        END IF
+      END DO
+
+      RETURN
+      end SUBROUTINE intersectI
+
+!************************************************************************
+      SUBROUTINE intersectI_v0(ia1,ia2,iaResult,keep1,keep2)
+! this is like Matlab [iaResult,keep1,keep2] = intersect(ia1,ia2)
+! see https://comp.lang.fortran.narkive.com/6kgRtCnI/arrays-intersection
+! see http://www.icl.utk.edu/~mgates3/docs/fortran.html
+
+      IMPLICIT NONE      
+
+!      subroutine intersect( ia1, ia2, iaResult )
+      integer, dimension(:) :: ia1, ia2
+      integer, dimension(:), pointer :: iaResult
+       
+      logical, dimension(size(ia1)) :: keep1
+      logical, dimension(size(ia2)) :: keep2
+       
+      integer i,j
+       
+!      keep1 = (/ (any(ia1(i) == ia2, i=1,size(ia1))) /)
+!      keep2 = (/ (any(ia2(i) == ia1, i=1,size(ia2))) /)
+      keep1 = .false.
+      keep2 = .false.
+      DO i = 1,size(ia1)
+        IF (any(ia1(i) == ia2)) keep1(i) = .true.
+      END DO
+      DO i = 1,size(ia2)
+        IF (any(ia2(i) == ia1)) keep2(i) = .true.
+      END DO
+
+      allocate( iaResult(count(keep1)) )       
+      iaResult = pack( ia1, keep1 )
+
+      RETURN
+      end SUBROUTINE intersectI_v0
+
+!************************************************************************
+
 END MODULE n_rtp

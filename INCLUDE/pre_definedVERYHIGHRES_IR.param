@@ -249,7 +249,7 @@ cccc
 ! rtp file also may give latitude and month (via rtime)
       INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle,kTemperVary
       REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult,kDefaultToffset
-      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
+      REAL kSolAzi,kSatAzi,kWindSpeed,kLatitude,kLongitude,kMonth,kSurfPress,kSurfAlt
 ! this is LBLRTM TPAPE5 toa, and LBLRTM level temps
       REAL kLBLRTM_toa,kLBLRTM_levelT(kMaxLayer+1),kLBLRTM_layerTavg(kMaxLayer)
 c this is to account for planet orbit changes (ie planet-sun distance)
@@ -262,7 +262,7 @@ c this is to account for planet orbit changes (ie planet-sun distance)
      $                 kSetThermalAngle,kTemperVary
       COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl,
      $                 kSolAzi,kSatAzi,kOrbitalSolFac,
-     $                 kWindSpeed,kLatitude,kMonth,kSurfPress,kSurfAlt
+     $                 kWindSpeed,kLatitude,kLongitude,kMonth,kSurfPress,kSurfAlt
       INTEGER ka100layerCloudType(kMaxUserSet),k100layerCloud
       COMMON/ComBlock6/ka100layerCloudType,k100layerCloud
       COMMON/ComBlock7/kLBLRTM_toa,kLBLRTM_levelT,kLBLRTM_layerTavg

@@ -1302,7 +1302,7 @@
 
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
-    CALL DateTime('kcartabasic.x')
+    CALL DateTimeX('kcartabasic.x')
     wtime = omp_get_wtime ( ) - wtime
     write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
     write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    

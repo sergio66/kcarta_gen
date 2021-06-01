@@ -37,9 +37,10 @@ OBS_BASIC_COMMON = basic_common.o ttorad_common.o spline_and_sort_and_common.o  
 OBJSRTP        = rtp_interface_f90.o
 
 OBJSSTRING     = kcoeff_common.o         clear_scatter_basic.o   n_nonlte_common.o   n_mr_common.o \
-                 n_gas_wt_spectra.o      n_pth_mix.o             n_rad_jac_scat.o    n_output.o \
-                 n_layers.o              n_layers_lblrtm.o       n_misc.o            n_rtp.o    \
-		 n_duplicate_sky.o       n_main.o\
+                 n_gas_wt_spectra.o      n_pth_mix.o             n_rad_jac_scat.o    n_output.o    \
+                 n_layers.o              n_layers_lblrtm.o       n_misc.o                          \
+                 datetime_module.o       solar_insolation.o      n_rtp.o    \
+		 n_duplicate_sky.o       n_main.o                
  
 OBS_LTE_OPTDPH  = kcoeffSPL.o               kcoeffSPLJAC.o        kcoeff_FAST_details.o \
                   kcoeff_FAST_details2.o    kcoeff_FAST.o         kcont_xsec.o           kcoeffMAIN.o
@@ -58,9 +59,10 @@ MOBS_BASIC_COMMON = basic_common.mod  ttorad_common.mod spline_and_sort_and_comm
 MOBJSRTP        = rtp_interface_f90.mod
 
 MOBJSSTRING     = kcoeff_common.mod       clear_scatter_basic.mod  n_nonlte_common.mod      n_mr_common.mod \
-                  n_gas_wt_spectra.mod    n_pth_mix.mod            n_rad_jac_scat.mod       n_output.mod \
-                  n_layers.mod            n_layers_lblrtm.mod      n_misc.mod               n_rtp.mod    \
-		  n_duplicate_sky.mod     n_main.mod
+                  n_gas_wt_spectra.mod    n_pth_mix.mod            n_rad_jac_scat.mod       n_output.mod    \
+                  n_layers.mod            n_layers_lblrtm.mod      n_misc.mod                               \
+                  datetime_module.mod     solar_insolation.mod     n_rtp.mod                                \
+		  n_duplicate_sky.mod     n_main.mod               
 
 MOBS_LTE_OPTDPH  = kcoeffSPL.mod              kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
                    kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
@@ -505,6 +507,13 @@ n_output.mod n_output.o : n_output.f90 $(PARAMS)
 
 n_rtp.mod n_rtp.o : n_rtp.f90 $(PARAMS_RTP) $(RTPDEFS_FILE)
 	$(FORTRANX) -c $(RTPINC) $(FLAGS) $(UFLAG) n_rtp.f90
+
+solar_insolation.mod solar_insolation.o : solar_insolation.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) solar_insolation.f90
+
+## this is not really used, so should be taken out
+datetime_module.mod datetime_module.o : datetime_module.f90 $(PARAMS)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) datetime_module.f90
 
 rtp_interface_f90.mod rtp_interface_f90.o : rtp_interface_f90.f90 $(PARAMS_RTP) $(RTPDEFS_FILE)
 	$(FORTRANX) -c $(RTPINC) $(FLAGS) $(UFLAG) rtp_interface_f90.f90
