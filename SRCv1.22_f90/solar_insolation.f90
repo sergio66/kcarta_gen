@@ -135,7 +135,7 @@ CONTAINS
         if (IDAWNM .LT. 0) IDAWNM = 0
         if (IDUSKM .LT. 0) IDUSKM = 0
         SRINC  = 1367*COSZT / SUNDIS**2
-        If (JDATE >= 1)  Write (6,941) RLAT,RLON,JYEAR,MONTH,JDATE, &
+        If (JDATE >= 1)  Write (kStdWarn,941) RLAT,RLON,JYEAR,MONTH,JDATE, &
                          IDAWNH,IDAWNM, IDUSKH,IDUSKM, SRINC,COSZS, &
                          COSZT,SUNDIS
         GoTo 700
@@ -143,14 +143,14 @@ CONTAINS
 !****   Daylight at all times at this location on this day
 !****
   500   SRINC = 1367*COSZT / SUNDIS**2
-        If (JDATE >= 1)  Write (6,941) RLAT,RLON,JYEAR,MONTH,JDATE, &
+        If (JDATE >= 1)  Write (kStdWarn,941) RLAT,RLON,JYEAR,MONTH,JDATE, &
                          0,0,24,0,SRINC,COSZS,COSZT,SUNDIS
         GoTo 700
 !****
 !**** Nightime at all times at this location on this day
 !****
   600   SRINC = 1367*COSZT / SUNDIS**2
-        If (JDATE >= 1)  Write (6,941) RLAT,RLON,JYEAR,MONTH,JDATE, &
+        If (JDATE >= 1)  Write (kStdWarn,941) RLAT,RLON,JYEAR,MONTH,JDATE, &
                          0,0,0,0,SRINC,COSZS,COSZT,SUNDIS
   700   Continue
   699  Continue

@@ -1610,7 +1610,10 @@ CONTAINS
       END IF         
     END IF
 
-    raSun = raSun * kOrbitalSolFac
+! see eg ../INCLUDE/Templates_V122/template_kcartaV122_400_H2016_NLTEH2016.param
+! rOmegaSun = pi(sun diam/sun dist) = pi*((0.6951e9/149.57e9) = 6.7851e-05
+!    ----->   pi(sun diam/fac x sun dist) = rOmegaSun0 / (fac^2)
+    raSun = raSun / (kOrbitalSolFac**2)
 
     RETURN
     end SUBROUTINE Solar

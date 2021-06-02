@@ -2293,6 +2293,7 @@ CONTAINS
 
     kLatitude  = prof%rlat
     kLongitude = prof%rlon
+
     IF (kPlanet == 03 .AND. iaaOverrideDefault(2,10) == +1) THEN
       rTimeOfObs = prof%rtime
       kOrbitalSolFac = find_sol_insolation_factor(kLatitude,kLongitude,rTimeOfObs)
@@ -4665,14 +4666,15 @@ CONTAINS
 !      iHH = getHour(rTimeOfObs)
 !      iMinMin = getMinute(rTimeOfObs)
 !      iSS = getSecond(rTimeOfObs)
-!     write(kStdErr,'(A,ES12.6,A,I2,A,I2,A,I2,A,F10.4)') 'rTimeOfObs = ',rTimeOfObs,' --> ',iYY,'/',iMM,'/',iDD,':',iHH+iMinMin/60.0
+!      write(kStdErr,'(A,ES12.6,A,I2,A,I2,A,I2,A,F10.4)') &
+!       'rTimeOfObs = ',rTimeOfObs,' --> ',iYY,'/',iMM,'/',iDD,':',iHH+iMinMin/60.0
 
       CALL getYY_MM_DD_HH(rTimeOfObs,1958,iYY,iMM,iDD,rHH)
-      write(kStdErr,'(A,ES12.6,A,I4,A,I2,A,I2,A,F10.4)') 'rTimeOfObs = ',rTimeOfObs,' --> ',iYY,'/',iMM,'/',iDD,' : ',rHH
-      CALL DoStop
 
       rJunk = 1.0000     !!!! 
       CALL GetSolarInsolation(iYY,iMM,iDD,rlat,rlon,rJUNK)
+      write(kStdWarn,'(A,ES12.6,A,I4,A,I2,A,I2,A,F6.3,A,F10.4)') &
+        'rTimeOfObs = ',rTimeOfObs,' --> Y/M/D:H = ',iYY,'/',iMM,'/',iDD,' :',rHH,' --> solar distance factor = ',rJUNK
 
       find_sol_insolation_factor = rJunk
 

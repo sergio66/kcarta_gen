@@ -504,7 +504,7 @@ c Default kCARTA database for Earth is in Toffsets of 10K from each other
       REAL kTempOffSet_database
       PARAMETER (kTempOffSet_database = 10.0)
 
-c 6.785087652174316e-5 = pi(sun diam/sun dist)/asl/data/kcarta_sergio2 = pi*((0.6951e9/149.57e9)/asl/data/kcarta_sergio2)
+c 6.785087652174316e-5 = pi(sun diam/sun dist) = pi*((0.6951e9/149.57e9) = 6.7851e-05
 c      we also need to multiply by muSat, and then divide by PI to use
 c      pencil beam intensity instead of Liou's fat beam flux ??
 c      6.785087652174316e-5 = (sun diam/sun dist)/asl/data/kcarta_sergio2 = solid angle

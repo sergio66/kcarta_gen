@@ -607,16 +607,16 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22
 -----
-5/29/21         Intrducing kOrbitalSolFac = 1.00 (in n_main and templeate*.param) to 
+5/29/21         Intrducing kOrbitalSolFac = 1.00 (in n_main and template*.param) to 
                 account for variations in Planet-Sun distance
                     
                 Last line of SUBROUTINE Solar in clear_scatter_basic.f90 has
-                  raSun = raSun * kOrbitalSolFac
+                  raSun = raSun / (kOrbitalSolFac ** 2)
     
                 iaaOverrideDefault(2,10) = -1 default, keep kOrbitalSolFac = 1
-                iaaOverrideDefault(2,10) = +1 allows in n_rtp I will have a line
+                iaaOverrideDefault(2,10) = +1 allows in n_rtp the code
                   IF (kPlanet == 03 & iaaOverrideDefault(2,10) = +1) THEN
-                    kOrbitalSolFac = find_sol_insolation_factor(rlat,yy,mm,dd)
+                    kOrbitalSolFac = find_sol_insolation_factor(rlat,rlon,rtime)
                   END IF
 
 5/28/21/        Cleaned up INCLUDE/template_vXYZ_ by putting them into INCLUDE/Template_VXYZ
