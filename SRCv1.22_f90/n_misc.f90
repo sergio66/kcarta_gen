@@ -439,8 +439,8 @@ CONTAINS
     iJ = iJ+1
     iTemp = iaaOverrideDefault(2,1)
     iTemp = iaaOverrideDefault(iI,iJ)
-    IF (iTemp /= 1 .AND. iTemp /= 2 .AND. iTemp /= 42 .AND. iTemp /= 43) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'kTemperVary : need iaaOverrideDefault(',iI,',',iJ,') = 1,2,42,43 not ',iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1 .AND. iTemp /= 2 .AND. iTemp /= 42 .AND. iTemp /= 43) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'kTemperVary : need iaaOverrideDefault(',iI,',',iJ,') = -1,1,2,42,43 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 

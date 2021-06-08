@@ -21,8 +21,8 @@ c!!!                                                                  !!!
 c template file : template_kcartaV122_400_H2016_NLTEH2016_mars.param  !!!
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-      PARAMETER(caVersion='v1.22 21-05-30 template_kcartaV121_400_H2016_NLTEH2016_mars.param')      !!!
-c!!!                       v     YY MM DD template_kcartaV121_PPM_H20XY_NLTEH20AB_mars.param')      !!!
+      PARAMETER(caVersion='v1.22 21-05-30 template_kcartaV122_400_H2016_NLTEH2016_mars.param')      !!!
+c!!!                       v     YY MM DD template_kcartaV122_PPM_H20XY_NLTEH20AB_mars.param')      !!!
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
