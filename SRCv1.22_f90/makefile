@@ -1,17 +1,17 @@
-#echo "IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB"
+#echo "IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90_v122.sc AFTER doing the datafixXYZ_H20AB"
 
 $(info   )
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
 $(info IMPORTANT (1) -- try to build on oldest nodes rather than taki2 so it runs on every node)
-$(info IMPORTANT (2) -- make sure you ALWAYS run cp_param_files_to_f90.sc AFTER doing the datafixXYZ_H20AB, if you do things by hand)
-$(info IMPORTANT (3) -- since this is 500-880,805-2830 cm-1 res use cp_param_files_to_f90.sc and not cp_param_files_to_f90_v120.sc)
+$(info IMPORTANT (2) -- make sure you ALWAYS run cp_param_files_to_f90_v122.sc AFTER doing the datafixXYZ_H20AB, if you do things by hand)
+$(info IMPORTANT (3) -- since this is 500-880,805-2830 cm-1 res use cp_param_files_to_f90_v122.sc and not cp_param_files_to_f90_v120.sc)
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
 $(info   )
 
 400_H16_default_f90:
 	make -f Makefile_v122_Intelf90 datafix400_v122_H2016
 	echo "this datafix400_v122_H2016 looks suspiciously similar to datafix400_v122_H2016_orig605_805res"
-	cp_param_files_to_f90.sc
+	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
 	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
@@ -31,7 +31,7 @@ mars_H16_default_f90:
 
 385_H16_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2016
-	cp_param_files_to_f90.sc
+	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
 	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
@@ -69,13 +69,23 @@ mars_H16_default_f90:
 400_H16_default_f90_orig605_805res:
 	make -f Makefile_v122_Intelf90 datafix400_v122origres_H2016
 	echo "this datafix400_v122_H2016 looks suspiciously similar to datafix400_v122_H2016_orig605_805res"
-	cp_param_files_to_f90_v120.sc
+	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
 	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H16_orig605_805res
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H16_orig605_805res
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H16_orig605_805res
+
+385_H08_CO2_UMBC_default_f90:
+	make -f Makefile_v122_Intelf90 datafix385_v122_H2008_CO2_UMBC
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 basic
+	make -f Makefile_v122_Intelf90 basicTXT	
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H08_CO2_UMBC
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H08_CO2_UMBC
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H08_CO2_UMBC
 
 
 clean: 

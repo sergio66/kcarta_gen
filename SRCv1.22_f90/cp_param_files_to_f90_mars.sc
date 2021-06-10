@@ -35,3 +35,6 @@ sed -e "s/pre_defined.param/pre_definedparam_mars.f90/g" -e "s/post_defined.para
 /bin/cp ../INCLUDE/gauss.param                   ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f;                  fixcon ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f                  ../INCLUDE/TempF90/gaussparam.f90;                   rm ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f
 
 ########################################################################
+echo "showing files in ../INCLUDE/TempF90/ .. should be todays date"
+ls -lt ../INCLUDE/TempF90/*.f90 ../INCLUDE/TempF90/*.param
+read -p "Press [Enter] key to continue ..."

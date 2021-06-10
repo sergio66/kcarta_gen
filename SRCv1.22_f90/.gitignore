@@ -1,5 +1,12 @@
+## files
+##-------
 *.mod
 *.o
-WORKS_*
-RayTrace
 ugh*
+
+## directories
+##-------------
+WORKS_*
+DateTime
+UNUSED
+SOLAR_INSOLATION

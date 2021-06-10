@@ -1,0 +1,163 @@
+################### DISTRIBUTIONS ########################################
+#### 1) to make the distributions, go to /home/sergio and look for kcartaV1xx
+#### 2) since all the KCARTA directories are under kcartaV1xx, rename this to 
+####    kcartaV122 eg               mv kcartaV110 kcartaV122
+#### 3) rm old sybolic link         rm KCARTA 
+#### 4) make new symbolic link      ln -s  kcartaV122 KCARTA 
+#### 5) cd to this dir              cd KCARTA
+#### 6) rm old symbolic link SRC    rm SRC
+#### 7) make new symbolic link SRC  ln -s SRCv1.22_f90 SRC
+#### 8) cd to this dir              cd SRC 
+#### 9) make whatever distribution you want! eg make dist 
+
+#### (A) : this has ALL the source code 
+####       clear sky rad transfer, clear sky jacobians, scatter, nlte and
+####       the nlte profiles
+dist:
+	cd ../.. ;				\
+	rm $(KTAR) 2> /dev/null || true;	\
+	tar -cf $(KTAR)				\
+		kcartaV122/BIN/kcarta.x90		\
+		kcartaV122/BIN/bkcarta.x90	\
+		kcartaV122/LIB                  \
+		kcartaV122/INCLUDE 		\
+		kcartaV122/SCATTERCODE          \
+		kcartaV122/DOC			\
+		kcartaV122/MATLAB		\
+		kcartaV122/README.1ST		\
+		kcartaV122/SCRIPTS		\
+		kcartaV122/SRCv1.22_f90/*.f90         \
+		kcartaV122/SRCv1.22_f90/Makefile    \
+		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
+		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
+		kcartaV122/UTILITY;		\
+	chmod 664 $(KTAR)
+
+bugfix:
+	cd ../.. ;				\
+	rm $(KTARBUG) 2> /dev/null || true;	\
+	tar -cf $(KTARBUG)			\
+		kcartaV122/README.1ST		\
+		kcartaV122/INCLUDE		\
+		kcartaV122/DOC/kcarta1.21_f90*	\
+		kcartaV122/SRCv1.22_f90/Makefile    \
+		/asl/data/kcarta/KCARTADATA/NLTE/UA/*.m          \
+		/asl/data/kcarta/KCARTADATA/NLTE/USUALLAYERS/*.m \
+		kcartaV122/SRCv1.22_f90/*.f90;        \
+	chmod 664 $(KTARBUG)
+
+##############################
+#### (B) this is the MATLAB directory, for reading in binary kCARTA output
+matlab:
+	cd ../.. ;				\
+	rm $(KMATLAB) 2> /dev/null || true;     \
+	tar -cf $(KMATLAB)			\
+		kcartaV122/MATLAB;		\
+	chmod 664 $(KMATLAB)
+
+data:
+	cd ../.. ;				\
+	rm $(KDATA) 2> /dev/null || true;	\
+	tar -cf $(KDATA)			\
+		/asl/data/kcarta/KCARTADATA;	\
+	chmod 664 $(KDATA)
+
+kcompdata:
+	./tarrer_kcompdata.sc
+
+##############################
+### (C) this is the very useful wrapper that Howard Motteler wrote
+###     the main version would be in /home/motteler/radtrans/kcwrap/kcwrap
+###     some copies would exist in the KCARTA/SCRIPTS directory
+kcwrap:
+	cd ../.. ;				\
+	rm $(KCWRAP) 2> /dev/null || true;	\
+	tar -cf $(KCWRAP)			\
+		/asl/matlab/rtptools		\
+		/asl/matlab/h4tools		\
+		/asl/matlab/sconv		\
+		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
+		/asl/data/airs/srf/srftables_m135_fringes_nov02.hdf \
+		kcartaV122/SCRIPTS;		\
+	chmod 664 $(KCWRAP)
+
+ftp: $(KTAR)
+	scp $(KTAR) $(KFTP)
+
+##############################
+#### (D) these are the basic files we give out : 
+####     clear sky radtransfer and jacobians, as well as nlte source code
+
+#these are the files for the basic kCARTA package
+# the c* and h* files have been moved to OLD_CONT_BLOCKDATA_AND_XSEC
+#   as they are no longer needed
+#kc1 = j*.f90 kcarta*.f90 kcoeff*.f90 n*.f90 \
+#      r*.f90 s_*.f90  INCLUDE/*.param Makefile
+
+giveout:
+	cd ../.. ;				\
+	rm $(KGIVEOUT) 2> /dev/null || true;	\
+	tar -cf $(KGIVEOUT)			\
+		KCARTA/BIN/kcarta.x90	\
+		KCARTA/BIN/bkcarta.x90	\
+		KCARTA/LIB                  \
+		KCARTA/INCLUDE 		\
+		KCARTA/DOC			\
+		KCARTA/MATLAB		\
+		KCARTA/README.1ST		\
+		KCARTA/SCRIPTS		\
+                KCARTA/INCLUDE/*.param      \
+                KCARTA/SRCv1.22_f90/freqfile.f90  \
+                KCARTA/SRCv1.22_f90/j*.f90        \
+                KCARTA/SRCv1.22_f90/k*.f90        \
+                KCARTA/SRCv1.22_f90/n*.f90        \
+                KCARTA/SRCv1.22_f90/r*.f90        \
+                KCARTA/SRCv1.22_f90/s_*.f90       \
+                KCARTA/SRCv1.22_f90/spline_*.f90  \
+                KCARTA/SRCv1.22_f90/clear_scatter_misc.f90  \
+                KCARTA/SRCv1.22_f90/singlescatter.f90       \
+                KCARTA/SRCv1.22_f90/Makefile    \
+		KCARTA/UTILITY;		\
+	chmod 664 $(KGIVEOUT)
+
+giveout_bugfix:
+	cd ../.. ;				         \
+	rm $(KTARBUGGIVEOUT) 2> /dev/null || true;	 \
+	tar -cf $(KTARBUGGIVEOUT)			 \
+		KCARTA/README.1ST		         \
+		KCARTA/INCLUDE		         \
+		KCARTA/DOC/kcarta1.18*	         \
+		KCARTA/SRCv1.22_f90/Makefile             \
+                KCARTA/SRCv1.22_f90/freqfile.f90           \
+                KCARTA/SRCv1.22_f90/j*.f90                 \
+                KCARTA/SRCv1.22_f90/k*.f90                 \
+                KCARTA/SRCv1.22_f90/n*.f90                 \
+                KCARTA/SRCv1.22_f90/r*.f90                 \
+                KCARTA/SRCv1.22_f90/s_*.f90                \
+                KCARTA/SRCv1.22_f90/spline_*.f90           \
+                KCARTA/SRCv1.22_f90/clear_scatter_misc.f90 \
+                KCARTA/SRCv1.22_f90/singlescatter.f90      \
+                KCARTA/SRCv1.22_f90/*akefile*;            \
+	chmod 664 $(KTARBUGGIVEOUT)
+
+giveout_aux:
+	cd ../.. ;                              \
+	rm $(KTARAUX) 2> /dev/null || true;     \
+	tar -cf $(KTARAUX)                      \
+		KCARTA/INCLUDE                  \
+		KCARTA/TEST/R*		     \
+		KCARTA/TEST/b*                  \
+		KCARTA/TEST/t*                  \
+		KCARTA/TEST/*.m                 \
+		KCARTA/TEST/*.sc                \
+		KCARTA/TEST/COMPARISON_v1.22_f90    \
+		KCARTA/DOC                  \
+		KCARTA/MATLAB               \
+		KCARTA/README.1ST           \
+		KCARTA/SCRIPTS              \
+		KCARTA/INCLUDE/*.param      \
+		KCARTA/INCLUDE/*.m          \
+		KCARTA/UTILITY;             \
+	chmod 664 $(KTARAUX) 
+
+################### DISTRIBUTIONS ########################################
