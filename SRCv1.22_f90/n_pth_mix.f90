@@ -50,6 +50,14 @@ CONTAINS
     grav0 = kGravity             !! m/s2
     Rd    = kSpecificGasDryAir   !!  specific gas constant for dry air J K−1kg−1
 
+    write(kSTdWarn,*) '--------------'
+    write(kStdWarn,*) 'index  iaGasID'
+    write(kSTdWarn,*) '--------------'
+    do iI = 1,10
+      write(kStdWarn,*) iI,iaGases(iI)
+    end do
+    write(kSTdWarn,*) '--------------'
+
     IF (iaGases(2) /= 1) THEN
       write(kStdErr,*) 'No CO2 in your profile??????????? have to "check" T(z) some other way'
       iCO2_ind = 1     !!! hopefully there is water!!!!
@@ -93,7 +101,7 @@ CONTAINS
       END DO
     ELSE
       DO iJ = iI-2,iI+2
-        write(kStdErr,*) 'Get_Temp_Plevs ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
+        write(kStdErr,'(A,I3,I3,ES10.3)') 'Get_Temp_Plevs iJ,iCO2_ind,raaPress(iJ,iCO2_ind) = ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
       END DO
       write(kStdErr,*) 'In Get_Temp_Plevs, Pressures neither increasing nor decreasing'
       CALL DoStop

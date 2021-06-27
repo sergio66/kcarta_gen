@@ -1665,8 +1665,8 @@ CONTAINS
     IF (kCKD >= 0) THEN
       DO iInt = kNewGasLo,kNewGasHi
         IF (iaMOLgases(iInt) <= 0) THEN
-          write(kStdWarn,*) 'Cannot have CKD on and gasIDs 101/102 unused'
-          write(kStdErr,*) 'Cannot have CKD on and gasIDs 101/102 unused'
+          write(kStdWarn,*) 'Cannot have CKD on and gasIDs 101/102 unused, kCKD = ',kCKD
+          write(kStdErr,*) 'Cannot have CKD on and gasIDs 101/102 unused, kCKD = ',kCKD
           Call DoSTOP
         END IF
       END DO

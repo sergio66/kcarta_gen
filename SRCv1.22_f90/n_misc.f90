@@ -333,6 +333,7 @@ CONTAINS
     iaaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
 ! plus EXTRA THINGS
     iaaOverrideDefault(3,4) = -1    !!! dump out surface terms (downwell therm, emiss, rho)
+    iaaOverrideDefault(3,5) = +1    !!! if there are clouds in rtp, keep them (TwoSlab); if this is -1, switch to clear sky
 
     RETURN
     end SUBROUTINE SetDefaultParams
@@ -558,6 +559,14 @@ CONTAINS
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
       write(kStdErr,'(A,I2,A,I2,A,I2)') 'Dump out surface terms (upwell radiation) : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(3,5)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF (abs(iTemp) /= 1) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'Keep rtp cloud info (+1) or switch to clear only (-1)  : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 

@@ -1431,6 +1431,8 @@ CONTAINS
       iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
 #ENDIF
 
+    write(kStdWarn,*) 'kCKD in n_main.f90 = ',kCKD
+
     IF (iKnowTP < 0) THEN
       CALL Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress, &
         raThickness,raPressLevels,raTPressLevels)

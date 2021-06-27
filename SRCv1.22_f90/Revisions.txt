@@ -607,7 +607,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22
 -----
-5/29/21         Intrducing kOrbitalSolFac = 1.00 (in n_main and template*.param) to 
+6/26/21         Introducing keeping cloud infro from rtp file (=1) or switch to clear (-1)
+                set by iaaOverrideDefault(3,5) = +1 (default) or -1
+
+5/29/21         Introducing kOrbitalSolFac = 1.00 (in n_main and template*.param) to 
                 account for variations in Planet-Sun distance
                     
                 Last line of SUBROUTINE Solar in clear_scatter_basic.f90 has

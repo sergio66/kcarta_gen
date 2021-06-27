@@ -1349,7 +1349,7 @@ CONTAINS
     kProfileUnitOpen = -1
 
 ! now see if there is a cloud to be used with this atmosphere
-    IF ((prof%cfrac > 0.0) .OR. (prof%cfrac2 > 0)) THEN
+    IF ((prof%cfrac > 0.0) .OR. (prof%cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
       IF ((prof%cfrac <= 0) .AND. (cfrac1 > 0)) THEN
         write(kStdWarn,*) 'Looks like prof%cfrac = ',prof%cfrac,' while cfrac1 = ',cfrac1
         write(kStdWarn,*) 'Assuming it was reset in previous routine'
@@ -2625,24 +2625,48 @@ CONTAINS
 !      print *,'*********************************************************'
 !!! TEST DEBUG
       
-    cfrac12 = prof%cfrac12
+    if (iaaOverrideDefault(3,5) == +1) then
+      cfrac12 = prof%cfrac12
+  
+      ctype1  = int(prof%ctype)
+      cfrac1  = prof%cfrac
+      cngwat1 = prof%cngwat
+      ctop1   = prof%cprtop
+      cbot1   = prof%cprbot
+      rSize1  = prof%cpsize
+            
+      ctype2  = int(prof%ctype2)
+      cfrac2  = prof%cfrac2
+      cngwat2 = prof%cngwat2
+      ctop2   = prof%cprtop2
+      cbot2   = prof%cprbot2
+      rSize2  = prof%cpsize2
+            
+      i4ctype1 = prof%ctype
+      i4ctype2 = prof%ctype2
 
-    ctype1  = int(prof%ctype)
-    cfrac1  = prof%cfrac
-    cngwat1 = prof%cngwat
-    ctop1   = prof%cprtop
-    cbot1   = prof%cprbot
-    rSize1  = prof%cpsize
-          
-    ctype2  = int(prof%ctype2)
-    cfrac2  = prof%cfrac2
-    cngwat2 = prof%cngwat2
-    ctop2   = prof%cprtop2
-    cbot2   = prof%cprbot2
-    rSize2  = prof%cpsize2
-          
-    i4ctype1 = prof%ctype
-    i4ctype2 = prof%ctype2
+    elseif (iaaOverrideDefault(3,5) == -1) then
+      write (kStdWarn,'(A)') 'iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,coprtop/boit,cpsize,ctype) to do CLEAR RUN ONLY'
+      write (kStdErr,'(A)')  'iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,coprtop/boit,cpsize,ctype) to do CLEAR RUN ONLY'
+      cfrac12 = 0.0
+  
+      ctype1  = -9999
+      cfrac1  = 0.0
+      cngwat1 = 0.0
+      ctop1   = -9999.99
+      cbot1   = -9999.99
+      rSize1  = 0.0
+            
+      ctype2  = -9999
+      cfrac2  = 0.0
+      cngwat2 = 0.0
+      ctop2   = -9999.99
+      cbot2   = -9999.99
+      rSize2  = 0.0
+            
+      i4ctype1 = -9999
+      i4ctype2 = -9999
+    endif 
 
 ! raaRTPCloudParams0(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
     raaRTPCloudParams0(1,1) = ctype1
@@ -2665,28 +2689,28 @@ CONTAINS
           
 !!! look for black clouds
     iNclouds_RTP_black = 0
-    IF ((prof%ctype >= 0) .AND. (prof%ctype < 100)) THEN
+    IF ((prof%ctype >= 0) .AND. (prof%ctype < 100) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
       raCemis(1) =  prof%cemis(1)
       iNclouds_RTP_black = iNclouds_RTP_black + 1
     END IF
-    IF ((prof%ctype2 >= 0) .AND. (prof%ctype2 < 100)) THEN
+    IF ((prof%ctype2 >= 0) .AND. (prof%ctype2 < 100) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
       raCemis(2) =  prof%cemis2(1)
       iNclouds_RTP_black = iNclouds_RTP_black + 1
     END IF
-    IF (iNclouds_RTP_black > 0) THEN
+    IF (iNclouds_RTP_black > 0 .AND. iaaOverrideDefault(3,5) == +1) THEN
       write(kStdWarn,*) 'hmm, iNclouds_RTP_black > 0 so resetting iNclouds_RTP'
       iNclouds_RTP = iNclouds_RTP_black
     END IF
 
-    IF (((ctype1 < 100) .OR. (ctype1 >= 400)) .AND. (cfrac1 > 0)) THEN
+    IF (((ctype1 < 100) .OR. (ctype1 >= 400)) .AND. (cfrac1 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
       write(kStdWarn,*) 'ctype1 = ',ctype1,' outside range 100 <= ctype <= 399 '
       write(kStdWarn,*) 'so Cloud1 must be black cloud with emis,ctop ',raCemis(1),ctop1,' mb'
-    ELSEIF (((ctype2 < 100) .OR. (ctype2 >= 400)) .AND. (cfrac2 > 0)) THEN
+    ELSEIF (((ctype2 < 100) .OR. (ctype2 >= 400)) .AND. (cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
       write(kStdWarn,*) 'ctype2 = ',ctype2,' outside range 100 <= ctype <= 399 '
       write(kStdWarn,*) 'so Cloud2 must be black cloud with emis,ctop ',raCemis(2),ctop2,' mb'
     END IF
 
-    IF ((cfrac1 <= 0) .AND. (cfrac2 > 0)) THEN
+    IF ((cfrac1 <= 0) .AND. (cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
       write(kStdErr,*) 'WARNING >>>>>>>>>'
       write(kStdErr,*) '  iNclouds_RTP = ',iNclouds_RTP
       write(kStdErr,*) '  kCARTA assumes if cfrac1 > 0 then cfrac2 >= 0'
