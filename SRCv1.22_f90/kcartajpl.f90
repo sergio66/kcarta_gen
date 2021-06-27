@@ -1239,7 +1239,7 @@
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPFname,caCloudPFName
+    CHARACTER(160) :: caPFname,caCloudPFName
     INTEGER :: iRTP
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
 ! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
@@ -2268,7 +2268,7 @@
     REAL :: NAMNT(MAXLAY)    !! N2O
 
 ! iAFGLProf  = which AFGL prof to use? 1 .. 6
-! caPFName = character*80 profile name
+! caPFName = character*160 profile name
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
 ! iaGases   = array that tracks which gas ID's should be read in
@@ -2287,7 +2287,7 @@
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 
 ! local variables
     CHARACTER(7) :: caWord

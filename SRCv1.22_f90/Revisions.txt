@@ -607,8 +607,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22
 -----
-6/26/21         Introducing keeping cloud infro from rtp file (=1) or switch to clear (-1)
+6/26/21         Introducing keeping cloud infro from rtp file (+1) 
+                        or switch to clear (-1)
                 set by iaaOverrideDefault(3,5) = +1 (default) or -1
+                Also the input length for caPFname, CaCloudPFname have 
+                been changed from 80 to 160 characters
 
 5/29/21         Introducing kOrbitalSolFac = 1.00 (in n_main and template*.param) to 
                 account for variations in Planet-Sun distance

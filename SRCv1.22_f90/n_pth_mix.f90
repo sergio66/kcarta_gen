@@ -269,7 +269,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 
 ! local variables for our klayers files
 ! READ (caStr,*) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -622,7 +622,7 @@ CONTAINS
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! parameters
-    CHARACTER(80) :: caPFname
+    CHARACTER(160) :: caPFname
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
 
 ! local variables
@@ -1202,7 +1202,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 
 ! local variables for our klayers files
 ! READ (caStr,*) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -1623,7 +1623,7 @@ CONTAINS
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! parameters
-    CHARACTER(80) :: caPFname
+    CHARACTER(160) :: caPFname
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     INTEGER :: iPathOffSet
 
@@ -1887,7 +1887,7 @@ CONTAINS
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! input
-    CHARACTER(80) :: caPfName
+    CHARACTER(160) :: caPfName
     INTEGER :: iNpath,iRTP
     INTEGER :: iaGases(kMaxGas)
 ! output

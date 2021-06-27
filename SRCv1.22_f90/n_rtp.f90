@@ -39,7 +39,7 @@ CONTAINS
 ! output
     REAL :: rf1,rf2           !the low and high end wavenumbers
 ! input
-    CHARACTER(80) :: caPFname !the RTP file to peruse
+    CHARACTER(160) :: caPFname !the RTP file to peruse
     INTEGER :: iRTP           !which profile to read
     INTEGER :: inpath
 ! local variables for RTP file
@@ -50,12 +50,12 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
 
 ! other local variables
     integer :: i
 
-    fname(1:80) = caPFName(1:80)
+    fname(1:160) = caPFName(1:160)
 
     mode = 'r'
     status = rtpopen(fname, mode, head, hatt, patt, rchan)
@@ -175,7 +175,7 @@ CONTAINS
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
     REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
     INTEGER :: iRTP,iNumNLTEGases
-    CHARACTER(80) :: caPFName
+    CHARACTER(160) :: caPFName
 
     INTEGER :: iI
 
@@ -264,7 +264,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iAFGLProf  = which AFGL prof to use? 1 .. 6
-! caPFName = character*80 profile name
+! caPFName = character*160 profile name
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
 ! iaGases   = array that tracks which gas ID's should be read in
@@ -284,7 +284,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 
 ! local variables
     CHARACTER(7) :: caWord
@@ -1137,7 +1137,7 @@ CONTAINS
     INTEGER :: iRTP,iProfileLayers,iNclouds_RTP,iBinOrAsc
     INTEGER :: iNclouds2, iNclouds3  ! added ESM
     INTEGER :: iaCloudScatType(kMaxCLouds)
-    CHARACTER(80) :: caPFname,caCloudPfname
+    CHARACTER(160) :: caPFname,caCloudPfname
     CHARACTER(120) :: caaCloudFile(kMaxClouds)
 ! output params  -------------------------------------------------->
 !   kMaxClouds == 5
@@ -1205,7 +1205,7 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
 
     INTEGER, DIMENSION(:), ALLOCATABLE :: iaIndexAlloc
     INTEGER :: AllocateStatus,DeAllocateStatus
@@ -1321,7 +1321,7 @@ CONTAINS
 ! <----------------------------------------------------------------------->
 ! now read the cloud parameters  --------------------------->
 
-    fname(1:80) = caPFName(1:80)
+    fname(1:160) = caPFName(1:160)
 
     mode = 'r'
     status = rtpopen(fname, mode, head, hatt, patt, rchan)
@@ -1409,7 +1409,7 @@ CONTAINS
 ! <----------------------------------------------------------------------->
 ! ow read the actual cloud profile ------------------->
 
-    fname(1:80) = caCloudPFName(1:80)
+    fname(1:160) = caCloudPFName(1:160)
 
     mode = 'r'
     status = rtpopen(fname, mode, head, hatt, patt, rchan)
@@ -1848,7 +1848,7 @@ CONTAINS
     REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
     INTEGER :: iRTP          !!!tells which profile info, radiance info, to read
     INTEGER :: iNumNLTEGases !! tells the future ... are you doing NLTE (because 0-90 is day, but Manuel also gave NLTE from 90-120)
-    CHARACTER(80) ::  caPFName !!!tells which profile
+    CHARACTER(160) ::  caPFName !!!tells which profile
 
 ! local variables
     CHARACTER(7) :: caWord
@@ -1873,11 +1873,11 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
     real :: rf1,rf2
     integer :: iI
           
-    fname(1:80) = caPFName(1:80)
+    fname(1:160) = caPFName(1:160)
 
     write(kStdWarn,*) 'Using RTP file to set atm info ....'
     mode = 'r'
@@ -2646,8 +2646,8 @@ CONTAINS
       i4ctype2 = prof%ctype2
 
     elseif (iaaOverrideDefault(3,5) == -1) then
-      write (kStdWarn,'(A)') 'iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,coprtop/boit,cpsize,ctype) to do CLEAR RUN ONLY'
-      write (kStdErr,'(A)')  'iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,coprtop/boit,cpsize,ctype) to do CLEAR RUN ONLY'
+      write (kStdWarn,'(A)') '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
+      write (kStdErr,'(A)')  '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
       cfrac12 = 0.0
   
       ctype1  = -9999
@@ -2922,7 +2922,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 ! for 100 layer clouds
     INTEGER :: iaCld100Read(3)
     REAL :: raaCld100Amt(kProfLayer,3)
@@ -2937,9 +2937,9 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
 
-    fname(1:80) = caPFName(1:80)
+    fname(1:160) = caPFName(1:160)
 
     DO status = 1,3
       iaCld100Read(status) = -1
@@ -3028,7 +3028,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
     REAL :: rCC, raCC(kProfLayer),raJunk(kProfLayer+1)
 
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
@@ -3061,7 +3061,7 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
     logical :: isfinite
 
     MGC = kMGC
@@ -3069,7 +3069,7 @@ CONTAINS
     pProf = 0.0
     iaCld100Read = -1
 
-    fname(1:80) = caPFName(1:80)
+    fname(1:160) = caPFName(1:160)
 
     mode = 'r'
     status = rtpopen(fname, mode, head, hatt, patt, rchan)
@@ -3563,7 +3563,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 
     REAL :: raaHeight(kProfLayer+1,kGasStore),MGC,delta1,raJunk(kProfLayer+1)
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
@@ -3595,7 +3595,7 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
     logical :: isfinite
 
     MGC = kMGC
@@ -3603,7 +3603,7 @@ CONTAINS
     pProf = 0.0
     iaCld100Read = -1
 
-    fname(1:80) = caPFName(1:80)
+    fname(1:160) = caPFName(1:160)
 
     mode = 'r'
     status = rtpopen(fname, mode, head, hatt, patt, rchan)
@@ -4113,7 +4113,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
@@ -4143,14 +4143,14 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
     logical :: isfinite
 
     MGC = kMGC
 
     pProf = 0.0
 
-    fname(1:80) = caPFName(1:80)
+    fname(1:160) = caPFName(1:160)
 
     mode = 'r'
     status = rtpopen(fname, mode, head, hatt, patt, rchan)

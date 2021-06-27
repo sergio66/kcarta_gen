@@ -30,7 +30,8 @@ CONTAINS
 ! local
     REAL :: PLEVx110(kMaxLayer+10)
     REAL :: rLat,raJunk(kMaxLayer+10)
-    CHARACTER(80) :: caPFname,caStr,caComment
+    CHARACTER(160) :: caPFname
+    CHARACTER(80) :: caStr,caComment
     INTEGER :: iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec
 
 ! first extend PLEV_KCARTADATABASE_AIRS a little above its lwest value, so can do interps well
@@ -459,7 +460,7 @@ CONTAINS
     include '../INCLUDE/TempF90/airslevelheightsparam.f90'
 
 ! input
-    CHARACTER(80) :: caPfName
+    CHARACTER(160) :: caPfName
 ! output
     REAL :: raTout(kProfLayer)                  !! in K
     REAL :: raAmountOut(kProfLayer)             !! in molecules/cm2
@@ -642,7 +643,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
-    CHARACTER(80) :: caPfName
+    CHARACTER(160) :: caPfName
     REAL :: rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
 ! output
     INTEGER :: iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
@@ -893,7 +894,8 @@ CONTAINS
 ! local
     REAL :: raRx110Temp(2*kProfLayer),raRx110MR(2*kProfLayer),raRx110Press(2*kProfLayer)
     REAL :: rLat,raJunk(kProfLayer*2)
-    CHARACTER(80) :: caPFname,caStr,caComment
+    CHARACTER(160) :: caPFname
+    CHARACTER(80) :: caStr,caComment
     INTEGER :: iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec,iNumLevsx
 
     caPFname = kcaLevsRefProf
@@ -1140,7 +1142,7 @@ CONTAINS
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
           
 ! input
-    CHARACTER(80) :: caPfName
+    CHARACTER(160) :: caPfName
     REAL :: rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
 ! output
     INTEGER :: iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
@@ -1413,7 +1415,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
-    CHARACTER(80) :: caPfName
+    CHARACTER(160) :: caPfName
     REAL :: rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
 ! output
     INTEGER :: iNumLays,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)

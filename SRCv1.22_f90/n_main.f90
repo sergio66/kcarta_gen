@@ -110,7 +110,7 @@ CONTAINS
 !                   which of the rtp profiles to use, number of clouds
 !                   if not all gases present in caPFname, then use AFGL profile
 !                     to fill in missing gas profiles
-    CHARACTER(80) :: caPFname,caPFName1,caCloudPFname,caCloudPFName1
+    CHARACTER(160) :: caPFname,caPFName1,caCloudPFname,caCloudPFName1
     INTEGER :: iRTP,iRTP1,iNcloudRTP,iNcloud_RTP1,iAFGLProf,iAFGLProf1
 
 ! this is for nm_WEIGHT
@@ -1048,7 +1048,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPFname,caCloudPFName
+    CHARACTER(160) :: caPFname,caCloudPFName
     INTEGER :: iRTP
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
 ! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
@@ -2325,7 +2325,7 @@ CONTAINS
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
     REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
     INTEGER :: iRTP
-    CHARACTER(80) :: caPFName
+    CHARACTER(160) :: caPFName
 
     INTEGER :: iI
           
@@ -2404,7 +2404,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iAFGLProf  = which AFGL prof to use? 1 .. 6
-! caPFName = character*80 profile name
+! caPFName = character*160 profile name
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
 ! iaGases   = array that tracks which gas ID's should be read in
@@ -2424,7 +2424,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    CHARACTER(80) :: caPfname
+    CHARACTER(160) :: caPfname
 
 ! local variables
     CHARACTER(7) :: caWord
