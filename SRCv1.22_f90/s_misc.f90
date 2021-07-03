@@ -1316,27 +1316,27 @@ CONTAINS
     CHARACTER*(*) caStr1,caStr2
 
 ! local vars
-    CHARACTER(120) :: caStr1x,caStr2x,caStr1y,caStr2y,caJunk
+    CHARACTER(160) :: caStr1x,caStr2x,caStr1y,caStr2y,caJunk
     INTEGER :: iFind,iSizeStr1,iSizeStr2,i1,i2,iJunk
     INTEGER :: iaFound(80)
           
     iFind = -1
 
-    IF (len(caStr1) > 120) THEN
-      write(kStdErr,*) 'len(caStr1) > 120'
+    IF (len(caStr1) > 160) THEN
+      write(kStdErr,*) 'len(caStr1) > 160'
       CALL DoStop
     ELSE
-      DO i1 = 1,120
+      DO i1 = 1,160
         caStr1y(i1:i1) = ' '
       END DO
       caStr1y(1:len(caStr1)) = caStr1(1:len(caStr1))
     END IF
 
-    IF (len(caStr2) > 120) THEN
-      write(kStdErr,*) 'len(caStr2) > 120'
+    IF (len(caStr2) > 160) THEN
+      write(kStdErr,*) 'len(caStr2) > 160'
       CALL DoStop
     ELSE
-      DO i1 = 1,120
+      DO i1 = 1,160
         caStr2y(i1:i1) = ' '
       END DO
       caStr2y(1:len(caStr2)) = caStr2(1:len(caStr2))

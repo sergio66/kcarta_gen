@@ -6,6 +6,7 @@
 
 MODULE n_misc
 
+USE ieee_arithmetic
 USE basic_common
 USE freqfile
 USE spline_and_sort_and_common
@@ -15,6 +16,48 @@ USE n_rad_jac_scat
 IMPLICIT NONE
 
 CONTAINS
+
+!************************************************************************
+     logical function is_badnum(x)
+
+     IMPLICIT NONE
+
+     include '../INCLUDE/TempF90/kcartaparam.f90'
+
+     real :: x
+     logical :: test
+
+     test = .false.
+
+     if (x > huge(x)) then
+       write(kStdWarn,*) 'x is huge ',x
+       write(kStdErr,*)  'x is huge ',x
+       test = .true.
+     end if
+     if (abs(x) > huge(x)) then
+       write(kStdWarn,*) '+/-x is huge ',x
+       write(kStdErr,*)  '+/-x is huge ',x
+       test = .true.
+     end if
+       
+    is_badnum = test
+    end FUNCTION is_badnum
+
+!************************************************************************
+     logical function is_goodnum(x)
+
+     logical :: test1,test2,test
+     real :: x
+
+     test2 = ieee_is_nan(x)
+     test1 = is_badnum(x)
+
+     test = .true.
+     if ((test1 .EQ. .true.) .OR. (test2 .EQ. .true.)) test = .false.
+
+     is_goodnum = test
+  
+     end FUNCTION is_goodnum
 
 !************************************************************************
 ! set the default parameter values, for those that are not set in *PARAM

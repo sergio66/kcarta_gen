@@ -14,7 +14,9 @@
 
 MODULE n_main
 
+!! see http://fortranwiki.org/fortran/show/ieee_arithmetic 
 use ieee_arithmetic
+
 USE basic_common
 USE s_misc
 USE s_writefile
@@ -2143,9 +2145,6 @@ CONTAINS
 
     300 FORMAT('     ',2(I5,'         '),A1)
 
-    write(kStdWarn,*)'                 '
-    CALL PrintStar
-
     CALL sanitycheckprofileNaN(                                                     &
                              raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,    &
                              raPressLevels,raThickness,                             &
@@ -2158,6 +2157,22 @@ CONTAINS
                              cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
                              ctop1,ctop2,cbot1,cbot2,                               &
                              raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
+
+    CALL sanitycheckprofileINF(                                                     &
+                             raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,    &
+                             raPressLevels,raThickness,                             &
+                             raTSpace,raTSurf,raSatAngle,raSatHeight,               &
+                             rakSolarAngle,rakThermalAngle,                         &
+                             raFracTop,raFracBot,raaPrBdry,                         &
+                             raaaSetEmissivity,raaaSetSolarRefl,                    &
+                             raaScatterPressure,raScatterDME,raScatterIWP,          &
+                             raaaCloudParams,                                       &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             ctop1,ctop2,cbot1,cbot2,                               &
+                             raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
+
+    write(kStdWarn,*)'                 '
+    CALL PrintStar
 
     RETURN
     end SUBROUTINE ReadNameListFile
@@ -2645,7 +2660,7 @@ CONTAINS
     end SUBROUTINE pthfil4NMLonly
 
 !************************************************************************
-! sanity check for NaN and InF
+! sanity check for NaN
     SUBROUTINE sanitycheckprofileNaN(                                               &
                              raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,    &
                              raPressLevels,raThickness,                             &
@@ -2964,8 +2979,345 @@ CONTAINS
       iErr = iErr + 1
     END IF
 
+    IF (iErr > 0) THEN
+      write(kStdWarn,*) 'Found ',iErr,' errors in profiles, stopping (NaN)'
+      write(kStdErr,*)  'Found ',iErr,' errors in profiles, stopping (NaN)'
+      CALL DoStop
+    END IF
+
     RETURN
     end SUBROUTINE sanitycheckprofileNaN
 
 !************************************************************************
+! sanity check for INF
+    SUBROUTINE sanitycheckprofileINF(                                               &
+                             raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,    &
+                             raPressLevels,raThickness,                             &
+                             raTSpace,raTSurf,raSatAngle,raSatHeight,               &
+                             rakSolarAngle,rakThermalAngle,                         &
+                             raFracTop,raFracBot,raaPrBdry,                         &
+                             raaaSetEmissivity,raaaSetSolarRefl,                    &
+                             raaScatterPressure,raScatterDME,raScatterIWP,          &
+                             raaaCloudParams,                                       &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             ctop1,ctop2,cbot1,cbot2,                               &
+                             raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+    REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
+    REAL :: raaPress(kProfLayer,kGasStore)
+    REAL :: raaPartPress(kProfLayer,kGasStore)
+    REAL :: raLayerHeight(kProfLayer)
+    REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+    REAL :: raTSurf(kMaxAtm),raTSpace(kMaxAtm)
+    REAL :: raSatAngle(kMaxAtm),raSatHeight(kMaxAtm)
+    REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
+    REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm),raaPrBdry(kMaxAtm,2)
+    REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
+    REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
+    REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
+    REAL :: raScatterIWP(kMaxAtm)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2
+    REAL :: raCemis(kMaxClouds)
+    REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
+    REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
+    INTEGER :: ctype1,ctype2
+
+    INTEGER iI,iJ,iK,iErr
+    !LOGICAL lFalse,is_badnum
+
+    iErr = 0
+    !!! use is_badnum(x) instead of (.not. ieee_is_norma(x))
+    DO iI=1,kProfLayer
+      DO iJ=1,kGasStore
+        IF (is_badnum(raaAmt(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaAmt(iI,iJ) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaAmt(iI,iJ) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+        IF (is_badnum(raaTemp(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaTemp(iI,iJ) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaTemp(iI,iJ) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+        IF (is_badnum(raaPress(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaPress(iI,iJ) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaPress(iI,iJ) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+        IF (is_badnum(raaPartPress(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaPartPress(iI,iJ) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaPartPress(iI,iJ) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+      END DO
+    END DO
+
+    !*************************
+
+    iI = kProfLayer+1
+      IF (is_badnum(raPressLevels(iI))) THEN
+        write(kStdWarn,*) 'raPressLevels(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raPressLevels(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+    DO iI = 1,kProfLayer
+      IF (is_badnum(raPressLevels(iI))) THEN
+        write(kStdWarn,*) 'raPressLevels(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raPressLevels(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raLayerHeight(iI))) THEN
+        write(kStdWarn,*) 'raLayerHeight(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raLayerHeight(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raThickness(iI))) THEN
+        write(kStdWarn,*) 'raThickness(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raThickness(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+    END DO
+
+    !*************************
+    DO iI = 1,kMaxAtm
+      print *,raTSurf(iI)
+      IF (is_badnum(raTSurf(iI))) THEN
+        write(kStdWarn,*) 'raTSurf(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raTSurf(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raTSpace(iI))) THEN
+        write(kStdWarn,*) 'raTSpace(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raTSpace(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raSatAngle(iI))) THEN
+        write(kStdWarn,*) 'raSatAngle(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raSatAngle(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raSatHeight(iI))) THEN
+        write(kStdWarn,*) 'raSatHeight(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raSatHeight(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(rakSolarAngle(iI))) THEN
+        write(kStdWarn,*) 'rakSolarAngle(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'rakSolarAngle(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(rakThermalAngle(iI))) THEN
+        write(kStdWarn,*) 'rakThermalAngle(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'rakThermalAngle(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raFracTop(iI))) THEN
+        write(kStdWarn,*) 'raFracTop(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raFracTop(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raFracBot(iI))) THEN
+        write(kStdWarn,*) 'raFracBot(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raFracBot(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raaPrBdry(iI,1))) THEN
+        write(kStdWarn,*) 'raaPrBdry(iI,1) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raaPrBdry(iI,1) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+      IF (is_badnum(raaPrBdry(iI,2))) THEN
+        write(kStdWarn,*) 'raaPrBdry(iI,2) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raaPrBdry(iI,2) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+    END DO
+
+    !*************************
+
+    DO iI=1,kMaxAtm
+      DO iJ=1,kEmsRegions
+        IF (is_badnum(raaaSetEmissivity(iI,iJ,1))) THEN
+          write(kStdWarn,*) 'raaaSetEmissivity(iI,iJ,1) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaaSetEmissivity(iI,iJ,1) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (is_badnum(raaaSetEmissivity(iI,iJ,2))) THEN
+          write(kStdWarn,*) 'raaaSetEmissivity(iI,iJ,2) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaaSetEmissivity(iI,iJ,2) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (is_badnum(raaaSetSolarRefl(iI,iJ,1))) THEN
+          write(kStdWarn,*) 'raaaSetSolarRefl(iI,iJ,1) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaaSetSolarRefl(iI,iJ,1) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (is_badnum(raaaSetSolarRefl(iI,iJ,2))) THEN
+          write(kStdWarn,*) 'raaaSetSolarRefl(iI,iJ,2) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaaSetSolarRefl(iI,iJ,2) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+      END DO
+    END DO
+    !*************************
+
+    DO iI=1,kMaxClouds
+      IF (is_badnum(raCemis(iI))) THEN
+        write(kStdWarn,*) 'raCemis(iI) is abnormal (inf?) ',iI,iJ
+        write(kStdErr,*)  'raCemis(iI) is abnormal (inf?) ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raCprtop(iI))) THEN
+        write(kStdWarn,*) 'raCprtop(iI) is abnormal (inf?) ',iI,iJ
+        write(kStdErr,*)  'raCprtop(iI) is abnormal (inf?) ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raCprbot(iI))) THEN
+        write(kStdWarn,*) 'raCprbot(iI) is abnormal (inf?) ',iI,iJ
+        write(kStdErr,*)  'raCprbot(iI) is abnormal (inf?) ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raCngwat(iI))) THEN
+        write(kStdWarn,*) 'raCngwat(iI) is abnormal (inf?) ',iI,iJ
+        write(kStdErr,*)  'raCngwat(iI) is abnormal (inf?) ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raCpsize(iI))) THEN
+        write(kStdWarn,*) 'raCpsize(iI) is abnormal (inf?) ',iI,iJ
+        write(kStdErr,*)  'raCpsize(iI) is abnormal (inf?) ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      DO iJ=1,kCLoudLayers
+        IF (is_badnum(raaaCloudParams(iI,iJ,1))) THEN
+          write(kStdWarn,*) 'raaaCloudParams(iI,iJ,1) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaaCloudParams(iI,iJ,1) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (is_badnum(raaaCloudParams(iI,iJ,2))) THEN
+          write(kStdWarn,*) 'raaaCloudParams(iI,iJ,2) is abnormal (inf?) ',iI,iJ
+          write(kStdErr,*)  'raaaCloudParams(iI,iJ,2) is abnormal (inf?) ',iI,iJ
+          iErr = iErr + 1
+        END IF
+      END DO
+    END DO
+
+    DO iI=1,kMaxAtm
+      IF (is_badnum(raaScatterPressure(iI,1))) THEN
+        write(kStdWarn,*) 'raaScatterPressure(iI,1) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raaScatterPressure(iI,1) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+      IF (is_badnum(raaScatterPressure(iI,2))) THEN
+        write(kStdWarn,*) 'raaScatterPressure(iI,2) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raaScatterPressure(iI,2) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raScatterDME(iI))) THEN
+        write(kStdWarn,*) 'raScatterDME(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raScatterDME(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (is_badnum(raScatterIWP(iI))) THEN
+        write(kStdWarn,*) 'raScatterIWP(iI) is abnormal (inf?) ',iI
+        write(kStdErr,*)  'raScatterIWP(iI) is abnormal (inf?) ',iI
+        iErr = iErr + 1
+      END IF
+    END DO
+
+    !*************************
+    IF (is_badnum(cfrac1)) THEN
+      write(kStdWarn,*) 'cfrac1 is abnormal (inf?) '
+      write(kStdErr,*)  'cfrac1 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(cfrac2)) THEN
+      write(kStdWarn,*) 'cfrac2 is abnormal (inf?) '
+      write(kStdErr,*)  'cfrac2 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(cfrac12)) THEN
+      write(kStdWarn,*) 'cfrac12 is abnormal (inf?) '
+      write(kStdErr,*)  'cfrac12 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(ctype1*1.0)) THEN
+      write(kStdWarn,*) 'ctype1 is abnormal (inf?) '
+      write(kStdErr,*)  'ctype1 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(ctype2*1.0)) THEN
+      write(kStdWarn,*) 'ctype2 is abnormal (inf?) '
+      write(kStdErr,*)  'ctype2 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(cngwat1)) THEN
+      write(kStdWarn,*) 'cngwat1 is abnormal (inf?) '
+      write(kStdErr,*)  'cngwat1 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(cngwat2)) THEN
+      write(kStdWarn,*) 'cngwat2 is abnormal (inf?) '
+      write(kStdErr,*)  'cngwat2 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+!    IF (is_badnum(cprtop1)) THEN
+!      write(kStdWarn,*) 'cprtop1 is abnormal (inf?) '
+!      write(kStdErr,*)  'cprtop1 is abnormal (inf?) '
+!      iErr = iErr + 1
+!    END IF
+!    IF (is_badnum(cprtop2)) THEN
+!      write(kStdWarn,*) 'cprtop2 is abnormal (inf?) '
+!      write(kStdErr,*)  'cprtop2 is abnormal (inf?) '
+!      iErr = iErr + 1
+!    END IF
+    IF (is_badnum(cbot1)) THEN
+      write(kStdWarn,*) 'cbot1 is abnormal (inf?) '
+      write(kStdErr,*)  'cbot1 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(cbot2)) THEN
+      write(kStdWarn,*) 'cbot2 is abnormal (inf?) '
+      write(kStdErr,*)  'cbot2 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+
+    IF (iErr > 0) THEN
+      write(kStdWarn,*) 'Found ',iErr,' errors in profiles, stopping (+/-INF)'
+      write(kStdErr,*)  'Found ',iErr,' errors in profiles, stopping (+/-INF)'
+      CALL DoStop
+    END IF
+
+    RETURN
+    end SUBROUTINE sanitycheckprofileINF
+
+!************************************************************************
+     
 END MODULE n_main

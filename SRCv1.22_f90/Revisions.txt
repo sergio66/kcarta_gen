@@ -607,6 +607,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22
 -----
+7/3/21          Introducing NaN and Inf checking for input profile
+                (stemp,T(z),gas(z) profiles, satellite and solar angles, 
+                 emissivity, altitudes, cloud params)
+
 6/26/21         Introducing keeping cloud infro from rtp file (+1) 
                         or switch to clear (-1)
                 set by iaaOverrideDefault(3,5) = +1 (default) or -1

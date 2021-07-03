@@ -630,7 +630,7 @@ CONTAINS
       CALL DoStop
     END IF
     IF (iDefault /= iWhichScatterCode) THEN
-      print *,'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
+      write (kStdErr,*) 'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
     END IF
 
     IF (iWhichScatterCode == 6) THEN
@@ -927,12 +927,12 @@ CONTAINS
       caStrJunk(5) = 'csz '
       caStrJunk(6) = 'frac'
       caStrJunk(7) = 'fr12'
-      !      print *,' '
-      !      print *,'  after expandscatter'
-      !      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
-      !      print *,'-------------------------------------------------------'
+      !      write(kStdErr,*) ' '
+      !      write(kStdErr,*) '  after expandscatter'
+      !      write(kStdErr,*) '    Cloud1  (before/after)        Cloud2 (before/after)'
+      !      write(kStdErr,*) '-------------------------------------------------------'
       !      DO iJ1=1,7
-      !         print *,iJ1,caStrJunk(iJ1),raaRTPCloudParams0(1,iJ1),raaRTPCloudParamsF(1,iJ1),'XF',
+      !         write(kStdErr,*) iJ1,caStrJunk(iJ1),raaRTPCloudParams0(1,iJ1),raaRTPCloudParamsF(1,iJ1),'XF',
       !     $raaRTPCloudParams0(2,iJ1),raaRTPCloudParamsF(2,iJ1)
       !      END DO
       ctop1 = raaRTPCloudParamsF(1,2)
@@ -1238,8 +1238,8 @@ CONTAINS
       END IF
   98  CONTINUE
       IF ((iFound < 0) .AND. (iaCloudScatType(iI) > 0)) THEN
-        print *,'OOOPS did not match cloud types',iI,iaCloudScatType(iI)
-        print *,(iaNML_CtypeX(iK),iK=1,kMaxClouds)
+        write(kStdErr,*) 'OOOPS did not match cloud types',iI,iaCloudScatType(iI)
+        write(kStdErr,*) (iaNML_CtypeX(iK),iK=1,kMaxClouds)
         CALL DOStop
       END IF
     END DO
@@ -1259,7 +1259,7 @@ CONTAINS
     iDefault = 5
 
     IF (iDefault /= iWhichScatterCode) THEN
-      print *,'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
+      write(kStdErr,*) 'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
     END IF
 
     IF (iWhichScatterCode == 6) THEN
@@ -2008,7 +2008,7 @@ CONTAINS
 !      DO i = 1, prof%nlevs - 1
 !        rT   = prof%ptemp(i)
 !      END DO
-!      print *,rTSurf,rT,rT+1
+!      write(kStdErr,*) rTSurf,rT,rT+1
 !      rTSurf      = rT+1
 
 !!!!!!!!!!!!!!! checking scanang, satzen,zobs !!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2119,6 +2119,7 @@ CONTAINS
         rAngleY = ORIG_SACONV_SUN(rAngleX, 705.00)                !! default AIRS hgt, dangerous
         rAngleY = SACONV_SUN(rAngleX, rSURFaltitude/1000, 705.00) !! default AIRS hgt, dangerous
         rAngleY = -9999
+        write(kStdErr,*) 'rHeight,rAngleX = ',rHeight,rAngleX
         write(kStdErr,*) 'trying to figure out scanang, but not enough satzen,zobs info'
         CALL DoStop
       ENDIF
@@ -2316,6 +2317,10 @@ CONTAINS
 ! sun is only on if 0 < prof%solzen < 90
 ! rakSolarAngle(iC) = abs(prof%sunang)   !!!RTP v 097-
     rakSolarAngle(iC) = prof%solzen          !!!RTP v 098+
+    IF (is_badnum(prof%solzen)) THEN    
+      write(kStdErr,*) 'prof.solzen in rtp = ',prof%solzen
+      CALL DoStop
+    END IF
     IF ((prof%solzen >= 0.0) .AND. (prof%solzen <= 90.0)) THEN
       IF ((rf1 >= 605.0) .AND. (rf2 <= 2830.0)) THEN
         iakSolar(iC) = +1
@@ -2329,7 +2334,7 @@ CONTAINS
     iaKThermal(iC)   = 0
     raKThermalAngle(iC) = -1.0
 
-!      print *,'kSetThermalAngle = ',kSetThermalAngle,iaaOverrideDefault(2,4),kThermalAngle
+!      write(kStdErr,*) 'kSetThermalAngle = ',kSetThermalAngle,iaaOverrideDefault(2,4),kThermalAngle
           
 !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
     raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
@@ -2475,12 +2480,12 @@ CONTAINS
 ! all layers, the diffusive angle $acos(x)$ is used for the
 ! reflected thermal. acos(3/5) = 53.1301 degrees
 
-!      print *,'**************************************************'
+!      write(kStdErr,*) '**************************************************'
 !      kThermal = -1
 !      kSolar = -1
-!      print *,'*******  in rtp_interface,  kThermal = -1 ********'
-!      print *,'*******  in rtp_interface,  kSolar   = -1 ********'
-!      print *,'**************************************************'
+!      write(kStdErr,*) '*******  in rtp_interface,  kThermal = -1 ********'
+!      write(kStdErr,*) '*******  in rtp_interface,  kSolar   = -1 ********'
+!      write(kStdErr,*) '**************************************************'
     iakSolar(iC)          = kSolar
     rakSolarAngle(iC)     = kSolarAngle
     rakSolarRefl(iC)      = kSolarRefl
@@ -2613,7 +2618,7 @@ CONTAINS
     ctype2 = 100
 
 !!! TEST DEBUG
-!      print *,'*********************************************************'
+!      write(kStdErr,*) '*********************************************************'
 !      prof%cfrac = 0.0
 !      prof%cfrac2 = 0.0
 !      prof%cfrac12 = 0.0
@@ -2621,8 +2626,8 @@ CONTAINS
 !      prof%ctype2 = 50
 !      prof%cngwat = 0.0
 !      prof%cngwat2 = 0.0
-!      print *, 'Set cfrac = 0, ctpye = 50 for testing'
-!      print *,'*********************************************************'
+!      write(kStdErr,*)  'Set cfrac = 0, ctpye = 50 for testing'
+!      write(kStdErr,*) '*********************************************************'
 !!! TEST DEBUG
       
     if (iaaOverrideDefault(3,5) == +1) then
@@ -2871,12 +2876,12 @@ CONTAINS
     raaRTPCloudParamsF(2,6) = prof%cfrac2
     raaRTPCloudParamsF(2,7) = prof%cfrac12
 
-!      print *,' '
-!      print *,'initial readjusts (if needed) after reading in rtp file'
-!      print *,'    Cloud1  (before/after)        Cloud2 (before/after)'
-!      print *,'-------------------------------------------------------'
+!      write(kStdErr,*) ' '
+!      write(kStdErr,*) 'initial readjusts (if needed) after reading in rtp file'
+!      write(kStdErr,*) '    Cloud1  (before/after)        Cloud2 (before/after)'
+!      write(kStdErr,*) '-------------------------------------------------------'
 !      DO I=1,7
-!        print *,I,raaRTPCloudParams0(1,i),raaRTPCloudParamsF(1,i),'X0',raaRTPCloudParams0(2,i),raaRTPCloudParamsF(2,i)
+!        write(kStdErr,*) I,raaRTPCloudParams0(1,i),raaRTPCloudParamsF(1,i),'X0',raaRTPCloudParams0(2,i),raaRTPCloudParamsF(2,i)
 !      END DO
 !      call dostop
           
@@ -3062,7 +3067,7 @@ CONTAINS
     integer :: rchan
     character(1) :: mode
     character(160) :: fname
-    logical :: isfinite
+    !logical :: isfinite,is_goodnum
 
     MGC = kMGC
 
@@ -3172,8 +3177,8 @@ CONTAINS
       write(kStdErr,*) 'p.nlevs | p.plevs(p.nlevs) p.spres p.plevs(p.nlevs-1)'
       write(kStdErr,*) prof.nlevs,prof.plevs(prof.nlevs),prof.spres,prof.plevs(prof.nlevs-1)
       write(kStdErr,*) 'spres not between p.plevs(nlevs) and p.plevs(nlevs-1)'
-      print *,'i       raP(i)          raPavg(i)        raP(i+1)    spres'
-      print *,'----------------------------------------------------------'
+      write(kStdErr,*) 'i       raP(i)          raPavg(i)        raP(i+1)    spres'
+      write(kStdErr,*) '----------------------------------------------------------'
       DO i = 1,prof.nlevs-1
         write(kStdErr,*) i,raPressLevels(i),pProf(i),raPressLevels(i+1),prof.spres
       END DO
@@ -3277,13 +3282,14 @@ CONTAINS
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
           rAmt = prof.gamnt(i,iG) / kAvog
-          IF (isfinite(rAmt) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
+          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
           rT   = prof.ptemp(i)
-          IF (isfinite(rT) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
+          ! write(kStdErr,*) 'READRTP_1A 1 gasid lay rT ',iIDgas,i,rT
+          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
@@ -3400,16 +3406,17 @@ CONTAINS
             iNpathCounterJunk = iNpathCounterJunk + 1
 
             ! rCC = prof.cc(i)
-            ! print *,i,rCC
+            ! write(kStdErr,*) i,rCC
                           
             rAmt = prof.gamnt(i,iG)
-            IF (isfinite(rAmt) == .FALSE. ) THEN
-              write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
+            IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+              write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF
             rT   = prof.ptemp(i)
-            IF (isfinite(rT) == .FALSE. ) THEN
-              write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
+            ! write(kStdErr,'(A,I2,A,F12.4,A,I3)') 'READRTP_1A 2 gasid lay rT ',iIDgas,i,rT
+            IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+              write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF
 
@@ -3596,7 +3603,7 @@ CONTAINS
     integer :: rchan
     character(1) :: mode
     character(160) :: fname
-    logical :: isfinite
+    !logical :: isfinite,is_goodnum
 
     MGC = kMGC
 
@@ -3711,7 +3718,7 @@ CONTAINS
 !      j = iFindJ(kProfLayer+1,I,iDownWard)
 !      pProf(j) = raPressLevels(i) - raPressLevels(i+1)
 !      pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
-!      print *,i,j,iDownWard,raHeight(j),raPressLevels(j),pProf(j)
+!      write(kStdErr,*) i,j,iDownWard,raHeight(j),raPressLevels(j),pProf(j)
        pProf(i) = raPressLevels(i) - raPressLevels(i+1)
        pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
     END DO
@@ -3724,7 +3731,7 @@ CONTAINS
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
-!        print *,i,j,raHeight(j),raPressLevels(j),-1         
+!        write(kStdErr,*) i,j,raHeight(j),raPressLevels(j),-1         
       END DO
     ELSE
       !!!add on dummy stuff
@@ -3734,7 +3741,7 @@ CONTAINS
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
-!        print *,'xyz 1',i,j,raHeight(j),raPressLevels(j),+1         
+!        write(kStdErr,*) 'xyz 1',i,j,raHeight(j),raPressLevels(j),+1         
       END DO
     END IF
 
@@ -3813,13 +3820,14 @@ CONTAINS
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
           rAmt = prof.gamnt(i,iG) / kAvog
-          IF (isfinite(rAmt) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
+          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
           rT   = prof.ptemp(i)
-          IF (isfinite(rT) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
+          ! write(kStdErr,*) 'READRTP_1B 1 gasid lay rT ',iIDgas,i,rT
+          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
@@ -3937,13 +3945,14 @@ CONTAINS
           iNpathCounterJunk = iNpathCounterJunk + 1
 
           rAmt = prof.gamnt(i,iG)
-          IF (isfinite(rAmt) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
+          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
           rT   = prof.ptemp(i)
-          IF (isfinite(rT) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
+          ! write(kStdErr,*) 'READRTP_1B 2 gasid lay rT ',iIDgas,i,rT
+          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
@@ -4029,7 +4038,7 @@ CONTAINS
 ! now set raLayerHeight
     DO iFound = 1,kProfLayer
       raLayerHeight(iFound) = raaHeight(iFound,1)
-!      print *,'xyz 2',iFound,raLayerHeight(iFound),raPressLevels(iFound),+2         
+!      write(kStdErr,*) 'xyz 2',iFound,raLayerHeight(iFound),raPressLevels(iFound),+2         
     END DO
 
 ! change layer thickness to meters, because this is what rad_* routines need
@@ -4065,10 +4074,10 @@ CONTAINS
     END DO
 
 !    DO i = 1,kProfLayer
-!	print *,'C0 end of READRTP_1B',i,raP1(i),raaPress(i,1),raaPress(i,2)
+!	write(kStdErr,*) 'C0 end of READRTP_1B',i,raP1(i),raaPress(i,1),raaPress(i,2)
 !    end do
 !    i = kProfLayer+1
-!    print *,'C0 end of READRTP_1B',i,raP1(i),-9999
+!    write(kStdErr,*) 'C0 end of READRTP_1B',i,raP1(i),-9999
     
     RETURN
     END SUBROUTINE READRTP_1B
@@ -4144,7 +4153,7 @@ CONTAINS
     integer :: rchan
     character(1) :: mode
     character(160) :: fname
-    logical :: isfinite
+    !logical :: isfinite,is_goodnum
 
     MGC = kMGC
 
@@ -4357,7 +4366,7 @@ CONTAINS
 !**********
 
 !      DO i = 1, prof.nlevs
-!        print *,i,prof.plevs(i),prof.ptemp(i),raActualLayTemps(i),
+!        write(kStdErr,*) i,prof.plevs(i),prof.ptemp(i),raActualLayTemps(i),
 !     $          prof.gamnt(i,1),prof.gamnt(i,3)
 !      END DO
 
@@ -4379,15 +4388,16 @@ CONTAINS
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
           rAmt = prof.gamnt(i,iG) / kAvog
-          IF (isfinite(rAmt) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
+          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
 
           rT   = prof.ptemp(i)
           rT   = raActualLayTemps(i)         !use this instead of prof.ptemp
-          IF (isfinite(rT) == .FALSE. ) THEN
-            write(kStdErr,*) ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
+          ! write(kStdErr,*) 'READRTP_2 1 gasid lay rT ',iIDgas,i,rT
+          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+            write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
@@ -4604,7 +4614,7 @@ CONTAINS
       IF ((rPP < 0.0) .OR. (rPP > 1100 * 100.0)) THEN
         WRITE(kStdWarn,1083)
         WRITE(kStdWarn,1112) iIDgas,iCnt,rPP,rP,rT,rZ,rAmt
-        !	if (iIDgas .EQ. 2) print *,'wah',rAmt,rAmt0,rPP0
+        !	if (iIDgas .EQ. 2) write(kStdErr,*) 'wah',rAmt,rAmt0,rPP0
         iError = 2
         rPP = 0.0
         rAmt = 0.0
@@ -4631,7 +4641,7 @@ CONTAINS
       IF ((rPP < 0.0) .OR. (rPP > 13.0 * 100.0)) THEN
         WRITE(kStdWarn,1083)
         WRITE(kStdWarn,1112) iIDgas,iCnt,rPP,rP,rT,rZ,rAmt
-        !	if (iIDgas .EQ. 2) print *,'wah',rAmt,rAmt0,rPP0
+        !	if (iIDgas .EQ. 2) write(kStdErr,*) 'wah',rAmt,rAmt0,rPP0
         iError = 2
         rPP = 0.0
         rAmt = 0.0
@@ -4744,16 +4754,16 @@ CONTAINS
       yytemp = 1957 + (/(iI,iI = 1,iMax)/)     !! I start from 1957 because iI = 1,iMax
       yyleap = 1956 + 4*(/(iI,iI = 1,iMax4)/)  !! I start from 1959 because iI = 1,iMax4
 
-!print *,'yytemp is ...'
-!  print *,yytemp(1:iMax)
-!print *,'yyleap is ...'
-!  print *,yyleap(1:iMax4)
+!write(kStdErr,*) 'yytemp is ...'
+!  write(kStdErr,*) yytemp(1:iMax)
+!write(kStdErr,*) 'yyleap is ...'
+!  write(kStdErr,*) yyleap(1:iMax4)
 
       daysINyear = 365
       call intersectI(yyleap(1:iMax4),yytemp(1:iMax),iaResult,keep1,keep2,iN1,iN2)
       daysINyear(keep2(1:iN2)) = 366;
-!print *,'daysINyear is ...'
-!print *,daysINyear(1:iMax)
+!write(kStdErr,*) 'daysINyear is ...'
+!write(kStdErr,*) daysINyear(1:iMax)
 
       iIndexYear = 0
       accumulated_seconds_each_year = 0
@@ -4770,8 +4780,8 @@ CONTAINS
       ELSE
         daysINmonth = (/31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/)
       END IF
-!print *,'daysINmonth is ...',rtime1
-! print *,daysINmonth
+!write(kStdErr,*) 'daysINmonth is ...',rtime1
+! write(kStdErr,*) daysINmonth
 
       iIndexMonth = 0
       accumulated_seconds_each_month = 0
