@@ -1212,14 +1212,14 @@
 ! these are JPL interfaces
 
 ! main output filename
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! iaGases       = integer array with list of gasID's in order they were read in
 ! iErr          = error count (mainly associated with file I/O)
 ! iNumGases     = total number of gases read in from *MOLGAS + *XSCGAS
 ! iaCont        = array indicating whther or not to do continuum/no continuum
     INTEGER :: iErr,iaCONT(kMaxGas)
 ! caFfileName   = name of input file
-    CHARACTER(80) :: caDriverName
+    CHARACTER(160) :: caDriverName
 ! this is for MOLGAS
     INTEGER :: iNGas,iaGasesNL(kGasComp)
 ! this is for xscfil
@@ -1296,8 +1296,8 @@
     REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
     REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
     INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
-    CHARACTER(80) :: caEmissivity(kMaxAtm)
-    CHARACTER(80) :: cakSolarRefl(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm)
+    CHARACTER(160) :: cakSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm),rakSolarRefl(kMaxAtm)
     INTEGER :: iaMPSetForRad(kMaxAtm)
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -1311,7 +1311,7 @@
     INTEGER :: iNatm,iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
     INTEGER :: iSetRTPCld
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 ! this is for looping over obne particular atmopheric parameter
@@ -1331,8 +1331,8 @@
 ! iNatm2        = number of atmospheres that *OUTPUT thinks there is
     INTEGER :: iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iNatm2
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
-    CHARACTER(120) :: caComment
-    CHARACTER(80) :: caLogFile
+    CHARACTER(160) :: caComment
+    CHARACTER(160) :: caLogFile
     REAL :: raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 ! this is for JACOBN
@@ -1391,7 +1391,7 @@
 ! caaaNewChunks  tells the name of the files associated with the chunks
     INTEGER :: iaNewGasID(kGasStore),iaNewData(kGasStore)
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
 ! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
 ! caaAltComprDirs    tells the name of the files associated with the alternate compressed files
@@ -1415,23 +1415,23 @@
 ! iUseWeakBackGnd tells the code if use weak background lines as well, or not
 ! iSetBloat tells whether or not to bloat up to 0.0005 cm-1 or not
     INTEGER :: iDoUpperAtmNLTE,iAllLayersLTE,iUseWeakBackGnd,iSetBloat
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile
     REAL :: raNLTEstrength(kGasStore)
     INTEGER :: iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore),iNLTE_SlowORFast
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! iaNLTEstart   tells the lowest layers that is in NONLTE
 ! caaaNLTEBands tells the name of the files containing the line parameters
 ! caaNLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore)
     INTEGER :: iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
 ! if we do NLTE above the kCARTA database (p < 0.005 mb), we need the mixing
 ! ratio profiles from GENLN2, and mebbe files to dump things to
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
-    CHARACTER(80) :: caPlanckUAfile,caOutUAfile,caOutUABloatFile
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caPlanckUAfile,caOutUAfile,caOutUABloatFile
 
 ! local variables
     INTEGER :: iNewLBL,iInt,iNumLayers,iType,iLow,iHigh,iaDumb(kMaxGas)
@@ -2294,7 +2294,7 @@
     INTEGER :: iNumLinesRead,iaDispGasID(12),iCount,iNeed2Read
     INTEGER :: iGenln4,iL,iLBLDIS,iG,iFlip
     REAL :: rP,rPP,rQ,rH,rX
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     CHARACTER(160) :: caStr160
     REAL :: raaHeight(kProfLayer,kGasStore)
     INTEGER :: iIOUN2,iNpath,iaGasPathCounter(kProfLayer)

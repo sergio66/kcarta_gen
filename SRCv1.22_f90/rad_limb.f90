@@ -149,7 +149,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iaNumLayer(kMaxAtm),iAtm
     INTEGER :: iNpmix,iFileID,iTag,iActualTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     REAL :: raThickNess(kProfLayer),pProf(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -162,13 +162,13 @@ CONTAINS
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iUpper,iDoUpperAtmNLTE
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 ! this is to do with NLTE
     INTEGER :: iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut
     REAL :: raaUpperSumNLTEGasAbCoeff(kMaxPts,kProfLayer),rCO2MixRatio
-    CHARACTER(80) :: caOutBloatFile,caOutUAFile
+    CHARACTER(160) :: caOutBloatFile,caOutUAFile
     DOUBLE PRECISION :: daFreqBloat(kBloatPts)
     DOUBLE PRECISION :: daaSumNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
     DOUBLE PRECISION :: daaPlanckCoeffBloat(kBloatPts,kProfLayer)
@@ -176,9 +176,9 @@ CONTAINS
     DOUBLE PRECISION :: daaUpperSumNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
     DOUBLE PRECISION :: daaUpperNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
 ! this is to do with flux
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is to do with jacobians
-    CHARACTER(80) :: caJacobFile,caJacobFile2
+    CHARACTER(160) :: caJacobFile,caJacobFile2
     INTEGER :: iNumGases,iaGases(kMaxGas),iNatm
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -360,7 +360,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iaNumLayer(kMaxAtm),iAtm
     INTEGER :: iNpmix,iFileID,iTag
-    CHARACTER(80) :: caJacobFile2
+    CHARACTER(160) :: caJacobFile2
 
 ! these are to do with the arbitrary pressure layering
     REAL :: raThickNess(kProfLayer),pProf(kProfLayer), &
@@ -374,15 +374,15 @@ CONTAINS
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iUpper,iDoUpperAtmNLTE
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 ! this is to do with NLTE
     INTEGER :: iChunk_DoNLTE,iSetBloat,iNumberUA_NLTEOut
     REAL :: raaUpperSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
-    CHARACTER(80) :: caOutBloatFile,caOutUAFile
+    CHARACTER(160) :: caOutBloatFile,caOutUAFile
 ! this is to do with flux
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is to do with jacobians
     INTEGER :: iNumGases,iaGases(kMaxGas),iNatm
     REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -606,7 +606,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iIOUN_USE
     INTEGER :: iNpmix,iFileID,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     REAL :: raThickNess(kProfLayer),pProf(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -619,7 +619,7 @@ CONTAINS
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iUpper,iDoUpperAtmNLTE
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -870,7 +870,7 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN_IN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     REAL :: raThickNess(kProfLayer),pProf(kProfLayer)
     REAL :: raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -883,7 +883,7 @@ CONTAINS
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iUpper,iDoUpperAtmNLTE
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -1285,13 +1285,13 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN_IN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     INTEGER :: iKnowTP,iProfileLayers
     REAL :: raThickness(kProfLayer),pProf(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2)
     REAL :: raScatterDME(kMaxAtm),raScatterIWP(kMaxAtm)
 

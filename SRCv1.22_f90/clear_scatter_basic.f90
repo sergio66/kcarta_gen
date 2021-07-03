@@ -1400,7 +1400,7 @@ CONTAINS
 
 ! local vars
     INTEGER :: iIOUN,iL,iFlip,iI
-    CHARACTER(80) :: fname,caLine
+    CHARACTER(160) :: fname,caLine
     REAL :: raW(kMaxPts),raR(kMaxPts),r1,r2,r3,r4,r5,raTemp(kMaxPts)
 
     INTEGER, DIMENSION(:), ALLOCATABLE :: iaIndexAlloc
@@ -1636,7 +1636,7 @@ CONTAINS
     INTEGER :: iTag
     REAL :: raSun(kMaxPts),raFreq(kMaxPts)
      
-    CHARACTER(80) :: fname
+    CHARACTER(160) :: fname
     INTEGER :: iIOUN,iL,iU,iFr
     DOUBLE PRECISION :: fs,fe,df,daSun(kMaxPts)
 
@@ -3367,7 +3367,7 @@ CONTAINS
     CHARACTER*(*) SCATFILE
     INTEGER ::  IMU, ID, IW, K2, K3
 
-    CHARACTER(80) :: caLine
+    CHARACTER(160) :: caLine
     CHARACTER cScale
 
     OPEN (UNIT=2, STATUS='OLD', FILE=SCATFILE)
@@ -3453,7 +3453,7 @@ CONTAINS
     CHARACTER*(*) SCATFILE
     INTEGER ::  IMU, ID, IW, K2, K3
 
-    CHARACTER(80) :: caLine
+    CHARACTER(160) :: caLine
     CHARACTER cScale
 
     NMUOBS = -9999
@@ -3494,7 +3494,7 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
       
-    CHARACTER(80) :: caLine
+    CHARACTER(160) :: caLine
     CHARACTER cScale
       
     INTEGER :: iI,iFound
@@ -3562,7 +3562,7 @@ CONTAINS
     INTEGER :: iFr,iL,iIOUN
     REAL :: raEmission(kMaxPts),raTrans(kMaxPts),rMu,raInten0(kMaxPts)
     DOUBLE PRECISION :: daInten(kMaxPts),daTrans(kMaxPts),daEmission(kMaxPts)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
     caOutName = 'DumDum'
     iIOUN = kNLTEOutUA

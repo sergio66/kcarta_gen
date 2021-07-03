@@ -97,7 +97,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -109,7 +109,7 @@ CONTAINS
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
 ! iScatBinaryFile tells us if scattering file is binary (+1) or text (-1)
@@ -131,11 +131,11 @@ CONTAINS
     REAL :: raaUpperSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
 
 ! caJacobFile is the name of the unformatted output file name for Jacobians
-    CHARACTER(80) :: caJacobFile,caJacobFile2
+    CHARACTER(160) :: caJacobFile,caJacobFile2
 ! caFluxFile is the name of the unformatted output file name for fluxes
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! caPlanckFile is the name of the unformatted output file name for planckes
-    CHARACTER(80) :: caPlanckFile
+    CHARACTER(160) :: caPlanckFile
 
     REAL :: raaAmt(kProfLayer,kGasStore)
     REAL :: raNumberDensity(kProfLayer)
@@ -949,7 +949,7 @@ CONTAINS
     INTEGER :: iJacob,iaJacob(kMaxDQ)
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
     INTEGER :: iNumGases,iAtm,iNatm,ctype2,iaGases(kMaxGas),iPrintAllPCLSAMJacs
-    CHARACTER(80) :: caJacobFile
+    CHARACTER(160) :: caJacobFile
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -961,7 +961,7 @@ CONTAINS
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
 ! this tells if there is phase info associated with the cloud; else use HG
@@ -1007,7 +1007,7 @@ CONTAINS
     INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA
 
     INTEGER :: iaTable(kMaxClouds*kCloudLayers)
-    CHARACTER(80) :: caName
+    CHARACTER(160) :: caName
     INTEGER :: iIn,iJ,iI,iG,iCloud,iScat,iIOUN,iF,iL
     REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
     INTEGER :: iaRadLayer(kProfLayer)
@@ -1339,7 +1339,7 @@ CONTAINS
     INTEGER :: iJacob,iaJacob(kMaxDQ)
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
     INTEGER :: iNumGases,iAtm,iNatm,iaGases(kMaxGas)
-    CHARACTER(80) :: caJacobFile
+    CHARACTER(160) :: caJacobFile
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -1351,7 +1351,7 @@ CONTAINS
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
 ! this tells if there is phase info associated with the cloud; else use HG
@@ -1386,7 +1386,7 @@ CONTAINS
     INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA
 
     INTEGER :: iaTable(kMaxClouds*kCloudLayers)
-    CHARACTER(80) :: caName
+    CHARACTER(160) :: caName
     INTEGER :: iIn,iJ,iI,iCloud,iScat,iIOUN,iF,iL
     REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
     INTEGER :: iaRadLayer(kProfLayer)

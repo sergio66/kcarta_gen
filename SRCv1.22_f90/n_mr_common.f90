@@ -31,7 +31,7 @@ CONTAINS
     REAL :: PLEVx110(kMaxLayer+10)
     REAL :: rLat,raJunk(kMaxLayer+10)
     CHARACTER(160) :: caPFname
-    CHARACTER(80) :: caStr,caComment
+    CHARACTER(160) :: caStr,caComment
     INTEGER :: iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec
 
 ! first extend PLEV_KCARTADATABASE_AIRS a little above its lwest value, so can do interps well
@@ -59,7 +59,7 @@ CONTAINS
       WRITE(kStdErr,1070) iErrIO, caPfname
       CALL DoSTOP
     ENDIF
- 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A160)
     kProfileUnitOpen=1
 
     iAFGL = 0
@@ -200,7 +200,7 @@ CONTAINS
   60 CONTINUE
     CLOSE(iIOUN2)
     kProfileUnitOpen=-1
-  1080 FORMAT(A80)
+  1080 FORMAT(A160)
 
     IF (iFoundGas < 0) THEN
       !! finally give up
@@ -258,7 +258,7 @@ CONTAINS
 
     INTEGER :: iL,iJ,iMid,iErr,iG,iFound,iNumGases0
     REAL :: rX,raR100Amt(kMaxLayer+10),raR100PartPress(kMaxLayer+10)
-    CHARACTER(80) :: caRefFName
+    CHARACTER(160) :: caRefFName
     CHARACTER(3) :: ca3
     INTEGER :: iNumLevsX,iIndex
     REAL :: raPPX(kMaxProfLayer),raQX(kMaxProfLayer) !!US Std layer ppress, amt
@@ -653,7 +653,7 @@ CONTAINS
 ! local var
     INTEGER :: iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,iReadInOK,iIgnore,iYes
     REAL :: raX(kMaxGas),rX,rP,rT,raP_Nm2(2*kProfLayer),rPRefMin,rPRefMax,rPRefMinAugmented
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     CHARACTER(40) :: caaUnit(50)
 
     DO iL = 1,50
@@ -677,7 +677,7 @@ CONTAINS
 
     write(kStdWarn,*) 'Reading in user supplied TXT LVLS file .....'
 
- 1070 FORMAT('ERROR! number ',I5,' opening PRFILE path LEVELS profile file',/,A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening PRFILE path LEVELS profile file',/,A160)
     iIgnore = -1
     iIOUN2 = kProfileUnit
     OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED',IOSTAT=iErrIO)
@@ -778,7 +778,7 @@ CONTAINS
     END IF
     iNumLevs = iReadInOK
           
- 5030 FORMAT(A80)
+ 5030 FORMAT(A160)
  5040 FORMAT('iReadInOK, rP (mb), rT (K), raG1 = ',I3,' ',F14.6,' ',F8.3,' ',ES12.5)
  5041 FORMAT('Ignore (too low P) rP (mb), rT (K), raG1 = ',I3,' ',ES12.5,' ',F8.3)
  5042 FORMAT('Bad (press below 0.005 mb (UNSORTED PinLEVS??)) rP (mb), rT (K), raG1 = ',I3,' ',ES12.5,' ',F8.3)
@@ -895,7 +895,7 @@ CONTAINS
     REAL :: raRx110Temp(2*kProfLayer),raRx110MR(2*kProfLayer),raRx110Press(2*kProfLayer)
     REAL :: rLat,raJunk(kProfLayer*2)
     CHARACTER(160) :: caPFname
-    CHARACTER(80) :: caStr,caComment
+    CHARACTER(160) :: caStr,caComment
     INTEGER :: iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec,iNumLevsx
 
     caPFname = kcaLevsRefProf
@@ -913,7 +913,7 @@ CONTAINS
       WRITE(kStdErr,1070) iErrIO, caPfname
       CALL DoSTOP
     ENDIF
- 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A160)
     kProfileUnitOpen=1
 
     iAFGL = 0
@@ -1053,7 +1053,7 @@ CONTAINS
     60 CONTINUE
     CLOSE(iIOUN2)
     kProfileUnitOpen=-1
- 1080 FORMAT(A80)
+ 1080 FORMAT(A160)
 
     IF (iFoundGas < 0) THEN
       !! finally give up
@@ -1155,7 +1155,7 @@ CONTAINS
 ! local var
     INTEGER :: iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,iaJunk(20),iNumLevsXsec,iNXsec,iLBROutBdryHorP
     REAL :: rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH,raSumCheck(kMaxGas)
-    CHARACTER(80) :: caStr,caStrX,caStrY
+    CHARACTER(160) :: caStr,caStrX,caStrY
     CHARACTER(30) :: caStr30
     CHARACTER(1) ::  c1
     CHARACTER(2) ::  c2
@@ -1213,7 +1213,7 @@ CONTAINS
           
     write(kSTdWarn,*) 'Reading in LBLRTM TAPE5 .....'
 
- 1070 FORMAT('ERROR! number ',I5,' opening PRFILE path LBLRTM profile file' ,/,A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening PRFILE path LBLRTM profile file' ,/,A160)
     iIOUN2 = kProfileUnit
     OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED',IOSTAT=iErrIO)
     IF (iErrIO /= 0) THEN
@@ -1251,7 +1251,7 @@ CONTAINS
       CALL read_record_1p4(caStr,rTSurf,raEmiss,raRefl)
     END IF
 
-    111 FORMAT(A80)
+    111 FORMAT(A160)
     write(kStdWarn,*) 'TAPE 5 has iAtm = ',iAtm
     IF (IATM == 0) THEN
       !! need to read in profile
@@ -1429,8 +1429,8 @@ CONTAINS
 ! local var
     INTEGER :: iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,iNumLevs,iaJunk(20),iNumLevsXsec,iNXsec,iLBROutBdryHorP
     REAL :: raX(kMaxGas),rX,rP,rT,rF1,rF2,rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH,r1,r2,r3,r4,r5,r6,rPTOA
-    CHARACTER(80) :: caStrX,caStrY
-    CHARACTER(120) :: caStr120,caStr
+    CHARACTER(160) :: caStrX,caStrY,caStr
+    CHARACTER(120) :: caStr120
     CHARACTER(30) :: caStr30
     CHARACTER(1) ::  c1
     CHARACTER(2) ::  c2a,c2b
@@ -1450,7 +1450,7 @@ CONTAINS
     rPmax = -1.0e+6
     iNXsec = -1
 
- 1070 FORMAT('ERROR! number ',I5,' opening PRFILE path LBLRTM profile file' ,/,A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening PRFILE path LBLRTM profile file' ,/,A160)
     write(kSTdWarn,*) 'Reading in modified LBLRTM TAPE6 = 5 line summary of TAPE5 + MID TAPE6.....'
     iIOUN2 = kProfileUnit
     OPEN(UNIT=iIOun2,FILE=caPfname,STATUS='OLD',FORM='FORMATTED', IOSTAT=iErrIO)
@@ -3767,7 +3767,7 @@ CONTAINS
     IMPLICIT NONE
           
 ! input
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
 ! output
     INTEGER :: IHIRAC,ILBLF4,ICNTNM,IAERSL,IEMIT,ISCAN,IFILTR,IPLOT,ITEST,IATM,IMRG,ILAS,IOD,IXSECT,MPTS,NPTS
 
@@ -3842,7 +3842,7 @@ CONTAINS
 !!      XRAYL Rayleigh extinction multiplicative factor
 
 ! input
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
 ! output
     INTEGER :: XSELF,XFRGN,XCO2C,XO3CN,XO2CN,XN2CN,XRAYL
 
@@ -3858,7 +3858,7 @@ CONTAINS
     IMPLICIT NONE
           
 ! input
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
 ! output
     REAL :: rF1,rF2,rSample,rDVset,rALFAL0,rAVMASS,rDPTMIN,rDPTFAC,rDVOUT
     INTEGER :: ILNFLG
@@ -3920,7 +3920,7 @@ CONTAINS
 !          E10.3,     E10.3,     E10.3,     E10.3,     E10.3,     E10.3,     E10.3
 
 ! input
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
 ! output
     REAL :: rTSurf,raEmiss(3),raRefl(3)
 
@@ -3990,7 +3990,7 @@ CONTAINS
     REAL :: rSecnto,rTopHgt,rHSurf,rViewAngle
 
 ! local
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     CHARACTER(10) :: c10
     CHARACTER(1) ::  c1
     CHARACTER(3) ::  c3
@@ -4065,7 +4065,7 @@ CONTAINS
     CHARACTER(3) ::  c3
     CHARACTER(2) ::  c2
     CHARACTER(1) ::  c1
-    CHARACTER(80) :: ca80
+    CHARACTER(160) :: ca160
     REAL :: rH,rP,rT,raX(kMaxGas),rJunk,rHSurfJunk
 
     120 FORMAT(A120)
@@ -4096,7 +4096,7 @@ CONTAINS
         read(c10,10) rJunk
         c3 = caStrY(31:33)
         c2 = caStrY(34:35)
-        ca80 = caStrY(37:120)
+        ca160 = caStrY(37:120)
       ELSEIF (iForm == 1) THEN
         c15 = caStrY(01:15)
         read(c15,15) rP
@@ -4106,7 +4106,7 @@ CONTAINS
         read(c10,10) rJunk
         c3 = caStrY(36:38)
         c2 = caStrY(39:40)
-        ca80 = caStrY(41:120)
+        ca160 = caStrY(41:120)
       END IF
 
       raPavg(iL) = rP
@@ -4116,7 +4116,7 @@ CONTAINS
         !! now read A(z-1)    P(z-1)  T(z-1) and A(z) P(z) and T(z)
         !!                      which are basically
         !!          SurfAlt      Spres   Stemp      A(z) Pz)  and T(z) in the level above the ground
-        READ (ca80,*) rHSurfJunk,rPSurf,rTSurf,raAlt(iL+1),raP(iL+1),raT(iL+1)   !! p is in mb
+        READ (ca160,*) rHSurfJunk,rPSurf,rTSurf,raAlt(iL+1),raP(iL+1),raT(iL+1)   !! p is in mb
         raAlt(iL) = rHSurfJunk
         raP(iL)   = rPSurf
         raT(iL)   = rTSurf
@@ -4144,7 +4144,7 @@ CONTAINS
         !! now read next "BLANK"  and A(z) P(z) and T(z)
         !!                         which are basically
         !!                         A(z) Pz)  and T(z) for next level, ad continuum
-        READ (ca80,*) raAlt(iL+1),raP(iL+1),raT(iL+1)    !! p in mb
+        READ (ca160,*) raAlt(iL+1),raP(iL+1),raT(iL+1)    !! p in mb
         IF (rPmax <= raP(iL+1)) rPmax = raP(iL+1)
         IF (rPmin > raP(iL+1)) rPmin = raP(iL+1)
         !print *,iL,raAlt(iL+1),raP(iL+1),raT(iL+1)
@@ -4225,7 +4225,7 @@ CONTAINS
           
 ! local
     INTEGER :: iYes,iG,iJ,iL,iGasCntLoop,iRemain,iX1,iX2,iXSBIN,iFormX,iXmol,iNumLevsXsec
-    CHARACTER(120) :: caStr,caStrX,caStrY
+    CHARACTER(160) :: caStr,caStrX,caStrY
     CHARACTER(30) :: caStr30
     CHARACTER(15) ::  c15
     CHARACTER(10) ::  c10
@@ -4234,7 +4234,7 @@ CONTAINS
     CHARACTER(3) ::  c3
     CHARACTER(2) ::  c2
     CHARACTER(1) ::  c1
-    CHARACTER(80) :: ca80
+    CHARACTER(160) :: ca160
     REAL :: raPX(2*kProfLayer),raTX(2*kProfLayer),raAltX(2*kProfLayer),raX(kMaxGas),rP,rT,rJunk
     REAL :: rTSurfX,rHSUrfX,rPSurfX
 
@@ -4286,7 +4286,7 @@ CONTAINS
           read(c10,10) rJunk
           c3 = caStrY(31:33)
           c2 = caStrY(34:35)
-          ca80 = caStrY(37:120)
+          ca160 = caStrY(37:120)
         ELSEIF (iFormX == 1) THEN
           c15 = caStrY(01:15)
           read(c15,15) rP
@@ -4296,16 +4296,16 @@ CONTAINS
           read(c10,10) rJunk
           c3 = caStrY(36:38)
           c2 = caStrY(39:40)
-          ca80 = caStrY(41:120)
+          ca160 = caStrY(41:120)
         END IF
 
         IF (iL == 1) THEN
           !! now read A(z-1)    P(z-1)  T(z-1) and A(z) P(z) and T(z)
           !!                      which are basically
           !!          SurfAlt      Spres   Stemp      A(z) Pz)  and T(z) in the level above the ground
-          READ (ca80,*) rHSurfX,rPSurfX,rTSurfX,raAltX(iL+1),raPX(iL+1),raTX(iL+1)   !! p is in mb
+          READ (ca160,*) rHSurfX,rPSurfX,rTSurfX,raAltX(iL+1),raPX(iL+1),raTX(iL+1)   !! p is in mb
         ELSE
-          READ (ca80,*) raAltX(iL+1),raPX(iL+1),raTX(iL+1)
+          READ (ca160,*) raAltX(iL+1),raPX(iL+1),raTX(iL+1)
         END IF
 
         IF (iNXsec <= 7) THEN
@@ -4362,7 +4362,7 @@ CONTAINS
 
 ! local
     INTEGER :: iJunk,iI,iY
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     CHARACTER(1) :: c1
     CHARACTER(2) :: c2
     CHARACTER(5) :: c5
@@ -4496,7 +4496,7 @@ CONTAINS
     CHARACTER(5) ::  c5
     INTEGER :: iErr,iErrIO,iL,iJ,iG,iMid,iaJunk(20),iNumLevsXsec,iNXsec,iLBROutBdryHorP
     REAL :: raX(kMaxGas),rX,rP,rT,rF1,rF2,rTophgt,rViewAngle,raLBL_Hgts(kProfLayer),rH
-    CHARACTER(80) :: caStr,caStrX,caStrY
+    CHARACTER(160) :: caStr,caStrX,caStrY
     CHARACTER(30) :: caStr30
     CHARACTER(1) ::  c1
 
@@ -4825,7 +4825,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     INTEGER :: iNXsec,iLBLTapeType
 ! input/output
     INTEGER :: iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)

@@ -126,7 +126,7 @@ CONTAINS
 ! iakthermaljacob=turn thermal jacobians on/off
 ! raProfileTemp = array containing CO2 gas profile temperature
 ! iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
-    CHARACTER(80) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
     INTEGER :: iaMPSetForRad(kMaxAtm)
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -495,7 +495,7 @@ CONTAINS
     REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
     REAL :: rDefault
     CHARACTER(130) :: caEmsFile
-    CHARACTER(80) :: caSetSolarRefl(kMaxAtm),caE
+    CHARACTER(160) :: caSetSolarRefl(kMaxAtm),caE
     REAL :: raSetSolarRefl(kMaxAtm)
 
 ! local variables
@@ -560,7 +560,7 @@ CONTAINS
       DO iI = 1,130
         caEmsFile = ' '
       END DO
-      DO iI = 1,80
+      DO iI = 1,160
         caEmsFile(iI:iI) = caE(iI:iI)
       END DO
 
@@ -656,7 +656,7 @@ CONTAINS
     INTEGER :: iaSetEms(kMaxAtm),iAtm
     REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2),rDefault
     CHARACTER(130) :: caEmsFile
-    CHARACTER(80) :: caEmissivity(kMaxAtm),caE
+    CHARACTER(160) :: caEmissivity(kMaxAtm),caE
     REAL :: raSetEmissivity(kMaxAtm)
 
 ! local variables
@@ -702,7 +702,7 @@ CONTAINS
       DO iI = 1,130
         caEmsFile = ' '
       END DO
-      DO iI = 1,80
+      DO iI = 1,160
         caEmsFile(iI:iI) = caE(iI:iI)
       END DO
 
@@ -1198,7 +1198,7 @@ CONTAINS
     REAL :: raCprtop(kMaxClouds),raCprbot(kMaxClouds)
 ! these are to check that the scattering table names are unique
     INTEGER :: iaTable(kCloudLayers*kMaxClouds)
-    CHARACTER(80) :: caaTable(kCloudLayers*kMaxClouds)
+    CHARACTER(160) :: caaTable(kCloudLayers*kMaxClouds)
 
     caWord = '*SCATTR'
     iErr = -1

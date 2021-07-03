@@ -21,6 +21,7 @@ IMPLICIT NONE
 !******** THIS FILE CONTAINS VARIOUS USEFUL SUBROUTINES/FUNCTIONS *******
 !** such as sorting, setting vertical temperature profiles, checking ****
 !** kcartaparam.f90, checking comp.param and xsec.param, splines etc *******
+! note xisnan2, xisinf2, xisinfinite2 are in n_pth_mix.f90
 !************************************************************************
 
 CONTAINS
@@ -225,7 +226,7 @@ CONTAINS
     REAL :: raR100Amt1(kMaxLayer),raR100Temp1(kMaxLayer)
     REAL :: raR100PartPress1(kMaxLayer),raR100Press1(kMaxLayer)
 
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     REAL :: rMeanT,rMeanA,rMeanP,rMeanPP,rDirectPPMV0,rDirectPPMV1
     REAL :: rCO2ppmv
     INTEGER :: iI,iJ,iGasID,iError,iIPMIX,iaIndex(kMaxLayer)
@@ -580,7 +581,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the driver file name from the command line arguments
-    CHARACTER(80) :: caDriverName
+    CHARACTER(160) :: caDriverName
 
     CHARACTER(30) :: namecomment
 
@@ -600,8 +601,8 @@ CONTAINS
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint)
     INTEGER :: iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint)
     INTEGER :: iIOUN,iErr
-    CHARACTER(80) :: caComment,caComment1
-    CHARACTER(80) :: caLogFile,caLogFile1
+    CHARACTER(160) :: caComment,caComment1
+    CHARACTER(160) :: caLogFile,caLogFile1
     REAL :: raaOp(kMaxPrint,kProfLayer),raaOp1(kMaxPrint,kProfLayer)
 
     NAMELIST /nm_output/namecomment,caLogFile,caComment,iaPrinter, &
@@ -742,14 +743,14 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! caDriverName is the name of the driver file to be processed
-    CHARACTER(80) :: caDriverName
+    CHARACTER(160) :: caDriverName
 ! caOutName is the name of the unformatted output file name
 ! integer iOutFileName tells whether or not there is a driver name, or
 ! dump output to Unit 6
     INTEGER :: iOutFileName
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! caJacobFile is the name of the unformatted output file name for Jacobians
-    CHARACTER(80) :: caJacobFile
+    CHARACTER(160) :: caJacobFile
 ! this tells if we have MS Product ie no command line stuff!
     INTEGER :: iMicroSoft
 ! this is the number of args

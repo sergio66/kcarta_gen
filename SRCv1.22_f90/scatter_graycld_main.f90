@@ -107,7 +107,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -119,7 +119,7 @@ CONTAINS
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(80) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
     REAL :: rAngle
@@ -309,7 +309,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iDownWard,iBinaryFile
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -321,7 +321,7 @@ CONTAINS
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(80) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
 ! this tells if there is phase info associated with the cloud; else use HG

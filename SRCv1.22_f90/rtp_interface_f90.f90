@@ -64,7 +64,7 @@ CONTAINS
     integer :: status
     integer :: rchan
     character(1) :: mode
-    character(80) :: fname
+    character(160) :: fname
 
     MGC = kMGC
 

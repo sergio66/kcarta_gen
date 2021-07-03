@@ -27,7 +27,7 @@ CONTAINS
     INTEGER :: iRegr               !!!which regr profile this is closest to
     INTEGER :: iRTP                !!!which of the rtp files processed
 ! output parameters
-    CHARACTER(80) :: caVTFile       !!!temp file name where VT profiles are
+    CHARACTER(160) :: caVTFile       !!!temp file name where VT profiles are
 !!!created and stored if not given by user
 
 ! local vars
@@ -39,8 +39,8 @@ CONTAINS
     REAL :: raaKinetic(MXXTMP,kNLTEProfLayer)
     REAL :: raaaVibPartFcn(MXXTMP,kMaxUserSet,kNLTEProfLayer)
     REAL :: raaaVibTemp(MXXTMP,kMaxK,kNLTEProfLayer)
-    CHARACTER(80) :: caFName
-    CHARACTER(80) :: caaComments(kMaxLayer)
+    CHARACTER(160) :: caFName
+    CHARACTER(160) :: caaComments(kMaxLayer)
     INTEGER :: iNumComments
 ! to dump out the profiles
     REAL :: raaVibPartFcn(kMaxUserSet,kNLTEProfLayer)
@@ -219,13 +219,13 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input vars
-    CHARACTER(80) :: caFname                          !i/o file name
+    CHARACTER(160) :: caFname                          !i/o file name
     INTEGER :: iAngle                                !which angle profile
     REAL :: raaPressure(MXXTMP,kNLTEProfLayer)
     REAL :: raaKinetic(MXXTMP,kNLTEProfLayer)
     REAL :: raaVibPartFcn(kMaxUserSet,kNLTEProfLayer)
     REAL :: raaVibTemp(kMaxK,kNLTEProfLayer)
-    CHARACTER(80) :: caaComments(kMaxLayer)
+    CHARACTER(160) :: caaComments(kMaxLayer)
     INTEGER :: iNumComments
     INTEGER :: iGasesInFile,iNumVibLevels            !gases,levels in file
     INTEGER :: iGasID,iVibPF                         !gas ID, number of isotopes
@@ -236,7 +236,7 @@ CONTAINS
 ! local vars
     CHARACTER(3) :: ca3
     CHARACTER(1) :: ca1
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     INTEGER :: i1,i2,iIOUN,iErr,iI,iJ,iDummy1,iDummyGasID,iDummyISO
     INTEGER :: iNV,iZero
     REAL :: raP2(kNLTEProfLayer),raT2(kNLTEProfLayer)
@@ -329,14 +329,14 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input vars
-    CHARACTER(80) :: caFname                          !i/o file name
+    CHARACTER(160) :: caFname                          !i/o file name
     INTEGER :: iAngle                                !which angle profile
 ! output vars
     REAL :: raaPressure(MXXTMP,kNLTEProfLayer)
     REAL :: raaKinetic(MXXTMP,kNLTEProfLayer)
     REAL :: raaaVibPartFcn(MXXTMP,kMaxUserSet,kNLTEProfLayer)
     REAL :: raaaVibTemp(MXXTMP,kMaxK,kNLTEProfLayer)
-    CHARACTER(80) :: caaComments(kMaxLayer)
+    CHARACTER(160) :: caaComments(kMaxLayer)
     INTEGER :: iNumComments
     INTEGER :: iGasesInFile,iNumVibLevels            !gases,levels in file
     INTEGER :: iGasID,iVibPF                         !gas ID, number of isotopes
@@ -347,7 +347,7 @@ CONTAINS
 ! local vars
     CHARACTER(3) :: ca3
     CHARACTER(1) :: ca1
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     INTEGER :: i1,i2,iIOUN,iErr,iI,iJ,iDummy1,iDummyGasID,iDummyISO
 
     iIOUN = kTempUnit
@@ -442,7 +442,7 @@ CONTAINS
      
     IMPLICIT NONE
      
-    CHARACTER(80) :: caS1
+    CHARACTER(160) :: caS1
     INTEGER :: iProf,iSol
      
     INTEGER :: i1
@@ -522,11 +522,11 @@ CONTAINS
     REAL :: raPressLevels(kProfLayer+1)  !!!pressure levels
     INTEGER :: iNumLayers                !!!number of layers
     REAL :: rSolarAngle                  !!!solar angle for atm #1
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     INTEGER :: iRTP                      !!!which of the rtp files processed
 ! output
     INTEGER :: iRegr               !!!which regr profile this is closest to
-    CHARACTER(80) :: caVTFile       !!!temp file name where VT profiles are
+    CHARACTER(160) :: caVTFile       !!!temp file name where VT profiles are
 !!!created and stored if not given by user
 
 ! local vars

@@ -73,7 +73,7 @@
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iTag
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -264,7 +264,7 @@
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iTag,iDownWard
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -333,7 +333,7 @@
     REAL ::    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
     REAL ::  ABSNU1, ABSNU2, ABSDELNU
     REAL ::  WAVENO
-    CHARACTER(80) :: SCATFILE(MAXSCAT)
+    CHARACTER(160) :: SCATFILE(MAXSCAT)
     CHARACTER(1) ::   RTMODEL
     CHARACTER(1) :: caScale(MAXSCAT)
 
@@ -343,7 +343,7 @@
     INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA
 
     INTEGER :: iaTable(kMaxClouds*kCloudLayers)
-    CHARACTER(80) :: caName
+    CHARACTER(160) :: caName
 
     INTEGER :: iGaussPts,iCloudySky,iAngle,troplayer
     REAL :: rSurfaceTemp,rDelta,raLayerTemp(kProfLayer),rAngle,rWeight

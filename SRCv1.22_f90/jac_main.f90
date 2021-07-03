@@ -148,7 +148,7 @@ CONTAINS
     INTEGER :: iJacob,iaJacob(kMaxDQ),iTag,iActualTag
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
     INTEGER :: iNumGases,iAtm,iNatm,iaGases(kMaxGas)
-    CHARACTER(80) :: caJacobFile
+    CHARACTER(160) :: caJacobFile
 ! this is for NLTE weight fcns
     INTEGER :: iNLTEStart
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)

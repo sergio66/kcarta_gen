@@ -100,7 +100,7 @@ CONTAINS
     REAL :: raaAllJacTout(kMaxPtsJac,kProfLayerJac)
     REAL :: raaAllWgtOut(kMaxPtsJac,kProfLayerJac)
     REAL :: raaAllSurfOut(kMaxPtsJac,4)
-    CHARACTER(80) :: caJacobFile
+    CHARACTER(160) :: caJacobFile
     INTEGER :: iJacob,iaJacob(kMaxDQ),iProfileLayers,iTag,iActualTag
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
     INTEGER :: iNumGases,iAtm,iNatm,ctype2,iaGases(kMaxGas)

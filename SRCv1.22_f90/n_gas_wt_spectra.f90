@@ -198,7 +198,7 @@ CONTAINS
 ! caaaNewChunks  tells the name of the files associated with the chunks
     INTEGER :: iaNewGasID(kGasStore),iaNewData(kGasStore)
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
 
 ! local variables
     CHARACTER(7) :: caWord
@@ -285,28 +285,28 @@ CONTAINS
     REAL :: raNLTEstrength(kGasStore)
     INTEGER :: iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore)
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! raNLTEstart   tells the height at which to start NONLTE
 ! caaaNLTEBands tells the name of the files containing the line parameters
 ! caaaNONLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore)
     REAL :: raNLTEstart(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caOutName
 ! the solar angle
     REAL :: raKSolarAngle(kMaxAtm)
 ! tells the name of the GENLN2 ip file that has mixing ratios!
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
 ! this is pressure levels info
     REAL :: raPressLevels(kProfLayer+1),raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
 
 ! output variable : converts NLTE start heights to AIRS layers
     INTEGER :: iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
-    CHARACTER(80) :: caPlanckUAfile,caOutUAfile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
+    CHARACTER(160) :: caPlanckUAfile,caOutUAfile
 
     IF (iNLTE_SlowORFast == +1) THEN
       CALL nonlteSLOW_LBL( &
@@ -392,28 +392,28 @@ CONTAINS
     REAL :: raNLTEstrength(kGasStore)
     INTEGER :: iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore)
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! raNLTEstart   tells the height at which to start NONLTE
 ! caaaNLTEBands tells the name of the files containing the line parameters
 ! caaaNONLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore)
     REAL :: raNLTEstart(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caOutName
 ! the solar angle
     REAL :: raKSolarAngle(kMaxAtm)
 ! tells the name of the GENLN2 ip file that has mixing ratios!
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
 ! this is pressure levels info
     REAL :: raPressLevels(kProfLayer+1),raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
 
 ! output variable : converts NLTE start heights to AIRS layers
     INTEGER :: iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
-    CHARACTER(80) :: caPlanckUAfile,caOutUAfile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
+    CHARACTER(160) :: caPlanckUAfile,caOutUAfile
 
 ! local vars
     INTEGER :: iI,iJ
@@ -474,28 +474,28 @@ CONTAINS
     REAL :: raNLTEstrength(kGasStore)
     INTEGER :: iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore)
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! raNLTEstart   tells the height at which to start NONLTE
 ! caaaNLTEBands tells the name of the files containing the line parameters
 ! caaaNONLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore)
     REAL :: raNLTEstart(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caOutName
 ! the solar angle
     REAL :: raKSolarAngle(kMaxAtm)
 ! tells the name of the GENLN2 ip file that has mixing ratios!
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
 ! this is pressure levels info
     REAL :: raPressLevels(kProfLayer+1),raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
 
 ! output variable : converts NLTE start heights to AIRS layers
     INTEGER :: iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
-    CHARACTER(80) :: caPlanckUAfile,caOutUAfile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
+    CHARACTER(160) :: caPlanckUAfile,caOutUAfile
 
 ! local variables
     CHARACTER(7) :: caWord
@@ -512,10 +512,10 @@ CONTAINS
     DOUBLE PRECISION :: daJLowerQuantumRot(kHITRAN)
     CHARACTER(1) ::      caJPQR(kHITRAN)
 
-    CHARACTER(80) :: caNONLTETempKC
+    CHARACTER(160) :: caNONLTETempKC
     INTEGER :: iRegr,iMethod,iDefault
     REAL :: raTemp(kProfLayer)
-    CHARACTER(80) :: caaaNLTEBandsOrig(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNLTEBandsOrig(kGasStore,kNumkCompT)
     INTEGER :: iJunkNum,iaJunk(kGasStore)
 
     DO iJunkNum = 1,iNumNLTEGases
@@ -749,7 +749,7 @@ CONTAINS
 
 ! now do the output file names, if we need to bloat things
     IF (iSetBloat > 0) THEN
-      DO iG = 1,80
+      DO iG = 1,160
         caOutBloatFile(iG:iG)  = ' '
         caPlanckBloatFile(iG:iG) = ' '
       END DO
@@ -769,7 +769,7 @@ CONTAINS
     END IF
 
     IF ((iSetBloat > 0) .AND. (iDoUpperAtmNLTE > 0)) THEN
-      DO iG = 1,80
+      DO iG = 1,160
         caOutUABloatFile(iG:iG)  = ' '
         ! caUAPlanckBloatFile(iG:iG)  = ' '
       END DO
@@ -792,7 +792,7 @@ CONTAINS
 ! and/or optical depths
 ! right now the code only dumps out rads
     IF (iDoUpperAtmNLTE > 0) THEN
-      DO iG = 1,80
+      DO iG = 1,160
         caPlanckUAFile(iG:iG)  = ' '
         caOutUAFile(iG:iG) = ' '
       END DO
@@ -856,28 +856,28 @@ CONTAINS
     REAL :: raNLTEstrength(kGasStore)
     INTEGER :: iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore)
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! raNLTEstart   tells the height at which to start NONLTE
 ! caaaNLTEBands tells the name of the files containing the line parameters
 ! caaaNONLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore)
     REAL :: raNLTEstart(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caOutName
 ! the solar angle
     REAL :: raKSolarAngle(kMaxAtm)
 ! tells the name of the GENLN2 ip file that has mixing ratios!
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
 ! this is pressure levels info
     REAL :: raPressLevels(kProfLayer+1),raLayerHeight(kProfLayer)
     INTEGER :: iProfileLayers
 
 ! output variable : converts NLTE start heights to AIRS layers
     INTEGER :: iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
-    CHARACTER(80) :: caPlanckUAfile,caOutUAfile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
+    CHARACTER(160) :: caPlanckUAfile,caOutUAfile
 
 ! local variables
     CHARACTER(7) :: caWord
@@ -892,10 +892,10 @@ CONTAINS
     DOUBLE PRECISION :: daPshift(kHITRAN),daStren296(kHITRAN),daW_for(kHITRAN)
     DOUBLE PRECISION :: daW_self(kHITRAN),daW_temp(kHITRAN)
 
-    CHARACTER(80) :: caNONLTETempKC
+    CHARACTER(160) :: caNONLTETempKC
     INTEGER :: iRegr,iMethod,iDefault
     REAL :: raTemp(kProfLayer)
-    CHARACTER(80) :: caaaNLTEBandsOrig(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNLTEBandsOrig(kGasStore,kNumkCompT)
 
     CALL NLTEBandMapper(iNumNLTEGases,iaNLTEGasID,iaNLTEBands,caaaNLTEBands)
 
@@ -1002,7 +1002,7 @@ CONTAINS
 ! and/or optical depths
 ! right now the code only dumps out rads
     IF (iDoUpperAtmNLTE > 0) THEN
-      DO iG = 1,80
+      DO iG = 1,160
         caPlanckUAFile(iG:iG)  = ' '
         caOutUAFile(iG:iG) = ' '
       END DO
@@ -1041,7 +1041,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
     INTEGER :: iLTEIn
 ! this is pressure levels info
     REAL :: raPressLevels(kProfLayer+1),raLayerHeight(kProfLayer)
@@ -1057,7 +1057,7 @@ CONTAINS
 ! local variables
     INTEGER :: iL,iG,raTemp(kProfLayer),iLp1,iLp2
     REAL :: rL0,rLp1,rLp2,rDeltaThreshold
-    CHARACTER(80) :: caFname                !!! file to read
+    CHARACTER(160) :: caFname                !!! file to read
     DOUBLE PRECISION :: daJL(kHITRAN),daJU(kHITRAN) !!! quantum numbers
     INTEGER :: iaJ_UorL(kHITRAN)           !!! matched upper or lower quant nos
     INTEGER :: iGasID, iISO                !!! what to read
@@ -1244,7 +1244,7 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: caFname                !!! file to read
+    CHARACTER(160) :: caFname                !!! file to read
     DOUBLE PRECISION :: daJL(kHITRAN),daJU(kHITRAN) !!! quantum numbers
     INTEGER :: iaJ_UorL(kHITRAN)           !!! matched upper or lower quant nos
     INTEGER :: iGasID, iISO                !!! what to read
@@ -1263,7 +1263,7 @@ CONTAINS
                       raY2P2(kNLTEProfLayer),raWorkP2(kNLTEProfLayer)    
 
     caFName = 'xnlte_1_1_1_6_sol_0.genln2'
-    CALL concatCA80(caAuxNLTERefsPath,caFName)
+    CALL concatCA160(caAuxNLTERefsPath,caFName)
     write(kStdWarn,'(A,A)') 'in GetUSSTD_2350, reading in ',caFName
 
     iStrongGasID = 2
@@ -1322,11 +1322,11 @@ CONTAINS
 ! iaNLTEBands   tells for each gas, how many are the NLTE bands bad boys
     INTEGER :: iaNLTEBands(kGasStore)
 ! input/output vars
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
 
 ! local vars
     INTEGER :: iI,iJ,iK,iGasID,iISO,iLSGQ,iUSGQ,iUMBC_LBL
-    CHARACTER(80) :: caaaNLTEBandsOrig(kGasStore,kNumkCompT),caX,caY
+    CHARACTER(160) :: caaaNLTEBandsOrig(kGasStore,kNumkCompT),caX,caY
     CHARACTER(4) :: ca4
     INTEGER :: iaBandID(kNumkCompT),iCount,iCountX,iFound
 
@@ -1413,13 +1413,13 @@ CONTAINS
         ! file name caY are of the form 'blah2350.dat'
          write(ca4,40) iUMBC_LBL
  40      FORMAT(I4)
-         DO iK = 1,80
+         DO iK = 1,160
            caY(iK:iK) = ' '
          END DO
          caY(1:4) = ca4
          caY(5:8) = '.dat'
 
-         CALL ConcatCA80(caStrongLineParams,caY)
+         CALL ConcatCA160(caStrongLineParams,caY)
          caaaNLTEBands(iI,iJ) = caY
          write(kStdWarn,'(2(I3,1X),A,4(I5,1X))') iI,iJ,'-> NLTE : iISO,iLSGQ,iUSGQ,UMBC-LBL iD: ',iISO,iLSGQ,iUSGQ,iUMBC_LBL
 

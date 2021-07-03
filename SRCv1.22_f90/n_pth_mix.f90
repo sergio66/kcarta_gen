@@ -19,6 +19,40 @@ CONTAINS
 ! also, the REFERENCE profile reading subroutine is here
 
 !************************************************************************
+
+logical function xisnan2(a)
+real :: a
+if (a.ne.a) then
+  xisnan2 = .true.
+else
+  xisnan2 = .false.
+end if
+return
+end
+
+logical function xisinf2(a)
+real :: a
+
+if ((a*0).ne.0) then
+  xisinf2 = .true.
+else
+  xisinf2 = .false.
+end if
+return
+end
+
+logical function xisfinite2(a)
+real :: a
+
+if (xisinf2(a) .OR. xisnan2(a)) then
+  xisfinite2 = .false.
+else
+  xisfinite2 = .true.
+end if
+return
+end
+
+!************************************************************************
 ! this subroutine computes the temperatures at the pressure levels
 ! since Antartic surface pressures can be as low as 500 mb, CO2.N2O,CO mixing ratios were failing if iBot=20
 ! this corresponds to raPresslevls(20) = 596 mb
@@ -1219,7 +1253,7 @@ CONTAINS
 ! READ (caStr,*) iMfil,iIDgas,iISO,rAmt,rT,rTU,rTL,rP,rPT,rPB,rPP,rV
     REAL :: rTU,rTL,rPT,rPB,rV  !!upper,lower level temp and pressure, velocity
     INTEGER :: iMFil,iISO,iInFile,iPathOffset
-    CHARACTER(80) :: caLine
+    CHARACTER(160) :: caLine
     CHARACTER(6) :: ex,path
     CHARACTER(9) :: heights,gas,gas2,gas3
     CHARACTER(4) :: star,star2,km,mb
@@ -2598,39 +2632,6 @@ CONTAINS
     end SUBROUTINE getAFGL
 
 !************************************************************************
-logical function xisnan2(a)
-real :: a
-if (a.ne.a) then
-  xisnan2 = .true.
-else
-  xisnan2 = .false.
-end if
-return
-end
-
-logical function xisinf2(a)
-real :: a
-
-if ((a*0).ne.0) then
-  xisinf2 = .true.
-else
-  xisinf2 = .false.
-end if
-return
-end
-
-logical function xisfinite2(a)
-real :: a
-
-if (xisinf2(a) .OR. xisnan2(a)) then
-  xisfinite2 = .false.
-else
-  xisfinite2 = .true.
-end if
-return
-end
-
-!************************************************************************
 ! this subroutine adds on US STandard Profile gas amounts for those gases NOT
 ! in the RTP profile (using h.ptype = 2 or even 1)
 
@@ -2830,7 +2831,7 @@ end
 
 ! local vars
     INTEGER :: i1,i2,iLenX,iLen,iLay,iX, iioun, ierr  ! added ESM iioun, ierr
-    CHARACTER(80) :: caFname0,caFname,cnameX
+    CHARACTER(160) :: caFname0,caFname,cnameX
     CHARACTER c1,c2
     CHARACTER(2) :: c12
     CHARACTER(100) :: caLine
@@ -2879,7 +2880,7 @@ end
       c2 = CHAR(i2+48)
       c12 = c2//c1
     END IF
-    DO i1 = 1,80
+    DO i1 = 1,160
       caFname(i1:i1) = ' '
     END DO
     DO i1 = 1,iLen

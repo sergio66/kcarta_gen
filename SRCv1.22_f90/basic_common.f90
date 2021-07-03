@@ -295,16 +295,16 @@ CONTAINS
 
     INTEGER :: iI,iFound
     CHARACTER     caMessage*(*)
-    CHARACTER(120) :: caMessage2
+    CHARACTER(160) :: caMessage2
 
-    DO iI = 1,80
+    DO iI = 1,160
         caMessage2(iI:iI) = ' '
     END DO
 
-    iI = 80
+    iI = 160
     iI = len(caMessage)
-    IF (iI > 120) THEN
-        write(kStdErr,*) 'lengthh of error message is over 120 characters!'
+    IF (iI > 160) THEN
+        write(kStdErr,*) 'length of error message is over 160 characters!'
         write(kStdErr,*) caMessage
         CALL DoStop
     END IF
@@ -535,7 +535,7 @@ CONTAINS
 ! iNlay     = number of layers that are read in
 ! raProA/T/P/PP = profile amout, temperature,pressure,partial pressure
 ! iErrOut   = error count (usually associated with file I/O)
-    CHARACTER(80) :: caFname
+    CHARACTER(160) :: caFname
     INTEGER :: iNlayIn,iErrOut
     REAL :: raProA(*),raProT(*)
     REAL :: raProP(*),raProPP(*)

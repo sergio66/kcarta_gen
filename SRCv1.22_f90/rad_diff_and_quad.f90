@@ -906,7 +906,7 @@ CONTAINS
 
     INTEGER :: iDiffmethod,iDefault
     REAL :: rf1,rf2
-    CHARACTER*80 FMT
+    CHARACTER(160) FMT
     
 !! bugfix 11/08/2010
     IF (kThermalAngle < 0) THEN

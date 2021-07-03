@@ -116,7 +116,7 @@
     INTEGER :: iakThermal(kMaxAtm),iaSetThermalAngle(kMaxAtm)
     INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -138,7 +138,7 @@
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
 ! this tells if there is phase info associated with the cloud; else use HG
@@ -156,7 +156,7 @@
 ! iNewIn         is just a variable that tells us if new gas to be used
     INTEGER :: iaNewGasID(kGasStore),iaNewData(kGasStore)
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT),iNewIn
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
 ! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
 ! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
@@ -164,7 +164,7 @@
 ! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
 !                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
-    CHARACTER(120) :: caaAltComprDirs(kGasStore)
+    CHARACTER(160) :: caaAltComprDirs(kGasStore)
     REAL ::          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! this is for nonLTE
@@ -183,8 +183,8 @@
 ! iSetBloat        tells us if we need to "bloat" up the resolution, and what
 !                  files to store things to
 ! the daaXBloat are matrices, at high resolution, done if iSetBloat > 0
-    CHARACTER(80) :: caPlanckUAfile,caOutUAfile
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
+    CHARACTER(160) :: caPlanckUAfile,caOutUAfile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
     REAL ::  raaRestOfLTEGases(kMaxPts,kProfLayer)
     REAL ::  raaCO2_LTE(kMaxPts,kProfLayer)
     DOUBLE PRECISION :: daaSumNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
@@ -199,7 +199,7 @@
     DOUBLE PRECISION :: daaSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
     INTEGER :: iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore)
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT),iLTEIn
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
 ! iaNLTEBands       tells for each gas, how many are the NON LTE bands bad boys
 ! iaNLTEStart     tells for each gas, lowest layer in NONLTE for minor bands
 ! iaNLTEStart2350 for each gas, lowest layer in NONLTE for strongest band
@@ -207,11 +207,11 @@
 ! caaNLTETemp   tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore)
     INTEGER :: iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
 ! if we do NLTE above the kCARTA database (p < 0.005 mb), we need the mixing
 ! ratio profiles from GENLN2
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
 ! tells the nonscattering code, at which layer to start NONLTE rad transfer
     INTEGER :: iNLTEStart
 ! are we playing with funny COUSIN stuff???????
@@ -260,30 +260,30 @@
     REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
 
 ! caDriverName is the name of the driver file to be processed
-    CHARACTER(80) :: caDriverName
+    CHARACTER(160) :: caDriverName
 ! caOutName is the name of the unformatted output file name
 ! integer iOutFileName tells whether or not there is a driver name, or
 ! dump output to Unit 6
     INTEGER :: iOutFileName
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! caJacobFile  is the name of the unformatted output file name for Jacobians
 ! caJacobFile2 is the name of the unformatted output file name for colJacobians
-    CHARACTER(80) :: caJacobFile,caJacobFile2
+    CHARACTER(160) :: caJacobFile,caJacobFile2
 ! caFluxFile is the name of the unformatted output file name for fluxes
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! caPlanckFile is the name of the unformatted output file name for planckes
-    CHARACTER(80) :: caPlanckFile
+    CHARACTER(160) :: caPlanckFile
 ! this is used when calling DISORT
     INTEGER :: iDoFlux
 
 ! iaOutNumbers is how many paths,MP, radiances to output
     INTEGER :: iaOutNumbers(kMaxPrint)
 ! caComment is the comment the user puts into *OUTPUT
-    CHARACTER(120) :: caComment
+    CHARACTER(160) :: caComment
 
 ! the rest of the variables have to do with reading in the reference profile
 ! and the vertical temperature profile
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
 ! this sets the vertical temp profile, to be checked for all gases
     REAL :: raVertTemp(kProfLayer)
     INTEGER :: iVertTempSet

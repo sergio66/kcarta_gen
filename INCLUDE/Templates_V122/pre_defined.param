@@ -7,7 +7,7 @@ c************* PRE DEFINED PARAMETERS!! DO NOT TOUCH!! ******************
 c************************************************************************
 c this sets the version number
 c note that the first four characters HAVE to be vx.xx for readers to work
-      CHARACTER*80 caVersion
+      CHARACTER(160) caVersion
       !!!!info : caVersion='vX.XX YY-MM-DD COMMENT')
       !!!PARAMETER (caVersion='v1.10 02-01-30 updates')
       !!!PARAMETER (caVersion='v1.11 02-10-06 updates')
@@ -20,7 +20,7 @@ c note that the first four characters HAVE to be vx.xx for readers to work
 c this sets the name of the file to which warnings/happy messages are logged to
 c this file is set by default to 'warning.msg' in n_main.f; however the user
 c can reset the name in the *OUTPUT section, as this would be a new parameter
-      CHARACTER*80 kWarnFile
+      CHARACTER(160) kWarnFile
       COMMON/ComWarnLog/kWarnFile
 
 c************************************************************************
@@ -305,7 +305,7 @@ cxx not done  COLUMN JACS iaaDefaults(4,:) = iColJac iLogOrLinear
 cxx not done  TAPE5/6     iaaDefaults(4,:) = iReplaceZeroProf iCONTN iAIRS101_or_LBL_levels IPLEV iAddLBLRTM
 c   caaOverrideDefault : can have a secreret text file floating around
       INTEGER iaaOverrideDefault(4,10)
-      CHARACTER*80 caaTextOverrideDefault
+      CHARACTER(160) caaTextOverrideDefault
       COMMON/comBlockDefault/iaaOverrideDefault,caaTextOverrideDefault
 
 c************************************************************************

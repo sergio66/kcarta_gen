@@ -272,7 +272,7 @@ CONTAINS
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     REAL :: raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)
@@ -452,7 +452,7 @@ CONTAINS
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     REAL :: raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)
@@ -646,7 +646,7 @@ CONTAINS
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     REAL :: raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)
@@ -851,7 +851,7 @@ CONTAINS
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iE
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)
@@ -1469,7 +1469,7 @@ CONTAINS
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     REAL :: raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)
@@ -1634,7 +1634,7 @@ CONTAINS
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iE
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)

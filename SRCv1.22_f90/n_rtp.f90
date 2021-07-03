@@ -159,7 +159,7 @@ CONTAINS
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
     INTEGER :: iaCtype(kMaxClouds),iNclouds_RTP,iaNML_Ctype(kMaxClouds)
-    CHARACTER(80) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
     INTEGER :: iaMPSetForRad(kMaxAtm),iMPSetForRadRTP
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -291,7 +291,7 @@ CONTAINS
     INTEGER :: iNumLinesRead,iaDispGasID(12),iCount
     INTEGER :: iGenln4,iL,iLBLDIS
     REAL :: rP,rPP
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     CHARACTER(160) :: caStr160
 
     iKnowTP = -1
@@ -593,7 +593,7 @@ CONTAINS
     INTEGER :: iaPhase(kMaxClouds)
     INTEGER :: iNatm
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -1174,7 +1174,7 @@ CONTAINS
     INTEGER :: iaPhase(kMaxClouds)
     REAL :: cfrac1,cfrac2
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     INTEGER :: iaCtype(kMaxClouds)
@@ -1830,7 +1830,7 @@ CONTAINS
     INTEGER :: iNclouds_RTP     !!!tells how many clouds
     INTEGER :: iaNML_Ctype(kMaxClouds)
 
-    CHARACTER(80) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
     INTEGER :: iaMPSetForRad(kMaxAtm)
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)

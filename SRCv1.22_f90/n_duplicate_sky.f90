@@ -63,7 +63,7 @@ CONTAINS
     INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
     REAL :: rakSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
-    CHARACTER(80) :: caEmissivity(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm)
 ! rakSolarAngle = solar angles for the atmospheres
 ! rakThermalAngle=thermal diffusive angle
 ! iakthermal,iaksolar = turn on/off solar and thermal
@@ -266,7 +266,7 @@ CONTAINS
     INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
     REAL :: rakSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
-    CHARACTER(80) :: caEmissivity(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm)
 ! rakSolarAngle = solar angles for the atmospheres
 ! rakThermalAngle=thermal diffusive angle
 ! iakthermal,iaksolar = turn on/off solar and thermal
@@ -497,7 +497,7 @@ CONTAINS
     INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
     REAL :: rakSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
-    CHARACTER(80) :: caEmissivity(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm)
 ! rakSolarAngle = solar angles for the atmospheres
 ! rakThermalAngle=thermal diffusive angle
 ! iakthermal,iaksolar = turn on/off solar and thermal

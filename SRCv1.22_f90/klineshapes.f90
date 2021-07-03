@@ -706,7 +706,7 @@ CONTAINS
     REAL :: raRPartPress(kProfLayer),raRPress(kProfLayer)
 
 ! local
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iI,iLowerOrUpper,iError
     REAL :: raDummyThickness(kProfLayer)
 
@@ -757,10 +757,10 @@ CONTAINS
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! caaaNLTEBands tells the name of the files containing the line parameters
 ! iLTEin    tells which set of data to use
-    CHARACTER(80) :: caStrong
+    CHARACTER(160) :: caStrong
     DOUBLE PRECISION :: dLineStrenMin
     INTEGER :: iaNLTEBands(kGasStore),iLTEin
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
 ! output params
     INTEGER :: iGasID,iNum
     DOUBLE PRECISION :: daElower(kHITRAN),daLineCenter(kHITRAN),daISO(kHITRAN)
@@ -784,10 +784,10 @@ CONTAINS
 
     INTEGER :: iI,iJ,iK,iErr,iIOUN,iNum0,iBands,iLoop,iCumLineSum,iISO
     INTEGER :: iFound,iRead
-    CHARACTER(80) :: caFname,caTemp
-    CHARACTER(80) :: caaCheckNamesIn(kGasStore)
-    CHARACTER(80) :: caaCheckNamesMatch(kGasStore)
-    CHARACTER(80) :: caaCheckNamesUse(kGasStore)
+    CHARACTER(160) :: caFname,caTemp
+    CHARACTER(160) :: caaCheckNamesIn(kGasStore)
+    CHARACTER(160) :: caaCheckNamesMatch(kGasStore)
+    CHARACTER(160) :: caaCheckNamesUse(kGasStore)
     DOUBLE PRECISION :: dLmin,dLmax
     INTEGER :: iaBin(10)   !!!to bin the linestrengths
     INTEGER :: iaOk(kHITRAN),iStrongLTEFound,iStrongNLTEFound

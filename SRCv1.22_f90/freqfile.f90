@@ -34,7 +34,7 @@ CONTAINS
 ! local variables
     INTEGER :: iIOUN,iFileErr,iID,iTag
     INTEGER :: iLine,iNpts,iTemps
-    CHARACTER(80) :: caLine,caFName
+    CHARACTER(160) :: caLine,caFName
     REAL :: rLower,rHigher
 
 ! assume GASID , freqs are wrong
@@ -134,7 +134,7 @@ CONTAINS
 ! local variables
     INTEGER :: iIOUN,iFileErr,iID,iTag
     REAL :: rLower,rHigher
-    CHARACTER(80) :: caLine,caFname
+    CHARACTER(160) :: caLine,caFname
 
 ! assume GASID , freqs are wrong
     iCheckCompDataBase = -1

@@ -30,7 +30,7 @@ CONTAINS
     REAL :: raP2(kMaxLayer),raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
 
 ! local params
-    CHARACTER(80) :: caRefgas2Name
+    CHARACTER(160) :: caRefgas2Name
     INTEGER :: iIOUN,iI,iFileErr,iJ
     REAL :: rX,rY
 
@@ -223,7 +223,7 @@ CONTAINS
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     REAL :: raP2(kMaxLayer),raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)
@@ -777,7 +777,7 @@ CONTAINS
     REAL :: raRPPressX(kMaxLayer)
 
 ! local
-    CHARACTER(80) :: caFname,caStr
+    CHARACTER(160) :: caFname,caStr
     INTEGER :: iIOUN,iI,iErr,iX
     REAL :: r1,r2,r3,r4
 

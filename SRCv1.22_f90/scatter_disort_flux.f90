@@ -74,7 +74,7 @@
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iTag
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -272,7 +272,7 @@
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iDownWard,iBinaryFile
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -326,7 +326,7 @@
     REAL ::    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
     REAL ::  ABSNU1, ABSNU2, ABSDELNU
     REAL ::  WAVENO
-    CHARACTER(80) :: SCATFILE(MAXSCAT)
+    CHARACTER(160) :: SCATFILE(MAXSCAT)
     CHARACTER(1) ::   RTMODEL
     CHARACTER(1) :: caScale(MAXSCAT)
 !      CHARACTER*24  OUTUNITS, OUTAVERAGING
@@ -337,7 +337,7 @@
     INTEGER :: IACLDTOP(kMaxClouds), IACLDBOT(kMaxClouds)
 
     INTEGER :: iaTable(kMaxClouds*kCloudLayers)
-    CHARACTER(80) :: caName
+    CHARACTER(160) :: caName
     INTEGER :: iIn,iJ,iI,iCloud,iScat,iIOUN,iFr,iL
     REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
     INTEGER :: iBdry,iaRadLayer(kProfLayer)

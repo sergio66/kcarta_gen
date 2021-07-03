@@ -60,7 +60,7 @@ CONTAINS
 ! input vars
     INTEGER :: iaNewGasID(kGasStore),iaNewData(kGasStore)
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     CHARACTER(120) :: caaAltComprDirs(kGasStore)
     INTEGER :: iGas,iaGases(kMaxGas)
@@ -230,7 +230,7 @@ CONTAINS
     REAL :: raVTemp(kProfLayer),raFreq(kMaxPts)
     INTEGER :: iCount,iGasID,iL,iU,iErr,iRefLayer
     INTEGER :: iActualTag,iDoDQ,iSplineType
-    CHARACTER(80) :: caXsecF
+    CHARACTER(160) :: caXsecF
     REAL :: raRAmt(kProfLayer),raRTemp(kProfLayer),kFrStep,rFileStartFr
     REAL :: raRPartPress(kProfLayer),raRPress(kProfLayer)
     DOUBLE PRECISION :: daaTemp(kMaxPts,kProfLayer)
@@ -368,7 +368,7 @@ CONTAINS
     REAL :: raVTemp(kProfLayer),raFreq(kMaxPts)
     INTEGER :: iCount,iGasID,iL,iU,iErr,iRefLayer
     INTEGER :: iActualTag,iDoDQ,iSplineType
-    CHARACTER(80) :: caXsecF
+    CHARACTER(160) :: caXsecF
     REAL :: raRAmt(kProfLayer),raRTemp(kProfLayer),kFrStep,rFileStartFr
     REAL :: raRPartPress(kProfLayer),raRPress(kProfLayer)
     DOUBLE PRECISION :: daaTemp(kMaxPts,kProfLayer)
@@ -397,7 +397,7 @@ CONTAINS
 
     iErr = -1
 
-    DO iI = 1,80
+    DO iI = 1,160
       kcaAltComprDirs(iI:iI) = ' '
     END DO
     kcaAltComprDirs = caaAltComprDirs(iNewIN)
@@ -767,7 +767,7 @@ CONTAINS
 ! iGasID is the GasID
     INTEGER :: iWhichChunk,iGasID,iNewIn
     DOUBLE PRECISION :: daaGasAbCoeff(kMaxPts,kProfLayer)
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
     REAL :: df,sf
 ! iRefLayer = number of layers in the reference profiles (=kProfLayer)
 ! iL,iU     = min/max layer number for each gas profile (=1,kProfLayer)
@@ -790,7 +790,7 @@ CONTAINS
     INTEGER :: iIoun,I,J
     INTEGER :: IDGAS, NPTS, NLAY
     DOUBLE PRECISION :: SFREQ, FSTEP
-    CHARACTER(80) :: FNAM
+    CHARACTER(160) :: FNAM
 
     FNAM=caaaNewChunks(iNewIn,iWhichChunk)
 
@@ -1260,7 +1260,7 @@ CONTAINS
     INTEGER :: iFr,iLay,iIOUN,iERR,iMin,iMax,iNpts
     REAL :: raF(kMaxPts),raChi(kMaxPts),raChi2(kMaxPts)
     REAL :: rF,fixed,water,watercon,o3,co,ch4,nte
-    CHARACTER(80) :: Fname,caStr
+    CHARACTER(160) :: Fname,caStr
     REAL :: raFX(kMaxPts),raChiX(kMaxPts)
 
     REAL :: raBeginBand(100),raEndBand(100)
@@ -1484,7 +1484,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts)
     REAL :: raF(kMaxPts),raChi(kMaxPts),raChi2(kMaxPts)
     REAL :: rF,fixed,water,watercon,o3,co,ch4,co2
-    CHARACTER(80) :: Fname,caStr
+    CHARACTER(160) :: Fname,caStr
 
     iChi = -1
     IF (rFileStartFR >= 1380.0 .AND. rFileStartFR <= 1680.0) THEN

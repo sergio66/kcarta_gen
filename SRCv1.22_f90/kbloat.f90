@@ -587,7 +587,7 @@ CONTAINS
     INTEGER :: iIoun,I,J,iErr, iL, iFr
     INTEGER :: IDGAS, NPTS, NLAY
     DOUBLE PRECISION :: SFREQ, FSTEP
-    CHARACTER(80) :: FNAM
+    CHARACTER(160) :: FNAM
     CHARACTER(4) :: ca4
     DOUBLEPRECISION df,sf,dK
     INTEGER :: iDefault
@@ -686,7 +686,7 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: caBloatFile
+    CHARACTER(160) :: caBloatFile
     REAL :: rFrLow,rFrHigh
     INTEGER :: iFileIDLo,iFileIDHi,iTag,iTotalStuff
 
@@ -836,13 +836,13 @@ CONTAINS
     DOUBLE PRECISION :: daaPlanckCoeffBloat(kBloatPts,kProfLayer)
     INTEGER :: iPrinter,iFileID,iType
     INTEGER :: iNp,iaOp(kPathsOut),iaPath(kProfLayer)
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile
 
 ! local variables
     INTEGER :: iIntOffset,iStart
     INTEGER :: iInt,iDp,iPath,iLay,iIOUN,iLoop,iL
     REAL :: raL2S(kMaxPts),raF(kMaxPts)
-    CHARACTER(80) :: caOut
+    CHARACTER(160) :: caOut
 
     IF (iType > 0) THEN
         iIOUN = kBloatNLTEOut
@@ -960,14 +960,14 @@ CONTAINS
     DOUBLE PRECISION :: daaPlanckCoeffBloat(kBloatPts,kProfLayer)
     INTEGER :: iPrinter,iFileID,iType
     INTEGER :: iNp,iaOp(kPathsOut),iaPath(kProfLayer)
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile
     INTEGER :: iAtm,iNumLayers,iaaRadLayer(kMaxAtm,kProfLayer)
 
 ! local variables
     INTEGER :: iIntOffset,iaRadLayer(kProfLayer)
     INTEGER :: iInt,iDp,iPath,iLay,iIOUN,iLoop,iL
     REAL :: raL2S(kMaxPts),raF(kMaxPts)
-    CHARACTER(80) :: caOut
+    CHARACTER(160) :: caOut
 
     IF (iType > 0) THEN
         write(kStdErr,*) 'Should be calling out_bloat'

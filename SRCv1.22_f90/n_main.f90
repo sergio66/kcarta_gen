@@ -14,6 +14,7 @@
 
 MODULE n_main
 
+use ieee_arithmetic
 USE basic_common
 USE s_misc
 USE s_writefile
@@ -82,16 +83,16 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the driver file name
-    CHARACTER(80) :: caDriverName
+    CHARACTER(160) :: caDriverName
 
 ! this is for overriding the defaults
 ! this is for nm_PARAMS
 ! note kLayer2Sp,kCKD,kGasTempkLongOrShort,kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,kThermalAngle
 ! are all defined in the param files, but they can be re-set inside nm_PARAMS
     INTEGER :: iaaOverride(4,10),iaaOverrideOrig(4,10)
-    CHARACTER(80) :: caNMLReset_param_spectra,caNMLReset_param_spectra1
+    CHARACTER(160) :: caNMLReset_param_spectra,caNMLReset_param_spectra1
 ! this is a dummy, but could in useful eg when giving the 100 layer cloud fracs for scattering
-    CHARACTER(80) :: caaTextOverride,caaTextOverride1
+    CHARACTER(160) :: caaTextOverride,caaTextOverride1
 
 ! this is for nm_MOLGAS
     INTEGER :: iNGas,iaGasesNL(kGasComp)
@@ -147,11 +148,11 @@ CONTAINS
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
     REAL :: raPressStart1(kMaxAtm),raPressStop1(kMaxAtm)
     REAL :: raTSurf(kMaxAtm),raTSpace(kMaxAtm), &
-    raTSurf1(kMaxAtm),raTSpace1(kMaxAtm)
+            raTSurf1(kMaxAtm),raTSpace1(kMaxAtm)
     REAL :: raSatAngle(kMaxAtm),raSatHeight(kMaxAtm), &
-    raSatAngle1(kMaxAtm),raSatHeight1(kMaxAtm)
-    CHARACTER(80) :: caEmissivity(kMaxAtm),caEmissivity1(kMaxAtm)
-    CHARACTER(80) :: cakSolarRefl(kMaxAtm),cakSolarRefl1(kMaxAtm)
+            raSatAngle1(kMaxAtm),raSatHeight1(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm),caEmissivity1(kMaxAtm)
+    CHARACTER(160) :: cakSolarRefl(kMaxAtm),cakSolarRefl1(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm),raSetEmissivity1(kMaxAtm)
     REAL :: rakSolarRefl(kMaxAtm),rakSolarRefl1(kMaxAtm)
     REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
@@ -164,7 +165,7 @@ CONTAINS
     INTEGER :: iakSolar1(kMaxAtm),iakThermalJacob1(kMaxAtm)
     INTEGER :: iMPSetForRadRTP1,iMPSetForRadRTP   !!these are used if kRTP = 1
 ! assuming purely absorptive scattering
-    CHARACTER(80) :: caaScatter1(kMaxAtm),caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter1(kMaxAtm),caaScatter(kMaxAtm)
     REAL :: raaScatterPressure1(kMaxAtm,2),raaScatterPressure(kMaxAtm,2)
     REAL :: raScatterDME1(kMaxAtm),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP1(kMaxAtm),raScatterIWP(kMaxAtm)
@@ -187,8 +188,8 @@ CONTAINS
     INTEGER :: iaGPMPAtm(kMaxPrint),iaGPMPAtm1(kMaxPrint)
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint)
     INTEGER :: iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint)
-    CHARACTER(120) :: caComment,caComment1
-    CHARACTER(80) :: caLogFile,caLogFile1
+    CHARACTER(160) :: caComment,caComment1
+    CHARACTER(160) :: caLogFile,caLogFile1
     REAL :: raaOp(kMaxPrint,kPathsOut),raaOp1(kMaxPrint,kPathsOut)
 
 ! this is for nm_JACOBN
@@ -216,7 +217,7 @@ CONTAINS
     INTEGER :: ibinorasc, ibinorasc1,iNClouds_RTP,iNClouds_RTP1
 ! this associate the RTP cloud code to the caaCloudFile
     INTEGER :: iaNML_Ctype(kMaxClouds),iaNML_Ctype1(kMaxClouds)
-    CHARACTER(120) :: caaCloudFile(kMaxClouds),caaCloudFile1(kMaxClouds)
+    CHARACTER(160) :: caaCloudFile(kMaxClouds),caaCloudFile1(kMaxClouds)
 ! raaCloudFrac(:,1) = cfrac1, raaCloudFrac(:,2) = cfrac2, raaCloudFrac(:,3) = cfrac12
     REAL ::    raaCloudFrac(kMaxClouds,3),raaCloudFrac1(kMaxClouds,3)
 
@@ -226,10 +227,10 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     INTEGER :: iaaScatTable1(kMaxClouds,kCloudLayers)
     INTEGER :: iaCloudScatType(kMaxClouds),iaCloudScatType1(kMaxClouds)
-    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaaScatTable1(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaCloudName(kMaxClouds)
-    CHARACTER(120) :: caaCloudName1(kMaxClouds)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaaScatTable1(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaCloudName(kMaxClouds)
+    CHARACTER(160) :: caaCloudName1(kMaxClouds)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
     REAL :: raaaCloudParams1(kMaxClouds,kCloudLayers,2)
@@ -250,8 +251,8 @@ CONTAINS
     INTEGER :: iaNewGasID1(kGasStore),iaNewData1(kGasStore)
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
     INTEGER :: iNumNewGases1,iaaNewChunks1(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks1(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks1(kGasStore,kNumkCompT)
 ! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
 ! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
@@ -261,8 +262,8 @@ CONTAINS
     REAL :: raAltComprDirsScale(kGasStore),raAltComprDirsScale1(kGasStore)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     INTEGER :: iaAltComprDirs1(kGasStore),iNumAltComprDirs1
-    CHARACTER(120) :: caaAltComprDirs(kGasStore)
-    CHARACTER(120) :: caaAltComprDirs1(kGasStore)
+    CHARACTER(160) :: caaAltComprDirs(kGasStore)
+    CHARACTER(160) :: caaAltComprDirs1(kGasStore)
     REAL :: rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
 
 ! this is for nm_NONLTE
@@ -285,8 +286,8 @@ CONTAINS
     INTEGER :: iaNLTEGasID1(kGasStore),iaNLTEChunks1(kGasStore)
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
     INTEGER :: iNumNLTEGases1,iaaNLTEChunks1(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
-    CHARACTER(80) :: caaStrongLines1(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines1(kGasStore)
     REAL ::    raNLTEstrength(kGasStore),raNLTEstrength1(kGasStore)
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! raNLTEstart   tells for each gas, which is start height of NONLTE
@@ -294,13 +295,13 @@ CONTAINS
 ! caaNLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore),iaNLTEBands1(kGasStore)
     REAL :: raNLTEstart(kGasStore),raNLTEstart1(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNLTEBands1(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caaNLTETemp1(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNLTEBands1(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaNLTETemp1(kGasStore)
 ! this is the gas amount/LTE profile that Dave Edwards uses for GENLN2
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
-    CHARACTER(80) :: caaUpperMixRatio1(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio1(kGasStore)
 
 ! define the namelists!!!!!!!!
 
@@ -479,7 +480,7 @@ CONTAINS
     iNpMix = -1
      
 ! *************** read input name list file *********************************
- 1070 FORMAT('ERROR! number ',I5,' opening namelist file:',/,A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening namelist file:',/,A160)
     write (kStdWarn,*) 'Reading in the Namelists ............. '
     iIOun = kStdDriver
     IF (iIOUN /= 5) THEN
@@ -825,14 +826,14 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the driver file name
-    CHARACTER(80) :: caNMLReset_param_spectra
+    CHARACTER(160) :: caNMLReset_param_spectra
 
 ! this is for overriding the defaults
 ! this is for nm_PARAMS
 ! note kLayer2Sp,kCKD,kGasTempkLongOrShort,kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs,kThermalAngle
 ! are all defined in the param files, but they can be re-set inside nm_PARAMS
     INTEGER :: iaaOverride(4,10),iaaOverrideOrig(4,10)
-    CHARACTER(80) :: caaTextOverride,caaTextOverride1
+    CHARACTER(160) :: caaTextOverride,caaTextOverride1
     
 ! this is for new spectroscopy nm_SPECTR
 ! iNumNewGases   tells number of new gases
@@ -844,8 +845,8 @@ CONTAINS
     INTEGER :: iaNewGasID1(kGasStore),iaNewData1(kGasStore)
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
     INTEGER :: iNumNewGases1,iaaNewChunks1(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks1(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks1(kGasStore,kNumkCompT)
 ! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
 ! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
@@ -855,8 +856,8 @@ CONTAINS
     REAL :: raAltComprDirsScale(kGasStore),raAltComprDirsScale1(kGasStore)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
     INTEGER :: iaAltComprDirs1(kGasStore),iNumAltComprDirs1
-    CHARACTER(120) :: caaAltComprDirs(kGasStore)
-    CHARACTER(120) :: caaAltComprDirs1(kGasStore)
+    CHARACTER(160) :: caaAltComprDirs(kGasStore)
+    CHARACTER(160) :: caaAltComprDirs1(kGasStore)
     REAL :: rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
 
 ! define the namelists!!!!!!!!
@@ -876,10 +877,10 @@ CONTAINS
     NAMELIST /nm_endinp/namecomment
 
 ! *************** read input name list file *********************************
- 1070 FORMAT('ERROR! number ',I5,' opening reset namelist file:',/,A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening reset namelist file:',/,A160)
 
     write (kStdWarn,*) 'Re-Reading in nm_param,nm_spectra namelists ............. '
-    write (kStdWarn,'(A80)') caNMLReset_param_spectra
+    write (kStdWarn,'(A160)') caNMLReset_param_spectra
     iIOun = kStdDriver
     IF (iIOUN /= 5) THEN
       OPEN(UNIT=iIOun,FILE=caNMLReset_param_spectra,STATUS='OLD',IOSTAT=iErr)
@@ -1021,14 +1022,14 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! main output filename
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! iaGases       = integer array with list of gasID's in order they were read in
 ! iErr          = error count (mainly associated with file I/O)
 ! iNumGases     = total number of gases read in from *MOLGAS + *XSCGAS
 ! iaCont        = array indicating whther or not to do continuum/no continuum
     INTEGER :: iErr,iaCONT(kMaxGas)
 ! caFfileName   = name of input file
-    CHARACTER(80) :: caDriverName
+    CHARACTER(160) :: caDriverName
 ! this is for MOLGAS
     INTEGER :: iNGas,iaGasesNL(kGasComp)
 ! this is for xscfil
@@ -1105,8 +1106,8 @@ CONTAINS
     REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
     REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
     INTEGER :: iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
-    CHARACTER(80) :: caEmissivity(kMaxAtm)
-    CHARACTER(80) :: cakSolarRefl(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm)
+    CHARACTER(160) :: cakSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm),rakSolarRefl(kMaxAtm)
     INTEGER :: iaMPSetForRad(kMaxAtm)
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -1120,7 +1121,7 @@ CONTAINS
     INTEGER :: iNatm,iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
     INTEGER :: iSetRTPCld,iTemperVary
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 ! this is for looping over obne particular atmopheric parameter
@@ -1140,8 +1141,8 @@ CONTAINS
 ! iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
     INTEGER :: iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iNatm2
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
-    CHARACTER(120) :: caComment
-    CHARACTER(80) :: caLogFile
+    CHARACTER(160) :: caComment
+    CHARACTER(160) :: caLogFile
     REAL :: raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 ! this is for JACOBN
@@ -1164,8 +1165,8 @@ CONTAINS
 ! caaaScatTable associates a file name with each scattering table
 ! iaCloudScatType tells the (SARTA) cloud type, associated woth caaaScatTable
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaCloudScatType(kMaxClouds)
-    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaCloudName(kMaxClouds)
+    CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
+    CHARACTER(160) :: caaCloudName(kMaxClouds)
 ! raaaCloudParams stores IWP, cloud mean particle size
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
 ! raPCloudTop,raPCloudBot define cloud top and bottom pressures
@@ -1185,7 +1186,7 @@ CONTAINS
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
     INTEGER :: iaCtype(kMaxClouds),ibinorasc,iMPSetForRadRTP,iNclouds_RTP,iAFGLProf
-    CHARACTER(120) :: caaCloudFile(kMaxClouds)
+    CHARACTER(160) :: caaCloudFile(kMaxClouds)
 ! cloud profile info
     INTEGER :: iCldProfile,iaCldTypes(kMaxClouds)
     REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
@@ -1200,7 +1201,7 @@ CONTAINS
 ! caaaNewChunks  tells the name of the files associated with the chunks
     INTEGER :: iaNewGasID(kGasStore),iaNewData(kGasStore)
     INTEGER :: iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaaNewChunks(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNewChunks(kGasStore,kNumkCompT)
 ! iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 ! iaAltComprDirs      tells which gases we want to use alternate compressed files
 ! caaAltComprDirs     tells the name of the files associated with the alternate compressed files
@@ -1208,7 +1209,7 @@ CONTAINS
 ! raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
 !                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
     INTEGER :: iaAltComprDirs(kGasStore),iNumAltComprDirs
-    CHARACTER(120) :: caaAltComprDirs(kGasStore)
+    CHARACTER(160) :: caaAltComprDirs(kGasStore)
     REAL ::          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 ! this is for nonLTE
@@ -1224,23 +1225,23 @@ CONTAINS
 ! iUseWeakBackGnd tells the code if use weak background lines as well, or not
 ! iSetBloat tells whether or not to bloat up to 0.0005 cm-1 or not
     INTEGER :: iDoUpperAtmNLTE,iAllLayersLTE,iUseWeakBackGnd,iSetBloat
-    CHARACTER(80) :: caPlanckBloatFile,caOutBloatFile
+    CHARACTER(160) :: caPlanckBloatFile,caOutBloatFile
     REAL :: raNLTEstrength(kGasStore)
     INTEGER :: iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore),iNLTE_SlowORFast
     INTEGER :: iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
 ! iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 ! iaNLTEstart   tells the lowest layers that is in NONLTE
 ! caaaNLTEBands tells the name of the files containing the line parameters
 ! caaNLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iaNLTEBands(kGasStore)
     INTEGER :: iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
 ! if we do NLTE above the kCARTA database (p < 0.005 mb), we need the mixing
 ! ratio profiles from GENLN2, and mebbe files to dump things to
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
-    CHARACTER(80) :: caPlanckUAfile,caOutUAfile,caOutUABloatFile
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caPlanckUAfile,caOutUAfile,caOutUABloatFile
 
 ! local variables
     INTEGER :: iNewLBL,iInt,iNumLayers,iType,iLow,iHigh,iaDumb(kMaxGas)
@@ -1257,7 +1258,7 @@ CONTAINS
     INTEGER :: iResetCldFracs
 ! this is is we have 100 layer clouds
     INTEGER :: iIOUNX,iErrX,iMRO,iNumLaysX
-    CHARACTER(80) :: caJunk80
+    CHARACTER(160) :: caJunk80
     REAL :: rTCC,rCfracX1,rCfracX2,rCfracX12
           
     iResetCldFracs = -1   !! if need to do pclsam flux computation, then reset cldfracs to 1.0
@@ -1554,7 +1555,7 @@ CONTAINS
 ! cngwat  = 0.0
 !!!!! TEST to get rid of clouds !!!!! <<<<<<<<<<<<<<<< >>>>>>>>>>>>>>>>>>>
 
- 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A160)
     IF (k100layerCloud == +1) THEN
       write(kStdWarn,*) 'Found 100 layer cloud(s) in rtp profile, set caCloudPFname = caPFname'
       write(kStdErr,*) 'Found 100 layer cloud(s) in rtp profile, set caCloudPFname = caPFname'
@@ -1584,7 +1585,7 @@ CONTAINS
         write(kSTdErr,*) rTCC,rCfracX1,rCfracX2,rCfracX12,(rCfracX1 + rCfracX2 - rCfracX12)
       END IF
     END IF
- 1012 FORMAT(A80)
+ 1012 FORMAT(A160)
      
 ! now based on iMRO = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
 !                   = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc
@@ -2145,6 +2146,19 @@ CONTAINS
     write(kStdWarn,*)'                 '
     CALL PrintStar
 
+    CALL sanitycheckprofileNaN(                                                     &
+                             raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,    &
+                             raPressLevels,raThickness,                             &
+                             raTSpace,raTSurf,raSatAngle,raSatHeight,               &
+                             rakSolarAngle,rakThermalAngle,                         &
+                             raFracTop,raFracBot,raaPrBdry,                         &
+                             raaaSetEmissivity,raaaSetSolarRefl,                    &
+                             raaScatterPressure,raScatterDME,raScatterIWP,          &
+                             raaaCloudParams,                                       &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             ctop1,ctop2,cbot1,cbot2,                               &
+                             raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
+
     RETURN
     end SUBROUTINE ReadNameListFile
 
@@ -2309,7 +2323,7 @@ CONTAINS
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
     INTEGER :: iaCtype(kMaxClouds),iNclouds_RTP,iaNML_Ctype(kMaxClouds)
-    CHARACTER(80) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
     INTEGER :: iaMPSetForRad(kMaxAtm),iMPSetForRadRTP
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -2431,7 +2445,7 @@ CONTAINS
     INTEGER :: iNumLinesRead,iaDispGasID(12),iCount
     INTEGER :: iGenln4,iL,iLBLDIS
     REAL :: rP,rPP
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     CHARACTER(160) :: caStr160
 
     iKnowTP = -1
@@ -2623,12 +2637,335 @@ CONTAINS
     END DO
 
  5030 FORMAT(A160)
- 5040 FORMAT(A80)
+ 5040 FORMAT(A160)
  5050 FORMAT(I3,' ',6(E11.5,' '))
  5060 FORMAT(I3,' ',11(E11.5,' '))
 
     RETURN
     end SUBROUTINE pthfil4NMLonly
+
+!************************************************************************
+! sanity check for NaN and InF
+    SUBROUTINE sanitycheckprofileNaN(                                               &
+                             raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,    &
+                             raPressLevels,raThickness,                             &
+                             raTSpace,raTSurf,raSatAngle,raSatHeight,               &
+                             rakSolarAngle,rakThermalAngle,                         &
+                             raFracTop,raFracBot,raaPrBdry,                         &
+                             raaaSetEmissivity,raaaSetSolarRefl,                    &
+                             raaScatterPressure,raScatterDME,raScatterIWP,          &
+                             raaaCloudParams,                                       &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             ctop1,ctop2,cbot1,cbot2,                               &
+                             raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+    REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
+    REAL :: raaPress(kProfLayer,kGasStore)
+    REAL :: raaPartPress(kProfLayer,kGasStore)
+    REAL :: raLayerHeight(kProfLayer)
+    REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+    REAL :: raTSurf(kMaxAtm),raTSpace(kMaxAtm)
+    REAL :: raSatAngle(kMaxAtm),raSatHeight(kMaxAtm)
+    REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
+    REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm),raaPrBdry(kMaxAtm,2)
+    REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
+    REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
+    REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
+    REAL :: raScatterIWP(kMaxAtm)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2
+    REAL :: raCemis(kMaxClouds)
+    REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
+    REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
+    INTEGER :: ctype1,ctype2
+
+    INTEGER iI,iJ,iK,iErr
+    LOGICAL lFalse
+
+    iErr = 0
+
+    DO iI=1,kProfLayer
+      DO iJ=1,kGasStore
+        IF (ieee_is_nan(raaAmt(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaAmt(iI,iJ) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaAmt(iI,iJ) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+        IF (ieee_is_nan(raaTemp(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaTemp(iI,iJ) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaTemp(iI,iJ) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+        IF (ieee_is_nan(raaPress(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaPress(iI,iJ) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaPress(iI,iJ) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+        IF (ieee_is_nan(raaPartPress(iI,iJ))) THEN
+          write(kStdWarn,*) 'raaPartPress(iI,iJ) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaPartPress(iI,iJ) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+
+      END DO
+    END DO
+
+    !*************************
+
+    iI = kProfLayer+1
+      IF (ieee_is_nan(raPressLevels(iI))) THEN
+        write(kStdWarn,*) 'raPressLevels(iI) is NaN ',iI
+        write(kStdErr,*)  'raPressLevels(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+    DO iI = 1,kProfLayer
+      IF (ieee_is_nan(raPressLevels(iI))) THEN
+        write(kStdWarn,*) 'raPressLevels(iI) is NaN ',iI
+        write(kStdErr,*)  'raPressLevels(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raLayerHeight(iI))) THEN
+        write(kStdWarn,*) 'raLayerHeight(iI) is NaN ',iI
+        write(kStdErr,*)  'raLayerHeight(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raThickness(iI))) THEN
+        write(kStdWarn,*) 'raThickness(iI) is NaN ',iI
+        write(kStdErr,*)  'raThickness(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+    END DO
+
+    !*************************
+    DO iI = 1,kMaxAtm
+      IF (ieee_is_nan(raTSurf(iI))) THEN
+        write(kStdWarn,*) 'raTSurf(iI) is NaN ',iI
+        write(kStdErr,*)  'raTSurf(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raTSpace(iI))) THEN
+        write(kStdWarn,*) 'raTSpace(iI) is NaN ',iI
+        write(kStdErr,*)  'raTSpace(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raSatAngle(iI))) THEN
+        write(kStdWarn,*) 'raSatAngle(iI) is NaN ',iI
+        write(kStdErr,*)  'raSatAngle(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raSatHeight(iI))) THEN
+        write(kStdWarn,*) 'raSatHeight(iI) is NaN ',iI
+        write(kStdErr,*)  'raSatHeight(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(rakSolarAngle(iI))) THEN
+        write(kStdWarn,*) 'rakSolarAngle(iI) is NaN ',iI
+        write(kStdErr,*)  'rakSolarAngle(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(rakThermalAngle(iI))) THEN
+        write(kStdWarn,*) 'rakThermalAngle(iI) is NaN ',iI
+        write(kStdErr,*)  'rakThermalAngle(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raFracTop(iI))) THEN
+        write(kStdWarn,*) 'raFracTop(iI) is NaN ',iI
+        write(kStdErr,*)  'raFracTop(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raFracBot(iI))) THEN
+        write(kStdWarn,*) 'raFracBot(iI) is NaN ',iI
+        write(kStdErr,*)  'raFracBot(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raaPrBdry(iI,1))) THEN
+        write(kStdWarn,*) 'raaPrBdry(iI,1) is NaN ',iI
+        write(kStdErr,*)  'raaPrBdry(iI,1) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+      IF (ieee_is_nan(raaPrBdry(iI,2))) THEN
+        write(kStdWarn,*) 'raaPrBdry(iI,2) is NaN ',iI
+        write(kStdErr,*)  'raaPrBdry(iI,2) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+    END DO
+
+    !*************************
+
+    DO iI=1,kMaxAtm
+      DO iJ=1,kEmsRegions
+        IF (ieee_is_nan(raaaSetEmissivity(iI,iJ,1))) THEN
+          write(kStdWarn,*) 'raaaSetEmissivity(iI,iJ,1) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaaSetEmissivity(iI,iJ,1) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (ieee_is_nan(raaaSetEmissivity(iI,iJ,2))) THEN
+          write(kStdWarn,*) 'raaaSetEmissivity(iI,iJ,2) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaaSetEmissivity(iI,iJ,2) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (ieee_is_nan(raaaSetSolarRefl(iI,iJ,1))) THEN
+          write(kStdWarn,*) 'raaaSetSolarRefl(iI,iJ,1) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaaSetSolarRefl(iI,iJ,1) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (ieee_is_nan(raaaSetSolarRefl(iI,iJ,2))) THEN
+          write(kStdWarn,*) 'raaaSetSolarRefl(iI,iJ,2) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaaSetSolarRefl(iI,iJ,2) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+      END DO
+    END DO
+    !*************************
+
+    DO iI=1,kMaxClouds
+      IF (ieee_is_nan(raCemis(iI))) THEN
+        write(kStdWarn,*) 'raCemis(iI) is NaN ',iI,iJ
+        write(kStdErr,*)  'raCemis(iI) is NaN ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raCprtop(iI))) THEN
+        write(kStdWarn,*) 'raCprtop(iI) is NaN ',iI,iJ
+        write(kStdErr,*)  'raCprtop(iI) is NaN ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raCprbot(iI))) THEN
+        write(kStdWarn,*) 'raCprbot(iI) is NaN ',iI,iJ
+        write(kStdErr,*)  'raCprbot(iI) is NaN ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raCngwat(iI))) THEN
+        write(kStdWarn,*) 'raCngwat(iI) is NaN ',iI,iJ
+        write(kStdErr,*)  'raCngwat(iI) is NaN ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raCpsize(iI))) THEN
+        write(kStdWarn,*) 'raCpsize(iI) is NaN ',iI,iJ
+        write(kStdErr,*)  'raCpsize(iI) is NaN ',iI,iJ
+        iErr = iErr + 1
+      END IF
+
+      DO iJ=1,kCLoudLayers
+        IF (ieee_is_nan(raaaCloudParams(iI,iJ,1))) THEN
+          write(kStdWarn,*) 'raaaCloudParams(iI,iJ,1) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaaCloudParams(iI,iJ,1) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+        IF (ieee_is_nan(raaaCloudParams(iI,iJ,2))) THEN
+          write(kStdWarn,*) 'raaaCloudParams(iI,iJ,2) is NaN ',iI,iJ
+          write(kStdErr,*)  'raaaCloudParams(iI,iJ,2) is NaN ',iI,iJ
+          iErr = iErr + 1
+        END IF
+      END DO
+    END DO
+
+    DO iI=1,kMaxAtm
+      IF (ieee_is_nan(raaScatterPressure(iI,1))) THEN
+        write(kStdWarn,*) 'raaScatterPressure(iI,1) is NaN ',iI
+        write(kStdErr,*)  'raaScatterPressure(iI,1) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+      IF (ieee_is_nan(raaScatterPressure(iI,2))) THEN
+        write(kStdWarn,*) 'raaScatterPressure(iI,2) is NaN ',iI
+        write(kStdErr,*)  'raaScatterPressure(iI,2) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raScatterDME(iI))) THEN
+        write(kStdWarn,*) 'raScatterDME(iI) is NaN ',iI
+        write(kStdErr,*)  'raScatterDME(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+
+      IF (ieee_is_nan(raScatterIWP(iI))) THEN
+        write(kStdWarn,*) 'raScatterIWP(iI) is NaN ',iI
+        write(kStdErr,*)  'raScatterIWP(iI) is NaN ',iI
+        iErr = iErr + 1
+      END IF
+    END DO
+
+    !*************************
+    IF (ieee_is_nan(cfrac1)) THEN
+      write(kStdWarn,*) 'cfrac1 is NaN '
+      write(kStdErr,*)  'cfrac1 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(cfrac2)) THEN
+      write(kStdWarn,*) 'cfrac2 is NaN '
+      write(kStdErr,*)  'cfrac2 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(cfrac12)) THEN
+      write(kStdWarn,*) 'cfrac12 is NaN '
+      write(kStdErr,*)  'cfrac12 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(ctype1*1.0)) THEN
+      write(kStdWarn,*) 'ctype1 is NaN '
+      write(kStdErr,*)  'ctype1 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(ctype2*1.0)) THEN
+      write(kStdWarn,*) 'ctype2 is NaN '
+      write(kStdErr,*)  'ctype2 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(cngwat1)) THEN
+      write(kStdWarn,*) 'cngwat1 is NaN '
+      write(kStdErr,*)  'cngwat1 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(cngwat2)) THEN
+      write(kStdWarn,*) 'cngwat2 is NaN '
+      write(kStdErr,*)  'cngwat2 is NaN '
+      iErr = iErr + 1
+    END IF
+!    IF (ieee_is_nan(cprtop1)) THEN
+!      write(kStdWarn,*) 'cprtop1 is NaN '
+!      write(kStdErr,*)  'cprtop1 is NaN '
+!      iErr = iErr + 1
+!    END IF
+!    IF (ieee_is_nan(cprtop2)) THEN
+!      write(kStdWarn,*) 'cprtop2 is NaN '
+!      write(kStdErr,*)  'cprtop2 is NaN '
+!      iErr = iErr + 1
+!    END IF
+    IF (ieee_is_nan(cbot1)) THEN
+      write(kStdWarn,*) 'cbot1 is NaN '
+      write(kStdErr,*)  'cbot1 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(cbot2)) THEN
+      write(kStdWarn,*) 'cbot2 is NaN '
+      write(kStdErr,*)  'cbot2 is NaN '
+      iErr = iErr + 1
+    END IF
+
+    RETURN
+    end SUBROUTINE sanitycheckprofileNaN
 
 !************************************************************************
 END MODULE n_main

@@ -39,7 +39,7 @@ CONTAINS
 !              = +1 for upward flux, -1 for downward flux
 ! iNumberOut   = number of the relevant spectra to look for
 
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     REAL :: rFrLow,rFrHigh,rDelta
     INTEGER :: iMainType,iSubMainType,iNumberOut,iIOUN
 
@@ -81,12 +81,12 @@ CONTAINS
 ! iaOp       = list of the paths to be output
     REAL ::             rFrLow,rFrHigh
     DOUBLE PRECISION :: daFreqBloat(kBloatPts)
-    CHARACTER(80) :: caOutFile
+    CHARACTER(160) :: caOutFile
     INTEGER :: iTag,iType
 
 ! local vars
     INTEGER :: iIOUN1,iI,iJump,i10000
-    CHARACTER(80) :: caOut
+    CHARACTER(160) :: caOut
     DOUBLE PRECISION :: daStart(kBoxCarUse),daEnd(kBoxCarUse)
     DOUBLE PRECISION :: daStartBox(kBoxCarUse),daEndBox(kBoxCarUse)
 
@@ -146,7 +146,7 @@ CONTAINS
 
     INTEGER :: iIOUN
     REAL :: raFreq(kMaxPts),raInten(kMaxPts)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iInt
@@ -168,7 +168,7 @@ CONTAINS
 ! input vars
     REAL ::         raFreqBloat(kBloatPts),raIntenBloat(kBloatPts)
     INTEGER ::      iIOUN
-    CHARACTER(80) :: caOutBloatFile
+    CHARACTER(160) :: caOutBloatFile
 
 ! local vars
     INTEGER :: iLoop,iInt,iIntOffSet
@@ -280,7 +280,7 @@ CONTAINS
     INTEGER :: iAtm,iUpper
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     REAL :: raFreq(kMaxPts),rDelta !!array and spacing
-    CHARACTER(80) :: caPlanckFile
+    CHARACTER(160) :: caPlanckFile
 
 ! local variables
     INTEGER :: iFr,iL,iLay,iIOUN,iBeta
@@ -315,7 +315,7 @@ CONTAINS
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iAtm
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
     REAL :: raFreq(kMaxPts),rDelta !!array and spacing
-    CHARACTER(80) :: caPlanckFile
+    CHARACTER(160) :: caPlanckFile
 
 ! local variables
     INTEGER :: iFr,iL,iLay,iIOUN,iBeta
@@ -356,7 +356,7 @@ CONTAINS
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iAtm
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
     REAL :: raFreq(kMaxPts),rDelta !!array and spacing
-    CHARACTER(80) :: caPlanckFile
+    CHARACTER(160) :: caPlanckFile
 
 ! local variables
     INTEGER :: iFr,iL,iLay,iIOUN,iBeta
@@ -396,7 +396,7 @@ CONTAINS
     INTEGER :: iAtm,iUpper
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     REAL :: raFreq(kMaxPts),rDelta !!array and spacing
-    CHARACTER(80) :: caPlanckFile
+    CHARACTER(160) :: caPlanckFile
 
 ! local variables
     INTEGER :: iFr,iL,iLay,iIOUN,iBeta
@@ -545,7 +545,7 @@ CONTAINS
     REAL :: raaGasAbs(kMaxPts,kProfLayer)
     INTEGER :: iPrinter,iFileID
     INTEGER :: iNp,iaOp(kPathsOut),iaPath(kProfLayer)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     REAL :: raTAmt(kProfLayer),raTTemp(kProfLayer),raTPress(kProfLayer),raTPartPress(kProfLayer)
 
 ! local variables
@@ -622,7 +622,7 @@ CONTAINS
     INTEGER :: iFound,iPrinter,iNpmix,iFileID,iNp,iaOp(kPathsOut)
     REAL :: raFreq(kMaxPts),rFreqStart,rFreqEnd
     REAL :: raaSumAbCoeff(kMaxPts,kMixFilRows)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local vars
     INTEGER :: iDummy,iIpmix
@@ -731,7 +731,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
     INTEGER :: iPrinter,iIpmix,iNpmix,iFileID
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iInt,iPath,iIOUN
@@ -800,7 +800,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
     INTEGER :: iPrinter,iNpmix,iFileID
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iPath,iIOUN,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax,iI
@@ -905,7 +905,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
     INTEGER :: iPrinter,iNpmix,iFileID
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iPath,iIOUN,iI,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax
@@ -1010,7 +1010,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
     INTEGER :: iPrinter,iNpmix,iFileID
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iPath,iIOUN,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax,iI
@@ -1115,7 +1115,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
     INTEGER :: iPrinter,iNpmix,iFileID
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iPath,iIOUN,iI,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax
@@ -1216,7 +1216,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
     INTEGER :: iPrinter,iNpmix,iFileID
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iIOUN,iI,iFr
@@ -1258,7 +1258,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
     INTEGER :: iPrinter,iNpmix,iFileID
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 
 ! local variables
     INTEGER :: iI,iFr,iIOUN
@@ -1621,17 +1621,17 @@ CONTAINS
 
     IMPLICIT NONE
 
-    CHARACTER(80) :: caOutName,caVTFile
+    CHARACTER(160) :: caOutName,caVTFile
     INTEGER :: iRegr
      
     CHARACTER(2) :: caString
     INTEGER :: iInt,iInt1
 
-    DO iInt = 1,80
+    DO iInt = 1,160
       caVTFile(iInt:iInt) = ' '
     END DO
 
-    iInt = 80
+    iInt = 160
  11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
       iInt = iInt-1
@@ -1653,7 +1653,7 @@ CONTAINS
       GO TO 16
     END IF
 
-    iInt1 = 80
+    iInt1 = 160
  21 CONTINUE
     IF ((caVTFile(iInt1:iInt1) == ' ') .AND. (iInt1 >= 1)) THEN
       iInt1 = iInt1-1
@@ -1672,17 +1672,17 @@ CONTAINS
 
     IMPLICIT NONE
 
-    CHARACTER(80) :: caOutName,caVTFile
+    CHARACTER(160) :: caOutName,caVTFile
     INTEGER :: iRtp
      
     CHARACTER(5) :: caString
     INTEGER :: iInt,iInt1
 
-    DO iInt = 1,80
+    DO iInt = 1,160
       caVTFile(iInt:iInt) = ' '
     END DO
 
-    iInt = 80
+    iInt = 160
  11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
       iInt = iInt-1
@@ -1704,7 +1704,7 @@ CONTAINS
       GO TO 16
     END IF
 
-    iInt1 = 80
+    iInt1 = 160
  21 CONTINUE
    IF ((caVTFile(iInt1:iInt1) == ' ') .AND. (iInt1 >= 1)) THEN
      iInt1 = iInt1-1
@@ -1729,19 +1729,19 @@ CONTAINS
     IMPLICIT NONE
 
 ! input params
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     INTEGER :: iRTP
 ! output params
-    CHARACTER(80) :: caVTFile
+    CHARACTER(160) :: caVTFile
      
     CHARACTER(5) :: caString
     INTEGER :: iInt,iInt1,iI,iJ
 
-    DO iInt = 1,80
+    DO iInt = 1,160
       caVTFile(iInt:iInt) = ' '
     END DO
 
-    iInt = 80
+    iInt = 160
  11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
       iInt = iInt-1
@@ -1765,7 +1765,7 @@ CONTAINS
       GO TO 16
     END IF
 
-    iInt1 = 80
+    iInt1 = 160
  21 CONTINUE
     IF ((caVTFile(iInt1:iInt1) == ' ') .AND. (iInt1 >= 1)) THEN
       iInt1 = iInt1-1
@@ -1791,15 +1791,15 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: caJacobFile,caJacobFile2
+    CHARACTER(160) :: caJacobFile,caJacobFile2
      
     INTEGER :: iInt
 
-    DO iInt = 1,80
+    DO iInt = 1,160
       caJacobFile2(iInt:iInt) = ' '
     END DO
 
-    iInt = 80
+    iInt = 160
   11 CONTINUE
     IF ((caJacobFile(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
       iInt = iInt-1
@@ -1820,15 +1820,15 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: caOutName,caFluxFile
+    CHARACTER(160) :: caOutName,caFluxFile
      
     INTEGER :: iInt
 
-    DO iInt = 1,80
+    DO iInt = 1,160
       caFluxFile(iInt:iInt) = ' '
     END DO
 
-    iInt = 80
+    iInt = 160
   11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
       iInt = iInt-1
@@ -1866,15 +1866,15 @@ CONTAINS
 
     IMPLICIT NONE
 
-    CHARACTER(80) :: caOutName,caPlanckFile
+    CHARACTER(160) :: caOutName,caPlanckFile
      
     INTEGER :: iInt
 
-    DO iInt = 1,80
+    DO iInt = 1,160
       caPlanckFile(iInt:iInt) = ' '
     END DO
 
-    iInt = 80
+    iInt = 160
  11 CONTINUE
     IF ((caOutName(iInt:iInt) == ' ') .AND. (iInt >= 1)) THEN
       iInt = iInt-1
@@ -1968,7 +1968,7 @@ CONTAINS
     REAL :: rakSolarRefl(kMaxAtm)
     INTEGER :: iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName
     INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
-    CHARACTER(80) :: caDriver,caOutName
+    CHARACTER(160) :: caDriver,caOutName
     CHARACTER(120) :: caComment
     CHARACTER(130) :: caaMixFileLines(kProfLayer)
     INTEGER :: iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
@@ -1989,13 +1989,13 @@ CONTAINS
 
     INTEGER :: iIOUN,iIOUN1,iIOUN2,iIOUN_JAC2,iI,iJ,iK,iFileErr,iEnd,iP,iOk
     INTEGER :: iOutputOptionNum,iNumLay
-    CHARACTER(80) :: caJacobFile,caJacobFile2,caFluxFile,caPlanckFile
+    CHARACTER(160) :: caJacobFile,caJacobFile2,caFluxFile,caPlanckFile
 
     INTEGER :: iImportant
     INTEGER :: iNatmJac,iaLayerJac(kMaxAtm),iIOUN_Flux,iIOUN_Planck,iIOUN_Cloud
     REAL :: raParams(kMaxUserSet),raPActualAvg(kProfLayer),rP
     CHARACTER(4) :: caStrJunk(7)
-    CHARACTER(80) :: caFCloudName
+    CHARACTER(160) :: caFCloudName
     REAL :: raSumTotalGasAmt(kMaxGas)
           
 ! his is for kLongOrShort = 0
@@ -2429,11 +2429,11 @@ CONTAINS
 
     IF ((kRTP >= 0) .AND. (kWhichScatterCode == 5)) THEN
       !! write out cloud info, straight from RTP file and after manipulation
-      DO iI = 1,80
+      DO iI = 1,160
         caFCloudName(iI:iI) = ' '
       END DO
       caFCloudName = caOutName
-        iJ = 80
+        iJ = 160
         DO WHILE ((caFCloudName(iJ:iJ) == ' ') .AND. (iJ > 0))
           iJ = iJ -1
         END DO
@@ -3178,7 +3178,7 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: caUAFile
+    CHARACTER(160) :: caUAFile
     REAL :: rFrLow,rFrHigh
     INTEGER :: iFileIDLo,iFileIDHi,iTag,iDumpAllUARads,iDumpAllUASpectra
 
@@ -3327,7 +3327,7 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: caOutUABloatFile
+    CHARACTER(160) :: caOutUABloatFile
     REAL :: rFrLow,rFrHigh
     INTEGER :: iFileIDLo,iFileIDHi,iTag,iDumpAllUARads
 
@@ -3481,7 +3481,7 @@ CONTAINS
 ! iNumberOut   = number of the relevant spectra to look for
 ! iPathOrRad   = +1 for CO2 ua path, +3 for ua rad
 
-    CHARACTER(80) :: caOutUAFile
+    CHARACTER(160) :: caOutUAFile
     REAL :: rFrLow,rFrHigh,raFreq(kMaxPts)
     INTEGER :: iTag,iNumberNLTEOut,iPathORRad
 

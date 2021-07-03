@@ -69,7 +69,7 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     INTEGER :: iKnowTP,iProfileLayers
     REAL :: raThickness(kProfLayer),pProf(kProfLayer),rCO2MixRatio, &
@@ -410,7 +410,7 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN,iWriteToOutputFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     INTEGER :: iKnowTP,iProfileLayers
     REAL :: raThickness(kProfLayer),pProf(kProfLayer), &
@@ -708,7 +708,7 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN_IN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     INTEGER :: iKnowTP
     REAL :: raThickness(kProfLayer),pProf(kProfLayer), &
@@ -722,7 +722,7 @@ CONTAINS
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iUpper,iDoUpperAtmNLTE
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)
@@ -1154,7 +1154,7 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN_IN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     INTEGER :: iKnowTP
     REAL :: raThickness(kProfLayer),pProf(kProfLayer), &
@@ -1168,7 +1168,7 @@ CONTAINS
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer),rCO2MixRatio
     INTEGER :: iUpper,iDoUpperAtmNLTE
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)

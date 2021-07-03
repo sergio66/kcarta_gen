@@ -96,13 +96,13 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN_IN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     INTEGER :: iKnowTP,iProfileLayers
     REAL :: raThickness(kProfLayer),pProf(kProfLayer), &
     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2)
     REAL :: raScatterDME(kMaxAtm),raScatterIWP(kMaxAtm)
 

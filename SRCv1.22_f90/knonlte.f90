@@ -255,11 +255,11 @@ CONTAINS
     REAL :: rFileStartFr
 ! caaaNLTEBands     tells the name of the files containing the line parameters
 ! caaNLTETemp       tells the name of the files containing the nonLTE temps
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
-    CHARACTER(80) :: caOutUAFile,caOutUABloatFile
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caOutUAFile,caOutUABloatFile
 ! pProf is the avg layer pressure
     REAL :: pProf(kProfLayer),pProfNLTE(kProfLayer),pProfNLTE_upatm(kProfLayer)
     REAL :: raLayerHeight(kProfLayer),rSolzen
@@ -473,11 +473,11 @@ CONTAINS
     REAL :: rFileStartFr,rSolzen
 ! caaaNLTEBands     tells the name of the files containing the line parameters
 ! caaNLTETemp       tells the name of the files containing the nonLTE temps
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
-    CHARACTER(80) :: caOutUAFile,caOutUABloatFile
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caOutUAFile,caOutUABloatFile
 ! pProf is the avg layer pressure
     REAL :: pProf(kProfLayer),pProfNLTE(kProfLayer),pProfNLTE_upatm(kProfLayer)
     REAL :: raLayerHeight(kProfLayer)
@@ -558,7 +558,7 @@ CONTAINS
     REAL :: raUpperDZ_Std(kProfLayer),raUpperCO2Amt_Std(kProfLayer)
     REAL :: raUpperTemp_Std(kProfLayer)
     REAL :: raInterpTempUA(kProfLayer),raUpperPress1013(kProfLayer)
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     REAL :: raX(kMaxPts),rMult,rMult0
     REAL :: raRPressX(kProfLayer),raRPPressX(kProfLayer)
     REAL :: raRAmtx(kProfLayer),raRTempx(kProfLayer)
@@ -898,11 +898,11 @@ CONTAINS
     REAL :: rFileStartFr
 ! caaaNLTEBands     tells the name of the files containing the line parameters
 ! caaNLTETemp       tells the name of the files containing the nonLTE temps
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
-    CHARACTER(80) :: caOutUAFile,caOutUABloatFile
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caOutUAFile,caOutUABloatFile
 ! pProf is the avg layer pressure
     REAL :: pProf(kProfLayer),pProfNLTE(kProfLayer),pProfNLTE_upatm(kProfLayer)
     REAL :: raLayerHeight(kProfLayer)
@@ -1249,8 +1249,8 @@ CONTAINS
     INTEGER :: iDoUpperAtmNLTE            !should we do upper stratosphere
     INTEGER :: iSetBloat                  !do we bloat to 0.0005 cm-1
     INTEGER :: iTag                       !what is the spacing we need?
-    CHARACTER(80) :: caOutBloatFile        !file to dump high res info to
-    CHARACTER(80) :: caPlanckBloatFile     !file to dump high res info to
+    CHARACTER(160) :: caOutBloatFile        !file to dump high res info to
+    CHARACTER(160) :: caPlanckBloatFile     !file to dump high res info to
     REAL :: rFrLow,rFrHigh                !start and stop freqs
     INTEGER :: iTotalStuff                !total number of outputs
     INTEGER :: iFileIDLo,iFileIDHi        !which 0.0025 kchunks to expect
@@ -1693,9 +1693,9 @@ CONTAINS
     REAL :: pProf(kProfLayer),raPressLevels(kProfLayer+1)
     REAL :: raLayerHeight(kProfLayer),raThickness(kProfLayer)
     INTEGER :: iaNLTEBands(kGasStore),iLTEIn,iSTart,iTag,iActualTag,iGASID
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
     REAL :: raTTemp(kProfLayer),raTAmt(kProfLayer),raTPress(kProfLayer)
     REAL :: raTPartPress(kProfLayer),raFreq(kMaxPts),rNLTEstrength
     INTEGER :: iDoVoigtChi   !!set this THE SAME in SetRunningMesh,voigt_chi
@@ -1716,7 +1716,7 @@ CONTAINS
     DOUBLE PRECISION :: daaSumNLTEGasAbcoeff(kMaxPts,kProfLayer)
 
 ! local variables
-    CHARACTER(80) :: caStrong
+    CHARACTER(160) :: caStrong
     INTEGER :: iFr,iL,iBand,iNum,iISO,iLineMixBand,iLowerOrUpper
     DOUBLE PRECISION :: daK(kMaxPts),dK
     DOUBLE PRECISION :: daElower(kHITRAN),daLineCenter(kHITRAN)
@@ -1858,15 +1858,15 @@ CONTAINS
     REAL :: rCO2mult
     DOUBLE PRECISION :: daFreqBloat(kBloatPts)
     INTEGER ::      iGas,iSplineType  !!!needed to uncompress database
-    CHARACTER(80) :: caaStrongLines(kGasStore)
+    CHARACTER(160) :: caaStrongLines(kGasStore)
     DOUBLE PRECISION :: dDeltafreqNLTE,dLineStrenMin
     INTEGER :: iUSeWeakBackGnd,iSetBloat
     REAL :: pProf(kProfLayer),raPressLevels(kProfLayer+1)     !!in mb
     REAL :: raLayerHeight(kProfLayer),raThickness(kProfLayer) !!in meters
     INTEGER :: iaNLTEBands(kGasStore),iLTEIn,iGasID,iTag,iActualTag,iNLTEStart
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
     REAL :: raFreq(kMaxPts),rNLTEstrength,rFileStartFr
     INTEGER :: iDoVoigtChi   !!set this THE SAME in SetRunningMesh,voigt_chi
 ! these are just for dumping stuff to the UA file
@@ -1875,7 +1875,7 @@ CONTAINS
     INTEGER :: iNumNLTEGases,iaNLTEChunks(kGasStore)
     INTEGER :: iaaNLTEChunks(kGasStore,kNumkCompT)
     INTEGER :: iDoUpperAtmNLTE,iAllLayersLTE
-    CHARACTER(80) :: caOutUAFile,caOutUABloatFile
+    CHARACTER(160) :: caOutUAFile,caOutUABloatFile
 
 ! output parameters
 ! iUpper    tells which layer to end NLTE calcs
@@ -1895,7 +1895,7 @@ CONTAINS
     REAL :: raUpperPressLevels(kProfLayer+1),raUpperThickness(kProfLayer)
 
 ! local variables
-    CHARACTER(80) :: caStrong
+    CHARACTER(160) :: caStrong
     INTEGER :: iFr,iL,iBand,iNum,iISO,iLineMixBand,iDefault,iType
     REAL :: raLTETemp(kProfLayer),raNLTEtemp(kProfLayer)
     DOUBLE PRECISION :: daK(kMaxPts),dK
@@ -2092,8 +2092,8 @@ CONTAINS
     REAL :: pProf(kProfLayer),raPressLevels(kProfLayer+1)
     REAL :: raLayerHeight(kProfLayer),raThickness(kProfLayer)
     INTEGER :: iaNLTEBands(kGasStore),iLTEIn,iSTart,iStart2350,iTag,iActualTag
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
     REAL :: raTTemp(kProfLayer),raTAmt(kProfLayer),raTPress(kProfLayer)
     REAL :: raTPartPress(kProfLayer),raFreq(kMaxPts),rNLTEstrength
     INTEGER :: iDoVoigtChi   !!set this THE SAME in SetRunningMesh,voigt_chi
@@ -2230,9 +2230,9 @@ CONTAINS
     REAL :: pProf(kProfLayer),raPressLevels(kProfLayer+1)     !!in mb
     REAL :: raLayerHeight(kProfLayer),raThickness(kProfLayer) !!in meters
     INTEGER :: iaNLTEBands(kGasStore),iLTEIn,iGasID,iTag,iActualTag,iNLTEStart
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
     REAL :: raFreq(kMaxPts),rNLTEstrength
     INTEGER :: iDoVoigtChi   !!set this THE SAME in SetRunningMesh,voigt_chi
     DOUBLE PRECISION :: daFreqBloat(kBloatPts)
@@ -2243,7 +2243,7 @@ CONTAINS
     INTEGER :: iaaNLTEChunks(kGasStore,kNumkCompT)
     INTEGER :: iDoUpperAtmNLTE,iAllLayersLTE
     INTEGER :: iGas,iSplineType,iNumberUA_NLTEOut
-    CHARACTER(80) :: caOutUAFile,caOutUABloatFile
+    CHARACTER(160) :: caOutUAFile,caOutUABloatFile
 
 ! output parameters
 ! iUpper    tells which layer to end NLTE calcs
@@ -2283,7 +2283,7 @@ CONTAINS
 
 ! this is for dumping stuff
     INTEGER :: iIOUN,iPrintTalk
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     REAL :: raX(kMaxPts)
 
 ! this is mainly junk
@@ -3459,7 +3459,7 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN_IN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! these are to do with the arbitrary pressure layering
     INTEGER :: iKnowTP
     REAL :: raThickness(kProfLayer),pProf(kProfLayer), &
@@ -3473,7 +3473,7 @@ CONTAINS
     REAL :: raaUpperPlanckCoeff(kMaxPts,kProfLayer)
     INTEGER :: iUpper,iDoUpperAtmNLTE
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     REAL :: raExtinct(kMaxPts),raAbsCloud(kMaxPts),raAsym(kMaxPts)

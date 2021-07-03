@@ -193,18 +193,18 @@ CONTAINS
 !************************************************************************
 ! this subroutine conactenates two ca80 strings together
 ! ca1 + ca2 = ca2       (storing the result in ca2)
-    SUBROUTINE ConcatCA80(ca1,ca2)
+    SUBROUTINE ConcatCA160(ca1,ca2)
 
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: ca1,ca2
+    CHARACTER(160) :: ca1,ca2
     INTEGER :: iGasID
 
 ! local variables
     INTEGER :: iI,i1,i2,iJ
-    CHARACTER(80) :: caSum
+    CHARACTER(160) :: caSum
 
 ! ccc user supplied info
 ! here give the directory path to where the reference profiles are
@@ -226,12 +226,12 @@ CONTAINS
       iJ = iJ + 1
     END DO
 
-    DO iI=1,80
+    DO iI=1,160
       ca2(iI:iI) = caSum(iI:iI)
     END DO
 
     RETURN
-    end SUBROUTINE ConcatCA80
+    end SUBROUTINE ConcatCA160
 !************************************************************************
 ! this subroutine finds the name of the CKD binary file
     SUBROUTINE CKDFileName(caFName,iGasID,iTag)
@@ -364,12 +364,12 @@ CONTAINS
 !                   or  upper atm AIRS (100 layer) file (+1)
 ! iGasID         = current ID of gas to be processed
 ! caFName        = name of file that contains reference profile
-    CHARACTER(80) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iGasID,iLowerOrUpper
 
 ! local variables
     CHARACTER(2) :: caString,caTemp
-    CHARACTER(80) :: caDir
+    CHARACTER(160) :: caDir
     INTEGER :: iInt,iLenDir
 !      CHARACTER*(*) adjustl
 
@@ -994,7 +994,7 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: fname
+    CHARACTER(160) :: fname
     REAL :: rFileStartFr
 
     CHARACTER(5) :: caString5,caTemp5
@@ -1046,7 +1046,7 @@ CONTAINS
      
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    CHARACTER(80) :: caWeak,caWeakFr
+    CHARACTER(160) :: caWeak,caWeakFr
     REAL :: raWaves(kMaxPts)
     INTEGER :: iGasID
 
@@ -1129,7 +1129,7 @@ CONTAINS
 ! local vars
     INTEGER :: iNumMystery,iIOUN,iErr,iFr
     REAL :: raXadj(kMaxPts),raYadj(kMaxPts)
-    CHARACTER(80) :: caMystery
+    CHARACTER(160) :: caMystery
 
     IF (iWhichGas == 0) THEN
       caMystery = '/asl/data/kcarta/KCARTADATA/General/mystery.dat'

@@ -774,7 +774,7 @@ CONTAINS
     CHARACTER(160) :: FNAME
     REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),raScale(kProfLayer),raQCO2(kProfLayer),raQWV(kProfLayer)
     REAL :: raXCO2(kProfLayer),raXWV(kProfLayer),raRho(kProfLayer),raCO2MRdry(kProfLayer)
-    CHARACTER(80) :: FMT,FMT2
+    CHARACTER(160) :: FMT,FMT2
 
     iYesNoCO2WVContinuum = -1    !! assume no CO2/WV continuum added on
     
@@ -919,7 +919,7 @@ CONTAINS
     CHARACTER(160) :: FNAME
     REAL :: raFChi(kMaxPts),raChi(kMaxPts),raX(kMaxPts),rScale,raQCO2(kProfLayer),raQWV(kProfLayer)
     REAL :: raXN2(kProfLayer),raXWV(kProfLayer),raRho(kProfLayer)
-    CHARACTER(80) :: FMT,FMT2
+    CHARACTER(160) :: FMT,FMT2
 
 !! see n_rtp.f90, SUBR READRTP_1B
 !! rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
@@ -1661,7 +1661,7 @@ CONTAINS
       REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer)
 ! local vars
       INTEGER :: iErrOut
-      CHARACTER*80 :: caFName
+      CHARACTER(160) :: caFName
       
       raUA_refQ = 1.0e-5
       IF ((iGasID == 1) .OR. (iGasID == 2) .OR. (iGasID == 3) .OR. (iGasID == 4) .OR. (iGasID == 5) .OR. (iGasID == 6) &

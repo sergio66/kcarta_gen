@@ -90,7 +90,7 @@ CONTAINS
     INTEGER :: iJacob,iaJacob(kMaxDQ),iProfileLayers
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
     INTEGER :: iNumGases,iAtm,iNatm,iaGases(kMaxGas),iTag,iActualJac
-    CHARACTER(80) :: caJacobFile
+    CHARACTER(160) :: caJacobFile
 
 ! local variables
     REAL :: raaLay2Gnd(kMaxPtsJac,kProfLayerJac),raResults(kMaxPtsJac)

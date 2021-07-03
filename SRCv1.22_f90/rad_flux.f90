@@ -106,9 +106,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore)
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iTag,iNpmix,iFileID
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -360,9 +360,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -902,9 +902,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -1598,9 +1598,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -2111,9 +2111,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -2595,9 +2595,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -3128,9 +3128,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -3562,7 +3562,7 @@ CONTAINS
     REAL :: raDensity0(kProfLayer),raThickness(kProfLayer),raDeltaPressure(kProfLayer)
     REAL :: raPressLevels(kProfLayer+1)
     INTEGER :: iIOUN,iNumLayer,troplayer,iAtm,iaRadLayer(kProfLayer)
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 
 ! local
     INTEGER :: iL,iLay,iFr
@@ -3617,7 +3617,7 @@ CONTAINS
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
     REAL :: raFreq(kMaxPts),rDelta,raDensityX(kProfLayer),raPressLevels(kProfLayer+1)
     INTEGER :: iIOUN,iNumLayer,troplayer,iAtm,iaRadLayer(kProfLayer)
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 
 ! local
     INTEGER :: iL,iLay,iFr,iWhichHeatRateCalc
@@ -3687,7 +3687,7 @@ CONTAINS
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
     REAL :: raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
     INTEGER :: iIOUN,iNumLayer,troplayer,iAtm
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 
 ! local
     INTEGER :: iL,iLay,iFr,i1,i2
@@ -3738,7 +3738,7 @@ CONTAINS
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
     REAL :: raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
     INTEGER :: iIOUN,iNumLayer,troplayer,iAtm
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 
 ! local
     INTEGER :: iL,iLay,iFr,i1,i2
@@ -3785,7 +3785,7 @@ CONTAINS
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
     REAL :: raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
     INTEGER :: iIOUN,iNumLayer,troplayer,iAtm
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 
 ! local
     INTEGER :: iL,iLay,iFr,i1,i2
@@ -3857,7 +3857,7 @@ CONTAINS
     REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
     REAL :: raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
     INTEGER :: iIOUN,iNumLayer,troplayer,iAtm
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 
 ! local
     INTEGER :: iL,iLay,iFr,i1,i2
@@ -4104,9 +4104,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 
@@ -4627,9 +4627,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     INTEGER :: iNpmix,iFileID,iDownWard,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is for absorptive clouds
-    CHARACTER(80) :: caaScatter(kMaxAtm)
+    CHARACTER(160) :: caaScatter(kMaxAtm)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
 

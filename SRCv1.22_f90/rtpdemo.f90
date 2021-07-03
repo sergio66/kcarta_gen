@@ -43,7 +43,7 @@
     INTEGER :: iNclouds_RTP     !!!tells how many clouds
     INTEGER :: iaNML_Ctype(kMaxClouds)
 
-    CHARACTER(80) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+    CHARACTER(160) :: caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
     REAL :: raSetEmissivity(kMaxAtm)
     INTEGER :: iaMPSetForRad(kMaxAtm)
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -85,7 +85,7 @@
     integer :: status
     integer :: rchan
     character(32) :: mode
-    character(80) :: fname
+    character(160) :: fname
     real :: rf1,rf2
 
     iRTP = 1

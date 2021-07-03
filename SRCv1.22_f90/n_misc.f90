@@ -332,7 +332,7 @@ CONTAINS
     iaaOverrideDefault(3,2) = +1    !!! iReplaceZeroProf = +1 to add in profiles TAPE5 does not have
     iaaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
 ! plus EXTRA THINGS
-    iaaOverrideDefault(3,4) = -1    !!! dump out surface terms (downwell therm, emiss, rho)
+    iaaOverrideDefault(3,4) = -1    !!! dump out surface terms (downwell therm, emiss, rho) : -1 = NO (default), +1 = yes
     iaaOverrideDefault(3,5) = +1    !!! if there are clouds in rtp, keep them (TwoSlab); if this is -1, switch to clear sky
 
     RETURN

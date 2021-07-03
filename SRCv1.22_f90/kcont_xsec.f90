@@ -875,7 +875,7 @@ CONTAINS
 ! iDoDQ     = -2 if no amt,temp jacs, -1 if no amt jacs, > 0 if amt,temp jacs
 ! kFrStep  = kFreqStep
     INTEGER :: iaCont(kMaxGas),iDoDQ
-    CHARACTER(80) :: caXsecName
+    CHARACTER(160) :: caXsecName
     DOUBLE PRECISION :: daaTemp(kMaxPts,kProfLayer)
     INTEGER :: iGasID,iL,iU,iErr,iRefLayer,iCount,iVTSet
     REAL :: raTPress(kProfLayer),raTPart(kProfLayer),kFrStep

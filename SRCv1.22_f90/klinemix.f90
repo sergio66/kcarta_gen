@@ -321,7 +321,7 @@ CONTAINS
     CHARACTER(30) ::  caX
     DOUBLE PRECISION :: dDiff0,dDiff1,dT1,dT2,dBlah
     CHARACTER(1) :: caPorR_1(kHITRAN),caPorR_2(kHITRAN)
-    CHARACTER(80) :: caSkip80
+    CHARACTER(160) :: caSkip80
           
     iTooFar = -1         !!assume this line DOES exist in linemix files
     iJL = int(dJL)
@@ -599,7 +599,7 @@ CONTAINS
     DOUBLE PRECISION ::  vbc,vtc,dvc,temp(ntemp),doc(ndoc)
 
     DOUBLE PRECISION :: chi(npts,ndoc,ntemp) !!for T=100,150,200,250,300,350,400
-    CHARACTER(80) :: caFName,caFName1
+    CHARACTER(160) :: caFName,caFName1
 
 ! we have 10 d of c parameters tau2=1e-3*(1,3,5,...,19) (ndoc=10)
 ! we have 7 temperatures : 100,150,200,250,300,350,400  (ntemp=7)
@@ -825,7 +825,7 @@ CONTAINS
     DOUBLE PRECISION ::  vbc,vtc,dvc,temp(ntemp),doc(ndoc)
 
     DOUBLE PRECISION :: chi(npts,ndoc,ntemp) !!for T=100,150,200,250,300,350,400
-    CHARACTER(80) :: caFName,caFName1
+    CHARACTER(160) :: caFName,caFName1
     DOUBLE PRECISION :: t,u,y1,y2,y3,y4,v(kMaxPts)
 
 ! we have 10 d of c parameters tau2=1e-3*(1,3,5,...,19) (ndoc=10)

@@ -36,7 +36,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
-    CHARACTER(80) :: caaUpperMixRatio(kGasStore)
+    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
     INTEGER :: iGasID, iLTEIn
     REAL :: rCO2mult
 ! output vars
@@ -50,7 +50,7 @@ CONTAINS
     INTEGER :: iUpperStd_Num
 
 ! local vars
-    CHARACTER(80) :: caFname,caStr
+    CHARACTER(160) :: caFname,caStr
     INTEGER :: iIOUN,iI,iErr
     REAL :: rH,rP,rT,rPPMV,rX,rCO2Mix,raTemp(2*kProfLayer),rMax
     INTEGER :: iDefault,iCurrent
@@ -199,7 +199,7 @@ CONTAINS
 ! input params
     REAL :: pProf(kProfLayer),raPressLevels(kProfLayer+1)
     REAL :: raLayerHeight(kProfLayer),raThickness(kProfLayer)
-    CHARACTER(80) :: caFname
+    CHARACTER(160) :: caFname
     DOUBLE PRECISION :: daJU(kHITRAN),daJL(kHITRAN)
     INTEGER :: iaJ_UorL(kHITRAN),iGasID,iISO,iAllOrSome,iNLTEStart
 ! output params
@@ -391,7 +391,7 @@ CONTAINS
     REAL :: pProf(kProfLayer),raPresslevels(kProfLayer+1)
     REAL :: raLayerHeight(kProfLayer),raThickness(kProfLayer)
     INTEGER :: iLTEIn,iBand,iGasID,iNLTEStart
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
 ! these are the input mixing ratios from Dave Edwards
     REAL :: raUpper_Pres(2*kProfLayer),raUpper_MixRatio(2*kProfLayer)
     INTEGER :: iNumMixRatioLevs
@@ -414,7 +414,7 @@ CONTAINS
     INTEGER :: iI,iErr,iIOUN,iLay,iFound,iJ,iUpper0,iVibs,iVibs0
     DOUBLE PRECISION :: daJU(kHITRAN),daJL(kHITRAN)
     INTEGER :: iaJ_UorL(kHITRAN)
-    CHARACTER(80) :: caFname
+    CHARACTER(160) :: caFname
     DOUBLE PRECISION :: dVibCenter            !!! vib center from GENLN2 file
 
     CHARACTER(120) :: ca120A,ca120B,ca120C,ca120D
@@ -594,7 +594,7 @@ CONTAINS
     REAL :: pProf(kProfLayer),raPresslevels(kProfLayer+1)
     REAL :: raLayerHeight(kProfLayer),raThickness(kProfLayer)
     INTEGER :: iLTEIn,iBand,iGasID,iNLTEStart,iISO,iAllLayersLTE
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
 ! these are the input mixing ratios from Dave Edwards
     REAL :: raUpper_Pres(2*kProfLayer),raUpper_MixRatio(2*kProfLayer)
     INTEGER :: iNumMixRatioLevs
@@ -627,8 +627,8 @@ CONTAINS
     INTEGER :: iI,iErr,iIOUN,iLay,iFound,iJ,iUpper0,iVibs,iVibs0,iAllOrSome
     INTEGER :: iNumVibLevels
     REAL :: p,pp,q,t,raUAMixRatio(kNLTEProfLayer)
-    CHARACTER(80) :: caFname
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caFname
+    CHARACTER(160) :: caStr
     CHARACTER(3) ::  ca3
     CHARACTER(120) :: ca120A,ca120B,ca120C,ca120D
 
@@ -808,7 +808,7 @@ CONTAINS
     REAL :: raTAmt(kProfLayer)     !!actual gas amounts
     REAL :: raTPress(kProfLayer),raTPartPress(kProfLayer) !!actual p,pp
     INTEGER :: iLTEIn,iBand,iGasID,iISO,iAllLayersLTE,iProfileLayers
-    CHARACTER(80) :: caaNLTETemp(kGasStore)
+    CHARACTER(160) :: caaNLTETemp(kGasStore)
 ! output params are nonLTE temperatures, and Qtips_vib interpolated to profile
     REAL :: raNLTETemp(kProfLayer)   !!!NLTE temperatures
     REAL :: raLTETemp(kProfLayer)    !!!want to send this is from the vib-temp
@@ -827,7 +827,7 @@ CONTAINS
     INTEGER :: iI,iErr,iIOUN,iLay,iFound,iJ,iVibs,iVibs0,iStart
     INTEGER :: i1,i2,iNumVibLevels,iLogOrLinear,iLP,iDefault
     REAL :: rP,rPP,rQ,rT,rFac
-    CHARACTER(80) :: caFname
+    CHARACTER(160) :: caFname
     CHARACTER(100) :: ca1,ca2
     REAL :: raNLTE_STD(kProfLayer),raLTE_STD(kProfLayer)
 

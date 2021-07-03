@@ -32,11 +32,11 @@ CONTAINS
     REAL :: raPressLevels(kProfLayer+1)  !!!pressure levels
     INTEGER :: iNumLayers                !!!number of layers
     REAL :: rSolarAngle                  !!!solar angle for atm #1
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     INTEGER :: iRTP                      !!!which iRTP prof read in
 ! output
     INTEGER :: iRegr               !!!which regr profile this is closest to
-    CHARACTER(80) :: caVTFile       !!!temp file name where VT profiles are
+    CHARACTER(160) :: caVTFile       !!!temp file name where VT profiles are
 !!!created and stored if not given by user
 
 ! local vars
@@ -138,7 +138,7 @@ CONTAINS
 ! input params, read from caaNLTETemp(iLTEin)
 ! caaaNONLTETemp  tells the name of the files containing the nonLTE temps
     INTEGER :: iLTEIn,iBand,iDOVoigtChi
-    CHARACTER(80) :: caaaNLTEBands(kGasStore,kNumkCompT)
+    CHARACTER(160) :: caaaNLTEBands(kGasStore,kNumkCompT)
 ! output params
     INTEGER :: iGasID,iNum,iISO,iLineMixBand
     DOUBLE PRECISION :: daElower(kHITRAN),daLineCenter(kHITRAN)
@@ -149,7 +149,7 @@ CONTAINS
     CHARACTER(1) ::      caJPQR(kHITRAN)
 
     INTEGER :: iI,iErr,iIOUN,iJU,iJL
-    CHARACTER(80) :: caFname
+    CHARACTER(160) :: caFname
     DOUBLE PRECISION :: dMax,dL,dR,dC
 
     caFName = caaaNLTEBands(iLTEin,iBand)
@@ -275,7 +275,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
-    CHARACTER(80) :: caFname                !!! file to read
+    CHARACTER(160) :: caFname                !!! file to read
     DOUBLE PRECISION :: daJU(kHITRAN),daJL(kHITRAN) !!! quantum numbers
     INTEGER :: iGasID, iISO                !!! what to read
     INTEGER :: iAllOrSome                  !!! read NLTE (+1) or LTE (-1) stuff?
@@ -287,7 +287,7 @@ CONTAINS
 
 ! local variables
     REAL :: p,pp,q,t
-    CHARACTER(80) :: caStr
+    CHARACTER(160) :: caStr
     CHARACTER(3) ::  ca3
     REAL :: raQtipsXVT(kNLTEProfLayer),rDummyVibEnergy
     INTEGER :: iIOUN,iErr,iInputJU,iInputJL,iSetQVT
@@ -817,7 +817,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
     REAL :: raTemp3(kProfLayerP3)           !!!kinetic temp profile
     REAL :: raLayPress3(kProfLayerP3)       !!!layering
     INTEGER :: iNumPts3                     !!!number of points in the arrays
@@ -825,7 +825,7 @@ CONTAINS
     INTEGER :: iRegr                        !!! closest regr prof number (1:48)
     INTEGER :: iRTP                         !!!which iRTP prof read in
 ! output param
-    CHARACTER(80) ::  caVTfile
+    CHARACTER(160) ::  caVTfile
 
 ! local vars
     CHARACTER(120) :: caDir,caFnamePoly
@@ -888,7 +888,7 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
-    CHARACTER(80) :: caVTfile,caSummaryFile
+    CHARACTER(160) :: caVTfile,caSummaryFile
     REAL :: raaCompute(kNLTEProfLayer,12)
     REAL :: raTemp3(kProfLayerP3)           !!!kinetic temp profile
     REAL :: raLayPress3(kProfLayerP3)       !!!layering

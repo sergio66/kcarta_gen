@@ -117,7 +117,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iTag
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -151,9 +151,9 @@ CONTAINS
 ! this is to do with flux
 !iColJacobOrRad_IOUN = -1 typically ie this is a radiance calc, so dump out to kStdKCARTA
 !                    = +1 if this is for column jacobians, so has to dump out to kStdJacob
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is to do with jacobians
-    CHARACTER(80) :: caJacobFile,caJacobFile2
+    CHARACTER(160) :: caJacobFile,caJacobFile2
     INTEGER :: iNumGases,iaGases(kMaxGas),iNatm,iColJacobOrRad_IOUN
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -359,7 +359,7 @@ CONTAINS
     INTEGER :: iNp,iaOp(kPathsOut),iOutNum,iTag
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
     INTEGER :: iNpmix,iFileID,iDownWard,iBinaryFile
-    CHARACTER(80) :: caOutName
+    CHARACTER(160) :: caOutName
 ! iNclouds tells us how many clouds there are
 ! iaCloudNumLayers tells how many neighboring layers each cloud occupies
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
@@ -391,9 +391,9 @@ CONTAINS
     REAL ::      raaIWP(MAXNZ,kMaxCLouds), raaDME(MAXNZ,kMaxClouds)
 ! this are column jacs
 ! this is to do with flux
-    CHARACTER(80) :: caFluxFile
+    CHARACTER(160) :: caFluxFile
 ! this is to do with jacobians
-    CHARACTER(80) :: caJacobFile,caJacobFile2
+    CHARACTER(160) :: caJacobFile,caJacobFile2
     INTEGER :: iNumGases,iaGases(kMaxGas),iNatm
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -426,7 +426,7 @@ CONTAINS
     REAL ::    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
     REAL ::  ABSNU1, ABSNU2, ABSDELNU
     REAL ::  WAVENO
-    CHARACTER(80) :: SCATFILE(MAXSCAT)
+    CHARACTER(160) :: SCATFILE(MAXSCAT)
     CHARACTER(1) ::   RTMODEL
     CHARACTER(1) :: caScale(MAXSCAT)
 
@@ -436,7 +436,7 @@ CONTAINS
     INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA
 
     INTEGER :: iaTable(kMaxClouds*kCloudLayers),iIOUN
-    CHARACTER(80) :: caName
+    CHARACTER(160) :: caName
     INTEGER :: iIn,iJ,iI,iCloud,iScat,iF,iL
     REAL :: TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
     INTEGER :: iaRadLayer(kProfLayer)
@@ -657,7 +657,7 @@ CONTAINS
           
 ! local vars
     INTEGER :: iIOUNX,iERRX,iCountLay,iNlaysInFile,iJunkX,raPCC(kProfLayer),iTest
-    CHARACTER(80) :: caJunk80
+    CHARACTER(160) :: caJunk80
 
     write(kStdWarn,*) 'looking for and opening caaTextOverride (from nm_params)'
     iIOUNX = kTempUnit
