@@ -77,16 +77,45 @@ mars_H16_default_f90:
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H16_orig605_805res
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H16_orig605_805res
 
+385_H12_CO2_UMBC_default_f90:
+	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 basic
+	make -f Makefile_v122_Intelf90 basicTXT	
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H12_CO2_UMBC
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H12_CO2_UMBC
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H12_CO2_UMBC
+
 385_H08_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2008_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
 	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
-	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H08_CO2_UMBC
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H08_CO2_UMBC
-	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H08_CO2_UMBC
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H08_CO2_UMBC
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H08_CO2_UMBC
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H08_CO2_UMBC
 
+x_NOexist_385_H04_CO2_UMBC_default_f90:
+	make -f Makefile_v122_Intelf90 datafix385_v122_H2004_CO2_UMBC
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 basic
+	make -f Makefile_v122_Intelf90 basicTXT	
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H04_CO2_UMBC
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H04_CO2_UMBC
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H04_CO2_UMBC
+
+x_NOexist_385_H2k_CO2_UMBC_default_f90:
+	make -f Makefile_v122_Intelf90 datafix385_v122_H2k_CO2_UMBC
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 basic
+	make -f Makefile_v122_Intelf90 basicTXT	
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H2k_CO2_UMBC
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H2k_CO2_UMBC
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H2k_CO2_UMBC
 
 clean: 
 	rm *.optrpt *genmod.* *.o *.mod *~ 2> /dev/null || true

@@ -47,8 +47,6 @@ c                            eg HT1998 means "built with HITRAN 1998 + Toth"
 c parameter kChiFIle tells the code where to look for necessary files
 c that improve the spectroscopy when multiplied with the kCompressed data
       CHARACTER(160) kXsecParamFile,kCompParamFile
-!      PARAMETER (kXsecParamFile = '^/KCDATA/General/xsecHT2007_test.param')
-!      PARAMETER (kCompParamFile = '^/KCDATA/General/compHT2008.param')
       PARAMETER (kXsecParamFile = '^/KCDATA/General/xsecHT2010.param')
       PARAMETER (kCompParamFile = '^/KCDATA/General/compHT2010.param')
 

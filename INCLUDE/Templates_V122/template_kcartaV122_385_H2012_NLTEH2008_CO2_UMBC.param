@@ -18,7 +18,7 @@ c!!!                                                                  !!!
 c note .... PARAMETER (kCO2Path = '^/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')
 c template file : template_kcartaV122_385_H2016_NLTEH2008_CO2_UMBC.param       !!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-      PARAMETER(caVersion='v1.22 21-06-08 template_kcartaV122_385_H2008_NLTEH2008_CO2_UMBC.param')      !!!      
+      PARAMETER(caVersion='v1.22 21-07-03 template_kcartaV122_385_H2012_NLTEH2008_CO2_UMBC.param')      !!!      
 c!!!                       v     YY MM DD template_kcartaV122_PPM_H20XY_NLTEH20AB_CO2_UMBC.param')      !!!
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
@@ -47,10 +47,8 @@ c                            eg HT1998 means "built with HITRAN 1998 + Toth"
 c parameter kChiFIle tells the code where to look for necessary files
 c that improve the spectroscopy when multiplied with the kCompressed data
       CHARACTER(160) kXsecParamFile,kCompParamFile
-!      PARAMETER (kXsecParamFile = '^/KCDATA/General/xsecHT2007_test.param')
-!      PARAMETER (kCompParamFile = '^/KCDATA/General/compHT2008.param')
-      PARAMETER (kXsecParamFile = '^/KCDATA/General/xsecHT2010.param')
-      PARAMETER (kCompParamFile = '^/KCDATA/General/compHT2010.param')
+      PARAMETER (kXsecParamFile = '^/KCDATA/General/xsecHT2007_test.param')
+      PARAMETER (kCompParamFile = '^/KCDATA/General/compHT2012.param')
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
@@ -75,8 +73,8 @@ c      PARAMETER (kWaterPath = '#/v07.ieee-le/h2o.ieee-le/')
 c      PARAMETER (kCompPath  = '#/v07.ieee-le/etc.ieee-le/')
 c      PARAMETER (kCKDPath   = '^/KCDATA/General/CKDieee_le/')
 c everything redone in July 2010
-      PARAMETER (kWaterPath      = '^/H2008_IR.v1.ieee-le/h2o_ALLISO.ieee-le/')
-      PARAMETER (kCompPath       = '^/H2008_IR.v1.ieee-le/etc.ieee-le/')
+      PARAMETER (kWaterPath      = '^/H2012.ieee-le/IR605/h2o_ALLISO.ieee-le/')
+      PARAMETER (kCompPath       = '^/H2012.ieee-le/IR605/etc.ieee-le/')
       PARAMETER (kCKDPath        = '^/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '^/KCDATA/General/CKDieee_le/Compr/')
 
@@ -92,7 +90,7 @@ c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       PARAMETER (kWaterIsobandStart1 = 1105, kWaterIsobandStop1 = 1730)
       PARAMETER (kWaterIsobandStart2 = 2405, kWaterIsobandStop2 = 3355)
       CHARACTER(160) kWaterIsotopePath
-      PARAMETER (kWaterIsotopePath = '^/H2008_IR.v1.ieee-le/hDo.ieee-le/')
+      PARAMETER (kWaterIsotopePath = '^/H2012.ieee-le/IR605/hdo.ieee-le/')
 c for testing; this will turn off new part of code and just use usual database
 c for testing; this will turn off new part of code and just use usual database
 c      PARAMETER (kWaterIsotopePath = kWaterPath)
@@ -149,15 +147,15 @@ c \\\\\\\\\\\\\\\\\\\\ this is the history of CO2 files /////////////////////
 c --------- > (B) these are the CO2 files; 
 c ---------->     kCO2_UMBCorHARTMAN tells us linemixing = +1 for UMBC, -1 for Hartmann
       INTEGER kCO2_UMBCorHARTMAN
-c      PARAMETER (kCO2Path = '#/v20.ieee-le/etc.ieee-le/')
-c      PARAMETER (kCO2Path = '#/v23.ieee-le/etc.ieee-le/')
+c      PARAMETER (kCO2Path = '#/v20.ieee-le/etc.ieee-le/')     !!! made in July 2000
+c      PARAMETER (kCO2Path = '#/v23.ieee-le/etc.ieee-le/')     
 c      PARAMETER (kCO2Path = '#/UMBC_CO2_H1998.ieee-le/CO2ppmv370.ieee-le/')
 c      PARAMETER (kCO2Path = '#/v24.ieee-le/co2.ieee-le/')
       PARAMETER (kCO2Path = '^/UMBC_CO2_H1998.ieee-le/CO2ppmv385.ieee-le/')
       PARAMETER (kCO2_UMBCorHARTMAN = +1)
 c--->
 c      Am pretty sure this is 385 ppmv
-c      PARAMETER (kCO2Path  = '^/H2008_IR.v1.ieee-le/co2_hartmann.ieee-le/')
+c      PARAMETER (kCO2Path  = '^/H2012_IR.v1.ieee-le/co2_hartmann.ieee-le/')
 c      PARAMETER (kCO2_UMBCorHARTMAN = -1)
 
 c kCO2ppmvFile      == file that has the CO2 amounts used in the LTE kCARTA database
