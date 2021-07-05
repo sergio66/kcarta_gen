@@ -49,6 +49,7 @@ function [data, wnums, plevs, hgt, hr] = readkcfluxFAST(kfile, plevsIN, dfile, v
 if nargin < 4
   versionlength = 080; %% upto kcarta 1.16
   versionlength = 120; %% kcarta 1.18 onwards
+  versionlength = 160; %% kcarta 1.22 onwards
 end
 
 hr = [];
@@ -65,17 +66,19 @@ fid=fin;                    %<------------- my modification
 % MAIN HEADER
 
 % this was the hope
-%flen    = fread(fin, 1, 'integer*4');
-%version = fread(fin, 120, 'char');
-%version = char(version');
-%version_number=str2num(version(2:5))
-%if  (version_number >= 1.18)
-%  comment = fread(fin, 120, 'char');
-%else
-%  comment = fread(fin, 80, 'char');
-%end  
-%comment = char(comment');
-%flen    = fread(fin, 1, 'integer*4');
+% flen    = fread(fin, 1, 'integer*4');
+% version = fread(fin, 120, 'char');
+% version = char(version');
+% version_number=str2num(version(2:5))
+% if  (version_number >= 1.22)
+%   comment = fread(fin, 160, 'char');
+% elseif  (version_number >= 1.18)
+%   comment = fread(fin, 120, 'char');
+% else
+%   comment = fread(fin, 80, 'char');
+% end  
+% comment = char(comment');
+% flen    = fread(fin, 1, 'integer*4');
 
 %this is the reality .. see lines 2860 - 2870 of v1.18/s_writefile.f
 flen    = fread(fin, 1, 'integer*4');

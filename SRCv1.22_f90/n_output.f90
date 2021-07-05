@@ -191,7 +191,7 @@ CONTAINS
     REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm),raaPrBdry(kMaxAtm,2)
     REAL :: raPressLevels(kProfLayer+1)    !!!!actual pressures of levels
     CHARACTER(7) :: caWord
-    CHARACTER(120) :: caComment
+    CHARACTER(160) :: caComment
 
     INTEGER :: iPrinter,iAtm,iNp,iaOp(kPathsOut)
     INTEGER :: iNumLinesRead,iI,iJ,iUpDown,iList,iListType

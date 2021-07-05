@@ -86,7 +86,10 @@ caVersion.ckd = rparams(2);
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-if  (version_number >= 1.18)
+if  (version_number >= 1.22)
+  comment = fread(fin, 160, 'char');
+  %%% comment = fread(fin, 80, 'char');  %% for testing SRCv1.18/WORKS_Apr15_2016/
+elseif  (version_number >= 1.18)
   comment = fread(fin, 120, 'char');
   %%% comment = fread(fin, 80, 'char');  %% for testing SRCv1.18/WORKS_Apr15_2016/
 else

@@ -48,7 +48,9 @@ fid=fin;                    %<------------- my modification
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-if  (version_number >= 1.18)
+if  (version_number >= 1.22)
+  comment = fread(fin, 160, 'char');
+elseif  (version_number >= 1.18)
   comment = fread(fin, 120, 'char');
 else
   comment = fread(fin, 80, 'char');

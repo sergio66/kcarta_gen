@@ -1969,7 +1969,7 @@ CONTAINS
     INTEGER :: iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName
     INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
     CHARACTER(160) :: caDriver,caOutName
-    CHARACTER(120) :: caComment
+    CHARACTER(160) :: caComment
     CHARACTER(130) :: caaMixFileLines(kProfLayer)
     INTEGER :: iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iOutTypes,iMixFileLines

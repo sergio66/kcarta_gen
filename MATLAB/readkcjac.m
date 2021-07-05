@@ -56,7 +56,9 @@ flen    = fread(fin, 1, 'integer*4');
 flen    = fread(fin, 1, 'integer*4');
 version = setstr(version');
 version_number=str2num(version(2:5));
-if  (version_number >= 1.18)
+if  (version_number >= 1.22)
+  comment = fread(fin, 160, 'char');
+elseif  (version_number >= 1.18)
   comment = fread(fin, 120, 'char');
 else
   comment = fread(fin, 80, 'char');
