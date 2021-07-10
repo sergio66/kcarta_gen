@@ -171,19 +171,19 @@ CONTAINS
     include '../INCLUDE/TempF90/airsheights_upperparam.f90'
     include '../INCLUDE/TempF90/airslevelheights_upperparam.f90'
 
-    write(kStdWarn,*) 'checking ../INCLUDE/TempF90/airsHeightsLevels*aparam.f90 are for kPlanet = ',kPlanet
+    write(kStdWarn,'(A,I3)') 'checking ../INCLUDE/TempF90/airsHeightsLevels*aparam.f90 are for kPlanet = ',kPlanet
     write(kStdWarn,*) '  '
 
     IF (kPlanet /= iXPlanet5) THEN
-      write(kStdErr,*) 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet5',iXPlanet5
+      write(kStdErr,'(A,I3,A,I3)') 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet5',iXPlanet5
       Call DoStop
     END IF
     IF (kPlanet /= iXPlanet6) THEN
-      write(kStdErr,*) 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet6',iXPlanet6
+      write(kStdErr,'(A,I3,A,I3)') 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet6',iXPlanet6
       Call DoStop
     END IF
     IF (kPlanet /= iXPlanet7) THEN
-      write(kStdErr,*) 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet7',iXPlanet7
+      write(kStdErr,'(A,I3,A,I3)') 'kCARTA compiled for kPlanet = ',kPlanet,'but reading in airs*param for iXPlanet7',iXPlanet7
       Call DoStop
     END IF
 

@@ -605,8 +605,17 @@ computations, even with scattering (introduce a OLR computation) etc]
 Details : Bug fixes/ clarifications and new features/updates/improvements
 -------------------------------------------------------------------------
 
-v1.22
------
+v1.22 ----- 
+
+7/9/21           Can now handle rtp p.co2ppmv, as long as 
+                 h.gunit(h.glist == 2) = 10 (which is klayers for ppmv :
+                 /asl/packages/klayersV205/Doc/gas_units_code.txt
+                Rule of thumb : just like SARTA
+                if p.gas_2 exists and h.glist == 1,  then co2(z) = molecules/cm2
+                if p.gas_2 exists and h.glist == 10, then co2(z) = ppm
+                if p.co2ppm                        , then co2(z) = co2ppm/400 * US STd(z)
+                if none                            , then co2(z) = US STd
+
 7/3/21          Introducing NaN and Inf checking for input profile
                 (stemp,T(z),gas(z) profiles, satellite and solar angles, 
                  emissivity, altitudes, cloud params)

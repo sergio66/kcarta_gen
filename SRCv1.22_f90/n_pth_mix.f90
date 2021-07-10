@@ -2517,6 +2517,38 @@ end
     end SUBROUTINE AddWaterContinuumProfile
 
 !************************************************************************
+! this subroutine gets CO2 from US Std
+    REAL FUNCTION get_co2_us_std(co2ppm,i,iUNITS)
+
+    implicit none
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! input var
+    INTEGER :: i,iUNITS
+    REAL co2ppm
+! output var
+    REAL junk
+
+! local vars
+    REAL :: raPPX(kMaxProfLayer),raQX(kMaxProfLayer) !!US Std layer ppress, amt
+    REAL :: raPX(kMaxProfLayer), raTX(kMaxProfLayer) !!US Std layer press, temp
+
+    CALL getAFGL(1,2,raPX,raPPX,raTX,raQX)
+
+    IF (iUNITS == 11) THEN
+      junk = raQX(kMaxProfLayer-i+1) * co2ppm/(kCO2ppmv*1.0)
+    ELSEIF (iUNITS == 10) THEN
+      junk = raQX(kMaxProfLayer-i+1) * co2ppm/(kCO2ppmv*1.0)
+    END IF
+
+    !write(kStdWarn,*) 'WTheckCO2', i,co2ppm,co2ppm/(kCO2ppmv*1.0),junk
+
+    get_co2_us_std = junk
+
+    END FUNCTION get_co2_us_std
+
+!************************************************************************
+
 ! this subroutine reads in the US Std Profile name and returns the gas amount
     SUBROUTINE getAFGL(iProfileNum,iIDgas,raPX,raPPX,raTX,raQX)
 
