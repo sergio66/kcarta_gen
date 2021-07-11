@@ -30,7 +30,7 @@ sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/pos
 
 /bin/cp ../INCLUDE/TempF90/Earth/airslevelheights_upper.param  ../INCLUDE/TempF90/JunkTempDir/airslevelheights_upperparam_earth.f; fixcon ../INCLUDE/TempF90/JunkTempDir/airslevelheights_upperparam_earth.f ../INCLUDE/TempF90/airslevelheights_upperparam.f90;  rm ../INCLUDE/TempF90/JunkTempDir/airslevelheights_upperparam_earth.f
 
-###
+#########################
 /bin/cp ../INCLUDE/EARTH_database_params/KCARTA_database.param_earth   ../INCLUDE/TempF90/JunkTempDir/KCARTA_databaseparam.f;        fixcon ../INCLUDE/TempF90/JunkTempDir/KCARTA_databaseparam.f        ../INCLUDE/TempF90/KCARTA_databaseparam.f90;     rm ../INCLUDE/TempF90/JunkTempDir/KCARTA_databaseparam.f
 
 /bin/cp ../INCLUDE/EARTH_database_params/gasIDname.param_earth               ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f;              fixcon ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f              ../INCLUDE/TempF90/gasIDnameparam.f90;              rm ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f

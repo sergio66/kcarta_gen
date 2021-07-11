@@ -14,11 +14,11 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
-      include '../INCLUDE/TempF90/pre_definedHIGHRES_IR.param'                !!!
-c template file : template_kcarta_v121HIGHRES_IR.param.param          !!!
+      include '../INCLUDE/TempF90/pre_definedVERYHIGHRES_IR.param'                !!!
+c template file : template_kcarta_v122VERY1HIGHRES_IR.param.param         !!!
 !!!!info : caVersion='vX.XX YY-MM-DD COMMENT')
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-       PARAMETER(caVersion='v1.21 19-09-20 template_kcartaV118HIGHRES_IR.param')!!	    
+       PARAMETER(caVersion='v1.22 21-07-11 template_kcartaV122_400_ERYHIGHRES_IR.param')!!	    
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -26,10 +26,8 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!! compressed files for gases 1,3 are currently span 605-1205 cm-1
 c!! at a chunk spacing of 5 cm-1
 c!!
-c!! /asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for WV,O3
-c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for CO2
-c!!
-c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/ for WV,CO2,O3
+c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/ for WV,CO2,O3
+c!! /asl/data/kcarta_sergio/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/ for WV,CO2,O3
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!! to run this code first go to SRC, type
@@ -61,7 +59,7 @@ c************************************************************************
 
 c kOrigRefPath == path to original 100 layers reference profiles
 c              == these profiles were used in making the kCARTA database
-      CHARACTER*80 kOrigRefPath
+      CHARACTER(160) kOrigRefPath
       PARAMETER (kOrigRefPath = 
      $          '/asl/rta/kcarta_sergio/KCDATA/RefProf_July2010.For.v115up_CO2ppmv385/')
 
@@ -72,7 +70,7 @@ c                            eg H1998  means "built with HITRAN 1998"
 c                            eg HT1998 means "built with HITRAN 1998 + Toth"
 c parameter kChiFIle tells the code where to look for necessary files
 c that improve the spectroscopy when multiplied with the kCompressed data
-      CHARACTER*80 kXsecParamFile,kCompParamFile
+      CHARACTER(160) kXsecParamFile,kCompParamFile
       PARAMETER (kXsecParamFile = '/asl/rta/kcarta_sergio/KCDATA/General/junkHT2012.param')
 
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
@@ -113,8 +111,11 @@ c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le 
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
 c >>>> dont forget to symbolically link the files in h2o.ieee-le to hdo.ieee-le using lner.m <<<<<
 c >>>>           see eg /asl/data/kcarta/H2012.ieee-le/IR605/hdo.ieee-le/lner.m <<<<<
-      PARAMETER (kWaterPath      = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
-      PARAMETER (kCompPath       = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+c
+c      PARAMETER (kWaterPath      = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+c      PARAMETER (kCompPath       = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+      PARAMETER (kWaterPath      = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/')
+      PARAMETER (kCompPath       = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/')
       PARAMETER (kCKDPath        = '/asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '/asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/Compr/')
 
@@ -125,9 +126,9 @@ c while second band starts at 2405 and ends at 3555 cm-1 (ie last chunk is 3530 
 c >>>>>>> NOTE that ALL the water isotope datafiles are in kWaterIsotopePath
 c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and 
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
-      CHARACTER*80 kWaterIsotopePath
+      CHARACTER(160) kWaterIsotopePath
 c      PARAMETER (kWaterIsotopePath = '/asl/data/kcarta/H2012_IR/hdo/')
-ccc      PARAMETER (kWaterIsotopePath = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+ccc      PARAMETER (kWaterIsotopePath = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
 ccc      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
@@ -146,74 +147,74 @@ c \\\ these files copied from                                         ////
 c \\\     /strowdata1/s1/sergio/OLD_RUN8_NIRDATABASE/blah/fbin/gah    ////
 
 c !!! f = 020_30 cm-1, at 0.00005 cm-1 spacing (= 0.5 cm-1 chunk span)
-      CHARACTER*80 kWaterPathf,kCompPathf,kCKDPathf
+      CHARACTER(160) kWaterPathf,kCompPathf,kCKDPathf
       PARAMETER (kWaterPathf = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR15_30/h2o.ieee-le/')
       PARAMETER (kCompPathf  = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR15_30/etc.ieee-le/')
       PARAMETER (kCKDPathf   = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR15_30/etc.ieee-le/')
 
 c !!! g = 030_50 cm-1, at 0.00010 cm-1 spacing (= 1.0 cm-1 chunk span)
-      CHARACTER*80 kWaterPathg,kCompPathg,kCKDPathg
+      CHARACTER(160) kWaterPathg,kCompPathg,kCKDPathg
       PARAMETER (kWaterPathg = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR30_50/h2o.ieee-le/')
       PARAMETER (kCompPathg  = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR30_50/etc.ieee-le/')
       PARAMETER (kCKDPathg   = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR30_50/etc.ieee-le/')
 
 c !!! h = 050_80 cm-1, at 0.00015 cm-1 spacing (= 1.5 cm-1 chunk span)
-      CHARACTER*80 kWaterPathh,kCompPathh,kCKDPathh
+      CHARACTER(160) kWaterPathh,kCompPathh,kCKDPathh
       PARAMETER (kWaterPathh = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR50_80/h2o.ieee-le/')
       PARAMETER (kCompPathh  = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR50_80/etc.ieee-le/')
       PARAMETER (kCKDPathh   = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR50_80/etc.ieee-le/')
 
 c !!! j = 080_150 cm-1, at 0.00025 cm-1 spacing (= 2.5 cm-1 chunk span)
-      CHARACTER*80 kWaterPathj,kCompPathj,kCKDPathj
+      CHARACTER(160) kWaterPathj,kCompPathj,kCKDPathj
       PARAMETER (kWaterPathj = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR80_150/h2o.ieee-le/')
       PARAMETER (kCompPathj  = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR80_150/etc.ieee-le/')
       PARAMETER (kCKDPathj   = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR80_150/etc.ieee-le/')
 
 c !!! k = 140_310 cm-1, at 0.0005 cm-1 spacing (= 05 cm-1 chunk span)
-      CHARACTER*80 kWaterPathk,kCompPathk,kCKDPathk
+      CHARACTER(160) kWaterPathk,kCompPathk,kCKDPathk
       PARAMETER (kWaterPathk = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR140_310/h2o.ieee-le/')
       PARAMETER (kCompPathk  = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR140_310/etc.ieee-le/')
       PARAMETER (kCKDPathk   = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR140_310/etc.ieee-le/')
 
 c !!! p = 300_510 cm-1, at 0.0010 cm-1 spacing (= 10 cm-1 chunk span)
-      CHARACTER*80 kWaterPathp,kCompPathp,kCKDPathp
+      CHARACTER(160) kWaterPathp,kCompPathp,kCKDPathp
       PARAMETER (kWaterPathp = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR300_510/h2o.ieee-le/')
       PARAMETER (kCompPathp  = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR300_510/etc.ieee-le/')
       PARAMETER (kCKDPathp   = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR300_510/etc.ieee-le/')
 
 c !!! q = 500_605 cm-1, at 0.0015 cm-1 spacing (= 15 cm-1 chunk span)
-      CHARACTER*80 kWaterPathq,kCompPathq,kCKDPathq
+      CHARACTER(160) kWaterPathq,kCompPathq,kCKDPathq
       PARAMETER (kWaterPathq = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR500_605/h2o.ieee-le/')
       PARAMETER (kCompPathq  = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR500_605/etc.ieee-le/')
       PARAMETER (kCKDPathq   = '/asl/rta/kcarta_sergio/H2012.ieee-le/FIR500_605/etc.ieee-le/')
 
 c !!! s = 2830-3380 cm-1, at 0.0025 cm-1 spacing (= 25 cm-1 chunk span)
 c !!! note we link to hdo.ieee-le instead of h2o_ALLISO.ieee-le
-      CHARACTER*80 kWaterPaths,kCompPaths,kCKDPaths
+      CHARACTER(160) kWaterPaths,kCompPaths,kCKDPaths
       PARAMETER (kWaterPaths = '/asl/rta/kcarta_sergio/H2012.ieee-le/NIR2830_3580/hdo.ieee-le/')
       PARAMETER (kCompPaths  = '/asl/rta/kcarta_sergio/H2012.ieee-le/NIR2830_3580/etc.ieee-le/')
       PARAMETER (kCKDPaths   = '/asl/rta/kcarta_sergio/H2012.ieee-le/NIR2830_3580/etc.ieee-le/')
 
 c !!! m = 3550-5550 cm-1, at 0.01 cm-1 spacing (= 100 cm-1 chunk span)
-      CHARACTER*80 kWaterPathm,kCompPathm,kCKDPathm
+      CHARACTER(160) kWaterPathm,kCompPathm,kCKDPathm
       PARAMETER (kWaterPathm = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR3550_5550/h2o.ieee-le/')
       PARAMETER (kCompPathm  = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR3550_5550/etc.ieee-le/')
       PARAMETER (kCKDPathm   = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR3550_5550/etc.ieee-le/')
 
 c !!! n = 5550-8350 cm-1, at 0.015 cm-1 spacing (= 150 cm-1 chunk span)
-      CHARACTER*80 kWaterPathn,kCompPathn,kCKDPathn
+      CHARACTER(160) kWaterPathn,kCompPathn,kCKDPathn
       PARAMETER (kWaterPathn = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR5550_8200/h2o.ieee-le/')
       PARAMETER (kCompPathn  = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR5550_8200/etc.ieee-le/')
       PARAMETER (kCKDPathn   = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR5550_8200/etc.ieee-le/')
 
 c !!! o = 8250-12250 cm-1, at 0.025 cm-1 spacing (= 250 cm-1 chunk span)
-      CHARACTER*80 kWaterPatho,kCompPatho,kCKDPatho
+      CHARACTER(160) kWaterPatho,kCompPatho,kCKDPatho
       PARAMETER (kWaterPatho = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR8250_12250/h2o.ieee-le/')
       PARAMETER (kCompPatho  = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR8250_12250/etc.ieee-le/')
       PARAMETER (kCKDPatho   = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/NIR8250_12250/etc.ieee-le/')
 
 c !!! v = 12000-25000 cm-1, at 0.0500 cm-1 spacing (= 500 cm-1 chunk span)
-      CHARACTER*80 kWaterPathv,kCompPathv,kCKDPathv
+      CHARACTER(160) kWaterPathv,kCompPathv,kCKDPathv
 c      PARAMETER (kWaterPathv = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/VIS12000_25000/h2o.ieee-le/')
 c      PARAMETER (kCompPathv  = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
 c      PARAMETER (kCKDPathv   = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/VIS12000_25000/etc.ieee-le/')
@@ -222,7 +223,7 @@ c      PARAMETER (kCKDPathv   = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS
       PARAMETER (kCKDPathv   = '/asl/rta/kcarta_sergio/H2004_otherbands.ieee-le/VIS12000_25000/etc.ieee-le/')
 
 c !!! u = 25000-44000 cm-1, at 0.1000 cm-1 spacing (= 1000 cm-1 chunk span)
-      CHARACTER*80 kWaterPathu,kCompPathu,kCKDPathu
+      CHARACTER(160) kWaterPathu,kCompPathu,kCKDPathu
 c      PARAMETER (kWaterPathu = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/UV25000_45000/h2o.ieee-le/')
 c      PARAMETER (kCompPathu  = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
 c      PARAMETER (kCKDPathu   = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS/UV25000_45000/etc.ieee-le/')
@@ -230,7 +231,7 @@ c      PARAMETER (kCKDPathu   = '/asl/rta/kcarta_sergio/H2012.ieee-le/OTHERBANDS
       PARAMETER (kCompPathu  = '/asl/rta/kcarta_sergio/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
       PARAMETER (kCKDPathu   = '/asl/rta/kcarta_sergio/H2004_otherbands.ieee-le/UV25000_45000/etc.ieee-le/')
 
-      CHARACTER*80 kCousin_CO2Path,kChiFile
+      CHARACTER(160) kCousin_CO2Path,kChiFile
 c kCousin_CO2Path == path to alt (cousin) CO2 compressed data files (gasID 2)
 c (a) v10 has the original database, with GENLN2 Cousin lineshape
 c         warning : if you use the v10 database, you will need to bump
@@ -253,7 +254,7 @@ ccccccc >>>>>>>>
 
 c \\\\\\\\\\\\\\\\\\\\ this is the history of CO2 files /////////////////////
 c kCO2Path        == path to main linemix CO2 compressed data files (gasID 2)
-      CHARACTER*80 kCO2Path
+      CHARACTER(160) kCO2Path
 c (1) v20 has the CO2 database made up in Summer 2000; HITRAN1998, PR mixing
 c         first all linemix database, where only one parameter for temperature
 c         sounding regions at 4um
@@ -299,7 +300,8 @@ c      PARAMETER (kCO2Path = '/asl/rta/kcarta_sergio/H2012.ieee-le/IR605/etc.iee
 c      PARAMETER (kCO2Path = '/asl/rta/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/hartmann/') !! hmm a new try of Hartmann
 c >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!! >>>> ******* <<<< !!!!
 
-      PARAMETER (kCO2Path = '/asl/data/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0005/')
+c      PARAMETER (kCO2Path = '/asl/data/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0001/')
+      PARAMETER (kCO2Path = '/asl/data/kcarta/H2016.ieee-le/IR605/etc.ieee-le/lblrtm0.0002/')
       PARAMETER (kCO2_UMBCorHARTMAN = -1)
 c--->
 c      Am pretty sure this is 385 ppmv
@@ -312,7 +314,7 @@ c                         LTE kCARTA database, layers 1 .. 100
 c kCO2ppmvFileBackUS== file that has the CO2 amounts used in the weak backgnd 
 c                         UA LTE kCARTA database, alyers 101 - 120
 c kCO2ppmv       == CO2 ppmv used in the kCARTA database, for LTE 1 .. 100 layers
-      CHARACTER*80 kCO2ppmvFile,kCO2ppmvFileBack,kCO2ppmvFileBackUA
+      CHARACTER(160) kCO2ppmvFile,kCO2ppmvFileBack,kCO2ppmvFileBackUA
       INTEGER      kCO2ppmv
       PARAMETER (kCO2ppmv           = 385)
       PARAMETER (kCO2ppmvFile       = '/asl/rta/kcarta_sergio/KCDATA/General/refgas2_385ppmv')
@@ -321,7 +323,7 @@ c kCO2ppmv       == CO2 ppmv used in the kCARTA database, for LTE 1 .. 100 layer
 
 c --------- > (C) these are the extra needed files
 c also need paths to where the xsec, CKD and Solar Radiance Files are
-      CHARACTER*80 kSolarPath,kXsecFile
+      CHARACTER(160) kSolarPath,kXsecFile
       PARAMETER (kSolarPath = '/asl/rta/kcarta_sergio/KCDATA/General/SOLARieee_le/')
       PARAMETER (kXsecFile  = '/asl/rta/kcarta_sergio/KCDATA/General/xsecdata.dat.intel')
 
@@ -397,10 +399,10 @@ c space saver; everything at 0.0025 cm-01
 c      PARAMETER (kBloatPts=1)     
 c kUpperAtmRefPath == path to upper atm 100 layers reference profiles
 c                  == profiles were used in making upper atm kCARTA database
-      CHARACTER*80 caUpperAtmRefPath
+      CHARACTER(160) caUpperAtmRefPath
       PARAMETER (caUpperAtmRefPath= '/asl/rta/kcarta_sergio/KCDATA/NLTE/UA/')
 c kAuxNLTERefsPath = path to some US STd reference profiles which include LA,UA
-      CHARACTER*80 caAuxNLTERefsPath
+      CHARACTER(160) caAuxNLTERefsPath
       PARAMETER (caAuxNLTERefsPath = '/asl/rta/kcarta_sergio/KCDATA/NLTE/LA/')
 
 c*********************
@@ -421,7 +423,7 @@ c   where the 3 versions reside
 c this is where the strong band line params are
 c in the files here are stored the HITRAN line params (stren, freq, width etc)
 c this name should be self consistent with "caaStrongLines" in nm_nonlte of namelist file
-      CHARACTER*80 caStrongLineParams
+      CHARACTER(160) caStrongLineParams
 c this is new, where we have 19 NLTE bands
       PARAMETER (caStrongLineParams=
      $         '/asl/rta/kcarta_sergio/KCDATA/NLTE/AIRSCO2/CO2_H12/co2_allpqr_')
@@ -429,10 +431,10 @@ c this is new, where we have 19 NLTE bands
 c H. Motteler had files in on 09/11/2005, in /taro/s2/motteler/, 
 c they have been copied to /asl/data/kcarta; these files have removed 19 NLTE bands
 c this is where we have lower atm weakline database
-      CHARACTER*80 caWeakCO2Path
+      CHARACTER(160) caWeakCO2Path
       PARAMETER (caWeakCO2Path = '/asl/rta/kcarta_sergio/BACKGND_COUSIN/fbin/etc.ieee-le/385ppmv/')
 c this is where the upper atm weakline database lies
-      CHARACTER*80 caWeakUpperAtmCO2Path
+      CHARACTER(160) caWeakUpperAtmCO2Path
       PARAMETER (caWeakUpperAtmCO2Path =
      $   '/asl/rta/kcarta_sergio/BACKGND_COUSIN_UPPER/fbin/etc.ieee-le/385ppmv/')
 
@@ -447,10 +449,10 @@ c this tells the code how many layers/levels to expect in the NLTE profile
       INTEGER kNLTEProfLayer
       PARAMETER (kNLTEProfLayer= 150)
 c kRegrPath == path to regression profiles that code needs if it guesses VT
-      CHARACTER*80 kRegrFile
+      CHARACTER(160) kRegrFile
       PARAMETER (kRegrFile = '/asl/rta/kcarta_sergio/KCDATA/TestProf/rtp_regress.op.rtp')
 c kLOPEZPUERTAS = path to Manuel Lope Puertas files, for regression fits
-      CHARACTER*80 kLopezPuertas
+      CHARACTER(160) kLopezPuertas
       PARAMETER (kLopezPuertas = 
      $ '/home/sergio/KCARTA/SRCv1.12/NONLTE2/sergio/VT_48PROFILES/sergio_merge/')
 c kNLTEPolyfits = path to where the polynomial fits to NLTE profiles are
@@ -458,11 +460,11 @@ c kNLTEPolyfits = path to where the polynomial fits to NLTE profiles are
       PARAMETER (kNLTEPolyFits = 
      $ '/home/sergio/KCARTA/SRCv1.12/NONLTE2/sergio/VT_48PROFILES/NLTE_POLYFITS/')
 
-cccc this profile is really the same as that in CHARACTER*80 kOrigRefPath
+cccc this profile is really the same as that in CHARACTER(160) kOrigRefPath
 cccc so subroutine get_us_std has been updated to just use kOrigRefPath/refgas*
 c the US Std Profiles for h.ptype = 2
 c kUSStdPath == path to US Std Profiles for h.ptype = 2
-c      CHARACTER*80 kUSStd
+c      CHARACTER(160) kUSStd
 c      PARAMETER (kUSStd = '/asl/rta/kcarta_sergio/KCDATA/USSTD/')
 
 c************************
@@ -486,7 +488,7 @@ c*************************
 c caUA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for UA CO2
 c caLA_US_STD_385ppmv has the US STD profile (for 385 ppmv) for LA CO2
 c this is useful when doing LBL NLTE calcs
-      CHARACTER*80 caUA_US_STD,caLA_US_STD
+      CHARACTER(160) caUA_US_STD,caLA_US_STD
       PARAMETER (caUA_US_STD = '/asl/rta/kcarta_sergio/KCDATA/NLTE/UA/us_std_prof_ua_400ppmv')
       PARAMETER (caLA_US_STD = '/asl/rta/kcarta_sergio/KCDATA/NLTE/LA/us_std_prof_la_400ppmv')
 
@@ -540,7 +542,7 @@ c kStempMin,kStempMax = what you would reasonably expect for stemp
 
 c this has the AFGL levels profiles for "layers" code
 c if you set this as 'DNE' then ReadRefProf_Units_laysORlevs will only call the LAYERS ref prof
-       CHARACTER*80 kcaLevsRefProf
+       CHARACTER(160) kcaLevsRefProf
        PARAMETER (kcaLevsRefProf = '/home/sergio/KCARTA/INCLUDE/glatm_16Aug2010.dat')
 
 c************************************************************************

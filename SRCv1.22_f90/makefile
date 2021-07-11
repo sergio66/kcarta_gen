@@ -48,8 +48,8 @@ mars_H16_default_f90:
 	make -f Makefile
 	make -f Makefile_v122_Intelf90 basic
 	make -f Makefile_v122_Intelf90 scat
-	mv ../BIN/bkcarta.x90 ../BIN/bkcarta.x_highres605_1205_12p8
-	mv ../BIN/kcarta.x90 ../BIN/kcarta.x_highres605_1205_12p8	
+	mv ../BIN/bkcarta.x90 ../BIN/bkcarta.x_f90_122_highres605_1205_12p8
+	mv ../BIN/kcarta.x90 ../BIN/kcarta.x_f90_122_highres605_1205_12p8	
 
 400_H12p8_veryhighres605_1205:
 	make -f Makefile_v122_Intelf90 datafix400_v122_H2016_veryhighres
@@ -60,8 +60,8 @@ mars_H16_default_f90:
 	make -f Makefile
 	make -f Makefile_v122_Intelf90 basic
 	make -f Makefile_v122_Intelf90 scat
-	mv ../BIN/bkcarta.x90 ../BIN/bkcarta.x_veryhighres605_1205_12p8
-	mv ../BIN/kcarta.x90 ../BIN/kcarta.x_veryhighres605_1205_12p8	
+	mv ../BIN/bkcarta.x90 ../BIN/bkcarta.x_f90_122_veryhighres605_1205_12p8
+	mv ../BIN/kcarta.x90 ../BIN/kcarta.x_f90_122_veryhighres605_1205_12p8	
 
 ########################################################################
 ## these uses ../INCLUDE/pre_defined_orig605_805res.param which is
