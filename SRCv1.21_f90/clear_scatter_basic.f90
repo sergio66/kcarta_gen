@@ -24,7 +24,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: raFreq(kMaxPts)             !wavenumbers
@@ -147,7 +147,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: raFreq(kMaxPts)             !wavenumbers
@@ -275,7 +275,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: raFreq(kMaxPts)              !wavenumbers
@@ -565,7 +565,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: raFreq(kMaxPts)             !wavenumbers
@@ -796,7 +796,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: raFreq(kMaxPts)             !wavenumbers
@@ -1026,7 +1026,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input parameters
     REAL :: raFreq(kMaxPts)             !wavenumbers
@@ -1241,7 +1241,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raVTemp  = array containing the original 1.0 fraction temps
 ! rFrac    = frac of layer that we need
@@ -1340,7 +1340,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raLayerHeight  = array containing the original layer heights
 ! rFrac          = frac of layer that we need
@@ -1391,7 +1391,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     REAL :: raFreq(kMaxPts)
@@ -1465,7 +1465,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile
@@ -1623,7 +1623,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! raSun    = final solar contr in mW/m2/sr/cm-1
 ! raFreq  = frequency array
@@ -1694,7 +1694,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay       = which of the radiating layers in atmosphere we are processing
 ! iNp        = number of layers to be output for current atmosphere
@@ -1750,7 +1750,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iSun     = for uplooking instr, should we include sun in FOV?
 ! raSun    = for uplooking instr, should we include sun in FOV?
@@ -1801,7 +1801,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 !   iSun     = for uplooking instr, should we include sun in FOV?
@@ -1920,7 +1920,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 !   raFreq  = wavenumbers
@@ -2044,7 +2044,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows)
@@ -2177,7 +2177,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input params
 ! rFracTop tells how much of the upper layer has been used, due to instr posn
@@ -2262,7 +2262,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! rFracTop tells how much of the upper layer has been used, due to instr posn
 ! iaRadLayer = current radiating atmosphere defn : gnd to instrument
@@ -2345,7 +2345,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !       Input parameters:
 !     SCATFILE   file name of scattering file
@@ -2580,7 +2580,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL ::     WAVENO, DME
     REAL ::     EXTINCT, SSALB, ASYM
@@ -2695,7 +2695,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! these are variables that come in from kcartamain.f
     REAL :: raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)
@@ -2841,7 +2841,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! output variable
     REAL :: TEMP(MAXNZ)     !temperature of layers, in kCARTA layering style
@@ -2871,7 +2871,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raPressLevels = actual pressure levels that come out of kLAYERS
 ! raProfileTemp = actual profile temp
@@ -3024,7 +3024,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: rPressStart,rPressStop,rTSurf,raProfileTemp(kProfLayer)
     REAL :: raPressLevels(kProfLayer+1)
@@ -3087,7 +3087,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL ::     WAVENO, DME
     REAL ::     EXTINCT, SSALB, ASYM
@@ -3227,7 +3227,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !       Reads in the single scattering table for a number of wavenumbers,
 !     particle sizes, and viewing angles.  The scattering properties are
@@ -3328,7 +3328,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !       Reads in the single scattering table for a number of wavenumbers,
 !     particle sizes, and viewing angles.  The scattering properties are
@@ -3413,7 +3413,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !       Reads in the single scattering table for a number of wavenumbers,
 !     particle sizes, and viewing angles.  The scattering properties are
@@ -3487,7 +3487,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
       
     CHARACTER(80) :: caLine
     CHARACTER cScale
@@ -3533,7 +3533,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 !   upper atm P,PP,T(LTE),Q   (really only need T(LTE))

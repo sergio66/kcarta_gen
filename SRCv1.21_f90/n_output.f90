@@ -158,7 +158,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -525,7 +525,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iaGasID    = array containig GAS ID's
 ! iGS        = GAS ID or MP set number
@@ -596,7 +596,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iList      = number of paths/mixed paths set in original iaOp
 ! iNp        = final number of paths/mixed paths set in iaOp for print option
@@ -675,7 +675,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -752,7 +752,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -827,7 +827,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -895,7 +895,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -966,7 +966,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iList     = set how many items found in list
 ! iListType = 1,2,3,4    1 if -1  -1
@@ -1017,7 +1017,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -1105,7 +1105,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -1172,7 +1172,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -1274,7 +1274,7 @@ CONTAINS
     iNumGases,iNp,iaNpT,iaPrinterT)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)
@@ -1358,7 +1358,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iaOp1(kPathsOut),iaOp2(kPathsOut),i1,i2,iSum
 
@@ -1402,7 +1402,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! i1,i2     = lenght of the lits blah1,blah2
 ! iSum      = final length of combined list .. stored in ia1,ra1,raP1
@@ -1452,7 +1452,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNew   = is this a new pressure?If so iNew = +1
 ! iUD    = direction of radiation travel
@@ -1512,7 +1512,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: kMaxPrT
     PARAMETER (kMaxPrT=kMaxPrint+1)

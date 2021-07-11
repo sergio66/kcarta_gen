@@ -23,7 +23,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     REAL :: raPressStart(kMaxAtm),raPressStop(kMaxAtm)
     REAL :: raaPrBdry(kMaxAtm,2),raFracTop(kMaxAtm),raFracBot(kMaxAtm)
     INTEGER :: iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iNatm
@@ -98,7 +98,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! caSetEmissivity= array that gives name of emissivity files (if any)
 ! raSetEmissivity= array that gives constant emissivity value (if set)
@@ -481,7 +481,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iAtm      = current atmosphere number
 ! raSetSolarRefl = array containing the wavenumber dependent solar refl
@@ -647,7 +647,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iAtm      = current atmosphere number
 ! raSetEmissivity = array containing the wavenumber dependent emissivities
@@ -795,7 +795,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raPressLevels are the actual pressure levels from KLAYERS
 ! rPressStart,rPressStop are the pressure start/stop values
@@ -1050,7 +1050,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iJacob    = number of gases to do d/dq for
 ! iaJacob   = list of gases to do d/dq for
@@ -1145,7 +1145,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! cloud type, and cloud fraction, from the namelist file
     INTEGER :: iaCloudScatType(kMaxClouds)
@@ -1576,7 +1576,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: r1,raPressLevels(kProfLayer+1)   !!pressure, pressure levels
     INTEGER :: iProfileLayers                !!number of layers in atm
@@ -1629,7 +1629,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raPressLevels(kProfLayer+1)             !!! AIRS layers
@@ -1707,7 +1707,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: iProfileLayers
     REAL :: raPressLevels(kProfLayer+1),raaJunkCloudTB(2,2)
@@ -2003,7 +2003,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iA,iaaRadLayer(kMaxAtm,kProfLayer)
     REAL :: raPressStart(kMaxAtm),raSatHeight(kMaxAtm)

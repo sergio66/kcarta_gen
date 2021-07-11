@@ -32,7 +32,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! input vars
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile
@@ -254,7 +254,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: mu1,mu2,g       !mu1,mu2 are the two angles, g is the asymmetry
     REAL :: phi1,phi2
@@ -289,7 +289,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: mu1,mu2,raG(kMaxPts)       !mu1,mu2 are the two angles, g is the asymmetry
     REAL :: phi1,phi2
@@ -332,7 +332,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! input vars
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile
@@ -447,7 +447,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! input vars
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile
@@ -578,7 +578,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! input vars
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile

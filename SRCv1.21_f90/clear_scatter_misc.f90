@@ -35,7 +35,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL ::     WAVENO, DME
     REAL ::     dEXTINCT_dr, dSSALB_dr, dASYM_dr
@@ -171,7 +171,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
      
     REAL ::     MU, WAVENO, DME
     REAL ::     EXTINCT, SSALB, ASYM, PHI1UP, PHI1DN, PHI2UP, PHI2DN
@@ -327,7 +327,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: NABSNU, NLEV            !!!!!!!!!!!MAXNZ, MAXABSNU
     LOGICAL :: BINARYABSFILE
@@ -397,7 +397,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
      
     INTEGER :: NLEV
     REAL ::    MU, WAVENO
@@ -556,7 +556,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! rFracTop tells how much of the upper layer has been used, due to instr posn
 ! iaRadLayer = current radiating atmosphere defn : gnd to instrument
@@ -663,7 +663,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input is raaFlux, layer iLay, computed on point spacing = kDis_Pts
 ! output is raaFlux, layer iLay, computed on point spacing = 1
@@ -740,7 +740,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
      
 ! iSergio INTEGER that tells if this is RTSPEC or SERGIO's code
     INTEGER :: iSergio
@@ -1272,7 +1272,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! these are variables that come in from kcartamain.f
     REAL :: raaAbs(kMaxPts,kMixFilRows),raFreq(kMaxPts),rFracTop,rFracBot
@@ -1457,7 +1457,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile
@@ -1533,7 +1533,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
      
 ! rFracTop tells how much of the upper layer has been used, due to instr posn
 ! iaRadLayer = current radiating atmosphere defn : gnd to instrument
@@ -1633,7 +1633,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     REAL :: tabextinct(*),tabssalb(*),tabasym(*)
     INTEGER :: N
@@ -1735,7 +1735,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer) !to get layer info
     INTEGER :: iAtm,iNumLayer,iL,iUpDown,iS,iE,iI,iiDiv
@@ -1775,7 +1775,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
     REAL :: raaAbs(kMaxPts,kMixFilRows)        !original, from uncompression
     REAL :: raaExtTemp(kMaxPts,kMixFilRows)    !temporary copy
@@ -1812,7 +1812,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -1939,7 +1939,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -2075,7 +2075,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -2258,7 +2258,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -2421,7 +2421,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
     REAL :: raaAbs(kMaxPts,kMixFilRows)        !original, from uncompression
     REAL :: raaExtTemp(kMaxPts,kMixFilRows)    !temporary copy
@@ -2451,7 +2451,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -2518,7 +2518,7 @@ CONTAINS
 
     IMPLICIT NONE
           
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input : the scattering file name
     CHARACTER(120) :: SCATFILE
@@ -2721,7 +2721,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: mu1,mu2,g(kMaxPts)       !mu1,mu2 are the two angles, g is the asymmetry vector
     REAL :: rahg2_real(kMaxPts)
@@ -2816,7 +2816,7 @@ CONTAINS
 
     implicit none
      
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iSergio INTEGER that tells if this is RTSPEC or SERGIO's code
     INTEGER :: iSergio
@@ -3260,7 +3260,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -3473,7 +3473,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -3716,7 +3716,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! usual variables
     INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers

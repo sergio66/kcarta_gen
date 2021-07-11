@@ -53,7 +53,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = array containing layer dependent sun angles
@@ -331,7 +331,7 @@ CONTAINS
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
     raaRadsX,iNumOutX,rFracX)
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -634,7 +634,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -1166,7 +1166,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     INTEGER :: iNumLayer,iaRadLayer(kProfLayer),iaCldLayer(kProfLayer)
@@ -1259,7 +1259,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     INTEGER :: iNumLayer,iaRadLayer(kProfLayer),iaCldLayer(kProfLayer),iLay
@@ -1356,7 +1356,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input vars
     REAL :: raaExt(kMaxPts,kMixFilRows),raaSSAlb(kMaxPts,kMixFilRows)
@@ -1433,7 +1433,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -1859,7 +1859,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -2328,7 +2328,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles

@@ -31,7 +31,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
 
 ! output
@@ -115,7 +115,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNpmix     = number of mixed paths read in from mixfile
 ! iaMPSetForRad = array telling which MP set to associate with which atm
@@ -259,7 +259,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iAFGLProf  = which AFGL prof to use? 1 .. 6
 ! caPFName = character*80 profile name
@@ -542,7 +542,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! input params
     INTEGER :: iakSolar(kMaxAtm),ctype1,ctype2
@@ -1110,14 +1110,14 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
     INTEGER :: inatm   ! Added ESM
     INTEGER :: iProfilelayers2   ! Added ESM
           
     REAL :: raaPrBdry(kMaxAtm,2)    ! Added ESM
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! input params ---------------------------------------------------->
 !   raaTemp/Press  = current gas profile parameters
@@ -1787,7 +1787,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
 
 ! caSetEmissivity= array that gives name of emissivity files (if any)
@@ -2868,10 +2868,10 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -2973,10 +2973,10 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -3481,7 +3481,7 @@ CONTAINS
 
 ! finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
 ! that he/she is outta luck!!!!!!!
-! see ../INCLUDE/KCARTA_databaseparam.f90 for the kCARTA database definitions
+! see ../INCLUDE/TempF90/KCARTA_databaseparam.f90 for the kCARTA database definitions
     write (kStdWarn,*) 'Highest database pressure (lowest level) : ', &
     PLEV_KCARTADATABASE_AIRS(1)
     write (kStdWarn,*) 'Lowest database pressure (highest level) : ', &
@@ -3514,10 +3514,10 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -4026,7 +4026,7 @@ CONTAINS
 
 ! finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
 ! that he/she is outta luck!!!!!!!
-! see ../INCLUDE/KCARTA_databaseparam.f90 for the kCARTA database definitions
+! see ../INCLUDE/TempF90/KCARTA_databaseparam.f90 for the kCARTA database definitions
     write (kStdWarn,*) 'Highest database pressure (lowest level) : ', &
     PLEV_KCARTADATABASE_AIRS(1)
     write (kStdWarn,*) 'Lowest database pressure (highest level) : ', &
@@ -4066,11 +4066,11 @@ CONTAINS
 
     implicit none
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     include 'rtpdefs.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
 
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
@@ -4518,7 +4518,7 @@ CONTAINS
 
 ! finally check to see if the highest z (lowest p) ~~ 0.005 mb, else tell user
 ! that he/she is outta luck!!!!!!!
-! see ../INCLUDE/KCARTA_databaseparam.f90 for the kCARTA database definitions
+! see ../INCLUDE/TempF90/KCARTA_databaseparam.f90 for the kCARTA database definitions
     write (kStdWarn,*) 'Highest database pressure (lowest level) : ',PLEV_KCARTADATABASE_AIRS(1)
     write (kStdWarn,*) 'Lowest database pressure (highest level) : ',PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
     write (kStdWarn,*) 'Highest klayers pressure (lowest level)  : ',raP1(i)
@@ -4533,7 +4533,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables, to process
     REAL :: rAmt,rT,rP,rPP,rZ

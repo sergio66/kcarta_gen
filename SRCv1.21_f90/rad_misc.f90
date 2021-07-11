@@ -26,7 +26,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iAtm        !current atmosphere
 ! rakSolarRefl   =solar reflectance
@@ -71,7 +71,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! raFreq is the current wavenumber range
     REAL :: raFreq(kMaxPts)
@@ -179,7 +179,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! raFreq is the current wavenumber range
     REAL :: raFreq(kMaxPts)
@@ -272,7 +272,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaSum     = cumulative spectra associated with the mixed paths
 ! raaGas     = current gas absorption spectra
@@ -308,7 +308,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! iDoSolar = 0 if use 5700K, 1 if use solar spectral profile
@@ -399,7 +399,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop = how much of the "top most" layer in the defn of atmosphere, is
 !            a fraction due to the positioning of the instrument
@@ -511,7 +511,7 @@ CONTAINS
     raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raLayAngles, &
     raSunAngles,raTSpace,iaaRadLayer,iaNumLayer,raNumberDensity)
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
     INTEGER :: iAtm                  !this is the atmosphere number
@@ -617,7 +617,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! these are variables that come in from kcartamain.f
     REAL :: raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)

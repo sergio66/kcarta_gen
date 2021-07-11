@@ -23,7 +23,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     DOUBLE PRECISION :: daTempClose(kMaxPtsBox)    !!!input
@@ -88,7 +88,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     INTEGER :: iLineMixBand                  !do we use linemixing coeffs
@@ -240,7 +240,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     INTEGER :: iFreqPts   !number of relevant points in daFreq
@@ -392,7 +392,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     INTEGER :: iN             !number of points
@@ -469,7 +469,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     INTEGER :: iN                                       !how many points
@@ -532,7 +532,7 @@ CONTAINS
 ! m    = molecular mass (amu)
 ! brd  = broadening
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     DOUBLE PRECISION :: wr(kMaxPtsBox),v(kMaxPtsBox),v0,Temp,m,brd
     DOUBLE PRECISION :: wi(kMaxPtsBox)

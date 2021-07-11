@@ -56,7 +56,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rDelta is the kComp file Step
 ! raLayAngles are the layer dependent satellite view angles
@@ -174,7 +174,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rDelta is the wavenumber step size
 ! iJacob,iaJacob tell which gases to do d/dq for
@@ -469,7 +469,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rDelta is the wavenumber step size
 ! iJacob,iaJacob tell which gases to do d/dq for
@@ -769,7 +769,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rDelta is the wavenumber step size
 ! iJacob,iaJacob tell which gases to do d/dq for

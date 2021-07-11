@@ -23,7 +23,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaSum     = cumulative spectra associated with the mixed paths
 ! raaGas     = current gas absorption spectra
@@ -65,7 +65,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     DOUBLE PRECISION :: daaNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
@@ -129,7 +129,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL :: raFreq(kMaxPts)
@@ -228,7 +228,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
 ! iType = +1 ==> use daHighY at kMaxPtsBox resolution
@@ -288,7 +288,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL ::             raFreq(kMaxPts)                        !!kCARTA res
@@ -367,7 +367,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL ::             raFreq(kMaxPts)                        !!kCARTA res
@@ -498,7 +498,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iUpper
@@ -574,7 +574,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raPAmt(kProfLayer),raPTemp(kProfLayer),pProf(kProfLayer)
     REAL :: raPPress(kProfLayer),raPPartPress(kProfLayer)
@@ -684,7 +684,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caBloatFile
     REAL :: rFrLow,rFrHigh
@@ -817,7 +817,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,
@@ -941,7 +941,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = array containin all the frequencies in the current 25 cm-1 block
 ! rFrLow,rFrHigh = freq start/stop points for the output (if iChunkSize=1,

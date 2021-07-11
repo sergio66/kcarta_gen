@@ -55,7 +55,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iaNewGasID(kGasStore),iaNewData(kGasStore)
@@ -205,7 +205,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf     = actual layers (from kLAYERS) avg pressure, in iProfileLayers
 ! iCount    = which of the iNumGases is being processed
@@ -343,7 +343,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf     = actual layers (from kLAYERS) avg pressure, in iProfileLayers
 ! iCount    = which of the iNumGases is being processed
@@ -488,7 +488,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers (from kLAYERS) avg pressure, in iProfileLayers
 ! iCount    = which of the iNumGases is being processed
@@ -594,7 +594,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iCount    = which of the iNumGases is being processed
 ! iGasID    = iaGasID(iCount) = gas ID of current gas
@@ -757,7 +757,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iWhichChunk   tells which file number to read in
 ! iNewIn        tells which NewSpectra set this gas corresponds to
@@ -863,7 +863,7 @@ CONTAINS
     daaDQ,daaDT,daaAbsCoeff,iSPlineType)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iGasID     = GASID ==1 for water
@@ -1030,7 +1030,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iGasID     = GASID
@@ -1135,7 +1135,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iGasID     = GASID
@@ -1245,7 +1245,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
           
 ! input
 !   iSARTAChi = -1 for no chi, +1 for AIRS, +2 for IASI, +3 for CrIS
@@ -1413,7 +1413,7 @@ CONTAINS
 ! this subroutine scales water absorption coefficients in the >= 2380 chunks
     SUBROUTINE water_4um_fudge(daaAbsCoeff,rFileStartFr)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaAbsCoeff = uncompressed gas abs coeffs, for reference profile
 ! rFileStartFr = which chunk
@@ -1473,7 +1473,7 @@ CONTAINS
 ! this subroutine scales water absorption coefficients in the >= 2380 chunks
     SUBROUTINE water_sarta_fudge(daaAbsCoeff,rFileStartFr)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaAbsCoeff = uncompressed gas abs coeffs, for reference profile
 ! rFileStartFr = which chunk

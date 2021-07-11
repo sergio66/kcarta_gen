@@ -1,0 +1,177 @@
+### new res : 500-805 cm-1 at 0.0005 cm-1, 805-2830 cm-1 at 0.0025 cm-1
+
+# executables live in ../BIN; note you need to set the DISTDIR
+#DISTDIR    = /asl/data/kcarta
+#DISTDIRGEN = /asl/data/kcarta_sergio
+DISTDIR    = /asl/rta/kcarta
+DISTDIRGEN = /asl/rta/kcarta_sergio
+
+###      $(warning "datafix400_v121_H2016 looks similar to datafix400_v121origres_H2016")
+datafix400_v121_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix385_v121_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_385_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v121_H2016_highres:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_HIGHRES_IR.param > ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v121_H2016_veryhighres:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_VERYHIGHRES_IR.param > ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+#########################################################################
+### orig res : 500-605 cm-1 at 0.0015 cm-1, 605-2830 cm-1 at 0.0025 cm-1
+###      $(warning "datafix400_v121_H2016 looks similar to datafix400_v121origres_H2016")
+datafix400_v121origres_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v120origres_H2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV120_400_H2016_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v120origres_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV120_400_H2012_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v120origres_H2008:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV120_400_H2008_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v120.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v120.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+########################################################################
+### others
+datafix400_v121_H2016_g110:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_H2016_NLTEH2016_WVg110.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v121_G2015_NLTEH2016:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_G2015_NLTEH2016.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v121_H2016_NLTEH2008:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_H2016_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v121_H2016_NLTEH2004:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_H2016_NLTEH2004.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix400_v121_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_400_H2012_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix385_v121_H2012_LBLRTM:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_385_H2012_LBLRTM_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+
+datafix385_v121_H2012:
+	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V121/template_kcartaV121_385_H2012_NLTEH2008.param > \
+      ../INCLUDE/kcarta_v121.param; \
+      rm ../INCLUDE/kcarta.param; \
+      cd ../INCLUDE; \
+      ln -s kcarta_v121.param kcarta.param; \
+      cd EARTH_database_params; \
+      ./lner_EARTH_database_params.sc ;\
+      cd ../; \
+      cd ../SRCv1.21_f90
+

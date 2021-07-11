@@ -137,7 +137,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raVTemp  = array containing the original 1.0 fraction temps
 ! rFrac    = frac of layer that we need
@@ -291,7 +291,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iI,iFound
     CHARACTER     caMessage*(*)
@@ -337,7 +337,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     write(kStdWarn,*)'Fatal Error found : closing all units ..'
 
@@ -443,7 +443,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID   = current gasID
 ! iaGases  = list of GasID's that are being used
@@ -487,7 +487,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iGasID   = current gasID
 ! iaJacob  = list of GasID's whose d/dq we want to output
@@ -529,7 +529,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! caFName   = name of file that has the profile
 ! iNlay     = number of layers that are read in
@@ -586,7 +586,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNum === mixed path that we want to convert to a layer
 ! eg 110 --> 10       200 --> 100
@@ -611,7 +611,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL :: raTemp(kMixFilRows)         !! temperature structure
@@ -751,7 +751,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL :: raThickNess(kProfLayer),raLayerHeight(kProfLayer)
@@ -913,7 +913,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! raInten is the radiance intensity at the instrument
 ! raFreq are the frequencies
 ! radBTdr is the derivative result
@@ -961,7 +961,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaLay2Sp is the transmission frm layer to space
 ! iM has the layer that we differentiate wrt to
@@ -987,7 +987,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raResults is the array
 ! raTorQ === relevant element of raaaDq or raaDt

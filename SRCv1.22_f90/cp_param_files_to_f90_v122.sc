@@ -35,7 +35,8 @@ sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/pos
 
 /bin/cp ../INCLUDE/EARTH_database_params/gasIDname.param_earth               ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f;              fixcon ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f              ../INCLUDE/TempF90/gasIDnameparam.f90;              rm ../INCLUDE/TempF90/JunkTempDir/gasIDnameparam.f
 
-/bin/cp ../INCLUDE/gauss.param                   ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f;                  fixcon ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f                  ../INCLUDE/TempF90/gaussparam.f90;                   rm ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f
+#/bin/cp ../INCLUDE/gauss.param                   ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f;                  fixcon ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f                  ../INCLUDE/TempF90/gaussparam.f90;                   rm ../INCLUDE/TempF90/JunkTempDir/gaussparam_mars.f
+/bin/cp ../INCLUDE/gauss.param                   ../INCLUDE/TempF90/JunkTempDir/gaussparam_earth.f;                  fixcon ../INCLUDE/TempF90/JunkTempDir/gaussparam_earth.f                  ../INCLUDE/TempF90/gaussparam.f90;                   rm ../INCLUDE/TempF90/JunkTempDir/gaussparam_earth.f
 
 ########################################################################
 echo "showing files in ../INCLUDE/TempF90/ .. should be todays date"

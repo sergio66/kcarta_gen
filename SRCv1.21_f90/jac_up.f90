@@ -50,7 +50,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rDelta is the wavenumber spacing
 ! iJacob,iaJacob tell which gases to do d/dq for
@@ -296,7 +296,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raLayAngles        == layer dependent satellite view angle
 ! rSatAngle          == Satellite View Angle
@@ -422,7 +422,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raLayAngles is the layer dependent satellite view angles
 ! rSatAngle is the satellite viewing angle
@@ -479,7 +479,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rSatAngle is the satellite viewing angle
 ! iNumLayer is the number of layers in the atmosphere
@@ -554,7 +554,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rSatAngle is the satellite viewing angle
 ! iNumLayer is the number of layers in the atmosphere
@@ -637,7 +637,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! raaSumAbCoeff is the cumulative absorption coeffs
 ! iNumLayer is the number of layers in the atmosphere

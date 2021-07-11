@@ -85,7 +85,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iI,iaSet(*),iNumElements
 
     INTEGER :: iJ,iAns
@@ -157,7 +157,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: No                  !number of points to sort through
     INTEGER :: indx(*)       !integer array that gives the indices
@@ -264,7 +264,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iaArr = integer array to be sorted
 ! iCnt  = sort indices 1..iCnt of iaArr
@@ -308,7 +308,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raArr = real array to be sorted
 ! iCnt  = sort indices 1..iCnt of raArr
@@ -400,7 +400,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raArr = real array to be sorted
 ! iCnt  = sort indices 1..iCnt of raArr
@@ -460,7 +460,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raArr = real array to be sorted
 ! iCnt  = sort indices 1..iCnt of raArr
@@ -546,7 +546,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raArr = real array to be sorted
 ! iCnt  = sort indices 1..iCnt of raArr
@@ -638,7 +638,7 @@ CONTAINS
     INTEGER FUNCTION BinarySearch(iLay,iNp,iaOp)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay  = layer number to be looked for
 ! iaOp  = array containing list of layers
@@ -685,7 +685,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay  = layer number to be looked for
 ! iaOp  = array containing list of layers
@@ -759,7 +759,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT(*),YOUT(*)
@@ -783,7 +783,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT(*),YOUT(*)
@@ -810,7 +810,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT,YOUT
@@ -837,7 +837,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT,YOUT
@@ -863,7 +863,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! real version
 !      -----------------------------------------------------------------
@@ -901,7 +901,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! real version
 !      -----------------------------------------------------------------
@@ -939,7 +939,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! real version
 !      -----------------------------------------------------------------
@@ -1025,7 +1025,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! REAL version
 !      -----------------------------------------------------------------
@@ -1156,7 +1156,7 @@ CONTAINS
 
 ! this directly calls dsply2 and then dspline
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! double precision version
 !      -----------------------------------------------------------------
@@ -1193,7 +1193,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! double precision version
 !      -----------------------------------------------------------------
@@ -1325,7 +1325,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 ! double precision version
@@ -1384,7 +1384,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! real version
 !      -----------------------------------------------------------------
@@ -1418,7 +1418,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 ! double precision version
@@ -1499,7 +1499,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! double precision version
 !      -----------------------------------------------------------------
@@ -1536,7 +1536,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 ! double precision version
@@ -1594,7 +1594,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! double precision version
 !      -----------------------------------------------------------------
@@ -1626,7 +1626,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT(*),YOUT(*)
@@ -1651,7 +1651,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT(*),YOUT(*)
@@ -1677,7 +1677,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT,YOUT
@@ -1702,7 +1702,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 !      Parameters
     REAL :: XA(*),YA(*),XOUT,YOUT
@@ -1733,7 +1733,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iLay  = layer number to be looked for
 ! iaOp  = array containing list of layers
@@ -1756,9 +1756,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airsheightsparam.f90'
-    include '../INCLUDE/airslevelsparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/airsheightsparam.f90'
+    include '../INCLUDE/TempF90/airslevelsparam.f90'
 
     INTEGER :: iI
     REAL :: pavg,rH,raY2P(kMaxLayer),p,logpavg(kMaxLayer),raHgt(kMaxLayer)

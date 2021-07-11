@@ -94,7 +94,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rf = wavenumber, rI = intensity, rBT = brightness temp
     DOUBLE PRECISION :: dI
@@ -138,7 +138,7 @@ CONTAINS
 !   rad --> c1 fr^3  exp(-c2 fr/T)
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rf = wavenumber, rI = intensity, rBT = brightness temp
     REAL :: rf,rI,rBT
@@ -186,7 +186,7 @@ CONTAINS
 !   rad --> c1 fr^3  exp(-c2 fr/T)
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raf = wavenumber, rBT = brightness temp
     REAL :: raf(kMaxPts),rBT
@@ -249,7 +249,7 @@ CONTAINS
 !   rad --> c1 fr^3  exp(-c2 fr/T)
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raf = wavenumber, rBT = brightness temp
     DOUBLE PRECISION :: daf(kBloatPts),dBT
@@ -291,7 +291,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rf = wavenumber, rI = intensity, rBT = brightness temp
     REAL :: raF(kmaxPts),raInten(kMaxPts),rBT
@@ -324,7 +324,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rf = wavenumber, rI = intensity, rBT = brightness temp
     REAL :: raF(kmaxPts),raInten(kMaxPts),raBT(kMaxPts)
@@ -359,7 +359,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rf = wavenumber, rI = intensity, rBT = brightness temp
     REAL :: rf,rI,rBT
@@ -387,7 +387,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq        = array containing wavenumbers
 ! raInten        = intensity from forward model

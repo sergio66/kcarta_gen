@@ -28,7 +28,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rTSpace      = blackbody temperature of space
 ! rFracTop   = is the highest layer multiplied by a fraction, because
@@ -184,7 +184,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -431,7 +431,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -640,7 +640,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = frequencies of the current 25 cm-1 block being processed
 ! raThermal  = backgnd thermal intensity at surface
@@ -724,7 +724,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -801,7 +801,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -876,7 +876,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iDoAcos35  = if we want to use acos(3/5) at all layers, all freqs for Jacob
 ! rTSpace      = blackbody temp of space
@@ -1028,7 +1028,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq is the frequency wavenumbers of the current block
     INTEGER :: iProfileLayers
@@ -1079,7 +1079,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq is the frequency wavenumbers of the current block
     REAL :: raFreq(kMaxPts),raPressLevels(kProfLayer+1)
@@ -1141,7 +1141,7 @@ CONTAINS
                
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raPressLevels(kProfLayer+1),p0
     INTEGER :: iProfileLayers
@@ -1207,7 +1207,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! raFreq    = frequencies of the current 25 cm-1 block being processed
 ! raThermal  = backgnd thermal intensity at surface
@@ -1567,7 +1567,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raFreq    = frequencies of the current 25 cm-1 block being processed
 ! raThermal  = backgnd thermal intensity at surface
@@ -1664,7 +1664,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -1818,7 +1818,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -1977,7 +1977,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -2058,7 +2058,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! rFracTop is the fractional weight of top layer, defined by instr posn
 ! rFracBot is the fractional weight of bottom layer, defined by ground
@@ -2207,7 +2207,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: kVerySmall,kSmall,kMedium,kLarge
     PARAMETER (kVerySmall=6,kSmall=4,kMedium=11,kLarge=8)
            
@@ -2293,7 +2293,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: kVerySmall,kSmall,kMedium,kLarge
     PARAMETER (kVerySmall=6,kSmall=4,kMedium=11,kLarge=8)
            
@@ -2374,7 +2374,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rFracTop is the fractional weight of the "uppermost" layer as defined in
 !      RADNCE; this need not be 100,200,300 but depends on instrument's height
@@ -2485,7 +2485,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iProfileLayers               !number of KLAYERS atmosphere layers
     REAL :: raPressLevels(kProfLayer+1)     !atmosphere pressure levels

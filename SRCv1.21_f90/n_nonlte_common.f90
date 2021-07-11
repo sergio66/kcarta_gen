@@ -25,7 +25,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: raTemp(kProfLayer)           !!!kinetic temp profile
@@ -133,7 +133,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params, read from caaNLTETemp(iLTEin)
 ! caaaNONLTETemp  tells the name of the files containing the nonLTE temps
@@ -272,7 +272,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     CHARACTER(80) :: caFname                !!! file to read
@@ -518,7 +518,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER iGID
 
@@ -635,7 +635,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iGID,iISO,iHITRAN
@@ -728,7 +728,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raAirsLevels(kNLTEProfLayer)
     REAL :: raPressLevels(kProfLayerP1)
@@ -759,7 +759,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     REAL :: raX(*),raY(*)   !!arrays to fit
@@ -814,7 +814,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     CHARACTER(80) :: caOutName
@@ -885,7 +885,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     CHARACTER(80) :: caVTfile,caSummaryFile
@@ -1011,7 +1011,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iOrder0,iCompute
@@ -1072,7 +1072,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input from the polyfit files
     INTEGER :: iNumPressPts,iNumSolar,iCompute
@@ -1263,7 +1263,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     CHARACTER(120) :: caFnamePoly
@@ -1344,7 +1344,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
        
     INTEGER :: iIOUN,iNV
 !      REAL raX(kNLTEProfLayer)
@@ -1411,8 +1411,8 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/airslevelsparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/airslevelsparam.f90'
 
 ! input/output
     INTEGER :: iNumVibLevels

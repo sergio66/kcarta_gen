@@ -29,9 +29,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iPlev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! input
 ! pProf           = actual layers from kLAYERS avg pressure
@@ -456,7 +456,7 @@ CONTAINS
     SUBROUTINE Check_xWeights_iSplinetype(iL,iaP1,iaP2,raP1,raP2)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! inputs
     INTEGER :: iL
@@ -521,7 +521,7 @@ CONTAINS
     INTEGER FUNCTION iFindMaxMin(iWhich,rV,raArray,iLen)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
 !   iWhich   = +1 for finding iX so that raArray(iX) < rV
@@ -614,7 +614,7 @@ CONTAINS
     iaQ21,iaQ22,raQ21,raQ22)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iGasID     = GASID ==1 for water
@@ -879,7 +879,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iGasID     = GASID
@@ -1024,7 +1024,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iGasID     = GASID
@@ -1198,7 +1198,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! pProf       = actual layers from kLAYERS avg pressure
 ! iGasID     = GASID

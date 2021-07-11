@@ -96,7 +96,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNLTEStart  = which layer NLTE calcs start
 ! raaPlanckCoeff = how to affect the Planck computation
@@ -304,7 +304,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNLTEStart  = which layer NLTE calcs start
 ! raaPlanckCoeff = how to affect the Planck computation
@@ -542,7 +542,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iChunk_DoNLTE = +1 for Slow accurate model, +2 for Fast SARTA model,-1 for no
 ! iNLTEStart  = which layer NLTE calcs start
@@ -930,7 +930,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -1374,7 +1374,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raSunAngles   = layer dependent satellite view angles
@@ -1813,7 +1813,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raLayAngles   = layer dependent satellite view angles
@@ -2125,7 +2125,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iDumpAllUARads = dump rads at all layers or only select layers?
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
@@ -2546,7 +2546,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iDumpAllUARads = dump rads at all layers or only select layers?
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
@@ -3093,7 +3093,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iDumpAllUARads = dump rads at all layers or only select layers?
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
@@ -3689,7 +3689,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iDumpAllUARads = dump rads at all layers or only select layers?
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
@@ -4190,7 +4190,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iTag          = 1,2,3 and tells what the wavenumber spacing is
 ! raLayAngles   = layer dependent satellite view angles
@@ -4532,7 +4532,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: rTSurf,raVT1(kMixFilRows),raaAbs(kMaxPts,kMixFilRows),raUseEmissivity(kMaxPts),rCos
@@ -4741,7 +4741,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
           
     INTEGER :: iProfileLayers           !number of layers in KLAYERS file
     REAL :: raPressLevels(kProfLayer+1) !pressure levels of atmosphere
@@ -4888,7 +4888,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNLTEStart  = which layer NONLTE calcs start
 ! raaPlanckCoeff = how to affect the Planck computation
@@ -5365,7 +5365,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 !   upper atm P,PP,T(LTE),Q   (really only need T(LTE))

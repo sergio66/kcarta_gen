@@ -44,7 +44,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaDT has the current gas d/dT coeffs for current freq block
 ! raaAllDT has the cumulative d/dT coeffs for current freq block
@@ -99,7 +99,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rDelta is the kComp file Step
 ! raLayAngles are the layer dependent satellite view angles
@@ -206,7 +206,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
     
     REAL :: raResults(kMaxPtsJac),rFracx
 

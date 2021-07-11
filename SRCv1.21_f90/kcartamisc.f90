@@ -82,9 +82,9 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iplev
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
 ! input vars
     REAL :: raPressLevels(kProfLayer+1)
@@ -200,7 +200,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
 ! raaMix     = mixing table info from *MIXFIL
@@ -422,7 +422,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iNumGases    !number of gases
     INTEGER :: iNpMix       !number of mix paths
@@ -476,7 +476,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iMixFileLines,iVertTempSet,iNpmix
     REAL :: raaMix(kMixFilRows,kGasStore)       !mixing table
@@ -536,7 +536,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! set up file unit numbers so at run time they default to STDIN,STDOUT,STDOUT
     kStdDriver = 5
@@ -577,7 +577,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the driver file name from the command line arguments
     CHARACTER(80) :: caDriverName
@@ -643,7 +643,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the printing switch,atmosphere# to print,# of layers to print,
 !   list of layers/paths to print (limited to kProfLayer for now) , and the
@@ -680,7 +680,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
     INTEGER :: iCo2              !which gas used to mimic CO2 temps
     INTEGER :: iNumGases         !how many gases
@@ -739,7 +739,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! caDriverName is the name of the driver file to be processed
     CHARACTER(80) :: caDriverName
@@ -832,7 +832,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the gasnumber (not gasID!!!!!!!!!!!!!!)
     INTEGER :: iGas
@@ -888,7 +888,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! this is the gasnumber (not gasID!!!!!!!!!!!!!!)
     INTEGER :: iGas
@@ -916,7 +916,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
           
     INTEGER :: iNumGases,iaGases(kMaxGas),iaList(kNumkCompT)
     REAL :: raFiles(kNumkCompT)
@@ -1072,7 +1072,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raaAb(kMaxPts,kProfLayer)
 
@@ -1090,7 +1090,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raaAb(kMaxPts,kMixFilRows)
     INTEGER :: iNpMix
@@ -1110,7 +1110,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     DOUBLE PRECISION :: daaAb(kMaxPts,kProfLayer)
 
@@ -1126,7 +1126,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     DOUBLE PRECISION :: daaAb(kMaxPtsJac,kProfLayerJac)
 
@@ -1143,7 +1143,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iCount     = which of the iNumGases are being processed
 ! daaGasAb   = double precision abs coeffs, from the uncompression
@@ -1170,7 +1170,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! daaGasAb   = double precision abs coeffs, from the uncompression
 ! raaaGasAbs = 3d matrix that save ALL abs coeffs for current 25 cm-1 chunk
@@ -1188,7 +1188,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaGasAbs = 2d matrix that save ALL abs coeffs for current 25 cm-1 chunk
     REAL :: raaGasAbCoeff(kMaxPts,kProfLayer)
@@ -1206,7 +1206,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     write(kStdWarn,*) 'checking parameters in kcartaparam.f90'
     write(kStdWarn,*) '  '
@@ -1243,7 +1243,7 @@ CONTAINS
      
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNumGases   = number of gases read in from *GASFIL + *XSCFIL
 ! iNpMix      = number of mixed paths read in from *MIXFIL
@@ -1319,7 +1319,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raPressLevels(kProfLayer+1),pProf(kProfLayer)
     INTEGER :: iProfileLayers
@@ -1348,7 +1348,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! input variables
     INTEGER :: iLowerOrUpper   !!upper or lower atm
@@ -1500,7 +1500,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iJax                   !! when testing jacobians
@@ -1615,7 +1615,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iNumLayer
@@ -1756,7 +1756,7 @@ CONTAINS
 
    SUBROUTINE DateTime(callname)
    IMPLICIT   NONE
-   INCLUDE '../INCLUDE/kcartaparam.f90'
+   INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
    
    CHARACTER*(*) :: callname
    CHARACTER(LEN = 8)  :: DateINFO                 ! ccyymmdd

@@ -53,7 +53,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rDelta is the wavenumber step size
 ! iJacob,iaJacob tell which gases to do d/dq for
@@ -368,7 +368,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rSatAngle  = current satellite view angle
 ! raaLay2Sp  = layer to space transmission coefficients
@@ -432,7 +432,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raLayAngles        == array of layer dependent satellite view angles
 ! rSatAngle          == Satellite View Angle
@@ -584,7 +584,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raLayAngles is the array of layer dependent satellite view angles
 ! raSunAngles is the array of layer dependent satellite view angles
@@ -696,7 +696,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNumLayer is the number of layers in the atmosphere
 ! iaaRadlayer has the radiating layer information for atmospher # iAtm
@@ -774,7 +774,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rWeight is the wieght of this gas from *WEIGHT
 ! rSatAngle is the satellite viewing angle
@@ -883,7 +883,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! rWeight is the cumulative average of all weights
 ! rSatAngle is the satellite viewing angle
@@ -1039,7 +1039,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNumLayer is the number of layers in the atmosphere
 ! iaaRadlayer has the radiating layer information for atmospher # iAtm
@@ -1120,7 +1120,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNumLayer is the number of layers in the atmosphere
 ! iaaRadlayer has the radiating layer information for atmospher # iAtm
@@ -1195,7 +1195,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
 ! raaSumAbCoeff is the cumulative absorption coeffs
 ! iNumLayer is the number of layers in the atmosphere
@@ -1280,7 +1280,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaLay2Gnd is the transmission frm layer to ground at diffusion angle
 ! iM has the layer that we differentiate wrt to
@@ -1312,7 +1312,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaLay2Sp   is the layer-to-space abs coeff matrix
 ! raFreq has the frequencies
@@ -1348,7 +1348,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raSurface is the surface emission
 ! raaLay2Sp   is the layer-to-space abs coeff matrix
@@ -1373,7 +1373,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaLay2Sp is the layer-to-space abscoeff matrix
 ! raResults has the results
@@ -1396,7 +1396,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! raaLay2Sp is the layer-to-space abscoeff matrix
 ! raResults has the results

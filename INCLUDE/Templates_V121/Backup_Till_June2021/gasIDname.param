@@ -1,0 +1,133 @@
+c see DOC/gasids_H2012
+
+      !! names of gIDs
+      CHARACTER*20 caGID(kMaxGas)
+
+c ID  name     common name
+c---- -------- -----------------
+c MOLGASES
+c ========
+      caGID( 1) = ' H2O'      ! water
+      caGID( 2) = ' CO2'      ! carbon dioxide
+      caGID( 3) = ' O3 '      ! ozone
+      caGID( 4) = ' N2O'      ! nitrous oxide
+      caGID( 5) = ' CO '      ! carbon monoxide
+      caGID( 6) = ' CH4'      ! methane
+      caGID( 7) = '  O2'      ! (diatomic) oxygen
+      caGID( 8) = '  NO'      ! nitric oxide
+      caGID( 9) = '  SO2'     ! sulfur dioxide
+      caGID(10) = '  NO2'
+      caGID(11) = '  NH3'     ! ammonia
+      caGID(12) = '  HNO3'    ! nitric acid       *** also included as a XSEC gas in LBLRTM???
+      caGID(13) = '  OH'      ! hydroxyl
+      caGID(14) = '  HF '     ! hydrogen floride
+      caGID(15) = '  HCl '    ! hydrocloric acid
+      caGID(16) = '  HBr  '   ! hydrogen bromide
+      caGID(17) = '  HI'
+      caGID(18) = '  ClO'
+      caGID(19) = '  OCS '    ! carbonyl sulfide
+      caGID(20) = '  H2CO'
+      caGID(21) = '  HOCl'
+      caGID(22) = '  N2   '   ! (diatmoic) nitrogen
+      caGID(23) = '  HCN'
+      caGID(24) = '  CH3Cl'
+      caGID(25) = '  H2O2'
+      caGID(26) = '  C2H2 '  !  acetylene
+      caGID(27) = '  C2H6'   !  ethane
+      caGID(28) = '  PH3'
+      caGID(29) = '  COF2'
+      caGID(30) = '  SF6 '  ! [also see 81]   <<<<<<<<<<<<<<<<<<<<<<<<<< no longer here, only in XSEC
+      caGID(31) = '  H2S'
+      caGID(32) = '  HCOOH' !   formic acid
+
+c+++++++++++++++++++++++++++++++++ LBLRTM CUTOFF 1 +++++++++++++++++++++++++++++++++++++++
+c++++++++++++++++++++++++++ (default profiles in LBLRTM? ) +++++++++++++++++++++++++++++++
+
+      caGID(33) = '  HO2'
+      caGID(34) = '  O      ' ! atomic oxygen
+      caGID(35) = '  ClONO2'  ! [also see 61]  <<<<<<<<<<<<<<<<<<<<<<<<<<< no longer here, only in XSEC
+      caGID(36) = '  NO+'
+      caGID(37) = '  HOBr'
+      caGID(38) = '  C2H4'     ! ethylene
+c+++++++++++++++++++++++++++++++++ LBLRTM CUTOFF 2 +++++++++++++++++++++++++++++++++++++++
+c++++++++++++++++++++++++++ (user spec profiles in LBLRTM? ) ++++++++++++++++++++++++++++
+
+      caGID(39) = '  CH3OH'    !methanol
+      caGID(40) = '  CH3Br'
+      caGID(41) = '  CH3CN'    ![also see 80]
+      caGID(42) = '  CF4'      ![also see 54]   <<<<<<<<<<<<<<<<<<<<<<<<<<< no longer here, only in XSEC
+
+c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++    
+c  %% these are new in H2012, but UNUSED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      caGID(43) = '  C4H2 '
+      caGID(44) = '  H3CN'
+      caGID(45) = '  H2'
+      caGID(46) = '  CS'
+      caGID(47) = '  SO3'
+c  %% these are new in H2012, but UNUSED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+cXSEC GASES (* denotes in LBLRTM (see Table II in
+c==========  http://web.gps.caltech.edu/~drf/misc/lblrtm/lblrtm_instructions.html)
+      caGID(51) = '  CCl3F    CFC-11'
+      caGID(52) = '  CCl2F2   CFC-12'
+      caGID(53) = '  CClF3    CFC-13'
+      caGID(54) = '  CF4      CFC-14' ! [also see 42]
+      caGID(55) = '  CHCl2F   HCFC-21'
+      caGID(56) = '  CHClF2   HCFC-22'
+      caGID(57) = '  C2Cl3F3  CFC-113'
+      caGID(58) = '  C2Cl2F4  CFC-114'
+      caGID(59) = '  C2ClF5   CFC-115'
+      caGID(60) = '  CCl4'
+      caGID(61) = '  ClONO2'           ![also see 35]
+      caGID(62) = '  N2O5'
+      caGID(63) = '  HNO4'
+c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++      
+c%%% 64-74 requested by Evan Fishbein, 28 June 2010
+      caGID(64) = '  C2F6         '  !     hexafluoroethane
+      caGID(65) = '  CHCl2CF3     '  !    HCFC-123
+      caGID(66) = '  CHCLFCF3     '  !   HCFC 124 ------> CHCl2C2F5
+      caGID(67) = '  CH3CCL2F     '  !  HCFC-141b -----> CCl2FCH3
+      caGID(68) = '  CH3CCLF2     '  !  HCFC-142b -----> CH3CClF2
+      caGID(69) = '  CHCL2CF2CF3  '  !  HCFC-225ca ----> C3HCl2F5
+      caGID(70) = '  CCLF2CF2CHCLF'  ! HCFC-225cb ----> C3HCl2F5
+      caGID(71) = '  CH2F2        '  !   HFC-32
+      caGID(72) = '  CFH2CF3      '  !   HFC-134a * (I had mistakenly called this CHF2CF3) 
+      caGID(73) = '  CF3CH3       '  !  HFC-143a
+      caGID(74) = '  CH3CHF2      '  !   HFC-152a
+c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++      
+c%%% added from new HITRAN gases
+      caGID(75) = '  C6F6' !          benzene (C6H6???))
+      caGID(76) = '  CHF2CF3' !       HFC-125 * (earlier mistakenly had gid 72/76 as same molecule names)
+      caGID(77) = '  CHF2CHF2' !      HFC-134   
+      caGID(78) = '  SF5CF3' 
+      caGID(79) = '  CH3C(O)OONO2  PAN' ! (Peroxy Acetyl Nitrate)
+      caGID(80) = '  CH3CN' ! [also see 41]
+      caGID(81) = '  SF6'   ! [also see 30]
+c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++        
+c%%%
+c  82-100 not in use
+c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+c%%%
+c 101 kCARTA H2O self-broadened continuum
+c 102 kCARTA H2O foreign-broadened continuum
+c 102 kCARTA HDO
+c%%%
+      caGID(101) = '  self continuum'
+      caGID(102) = '  forn continuum'
+      caGID(103) = '  HDO'
+
+c 104-200 not in use
+c%%%
+c 201 cloud1 ice/water/whatever amount
+c 202 cloud2 ice/water/whatever amount
+c 203 cloud3 ice/water/whatever amount
+c%%%
+c 204-300 not in use
+c%%%
+c 301 cloud1 particle size
+c 302 cloud2 particle size
+c 303 cloud3 particle size
+c%%%
+cNo numbers past 303 are in use
+c---end of file---

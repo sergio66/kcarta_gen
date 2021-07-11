@@ -31,7 +31,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNGas     = number of gases stored in this namelist
 ! iaGasesNL = gasIDs stored in this namelist
@@ -112,7 +112,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNXSec     = number of gases stored in this namelist
 ! iaLXGasesNL = gasIDs stored in this namelist
@@ -182,7 +182,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iNumNewGases   tells number of new gases
 ! iaNewGasID     tells which gases we want to update spectroscopy
@@ -258,7 +258,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (-1/-2) model
@@ -365,7 +365,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (+1) model
@@ -447,7 +447,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (-1/-2) model
@@ -829,7 +829,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
 ! iNLTE_SlowORFast tells whether to use slow accurate (+1) or fast (-1/-2) model
@@ -1031,7 +1031,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input parameters
     CHARACTER(80) :: caaNLTETemp(kGasStore)
@@ -1235,7 +1235,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     CHARACTER(80) :: caFname                !!! file to read
     DOUBLE PRECISION :: daJL(kHITRAN),daJU(kHITRAN) !!! quantum numbers
@@ -1308,7 +1308,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input vars
     INTEGER :: iNumNLTEGases,iaNLTEGasID(kGasStore)
@@ -1448,7 +1448,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input/output
     INTEGER :: iNgas
@@ -1657,7 +1657,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input/output
     INTEGER :: iNXsec
@@ -1787,7 +1787,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iGasID
 

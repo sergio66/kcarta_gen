@@ -26,7 +26,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iI,iJ
 
@@ -344,7 +344,7 @@ CONTAINS
     SUBROUTINE CheckParams
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: i0,iT,iB,iJ,iGah,iConstOrVary
     CHARACTER(9) :: iIOUN9
@@ -606,7 +606,7 @@ CONTAINS
     SUBROUTINE SetkTemperVary(iTemperVary)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input param
     INTEGER :: iTemperVary      !!! from namelist file
@@ -712,7 +712,7 @@ CONTAINS
     REAL FUNCTION SACONV_SUN(LSZA, SURFALT, ALT )
                             
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
            
 ! input param
     REAL :: LSZA         !! solar/satellite zenith angle at local surface (which is not necessarily 0)
@@ -797,7 +797,7 @@ CONTAINS
     REAL FUNCTION ORIG_SACONV_SUN( SZA, ALT )
      
     implicit none
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
            
     real :: sza,alt
 
@@ -857,7 +857,7 @@ CONTAINS
     REAL FUNCTION VACONV( SVA, ALT, SALT )
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
            
     REAL :: SVA, ALT, SALT
 
@@ -926,7 +926,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: SVA, ALT, SALT, rNumberDensity
 

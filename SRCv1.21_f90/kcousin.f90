@@ -17,7 +17,7 @@ CONTAINS
 ! except we have ... pco2,iStart,iStop) instead of pco2,n_in)
     subroutine cousin(z,v,v0,w_tot,T,pfor,pco2,iStart,iStop)
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! subroutine cousin(z,v,v0,w_tot,T,pfor,pco2,n_in)
 ! this is the cousin lineshape using lookup tables
@@ -662,7 +662,7 @@ CONTAINS
 
     IMPLICIT NONE
      
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
     INTEGER :: iL,iNumPts

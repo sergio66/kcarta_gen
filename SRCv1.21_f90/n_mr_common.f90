@@ -19,7 +19,7 @@ CONTAINS
           
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iGasID
@@ -240,7 +240,7 @@ CONTAINS
 
     IMPLICIT NONE
           
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input/output
     INTEGER :: iaG(kMaxGas),iaGasUnits(kMaxGas),iNumGases    !! from user supplied list
@@ -368,7 +368,7 @@ CONTAINS
 
     IMPLICIT NONE
           
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iNumGases0,iaG0(kMaxGas),iNumGases,iaG(kMaxGas),iNumLevs,iRefLevels
@@ -454,9 +454,9 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER :: iplev
-    include '../INCLUDE/kcartaparam.f90'
-    include '../INCLUDE/KCARTA_databaseparam.f90'
-    include '../INCLUDE/airslevelheightsparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
 
 ! input
     CHARACTER(80) :: caPfName
@@ -639,7 +639,7 @@ CONTAINS
 
     IMPLICIT NONE
          
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     CHARACTER(80) :: caPfName
@@ -882,7 +882,7 @@ CONTAINS
     SUBROUTINE ReadRefProf_Levels2(iGasID,raP,iNumLevsIN,raX)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iGasID,iNumLevsIN
@@ -1078,7 +1078,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! output
     REAL :: rPminKCarta,rPmaxKCarta,rPmin,rPmax,rHminKCarta,rHmaxKCarta
@@ -1135,9 +1135,9 @@ CONTAINS
 
     IMPLICIT NONE
          
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
     INTEGER :: iPLEV
-    include '../INCLUDE/KCARTA_databaseparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
           
 ! input
     CHARACTER(80) :: caPfName
@@ -1410,7 +1410,7 @@ CONTAINS
 
     IMPLICIT NONE
          
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     CHARACTER(80) :: caPfName
@@ -1798,7 +1798,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     INTEGER :: iNumLevs
@@ -2065,7 +2065,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
@@ -2187,7 +2187,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     INTEGER :: iNumLevs,iNumGases,iaG(kMaxGas)
@@ -2316,7 +2316,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: rHSurf,rPSurf,rTSurf,PAVG_KCARTADATABASE_AIRS(kMaxLayer),PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
@@ -2716,7 +2716,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: rHSurf,rPSurf,rTSurf,raPBnd(2*kProfLayer)
@@ -3106,7 +3106,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     REAL :: rHSurf,rPSurf,rTSurf,PAVG_KCARTADATABASE_AIRS(kMaxLayer),PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
@@ -3437,7 +3437,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input var
     INTEGER :: iNumLevs,iNumGases,iaG(kMaxGas)
@@ -3622,7 +3622,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iGasID,iGasUnits,iNumLevs,iG,iQuiet
@@ -3639,7 +3639,7 @@ CONTAINS
     CHARACTER(40) :: caaUnit(50)
     CHARACTER(20) :: cID
 
-    include '../INCLUDE/gasIDnameparam.f90'
+    include '../INCLUDE/TempF90/gasIDnameparam.f90'
 ! see cbgids.f in klayers
     DATA (iaLocalGasID(iL),iL=1,12) /01,02,03,04,05,06,07,08,09,10,11,12/
     DATA (MASSF(iL),iL=1,12) /18.015,44.010,47.9982,44.013,28.011,16.043,31.999,30.006,64.063,46.006,17.031,63.013/
@@ -4038,7 +4038,7 @@ CONTAINS
     iaG,iaGasUnits,iForm,iNumGases)
 
     IMPLICIT NONE
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
        
 ! input
     INTEGER :: iNumLevs,iIOUN2,iForm,iNumGases
@@ -4208,7 +4208,7 @@ CONTAINS
     SUBROUTINE read_record_2p2(iIOUN2,iNumLevs,iNumGases,iNXsec,raP,raT,raaG_MR,raSumCheck,iaG,iaGasUnits)
 
     IMPLICIT NONE
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
        
 ! input
     INTEGER :: iIOUN2,iNumLevs,iNumGases,iNXsec
@@ -4345,7 +4345,7 @@ CONTAINS
     SUBROUTINE read_record_3p1_and_3p2(iIOUN2,iNumGases,iBmax,rHSurf,rTopHgt,rSatZen)
 
     IMPLICIT NONE
-    INCLUDE '../INCLUDE/kcartaparam.f90'
+    INCLUDE '../INCLUDE/TempF90/kcartaparam.f90'
            
 ! input
     INTEGER :: iIOUN2
@@ -4437,7 +4437,7 @@ CONTAINS
     SUBROUTINE read_record_3p3b(iIOUN2,iBmax,raZbnd)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iBmax,iIOUN2
@@ -4471,7 +4471,7 @@ CONTAINS
     iZbnd,raZbnd,raPbnd)
          
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iNumGases,iIOUN2
@@ -4666,7 +4666,7 @@ CONTAINS
     SUBROUTINE substitute_tape5_profile_for_climatology(iG,iNumLevs,raP,raaG_MR)
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iG             ! which gasID to put in profile
@@ -4696,7 +4696,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     INTEGER :: iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
@@ -4815,7 +4815,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     CHARACTER(80) :: caStr
@@ -4865,7 +4865,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     CHARACTER(10) :: caStr10  !! str we need to compare
@@ -4974,7 +4974,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input
     CHARACTER(8) :: ca8
