@@ -3673,9 +3673,11 @@ CONTAINS
       IF (iIDGas .EQ. 2) THEN
         IF (head.gunit(iG) .EQ. 1) THEN
           write(kStdWarn,'(A)') 'CO2 profile in rtp file is in molecules/cm2'
+          write(kStdErr,'(A)')  'CO2 profile in rtp file is in molecules/cm2'
           iCO2ppm = +1   !!! molecules/cm2(z)
         ELSEIF (head.gunit(iG) .EQ. 10) THEN
           write(kStdWarn,'(A)') 'CO2 profile in rtp file is in ppmv'
+          write(kStdErr,'(A)')  'CO2 profile in rtp file is in ppmv'
           iCO2ppm = +10   !!! ppmv(z)
         END IF
       END IF
@@ -3684,17 +3686,20 @@ CONTAINS
       IF (kPlanet == 3 .AND. (prof.co2ppm >= 350 .AND. prof.co2ppm <= 450)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
         write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSEIF (kPlanet == 4 .AND. (prof.co2ppm >= 0.90*1e6 .AND. prof.co2ppm <= 0.99*1e6)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
         write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSE
         write(kStdWarn,'(A,I3,A)') 'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+        write(kStdErr,'(A,I3,A)')  'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
       ENDIF
     END IF
 
