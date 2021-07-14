@@ -605,10 +605,16 @@ computations, even with scattering (introduce a OLR computation) etc]
 Details : Bug fixes/ clarifications and new features/updates/improvements
 -------------------------------------------------------------------------
 
-v1.22 ----- 
+v1.22
+----- 
 
-7/9/21           Can now handle rtp p.co2ppmv, as long as 
-                 h.gunit(h.glist == 2) = 10 (which is klayers for ppmv :
+7/13/21         iaaOverrideDefault(3,6) = -9999 (default) keeeps iaKSolar as is
+                But for example highres or veryhigh res does not have corresponding
+                solar data files so if iaKSolar = +1, the code would crash
+                Set iaaOverrideDefault(3,6) = 0 for ttorad(v,kSolarTemp) is used
+
+7/9/21          Can now handle rtp p.co2ppmv, as long as 
+                  h.gunit(h.glist == 2) = 10 (which is klayers for ppmv :
                  /asl/packages/klayersV205/Doc/gas_units_code.txt
                 Rule of thumb : just like SARTA
                 if p.gas_2 exists and h.glist == 1,  then co2(z) = molecules/cm2

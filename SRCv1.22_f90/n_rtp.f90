@@ -233,6 +233,21 @@ CONTAINS
       write(kStdErr,*) 'Please correct the levels you ask KLAYERS to use'
     END IF
 
+    IF (iaaOverrideDefault(3,6) .EQ. -1) THEN
+      write(kStdErr,*)  'iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
+      write(kStdWarn,*) 'iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
+      iakSolar = -1
+      rakSolarAngle = 150.0
+    ELSEIF (iaaOverrideDefault(3,6) .EQ. +1) THEN
+      write(kStdErr,*)  'iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
+      write(kStdWarn,*) 'iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
+      iakSolar = +1
+    ELSEIF (iaaOverrideDefault(3,6) .EQ. +0) THEN
+      write(kStdErr,*)  'iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
+      write(kStdWarn,*) 'iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
+      iakSolar = 0
+    END IF
+
     DO iI = 1,iNatm
       IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. (rakSolarAngle(iI) <= 90.0))) THEN
         write(kStdWarn,'(A,I3,I3,F10.3)') 'n_rtp.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
@@ -245,9 +260,9 @@ CONTAINS
 
 !   now go through and see if any of these atmospheres are for limb sounding
     CALL check_limbsounder(iNatm,raPressStart,raPressStop,raFracTop,raFracBot,raTSurf, &
-      raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
-      raPressLevels,raLayerHeight, &
-      iaKsolar,rakSolarAngle)
+        raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
+        raPressLevels,raLayerHeight, &
+        iaKsolar,rakSolarAngle)
 
     RETURN
     end SUBROUTINE radnceRTPorNML
@@ -3053,7 +3068,7 @@ CONTAINS
     CHARACTER(130) :: ca1,ca2,caTemp
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
-    integer :: i,j,k,iG,iPtype
+    integer :: i,j,k,iG,iPtype,iCO2PPM
     REAL :: raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer),salti
 
     INTEGER :: iNpathCounterJunk,iaCld100Read(3)
@@ -3129,6 +3144,43 @@ CONTAINS
     iL1 = prof.nlevs - 1         !!! number of layers = num of levels - 1
     iProfileLayers = iL1
     iGasInRTPFile = head.ngas              !!! number of gases
+
+    !! go through and see if CO2 is there as ppmv
+    iCO2ppm = -1   !!! this means assume no CO2 in rtp file
+    DO iG = 1, iGasInRTPFile
+      iIDGas = head.glist(iG)
+      IF (iIDGas .EQ. 2) THEN
+        IF (head.gunit(iG) .EQ. 1) THEN
+          write(kStdWarn,'(A)') 'CO2 profile in rtp file is in molecules/cm2'
+          write(kStdErr,'(A)')  'CO2 profile in rtp file is in molecules/cm2'
+          iCO2ppm = +1   !!! molecules/cm2(z)
+        ELSEIF (head.gunit(iG) .EQ. 10) THEN
+          write(kStdWarn,'(A)') 'CO2 profile in rtp file is in ppmv'
+          write(kStdErr,'(A)')  'CO2 profile in rtp file is in ppmv'
+          iCO2ppm = +10   !!! ppmv(z)
+        END IF
+      END IF
+    END DO
+    IF (iCO2ppm < 0) THEN
+      IF (kPlanet == 3 .AND. (prof.co2ppm >= 350 .AND. prof.co2ppm <= 450)) THEN
+        iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
+        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        iGasInRTPFile = iGasInRTPFile + 1
+        head.gunit(iGasInRTPFile) = 10
+        head.glist(iGasInRTPFile) = 2
+      ELSEIF (kPlanet == 4 .AND. (prof.co2ppm >= 0.90*1e6 .AND. prof.co2ppm <= 0.99*1e6)) THEN
+        iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
+        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        iGasInRTPFile = iGasInRTPFile + 1
+        head.gunit(iGasInRTPFile) = 10
+        head.glist(iGasInRTPFile) = 2
+      ELSE
+        write(kStdWarn,'(A,I3,A)') 'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+        write(kStdErr,'(A,I3,A)')  'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+      ENDIF
+    END IF
 
     IF (prof.nlevs > kProfLayer+1) THEN
       write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
@@ -3281,7 +3333,18 @@ CONTAINS
           j = iFindJ(kProfLayer,I,iDownWard)
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
-          rAmt = prof.gamnt(i,iG) / kAvog
+          ! rAmt = prof.gamnt(i,iG) / kAvog
+          IF ((iIDgas .NE. 2) .OR. ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 1))) THEN
+            !! profile(z) in molecules/cm2
+            rAmt = prof.gamnt(i,iG) / kAvog                       
+          ELSEIF ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 10)) THEN
+            !! CO2 profile(z) in ppm, change to kmoles/cm2
+            rAmt = get_co2_us_std(prof.gamnt(i,iG),i,10)
+          ELSEIF ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 11)) THEN
+            !! CO2 in ppm, change to profile and change to kmoles/cm2
+            rAmt = get_co2_us_std(prof.co2ppm,i,11)
+          END IF
+
           IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
@@ -3856,6 +3919,7 @@ CONTAINS
           j = iFindJ(kProfLayer,I,iDownWard)
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
+          ! rAmt = prof.gamnt(i,iG) / kAvog
           IF ((iIDgas .NE. 2) .OR. ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 1))) THEN
             !! profile(z) in molecules/cm2
             rAmt = prof.gamnt(i,iG) / kAvog                       

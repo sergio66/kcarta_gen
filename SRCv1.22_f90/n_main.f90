@@ -1502,8 +1502,8 @@ CONTAINS
       iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
       iaNumLayer,iaaRadLayer,raProfileTemp, &
       raSatAzimuth,raSolAzimuth,raWindSpeed, &
-     cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
-       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+      cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
+      raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 #ELSE
     CALL radnceRTPorNML(iRTP,caPFname,iMPSetForRadRTP, &
       iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
@@ -2389,6 +2389,20 @@ CONTAINS
         iakSolar,rakSolarAngle,rakSolarRefl, &
         iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
         iaNumLayer,iaaRadLayer,raProfileTemp)
+      IF (iaaOverrideDefault(3,6) == -1) THEN
+        write(kStdErr,*)  'iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
+        write(kStdWarn,*) 'iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
+        iakSolar = -1
+        rakSolarAngle = 150.0
+      ELSEIF (iaaOverrideDefault(3,6) == +1) THEN
+        write(kStdErr,*)  'iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
+        write(kStdWarn,*) 'iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
+        iakSolar = +1
+      ELSEIF (iaaOverrideDefault(3,6) == +0) THEN
+        write(kStdErr,*)  'iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
+        write(kStdWarn,*) 'iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
+        iakSolar = 0
+      END IF
     ELSE
         write(kStdErr,*) 'this does NOT want RTP setup'
         CALL DoStop
@@ -2414,9 +2428,9 @@ CONTAINS
 
 !   now go through and see if any of these atmospheres are for limb sounding
     CALL check_limbsounder(iNatm,raPressStart,raPressStop,raFracTop,raFracBot,raTSurf, &
-    raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
-    raPressLevels,raLayerHeight, &
-    iaKsolar,rakSolarAngle)
+      raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
+      raPressLevels,raLayerHeight, &
+      iaKsolar,rakSolarAngle)
 
     RETURN
     end SUBROUTINE radnceNMLonly
