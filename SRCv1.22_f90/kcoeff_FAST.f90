@@ -1043,6 +1043,8 @@ CONTAINS
       iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
       daaaKX,daaUX)
 
+!write(kStdErr,'(A,A,i3,F12.4,F12.4,F12.4)') 'miaow ',caFName(1:90),iGasID,rFileStartFr,(raFreq(2)-raFreq(1)),dFStep
+
     CALL sanity_check_database_wavenumbers(raFreq,rFileStartFr,iTag,dSfreq,dFStep,iFileGasID,iGasID,iNLay,caFName)
 
 ! interpolate compressed data in temperature, to get abs coeff matrix

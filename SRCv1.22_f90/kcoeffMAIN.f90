@@ -397,11 +397,13 @@ CONTAINS
 
     iErr = -1
 
+    kFrStep = kaFrStep(iTag)
+
     DO iI = 1,160
       kcaAltComprDirs(iI:iI) = ' '
     END DO
     kcaAltComprDirs = caaAltComprDirs(iNewIN)
-    write(kStdWarn,'(A,I3)') '>>> substituting caCompressedDataPath for gasID ',iGasID
+    write(kStdWarn,'(A,I3,A,ES15.6,A)') '>>> substituting caCompressedDataPath for gasID ',iGasID,' : needs dv = ',kFrStep,' cm-1'
     write(kStdWarn,160) kcaAltComprDirs
 
     IF (iGasID == 2) THEN

@@ -491,7 +491,7 @@
         write(kStdWarn,*) 'iOuterLoop = ',iOuterLoop,' out of ',iTotal
         write(kStdWarn,*) 'Currently processing k-comp block# ',iFileID
         write(kStdWarn,*) 'which has StartFreq = ',rFileStartFr
-        write(kStdWarn,*) 'File iTagIndex, ActualTag, freqspacing = ', &
+        write(kStdWarn,'(A,I4,I4,ES12.5)') 'File iTagIndex, ActualTag, freqspacing = ', &
         iTag,iaActualTag(iFileID),kaFrStep(iTag)
                 
     ! first set the cumulative d/dT matrix to zero, if we need Jacobians

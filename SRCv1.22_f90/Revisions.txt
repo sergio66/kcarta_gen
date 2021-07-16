@@ -607,6 +607,20 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22
 ----- 
+7/15/21         Putting in error checks to make sure eg database
+                spacing of 0.0025 cm-1 is exactly compatible with what
+                kcarta is processing. Note for VERYHHIGHRES IR (0.0002
+                cm-1) some of the CO2 files eg 617 cm-1 required 100
+                basis vectors instead of 50, so
+                pre_definedVERYHIGHRES.param accounts for this. See
+                also
+                /home/sergio/HITRAN2UMBCLBL/FORTRAN/mat2for/mat2forGENERIC.m.which
+                now does error checks as it writes out the mat2for
+                files. These checks mean I may have to re-write the
+                FIR and NIR,VIS and UV databses since they previously
+                were written out mistakenly claiming df=0.0025 cm-1
+                which will now be trapped by kcoeff_common.f90, subr
+                RDCOMP and RDCOMPWATER
 
 7/13/21         iaaOverrideDefault(3,6) = -9999 (default) keeeps iaKSolar as is
                 But for example highres or veryhigh res does not have corresponding
