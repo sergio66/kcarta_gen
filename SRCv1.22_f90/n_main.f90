@@ -2390,17 +2390,17 @@ CONTAINS
         iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
         iaNumLayer,iaaRadLayer,raProfileTemp)
       IF (iaaOverrideDefault(3,6) == -1) THEN
-        write(kStdErr,*)  'iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
-        write(kStdWarn,*) 'iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
+        write(kStdErr,*)  'n_main iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
+        write(kStdWarn,*) 'n_main iaaOverrideDefault(3,6) == -1 so setting all solar angles to night'
         iakSolar = -1
         rakSolarAngle = 150.0
       ELSEIF (iaaOverrideDefault(3,6) == +1) THEN
-        write(kStdErr,*)  'iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
-        write(kStdWarn,*) 'iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
+        write(kStdErr,*)  'n_main iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
+        write(kStdWarn,*) 'n_main iaaOverrideDefault(3,6) == +1 so setting to read in solar files'
         iakSolar = +1
       ELSEIF (iaaOverrideDefault(3,6) == +0) THEN
-        write(kStdErr,*)  'iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
-        write(kStdWarn,*) 'iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
+        write(kStdErr,*)  'n_main iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
+        write(kStdWarn,*) 'n_main iaaOverrideDefault(3,6) == 0 so setting to use ttorad(v,kSunTemp)'
         iakSolar = 0
       END IF
     ELSE

@@ -27,18 +27,18 @@ if fid == -1
   error('can''t open input file')
 end
 
-ktype=2;
-npts=10000;
-fstep=0.0025;
-nlay = 100;
+ktype = 2;
+npts  = 10000;
+fstep = 0.0025;
+nlay  = 100;
 % [npts,nd]=size(B);
 
 % temperature offsets
-ntemp=11;
-toff=-50.0:10.0:50.0;
+ntemp = 11;
+toff  = -50.0:10.0:50.0;
 
 % read header info
-filemark= 4 + 8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4;
+filemark  = 4 + 8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4;
 filemark2 = fread(fid, 1, 'integer*4');
 if filemark ~= filemark2, error('header read format error'), end
 gid = fread(fid, 1, 'integer*4');
@@ -64,7 +64,7 @@ filemark2 = fread(fid, 1, 'integer*4');
 if gid > 1
   % do anything but water
   kcomp = zeros(nd,nlay,ntemp);
-  filemark= 8 * ntemp * nlay;
+  filemark = 8 * ntemp * nlay;
   for i = 1:nd
     filemark2 = fread(fid, 1, 'integer*4');
     if filemark ~= filemark2, error('absorption read format error'), end
@@ -75,7 +75,7 @@ else
   % do 5 partial pressures, for water
   kcomp = zeros(nd,nlay,ntemp,5);
   for pi = 1 : 5
-    filemark= 8 * ntemp * nlay;
+    filemark = 8 * ntemp * nlay;
     for i = 1:nd
       filemark2 = fread(fid, 1, 'integer*4');
       if filemark ~= filemark2, error('absorption read format error'), end

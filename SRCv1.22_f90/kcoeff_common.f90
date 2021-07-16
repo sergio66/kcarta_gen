@@ -170,41 +170,44 @@ CONTAINS
 
 !     Read in the header
     READ(iIOUN) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN
+!write(kStdErr,'(A)') ' RDCOMPWATER :  IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN = '
+!write(kStdErr,*) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN
 
- 1110 FORMAT('Error! Compressed data array dimension exceeds ','max size')
- 1120 FORMAT('NK = ',I3,', kMaxK = ',I3)
+ 1110 FORMAT('Error! RDCOMPWATER Compressed data array dimension exceeds max size')
+
+ 1120 FORMAT('RDCOMPWATER : FNAM = ',A,' NK = ',I3,', kMaxK = ',I3)
       ! Make sure the array sizes are <= to the declared sizes
       IF (NK > kMaxK) THEN
         WRITE(kStdErr,1110)
-        WRITE(kStdErr,1120) NK, kMaxK
+        WRITE(kStdErr,1120) FNAM, NK, kMaxK
         CALL DoSTOP
       ENDIF
 
- 1130 FORMAT('KT = ',I2,', kMaxTemp = ',I2)
+ 1130 FORMAT('RDCOMPWATER : FNAM = ',A,' KT = ',I2,', kMaxTemp = ',I2)
       IF (KT > kMaxTemp) THEN
         WRITE(kStdErr,1110)
-        WRITE(kStdErr,1130) KT, kMaxTemp
+        WRITE(kStdErr,1130) FNAM, KT, kMaxTemp
         CALL DoSTOP
       ENDIF
 
- 1140 FORMAT('KN = ',I3,', kMaxLayer = ',I3)
+ 1140 FORMAT('RDCOMPWATER : FNAM = ',A,'KN = ',I3,', kMaxLayer = ',I3)
       IF (KN > kMaxLayer) THEN
         WRITE(kStdErr,1110)
-        WRITE(kStdErr,1140) KN, kMaxLayer
+        WRITE(kStdErr,1140) FNAM, KN, kMaxLayer
         CALL DoSTOP
       ENDIF
 
- 1150 FORMAT('UM = ',I5,', kMaxPts = ',I5)
+ 1150 FORMAT('RDCOMPWATER : FNAM = ',A,'UM = ',I5,', kMaxPts = ',I5)
       IF (UM > kMaxPts) THEN
         WRITE(kStdErr,1110)
-        WRITE(kStdErr,1150) UM, kMaxPts
+        WRITE(kStdErr,1150) FNAM, UM, kMaxPts
         CALL DoSTOP
       ENDIF
 
- 1160 FORMAT('UN = ',I3,', kMaxK = ',I3)
+ 1160 FORMAT('RDCOMPWATER : FNAM = ',A,'UN = ',I3,', kMaxK = ',I3)
       IF (UN > kMaxK) THEN
         WRITE(KSTDERR,1110)
-        WRITE(KSTDERR,1160) UN, kMaxK
+        WRITE(KSTDERR,1160) FNAM, UN, kMaxK
         CALL DoSTOP
       ENDIF
 
@@ -333,41 +336,44 @@ CONTAINS
 
 !     Read in the header
     READ(iIOUN) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN
+!write(kStdErr,'(A)') ' RDCOMP :  IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN = '
+!write(kStdErr,*) IDGAS, SFREQ, FSTEP, NPTS, NLAY, KTYPE, NK, KT, KN, UM, UN
 
-    1110 FORMAT('Error! Compressed data array dimension exceeds ', 'max size')
-    1120 FORMAT('NK = ',I3,', kMaxK = ',I3)
+    1110 FORMAT('Error! RDCOMP Compressed data array dimension exceeds max size')
+
+    1120 FORMAT('RDCOMP : FNAM = ',A,' NK = ',I3,' kMaxK = ',I3)
 !     Make sure the array sizes are <= to the declared sizes
     IF (NK > kMaxK) THEN
       WRITE(KSTDERR,1110)
-      WRITE(KSTDERR,1120) NK, kMaxK
+      WRITE(KSTDERR,1120) FNAM, NK, kMaxK
       CALL DoSTOP
     ENDIF
 
- 1130 FORMAT('KT = ',I2,', kMaxTemp = ',I2)
+ 1130 FORMAT('RDCOMP : FNAM = ',A,' KT = ',I2,', kMaxTemp = ',I2)
     IF (KT > kMaxTemp) THEN
       WRITE(KSTDERR,1110)
-      WRITE(KSTDERR,1130) KT, kMaxTemp
+      WRITE(KSTDERR,1130) FNAM, KT, kMaxTemp
       CALL DoSTOP
     ENDIF
 
- 1140 FORMAT('KN = ',I3,', kMaxLayer = ',I3)
+ 1140 FORMAT('RDCOMP : FNAM = ',A,'KN = ',I3,', kMaxLayer = ',I3)
     IF (KN > kMaxLayer) THEN
       WRITE(KSTDERR,1110)
-      WRITE(KSTDERR,1140) KN, kMaxLayer
+      WRITE(KSTDERR,1140) FNAM, KN, kMaxLayer
       CALL DoSTOP
     ENDIF
 
-  1150 FORMAT('UM = ',I5,', kMaxPts = ',I5)
+  1150 FORMAT('RDCOMP : FNAM = ',A,'UM = ',I5,', kMaxPts = ',I5)
     IF (UM > kMaxPts) THEN
       WRITE(KSTDERR,1110)
-      WRITE(KSTDERR,1150) UM, kMaxPts
+      WRITE(KSTDERR,1150) FNAM, UM, kMaxPts
       CALL DoSTOP
     ENDIF
 
- 1160 FORMAT('UN = ',I3,', kMaxK = ',I3)
+ 1160 FORMAT('RDCOMP : FNAM = ',A,'UN = ',I3,', kMaxK = ',I3)
     IF (UN > kMaxK) THEN
       WRITE(KSTDERR,1110)
-      WRITE(KSTDERR,1160) UN, kMaxK
+      WRITE(KSTDERR,1160) FNAM, UN, kMaxK
       CALL DoSTOP
     ENDIF
 

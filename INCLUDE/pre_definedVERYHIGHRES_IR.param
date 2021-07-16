@@ -73,7 +73,8 @@ c
 ! kMaxProf  == max number of temperature profiles
 
       INTEGER kMaxTemp,kMaxK,kMaxU,kMaxProf,kMaxWater
-      PARAMETER (kMaxTemp=11,kMaxK=50,kMaxU=50,kMaxWater=5,kMaxProf=18)
+!      PARAMETER (kMaxTemp=11,kMaxK=50,kMaxU=50,kMaxWater=5,kMaxProf=18)
+      PARAMETER (kMaxTemp=11,kMaxK=100,kMaxU=100,kMaxWater=5,kMaxProf=18)
 
 ! MXXMOL = maximum number of xse! gases
 ! MXXTMP = maximum number of temperature sets for a xse! gas
