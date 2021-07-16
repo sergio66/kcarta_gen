@@ -112,7 +112,7 @@ CONTAINS
       write (kStdWarn,*) ' WV cont : using kCompressed Database format'
       rConvFac = 1.0e-23    !! SELF/FORN continuum coeffs in compressed
                               !! database were remultiplied by 1.0e+23
-      CALL xCKDgases(iGasID,rFileStartFr,iTag,iActualTag, &
+      CALL xCKDgases(iGasID,raFreq,rFileStartFr,iTag,iActualTag, &
         iRefLayer,iL,iU, &
         raAmt,raRAmt,raTemp,raRTemp, &
         iErr1,iDoDQ,pProf,iProfileLayers, &

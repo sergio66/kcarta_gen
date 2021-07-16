@@ -603,7 +603,7 @@ CONTAINS
 ! have to send in ref temp, amount and profile temp,amount
 ! the spline is done wrt partial pressure, while the scaling is done
 ! wrt partial pressure
-    SUBROUTINE xwater(iGasID,rFileStartFr,iTag,iActualTag,iProfLayer,iL,iU, &
+    SUBROUTINE xwater(iGasID,raFreq,rFileStartFr,iTag,iActualTag,iProfLayer,iL,iU, &
     raPAmt,raRAmt,raPPart,raRPart,raPTemp,raRTemp, &
     iErr,iDoDQ,pProf,iProfileLayers, &
     daaDQ,daaDT,daaAbsCoeff,iSPlineType, &
@@ -635,7 +635,7 @@ CONTAINS
     INTEGER :: iProfileLayers,iSPlineType
     REAL :: raPAmt(kProfLayer),raRAmt(kProfLayer),pProf(kProfLayer)
     REAL :: raPPart(kProfLayer),raRPart(kProfLayer)
-    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr
+    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr,raFreq(KmaxPts)
     DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
     DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
     DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
@@ -654,7 +654,7 @@ CONTAINS
     raQ21(kProfLayer),raQ22(kProfLayer)
 
 ! local variables associated with uncompressing the water database files
-    CHARACTER(120) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iIOUN,iFileGasID,iNpts,iNLay,iKtype,iNk,iKm,iKn,iUm,iUn
     INTEGER :: iT0,iaTsort(kMaxTemp),iLowerOrUpper
     DOUBLE PRECISION :: dSfreq,dFStep,daToffset(kMaxTemp)
@@ -678,26 +678,7 @@ CONTAINS
       iNLay,iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
       daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUX)
 
-! check that the file has the data for the correct gas
-  1000 FORMAT('Error! file : ',/,A120,/,'contains data for GasID ',I3,' not desired GasID ',I3)
-    IF (iFileGasID /= iGasID) THEN
-      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
-        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-      ELSE
-        iErr=1
-        WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        CALL DoSTOP
-      END IF
-    END IF
-
-! check that the data file has the right number of layers ===== AIRS layers
- 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
-    IF (iNLay /= kMaxLayer) THEN
-      iErr=1
-      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-      CALL DoSTOP
-    END IF
+    CALL sanity_check_database_wavenumbers(raFreq,rFileStartFr,iTag,dSfreq,dFStep,iFileGasID,iGasID,iNLay,caFName)
 
 ! kGenln2Water   = self broadening correction for water, using interpolation
 !                  in water partial pressure (+1)
@@ -868,7 +849,7 @@ CONTAINS
 ! iGasID tells which gas type, rFileStartFr identifies the frequency range
 ! have to send in ref temp, amount and profile temp,amount
     SUBROUTINE xCousinContribution(iGasID, &
-    rFileStartFr,iTag,iActualTag,iProfileLayers,iL,iU, &
+    raFreq,rFileStartFr,iTag,iActualTag,iProfileLayers,iL,iU, &
     raPAmt,raRAmt,raPTemp,raRTemp,pProf, &
     rLTEstrength,iNLTEStart,iLowerOrUpper,daaAbsCoeff,iSPlineType, &
     iaP1,iaP2,raP1,raP2, &
@@ -899,7 +880,7 @@ CONTAINS
     INTEGER :: iGasID,iErr,iL,iU,iTag,iActualTag
     INTEGER :: iProfileLayers,iLowerOrUpper,iSPlineType
     REAL :: raPAmt(kProfLayer),raRAmt(kProfLayer),pProf(kProfLayer)
-    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr
+    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr,raFreq(kMaxPts)
     DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
     REAL :: rLTEStrength
     INTEGER :: iNLTEStart
@@ -918,7 +899,7 @@ CONTAINS
     raQ21(kProfLayer),raQ22(kProfLayer)
         
 ! local variables associated with uncompressing the database
-    CHARACTER(120) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iIOUN,iFileGasID,iNpts,iNLay,iKtype,iNk,iKm,iKn,iUm,iUn
     INTEGER :: iT0,iaTsort(kMaxTemp),iFr
     DOUBLE PRECISION :: dSfreq,dFStep,daToffset(kMaxTemp)
@@ -937,27 +918,7 @@ CONTAINS
       iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
       daaaKX,daaUX)
 
-! check that the file has the data for the correct gas
- 1000 FORMAT('Error! file : ',/,A120,/,'contains data for GasID ',I3,' not desired GasID ',I3)
-
-    IF (iFileGasID /= iGasID) THEN
-      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
-        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-      ELSE
-        iErr=1
-        WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        CALL DoSTOP
-      END IF
-    END IF
-
-! check that the data file has the right number of layers
- 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
-    IF (iNLay /= kMaxLayer) THEN
-      iErr=1
-      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-        CALL DoSTOP
-    END IF
+    CALL sanity_check_database_wavenumbers(raFreq,rFileStartFr,iTag,dSfreq,dFStep,iFileGasID,iGasID,iNLay,caFName)
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN
@@ -1012,7 +973,7 @@ CONTAINS
 ! this subroutine calls the routines to read in the k-compressed data
 ! iGasID tells which gas type, rFileStartFr identifies the frequency range
 ! have to send in ref temp, amount and profile temp,amount
-    SUBROUTINE xothergases(iGasID,rFileStartFr,iTag,iActualTag, &
+    SUBROUTINE xothergases(iGasID,raFreq,rFileStartFr,iTag,iActualTag, &
     iProfLayer,iL,iU, &
     raPAmt,raRAmt,raPTemp,raRTemp,iErr,iDoDQ,pProf,iProfileLayers, &
     daaDQ,daaDT,daaAbsCoeff,iSplineType, &
@@ -1044,7 +1005,7 @@ CONTAINS
     INTEGER :: iGasID,iErr,iProfLayer,iL,iU,iDoDQ,iTag,iActualTag
     INTEGER :: iProfileLayers,iSplineType
     REAL :: raPAmt(kProfLayer),raRAmt(kProfLayer),pProf(kProfLayer)
-    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr
+    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr,raFreq(KmaxPts)
     DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
     DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
     DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
@@ -1063,7 +1024,7 @@ CONTAINS
     raQ21(kProfLayer),raQ22(kProfLayer)
         
 ! local variables associated with uncompressing the database
-    CHARACTER(120) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iIOUN,iFileGasID,iNpts,iNLay,iKtype,iNk,iKm,iKn,iUm,iUn
     INTEGER :: iT0,iaTsort(kMaxTemp)
     DOUBLE PRECISION :: dSfreq,dFStep,daToffset(kMaxTemp)
@@ -1082,26 +1043,7 @@ CONTAINS
       iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
       daaaKX,daaUX)
 
-! check that the file has the data for the correct gas
-  1000 FORMAT('Error! file : ',/,A120,/, 'contains data for GasID ',I3,' not desired GasID ',I3)
-    IF (iFileGasID /= iGasID) THEN
-      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
-        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-      ELSE
-        iErr=1
-        WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        CALL DoSTOP
-      END IF
-    END IF
-
-! check that the data file has the right number of layers
- 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
-    IF (iNLay /= kMaxLayer) THEN
-      iErr=1
-      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-      CALL DoSTOP
-    END IF
+    CALL sanity_check_database_wavenumbers(raFreq,rFileStartFr,iTag,dSfreq,dFStep,iFileGasID,iGasID,iNLay,caFName)
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN
@@ -1186,7 +1128,7 @@ CONTAINS
 ! this subroutine calls the routines to read CKD continmuum k-compressed data
 ! iGasID tells which gas type, rFileStartFr identifies the frequency range
 ! have to send in ref temp, amount and profile temp,amount
-    SUBROUTINE xCKDgases(iGasID,rFileStartFr,iTag,iActualTag, &
+    SUBROUTINE xCKDgases(iGasID,raFreq,rFileStartFr,iTag,iActualTag, &
     iProfLayer,iL,iU, &
     raPAmt,raRAmt,raPTemp,raRTemp,iErr,iDoDQ,pProf,iProfileLayers, &
     daaDQ,daaDT,daaAbsCoeff,iSplineType, &
@@ -1218,7 +1160,7 @@ CONTAINS
     INTEGER :: iGasID,iErr,iProfLayer,iL,iU,iDoDQ,iTag,iActualTag
     INTEGER :: iProfileLayers,iSplineType
     REAL :: raPAmt(kProfLayer),raRAmt(kProfLayer),pProf(kProfLayer)
-    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr
+    REAL :: raPTemp(kProfLayer),raRTemp(kProfLayer),rFileStartFr,raFreq(kMaxPts)
     DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
     DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
     DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
@@ -1237,7 +1179,7 @@ CONTAINS
     raQ21(kProfLayer),raQ22(kProfLayer)
         
 ! local variables associated with uncompressing the database
-    CHARACTER(120) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iIOUN,iFileGasID,iNpts,iNLay,iKtype,iNk,iKm,iKn,iUm,iUn
     INTEGER :: iT0,iaTsort(kMaxTemp)
     DOUBLE PRECISION :: dSfreq,dFStep,daToffset(kMaxTemp)
@@ -1261,26 +1203,7 @@ CONTAINS
       iKtype,iNk,iKm,iKn,iUm,iUn,daToffset,iT0,iaTsort, &
       daaaKX,daaUX)
 
-! check that the file has the data for the correct gas
- 1000 FORMAT('Error! file : ',/,A120,/, 'contains data for GasID ',I3,' not desired GasID ',I3)
-    IF (iFileGasID /= iGasID) THEN
-      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
-        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
-      ELSE
-        iErr=1
-        WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
-        CALL DoSTOP
-      END IF
-    END IF
-
-! check that the data file has the right number of layers
- 1010 FORMAT('Error! file : ',/,A120,/,'contains data for ',i3,' layers but kMaxLayer = ',I3)
-    IF (iNLay /= kMaxLayer) THEN
-      iErr=1
-      WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
-      CALL DoSTOP
-    END IF
+    CALL sanity_check_database_wavenumbers(raFreq,rFileStartFr,iTag,dSfreq,dFStep,iFileGasID,iGasID,iNLay,caFName)
 
 ! interpolate compressed data in temperature, to get abs coeff matrix
     IF (kJacobian >= 0) THEN

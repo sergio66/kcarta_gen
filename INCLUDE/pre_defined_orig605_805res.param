@@ -282,7 +282,7 @@ c (kcarta.x) and when it cannot (bkcarta.x)
 
 c these are for overwriting the compressed database dirs (from SPECTRA)
       INTEGER kAltComprDirs
-      CHARACTER*120 kcaAltComprDirs
+      CHARACTER*160 kcaAltComprDirs
       COMMON/ComBlock9/kAltComprDirs,kcaAltComprDirs
 
 c these are for seeing how cloud params are overwritten

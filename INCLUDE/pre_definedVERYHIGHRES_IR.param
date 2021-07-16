@@ -282,7 +282,7 @@ c this is to account for planet orbit changes (ie planet-sun distance)
 
 ! these are for overwriting the compressed database dirs (from SPECTRA)
       INTEGER kAltComprDirs
-      CHARACTER*120 kcaAltComprDirs
+      CHARACTER*160 kcaAltComprDirs
       COMMON/ComBlock9/kAltComprDirs,kcaAltComprDirs
 
 ! these are for seeing how cloud params are overwritten

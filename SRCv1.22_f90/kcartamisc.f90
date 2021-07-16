@@ -40,7 +40,7 @@ CONTAINS
     REAL :: x
     LOGICAL :: isnan
 
-    print *,x,x+1.0e0
+!    print *,x,x+1.0e0
     IF (x+1.0e0 == x) THEN
       isnan = .TRUE. 
     ELSE
@@ -66,7 +66,7 @@ CONTAINS
     logical :: isnan
     double precision :: x
 
-    print *,x,x+1.0d0
+!    print *,x,x+1.0d0
     IF (x+1.0d0 == x) THEN
       isnan = .TRUE. 
     ELSE

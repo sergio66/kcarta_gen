@@ -483,13 +483,13 @@ CONTAINS
 !            for all other gases, iLineMix = irrelevant (set to +1 usually)
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    CHARACTER(120) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iGasID,iTag,iActualTag,iLineMix
     REAL :: rFileStartFr
           
 ! local variables
     CHARACTER(16) :: caTemp
-    CHARACTER(120) :: caDir,caDirUse
+    CHARACTER(160) :: caDir,caDirUse
     CHARACTER(2) :: caString2,caTemp2
     CHARACTER(5) :: caString3,caTemp3
     CHARACTER(5) :: caString5,caTemp5
@@ -548,7 +548,7 @@ CONTAINS
         !!  kWaterIsoBandStart2 <= f < kWaterIsoBandStop2
         caDir = kWaterIsotopePath
       ELSE
-          caDir = kCompPaths
+        caDir = kCompPaths
       END IF
     ELSEIF (kaTag(iTag) == 15) THEN
       !! -------> 500-605 cm-1  <---------------------   'q' prefix
@@ -682,7 +682,11 @@ CONTAINS
       CALL DoStop
     END IF
 
-    IF (kAltComprDirs == +1) caDir = kcaAltComprDirs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!! this is if we use ALTERNATE directory !!!
+    IF (kAltComprDirs == +1) THEN
+       caDir = kcaAltComprDirs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    END IF
+    !!! this is if we use ALTERNATE directory !!!
 
     iLenDir = iLeftjust_lenstr(caDir,len(caDir))
 

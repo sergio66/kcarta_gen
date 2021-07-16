@@ -1029,7 +1029,7 @@ CONTAINS
         write(kStdWarn,*) 'Replacing kCARTA database CO2 optical depths '
         write(kStdWarn,*) 'with GENLN2 cousin CO2 optical depths'
         CALL CousinContribution(iaGases(iGas), &
-            rFileStartFr,iTag,iActualTag,iProfileLayers,iL_low,iL_high, &
+            raFreq,rFileStartFr,iTag,iActualTag,iProfileLayers,iL_low,iL_high, &
             raTAmt,raRAmt,raTTemp,raRTemp,pProf, &
             raNLTEstrength(iLTEIn),iaNLTEStart(iLTEin), &
             iUpper,daaGasAbCoeff,iSplineType)
@@ -3900,7 +3900,7 @@ CONTAINS
     REAL ::    raQ21(kProfLayer),raQ22(kProfLayer)
 
 ! local variables associated with uncompressing the database
-    CHARACTER(120) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iIOUN,iFileGasID,iNpts,iNLay,iKtype,iNk,iKm,iKn,iUm,iUn
     INTEGER :: iT0,iaTsort(kMaxTemp),iUAoriLA
     DOUBLE PRECISION :: dSfreq,dFStep,daToffset(kMaxTemp)

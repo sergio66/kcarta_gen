@@ -418,7 +418,7 @@ CONTAINS
     iDebugMatlab = +1   !!! do     debug using print statements
     iDebugMatlab = -1   !!! do not debug using print statements
     IF (iDebugMatlab > 0) THEN
-      print *,idgas,nk,kn,kt,ktype
+      print *,'in RDCOMP',idgas,nk,kn,kt,ktype
       !! kx is a matrix(nk,kt,kn) = matrix(nk,11,100)
       !!   where nk = number of basis vectors
       !! this is matrix "kcomp" in the cg5v4250.mat files kcomp(nk,100,11)
@@ -440,8 +440,8 @@ CONTAINS
      !      iDebugMatlab = 1
     IF (iDebugMatlab > 0) THEN
       IF (idgas == 2) THEN
-        print *,(UX(J,1),J=1,5)     !! should equal B(1:5,1)
-        print *,(KX(1,J,6),J=1,6)   !! should equal kcomp(1,6,1:6)
+        print *,'in RDCOMP ',(UX(J,1),J=1,5)     !! should equal B(1:5,1)
+        print *,'in RDCOMP ',(KX(1,J,6),J=1,6)   !! should equal kcomp(1,6,1:6)
       END IF
     END IF
 
@@ -1672,6 +1672,86 @@ CONTAINS
       
       RETURN
       END SUBROUTINE getUArefprofile
+!************************************************************************
+! this does sanity check of input raFreq vs the start,dv in the compressed datafile
+    SUBROUTINE sanity_check_database_wavenumbers(raFreq,rFileStartFr,iTag,dSfreq,dFStep,iFileGasID,iGasID,iNLay,caFName)
+
+    IMPLICIT NONE
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+    REAL :: rFileStartFr,raFreq(kMaxPts)
+    INTEGER :: iTag,iFileGasID,iGasID,iNLay
+    DOUBLE PRECISION :: dSfreq,dFStep
+    CHARACTER(160) caFName
+
+    REAL :: dv
+    INTEGER :: iErr
+
+    iErr = -1
+!!! start sanity check !!!
+    dv = (raFreq(kMaxPts)-raFreq(1))/(kMaxPts*1.0)
+
+! check that the data file has the right number of layers ===== AIRS layers
+ 1010 FORMAT('Error! file : ',/,A160,/, 'contains data for ',i3,' layers but kMaxLayer = ',I3)
+    IF (iNLay /= kMaxLayer) THEN
+      iErr = 1
+      WRITE(kStdWarn,1010) caFName,iNLay,kMaxLayer
+      WRITE(kStdErr,1010)  caFName,iNLay,kMaxLayer
+    END IF
+
+! check that the file has the data for the correct gas
+ 1000 FORMAT('Error! file : ',/,A160,/,'contains data for GasID ',I3,' not desired GasID ',I3)
+    IF (iFileGasID /= iGasID) THEN
+      IF ((iFileGasID == 110) .AND. (iGasID == 1)) THEN
+        write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+        write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
+      ELSE
+        iErr = 1
+        WRITE(kStdWarn,1000) caFName,iFileGasID,iGasID
+        WRITE(kStdErr,1000)  caFName,iFileGasID,iGasID
+      END IF
+    END IF
+
+    IF (abs((raFreq(1)-rFileStartFr)) > 1.0e-6) THEN
+      iErr = 1
+      write(kStdErr,'(A,F12.4,F12.4)') 'oh oh raFreq(1),rFileStartFr differ ',raFreq(1),rFileStartFr
+      write(kStdWarn,'(A,F12.4,F12.4)') 'oh oh raFreq(1),rFileStartFr differ ',raFreq(1),rFileStartFr
+    END IF
+
+    IF (abs(dv-kaFrStep(iTag)) > 1.0e-6) THEN
+      iErr = 1
+      write(kStdErr,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
+      write(kStdErr,'(A,I3,F12.4,F12.4)') 'oh oh dv (from raFreq(1:kMaxPts)),kaFrStep(iTag) differ for iTag',iTag,dv,kaFrStep(iTag)
+
+      write(kStdWarn,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
+      write(kStdWarn,'(A,I3,F12.4,F12.4)') 'oh oh dv (from raFreq(1:kMaxPts)),kaFrStep(iTag) differ for iTag',iTag,dv,kaFrStep(iTag)
+    END IF
+
+    IF (abs((raFreq(1)-real(dSfreq))) > 1.0e-6) THEN
+      iErr = 1
+      write(kStdErr,'(A,F12.4,F12.4)') 'oh oh raFreq(1),dSfreq differ ',raFreq(1),dSfreq
+      write(kStdWarn,'(A,F12.4,F12.4)') 'oh oh raFreq(1),dSfreq differ ',raFreq(1),dSfreq
+    END IF
+
+    IF (abs(dv-real(dFStep)) > 1.0e-6) THEN
+      iErr = 1
+      write(kStdErr,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
+      write(kStdErr,'(A,I3,F12.4,F12.4)') 'oh oh dv (from raFreq(1:kMaxPts)),dFStep differ for iTag',iTag,dv,dFStep
+
+      write(kStdWarn,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
+      write(kStdWarn,'(A,I3,F12.4,F12.4)') 'oh oh dv (from raFreq(1:kMaxPts)),dFStep differ for iTag',iTag,dv,dFStep
+    END IF
+!!! end sanity check !!!
+
+    IF (iErr > 0) THEN
+      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile ',caFName
+      WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile ',caFName
+      CALL DoStop
+    END IF
+  
+    RETURN
+    END SUBROUTINE sanity_check_database_wavenumbers
+
 !************************************************************************
 
 END MODULE kcoeff_common

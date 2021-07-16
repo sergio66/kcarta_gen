@@ -2137,6 +2137,7 @@ CONTAINS
       WRITE(iIOUN,*) (iaaOverrideDefault(1,iI),iI=1,10)    !! general settings
       WRITE(iIOUN,*) (iaaOverrideDefault(2,iI),iI=1,10)    !! radtrans settings
       WRITE(iIOUN,*) (iaaOverrideDefault(3,iI),iI=1,10)    !! iLBLRTM settings
+      !WRITE(iIOUN,*) (iaaOverrideDefault(4,iI),iI=1,10)    !! misc settings
       WRITE(iIOUN,*) '***********************************************'
 
       ! then output path ID stuff ------------------------------------------
@@ -2540,6 +2541,7 @@ CONTAINS
     WRITE(iIOUN1) (iaaOverrideDefault(1,iI),iI=1,10)    !! general settings
     WRITE(iIOUN1) (iaaOverrideDefault(2,iI),iI=1,10)    !! radtrans settings
     WRITE(iIOUN1) (iaaOverrideDefault(3,iI),iI=1,10)    !! iLBLRTM settings
+   !WRITE(iIOUN,*) (iaaOverrideDefault(4,iI),iI=1,10)    !! misc settings
 
 ! then output path ID stuff ------------------------------------------
     IF (kLongOrShort > 0) THEN

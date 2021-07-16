@@ -459,6 +459,10 @@ end
 % read "output data blocks"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+frlow_all = [];
+frhigh_all = [];
+frinc_all = [];
+
 for chunk = 1:nchunk
 
   cumODBrow = 1;
@@ -477,6 +481,11 @@ for chunk = 1:nchunk
     frlow   = fread(fin, 1, 'real*4');    % low freq of chunk
     frhigh  = fread(fin, 1, 'real*4');    % high freq of chunk
     frinc   = fread(fin, 1, 'real*4');    % frequency increment
+
+    frlow_all(chunk)  = frlow;
+    frhigh_all(chunk) = frhigh;
+    frinc_all(chunk)  = frinc;
+
     flen    = fread(fin, 1, 'integer*4');
   
     if chunk == 1
@@ -556,3 +565,7 @@ detail.fmax = fmax;
 detail.lowchunk  = lowchunk;
 detail.highchunk = highchunk;
 detail.htype     = htype;
+
+detail.frlow_all  = frlow_all;
+detail.frhigh_all = frhigh_all;
+detail.frinc_all  = frinc_all;

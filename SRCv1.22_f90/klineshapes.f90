@@ -481,7 +481,7 @@ CONTAINS
 ! local variables
     DOUBLE PRECISION :: daaDQ(kMaxPts,kProfLayer)
     DOUBLE PRECISION :: daaDT(kMaxPts,kProfLayer)
-    CHARACTER(120) :: caFName
+    CHARACTER(160) :: caFName
     INTEGER :: iIOUN,iFileGasID,iNpts,iNLay,iKtype,iNk,iKm,iKn,iUm,iUn
     INTEGER :: iT0,iaTsort(kMaxTemp),iErr
     DOUBLE PRECISION :: dSfreq,dFStep,daToffset(kMaxTemp)

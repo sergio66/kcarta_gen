@@ -3106,7 +3106,6 @@ CONTAINS
 
     !*************************
     DO iI = 1,kMaxAtm
-      print *,raTSurf(iI)
       IF (is_badnum(raTSurf(iI))) THEN
         write(kStdWarn,*) 'raTSurf(iI) is abnormal (inf?) ',iI
         write(kStdErr,*)  'raTSurf(iI) is abnormal (inf?) ',iI
