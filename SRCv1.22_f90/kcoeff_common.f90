@@ -1700,7 +1700,7 @@ CONTAINS
 ! check that the data file has the right number of layers ===== AIRS layers
  1010 FORMAT('Error! file : ',/,A160,/, 'contains data for ',i3,' layers but kMaxLayer = ',I3)
     IF (iNLay /= kMaxLayer) THEN
-      iErr = iErr + 1
+      iErr = 1
       WRITE(kStdWarn,1010) caFName,iNLay,kMaxLayer
       WRITE(kStdErr,1010)  caFName,iNLay,kMaxLayer
     END IF
@@ -1712,47 +1712,67 @@ CONTAINS
         write(kStdWarn,*) 'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
         write(kStdErr,*)  'oops looks like compr data is for G110=G1+G103, so proceeding with caution'
       ELSE
-        iErr = iErr + 1
+        iErr = 2
         WRITE(kStdWarn,1000) caFName,iFileGasID,iGasID
         WRITE(kStdErr,1000)  caFName,iFileGasID,iGasID
       END IF
     END IF
 
     IF (abs((raFreq(1)-rFileStartFr)) > 1.0e-6) THEN
-      iErr = iErr + 1
-      write(kStdErr,'(A,F12.4,F12.4)') 'oh oh raFreq(1),rFileStartFr differ ',raFreq(1),rFileStartFr
-      write(kStdWarn,'(A,F12.4,F12.4)') 'oh oh raFreq(1),rFileStartFr differ ',raFreq(1),rFileStartFr
+      iErr = 3
+      write(kStdErr,'(A,F15.8,F15.8)') 'oh oh raFreq(1),rFileStartFr differ ',raFreq(1),rFileStartFr
+      write(kStdWarn,'(A,F15.8,F15.8)') 'oh oh raFreq(1),rFileStartFr differ ',raFreq(1),rFileStartFr
     END IF
 
     IF (abs(dv-kaFrStep(iTag)) > 1.0e-6) THEN
-      iErr = iErr + 1
+      iErr = 4
       write(kStdErr,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
-      write(kStdErr,'(A,I3,F12.4,F12.4)') 'spectral resolution - raFreq vs preddefined.param setting - are different :  iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ',iTag,dv,kaFrStep(iTag)
+      write(kStdErr,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs preddefined.param setting - are different :  iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ',iTag,dv,kaFrStep(iTag)
 
       write(kStdWarn,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
-      write(kStdWarn,'(A,I3,F12.4,F12.4)') 'spectral resolution - raFreq vs preddefined.param setting - are different :  iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ',iTag,dv,kaFrStep(iTag)
+      write(kStdWarn,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs preddefined.param setting - are different :  iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ',iTag,dv,kaFrStep(iTag)
     END IF
 
     IF (abs((raFreq(1)-real(dSfreq))) > 1.0e-6) THEN
-      iErr = iErr + 1
-      write(kStdErr,'(A,I3,F12.4,F12.4)') 'start freqpoint - raFreq vs database file - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
-      write(kStdWarn,'(A,I3,F12.4,F12.4)') 'start freqpoint - raFreq vs database file  - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
+      iErr = 5
+      write(kStdErr,'(A,I3,F15.8,F15.8)') 'start freqpoint - raFreq vs database file - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
+      write(kStdWarn,'(A,I3,F15.8,F15.8)') 'start freqpoint - raFreq vs database file  - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
     END IF
 
     IF (abs(dv-real(dFStep)) > 1.0e-6) THEN
-      iErr = iErr + 1
-      write(kStdErr,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
-      write(kStdErr,'(A,I3,F12.4,F12.4)') 'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep',iTag,dv,dFStep
+      iErr = 6
+      write(kStdErr,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
+      write(kStdErr,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep',iTag,dv,dFStep
 
-      write(kStdWarn,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
-      write(kStdWarn,'(A,I3,F12.4,F12.4)') 'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep',iTag,dv,dFStep
+      write(kStdWarn,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
+      write(kStdWarn,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep',iTag,dv,dFStep
     END IF
 !!! end sanity check !!!
 
-    IF (iErr > 0) THEN
-      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile ',caFName
-      WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile ',caFName
+    IF (iErr .EQ. 1) THEN
+      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer',caFName
+      WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer',caFName
       CALL DoStop
+    ELSEIF (iErr .EQ. 2) THEN
+      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong',caFName
+      WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong',caFName
+      CALL DoStop
+    ELSEIF (iErr .EQ. 3) THEN
+      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong',caFName
+      WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong',caFName
+      CALL DoStop
+    ELSEIF (iErr .EQ. 4) THEN
+      WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong',caFName
+      WRITE(kStdWarn,'(A,A)') 'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong',caFName
+!      CALL DoStop
+    ELSEIF (iErr .EQ. 5) THEN
+      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong',caFName
+      WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong',caFName
+      CALL DoStop
+    ELSEIF (iErr .EQ. 6) THEN
+      WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong',caFName
+      WRITE(kStdWarn,'(A,A)') 'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong',caFName
+!      CALL DoStop
     END IF
   
     RETURN

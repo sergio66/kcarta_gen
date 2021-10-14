@@ -51,8 +51,10 @@ c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 
 c this has new H2016 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, TRIED AND TESTED UMBC CO2 linemixing
+c      PARAMETER (kCompParamFile = 
+c     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param')
       PARAMETER (kCompParamFile = 
-     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param')
+     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/all_15_450000.param')
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
