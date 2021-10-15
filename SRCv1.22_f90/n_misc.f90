@@ -511,8 +511,8 @@ CONTAINS
     iJ = iJ+1
     iTemp = iaaOverrideDefault(2,4)
     iTemp = iaaOverrideDefault(iI,iJ)
-    IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iraKThermalAngle : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+    IF ((abs(iTemp) /= 1) .AND. (abs(iTemp) /= 2)) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iraKThermalAngle : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,2 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 

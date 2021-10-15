@@ -998,8 +998,16 @@ CONTAINS
         iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot, &
         iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-2)
     ELSE IF (iDiffmethod == +2) THEN
-      write(kStdErr,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
-      Call DoStop
+!      write(kStdErr,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
+!      write(kStdWarn,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
+!      Call DoStop
+      write(kStdErr,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH???? WILL DO iDiffmethod == -2 INSTEAD'
+      write(kStdWarn,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH???? WILL DO iDiffmethod == -2 INSTEAD'
+      CALL new_linear_in_tau_Diff_LowerAngAccurate(raThermal,raVT1,rTSpace, &
+        raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+        iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot, &
+        iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-2)
+
     END IF
 
 ! this is the thermal diffusive approx ==> multiply by 0.5

@@ -2424,6 +2424,11 @@ CONTAINS
       END IF
     ELSE
       kSetThermalAngle = +1   !use user specified angle everywhere
+      IF ((kFlux > 0) .OR. (kTemperVary >= 4)) THEN
+        ! kSetThermalAngle = -2   !use accurate angles lower down in atm, linear in tau temp variation
+        kThermal = +2           !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+        kSetThermalAngle = +2   !use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
+      END IF
     END IF
 
     FMT = '(A,4(I3,1X),F8.3)'
