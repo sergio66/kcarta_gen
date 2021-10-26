@@ -3269,7 +3269,8 @@ CONTAINS
 
     OPEN (UNIT = kTempUnit, STATUS='OLD', FORM='UNFORMATTED', FILE=SCATFILE, IOSTAT=IERR)
     IF (IERR /= 0) THEN
-      WRITE(kStdErr,1010) IERR, SCATFILE
+!      WRITE(kStdErr,1010) IERR, SCATFILE
+      WRITE(kStdErr,'(A,I5,A,A)') 'ERROR! number ',IERR,' opening scatter data file ',SCATFILE
       CALL DoSTOP
     ENDIF
  1010 FORMAT('ERROR! number ',I5,' opening scatter data file:',/,A120)

@@ -460,8 +460,10 @@ CONTAINS
 ! assume no clouds in RTP file
     ibinorasc     = -1
     iNclouds_RTP  = -1
-    caaCloudFile  = 'dummy cloud'
-    caaCloudFile1 = 'dummy cloud'
+    do iI = 1,kMaxClouds
+      caaCloudFile(iI)  = 'dummy cloud'
+      caaCloudFile1(iI) = 'dummy cloud'
+    end do
     iaNML_Ctype = -9999         !no RTP cloud type number association
 
 ! ******** these initializations copied from s_main_key KCARTAv1.05- *******
@@ -556,7 +558,10 @@ CONTAINS
     iNclouds_RTP1    = iNclouds_RTP
     ! if you use a 100 layer cloud cngwat profile throught the rtp file
     ! then you must specify the (same in all layers) particle sizes
-    caaCloudFile1 = caaCloudFile  !! should really be     DO iI = 1,iNClouds_RTP
+    DO iI = 1,iNClouds_RTP
+      caaCloudFile1(iI) = caaCloudFile(iI)
+      write(kSTdWarn,'(A,I2,A)') 'caaCloudFile(',iI,') =  ',caaCloudFile1(iI)
+    END DO  !! should really be     DO iI = 1,iNClouds_RTP
     iaNML_Ctype1  = iaNML_Ctype
     write (kStdWarn,*) 'successfully read in prfile .....'
     CALL printstar
@@ -1262,6 +1267,8 @@ CONTAINS
     INTEGER :: iIOUNX,iErrX,iMRO,iNumLaysX
     CHARACTER(160) :: caJunk80
     REAL :: rTCC,rCfracX1,rCfracX2,rCfracX12
+
+    INTEGER :: iI
           
     iResetCldFracs = -1   !! if need to do pclsam flux computation, then reset cldfracs to 1.0
     ctype1 = -9999
@@ -1645,6 +1652,9 @@ CONTAINS
         CALL DoStop
 #ELSE
         !in this subroutine, iNclouds is set equal to Nclouds_RTP
+!        DO iI = 1,iNClouds_RTP
+!          write(kSTdWarn,'(A,I2,A)') 'just before SetRTPCloud caaCloudFile(',iI,') =  ',caaCloudFile(iI)
+!        END DO  !! should really be     DO iI = 1,iNClouds_RTP
         CALL SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop, &
             cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2, &
             ctop1,ctop2,cbot1,cbot2, &
@@ -1656,6 +1666,9 @@ CONTAINS
             raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
             iaaScatTable,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm, &
             iaaCloudWhichLayers,iNatm,raaPrBdry,raPressLevels,iProfileLayers)
+!        DO iI = 1,iNClouds_RTP
+!          write(kSTdWarn,'(A,I2,A)') 'just after SetRTPCloud caaCloudFile(',iI,') =  ',caaCloudFile(iI)
+!        END DO  !! should really be     DO iI = 1,iNClouds_RTP
 #ENDIF	    
         iaCloudScatType(1) = iaCtype(1)
         iaCloudScatType(2) = iaCtype(2)

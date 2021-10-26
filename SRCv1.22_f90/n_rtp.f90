@@ -571,7 +571,7 @@ CONTAINS
     REAL :: raCprtop(kMaxClouds),  raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds),  raCpsize(kMaxClouds)
     INTEGER :: iaCtype(kMaxClouds),iBinORasc,iNclouds_RTP
-    CHARACTER(120) :: caaCloudFile(kMaxClouds)
+    CHARACTER(160) :: caaCloudFile(kMaxClouds)
     INTEGER :: iaNML_Ctype(kMaxClouds)
 ! output params,
 !     above set into the cloud parameters .....
@@ -622,6 +622,10 @@ CONTAINS
 ! these are to match iaCtype vs iaNML_Ctype
     INTEGER :: iFound1,iFound2,iNclouds_RTPX
     CHARACTER(4) :: caStrJunk(7)
+
+!       DO iI = 1,iNClouds_RTP
+!          write(kSTdWarn,'(A,I2,A)') 'just inside SetRTPCloud caaCloudFile(',iI,') =  ',caaCloudFile(iI)
+!        END DO  !! should really be     DO iI = 1,iNClouds_RTP
 
     IF (kAllowScatter == -1) THEN
       write(kStdErr,*) 'bkcarta.x (basic) version does not allow scattering'
@@ -1153,7 +1157,7 @@ CONTAINS
     INTEGER :: iNclouds2, iNclouds3  ! added ESM
     INTEGER :: iaCloudScatType(kMaxCLouds)
     CHARACTER(160) :: caPFname,caCloudPfname
-    CHARACTER(120) :: caaCloudFile(kMaxClouds)
+    CHARACTER(160) :: caaCloudFile(kMaxClouds)
 ! output params  -------------------------------------------------->
 !   kMaxClouds == 5
 !   raaKlayersCldAmt = cloud profiles(s) in g/m2
@@ -1210,7 +1214,7 @@ CONTAINS
     INTEGER ::   iactype_rtp(kMaxClouds)
      
     INTEGER :: iaNML_CtypeX(kMaxClouds),iaMatchX(kMaxClouds)
-    CHARACTER(120) :: caaCloudFileX(kMaxClouds)
+    CHARACTER(160) :: caaCloudFileX(kMaxClouds)
 
     integer ::   ii,ij,ik      ! added ESM
     integer :: rtpopen, rtpread, rtpwrite, rtpclose ! added ESM
