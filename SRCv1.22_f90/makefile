@@ -8,6 +8,19 @@ $(info IMPORTANT (3) -- since this is 500-880,805-2830 cm-1 res use cp_param_fil
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
 $(info   )
 
+400_H20_default_f90:
+	make -f Makefile_v122_Intelf90 datafix400_v122_H2020
+	echo "this datafix400_v122_H2020 looks suspiciously similar to datafix400_v122_H2020_orig605_805res"
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 basic
+	make -f Makefile_v122_Intelf90 basicTXT	
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H20
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H20
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H20
+
+#########################################################################
+
 400_H16_default_f90:
 	make -f Makefile_v122_Intelf90 datafix400_v122_H2016
 	echo "this datafix400_v122_H2016 looks suspiciously similar to datafix400_v122_H2016_orig605_805res"
@@ -66,6 +79,18 @@ mars_H16_default_f90:
 ########################################################################
 ## these uses ../INCLUDE/pre_defined_orig605_805res.param which is
 ##   500-605 cm-1 at 0.0015 cm-1 res, 605-2830 cm-1 at 0.0025 cm-1
+
+400_H20_default_f90_orig605_805res:
+	make -f Makefile_v122_Intelf90 datafix400_v122origres_H2020
+	echo "this datafix400_v122_H2020 looks suspiciously similar to datafix400_v122_H2020_orig605_805res"
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 basic
+	make -f Makefile_v122_Intelf90 basicTXT	
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H20_orig605_805res
+	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H20_orig605_805res
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H20_orig605_805res
+
 400_H16_default_f90_orig605_805res:
 	make -f Makefile_v122_Intelf90 datafix400_v122origres_H2016
 	echo "this datafix400_v122_H2016 looks suspiciously similar to datafix400_v122_H2016_orig605_805res"

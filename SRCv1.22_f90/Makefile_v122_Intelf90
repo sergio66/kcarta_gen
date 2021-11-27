@@ -32,13 +32,13 @@ include Makefile_intel_hdf_rtp
 SHELL = /bin/sh
 
 #------------ STYLE ----------------
-# STYLE=PARALLEL
+# STYLE=PARALLEL  UGH DO NOT USE THIS AT ALL!!!!!
 # STYLE=DEBUG
 STYLE=USUAL
 
-$(info    <<<<  Makefile_v121_Intelf90 is using flags for $(STYLE) >>>)
-$(info    <<<<  Makefile_v121_Intelf90 is using flags for $(STYLE) >>>)
-$(info    <<<<  Makefile_v121_Intelf90 is using flags for $(STYLE) >>>)
+$(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
+$(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
+$(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
 
 ############################################################################
 ## set up the appropriate compiler and its options                        ##
