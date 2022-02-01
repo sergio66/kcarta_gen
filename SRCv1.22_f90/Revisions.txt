@@ -607,9 +607,31 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22
 ----- 
+11/27/21        Can handle HITRAN 2020
+
+10/14/21        Updated rad_diff_and_quad.f90 so that interaction of kTemperVary 
+                and kSetThermalAngle allows for easier flux calcs
+                - iaaOverrideDefault(2,4) can be +/- 1 or +/- 2, not just +/- 1 in 
+                  SUBROUTINE Check_iaaOverrideDefault (n_misc.f90)
+                - kSetThermalAngle,kThermal becomes +2 in 
+                  SUBROUTINE radnce4RTP (n_rtp.f90)
+                  This is 3 angle calc that LBLRTM flux uses
+                - new_linear_in_tau_Diff_LowerAngAccurate is called when iDiffMethod = +2 in
+                  SUBROUTINE DoDiffusivityApprox( rad_diff_and_quad.f90)
+                  instead of erring out 
+                  This is 3 angle calc that LBLRTM flux uses              
+                To keep the temperature variation CONSTAnt just as in SARTA, use
+                (see eg ~/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/template_reset_nm_spectra.nml)
+                   !!! temperature variation : default is none
+                   iaaOverride(2,1) = -1
+                   !!! linear-in-tau : set iaaOverrideDefault(2,4) = 1,iaaOverride(2,1) = 43 in template_reset_nm_spectra.nml
+                   !iaaOverride(2,1) = 43
+                   !iaaOverride(2,4) = 1
+                   !iaaOverride(2,4) = 2            
+                
 7/15/21         Putting in error checks to make sure eg database
                 spacing of 0.0025 cm-1 is exactly compatible with what
-                kcarta is processing. Note for VERYHHIGHRES IR (0.0002
+                kcarta is processing. Note for VERYHIGHRES IR (0.0002
                 cm-1) some of the CO2 files eg 617 cm-1 required 100
                 basis vectors instead of 50, so
                 pre_definedVERYHIGHRES.param accounts for this. See

@@ -1,0 +1,4 @@
+hThis is basically to backup the code in ../WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/
+
+Main thing is I did cp ../WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/backup.sc .
+and renamed it to backupHPC.msc and edited it to bring over the files from ../WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/ to here

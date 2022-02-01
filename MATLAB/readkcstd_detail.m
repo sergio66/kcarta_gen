@@ -15,7 +15,7 @@ function [data, wnums, caVersion, detail] = readkcstd_detail(kfile, dfile)
 %   wnums  - a w by 1 vector of data wavenumbers
 %   caVersion - descriptive  string set in kcarta.param at compile time,
 %               CKD vers and nml comment (in nm_outout)
-%   detail - bunch of stuff about the atmopshere/profile
+%   detail - bunch of stuff about the atmosphere/profile
 %
 % If the input parameter dfile is specified, then the data array
 % is written to file dfile, and the return values [data, wnums]

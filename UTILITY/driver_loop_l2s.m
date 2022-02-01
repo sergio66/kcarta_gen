@@ -12,18 +12,29 @@ f1 = [15 30 50 80 140 300 500 605 2830 3550 5550 8250 12000 25000];
 f2 = f1(2:end); f2(length(f1)) = 44000;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_H16_orig605_805res';
+iHIT = 2020;
+iHIT = 2016;
+if iHIT == 2016
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_H16_orig605_805res';
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H16_orig605_805res';
+elseif iHIT == 2020
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20_orig605_805res';
+end
 outnml = 'junk.nml';
 
+iaDo = 1 : length(f1);
+iaDo = [8];
+
 iMakeData = -1;
+iMakeData = +1;
 if iMakeData > 0
-  %for ii = 1 : length(f1)
-  for ii = 8 : 8
+  for iii = 1 : length(iaDo)
+    ii = iaDo(iii);
     sedder = ['!sed -e "s/FF1/' num2str(f1(ii)) '/g"  -e "s/FF2/' num2str(f2(ii)) '/g" '];
     sedder = [sedder ' tempate_quickuse_l2s_kcVERS.nml  > ' outnml];
     eval(sedder);
   
-    outname = ['l2s_kc121_H16_' num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
+    outname = ['../L2SComparisons/l2s_kc122_H' num2str(iHIT-2000) '_' num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
     if exist(outname)
       rmer = ['!rm ' outname];
       eval(rmer);
@@ -49,11 +60,18 @@ if iReadData > 0
   d6qc = [];
   fqc = [];
 
-  for ii = 1 : length(f1)
+  for iii = 1 : length(iaDo)
+    ii = iaDo(iii);
   
-    outname = ['l2s_kc121_H16_' num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
+    outname = ['../L2SComparisons/l2s_kc122_H16_'                     num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
+    outname = ['../L2SComparisons/l2s_kc122_H' num2str(iHIT-2000) '_' num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
     if exist(outname)
-      [d,w] = readkcstd(outname);
+      [d,w,caVersion, detail] = readkcstd_detail(outname);
+      iaGasID = detail.iaGasID;
+
+      saver = ['save ../L2SComparisons/l2s_kc122_H' num2str(iHIT-2000) '_' num2str(f1(ii)) '_' num2str(f2(ii)) '.mat d w iaGasID'];
+      eval(saver);
+      %[d,w] = readkcstd(outname);
       ptspacing(ii) = mean(diff(w));
       meanw(ii)     = mean(w);
 
