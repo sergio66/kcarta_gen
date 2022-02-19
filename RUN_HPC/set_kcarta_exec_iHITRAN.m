@@ -43,6 +43,9 @@ elseif iHITRAN == 2017
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_highres605_1205_12p8';
 elseif iHITRAN == 2018
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_veryhighres605_1205_12p8_error';
+
+elseif iHITRAN == 2020
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20_orig605_805res';
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

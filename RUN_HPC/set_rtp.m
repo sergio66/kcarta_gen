@@ -306,7 +306,6 @@ use_this_rtp = 'RTP/latbin1_40.op_400ppm.rtp';
 %% testing ecRad vs RRTM flux
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/testRRTM_ECRAD.rtp';
 
-
 %% allsky trends for tiles
 %% /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/MakeAvgCldProfs2002_2020/make_summary_latbin_files_txt.m
 %%    these start in Jan 1 of every year
@@ -333,6 +332,8 @@ use_this_rtp = 'RTP/summary_19years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/SimulateTimeSeries/simulate64binsERA5_32.rp.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/SimulateTimeSeries/simulate64binsERA5_32.op.rtp'; %% 16416 profiles, no need to do ANY jacs
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/SimulateTimeSeries/simulate64binsERA5_15.op.rtp'; %% 16416 profiles, no need to do ANY jacs
+
+use_this_rtp = '/home/chepplew/data/sarta/validation/sng_2020_subs_for_kcarta.rtp';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m

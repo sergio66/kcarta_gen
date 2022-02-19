@@ -12,7 +12,7 @@
 # run this with   /bin/rm batchout*.* slurm* JUNK/individual_prof_convolved_kcarta* JUNK/rad.dat*; sbatch -p high_mem --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --exclude=cnode203,cnode267 --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu_2021 --exclude=cnode203,cnode267 --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
+# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 #
 # >>>>>>>>>>>>>>>>>>>>>>>>>
 # if putting ONE job per node (ie no loop)

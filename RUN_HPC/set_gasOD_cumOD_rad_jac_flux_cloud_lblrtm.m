@@ -155,6 +155,8 @@ iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;
 %iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 10; iDoCloud = -1; iDoJac = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT, Nalli Emiss, no jacs
 %iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT               no jacs
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3; iDoCloud = -1; iDoJac = -1; %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT               no jacs
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3; iDoCloud = -1; iDoJac = -1; %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT               no jacs
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3; iDoCloud = +1; iDoJac = -1; %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT               no jacs
 %              iHITRAN = 2012;
 %              iHITRAN = 2008;
 

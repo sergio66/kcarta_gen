@@ -2,16 +2,26 @@
  namecomment	=  '******* PARAMS section *******'
  !Paths/mixed paths output is to be layer-to-space optical depth
  KLayer2Sp = 1
-
- !latest and greatest CKD from AER
- KCKD = 25
-
- !water continuum mtCKD 1.0 with Scott/my tuning
- KCKD = 6    
-
  !short header
  kLongOrShort = -1
  kRTP = 1
+
+ !latest and greatest CKD from AER
+ KCKD = 25
+ !water continuum mtCKD 1.0 with Scott/my tuning
+ KCKD = 6    
+ !! use this, set by cluster
+ kCKD = CKDCKD
+
+ !! override rtp freq header info with rf1,rf2
+ iaaOverride(1,8) = -1
+ iaaOverride(1,8) = 1
+
+ !! ktempervary iLBLRTM RT (kTemperVary = 43) plus fixes for high res, -1 for no vary
+ iaaOverride(2,1) = 43    !! to do linear in tau
+ iaaOverride(2,1) = -1    !! to do const
+
+ caNMLReset_param_spectra = 'template_reset_nm_spectra.nml' 
 
  $end
 
@@ -84,6 +94,7 @@
  !1 atmospheres
  iNatm          =  -1
  iTemperVary    = TTT
+ iTemperVary    = -1
  
  ! Atmos #1: no solar, with refl thermal, angle 0
  iaMPSetForRad(1)   =  1
