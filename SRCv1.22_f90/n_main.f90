@@ -3092,26 +3092,27 @@ CONTAINS
 
     iI = kProfLayer+1
       IF (is_badnum(raPressLevels(iI))) THEN
-        write(kStdWarn,*) 'raPressLevels(iI) is abnormal (inf?) ',iI
-        write(kStdErr,*)  'raPressLevels(iI) is abnormal (inf?) ',iI
+        write(kStdWarn,*) 'raPressLevels(iI) is abnormal (inf?) ',iI,raPressLevels(iI)
+        write(kStdErr,*)  'raPressLevels(iI) is abnormal (inf?) ',iI,raPressLevels(iI)
         iErr = iErr + 1
       END IF
+
     DO iI = 1,kProfLayer
       IF (is_badnum(raPressLevels(iI))) THEN
-        write(kStdWarn,*) 'raPressLevels(iI) is abnormal (inf?) ',iI
-        write(kStdErr,*)  'raPressLevels(iI) is abnormal (inf?) ',iI
+        write(kStdWarn,*) 'raPressLevels(iI) is abnormal (inf?) ',iI,raPressLevels(iI)
+        write(kStdErr,*)  'raPressLevels(iI) is abnormal (inf?) ',iI,raPressLevels(iI)
         iErr = iErr + 1
       END IF
 
       IF (is_badnum(raLayerHeight(iI))) THEN
-        write(kStdWarn,*) 'raLayerHeight(iI) is abnormal (inf?) ',iI
-        write(kStdErr,*)  'raLayerHeight(iI) is abnormal (inf?) ',iI
+        write(kStdWarn,*) 'raLayerHeight(iI) is abnormal (inf?) ',iI,raLayerHeight(iI)
+        write(kStdErr,*)  'raLayerHeight(iI) is abnormal (inf?) ',iI,raLayerHeight(iI)
         iErr = iErr + 1
       END IF
 
       IF (is_badnum(raThickness(iI))) THEN
-        write(kStdWarn,*) 'raThickness(iI) is abnormal (inf?) ',iI
-        write(kStdErr,*)  'raThickness(iI) is abnormal (inf?) ',iI
+        write(kStdWarn,*) 'raThickness(iI) is abnormal (inf?) ',iI,raThickness(iI)
+        write(kStdErr,*)  'raThickness(iI) is abnormal (inf?) ',iI,raThickness(iI)
         iErr = iErr + 1
       END IF
 

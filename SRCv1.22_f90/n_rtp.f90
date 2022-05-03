@@ -3223,6 +3223,10 @@ CONTAINS
       raPressLevels(j) = prof.plevs(i)                !!!! in mb
       raJunk(j)  = prof.ptemp(j)                      !!!! junk T
     END DO
+    if (prof.nlevs .EQ. kProfLayer) THEN
+      raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
+      raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
+    end if
 
     DO i = 1,prof.nlevs-1
       !j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
@@ -3250,7 +3254,11 @@ CONTAINS
       !!!add on dummy stuff
       !!!assume lowest pressure layer is at -600 meters
       k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
-      delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof.nlevs) .NE. 0) then
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      else
+        delta1 = 190.0
+      end if
       salti = prof.salti
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
@@ -3261,7 +3269,11 @@ CONTAINS
       !!!assume  top pressure layer is at 10e5 meters
       k = i
       salti = prof.salti
-      delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof.nlevs) .NE. 0) then
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      else
+        delta1 = 4000
+      end if
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
@@ -3271,10 +3283,14 @@ CONTAINS
 !    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
      DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,*) 'i,height,thickness,T',i,raHeight(i),raThickness(i)/100,raJunk(i)
-      IF (raThickness(i) <= 100.00) THEN
-        write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
-        write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
+      IF (raThickness(i) <= 100.00) THEN        
+        write(kStdErr,*)  'READRTP_1A NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        write(kStdWarn,*) 'READRTP_1A NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        CALL DoStop
+      ELSEIF (is_badnum(raThickness(i))) THEN
+        write(kStdErr,*)  'READRTP_1A NONSENSE! Layer i, thickness in inf or nan ',i,raThickness(i),raHeight(i+1),raHeight(i)
+        write(kStdWarn,*) 'READRTP_1A NONSENSE! Layer i, thickness in inf or nan ',i,raThickness(i),raHeight(i+1),raHeight(i)
         CALL DoStop
       END IF
     END DO
@@ -3715,7 +3731,7 @@ CONTAINS
    !      write(kStdWarn,*)  'read close status = ', status
 
     kProfileUnitOpen = -1
-
+    write(kStdWarn,*) 'iRTP,prof.nlevs,prof.stemp = ',iRTP,prof.nlevs,prof.stemp
     IF (prof.plevs(1) < prof.plevs(prof.nlevs)) THEN
       ! layers are from TOA to the bottom
       iDownWard = -1
@@ -3812,6 +3828,10 @@ CONTAINS
       raPressLevels(j) = 0.0                          !!!! in mb, safer !!!!		
       raJunk(j)  = 0.0                                !!!! junk T
     END DO
+    if (prof.nlevs .EQ. kProfLayer) THEN
+      raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
+      raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
+    end if
 
     DO i = 1,prof.nlevs
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
@@ -3836,21 +3856,29 @@ CONTAINS
       !!!add on dummy stuff
       !!!assume lowest pressure layer is at -600 meters
       k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
-      delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof.nlevs) .NE. 0) then
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      else
+        delta1 = 190.0
+      end if
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
-!        write(kStdErr,*) i,j,raHeight(j),raPressLevels(j),-1         
+        write(kStdErr,*) i,j,raHeight(j),raPressLevels(j),-1,prof.nlevs
       END DO
     ELSE
       !!!add on dummy stuff
       !!!assume  top pressure layer is at 10e5 meters
       k = i
-      delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof.nlevs) .NE. 0) then
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      else
+        delta1 = 4000.0
+      end if
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
-!        write(kStdErr,*) 'xyz 1',i,j,raHeight(j),raPressLevels(j),+1         
+        write(kStdErr,*) 'xyz 1',i,j,raHeight(j),raPressLevels(j),+1,prof.nlevs      
       END DO
     END IF
 
@@ -3858,9 +3886,13 @@ CONTAINS
     DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
       write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
-      IF (raThickness(i) <= 100.00) THEN
-        write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
-        write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+      IF (raThickness(i) <= 100.00) THEN        
+        write(kStdErr,*)  'READRTP_1B NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        write(kStdWarn,*) 'READRTP_1B NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        CALL DoStop
+      ELSEIF (is_badnum(raThickness(i))) THEN
+        write(kStdErr,*)  'READRTP_1B NONSENSE! Layer i, thickness in inf or nan ',i,raThickness(i),raHeight(i+1),raHeight(i)
+        write(kStdWarn,*) 'READRTP_1B NONSENSE! Layer i, thickness in inf or nan ',i,raThickness(i),raHeight(i+1),raHeight(i)
         CALL DoStop
       END IF
     END DO
@@ -4387,6 +4419,10 @@ CONTAINS
       raPressLevels(j) = prof.plevs(i)                !!!!in mb
       raJunk(j)  = prof.ptemp(j)                      !!!! junk T
     END DO
+    if (prof.nlevs .EQ. kProfLayer) THEN
+      raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
+      raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
+    end if
 
     DO i = 1,prof.nlevs-1
 !      j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
@@ -4400,7 +4436,11 @@ CONTAINS
       !!!add on dummy stuff
       !!!assume lowest pressure layer is at -600 meters
       k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
-      delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof.nlevs) .NE. 0) then
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      else
+        delta1 = 190.0
+      end if
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
@@ -4409,7 +4449,11 @@ CONTAINS
       !!!add on dummy stuff
       !!!assume  top pressure layer is at 10e5 meters
        k = i
-      delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof.nlevs) .NE. 0) then
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      else
+        delta1 = 4000.0
+      end if
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
@@ -4419,10 +4463,14 @@ CONTAINS
 !    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
     DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,*) 'i,height,thickness',i,raHeight(i),raThickness(i)/100,raJunk(i)
-      IF (raThickness(i) <= 100.00) THEN
-        write(kStdErr,*)  'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
-        write(kStdWarn,*) 'NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
+      IF (raThickness(i) <= 100.00) THEN        
+        write(kStdErr,*)  'READRTP_2 NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        write(kStdWarn,*) 'READRTP_2 NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
+        CALL DoStop
+      ELSEIF (is_badnum(raThickness(i))) THEN
+        write(kStdErr,*)  'READRTP_2 NONSENSE! Layer i, thickness in inf or nan ',i,raThickness(i),raHeight(i+1),raHeight(i)
+        write(kStdWarn,*) 'READRTP_2 NONSENSE! Layer i, thickness in inf or nan ',i,raThickness(i),raHeight(i+1),raHeight(i)
         CALL DoStop
       END IF
     END DO
