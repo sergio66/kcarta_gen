@@ -135,6 +135,7 @@ iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 3;     iDoJac = +1; iDoCloud = 
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1; iDoCloud = +1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
 
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2;     iDoRad = 3; iDoJac = +100; iDoCloud = -1; %% use LBLRTM ODs   ***************************** col jac BEST DEFAULT
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 5912;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
 
@@ -152,11 +153,19 @@ iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;
 
 %%%%%%% note when I do this,I have changed convolver so only AIRS 2834 chans are done, else waste time convolving!!!  so reset set_convolver.m after this!!!! %%%%%%%%%%
 
-%iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 10; iDoCloud = -1; iDoJac = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT, Nalli Emiss, no jacs
-%iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT               no jacs
-iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3; iDoCloud = -1; iDoJac = -1; %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT               no jacs
-iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3; iDoCloud = -1; iDoJac = -1; %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT               no jacs
-iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3; iDoCloud = +1; iDoJac = -1; %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT               no jacs
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 10; iDoCloud = -1; iDoJac = -1;             %% use LBLRTM ODs   ************************************* BEST DEFAULT, Nalli Emiss, no jacs
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;             %% use LBLRTM ODs   ************************************* BEST DEFAULT               no jacs
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac = -1;             %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT cldsky        no jacs
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;             %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac = -1;             %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT cldsky        no jacs
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;             %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 1001;  %% clrsky, use LBLRTM ODs   ***************************** CLR JACS 97 layers eg for 64x72 grids
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;             %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
+
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 1001;  %% clrsky, use LBLRTM ODs   ***************************** CLR JACS 97 layers eg for 64x72 grids
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 2346;  %% clrsky, use LBLRTM ODs   ***************************** CLR JACS 97 layers eg for 64x72 grids
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 5912;  %% clrsky, use LBLRTM ODs   ***************************** CLR JACS 97 layers eg for 64x72 grids
+
 %              iHITRAN = 2012;
 %              iHITRAN = 2008;
 

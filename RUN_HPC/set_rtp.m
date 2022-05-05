@@ -334,6 +334,11 @@ use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/Simula
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/SimulateTimeSeries/simulate64binsERA5_15.op.rtp'; %% 16416 profiles, no need to do ANY jacs
 
 use_this_rtp = '/home/chepplew/data/sarta/validation/sng_2020_subs_for_kcarta.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/validation/sng_2020_subs_for_kcarta_v2.rtp';
+use_this_rtp = 'RTP/ecmwf_airicrad_day268_2021clear.rtp';
+
+use_this_rtp = '/home/chepplew/data/scratch/iasi_35987367.kla_1';
+use_this_rtp = '/home/sergio/KCARTA/IP_PROFILES/junk49_400ppm.op.rtp';              %% scanang = 22
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m

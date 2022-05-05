@@ -68,7 +68,7 @@ elseif iDoRad == 2  %% cumulative mixed path ODs
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& ' outstat];
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif iDoJac == 1 & iDoFlux < 0 & iDoCloud < 0 & gg ~= 1001 & gg ~= 2346
+elseif iDoJac == 1 & iDoFlux < 0 & iDoCloud < 0 & gg ~= 1001 & gg ~= 2346 & gg ~= 5912
   disp('do_kcarta.m here A1 (clr sky rads and jacs, not WV1,101,102,103)')
   sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
   sedder = [sedder ' template_Qjacobian.nml  > ' outnml];      
@@ -81,21 +81,33 @@ elseif iDoJac == 1 & iDoFlux < 0 & iDoCloud < 0 & gg == 1001
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
 
 elseif iDoJac == 1 & iDoFlux < 0 & iDoCloud < 0 & gg == 2346
-  disp('do_kcarta.m here A3 (clr sky rads and jacs for GID 2,3,4,6)')
+  disp('do_kcarta.m here A3 (clr sky rads and jacs for GID 2,3,4,6,51,52)')
   %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
   sedder = [sedder ' template_Q2346_51_52jacobian.nml  > ' outnml];      
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
 
-elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg ~= 1001 & gg ~= 2346
+elseif iDoJac == 1 & iDoFlux < 0 & iDoCloud < 0 & gg == 5912
+  disp('do_kcarta.m here A3 (clr sky rads and jacs for GID 5,9,11,12,61,103)')
+  %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
+  sedder = [sedder ' template_Q5_9_11_12_61_103_jacobian.nml  > ' outnml];      
+  kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
+
+elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg ~= 1001 & gg ~= 2346 & gg ~= 5912
   disp('do_kcarta.m here A4 (clr sky rads and col jacs, not WV1,101,102,103)')
   sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
   sedder = [sedder ' template_Qcoljacobian.nml  > ' outnml];      
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
   
 elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg == 2346
-  disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G2,3,4,6)')
+  disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G2,3,4,6,51,52)')
   %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
   sedder = [sedder ' template_Qcol2346_51_52jacobian.nml  > ' outnml];  %currently g 2,4,5,6,51,52    
+  kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
+
+elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg == 5912
+  disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G5,9,11,12,61,103)')
+  %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
+  sedder = [sedder ' template_Qcol5_9_11_12_61_103_jacobian.nml template_Qcol2346_51_52jacobian.nml  > ' outnml];  %currently g 5,9,11,12,61,103
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
   
 %%%%%%%%%%%%%%%%%%%%%%%%%

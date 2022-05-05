@@ -80,7 +80,7 @@ end
 whos w dall
 
 fprintf(1,' >>>> gg = %4i iDoCloud = %4i \n',gg,iDoCloud)
-if gg ~= 1001 & gg ~= 2346 & iDoJac == 1
+if gg ~= 1001 & gg ~= 2346 & gg ~= 5912 & iDoJac == 1
   fprintf(1,'doing jacobians for gasID %3i \n',gg)
 elseif gg == 1001 & iDoJac == 1
   if iDoCloud <= 0
@@ -119,9 +119,9 @@ elseif gg == 2346 & iDoJac == 1
   %% remember also do T and WgtFcn  1:nn  and then 4 surface
   [mm,nn] = size(dall);
   if iDoCloud <= 0
-    nnlay = (nn-4)/(6);
-  else
     nnlay = (nn-4)/(8);
+  else
+    nnlay = (nn-4)/(10); %% should this also be 8?
   end
   fprintf(1,'   do_convolve_jac.m : gg=%4i iDoCloud=%2i     iDoJac=%2i mm,nn=%10i %4i     nnlay=%8.6f \n',gg,iDoCloud,iDoJac,mm,nn,nnlay);
   jjuse = 1:nnlay;
@@ -135,12 +135,44 @@ elseif gg == 2346 & iDoJac == 1
   dallWgtFcn = dall(:,jjuse+7*nnlay);
   dallSurf   = max(jjuse+8*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
   %whos dall*
-  dall = [dall2 dall3 dall4 dall6 dall51 dall53 dallT dallWgtFcn dallSurf];
+  dall = [dall2 dall3 dall4 dall6 dall51 dall52 dallT dallWgtFcn dallSurf];
   ngases = 6;
 
   addpath /home/sergio/MATLABCODE
   [fc,qc] = quickconvolve(w,dall2,1,1);
   figure(1); plot(fc,nansum(qc')); title('CO2 coljac'); pause(0.1);
+
+elseif gg == 5912 & iDoJac == 1
+  if iDoCloud <= 0
+    fprintf(1,'doing clear sky jacobians for gasID %3i ==> 5 9 11 12 61 103 \n',5912)
+  elseif iDoCloud == 1
+    fprintf(1,'doing clear sky jacobians for gasID %3i ==> 5 9 11 12 61 103 \n',5912)
+  end
+  %% remember also do T and WgtFcn  1:nn  and then 4 surface
+  [mm,nn] = size(dall);
+  if iDoCloud <= 0
+    nnlay = (nn-4)/(8);
+  else
+    nnlay = (nn-4)/(10); %% should this also be 8?
+  end
+  fprintf(1,'   do_convolve_jac.m : gg=%4i iDoCloud=%2i     iDoJac=%2i mm,nn=%10i %4i     nnlay=%8.6f \n',gg,iDoCloud,iDoJac,mm,nn,nnlay);
+  jjuse = 1:nnlay;
+  dall5      = dall(:,jjuse+0*nnlay);
+  dall9      = dall(:,jjuse+1*nnlay);
+  dall11      = dall(:,jjuse+2*nnlay);
+  dall12     = dall(:,jjuse+3*nnlay);
+  dall61     = dall(:,jjuse+4*nnlay);
+  dall103    = dall(:,jjuse+5*nnlay);
+  dallT      = dall(:,jjuse+6*nnlay);
+  dallWgtFcn = dall(:,jjuse+7*nnlay);
+  dallSurf   = max(jjuse+8*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
+  %whos dall*
+  dall = [dall5 dall9 dall11 dall12 dall61 dall103 dallT dallWgtFcn dallSurf];
+  ngases = 6;
+
+  addpath /home/sergio/MATLABCODE
+  [fc,qc] = quickconvolve(w,dall5,1,1);
+  figure(1); plot(fc,nansum(qc')); title('CO coljac'); pause(0.1);
 
 %%elseif gg == 1001 & iDoCloud > 0
 %%  fprintf(1,'doing all sky jacobians for gasID %3i ==> WV 1+101+102+103 ... add together and then O3 \n',1001)

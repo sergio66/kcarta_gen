@@ -88,12 +88,12 @@
 
  !gas jacobian
  iJacob	=     6
- iaJacob(1) = 2
- iaJacob(2) = 3
- iaJacob(3) = 4
- iaJacob(4) = 6
- iaJacob(5) = 51
- iaJacob(6) = 52
+ iaJacob(1) = 5
+ iaJacob(2) = 9
+ iaJacob(3) = 11
+ iaJacob(4) = 12
+ iaJacob(5) = 61
+ iaJacob(6) = 103
 
  $end
 

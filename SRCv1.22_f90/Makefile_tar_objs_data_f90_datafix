@@ -110,28 +110,6 @@ datafix400_v122_G2015_NLTEH2016:
       cd ../; \
       cd ../SRCv1.22_f90
 
-datafix400_v122origres_H2012:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2012_NLTEH2016.param > \
-      ../INCLUDE/kcarta_v122.param; \
-      rm ../INCLUDE/kcarta.param; \
-      cd ../INCLUDE; \
-      ln -s kcarta_v122.param kcarta.param; \
-      cd EARTH_database_params; \
-      ./lner_EARTH_database_params.sc ;\
-      cd ../; \
-      cd ../SRCv1.22_f90
-
-datafix400_v122origres_H2008:
-	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V122/template_kcartaV122_400_H2008_NLTEH2016.param > \
-      ../INCLUDE/kcarta_v122.param; \
-      rm ../INCLUDE/kcarta.param; \
-      cd ../INCLUDE; \
-      ln -s kcarta_v122.param kcarta.param; \
-      cd EARTH_database_params; \
-      ./lner_EARTH_database_params.sc ;\
-      cd ../; \
-      cd ../SRCv1.22_f90
-
 #########################################################################
 ### orig res : 500-605 cm-1 at 0.0015 cm-1, 605-2830 cm-1 at 0.0025 cm-1
 ### these files exist

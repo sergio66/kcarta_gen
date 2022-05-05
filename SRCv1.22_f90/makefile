@@ -112,6 +112,7 @@ mars_H16_default_f90:
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_G15
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_G15
 
+## these are orig res, and 385 pmv only
 385_H12_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
@@ -122,6 +123,7 @@ mars_H16_default_f90:
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H12_CO2_UMBC
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H12_CO2_UMBC
 
+## these are orig res, and 385 pmv only
 385_H08_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2008_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
@@ -132,6 +134,7 @@ mars_H16_default_f90:
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H08_CO2_UMBC
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H08_CO2_UMBC
 
+## these are orig res, and 385 pmv only
 x_NOexist_385_H04_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2004_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
@@ -142,6 +145,7 @@ x_NOexist_385_H04_CO2_UMBC_default_f90:
 	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H04_CO2_UMBC
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H04_CO2_UMBC
 
+## these are orig res, and 385 pmv only
 x_NOexist_385_H2k_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2k_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
