@@ -605,8 +605,11 @@ computations, even with scattering (introduce a OLR computation) etc]
 Details : Bug fixes/ clarifications and new features/updates/improvements
 -------------------------------------------------------------------------
 
-v1.22
+v1.22 
 ----- 
+
+2/5/22          fixed readrtp_1A,_1B,_2 when prof.nlevs == kproflayer (was having an infinity issue
+
 11/27/21        Can handle HITRAN 2020
 
 10/14/21        Updated rad_diff_and_quad.f90 so that interaction of kTemperVary 

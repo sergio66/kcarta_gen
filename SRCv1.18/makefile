@@ -2,8 +2,10 @@
 	make -f Makefile_tar_objs_data datafix400_H2016
 	make -f Makefile
 	make -f Makefile scat		
-	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv_H16
-	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv_H16
+	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_f77_118_400ppmv_H16_NLTEH16_120NLTElayers_new
+	mv ../BIN/kcarta.x  ../BIN/kcarta.x_f77_118_400ppmv_H16_NLTEH16_120NLTElayers_new
+#	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_400ppmv_H16
+#	mv ../BIN/kcarta.x ../BIN/kcarta.x_400ppmv_H16
 
 400_H16_NLTEH2008:
 	make -f Makefile_tar_objs_data datafix400_H2016_NLTEH2008

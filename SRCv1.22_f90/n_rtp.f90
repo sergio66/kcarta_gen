@@ -3861,10 +3861,11 @@ CONTAINS
       else
         delta1 = 190.0
       end if
+      salti = prof.salti
       DO i = prof.nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
-        write(kStdErr,*) i,j,raHeight(j),raPressLevels(j),-1,prof.nlevs
+!        write(kStdErr,*) i,j,raHeight(j),raPressLevels(j),-1,prof.nlevs
       END DO
     ELSE
       !!!add on dummy stuff
