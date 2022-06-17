@@ -22,6 +22,12 @@ CONTAINS
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************************************************************************
+!**** note : these ate basically called by scatter_pclsam_main.f90 
+!****        subr interface_pclsam(raaE,raaW,raaG,raaGasAbs)
+!            combines the above four and sends in
+!            subr find_radiances_pclsam(raaEx) 
+!              where raaEx = raaGas + raaE*(1-raaWx)(raaFG)) 
+!                          = effective absorption for radiative transfer
 !************************************************************************
 ! given the profiles, the atmosphere has been reconstructed. now this
 ! calculate the forward radiances for the vertical temperature profile
@@ -781,7 +787,7 @@ CONTAINS
      
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
-    DO iLay=1,iNumLayer
+    DO ilay = 1,iNumLayer
       iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
       IF (iaRadLayer(iLay) > iNpmix) THEN
         write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
@@ -895,8 +901,8 @@ CONTAINS
      
 ! note that as direction of radiation travel is defined as 100,99,98,..,1
 ! which is what is stored in iaRadLayer, we have to
-!      DO iLay=1,iNumLayer instead of DO iLay=iNumLayer,1,-1
-! use  DO iLay=1,iLow instead of  DO iLay=1,iNumLayer
+!      DO ilay = 1,iNumLayer instead of DO ilay = iNumLayer,1,-1
+! use  DO ilay = 1,iLow instead of  DO ilay = 1,iNumLayer
 
 ! --------------------------------------------------------------------->
 ! --------------------------------------------------------------------->
@@ -1516,6 +1522,12 @@ CONTAINS
     REAL :: raCC(kProfLayer),rC
     REAL :: rWeight
 
+! to do PCLSAM correction by Tang 2018
+    REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raAdjust(kMaxPts),raFactor(kMaxPts)
+    REAL :: raY(kMaxPts),raX(kMaxPts),raB(kMaxPts)
+
+    IF (kScatter .GE. 2) raaPCLSAMCorrection = 0.0
+
     rWeight = 1.0
     IF ((kActualJacs == 100) .AND. (rFracX .GE. 0.0) .AND. (rFracX .LE. 1.0)) THEN
       rWeight = rFracX
@@ -1550,7 +1562,7 @@ CONTAINS
       write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
       CALL DoSTOP
     END IF
-    DO iLay=1,iNumLayer
+    DO ilay = 1,iNumLayer
       iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
       iL = iaRadLayer(iLay)
       IF (iaRadLayer(iLay) > iNpmix) THEN
@@ -1607,20 +1619,20 @@ CONTAINS
           
 ! if the bottommost layer is fractional, interpolate!!!!!!
     iL = iaRadLayer(1)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
     write(kStdWarn,*) 'bottom temp : orig, interp',raVTemp(iL),raVT1(iL)
 ! if the topmost layer is fractional, interpolate!!!!!!
 ! this is hardly going to affect thermal/solar contributions (using this temp
 ! instead of temp of full layer at 100 km height!!!!!!
     iL = iaRadLayer(iNumLayer)
-    raVT1(iL)=InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+    raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
 
 ! find the highest layer that we need to output radiances for
-    iHigh=-1
-    DO iLay=1,iNp
+    iHigh = -1
+    DO iLay = 1,iNp
       IF (iaOp(iLay) > iHigh) THEN
-        iHigh=iaOp(iLay)
+        iHigh = iaOp(iLay)
       END IF
     END DO
     write(kStdWarn,*) 'Current atmosphere has ',iNumLayer,' layers'
@@ -1629,19 +1641,19 @@ CONTAINS
 
 ! note while computing downward solar/ thermal radiation, have to be careful
 ! for the BOTTOMMOST layer!!!!!!!!!!!
-    DO iLay=1,1
+    DO iLay = 1,1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       raaLayTrans(:,iLay) = exp(-raaExt(:,iL)*rFracBot/muSat)
       raaEmission(:,iLay) = 0.0
     END DO
-    DO iLay=2,iNumLayer-1
+    DO iLay = 2,iNumLayer-1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       raaLayTrans(:,iLay) = exp(-raaExt(:,iL)/muSat)
       raaEmission(:,iLay) = 0.0
     END DO
-    DO iLay=iNumLayer,iNumLayer
+    DO iLay = iNumLayer,iNumLayer
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       raaLayTrans(:,iLay) = exp(-raaExt(:,iL)*rFracTop/muSat)
@@ -1673,12 +1685,36 @@ CONTAINS
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
-        raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
-        iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
+      IF (kScatter .LE. 1) THEN
+        !!! no need to do correction
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
+      ELSEIF (kScatter .GE. 1) THEN
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
+        !!! do correction
+        CALL BackGndThermalSaveLayers(raVT1,rTSpace,raFreq,raLayAngles, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,raaPCLSAMCorrection)
+      END IF
     ELSE
       write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
+
+!    DO iI = 1,iNumLayer
+!      print *,iI,iaRadLayer(iI),ICLDTOPKCARTA,ICLDBOTKCARTA,raaSSAlb(1,iaRadLayer(iI))
+!    END DO
+!
+!     iLay = iNumLayer+1
+!     iL = iaRadLayer(iNumLayer)+1
+!     print *,iLay,iL,TEMP(iL),0.0,raaPCLSAMCorrection(1,iL-1)
+!     DO iLay = iNumLayer,1,-1
+!       iL = iaRadLayer(iLay)
+!       print *,iLay,iL,TEMP(iL),raVT1(iL),raaPCLSAMCorrection(1,iL-1)
+!     END DO
+!     call dostop
      
 ! see if we have to add on the solar contribution
     IF (iDoSolar >= 0) THEN
@@ -1706,11 +1742,11 @@ CONTAINS
     r0 = raInten(1)
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
-! upto iHigh ccccc      DO iLay=1,NumLayer -->  DO iLay=1,1 + DO ILay=2,iHigh
+! upto iHigh ccccc      DO ilay = 1,NumLayer -->  DO ilay = 1,1 + DO Ilay = 2,iHigh
      
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! first do the bottommost layer (could be fractional)
-    DO iLay=1,1
+    DO ilay = 1,1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
@@ -1741,10 +1777,39 @@ CONTAINS
       ! sun               raInten*raaLayTrans(:,iLay)
     END DO
 
+    iLay = 1
+    iL = iaRadLayer(iLay)
+    raFactor(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
+!    print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raFactor(1)
+    IF ((kScatter .GE. 2) .AND. (raFactor(1) .GT. 1.0e-4) .AND. &
+        (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
+      raB = raaAsym(:,iL)      !!! asym
+      raB = 1 - (0.5 + 0.3738*raB + 0.0076*(raB**2) + 0.1186*(raB**3))
+      IF (kScatter .EQ. 2) THEN
+        !! Chou similarity scaling adjustment using 1-w/2(1+g)
+        !! raFactor = 0.4/raFactor  
+        raFactor = 1 - raaSSAlb(:,iL)*(1+raaAsym(:,iL))/2.0
+      ELSEIF (kScatter .EQ. 3) THEN       
+        !! Chou scaling adjustment using 1-w(1-b)
+        !! raFactor = 0.3/raFactor  
+        raFactor = 1 - raaSSAlb(:,iL)*(1-raB)
+      END IF
+      raX      = (raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) - &
+                 (raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))      
+!      raAdjust = raX * exp(-raFactor/muSat*raaExt(:,iL))
+      raAdjust = raX * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
+      raAdjust = raAdjust * 0.35 * raaSSAlb(:,iL) * raB/raFactor
+      raY = 0.35*raaSSAlb(:,iL) * raB / raFactor
+      raInten = raInten + raAdjust    
 
+!      write(kStdErr,'(A,5(I3),8(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
+!         raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raB(1),raaPCLSAMCorrection(1,iL)
+
+    END IF
+    
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
-    DO iLay=2,iHigh-1
+    DO iLay = 2,iHigh-1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
@@ -1770,17 +1835,70 @@ CONTAINS
       ! now do the radiative transfer thru this complete layer
 
       r0 = raInten(9523)
-      raInten = raaEmission(:,iLay) + &
-            raInten*raaLayTrans(:,iLay) + &
-            raaSolarScatter1Lay(:,iL)
+      raInten = raaEmission(:,iLay) + raInten*raaLayTrans(:,iLay) + raaSolarScatter1Lay(:,iL)
       !sun          raInten = raInten*raaLayTrans(:,iLay) +
       !sun     $                   raaSolarScatter1Lay(:,iL)
+
+      !! RRTM uses the following angles and wgts , for x = 3.5g/m2 at 11 km gives about -1 % corrections to flux in window
+      !!  asec([1.0606 1.3821 2.4015 7.1551])*180/pi
+      !! 19.4620   43.6528   65.3921   81.9660
+      !!  0.1335    0.2035    0.1299    0.03118
+      raFactor(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
+!      print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raFactor(1)
+      IF ((kScatter .GE. 2) .AND. (raFactor(1) .GT. 1.0e-4) .AND. &
+          (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
+        raB = raaAsym(:,iL)
+        raB = 1 - (0.5 + 0.3738*raB + 0.0076*(raB**2) + 0.1186*(raB**3))        !!! 1 - g
+        raB = 1 - raaAsym(:,iL)                                                 !!! 1 - g
+        IF (kScatter .EQ. 2) THEN
+          !! Chou similarity scaling adjustment using 1-w/2(1+g)
+          !! raFactor = 0.4/raFactor  
+          raFactor = 1 - raaSSAlb(:,iL)*(1+raaAsym(:,iL))/2.0                   !!! 1 - wg
+        ELSEIF (kScatter .EQ. 3) THEN       
+          !! Chou scaling adjustment using 1-w(1-b)
+          !! raFactor = 0.3/raFactor  
+          raFactor = 1 - raaSSAlb(:,iL)*(1-raB)                                 !!! 1 - wg
+          raFactor = 1 - raaSSAlb(:,iL)*raaAsym(:,iL)                           !!! 1 - wg
+        END IF
+        raX      = (raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) - &
+                   (raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))
+!        raAdjust = raX * exp(-raFactor/muSat*raaExt(:,iL))
+        raAdjust = raX * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
+        raY = raaSSAlb(:,iL) * raB / raFactor   !!! this is the multiplier
+        raAdjust = raAdjust * 0.35 * raaSSAlb(:,iL) * raB/raFactor
+        raInten = raInten + raAdjust
+
+!        write(kStdErr,'(A,5(I3),7(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
+!           raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raB(1),raaPCLSAMCorrection(1,iL)
+
+!        write(kStdErr,'(A,5(I3),11(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
+!           raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raB(1),raX(1),raaExt(1,iL), &
+!           raaPCLSAMCorrection(1,iL+1),TEMP(iL+1),raAdjust(1)*100/(raInten(1)-raAdjust(1))
+
+        write(kStdErr,'(A,5(I3),F12.4,12(ES12.4))') 'Chou ADJ ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
+           raFreq(1),raaExt(1,iL),raaSSAlb(1,iL),raaAsym(1,iL),&
+           raaPCLSAMCorrection(1,iL+1),ttorad(raFreq(1),raTPressLevels(iL+1)),raaPCLSAMCorrection(1,iL),ttorad(raFreq(1),raTPressLevels(iL)),&
+           raY(1),0.0,exp(-1/muSat*raaExt(1,iL)),raInten(1)-raAdjust(1),raAdjust(1),raAdjust(1)/(raInten(1)-raAdjust(1))*100
+
+!! RRTM code rtregcld.f
+!!  IBAND,LEV,IANG,IG taug,      tauc,        w          g         Rd(i)       Pl(i)      Rd(i-1)     Pl(i)         ccc     origrad       newrad     adj       adj*100/total
+!      write(*,'(A,4(I3),13(ES12.4))') 'A',IBAND,LEV,IANG,IG,
+!     $     TAUG(LEV,IG),TAUCLOUD(lev,iband),
+!     &     ssacloud(lev,iband),xmom(1,lev,iband),
+!     &     dradg(lev,iang),PLANKLEV(lev,iband),
+!     &     dradg(lev-1,iang),PLANKLEV(lev-1,iband),ccc,
+!     &     ORIGRADLU,RADLU,CUMSUM,CUMSUM*100/RADLU
+
+      END IF
+    
     END DO
+
+!call dostop
      
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the topmost layer (could be fractional)
  777 CONTINUE
-    DO iLay=iHigh,iHigh
+    DO ilay = iHigh,iHigh
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
@@ -1800,6 +1918,12 @@ CONTAINS
               iNumOutX = iNumOutX + 1
               raInten2 = raInten2 * rWeight
               raaRadsX(:,iNumOutX) = raInten2
+
+!raInten2 = raaPCLSAMCorrection(:,iaRadLayer(1))
+!raInten = raInten2
+!raaRadsX(:,iNumOutX) = raInten2
+!print *,'nana',raInten2(1)
+
               CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
             END DO
           END IF
@@ -1823,6 +1947,11 @@ CONTAINS
             raInten2 = raInten2 * rWeight
             raaRadsX(:,iNumOutX) = raInten2
                     
+!raInten2 = raaPCLSAMCorrection(:,iaRadLayer(1))
+!raInten = raInten2
+!raaRadsX(:,iNumOutX) = raInten2
+!print *,'nana2',raInten2(1)
+
             CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
         ELSEIF (iDp > 1) THEN
           write(kStdErr,*) 'oops in scatter_pclsam_code, at NLTE, dump more than 1 rad at TOA???'
@@ -1830,8 +1959,10 @@ CONTAINS
         END IF
       END IF
                
-    END DO      !!       DO iLay=iHigh,iHigh
+    END DO      !!       DO ilay = iHigh,iHigh
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
+
+!call dostop
 
     RETURN
     end SUBROUTINE rad_DOWN_pclsam_solar
@@ -1987,7 +2118,7 @@ CONTAINS
       write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
       CALL DoSTOP
     END IF
-    DO iLay=1,iNumLayer
+    DO ilay = 1,iNumLayer
       iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
       iL = iaRadLayer(iLay)
       IF (iaRadLayer(iLay) > iNpmix) THEN
@@ -2055,7 +2186,7 @@ CONTAINS
 
 ! find the highest layer that we need to output radiances for
     iHigh=-1
-    DO iLay=1,iNp
+    DO ilay = 1,iNp
       IF (iaOp(iLay) > iHigh) THEN
         iHigh=iaOp(iLay)
       END IF
@@ -2066,7 +2197,7 @@ CONTAINS
 
 ! note while computing downward solar/ thermal radiation, have to be careful
 ! for the BOTTOMMOST layer!!!!!!!!!!!
-    DO iLay=1,1
+    DO ilay = 1,1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       raaLayTrans(:,iLay) = exp(-raaExt(:,iL)*rFracBot/muSat)
@@ -2074,7 +2205,7 @@ CONTAINS
       raaLayTransGasOnly(:,iLay) = exp(-raaAbs(:,iL)*rFracBot/muSat)
       raaEmissionGasOnly(:,iLay) = 0.0
     END DO
-    DO iLay=2,iNumLayer-1
+    DO ilay = 2,iNumLayer-1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       raaLayTrans(:,iLay) = exp(-raaExt(:,iL)/muSat)
@@ -2082,7 +2213,7 @@ CONTAINS
       raaLayTransGasOnly(:,iLay) = exp(-raaAbs(:,iL)/muSat)
       raaEmissionGasOnly(:,iLay) = 0.0
     END DO
-    DO iLay=iNumLayer,iNumLayer
+    DO ilay = iNumLayer,iNumLayer
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       raaLayTrans(:,iLay) = exp(-raaExt(:,iL)*rFracTop/muSat)
@@ -2167,11 +2298,11 @@ CONTAINS
     r0 = raInten(1)
 ! now we can compute the upwelling radiation!!!!!
 ! compute the total emission using the fast forward model, only looping
-! upto iHigh ccccc      DO iLay=1,NumLayer -->  DO iLay=1,1 + DO ILay=2,iHigh
+! upto iHigh ccccc      DO ilay = 1,NumLayer -->  DO ilay = 1,1 + DO Ilay = 2,iHigh
      
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! first do the bottommost layer (could be fractional)
-    DO iLay=1,1
+    DO ilay = 1,1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
@@ -2208,7 +2339,7 @@ CONTAINS
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the rest of the layers till the last but one(all will be full)
-    DO iLay=2,iHigh-1
+    DO ilay = 2,iHigh-1
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
@@ -2248,7 +2379,7 @@ CONTAINS
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the topmost layer (could be fractional)
  777 CONTINUE
-    DO iLay=iHigh,iHigh
+    DO ilay = iHigh,iHigh
       iL = iaRadLayer(iLay)
       muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
       rMPTemp = raVT1(iL)
@@ -2299,7 +2430,7 @@ CONTAINS
         END IF
       END IF
                
-    END DO      !!       DO iLay=iHigh,iHigh
+    END DO      !!       DO ilay = iHigh,iHigh
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 
     RETURN
@@ -2495,5 +2626,71 @@ CONTAINS
     RETURN
     end SUBROUTINE rad_DOWN_pclsam_solar100_MRO_driver
           
+!************************************************************************
+    SUBROUTINE BackGndThermalSaveLayers(raVT1,rTSpace,raFreq,raLayAngles, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,raaPCLSAMCorrection)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! rTSpace      = blackbody temperature of space
+! rFracTop   = is the highest layer multiplied by a fraction, because
+!              of the instrument posn w/in the layer, instead of top of layer?
+!              this would affect the backgnd thermal calculation
+! raFreq    = frequencies of the current 25 cm-1 block being processed
+! raThermal  = backgnd thermal intensity at surface
+! raaAbs     = matrix containing the mixed path abs coeffs
+! raVT1    = vertical temperature profile associated with the mixed paths
+! iNumLayer  = total number of layers in current atmosphere
+! iaRadLayer = this is a list of layers in atm
+! raUseEmissivity = surface emissivity
+! iDoAcos35  = tells to use acos(3/5) at EACH freq, EACH layer
+    REAL :: raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
+    REAL :: raFreq(kMaxPts),raVT1(kMixFilRows),rTSpace
+    REAL :: raUseEmissivity(kMaxPts),raLayAngles(kProfLayer)
+    REAL :: raaExt(kMaxPts,kMixFilRows),rFracTop,rFracBot
+    INTEGER :: iaRadLayer(kProfLayer),iNumLayer,iDoAcos35,iProfileLayers
+    REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raVTemp(kMixFilRows)
+
+    INTEGER iLay,iL
+    REAL muSat,rMPTemp
+    REAL raX(kMaxPts),raE(kMaxPts)
+
+    iLay = iNumLayer
+    iL = iaRadLayer(iLay)  
+    raX = ttorad(raFreq,rTSpace)  !! for the infrared, this is basically 0
+    raaPCLSAMCorrection(:,iL+1) = raX
+
+    DO iLay = iNumLayer,2,-1
+      iL = iaRadLayer(iLay)
+      muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+      rMPTemp = raVT1(iL)
+      raE = raaExt(:,iL)
+      raX = raX * exp(-raE/muSat) + (1-exp(-raE/muSat))*ttorad(raFreq,rMPTemp)
+      raaPCLSAMCorrection(:,iL) = raX
+!      print *,iLay,iL,raFreq(1),rMPTemp,raX(1)
+    END DO
+
+    iLay = 1
+    iL = iaRadLayer(iLay)
+    muSat = cos(raLayAngles(MP2Lay(iL))*kPi/180.0)
+    rMPTemp = raVT1(iL)
+    raE = raaExt(:,iL)*rFracBot
+    raX = raX * exp(-raE/muSat) + (1-exp(-raE/muSat))*ttorad(raFreq,rMPTemp)
+    raaPCLSAMCorrection(:,iL) = raX
+
+!    DO iLay = 1,iNumLayer
+!      iL = iaRadLayer(iLay)  
+!      raX      = (raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) - &
+!                 (raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))
+!      write(kStdErr,'(A,2(I4),3(F12.5),3(2X,ES12.5))') 'WOWOW',iLay,iL,raTPressLevels(iL),raVT1(iL),raTPressLevels(iL+1),&
+!                     raaPCLSAMCorrection(1,iL+1),raaPCLSAMCorrection(1,iL),raX(1)
+!    END DO
+
+    RETURN
+    end SUBROUTINE BackGndThermalSaveLayers
+
 !************************************************************************
 END MODULE scatter_pclsam_code

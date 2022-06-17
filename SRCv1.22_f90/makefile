@@ -8,15 +8,22 @@ $(info IMPORTANT (3) -- since this is 500-880,805-2830 cm-1 res use cp_param_fil
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
 $(info   )
 
+400_H20_default_f90_short:
+	make -f Makefile_v122_Intelf90 datafix400_v122_H2020
+	echo "this datafix400_v122_H2020 looks suspiciously similar to datafix400_v122_H2020_orig605_805res"
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H20
+
 400_H20_default_f90:
 	make -f Makefile_v122_Intelf90 datafix400_v122_H2020
 	echo "this datafix400_v122_H2020 looks suspiciously similar to datafix400_v122_H2020_orig605_805res"
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H20
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H20
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H20
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H20
 
 #########################################################################
@@ -26,30 +33,30 @@ $(info   )
 	echo "this datafix400_v122_H2016 looks suspiciously similar to datafix400_v122_H2016_orig605_805res"
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H16
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H16
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H16
 
 mars_H16_default_f90:
 	make -f Makefile_v122_Intelf90 mars_datafix400_v122_H2016
 	cp_param_files_to_f90_mars.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT
+#	make -f Makefile_v122_Intelf90 basicTXT
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta_mars.x_f90_122_400ppmv_H16
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT_mars.x_f90_122_400ppmv_H16
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT_mars.x_f90_122_400ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta_mars.x_f90_122_400ppmv_H16
 
 385_H16_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2016
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H16
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H16
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H16
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H16
 
 400_H12p8_highres605_1205:
@@ -85,10 +92,10 @@ mars_H16_default_f90:
 	echo "this datafix400_v122_H2020 looks suspiciously similar to datafix400_v122_H2020_orig605_805res"
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H20_orig605_805res
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H20_orig605_805res
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H20_orig605_805res
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H20_orig605_805res
 
 400_H16_default_f90_orig605_805res:
@@ -96,20 +103,20 @@ mars_H16_default_f90:
 	echo "this datafix400_v122_H2016 looks suspiciously similar to datafix400_v122_H2016_orig605_805res"
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_H16_orig605_805res
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H16_orig605_805res
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_H16_orig605_805res
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_H16_orig605_805res
 
 400_G15_NLTEH16_f90_orig605_805res:
 	make -f Makefile_v122_Intelf90 datafix400_v122_G2015_NLTEH2016
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_400ppmv_G15
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_G15
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_G15
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_G15
 
 ## these are orig res, and 385 pmv only
@@ -117,10 +124,10 @@ mars_H16_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H12_CO2_UMBC
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H12_CO2_UMBC
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H12_CO2_UMBC
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H12_CO2_UMBC
 
 ## these are orig res, and 385 pmv only
@@ -128,10 +135,10 @@ mars_H16_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2008_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H08_CO2_UMBC
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H08_CO2_UMBC
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H08_CO2_UMBC
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H08_CO2_UMBC
 
 ## these are orig res, and 385 pmv only
@@ -139,10 +146,10 @@ x_NOexist_385_H04_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2004_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H04_CO2_UMBC
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H04_CO2_UMBC
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H04_CO2_UMBC
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H04_CO2_UMBC
 
 ## these are orig res, and 385 pmv only
@@ -150,10 +157,10 @@ x_NOexist_385_H2k_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2k_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 basic
-	make -f Makefile_v122_Intelf90 basicTXT	
+#	make -f Makefile_v122_Intelf90 basicTXT	
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H2k_CO2_UMBC
-	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H2k_CO2_UMBC
+#	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H2k_CO2_UMBC
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H2k_CO2_UMBC
 
 clean: 

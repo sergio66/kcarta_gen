@@ -657,7 +657,7 @@ CONTAINS
       kScatter          = 1        !
     ELSEIF (iWhichScatterCode == 5) THEN
       kWhichScatterCode = 5        !use PCLSAM
-      kScatter          = 1        !
+      !kScatter          = 1       !cooment this out after June 2022 because you have scaling adjustments possible
     ELSEIF (iWhichScatterCode == 4) THEN
       kWhichScatterCode = 4        !use r = r0 + r1 = perturb
       kScatter          = 1        !
@@ -1286,7 +1286,7 @@ CONTAINS
       kScatter          = 1        !
     ELSEIF (iWhichScatterCode == 5) THEN
       kWhichScatterCode = 5        !use PCLSAM
-      kScatter          = 1        !
+      !kScatter          = 1       !comment this out after June 2022 becaue you have scaling adjustments possible
     ELSEIF (iWhichScatterCode == 4) THEN
       kWhichScatterCode = 4        !use r = r0 + r1 = perturb
       kScatter          = 1        !
@@ -4971,6 +4971,31 @@ CONTAINS
       END SUBROUTINE getYY_MM_DD_HH
   
 !************************************************************************
+      FUNCTION quickintersect(iX,iaX,iN)
+! this sees if integer iX lies in array iaX of length iN
+
+      integer, dimension(:) :: iaX
+      integer iX,iN,quickintersect
+
+      integer iJ,iK
+
+      iJ = -1
+      iK = 1
+      
+      do while ( (iK <= iN) .and. (iJ < 0))
+        if (iX .EQ. iaX(iK)) THEN
+           iJ = iK
+        else
+           iK = iK + 1
+        end if
+      end do
+
+      quickintersect = iJ
+
+      END FUNCTION quickintersect
+
+!************************************************************************
+
       SUBROUTINE intersectI(ia1,ia2,iaResult,keep1,keep2,iN1,iN2)
 ! this is like Matlab [iaResult,keep1,keep2] = intersect(ia1,ia2)
 ! see https://comp.lang.fortran.narkive.com/6kgRtCnI/arrays-intersection

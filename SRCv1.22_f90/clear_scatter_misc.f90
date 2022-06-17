@@ -1726,6 +1726,103 @@ CONTAINS
     RETURN
     end SUBROUTINE UnScaleMie
 !************************************************************************
+! if needed, unscale parameters so DISORT is happy, when compared to RTSPEC
+! Frank Evans recommended not to do this, but instead turn DELTAM off in DISORT
+! however, leaving DELTAM on does not significantly change things
+    SUBROUTINE UnScaleMieOne(cScale,TABEXTINCT, TABSSALB, TABASYM)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/scatterparam.f90'
+
+    REAL :: tabextinct,tabssalb,tabasym
+    CHARACTER cScale
+
+    INTEGER :: iI
+    INTEGER :: N
+    REAL :: wn,w0,w1,an,a0_p,a0_m,a0,a1,en,e0,e1,f
+
+! Frank Evans code scales the Mie scattering parameters, so we have to
+! unscale them!!!!!!!!
+!       Delta function scale the scattering properties in the phase function.
+!     The delta function fraction (F) is related to the asymmetry parameter,
+!     depending on DELTASCALE: N - F=0, Y - F=g, H - F=g^2, G - F=g^2 w/
+!     Gaussian filtering
+!       The extinction and single scattering albedo are scaled but the
+!     phase function Legendre coefficients are not, because the phase
+!     function scaling is done in CALC_PHI.  Instead the scaling fraction
+!     is returned in LEGEG(0,*) = 1-F.  The scaled asymmetry parameter is
+!     computed and returned.
+!       Subroutine modified 12/11/96 to force Gaussian filtering of Legendre
+!     coefficients.  Gaussian-width values L0 determined by fitting
+!     half-width half-max of forward scattering peak (in terms of mu) of
+!     actual phase function to a Gaussian-filtered delta function - phase
+!     function with width parameter L0 ;
+!       Subroutine FINDL0 determines L0, subroutine FINDHALF determines HWHM
+!     of arbitrary phase function, subroutine SCATCALC calculates phase
+!     function at specific value of mu
+!      REAL EXTINCT, ALBEDO, ASYM
+!      CHARACTER DELTASCALE
+!      REAL    F, FCTR, L0
+     
+!      ASYM = LEGEN(1)/3.0
+!      IF (DELTASCALE .EQ. 'Y') THEN
+!        F = ASYM
+!      ELSE IF ((DELTASCALE .EQ. 'H').OR.(DELTASCALE .EQ. 'G')) THEN
+!        F = ASYM**2
+!      ELSE
+!        F = 0.0
+!      ENDIF
+
+!   Scale the extinction, single scattering albedo,  asymmetry parameter
+!      FCTR = (1 - F*ALBEDO)
+!      EXTINCT = EXTINCT*FCTR
+!      ALBEDO = ALBEDO*(1-F)/FCTR
+!      ASYM = (ASYM-F)/(1-F)
+!      IF (DELTASCALE .EQ. 'Y' .OR. DELTASCALE .EQ. 'H') THEN
+!        LEGEN(0) = 1-F
+!      ENDIF
+     
+    IF ((cScale == 'n') .OR. (cScale == 'N')) THEN
+      !!!nothing scaled, so everything is cool
+      GOTO 10
+    END IF
+    IF ((cScale == 'y') .OR. (cScale == 'Y')) THEN
+      write (kStdErr,*) 'Cannot invert the Mie parameters for ''y'' scaling'
+      write (kStdErr,*) 'Please rerun sscatmie using n,g or h scaling'
+      CALL DoStop
+    END IF
+
+! only cases left are "g" or "h" scaling, so go ahead
+! x1 is the new scaled stuff that sscatmie put out
+! x0 is the original unscaled stuff that DISORT wants
+! xn is a check, to see if using "f" we get a0 -> a1, w0 -> w1, e0 ->e1
+      a1 = tabasym
+      a0 = 1 + 4*a1*a1 - 4*a1            !!!!!this term is always positive
+      a0_m = (-1 - sqrt(a0))/(2*(a1-1))  !!!!!a1-1 always < 0
+      a0_p = (-1 + sqrt(a0))/(2*(a1-1))  !!!!!a1-1 always < 0
+      a0 = min(a0_p,a0_m)
+      tabasym = a0
+      f = a0*a0                      !!!this is the scaling parameter
+
+      w1 = tabssalb
+      w0 = w1/(1+f*(w1-1))
+      tabssalb = w0
+
+      e1 = tabextinct
+      e0 = e1/(1-f*w0)
+      tabextinct = e0
+
+      !!!!just a check
+      ! n=e0*(1-f*w0)
+      ! n=w0*(1-f)/(1-f*w0)
+      ! n=(a0-f)/(1-f)
+      ! rint *,a0,a1,an,e0,e1,en,w0,w1,wn
+
+ 10 CONTINUE
+    RETURN
+    end SUBROUTINE UnScaleMieOne
+!************************************************************************
 ! this integer function finds out WHERE to put the cloud layer WRT kCARTA
 ! Suppose RTSPEC,DISOR have iNumlayers in Atm, from 1 to iNumLayer
 !                      with cloud in layers iC1 ..iCN
@@ -1967,9 +2064,26 @@ CONTAINS
 ! local variables
     INTEGER :: iL,iFr,iI,N,L,I,ikcCldtop,ikcCldbot
     INTEGER :: i1,i2,iFixHere
-    REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b
+    REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b,rE,rW,rG
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
     REAL :: dmedme,albedo,asymmetry,rAbs,rAlbedo,rScat
+    INTEGER :: iExtScaling,iDefault
+
+    iDefault = +1  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
+
+    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake/small error in b
+    iExtScaling = +1 !! this is correct Chou scaling == 1-w(1-b)
+    iExtScaling = +2 !! this is Chou with similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
+    iExtScaling = +3 !! this is Chou with            scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+
+    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake
+
+    iExtScaling = kScatter
+
+    IF (iExtScaling .NE. iDefault) THEN
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam raFreq(1) = ',&
+                   iDefault,iExtScaling,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    END IF
 
     rScat = 0.0
     rScat = sum(iwp)
@@ -1983,6 +2097,9 @@ CONTAINS
 
       !now get the optical properties for the cloud layers
       raaAsymTemp = 0.0
+
+    print *,'DELTA UNSCALE'
+
 
       DO N = ICLDTOP, ICLDBOT-1
         L  = N-ICLDTOP+1
@@ -1998,19 +2115,94 @@ CONTAINS
             EXTINCT, SSALB(L), ASYM_RTSPEC(L), &
             NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
             TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
+
+          !!! new
+          rE = EXTINCT
+          rW = SSALB(L)
+          rG = ASYM_RTSPEC(L)
+          CALL UnScaleMieOne('G',rE,rW,rG)
+          EXTINCT = rE
+          SSALB(L) = rW
+          ASYM_RTSPEC(L) = rG
+
+          !!! 980-1080 cm-1
+          EXTINCT = rE
+          SSALB(L) = 0.69
+          ASYM_RTSPEC(L) = 0.94
+
+          !!! 820-980 cm-1
+          EXTINCT = rE
+          SSALB(L) = 0.44
+          ASYM_RTSPEC(L) = 0.95
+
+          !!! 1390-1480 cm-1
+          EXTINCT = rE
+          SSALB(L) = 0.647
+          ASYM_RTSPEC(L) = 0.941
+
+          !!! 1480-1800 cm-1
+          EXTINCT = rE
+          SSALB(L) = 0.638
+          ASYM_RTSPEC(L) = 0.946
+
+          IF (iFr == 1) PRINT *,'OMG rE rW rG',rE,SSALB(L),ASYM_RTSPEC(L)
+
           !  Compute the optical depth of cloud layer, including gas
           TAUC_L   = IWP(L)*EXTINCT/1000
           TAUCG_L  = TAUGAS + TAUC_L
           TAUTOT_N = TAUCG_L
 
+          IF (iFr == 1) THEN
+            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
+          END IF
+
           ! the SSALB coeff
           rScat    = SSALB(L) * IWP(L)*EXTINCT/1000
+!!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
+!          IF (iFr .EQ. 1) THEN
+!            write(kStdErr,'(A,6(F12.4))') 'Adjust SSA',waveno,taugas,TAUC_L,TAUC_L/TAUCG_L,SSALB(L),SSALB(L)*TAUC_L/TAUCG_L
+!          END IF
+!!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
           SSALB(L) = SSALB(L)*TAUC_L/TAUCG_L
+!!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
+
           raaScatTemp(iFr,iI) = SSALB(L)
 
           ! ---------------> now add on the backscattered part <--------------------
-          b = (1.0 - ASYM_RTSPEC(L))/2.0
-          TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b))
+          IF (iExtScaling .EQ. -1) THEN
+            !! the "correct" version is 
+            !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+            !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
+            !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
+            !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
+
+            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
+            b = (1.0 - ASYM_RTSPEC(L))/2.0               
+ 
+            !! CHOU SCALING TERM
+            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+            TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
+
+          ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
+            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
+            b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+
+            !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
+            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+            TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
+
+          ELSEIF (iExtScaling .EQ. +2) THEN
+            !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
+            b = (1.0 + ASYM_RTSPEC(L))/2.0               
+
+            !! CHOU SCALING TERM with similarity scaling adjustment
+            !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
+            TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*b) 
+
+          END IF
+
           raaExtTemp(iFr,iI)  = TAUTOT_N
           ! ---------------> now add on the backscattered part <--------------------
 

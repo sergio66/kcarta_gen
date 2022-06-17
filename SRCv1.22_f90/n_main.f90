@@ -47,6 +47,7 @@ CONTAINS
     iNGas1,iaGasesNL1,iNXsec1,iaLXsecNL1, &
 ! gas and cloud profiles
     caPFName1,caCloudPFName1,iRTP1,iNclouds_RTP1,iAFGLProf1, &
+    iWhichScatterCode_RTP1,iScatter_RTP1, &
 ! mixpath info
     iNpmix1,caaMixFileLines1, &
 ! radiating atmosphere info
@@ -60,7 +61,7 @@ CONTAINS
 ! loop over radiating atmosphere info
     iAtmLoop1,raAtmLoop1, &
 ! cloud info from RTP file
-    iMPSetForRadRTP1, iBinORAsc1, caaCloudFile1,iaNML_Ctype1, &
+    iMPSetForRadRTP1, iBinOrAsc1, caaCloudFile1,iaNML_Ctype1, &
 ! jacob info
     iJacob1,iaJacob1, &
 ! output info
@@ -216,7 +217,8 @@ CONTAINS
     REAL :: raExp(kMaxClouds),raExp1(kMaxClouds)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase1(kMaxClouds),iaPhase(kMaxClouds)
-    INTEGER :: ibinorasc, ibinorasc1,iNClouds_RTP,iNClouds_RTP1
+    INTEGER :: iBinOrAsc, iBinOrAsc1,iNClouds_RTP,iNClouds_RTP1
+    INTEGER :: iWhichScatterCode_RTP,iScatter_RTP,iWhichScatterCode_RTP1,iScatter_RTP1
 ! this associate the RTP cloud code to the caaCloudFile
     INTEGER :: iaNML_Ctype(kMaxClouds),iaNML_Ctype1(kMaxClouds)
     CHARACTER(160) :: caaCloudFile(kMaxClouds),caaCloudFile1(kMaxClouds)
@@ -319,8 +321,8 @@ CONTAINS
     NAMELIST /nm_molgas/namecomment,iNGas,iaGasesNL
     NAMELIST /nm_xscgas/namecomment,iNXsec,iaLXsecNL
     NAMELIST /nm_prfile/namecomment,caPFName,iRTP,iAFGLProf, &
-    iMPSetForRadRTP,ibinORasc, &
-    caaCloudFile,iNClouds_RTP,iaNML_Ctype
+    iMPSetForRadRTP,iBinOrAsc, &
+    caaCloudFile,iNClouds_RTP,iWhichScatterCode_RTP,iScatter_RTP,iaNML_Ctype
     NAMELIST /nm_weight/namecomment,iNpmix,caaMixFileLines
     NAMELIST /nm_radnce/namecomment, &
     iNatm,iaMPSetForRad,raPressStart,raPressStop, &
@@ -392,6 +394,7 @@ CONTAINS
 ! ssume we do not have cloud profile info for PCLSAM
     caCloudPFname = 'dummycloudfile_profile'
     iNclouds_RTP  = -1
+    
        
 ! default mixing table
     iNpmix=1                !assume one set of mixed paths to be used
@@ -436,8 +439,8 @@ CONTAINS
     iaPhase          = -1       ! no phase info with cloud
     iaCloudNumLayers = -1 !no clouds
     iaCloudScatType  = -9999
-    raaaCloudParams  = 0.0   !! iwp
-    raaaCloudParams  = 1.0   !! dme
+    raaaCloudParams(:,:,1)  = 0.0    !! iwp
+    raaaCloudParams(:,:,2)  = 10.0   !! dme
  
 ! %%%%%%%%%%%%%%%%%%%%%%%%%
 ! assume there are no Jacobians
@@ -449,6 +452,8 @@ CONTAINS
     iWhichScatterCode0 = kWhichScatterCode  !set to kCARTA_CLEAR
 
     kScatter  = 3          !if DISORT, then this says correlated k
+    kScatter  = 1          !if PCLSAM, this says use CHou correct scaling 
+    kScatter  = 3          !if PCLSAM, this says use CHou correct scaling with scaling ajustment correction 
 ! f RTSPEC, then this says H scattering
 ! f TWOSTREAM, this says rerun code three times
     kDis_nstr = 16         !number of streams for DISORT to use
@@ -458,8 +463,11 @@ CONTAINS
     iMPSetForRadRTP = 1
 
 ! assume no clouds in RTP file
-    ibinorasc     = -1
+    iBinOrAsc     = -1
     iNclouds_RTP  = -1
+! but if there are clouds, do PCLSAM scattering with scaling ajustment correction
+    iWhichScatterCode_RTP = 5   !! PCLSAM
+    iScatter_RTP = 3            !! scaling ajustment correction
     do iI = 1,kMaxClouds
       caaCloudFile(iI)  = 'dummy cloud'
       caaCloudFile1(iI) = 'dummy cloud'
@@ -554,8 +562,10 @@ CONTAINS
     iAFGLProf1       = iAFGLProf
     iRTP1            = iRTP
     iMPSetForRadRTP1 = iMPSetForRadRTP
-    ibinorasc1       = ibinorasc
+    iBinOrAsc1       = iBinOrAsc
     iNclouds_RTP1    = iNclouds_RTP
+    iWhichScatterCode_RTP1 = iWhichScatterCode_RTP
+    iScatter_RTP1          = iScatter_RTP
     ! if you use a 100 layer cloud cngwat profile throught the rtp file
     ! then you must specify the (same in all layers) particle sizes
     DO iI = 1,iNClouds_RTP
@@ -736,15 +746,17 @@ CONTAINS
       caaNLTETemp1      = caaNLTETemp
       caaUpperMixRatio1 = caaUpperMixRatio
       caaStrongLines1   = caaStrongLines
-      iaaNLTEChunks1 = iaaNLTEChunks
-      caaaNLTEBands1 = caaaNLTEBands
+      iaaNLTEChunks1    = iaaNLTEChunks
+      caaaNLTEBands1    = caaaNLTEBands
     END IF
     write (kStdWarn,*) 'successfully read in nonlte .....'
     CALL printstar
 
     namecomment = '******* SCATTR section *******'
     read (iIOUN,nml = nm_scattr)
+
     iNclouds1  =  iNclouds
+
     IF (iNclouds >= 1) THEN
       iScatBinaryFile1   = iScatBinaryFile
       iNclouds1 = iNclouds
@@ -762,10 +774,15 @@ CONTAINS
       caaaScatTable1     = caaaScatTable
       iaaScatTable1      = iaaScatTable
 
-      iaaCloudWhichAtm1=iaaCloudWhichAtm
-      raaCloudFrac1 = raaCloudFrac
+      iaaCloudWhichAtm1  = iaaCloudWhichAtm
+      raaCloudFrac1      = raaCloudFrac
     ELSE
-      kWhichScatterCode = iWhichScatterCode0
+      kWhichScatterCode  = iWhichScatterCode0
+    END IF
+
+    IF (iNclouds_RTP >= 1) THEN
+      kWhichScatterCode = iWhichScatterCode_RTP
+      kScatter          = iScatter_RTP
     END IF
 
 !!!! allow for plain old vanilla kCARTA rad transfer
@@ -812,7 +829,7 @@ CONTAINS
         iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1, &
         iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1)
     END IF
-      
+
     RETURN
     end SUBROUTINE TranslateNameListFile
 
@@ -1192,7 +1209,7 @@ CONTAINS
     INTEGER :: ctype1,ctype2
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
-    INTEGER :: iaCtype(kMaxClouds),ibinorasc,iMPSetForRadRTP,iNclouds_RTP,iAFGLProf
+    INTEGER :: iaCtype(kMaxClouds),iBinOrAsc,iMPSetForRadRTP,iNclouds_RTP,iAFGLProf,iWhichScatterCode_RTP,iScatter_RTP
     CHARACTER(160) :: caaCloudFile(kMaxClouds)
 ! cloud profile info
     INTEGER :: iCldProfile,iaCldTypes(kMaxClouds)
@@ -1268,7 +1285,9 @@ CONTAINS
     CHARACTER(160) :: caJunk80
     REAL :: rTCC,rCfracX1,rCfracX2,rCfracX12
 
-    INTEGER :: iI
+    INTEGER :: iI,iaPCLSAM(4)
+
+    iaPCLSAM = (/-1,1,2,3/)
           
     iResetCldFracs = -1   !! if need to do pclsam flux computation, then reset cldfracs to 1.0
     ctype1 = -9999
@@ -1284,6 +1303,7 @@ CONTAINS
     rf_low,rf_high, &
     iNGas,iaGasesNL,iNXsec,iaLXsecNL, &
     caPFName,caCloudPFName,iRTP,iNclouds_RTP,iAFGLProf, &
+    iWhichScatterCode_RTP,iScatter_RTP, &
     iNpmix,caaMixFileLines, &
     iNatm,iTemperVary,iaMPSetForRad,raPressStart,raPressStop, &
     raTSpace,raTSurf,raSatAngle,raSatHeight, &
@@ -1655,6 +1675,10 @@ CONTAINS
 !        DO iI = 1,iNClouds_RTP
 !          write(kSTdWarn,'(A,I2,A)') 'just before SetRTPCloud caaCloudFile(',iI,') =  ',caaCloudFile(iI)
 !        END DO  !! should really be     DO iI = 1,iNClouds_RTP
+
+!print *,'MIAOW 6X1',kWhichScatterCode,kScatter
+        !!! NB depending in iWhichScatterCode, this sets kWhichScatterCode,kScatter
+        !!! NB depending in iWhichScatterCode, this sets kWhichScatterCode,kScatter
         CALL SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop, &
             cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2, &
             ctop1,ctop2,cbot1,cbot2, &
@@ -1666,6 +1690,8 @@ CONTAINS
             raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
             iaaScatTable,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm, &
             iaaCloudWhichLayers,iNatm,raaPrBdry,raPressLevels,iProfileLayers)
+!print *,'MIAOW 6X2',kWhichScatterCode,kScatter
+
 !        DO iI = 1,iNClouds_RTP
 !          write(kSTdWarn,'(A,I2,A)') 'just after SetRTPCloud caaCloudFile(',iI,') =  ',caaCloudFile(iI)
 !        END DO  !! should really be     DO iI = 1,iNClouds_RTP
@@ -1826,22 +1852,42 @@ CONTAINS
 
 ! ******** SCATTR section
     namecomment = '******* SCATTR section *******'
+
     IF ((iNclouds > 0)) THEN
       IF ((kWhichScatterCode == 1) .AND. (kScatter < 0)) THEN
         write(kStdErr,*) 'you specify iNclouds > 0, but no repeat number'
         write(kStdErr,*) 'for TWOSTREAM. please check iNclouds, kScatter'
         CALL DoStop
       END IF
+
       IF ((kWhichScatterCode == 2) .AND. (kScatter < 0)) THEN
         write(kStdErr,*) 'you specify iNclouds > 0, but no code type'
         write(kStdErr,*) 'for RTSPEC. please check iNclouds, kScatter'
         CALL DoStop
       END IF
+
       IF ((kWhichScatterCode == 3) .AND. (kScatter < 0)) THEN
         write(kStdErr,*) 'you specify iNclouds > 0, but no interpolation '
         write(kStdErr,*) 'type for DISORT. please check iNclouds, kScatter'
         CALL DoStop
       END IF
+
+      IF ((kWhichScatterCode == 5) .AND. (quickintersect(kScatter,iaPCLSAM,4) .LE. 0)) THEN
+        write(kStdErr,*) 'you specify iNclouds > 0, but no correct Chou option '
+        write(kStdErr,*) 'type for PCLSAM. please check iNclouds, kScatter'
+        CALL DoStop
+      ELSEIF ((kWhichScatterCode == 5) .AND. (quickintersect(kScatter,iaPCLSAM,4) .GT. 0)) THEN
+        IF (kScatter .EQ. -1) THEN
+          write(kStdWarn,*) 'PCLSAM : kScatter = -1 so original b === small error'
+        ELSEIF (kScatter .EQ. +1) THEN
+           write(kStdWarn,*) 'PCLSAM : kScatter = +1 so correct b, opened to 4 terms using g'
+        ELSEIF (kScatter .EQ. +2) THEN
+           write(kStdWarn,*) 'PCLSAM : kScatter = +2 so correct b, similarity scaling adjustment'
+        ELSEIF (kScatter .EQ. +3) THEN
+           write(kStdWarn,*) 'PCLSAM : kScatter = +3 so correct b,            scaling adjustment'
+        END IF
+      END IF
+
     !        IF ((kWhichScatterCode .EQ. 4) .AND. (kScatter .LT. 0)) THEN
     !          write(kStdErr,*) 'you specify iNclouds > 0, but no repeat number'
     !          write(kStdErr,*) 'for kPerturb. That is fine'

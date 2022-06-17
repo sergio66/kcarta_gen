@@ -608,6 +608,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.22 
 ----- 
 
+6/9/22          Adding in PCLSAM scaling adjustments  
+                See "Improvement of the simulation of Cloud LW scattering in Broadband RTMs"
+                G. Tang, P. Yang, G. Kattawar, X. Huang, E. Mlawer, B. Baum, M. King
+                J. Atmos. Sci., July 2018
+
 2/5/22          fixed readrtp_1A,_1B,_2 when prof.nlevs == kproflayer (was having an infinity issue
 
 11/27/21        Can handle HITRAN 2020

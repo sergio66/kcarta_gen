@@ -68,6 +68,13 @@ MODULE ttorad_common
 
 IMPLICIT NONE
 
+!! here I overload the TTORAD and RADTOT routines, so they can be called in 4 way and 2 ways respectively!!!
+!! here I overload the TTORAD and RADTOT routines, so they can be called in 4 way and 2 ways respectively!!!
+!! here I overload the TTORAD and RADTOT routines, so they can be called in 4 way and 2 ways respectively!!!
+
+!! so for example SUBROUTINE BackGndThermalSaveLayers uses raPlanck = ttorad(raFreq,rT)
+!! while          SUBROUTINE NoScatterRadTransfer     uses rThermal = ttorad(rF,kTSpace)
+
 private
 
 interface ttorad
@@ -82,7 +89,7 @@ interface radtot
   module procedure raradtot
 end interface
 
-public :: ttorad,ttorad_oneBT2array,ttorad_array_lblrtmfix,radtot
+public :: radtot,ttorad,ttorad_oneBT2array,ttorad_array_lblrtmfix
 
 CONTAINS
 

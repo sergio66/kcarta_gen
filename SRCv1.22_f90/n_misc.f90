@@ -270,8 +270,9 @@ CONTAINS
     kThermalAngle = -1.0  !use acos(3/5) in upper layers
     kThermalJacob = 1     !use thermal backgnd in Jacobians
 
-    kJacobian = -1        !do not do Jacobians
-    kScatter  = -1        !do not do scattering computations
+    kJacobian = -1         !do not do Jacobians
+    kWhichScatterCode = -1 !do not do scattering computations
+    kScatter  = -1         !do not do scattering computations
 
     k100layerCloud = -1   !assume rtp file does NOT have 100 layer cloud
 
@@ -367,8 +368,9 @@ CONTAINS
     iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
 !!!   see SUBR rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS in rad_main.f
 !!!   0 for ABS clouds, 2 for RTPSEC, 3 for DISORT
-!!!    iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = 5 for PCLSAM (Default)   TILL MAY 2021
-    iaaOverrideDefault(2,10) = -1   !!! if kPlanet == 3, then adjust Planet/Sun dist (=1 no,, default, +1 yes)
+!!!    iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode =  5 for PCLSAM (Default)                 TILL  MAY 2021
+!!!    iaaOverrideDefault(2,10) = 5    !!! kWhichScatterCode = -1/+1 for adjusting Planet/Sun distance AFTER MAY 2021
+    iaaOverrideDefault(2,10) = -1   !!! if kPlanet == 3, then adjust Planet/Sun dist (-1 no, default, +1 yes)
       
 ! n_layers_lblrtm.f and n_pth_mix.f  TAPE5/6 
     iaaOverrideDefault(3,1) = -1    !!! iAIRS101_or_LBL_levels use LBLRTM, not AIRS 101 levels, for integration

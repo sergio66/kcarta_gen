@@ -18,6 +18,11 @@ IMPLICIT NONE
 CONTAINS
 
 !************************************************************************
+
+!    REAL :: tempLEV(maxnz)        ~~~ raTPressLevels   !level temperature profile (1+kProfLayer)   
+!    REAL :: tempLAY(kMixFilRows)  ~~~ raVT1            !layer temperature profile (0+kProfLayer)
+
+!************************************************************************
 ! this subroutine computes the UPWARD rad transfer thru an atmospheric layer,
 ! assuming there is a temperature profile, and NO scattering
     SUBROUTINE RT_ProfileUPWELL(raFreq,raaAbs,iL,TEMP,rCos,rFrac,iVary,raInten)
@@ -281,7 +286,7 @@ CONTAINS
     REAL :: raFreq(kMaxPts)              !wavenumbers
     REAL :: raaAbs(kMaxPts,kMixFilRows)  !mixing table
     INTEGER :: iL                        !which row of mix table
-    REAL :: tempLEV(maxnz)               !level temperature profile (1+kProfLayer)
+    REAL :: tempLEV(maxnz)               !level temperature profile (1+kProfLayer)   
     REAL :: tempLAY(kMixFilRows)         !layer temperature profile (0+kProfLayer)
     REAL :: rCos                         !satellite view angle
     REAL :: rFrac                        !fractional (0<f<1) or full (|f| > 1.0)
