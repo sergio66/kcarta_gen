@@ -217,6 +217,16 @@ CONTAINS
     iAccOrLoopFlux = +2         !!! uses weighted mu gaussian quadrature (RRTM)
 !!! and varies T with layer. yep the whole shebang
 
+    IF (kScatter .GE. 2) THEN
+      write(kStdErr,'(A)')  'kScatter >= 2 so set slowloop iAccOrLoopFlux = -1 in scatter_pclsam_flux.f90'
+      write(kStdWarn,'(A)') 'kScatter >= 2 so set slowloop iAccOrLoopFlux = -1 in scatter_pclsam_flux.f90'
+      iAccOrLoopFlux = -1       !!!do loops over gaussian angles
+    END IF
+
+    !!! for testing the Chou Adj ok else does the quick gaussian and cannot compare to slow loop
+    !!! iAccOrLoopFlux = -1       !!!do loops over gaussian angles, bit slow but keeps the Chou Adj ok
+    !!! for testing the Chou Adj ok else does the quick gaussian and cannot compare to slow loop
+
     IF (iDefault /= iAccOrLoopFlux) THEN
       print *,'pclsam iDefault,iAccOrLoopFlux = ',iDefault,iAccOrLoopFlux
     END IF
@@ -359,7 +369,7 @@ CONTAINS
 !                   user specified value if positive
     REAL :: raLayerHeight(kProfLayer),raaPrBdry(kMaxAtm,2)
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
-    pProf(kProfLayer),raTPressLevels(kProfLayer+1)
+             pProf(kProfLayer),raTPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers,iLayPrintFlux
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
@@ -477,6 +487,7 @@ CONTAINS
     IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
 
     iGaussPts = 10 !!!!default, good enough for clear sky
+    iGaussPts = 4  !!!!default, good enough for clear sky
 
     IF (iGaussPts > kGauss) THEN
       write(kStdErr,*) 'need iGaussPts < kGauss'
@@ -598,47 +609,55 @@ CONTAINS
 
 ! if CloudySky > 0 then go ahead with PCLSAM!
     IF (iCloudySky < 0) THEN
-      write(kStdErr,*) 'Cannot do flux for clear sky with scatter_pclsam'
-      CALL DoStop
-    END IF
+      write(kStdWarn,*) 'Cannot do flux for clear sky with scatter_pclsam slowloop'
+      write(kStdWarn,*) 'Need to be tricky to fool the code'
+      raaExtTemp = raaAbs
+      raaSSAlbTemp = 0.0
+      raaAsymTemp  = 1.0
+      ICLDTOPKCARTA = -1
+      ICLDBOTKCARTA = -1
 
-!!!!!!! we bloody well need the temperature profile in terms of the
-!!!!!!! pressure layers, so we need to fill in the array TEMP
-    CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
-      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
-      ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
-      ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
-      iProfileLayers,raPressLevels)
+      print *,'sum raaECXTXTXT = ', SUM (raaExtTemp, MASK=raaExtTemp .GT. 0.0) 
 
-    CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
-      iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
-
-    CALL CopyRaaExt_twostream(raaAbs,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-      iaaRadLayer,iAtm,iNumlayer)
-
-    IF (iaCloudNumLayers(1) < iNumLayer) THEN
-      CALL AddCloud_pclsam( &
-        raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-        iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
-        ICLDTOPKCARTA, ICLDBOTKCARTA, &
-        NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
-        NSCATTAB, MUINC, &
-        NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
-        TABEXTINCT, TABSSALB, TABASYM, &
-        TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
     ELSE
-      raCC(iLay) = 1.0
-      CALL AddCloud_pclsam_SunShine_100layerclouds( &
-        raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-        iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
-        ICLDTOPKCARTA, ICLDBOTKCARTA, &
-        NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB, &
-        NSCATTAB, MUINC, &
-        NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
-        TABEXTINCT, TABSSALB, TABASYM, &
-        TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
+      !!!!!!! we bloody well need the temperature profile in terms of the
+      !!!!!!! pressure layers, so we need to fill in the array TEMP
+      CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
+        iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
+        ABSNU1, ABSNU2, ABSDELNU, NABSNU, NLEV, TEMP, ABSPROF, &
+        ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raLayerTemp, &
+        iProfileLayers,raPressLevels)
+  
+      CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
+        iDownWard,rSurfaceTemp,iProfileLayers,raPressLevels)
+  
+      CALL CopyRaaExt_twostream(raaAbs,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+        iaaRadLayer,iAtm,iNumlayer)
+  
+      IF (iaCloudNumLayers(1) < iNumLayer) THEN
+        CALL AddCloud_pclsam( &
+          raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+          iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
+          ICLDTOPKCARTA, ICLDBOTKCARTA, &
+          NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+          NSCATTAB, MUINC, &
+          NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
+          TABEXTINCT, TABSSALB, TABASYM, &
+          TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
+      ELSE
+        raCC(iLay) = 1.0
+        CALL AddCloud_pclsam_SunShine_100layerclouds( &
+          raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+          iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
+          ICLDTOPKCARTA, ICLDBOTKCARTA, &
+          NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB, &
+          NSCATTAB, MUINC, &
+          NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
+          TABEXTINCT, TABSSALB, TABASYM, &
+          TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
+      END IF
     END IF
-
+  
     raaDownFlux = 0.0
     raaUpFlux   = 0.0
 
@@ -648,6 +667,7 @@ CONTAINS
 
       raLayAngles = rAngle
 
+      print *,'iAngle,iGaaussPts = ',iAngle,iGaussPts,'+'
       !!! UPWARD flux
       CALL all_radiances_pclsam( &
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
@@ -665,6 +685,7 @@ CONTAINS
       !     $         iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff,
       !     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
 
+      print *,'iAngle,iGaaussPts = ',iAngle,iGaussPts,'-'
       IF (kFlux <= 3 .OR. kFlux == 5) THEN
         !!! DOWNWARD flux
         CALL all_radiances_pclsam( &
@@ -962,6 +983,11 @@ CONTAINS
     INTEGER :: iSTopNormalRadTransfer
     REAL :: rFrac,rL,rU,r0,raInten(kMaxPts),rNoScale
 
+! to do PCLSAM correction by Tang 2018
+    REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raAdjust(kMaxPts)
+
+    raaPCLSAMCorrection = 0.0
+
     rThermalRefl = 1.0/kPi
     IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
 
@@ -1028,7 +1054,6 @@ CONTAINS
       iiDiv = iLay
     END IF
      
-
     iaCldLayer(iCldBotkCarta:iCldTopkCarta) = 1
      
 ! cccccccccccccccccc set these all important variables ****************
@@ -1091,9 +1116,20 @@ CONTAINS
 ! if rEmsty=1, then raInten need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
-        raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
-        iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
+      IF (kScatter .LE. 1) THEN
+        !!! no need to do correction
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
+      ELSEIF (kScatter .GT. 1) THEN
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
+        !!! do correction
+        CALL BackGndThermalSaveLayers(raVT1,rTSpace,raFreq,raLayAngles, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,raaPCLSAMCorrection)
+      END IF
     ELSE
       write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
@@ -1130,6 +1166,14 @@ CONTAINS
     rMPTemp = raVT1(iL)
     raInten = raaEmission(:,iLay) + raInten*raaLayTrans(:,iLay) + &
                    raaSolarScatter1Lay(:,iL)
+    raAdjust(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
+!    print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raFactor(1)
+    IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
+        (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
+      CALL ChouAdjust(iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
+                      raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
+      raInten = raInten + raAdjust    
+    END IF
     raaTempX(:,iPutLay) = raaTempX(:,iPutLay) + raInten*rGaussWeight*muSat
          
 ! then do the rest of the layers till the last but one(all will be full)
@@ -1140,6 +1184,16 @@ CONTAINS
       rMPTemp=raVT1(iL)
       raInten = raaEmission(:,iLay) + raInten*raaLayTrans(:,iLay) + &
                      raaSolarScatter1Lay(:,iL)
+
+      raAdjust(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
+!      print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raAdjust(1)
+      IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
+          (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
+        CALL ChouAdjust(iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
+                        raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
+        raInten = raInten + raAdjust    
+      END IF
+
       raaTempX(:,iPutLay) = raaTempX(:,iPutLay) + raInten*rGaussWeight*muSat
     END DO
 
@@ -1513,7 +1567,7 @@ CONTAINS
 !                   user specified value if positive
     REAL :: raLayerHeight(kProfLayer),raaPrBdry(kMaxAtm,2)
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
-    pProf(kProfLayer),raTPressLevels(kProfLayer+1)
+            pProf(kProfLayer),raTPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers,iaCldTypes(kMaxClouds),iLayPrintFlux
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
@@ -1622,6 +1676,11 @@ CONTAINS
 
     INTEGER :: iComputeAll,iDefault
     INTEGER :: troplayer
+
+    IF (kScatter .GE. 2) THEN
+      write(kStdErr,*) 'Subr flux_pclsam_fastloop cannot do Chou scaling adjust .. do slow loop instead'
+      CALL DoStop
+    END IF
 
     WRITE (kStdWarn,*) 'PCLSAM radiative transfer code'
     WRITE (kStdWarn,*) 'Includes layer temperature profile effects in clds'
@@ -1763,7 +1822,7 @@ CONTAINS
 
 ! if CloudySky > 0 then go ahead with PCLSAM!
     IF (iCloudySky < 0) THEN
-      write(kStdErr,*) 'Cannot do flux for clear sky with scatter_pclsam'
+      write(kStdErr,*) 'Cannot do flux for clear sky with scatter_pclsam fastloop'
       CALL DoStop
     END IF
 
@@ -1824,13 +1883,26 @@ CONTAINS
 ! if rEmsty=1, then intensity need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
-        raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
-        iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
+      IF (kScatter .LE. 1) THEN
+        !!! no need to do correction
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
+      ELSEIF (kScatter .GT. 1) THEN
+        write(kStdErr,*) 'WOOOOOO SHOULD HAVE STIOPPED'
+        Call DoStop
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
+        !!! do correction
+!        CALL BackGndThermalSaveLayers(raVT1,rTSpace,raFreq,raLayAngles, &
+!          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+!          iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,raaPCLSAMCorrection)
+      END IF
     ELSE
       write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
-     
+
 ! see if we have to add on the solar contribution
     IF (iDoSolar >= 0) THEN
       CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
@@ -1910,10 +1982,16 @@ CONTAINS
 ! then loop over the atrmosphere, up to the top
     DO iLay = 1,iNumLayer
       iL=iaRadLayer(iLay)
-      CALL cumulativelayer_expint3(raFreq,raaExtTemp,raaRad,raVT1,raUp, &
-        iLay,iL,iNumLayer,+1,iComputeAll, &
-        raaCumSum,raTemp,raY,troplayer)
+      IF (kScatter .LE. 1) THEN
+        CALL cumulativelayer_expint3(raFreq,raaExtTemp,raaRad,raVT1,raUp, &
+          iLay,iL,iNumLayer,+1,iComputeAll, &
+          raaCumSum,raTemp,raY,troplayer)
+      ELSE
+        write(kStdErr,*) 'Oops cannot do fastloop cumulativelayer_expint3 for Chou adj'
+        CALL DoStop
+      END IF
       raaUpFlux(:,iLay+1) = raTemp - raaRad(:,iL)*raY + raaRad(:,iL)/2.0
+
     END DO
      
 !------------------------------------------------------------------------
@@ -2123,6 +2201,11 @@ CONTAINS
           
     INTEGER :: iComputeAll,iDefault
     INTEGER :: troplayer
+
+    IF (kScatter .GE. 2) THEN
+      write(kStdErr,*) 'Subr flux_pclsam_fastloop_linearvary cannot do Chou scaling adjust .. do slow loop instead'
+      CALL DoStop
+    END IF
 
     WRITE (kStdWarn,*) 'PCLSAM radiative transfer code'
     WRITE (kStdWarn,*) 'Includes layer temperature profile effects in clds'
@@ -2354,9 +2437,22 @@ CONTAINS
 ! if rEmsty=1, then intensity need not be adjusted, as the downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
-        raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
-        iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
+      IF (kScatter .LE. 1) THEN
+        !!! no need to do correction
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
+      ELSEIF (kScatter .GT. 1) THEN
+        write(kStdErr,*) 'WOOOOOO SHOULD HAVE STIOPPED 2'
+        Call DoStop
+        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+          iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,-1)
+        !!! do correction
+!        CALL BackGndThermalSaveLayers(raVT1,rTSpace,raFreq,raLayAngles, &
+!          raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
+!          iNumLayer,iaRadLayer,raaExtTemp,rFracTop,rFracBot,raaPCLSAMCorrection)
+      END IF
     ELSE
       write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF

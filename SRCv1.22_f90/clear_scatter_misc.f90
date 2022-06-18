@@ -2066,9 +2066,10 @@ CONTAINS
     INTEGER :: i1,i2,iFixHere
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b,rE,rW,rG
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
-    REAL :: dmedme,albedo,asymmetry,rAbs,rAlbedo,rScat
-    INTEGER :: iExtScaling,iDefault
+    REAL :: dmedme,albedo,asymmetry,rAbs,rAlbedo,rScat,SSALB0
+    INTEGER :: iExtScaling,iSartaTables,iDefault
 
+!>>>>>>>>>>>>>>>>>>>>>>>>>
     iDefault = +1  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
 
     iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake/small error in b
@@ -2085,6 +2086,19 @@ CONTAINS
                    iDefault,iExtScaling,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 
+!>>>>>>>>>>>>>>>>>>>>>>>>>
+    iDefault = +1  !! use the SARTA Tables (delt scaled)
+
+    iSartaTables = -1   !! Fake RRTM, no delta scaling
+    iSartaTables = +1   !! SARTA Tscattering tables,  delta scaled
+
+    IF (iSartaTables .NE. iDefault) THEN
+      write(kStdErr,*) 'DELTA UNSCALE'
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam raFreq(1) = ',&
+                   iDefault,iSartaTables,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    END IF
+!>>>>>>>>>>>>>>>>>>>>>>>>>
+
     rScat = 0.0
     rScat = sum(iwp)
 
@@ -2097,9 +2111,6 @@ CONTAINS
 
       !now get the optical properties for the cloud layers
       raaAsymTemp = 0.0
-
-    print *,'DELTA UNSCALE'
-
 
       DO N = ICLDTOP, ICLDBOT-1
         L  = N-ICLDTOP+1
@@ -2116,36 +2127,38 @@ CONTAINS
             NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
             TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
 
-          !!! new
-          rE = EXTINCT
-          rW = SSALB(L)
-          rG = ASYM_RTSPEC(L)
-          CALL UnScaleMieOne('G',rE,rW,rG)
-          EXTINCT = rE
-          SSALB(L) = rW
-          ASYM_RTSPEC(L) = rG
-
-          !!! 980-1080 cm-1
-          EXTINCT = rE
-          SSALB(L) = 0.69
-          ASYM_RTSPEC(L) = 0.94
-
-          !!! 820-980 cm-1
-          EXTINCT = rE
-          SSALB(L) = 0.44
-          ASYM_RTSPEC(L) = 0.95
-
-          !!! 1390-1480 cm-1
-          EXTINCT = rE
-          SSALB(L) = 0.647
-          ASYM_RTSPEC(L) = 0.941
-
-          !!! 1480-1800 cm-1
-          EXTINCT = rE
-          SSALB(L) = 0.638
-          ASYM_RTSPEC(L) = 0.946
-
-          IF (iFr == 1) PRINT *,'OMG rE rW rG',rE,SSALB(L),ASYM_RTSPEC(L)
+          IF (iSartaTables .LT. 0) THEN
+            !!! new
+            rE = EXTINCT
+            rW = SSALB(L)
+            rG = ASYM_RTSPEC(L)
+            CALL UnScaleMieOne('G',rE,rW,rG)
+            EXTINCT = rE
+            SSALB(L) = rW
+            ASYM_RTSPEC(L) = rG
+  
+            !!! 980-1080 cm-1
+            EXTINCT = rE
+            SSALB(L) = 0.69
+            ASYM_RTSPEC(L) = 0.94
+  
+            !!! 1390-1480 cm-1
+            EXTINCT = rE
+            SSALB(L) = 0.647
+            ASYM_RTSPEC(L) = 0.941
+  
+            !!! 1480-1800 cm-1
+            EXTINCT = rE * 1
+            SSALB(L) = 0.638
+            ASYM_RTSPEC(L) = 0.946
+  
+            !!! 820-980 cm-1
+            EXTINCT = rE
+            SSALB(L) = 0.44
+            ASYM_RTSPEC(L) = 0.95
+  
+            IF (iFr == 1) PRINT *,'OMG rE rW rG',EXTINCT,SSALB(L),ASYM_RTSPEC(L)
+          END IF
 
           !  Compute the optical depth of cloud layer, including gas
           TAUC_L   = IWP(L)*EXTINCT/1000
@@ -2156,8 +2169,15 @@ CONTAINS
             write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
           END IF
 
-          ! the SSALB coeff
-          rScat    = SSALB(L) * IWP(L)*EXTINCT/1000
+          ! the scattering OD, not using this!!!
+          !!! rScat    = SSALB(L) * IWP(L)*EXTINCT/1000
+
+!!!!! this is to debug Tang 2018 JAS PCLSAM corrections
+!          SSALB0 = SSALB(L)
+!          SSALB(L) = SSALB(L)*TAUC_L/TAUCG_L
+!          SSALB(L) = SSALB0
+!!!!! this is to debug Tang 2018 JAS PCLSAM corrections
+
 !!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
 !          IF (iFr .EQ. 1) THEN
 !            write(kStdErr,'(A,6(F12.4))') 'Adjust SSA',waveno,taugas,TAUC_L,TAUC_L/TAUCG_L,SSALB(L),SSALB(L)*TAUC_L/TAUCG_L

@@ -22,7 +22,7 @@ CONTAINS
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************************************************************************
-!**** note : these ate basically called by scatter_pclsam_main.f90 
+!**** note : these are basically called by scatter_pclsam_main.f90 
 !****        subr interface_pclsam(raaE,raaW,raaG,raaGasAbs)
 !            combines the above four and sends in
 !            subr find_radiances_pclsam(raaEx) 
@@ -1482,7 +1482,7 @@ CONTAINS
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
     CHARACTER(160) :: caOutName
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1), &
-    pProf(kProfLayer),raTPressLevels(kProfLayer+1)
+            pProf(kProfLayer),raTPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers,iRadorColJac
 ! this is to do with NLTE
     INTEGER :: iNLTEStart
@@ -1523,10 +1523,9 @@ CONTAINS
     REAL :: rWeight
 
 ! to do PCLSAM correction by Tang 2018
-    REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raAdjust(kMaxPts),raFactor(kMaxPts)
-    REAL :: raY(kMaxPts),raX(kMaxPts),raB(kMaxPts)
+    REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raAdjust(kMaxPts)
 
-    IF (kScatter .GE. 2) raaPCLSAMCorrection = 0.0
+    raaPCLSAMCorrection = 0.0
 
     rWeight = 1.0
     IF ((kActualJacs == 100) .AND. (rFracX .GE. 0.0) .AND. (rFracX .LE. 1.0)) THEN
@@ -1690,7 +1689,7 @@ CONTAINS
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
           raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
           iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
-      ELSEIF (kScatter .GE. 1) THEN
+      ELSEIF (kScatter .GT. 1) THEN
         CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
           raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
           iNumLayer,iaRadLayer,raaExt,rFracTop,rFracBot,-1)
@@ -1779,32 +1778,13 @@ CONTAINS
 
     iLay = 1
     iL = iaRadLayer(iLay)
-    raFactor(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
+    raAdjust(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
 !    print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raFactor(1)
-    IF ((kScatter .GE. 2) .AND. (raFactor(1) .GT. 1.0e-4) .AND. &
+    IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
         (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
-      raB = raaAsym(:,iL)      !!! asym
-      raB = 1 - (0.5 + 0.3738*raB + 0.0076*(raB**2) + 0.1186*(raB**3))
-      IF (kScatter .EQ. 2) THEN
-        !! Chou similarity scaling adjustment using 1-w/2(1+g)
-        !! raFactor = 0.4/raFactor  
-        raFactor = 1 - raaSSAlb(:,iL)*(1+raaAsym(:,iL))/2.0
-      ELSEIF (kScatter .EQ. 3) THEN       
-        !! Chou scaling adjustment using 1-w(1-b)
-        !! raFactor = 0.3/raFactor  
-        raFactor = 1 - raaSSAlb(:,iL)*(1-raB)
-      END IF
-      raX      = (raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) - &
-                 (raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))      
-!      raAdjust = raX * exp(-raFactor/muSat*raaExt(:,iL))
-      raAdjust = raX * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
-      raAdjust = raAdjust * 0.35 * raaSSAlb(:,iL) * raB/raFactor
-      raY = 0.35*raaSSAlb(:,iL) * raB / raFactor
+      CALL ChouAdjust(iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
+                      raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
       raInten = raInten + raAdjust    
-
-!      write(kStdErr,'(A,5(I3),8(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
-!         raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raB(1),raaPCLSAMCorrection(1,iL)
-
     END IF
     
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1839,62 +1819,17 @@ CONTAINS
       !sun          raInten = raInten*raaLayTrans(:,iLay) +
       !sun     $                   raaSolarScatter1Lay(:,iL)
 
-      !! RRTM uses the following angles and wgts , for x = 3.5g/m2 at 11 km gives about -1 % corrections to flux in window
-      !!  asec([1.0606 1.3821 2.4015 7.1551])*180/pi
-      !! 19.4620   43.6528   65.3921   81.9660
-      !!  0.1335    0.2035    0.1299    0.03118
-      raFactor(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
-!      print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raFactor(1)
-      IF ((kScatter .GE. 2) .AND. (raFactor(1) .GT. 1.0e-4) .AND. &
+      raAdjust(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
+!      print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raAdjust(1)
+      IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
           (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
-        raB = raaAsym(:,iL)
-        raB = 1 - (0.5 + 0.3738*raB + 0.0076*(raB**2) + 0.1186*(raB**3))        !!! 1 - g
-        raB = 1 - raaAsym(:,iL)                                                 !!! 1 - g
-        IF (kScatter .EQ. 2) THEN
-          !! Chou similarity scaling adjustment using 1-w/2(1+g)
-          !! raFactor = 0.4/raFactor  
-          raFactor = 1 - raaSSAlb(:,iL)*(1+raaAsym(:,iL))/2.0                   !!! 1 - wg
-        ELSEIF (kScatter .EQ. 3) THEN       
-          !! Chou scaling adjustment using 1-w(1-b)
-          !! raFactor = 0.3/raFactor  
-          raFactor = 1 - raaSSAlb(:,iL)*(1-raB)                                 !!! 1 - wg
-          raFactor = 1 - raaSSAlb(:,iL)*raaAsym(:,iL)                           !!! 1 - wg
-        END IF
-        raX      = (raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) - &
-                   (raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))
-!        raAdjust = raX * exp(-raFactor/muSat*raaExt(:,iL))
-        raAdjust = raX * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
-        raY = raaSSAlb(:,iL) * raB / raFactor   !!! this is the multiplier
-        raAdjust = raAdjust * 0.35 * raaSSAlb(:,iL) * raB/raFactor
-        raInten = raInten + raAdjust
-
-!        write(kStdErr,'(A,5(I3),7(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
-!           raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raB(1),raaPCLSAMCorrection(1,iL)
-
-!        write(kStdErr,'(A,5(I3),11(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
-!           raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raB(1),raX(1),raaExt(1,iL), &
-!           raaPCLSAMCorrection(1,iL+1),TEMP(iL+1),raAdjust(1)*100/(raInten(1)-raAdjust(1))
-
-        write(kStdErr,'(A,5(I3),F12.4,12(ES12.4))') 'Chou ADJ ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
-           raFreq(1),raaExt(1,iL),raaSSAlb(1,iL),raaAsym(1,iL),&
-           raaPCLSAMCorrection(1,iL+1),ttorad(raFreq(1),raTPressLevels(iL+1)),raaPCLSAMCorrection(1,iL),ttorad(raFreq(1),raTPressLevels(iL)),&
-           raY(1),0.0,exp(-1/muSat*raaExt(1,iL)),raInten(1)-raAdjust(1),raAdjust(1),raAdjust(1)/(raInten(1)-raAdjust(1))*100
-
-!! RRTM code rtregcld.f
-!!  IBAND,LEV,IANG,IG taug,      tauc,        w          g         Rd(i)       Pl(i)      Rd(i-1)     Pl(i)         ccc     origrad       newrad     adj       adj*100/total
-!      write(*,'(A,4(I3),13(ES12.4))') 'A',IBAND,LEV,IANG,IG,
-!     $     TAUG(LEV,IG),TAUCLOUD(lev,iband),
-!     &     ssacloud(lev,iband),xmom(1,lev,iband),
-!     &     dradg(lev,iang),PLANKLEV(lev,iband),
-!     &     dradg(lev-1,iang),PLANKLEV(lev-1,iband),ccc,
-!     &     ORIGRADLU,RADLU,CUMSUM,CUMSUM*100/RADLU
-
+        CALL ChouAdjust(iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
+                        raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
+        raInten = raInten + raAdjust    
       END IF
     
     END DO
 
-!call dostop
-     
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 ! then do the topmost layer (could be fractional)
  777 CONTINUE
@@ -2692,5 +2627,75 @@ CONTAINS
     RETURN
     end SUBROUTINE BackGndThermalSaveLayers
 
+!************************************************************************
+!! this is Chou scaling factor adjustment
+!! to do PCLSAM correction by G. Tang, P. Yang, G. Kottowar, X. Huang, B. Baum, JAS 2018
+      SUBROUTINE ChouAdjust(iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,& 
+                            raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/TempF90/scatterparam.f90'
+
+! input
+      INTEGER :: iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA
+      REAL :: raaExt(kMaxPts,kMixFilRows),raaSSAlb(kMaxPts,kMixFilRows),muSat
+      REAL :: raaAsym(kMaxPts,kMixFilRows),raTPressLevels(kProfLayer+1)
+      REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raFreq(kMaxPts),raInten(kMaxPts)
+! output
+      REAL :: raAdjust(kMaxPts)
+
+! local 
+      REAL :: raYY(kMaxPts),raXX(kMaxPts),raBB(kMaxPts),raFactor(kMaxPts)
+
+      !! RRTM uses the following angles and wgts , for x = 3.5g/m2 at 11 km gives about -1 % corrections to flux in window
+      !! also asee Subroutine FindGauss2 in rad_angles.f90
+      !!  asec([1.0606 1.3821 2.4015 7.1551])*180/pi
+      !! 19.4620   43.6528   65.3921   81.9660
+      !!  0.1335    0.2035    0.1299    0.03118
+
+      raBB = raaAsym(:,iL)
+      raBB = 1 - (0.5 + 0.3738*raBB + 0.0076*(raBB**2) + 0.1186*(raBB**3))     !!! 1 - g
+      raBB = 1 - raaAsym(:,iL)                                                 !!! 1 - g
+      IF (kScatter .EQ. 2) THEN
+        !! Chou similarity scaling adjustment using 1-w/2(1+g)
+        !! raFactor = 0.4/raFactor  
+        raFactor = 1 - raaSSAlb(:,iL)*(1+raaAsym(:,iL))/2.0                   !!! 1 - wg
+      ELSEIF (kScatter .EQ. 3) THEN       
+        !! Chou scaling adjustment using 1-w(1-b)
+        !! raFactor = 0.3/raFactor  
+        raFactor = 1 - raaSSAlb(:,iL)*(1-raBB)                                 !!! 1 - wg
+        raFactor = 1 - raaSSAlb(:,iL)*raaAsym(:,iL)                           !!! 1 - wg
+      END IF
+      raXX      = (raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) - &
+                 (raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))
+!     raAdjust = raXX * exp(-raFactor/muSat*raaExt(:,iL))
+      raAdjust = raXX * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
+      raYY = raaSSAlb(:,iL) * raBB / raFactor   !!! this is the multiplier
+      raAdjust = raAdjust * 0.35 * raaSSAlb(:,iL) * raBB/raFactor
+
+!     write(kStdErr,'(A,5(I3),7(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
+!           raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raBB(1),raaPCLSAMCorrection(1,iL)
+
+!     write(kStdErr,'(A,5(I3),11(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
+!           raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raBB(1),raXX(1),raaExt(1,iL), &
+!           raaPCLSAMCorrection(1,iL+1),TEMP(iL+1),raAdjust(1)*100/(raInten(1)-raAdjust(1))
+
+      write(kStdErr,'(A,5(I3),F12.4,12(ES12.4))') 'Chou ADJ ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
+           raFreq(1),raaExt(1,iL),raaSSAlb(1,iL),raaAsym(1,iL),&
+           raaPCLSAMCorrection(1,iL+1),ttorad(raFreq(1),raTPressLevels(iL+1)),&
+           raaPCLSAMCorrection(1,iL),ttorad(raFreq(1),raTPressLevels(iL)),&
+           raYY(1),0.0,exp(-1/muSat*raaExt(1,iL)),raInten(1)-raAdjust(1),raAdjust(1),raAdjust(1)/(raInten(1)-raAdjust(1))*100
+
+!! RRTM code rtregcld.f
+!!  IBAND,LEV,IANG,IG taug,      tauc,        w          g         Rd(i)       Pl(i)      Rd(i-1)     Pl(i)         ccc     origrad       newrad     adj       adj*100/total
+!      write(*,'(A,4(I3),13(ES12.4))') 'A',IBAND,LEV,IANG,IG,
+!     $     TAUG(LEV,IG),TAUCLOUD(lev,iband),
+!     &     ssacloud(lev,iband),xmom(1,lev,iband),
+!     &     dradg(lev,iang),PLANKLEV(lev,iband),
+!     &     dradg(lev-1,iang),PLANKLEV(lev-1,iband),ccc,
+!     &     ORIGRADLU,RADLU,CUMSUM,CUMSUM*100/RADLU
+
+      END SUBROUTINE ChouAdjust
 !************************************************************************
 END MODULE scatter_pclsam_code
