@@ -207,6 +207,7 @@ CONTAINS
     INTEGER :: iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint),iMaxMinLBLRTMOp
     REAL :: raaOp1(kMaxPrint,kPathsOut),rMaxMinLBLRTMOp
 
+    iGlobalUpperMostOut = -1
     IF ((kRTP == -10) .OR. (kRTP == -5) .OR. (kRTP == -6)) THEN
       write (kStdWarn,*) 'Need to reset some output params as they came from text LVLS/LBLRTM code'
       write(kStdWarn,*) 'raaOp(1,1) = ',raaOp(1,1),' --> ',raRTP_TxtInput(6),' mb'
@@ -341,6 +342,7 @@ CONTAINS
           CALL AllLayersOutputPress(iaaRadLayer,iAtm,iaNumLayer, &
                 iaOp,iaaOpT,raaOpT,iOutTypes,raaUserPressT, &
                 raaPrBdry,raFracTop,raFracBot,raPressLevels)
+          iGlobalUpperMostOut = maxval(iaNumLayer)
         END IF
       END IF       !IF ((iAtm >= 0)  .AND. (iNp < 0)) THEN
       ! &&&&&&&&&& END CASE 1
@@ -361,7 +363,8 @@ CONTAINS
           CALL DoSortReal(raTemp,iNp,-iUpDown)
           CALL PressTOLayers(raaOpT,iaOp,iaNumLayer,iaaRadLayer,iAtm, &
                 iOutTypes,raTemp,iNp,raaPrBdry,raaUserPressT,raPressLevels)
-          iaaOpT(iOutTypes,1:iNp)=iaOp(1:iNp)
+          iaaOpT(iOutTypes,1:iNp) = iaOp(1:iNp)
+          iGlobalUpperMostOut = maxval(iaOp(1:iNp))
           ! &&&&&&&&&& END CASE 2A
 
           ! for iPrinter = 1,2 (path or MP)
@@ -438,6 +441,7 @@ CONTAINS
         CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
                 iNp,iaNpT,iaPrinterT,iNatm,iAtm,iaGPMPAtmT, &
                 raaOpT,raaUserPressT,iaNumLayer,iUpDown)
+          iGlobalUpperMostOut = maxval(iaOp(1:iNp))
       END IF
     END IF           !if iAtm >= 0)
 
@@ -469,6 +473,7 @@ CONTAINS
           DO iI=1,iNp
             iaaOpT(iOutTypes,iI)=iaOp(iI)
           END DO
+          iGlobalUpperMostOut = maxval(iaaOpT(iOutTypes,:))
           CALL SetIaaOpT(iaaOpT,iaOp,iOutTypes,iPrinter,iJ,iNpmix, &
             iNumGases,iNp,iaNumLayer)
           CALL CheckRaaOpT(iaaOpT,iOutTypes,iPrinter,iNpmix,iNumGases, &
@@ -514,6 +519,11 @@ CONTAINS
     CALL SetActualPrintOptions(iOutTypes,iaPrinter,iaPrinterT, &
       iaGPMPAtm,iaGPMPAtmT,iaNp,iaNpT,iaaOp,iaaOpT,raaOp,raaOpT, &
       raaUserPress,raaUserPressT,iaNumlayer)
+
+    IF (iGlobalUpperMostOut > -1) THEN
+      write(kStdWarn,'(A,I3)') 'for flux, output4 set iGlobalUpperMostOut = ',iGlobalUpperMostOut
+      !write(kStdErr,'(A,I3)') 'for flux, output4 set iGlobalUpperMostOut = ',iGlobalUpperMostOut
+    END IF
 
     RETURN
     end SUBROUTINE output4

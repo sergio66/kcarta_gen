@@ -541,7 +541,15 @@ CONTAINS
     raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
-    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa 
+   IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
     END IF
@@ -1076,6 +1084,14 @@ CONTAINS
     raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
     write(kStdWarn,*)'top layer temp interped to ',raVT1(iL)
 
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
     IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer  =  find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer  =  find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
@@ -1238,7 +1254,7 @@ CONTAINS
     END IF
 
     IF (kFlux == 4) THEN
-      iComputeAll = -1  !!! only compute flux at top bdries (OLR)
+      iComputeAll = -1  !!! only compute flux at TOA (OLR)
     ELSE
       iComputeAll = +1  !!! compute flux at all layers
     END IF
@@ -1792,6 +1808,14 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
     IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
@@ -2287,6 +2311,14 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
     IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
@@ -2450,7 +2482,7 @@ CONTAINS
     END IF
 
     IF (kFlux == 4) THEN
-      iComputeAll = -1  !!! only compute flux at top bdries (OLR)
+      iComputeAll = -1  !!! only compute flux at TOA (OLR)
     ELSE
       iComputeAll = +1  !!! compute flux at all layers
     END IF
@@ -2487,7 +2519,7 @@ CONTAINS
     END IF
 
 !^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
-! loop over angles for upward flux, for kFlux = 1,2,3,4,5,6
+! loop over angles for upward flux, for kFlux = 1,2,3,4,5,6,7
 
     write(kStdWarn,*) 'upward flux, with exp integrals'
     rCosAngle = 1.0
@@ -2790,6 +2822,14 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
     IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
@@ -3315,6 +3355,14 @@ CONTAINS
     CALL ResetTemp_Twostream(TEMP,iaaRadLayer,iNumLayer,iAtm,raVTemp, &
       iDownWard,rTSurf,iProfileLayers,raPressLevels)
 
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
     IF ((kFlux == 5) .or. (kFlux == 7)) THEN
       troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
       troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
@@ -3478,7 +3526,7 @@ CONTAINS
     END IF
 
     IF (kFlux == 4) THEN
-      iComputeAll = -1  !!! only compute flux at top bdries (OLR)
+      iComputeAll = -1  !!! only compute flux at TOA (OLR)
     ELSE
       iComputeAll = +1  !!! compute flux at all layers
     END IF
@@ -3515,7 +3563,7 @@ CONTAINS
     END IF
 
 !^^^^^^^^^ compute upward flux, at top of each layer  ^^^^^^^^^^^^^^^^
-! loop over angles for upward flux, for kFlux = 1,2,3,4,5,6
+! loop over angles for upward flux, for kFlux = 1,2,3,4,5,6,7
 
     write(kStdWarn,*) 'upward flux, with exp integrals'
     rCosAngle = 1.0
@@ -3568,6 +3616,14 @@ CONTAINS
     INTEGER :: iL,iLay,iFr
     REAL :: raTemp(kMaxPts)
 
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
     IF ((kFlux == 1) .OR. (kFlux == 3)) THEN
       ! do flux at TOP (1) or BOTTOM (3) of  each layer
       CALL PrintFlux13(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
@@ -3577,7 +3633,8 @@ CONTAINS
         raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raPressLevels,iaRadLayer)
     ELSEIF (kFlux == 4) THEN  !!do a OLR computation only at TOA
       ! do the integral over z axis (2pi)
-      DO iLay = iNumLayer+1,iNumLayer+1
+!!!!!!      DO iLay = iNumLayer+1,iNumLayer+1
+      DO iLay = iGlobalUpperMostOut+1,iGlobalUpperMostOut+1
         raaUpFlux(:,iLay) = raaUpFlux(:,iLay)*2*kPi
       END DO
       CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,1)
@@ -3752,6 +3809,7 @@ CONTAINS
     raaUpFlux(:,iLay) = raaUpFlux(:,iLay)*2*kPi
 
     iLay = iNumLayer+1
+    iLay = iGlobalUpperMostOut+1
     raaUpFlux(:,iLay) = raaUpFlux(:,iLay)*2*kPi
           
     CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts),rDelta,iAtm,1,3)
@@ -3873,6 +3931,7 @@ CONTAINS
     raaUpFlux(:,iLay)   = raaUpFlux(:,iLay)*2*kPi
 
     iLay = iNumLayer+1
+    iLay = iGlobalUpperMostOut+1
     raaDownFlux(:,iLay) = raaDownFlux(:,iLay)*2*kPi
     raaUpFlux(:,iLay)   = raaUpFlux(:,iLay)*2*kPi
           
@@ -3887,6 +3946,7 @@ CONTAINS
     CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
 
     iLay = iNumLayer+1
+    iLay = iGlobalUpperMostOut+1
     raTemp = raaDownFlux(:,iLay)
     CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
 
@@ -3899,6 +3959,7 @@ CONTAINS
     CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
 
     iLay = iNumLayer+1
+    iLay = iGlobalUpperMostOut+1
     raTemp = raaUpFlux(:,iLay)
     CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
 

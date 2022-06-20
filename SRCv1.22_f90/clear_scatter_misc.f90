@@ -1813,11 +1813,12 @@ CONTAINS
       e0 = e1/(1-f*w0)
       tabextinct = e0
 
+      !! xn is a check, to see if using "f" we get a0 -> a1, w0 -> w1, e0 ->e1
       !!!!just a check
-      ! n=e0*(1-f*w0)
-      ! n=w0*(1-f)/(1-f*w0)
-      ! n=(a0-f)/(1-f)
-      ! rint *,a0,a1,an,e0,e1,en,w0,w1,wn
+      !! en = e0*(1-f*w0)
+      !! wn = w0*(1-f)/(1-f*w0)
+      !! an = (a0-f)/(1-f)
+      !! write(*,'(A,9(ES12.5))') 'Check UnScale',a0,a1,an,e0,e1,en,w0,w1,wn
 
  10 CONTINUE
     RETURN
@@ -2023,7 +2024,7 @@ CONTAINS
 ! basically the same as AddCloud_twostream EXCEPT
 !   *** it also adds on the "backscattered" part for PCLSAM algorithm ***
 ! this way we have a fast alternative to kTwoStream
-    SUBROUTINE AddCloud_pclsam(raFreq, &
+    SUBROUTINE AddCloud_pclsam_WORKS_June17_2022(raFreq, &
     raaExtTemp,raaScatTemp,raaAsymTemp, &
     iaaRadLayer,iAtm,iNumlayer, &
     rFracTop,rFracBot, &
@@ -2082,7 +2083,7 @@ CONTAINS
     iExtScaling = kScatter
 
     IF (iExtScaling .NE. iDefault) THEN
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam raFreq(1) = ',&
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam_WORKS_June17_2022 raFreq(1) = ',&
                    iDefault,iExtScaling,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 
@@ -2094,7 +2095,7 @@ CONTAINS
 
     IF (iSartaTables .NE. iDefault) THEN
       write(kStdErr,*) 'DELTA UNSCALE'
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam raFreq(1) = ',&
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam_WORKS_June17_2022 raFreq(1) = ',&
                    iDefault,iSartaTables,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2224,6 +2225,254 @@ CONTAINS
           END IF
 
           raaExtTemp(iFr,iI)  = TAUTOT_N
+          ! ---------------> now add on the backscattered part <--------------------
+
+          IF (IWP(L) >= 1.0e-5) THEN
+            raaAsymTemp(iFr,iI) = ASYM_RTSPEC(L)
+          ELSE
+            raaAsymTemp(iFr,iI) = 0.0
+          END IF
+
+        END DO          !loop over freqs
+      END DO        !loop over cloud layers
+    ENDIF
+
+! now use the partial fractions
+    i1  = iaaRadLayer(iAtm,1)
+    i2  = iaaRadLayer(iAtm,iNumLayer)
+    iFixHere = -1         !!!do not adjust here, scatter_twostream does it
+    iFixHere = +1         !!!do adjust here, scatter_twostream does not
+    iFixHere = -1
+    IF (iFixHere > 0) THEN
+      IF (i1 > i2) THEN
+        !radiation going from eg layer 100 to 1 ==> up look instr
+        raaExtTemp(:,i1)   = raaExtTemp(:,i1) * rFracTop
+        raaExtTemp(:,i2)   = raaExtTemp(:,i2) * rFracBot
+        ! do not need this since this is a ratio
+        !            raaSSAlbTemp(:,i1) = raaSSAlbTemp(:,i1) * rFracTop
+        !            raaSSAlbTemp(:,i2) = raaSSAlbTemp(:,i2) * rFracBot
+      ELSEIF (i1 < i2) THEN
+        !radiation going from eg layer 1 to 100 ==> down look instr
+        raaExtTemp(:,i1)   = raaExtTemp(:,i1) * rFracBot
+        raaExtTemp(:,i2)   = raaExtTemp(:,i2) * rFracTop
+        ! do not need this since this is a ratio
+        !            raaSSAlbTemp(:,i1) = raaSSAlbTemp(:,i1) * rFracBot
+        !            raaSSAlbTemp(:,i2) = raaSSAlbTemp(:,i2) * rFracTop
+      END IF
+    END IF
+
+    RETURN
+    end SUBROUTINE AddCloud_pclsam_WORKS_June17_2022
+
+!************************************************************************
+! this subroutine adds on the absorptive part of cloud extinction
+! basically the same as AddCloud_twostream EXCEPT
+!   *** it also adds on the "backscattered" part for PCLSAM algorithm ***
+! this way we have a fast alternative to kTwoStream
+    SUBROUTINE AddCloud_pclsam(raFreq, &
+    raaExtTemp,raaScatTemp,raaAsymTemp, &
+    iaaRadLayer,iAtm,iNumlayer, &
+    rFracTop,rFracBot, &
+    ICLDTOPKCARTA, ICLDBOTKCARTA, &
+    NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+    NSCATTAB, MUINC, &
+    NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
+    TABEXTINCT, TABSSALB, TABASYM, &
+    TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/scatterparam.f90'
+
+! usual variables
+    INTEGER :: iAtm,iNumlayer                  !which atmosphere, num of layers
+    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer) !to get layer info
+    REAL :: raaExtTemp(kMaxPts,kMixFilRows)    !absorption temporary copy
+    REAL :: raaScatTemp(kMaxPts,kMixFilRows)   !scattering temporary copy
+    REAL :: raaAsymTemp(kMaxPts,kMixFilRows)   !asymmetry temporary copy
+    REAL :: raFreq(kMaxPts)                    !wavenumber grid
+    INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA    !kcarta cloud top/bottoms
+    REAL :: rFracTop,rFracBot                  !layer fractions at TOA,GND
+
+! mie scattering tables
+    INTEGER :: NCLDLAY, ICLDTOP, ICLDBOT, ISCATTAB(MAXNZ)
+    REAL ::    IWP(MAXNZ), DME(MAXNZ)
+    INTEGER ::  NSCATTAB
+    INTEGER ::  NMUOBS(NSCATTAB), NDME(NSCATTAB), NWAVETAB(NSCATTAB)
+    REAL ::     MUTAB(MAXGRID,NSCATTAB)
+    REAL ::     DMETAB(MAXGRID,NSCATTAB), WAVETAB(MAXGRID,NSCATTAB)
+    REAL ::     MUINC(2)
+    REAL ::     TABEXTINCT(MAXTAB,NSCATTAB), TABSSALB(MAXTAB,NSCATTAB)
+    REAL ::     TABASYM(MAXTAB,NSCATTAB)
+    REAL ::     TABPHI1UP(MAXTAB,NSCATTAB), TABPHI1DN(MAXTAB,NSCATTAB)
+    REAL ::     TABPHI2UP(MAXTAB,NSCATTAB), TABPHI2DN(MAXTAB,NSCATTAB)
+
+! local variables
+    INTEGER :: iL,iFr,iI,N,L,I,ikcCldtop,ikcCldbot
+    INTEGER :: i1,i2,iFixHere
+    REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b,rE,rW,rG
+    REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
+    REAL :: dmedme,albedo,asymmetry,rAbs,rAlbedo,rScat,SSALB0
+    INTEGER :: iExtScaling,iSartaTables,iDefault
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>
+    iDefault = +1  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
+
+    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake/small error in b
+    iExtScaling = +1 !! this is correct Chou scaling == 1-w(1-b)
+    iExtScaling = +2 !! this is Chou with similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
+    iExtScaling = +3 !! this is Chou with            scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+
+    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake
+
+    iExtScaling = kScatter
+
+    IF (iExtScaling .NE. iDefault) THEN
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam raFreq(1) = ',&
+                   iDefault,iExtScaling,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    END IF
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>
+    iDefault = +1  !! use the SARTA Tables (delt scaled)
+
+    iSartaTables = -1   !! Fake RRTM, no delta scaling
+    iSartaTables = +1   !! SARTA scattering tables,  delta scaled
+
+    IF (iSartaTables .NE. iDefault) THEN
+      write(kStdErr,*) 'DELTA UNSCALE'
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam raFreq(1) = ',&
+                   iDefault,iSartaTables,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    END IF
+!>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    rScat = 0.0
+    rScat = sum(iwp)
+
+    IF (rScat > 0.0) THEN
+      !!!!first find out where the cloud top is, in kCARTA layering
+      N = iCldTop
+      iKcCldTop = IFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
+      N = iCldBot-1
+      iKcCldBot = IFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
+
+      !now get the optical properties for the cloud layers
+      raaAsymTemp = 0.0
+
+      DO N = ICLDTOP, ICLDBOT-1
+        L  = N-ICLDTOP+1
+        I  = ISCATTAB(L)
+        iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N+1)
+        DO iFr = 1,kMaxPts
+          waveno = raFreq(iFr)
+          taugas = raaExtTemp(iFr,iI)
+          rAbs   = taugas
+          !  here we only need the simpler first choice as we are not messing
+          !  around with the phase functions
+          CALL INTERP_SCAT_TABLE2 (WAVENO, DME(L), &
+            EXTINCT, SSALB(L), ASYM_RTSPEC(L), &
+            NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
+            TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
+
+          IF (iSartaTables .GT. 0) THEN
+            rE = EXTINCT
+            rW = SSALB(L)
+            rG = ASYM_RTSPEC(L)
+            CALL UnScaleMieOne('G',rE,rW,rG)
+            EXTINCT = rE
+            SSALB(L) = rW
+            ASYM_RTSPEC(L) = rG
+
+!            IF (iFr == 1) write(kStdErr,'(A,2(F12.5),3(ES12.5))') ' iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
+
+          ELSEIF (iSartaTables .LT. 0) THEN
+            !!! new
+            rE = EXTINCT
+            rW = SSALB(L)
+            rG = ASYM_RTSPEC(L)
+            CALL UnScaleMieOne('G',rE,rW,rG)
+            EXTINCT = rE
+            SSALB(L) = rW
+            ASYM_RTSPEC(L) = rG
+  
+            !!! 980-1080 cm-1
+            EXTINCT = 0.14
+            SSALB(L) = 0.69
+            ASYM_RTSPEC(L) = 0.94
+  
+            !!! 1390-1480 cm-1
+            EXTINCT = 0.17
+            SSALB(L) = 0.647
+            ASYM_RTSPEC(L) = 0.941
+  
+            !!! 1480-1800 cm-1
+            EXTINCT = 0.17
+            SSALB(L) = 0.638
+            ASYM_RTSPEC(L) = 0.946
+  
+            !!! 820-980 cm-1
+            EXTINCT = 0.13
+            SSALB(L) = 0.44
+            ASYM_RTSPEC(L) = 0.95
+  
+!            IF (iFr == 1) write(kStdErr,'(A,2(F12.5),3(ES12.5))') ' iSartaTables = -1 : OMG CHANGED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
+          END IF
+
+          !  Compute the optical depth of cloud layer, including gas
+          TAUC_L   = IWP(L)*EXTINCT/1000
+
+!          IF (iFr == 1) THEN
+!            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g before Chou Scale = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
+!          END IF
+
+          ! ---------------> now do Chou scaling of Cloud OD <--------------------
+          IF (iExtScaling .EQ. -1) THEN
+            !! the "correct" version is 
+            !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+            !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
+            !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
+            !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
+
+            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
+            b = (1.0 - ASYM_RTSPEC(L))/2.0               
+ 
+            !! CHOU SCALING TERM
+            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+            TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
+
+          ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
+            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
+            b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+
+            !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
+            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+            TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
+
+          ELSEIF (iExtScaling .EQ. +2) THEN
+            !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
+            b = (1.0 + ASYM_RTSPEC(L))/2.0               
+
+            !! CHOU SCALING TERM with similarity scaling adjustment
+            !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
+            TAUC_L = TAUC_L * (1 - SSALB(L)*b) 
+
+          END IF
+
+!          IF (iFr == 1) THEN
+!            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g after Chou Scale  = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
+!          END IF
+
+          TAUCG_L  = TAUGAS + TAUC_L
+          TAUTOT_N = TAUCG_L
+
+          SSALB0 = SSALB(L)
+          SSALB(L) = SSALB0
+
+          raaScatTemp(iFr,iI) = SSALB(L)  !! uncchanged
+
+          raaExtTemp(iFr,iI)  = TAUTOT_N
+
           ! ---------------> now add on the backscattered part <--------------------
 
           IF (IWP(L) >= 1.0e-5) THEN

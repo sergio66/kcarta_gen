@@ -23,3 +23,6 @@ c these are to do NO raytracing with kcarta satzen option, if rSatHeight < 0
       REAL raAtmLoopCom(kMaxAtm),rSatHeightCom,rAtmLoopCom
       COMMON/comBlockAtmLoop/raAtmLoopCom,rSatHeightCom,rAtmLoopCom
       
+c these are desperate global variables
+      INTEGER iGlobalUpperMostOut
+      COMMON/comBlockDesperate/iGlobalUpperMostOut 

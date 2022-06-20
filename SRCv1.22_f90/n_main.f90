@@ -2095,11 +2095,11 @@ CONTAINS
 
     kWarnFile = caLogFile
     CALL output4(iaPrinter,iaGPMPAtm,iaNp, &
-    iaaOp,raaOp,raaUserPress, &
-    iaNumLayer,iaaRadLayer,iNatm,iNatm2, &
-    iOutTypes,iNumGases,iNpmix, &
-    raFracTop,raFracBot,raaPrBdry,raPressLevels, &
-    iaGases,caComment)
+      iaaOp,raaOp,raaUserPress, &
+      iaNumLayer,iaaRadLayer,iNatm,iNatm2, &
+      iOutTypes,iNumGases,iNpmix, &
+      raFracTop,raFracBot,raaPrBdry,raPressLevels, &
+      iaGases,caComment)
 
     write (kStdWarn,*) 'successfully checked output .....'
     iaKeyword(5) = 1
