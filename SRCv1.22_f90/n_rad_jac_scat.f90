@@ -1215,7 +1215,7 @@ CONTAINS
 
     iNumLinesRead = 1
 
-    IF ((kWhichScatterCode > 6) .OR. (kWhichScatterCode < 1)) THEN
+    IF ((kWhichScatterCode > 7) .OR. (kWhichScatterCode < 0)) THEN
       write(kStdErr,*)'invalid scattering code !!',kWhichScatterCode
       write(kStdErr,*)'need kWhichScatterCode = 1 (TWOSTREAM)'
       write(kStdErr,*)'                       = 2 (RTSPEC)'
@@ -1223,6 +1223,9 @@ CONTAINS
       write(kStdErr,*)'                       = 4 (FIRST ORDER PERTURB)'
       write(kStdErr,*)'                       = 5 (PCLSAM)'
       write(kStdErr,*)'                       = 6 (RAYLEIGH)'
+      write(kStdErr,*)'                       = 7 (GRAYCLD)'
+      write(kStdErr,*) ' ' 
+      write(kStdErr,*)'                       = 0 (CLEAR SKY)'
       write(kStdErr,*)'please check and retry!'
       CALL DoSTOP
     END IF

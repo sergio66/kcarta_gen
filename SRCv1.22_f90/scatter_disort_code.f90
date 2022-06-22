@@ -40,7 +40,7 @@
 !     &                   MAXULV, MAXUMU, MAXPHI, MAXMOM, RFLDIR, RFLDN,
 !     &                   FLUP, DFDT, UAVG, UU, ALBMED, TRNMED )
 
-! since they are in  include '../INCLUDE/scatterparam.f90'
+! since they are in  include '../INCLUDE/TempF90/scatterparam.f90'
 ! got rid of MAXCLY, MAXULV, MAXUMU, MAXPHI, MAXMOM
 !      INTEGER   MXCLY, MXULV, MXCMU, MXUMU, MXPHI, MI, MI9M2, NNLYRI,
 !     &          MXSQT
@@ -48,6 +48,21 @@
 !     &            MXUMU = maxumu, MXPHI = maxphi,
 !     &            MI = MXCMU / 2, MI9M2 = 9*MI - 2,
 !     &            NNLYRI = MXCMU*MXCLY, MXSQT = maxsqt )
+
+MODULE scatter_disort_code
+
+USE basic_common
+USE ttorad_common
+USE kcoeff_common
+USE spline_and_sort_and_common
+USE rad_diff_and_quad
+USE clear_scatter_basic
+
+IMPLICIT NONE
+
+CONTAINS
+
+!************************************************************************
 
     SUBROUTINE DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, WVNMLO, &
     WVNMHI, USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, &
@@ -401,7 +416,7 @@
 ! cccccccc sergio modified this a little
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER ::   MXCLY, MXULV, MXCMU, MXUMU, MXPHI, MI, MI9M2, NNLYRI, &
     MXSQT
@@ -438,7 +453,7 @@
     LOGICAL ::   COMPAR, CORINT, DELTAM, LYRCUT, PASS1
     INTEGER ::   IQ, IU, J, KCONV, L, LC, LEV, LU, MAZIM, NAZ, NCOL, &
     NCOS, NCUT, NN, NS
-    REAL ::      ANGCOS, AZERR, AZTERM, BPLANK, COSPHI, DELM0, &
+    REAL ::      ANGCOSN(MAXCMU), ANGCOS, AZERR, AZTERM, BPLANK, COSPHI, DELM0, &
     DITHER, DUM, PI, RPD, SGN, TPLANK
 !     ..
 !     .. Local Arrays ..
@@ -461,7 +476,7 @@
     TAUC( 0:MXCLY ), TAUCPR( 0:MXCLY ), U0C( MXCMU, MXULV ), &
     U0U( MXUMU, MXULV ), UTAUPR( MXULV ), &
     UUM( MXUMU, MXULV ), WK( MXCMU ), XR0( MXCLY ), &
-    XR1( MXCLY ), YLM0( 0:MXCMU ), YLMC( 0:MXCMU, MXCMU ), &
+    XR1( MXCLY ), YLM0( 0:MXCMU, MXUMU ), YLMC( 0:MXCMU, MXCMU ), &
     YLMU( 0:MXCMU, MXUMU ), Z( NNLYRI ), Z0( MXCMU ), &
     Z0U( MXUMU, MXCLY ), Z1( MXCMU ), Z1U( MXUMU, MXCLY ), &
     ZBEAM( MXUMU, MXCLY )
@@ -473,15 +488,17 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      PLKAVG, D1MACH, RATIO
-    EXTERNAL  PLKAVG, D1MACH, RATIO
+!!!    REAL ::      PLKAVG, D1MACH, RATIO
+!!!    EXTERNAL  PLKAVG, D1MACH, RATIO
+
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ALBTRN, CHEKIN, CMPINT, FLUXES, INTCOR, LEPOLY, PRAVIN, &
-    PRTINP, PRTINT, SETDIS, SETMTX, SLFTST, SOLEIG, SOLVE0, &
-    SURFAC, TERPEV, TERPSO, UPBEAM, UPISOT, USRINT, ZEROAL, &
-    ZEROIT
+!!!    EXTERNAL  ALBTRN, CHEKIN, CMPINT, FLUXES, INTCOR, LEPOLY, PRAVIN, &
+!!!    PRTINP, PRTINT, SETDIS, SETMTX, SLFTST, SOLEIG, SOLVE0, &
+!!!    SURFAC, TERPEV, TERPSO, UPBEAM, UPISOT, USRINT, ZEROAL, &
+!!!    ZEROIT
+
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -583,7 +600,7 @@
 
 !                                 ** Print input information
     IF( PRNT( 1 ) ) &
-! ergio got rid of maxmom
+! sergio got rid of maxmom
 !     &    CALL PRTINP( NLYR, DTAUC, DTAUCP, SSALB, NMOM, PMOM, TEMPER,
 !     &                 WVNMLO, WVNMHI, NTAU, UTAU, NSTR, NUMU, UMU,
 !     &                 NPHI, PHI, IBCND, FBEAM, UMU0, PHI0, FISOT,
@@ -658,8 +675,9 @@
 
             NCOS   = 1
             ANGCOS = -UMU0
-
-            CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOS, SQT, YLM0 )
+            ANGCOSN(1) = ANGCOS
+            !!! CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOS, SQT, YLM0 ) !!! ORIG CODE
+            CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOSN, SQT, YLM0 )
 
         END IF
 
@@ -1025,12 +1043,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      D1MACH
-    EXTERNAL  D1MACH
+!!!!!!    REAL ::      D1MACH
+!!!!!!    EXTERNAL  D1MACH
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG
+!!!!!!    EXTERNAL  ERRMSG
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -1854,7 +1872,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !       Calculates the radiative fluxes, mean intensity, and flux
 !       derivative with respect to optical depth from the m=0 intensity
@@ -1959,7 +1977,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ZEROIT
+!!!!!!    EXTERNAL  ZEROIT
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -2227,8 +2245,8 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      SECSCA, SINSCA
-    EXTERNAL  SECSCA, SINSCA
+!!!!!!    REAL ::      SECSCA, SINSCA
+!!!!!!    EXTERNAL  SECSCA, SINSCA
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -2433,8 +2451,8 @@
     WBAR, ZERO
 !     ..
 !     .. External Functions ..
-    REAL ::      XIFUNC
-    EXTERNAL  XIFUNC
+!!!!!!    REAL ::      XIFUNC
+!!!!!!    EXTERNAL  XIFUNC
 !     ..
 
     ZERO = 1E-4
@@ -2590,7 +2608,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG, QGAUSN
+!!!!!    EXTERNAL  ERRMSG, QGAUSN
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -2890,7 +2908,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ZEROIT
+!!!!!    EXTERNAL  ZEROIT
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -3168,7 +3186,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !         Solves eigenvalue/vector problem necessary to construct
 !         homogeneous part of discrete ordinate solution; STWJ(8b),
@@ -3253,7 +3271,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ASYMTX, ERRMSG
+!!!!!!    EXTERNAL  ASYMTX, ERRMSG
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -3486,7 +3504,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG, SGBCO, SGBSL, ZEROIT
+!!!!!!    EXTERNAL  ERRMSG, SGBCO, SGBSL, ZEROIT
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -3781,12 +3799,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      BDREF
-    EXTERNAL  BDREF
+!!!!!!    REAL ::      BDREF
+!!!!!!    EXTERNAL  BDREF
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  QGAUSN, ZEROIT
+!!!!!    EXTERNAL  QGAUSN, ZEROIT
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -3838,7 +3856,7 @@
                 SUM  = 0.0
                 DO 40 K = 1, NMUG
                     SUM  = SUM + GWT( K ) * &
-                    BDREF( WVNMLO, WVNMHI, CMU(IQ), CMU(JQ), &
+                    DBDREF( WVNMLO, WVNMHI, CMU(IQ), CMU(JQ), &
                     PI*GMU(K) ) * COS( MAZIM*PI*GMU( K ) )
                 40 END DO
 
@@ -3852,7 +3870,7 @@
                 SUM  = 0.0
                 DO 60 K = 1, NMUG
                     SUM  = SUM + GWT( K ) * &
-                    BDREF( WVNMLO, WVNMHI, CMU(IQ), UMU0, &
+                    DBDREF( WVNMLO, WVNMHI, CMU(IQ), UMU0, &
                     PI*GMU(K) ) * COS( MAZIM*PI*GMU( K ) )
                 60 END DO
 
@@ -3879,7 +3897,7 @@
                     SUM  = 0.0
                     DO 80 K = 1, NMUG / 2
                         SUM  = SUM + GWT( K ) * GMU( K ) * &
-                        BDREF( WVNMLO, WVNMHI, CMU(IQ), GMU(K), &
+                        DBDREF( WVNMLO, WVNMHI, CMU(IQ), GMU(K), &
                         PI*GMU(JG) )
                     80 END DO
 
@@ -3922,7 +3940,7 @@
                         SUM  = 0.0
                         DO 120 K = 1, NMUG
                             SUM  = SUM + GWT( K ) * &
-                            BDREF( WVNMLO, WVNMHI, UMU(IU), CMU(IQ), &
+                            DBDREF( WVNMLO, WVNMHI, UMU(IU), CMU(IQ), &
                             PI*GMU(K) ) * &
                             COS( MAZIM*PI*GMU( K ) )
                         120 END DO
@@ -3936,7 +3954,7 @@
                         SUM  = 0.0
                         DO 140 K = 1, NMUG
                             SUM  = SUM + GWT( K ) * &
-                            BDREF( WVNMLO, WVNMHI, UMU(IU), UMU0, &
+                            DBDREF( WVNMLO, WVNMHI, UMU(IU), UMU0, &
                             PI*GMU(K) ) * &
                             COS( MAZIM*PI*GMU( K ) )
                         140 END DO
@@ -3960,7 +3978,7 @@
                             SUM  = 0.0
                             DO 150 K = 1, NMUG / 2
                                 SUM  = SUM + GWT( K )*GMU( K )* &
-                                BDREF( WVNMLO, WVNMHI, UMU(IU), &
+                                DBDREF( WVNMLO, WVNMHI, UMU(IU), &
                                 GMU(K), PI*GMU(JG) )
                             150 END DO
 
@@ -4261,7 +4279,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG, SGECO, SGESL
+!!!!!!    EXTERNAL  ERRMSG, SGECO, SGESL
 !     ..
 
 
@@ -4372,7 +4390,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG, SGECO, SGESL
+!!!!!!    EXTERNAL  ERRMSG, SGECO, SGESL
 !     ..
 
 
@@ -4958,13 +4976,13 @@
 !     ..
 !     .. External Functions ..
 
-    LOGICAL ::   WRTBAD, WRTDIM
-    REAL ::      DREF
-    EXTERNAL  WRTBAD, WRTDIM, DREF
+!!!!!!    LOGICAL ::   WRTBAD, WRTDIM
+!!!!!!    REAL ::      DREF
+!!!!!!    EXTERNAL  WRTBAD, WRTDIM, DREF
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG
+!!!!!!    EXTERNAL  ERRMSG
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -5130,7 +5148,7 @@
                 FLXALB = DREF( WVNMLO, WVNMHI, RMU )
 
                 IF( FLXALB < 0.0 .OR. FLXALB > 1.0 ) &
-                INPERR = WRTBAD( 'FUNCTION BDREF' )
+                INPERR = WRTBAD( 'FUNCTION DBDREF' )
 
             70 END DO
 
@@ -5269,12 +5287,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      BDREF
-    EXTERNAL  BDREF
+!!!!!!    REAL ::      BDREF
+!!!!!!    EXTERNAL  BDREF
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG, QGAUSN
+!!!!!!    EXTERNAL  ERRMSG, QGAUSN
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -5310,7 +5328,7 @@
     !                       ** Loop over angle of reflection
         DO 20 K = 1, NMUG / 2
             SUM  = SUM + GWT( K )*GMU( K )* &
-            BDREF( WVNMLO, WVNMHI, GMU( K ), MU, PI*GMU( JG ) )
+            DBDREF( WVNMLO, WVNMHI, GMU( K ), MU, PI*GMU( JG ) )
         20 END DO
 
         DREF = DREF + GWT( JG )*SUM
@@ -5553,12 +5571,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      D1MACH
-    EXTERNAL  D1MACH
+!!!!!!    REAL ::      D1MACH
+!!!!!!    EXTERNAL  D1MACH
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG
+!!!!!!    EXTERNAL  ERRMSG
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -5598,7 +5616,7 @@
     IF( T < 1.E-4 ) THEN
 
         PLKAVG = 0.0
-        plkavg_orig=plkavg
+        plkavg_orig = plkavg
         RETURN
 
     END IF
@@ -5638,7 +5656,7 @@
         30 CONTINUE
 
         PLKAVG = SIGDPI * T**4 * CONC * VAL
-        plkavg_orig=plkavg
+        plkavg_orig = plkavg
         RETURN
 
     END IF
@@ -5703,7 +5721,7 @@
     CALL ERRMSG('PLKAVG--returns zero; possible underflow', &
      .FALSE. )
 
-    plkavg_orig=plkavg
+    plkavg_orig = plkavg
 
     RETURN
     END FUNCTION PLKAVG_ORIG
@@ -5723,7 +5741,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !     .. Scalar Arguments ..
 
@@ -5796,7 +5814,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     LOGICAL ::   CORINT, DELTAM, LAMBER, LYRCUT, ONLYFL, PLANK, PRTMOM
 ! ergio got rid of maxmom
@@ -5970,7 +5988,7 @@
     SUBROUTINE PRTINT( UU, UTAU, NTAU, UMU, NUMU, PHI, NPHI)
 
     IMPLICIT NONE
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !         Prints the intensity at user polar and azimuthal angles
 
@@ -6106,12 +6124,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      D1MACH
-    EXTERNAL  D1MACH
+!!!!!!    REAL ::      D1MACH
+!!!!!!    EXTERNAL  D1MACH
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG
+!!!!!!    EXTERNAL  ERRMSG
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -6239,8 +6257,8 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      D1MACH
-    EXTERNAL  D1MACH
+!!!!!!    REAL ::      D1MACH
+!!!!!!    EXTERNAL  D1MACH
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -6380,12 +6398,12 @@
 !     ..
 !     .. External Functions ..
 
-    LOGICAL ::   TSTBAD
-    EXTERNAL  TSTBAD
+!!!!!!    LOGICAL ::   TSTBAD
+!!!!!!    EXTERNAL  TSTBAD
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ERRMSG
+!!!!!!    EXTERNAL  ERRMSG
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -6874,8 +6892,8 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  ALTRIN, ERRMSG, LEPOLY, PRALTR, SETMTX, SGBCO, SOLEIG, &
-    SOLVE1, SPALTR, TERPEV, ZEROIT
+!!!!!!    EXTERNAL  ALTRIN, ERRMSG, LEPOLY, PRALTR, SETMTX, SGBCO, SOLEIG, &
+!!!!!!    SOLVE1, SPALTR, TERPEV, ZEROIT
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -7226,7 +7244,7 @@
     SUBROUTINE PRALTR( UMU, NUMU, ALBMED, TRNMED )
 
     IMPLICIT NONE
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !        Print planar albedo and transmissivity of medium
 !        as a function of incident beam angle
@@ -7331,7 +7349,7 @@
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  SGBSL, ZEROIT
+!!!!!!    EXTERNAL  SGBSL, ZEROIT
 !     ..
 
 
@@ -7491,46 +7509,10 @@
 ! $Header: ErrPack.f,v 2.1 2000/03/27 21:40:49 laszlo Exp $
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    SUBROUTINE  ErrMsg( MESSAG, FATAL )
-
-    IMPLICIT NONE
-    include '../INCLUDE/scatterparam.f90'
-
-!        Print out a warning or error message;  abort if error
-
-    LOGICAL ::       FATAL, MsgLim
-    CHARACTER*(*) MESSAG
-    INTEGER ::       MaxMsg, NumMsg
-    SAVE          MaxMsg, NumMsg, MsgLim
-    DATA NumMsg / 0 /,  MaxMsg / 100 /,  MsgLim / .FALSE. /
-
-
-    IF ( FATAL )  THEN
-        WRITE ( KSTDERR, '(/,2A,/)' )  ' ******* ERROR >>>>>>  ', MESSAG
-        STOP
-    END IF
-
-    NumMsg = NumMsg + 1
-    IF( MsgLim )  RETURN
-
-    IF ( NumMsg <= MaxMsg )  THEN
-        WRITE ( KSTDWARN, '(/,2A,/)' )  ' ******* WARNING >>>>>>  ', MESSAG
-    ELSE
-        WRITE ( KSTDWARN,99 )
-        MsgLim = .TRUE. 
-    ENDIF
-
-    RETURN
-
-    99 FORMAT( //,' >>>>>>  TOO MANY WARNING MESSAGES --  ', &
-    'They will no longer be printed  <<<<<<<', // )
-    END SUBROUTINE 
-
-!************************************************************************
     LOGICAL FUNCTION  WrtBad ( VarNam )
 
     IMPLICIT NONE
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !          Write names of erroneous variables and return 'TRUE'
 
@@ -7557,7 +7539,7 @@
     LOGICAL FUNCTION  WrtDim ( DimNam, MinVal )
 
     IMPLICIT NONE
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !          Write name of too-small symbolic dimension and
 !          the value it should be increased to;  return 'TRUE'
@@ -7582,7 +7564,7 @@
     LOGICAL FUNCTION  TstBad( VarNam, RelErr )
 
     IMPLICIT NONE
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !       Write name (VarNam) of variable failing self-test and its
 !       percent error from the correct value;  return  'FALSE'.
@@ -7631,7 +7613,7 @@
 ! ====================================================================
 
     INTEGER ::   I
-    EXTERNAL  ERRMSG
+!!!!!!    EXTERNAL  ERRMSG
 
     IF( I == 1 )  THEN
         D1MACH = 2.3D-308
@@ -7812,12 +7794,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      SASUM_DIS, SDOT_DIS
-    EXTERNAL  SASUM_DIS, SDOT_DIS
+!!!!!!    REAL ::      SASUM_DIS, SDOT_DIS
+!!!!!!    EXTERNAL  SASUM_DIS, SDOT_DIS
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  SAXPY_DIS, SGBFA, SSCAL_DIS
+!!!!!!    EXTERNAL  SAXPY_DIS, SGBFA, SSCAL_DIS
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -8074,12 +8056,12 @@
 !     ..
 !     .. External Functions ..
 
-    INTEGER ::   ISAMAX_DIS
-    EXTERNAL  ISAMAX_DIS
+!!!!!!    INTEGER ::   ISAMAX_DIS
+!!!!!!    EXTERNAL  ISAMAX_DIS
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  SAXPY_DIS, SSCAL_DIS
+!!!!!!    EXTERNAL  SAXPY_DIS, SSCAL_DIS
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -8251,12 +8233,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      SDOT_DIS
-    EXTERNAL  SDOT_DIS
+!!!!!!    REAL ::      SDOT_DIS
+!!!!!!    EXTERNAL  SDOT_DIS
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  SAXPY_DIS
+!!!!!!    EXTERNAL  SAXPY_DIS
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -8418,12 +8400,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      SASUM_DIS, SDOT_DIS
-    EXTERNAL  SASUM_DIS, SDOT_DIS
+!!!!!!    REAL ::      SASUM_DIS, SDOT_DIS
+!!!!!!    EXTERNAL  SASUM_DIS, SDOT_DIS
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  SAXPY_DIS, SGEFA, SSCAL_DIS
+!!!!!!    EXTERNAL  SAXPY_DIS, SGEFA, SSCAL_DIS
 !     ..
 !     .. Intrinsic Functions ..
 
@@ -8650,12 +8632,12 @@
 !     ..
 !     .. External Functions ..
 
-    INTEGER ::   ISAMAX_DIS
-    EXTERNAL  ISAMAX_DIS
+!!!!!!    INTEGER ::   ISAMAX_DIS
+!!!!!!    EXTERNAL  ISAMAX_DIS
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  SAXPY_DIS, SSCAL_DIS
+!!!!!!    EXTERNAL  SAXPY_DIS, SSCAL_DIS
 !     ..
 
 
@@ -8785,12 +8767,12 @@
 !     ..
 !     .. External Functions ..
 
-    REAL ::      SDOT_DIS
-    EXTERNAL  SDOT_DIS
+!!!!!!    REAL ::      SDOT_DIS
+!!!!!!    EXTERNAL  SDOT_DIS
 !     ..
 !     .. External Subroutines ..
 
-    EXTERNAL  SAXPY_DIS
+!!!!!!    EXTERNAL  SAXPY_DIS
 !     ..
 
 
@@ -9323,12 +9305,12 @@
     REAL FUNCTION PLKAVG ( WNUMLO, WNUMHI, T )
 
     IMPLICIT NONE
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
      
     REAL ::     T, WNUMLO, WNUMHI
-    REAL ::     PLKAVG_ORIG
+!!!!!!    REAL ::     PLKAVG_ORIG
      
-    REAL :: wvn,ttorad
+    REAL :: wvn
      
     IF (T < 1.0e-4) THEN
         PLKAVG = 0.0
@@ -9345,7 +9327,10 @@
      
     RETURN
     END FUNCTION PLKAVG
-     
+
+!************************************************************************
+
+
 !************************************************************************
 ! slftest : when working
 ! in disort nana  0.000000000000000  50000.0000000000
@@ -9354,3 +9339,5 @@
 ! 1.000E-004  0.700  300.  1.00  3.1415926500  1.00  152.585283866739  90.0
 ! 0.000  1.52728600717066  28.3722254400388  0.900  0.800  100.  0.500  0.866
 ! 0.500  47.8655714383180  5.00  0.000
+
+END MODULE scatter_disort_code

@@ -452,12 +452,13 @@ CONTAINS
     iWhichScatterCode0 = kWhichScatterCode  !set to kCARTA_CLEAR
 
     kScatter  = 3          !if DISORT, then this says correlated k
-    kScatter  = 1          !if PCLSAM, this says use CHou correct scaling 
-    kScatter  = 3          !if PCLSAM, this says use CHou correct scaling with scaling ajustment correction 
-! f RTSPEC, then this says H scattering
-! f TWOSTREAM, this says rerun code three times
     kDis_nstr = 16         !number of streams for DISORT to use
     kDis_Pts  = 50         !number of points to do radiance computations
+
+    kScatter  = 1          !if PCLSAM, this says use CHou correct scaling 
+    kScatter  = 3          !if PCLSAM, this says use CHou correct scaling with scaling ajustment correction 
+! if RTSPEC, then this says H scattering
+! if TWOSTREAM, this says rerun code three times
 
 ! assume that the first MP set is used for the atmosphere driven by RTP
     iMPSetForRadRTP = 1
@@ -1677,8 +1678,8 @@ CONTAINS
 !        END DO  !! should really be     DO iI = 1,iNClouds_RTP
 
 !print *,'MIAOW 6X1',kWhichScatterCode,kScatter
-        !!! NB depending in iWhichScatterCode, this sets kWhichScatterCode,kScatter
-        !!! NB depending in iWhichScatterCode, this sets kWhichScatterCode,kScatter
+        !!! NB depending on iWhichScatterCode, this sets kWhichScatterCode,kScatter
+        !!! NB depending on iWhichScatterCode, this sets kWhichScatterCode,kScatter
         CALL SetRTPCloud(raFracTop,raFracBot,raPressStart,raPressStop, &
             cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2, &
             ctop1,ctop2,cbot1,cbot2, &

@@ -677,40 +677,40 @@ CONTAINS
     ! %%%%%%%%%%%%% CLOUDY SKY  %%%%%% DISORT %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ELSEIF (kWhichScatterCode == 3) THEN
       write(kStdWarn,*) ' ---> DISORT Scattering Computations ...'
-      write(kStdErr,*) 'Temporarily commented out'
-      CALL DoStop
+      !write(kStdErr,*) 'Temporarily commented out'
+      !CALL DoStop
       iDoFLux = -1
-      !x        CALL doscatter_disort(raFreq,
-      !x     $          raaSumAbCoeff,raMixVertTemp,caOutName,
-      !x     $          iOutNum,iAtm,iNumLayer,iaaRadLayer,
-      !x     $          rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-      !x     $          rSatAngle,rFracTop,rFracBot,
-      !x     $          iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,
-      !x     $          raSurface,raSun,raThermal,raSunRefl,
-      !x     $          raLayAngles,raSunAngles,
-      !x     $          raThickness,raPressLevels,iProfileLayers,pProf,
-      !x     $          iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-      !x     $          raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
-      !x     $          iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,iDoFlux)
-      !x        CALL PrintPound
+      CALL doscatter_disort(raFreq,                      &
+             raaSumAbCoeff,raMixVertTemp,caOutName,      &
+             iOutNum,iAtm,iNumLayer,iaaRadLayer,         &
+             rTSpace,rTSurf,rSurfPress,raUseEmissivity,  &
+             rSatAngle,rFracTop,rFracBot,                &
+             iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,                  &
+             raSurface,raSun,raThermal,raSunRefl,                           &
+             raLayAngles,raSunAngles,                                       &
+             raThickness,raPressLevels,iProfileLayers,pProf,                &
+             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+             raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
+             iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,iDoFlux)
+      CALL PrintPound
           
       IF (kFlux > 0) THEN
         write(kStdWarn,*) ' ---> DISORT Flux Computations ...'
-        write(kStdErr,*) 'Temporarily commented out'
-        CALL DoStop
-        !x          CALL scatterfluxes_disort(raFreq,
-        !x     $           raaSumAbCoeff,raMixVertTemp,caOutName,
-        !x     $           iOutNum,iAtm,iNumLayer,iaaRadLayer,
-        !x     $           rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-        !x     $           rSatAngle,rFracTop,rFracBot,
-        !x     $           iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,
-        !x     $           raSurface,raSun,raThermal,raSunRefl,
-        !x     $           raLayAngles,raSunAngles,
-        !x     $           raThickness,raPressLevels,iProfileLayers,pProf,
-        !x     $           iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
-        !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
-        !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity)
-        !x          CALL PrintPound
+        !write(kStdErr,*) 'Temporarily commented out'
+        !CALL DoStop
+        CALL scatterfluxes_disort(raFreq,                 &
+              raaSumAbCoeff,raMixVertTemp,caOutName,     &
+              iOutNum,iAtm,iNumLayer,iaaRadLayer,        &
+              rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
+              rSatAngle,rFracTop,rFracBot,               &
+              iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,      &
+              raSurface,raSun,raThermal,raSunRefl,       &
+              raLayAngles,raSunAngles,                   &
+              raThickness,raPressLevels,iProfileLayers,pProf,                &
+              iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+              raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
+              iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity)
+        CALL PrintPound
       END IF
 
       IF (kJacobian >= 0) THEN

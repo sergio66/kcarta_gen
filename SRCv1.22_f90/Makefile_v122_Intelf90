@@ -126,8 +126,8 @@ USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #UFLAG = 
 FLAGS=$($(STYLE)_FLAGS)
-LIBS  = -lblas -mkl
-LIBS  = -L ../LIB -lblas -mkl
+LIBS  = -lblas -qmkl
+LIBS  = -L ../LIB -lblas -qmkl
 FDOUBLE = -r8
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

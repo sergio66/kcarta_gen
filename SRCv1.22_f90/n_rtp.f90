@@ -636,35 +636,48 @@ CONTAINS
     END IF
 
     iDefault = 5
-    iWhichScatterCode = 6         !!RAYLEIGH in CLEAR SKY, nir/vis/uv
-    iWhichScatterCode = 5         !!PCLSAM
-    iWhichScatterCode = 4         !!r = r0 + r1 = perturb (not yet done)
-    iWhichScatterCode = 3         !!DISORT
-    iWhichScatterCode = 2         !!RTSPEC
-    iWhichScatterCode = 1         !!TWOSTREAM  DEFAULT
-    iWhichScatterCode = 0         !!simple absorb; directly goes to rad_main
+    iWhichScatterCode = 7         !! simple absorb; directly goes to rad_main, note this use to be 0
+    iWhichScatterCode = 6         !! RAYLEIGH in CLEAR SKY, nir/vis/uv
+    iWhichScatterCode = 5         !! PCLSAM <<<<<<< DEFAULT DEFAULT DEFAULT TWOSLAB CLD >>>>>>>>>>>>>>>
+    iWhichScatterCode = 4         !! r = r0 + r1 = perturb (not yet done)
+    iWhichScatterCode = 3         !! DISORT
+    iWhichScatterCode = 2         !! RTSPEC
+    iWhichScatterCode = 1         !! TWOSTREAM  DEFAULT
+    iWhichScatterCode = 0         !! NO SCATTERING.  JUST GASES
+
     iWhichScatterCode = iaaOverrideDefault(1,5)
-    IF ((iWhichScatterCode < 0) .OR. (iWhichScatterCode > 6)) THEN
-      write(kStdErr,*) 'invalid iWhichScatterCode = ',iWhichScatterCode
+
+    IF ((kWhichScatterCode >= 0) .AND. (kWhichScatterCode <= 7)) THEN
+      iWhichScatterCode = kWhichScatterCode
+    ELSE
+      write(kStdErr,*) 'SetRTPCloud : invalid kWhichScatterCode = ',kWhichScatterCode
+      CALL DoStop
+    END IF
+
+    IF ((iWhichScatterCode < 0) .OR. (iWhichScatterCode > 7)) THEN
+      write(kStdErr,*) 'SetRTPCloud : invalid iWhichScatterCode = ',iWhichScatterCode
       CALL DoStop
     END IF
     IF (iDefault /= iWhichScatterCode) THEN
       write (kStdErr,*) 'iDefault,iWhichScatterCode = ',iDefault,iWhichScatterCode
     END IF
-
-    IF (iWhichScatterCode == 6) THEN
+      
+    IF (iWhichScatterCode == 7) THEN
+      kWhichScatterCode = 7        !direct absorption in 1 layer!!!!!
+      kScatter          = 1        !
+    ELSEIF (iWhichScatterCode == 6) THEN
       kWhichScatterCode = 6        !use Rayleigh in nir/vis/uv
       kScatter          = 1        !
     ELSEIF (iWhichScatterCode == 5) THEN
       kWhichScatterCode = 5        !use PCLSAM
-      !kScatter          = 1       !cooment this out after June 2022 because you have scaling adjustments possible
+      !kScatter          = 1       !comment this out after June 2022 because nml allows you to choose scaling adjustments
     ELSEIF (iWhichScatterCode == 4) THEN
       kWhichScatterCode = 4        !use r = r0 + r1 = perturb
       kScatter          = 1        !
     ELSEIF (iWhichScatterCode == 3) THEN
       kWhichScatterCode = 3        !use Disort
-      kScatter          = 1        !use this setting
-      kDis_Pts          = 400      !do 1 every 400 pts
+      !kScatter          = 1       !comment this out because nml file allows you to set this
+      !kDis_Pts          = 400     !do 1 every 400 pts,comment this out because nml file allows you to set this
     ELSEIF (iWhichScatterCode == 2) THEN
       kWhichScatterCode = 2        !use RTSPEC
       kScatter          = 1        !use this setting  SingleScatter
@@ -675,9 +688,6 @@ CONTAINS
     ELSEIF (iWhichScatterCode == 1) THEN
       kWhichScatterCode = 1        !use TwoStream
       kScatter          = 1        !use one run of TwoStream
-    ELSEIF (iWhichScatterCode == 0) THEN
-      kWhichScatterCode = 0        !direct absorption in 1 layer!!!!!
-      kScatter          = 1        !
     END IF
 
     IF ((iakSolar(1) >= 0)  .AND. (kWhichScatterCode == 2)) THEN
@@ -727,7 +737,7 @@ CONTAINS
       raCngwat(1)  = raCngwat(2)
       iNclouds_RTP = 1
 
-       ctype2       = -9999
+      ctype2       = -9999
       iaCtype(2)   = -9999
       raCngwat(2)  = 0.0
       cngwat2      = 0.0

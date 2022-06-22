@@ -13,6 +13,26 @@
 !                      need to set temperature at levels from 1 .. 1+iNumLayer
 !************************************************************************
 
+MODULE scatter_disort_flux
+
+USE basic_common
+USE ttorad_common
+USE kcoeff_common
+USE spline_and_sort_and_common
+USE rad_diff_and_quad
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_main
+USE ttorad_common
+USE spline_and_sort_and_common
+USE scatter_disort_main
+USE scatter_disort_code
+
+IMPLICIT NONE
+
+CONTAINS
+
+!************************************************************************
 ! given the profiles, the atmosphere has been reconstructed. now this
 ! calculate the forward radiances for the vertical temperature profile
 ! the gases are weighted according to raaMix
@@ -34,7 +54,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
 ! raLayAngles   = array containing layer dependent sun angles
@@ -93,7 +113,7 @@
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
 
 ! set the direction of radiation travel
     IF (iaaRadLayer(iAtm,1) < iaaRadLayer(iAtm,iNumLayer)) THEN
@@ -101,9 +121,9 @@
     ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
     ! set down to 99,199, ... and so the FLOOR routine will not be too confused
         iDownWard = 1
-        i1=iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
-        i2=iaaRadLayer(iAtm,iNumLayer)-1
-        i2=iFloor(i2*1.0/kProfLayer)
+        i1 = iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
+        i2 = iaaRadLayer(iAtm,iNumLayer)-1
+        i2 = iFloor(i2*1.0/kProfLayer)
         IF (rTSpace > 5.0) THEN
             write(kStdErr,*) 'you want satellite to be downward looking'
             write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
@@ -116,9 +136,9 @@
     ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer)=100,200,.. it gets
     ! set down to 99,199, ... and so the FLOOR routine will not be too confused
         iDownWard = -1
-        i1=iaaRadLayer(iAtm,1)-1
-        i1=iFloor(i1*1.0/(1.0*kProfLayer))
-        i2=iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
+        i1 = iaaRadLayer(iAtm,1)-1
+        i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+        i2 = iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
     END IF
     write(kStdWarn,*) 'have set iDownWard = ',iDownWard
 
@@ -228,7 +248,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 ! ressures in mb, thicknesses in meters
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
@@ -374,7 +394,7 @@
     REAL :: raaUpRad(kMaxPts,kProfLayer+1),raaDownRad(kMaxPts,kProfLayer+1)
     REAL :: raaFlux(kMaxPts,kProfLayer+1),raaFluxx(kMaxPts,kProfLayer+1)
     REAL :: raDensity(kProfLayer),kb,cp,mass,avog
-    REAL :: raVT1(kMixFilRows),InterpTemp,rThermalRefl,r1,r2,rCos,rTsurf
+    REAL :: raVT1(kMixFilRows),rThermalRefl,r1,r2,rCos,rTsurf
     REAL :: rMPTemp,rPlanck,raUp(kMaxPts),raDown(kMaxPts),raTemp(kMaxPts)
     REAL :: rAngleTrans,rAngleEmission,rDelta,rCosAngle
     INTEGER :: iLay,iDoSolar,iDoThermal,iHigh,iT,iaRadLayerTemp(kMixFilRows)
@@ -467,10 +487,10 @@
     INTEGER :: iRayLeigh,iScatter,iScatter0
 
 ! more local variables
-    INTEGER :: iaStep(kMaxPts),iDiv
+    INTEGER :: iaStep(kMaxPts)
     INTEGER :: iF,iFFMax
     REAL :: raSolarBeam(kMaxPts),raTopIntensity(kMaxPts)
-    REAL :: rDummy,ttorad
+    REAL :: rDummy
     INTEGER :: iII
 
 ! these parameters are to step thru some of the 10000 pts
@@ -1013,7 +1033,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iaStep(kMaxPts),iStep,iFFMax
 
@@ -1043,3 +1063,5 @@
     RETURN
     end SUBROUTINE FluxWavenumberPoints
 !************************************************************************
+
+END MODULE scatter_disort_flux

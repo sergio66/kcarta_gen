@@ -16,28 +16,47 @@
 !                      there are nlev = 1 + iNumlayer  levels
 !************************************************************************
 
+MODULE scatter_disort_main
 
+USE basic_common
+USE ttorad_common
+USE kcoeff_common
+USE spline_and_sort_and_common
+USE rad_diff_and_quad
+USE clear_scatter_basic
+USE clear_scatter_misc
+USE rad_main
+USE ttorad_common
+USE spline_and_sort_and_common
+USE scatter_disort_code
+
+IMPLICIT NONE
+
+CONTAINS
+
+!************************************************************************
 ! given the profiles, the atmosphere has been reconstructed. now this
 ! calculate the forward radiances for the vertical temperature profile
 ! the gases are weighted according to raaMix
 ! iNp is # of layers to be printed (if < 0, print all), iaOp is list of
 !     layers to be printed
 ! caOutName gives the file name of the unformatted output
-    SUBROUTINE doscatter_disort(raFreq,raaAbs,raVTemp, &
-    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
-    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,rSatAngle, &
-    rFracTop,rFracBot, &
-    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
-    raSurface,raSun,raThermal,raSunRefl, &
-    raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
+    SUBROUTINE doscatter_disort(raFreq,                        &
+    raaAbs,raVTemp,caOutName,                                  & 
+    iOutNum,iAtm,iNumLayer,iaaRadLayer,                        &
+    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,           & 
+    rSatAngle,rFracTop,rFracBot,                               &
+    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,              &
+    raSurface,raSun,raThermal,raSunRefl,                       &
+    raLayAngles,raSunAngles,                                   &
+    raThickness,raPressLevels,iProfileLayers,pProf,            &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,        &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,iDoFlux)
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! iDoFlux     = do radiance or flux computation
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
@@ -99,7 +118,7 @@
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 
-    INTEGER :: i1,i2,iFloor,iDownWard
+    INTEGER :: i1,i2,iDownWard
 
     DO i1=1,kMaxPts
         raInten(i1) = 0.0
@@ -110,25 +129,25 @@
     ! radiation travelling upwards to instrument ==> sat looking down
     ! i2 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer) = 100,200,.. it gets
     ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = 1
-        i1=iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
-        i2=iaaRadLayer(iAtm,iNumLayer)-1
-        i2=iFloor(i2*1.0/kProfLayer)
-        IF (rTSpace > 5.0) THEN
-            write(kStdErr,*) 'you want satellite to be downward looking'
-            write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
-            write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
-            write(kStdErr,*) 'Please retry'
-            CALL DoSTOP
-        END IF
+      iDownWard = 1
+      i1 = iFloor(iaaRadLayer(iAtm,1)*1.0/kProfLayer)
+      i2 = iaaRadLayer(iAtm,iNumLayer)-1
+      i2 = iFloor(i2*1.0/kProfLayer)
+      IF (rTSpace > 5.0) THEN
+        write(kStdErr,*) 'you want satellite to be downward looking'
+        write(kStdErr,*) 'for atmosphere # ',iAtm,' but you set the '
+        write(kStdErr,*) 'blackbody temp of space >> ',kTspace,' K'
+        write(kStdErr,*) 'Please retry'
+        CALL DoSTOP
+      END IF
     ELSE IF (iaaRadLayer(iAtm,1) > iaaRadLayer(iAtm,iNumLayer))THEN
     ! radiation travelling downwards to instrument ==> sat looking up
     ! i1 has the "-1" so that if iaaRadLayer(iAtm,iNumLayer) = 100,200,.. it gets
     ! set down to 99,199, ... and so the FLOOR routine will not be too confused
-        iDownWard = -1
-        i1=iaaRadLayer(iAtm,1)-1
-        i1=iFloor(i1*1.0/(1.0*kProfLayer))
-        i2=iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
+      iDownWard = -1
+      i1 = iaaRadLayer(iAtm,1)-1
+      i1 = iFloor(i1*1.0/(1.0*kProfLayer))
+      i2 = iFloor(iaaRadLayer(iAtm,iNumLayer)*1.0/(1.0*kProfLayer))
     END IF
     write(kStdWarn,*) 'have set iDownWard = ',iDownWard
 
@@ -136,19 +155,19 @@
 ! eg iUpper=90,iLower=1 is acceptable
 ! eg iUpper=140,iLower=90 is NOT acceptable
     IF (i1 /= i2) THEN
-        write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
-        write(kStdErr,*) 'to have come from same set of 100 mixed paths'
-        write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer), &
-        i1,i2
-        CALL DoSTOP
+      write(kStdErr,*) 'need lower/upper mixed paths for iAtm = ',iAtm
+      write(kStdErr,*) 'to have come from same set of 100 mixed paths'
+      write(kStdErr,*)iaaRadLayer(iAtm,1),iaaRadLayer(iAtm,iNumLayer), &
+      i1,i2
+      CALL DoSTOP
     END IF
 
 ! check to see that the radiating atmosphere has <= 100 layers
 ! actually, this is technically done above)
     i1=abs(iaaRadLayer(iAtm,1)-iaaRadLayer(iAtm,iNumLayer))+1
     IF (i1 > kProfLayer) THEN
-        write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
-        CALL DoSTOP
+      write(kStdErr,*) 'iAtm = ',iAtm,' has >  ',kProfLayer,' layers!!'
+      CALL DoSTOP
     END IF
 
     write(kStdWarn,*) 'rFracTop,rFracBot = ',rFracTop,rFracBot
@@ -156,24 +175,24 @@
     iaaRadLayer(iatm,1),iaaRadLayer(iatm,inumlayer)
 
     IF (iDownward == 1) THEN
-        rAngle=rSatAngle
+      rAngle=rSatAngle
     ELSE
-        rAngle=-rSatAngle
+      rAngle=-rSatAngle
     END IF
 
     CALL interface_disort(raFreq,raInten,raVTemp, &
-    raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
-    rAngle,rFracTop,rFracBot, &
+      raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
+      rAngle,rFracTop,rFracBot, &
 !     $        iNp,iaOp,raaOp,iNpmix,iFileID,
-    iNp,iaOp,iNpmix,iFileID, &
-    caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
+      iNp,iaOp,iNpmix,iFileID, &
+      caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
 !     $        raaMix,raSurface,raSun,raThermal,raSunRefl,
 !     $        raLayAngles,raSunAngles,
-    raLayAngles,iDoFlux, &
-    raThickness,raPressLevels,iProfileLayers,pProf, &
-    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity)
+      raLayAngles,iDoFlux, &
+      raThickness,raPressLevels,iProfileLayers,pProf, &
+      iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+      iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity)
      
     RETURN
     end SUBROUTINE doscatter_disort
@@ -196,7 +215,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! ---------------- inputs needed to read scattering tables -------------------
     REAL :: raFreq(kMaxPts)
@@ -278,11 +297,11 @@
 !!!!       this occupies kCARTA layers 69 to 72
 !!!! Thus the cloud occupies RTSPEC atmosphere "tau" from 6 to 9
     IF (iDownWard == 1) THEN
-        iB_Atm=iaaRadLayer(iAtm,1)
-        iT_Atm=iaaRadLayer(iAtm,iNumLayer)
+      iB_Atm=iaaRadLayer(iAtm,1)
+      iT_Atm=iaaRadLayer(iAtm,iNumLayer)
     ELSEIF (iDownWard == -1) THEN
-        iT_Atm=iaaRadLayer(iAtm,1)
-        iB_Atm=iaaRadLayer(iAtm,iNumLayer)
+      iT_Atm=iaaRadLayer(iAtm,1)
+      iB_Atm=iaaRadLayer(iAtm,iNumLayer)
     END IF
 
 !!!!!!hwowever we also do fluxes, so even if the atm is defined so it
@@ -290,9 +309,9 @@
 !!!!!!fashion, and vice versa
 
     IF (iB_Atm > iT_Atm) THEN
-        iCloudySky = iT_Atm
-        iT_Atm = iB_Atm
-        iB_atm = iCloudySky
+      iCloudySky = iT_Atm
+      iT_Atm = iB_Atm
+      iB_atm = iCloudySky
     END IF
 
     iCloudySky = -1  !!!!!!! assume NO clouds associated with this atm
@@ -301,204 +320,200 @@
     iCldBotKcarta = kProfLayer+1
     NSCATTAB=-1000   !!!!!!! total of how many scattering tables (files)
     DO iIn=1,kMaxClouds*kCloudLayers
-        iaTable(iIn) = -1
+      iaTable(iIn) = -1
     END DO
     DO iIn=1,MAXSCAT
-        ScatFile(iIn) = ' '
-        iaScatTable_With_Atm(iIn) = -1
+      ScatFile(iIn) = ' '
+      iaScatTable_With_Atm(iIn) = -1
     END DO
     DO iIn=1,kMaxClouds
-        iaCloudWithThisAtm(iIn) = -1
-        iaCldTop(iIn) = -1
-        iaCldBot(iIn) = -1
+      iaCloudWithThisAtm(iIn) = -1
+      iaCldTop(iIn) = -1
+      iaCldBot(iIn) = -1
     END DO
 
 !!!go thru info and check against whether should be used with this atm
     DO iIn=1,iNclouds
 
-    ! associate scattering tables with the clouds
-    ! initialise info for this iIn th cloud
-        DO iJ=1,iaCloudNumLayers(iIn)
-            iI=iaaScatTable(iIn,iJ)
-            IF (iI > MAXSCAT) THEN
-                write(kStdErr,*)'in interface_disort, you have set it up so'
-                write(kStdErr,*)'MAXSCAT < kMaxClouds*kCloudLayers'
-                write(kStdErr,*)'please reset and retry'
-                CALL DoSTOP
-            END IF
-            caName=caaaScatTable(iIn,iJ)
-            IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
-                IF (iI > NSCATTAB) THEN
-                    NSCATTAB=iI
-                END IF
-                iaTable(iI) = 1
-                ScatFile(iI) = caName
-            END IF
-        END DO
+      ! associate scattering tables with the clouds
+      ! initialise info for this iIn th cloud
+      DO iJ=1,iaCloudNumLayers(iIn)
+        iI=iaaScatTable(iIn,iJ)
+        IF (iI > MAXSCAT) THEN
+          write(kStdErr,*)'in interface_disort, you have set it up so'
+          write(kStdErr,*)'MAXSCAT < kMaxClouds*kCloudLayers'
+          write(kStdErr,*)'please reset and retry'
+          CALL DoSTOP
+        END IF
+        caName=caaaScatTable(iIn,iJ)
+        IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
+          IF (iI > NSCATTAB) THEN
+            NSCATTAB=iI
+          END IF
+          iaTable(iI) = 1
+          ScatFile(iI) = caName
+        END IF
+      END DO
 
-    ! check to see if this cloud is to be used with this atm
-        DO iJ=1,iaCloudNumAtm(iIn)
-            IF (iaaCloudWhichAtm(iIn,iJ)  == iAtm) THEN
-                iCloudySky = iIn         !!!! set this up
-                iaCloudWithThisAtm(iIn) = 1
+      ! check to see if this cloud is to be used with this atm
+      DO iJ=1,iaCloudNumAtm(iIn)
+        IF (iaaCloudWhichAtm(iIn,iJ)  == iAtm) THEN
+          iCloudySky = iIn         !!!! set this up
+          iaCloudWithThisAtm(iIn) = 1
 
-            !!!!!these are the kCARTA layers 1 to 100 = GND to TOA
-                IACLDTOP(iIn) = iaaCloudWhichLayers(iIn,1)+1
-                IACLDBOT(iIn) = iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn))
+          !!!!!these are the kCARTA layers 1 to 100 = GND to TOA
+          IACLDTOP(iIn) = iaaCloudWhichLayers(iIn,1)+1
+          IACLDBOT(iIn) = iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn))
 
-                IF (iCldTopkCarta < iaCldTop(iIn)-1) THEN
-                    iCldTopkCarta = iaCldTop(iIn)-1
-                END IF
-                IF (iCldBotkCarta > iaCldBot(iIn)) THEN
-                    iCldBotkCarta = iaCldBot(iIn)
-                END IF
+          IF (iCldTopkCarta < iaCldTop(iIn)-1) THEN
+            iCldTopkCarta = iaCldTop(iIn)-1
+          END IF
+          IF (iCldBotkCarta > iaCldBot(iIn)) THEN
+            iCldBotkCarta = iaCldBot(iIn)
+          END IF
 
-                write(kStdWarn,*)'cloud # ',iIn,' associated with atm # ',iAtm
-                write(kStdWarn,*)'cloud is in KCARTA layers ', &
-                iaCldTop(iIn)-1,' to ',iaCldBot(iIn)
+          write(kStdWarn,*)'cloud # ',iIn,' associated with atm # ',iAtm
+          write(kStdWarn,*)'cloud is in KCARTA layers ', &
+          iaCldTop(iIn)-1,' to ',iaCldBot(iIn)
 
-            !!!!!these are the DISORT layers 100 to 1 = GND to TOA
-                iaCldbot(iIn) = iT_Atm - iaCldbot(iIn) + 1
-                iaCldtop(iIn) = iT_Atm - iaCldtop(iIn) + 1
+          !!!!!these are the DISORT layers 100 to 1 = GND to TOA
+          iaCldbot(iIn) = iT_Atm - iaCldbot(iIn) + 1
+          iaCldtop(iIn) = iT_Atm - iaCldtop(iIn) + 1
 
-            !            iaCldBot(iIn) = iaCldBot(iIn) + 1
-            !            iaCldTop(iIn) = iaCldTop(iIn) + 1
+          ! iaCldBot(iIn) = iaCldBot(iIn) + 1
+          ! iaCldTop(iIn) = iaCldTop(iIn) + 1
 
-                write(kStdWarn,*)'cloud is in DISORT layers ', &
-                iaCldTop(iIn)+1,' to ',iaCldBot(iIn)
+          write(kStdWarn,*)'cloud is in DISORT layers ', &
+          iaCldTop(iIn)+1,' to ',iaCldBot(iIn)
 
-            END IF
-        END DO
+        END IF
+      END DO
 
-    ! check to see which scattering tables to be used with this atm
-        DO iJ=1,iaCloudNumLayers(iIn)
-            iI=iaaScatTable(iIn,iJ)
-            IF (iaCloudWithThisAtm(iIn)  == 1) THEN
-                iaScatTable_With_Atm(iI) = 1
-                write(kStdWarn,*)'scatter table ',iI,' used with atm # ',iAtm
-            END IF
-        END DO
+      ! check to see which scattering tables to be used with this atm
+      DO iJ=1,iaCloudNumLayers(iIn)
+         iI = iaaScatTable(iIn,iJ)
+         IF (iaCloudWithThisAtm(iIn)  == 1) THEN
+           iaScatTable_With_Atm(iI) = 1
+           write(kStdWarn,*)'scatter table ',iI,' used with atm # ',iAtm
+         END IF
+      END DO
 
     END DO      !!!!!!!!main       DO iIn=1,iNclouds
 
-!     Only read in scattering tables that are needed for this atm
+    ! Only read in scattering tables that are needed for this atm
     iReadTable = 1
     IF (iReadTable > 0) THEN
-        IF (iBinaryFile == 1) THEN
-            DO I = 1, NSCATTAB
-                IF (iaScatTable_With_Atm(I) > 0) THEN
-                    write(kStdWarn,*) 'Reading binary scatter data for table #',I
-                    CALL READ_SSCATTAB_BINARY(SCATFILE(I),   & !!!!!!MAXTAB, MAXGRID,
-                    caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-                    NWAVETAB(I), WAVETAB(1,I), &
-                    MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-                    TABPHI1UP(1,I), TABPHI1DN(1,I), &
-                    TABPHI2UP(1,I), TABPHI2DN(1,I))
-                    IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. &
-                    (ABS(MUINC(2)-0.7887) > 0.001)) THEN
-                        write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
-                        CALL DoStop
-                    END IF
-                END IF
-            ENDDO
-        ELSE IF (iBinaryFile == -1) THEN
-            DO I = 1, NSCATTAB
-                IF (iaScatTable_With_Atm(I) > 0) THEN
-                    write(kStdWarn,*) 'Reading ascii scatter data for table #',I
-                    CALL READ_SSCATTAB(SCATFILE(I),   & !!!!!!MAXTAB, MAXGRID,
-                    caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-                    NWAVETAB(I), WAVETAB(1,I), &
-                    MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-                    TABPHI1UP(1,I), TABPHI1DN(1,I), &
-                    TABPHI2UP(1,I), TABPHI2DN(1,I))
-                    IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. &
-                    (ABS(MUINC(2)-0.7887) > 0.001)) THEN
-                        write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
-                        CALL DoStop
-                    END IF
-                END IF
-            ENDDO
-        ELSE IF (iBinaryFile == 0) THEN
-            DO I = 1, NSCATTAB
-                IF (iaScatTable_With_Atm(I) > 0) THEN
-                    write(kStdWarn,*) 'Reading ascii scatter data for table #',I
-                    CALL READ_SSCATTAB_SPECIAL(SCATFILE(I), &
-                    caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-                    NWAVETAB(I), WAVETAB(1,I), &
-                    MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-                    TABPHI1UP(1,I), TABPHI1DN(1,I), &
-                    TABPHI2UP(1,I), TABPHI2DN(1,I))
-
-                END IF
-            ENDDO
-        END IF    !iBinaryFile > 0
+      IF (iBinaryFile == 1) THEN
+        DO I = 1, NSCATTAB
+          IF (iaScatTable_With_Atm(I) > 0) THEN
+            write(kStdWarn,*) 'Reading binary scatter data for table #',I
+            CALL READ_SSCATTAB_BINARY(SCATFILE(I),   & !!!!!!MAXTAB, MAXGRID,
+              caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
+              NWAVETAB(I), WAVETAB(1,I), &
+              MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
+              TABPHI1UP(1,I), TABPHI1DN(1,I), &
+              TABPHI2UP(1,I), TABPHI2DN(1,I))
+            IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. &
+            (ABS(MUINC(2)-0.7887) > 0.001)) THEN
+              write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
+              CALL DoStop
+            END IF
+          END IF
+        ENDDO
+      ELSE IF (iBinaryFile == -1) THEN
+        DO I = 1, NSCATTAB
+          IF (iaScatTable_With_Atm(I) > 0) THEN
+            write(kStdWarn,*) 'Reading ascii scatter data for table #',I
+            CALL READ_SSCATTAB(SCATFILE(I),   & !!!!!!MAXTAB, MAXGRID,
+              caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
+              NWAVETAB(I), WAVETAB(1,I), &
+              MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
+              TABPHI1UP(1,I), TABPHI1DN(1,I), &
+              TABPHI2UP(1,I), TABPHI2DN(1,I))
+            IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. &
+              (ABS(MUINC(2)-0.7887) > 0.001)) THEN
+              write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
+              CALL DoStop
+            END IF
+          END IF
+        ENDDO
+      ELSE IF (iBinaryFile == 0) THEN
+        DO I = 1, NSCATTAB
+          IF (iaScatTable_With_Atm(I) > 0) THEN
+            write(kStdWarn,*) 'Reading ascii scatter data for table #',I
+            CALL READ_SSCATTAB_SPECIAL(SCATFILE(I), &
+              caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
+              NWAVETAB(I), WAVETAB(1,I), &
+              MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
+              TABPHI1UP(1,I), TABPHI1DN(1,I), &
+              TABPHI2UP(1,I), TABPHI2DN(1,I))
+          END IF
+        ENDDO
+      END IF    !iBinaryFile > 0
     END IF      !iReadTable  > 0
           
-! heck to see that all MIE tables read in had the same nmuobs used
-! ssuming that this atm does have a cloud associated with it
+! check to see that all MIE tables read in had the same nmuobs used
+! assuming that this atm does have a cloud associated with it
     IF (iCloudySky > 0) THEN
-        iLayers = 0
-        LL = 0
-        DO i=1,nscattab
-            IF (iaScatTable_With_Atm(I) > 0) THEN
-                iLayers = iLayers + nmuobs(i)
-                LL = LL + 1  !!keep track of how many scattering tables used
-                II = I       !!keep track of which scattering table used with atm
-            END IF
-        END DO
-        IF (int(iLayers*1.0/LL) /= nmuobs(II)) THEN
-            write (kStdErr,*) iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
-            write (kStdErr,*) 'Some of the Mie Scattering tables had different'
-            write (kStdErr,*) 'number of angles used in computing Mie coeffs'
-            write (kStdErr,*) 'Please recheck  sscatmie.x and rerun'
-            CALL DoStop
+      iLayers = 0
+      LL = 0
+      DO i=1,nscattab
+        IF (iaScatTable_With_Atm(I) > 0) THEN
+          iLayers = iLayers + nmuobs(i)
+          LL = LL + 1  !!keep track of how many scattering tables used
+          II = I       !!keep track of which scattering table used with atm
         END IF
+      END DO
+      IF (int(iLayers*1.0/LL) /= nmuobs(II)) THEN
+        write (kStdErr,*) iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
+        write (kStdErr,*) 'Some of the Mie Scattering tables had different'
+        write (kStdErr,*) 'number of angles used in computing Mie coeffs'
+        write (kStdErr,*) 'Please recheck  sscatmie.x and rerun'
+        CALL DoStop
+      END IF
     ELSE
-        write (kStdWarn,*) 'no clouds with atmosphere number ',iAtm,' !!!'
+      write (kStdWarn,*) 'no clouds with atmosphere number ',iAtm,' !!!'
     END IF
 
-! Frank Evans code scales the Mie scattering parameters, so we have to
-! unscale them!!!!!!!!
-!          DO I = 1, NSCATTAB
-!            IF (iaScatTable_With_Atm(I).GT. 0) THEN
-!              CALL UnScaleMie(
-!     $          caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I),
-!     $          ndme(i)*nwavetab(i))
-!            END IF
-!          END DO
+!   this was com,mented out till June 2022 then Tang/Yang/Huang/RRTM suggest no use unscaled
+!   Frank Evans code scales the Mie scattering parameters, so we have to
+!   unscale them!!!!!!!!
+    DO I = 1, NSCATTAB
+      IF (iaScatTable_With_Atm(I).GT. 0) THEN
+        CALL UnScaleMie(caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
+                        ndme(i)*nwavetab(i))
+      END IF
+    END DO
            
 ! code from n_rad_jac_scat.f
     iCloud = -1
     IF (iCloudySky < 0) THEN
-        write(kStdWarn,*)'Could not find a cloud for atmosphere #',iAtm
-        write(kStdWarn,*)'setting IWP = -100.0'
-        iCloud=1    !say cloud number one associated with this atmosphere
-        ncldlay=1   !say fictitious cloud occupies one layer
-        IWP(1)      = -100.0   !but ensure cloud has NO particles in it!
-        DME(1)      = -10.0    !but ensure cloud has NO particles in it!
-        ISCATTAB(1) = -1
-
+      write(kStdWarn,*)'Could not find a cloud for atmosphere #',iAtm
+      write(kStdWarn,*)'setting IWP = -100.0'
+      iCloud = 1    !say cloud number one associated with this atmosphere
+      ncldlay = 1   !say fictitious cloud occupies one layer
+      IWP(1)      = -100.0   !but ensure cloud has NO particles in it!
+      DME(1)      = -10.0    !but ensure cloud has NO particles in it!
+      ISCATTAB(1) = -1
     ELSE
-    !!!!!find total number of clouds, and hence total number of layers
-        NCLDLAY=0
-        iLayers = 0
-        DO i=1,kMaxClouds
-            IF (iaCloudWithThisAtm(i) == 1) THEN
-                ncldlay = ncldlay + iaCloudNumLayers(i)
-                write(kStdWarn,*) 'Cloud #, num layers = ',i,iaCloudNumLayers(i)
-
-                write(kStdWarn,*) 'L   iwp  dme  iscattab   kCARTA Layer  : '
-
-                DO iStep = 1, iaCloudNumLayers(i)
-                    iLayers = iLayers + 1
-                    IWP(iLayers) = raaaCloudParams(i,iStep,1)
-                    DME(iLayers) = raaaCloudParams(i,iStep,2)
-                    ISCATTAB(iLayers) = iaaScatTable(i,iStep)
-                    write(kStdWarn,*) iLayers,iwp(iLayers),dme(iLayers), &
-                    iscattab(iLayers),iaaCloudWhichLayers(i,iStep)
-                END DO
-            END IF
-        END DO
+      !!!!!find total number of clouds, and hence total number of layers
+      NCLDLAY=0
+      iLayers = 0
+      DO i=1,kMaxClouds
+        IF (iaCloudWithThisAtm(i) == 1) THEN
+          ncldlay = ncldlay + iaCloudNumLayers(i)
+          write(kStdWarn,*) 'Cloud #, num layers = ',i,iaCloudNumLayers(i)
+          write(kStdWarn,*) 'L   iwp  dme  iscattab   kCARTA Layer  : '
+          DO iStep = 1, iaCloudNumLayers(i)
+              iLayers = iLayers + 1
+              IWP(iLayers) = raaaCloudParams(i,iStep,1)
+              DME(iLayers) = raaaCloudParams(i,iStep,2)
+              ISCATTAB(iLayers) = iaaScatTable(i,iStep)
+              write(kStdWarn,*) iLayers,iwp(iLayers),dme(iLayers), &
+                iscattab(iLayers),iaaCloudWhichLayers(i,iStep)
+          END DO
+        END IF
+      END DO
     END IF
 
 !     Find the levels for top of cloud and observation level
@@ -506,7 +521,7 @@
 !     levels and layers
 !     these will be reset when passed in and out of GetAbsProfileDISORT
 !     NOTE : here we are still in kCARTA frame ie
-
+!
 !   TOA    --------------
 !          layer iNumlayer
 !          --------------
@@ -530,41 +545,41 @@
 !   GND --------------------------
 
     IF (IWP(1) <= 0.0) THEN  !we have no cloud; set up fictitious clouds
-        IF (iDownWard > 0) THEN
-        ! own look instr : set cloud BELOW observer, in kCARTA layer #1
-            ICLDTOP = 2
-            ICLDBOT = 1
-        ! own look instr : set cloud BELOW observer, in DISORT layer #2
-            ICLDTOP = 2
-            ICLDBOT = 3
-            IOBS    = iNumLayer
-        ELSE IF (iDownWard < 0) THEN    !up look instr
-        ! p look instr : set cloud ABOVE observer, in kCARTA layer #iNumLayer
-            ICLDTOP = iNumLayer+1
-            ICLDBOT = iNumLayer
-        ! p look instr : set cloud ABOVE observer, in DISORT layer #1
-            ICLDTOP = 2
-            ICLDBOT = 1
-            IOBS    = 1
-        END IF
+      IF (iDownWard > 0) THEN
+        ! down look instr : set cloud BELOW observer, in kCARTA layer #1
+        ICLDTOP = 2
+        ICLDBOT = 1
+        ! down look instr : set cloud BELOW observer, in DISORT layer #2
+        ICLDTOP = 2
+        ICLDBOT = 3
+        IOBS    = iNumLayer
+      ELSE IF (iDownWard < 0) THEN    !up look instr
+        ! up look instr : set cloud ABOVE observer, in kCARTA layer #iNumLayer
+        ICLDTOP = iNumLayer+1
+        ICLDBOT = iNumLayer
+        ! up look instr : set cloud ABOVE observer, in DISORT layer #1
+        ICLDTOP = 2
+        ICLDBOT = 1
+        IOBS    = 1
+      END IF
     END IF
 
     IF (IWP(1) > 0.0) THEN
-    ! o not really need icldtop/bot, but just set it up
-        ICLDTOP=iaaCloudWhichLayers(iCloudySky,1)+1
-        ICLDBOT=iaaCloudWhichLayers(iCloudySky,iaCloudNumLayers(iCloudySky))
+      ! not really need icldtop/bot, but just set it up
+      ICLDTOP=iaaCloudWhichLayers(iCloudySky,1)+1
+      ICLDBOT=iaaCloudWhichLayers(iCloudySky,iaCloudNumLayers(iCloudySky))
 
-        icldbot = iT_Atm - icldbot + 1
-        icldtop = iT_Atm - icldtop + 1
+      icldbot = iT_Atm - icldbot + 1
+      icldtop = iT_Atm - icldtop + 1
 
-        icldbot = icldbot + 1
-        icldtop = icldtop + 1
+      icldbot = icldbot + 1
+      icldtop = icldtop + 1
 
-        IF (iDownWard > 0) THEN
-            IOBS   = iNumLayer
-        ELSE IF (iDownWard < 0) THEN
-            IOBS   = 1
-        END IF
+      IF (iDownWard > 0) THEN
+        IOBS   = iNumLayer
+      ELSE IF (iDownWard < 0) THEN
+        IOBS   = 1
+      END IF
     END IF
 
     iobs=(iNumLayer+1)-iobs+1
@@ -582,7 +597,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iTag
@@ -598,16 +613,16 @@
 
 ! local variables
     INTEGER :: iaRadLayer(kProfLayer),iL,iF
-    REAL :: ttorad,rDummy
+    REAL :: rDummy
 
     DO iL=1,kMaxPts
-        TOA_to_instr(iL) = 0.0
+      TOA_to_instr(iL) = 0.0
     END DO
 
 ! bring incident space radiation down from TOA to instrument
     DO iF=1,kMaxPts
-    ! compute the Plank radiation from space
-        raTopIntensity(iF) = ttorad(raFreq(iF),sngl(kTSpace))
+      ! compute the Plank radiation from space
+      raTopIntensity(iF) = ttorad(raFreq(iF),sngl(kTSpace))
     END DO
 
 ! set the solar beam intensity ...
@@ -617,28 +632,27 @@
 !   set to solar beam, while BC of TOA is 2.6K is set
 
     DO iF=1,kMaxPts     !!!!assume sun is NOT ON
-        raSolarBeam(iF) = 0.0
+      raSolarBeam(iF) = 0.0
     END DO
 
     IF (kSolar >= 0) THEN
-        IF (abs(abs(rSatAngle)-abs(kSolarAngle)) >= 1.0e-3) THEN
-        ! un is on, but not in FOV of instr
-        ! o set fbeam correctly to that of sun
-            CALL SolarBeamDisort(kSolar,raSolarBeam,raFreq,iTag)
-            rDummy = abs(cos(kSolarAngle*kPi/180))
+      IF (abs(abs(rSatAngle)-abs(kSolarAngle)) >= 1.0e-3) THEN
+        ! sun is on, but not in FOV of instr
+        ! set fbeam correctly to that of sun
+        CALL SolarBeamDisort(kSolar,raSolarBeam,raFreq,iTag)
+        rDummy = abs(cos(kSolarAngle*kPi/180))
         ! bring solar radiation down from TOA to instrument
-            CALL Find_K_TOA_to_instr(iaRadLayer,iNumLayer,raVTemp, &
+        CALL Find_K_TOA_to_instr(iaRadLayer,iNumLayer,raVTemp, &
             rFracTop,raFreq,raaAbs,TOA_to_instr)
-            DO iF=1,kMaxPts
-                raSolarBeam(iF) = raSolarBeam(iF)*exp(-TOA_to_instr(iF)/rDummy)
-            END DO
-        END IF
+        DO iF=1,kMaxPts
+          raSolarBeam(iF) = raSolarBeam(iF)*exp(-TOA_to_instr(iF)/rDummy)
+        END DO
+      END IF
 
-        IF (abs(abs(rSatAngle)-abs(kSolarAngle)) <= 1.0e-3) THEN
+      IF (abs(abs(rSatAngle)-abs(kSolarAngle)) <= 1.0e-3) THEN
         ! un is on, and in FOV of instr
         ! o set fbeam correctly to 0.0, and the BC of 5700K
-        END IF
-
+      END IF
     END IF     !!IF (kSolar >= 0)
 
     RETURN
@@ -651,7 +665,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input variables
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iTag
@@ -667,36 +681,36 @@
 
 ! local variables
     INTEGER :: iaRadLayer(kProfLayer),iL,iF
-    REAL :: ttorad,rDummy
+    REAL :: rDummy
 
 ! see if there are any layers between TOA and instr; if there are, set
 ! TOA_to_instr to the cumulative k(TOA to aircraft), else set it to 0
     DO iL=1,kProfLayer
-        iaRadLayer(iL) = iaaRadLayer(iAtm,iL)
+      iaRadLayer(iL) = iaaRadLayer(iAtm,iL)
     END DO
     CALL Find_K_TOA_to_instr(iaRadLayer,iNumLayer,raVTemp, &
-    rFracTop,raFreq,raaAbs,TOA_to_instr)
+      rFracTop,raFreq,raaAbs,TOA_to_instr)
 
 ! bring incident space radiation down from TOA to instrument
     DO iF=1,kMaxPts
-        raTopIntensity(iF) = ttorad(raFreq(iF),sngl(kTSpace))
+      raTopIntensity(iF) = ttorad(raFreq(iF),sngl(kTSpace))
     END DO
 ! this is technically incorrect ... we really should do rad transfer here
     DO iF=1,kMaxpts
-        raTopIntensity(iF) = raTopIntensity(iF)*exp(-TOA_to_instr(iF))
+      raTopIntensity(iF) = raTopIntensity(iF)*exp(-TOA_to_instr(iF))
     END DO
           
     IF (kSolar >= 0) THEN
-        CALL SolarBeamDisort(kSolar,raSolarBeam,raFreq,iTag)
-        rDummy = abs(cos(kSolarAngle*kPi/180))
-    ! bring solar radiation down from TOA to instrument
-        DO iF=1,kMaxPts
-            raSolarBeam(iF) = raSolarBeam(iF)*exp(-TOA_to_instr(iF)/rDummy)
-        END DO
+      CALL SolarBeamDisort(kSolar,raSolarBeam,raFreq,iTag)
+      rDummy = abs(cos(kSolarAngle*kPi/180))
+      ! bring solar radiation down from TOA to instrument
+      DO iF=1,kMaxPts
+        raSolarBeam(iF) = raSolarBeam(iF)*exp(-TOA_to_instr(iF)/rDummy)
+      END DO
     ELSE
-        DO iF=1,kMaxPts
-            raSolarBeam(iF) = 0.0
-        END DO
+      DO iF=1,kMaxPts
+        raSolarBeam(iF) = 0.0
+      END DO
     END IF
 
     RETURN
@@ -708,7 +722,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
     INTEGER :: iDownWard            !direction of rad transfer
     REAL :: raCorrelatedK(kMaxPts)  !to see how the "k distributions" are
@@ -722,68 +736,69 @@
     iMethod = -1
 
     IF (iMethod == -1) THEN
-    ! imply store optical depth of layer closest to gnd
-        IF (iDownWard == 1) THEN
+      ! store optical depth of layer closest to gnd
+      IF (iDownWard == 1) THEN
         !! as k(gnd) increases, down look instr only penetrates less into
         !! atmosphere, so radiance decreases
-            DO iI=1,kMaxPts
-                raCorrelatedK(iI) = raaAbs(iI,iaaRadLayer(iAtm,1))
-            END DO
-        ELSE
+        DO iI=1,kMaxPts
+           raCorrelatedK(iI) = raaAbs(iI,iaaRadLayer(iAtm,1))
+        END DO
+      ELSE
         !! as k(gnd) increases, uplook instr only penetrates less into
         !! atmosphere, so radiance increases as you see hot stuff in
-        ! your face
-            DO iI=1,kMaxPts
-                raCorrelatedK(iI) = raaAbs(iI,iaaRadLayer(iAtm,iNumLayer))
-            END DO
-        END IF
+        !! your face
+        DO iI=1,kMaxPts
+          raCorrelatedK(iI) = raaAbs(iI,iaaRadLayer(iAtm,iNumLayer))
+        END DO
+      END IF
     END IF
 
     IF (iMethod == +1) THEN
-    ! tore optical depth of layer that peaks the weight fcn
-    !!!!!!remember ABSPROF(1,:) = TOA, ABSPROF(NLEV-1,:) = GND
-        IF (iDownward == 1) THEN
-        ! o down look weight fcn
-            DO iI=1,kMaxPts
-                raL2S(iI)  = 0.0        !!!optical depth to space = 0.0
-                iaIndx(iI) = 1
-                raPeak(iI) = -1.0e10
-            END DO
-            DO iI = 1,kMaxPts
-                DO iJ = iNumLayer,1,-1
-                    raaWgt(iI,iJ) = absprof(iNumLayer-iJ+1,iI)
-                    raaWgt(iI,iJ) = (1-exp(-raaWgt(iI,iJ)))*exp(-raL2S(iI))
-                    raL2S(iI)     = raL2S(iI) + absprof(iNumLayer-iJ+1,iI)
-                END DO
-            END DO
-        ELSE IF (iDownward == -1) THEN
-        ! o up look weight fcn
-            DO iI=1,kMaxPts
-                raL2S(iI) = 0.0        !!!optical depth to gnd = 0.0
-                iaIndx(iI) = 1
-                raPeak(iI) = -1.0e10
-            END DO
-            DO iI = 1,kMaxPts
-                DO iJ = 1,iNumLayer
-                    raaWgt(iI,iJ) = absprof(iNumLayer-iJ+1,iI)
-                    raaWgt(iI,iJ) = (1-exp(-raaWgt(iI,iJ)))*exp(-raL2S(iI))
-                    raL2S(iI)     = raL2S(iI) + absprof(iNumLayer-iJ+1,iI)
-                END DO
-            END DO
-        END IF
-    !!!having stored the wgt fcns, find where it peaks
-        DO iI = 1,kMaxPts
-            DO iJ = 1,iNumLayer
-                IF (raaWgt(iI,iJ) > raPeak(iI)) THEN
-                    raPeak(iI) = raaWgt(iI,iJ)
-                    iaIndx(iI) = iJ
-                END IF
-            END DO
+      ! store optical depth of layer that peaks the weight fcn
+      !!!!!!remember ABSPROF(1,:) = TOA, ABSPROF(NLEV-1,:) = GND
+      IF (iDownward == 1) THEN
+        ! down look weight fcn
+        DO iI=1,kMaxPts
+          raL2S(iI)  = 0.0        !!!optical depth to space = 0.0
+          iaIndx(iI) = 1
+          raPeak(iI) = -1.0e10
         END DO
-    !!!now set this info to raCorrelatedK
-        DO iI = 1,kMaxPts
-            raCorrelatedK(iI) = absprof(iNumLayer-iaIndx(iI) + 1,iI)
-        END DO
+       DO iI = 1,kMaxPts
+         DO iJ = iNumLayer,1,-1
+           raaWgt(iI,iJ) = absprof(iNumLayer-iJ+1,iI)
+           raaWgt(iI,iJ) = (1-exp(-raaWgt(iI,iJ)))*exp(-raL2S(iI))
+           raL2S(iI)     = raL2S(iI) + absprof(iNumLayer-iJ+1,iI)
+         END DO
+       END DO
+     ELSE IF (iDownward == -1) THEN
+       ! do up look weight fcn
+       DO iI=1,kMaxPts
+         raL2S(iI) = 0.0        !!!optical depth to gnd = 0.0
+         iaIndx(iI) = 1
+         raPeak(iI) = -1.0e10
+       END DO
+       DO iI = 1,kMaxPts
+         DO iJ = 1,iNumLayer
+           raaWgt(iI,iJ) = absprof(iNumLayer-iJ+1,iI)
+           raaWgt(iI,iJ) = (1-exp(-raaWgt(iI,iJ)))*exp(-raL2S(iI))
+           raL2S(iI)     = raL2S(iI) + absprof(iNumLayer-iJ+1,iI)
+         END DO
+       END DO
+     END IF
+
+     !!!having stored the wgt fcns, find where it peaks
+     DO iI = 1,kMaxPts
+       DO iJ = 1,iNumLayer
+         IF (raaWgt(iI,iJ) > raPeak(iI)) THEN
+           raPeak(iI) = raaWgt(iI,iJ)
+           iaIndx(iI) = iJ
+           END IF
+         END DO
+       END DO
+      !!!now set this info to raCorrelatedK
+      DO iI = 1,kMaxPts
+         raCorrelatedK(iI) = absprof(iNumLayer-iaIndx(iI) + 1,iI)
+      END DO
     END IF
 
     RETURN
@@ -800,7 +815,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! inputs
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
@@ -827,73 +842,80 @@
     INTEGER :: LL,M,ICLDTOP,ICLDBOT,N,L,I,nmom, iiDiv,Nprime
     REAL :: ASYM_RTSPEC(maxnz),SSALB_RTSPEC(maxnz)
     DOUBLE PRECISION :: tauC(kProfLayer),tauCG(kProfLayer)
+    CHARACTER(1) :: caScale(MAXSCAT)
 
     iiDiv = 0
     555 CONTINUE
     IF (iiDiv*kProfLayer < iaaRadLayer(iAtm,3)) THEN
-        iiDiv = iiDiv + 1
-        GOTO 555
+      iiDiv = iiDiv + 1
+      GOTO 555
     END IF
     iiDiv = iiDiv - 1
 
 !!!!!!!!!!!!!! ********* CLOUD SCATTERING ************* !!!!!!!!!!!!
-    LL=0
+    LL = 0
     DO M = 1,kMaxClouds
-        IF (iaCloudWithThisAtm(M) > 0) THEN
-            ICLDTOP = IACLDTOP(M)
-            ICLDBOT = IACLDBOT(M)
-            DO N = ICLDTOP, ICLDBOT - 1
-                Nprime = N-iiDiv*kProfLayer
-            !L is the cloud layer = 1(top)..nlay(bot) in cloud
-                L = LL + N-ICLDTOP+1
+      IF (iaCloudWithThisAtm(M) > 0) THEN
+        ICLDTOP = IACLDTOP(M)
+        ICLDBOT = IACLDBOT(M)
+        DO N = ICLDTOP, ICLDBOT - 1
+          Nprime = N-iiDiv*kProfLayer
+          ! L is the cloud layer = 1(top)..nlay(bot) in cloud
+          L = LL + N-ICLDTOP+1
 
-            !            write (kstdwarn,*) 'm,tp,bt,l,iwp(l),dme(l) = ',
-            !     $ m,icldtop,icldbot,l,iwp(l),dme(l)
+          !write (kstdwarn,*) 'm,tp,bt,l,iwp(l),dme(l) = ',
+          !     $ m,icldtop,icldbot,l,iwp(l),dme(l)
 
-                I = ISCATTAB(L)     !!!!!I is the scattering table info number
+          I = ISCATTAB(L)     !!!!!I is the scattering table info number
 
-            !      Interpolate to get values of extinction, s.s. albedo, and
-            !      phi function values at given obs. mu, waveno, and particle size.
-            !      Note: we don't need phi functions for Eddington-only solution
-            !      This means that while the rtspec code had a choice of
-            !            CALL INTERP_SCAT_TABLE2 (rF, DME(L),    versus
-            !            CALL INTERP_SCAT_TABLE3 (rF, DME(L),
-            !      here we only need the simpler first choice as we are not messing
-            !      around with the phase functions
-                CALL INTERP_SCAT_TABLE2 (rF, DME(L), &
+          ! Interpolate to get values of extinction, s.s. albedo, and
+          ! phi function values at given obs. mu, waveno, and particle size.
+          ! Note: we don't need phi functions for Eddington-only solution
+          ! This means that while the rtspec code had a choice of
+          !       CALL INTERP_SCAT_TABLE2 (rF, DME(L),    versus
+          !       CALL INTERP_SCAT_TABLE3 (rF, DME(L),
+          ! here we only need the simpler first choice as we are not messing
+          ! around with the phase functions
+          CALL INTERP_SCAT_TABLE2 (rF, DME(L), &
                 EXTINCT, SSALB_RTSPEC(L), ASYM_RTSPEC(L), &
                 NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
                 TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
 
-            ! but the indices have to be modified so we put info into the correct layers
-            ! also have to set asymmetry parameter
-                TAUC(L) = DBLE(IWP(L)*EXTINCT/1000.0)
-            !!!!!!!!!!!! orig code TAUCG(L) = TAUGAS(N) + TAUC(L)
-                TAUCG(L) = dtauc(Nprime) + TAUC(L)
-                IF (TAUCG(L) > 1.0D-5) THEN
-                    SSALB_RTSPEC(L) = SSALB_RTSPEC(L)*TAUC(L)/TAUCG(L)
-                ELSE
-                    SSALB_RTSPEC(L) = 0.0
-                ENDIF
-            ! so now set the indices correctly and do relevant changes of real --> double
-            !!!orig code dtauc(N)      = blah, ssalb(N)      = blah
-            !!!onew code dtauc(Nprime) = blah, ssalb(Nprime) = blah
-                dtauc(Nprime) = DBLE(TAUCG(L))
-                SSALB(Nprime) = DBLE(SSALB_RTSPEC(L))
-                IF (ssalb_rtspec(L) > 1.0e-6) THEN
-                    asym(Nprime)  = DBLE(asym_rtspec(L))
-                ELSE
-                    asym(Nprime)  = DBLE(0.0)
-                END IF
+!   this was com,mented out till June 2022 then Tang/Yang/Huang/RRTM suggest no use unscaled
+!   Frank Evans code scales the Mie scattering parameters, so we have to
+!   unscale them!!!!!!!!
+          CALL UnScaleMie(caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
+                        ndme(i)*nwavetab(i))
+
+          ! but the indices have to be modified so we put info into the correct layers
+          ! also have to set asymmetry parameter
+          TAUC(L) = DBLE(IWP(L)*EXTINCT/1000.0)
+          !!!!!!!!!!!! orig code TAUCG(L) = TAUGAS(N) + TAUC(L)
+          TAUCG(L) = dtauc(Nprime) + TAUC(L)
+          IF (TAUCG(L) > 1.0D-5) THEN
+            SSALB_RTSPEC(L) = SSALB_RTSPEC(L)*TAUC(L)/TAUCG(L)
+          ELSE
+            SSALB_RTSPEC(L) = 0.0
+          ENDIF
+          ! so now set the indices correctly and do relevant changes of real --> double
+          !!!orig code dtauc(N)      = blah, ssalb(N)      = blah
+          !!!onew code dtauc(Nprime) = blah, ssalb(Nprime) = blah
+          dtauc(Nprime) = DBLE(TAUCG(L))
+          SSALB(Nprime) = DBLE(SSALB_RTSPEC(L))
+          IF (ssalb_rtspec(L) > 1.0e-6) THEN
+            asym(Nprime)  = DBLE(asym_rtspec(L))
+          ELSE
+            asym(Nprime)  = DBLE(0.0)
+          END IF
                   
-            !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
-                nmom = max(2*nmuobs + 1,nstr)
-                nmom = min(maxmom,nmom)
-            !! get the phase moments for the HG phase function
-                CALL getmom(3,asym(Nprime),nmom,pmom(0,Nprime))
-            ENDDO                 !DO N=ICLDTOP,ICLDBOT-1
-            LL = LL + iaCloudNumLayers(M)
-        END IF                  !IF (iaCloudWithThisAtm(M) > 0) THEN
+          !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
+          nmom = max(2*nmuobs + 1,nstr)
+          nmom = min(maxmom,nmom)
+          !! get the phase moments for the HG phase function
+          CALL dgetmom(3,asym(Nprime),nmom,pmom(0,Nprime))
+        ENDDO                 !DO N=ICLDTOP,ICLDBOT-1
+      LL = LL + iaCloudNumLayers(M)
+      END IF                  !IF (iaCloudWithThisAtm(M) > 0) THEN
     END DO                    !DO M = 1,kMaxClouds
 
     RETURN
@@ -903,11 +925,11 @@
 ! this subroutine sets up the optical depths, single scatter albedo etc for
 ! a atmosphere where there is only gas + Rayleigh scattering
     SUBROUTINE SetUpRayleigh(nlev,nstr,nmuobs, rF,raDensity,raThickness, &
-    dtauc,ssalb,asym,pmom)
+      dtauc,ssalb,asym,pmom)
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 ! inputs
     INTEGER :: nlev,nstr          !number of levels, number of streams
     INTEGER :: nmuobs             !number of RTSPEC angles for Mie computations
@@ -922,24 +944,23 @@
 ! local variables
     REAL :: ASYM_RTSPEC(maxnz),SSALB_RTSPEC(maxnz)
     DOUBLE PRECISION :: tauC(kProfLayer),tauCG(kProfLayer)
-    REAL :: Rayleigh
     INTEGER :: N,nmom
 
     DO N = 1,NLEV-1   !!!!!!!to include scattering
-    ! ndices have to be modified so we put info into the correct layers
-        TAUC(N) = DBLE(rayleigh(rF,raDensity(N),raThickness(N)))
-        TAUCG(N) = dtauc(N) + TAUC(N)
-        SSALB_RTSPEC(N) = SNGL(TAUC(N)/TAUCG(N))
-    ! so now set the indices correctly and do relevant changes of real --> double
-        dtauc(N) = TAUCG(N)
-        SSALB(N) = DBLE(SSALB_RTSPEC(N))
-        asym(N)  = DBLE(0.0)
+      !indices have to be modified so we put info into the correct layers
+      TAUC(N) = DBLE(rayleigh(rF,raDensity(N),raThickness(N)))
+      TAUCG(N) = dtauc(N) + TAUC(N)
+      SSALB_RTSPEC(N) = SNGL(TAUC(N)/TAUCG(N))
+      ! so now set the indices correctly and do relevant changes of real --> double
+      dtauc(N) = TAUCG(N)
+      SSALB(N) = DBLE(SSALB_RTSPEC(N))
+      asym(N)  = DBLE(0.0)
 
-    !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
-        nmom = max(2*nmuobs + 1,nstr)
-        nmom = min(maxmom,nmom)
-    !! get the phase moments for Rayleigh scattering
-        CALL getmom(2,asym(N),nmom,pmom(0,N))
+      !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
+      nmom = max(2*nmuobs + 1,nstr)
+      nmom = min(maxmom,nmom)
+      !! get the phase moments for Rayleigh scattering
+      CALL dgetmom(2,asym(N),nmom,pmom(0,N))
     ENDDO
 
     RETURN
@@ -960,7 +981,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
      
 ! input variables
     INTEGER :: nlev,iNp,iaOp(kPathsOut)
@@ -971,17 +992,17 @@
 ! output variables
     INTEGER :: ntau,numu,nphi
     LOGICAL :: usrtau,usrang
-    DOUBLE PRECISION :: utau(maxulv)     !tau's at which to output results
-    DOUBLE PRECISION :: umu(maxumu)      !ang's at which to output results
-    DOUBLE PRECISION :: phi(maxphi)      !azimuthal phi's to output radiance
-    DOUBLE PRECISION :: fisot            !isotropic TOA radiation
-    DOUBLE PRECISION :: fbeam,umu0,phi0  !solar beam
+    DOUBLE PRECISION :: utau(maxulv)     ! tau's at which to output results
+    DOUBLE PRECISION :: umu(maxumu)      ! ang's at which to output results
+    DOUBLE PRECISION :: phi(maxphi)      ! azimuthal phi's to output radiance
+    DOUBLE PRECISION :: fisot            ! isotropic TOA radiation
+    DOUBLE PRECISION :: fbeam,umu0,phi0  ! solar beam
 
     INTEGER :: ibcnd
     LOGICAL :: lamber,plank,onlyfl
     DOUBLE PRECISION :: albedo,btemp,ttemp,temis,accur
-    CHARACTER  header*127             !dumb comment
-    LOGICAL :: prnt(5)                   !prnt(1) = true, print input variables
+    CHARACTER  header*127                ! dumb comment
+    LOGICAL :: prnt(5)                   ! print(1) = true, print input variables
 
 ! local variables
     INTEGER :: iI,iJ
@@ -991,62 +1012,62 @@
     d2 = dTotalOpticalDepth
 
     IF (iDownward == 1) THEN
-    ! own look instrument
-        usrtau = .TRUE.   !return intensity at ONE optical depth
-    ! nstead of at all levels
+      !down look instrument
+      usrtau = .TRUE.   !return intensity at ONE optical depth instead of at all levels
+      ntau    = 1       !return intensity at one user level
+      utau(1) = DBLE(0.000000000)                  !!! for TOA
 
-        ntau    = 1       !return intensity at one user level
-        utau(1) = DBLE(0.000000000)                  !!! for TOA
+      !!!!allow more than one level
+      ntau = iNp
+      dCumulative(1) = dtauc(1)
+      DO iI = 2,nlev-1
+        dCumulative(iI) = 0.0
+        dCumulative(iI) = dtauc(iI) + dCumulative(iI-1)
+      END DO
 
-    !!!!allow more than one level
-        ntau = iNp
-        dCumulative(1) = dtauc(1)
-        DO iI = 2,nlev-1
-            dCumulative(iI) = 0.0
-            dCumulative(iI) = dtauc(iI) + dCumulative(iI-1)
-        END DO
-
-        DO iI = 1,ntau
+      DO iI = 1,ntau
         ! we will get out radiance at TOP of layer
-            utau(iI) = dCumulative((nlev-1)-iaOp(iI)+1) - d1
-        END DO
+        utau(iI) = dCumulative((nlev-1)-iaOp(iI)+1) - d1
+      END DO
           
-        usrang = .TRUE.   !return intensity at one user polar angle
-        numu = 1
-        umu(1) = DBLE(ABS(cos(rSatAngle*kPi/180)))
-        nphi = 1          !return intensity at one user zenith angle
-        phi(1) = DBLE(0.0)
+      usrang = .TRUE.   !return intensity at one user polar angle
+      numu = 1
+      umu(1) = DBLE(ABS(cos(rSatAngle*kPi/180)))
+      !nphi = 1          !return intensity at one user zenith angle == 0
+      !phi(1) = DBLE(0.0)
+      nphi = 0          !return intensity at one user zenith angle == 0
+      !phi(1) = DBLE(0.0)
 
-                
     ELSE
-    ! p look instrument
-        usrtau = .TRUE.   !return intensity at ONE optical depth
-    ! nstead of at all levels
+      ! up look instrument
+      usrtau = .TRUE.   !return intensity at ONE optical depth instead of at all levels
+      ntau    = 1       !return intensity at one user level
+      utau(1) = dTotalOpticalDepth                 !!! for bottom
 
-        ntau    = 1       !return intensity at one user level
-        utau(1) = dTotalOpticalDepth                 !!! for bottom
+      !!!!allow more than one level
+      ntau = iNp
+      dCumulative(1) = dtauc(1)
+      DO iI = 2,nlev-1
+        dCumulative(iI) = 0.0
+        dCumulative(iI) = dtauc(iI) + dCumulative(iI-1)
+      END DO
 
-    !!!!allow more than one level
-        ntau = iNp
-        dCumulative(1) = dtauc(1)
-        DO iI = 2,nlev-1
-            dCumulative(iI) = 0.0
-            dCumulative(iI) = dtauc(iI) + dCumulative(iI-1)
-        END DO
+      DO iI = 1,ntau
+      ! we will get out radiance at BOTTOM of layer; flip iaOp stuff
+          utau(iI) = dCumulative(iaOp(iI)) - d1
+      END DO
 
-        DO iI = 1,ntau
-        ! we will get out radiance at BOTTOM of layer; flip iaOp stuff
-            utau(iI) = dCumulative(iaOp(iI)) - d1
-        END DO
-
-        usrang = .TRUE.   !return intensity at one user polar angle
-        numu = 1
-        umu(1) = DBLE(-ABS(cos(rSatAngle*kPi/180)))
-        nphi = 1          !return intensity at one user zenith angle
-        phi(1) = DBLE(0.0)
+      usrang = .TRUE.   !return intensity at one user polar angle
+      numu = 1
+      umu(1) = DBLE(-ABS(cos(rSatAngle*kPi/180)))
+      !nphi = 1          !return intensity at one user zenith angle == 0
+      !phi(1) = DBLE(0.0)
+      nphi = 0          !return intensity at one user zenith angle == 0
+      !phi(1) = DBLE(0.0)
     END IF
 
-    fisot  = DBLE(rTopIntensity)
+    fisot = 0.0
+    fisot = DBLE(rTopIntensity)
 
     IF (abs(abs(rSatAngle) - abs(kSolarAngle)) <= 1e-7) THEN
         kSolarAngle = kSolarAngle+1e-4
@@ -1055,44 +1076,45 @@
     umu0   = DBLE(cos(kSolarAngle*kPi/180))
     phi0   = DBLE(0.0)
 
-    ibcnd = 0           !general case
-    lamber = .FALSE.    !specify bidir reflectance
-    lamber = .TRUE.     !isotropic reflect lower bdry ==> specify albedo
-    albedo  = DBLE(1.0-emiss)   !from defns in books,papers
+    ibcnd = 0                   ! general case
+    lamber = .FALSE.            ! specify bidir reflectance
+    lamber = .TRUE.             ! isotropic reflect lower bdry ==> specify albedo
+    albedo  = DBLE(1.0-emiss)   ! from defns in books,papers
 
     btemp  = DBLE(rSurfaceTemp)      !!ground temperature
     IF (iDownward == 1) THEN
-    ! own look instrument
-        ttemp  = DBLE(kTSpace)         !!2.7 Kelvin
+      !down look instrument
+      ttemp  = DBLE(kTSpace)         !!2.7 Kelvin
     ELSE
-    ! p look instrument
-        IF (kSolar < 0) THEN
-            ttemp  = DBLE(kTSpace)       !!2.7 Kelvin or 5700K!!!!!!
-        ELSE IF (kSolar >= 0) THEN
-            IF (abs(abs(kSolarAngle)-abs(rSatAngle)) <= 1.0e-3) THEN
-                ttemp  = DBLE(kSunTemp)    !!sun in FOV .. 5700K!!!!!!
-            ELSE
-                ttemp  = DBLE(kTSpace)     !!sun not in FOV .. 2.7!!!!!!
-            END IF
+      !up look instrument
+      IF (kSolar < 0) THEN
+        ttemp  = DBLE(kTSpace)       !!2.7 Kelvin or 5700K!!!!!!
+      ELSE IF (kSolar >= 0) THEN
+        IF (abs(abs(kSolarAngle)-abs(rSatAngle)) <= 1.0e-3) THEN
+            ttemp  = DBLE(kSunTemp)    !!sun in FOV .. 5700K!!!!!!
+        ELSE
+            ttemp  = DBLE(kTSpace)     !!sun not in FOV .. 2.7!!!!!!
         END IF
+      END IF
     END IF
 
     temis  = DBLE(1.0)
     plank  = .TRUE.      !emission from layers
 
     IF (iDoFlux == -1) THEN
-        onlyfl = .FALSE.     !only need intensity as well
-        header  = 'scattering computations'
+      onlyfl = .FALSE.     !only need intensity as well
+      header  = 'scattering computations'
     ELSEIF (iDoFlux == +1) THEN
-        onlyfl = .TRUE.     !compute flux only
-        usrtau = .FALSE.    !compute at every boundary
-        ntau = nlev
-        numu = 0
-        nphi = 0
-        header  = 'flux computations'
+      onlyfl = .TRUE.     !compute flux only
+      usrtau = .FALSE.    !compute at every boundary
+      ntau = nlev
+      numu = 0
+      nphi = 0
+      header  = 'flux computations'
     END IF
 
-    accur   = DBLE(0.000)
+    accur   =  DBLE(0.000)
+    accur   =  DBLE(0.000001)
     prnt(1) = .FALSE. 
     prnt(2) = .FALSE. 
     prnt(3) = .FALSE. 
@@ -1122,7 +1144,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iDoFlux     = do flux (+1) or radiance (-1)
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
@@ -1296,13 +1318,13 @@
     REAL :: raCorrelatedK(kMaxPts)
 
 ! more local variables
-    INTEGER :: iaStep(kMaxPts),iDiv,iScatter
+    INTEGER :: iaStep(kMaxPts),iScatter
     CHARACTER(160) :: caName
     INTEGER :: iIn,iJ,iI,iScat,iIOUN,iF,iFF,iFFMax,iL
     REAL :: TOA_to_instr(kMaxPts)
     INTEGER :: iaRadLayer(kProfLayer)
     REAL :: raSolarBeam(kMaxPts),raTopIntensity(kMaxPts)
-    REAL :: ttorad,rDummy
+    REAL :: rDummy
     INTEGER :: iReadTable,iII
     INTEGER :: iDumper,iRayleigh
     REAL :: raDensity(kProfLayer)
@@ -1340,87 +1362,85 @@
     iIOUN = kStdkCarta
 
     DO iIn=1,kMaxPts
-        raIntenSTEP(iIn) = 0.0
-        raFreqSTEP(iIn)  = 0.0
-        rakSTEP(iIn)     = 0.0
+      raIntenSTEP(iIn) = 0.0
+      raFreqSTEP(iIn)  = 0.0
+      rakSTEP(iIn)     = 0.0
     END DO
 
-    WRITE (kStdWarn,*) 'cos(rSatAngle),sfctemp = ',cos(rSatAngle*kPi/180.0), &
-    rSurfaceTemp
+    WRITE (kStdWarn,*) 'cos(rSatAngle),sfctemp = ',cos(rSatAngle*kPi/180.0),rSurfaceTemp
 
     CALL SetMieTables_DISORT(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
-    iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
+      iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+      raPhasePoints,raComputedPhase, &
+      iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
 !!!!!!!!!!!!!!!!!!these are the output variables
-    NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
-    TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
-    TABPHI2UP, TABPHI2DN, &
-    NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
-    IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
-    iCloudySky, IACLDTOP, IACLDBOT)
+      NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
+      TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
+      TABPHI2UP, TABPHI2DN, &
+      NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
+      IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
+      iCloudySky, IACLDTOP, IACLDBOT)
 
     CALL GetAbsProfileDISORT(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
-    iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
-    NABSNU, NLEV, TEMP, ABSPROF, &
-    ICLDTOP,iCLDBOT,IOBS, iDownward, iwp, raNumberDensity, &
-    raDensity,raLayerTemp, &
-    iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh)
+      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
+      NABSNU, NLEV, TEMP, ABSPROF, &
+      ICLDTOP,iCLDBOT,IOBS, iDownward, iwp, raNumberDensity, &
+      raDensity,raLayerTemp, &
+      iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh)
 
 !!!!!!! if iCloudSky .LT. 0 do clear sky rad transfer easily !!!!!!!
     IF (iCloudySky < 0) THEN
-    !!!!note that we do not care about background thermal accurately here
-        write (kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
-        DO iii = 1,iNp
-            DO iF = 1,kMaxPts
-                DO iL = 1,NLEV-1
-                    raTau(iL)  = absprof(iL,iF)
-                END DO
-                CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
-                rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
-                raUseEmissivity(iF),raFreq(iF),raInten(iF),iaOp(iii), &
-                iProfileLayers,raPressLevels)
-            END DO
-            CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+      !!!!note that we do not care about background thermal accurately here
+      write (kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
+      DO iii = 1,iNp
+        DO iF = 1,kMaxPts
+          DO iL = 1,NLEV-1
+            raTau(iL)  = absprof(iL,iF)
+          END DO
+        CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
+          rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
+          raUseEmissivity(iF),raFreq(iF),raInten(iF),iaOp(iii), &
+          iProfileLayers,raPressLevels)
         END DO
-        GOTO 9876
+      CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+      END DO
+    GOTO 9876
     END IF
 
     write(kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
     write(kStdWarn,*) 'for the clear <-> cloudy comparisons'
 ! his fills up raaNoScatterStep
     DO iii = 1,iNumlayer
-        DO iF = 1,kMaxPts
-            DO iL = 1,NLEV-1
-                raTau(iL)  = absprof(iL,iF)
-            END DO
-            CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
+      DO iF = 1,kMaxPts
+        DO iL = 1,NLEV-1
+          raTau(iL)  = absprof(iL,iF)
+        END DO
+        CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
             rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
             raUseEmissivity(iF),raFreq(iF),raaNoScatterStep(iii,iF), &
             iaOp(iii),iProfileLayers,raPressLevels)
-        END DO
+      END DO
     END DO
 
 !!!!!!!!!! if iCloudSky .GT. 0 go thru and do the DISORT stuff !!!!!!!!
-    CALL SetCorrelatedK(iDownWard,raCorrelatedK,raaAbs, &
-    iaaRadLayer,iAtm,iNumLayer,ABSPROF)
+    CALL SetCorrelatedK(iDownWard,raCorrelatedK,raaAbs,iaaRadLayer,iAtm,iNumLayer,ABSPROF)
 
 ! set up some things for the instrument
     IF (iDownward == 1) THEN             !!down look instr
-        CALL Init_DownLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
+      CALL Init_DownLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
         rFracTop,raFreq,raaAbs,rSatAngle,iTag, &
         raTopIntensity,raSolarBeam,TOA_to_instr)
     ELSE
-        CALL Init_UpLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
+      CALL Init_UpLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
         rFracTop,raFreq,raaAbs,rSatAngle,iTag, &
         raTopIntensity,raSolarBeam,TOA_to_instr)
     END IF
 
 ! set the temperature levels, changing to double precision
     DO iL=1,NLEV
-        temper(iL-1) = DBLE(temp(iL))
+      temper(iL-1) = DBLE(temp(iL))
     END DO
 
 ! **************************** SPEED UP CODE ***************************
@@ -1429,20 +1449,20 @@
 ! out of 10000
 ! **************************** SPEED UP CODE ***************************
     IF (iStep > kMaxPts) THEN
-        write(kStdWarn,*) 'Resetting kDis_Pts to kMaxPts'
-        iStep = kMaxPts
+      write(kStdWarn,*) 'Resetting kDis_Pts to kMaxPts'
+      iStep = kMaxPts
     END IF
 
     IF (iStep < 20) THEN
-        write(kStdWarn,*) 'Resetting kDis_Pts to 20'
-        iStep = 20
+      write(kStdWarn,*) 'Resetting kDis_Pts to 20'
+      iStep = 20
     END IF
 
 ! f you want to do 10 pts out of 10000 pts, then you have to do rad
 ! ransfer on points 1,1001,2001,3001,...10000
 ! e step over 10000/iStep points
     IF (kScatter /= 2) THEN
-        iStep = iDiv(kMaxPts,iStep)
+      iStep = iDiv(kMaxPts,iStep)
     END IF
 
 ! set up array of wavenumber indices that we step thru, to do the rad transfer
@@ -1452,52 +1472,51 @@
 
     iStepPts = 0
     DO iFF = 1,iFFMax
-        IF = iaStep(iFF)
-        iStepPts = iStepPts + 1
-        DO iL=1,NLEV-1
-            dtauc(iL) = DBLE(absprof(iL,iF))
-            raTau(iL) = absprof(iL,iF)
+      IF = iaStep(iFF)
+      iStepPts = iStepPts + 1
+      DO iL=1,NLEV-1
+        dtauc(iL) = DBLE(absprof(iL,iF))
+        raTau(iL) = absprof(iL,iF)
+      END DO
+
+      wvnmlo = DBLE(raFreq(iF))
+      wvnmhi = DBLE(raFreq(iF)+kaFrStep(iTag))
+      ! ++++++++++++++++ this is to include MIE data from RTSPEC +++++++++++++++++
+
+      nlyr = nlev-1
+      DO iL=1,kProfLayer
+        ssalb(iL) = DBLE(0.0)
+        asym(iL)  = DBLE(0.0)
+        asym_rtspec(iL) = 0.0
+      END DO
+
+      DO iL=0,maxmom
+        DO I = 1,maxcly
+          pmom(iL,I) = DBLE(0.0)
         END DO
+      END DO
 
-        wvnmlo = DBLE(raFreq(iF))
-        wvnmhi = DBLE(raFreq(iF)+kaFrStep(iTag))
-    ! ++++++++++++++++ this is to include MIE data from RTSPEC +++++++++++++++++
-
-        nlyr = nlev-1
-        DO iL=1,kProfLayer
-            ssalb(iL) = DBLE(0.0)
-            asym(iL)  = DBLE(0.0)
-            asym_rtspec(iL) = 0.0
-        END DO
-
-        DO iL=0,maxmom
-            DO I = 1,maxcly
-                pmom(iL,I) = DBLE(0.0)
-            END DO
-        END DO
-
-    ! to test no scattering, just replace following doloops with DO N = 1,-1
-
-        IF (iRayleigh == -1) THEN     !want cloud, not Rayleigh scattering
-            CALL SetUpClouds(nstr,nmuobs(1),iaCloudWithThisAtm, &
+      ! to test no scattering, just replace following doloops with DO N = 1,-1
+      IF (iRayleigh == -1) THEN     !want cloud, not Rayleigh scattering
+        CALL SetUpClouds(nstr,nmuobs(1),iaCloudWithThisAtm, &
             iaCldTop,iaCldBot,iaCloudNumLayers,raFreq(iF), &
             iAtm,iaaRadLayer,iNumLayer, &
             IWP, DME, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, ISCATTAB, &
             extinct,dtauc,ssalb,asym,pmom)
-        ELSE IF (iRayleigh == +1) THEN   !want Rayleigh, not cloud scattering
-            CALL SetUpRayleigh(nlev,nstr,nmuobs(1),raFreq(iF),raDensity, &
+      ELSE IF (iRayleigh == +1) THEN   !want Rayleigh, not cloud scattering
+        CALL SetUpRayleigh(nlev,nstr,nmuobs(1),raFreq(iF),raDensity, &
             raThicknessRayleigh,dtauc,ssalb,asym,pmom)
-        END IF
+      END IF
 
-        dTotalOpticalDepth=DBLE(0.0)
-        DO iL=1,NLEV-1
-            dTotalOpticalDepth = dTotalOpticalDepth+dtauc(iL)
-        END DO
+      dTotalOpticalDepth=DBLE(0.0)
+      DO iL=1,NLEV-1
+        dTotalOpticalDepth = dTotalOpticalDepth+dtauc(iL)
+      END DO
 
-    ! ++++++++++++++++ final initializations ++++++++++++++++++++++++++++++
-    !     note we do not need flux here!!!!
-        CALL FinalInitialization( &
+      ! ++++++++++++++++ final initializations ++++++++++++++++++++++++++++++
+      !     note we do not need flux here!!!!
+      CALL FinalInitialization( &
         iDownWard,rSatAngle,raTopIntensity(iF),raSolarBeam(iF), &
         raUseEmissivity(iF),rSurfaceTemp, &
         dtauc,dTotalOpticalDepth,iDoFlux,nlyr+1,iNp,iaOp, &
@@ -1506,33 +1525,33 @@
         ibcnd,lamber,albedo, &
         btemp,ttemp,temis,plank,onlyfl,accur,prnt,header)
              
-    !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
-        nmom = max(2*nmuobs(1) + 1,nstr)
-        nmom = min(maxmom,nmom)
+      !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
+      nmom = max(2*nmuobs(1) + 1,nstr)
+      nmom = min(maxmom,nmom)
 
-        CALL DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, WVNMLO, &
+      CALL DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, WVNMLO, &
         WVNMHI, USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, &
         UMU, NPHI, PHI, IBCND, FBEAM, UMU0, PHI0, &
         FISOT, LAMBER, ALBEDO, BTEMP, TTEMP, TEMIS, &
         PLANK, ONLYFL, ACCUR, PRNT, HEADER, RFLDIR, RFLDN, &
         FLUP, DFDT, UAVG, UU, ALBMED, TRNMED )
 
-        DO iii = 1,iNp
-            raKStep(iStepPts)     = raCorrelatedK(iF)
-            raFreqSTEP(iStepPts)  = raFreq(iF)
-            raaIntenSTEP(iii,iStepPts) = SNGL(uu(1,iii,1))
-        END DO
+      DO iii = 1,iNp
+        raKStep(iStepPts)     = raCorrelatedK(iF)
+        raFreqSTEP(iStepPts)  = raFreq(iF)
+        raaIntenSTEP(iii,iStepPts) = SNGL(uu(1,iii,1))
+      END DO
          
     END DO   !!loop over freqs
 ! ------------------------ END OF DISORT ---------------------------------
 
-! nterpolate coarse step grid onto fine kCARTA grid
+!interpolate coarse step grid onto fine kCARTA grid
     DO iii = 1,iNp
-        DO iF = 1,iStepPts
-            raIntenStep(iF)     = raaIntenStep(iii,iF)
-            raNoScatterStep(iF) = raaNoScatterStep(iii,iF)
-        END DO
-        CALL Interpolator(raFreqStep,rakStep,raIntenStep, &
+      DO iF = 1,iStepPts
+        raIntenStep(iF)     = raaIntenStep(iii,iF)
+        raNoScatterStep(iF) = raaNoScatterStep(iii,iF)
+      END DO
+      CALL Interpolator(raFreqStep,rakStep,raIntenStep, &
         raNoScatterSTEP,raaNoScatterStep,iii, &
         iStepPts,iDownWard,nlev, &
         iProfileLayers,raPressLevels, &
@@ -1541,8 +1560,8 @@
         rSurfaceTemp,rSurfPress,raUseEmissivity, &
         raInten)
         CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-    !        iF = 1
-    !        print *,iii,iF,raIntenStep(iF),raNoScatterStep(iF),raInten(iF)
+        !        iF = 1
+        !        print *,iii,iF,raIntenStep(iF),raNoScatterStep(iF),raInten(iF)
     END DO
           
     9876 CONTINUE       !!!!we could have skipped here direct if NO clouds in atm
@@ -1566,7 +1585,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! inputs
     REAL :: raPressLevels(kProfLayer+1)
@@ -1582,11 +1601,10 @@
 ! local variables
     REAL :: DWA(kMaxPts),raTau(kProfLayer),raNoScatterAll(kMaxPts)
     INTEGER :: Indx(kMaxPts),iF,iL
-    REAL :: radtot,ttorad
 
     IF (kScatter == 1) THEN
-    !!!interpolate wavenumber points
-        IF (iDownWard == -1) THEN      !!!works better for uplook instr
+      !!!interpolate wavenumber points
+      IF (iDownWard == -1) THEN      !!!works better for uplook instr
         !          DO iF = 1,kMaxPts
         !            DO iL = 1,NLEV-1
         !              raTau(iL)  = absprof(iL,iF)
@@ -1596,26 +1614,26 @@
         !     $         raUseEmissivity(iF),raFreq(iF),raNoScatterAll(iF),-1,
         !     $         iProfileLayers,raPressLevels)
         !          END DO
-            DO iF = 1,kMaxPts
-                raNoScatterAll(iF) = raaNoScatterStep(iii,iF)
-            END DO
-            CALL INTERP_PLANCK_0( &
-            raFreqStep,raIntenStep,raNoScatterStep,iStepPts, &
-            raFreq,raNoScatterAll,raInten)
-        ELSEIF (iDownWard == 1) THEN   !!!works better for downlook instr
-            DO iF = 1,kMaxPts
-                DO iL = 1,NLEV-1
-                    raTau(iL)  = absprof(iL,iF)
-                END DO
-                CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
+        DO iF = 1,kMaxPts
+          raNoScatterAll(iF) = raaNoScatterStep(iii,iF)
+        END DO
+        CALL INTERP_PLANCK_0( &
+          raFreqStep,raIntenStep,raNoScatterStep,iStepPts, &
+          raFreq,raNoScatterAll,raInten)
+      ELSEIF (iDownWard == 1) THEN   !!!works better for downlook instr
+        DO iF = 1,kMaxPts
+          DO iL = 1,NLEV-1
+            raTau(iL)  = absprof(iL,iF)
+          END DO
+          CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
                 rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
                 raUseEmissivity(iF),raFreq(iF),raNoScatterAll(iF),-1, &
                 iProfileLayers,raPressLevels)
-            END DO
-            CALL INTERP_PLANCK_0( &
+        END DO
+      CALL INTERP_PLANCK_0( &
             raFreqStep,raIntenStep,raNoScatterStep,iStepPts, &
             raFreq,raNoScatterAll,raInten)
-        END IF
+      END IF
     END IF
 
     IF ((kScatter >= 2) .AND. (iDownWard == -1)) THEN
@@ -1625,21 +1643,20 @@
       END DO
 
     ELSEIF ((kScatter >= 2) .AND. (iDownWard == 1)) THEN
-    !!!interpolate in k
-    !!!do cumulative distr function to see if things might be too spiky
-        DO iF=1,kMaxPts
-            DO iL=1,NLEV-1
-                raTau(iL)  = absprof(iL,iF)
-            END DO
-            CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
+      !!!interpolate in k
+      !!!do cumulative distr function to see if things might be too spiky
+      DO iF=1,kMaxPts
+        DO iL=1,NLEV-1
+          raTau(iL)  = absprof(iL,iF)
+          END DO
+        CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
             rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
             raUseEmissivity(iF),raFreq(iF),raNoScatterAll(iF),-1, &
             iProfileLayers,raPressLevels)
         END DO
         CALL INTERP_PLANCK_3( &
-        raFreqStep,raKStep,raIntenStep,raNoScatterStep,iStepPts, &
-        raFreq,raNoScatterAll,raCorrelatedK,raInten)
-
+          raFreqStep,raKStep,raIntenStep,raNoScatterStep,iStepPts, &
+          raFreq,raNoScatterAll,raCorrelatedK,raInten)
     END IF
 
     RETURN
@@ -1649,13 +1666,13 @@
 ! is the lowest layer and raa(kProfLayer,:) is the highest layer .. it then
 ! outputs these  abs coeffs into absprof, where absprof(1,:) is the top, and
 ! absprof(iNumLayer,:) = ground
-
+!
 ! remember kCARTA has -----------------
 !                      layer 100 = TOA
 !                     -----------------
-
+!
 !                           ...
-
+!
 !                     -----------------
 !                      layer 1 = GND
 !                     -----------------
@@ -1695,7 +1712,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! these are variables that come in from kcartamain.f
     REAL :: raaAbs(kMaxPts,kMixFilRows),raFreq(kMaxPts),rFracTop,rFracBot
@@ -1703,7 +1720,7 @@
     REAL :: raThickness(kProfLayer),raPressLevels(kProfLayer+1)
     INTEGER :: iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNpmix
     INTEGER :: iDownWard,iProfileLayers
-    REAL :: iwp, raNumberDensity(kProfLayer),raLayerTemp(kProfLayer)
+    REAL :: iwp(MAXNZ), raNumberDensity(kProfLayer),raLayerTemp(kProfLayer)
 ! these are variables that we have to set
     INTEGER ::  NABSNU, NLEV         !!!!!!!!!!!!!MAXNZ, MAXABSNU
     REAL ::   TEMP(*), ABSPROF(MAXNZ,*)
@@ -1713,7 +1730,7 @@
 
 ! local variables
     INTEGER :: iaRadLayer(kProfLayer), iaTemp(kProfLayer),iFr, iL, iLay, iiDiv
-    REAL :: NU, raVT1(kMixFilRows), InterpTemp, InterpTempSurf
+    REAL :: NU, raVT1(kMixFilRows)
 
 ! these are to flip the temperature, abs profiles if instr looks up
     REAL :: raTemp(kProfLayer+1),raaTemp(kProfLayer,kMaxPts),rT2
@@ -1722,59 +1739,56 @@
     nlev=iNumLayer+1           !this is the number of pressure levels
 
     DO iLay=1,iNumLayer
-        iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
-        IF (iaRadLayer(iLay) > iNpmix) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
-        IF (iaRadLayer(iLay) < 1) THEN
-            write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-            write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-            CALL DoSTOP
-        END IF
+      iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
+      IF (iaRadLayer(iLay) > iNpmix) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
+      IF (iaRadLayer(iLay) < 1) THEN
+        write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+        write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        CALL DoSTOP
+      END IF
     END DO
 
     iiDiv = 0
     555 CONTINUE
     IF (iiDiv*kProfLayer < iaRadLayer(3)) THEN
-        iiDiv = iiDiv + 1
-        GOTO 555
+      iiDiv = iiDiv + 1
+      GOTO 555
     END IF
     iiDiv = iiDiv - 1
 
     DO iFr=1,kMixFilRows
-        raVT1(iFr) = raVTemp(iFr)
+      raVT1(iFr) = raVTemp(iFr)
     END DO
 
 ! set the temperature of the bottommost layer correctly
     IF (iDownWard == 1) THEN         !downlook instr
-    ! if the bottommost layer is fractional, interpolate!!!!!!
-        iL=iaRadLayer(1)
-        raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot, &
+      ! if the bottommost layer is fractional, interpolate!!!!!!
+      iL=iaRadLayer(1)
+      raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot, &
         &                        1,iL)
-        rT2=InterpTempSurf(iProfileLayers,raPressLevels,raVTemp,rFracBot, &
+      rT2 = InterpTempSurf(iProfileLayers,raPressLevels,raVTemp,rFracBot, &
         &                        1,iL,rSurfaceTemp,rSurfPress)
         write(kStdWarn,*) 'bottom temp interped to ',raVT1(iL)
-    ! if the topmost layer is fractional, interpolate!!!!!!
-    ! this is hardly going to affect thermal/solar contributions (using this temp
-    ! instead of temp of full layer at 100 km height!!!!!!
-        iL=iaRadLayer(iNumLayer)
-        raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop, &
-        -1,iL)
-        write(kStdWarn,*) 'top temp interped to ',raVT1(iL)
+      ! if the topmost layer is fractional, interpolate!!!!!!
+      ! this is hardly going to affect thermal/solar contributions (using this temp
+      ! instead of temp of full layer at 100 km height!!!!!!
+      iL=iaRadLayer(iNumLayer)
+      raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+      write(kStdWarn,*) 'top temp interped to ',raVT1(iL)
     ELSE IF (iDownWard == -1) THEN       !uplook instr
-    ! if the bottom layer is fractional, interpolate!!!!!!
-        iL=iaRadLayer(iNumLayer)
-        raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot, &
-        &                        1,iL)
-        write(kStdWarn,*) 'bottom temp : orig, interp',raVTemp(iL),raVT1(iL)
-    ! if the top layer is fractional, interpolate!!!!!!
-        iL=iaRadLayer(1)
-        raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop, &
-        -1,iL)
-        write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
+      ! if the bottom layer is fractional, interpolate!!!!!!
+      iL = iaRadLayer(iNumLayer)
+      raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracBot,1,iL)
+      write(kStdWarn,*) 'bottom temp : orig, interp',raVTemp(iL),raVT1(iL)
+      ! if the top layer is fractional, interpolate!!!!!!
+      iL = iaRadLayer(1)
+      raVT1(iL) = InterpTemp(iProfileLayers,raPressLevels,raVTemp,rFracTop,-1,iL)
+      write(kStdWarn,*) 'top temp : orig, interp ',raVTemp(iL),raVT1(iL)
     END IF
 
 ! now set the kCARTA LAYERS temperatures, used with NoScatterRadTransfer
@@ -1782,65 +1796,65 @@
 ! recall for DISORT , gnd = layer 100 while for kCARTA, gnd = 1
 ! but also that for UPLOOK instr, clear sky kCARTA flips the layering!!!!
     IF (iDownward == 1) THEN
-        DO iLay=1,iNumLayer
-            raLayerTemp(iLay) = raVT1(iaRadLayer(iNumLayer-iLay+1))
-        END DO
+      DO iLay=1,iNumLayer
+        raLayerTemp(iLay) = raVT1(iaRadLayer(iNumLayer-iLay+1))
+      END DO
     ELSE
-        DO iLay=1,iNumLayer
-            raLayerTemp(iLay) = raVT1(iaRadLayer(iNumLayer-iLay+1))
-        END DO
-        DO iLay=1,iNumLayer
-            raVT1(iLay) = raLayerTemp(iNumLayer-iLay+1)
-        END DO
-        DO iLay=1,iNumLayer
-            raLayerTemp(iLay) = raVT1(iLay)
-        END DO
+      DO iLay=1,iNumLayer
+        raLayerTemp(iLay) = raVT1(iaRadLayer(iNumLayer-iLay+1))
+      END DO
+      DO iLay=1,iNumLayer
+        raVT1(iLay) = raLayerTemp(iNumLayer-iLay+1)
+      END DO
+      DO iLay=1,iNumLayer
+        raLayerTemp(iLay) = raVT1(iLay)
+      END DO
     END IF
 
 ! ecause kCARTA flips everything for uplook instrument early on in
 ! he code, we have to reflip everything for DISORT
     IF (iDownWard == -1) THEN
-        DO iLay = 1, iNumLayer
-            iaTemp(iLay) = iaRadLayer(iLay)
-        END DO
-        DO iLay = 1, iNumLayer
-            iaRadLayer(iNumLayer-iLay+1) = iaTemp(iLay)
-        END DO
+      DO iLay = 1, iNumLayer
+        iaTemp(iLay) = iaRadLayer(iLay)
+      END DO
+      DO iLay = 1, iNumLayer
+        iaRadLayer(iNumLayer-iLay+1) = iaTemp(iLay)
+      END DO
     END IF
 
 ! set the vertical temperatures of the atmosphere
 ! instead of temperatures at n layers, it computes temps at (n+1) levels
     CALL SetDISORTTemp(TEMP,iaRadLayer,raVTemp,iNumLayer, &
-    rSurfaceTemp,iProfileLayers,raPressLevels)
+      rSurfaceTemp,iProfileLayers,raPressLevels)
 
 ! now set up the abs coeffs
 ! initialize array to all zeroes
     DO iFr=1,kMaxPts
-        DO iLay=iNumLayer+1,kProfLayer
-            absprof(iLay,iFr) = 0.0
-            raDensity(iLay) = 0.0
-            raThicknessRayleigh(iLay) = 0.0
-        END DO
+      DO iLay=iNumLayer+1,kProfLayer
+        absprof(iLay,iFr) = 0.0
+        raDensity(iLay) = 0.0
+        raThicknessRayleigh(iLay) = 0.0
+      END DO
     END DO
 
     DO iLay=1,iNumLayer
-        iL=iaRadLayer(iLay)
-        nu=1.0
-        IF (iLay == 1) THEN
-            nu=rFracBot
-        ELSE IF (iLay == iNumLayer) THEN
-            nu=rFracTop
-        END IF
-        raDensity(iNumLayer-iLay+1) = raNumberDensity(iL-iiDiv*kProfLayer)
-    !!!!!Laythick is from outlayers.param    before Nov 17,2001
-    !!!!!Laythick is gotten from the KLAYERS profile after Nov 17, 2001
-    !!!!!only need for Rayleigh scattering, which is small in infrared
-        raThicknessRayleigh(iNumLayer-iLay+1) = &
-        raThickness(iL-iiDiv*kProfLayer)*nu
-        DO iFr=1,kMaxPts
-        ! bsprof wants level 1 == TOA, level iNumLayer= gnd
-            absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
-        END DO
+      iL=iaRadLayer(iLay)
+      nu=1.0
+      IF (iLay == 1) THEN
+        nu=rFracBot
+      ELSEIF (iLay == iNumLayer) THEN
+        nu=rFracTop
+      END IF
+      raDensity(iNumLayer-iLay+1) = raNumberDensity(iL-iiDiv*kProfLayer)
+      !!!!!Laythick is from outlayers.param    before Nov 17,2001
+      !!!!!Laythick is gotten from the KLAYERS profile after Nov 17, 2001
+      !!!!!only need for Rayleigh scattering, which is small in infrared
+      raThicknessRayleigh(iNumLayer-iLay+1) = &
+      raThickness(iL-iiDiv*kProfLayer)*nu
+      DO iFr=1,kMaxPts
+       ! absprof wants level 1 == TOA, level iNumLayer= gnd
+       absprof(iNumLayer-iLay+1,iFr) = raaAbs(iFr,iL)*nu
+      END DO
     END DO
 
 ! comment this out on Oct 20, 2000 as is taken care of in interface_disort
@@ -1866,7 +1880,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! these are variables that come in from kcartamain.f
     REAL :: raVTemp(kMixFilRows),rSurfaceTemp,raPressLevels(kProfLayer+1)
@@ -1875,12 +1889,12 @@
     REAL ::    TEMP(*)
 
 ! local variables
-    INTEGER :: iaRadLayer(kProfLayer), iL, iLay ,iM, idiv
-    REAL :: FindBottomTemp,Temp1(maxnz)
+    INTEGER :: iaRadLayer(kProfLayer), iL, iLay ,iM
+    REAL :: Temp1(maxnz)
     REAL :: pavg(kProfLayer),rP,raProfileTemp(kProfLayer)
 
-    DO iLay=1,MAXNZ
-        Temp1(iLay) = 0.0
+    DO iLay = 1,MAXNZ
+      Temp1(iLay) = 0.0
     END DO
 
 ! see which set of Mixed Paths the current atmosphere occupies eg
@@ -1888,34 +1902,32 @@
 ! eg if current atmosphere is from MixfilPath 110-190, and kProfLayer = 100,
 ! then we set iMod as 2      idiv(150,100) = 1  === 2nd set of mixed paths
 ! assume each atmosphere has at least 25 layers in it!!!
-    iM=idiv(iaRadLayer(25),kProfLayer)+1
-    DO iLay=1,kProfLayer
-        raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
+    iM = idiv(iaRadLayer(25),kProfLayer)+1
+    DO iLay = 1,kProfLayer
+      raProfileTemp(iLay) = raVTemp(iLay+(iM-1)*kProfLayer)
     END DO
 
-    DO iLay=1,iNumLayer
-        iL=iaRadLayer(iLay)
-    ! ap this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
-        iL=iL-idiv(iL,kProfLayer)*kProfLayer
-        IF (iL == 0) THEN
-            iL = kProfLayer
-        END IF
-        rP=raPressLevels(iL+1)-10000*delta
-        if (rp < raPressLevels(kProfLayer+1)) then
-            rp = raPressLevels(kProfLayer+1)+10000*delta
-        end if
-        TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp, &
-        raPressLevels,iProfileLayers)
+    DO iLay = 1,iNumLayer
+      iL = iaRadLayer(iLay)
+      ! map this onto 1 .. kProfLayer eg 202 --> 2   365 --> 65
+      iL = iL-idiv(iL,kProfLayer)*kProfLayer
+      IF (iL == 0) THEN
+        iL = kProfLayer
+      END IF
+      rP=raPressLevels(iL+1)-10000*delta
+      if (rp < raPressLevels(kProfLayer+1)) then
+        rp = raPressLevels(kProfLayer+1)+10000*delta
+      end if
+      TEMP1(iNumLayer-iLay+1) = FindBottomTemp(rP,raProfileTemp,raPressLevels,iProfileLayers)
     END DO
 
 ! cc this is where we differ from RTSPEC
 ! cc      TEMP1(iNumLayer+1) = rSurfaceTemp
     rP = DISORTsurfPress
-    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp, &
-    raPressLevels,iProfileLayers)
+    TEMP1(iNumLayer+1) = FindBottomTemp(rP,raProfileTemp,raPressLevels,iProfileLayers)
 
-    DO iLay=1,iNumLayer+1
-        temp(iLay) = temp1(iLay)
+    DO iLay = 1,iNumLayer+1
+      temp(iLay) = temp1(iLay)
     END DO
 
     RETURN
@@ -1928,7 +1940,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
           
 !     ********** Rayleigh Scattering calculation **********
 
@@ -2056,7 +2068,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iStep               !tells how many points to step thru, or find
     INTEGER :: iScatter            !1,2 or 3 tells which type to use
@@ -2067,56 +2079,56 @@
     INTEGER :: iF,iL
 
     DO iF=1,kMaxPts
-        iaStep(iF) = 0
+      iaStep(iF) = 0
     END DO
 
     IF ((iScatter < 1) .OR. (iScatter > 3)) THEN
-        write (kStdErr,*) 'For DISORT, need to choose kScatter = 1,2 or 3'
-        write (kStdErr,*) 'iScatter = ',iScatter
-        write (kStdErr,*) 'Please retry'
-        CALL DoStop
+      write (kStdErr,*) 'For DISORT, need to choose kScatter = 1,2 or 3'
+      write (kStdErr,*) 'iScatter = ',iScatter
+      write (kStdErr,*) 'Please retry'
+      CALL DoStop
     END IF
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     IF (iScatter == 1) THEN
-    !!!!! use equal spacing of points; nothing special about chosen points
-    !!!!! do radiative transfer on freq index pts 1,1+iStep,1+2*iStep,...
-    !!!!!       1+N*iStep,10000
-        iL=1
-        iF=1
-        10 CONTINUE
-        iaStep(iL) = iF
-        iL=iL+1
-        iF=iF+iStep
-        IF (iF <= kMaxPts) THEN
-            GOTO 10
-        ELSE
-            GOTO 20
-        END IF
-        20 CONTINUE
-        IF (iaStep(iL-1) /= kMaxPts) THEN
-        ! ake sure last point radiances are computed for, is the 10000th pt
-            iaStep(iL) = kMaxPts
-            iFFMax = iL
-        ELSE
-            iL=iL-1
-            iFFMax = iL
-        END IF
+      !!!!! use equal spacing of points; nothing special about chosen points
+      !!!!! do radiative transfer on freq index pts 1,1+iStep,1+2*iStep,...
+      !!!!!       1+N*iStep,10000
+      iL=1
+      iF=1
+  10 CONTINUE
+      iaStep(iL) = iF
+      iL=iL+1
+      iF=iF+iStep
+      IF (iF <= kMaxPts) THEN
+        GOTO 10
+      ELSE
+        GOTO 20
+      END IF
+      20 CONTINUE
+      IF (iaStep(iL-1) /= kMaxPts) THEN
+        !make sure last point radiances are computed for, is the 10000th pt
+        iaStep(iL) = kMaxPts
+        iFFMax = iL
+      ELSE
+        iL=iL-1
+        iFFMax = iL
+      END IF
     END IF            !IF (kScatter == 1) THEN
 !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     IF (iScatter == 2) THEN
-    !!!!! do radiative transfer on freq index pts a,b,c,...z
-    !!!!! where the points are chosen such that they have the smallest
-    !!!!! absorption coeffs
-        CALL FindIndices(iScatter,iStep,raCorrelatedK,iaStep,iFFMax)
+      !!!!! do radiative transfer on freq index pts a,b,c,...z
+      !!!!! where the points are chosen such that they have the smallest
+      !!!!! absorption coeffs
+      CALL FindIndices(iScatter,iStep,raCorrelatedK,iaStep,iFFMax)
     END IF            !IF (kScatter == 2) THEN
 
     IF (iScatter == 3) THEN
-    !!!!! do radiative transfer on freq index pts a,b,c,...z
-    !!!!! where the points are chosen such that they range from the
-    !!!!! smallest to largest absorption coeffs
-        CALL FindIndices(iScatter,iStep,raCorrelatedK,iaStep,iFFMax)
+      !!!!! do radiative transfer on freq index pts a,b,c,...z
+      !!!!! where the points are chosen such that they range from the
+      !!!!! smallest to largest absorption coeffs
+      CALL FindIndices(iScatter,iStep,raCorrelatedK,iaStep,iFFMax)
     END IF            !IF (kScatter == 3) THEN
 
     RETURN
@@ -2132,7 +2144,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iStep               !tells how many points to step thru, or find
     INTEGER :: iScatter            !1,2 or 3 tells which type to use
@@ -2147,114 +2159,113 @@
 
 ! now we have sorted the k so that indx(i) contains the sorted keys info
     IF (iScatter == 2) THEN
-    ! imply give smallest k values for all but last two points.
-    ! or last point, give largest k value
-    ! or second last point, give medium k value
-        DO i=1,iStep-2
-            iaStep(i) = indx(i)
-        END DO
-        j = kMaxPts-i
-        IF (mod(j,2) == 0) THEN
-            j=j/2 + i
-        ELSE
-            j=(j+1)/2 + i
-        END IF
-    !        iaStep(iStep-1) = indx(kMaxPts-100)
-        iaStep(iStep-1) = indx(j)
-        iaStep(iStep)   = indx(kMaxPts)
-        iFFMax = iStep
+      ! imply give smallest k values for all but last two points.
+      ! or last point, give largest k value
+      ! or second last point, give medium k value
+      DO i=1,iStep-2
+        iaStep(i) = indx(i)
+      END DO
+      j = kMaxPts-i
+      IF (mod(j,2) == 0) THEN
+        j=j/2 + i
+      ELSE
+        j=(j+1)/2 + i
+      END IF
+      ! iaStep(iStep-1) = indx(kMaxPts-100)
+      iaStep(iStep-1) = indx(j)
+      iaStep(iStep)   = indx(kMaxPts)
+      iFFMax = iStep
     END IF
 
     IF (iScatter == 3) THEN  !give smallest to largest k values
-        iL=1
-        iF=1
-        10 CONTINUE
-        iaStep(iL) = indx(iF)
-        iL=iL+1
-        iF=iF+iStep
-        IF (iF <= kMaxPts) THEN
-            GOTO 10
-        ELSE
-            GOTO 20
-        END IF
-        20 CONTINUE
-        IF (iaStep(iL-1) /= indx(kMaxPts)) THEN
-        ! ake sure radiances are computed for largest k
-            iaStep(iL) = indx(kMaxPts)
-            iFFMax = iL
-        ELSE
-            iL=iL-1
-            iFFMax = iL
-        END IF
+      iL=1
+      iF=1
+      10 CONTINUE
+      iaStep(iL) = indx(iF)
+      iL=iL+1
+      iF=iF+iStep
+      IF (iF <= kMaxPts) THEN
+        GOTO 10
+      ELSE
+        GOTO 20
+      END IF
+      20 CONTINUE
+      IF (iaStep(iL-1) /= indx(kMaxPts)) THEN
+        ! make sure radiances are computed for largest k
+        iaStep(iL) = indx(kMaxPts)
+        iFFMax = iL
+      ELSE
+        iL=iL-1
+        iFFMax = iL
+      END IF
     END IF
 
 ! very important .. want to keep integrity of the Planck fcn!!!!!
 ! so make sure the original 1st and 10000th points are always used
     IF (iScatter >= 2) THEN
-
-    !!!!!!make sure (iaStep(i) contains "1")
-        j = -1
+      !!!!!!make sure (iaStep(i) contains "1")
+      j = -1
+      iL = 1
+      30 CONTINUE
+      IF (iaStep(iL) == 1)  THEN
+        j = +1      !!!!!yes, it does contain "1"
+      ELSE
+        iL = iL + 1 !!!!keep on hoping
+      END IF
+      IF ((iL <= iFFMax) .AND. (j < 0)) THEN
+        GOTO 30
+      END IF
+      IF (j < 0) THEN !!!!!!poooey, not found
+        i = -1
         iL = 1
-        30 CONTINUE
-        IF (iaStep(iL) == 1)  THEN
-            j = +1      !!!!!yes, it does contain "1"
+        40 CONTINUE
+        IF (indx(iL) == 1) THEN
+          i = +1       !!!!!yes, it is found
+          iFFMax = iFFMax + 1
+          iaStep(iFFMax) = indx(iL)
         ELSE
-            iL = iL + 1 !!!!keep on hoping
+          iL = iL + 1
+          GOTO 40
         END IF
-        IF ((iL <= iFFMax) .AND. (j < 0)) THEN
-            GOTO 30
-        END IF
-        IF (j < 0) THEN !!!!!!poooey, not found
-            i = -1
-            iL = 1
-            40 CONTINUE
-            IF (indx(iL) == 1) THEN
-                i = +1       !!!!!yes, it is found
-                iFFMax = iFFMax + 1
-                iaStep(iFFMax) = indx(iL)
-            ELSE
-                iL = iL + 1
-                GOTO 40
-            END IF
-        END IF
+      END IF
 
-    !!!!!!make sure (iaStep(i) contains "kMaxPts")
-        j = -1
+      !!!!!!make sure (iaStep(i) contains "kMaxPts")
+      j = -1
+      iL = 1
+      50 CONTINUE
+      IF (iaStep(iL) == kMaxPts)  THEN
+        j = +1      !!!!!yes, it does contain "kMaxPts"
+      ELSE
+        iL = iL + 1 !!!!keep on hoping
+      END IF
+      IF ((iL <= iFFMax) .AND. (j < 0)) THEN
+        GOTO 50
+      END IF
+      IF (j < 0) THEN !!!!!!poooey, not found
+        i = -1
         iL = 1
-        50 CONTINUE
-        IF (iaStep(iL) == kMaxPts)  THEN
-            j = +1      !!!!!yes, it does contain "kMaxPts"
+        60 CONTINUE
+        IF (indx(iL) == kMaxPts) THEN
+          i = +1       !!!!!yes, it is found
+          iFFMax = iFFMax + 1
+          iaStep(iFFMax) = indx(iL)
         ELSE
-            iL = iL + 1 !!!!keep on hoping
+          iL = iL + 1
+          GOTO 60
         END IF
-        IF ((iL <= iFFMax) .AND. (j < 0)) THEN
-            GOTO 50
-        END IF
-        IF (j < 0) THEN !!!!!!poooey, not found
-            i = -1
-            iL = 1
-            60 CONTINUE
-            IF (indx(iL) == kMaxPts) THEN
-                i = +1       !!!!!yes, it is found
-                iFFMax = iFFMax + 1
-                iaStep(iFFMax) = indx(iL)
-            ELSE
-                iL = iL + 1
-                GOTO 60
-            END IF
-        END IF
+      END IF
 
     ! reset iaStep(iFFMax)
-        DO i=1,kMaxPts
-            TempArr(i) = 1.0e10
-        END DO
-        DO i=1,iFFMax
-            TempArr(iaStep(i)) = arr(iaStep(i))
-        END DO
-        CALL NumericalRecipesIndexer(indx,TempArr,kMaxPts)
-        DO i=1,iFFMax
-            iaStep(i) = indx(i)
-        END DO
+      DO i=1,kMaxPts
+        TempArr(i) = 1.0e10
+      END DO
+      DO i=1,iFFMax
+        TempArr(iaStep(i)) = arr(iaStep(i))
+      END DO
+      CALL NumericalRecipesIndexer(indx,TempArr,kMaxPts)
+      DO i=1,iFFMax
+        iaStep(i) = indx(i)
+      END DO
     END IF
             
     RETURN
@@ -2271,7 +2282,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     INTEGER :: iStep               !tells how many points to step thru, or find
     INTEGER :: iScatter            !1,2 or 3 tells which type to use
@@ -2292,126 +2303,125 @@
 !      END DO
 
     IF (iScatter == 2) THEN
-    ! imply give smallest k values for all but last two points.
-    ! or last point, give largest k value
-    ! or second last point, give medium k value
-        DO i=1,iStep-2
-            iaStep(i) = indx(i)
-        END DO
-        j = kMaxPts-i
-        IF (mod(j,2) == 0) THEN
-            j=j/2 + i
-        ELSE
-            j=(j+1)/2 + i
-        END IF
-    !        iaStep(iStep-1) = indx(kMaxPts-100)
-        iaStep(iStep-1) = indx(j)
-        iaStep(iStep)   = indx(kMaxPts)
-        iFFMax = iStep
+      ! imply give smallest k values for all but last two points.
+      ! or last point, give largest k value
+      ! or second last point, give medium k value
+      DO i=1,iStep-2
+        iaStep(i) = indx(i)
+      END DO
+      j = kMaxPts-i
+      IF (mod(j,2) == 0) THEN
+        j=j/2 + i
+      ELSE
+        j=(j+1)/2 + i
+      END IF
+      !iaStep(iStep-1) = indx(kMaxPts-100)
+      iaStep(iStep-1) = indx(j)
+      iaStep(iStep)   = indx(kMaxPts)
+      iFFMax = iStep
     END IF
 
     IF (iScatter == 3) THEN
-    ! mallest to largest k values, equally stepped (kmax-kmin)/(iStep-1)
-        kmin = arr(indx(1))
-        kmax = arr(indx(kMaxPts))
-        dk = (kmax-kmin)/(iStep-1)
-        k0 = kmin
+      ! smallest to largest k values, equally stepped (kmax-kmin)/(iStep-1)
+      kmin = arr(indx(1))
+      kmax = arr(indx(kMaxPts))
+      dk = (kmax-kmin)/(iStep-1)
+      k0 = kmin
 
+      k0 = k0 + dk
+      iaStep(1) = indx(1)
+      iF=2
+      iL=2
+
+      10 CONTINUE
+      IF ((arr(indx(iL)) < k0) .AND. (iL < kMaxPts)) THEN
+        iL = iL + 1
+        GOTO 10
+      ELSE
+        iaStep(iF) = indx(iL)
+        iF = iF + 1
+        iL = iL + 1
         k0 = k0 + dk
-        iaStep(1) = indx(1)
-        iF=2
-        iL=2
-
-        10 CONTINUE
-        IF ((arr(indx(iL)) < k0) .AND. (iL < kMaxPts)) THEN
-            iL = iL + 1
-            GOTO 10
-        ELSE
-            iaStep(iF) = indx(iL)
-            iF = iF + 1
-            iL = iL + 1
-            k0 = k0 + dk
-            IF (k0 < kmax) THEN
-                GOTO 10
-            END IF
+        IF (k0 < kmax) THEN
+          GOTO 10
         END IF
-        IF (iaStep(iF-1) /= indx(kMaxPts)) THEN
-        ! ake sure radiances are computed for largest k
-            iaStep(iF) = indx(kMaxPts)
-            iFFMax = iF
-        ELSE
-            iF=iF-1
-            iFFMax = iF
-        END IF
+      END IF
+      IF (iaStep(iF-1) /= indx(kMaxPts)) THEN
+        ! make sure radiances are computed for largest k
+        iaStep(iF) = indx(kMaxPts)
+        iFFMax = iF
+      ELSE
+        iF=iF-1
+        iFFMax = iF
+      END IF
     END IF
 
 ! very important .. want to keep integrity of the Planck fcn!!!!!
 ! so make sure the original 1st and 10000th points are always used
     IF (iScatter >= 2) THEN
-
-    !!!!!!make sure (iaStep(i) contains "1")
-        j = -1
+      !!!!!!make sure (iaStep(i) contains "1")
+      j = -1
+      iL = 1
+      30 CONTINUE
+      IF (iaStep(iL) == 1)  THEN
+        j = +1      !!!!!yes, it does contain "1"
+      ELSE
+        iL = iL + 1 !!!!keep on hoping
+      END IF
+      IF (iL <= iFFMax) THEN
+        GOTO 30
+      END IF
+      IF (j < 0) THEN !!!!!!poooey, not found
+        i = -1
         iL = 1
-        30 CONTINUE
-        IF (iaStep(iL) == 1)  THEN
-            j = +1      !!!!!yes, it does contain "1"
+        40 CONTINUE
+        IF (indx(iL) == 1) THEN
+          i = +1       !!!!!yes, it is found
+          iFFMax = iFFMax + 1
+          iaStep(iFFMax) = indx(iL)
         ELSE
-            iL = iL + 1 !!!!keep on hoping
+          iL = iL + 1
+          GOTO 40
         END IF
-        IF (iL <= iFFMax) THEN
-            GOTO 30
-        END IF
-        IF (j < 0) THEN !!!!!!poooey, not found
-            i = -1
-            iL = 1
-            40 CONTINUE
-            IF (indx(iL) == 1) THEN
-                i = +1       !!!!!yes, it is found
-                iFFMax = iFFMax + 1
-                iaStep(iFFMax) = indx(iL)
-            ELSE
-                iL = iL + 1
-                GOTO 40
-            END IF
-        END IF
+      END IF
 
-    !!!!!!make sure (iaStep(i) contains "kMaxPts")
-        j = -1
+      !!!!!!make sure (iaStep(i) contains "kMaxPts")
+      j = -1
+      iL = 1
+      50 CONTINUE
+      IF (iaStep(iL) == kMaxPts)  THEN
+        j = +1      !!!!!yes, it does contain "kMaxPts"
+      ELSE
+        iL = iL + 1 !!!!keep on hoping
+      END IF
+      IF (iL <= iFFMax) THEN
+        GOTO 50
+      END IF
+      IF (j < 0) THEN !!!!!!poooey, not found
+        i = -1
         iL = 1
-        50 CONTINUE
-        IF (iaStep(iL) == kMaxPts)  THEN
-            j = +1      !!!!!yes, it does contain "kMaxPts"
+        60 CONTINUE
+        IF (indx(iL) == kMaxPts) THEN
+          i = +1       !!!!!yes, it is found
+          iFFMax = iFFMax + 1
+          iaStep(iFFMax) = indx(iL)
         ELSE
-            iL = iL + 1 !!!!keep on hoping
+          iL = iL + 1
+          GOTO 60
         END IF
-        IF (iL <= iFFMax) THEN
-            GOTO 50
-        END IF
-        IF (j < 0) THEN !!!!!!poooey, not found
-            i = -1
-            iL = 1
-            60 CONTINUE
-            IF (indx(iL) == kMaxPts) THEN
-                i = +1       !!!!!yes, it is found
-                iFFMax = iFFMax + 1
-                iaStep(iFFMax) = indx(iL)
-            ELSE
-                iL = iL + 1
-                GOTO 60
-            END IF
-        END IF
+      END IF
 
-    ! reset iaStep(iFFMax)
-        DO i=1,kMaxPts
-            TempArr(i) = 1.0e10
-        END DO
-        DO i=1,iFFMax
-            TempArr(iaStep(i)) = arr(iaStep(i))
-        END DO
-        CALL NumericalRecipesIndexer(indx,TempArr,kMaxPts)
-        DO i=1,iFFMax
-            iaStep(i) = indx(i)
-        END DO
+      ! reset iaStep(iFFMax)
+      DO i=1,kMaxPts
+        TempArr(i) = 1.0e10
+      END DO
+      DO i=1,iFFMax
+        TempArr(iaStep(i)) = arr(iaStep(i))
+      END DO
+      CALL NumericalRecipesIndexer(indx,TempArr,kMaxPts)
+      DO i=1,iFFMax
+        iaStep(i) = indx(i)
+      END DO
     END IF
             
     RETURN
@@ -2426,7 +2436,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 !      -----------------------------------------------------------------
@@ -2445,7 +2455,7 @@
 
 !      Local Variables
     INTEGER :: K,KLO,KHI,iI,iMethod,iDefault
-    REAL :: A,B,H,radtot,ttorad
+    REAL :: A,B,H
     REAL :: yn,y0,X,y,w,dx
 
     iMethod = 2        !! uses rads; seems to be a good method, as it
@@ -2455,91 +2465,91 @@
 !! tweaks to handle TOA rads for uplook inst (==0)
 
     DO iI=1,kMaxPts
-        X = raFO(iI)
-        IF (X > xa(n)) X = xa(n) - 1.0e-7
-        IF (X < xa(1)) X = xa(1) + 1.0e-7
+      X = raFO(iI)
+      IF (X > xa(n)) X = xa(n) - 1.0e-7
+      IF (X < xa(1)) X = xa(1) + 1.0e-7
 
-    ! etermine between which pair of points X falls (bisect loop)
-        KLO = 1
-        KHI = N
+      ! determine between which pair of points X falls (bisect loop)
+      KLO = 1
+      KHI = N
 
-        20 IF ( (KHI - KLO) > 1) THEN
-            K = (KHI + KLO)/2
-            IF (XA(K) > X) THEN
-                KHI = k
-            ELSE
-                KLO = k
-            ENDIF
-            GOTO 20
+  20  IF ( (KHI - KLO) > 1) THEN
+        K = (KHI + KLO)/2
+        IF (XA(K) > X) THEN
+          KHI = k
+        ELSE
+          KLO = k
         ENDIF
+      GOTO 20
+      ENDIF
     
-        dx = XA(KHI) - x
-        H  = XA(KHI) - XA(KLO)
+      dx = XA(KHI) - x
+      H  = XA(KHI) - XA(KLO)
 
-        IF (H <= 0.0) THEN
-            WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI),X,N
-            1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
+      IF (H <= 0.0) THEN
+        WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI),X,N
+  1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
             'KLO=',I5,', KHI=',I5,', XA(KLO) = ',1PE12.5, &
             ', XA(KHI) = ',E12.5,',X = ',E12.5,', numpts = ',I4,'. Quitting.')
-        ENDIF
+      ENDIF
 
-        IF (iMethod == 1) THEN
+      IF (iMethod == 1) THEN
         ! ix this, as we need to define dh,dl
         !B=((YA(KHI) + dh) - (YA(KLO) + dl))/(XA(KHI) - XA(KLO)) !!slope
         !Y=(YA(KHI) + dh) - h*b
-            write (kStdErr,*) 'iMethod = 1 invalid in INTERP_PLANCK_0'
-            CALL DoStop
+        write (kStdErr,*) 'iMethod = 1 invalid in INTERP_PLANCK_0'
+        CALL DoStop
 
-        ELSEIF (iMethod == 2) THEN
+      ELSEIF (iMethod == 2) THEN
         ! nterpolate radiances
         ! A  : I  : REAL arr : intensity y array(N) from scattering
         ! A  : I  : REAL arr : intensity y array(N) from clear sky
         !!!interpolate in radiance space
-            yn = ya(KHI)-CA(KHI)      !!! get out stuff from clear sky
-            y0 = ya(KLO)-CA(KLO)      !!! get out stuff from clear sky
-            B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
-            Y = yn - dx*b
-            Y = Y + raNS(iI)
+        yn = ya(KHI)-CA(KHI)      !!! get out stuff from clear sky
+        y0 = ya(KLO)-CA(KLO)      !!! get out stuff from clear sky
+        B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
+        Y = yn - dx*b
+        Y = Y + raNS(iI)
 
-        ELSEIF (iMethod == 3) THEN
-            IF (ya(KHI) > 0 .AND. CA(KHI) > 0 .AND.  ya(KLO) > 0 &
+      ELSEIF (iMethod == 3) THEN
+        IF (ya(KHI) > 0 .AND. CA(KHI) > 0 .AND.  ya(KLO) > 0 &
              .AND. CA(KLO) > 0) THEN
-            ! ETHOD 3
-            ! nterpolate in BT space if rads ~= 0
-            !!!interpolate in temperature space
-            !!! get out stuff from clear sky
-                yn = radtot(xa(khi),ya(KHI))-radtot(xa(khi),CA(KHI))
-                y0 = radtot(xa(klo),ya(Klo))-radtot(xa(klo),CA(Klo))
-                B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
-                Y = yn - dx*b   !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
-                Y = Y + radtot(x,raNS(iI)) !!add on clear sky stuff
-                Y = ttorad(x,y)
-            ELSE
-            ! ETHOD 3
-            ! nterpolate in rad space if rads = 0
-                yn = ya(KHI)-CA(KHI)      !!! get out stuff from clear sky
-                y0 = ya(KLO)-CA(KLO)      !!! get out stuff from clear sky
-                B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
-                Y = yn - dx*b
-                Y = Y + raNS(iI)
-            END IF
+          ! METHOD 3
+          ! interpolate in BT space if rads ~= 0
+          !!!interpolate in temperature space
+          !!! get out stuff from clear sky
+          yn = radtot(xa(khi),ya(KHI))-radtot(xa(khi),CA(KHI))
+          y0 = radtot(xa(klo),ya(Klo))-radtot(xa(klo),CA(Klo))
+          B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
+          Y = yn - dx*b   !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
+          Y = Y + radtot(x,raNS(iI)) !!add on clear sky stuff
+          Y = ttorad(x,y)
+        ELSE
+          ! METHOD 3
+          ! interpolate in rad space if rads = 0
+          yn = ya(KHI)-CA(KHI)      !!! get out stuff from clear sky
+          y0 = ya(KLO)-CA(KLO)      !!! get out stuff from clear sky
+          B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
+          Y = yn - dx*b
+          Y = Y + raNS(iI)
+        END IF
 
-        ELSEIF (iMethod == 4) THEN
-        ! ETHOD 4 : directly interpolate in BT space
-        ! nterpolate BTs
-        ! ix this
-            write (kStdErr,*) 'iMethod = 4 invalid in INTERP_PLANCK_0'
+      ELSEIF (iMethod == 4) THEN
+        ! METHOD 4 : directly interpolate in BT space
+        ! interpolate BTs
+        ! fix this
+        write (kStdErr,*) 'iMethod = 4 invalid in INTERP_PLANCK_0'
         !B = (radtot(WA(KHI),YA(KHI))-radtot(WA(KLO),YA(KLO)))/
         !     $        (XA(KHI) - XA(KLO))
         !Y=radtot(WA(KHI),YA(KHI))-dx*b !!r(vo+dv,ko+dk)=r(vo,ko)+dr/dko dk
         !Y=ttorad(W,Y)+0*dh             !!change bck to rad, add on dr/dvodv
 
-        ELSEIF (iMethod == 5) THEN
-            write (kStdErr,*) 'iMethod = 5 invalid in INTERP_PLANCK_0'
+      ELSEIF (iMethod == 5) THEN
+        write (kStdErr,*) 'iMethod = 5 invalid in INTERP_PLANCK_0'
         !Y=YA(KHI) + dh    !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dvo dv
-        END IF
+      END IF
 
-        raOut(iI) = Y
+      raOut(iI) = Y
     END DO
 
     RETURN
@@ -2552,7 +2562,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 !      -----------------------------------------------------------------
@@ -2572,7 +2582,7 @@
 
 !      Local Variables
     INTEGER :: K,KLO,KHI
-    REAL :: A,B,H,dh,dl,radtot,ttorad
+    REAL :: A,B,H,dh,dl
 
 ! can try METHOD 1
 ! using linear interp (yh-yh)/(xh-xh) = (yh-y)/(xh-x) ==>
@@ -2592,25 +2602,25 @@
     KLO=1
     KHI=N
 
-    20 IF ( (KHI - KLO) > 1) THEN
-        K=(KHI + KLO)/2
-        IF (XA(K) > X) THEN
-            KHI = k
-        ELSE
-            KLO = k
-        ENDIF
-        GOTO 20
+ 20 IF ( (KHI - KLO) > 1) THEN
+      K=(KHI + KLO)/2
+      IF (XA(K) > X) THEN
+        KHI = k
+      ELSE
+        KLO = k
+      ENDIF
+      GOTO 20
     ENDIF
 
-    H=XA(KHI) - XA(KLO)
+    H = XA(KHI) - XA(KLO)
     dh = W - WA(khi)       !!!wavenumber diff
     dl = WA(klo) - W       !!!wavenumber diff
     dh = dh * DWA(khi)     !!!first derivative
     dl = dl * DWA(klo)     !!!first derivative
 
     IF (H <= 0.0) THEN
-        WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI)
-        1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
+      WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI)
+1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
         'KLO=',I5,', KHI=',I5,', XA(KLO) = ',1PE12.5, &
         ', XA(KHI) = ',E12.5,'. Quitting.')
     ENDIF
@@ -2625,9 +2635,9 @@
 !      Y=YA(KHI) - h*b   !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
 !      Y=Y+dh            !!add on                            + dr/dvo dv
 ! interpolate BTs
-    B=(radtot(WA(KHI),YA(KHI)) - radtot(WA(KLO),YA(KLO)))/(XA(KHI) - XA(KLO))
-    Y=radtot(WA(KHI),YA(KHI)) - h*b   !!r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
-    Y=ttorad(W,Y)+0*dh                !!change back to rad, add on  dr/dvo dv
+    B = (radtot(WA(KHI),YA(KHI)) - radtot(WA(KLO),YA(KLO)))/(XA(KHI) - XA(KLO))
+    Y = radtot(WA(KHI),YA(KHI)) - h*b   !!r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
+    Y = ttorad(W,Y)+0*dh                !!change back to rad, add on  dr/dvo dv
 
 ! METHOD 3
 !      Y=YA(KHI) + dh    !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dvo dv
@@ -2641,7 +2651,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 !      -----------------------------------------------------------------
@@ -2663,7 +2673,7 @@
 
 !      Local Variables
     INTEGER :: K,KLO,KHI,iI
-    REAL :: A,B,H,dh,dl,radtot,ttorad
+    REAL :: A,B,H,dh,dl
     REAL :: yn,y0,X,y,w,dx
 
 ! can try METHOD 1
@@ -2680,73 +2690,73 @@
 
 
     DO iI=1,kMaxPts
-        X=raCK(iI)
-        W=raFO(iI)
+      X=raCK(iI)
+      W=raFO(iI)
 
-    ! etermine between which pair of points X falls (bisect loop)
-        KLO=1
-        KHI=N
+    ! determine between which pair of points X falls (bisect loop)
+      KLO=1
+      KHI=N
 
-        20 IF ( (KHI - KLO) > 1) THEN
-            K=(KHI + KLO)/2
-            IF (XA(K) > X) THEN
-                KHI = k
-            ELSE
-                KLO = k
-            ENDIF
-            GOTO 20
+ 20   IF ( (KHI - KLO) > 1) THEN
+        K=(KHI + KLO)/2
+        IF (XA(K) > X) THEN
+          KHI = k
+        ELSE
+          KLO = k
         ENDIF
-    
-        dx = XA(KHI) - x
-        H  = XA(KHI) - XA(KLO)
-        dh = W - WA(khi)       !!!wavenumber diff
-        dl = WA(klo) - W       !!!wavenumber diff
-        dh = dh * DWA(khi)     !!!first derivative
-        dl = dl * DWA(klo)     !!!first derivative
-
-        IF (H <= 0.0) THEN
-            WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI)
-            1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
+        GOTO 20
+      ENDIF
+      
+      dx = XA(KHI) - x
+      H  = XA(KHI) - XA(KLO)
+      dh = W - WA(khi)       !!!wavenumber diff
+      dl = WA(klo) - W       !!!wavenumber diff
+      dh = dh * DWA(khi)     !!!first derivative
+      dl = dl * DWA(klo)     !!!first derivative
+  
+      IF (H <= 0.0) THEN
+        WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI)
+ 1010   FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
             'KLO=',I5,', KHI=',I5,', XA(KLO) = ',1PE12.5, &
             ', XA(KHI) = ',E12.5,'. Quitting.')
-        ENDIF
+      ENDIF
 
-    ! METHOD 1
-    !      B=((YA(KHI) + dh) - (YA(KLO) + dl))/(XA(KHI) - XA(KLO)) !!slope
-    !      Y=(YA(KHI) + dh) - h*b
+      ! METHOD 1
+      !      B=((YA(KHI) + dh) - (YA(KLO) + dl))/(XA(KHI) - XA(KLO)) !!slope
+      !      Y=(YA(KHI) + dh) - h*b
+  
+      ! METHOD 2
+      ! interpolate radiances
+      !      YA  : I  : REAL arr : intensity y array(N) from scattering
+      !      CA  : I  : REAL arr : intensity y array(N) from clear sky
+      !        !!!interpolate in radiance space
+      !        yn = ya(KHI)-CA(KHI)      !!! get out stuff from clear sky
+      !        y0 = ya(KLO)-CA(KLO)      !!! get out stuff from clear sky
+      !        B=(yn-y0)/(XA(KHI) - XA(KLO)) !!slope
+      !        Y=yn - dx*b   !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
+      !        Y=Y+raNS(iI) !!add on clear sky stuff
+      !        !!add on dr/dvo dv
+      !        !!CANNOT DO THIS as we are modelling differences, not actual numbers
+      !        !!Y=Y+dh
 
-    ! METHOD 2
-    ! interpolate radiances
-    !      YA  : I  : REAL arr : intensity y array(N) from scattering
-    !      CA  : I  : REAL arr : intensity y array(N) from clear sky
-    !        !!!interpolate in radiance space
-    !        yn = ya(KHI)-CA(KHI)      !!! get out stuff from clear sky
-    !        y0 = ya(KLO)-CA(KLO)      !!! get out stuff from clear sky
-    !        B=(yn-y0)/(XA(KHI) - XA(KLO)) !!slope
-    !        Y=yn - dx*b   !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
-    !        Y=Y+raNS(iI) !!add on clear sky stuff
-    !        !!add on dr/dvo dv
-    !        !!CANNOT DO THIS as we are modelling differences, not actual numbers
-    !        !!Y=Y+dh
+      !!!interpolate in temperature space
+      !!! get out stuff from clear sky
+      yn = radtot(wa(khi),ya(KHI))-radtot(wa(khi),CA(KHI))
+      y0 = radtot(wa(klo),ya(Klo))-radtot(wa(klo),CA(Klo))
+      B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
+      Y = yn - dx*b   !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
+      Y = Y + radtot(w,raNS(iI)) !!add on clear sky stuff
+      Y = ttorad(w,y)
 
-    !!!interpolate in temperature space
-    !!! get out stuff from clear sky
-        yn = radtot(wa(khi),ya(KHI))-radtot(wa(khi),CA(KHI))
-        y0 = radtot(wa(klo),ya(Klo))-radtot(wa(klo),CA(Klo))
-        B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
-        Y = yn - dx*b   !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
-        Y = Y + radtot(w,raNS(iI)) !!add on clear sky stuff
-        Y = ttorad(w,y)
-
-    ! interpolate BTs
-    !      B=(radtot(WA(KHI),YA(KHI))-radtot(WA(KLO),YA(KLO)))/(XA(KHI) - XA(KLO))
-    !      Y=radtot(WA(KHI),YA(KHI))-dx*b   !!r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
-    !      Y=ttorad(W,Y)+0*dh              !!change back to rad, add on  dr/dvo dv
+      ! interpolate BTs
+      !      B=(radtot(WA(KHI),YA(KHI))-radtot(WA(KLO),YA(KLO)))/(XA(KHI) - XA(KLO))
+      !      Y=radtot(WA(KHI),YA(KHI))-dx*b   !!r(vo+dv,ko+dk) = r(vo,ko) + dr/dko dk
+      !      Y=ttorad(W,Y)+0*dh              !!change back to rad, add on  dr/dvo dv
 
     ! METHOD 3
     !      Y=YA(KHI) + dh    !!this is r(vo+dv,ko+dk) = r(vo,ko) + dr/dvo dv
 
-        raOut(iI) = Y
+      raOut(iI) = Y
     END DO
 
     RETURN
@@ -2758,7 +2768,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 !      -----------------------------------------------------------------
@@ -2779,106 +2789,105 @@
 
 !     Local Variables
     INTEGER :: K,KLO,KHI,iI,indx(kMaxPts),iDok,iDoF
-    REAL :: A,B,H,radtot,ttorad
+    REAL :: A,B,H
     REAL :: yn,y0,X,Y1,Y2,YTotal,dx
 ! these have WA,XA,YA,CA sorted according to wavenumber
     REAL :: WA_sort(kMaxPts),XA_sort(kMaxPts)
     REAL :: YA_sort(kMaxPts),CA_sort(kMaxPts)
 
     1010 FORMAT('ERROR! linear SPLINT: bad XA array.',/, &
-    'KLO=',I5,', KHI=',I5,', XA(KLO) = ',1PE12.5, &
-    ', XA(KHI) = ',E12.5,'. Quitting.')
+         'KLO=',I5,', KHI=',I5,', XA(KLO) = ',1PE12.5, &
+          ', XA(KHI) = ',E12.5,'. Quitting.')
 
     CALL NumericalRecipesIndexer(indx,WA,N)
     DO iI=1,N
-        WA_sort(iI) = WA(indx(iI))
-        XA_sort(iI) = XA(indx(iI))
-        YA_sort(iI) = YA(indx(iI))
-        CA_sort(iI) = CA(indx(iI))
+      WA_sort(iI) = WA(indx(iI))
+      XA_sort(iI) = XA(indx(iI))
+      YA_sort(iI) = YA(indx(iI))
+      CA_sort(iI) = CA(indx(iI))
     END DO
 
     iDoK = -1       !!!!!do not interpolate in K
     iDoF = +1       !!!!!do interpolate in F
 
     DO iI=1,kMaxPts
-        Y1 = 0.0
-        IF (iDoK > 0) THEN
+      Y1 = 0.0
+      IF (iDoK > 0) THEN
         !!!!! -------------  first do dT/dk dk !!!!!!!!!!!!!
-            X=raCK(iI)
-             
-        ! etermine between which pair of points X falls (bisect loop)
-            KLO=1
-            KHI=N
-              
-            20 IF ( (KHI - KLO) > 1) THEN
-                K=(KHI + KLO)/2
-                IF (XA(K) > X) THEN
-                    KHI = k
-                ELSE
-                    KLO = k
-                ENDIF
-                GOTO 20
-            ENDIF
+        X=raCK(iI)
+           
+        !determine between which pair of points X falls (bisect loop)
+        KLO=1
+        KHI=N
+            
+     20 IF ( (KHI - KLO) > 1) THEN
+          K=(KHI + KLO)/2
+          IF (XA(K) > X) THEN
+            KHI = k
+          ELSE
+            KLO = k
+          ENDIF
+          GOTO 20
+        ENDIF
 
-            dx = XA(KHI) - x
-            H  = XA(KHI) - XA(KLO)
+        dx = XA(KHI) - x
+        H  = XA(KHI) - XA(KLO)
 
-            IF (H <= 0.0) THEN
-                WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI)
-            ENDIF
+        IF (H <= 0.0) THEN
+          WRITE(kStdWarn,1010) KLO,KHI,XA(KLO),XA(KHI)
+        ENDIF
 
         !!!interpolate in temperature space
         !!! get out stuff from clear sky
-            yn = radtot(wa(khi),ya(KHI))-radtot(wa(khi),CA(KHI))
-            y0 = radtot(wa(klo),ya(Klo))-radtot(wa(klo),CA(Klo))
-            B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
-            Y1 = yn - dx*b   !!this is T(vo+dv,ko+dk) = T(vo,ko) + dT/dko dk
-        END IF
+        yn = radtot(wa(khi),ya(KHI))-radtot(wa(khi),CA(KHI))
+        y0 = radtot(wa(klo),ya(Klo))-radtot(wa(klo),CA(Klo))
+        B = (yn-y0)/(XA(KHI) - XA(KLO)) !!slope
+        Y1 = yn - dx*b   !!this is T(vo+dv,ko+dk) = T(vo,ko) + dT/dko dk
+      END IF
 
-        Y2=0.0
-        IF (iDoF > 0) THEN
+      Y2=0.0
+      IF (iDoF > 0) THEN
         !!!!! -------------  then do dT/dv dv !!!!!!!!!!!!!
-            X=raFO(iI)
+        X=raFO(iI)
               
         ! etermine between which pair of points X falls (bisect loop)
-            KLO=1
-            KHI=N
+        KLO=1
+        KHI=N
 
-            30 IF ( (KHI - KLO) > 1) THEN
-                K=(KHI + KLO)/2
-                IF (WA_Sort(K) > X) THEN
-                    KHI = k
-                ELSE
-                    KLO = k
-                ENDIF
-                GOTO 30
-            ENDIF
-        
-            dx = WA_Sort(KHI) - x
-            H  = WA_Sort(KHI) - WA_Sort(KLO)
+    30  IF ( (KHI - KLO) > 1) THEN
+          K=(KHI + KLO)/2
+          IF (WA_Sort(K) > X) THEN
+            KHI = k
+          ELSE
+            KLO = k
+          ENDIF
+          GOTO 30
+      ENDIF
+  
+      dx = WA_Sort(KHI) - x
+      H  = WA_Sort(KHI) - WA_Sort(KLO)
 
-            IF (H <= 0.0) THEN
-                WRITE(kStdWarn,1010) KLO,KHI,WA_Sort(KLO),WA_Sort(KHI)
-            ENDIF
+      IF (H <= 0.0) THEN
+        WRITE(kStdWarn,1010) KLO,KHI,WA_Sort(KLO),WA_Sort(KHI)
+      ENDIF
 
-        !!!interpolate in temperature space
-        !!! get out stuff from clear sky
-            yn = radtot(wa_sort(khi),ya_sort(KHI)) - &
-            radtot(wa_sort(khi),ca_sort(KHI))
-            y0 = radtot(wa_sort(klo),ya_sort(Klo)) - &
-            radtot(wa_sort(klo),ca_sort(Klo))
-            B = (yn-y0)/(wa_sort(KHI) - wa_sort(KLO)) !!slope
-            Y2 = yn - dx*b   !!this is T(vo+dv,ko+dk) = T(vo,ko) + dT/dvo dv
-        END IF
+      !!!interpolate in temperature space
+      !!! get out stuff from clear sky
+      yn = radtot(wa_sort(khi),ya_sort(KHI)) - &
+      radtot(wa_sort(khi),ca_sort(KHI))
+      y0 = radtot(wa_sort(klo),ya_sort(Klo)) - &
+      radtot(wa_sort(klo),ca_sort(Klo))
+      B = (yn-y0)/(wa_sort(KHI) - wa_sort(KLO)) !!slope
+      Y2 = yn - dx*b   !!this is T(vo+dv,ko+dk) = T(vo,ko) + dT/dvo dv
+    END IF
 
     ! remember      iDoK = -1       !!!!!do not interpolate in K, so Y1 == 0.0
     ! remember      iDoF = +1       !!!!!do interpolate in F    , so Y2 <> 0.0
-
-        YTotal = Y1 + Y2        !!this is the total dT/dk dk + dT/dv dv
-        YTotal = YTotal + radtot(raFO(iI),raNS(iI)) !!add on clear sky stuff
+    YTotal = Y1 + Y2        !!this is the total dT/dk dk + dT/dv dv
+    YTotal = YTotal + radtot(raFO(iI),raNS(iI)) !!add on clear sky stuff
     !!!!!now change from BT to radiance
-        YTotal = ttorad(raFO(iI),YTotal)
-        raOut(iI) = YTotal
+    YTotal = ttorad(raFO(iI),YTotal)
+    raOut(iI) = YTotal
 
     END DO
 
@@ -2891,7 +2900,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! linear interpolation
 !      -----------------------------------------------------------------
@@ -2919,18 +2928,18 @@
 ! first convert the intensities to equivalent temps T
 ! bt = c2 * fr / log(1 + c1 * fr^3 / rd)
     DO i = 1,N
-        raT(i) = r2*wa(i)/(log(1+r1*(wa(i)**3)/ya(i)))
+      raT(i) = r2*wa(i)/(log(1+r1*(wa(i)**3)/ya(i)))
     END DO
 
 ! now do dr/df where r=ttorad = planck radiance at temp T, frequency fr
 ! rad = c1 * fr^3 / (exp(c2*fr/T) - 1)
     DO i = 1,N
-        u  = r1*(wa(i)**3)
-        du = r1*3*(wa(i)**2)
-        v  = exp(r2*wa(i)/raT(i))-1
-        dv = r2/raT(i) * exp(r2*wa(i)/raT(i))
-    !!!! now do the derivative
-        dwa(i) = (v*du - u*dv)/(v*v)
+      u  = r1*(wa(i)**3)
+      du = r1*3*(wa(i)**2)
+      v  = exp(r2*wa(i)/raT(i))-1
+      dv = r2/raT(i) * exp(r2*wa(i)/raT(i))
+      !!!! now do the derivative
+      dwa(i) = (v*du - u*dv)/(v*v)
     END DO
 
     RETURN
@@ -2943,7 +2952,7 @@
 
     IMPLICIT NONE
 
-    include '../INCLUDE/kcartaparam.f90'
+    include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL :: raKAll(kMaxPts)        !this is all 10000 pts k(lowest layer)
     REAL :: raF(kMaxPts)           !these are freqs of pts where DISORT used
@@ -2955,7 +2964,7 @@
 ! points in raK and raI so as to make things smoother
 
     INTEGER :: iCnt50,iCnt75,iInCnt50,iInCnt75
-    REAL :: rCnt50,rCnt75,rF,rI,rK,radtot,ttorad
+    REAL :: rCnt50,rCnt75,rF,rI,rK
     INTEGER :: indx(kMaxPts),iI,iJ,iCnt
     REAL :: NormalizedK(kMaxPts),kmin,kmax,dk
     REAL :: TempF(kMaxPts),TempI(kMaxPts),TempK(kMaxPts)
@@ -2964,29 +2973,29 @@
     CALL NumericalRecipesIndexer(indx,raKAll,kMaxPts)
           
 ! set up the normalised vector knorm = ksorted/max(k)
-    DO iI=1,kMaxPts
+    DO iI = 1,kMaxPts
         NormalizedK(iI) = raKall(indx(iI))/raKall(indx(kMaxPts))
     END DO
 
-    kmin=0.0
-    kmax=NormalizedK(kMaxPts)   !!!should be 1.0
+    kmin = 0.0
+    kmax = NormalizedK(kMaxPts)   !!!should be 1.0
 
     iJ = 500
     dk = 1.0/iJ
 
 ! compute the cumulative distr function
-    iCnt=1
-    DO iI=1,iJ
-        raCumulativeK(iI) = kmin + iI*dk
-        10 CONTINUE
-        IF (NormalizedK(iCnt) <= raCumulativeK(iI)) THEN
-            iCnt = iCnt + 1
-            IF (iCnt <= kMaxPts) THEN
-                GOTO 10
-            END IF
+    iCnt = 1
+    DO iI = 1,iJ
+      raCumulativeK(iI) = kmin + iI*dk
+      10 CONTINUE
+      IF (NormalizedK(iCnt) <= raCumulativeK(iI)) THEN
+        iCnt = iCnt + 1
+        IF (iCnt <= kMaxPts) THEN
+          GOTO 10
         END IF
-        iCnt = min(iCnt,kMaxPts)
-        raCumulativeDistr(iI) = iCnt*1.0/kMaxPts
+      END IF
+      iCnt = min(iCnt,kMaxPts)
+      raCumulativeDistr(iI) = iCnt*1.0/kMaxPts
     END DO
 
 ! now see which index required before 50% of the cumulative function is used
@@ -2994,13 +3003,13 @@
     iCnt75 = 1
     30 CONTINUE
     IF (raCumulativeDistr(iCnt50) < 0.5) THEN
-        iCnt50 = iCnt50 + 1
-        GOTO 30
+      iCnt50 = iCnt50 + 1
+      GOTO 30
     END IF
     40 CONTINUE
     IF (raCumulativeDistr(iCnt75) < 0.75) THEN
-        iCnt75 = iCnt75 + 1
-        GOTO 40
+      iCnt75 = iCnt75 + 1
+      GOTO 40
     END IF
 
 ! ind values of raK corresponding to the normalised k=0.5,0.75 values
@@ -3012,13 +3021,13 @@
     iInCnt75 = 1
     50 CONTINUE
     IF (raK(iInCnt50) < rCnt50) THEN
-        iInCnt50 = iInCnt50 + 1
-        GOTO 50
+      iInCnt50 = iInCnt50 + 1
+      GOTO 50
     END IF
     60 CONTINUE
     IF (raK(iInCnt75) < rCnt75) THEN
-        iInCnt75 = iInCnt75 + 1
-        GOTO 60
+      iInCnt75 = iInCnt75 + 1
+      GOTO 60
     END IF
 !      print *,'normalised cml upto 50% = ',iCnt50,raCumulativeK(iCnt50),rCnt50
 !      print *,'normalised cml upto 75% = ',iCnt75,raCumulativeK(iCnt75),rCnt75
@@ -3029,50 +3038,51 @@
 ! ccount for so much of raK, let us avg the first few values and
 ! hove the rest around
     IF (raCumulativeK(iCnt50) <= 0.1) THEN
-    ! irst initialise the temp arrays
-        DO iI=1,iN
-            TempF(iI) = raF(iI)
-            TempK(iI) = raK(iI)
-            TempI(iI) = raI(iI)
-        END DO
+      ! irst initialise the temp arrays
+      DO iI = 1,iN
+        TempF(iI) = raF(iI)
+        TempK(iI) = raK(iI)
+        TempI(iI) = raI(iI)
+      END DO
     ! 0% of the (k/kmax) are smaller in magnitude that 0.1
-    ! his will drive the interpolation wrt raKStep nuts!!!!
-    ! o do an average;
-    ! ake sure at least FIVE points remain for the interpolations
-        IF ((iN - iInCnt50) <= 5) THEN
-            iInCnt50 = iN-5
-        END IF
-        rF=0.0
-        rI=0.0
-        rK=0.0
-        DO iI=2,iInCnt50
-            rF=rF+raF(iI)
-            rK=rK+raK(iI)
-            rI=rI+radtot(raF(iI),raI(iI))      !!!average the temps!!!
-        END DO
-        rF=rF/(iInCnt50-1)
-        rK=rK/(iInCnt50-1)
-        rI=rI/(iInCnt50-1)
-        rI=ttorad(rF,rI)                      !!!change to radiance!!!
+    ! this will drive the interpolation wrt raKStep nuts!!!!
+    ! so do an average;
+    ! make sure at least FIVE points remain for the interpolations
+      IF ((iN - iInCnt50) <= 5) THEN
+        iInCnt50 = iN-5
+      END IF
+      rF = 0.0
+      rI = 0.0
+      rK = 0.0
+      DO iI = 2,iInCnt50
+        rF = rF+raF(iI)
+        rK = rK+raK(iI)
+        rI = rI+radtot(raF(iI),raI(iI))      !!!average the temps!!!
+      END DO
+      rF = rF/(iInCnt50-1)
+      rK = rK/(iInCnt50-1)
+      rI = rI/(iInCnt50-1)
+      rI = ttorad(rF,rI)                      !!!change to radiance!!!
                 
-    ! ow shove this info into the arrays
-    ! eep the smallest "k" info!!!!!
-        raF(1) = raF(1)
-        raK(1) = raK(1)
-        raI(1) = raI(1)
-    ! ou have averaged the next few to get something
-        raF(2) = rF
-        raK(2) = rK
-        raI(2) = rI
-    ! ow fill in the larger "k" values
-        DO iI=3,iN - iInCnt50 + 2
-            raF(iI) = TempF(iInCnt50 + iI - 2)
-            rak(iI) = Tempk(iInCnt50 + iI - 2)
-            raI(iI) = TempI(iInCnt50 + iI - 2)
-        END DO
-        IN = iN - iInCnt50 + 2
+      ! now shove this info into the arrays
+      ! keep the smallest "k" info!!!!!
+      raF(1) = raF(1)
+      raK(1) = raK(1)
+      raI(1) = raI(1)
+      ! you have averaged the next few to get something
+      raF(2) = rF
+      raK(2) = rK
+      raI(2) = rI
+      ! now fill in the larger "k" values
+      DO iI=3,iN - iInCnt50 + 2
+        raF(iI) = TempF(iInCnt50 + iI - 2)
+        rak(iI) = Tempk(iInCnt50 + iI - 2)
+        raI(iI) = TempI(iInCnt50 + iI - 2)
+      END DO
+      IN = iN - iInCnt50 + 2
     END IF
 
     RETURN
     end SUBROUTINE CumulativeK
 !************************************************************************
+END MODULE scatter_disort_main

@@ -607,6 +607,7 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+6/21/22         Fixing DISORT for the f90 kCARTA
 
 6/9/22          Adding in PCLSAM scaling adjustments  
                 See "Improvement of the simulation of Cloud LW scattering in Broadband RTMs"

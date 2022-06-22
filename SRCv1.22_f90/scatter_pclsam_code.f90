@@ -2654,8 +2654,8 @@ CONTAINS
       !! 19.4620   43.6528   65.3921   81.9660
       !!  0.1335    0.2035    0.1299    0.03118
 
-      rPCLSAMfact = 1.0  !!! should be true right
       rPCLSAMfact = 0.0  !!! but Tang sets to 0
+      rPCLSAMfact = 1.0  !!! should be true 
 
       raBB = raaAsym(:,iL)
       raBB = 1 - (0.5 + 0.3738*raBB + 0.0076*(raBB**2) + 0.1186*(raBB**3))     !!! 1 - g
@@ -2729,7 +2729,7 @@ CONTAINS
       !! 19.4620   43.6528   65.3921   81.9660
       !!  0.1335    0.2035    0.1299    0.03118
 
-      rPCLSAMfact = 1.0  !!! should be true right
+      rPCLSAMfact = 1.0  !!! should be true
       rPCLSAMfact = 0.0  !!! but Tang sets to 0
 
       raBB = raaAsym(:,iL)
