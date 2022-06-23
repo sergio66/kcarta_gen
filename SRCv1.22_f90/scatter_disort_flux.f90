@@ -25,7 +25,7 @@ USE clear_scatter_misc
 USE rad_main
 USE ttorad_common
 USE spline_and_sort_and_common
-USE scatter_disort_main
+USE scatter_disort_aux
 USE scatter_disort_code
 
 IMPLICIT NONE
@@ -40,16 +40,17 @@ CONTAINS
 !     layers to be printed
 ! caFluxFile gives the file name of the unformatted output
 
-    SUBROUTINE scatterfluxes_disort(raFreq,raaAbs,raVTemp, &
-    caFluxFile,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
-    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,rSatAngle, &
-    rFracTop,rFracBot, &
-    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix, &
-    raSurface,raSun,raThermal,raSunRefl, &
-    raLayAngles,raSunAngles, &
+    SUBROUTINE scatterfluxes_disort(raFreq,           &
+    raaAbs,raVTemp,caFluxFile,                        &
+    iOutNum,iAtm,iNumLayer,iaaRadLayer,               &
+    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,  & 
+    rSatAngle,rFracTop,rFracBot,                      &
+    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,             &
+    raSurface,raSun,raThermal,raSunRefl,              &
+    raLayAngles,raSunAngles,                          &
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
-    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,     &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity)
 
     IMPLICIT NONE

@@ -1727,25 +1727,37 @@ CONTAINS
     IF (abs(dv-kaFrStep(iTag)) > 1.0e-6) THEN
       iErr = 4
       write(kStdErr,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
-      write(kStdErr,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs preddefined.param setting - are different :  iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ',iTag,dv,kaFrStep(iTag)
+      write(kStdErr,'(A,A,I3,F15.8,F15.8)') &
+         'spectral resolution - raFreq vs preddefined.param setting - are different : ', &
+         ' iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ', &
+         iTag,dv,kaFrStep(iTag)
 
       write(kStdWarn,'(A)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts'
-      write(kStdWarn,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs preddefined.param setting - are different :  iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ',iTag,dv,kaFrStep(iTag)
+      write(kStdWarn,'(A,A,I3,F15.8,F15.8)') &
+          'spectral resolution - raFreq vs preddefined.param setting - are different : ', &
+          ' iTag : dv (from raFreq(1:kMaxPts)) : kaFrStep(iTag) ',&
+          iTag,dv,kaFrStep(iTag)
     END IF
 
     IF (abs((raFreq(1)-real(dSfreq))) > 1.0e-6) THEN
       iErr = 5
-      write(kStdErr,'(A,I3,F15.8,F15.8)') 'start freqpoint - raFreq vs database file - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
-      write(kStdWarn,'(A,I3,F15.8,F15.8)') 'start freqpoint - raFreq vs database file  - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
+      write(kStdErr,'(A,I3,F15.8,F15.8)') &
+       'start freqpoint - raFreq vs database file - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
+      write(kStdWarn,'(A,I3,F15.8,F15.8)') &
+        'start freqpoint - raFreq vs database file  - are different iTag : raFreq(1) : dSfreq ',iTag,raFreq(1),dSfreq
     END IF
 
     IF (abs(dv-real(dFStep)) > 1.0e-6) THEN
       iErr = 6
       write(kStdErr,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
-      write(kStdErr,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep',iTag,dv,dFStep
+      write(kStdErr,'(A,I3,F15.8,F15.8)') &
+        'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep',&
+        iTag,dv,dFStep
 
       write(kStdWarn,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
-      write(kStdWarn,'(A,I3,F15.8,F15.8)') 'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep',iTag,dv,dFStep
+      write(kStdWarn,'(A,I3,F15.8,F15.8)') &
+       'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep', &
+       iTag,dv,dFStep
     END IF
 !!! end sanity check !!!
 

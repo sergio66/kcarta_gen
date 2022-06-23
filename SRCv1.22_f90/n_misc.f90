@@ -53,7 +53,7 @@ CONTAINS
      test1 = is_badnum(x)
 
      test = .true.
-     if ((test1 .EQ. .true.) .OR. (test2 .EQ. .true.)) test = .false.
+     if ((test1 .EQV. .true.) .OR. (test2 .EQV. .true.)) test = .false.
 
      is_goodnum = test
   
@@ -406,7 +406,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,1)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF ((abs(iTemp) /= 1) .AND. (iTemp /= 2) .AND. (itemp /= 3)) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iSartaChi : need iaaOverrideDefault(',iI,',',iJ,') = -1,+1,2,3 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+       'iSartaChi : need iaaOverrideDefault(',iI,',',iJ,') = -1,+1,2,3 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -414,7 +415,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,2)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF ((abs(iTemp) /= 1) .AND. (abs(iTemp) /= 2)) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iSplineType : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1,2 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+       'iSplineType : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1,2 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -422,7 +424,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,3)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (iTemp < 0 .OR. iTemp > 2) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iCO2Chi : need iaaOverrideDefault(',iI,',',iJ,') = 0,1,2 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+        'iCO2Chi : need iaaOverrideDefault(',iI,',',iJ,') = 0,1,2 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -430,7 +433,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,4)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) .NE. 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iMatlabORf77 : need iaaOverrideDefault(',iI,',',iJ,') = -1,+1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+        'iMatlabORf77 : need iaaOverrideDefault(',iI,',',iJ,') = -1,+1 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -438,7 +442,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,5)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (iTemp < 0 .OR.  iTemp > 6) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iWhichScatterCode : need iaaOverrideDefault(',iI,',',iJ,') = 0..6 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+        'iWhichScatterCode : need iaaOverrideDefault(',iI,',',iJ,') = 0..6 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -446,7 +451,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,6)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iReadRP : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+       'iReadRP : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -454,7 +460,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,7)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iLogOrLinear : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+       'iLogOrLinear : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -462,7 +469,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,8)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'rfmin/rfmax : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+        'rfmin/rfmax : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -470,7 +478,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,9)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (iTemp .NE. 0 .and. iTemp .NE. 2 .and. iTemp .NE. 4 .and. iTemp .NE. 6) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'CO2 N2 WV CIA : need iaaOverrideDefault(',iI,',',iJ,') = 0,2,4,6,8 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') &
+        'CO2 N2 WV CIA : need iaaOverrideDefault(',iI,',',iJ,') = 0,2,4,6,8 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -478,7 +487,9 @@ CONTAINS
     iTemp = iaaOverrideDefault(1,10)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'size of cloudy jac file : all or just weighted sum  : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') &
+        'size of cloudy jac file : all or just weighted sum  : need iaaOverrideDefault(',iI,',',iJ,') = +/- 1 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -490,7 +501,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,1)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1 .AND. iTemp /= 2 .AND. iTemp /= 42 .AND. iTemp /= 43) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'kTemperVary : need iaaOverrideDefault(',iI,',',iJ,') = -1,1,2,42,43 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'kTemperVary : need iaaOverrideDefault(',iI,',',iJ,') = -1,1,2,42,43 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -498,7 +510,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,2)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (iTemp /= 1 .AND. iTemp /= 2 .AND. iTemp /= 3 .AND. iTemp /= 4) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iNumGaussPts : need iaaOverrideDefault(',iI,',',iJ,') = 1..4 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iNumGaussPts : need iaaOverrideDefault(',iI,',',iJ,') = 1..4 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -506,7 +519,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,3)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF ((iTemp < -1 .AND. iTemp > 2) .AND. (iTemp /= 10)) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iDoThermalBackGnd : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,1,2,10 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iDoThermalBackGnd : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,1,2,10 not ', &
+         iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -514,7 +528,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,4)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF ((abs(iTemp) /= 1) .AND. (abs(iTemp) /= 2)) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iraKThermalAngle : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,2 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iraKThermalAngle : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,2 not ', &
+      iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -522,7 +537,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,5)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) > 0) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iGaussQuad : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,+1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iGaussQuad : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,+1 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -530,7 +546,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,6)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iUpwell : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,-2 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iUpwell : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,-2 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -538,7 +555,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,7)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) > 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iSnell : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,+1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iSnell : need iaaOverrideDefault(',iI,',',iJ,') = -1,0,+1 not ',  &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -546,7 +564,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,8)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iInterpType : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iInterpType : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -554,7 +573,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,9)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iEstimateHighRes : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iEstimateHighRes : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -571,7 +591,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,10)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAdjust Sun-Planet Distance : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAdjust Sun-Planet Distance : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -583,7 +604,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(3,1)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAIRS101_or_LBL_levels : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAIRS101_or_LBL_levels : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',  &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -591,7 +613,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(3,2)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iReplaceXeroProf for LBLRTM : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iReplaceXeroProf for LBLRTM : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',  &
+      iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -599,7 +622,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(3,3)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAddLBLRTM missing profile : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAddLBLRTM missing profile : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',  &
+      iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -607,7 +631,9 @@ CONTAINS
     iTemp = iaaOverrideDefault(3,4)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'Dump out surface terms (upwell radiation) : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+        'Dump out surface terms (upwell radiation) : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',  &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -615,7 +641,9 @@ CONTAINS
     iTemp = iaaOverrideDefault(3,5)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'Keep rtp cloud info (+1) or switch to clear only (-1)  : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+        'Keep rtp cloud info (+1) or switch to clear only (-1)  : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
+        iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -623,7 +651,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(3,6)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF ((abs(iTemp) /= 1) .AND. (iTemp .NE. 0) .AND. (iTemp .NE. -9999)) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'Keep sun as -9999 or -1,0,+1 : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,0,-9999 not ',iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I2)') &
+        'Keep sun as -9999 or -1,0,+1 : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,0,-9999 not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 

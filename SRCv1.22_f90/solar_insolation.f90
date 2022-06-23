@@ -386,9 +386,10 @@ CONTAINS
 !****   OBLIQD = OBLIQ# + sum[A cos(ft+delta)]   Equation 1 (5)
 !****
       SUMC = 0
-      Do 110 I=1,47
-      ARG    = PIz180*(YM1950*TABLE1(2,I)/3600+TABLE1(3,I))
-  110 SUMC   = SUMC + TABLE1(1,I)*Cos(ARG)
+      Do I=1,47
+        ARG    = PIz180*(YM1950*TABLE1(2,I)/3600+TABLE1(3,I))
+        SUMC   = SUMC + TABLE1(1,I)*Cos(ARG)
+      END DO
       OBLIQD = 23.320556d0 + SUMC/3600
       OBLIQ  = OBLIQD*PIz180
 !****
@@ -399,10 +400,11 @@ CONTAINS
 !****
       ESINPI = 0
       ECOSPI = 0
-      Do 210 I=1,19
-      ARG    = PIz180*(YM1950*TABLE4(2,I)/3600+TABLE4(3,I))
-      ESINPI = ESINPI + TABLE4(1,I)*Sin(ARG)
-  210 ECOSPI = ECOSPI + TABLE4(1,I)*Cos(ARG)
+      Do I=1,19
+        ARG    = PIz180*(YM1950*TABLE4(2,I)/3600+TABLE4(3,I))
+        ESINPI = ESINPI + TABLE4(1,I)*Sin(ARG)
+        ECOSPI = ECOSPI + TABLE4(1,I)*Cos(ARG)
+      END DO
       ECCEN  = Sqrt (ESINPI*ESINPI+ECOSPI*ECOSPI)
 !****
 !**** Perihelion from Equation 4,6,7 (9) and Table 4,5 (1,3):
@@ -414,9 +416,10 @@ CONTAINS
 !****
       PIE    = ATan2(ESINPI,ECOSPI)
       FSINFD = 0
-      Do 310 I=1,78
-      ARG    = PIz180*(YM1950*TABLE5(2,I)/3600+TABLE5(3,I))
-  310 FSINFD = FSINFD + TABLE5(1,I)*Sin(ARG)
+      DO I=1,78
+        ARG    = PIz180*(YM1950*TABLE5(2,I)/3600+TABLE5(3,I))
+        FSINFD = FSINFD + TABLE5(1,I)*Sin(ARG)
+      END DO
       PSI    = PIz180*(3.392506d0+(YM1950*50.439273d0+FSINFD)/3600)
       OMEGVP = Modulo (PIE+PSI+.5*TWOPI, TWOPI)
 !****

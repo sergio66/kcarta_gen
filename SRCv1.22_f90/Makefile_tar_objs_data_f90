@@ -16,6 +16,7 @@ OBJSSTRING     = kcoeff_common.o         clear_scatter_basic.o   n_nonlte_common
                  n_layers.o              n_layers_lblrtm.o       n_misc.o                          \
                  datetime_module.o       solar_insolation.o      n_rtp.o    \
 		 n_duplicate_sky.o       n_main.o                
+#                 datetime_module.o       solar_insolation.o         \
  
 OBS_LTE_OPTDPH  = kcoeffSPL.o               kcoeffSPLJAC.o        kcoeff_FAST_details.o \
                   kcoeff_FAST_details2.o    kcoeff_FAST.o         kcont_xsec.o           kcoeffMAIN.o
@@ -38,6 +39,7 @@ MOBJSSTRING     = kcoeff_common.mod       clear_scatter_basic.mod  n_nonlte_comm
                   n_layers.mod            n_layers_lblrtm.mod      n_misc.mod                               \
                   datetime_module.mod     solar_insolation.mod     n_rtp.mod                                \
 		  n_duplicate_sky.mod     n_main.mod               
+#                  datetime_module.mod     solar_insolation.mod                                     \
 
 MOBS_LTE_OPTDPH  = kcoeffSPL.mod              kcoeffSPLJAC.mod      kcoeff_FAST_details.mod   \
                    kcoeff_FAST_details2.mod   kcoeff_FAST.mod       kcont_xsec.mod        kcoeffMAIN.mod       
@@ -95,10 +97,10 @@ MOBSSCAT_RTSPEC = scatter_rtspec_code.mod scatter_rtspec_main.mod scatter_rtspec
 #                  scatter_disort_flux.o scatter_disort_misc.o
 #MOBSSCAT_DISORT = scatter_disort_main.mod scatter_disort_code.mod \
 #                 scatter_disort_flux.mod scatter_disort_misc.mod
-OBSSCAT_DISORT  = scatter_disort_code.o scatter_disort_main.o \
-                  scatter_disort_flux.o 
-MOBSSCAT_DISORT = scatter_disort_code.mod scatter_disort_main.mod \
-                  scatter_disort_flux.mod 
+OBSSCAT_DISORT  = scatter_disort_aux.o scatter_disort_code.o scatter_disort_flux.o \
+                  scatter_disort_main.o 
+MOBSSCAT_DISORT = scatter_disort_aux.o scatter_disort_code.mod scatter_disort_flux.mod \
+                  scatter_disort_main.mod 
 
 OBSSCAT_GRAYCLD  = scatter_graycld_code.o scatter_graycld_main.o
 MOBSSCAT_GRAYCLD = scatter_graycld_code.mod scatter_graycld_main.mod
@@ -112,6 +114,8 @@ OBSSCAT5  = $(OBSSCAT_RTSPEC)   $(OBSSCAT_PCLSAM)  $(OBSSCAT_GRAYCLD)   $(OBSSCA
              scatter_interface.o
 MOBSSCAT5 = $(MOBSSCAT_RTSPEC)  $(MOBSSCAT_PCLSAM) $(MOBSSCAT_GRAYCLD)  $(MOBSSCAT_DISORT) \
              scatter_interface.mod
+#OBSSCAT5  = $(OBSSCAT_PCLSAM)  $(OBSSCAT_GRAYCLD)   $(OBSSCAT_DISORT)   scatter_interface.o
+#MOBSSCAT5 = $(MOBSSCAT_PCLSAM) $(MOBSSCAT_GRAYCLD)  $(MOBSSCAT_DISORT)  scatter_interface.mod
 
 ########################################################################
 ### this is for the whole kit and caboodle
@@ -397,14 +401,19 @@ scatter_rtspec_flux.mod scatter_rtspec_flux.o : scatter_rtspec_flux.f90 $(PARAMS
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_rtspec_flux.f90
 
 #### this is Kurt Stamnes DISORT
-scatter_disort_main.mod scatter_disort_main.o : scatter_disort_main.f90  $(PARAMS_SCAT) 
+scatter_disort_aux.mod scatter_disort_aux.o : scatter_disort_aux.f90  $(PARAMS_SCAT)
+	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_aux.f90
+
+scatter_disort_main.mod scatter_disort_main.o : scatter_disort_main.f90  $(PARAMS_SCAT)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_main.f90
 
-scatter_disort_flux.mod scatter_disort_flux.o : scatter_disort_flux.f90  $(PARAMS_SCAT) 
+scatter_disort_flux.mod scatter_disort_flux.o : scatter_disort_flux.f90  $(PARAMS_SCAT)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_flux.f90
 
-scatter_disort_code.mod scatter_disort_code.o : scatter_disort_code.f90  $(PARAMS_SCAT) 
+scatter_disort_code.mod scatter_disort_code.o : scatter_disort_code.f90  $(PARAMS_SCAT)
 	$(FORTRANX) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_code.f90
+#scatter_disort_code.mod scatter_disort_code.o : scatter_disort_code.f90  $(PARAMS_SCAT)
+#	$(FORTRANX) -c $(FLAGS) $(UFLAG) scatter_disort_code.f90
 
 #scatter_disort_misc.mod scatter_disort_misc.o : scatter_disort_misc.f90  $(PARAMS_SCAT)
 #	$(FORTRANX) -c $(FLAGS) $(FDOUBLE) $(UFLAG) scatter_disort_misc.f90

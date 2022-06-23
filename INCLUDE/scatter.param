@@ -85,9 +85,9 @@ c       MXSQT  = Max no. of square roots of integers (for LEPOLY)
       INTEGER maxmom             !max number of legendre polys=streamnums
 
 c      PARAMETER (maxcly = kProfLayer, maxulv = maxcly+1, maxmom = 299 ) 
-      PARAMETER (maxphi = 3, maxumu = 10)
-      PARAMETER (maxsqt = 1000, maxcmu = 12)
-      PARAMETER (maxcly = kProfLayer, maxulv = maxcly+1, maxmom = 1 ) 
+      PARAMETER (maxphi = 10, maxumu = 10)
+      PARAMETER (maxsqt = 1000, maxcmu = 16)
+      PARAMETER (maxcly = kProfLayer, maxulv = maxcly+1, maxmom = 100 ) 
 c space saver dimensions!!!!!!!!!!!!!!!!!
 c      PARAMETER (maxphi = 2, maxumu = 2)
 c      PARAMETER (maxsqt = 10, maxcmu = 2)

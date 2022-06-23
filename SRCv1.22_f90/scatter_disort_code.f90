@@ -57,6 +57,7 @@ USE kcoeff_common
 USE spline_and_sort_and_common
 USE rad_diff_and_quad
 USE clear_scatter_basic
+USE scatter_disort_aux
 
 IMPLICIT NONE
 
@@ -676,7 +677,7 @@ CONTAINS
             NCOS   = 1
             ANGCOS = -UMU0
             ANGCOSN(1) = ANGCOS
-            !!! CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOS, SQT, YLM0 ) !!! ORIG CODE
+            !!!CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOS, SQT, YLM0 ) !!! ORIG CODE
             CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOSN, SQT, YLM0 )
 
         END IF
@@ -933,7 +934,9 @@ CONTAINS
 !     &    CALL PRTINT( UU, UTAU, NTAU, UMU, NUMU, PHI, NPHI, MAXULV,
 !     &                 MAXUMU )
     CALL PRTINT( UU, UTAU, NTAU, UMU, NUMU, PHI, NPHI)
-
+!print *,UU
+!print *,UTAU
+!print *,'NTAU,NUMU,NPHI = ',NTAU,NUMU,NPHI
 
     IF( PASS1 ) THEN
     !                                    ** Compare test case results with
@@ -3343,7 +3346,7 @@ CONTAINS
         IER, '  didnt converge.  Lower-numbered eigenvalues wrong.'
 
     ! commented this out ----- sergio
-        CALL ERRMSG( 'ASYMTX--convergence problems', .TRUE. )
+    !    CALL ERRMSG( 'ASYMTX--convergence problems', .TRUE. )
 
     END IF
 

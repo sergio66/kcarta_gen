@@ -2410,7 +2410,8 @@ CONTAINS
     kSolar        = iaKSolar(iC)
 
     IF ((raKSolarAngle(iC) > 90.0) .AND. (raKSolarAngle(iC) <= 120) .AND. (iNumNLTEGases > 0)) THEN
-      write(kStdWarn,'(A,I2,A,I2,A,F10.4,A)') 'iNumNLTEGases = ',iNumNLTEGases,' : profile ',iC,' resetting solar angle from ',raKSolarAngle(iC),' to 89.9'
+      write(kStdWarn,'(A,I2,A,I2,A,F10.4,A)') & 
+      'iNumNLTEGases = ',iNumNLTEGases,' : profile ',iC,' resetting solar angle from ',raKSolarAngle(iC),' to 89.9'
       raKSolarAngle(iC) = 89.9
       iaKSolar(iC)      = +1
       kSolar            = iaKSolar(iC)      
@@ -2427,7 +2428,8 @@ CONTAINS
     kThermalJacob = iakThermalJacob(iC)
 
     FMT = '(A,4(I3,1X),F8.3)'
-    write(kStdWarn,FMT) '(1) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
+    write(kStdWarn,FMT) '(1) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',&
+      kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
 
     IF (kThermalAngle  < 0) THEN
       kSetThermalAngle = -1   !use accurate angles lower down in atm, const  in tau temp variation
@@ -2446,8 +2448,10 @@ CONTAINS
     END IF
 
     FMT = '(A,4(I3,1X),F8.3)'
-    write(kStdWarn,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
-!    write(kStdErr,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',kFlux,kTemperVary!,kThermal,kSetThermalAngle,kThermalAngle
+    write(kStdWarn,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',&
+      kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
+!    write(kStdErr,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ', &
+!      kFlux,kTemperVary!,kThermal,kSetThermalAngle,kThermalAngle
 
     IF (iDirection > 0) THEN
       ! check things make sense for downlook in
@@ -2685,8 +2689,10 @@ CONTAINS
       i4ctype2 = prof%ctype2
 
     elseif (iaaOverrideDefault(3,5) == -1) then
-      write (kStdWarn,'(A)') '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
-      write (kStdErr,'(A)')  '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
+      write (kStdWarn,'(A)') & 
+        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
+      write (kStdErr,'(A)')  &
+        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
       cfrac12 = 0.0
   
       ctype1  = -9999
@@ -3145,29 +3151,29 @@ CONTAINS
     IF (prof.plevs(1) < prof.plevs(prof.nlevs)) THEN
       ! layers are from TOA to the bottom
       iDownWard = -1
-      kRTP_pBot = prof.plevs(prof.nlevs)
-      kRTP_pTop = prof.plevs(1)
-      kRTPBot   = kProfLayer - (prof.nlevs-1) + 1
+      kRTP_pBot = prof%plevs(prof%nlevs)
+      kRTP_pTop = prof%plevs(1)
+      kRTPBot   = kProfLayer - (prof%nlevs-1) + 1
       kRTPTop   = kProfLayer
     ELSE
       !layers are from GND to the top
       !but klayers NEVER does this :  whether plevs are from 1 to 1000 mb or 1000 to 1 mb
       !the output is always from 0.005 to 1000 mb!!!!!
       iDownWard = +1
-      kRTP_pTop = prof.plevs(prof.nlevs)
-      kRTP_pBot  = prof.plevs(1)
+      kRTP_pTop = prof%plevs(prof%nlevs)
+      kRTP_pBot  = prof%plevs(1)
       kRTPTop   = 1
-      kRTPBot   = prof.nlevs-1
+      kRTPBot   = prof%nlevs-1
     END IF
 
-    iL1 = prof.nlevs - 1         !!! number of layers = num of levels - 1
+    iL1 = prof%nlevs - 1         !!! number of layers = num of levels - 1
     iProfileLayers = iL1
-    iGasInRTPFile = head.ngas              !!! number of gases
+    iGasInRTPFile = head%ngas              !!! number of gases
 
     !! go through and see if CO2 is there as ppmv
     iCO2ppm = -1   !!! this means assume no CO2 in rtp file
     DO iG = 1, iGasInRTPFile
-      iIDGas = head.glist(iG)
+      iIDGas = head%glist(iG)
       IF (iIDGas .EQ. 2) THEN
         IF (head.gunit(iG) .EQ. 1) THEN
           write(kStdWarn,'(A)') 'CO2 profile in rtp file is in molecules/cm2'
@@ -3183,27 +3189,33 @@ CONTAINS
     IF (iCO2ppm < 0) THEN
       IF (kPlanet == 3 .AND. (prof.co2ppm >= 350 .AND. prof.co2ppm <= 450)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdWarn,'(A,F8.3,A)') &
+          'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)')  &
+          'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSEIF (kPlanet == 4 .AND. (prof.co2ppm >= 0.90*1e6 .AND. prof.co2ppm <= 0.99*1e6)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdWarn,'(A,F8.3,A)') &
+          'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)')  &
+          'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSE
-        write(kStdWarn,'(A,I3,A)') 'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
-        write(kStdErr,'(A,I3,A)')  'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+        write(kStdWarn,'(A,I3,A)') &
+          'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+        write(kStdErr,'(A,I3,A)')  &
+          'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
       ENDIF
     END IF
 
     IF (prof.nlevs > kProfLayer+1) THEN
       write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
-      write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
+      write(kStdErr,*) 'RTP file has ',prof%nlevs-1,' layers'
       write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
       CALL DoStop
     END IF
@@ -3229,16 +3241,16 @@ CONTAINS
 
     DO i = 1,prof.nlevs
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
-      raHeight(j) = prof.palts(i)                     !!!! in meters
-      raPressLevels(j) = prof.plevs(i)                !!!! in mb
-      raJunk(j)  = prof.ptemp(j)                      !!!! junk T
+      raHeight(j) = prof%palts(i)                     !!!! in meters
+      raPressLevels(j) = prof%plevs(i)                !!!! in mb
+      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
     END DO
     if (prof.nlevs .EQ. kProfLayer) THEN
       raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
       raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
     end if
 
-    DO i = 1,prof.nlevs-1
+    DO i = 1,prof%nlevs-1
       !j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
       !pProf(j) = raPressLevels(i) - raPressLevels(i+1)
       !pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
@@ -3247,15 +3259,15 @@ CONTAINS
     END DO
 
 ! check that spres lies withn plevs(nlevs) and plevs(nlevs-1)
-    IF ((prof.plevs(prof.nlevs) > prof.spres) .AND. &
-    (prof.plevs(prof.nlevs-1) > prof.spres)) THEN
+    IF ((prof%plevs(prof%nlevs) > prof%spres) .AND. &
+    (prof%plevs(prof%nlevs-1) > prof%spres)) THEN
       write(kStdErr,*) 'p.nlevs | p.plevs(p.nlevs) p.spres p.plevs(p.nlevs-1)'
-      write(kStdErr,*) prof.nlevs,prof.plevs(prof.nlevs),prof.spres,prof.plevs(prof.nlevs-1)
+      write(kStdErr,*) prof%nlevs,prof%plevs(prof%nlevs),prof%spres,prof%plevs(prof%nlevs-1)
       write(kStdErr,*) 'spres not between p.plevs(nlevs) and p.plevs(nlevs-1)'
       write(kStdErr,*) 'i       raP(i)          raPavg(i)        raP(i+1)    spres'
       write(kStdErr,*) '----------------------------------------------------------'
-      DO i = 1,prof.nlevs-1
-        write(kStdErr,*) i,raPressLevels(i),pProf(i),raPressLevels(i+1),prof.spres
+      DO i = 1,prof%nlevs-1
+        write(kStdErr,*) i,raPressLevels(i),pProf(i),raPressLevels(i+1),prof%spres
       END DO
       CALL DoStop
     END IF
@@ -3263,14 +3275,14 @@ CONTAINS
     IF (iDownWard == -1) THEN
       !!!add on dummy stuff
       !!!assume lowest pressure layer is at -600 meters
-      k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
-      if ((kProfLayer - prof.nlevs) .NE. 0) then
-        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      k = iFindJ(kProfLayer+1,prof%nlevs,iDownWard)
+      if ((kProfLayer - prof%nlevs) .NE. 0) then
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof%nlevs)
       else
         delta1 = 190.0
       end if
-      salti = prof.salti
-      DO i = prof.nlevs+1, kProfLayer + 1
+      salti = prof%salti
+      DO i = prof%nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
       END DO
@@ -3278,19 +3290,19 @@ CONTAINS
       !!!add on dummy stuff
       !!!assume  top pressure layer is at 10e5 meters
       k = i
-      salti = prof.salti
-      if ((kProfLayer - prof.nlevs) .NE. 0) then
-        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      salti = prof%salti
+      if ((kProfLayer - prof%nlevs) .NE. 0) then
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof%nlevs)
       else
         delta1 = 4000
       end if
-      DO i = prof.nlevs+1, kProfLayer + 1
+      DO i = prof%nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
       END DO
     END IF
 
-!    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
+!    DO i = 1,prof%nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
      DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
       write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
@@ -3364,34 +3376,34 @@ CONTAINS
         write(kStdWarn,*) ' ---------------------------------------------'
         write(kStdWarn,*) ' Reading Gas number ',iG ,' of ',iGasInRTPFile,' : ID = ',iIDGas
         !!! first fill things out with stuff from the RTP file
-        DO i = 1, prof.nlevs - 1
+        DO i = 1, prof%nlevs - 1
           j = iFindJ(kProfLayer,I,iDownWard)
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
-          ! rAmt = prof.gamnt(i,iG) / kAvog
+          ! rAmt = prof%gamnt(i,iG) / kAvog
           IF ((iIDgas .NE. 2) .OR. ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 1))) THEN
             !! profile(z) in molecules/cm2
-            rAmt = prof.gamnt(i,iG) / kAvog                       
+            rAmt = prof%gamnt(i,iG) / kAvog                       
           ELSEIF ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 10)) THEN
             !! CO2 profile(z) in ppm, change to kmoles/cm2
-            rAmt = get_co2_us_std(prof.gamnt(i,iG),i,10)
+            rAmt = get_co2_us_std(prof%gamnt(i,iG),i,10)
           ELSEIF ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 11)) THEN
             !! CO2 in ppm, change to profile and change to kmoles/cm2
-            rAmt = get_co2_us_std(prof.co2ppm,i,11)
+            rAmt = get_co2_us_std(prof%co2ppm,i,11)
           END IF
 
           IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
-          rT   = prof.ptemp(i)
+          rT   = prof%ptemp(i)
           ! write(kStdErr,*) 'READRTP_1A 1 gasid lay rT ',iIDgas,i,rT
           IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
-          plays(i) = (prof.plevs(i)-prof.plevs(i+1))/log(prof.plevs(i)/prof.plevs(i+1))
+          plays(i) = (prof%plevs(i)-prof%plevs(i+1))/log(prof%plevs(i)/prof%plevs(i+1))
           rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
           IF (iDownWard == -1) THEN
             !!! this automatically puts partial pressure in ATM, assuming
@@ -3408,12 +3420,12 @@ CONTAINS
           END IF
           IF (iDownWard == -1) THEN
             !! toa = 1, gnd = Nlevs-1,Nlevs
-            rH   = prof.palts(i)
-            if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+            rH   = prof%palts(i)
+            if (i == prof%nlevs-1) rHm1 = prof%palts(i+1)
           ELSEIF (iDownWard == +1) THEN
             !! toa = Nlevs, gnd = 2,1
-            rH   = prof.palts(i+1)
-            if (i == 1) rHm1 = prof.palts(1)
+            rH   = prof%palts(i+1)
+            if (i == 1) rHm1 = prof%palts(1)
           END IF
 
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -3430,7 +3442,7 @@ CONTAINS
               raaPartPress(j,iGasIndex) = rPP
               IF (iDownWard == -1) THEN
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
-                if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+                if (i == prof%nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
               ELSEIF (iDownWard == +1) THEN
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
                 if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
@@ -3438,21 +3450,21 @@ CONTAINS
               iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
-          END DO              !DO i = 1, prof.nlevs - 1 for klayers info
+          END DO              !DO i = 1, prof%nlevs - 1 for klayers info
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
-          DO i = prof.nlevs, kProfLayer
+          DO i = prof%nlevs, kProfLayer
             j = iFindJ(kProfLayer,I,iDownWard)
             iIDGas = head.glist(iG)
             iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
             IF (iDownWard == -1) THEN
-              delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
+              delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
               rZ = 1000.0
             ELSE
-              delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
-              rT   = prof.ptemp(prof.nlevs-1) + delta1*j
+              delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
+              rT   = prof%ptemp(prof%nlevs-1) + delta1*j
               rT   = 300.0
               rZ = 1000.0
             END IF
@@ -3477,7 +3489,7 @@ CONTAINS
                 iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
-          END DO    !DO i = prof.nlevs, kProfLayer for zeros
+          END DO    !DO i = prof%nlevs, kProfLayer for zeros
           CALL ContinuumFlag(iIDGas,iaCont)
                 
           iFileGasesReadIn = iFileGasesReadIn+1
@@ -3499,26 +3511,26 @@ CONTAINS
           write(kStdWarn,*) ' Reading Cloud100 Layer Profiles, as gas ',iG ,' of ',iGasInRTPFile
           !!! first fill things out with stuff from the RTP file
           iNpathCounterJunk = 0
-          DO i = 1, prof.nlevs - 1
+          DO i = 1, prof%nlevs - 1
             j = iFindJ(kProfLayer,I,iDownWard)
             iNpathCounterJunk = iNpathCounterJunk + 1
 
-            ! rCC = prof.cc(i)
+            ! rCC = prof%cc(i)
             ! write(kStdErr,*) i,rCC
                           
-            rAmt = prof.gamnt(i,iG)
+            rAmt = prof%gamnt(i,iG)
             IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
               write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF
-            rT   = prof.ptemp(i)
+            rT   = prof%ptemp(i)
             ! write(kStdErr,'(A,I2,A,F12.4,A,I3)') 'READRTP_1A 2 gasid lay rT ',iIDgas,i,rT
             IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
               write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF
 
-            plays(i) = (prof.plevs(i)-prof.plevs(i+1))/log(prof.plevs(i)/prof.plevs(i+1))
+            plays(i) = (prof%plevs(i)-prof%plevs(i+1))/log(prof%plevs(i)/prof%plevs(i+1))
             rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
             IF (iDownWard == -1) THEN
               !!! this automatically puts partial pressure in ATM, assuming
@@ -3533,7 +3545,7 @@ CONTAINS
               rPP  = 0
               rZ = 1000.0
             END IF
-            rH   = prof.palts(i)
+            rH   = prof%palts(i)
             ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
             CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iNpathCounterJunk)
             ! set the relevant variables, after checking to see that the gas has been
@@ -3541,20 +3553,20 @@ CONTAINS
             iGasIndex = iIDgas-kNewCloudLo+1
             raaCld100Amt(j,iGasIndex) = rAmt
             iaCld100Read(iGasIndex)   = 1
-          END DO              !DO i = 1, prof.nlevs - 1 for klayers info
+          END DO              !DO i = 1, prof%nlevs - 1 for klayers info
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
-          DO i = prof.nlevs, kProfLayer
+          DO i = prof%nlevs, kProfLayer
             j = iFindJ(kProfLayer,I,iDownWard)
             iIDGas = head.glist(iG)
             iNpathCounterJunk = iNpathCounterJunk + 1
             IF (iDownWard == -1) THEN
-              delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
+              delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
               rT   = 300.0  + delta1*j
               rT = 300.0
             ELSE
-              delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
-              rT   = prof.ptemp(prof.nlevs-1) + delta1*j
+              delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
+              rT   = prof%ptemp(prof%nlevs-1) + delta1*j
               rT   = 300.0
             END IF
             rAmt = 0.0
@@ -3564,7 +3576,7 @@ CONTAINS
             rH   = raHeight(j)
             raaCld100Amt(j,iGasIndex)       = rAmt
             iaCld100Read(iGasIndex)      = 1
-          END DO    !DO i = prof.nlevs, kProfLayer for zeros
+          END DO    !DO i = prof%nlevs, kProfLayer for zeros
         END IF      !if iGasID <= 63
     END DO
 
@@ -3600,7 +3612,7 @@ CONTAINS
     raH1        = raThickness/1000         !!!dump out info in km
     raP1        = raPresslevels
 
-    i = prof.nlevs - 1     !!!!!!number of layers in RTP file
+    i = prof%nlevs - 1     !!!!!!number of layers in RTP file
     i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
     write (kStdWarn,*) '      '
     write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'
@@ -3741,26 +3753,26 @@ CONTAINS
    !      write(kStdWarn,*)  'read close status = ', status
 
     kProfileUnitOpen = -1
-    write(kStdWarn,*) 'iRTP,prof.nlevs,prof.stemp = ',iRTP,prof.nlevs,prof.stemp
-    IF (prof.plevs(1) < prof.plevs(prof.nlevs)) THEN
+    write(kStdWarn,*) 'iRTP,prof%nlevs,prof%stemp = ',iRTP,prof%nlevs,prof%stemp
+    IF (prof%plevs(1) < prof%plevs(prof%nlevs)) THEN
       ! layers are from TOA to the bottom
       iDownWard = -1
-      kRTP_pBot = prof.plevs(prof.nlevs)
-      kRTP_pTop = prof.plevs(1)
-      kRTPBot   = kProfLayer - (prof.nlevs-1) + 1
+      kRTP_pBot = prof%plevs(prof%nlevs)
+      kRTP_pTop = prof%plevs(1)
+      kRTPBot   = kProfLayer - (prof%nlevs-1) + 1
       kRTPTop   = kProfLayer
     ELSE
       ! layers are from GND to the top
       !but klayers NEVER does this :  whether plevs are from 1 to 1000 mb or 1000 to 1 mb
       !the output is always from 0.005 to 1000 mb!!!!!
       iDownWard = +1
-      kRTP_pTop = prof.plevs(prof.nlevs)
-      kRTP_pBot  = prof.plevs(1)
+      kRTP_pTop = prof%plevs(prof%nlevs)
+      kRTP_pBot  = prof%plevs(1)
       kRTPTop   = 1
-      kRTPBot   = prof.nlevs-1
+      kRTPBot   = prof%nlevs-1
     END IF
 
-    iL1 = prof.nlevs - 1         !!! number of layers = num of levels - 1
+    iL1 = prof%nlevs - 1         !!! number of layers = num of levels - 1
     iProfileLayers = iL1
     iGasInRTPFile = head.ngas              !!! number of gases
 
@@ -3781,34 +3793,38 @@ CONTAINS
       END IF
     END DO
     IF (iCO2ppm < 0) THEN
-      IF (kPlanet == 3 .AND. (prof.co2ppm >= 350 .AND. prof.co2ppm <= 450)) THEN
+      IF (kPlanet == 3 .AND. (prof%co2ppm >= 350 .AND. prof%co2ppm <= 450)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdWarn,'(A,F8.3,A)') &
+          'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)') &
+          'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
-      ELSEIF (kPlanet == 4 .AND. (prof.co2ppm >= 0.90*1e6 .AND. prof.co2ppm <= 0.99*1e6)) THEN
+      ELSEIF (kPlanet == 4 .AND. (prof%co2ppm >= 0.90*1e6 .AND. prof%co2ppm <= 0.99*1e6)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
+        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
+        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSE
-        write(kStdWarn,'(A,I3,A)') 'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
-        write(kStdErr,'(A,I3,A)')  'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+        write(kStdWarn,'(A,I3,A)') &
+          'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+        write(kStdErr,'(A,I3,A)')  &
+          'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
       ENDIF
     END IF
 
-    IF (prof.nlevs > kProfLayer+1) THEN
+    IF (prof%nlevs > kProfLayer+1) THEN
       write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
-      write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
+      write(kStdErr,*) 'RTP file has ',prof%nlevs-1,' layers'
       write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
       CALL DoStop
     ELSE
       write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
-      write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
+      write(kStdErr,*) 'RTP file has ',prof%nlevs-1,' layers'
     END IF
      
     write(kStdWarn,*) 'Reading profile from RTP file... '
@@ -3831,29 +3847,29 @@ CONTAINS
     END IF
 
     ! fill this for fun (below the surface)
-    DO i = prof.nlevs+1,kProfLayer+1
+    DO i = prof%nlevs+1,kProfLayer+1
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
-      raHeight(j) = prof.palts(i)                     !!!! in meters
-      raPressLevels(j) = prof.plevs(i)                !!!! in mb
+      raHeight(j) = prof%palts(i)                     !!!! in meters
+      raPressLevels(j) = prof%plevs(i)                !!!! in mb
       raPressLevels(j) = 0.0                          !!!! in mb, safer !!!!		
       raJunk(j)  = 0.0                                !!!! junk T
     END DO
-    if (prof.nlevs .EQ. kProfLayer) THEN
+    if (prof%nlevs .EQ. kProfLayer) THEN
       raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
       raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
     end if
 
-    DO i = 1,prof.nlevs
+    DO i = 1,prof%nlevs
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
-      raHeight(j) = prof.palts(i)                     !!!! in meters
-      raPressLevels(j) = prof.plevs(i)                !!!! in mb
-      raJunk(j)  = prof.ptemp(j)                      !!!! junk T
-      raJunk(j)  = prof.ptemp(i)                      !!!! junk T
+      raHeight(j) = prof%palts(i)                     !!!! in meters
+      raPressLevels(j) = prof%plevs(i)                !!!! in mb
+      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+      raJunk(j)  = prof%ptemp(i)                      !!!! junk T
       write(kStdWarn,'(A,I3,A,I3,1X,I3,A,3(F12.5,1X))') 'iDownward = ',iDownward,' i,j = ',i,j,' hgt p T = ', &
          raHeight(j),raPressLevels(j),raJunk(j)
     END DO
         
-    DO i = 1,prof.nlevs-1
+    DO i = 1,prof%nlevs-1
 !      j = iFindJ(kProfLayer+1,I,iDownWard)
 !      pProf(j) = raPressLevels(i) - raPressLevels(i+1)
 !      pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
@@ -3865,35 +3881,35 @@ CONTAINS
     IF (iDownWard == -1) THEN
       !!!add on dummy stuff
       !!!assume lowest pressure layer is at -600 meters
-      k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
-      if ((kProfLayer - prof.nlevs) .NE. 0) then
-        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      k = iFindJ(kProfLayer+1,prof%nlevs,iDownWard)
+      if ((kProfLayer - prof%nlevs) .NE. 0) then
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof%nlevs)
       else
         delta1 = 190.0
       end if
-      salti = prof.salti
-      DO i = prof.nlevs+1, kProfLayer + 1
+      salti = prof%salti
+      DO i = prof%nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
-!        write(kStdErr,*) i,j,raHeight(j),raPressLevels(j),-1,prof.nlevs
+!        write(kStdErr,*) i,j,raHeight(j),raPressLevels(j),-1,prof%nlevs
       END DO
     ELSE
       !!!add on dummy stuff
       !!!assume  top pressure layer is at 10e5 meters
       k = i
-      if ((kProfLayer - prof.nlevs) .NE. 0) then
-        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof%nlevs) .NE. 0) then
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof%nlevs)
       else
         delta1 = 4000.0
       end if
-      DO i = prof.nlevs+1, kProfLayer + 1
+      DO i = prof%nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
-        write(kStdErr,*) 'xyz 1',i,j,raHeight(j),raPressLevels(j),+1,prof.nlevs      
+        write(kStdErr,*) 'xyz 1',i,j,raHeight(j),raPressLevels(j),+1,prof%nlevs      
       END DO
     END IF
 
-!    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
+!    DO i = 1,prof%nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
     DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
       write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
@@ -3967,34 +3983,34 @@ CONTAINS
         write(kStdWarn,*) ' ---------------------------------------------'
         write(kStdWarn,*) ' Reading Gas number ',iG ,' of ',iGasInRTPFile,' : ID = ',iIDGas
         !! first fill things out with stuff from the RTP file
-        DO i = 1, prof.nlevs - 1
+        DO i = 1, prof%nlevs - 1
           j = iFindJ(kProfLayer,I,iDownWard)
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
-          ! rAmt = prof.gamnt(i,iG) / kAvog
+          ! rAmt = prof%gamnt(i,iG) / kAvog
           IF ((iIDgas .NE. 2) .OR. ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 1))) THEN
             !! profile(z) in molecules/cm2
-            rAmt = prof.gamnt(i,iG) / kAvog                       
+            rAmt = prof%gamnt(i,iG) / kAvog                       
           ELSEIF ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 10)) THEN
             !! CO2 profile(z) in ppm, change to kmoles/cm2
-            rAmt = get_co2_us_std(prof.gamnt(i,iG),i,10)
+            rAmt = get_co2_us_std(prof%gamnt(i,iG),i,10)
           ELSEIF ((iIDgas .EQ. 2) .AND. (iCO2ppm .EQ. 11)) THEN
             !! CO2 in ppm, change to profile and change to kmoles/cm2
-            rAmt = get_co2_us_std(prof.co2ppm,i,11)
+            rAmt = get_co2_us_std(prof%co2ppm,i,11)
           END IF
 
           IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
-          rT   = prof.ptemp(i)
+          rT   = prof%ptemp(i)
           ! write(kStdErr,*) 'READRTP_1B 1 gasid lay rT ',iIDgas,i,rT
           IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
-          plays(i) = (prof.plevs(i)-prof.plevs(i+1))/log(prof.plevs(i)/prof.plevs(i+1))
+          plays(i) = (prof%plevs(i)-prof%plevs(i+1))/log(prof%plevs(i)/prof%plevs(i+1))
           rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
           IF (iDownWard == -1) THEN
             !!! this automatically puts partial pressure in ATM, assuming
@@ -4011,12 +4027,12 @@ CONTAINS
           END IF
           IF (iDownWard == -1) THEN
             !! toa = 1, gnd = Nlevs-1,Nlevs
-            rH   = prof.palts(i)
-            if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+            rH   = prof%palts(i)
+            if (i == prof%nlevs-1) rHm1 = prof%palts(i+1)
           ELSEIF (iDownWard == +1) THEN
             !! toa = Nlevs, gnd = 2,1
-            rH   = prof.palts(i+1)
-            if (i == 1) rHm1 = prof.palts(1)
+            rH   = prof%palts(i+1)
+            if (i == 1) rHm1 = prof%palts(1)
           END IF
 
           ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -4033,7 +4049,7 @@ CONTAINS
               raaPartPress(j,iGasIndex) = rPP
               IF (iDownWard == -1) THEN
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
-                if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+                if (i == prof%nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
               ELSEIF (iDownWard == +1) THEN
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
                 if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
@@ -4041,21 +4057,21 @@ CONTAINS
               iaWhichGasRead(iIDgas) = 1
             END IF
           END IF
-        END DO              !DO i = 1, prof.nlevs - 1 for klayers info
+        END DO              !DO i = 1, prof%nlevs - 1 for klayers info
 
         !!! then fill bottom of atm with zeros for gas amt, partial pressure
-        DO i = prof.nlevs, kProfLayer
+        DO i = prof%nlevs, kProfLayer
          j = iFindJ(kProfLayer,I,iDownWard)
          iIDGas = head.glist(iG)
          iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
          IF (iDownWard == -1) THEN
-           delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
+           delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
            rT   = 300.0  + delta1*j
            rT = 300.0
            rZ = 1000.0
          ELSE
-           delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
-           rT   = prof.ptemp(prof.nlevs-1) + delta1*j
+           delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
+           rT   = prof%ptemp(prof%nlevs-1) + delta1*j
            rT   = 300.0
            rZ = 1000.0
          END IF
@@ -4072,7 +4088,8 @@ CONTAINS
          IF (iaGases(iIDgas) > 0) THEN
            Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
            IF (iFound > 0) THEN
-             write(kStdWarn,'(A,I3,A,I3,A,I3,F12.5)') 'empty layer i ',i,' set rAmt = 0 for gasID = ',iIDGas,' gindex, rP = ',iGasIndex,rP
+             write(kStdWarn,'(A,I3,A,I3,A,I3,F12.5)') &
+               'empty layer i ',i,' set rAmt = 0 for gasID = ',iIDGas,' gindex, rP = ',iGasIndex,rP
              raaAmt(j,iGasIndex)       = rAmt
              raaTemp(j,iGasIndex)      = rT
              raaPress(j,iGasIndex)     = rP
@@ -4081,7 +4098,7 @@ CONTAINS
              iaWhichGasRead(iIDgas) = 1
            END IF
          END IF
-       END DO    !DO i = prof.nlevs, kProfLayer for zeros
+       END DO    !DO i = prof%nlevs, kProfLayer for zeros
        CALL ContinuumFlag(iIDGas,iaCont)
 
        iFileGasesReadIn = iFileGasesReadIn+1
@@ -4103,23 +4120,23 @@ CONTAINS
         write(kStdWarn,*) ' Reading Cloud100 Layer Profiles, as gas ',iG ,' of ',iGasInRTPFile
         !!! first fill things out with stuff from the RTP file
         iNpathCounterJunk = 0
-        DO i = 1, prof.nlevs - 1
+        DO i = 1, prof%nlevs - 1
           j = iFindJ(kProfLayer,I,iDownWard)
           iNpathCounterJunk = iNpathCounterJunk + 1
 
-          rAmt = prof.gamnt(i,iG)
+          rAmt = prof%gamnt(i,iG)
           IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
-          rT   = prof.ptemp(i)
+          rT   = prof%ptemp(i)
           ! write(kStdErr,*) 'READRTP_1B 2 gasid lay rT ',iIDgas,i,rT
           IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
-          plays(i) = (prof.plevs(i)-prof.plevs(i+1))/log(prof.plevs(i)/prof.plevs(i+1))
+          plays(i) = (prof%plevs(i)-prof%plevs(i+1))/log(prof%plevs(i)/prof%plevs(i+1))
           rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
           IF (iDownWard == -1) THEN
             !!! this automatically puts partial pressure in ATM, assuming
@@ -4134,7 +4151,7 @@ CONTAINS
              rPP  = 0.0
              rZ = 1000.0
            END IF
-           rH   = prof.palts(i)
+           rH   = prof%palts(i)
 
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
           CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iNpathCounterJunk)
@@ -4143,20 +4160,20 @@ CONTAINS
           iGasIndex = iIDgas-kNewCloudLo+1
           raaCld100Amt(j,iGasIndex) = rAmt
           iaCld100Read(iGasIndex)   = 1
-        END DO              !DO i = 1, prof.nlevs - 1 for klayers info
+        END DO              !DO i = 1, prof%nlevs - 1 for klayers info
 
         !!! then fill bottom of atm with zeros for gas amt, partial pressure
-        DO i = prof.nlevs, kProfLayer
+        DO i = prof%nlevs, kProfLayer
           j = iFindJ(kProfLayer,I,iDownWard)
           iIDGas = head.glist(iG)
           iNpathCounterJunk = iNpathCounterJunk + 1
           IF (iDownWard == -1) THEN
-            delta1 = (300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
+            delta1 = (300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
             rT   = 300.0  + delta1*j
             rT = 300.0
           ELSE
-            delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
-            rT   = prof.ptemp(prof.nlevs-1) + delta1*j
+            delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
+            rT   = prof%ptemp(prof%nlevs-1) + delta1*j
             rT   = 300.0
           END IF
           rAmt = 0.0
@@ -4166,7 +4183,7 @@ CONTAINS
           rH   = raHeight(j)
           raaCld100Amt(j,iGasIndex)       = rAmt
           iaCld100Read(iGasIndex)      = 1
-        END DO    !DO i = prof.nlevs, kProfLayer for zeros
+        END DO    !DO i = prof%nlevs, kProfLayer for zeros
 
       END IF      !if iGasID <= 63
     END DO
@@ -4209,7 +4226,7 @@ CONTAINS
     raH1        = raThickness/1000         !!!dump out info in km
     raP1        = raPresslevels
 
-    i = prof.nlevs - 1     !!!!!!number of layers in RTP file
+    i = prof%nlevs - 1     !!!!!!number of layers in RTP file
     i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
     write (kStdWarn,*) '      '
     write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'
@@ -4356,30 +4373,30 @@ CONTAINS
 
     kProfileUnitOpen = -1
 
-    prof.nlevs = prof.nlevs + 1   !!this really was number of LAYERS
+    prof%nlevs = prof%nlevs + 1   !!this really was number of LAYERS
 
-    IF (prof.plevs(1) < prof.plevs(prof.nlevs)) THEN
-      ! reset prof.plevs so it has ALL the AIRS levels(1:101), rather than
+    IF (prof%plevs(1) < prof%plevs(prof%nlevs)) THEN
+      ! reset prof%plevs so it has ALL the AIRS levels(1:101), rather than
       ! AIRS levels (1:100) where p(1)=1100, p(100)= 0.0161, p(101) = 0.0050
       DO i = 1,kProfLayer+1
-        prof.plevs(i) = PLEV_KCARTADATABASE_AIRS(kProfLayer+1-i+1)
-        prof.palts(i) = DATABASELEVHEIGHTS(kProfLayer+1-i+1)*1000
+        prof%plevs(i) = PLEV_KCARTADATABASE_AIRS(kProfLayer+1-i+1)
+        prof%palts(i) = DATABASELEVHEIGHTS(kProfLayer+1-i+1)*1000
       END DO
       DO i = 1,kProfLayer
         plays(i) = PAVG_KCARTADATABASE_AIRS(kProfLayer-i+1)
       END DO
       !layers are from TOA to the bottom
       iDownWard = -1
-      kRTP_pBot = prof.plevs(prof.nlevs)
-      kRTP_pTop = prof.plevs(1)
-      kRTPBot   = kProfLayer - (prof.nlevs-1) + 1
+      kRTP_pBot = prof%plevs(prof%nlevs)
+      kRTP_pTop = prof%plevs(1)
+      kRTPBot   = kProfLayer - (prof%nlevs-1) + 1
       kRTPTop   = kProfLayer
     ELSE
-      ! reset prof.plevs so it has ALL the AIRS levels(1:101), rather than
+      ! reset prof%plevs so it has ALL the AIRS levels(1:101), rather than
       ! AIRS levels (1:100) where p(1)=1100, p(100)= 0.0161, p(101) = 0.0050
       DO i = 1,kProfLayer+1
-        prof.plevs(i) = PLEV_KCARTADATABASE_AIRS(i)
-        prof.palts(i) = DATABASELEVHEIGHTS(i)*1000
+        prof%plevs(i) = PLEV_KCARTADATABASE_AIRS(i)
+        prof%palts(i) = DATABASELEVHEIGHTS(i)*1000
       END DO
       DO i = 1,kProfLayer
         plays(i) = PAVG_KCARTADATABASE_AIRS(i)
@@ -4388,19 +4405,19 @@ CONTAINS
       !but klayers NEVER does this :  whether plevs are from 1 to 1000 mb or 1000 to 1 mb
       !the output is always from 0.005 to 1000 mb!!!!!
       iDownWard = +1
-      kRTP_pTop = prof.plevs(prof.nlevs)
-      kRTP_pBot  = prof.plevs(1)
+      kRTP_pTop = prof%plevs(prof%nlevs)
+      kRTP_pBot  = prof%plevs(1)
       kRTPTop   = 1
-      kRTPBot   = prof.nlevs-1
+      kRTPBot   = prof%nlevs-1
     END IF
 
-    iL1 = prof.nlevs - 1         !!! number of layers = num of levels - 1
+    iL1 = prof%nlevs - 1         !!! number of layers = num of levels - 1
     iProfileLayers = iL1
     iGasInRTPFile = head.ngas              !!! number of gases
 
-    IF (prof.nlevs > kProfLayer+1) THEN
+    IF (prof%nlevs > kProfLayer+1) THEN
       write(kStdErr,*) 'kCARTA compiled for ',kProfLayer,' layers'
-      write(kStdErr,*) 'RTP file has ',prof.nlevs-1,' layers'
+      write(kStdErr,*) 'RTP file has ',prof%nlevs-1,' layers'
       write(kStdErr,*) 'Please fix either kLayers or kCarta!!'
       CALL DoStop
     END IF
@@ -4424,18 +4441,18 @@ CONTAINS
       write (kStdWarn,*) 'Will add on dummy info to UPPER layers'
     END IF
 
-    DO i = 1,prof.nlevs
+    DO i = 1,prof%nlevs
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
-      raHeight(j) = prof.palts(i)                     !!!!in meters
-      raPressLevels(j) = prof.plevs(i)                !!!!in mb
-      raJunk(j)  = prof.ptemp(j)                      !!!! junk T
+      raHeight(j) = prof%palts(i)                     !!!!in meters
+      raPressLevels(j) = prof%plevs(i)                !!!!in mb
+      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
     END DO
-    if (prof.nlevs .EQ. kProfLayer) THEN
+    if (prof%nlevs .EQ. kProfLayer) THEN
       raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
       raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
     end if
 
-    DO i = 1,prof.nlevs-1
+    DO i = 1,prof%nlevs-1
 !      j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
 !      pProf(j) = raPressLevels(i) - raPressLevels(i+1)
 !      pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
@@ -4446,13 +4463,13 @@ CONTAINS
     IF (iDownWard == -1) THEN
       !!!add on dummy stuff
       !!!assume lowest pressure layer is at -600 meters
-      k = iFindJ(kProfLayer+1,prof.nlevs,iDownWard)
-      if ((kProfLayer - prof.nlevs) .NE. 0) then
-        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof.nlevs)
+      k = iFindJ(kProfLayer+1,prof%nlevs,iDownWard)
+      if ((kProfLayer - prof%nlevs) .NE. 0) then
+        delta1 = (raHeight(k) - (-600.0))/(kProfLayer - prof%nlevs)
       else
         delta1 = 190.0
       end if
-      DO i = prof.nlevs+1, kProfLayer + 1
+      DO i = prof%nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) - delta1                !!!!in meters
       END DO
@@ -4460,18 +4477,18 @@ CONTAINS
       !!!add on dummy stuff
       !!!assume  top pressure layer is at 10e5 meters
        k = i
-      if ((kProfLayer - prof.nlevs) .NE. 0) then
-        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof.nlevs)
+      if ((kProfLayer - prof%nlevs) .NE. 0) then
+        delta1 = (10e5 - raHeight(k))/(kProfLayer - prof%nlevs)
       else
         delta1 = 4000.0
       end if
-      DO i = prof.nlevs+1, kProfLayer + 1
+      DO i = prof%nlevs+1, kProfLayer + 1
         j = iFindJ(kProfLayer+1,I,iDownWard)
         raHeight(j) = raHeight(j+1) + delta1                !!!!in meters
       END DO
     END IF
 
-!    DO i = 1,prof.nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
+!    DO i = 1,prof%nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
     DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
       write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
@@ -4530,23 +4547,23 @@ CONTAINS
 ! now map the pseudolevel temps to the layer temps
 ! see /asl/packages/sartaV105/Src/mean_t.f
     write(kStdWarn,*) 'replacing pseudolevel temps with layer temps'
-    LBOT = prof.nlevs-1
+    LBOT = prof%nlevs-1
 ! so top layer (special case)
-    raActualLayTemps(1) = prof.ptemp(1)
+    raActualLayTemps(1) = prof%ptemp(1)
 ! loop down over the layers
     DO i = 2,LBOT-1
-      raActualLayTemps(i) = 0.5*( prof.ptemp(i-1) + prof.ptemp(i) )
+      raActualLayTemps(i) = 0.5*( prof%ptemp(i-1) + prof%ptemp(i) )
     ENDDO
 ! Interpolate to get air temperature at the surface
-    TSURFA = prof.ptemp(LBOT-1) + ( prof.ptemp(LBOT) - prof.ptemp(LBOT-1) )* &
-    (prof.spres - plays(LBOT))/(plays(LBOT+1)-plays(LBOT))
+    TSURFA = prof%ptemp(LBOT-1) + ( prof%ptemp(LBOT) - prof%ptemp(LBOT-1) )* &
+    (prof%spres - plays(LBOT))/(plays(LBOT+1)-plays(LBOT))
 ! so bottom layer (special case)
-    raActualLayTemps(LBOT) = 0.5*( prof.ptemp(LBOT-1) + TSURFA)
+    raActualLayTemps(LBOT) = 0.5*( prof%ptemp(LBOT-1) + TSURFA)
 !**********
 
-!      DO i = 1, prof.nlevs
-!        write(kStdErr,*) i,prof.plevs(i),prof.ptemp(i),raActualLayTemps(i),
-!     $          prof.gamnt(i,1),prof.gamnt(i,3)
+!      DO i = 1, prof%nlevs
+!        write(kStdErr,*) i,prof%plevs(i),prof%ptemp(i),raActualLayTemps(i),
+!     $          prof%gamnt(i,1),prof%gamnt(i,3)
 !      END DO
 
 ! now loop iNpath/iNumGases  times for each gas in the user supplied profile
@@ -4562,25 +4579,25 @@ CONTAINS
         write(kStdWarn,*) ' ---------------------------------------------'
         write(kStdWarn,*) ' Reading Gas number ',iG ,' of ',iGasInRTPFile
         !!! first fill things out with stuff from the RTP file
-        DO i = 1, prof.nlevs - 1
+        DO i = 1, prof%nlevs - 1
           j = iFindJ(kProfLayer,I,iDownWard)
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
-          rAmt = prof.gamnt(i,iG) / kAvog
+          rAmt = prof%gamnt(i,iG) / kAvog
           IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
 
-          rT   = prof.ptemp(i)
-          rT   = raActualLayTemps(i)         !use this instead of prof.ptemp
+          rT   = prof%ptemp(i)
+          rT   = raActualLayTemps(i)         !use this instead of prof%ptemp
           ! write(kStdErr,*) 'READRTP_2 1 gasid lay rT ',iIDgas,i,rT
           IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
 
-          plays(i) = (prof.plevs(i)-prof.plevs(i+1))/log(prof.plevs(i)/prof.plevs(i+1))
+          plays(i) = (prof%plevs(i)-prof%plevs(i+1))/log(prof%plevs(i)/prof%plevs(i+1))
           rP   = plays(i) / kAtm2mb     !need pressure in ATM, not mb
           IF (iDownWard == -1) THEN
             !!! this automatically puts partial pressure in ATM, assuming
@@ -4597,12 +4614,12 @@ CONTAINS
           END IF
           IF (iDownWard == -1) THEN
             !! toa = 1, gnd = Nlevs-1,Nlevs
-            rH   = prof.palts(i)
-            if (i == prof.nlevs-1) rHm1 = prof.palts(i+1)
+            rH   = prof%palts(i)
+            if (i == prof%nlevs-1) rHm1 = prof%palts(i+1)
           ELSEIF (iDownWard == +1) THEN
             !! toa = Nlevs, gnd = 2,1
-            rH   = prof.palts(i+1)
-            if (i == 1) rHm1 = prof.palts(1)
+            rH   = prof%palts(i+1)
+            if (i == 1) rHm1 = prof%palts(1)
           END IF
 
           !READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -4619,7 +4636,7 @@ CONTAINS
               raaPartPress(j,iGasIndex) = rPP
               IF (iDownWard == -1) THEN
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
-                if (i == prof.nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
+                if (i == prof%nlevs-1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
               ELSEIF (iDownWard == +1) THEN
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
                 if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
@@ -4627,21 +4644,21 @@ CONTAINS
               iaWhichGasRead(iIDgas)    = 1
             END IF
           END IF
-        END DO              !DO i = 1, prof.nlevs - 1 for klayers info
+        END DO              !DO i = 1, prof%nlevs - 1 for klayers info
 
         !!! then fill bottom of atm with zeros for gas amt, partial pressure
-        DO i = prof.nlevs, kProfLayer
+        DO i = prof%nlevs, kProfLayer
           j = iFindJ(kProfLayer,I,iDownWard)
           iIDGas = head.glist(iG)
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
           IF (iDownWard == -1) THEN
-            delta1=(300-prof.ptemp(prof.nlevs-1))/(1-(kProfLayer-prof.nlevs))
+            delta1=(300-prof%ptemp(prof%nlevs-1))/(1-(kProfLayer-prof%nlevs))
             rT   = 300.0  + delta1*j
             rT = 300.0
             rZ   = 1000.0
           ELSE
-            delta1 = (200-prof.ptemp(prof.nlevs-1))/(kProfLayer-prof.nlevs)
-            rT   = prof.ptemp(prof.nlevs-1) + delta1*j
+            delta1 = (200-prof%ptemp(prof%nlevs-1))/(kProfLayer-prof%nlevs)
+            rT   = prof%ptemp(prof%nlevs-1) + delta1*j
             rT   = 300.0
             rZ   = 1000.0
           END IF
@@ -4666,7 +4683,7 @@ CONTAINS
                 iaWhichGasRead(iIDgas)    = 1
               END IF
             END IF
-          END DO    !DO i = prof.nlevs, kProfLayer for zeros
+          END DO    !DO i = prof%nlevs, kProfLayer for zeros
           CALL ContinuumFlag(iIDGas,iaCont)
                 
           iFileGasesReadIn = iFileGasesReadIn+1
@@ -4719,7 +4736,7 @@ CONTAINS
     raH1        = raThickness/1000         !!!dump out info in km
     raP1        = raPresslevels
 
-    i = prof.nlevs - 1     !!!!!!number of layers in RTP file
+    i = prof%nlevs - 1     !!!!!!number of layers in RTP file
     i = kProfLayer - i + 1 !!!!lowest RTPfilled layer
     write (kStdWarn,*) '      '
     write (kStdWarn,*) 'Pressure level, layer thickness info (RTP file)'

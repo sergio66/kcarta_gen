@@ -876,7 +876,8 @@ CONTAINS
 
       IF (rPressStart >= rPressStop) THEN
         IF (rPressStop < raPressLevels(kRTPTop+1)) THEN
-          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStop,raPressLevels(kRTPTop+1),kRTPTop+1 = ',rPressStop,raPressLevels(kRTPTop+1),kRTPTop+1
+          write(kSTdWarn,'(A,2(F12.5,1X),I3)') 'rPressStop,raPressLevels(kRTPTop+1),kRTPTop+1 = ', &
+            rPressStop,raPressLevels(kRTPTop+1),kRTPTop+1
           !radiation going UPTO top of atmos
           rPressStop = raPressLevels(kRTPTop+1)+delta
           !set top (stop) level as kProfLayer
@@ -885,7 +886,8 @@ CONTAINS
           write(kStdWarn,*) 'rtp : downlook instr : Reset pressure of top level to ',rPressStop
         END IF
         IF (rPressStart > raPressLevels(kRTPBot)) THEN
-          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1 = ',rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1
+          write(kSTdWarn,'(A,2(F12.5,1X),I3)') 'rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1 = ', &
+            rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1
           !rad going below Dead Sea
           rPressStart = raPressLevels(kRTPBot)-delta !set bottom (start) level
           rPressStart = raPressLevels(kRTPBot)       !set bottom (start) level
@@ -896,7 +898,8 @@ CONTAINS
       ! the next two IF statements assume instrument looks up
       IF (rPressStart <= rPressStop) THEN
         IF (rPressStart < raPressLevels(kRTPTop+1)) THEN
-          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStart,raPressLevels(kRTPTop+1),kRTPTop+1 = ',rPressStart,raPressLevels(kRTPTop+1),kRTPTop+1
+          write(kSTdWarn,'(A,2(F12.5,1X),I3)') 'rPressStart,raPressLevels(kRTPTop+1),kRTPTop+1 = ', &
+            rPressStart,raPressLevels(kRTPTop+1),kRTPTop+1
           !radiation going DOWN from atmtop
           rPressStart = raPressLevels(kRTPTop+1)+delta
           !set top (start) level as kProfLayer
@@ -905,7 +908,8 @@ CONTAINS
           write(kStdWarn,*)'rtp : uplook instr : Reset pressure of top level to ',rPressStart
         END IF
         IF (rPressStop > raPressLevels(iLowest)) THEN
-          write(kSTdWarn,'(A,2(F12.5,1X),3I)') 'rPressStop,raPressLevels(iLowest),iLowest = ',rPressStop,raPressLevels(iLowest),iLowest
+          write(kSTdWarn,'(A,2(F12.5,1X),I3)') 'rPressStop,raPressLevels(iLowest),iLowest = ', &
+            rPressStop,raPressLevels(iLowest),iLowest
           !radiation going below Dead Sea
           rPressStop = raPressLevels(kRTPBot)-delta
           !set bottom (stop) level as iLowest

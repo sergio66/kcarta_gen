@@ -15,10 +15,11 @@ USE clear_scatter_misc
 USE rad_diff_and_quad
 
 USE scatter_graycld_main
-USE scatter_pclsam_main
-USE scatter_rtspec_main
-USE scatter_pclsam_flux
 USE scatter_rtspec_flux
+USE scatter_rtspec_main
+USE scatter_pclsam_main
+USE scatter_pclsam_flux
+USE scatter_disort_main
 
 IMPLICIT NONE
 
@@ -238,6 +239,7 @@ CONTAINS
       write(kStdWarn,*) ' ---> RAYLEIGH Scattering Computations...'
       write(kStdWarn,*) 'Temporarily commented out'
       CALL DoStop
+      !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE RAYLEIGH" AT TOP OF THIS FILE
       !x        CALL doscatter_rayleigh(
       !x     $         raFreq,raaSumAbCoeff,raMixVertTemp,
       !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
@@ -259,6 +261,7 @@ CONTAINS
       IF (kFlux > 0) THEN
         write(kStdErr,*) 'Have not done Rayleigh Flux yet'
         CALL DoStop
+        !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE RAYLEIGH" AT TOP OF THIS FILE
         !x          write(kStdWarn,*) ' ---> RAYLEIGH Flux Computations ...'
         !x          CALL scatterfluxes_rayleigh(
         !x     $           raFreq,raaSumAbCoeff,raMixVertTemp,caOutName,
@@ -352,6 +355,7 @@ CONTAINS
         rFracX = 0.0
         rFracX = 1.0
 
+        !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE PCLSAM" AT TOP OF THIS FILE
         CALL doscatter_pclsam( &
             +1,raFreq,raaSumAbCoeff,raMixVertTemp, &
             caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer, &
@@ -652,6 +656,7 @@ CONTAINS
       write(kStdWarn,*) ' ---> PERTURB Scattering Computations...'
       write(kStdErr,*) 'Cannot do PERTURB algorithm yet'
       CALL DoStop
+      !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE PERTURB" AT TOP OF THIS FILE
       !x        CALL doscatter_perturb(raFreq,raaSumAbCoeff,raMixVertTemp,
       !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
       !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,
@@ -680,6 +685,7 @@ CONTAINS
       !write(kStdErr,*) 'Temporarily commented out'
       !CALL DoStop
       iDoFLux = -1
+      !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE DISORT" AT TOP OF THIS FILE
       CALL doscatter_disort(raFreq,                      &
              raaSumAbCoeff,raMixVertTemp,caOutName,      &
              iOutNum,iAtm,iNumLayer,iaaRadLayer,         &
@@ -698,7 +704,7 @@ CONTAINS
         write(kStdWarn,*) ' ---> DISORT Flux Computations ...'
         !write(kStdErr,*) 'Temporarily commented out'
         !CALL DoStop
-        CALL scatterfluxes_disort(raFreq,                 &
+        CALL scatterfluxes_disort(raFreq,                &
               raaSumAbCoeff,raMixVertTemp,caOutName,     &
               iOutNum,iAtm,iNumLayer,iaaRadLayer,        &
               rTSpace,rTSurf,rSurfPress,raUseEmissivity, &
@@ -706,7 +712,7 @@ CONTAINS
               iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,      &
               raSurface,raSun,raThermal,raSunRefl,       &
               raLayAngles,raSunAngles,                   &
-              raThickness,raPressLevels,iProfileLayers,pProf,                &
+              raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
               iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
               raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
               iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity)
@@ -747,6 +753,7 @@ CONTAINS
       END IF
 
       write(kStdWarn,*) ' ---> RTSPEC Scattering Computations ...'
+      !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE RTSPEC" AT TOP OF THIS FILE
       CALL doscatter_rtspec(raFreq, &
         raaSumAbCoeff,raMixVertTemp,caOutName, &
         iOutNum,iAtm,iNumLayer,iaaRadLayer, &
@@ -807,6 +814,7 @@ CONTAINS
       write(kStdWarn,*) ' ---> 2STREAM Scattering Computations...'
       write(kStdErr,*) 'this has been commented out'
       CALL DoStop
+      !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE TWOSTREAM" AT TOP OF THIS FILE
       !x        CALL doscatter_twostream(raFreq,raaSumAbCoeff,raMixVertTemp,
       !x     $         caOutName,iOutNum,iAtm,iNumLayer,iaaRadLayer,
       !x     $         rTSpace,rTSurf,rSurfPress,raUseEmissivity,

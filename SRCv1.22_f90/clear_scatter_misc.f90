@@ -896,7 +896,7 @@ CONTAINS
           write(kStdErr,*)'please reset and retry'
           CALL DoSTOP
         END IF
-        caName=caaaScatTable(iIn,iJ)
+        caName = caaaScatTable(iIn,iJ)
         IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
           IF (iI > NSCATTAB) THEN
             NSCATTAB = iI
@@ -914,8 +914,10 @@ CONTAINS
           IF (iaaCloudWhichAtm(iIn,iJ)  == iAtm) THEN
             iCloudySky = iIn         !!!! set this up
             iaCloudWithThisAtm(iIn) = 1
+
             IACLDTOP(iIn) = iaaCloudWhichLayers(iIn,1)+1
             IACLDBOT(iIn) = iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn))
+
             iaCldTopkCarta(iIn) = iaCldTop(iIn)     !!! not needed
             iaCldBotkCarta(iIn) = iaCldBot(iIn)     !!! not needed
             ! iCldTopkCarta = iaCldTop(iIn)-1
@@ -926,6 +928,7 @@ CONTAINS
             IF (iCldBotkCarta > iaCldBot(iIn)) THEN
               iCldBotkCarta = iaCldBot(iIn)
             END IF
+
             write(kStdWarn,*) ' '
             write(kStdWarn,*)'cloud # ',iIn,' associated with atm # ',iAtm
             write(kStdWarn,*)'setmie0 : cloud is in KCARTA layers ', &
@@ -941,13 +944,14 @@ CONTAINS
         END DO
          
     ! check to see which scattering tables to be used with this atm
-        DO iJ=1,iaCloudNumLayers(iIn)
+        DO iJ = 1,iaCloudNumLayers(iIn)
           iI = iaaScatTable(iIn,iJ)
           IF (iaCloudWithThisAtm(iIn) == 1) THEN
             iaScatTable_With_Atm(iI) = 1
             write(kStdWarn,*)'scat table ',iI,' for atm,layer # ',iAtm,iJ
           END IF
       END DO
+
     END DO      !!!!!!!!main       DO iIn=1,iNclouds
 
 !     Only read in scattering tables that are needed for this atm
@@ -989,7 +993,6 @@ CONTAINS
               MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
               TABPHI1UP(1,I), TABPHI1DN(1,I), &
               TABPHI2UP(1,I), TABPHI2DN(1,I))
-
             IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. (ABS(MUINC(2)-0.7887) > 0.001)) THEN
               write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
               CALL DoStop
@@ -1014,7 +1017,6 @@ CONTAINS
               MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
               TABPHI1UP(1,I), TABPHI1DN(1,I), &
               TABPHI2UP(1,I), TABPHI2DN(1,I))
-
             IF (iaPhase(I) > 0) THEN
               write(kStdErr,*) 'Right now, incapapable of this silly task!!!'
               write(kStdErr,*) 'need iaPhase = 0 for iBinaryFIle = 0'
@@ -2024,7 +2026,16 @@ CONTAINS
 ! basically the same as AddCloud_twostream EXCEPT
 !   *** it also adds on the "backscattered" part for PCLSAM algorithm ***
 ! this way we have a fast alternative to kTwoStream
-    SUBROUTINE AddCloud_pclsam_WORKS_June17_2022(raFreq, &
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! note that by algebra you can show that
+! AddCloud_pclsam_SergioChou == AddCloud_pclsam_TanoChou
+! here we first do TauTotal = TauGas + TauCld
+!                  w --> w' = (w)(TauCld)/(TauGas + TauCld)
+!                  TauTotal --> (TauToal (1 - w' g)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    SUBROUTINE AddCloud_pclsam_SergioChou(raFreq, &
     raaExtTemp,raaScatTemp,raaAsymTemp, &
     iaaRadLayer,iAtm,iNumlayer, &
     rFracTop,rFracBot, &
@@ -2083,19 +2094,20 @@ CONTAINS
     iExtScaling = kScatter
 
     IF (iExtScaling .NE. iDefault) THEN
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam_WORKS_June17_2022 raFreq(1) = ',&
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam_SergioChou raFreq(1) = ',&
                    iDefault,iExtScaling,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
-    iDefault = +1  !! use the SARTA Tables (delt scaled)
+    iDefault = +1  !! use      the SARTA Tables as is (delta scaled)
+    iDefault = -1  !! usnscsle the SARTA Tables as is (no delta scaled)
 
-    iSartaTables = -1   !! Fake RRTM, no delta scaling
     iSartaTables = +1   !! SARTA Tscattering tables,  delta scaled
+    iSartaTables = -1   !! RRTM does not use delta scaling
 
     IF (iSartaTables .NE. iDefault) THEN
-      write(kStdErr,*) 'DELTA UNSCALE'
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam_WORKS_June17_2022 raFreq(1) = ',&
+      write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam_SergioChou raFreq(1) = ',&
                    iDefault,iSartaTables,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2136,29 +2148,11 @@ CONTAINS
             CALL UnScaleMieOne('G',rE,rW,rG)
             EXTINCT = rE
             SSALB(L) = rW
-            ASYM_RTSPEC(L) = rG
-  
-            !!! 980-1080 cm-1
-            EXTINCT = rE
-            SSALB(L) = 0.69
-            ASYM_RTSPEC(L) = 0.94
-  
-            !!! 1390-1480 cm-1
-            EXTINCT = rE
-            SSALB(L) = 0.647
-            ASYM_RTSPEC(L) = 0.941
-  
-            !!! 1480-1800 cm-1
-            EXTINCT = rE * 1
-            SSALB(L) = 0.638
-            ASYM_RTSPEC(L) = 0.946
-  
-            !!! 820-980 cm-1
-            EXTINCT = rE
-            SSALB(L) = 0.44
-            ASYM_RTSPEC(L) = 0.95
-  
-            IF (iFr == 1) PRINT *,'OMG rE rW rG',EXTINCT,SSALB(L),ASYM_RTSPEC(L)
+            ASYM_RTSPEC(L) = rG    
+!            IF (iFr == 1) THEN 
+!              write(kStdErr,'(A,2(F12.5),3(ES12.5))') &
+!              ' iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
+!            END IF
           END IF
 
           !  Compute the optical depth of cloud layer, including gas
@@ -2166,9 +2160,9 @@ CONTAINS
           TAUCG_L  = TAUGAS + TAUC_L
           TAUTOT_N = TAUCG_L
 
-          IF (iFr == 1) THEN
-            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
-          END IF
+!          IF (iFr == 1) THEN
+!            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
+!          END IF
 
           ! the scattering OD, not using this!!!
           !!! rScat    = SSALB(L) * IWP(L)*EXTINCT/1000
@@ -2262,14 +2256,22 @@ CONTAINS
     END IF
 
     RETURN
-    end SUBROUTINE AddCloud_pclsam_WORKS_June17_2022
+    end SUBROUTINE AddCloud_pclsam_SergioChou
 
 !************************************************************************
 ! this subroutine adds on the absorptive part of cloud extinction
 ! basically the same as AddCloud_twostream EXCEPT
 !   *** it also adds on the "backscattered" part for PCLSAM algorithm ***
 ! this way we have a fast alternative to kTwoStream
-    SUBROUTINE AddCloud_pclsam(raFreq, &
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! note that by algebra you can show that
+! AddCloud_pclsam_SergioChou == AddCloud_pclsam_TanoChou
+! here we first do TauCld --> TauCld(1-wg) and keep w the same, then say
+!                  TauTotal = TauCld'+ TauGas
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    SUBROUTINE AddCloud_pclsam_TangChou(raFreq, &
     raaExtTemp,raaScatTemp,raaAsymTemp, &
     iaaRadLayer,iAtm,iNumlayer, &
     rFracTop,rFracBot, &
@@ -2333,14 +2335,15 @@ CONTAINS
     END IF
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
-    iDefault = +1  !! use the SARTA Tables (delt scaled)
+    iDefault = +1  !! use      the SARTA Tables as is (delta scaled)
+    iDefault = -1  !! usnscsle the SARTA Tables as is (no delta scaled)
 
-    iSartaTables = -1   !! Fake RRTM, no delta scaling
-    iSartaTables = +1   !! SARTA scattering tables,  delta scaled
+    iSartaTables = +1   !! SARTA Tscattering tables,  delta scaled
+    iSartaTables = -1   !! RRTM does not use delta scaling
 
     IF (iSartaTables .NE. iDefault) THEN
-      write(kStdErr,*) 'DELTA UNSCALE'
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam raFreq(1) = ',&
+      write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam_SergioChou raFreq(1) = ',&
                    iDefault,iSartaTables,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2373,7 +2376,7 @@ CONTAINS
             NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
             TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
 
-          IF (iSartaTables .GT. 0) THEN
+          IF (iSartaTables .LT. 0) THEN
             rE = EXTINCT
             rW = SSALB(L)
             rG = ASYM_RTSPEC(L)
@@ -2381,40 +2384,10 @@ CONTAINS
             EXTINCT = rE
             SSALB(L) = rW
             ASYM_RTSPEC(L) = rG
-
-!            IF (iFr == 1) write(kStdErr,'(A,2(F12.5),3(ES12.5))') ' iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
-
-          ELSEIF (iSartaTables .LT. 0) THEN
-            !!! new
-            rE = EXTINCT
-            rW = SSALB(L)
-            rG = ASYM_RTSPEC(L)
-            CALL UnScaleMieOne('G',rE,rW,rG)
-            EXTINCT = rE
-            SSALB(L) = rW
-            ASYM_RTSPEC(L) = rG
-  
-            !!! 980-1080 cm-1
-            EXTINCT = 0.14
-            SSALB(L) = 0.69
-            ASYM_RTSPEC(L) = 0.94
-  
-            !!! 1390-1480 cm-1
-            EXTINCT = 0.17
-            SSALB(L) = 0.647
-            ASYM_RTSPEC(L) = 0.941
-  
-            !!! 1480-1800 cm-1
-            EXTINCT = 0.17
-            SSALB(L) = 0.638
-            ASYM_RTSPEC(L) = 0.946
-  
-            !!! 820-980 cm-1
-            EXTINCT = 0.13
-            SSALB(L) = 0.44
-            ASYM_RTSPEC(L) = 0.95
-  
-!            IF (iFr == 1) write(kStdErr,'(A,2(F12.5),3(ES12.5))') ' iSartaTables = -1 : OMG CHANGED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
+!            IF (iFr == 1) THEN 
+!              write(kStdErr,'(A,2(F12.5),3(ES12.5))') &
+!              ' iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
+!            END IF
           END IF
 
           !  Compute the optical depth of cloud layer, including gas
@@ -2510,7 +2483,7 @@ CONTAINS
     END IF
 
     RETURN
-    end SUBROUTINE AddCloud_pclsam
+    end SUBROUTINE AddCloud_pclsam_TangChou
 
 !************************************************************************
 ! this subroutine adds on the absorptive part of cloud extinction
@@ -2689,9 +2662,6 @@ CONTAINS
       END DO        !loop over cloud layers
     ENDIF
 
-! now use the partial fractions????? see last section in
-!       SUBROUTINE AddCloud_pclsam( )
-
     RETURN
     end SUBROUTINE AddCloud_pclsam_Jacob_downlook
 
@@ -2869,9 +2839,6 @@ CONTAINS
         END DO          !loop over freqs
       END DO        !loop over cloud layers
     ENDIF
-
-! now use the partial fractions????? see last section in
-!       SUBROUTINE AddCloud_pclsam( )
 
     RETURN
     end SUBROUTINE AddCloud_pclsam_Jacob_uplook
@@ -4145,9 +4112,6 @@ CONTAINS
       END DO          !loop over freqs
     END DO        !loop over cloud layers
 
-! now use the partial fractions????? see last section in
-!       SUBROUTINE AddCloud_pclsam( )
-
     RETURN
     end SUBROUTINE AddCloud_pclsam_Jacob_downlook_sunshine
 
@@ -4354,9 +4318,6 @@ CONTAINS
         END DO          !loop over freqs
       END DO        !loop over cloud layers
     END IF
-
-! now use the partial fractions????? see last section in
-!       SUBROUTINE AddCloud_pclsam( )
 
     RETURN
     end SUBROUTINE AddCloud_pclsam_Jacob_uplook_sunshine

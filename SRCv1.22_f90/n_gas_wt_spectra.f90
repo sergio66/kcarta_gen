@@ -1108,7 +1108,8 @@ CONTAINS
     CALL ReadGENLN2_NLTE_Profile(caFName,daJL,daJU,iaJ_UorL,iStrongGasID,iStrongISO,+1, &
                                  iNumVibLevels,raTPress1,raTTemp1,raQtips1,raNLTEtemp1,dVibCenter)
 
-    write(kStdWarn,'(A,A,I4,I4,I4,I4,F12.5)') 'caFname,iGASID,ISO,iLSGQ,iUSGQ,vibcntr = ',caFName,iStrongGasID,iStrongISO,iStrongJL,iStrongJU,dVibCenter
+    write(kStdWarn,'(A,A,I4,I4,I4,I4,F12.5)') 'caFname,iGASID,ISO,iLSGQ,iUSGQ,vibcntr = ', &
+        caFName,iStrongGasID,iStrongISO,iStrongJL,iStrongJU,dVibCenter
 
 ! wap so pressures are increasing
     IF (raTPress1(1) > raTPress1(iNumVibLevels)) THEN
@@ -1186,7 +1187,8 @@ CONTAINS
 
     rH = raLayerHeight(iL)
     IF (iL >= kProfLayer-2) rH = 45000.0   !!!default to 45 km
-    write(kStdWarn,'(A,I3,A,F12.5,A,F12.5,A)') 'start doing NLTE profile at layer ',iL,', p = ',raPressLevels(iL),' mb, h = ', rH/1000,' km'
+    write(kStdWarn,'(A,I3,A,F12.5,A,F12.5,A)') 'start doing NLTE profile at layer ',iL,', &
+       p = ',raPressLevels(iL),' mb, h = ', rH/1000,' km'
           
     IF (rH > rH0) THEN
       !!! oops ... let us start where user specified, instead of
@@ -1212,10 +1214,14 @@ CONTAINS
     IF (iBand == 1) THEN
       CALL GetUSSTD_2350(raPavg,iStart,daJL,daJU,iaJ_UorL,raLTE_STD,raNLTE_STD)
 
-      write(kSTdWarn,'(A)') 'Checking current (klayers) profile against US Std NLTE 2350 Band profile in n_gas_wt_spectra.f90'
-      write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
-      write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
-      write(kStdWarn,'(A,F12.5,A,F12.5,A)') 'Start NLTE at (user supplied VS 2350[T-Tvib]) height = ',rH0/1000,' vs ',rH/1000,' km'
+      write(kSTdWarn,'(A)') &
+        'Checking current (klayers) profile against US Std NLTE 2350 Band profile in n_gas_wt_spectra.f90'
+      write(kSTdWarn,'(A)') &
+        'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
+      write(KStdWarn,'(A)')  &
+        'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
+      write(kStdWarn,'(A,F12.5,A,F12.5,A)') &
+        'Start NLTE at (user supplied VS 2350[T-Tvib]) height = ',rH0/1000,' vs ',rH/1000,' km'
 
       write(kStdWarn,*) ' '
       write(kStdWarn,*) ' Comparisons of Tk,tNLTE vs USSTD : '

@@ -646,7 +646,7 @@ CONTAINS
         iaaRadLayer,iAtm,iNumlayer)
   
       IF (iaCloudNumLayers(1) < iNumLayer) THEN
-        CALL AddCloud_pclsam( &
+        CALL AddCloud_pclsam_TangChou( &
           raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
           iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
           ICLDTOPKCARTA, ICLDBOTKCARTA, &
@@ -1860,7 +1860,7 @@ CONTAINS
       iaaRadLayer,iAtm,iNumlayer)
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-      CALL AddCloud_pclsam(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+      CALL AddCloud_pclsam_TangChou(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
         NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
@@ -2422,7 +2422,7 @@ CONTAINS
       iaaRadLayer,iAtm,iNumlayer)
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-      CALL AddCloud_pclsam(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+      CALL AddCloud_pclsam_TangChou(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
         NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &

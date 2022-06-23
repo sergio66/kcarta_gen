@@ -587,7 +587,7 @@ CONTAINS
       !!! now add on clouds to raaExtTemp, raaSSAlbTemp, raaSSAlbTemp
       IF (iaCloudNumLayers(1) < iNumLayer) THEN
         write(kStdWarn,*) '    --- TwoSlab cloud layers ---'
-        CALL AddCloud_pclsam(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+        CALL AddCloud_pclsam_TangChou(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
             NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &

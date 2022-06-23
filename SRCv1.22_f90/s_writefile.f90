@@ -2146,10 +2146,14 @@ CONTAINS
       WRITE(iIOUN,*) 'Num Layers in Profile = ',iProfileLayers
       WRITE(iIOUN,*) 'So start showing info from layer ',kProfLayer-iProfileLayers+1
 
-      caStr1 = '  Path# GID  Press      PartP        PPMV        PPMV        Temp         Amnt    ||      RefPP     RefAmt  Amt/RAmt'
-      caStr2 = '             (atm)      (atm)        wet         dry          (K)     (kmole/cm2) ||       (atm)  (kmol/cm2)        '
-      caStr2 = '             (mb )      (mb )        wet         dry          (K)  (molecule/cm2) ||       (mb ) (molecule/cm2)     '
-      caStr3 = '----------------------------------------------------------------------------------||--------------------------------'
+      caStr1 = &
+        '  Path# GID  Press      PartP        PPMV        PPMV        Temp         Amnt    ||      RefPP     RefAmt  Amt/RAmt'
+      caStr2 = &
+        '             (atm)      (atm)        wet         dry          (K)     (kmole/cm2) ||       (atm)  (kmol/cm2)        '
+      caStr2 = &
+        '             (mb )      (mb )        wet         dry          (K)  (molecule/cm2) ||       (mb ) (molecule/cm2)     '
+      caStr3 = &
+        '----------------------------------------------------------------------------------||--------------------------------'
       DO iI=1,iNumGases
         write(iIOUN,234) iI,iaGases(iI),caGID(iaGases(iI))
         WRITE(iIOUN,7169) caStr1

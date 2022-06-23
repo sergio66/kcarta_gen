@@ -559,7 +559,8 @@ CONTAINS
         CALL InterpUser2kCARTA(iNumLevs,iNumGases,iaG,raP,raT,raaG_VMR,rPMin,rPMax,rPSurf,rTSurf,rPmaxKCarta, &
           PLEV_KCARTADATABASE_AIRS,raPX,raTX,raaG_VMRX,iLowestLev)
 
-        rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/(PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
+        rFracBot = (rPSurf-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))/ &
+          (PLEV_KCARTADATABASE_AIRS(iLowestLev)-PLEV_KCARTADATABASE_AIRS(iLowestLev+1))
         write(kStdWarn,*) ' '
         write(kStdWarn,*) 'iX = iLowestLev ==>'
         write(kStdWarn,*)' PLEV_KCARTADATABASE_AIRS(iX),rPSurf,PLEV_KCARTADATABASE_AIRS(iX+1) = '
