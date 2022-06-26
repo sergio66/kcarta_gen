@@ -34,428 +34,6 @@ IMPLICIT NONE
 CONTAINS
 
 !************************************************************************
-! this subroutine sets up the scattering table info from SSCATMIE.F
-    SUBROUTINE SetMieTables_DISORT(raFreq, &
-!!!!!!!!!!!!!!!!!these are the input variables
-    iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
-!!!!!!!!!!!!!!!!!!these are the output variables
-    NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
-    TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
-    TABPHI2UP, TABPHI2DN, &
-    NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
-    IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
-    iCloudySky, IACLDTOP, IACLDBOT)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/TempF90/scatterparam.f90'
-
-! ---------------- inputs needed to read scattering tables -------------------
-    REAL :: raFreq(kMaxPts)
-! this is which atm number is being used, and whether these are binary files
-    INTEGER :: iAtm,iBinaryFile,iNumLayer,iDownward
-! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
-! iNclouds tells us how many clouds there are
-! iaCloudNumLayers tells how many neighboring layers each cloud occupies
-! iaaCloudWhichLayers tells which layers each cloud occupies
-    INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
-    INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
-! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
-! iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
-    INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
-! iaaScatTable associates a file number with each scattering table
-! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
-    CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
-! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
-! this is just to set everything about clouds relative to TOA layer
-    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
-! this tells if there is phase info associated with the cloud; else use HG
-    INTEGER :: iaPhase(kMaxClouds)
-    REAL :: raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
-
-! ---------------- outputs from the scattering tables -------------------
-! --------------------- produced by Evans Mie code ----------------------
-!     The scattering tables are read in with READ_SSCATTAB.  The scattering
-!     table is 3D: wavenumber, particle size, and viewing angle.
-!         Scattering table variables:
-!       MUTAB is view angle values (cosine zenith),
-!       DMETAB is particle size values (median mass diameter, micron),
-!       WAVETAB is wavenumber values (cm^-1).
-!       MUINC(2) are the mu values of the two incident angles
-!       TABEXTINCT is extinction, TABSSALB is single scattering albedo,
-!       TABASYM is the asymmetry parameter
-!       TABPHI??? are phase function info for incident directions
-         
-! c      INTEGER  MAXTAB, MAXGRID, MAXSCAT
-! c      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5)
-    CHARACTER(160) :: SCATFILE(MAXSCAT)
-
-    INTEGER ::  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
-    REAL ::     MUTAB(MAXGRID,MAXSCAT)
-    REAL ::     DMETAB(MAXGRID,MAXSCAT), WAVETAB(MAXGRID,MAXSCAT)
-    REAL ::     MUINC(2)
-    REAL ::     TABEXTINCT(MAXTAB,MAXSCAT), TABSSALB(MAXTAB,MAXSCAT)
-    REAL ::     TABASYM(MAXTAB,MAXSCAT)
-    REAL ::     TABPHI1UP(MAXTAB,MAXSCAT), TABPHI1DN(MAXTAB,MAXSCAT)
-    REAL ::     TABPHI2UP(MAXTAB,MAXSCAT), TABPHI2DN(MAXTAB,MAXSCAT)
-
-    INTEGER :: NSCATTAB, NCLDLAY, NLEV, NABSNU
-    INTEGER :: ICLDTOP, ICLDBOT, IOBS, ISCATTAB(MAXNZ)
-    REAL ::    IWP(MAXNZ), DME(MAXNZ)         !ztop, zobs not needed
-    INTEGER :: iaCloudWithThisAtm(kMaxClouds),iaScatTable_With_Atm(kMaxClouds)
-    INTEGER :: IACLDTOP(kMaxClouds), IACLDBOT(kMaxClouds)
-
-    INTEGER :: iCloudySky        !!!!are there clouds in this atm???
-     
-! ---------------------------- local variables ----------------------------
-    INTEGER :: iaTable(kMaxClouds*kCloudLayers),iIn,iJ,iReadTable,I
-    INTEGER :: iCloud,iStep
-    REAL :: extinct
-    INTEGER :: LL,II,N,M,iB_atm,iT_Atm,iLayers
-    REAL ::    dmetab_phase(kProfLayer)
-    INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA
-
-    CHARACTER(160) :: caName
-    CHARACTER(1) :: caScale(MAXSCAT)
-    INTEGER :: iSergio
-
-! nitialise all scattering info to null
-
-!!!! need to reference the cloud tops and bottoms wrt TOP layer of
-!!!! defined atm
-!!!! eg if atm from 971 to 150 mb (plane at 150 mb) ==>
-!!!!       this occupies kCARTA layers 19-78
-!!!!   if cloud from 248 to 214 mb  ==>
-!!!!       this occupies kCARTA layers 69 to 72
-!!!! Thus the cloud occupies RTSPEC atmosphere "tau" from 6 to 9
-    IF (iDownWard == 1) THEN
-      iB_Atm=iaaRadLayer(iAtm,1)
-      iT_Atm=iaaRadLayer(iAtm,iNumLayer)
-    ELSEIF (iDownWard == -1) THEN
-      iT_Atm=iaaRadLayer(iAtm,1)
-      iB_Atm=iaaRadLayer(iAtm,iNumLayer)
-    END IF
-
-!!!!!!hwowever we also do fluxes, so even if the atm is defined so it
-!!!!!!is for an uplook instrument, RTSPEC will be called in a downlook
-!!!!!!fashion, and vice versa
-
-    IF (iB_Atm > iT_Atm) THEN
-      iCloudySky = iT_Atm
-      iT_Atm = iB_Atm
-      iB_atm = iCloudySky
-    END IF
-
-    iCloudySky = -1  !!!!!!! assume NO clouds associated with this atm
-
-    iCldTopKcarta = -1
-    iCldBotKcarta = kProfLayer+1
-    NSCATTAB=-1000   !!!!!!! total of how many scattering tables (files)
-    DO iIn=1,kMaxClouds*kCloudLayers
-      iaTable(iIn) = -1
-    END DO
-    DO iIn=1,MAXSCAT
-      ScatFile(iIn) = ' '
-      iaScatTable_With_Atm(iIn) = -1
-    END DO
-    DO iIn=1,kMaxClouds
-      iaCloudWithThisAtm(iIn) = -1
-      iaCldTop(iIn) = -1
-      iaCldBot(iIn) = -1
-    END DO
-
-!!!go thru info and check against whether should be used with this atm
-    DO iIn=1,iNclouds
-
-      ! associate scattering tables with the clouds
-      ! initialise info for this iIn th cloud
-      DO iJ=1,iaCloudNumLayers(iIn)
-        iI=iaaScatTable(iIn,iJ)
-        IF (iI > MAXSCAT) THEN
-          write(kStdErr,*)'in interface_disort, you have set it up so'
-          write(kStdErr,*)'MAXSCAT < kMaxClouds*kCloudLayers'
-          write(kStdErr,*)'please reset and retry'
-          CALL DoSTOP
-        END IF
-        caName = caaaScatTable(iIn,iJ)
-        IF (iaTable(iI) < 0) THEN  !nothing associated with this yet
-          IF (iI > NSCATTAB) THEN
-            NSCATTAB=iI
-          END IF
-          iaTable(iI) = 1
-          ScatFile(iI) = caName
-        END IF
-      END DO
-
-      ! check to see if this cloud is to be used with this atm
-      DO iJ=1,iaCloudNumAtm(iIn)
-        IF (iaaCloudWhichAtm(iIn,iJ)  == iAtm) THEN
-          iCloudySky = iIn         !!!! set this up
-          iaCloudWithThisAtm(iIn) = 1
-
-          !!!!!these are the kCARTA layers 1 to 100 = GND to TOA
-          IACLDTOP(iIn) = iaaCloudWhichLayers(iIn,1)+1
-          IACLDBOT(iIn) = iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn))
-
-          IF (iCldTopkCarta < iaCldTop(iIn)-1) THEN
-            iCldTopkCarta = iaCldTop(iIn)-1
-          END IF
-          IF (iCldBotkCarta > iaCldBot(iIn)) THEN
-            iCldBotkCarta = iaCldBot(iIn)
-          END IF
-
-          write(kStdWarn,*)'cloud # ',iIn,' associated with atm # ',iAtm
-          write(kStdWarn,*)'cloud is in KCARTA layers ', &
-          iaCldTop(iIn)-1,' to ',iaCldBot(iIn)
-
-          !!!!!these are the DISORT layers 100 to 1 = GND to TOA
-          iaCldbot(iIn) = iT_Atm - iaCldbot(iIn) + 1
-          iaCldtop(iIn) = iT_Atm - iaCldtop(iIn) + 1
-
-          ! iaCldBot(iIn) = iaCldBot(iIn) + 1
-          ! iaCldTop(iIn) = iaCldTop(iIn) + 1
-
-          write(kStdWarn,*)'cloud is in DISORT layers ', &
-          iaCldTop(iIn)+1,' to ',iaCldBot(iIn)
-
-        END IF
-      END DO
-
-      ! check to see which scattering tables to be used with this atm
-      DO iJ = 1,iaCloudNumLayers(iIn)
-         iI = iaaScatTable(iIn,iJ)
-         IF (iaCloudWithThisAtm(iIn)  == 1) THEN
-           iaScatTable_With_Atm(iI) = 1
-           write(kStdWarn,*)'scatter table ',iI,' used with atm # ',iAtm
-         END IF
-      END DO
-
-    END DO      !!!!!!!!main       DO iIn=1,iNclouds
-
-    ! Only read in scattering tables that are needed for this atm
-    iReadTable = 1
-    IF (iReadTable > 0) THEN
-      IF (iBinaryFile == 1) THEN
-        DO I = 1, NSCATTAB
-          IF (iaScatTable_With_Atm(I) > 0) THEN
-            write(kStdWarn,*) 'Reading binary scatter data for table #',I
-            CALL READ_SSCATTAB_BINARY(SCATFILE(I),   & !!!!!!MAXTAB, MAXGRID,
-              caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-              NWAVETAB(I), WAVETAB(1,I), &
-              MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-              TABPHI1UP(1,I), TABPHI1DN(1,I), &
-              TABPHI2UP(1,I), TABPHI2DN(1,I))
-            IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. (ABS(MUINC(2)-0.7887) > 0.001)) THEN
-              write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
-              CALL DoStop
-            END IF
-!            IF (iaPhase(I) > 0) THEN
-!              DO iBlah = 1,NDME(I)
-!                dmetab_phase(iBlah) = DMETAB(iBlah,I)
-!              END DO
-!              rDmePhase = raaaCloudParams(I,1,2)
-!              CALL READ_PHASE(SCATFILE(I),raFreq,rDmePhase,ndme(I),dmetab, &
-!                raPhasePoints,raComputedPhase)
-!            END IF
-          END IF
-        ENDDO
-      ELSE IF (iBinaryFile == -1) THEN
-        DO I = 1, NSCATTAB
-          IF (iaScatTable_With_Atm(I) > 0) THEN
-            write(kStdWarn,*) 'Reading ascii scatter data for table #',I
-            CALL READ_SSCATTAB(SCATFILE(I),   & !!!!!!MAXTAB, MAXGRID,
-              caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-              NWAVETAB(I), WAVETAB(1,I), &
-              MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-              TABPHI1UP(1,I), TABPHI1DN(1,I), &
-              TABPHI2UP(1,I), TABPHI2DN(1,I))
-            IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. &
-              (ABS(MUINC(2)-0.7887) > 0.001)) THEN
-              write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
-              CALL DoStop
-            END IF
-!            IF (iaPhase(I) > 0) THEN
-!              DO iBlah = 1,NDME(I)
-!                dmetab_phase(iBlah) = DMETAB(iBlah,I)
-!              END DO
-!              rDmePhase = raaaCloudParams(I,1,2)
-!              CALL READ_PHASE(SCATFILE(I),raFreq,rDmePhase,ndme(I),dmetab, &
-!                raPhasePoints,raComputedPhase)
-!            END IF
-          END IF
-        ENDDO
-      ELSE IF (iBinaryFile == 0) THEN
-        DO I = 1, NSCATTAB
-          IF (iaScatTable_With_Atm(I) > 0) THEN
-            write(kStdWarn,*) 'Reading ascii scatter data for table #',I
-            CALL READ_SSCATTAB_SPECIAL(SCATFILE(I), &
-              caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
-              NWAVETAB(I), WAVETAB(1,I), &
-              MUINC, TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-              TABPHI1UP(1,I), TABPHI1DN(1,I), &
-              TABPHI2UP(1,I), TABPHI2DN(1,I))
-          END IF
-        ENDDO
-      END IF    !iBinaryFile > 0
-    END IF      !iReadTable  > 0
- 
-! Frank Evans code scales the Mie scattering parameters, so if we are using
-! my canned EDDINGTON method, we have to unscale them!!!!!!!!
-    iSergio = -1
-    IF (iSergio > 0) THEN
-      DO I = 1, NSCATTAB
-        IF (iaScatTable_With_Atm(I) > 0) THEN
-          CALL UnScaleMie( &
-               caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-                ndme(i)*nwavetab(i))
-        END IF
-      END DO
-    END IF
-         
-! check to see that all MIE tables read in had the same nmuobs used
-! assuming that this atm does have a cloud associated with it
-    IF (iCloudySky > 0) THEN
-      iLayers = 0
-      LL = 0
-      DO i=1,nscattab
-        IF (iaScatTable_With_Atm(I) > 0) THEN
-          iLayers = iLayers + nmuobs(i)
-          LL = LL + 1  !!keep track of how many scattering tables used
-          II = I       !!keep track of which scattering table used with atm
-        END IF
-      END DO
-      IF (int(iLayers*1.0/LL) /= nmuobs(II)) THEN
-        write (kStdErr,*) iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
-        write (kStdErr,*) 'Some of the Mie Scattering tables had different'
-        write (kStdErr,*) 'number of angles used in computing Mie coeffs'
-        write (kStdErr,*) 'Please recheck  sscatmie.x and rerun'
-        CALL DoStop
-      END IF
-    ELSE
-      write (kStdWarn,*) 'no clouds with atmosphere number ',iAtm,' !!!'
-    END IF
-
-!!!!!!!!!!!!!!!  I basically do this in SetMieTables_DISORT
-!!!!   this was commented out till June 2022 then Tang/Yang/Huang/RRTM suggest to use unscaled
-!!!!  Frank Evans code scales the Mie scattering parameters, so we have to
-!!!!   unscale them!!!!!!!!
-!!!!    DO I = 1, NSCATTAB
-!!!!      IF (iaScatTable_With_Atm(I).GT. 0) THEN
-!!!!        CALL UnScaleMie(caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
-!!!!                        ndme(i)*nwavetab(i))
-!!!!      END IF
-!!!!    END DO
-           
-! code from n_rad_jac_scat.f
-    iCloud = -1
-    IF (iCloudySky < 0) THEN
-      write(kStdWarn,*)'Could not find a cloud for atmosphere #',iAtm
-      write(kStdWarn,*)'setting IWP = -100.0'
-      iCloud = 1    !say cloud number one associated with this atmosphere
-      ncldlay = 1   !say fictitious cloud occupies one layer
-      IWP(1)      = -100.0   !but ensure cloud has NO particles in it!
-      DME(1)      = -10.0    !but ensure cloud has NO particles in it!
-      ISCATTAB(1) = -1
-    ELSE
-      !!!!!find total number of clouds, and hence total number of layers
-      NCLDLAY=0
-      iLayers = 0
-      DO i=1,kMaxClouds
-        IF (iaCloudWithThisAtm(i) == 1) THEN
-          ncldlay = ncldlay + iaCloudNumLayers(i)
-          write(kStdWarn,*) 'Cloud #, num layers = ',i,iaCloudNumLayers(i)
-          write(kStdWarn,*) 'L   iwp  dme  iscattab   kCARTA Layer  : '
-          DO iStep = 1, iaCloudNumLayers(i)
-              iLayers = iLayers + 1
-              IWP(iLayers) = raaaCloudParams(i,iStep,1)
-              DME(iLayers) = raaaCloudParams(i,iStep,2)
-              ISCATTAB(iLayers) = iaaScatTable(i,iStep)
-              write(kStdWarn,*) iLayers,iwp(iLayers),dme(iLayers), &
-                iscattab(iLayers),iaaCloudWhichLayers(i,iStep)
-          END DO
-        END IF
-      END DO
-    END IF
-
-!     Find the levels for top of cloud and observation level
-!     remember that these numbers are with respect to the KLAYERS pressure
-!     levels and layers
-!     these will be reset when passed in and out of GetAbsProfileDISORT
-!     NOTE : here we are still in kCARTA frame ie
-!
-!   TOA    --------------
-!          layer iNumlayer
-!          --------------
-!              .....
-!          --------------             KCARTA
-!             layer 2
-!          --------------
-!             layer 1
-!   GND --------------------------
-
-! when we call GetAbsProfile, variables icldtop,icldbot,iobs will be reset
-! to reflect the rtspec layering
-!   TOA    --------------
-!             layer 1
-!          --------------
-!              .....                 DISORT
-!          --------------
-!        layer iNumLayer-1
-!          --------------
-!         layer iNumLayer
-!   GND --------------------------
-
-    IF (IWP(1) <= 0.0) THEN  !we have no cloud; set up fictitious clouds
-      IF (iDownWard > 0) THEN
-        ! down look instr : set cloud BELOW observer, in kCARTA layer #1
-        ICLDTOP = 2
-        ICLDBOT = 1
-        ! down look instr : set cloud BELOW observer, in DISORT layer #2
-        ICLDTOP = 2
-        ICLDBOT = 3
-        IOBS    = iNumLayer
-      ELSE IF (iDownWard < 0) THEN    !up look instr
-        ! up look instr : set cloud ABOVE observer, in kCARTA layer #iNumLayer
-        ICLDTOP = iNumLayer+1
-        ICLDBOT = iNumLayer
-        ! up look instr : set cloud ABOVE observer, in DISORT layer #1
-        ICLDTOP = 2
-        ICLDBOT = 1
-        IOBS    = 1
-      END IF
-    END IF
-
-    IF (IWP(1) > 0.0) THEN
-      ! not really need icldtop/bot, but just set it up
-      ICLDTOP=iaaCloudWhichLayers(iCloudySky,1)+1
-      ICLDBOT=iaaCloudWhichLayers(iCloudySky,iaCloudNumLayers(iCloudySky))
-
-      icldbot = iT_Atm - icldbot + 1
-      icldtop = iT_Atm - icldtop + 1
-
-      icldbot = icldbot + 1
-      icldtop = icldtop + 1
-
-      IF (iDownWard > 0) THEN
-        IOBS   = iNumLayer
-      ELSE IF (iDownWard < 0) THEN
-        IOBS   = 1
-      END IF
-    END IF
-
-    iobs=(iNumLayer+1)-iobs+1
-
-    30 FORMAT(I3,' ',A80)
-
-    RETURN
-    end SUBROUTINE SetMieTables_DISORT
-
-!************************************************************************
 ! this subtroutine does some initializations for a uplook instr
     SUBROUTINE Init_UpLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
     rFracTop,raFreq,raaAbs,rSatAngle,iTag, &
@@ -672,7 +250,7 @@ CONTAINS
 
 !************************************************************************
 ! set up the single scatter albedos etc for the clouds
-    SUBROUTINE SetUpClouds(nstr, nmuobs, iaCloudWithThisAtm, &
+    SUBROUTINE SetUpCloudsDISORT(nstr, nmuobs, iaCloudWithThisAtm, &
     iaCldTop,iaCldBot,iaCloudNumLayers,rF, &
     iAtm,iaaRadLayer,iNumLayer, &
     IWP, DME, NDME, DMETAB, NWAVETAB, WAVETAB, &
@@ -737,9 +315,9 @@ CONTAINS
     LL = 0
     DO M = 1,kMaxClouds
       IF (iaCloudWithThisAtm(M) > 0) THEN
-        ICLDTOP = IACLDTOP(M)
-        ICLDBOT = IACLDBOT(M)
-        DO N = ICLDTOP, ICLDBOT - 1
+        ICLDTOP = IACLDTOP(M)+1
+        ICLDBOT = IACLDBOT(M)+1
+        DO N = ICLDTOP, ICLDBOT-1
           Nprime = N-iiDiv*kProfLayer
           ! L is the cloud layer = 1(top)..nlay(bot) in cloud
           L = LL + N-ICLDTOP+1
@@ -762,7 +340,7 @@ CONTAINS
                 NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
                 TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
 
-!   this was com,mented out till June 2022 then Tang/Yang/Huang/RRTM suggest no use unscaled
+!   this was commmented out till June 2022 then Tang/Yang/Huang/RRTM suggest no use unscaled
 !   Frank Evans code scales the Mie scattering parameters, so we have to
 !   unscale them!!!!!!!!
           IF (iSartaTables .LT. 0) THEN
@@ -784,11 +362,14 @@ CONTAINS
           TAUC(L) = DBLE(IWP(L)*EXTINCT/1000.0)
           !!!!!!!!!!!! orig code TAUCG(L) = TAUGAS(N) + TAUC(L)
           TAUCG(L) = dtauc(Nprime) + TAUC(L)
+
           IF (TAUCG(L) > 1.0D-5) THEN
+            !!! rescale SSA to be wc Ecld/ Etotal
             SSALB_RTSPEC(L) = SSALB_RTSPEC(L)*TAUC(L)/TAUCG(L)
           ELSE
             SSALB_RTSPEC(L) = 0.0
           ENDIF
+
 !    write(kStdErr,'(A,3(I4),F12.4,5(ES12.4))') 'OIOIOI',L,ICLDTOP,ICLDBOT,rF,IWP(L),EXTINCT/1000.0,TAUCG(L),SSALB_RTSPE!C(L),asym_rtspec(L)
 
           ! so now set the indices correctly and do relevant changes of real --> double
@@ -813,7 +394,7 @@ CONTAINS
     END DO                    !DO M = 1,kMaxClouds
 
     RETURN
-    end SUBROUTINE SetUpClouds
+    end SUBROUTINE SetUpCloudsDISORT
 
 !************************************************************************
 ! this subroutine sets up the optical depths, single scatter albedo etc for
@@ -1154,7 +735,8 @@ CONTAINS
     NABSNU, NLEV, TEMP, ABSPROF, &
     ICLDTOP,iCLDBOT,IOBS, iDownward, iwp, raNumberDensity, &
     raDensity,raLayerTemp, &
-    iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh)
+    iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh, &
+    rSatAngle,raLayAngles)
 
     IMPLICIT NONE
 
@@ -1173,6 +755,7 @@ CONTAINS
     INTEGER ::  ICLDTOP,iCLDBOT,IOBS
     REAL :: raDensity(*)
     REAL :: raThicknessRayleigh(kProfLayer)
+    REAL :: raLayAngles(kProfLayer),rSatAngle
 
 ! local variables
     INTEGER :: iaRadLayer(kProfLayer), iaTemp(kProfLayer),iFr, iL, iLay, iiDiv
@@ -1180,6 +763,30 @@ CONTAINS
 
 ! these are to flip the temperature, abs profiles if instr looks up
     REAL :: raTemp(kProfLayer+1),raaTemp(kProfLayer,kMaxPts),rT2
+
+!!! SUBROUTINE FinalInitialization uses
+!!!      usrang = .TRUE.   !return intensity at one user polar angle
+!!!      numu = 1
+!!!      umu(1) = DBLE(ABS(cos(rSatAngle*kPi/180)))
+!!!                Remember, can set iSnell = 0 (iaaOveride(2,7)) and the NO ray tracing due to curvature
+!!!                is done. SO then PCLSAM angls will equal DISORT angles at all layers
+!!!
+!!!                Unfortunately DISORT does it Gaussian streams probably assuming nadir ODs are
+!!!                sent in, with plane parallel assumptions
+!!! SO THIS BRILLIANT PLAN IS TOAST FOR NOW
+!!!                In the future I plan to modify GetAbsProfileDISORT so the layerangles are input. Then
+!!!                the NABSNU ODs can be modified so that instead of being nadir ODs and then adjusted by DISORT
+!!!                using umu, they will be slightly adjusted with a factor L that changes layer by layer 
+!!!                   exp(-k/cos(a+b)) = exp(-k/(adj(L)*cosa)) where a      = sat angle, 
+!!!                                                                  adj(L) = ray tracing adjustment factor to OD
+!!!                k/cos(satzen + f(L)) = k/cos(satzen) 1/adj(L)
+!!!                cos(satzen) adj(L) = cos(satzen + f(L))
+!!!                adj(L) = cos(satzen + f(L))/cos(satzen) = cos(LayAngle)/cos(satzen)
+!!!
+!!!                So instead of just sending     absnu(L) = k(L)       to DISORT
+!!!                we will send               absnu_adj(L) = k(L)/adj(L)
+!!!                and then DISORT will do    absnu_adj(L)/cos(satzen)
+!!!
 
     nabsnu = kMaxPts
     nlev=iNumLayer+1           !this is the number of pressure levels
@@ -2531,4 +2138,175 @@ CONTAINS
     RETURN
     end SUBROUTINE CumulativeK
 !************************************************************************
+
+!! see eg /home/sergio/KCARTA/SCATTERCODE/DISORT4.0.99/disort4.0.99/doc/DISORT.txt
+      SUBROUTINE InputPrintDebugDisort(raFreq, NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, &
+           USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, UMU, NPHI, PHI, &
+           IBCND, FBEAM, UMU0, PHI0, FISOT, LAMBER, BTEMP, TTEMP, TEMIS, &           
+           PLANK, WVNMLO, WVNMHI, ONLYFL, ACCUR, PRNT, HEADER, &
+           ICLDTOP, ICLDBOT, iaRadLayer,iNumLayer,raPressLevels,rSurfPress)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/scatterparam.f90'
+
+    INTEGER :: ICLDTOP, ICLDBOT, iaRadLayer(kProfLayer),iNumLayer
+
+    REAL :: raFreq(kMaxPts),raPressLevels(kProflayer+1),rSurfPress
+
+    CHARACTER  header*127          !dumb comment
+          
+    LOGICAL :: lamber  !true  ==> isotropic reflecting lower bdry
+!          so need to specify albedo
+! alse ==> bidirectionally reflecting bottom bdry
+!      ==> need to specify fcn BDREF()
+    LOGICAL :: plank   !use the plank function for local emission
+    LOGICAL :: onlyfl  !true ==> return flux, flux divergence, mean intensitys
+! alsetrue ==> return flux, flux divergence, mean
+!              intensities and intensities
+    LOGICAL :: prnt(5) !prnt(1) = true, print input variables
+! rnt(2) = true, print fluxes
+! rnt(3) = true, intensities at user angles and levels
+! rnt(4) = true, print planar transmitivity and albedo
+! rnt(5) = true, print phase function moments PMOM
+    LOGICAL :: usrtau  !false ==> rad quantities return at every bdry
+! rue  ==> rad quantities return at NTAU optical depths
+!          which will be specified in utau(1:ntau)
+    LOGICAL :: usrang  !false ==> rad quantities returned at stream angles
+! rue  ==> rad quantities returned at user angles
+!          which will be specified in umu(1:numu)
+
+    INTEGER :: ibcnd            !0 ==> general case beam (fbeam), isotropic
+!      top illumination (fisot), thermal top
+!      emission (temis,ttemp),internal thermal
+!      sources (temper), reflection at bottom
+!      (lamber, albedo, bdref), thermal
+!      emission from bottom (btemp)
+!1 ==> return only albedo/trans of entire
+!      medium vs incident beam angle
+    INTEGER :: nmom             !number of legendre phase polynoms ie phase fcn
+    INTEGER :: nlyr             !number of computational layers in DISORT
+! o nlvl = nlyr + 1
+    INTEGER :: nstr             !number of radiation streams
+    INTEGER :: ntau             !associated with LOGICAL usrtau, print results
+! t this many optical depths
+    INTEGER :: numu             !associated with LOGICAL usrang, specifies how
+! any polar angles results to be printed (umu)
+    INTEGER :: nphi             !specifies how many azimuth angles results to
+! e printed (phi) .. can only be 0 if
+! nlyfl = .true.
+
+    DOUBLE PRECISION :: accur   !accuracy convergence criterion for azimuth
+! fourier cosine) series .. set between 0-0.01
+    DOUBLE PRECISION :: albedo  !bottom bdry albedo
+    DOUBLE PRECISION :: btemp   !bottom surface temp
+    DOUBLE PRECISION :: dtauc(maxcly)
+! ptical depths of computational layers
+    DOUBLE PRECISION :: fisot   !intensity of top bdry isotropic illumination
+    DOUBLE PRECISION :: fbeam   !intensity of incident // beam at TOA
+    DOUBLE PRECISION :: phi(maxphi)
+! he azimuthal phi's to output radiance
+    DOUBLE PRECISION :: pmom(0:maxmom,maxcly)
+! cattering phase fcn in legendre polynoms
+    DOUBLE PRECISION :: phi0    !solar azimuth
+    DOUBLE PRECISION :: ssalb(maxcly)
+! ingle scatter albedo of computational layers
+    DOUBLE PRECISION :: temper(0:maxcly) !temperature of the levels (0=TOA)
+    DOUBLE PRECISION :: temis            !emissivity of top bdry
+    DOUBLE PRECISION :: ttemp            !temperature of top bdry
+    DOUBLE PRECISION :: wvnmhi, wvnmlo   !bounds within which to do computations
+    DOUBLE PRECISION :: umu(maxumu)      !ang's at which to output results
+    DOUBLE PRECISION :: umu0         !polar angle cosine of incident solar beam
+    DOUBLE PRECISION :: utau(maxulv)     !tau's at which to output results
+
+    INTEGER :: iI,iJ,iK
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,*)           ' DISORT input for raFreq(1) = ',raFreq(1)
+    WRITE(kStdWarn,'(A,F12.5)') ' emissivity = ',TEMIS
+    write(kStdWarn,'(A,I4)') ' NLYR          Number of computational layers   = ',NLYR
+    write(kStdWarn,'(A,I4)') ' NMOM          Number of phase function moments = ',NMOM
+    write(kStdWarn,'(A)')    '   IC                             TLEV     DTAUC    SSALB    PMOM(0)    PMOM(1)   PMOM(2)    PMOM(3)'
+    write(kStdWarn,'(A)')    ' ----------------------------------------------------------------------------------------------------'
+    WRITE(kStdWarn,'(3(I4),2(F12.5))') 0,0,0,0.0,TTEMP 
+    DO iI = 1,NLYR
+      IJ = iaRadLayer(iI)
+      iK = kProfLayer - iJ + 1
+      IF ((iI .EQ. ICLDTOP) .OR. (iI .EQ. ICLDBOT)) THEN
+        write(kStdWarn,'(A)')    ' -----------------------------------------------------------------------------------------------'
+      END IF
+      WRITE(kStdWarn,'(3(I4),2(F12.5),6(ES12.5))') & 
+       iI,iJ,iK,raPressLevels(iK+(kProfLayer-iNumLayer)),TEMPER(iI),DTAUC(iI),SSALB(iI),PMOM(0,iI),PMOM(1,iI),PMOM(2,iI),PMOM(3,iI)
+    END DO
+    WRITE(kStdWarn,'(3(I4),2(F12.5))') NLYR+1,NLYR+1,NLYR+1,rSurfPress,BTEMP 
+    write(kStdWarn,'(A)')    '   IC                             TLEV     DTAUC    SSALB    PMOM(0)    PMOM(1)   PMOM(2)    PMOM(3)'
+    write(kStdWarn,'(A)')    ' ---------------------------------------------------------------------------------------------------'
+
+    IF (LAMBER .EQ. .true.) THEN
+      write(kStdWarn,'(A)') 'LAMBER = true = isotropic reflecting boundary'
+    ELSE
+      write(kStdWarn,'(A)') 'LAMBER = false = bidirectional reflecting boundary'
+    END IF
+    IF (PLANK .EQ. .true.) THEN
+      write(kStdWarn,'(A)') 'PLANK = true = thermal emission'
+    ELSE
+      write(kStdWarn,'(A)') 'PLANK = false = no thermal emission !!!!!!!!!!!!!!!!!!'
+    END IF
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,'(A,I3)') 'NSTR = Number of computational polar angles to be used = streams',NSTR
+    
+    write(kStdWarn,*) ' '
+    IF (USRANG .EQ. .false.) THEN
+       write(kStdWarn,'(A)') 'USRANG = false, radiant quantities at gauss quad streams'
+    ELSE
+      write(kStdWarn,'(A,I3,A)') 'USRANG = true, return rads at ',NUMU,' specified cos(polar angle),polar angle : '
+      DO iI = 1,NUMU
+        WRITE(kStdWarn,'(I3,2(F12.5))') iI,UMU(iI),ACOS(UMU(iI))*180.0/kPi
+      END DO       
+    END IF
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,'(A,I3,A)') ' return rads at ',NPHI,' specified azimuth angs (0 ok only if ONLYFL = true)'
+    DO iI = 1,NPHI
+      WRITE(kStdWarn,'(I3,F12.5)') iI,PHI(iI)
+    END DO       
+
+    write(kStdWarn,*) ' '
+    IF (USRTAU .EQ. .false.) THEN
+       write(kStdWarn,'(A)') 'USRTAU = false, return rads at every layer'
+    ELSE
+      write(kStdWarn,'(A,I3,A)') 'USRTAU = true, return rads at ',NTAU,' specified layers/ODs : '
+      DO iI = 1,NTAU
+        WRITE(kStdWarn,'(I3,ES12.5)') iI,UTAU(iI)
+      END DO       
+    END IF
+
+    write(kStdWarn,*) ' '
+    IF (IBCND .EQ. 0) THEN
+      write(kStdWarn,'(A)') 'IBCND = 0    GENERAL CASE'
+    ELSEIF (IBCND .EQ. 1) THEN
+      write(kStdWarn,'(A)') 'IBCND = 1    Return alb/transmissivity (no Planck sources) = Re/Tr = PCRTM at UMU output angles'
+    END IF
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,'(A,3(ES12.5))') 'FBEAM intensity,cos(sol0),sol0,phi0',FBEAM,UMU0,acos(UMU0)*180/kPi,PHI0
+    write(kStdWarn,'(A,ES12.5)')    'FISOT intensity of top boundary illumination',FISOT
+
+    write(kStdWarn,*) ' '
+    write(kStdWarn,'(A,2(F12.5),A,ES12.5)')  'WAVENO ',WVNMLO,WVNMHI,' ACCUR',ACCUR
+    write(kStdWarn,'(A,L)') 'ONLYFL ',ONLYFL
+    write(kStdWarn,'(A,L)') 'PRNT 1 ',PRNT(1)
+    write(kStdWarn,'(A,L)') 'PRNT 2 ',PRNT(2)
+    write(kStdWarn,'(A,L)') 'PRNT 3 ',PRNT(3)
+    write(kStdWarn,'(A,L)') 'PRNT 4 ',PRNT(4)
+    write(kStdWarn,'(A,L)') 'PRNT 5 ',PRNT(5)
+
+    write(kStdWarn,*) ' '
+
+    RETURN
+    end SUBROUTINE InputPrintDebugDisort
+
+!************************************************************************
+
 END MODULE scatter_disort_aux

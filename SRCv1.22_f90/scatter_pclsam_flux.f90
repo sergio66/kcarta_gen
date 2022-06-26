@@ -337,6 +337,7 @@ CONTAINS
     raLayAngles,raSunAngles, &
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
     raLayerHeight,raaPrBdry, &
+! then the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
@@ -593,6 +594,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -608,6 +610,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!! these are the cloud profiles PLUS output
         iaCldTypes,raaKlayersCldAmt,raVTemp, &
     !!!!!!!!!!!!!!!!!!these are the output variables
@@ -1812,6 +1815,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -1828,6 +1832,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!! these are the cloud profiles
         iaCldTypes,raaKlayersCldAmt,raVTemp, &
     !!!!!!!!!!!!!!!!!!these are the output variables
@@ -2374,6 +2379,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -2390,6 +2396,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!! these are the cloud profiles
         iaCldTypes,raaKlayersCldAmt,raVTemp, &
     !!!!!!!!!!!!!!!!!!these are the output variables

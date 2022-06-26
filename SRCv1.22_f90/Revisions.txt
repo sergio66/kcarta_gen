@@ -607,7 +607,37 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+6/25/22         Have fixed DISORT flux calcs so now the same outputs as PCLSAM or CLEAR should be possible
+                Note if there are TwoSlab clouds, then PCLSAM will dump out 5 copies of things -- 
+                    clear, cld1, cld2 cld12, total weighted output
+                while DISORT will always only dmp out one thing .. the final number
+
+                Also note if cngwat is very small, PCLSAM defaults to just doing one clear sky calc
+                while DISORT still can go ahead and do the DISORT radiance calc : see the variable
+                "iForceScatterCalc_EvenIfNoCld" which shows the window region calcs are very similar if
+                emissivity == 1, but the higher altitude calcs have differences (because kCARTA Clear Sky
+                defaults to no T variation across a later, and the AIRS 100 layers get thicker and thicker)
+
+                the 7 fluxchoices : nm_params and set kFlux = -1,1..7, with filenames appended as
+                1 = '_DOWN'  = dngoing flux at each level                          
+                2 = '_HEAT'  = up-dn heating rate at each layer
+                3 = '_UP'    = upgoing flux at each level
+                4 = '_OLR'   = OLR at TOA
+                5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+                6 = '_ALL'   = up/dn flux at each level
+                7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
+
 6/21/22         Fixing DISORT for the f90 kCARTA
+                Computers are fast enough now so just have (kDis_pts .EQ. kMaxPts) 
+                ie no more wierd error prone interpolation
+                DISORT = x100 slower than PCLSAM
+                So a 20 second run with PCLAM will take 30 minutes with DISORT on one processor
+
+                Remember, can set iSnell = 0 (iaaOveride(2,7)) and the NO ray tracing due to curvature
+                is done. SO then PCLSAM angls will equal DISORT angles at all layers
+                Unfortunately DISORT does it Gaussian streams probably assuming nadir ODs are
+                sent in, with plane parallel assumptions
+                So cannot "preadjust" ODs 
 
 6/9/22          Adding in PCLSAM scaling adjustments  
                 See "Improvement of the simulation of Cloud LW scattering in Broadband RTMs"

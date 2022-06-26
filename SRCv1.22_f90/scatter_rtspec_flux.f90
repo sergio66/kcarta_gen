@@ -416,7 +416,8 @@ CONTAINS
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
-    iSergio, &
+         iSergio, &
+        -1,              & !!!!iDISORT
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -706,7 +707,8 @@ CONTAINS
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
-    iSergio, &
+         iSergio, &
+        -1,              & !!!!iDISORT
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -839,7 +841,8 @@ CONTAINS
     raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
-    iSergio, &
+         iSergio, &
+        -1,              & !!!!iDISORT
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &

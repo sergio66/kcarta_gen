@@ -168,6 +168,7 @@ CONTAINS
     REAL :: raaAllDT5(kMaxPtsJac,kProfLayerJac)
     REAL :: raaAllSurfOut5(kMaxPtsJac,4)
     REAL :: raaAllWgtOut5(kMaxPtsJac,kProfLayerJac)
+    REAL :: raaFluxOut(kMaxPts,2*(kProfLayer+1))
 
     INTEGER :: iDoFlux,iG,iGasJacList,iNatmCldEffective,iPrintAllPCLSAMJacs
     INTEGER :: iFr,iL,iJ,iDoPCLSAM,iLayPrintFlux
@@ -715,7 +716,11 @@ CONTAINS
               raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
               iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
               raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
-              iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity)
+              iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,           &
+              raLayerHeight,raaPrBdry, &
+              iCldProfile,iaCldTypes,raaKlayersCldAmt, &
+              iLayPrintFlux,raaFluxOut)
+
         CALL PrintPound
       END IF
 
@@ -1104,6 +1109,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things ok
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -1119,6 +1125,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things ok
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!! these are the cloud profiles
         iaCldTypes,raaKlayersCldAmt,raVTemp, &
     !!!!!!!!!!!!!!!!!! these are the output variables
@@ -1481,6 +1488,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 as this is MY code
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -1496,6 +1504,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 as this is MY code
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!! these are the cloud profiles
         iaCldTypes,raaKlayersCldAmt,raVTemp, &
     !!!!!!!!!!!!!!!!!!these are the output variables

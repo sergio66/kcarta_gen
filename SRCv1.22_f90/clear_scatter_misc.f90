@@ -730,6 +730,7 @@ CONTAINS
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
     iSergio, &
+    iDisort, &
 !!!!!!!!!!!!!!!!!!these are the output variables
     NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
     TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -743,7 +744,7 @@ CONTAINS
     include '../INCLUDE/TempF90/scatterparam.f90'
      
 ! iSergio INTEGER that tells if this is RTSPEC or SERGIO's code
-    INTEGER :: iSergio
+    INTEGER :: iSergio,iDisort
     INTEGER :: iaCldTypes(kMaxClouds)  !! 101 201 or 301 for water, ice, aerosol
     REAL :: raFreq(kMaxPts)
 ! ---------------- inputs needed to read scattering tables -------------------
@@ -820,6 +821,14 @@ CONTAINS
      
     CHARACTER(120) :: caName
     CHARACTER(1) :: caScale(MAXSCAT)
+
+!!!! need to reference the cloud tops and bottoms wrt TOP layer of
+!!!! defined atm
+!!!! eg if atm from 971 to 150 mb (plane at 150 mb) ==>
+!!!!       this occupies kCARTA layers 19-78
+!!!!   if cloud from 248 to 214 mb  ==>
+!!!!       this occupies kCARTA layers 69 to 72
+!!!! Thus the cloud occupies RTSPEC atmosphere "tau" from 6 to 9
      
 ! nitialise all scattering info to null
     iB = -kProfLayer
@@ -832,6 +841,7 @@ CONTAINS
     END IF
     iiDiv = iiDiv - 1
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! copied from s_scatter_spectra.f .. all table names etc are unique, so no
 ! need to make more checks
 
@@ -853,9 +863,10 @@ CONTAINS
       iT_Atm = iaaRadLayer(iAtm,1)
       iB_Atm = iaaRadLayer(iAtm,iNumLayer)
     END IF
-!!!!!!hwowever we also do fluxes, so even if the atm is defined so it
-!!!!!!is for an uplook instrument, RTSPEC will be called in a downlook
-!!!!!!fashion, and vice versa
+
+!!!!!! however we also do fluxes, so even if the atm is defined so it
+!!!!!! is for an uplook instrument, RTSPEC will be called in a downlook
+!!!!!! fashion, and vice versa
 
     IF (iB_Atm > iT_Atm) THEN
       iCloudySky = iT_Atm
@@ -869,7 +880,7 @@ CONTAINS
 
     iCldTopKcarta = -1
     iCldBotKcarta = kProfLayer+1
-    NSCATTAB=-1000
+    NSCATTAB = -1000
     DO iIn = 1,kMaxClouds*kCloudLayers
       iaTable(iIn) = -1
     END DO
@@ -887,11 +898,14 @@ CONTAINS
       iaCldBotkCarta(iIn) = -1
     END DO
 
+!!!go thru info and check against whether should be used with this atm
     DO iIn=1,iNclouds
+      ! associate scattering tables with the clouds
+      ! initialise info for this iIn th cloud
       DO iJ=1,iaCloudNumLayers(iIn)
         iI = iaaScatTable(iIn,iJ)
         IF (iI > MAXSCAT) THEN
-          write(kStdErr,*)'unfortunately, in scatterparam.f90 we have '
+          write(kStdErr,*)'unfortunately, in SetMieTables_RTPSEC find scattercode.param has set'
           write(kStdErr,*)'MAXSCAT = ',maxscat
           write(kStdErr,*)'please reset and retry'
           CALL DoSTOP
@@ -910,38 +924,38 @@ CONTAINS
       ! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
       ! iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
       ! INTEGER iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
-        DO iJ=1,iaCloudNumAtm(iIn)
-          IF (iaaCloudWhichAtm(iIn,iJ)  == iAtm) THEN
-            iCloudySky = iIn         !!!! set this up
-            iaCloudWithThisAtm(iIn) = 1
-
-            IACLDTOP(iIn) = iaaCloudWhichLayers(iIn,1)+1
-            IACLDBOT(iIn) = iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn))
-
-            iaCldTopkCarta(iIn) = iaCldTop(iIn)     !!! not needed
-            iaCldBotkCarta(iIn) = iaCldBot(iIn)     !!! not needed
-            ! iCldTopkCarta = iaCldTop(iIn)-1
-            ! iCldBotkCarta = iaCldBot(iIn)
-            IF (iCldTopkCarta < iaCldTop(iIn)-1) THEN
-              iCldTopkCarta = iaCldTop(iIn)-1
-            END IF
-            IF (iCldBotkCarta > iaCldBot(iIn)) THEN
-              iCldBotkCarta = iaCldBot(iIn)
-            END IF
-
-            write(kStdWarn,*) ' '
-            write(kStdWarn,*)'cloud # ',iIn,' associated with atm # ',iAtm
-            write(kStdWarn,*)'setmie0 : cloud is in KCARTA layers ', &
-            iiDiv*kProfLayer+iaCldTop(iIn)-1,' to ', &
-            iiDiv*kProfLayer+iaCldBot(iIn)
-
-            !!!!!these are the RTSPEC layers 100 to 1 = GND to TOA
-            iaCldbot(iIn) = iT_Atm - iaCldbot(iIn) + 1
-            iaCldtop(iIn) = iT_Atm - iaCldtop(iIn) + 1
-            write(kStdWarn,*)'setmie0 : cloud is in RTSPEC layers ', &
-            iaCldTop(iIn)+1,' to ',iaCldBot(iIn)
+      DO iJ=1,iaCloudNumAtm(iIn)
+        IF (iaaCloudWhichAtm(iIn,iJ)  == iAtm) THEN
+          iCloudySky = iIn         !!!! set this up
+          iaCloudWithThisAtm(iIn) = 1
+  
+          IACLDTOP(iIn) = iaaCloudWhichLayers(iIn,1)+1
+          IACLDBOT(iIn) = iaaCloudWhichLayers(iIn,iaCloudNumLayers(iIn))
+  
+          iaCldTopkCarta(iIn) = iaCldTop(iIn)     !!! not needed
+          iaCldBotkCarta(iIn) = iaCldBot(iIn)     !!! not needed
+          ! iCldTopkCarta = iaCldTop(iIn)-1
+          ! iCldBotkCarta = iaCldBot(iIn)
+          IF (iCldTopkCarta < iaCldTop(iIn)-1) THEN
+            iCldTopkCarta = iaCldTop(iIn)-1
           END IF
-        END DO
+          IF (iCldBotkCarta > iaCldBot(iIn)) THEN
+            iCldBotkCarta = iaCldBot(iIn)
+          END IF
+  
+          write(kStdWarn,*) ' '
+          write(kStdWarn,*)'cloud # ',iIn,' associated with atm # ',iAtm
+          write(kStdWarn,*)'setmie0 : cloud is in KCARTA layers ', &
+          iiDiv*kProfLayer+iaCldTop(iIn)-1,' to ', &
+          iiDiv*kProfLayer+iaCldBot(iIn)
+  
+          !!!!!these are the RTSPEC layers 100 to 1 = GND to TOA
+          iaCldbot(iIn) = iT_Atm - iaCldbot(iIn) + 1
+          iaCldtop(iIn) = iT_Atm - iaCldtop(iIn) + 1
+          write(kStdWarn,*)'setmie0 : cloud is in RTSPEC layers ', &
+          iaCldTop(iIn)+1,' to ',iaCldBot(iIn)
+        END IF
+      END DO
          
     ! check to see which scattering tables to be used with this atm
         DO iJ = 1,iaCloudNumLayers(iIn)
@@ -1053,15 +1067,40 @@ CONTAINS
       iwp0(I)       = -1.0
     END DO
 
+!! this is new June 2022
+! check to see that all MIE tables read in had the same nmuobs used
+! assuming that this atm does have a cloud associated with it
+    IF (iCloudySky > 0) THEN
+      iLayers = 0
+      LL = 0
+      DO i=1,nscattab
+        IF (iaScatTable_With_Atm(I) > 0) THEN
+          iLayers = iLayers + nmuobs(i)
+          LL = LL + 1  !!keep track of how many scattering tables used
+          II = I       !!keep track of which scattering table used with atm
+        END IF
+      END DO
+      IF (int(iLayers*1.0/LL) /= nmuobs(II)) THEN
+        write (kStdErr,*) iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
+        write (kStdErr,*) 'Some of the Mie Scattering tables had different'
+        write (kStdErr,*) 'number of angles used in computing Mie coeffs'
+        write (kStdErr,*) 'Please recheck  sscatmie.x and rerun'
+        CALL DoStop
+      END IF
+    ELSE
+      write (kStdWarn,*) 'no clouds with atmosphere number ',iAtm,' !!!'
+    END IF
+!! this is new June 2022
+
     iCloud = -1
     IF (iCloudySky < 0) THEN
       !!!!!this is similar to DISORT interface
       write(kStdWarn,*)'Could not find a cloud for atmosphere #',iAtm
       write(kStdWarn,*)'setting IWP = -100.0'
-      iCloud=1    !say cloud number one associated with this atmosphere
-      ncldlay=1   !say fictitious cloud occupies one layer
-      IWP(1)      = -100.0   !but ensure cloud has NO particles in it!
-      DME(1)      = -10.0    !but ensure cloud has NO particles in it!
+      iCloud = 1         !say cloud number one associated with this atmosphere
+      ncldlay = 1        !say fictitious cloud occupies one layer
+      IWP(1)  = -100.0   !but ensure cloud has NO particles in it!
+      DME(1)  = -10.0    !but ensure cloud has NO particles in it!
       ISCATTAB(1) = -1
          
     ELSE
@@ -1097,88 +1136,96 @@ CONTAINS
         END IF
       END DO
 
-      !!!this is where we totally differ from DISORT, as we have to fill
-      !!!in any "in-between" layers with a fictitious empty cloud
-      IF (iNumClds == 1) THEN
-        ! iT is the highest cloud, and lowest cloud, set from above
-        ! so just figure out top and bottom
-        iB = iaaCloudWhichLayers(iT,iaCloudNumLayers(iT))
-        iT = iaaCloudWhichLayers(iT,1)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      IF (iDisort < 0) THEN
+        !!!this is where RTSPEC/TWOSLAB totally differ from DISORT, as we have to fill
+        !!!in any "in-between" layers with a fictitious empty cloud
+        IF (iNumClds == 1) THEN
+          ! iT is the highest cloud, and lowest cloud, set from above
+          ! so just figure out top and bottom
+          iB = iaaCloudWhichLayers(iT,iaCloudNumLayers(iT))
+          iT = iaaCloudWhichLayers(iT,1)
+  
+          iB = iT_Atm - iB + 1
+          iT = iT_Atm - iT + 1
+          write (kStdWarn,*) 'RTSPEC cloud layers are from ',iB,' to ',iT
+  
+        ELSE
+          ! oh boy, have to figure out if the clouds are next to each
+          ! other; if not, create a blank cloud in between them
+          DO i=1,kProfLayer
+            !!!assume all layers are clear sky
+            iaCldInLayer(i) = 0
+          END DO
+                        
+          DO i=1,kMaxClouds  !!! see which layers have a cloud in them
+            IF (iaCloudWithThisAtm(i) == 1) THEN
+              iT = iaaCloudWhichLayers(i,1)
+              iB = iaaCloudWhichLayers(i,iaCloudNumLayers(i))
+  
+              iB = iT_Atm - iB + 1
+              iT = iT_Atm - iT + 1
+              write (kStdWarn,*) 'cloud # ',i,' : RTSPEC layers are from ',iB,' to ',iT
+  
+              DO iL = iT,iB
+                iaCldInLayer(iL) = iaCldInLayer(iL) + 1
+              END DO
+            END IF
+          END DO
+  
+          iB = -kProfLayer
+          iT = kMixFilRows+1
+          DO i=1,kProfLayer
+            ! see if more than one cloud per layer
+            IF (iaCldInLayer(i) > 1) THEN
+              write(kStdErr,*) 'More than one cloud in kLAYERS layer ',i
+              write(kStdErr,*) 'Please check section SCATTR and retry'
+              CALL DoStop
+            END IF
+            ! see lowest, highest parts of different clouds simultaneously
+            IF (iaCldInLayer(i) == 1) THEN
+              IF (i >= iB) iB = i
+              IF (i <= iT) iT = i
+            END IF
+          END DO
+  
+          write (kStdWarn,*) 'highest/lowest RTSPEC cloud layers = ',iT,iB
+  
+          !!!!!! now loop from iB to iT and see if we have to fill in
+          DO i = iT,iB
+            IF (iaCldInLayer(i) == 0) THEN
+              write(kStdWarn,999) i
+              ncldlay = ncldlay + 1
+              iLayers = iLayers + 1     !!! --- iLayers is VERY IMPORTANT ---
+              IWP(iLayers) = 0.0
+              DME(iLayers) = raaaCloudParams(iCloudySky,1,2)
+              ISCATTAB(iLayers) = iaaScatTable(iCloudySky,1)
+  
+              IWP0(iLayers) = 0.0
+              DME0(iLayers) = raaaCloudParams(iCloudySky,1,2)
+              ISCATTAB0(iLayers) = iaaScatTable(iCloudySky,1)
+              raCldLayer(iLayers) = 1.0 * i
+  
+            END IF
+          END DO
+  
+          !!!!!!!!!now sort the layers
+          CALL NumericalRecipesIndexer(indx,raCldLayer,iLayers)
+          DO i = 1,iLayers
+            iwp(i) = iwp0(indx(i))
+            dme(i) = dme0(indx(i))
+            iscattab(i) = iscattab0(indx(i))
+          END DO
+        END IF       !!!IF (iNumClds == 1) THEN
+      END IF
 
-        iB = iT_Atm - iB + 1
-        iT = iT_Atm - iT + 1
-        write (kStdWarn,*) 'RTSPEC cloud layers are from ',iB,' to ',iT
-
-      ELSE
-        ! oh boy, have to figure out if the clouds are next to each
-        ! other; if not, create a blank cloud in between them
-        DO i=1,kProfLayer
-          !!!assume all layers are clear sky
-          iaCldInLayer(i) = 0
-        END DO
-                      
-        DO i=1,kMaxClouds  !!! see which layers have a cloud in them
-          IF (iaCloudWithThisAtm(i) == 1) THEN
-            iT = iaaCloudWhichLayers(i,1)
-            iB = iaaCloudWhichLayers(i,iaCloudNumLayers(i))
-
-            iB = iT_Atm - iB + 1
-            iT = iT_Atm - iT + 1
-            write (kStdWarn,*) 'cloud # ',i,' : RTSPEC layers are from ',iB,' to ',iT
-
-            DO iL = iT,iB
-              iaCldInLayer(iL) = iaCldInLayer(iL) + 1
-            END DO
-          END IF
-        END DO
-
-        iB = -kProfLayer
-        iT = kMixFilRows+1
-        DO i=1,kProfLayer
-          ! see if more than one cloud per layer
-          IF (iaCldInLayer(i) > 1) THEN
-            write(kStdErr,*) 'More than one cloud in kLAYERS layer ',i
-            write(kStdErr,*) 'Please check section SCATTR and retry'
-            CALL DoStop
-          END IF
-          ! see lowest, highest parts of different clouds simultaneously
-          IF (iaCldInLayer(i) == 1) THEN
-            IF (i >= iB) iB = i
-            IF (i <= iT) iT = i
-          END IF
-        END DO
-
-        write (kStdWarn,*) 'highest/lowest RTSPEC cloud layers = ',iT,iB
-
-        !!!!!! now loop from iB to iT and see if we have to fill in
-        DO i = iT,iB
-          IF (iaCldInLayer(i) == 0) THEN
-            write(kStdWarn,999) i
-            ncldlay = ncldlay + 1
-            iLayers = iLayers + 1     !!! --- iLayers is VERY IMPORTANT ---
-            IWP(iLayers) = 0.0
-            DME(iLayers) = raaaCloudParams(iCloudySky,1,2)
-            ISCATTAB(iLayers) = iaaScatTable(iCloudySky,1)
-
-            IWP0(iLayers) = 0.0
-            DME0(iLayers) = raaaCloudParams(iCloudySky,1,2)
-            ISCATTAB0(iLayers) = iaaScatTable(iCloudySky,1)
-            raCldLayer(iLayers) = 1.0 * i
-
-          END IF
-        END DO
-
-        !!!!!!!!!now sort the layers
-        CALL NumericalRecipesIndexer(indx,raCldLayer,iLayers)
-        DO i = 1,iLayers
-          iwp(i) = iwp0(indx(i))
-          dme(i) = dme0(indx(i))
-          iscattab(i) = iscattab0(indx(i))
-        END DO
-      END IF       !!!IF (iNumClds == 1) THEN
-    END IF
+!    ELSE 
+!      !!! disort code did nothing here!!!
+    END IF           !! IF (iDisort < 0)
 
  999 FORMAT('empty RTSPEC layer ',I3,' found between clouds; set IWP = 0.0')
+     
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !     Find the levels for top of cloud and observation level
 !     remember that these numbers are with respect to the KLAYERS pressure
@@ -1208,50 +1255,99 @@ CONTAINS
 !         layer iNumLayer
 !   GND --------------------------
 
-    rScat = 0.0
-    rScat = sum(iwp)
-
-    IF (rScat > 0.0) THEN
-      ICLDTOP = iT-1
-      ICLDBOT = iB
-
-      IF ((kWhichScatterCode == 2) .OR. (kWhichScatterCode == 3)) THEN
-        ICLDTOP = icldtop+1
-        ICLDBOT = icldbot+1
+    IF (iDisort < 0) THEN
+  
+      rScat = 0.0
+      rScat = sum(iwp)
+  
+      IF (rScat > 0.0) THEN
+        ICLDTOP = iT-1
+        ICLDBOT = iB
+  
+        IF ((kWhichScatterCode == 2) .OR. (kWhichScatterCode == 3)) THEN
+          ICLDTOP = icldtop+1
+          ICLDBOT = icldbot+1
+        END IF
+  
+        IF (iDownWard > 0) THEN
+          IOBS    = iNumLayer
+        ELSE IF (iDownWard < 0) THEN
+          IOBS   = 1
+        END IF
+      END IF
+  
+      rScat = 0.0
+      rScat = sum(iwp)
+             
+      IF (rScat <= 0.0) THEN  !we have no cloud; set up fictitious clouds
+        !!!! this is never used by radiative transfer code alone, as a noncloud
+        !!!! situation is dealt with by using procedure clearskyradtrans
+        !!!! however,  when computing fluxes, this becomes important
+  
+        IF (iDownWard > 0) THEN
+          ! down look instr : set cloud BELOW observer, in kCARTA layer #1
+          ICLDTOP = 2
+          ICLDBOT = 1
+          ! down look instr : set cloud BELOW observer, RTSPEC layer #iNumLayer
+          ICLDTOP = iNumLayer-2
+          ICLDBOT = iNumLayer-1
+          IOBS    = iNumLayer
+        ELSE IF (iDownWard < 0) THEN    !up look instr
+          ! up look instr : set cloud ABOVE observer, in kCARTA layer #iNumLayer
+          ICLDTOP = iNumLayer+1
+          ICLDBOT = iNumLayer
+          ! up look instr : set cloud ABOVE observer, in RTSPEC layer #1
+          ICLDTOP = 1
+          ICLDBOT = 2
+          IOBS    = 1
+        END IF
       END IF
 
-      IF (iDownWard > 0) THEN
-        IOBS    = iNumLayer
-      ELSE IF (iDownWard < 0) THEN
-        IOBS   = 1
-      END IF
-    END IF
 
-    rScat = 0.0
-    rScat = sum(iwp)
-           
-    IF (rScat <= 0.0) THEN  !we have no cloud; set up fictitious clouds
-      !!!! this is never used by radiative transfer code alone, as a noncloud
-      !!!! situation is dealt with by using procedure clearskyradtrans
-      !!!! however,  when computing fluxes, this becomes important
+    ELSE
+      !! this is the DISORT code
 
-      IF (iDownWard > 0) THEN
-        ! down look instr : set cloud BELOW observer, in kCARTA layer #1
-        ICLDTOP = 2
-        ICLDBOT = 1
-        ! down look instr : set cloud BELOW observer, RTSPEC layer #iNumLayer
-        ICLDTOP = iNumLayer-2
-        ICLDBOT = iNumLayer-1
-        IOBS    = iNumLayer
-      ELSE IF (iDownWard < 0) THEN    !up look instr
-        ! up look instr : set cloud ABOVE observer, in kCARTA layer #iNumLayer
-        ICLDTOP = iNumLayer+1
-        ICLDBOT = iNumLayer
-        ! up look instr : set cloud ABOVE observer, in RTSPEC layer #1
-        ICLDTOP = 1
-        ICLDBOT = 2
-        IOBS    = 1
+      IF (IWP(1) <= 0.0) THEN  !we have no cloud; set up fictitious clouds
+        IF (iDownWard > 0) THEN
+          ! down look instr : set cloud BELOW observer, in kCARTA layer #1
+          ICLDTOP = 2
+          ICLDBOT = 1
+          ! down look instr : set cloud BELOW observer, in DISORT layer #2
+          ICLDTOP = 2
+          ICLDBOT = 3
+          IOBS    = iNumLayer
+        ELSE IF (iDownWard < 0) THEN    !up look instr
+          ! up look instr : set cloud ABOVE observer, in kCARTA layer #iNumLayer
+          ICLDTOP = iNumLayer+1
+          ICLDBOT = iNumLayer
+          ! up look instr : set cloud ABOVE observer, in DISORT layer #1
+          ICLDTOP = 2
+          ICLDBOT = 1
+          IOBS    = 1
+        END IF
       END IF
+  
+      IF (IWP(1) > 0.0) THEN
+        ! not really need icldtop/bot, but just set it up
+        ICLDTOP=iaaCloudWhichLayers(iCloudySky,1)+1
+        ICLDBOT=iaaCloudWhichLayers(iCloudySky,iaCloudNumLayers(iCloudySky))
+  
+        icldbot = iT_Atm - icldbot + 1
+        icldtop = iT_Atm - icldtop + 1
+  
+        icldbot = icldbot + 1
+        icldtop = icldtop + 1
+  
+        IF (iDownWard > 0) THEN
+          IOBS   = iNumLayer
+        ELSE IF (iDownWard < 0) THEN
+          IOBS   = 1
+        END IF
+      END IF
+  
+      iobs = (iNumLayer+1)-iobs+1
+  
+      30 FORMAT(I3,' ',A80)
     END IF
 
     RETURN
@@ -3232,6 +3328,7 @@ CONTAINS
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
     iSergio, &
+    iDisort, &
 !!!!!!!!!!!!!!!!!! these are the cloud profiles PLUS output
     iaCldTypes,raaKlayersCldAmt,raVTemp, &
 !!!!!!!!!!!!!!!!!! these are the output variables
@@ -3247,7 +3344,7 @@ CONTAINS
     include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! iSergio INTEGER that tells if this is RTSPEC or SERGIO's code
-    INTEGER :: iSergio
+    INTEGER :: iSergio,iDisort
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows)
 ! ---------------- inputs needed to read scattering tables -------------------
 ! this is which atm number is being used, and whether these are binary files
@@ -3575,8 +3672,8 @@ CONTAINS
       !!!!!this is similar to DISORT interface
       write(kStdWarn,*)'Could not find a cloud for atmosphere #',iAtm
       write(kStdWarn,*)'setting IWP = -100.0'
-      iCloud=1    !say cloud number one associated with this atmosphere
-      ncldlay=1   !say fictitious cloud occupies one layer
+      iCloud = 1      !say cloud number one associated with this atmosphere
+      ncldlay = 1     !say fictitious cloud occupies one layer
       raaIWP(1,1)     = -100.0   !but ensure cloud has NO particles in it!
       raaDME(1,1)     = -10.0    !but ensure cloud has NO particles in it!
       iaaSCATTAB(1,1) = -1

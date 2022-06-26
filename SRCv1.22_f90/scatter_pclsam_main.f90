@@ -452,6 +452,7 @@ CONTAINS
     REAL ::    raCFrac(2*kProfLayer)  !! the fractional weight assigned to each of the iNumSubPixels
     REAL ::    rCLrFrac               !! clear fraction
     INTEGER :: iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
+    INTEGER :: iDebugPrint
 
     iIOUN = kStdkCarta
     IF (iColJacobOrRad_IOUN == +1) THEN
@@ -471,6 +472,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!!these are the output variables
         NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
         TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
@@ -487,6 +489,7 @@ CONTAINS
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
+        -1,              & !!!!iDISORT
     !!!!!!!!!!!!!!!!!! these are the cloud profiles
         iaCldTypes,raaKlayersCldAmt,raVTemp, &
     !!!!!!!!!!!!!!!!!!these are the output variables
@@ -595,6 +598,17 @@ CONTAINS
             NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, &
             TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
+
+        iDebugPrint = +1
+        IF (iDebugPrint > 0) THEN
+          iaRadLayer = iaaRadLayer(iAtm,:)
+          CALL InputPrintDebugPCLSAM(raFREQ,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+            iNclouds,raUseEmissivity, &
+            raVTemp,raTPressLevels,rTSpace,rSurfaceTemp,rSurfPress,rFracTop,rFracBot, &
+            ICLDTOPKCARTA, ICLDBOTKCARTA,iaRadLayer,iNumlayer,raPressLevels)
+        write(kStdErr,*) 'Printed out PCLSAM input'
+      ENDIF
+
       ELSE
         write(kStdWarn,*) '    --- 100Slab cloud layers ---'
         CALL AddCloud_pclsam_SunShine_100layerclouds( &
@@ -931,4 +945,56 @@ CONTAINS
     RETURN
     end SUBROUTINE doMROcfrac
 !************************************************************************
+   SUBROUTINE InputPrintDebugPCLSAM(raFREQ,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
+            iNclouds,raUseEmissivity, &
+            raVTemp,raTPressLevels,rTSpace,rSurfaceTemp,rSurfPress,rFracTop,rFracBot, &
+            ICLDTOPKCARTA, ICLDBOTKCARTA,iaRadLayer,iNumLayer,raPressLevels)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/scatterparam.f90'
+
+    REAL :: raaExtTemp(kMaxPts,kMixFilRows)
+    REAL :: raaSSAlbTemp(kMaxPts,kMixFilRows)
+    REAL :: raaAsymTemp(kMaxPts,kMixFilRows)
+    REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows)
+    REAL :: raTPressLevels(kProfLayer+1),raPressLevels(kProfLayer+1),raUseEmissivity(kMaxPts)
+    REAL :: rTSpace,rSurfaceTemp,rFracTop,rFracBot,rSurfPress
+    INTEGER :: iAtm,iNumlayer,iNclouds,ICLDTOPKCARTA, ICLDBOTKCARTA,iaRadLayer(kMaxLayer)
+
+    INTEGER :: iI,iJ,iK
+
+    write(kStdWarn,'(A,F12.5)') ' PCLSAM input for raFreq(1) = ',raFreq(1)
+    write(kStdWarn,'(A,F12.5)') ' emissoivity = ',raUseEmissivity(1)
+    write(kStdWarn,'(A,I4)')    ' NLYR          Number of computational layers   = ',iNumlayer
+    write(kStdWarn,'(A)') '   IC  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM '
+    write(kStdWarn,'(A)') '-----------------------------------------------------------------------------------'
+    write(kStdWarn,'(I4,I4,I4,2(F12.5))') 0,0,0,0.0,rTSpace
+    iI = iNumlayer
+    iJ = iaRadLayer(iI)
+    iI = iI + 1
+    iJ = iJ + 1
+    iK = 0    
+    write(kStdWarn,'(I4,I4,I4,2(F12.5))') iI,iJ,iK,raPressLevels(iJ),raTPressLevels(iJ)
+    DO iI = iNumlayer,1,-1
+      iJ = iaRadLayer(iI)
+      iK = iK + 1
+      IF ((iJ .EQ. ICLDTOPKCARTA) .OR. (iJ .EQ. ICLDBOTKCARTA) .OR. (iJ .EQ. ICLDBOTKCARTA-1)) THEN
+        write(kStdWarn,'(A)') '-----------------------------------------------------------------------------------'
+      END IF
+      write(kStdWarn,'(I4,I4,I4,3(F12.5),4(ES12.5))') iI,iJ,iK, &
+        raPressLevels(iJ),raTPressLevels(iJ),raVTemp(iJ), &
+        raaExtTemp(1,iJ),raaSSAlbTemp(1,iJ),raaAsymTemp(1,iJ)
+    END DO
+    iK = iK + 1
+    write(kStdWarn,'(I4,I4,I4,2(F12.5))') iNumlayer+1,iNumlayer+1,iK,rSurfPress,rSurfaceTemp
+
+    write(kStdWarn,'(A)') '  IC  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM'
+    write(kStdWarn,'(A)') '---------------------------------------------------------------------------------' 
+
+    RETURN
+    end SUBROUTINE InputPrintDebugPCLSAM
+!************************************************************************
+
+
 END MODULE scatter_pclsam_main

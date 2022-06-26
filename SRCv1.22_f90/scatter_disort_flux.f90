@@ -27,6 +27,7 @@ USE ttorad_common
 USE spline_and_sort_and_common
 USE scatter_disort_aux
 USE scatter_disort_code
+USE scatter_pclsam_flux
 
 IMPLICIT NONE
 
@@ -51,7 +52,11 @@ CONTAINS
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,     &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
-    iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity)
+    iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,           &
+    raLayerHeight,raaPrBdry, &
+    iCldProfile,iaCldTypes,raaKlayersCldAmt, &
+    iLayPrintFlux,raaFluxOut)
+
 
     IMPLICIT NONE
 
@@ -81,6 +86,7 @@ CONTAINS
 ! raSunRefl=(1-ems)/pi if user puts -1 in *PARAMS
 !                   user specified value if positive
 ! raNumberDensity = P/RT == number of particles in each layer of atm
+    REAL :: raLayerHeight(kProfLayer),raaPrBdry(kMaxAtm,2)
     REAL :: pProf(kProfLayer),raThickness(kProfLayer)
     REAL :: raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers
@@ -113,6 +119,11 @@ CONTAINS
     REAL :: rAngle
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
+
+! this gives us the cloud profile info
+    INTEGER :: iCldProfile,iaCldTypes(kMaxClouds),iLayPrintFlux
+    REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
+    REAL :: raaFluxOut(kMaxPts,2*(kProfLayer+1))
 
     INTEGER :: i1,i2,iDownWard
 
@@ -173,16 +184,19 @@ CONTAINS
     END IF
 
     CALL flux_disort(raFreq,raVTemp, &
-    raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
-    rAngle,rFracTop,rFracBot, &
-    iNp,iaOp,raaOp,iNpmix,iFileID, &
-    caFluxFile,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
-    raSurface,raSun,raThermal,raSunRefl, &
-    raLayAngles,raSunAngles, &
-    raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
-    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity)
+      raaAbs,rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity, &
+      rAngle,rFracTop,rFracBot, &
+      iNp,iaOp,raaOp,iNpmix,iFileID, &
+      caFluxFile,iOutNum,iAtm,iNumLayer,iaaRadLayer,raaMix, &
+      raSurface,raSun,raThermal,raSunRefl, &
+      raLayAngles,raSunAngles, &
+      raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
+      raLayerHeight,raaPrBdry, &
+      iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+      iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity, &
+      iCldProfile,iaCldTypes,raaKlayersCldAmt, &
+      iLayPrintFlux,raaFluxOut)
      
     RETURN
     end SUBROUTINE scatterfluxes_disort
@@ -242,15 +256,18 @@ CONTAINS
     raSurface,raSun,raThermal,raSunRefl, &
     raLayAngles,raSunAngles, &
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
-! hen the necessary scattering variables
+    raLayerHeight,raaPrBdry, &
+! then the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity)
+    iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity, &
+    iCldProfile,iaCldTypes,raaKlayersCldAmt, &
+    iLayPrintFlux,raaFluxOut)
 
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/scatterparam.f90'
-! ressures in mb, thicknesses in meters
+! pressures in mb, thicknesses in meters
 
 ! iTag        = which kind of spacing (0.0025, 0.001, 0.05 cm-1)
 ! iBinaryFile = +1 if sscatmie.x output has been translated to binary, -1 o/w
@@ -279,8 +296,9 @@ CONTAINS
 ! iDownward = +1 ==> downward looking instrument
 !             -1 ==> upward looking instrument
 ! raNumberDensity = P/RT == number of particles in each layer of atm
+    REAL :: raLayerHeight(kProfLayer),raaPrBdry(kMaxAtm,2)
     REAL :: pProf(kProfLayer),raThickness(kProfLayer), &
-    raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
+            raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers
     REAL :: raNumberDensity(kProfLayer),rSurfPress
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
@@ -366,6 +384,11 @@ CONTAINS
     INTEGER :: iCloudySky,iLayers
     REAL :: raLayerTemp(kProfLayer),raTau(kProfLayer),rSolarAngle
 
+! this gives us the cloud profile info
+    INTEGER :: iCldProfile,iaCldTypes(kMaxClouds)
+    REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
+    REAL :: raaFluxOut(kMaxPts,2*(kProfLayer+1))
+
 ! from original v2 disort code, to show differences :
 !      INTEGER  MAXABSNU, MAXNZ, MAXSPEC
 !      PARAMETER (MAXABSNU=100000, MAXNZ=100, MAXSPEC=10)
@@ -392,7 +415,7 @@ CONTAINS
 
 ! we need to compute upward and downward flux at all boundaries ==>
 ! maximum of kProfLayer+1 pressulre level boundaries
-    REAL :: raaUpRad(kMaxPts,kProfLayer+1),raaDownRad(kMaxPts,kProfLayer+1)
+    REAL :: raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
     REAL :: raaFlux(kMaxPts,kProfLayer+1),raaFluxx(kMaxPts,kProfLayer+1)
     REAL :: raDensity(kProfLayer),kb,cp,mass,avog
     REAL :: raVT1(kMixFilRows),rThermalRefl,r1,r2,rCos,rTsurf
@@ -502,57 +525,84 @@ CONTAINS
 ! these variables are to get the parameters from Frank Evans Mie Code
     REAL :: ASYM_RTSPEC(maxnz),SSALB_RTSPEC(maxnz)
     REAL :: extinct
-    INTEGER :: LL,L,N,M
+    INTEGER :: LL,L,N,M,iDebugPrint
     INTEGER :: iDoFlux
 
 ! this is if user wants a funky  dunky phase fcn
     REAL :: raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
 
     REAL :: raThicknessRayleigh(kProfLayer)
-     
+    INTEGER :: iCldTopkCarta,iCldBotkCarta,iLayPrintFlux
+
+    INTEGER :: troplayer
+! for flux computations
+    REAL :: raDensityX(kProfLayer)
+    REAL :: raDensity0(kProfLayer),raDeltaPressure(kProfLayer)
+
 ! ---------------------------------------------------------------------
+
+! suppose highest output level = 1 mb (50 km RRTM test) then have to do some thinking in the cases with an X !!!!!
+!                1 = '_DOWN'  = dngoing flux at each level                          
+!                2 = '_HEAT'  = up-dn heating rate at each layer
+!                3 = '_UP'    = upgoing flux at each level
+!    X           4 = '_OLR'   = OLR at TOA
+!    X           5 = '_OLR3'  = ILR at gnd, OLR at topopause/TOA
+!                6 = '_ALL'   = up/dn flux at each level
+!    X           7 = '_IOLR3' = almost same as 5 : ILR at gnd,tropopause,toa; OLR at gnd,tropopause,toa
+    IF ((kFlux == 5) .or. (kFlux == 7)) THEN
+      troplayer = find_tropopause(raVT1,raPressLevels,iaRadlayer,iNumLayer)
+      troplayer = find_tropopauseNew(raVT1,raPressLevels,raThickness,raLayerHeight,iaRadlayer,iNumLayer)
+    END IF
+
+    IF (kFlux == 2) THEN
+      CALL Set_Flux_Derivative_Denominator(iaRadLayer,raVT1,pProf,iNumLayer, &
+        rSurfPress,raPressLevels, &
+        raThickness,raDensityX,raDensity0,raDeltaPressure,rFracTop,rFracBot)
+    END IF
 
     rTSurf = rSurfaceTemp
 !!! Rayleigh scatter has hardly any effect at infrared wavenumbers
     iRayleigh = -1       !!! -1 : do not want Rayleigh Scattering
 !!! +1 : do Rayleigh Scattering
 
-
 ! ------------ first see if the sky is clear; if so, call clear sky flux --
 
-    CALL SetMieTables_DISORT(raFreq, &
+    CALL SetMieTables_RTSPEC(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
-    iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
+      iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, & 
+      iaPhase,raPhasePoints,raComputedPhase, &
+      iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
+        -1,              & !!!! iSergio
+        +1,              & !!!! iDisort
 !!!!!!!!!!!!!!!!!!these are the output variables
-    NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
-    TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
-    TABPHI2UP, TABPHI2DN, &
-    NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
-    IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
-    iCloudySky, IACLDTOP, IACLDBOT)
+      NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
+      TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
+      TABPHI2UP, TABPHI2DN, &
+      NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
+      IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
+      iCloudySky, IACLDTOP, IACLDBOT, iCldTopkCarta,iCldBotkCarta)
 
+!!!!!!! no need to call this since DISORT hould be able to handle no clouds, right????????
 !!!!!!! if iCloudSky .LT. 0 we should do clear sky rad transfer !!!!!!!
 !!!!!!! but we need the radiances at EACH level! sigh!!!!
-    IF (iCloudySky < 0) THEN
-        write (kStdWarn,*) 'This is a clear sky ... calling clear sky flux'
-        write(kStdWarn,*) ' ---> Clear Sky Flux Computations ...'
-        write(kStdErr,*) 'calling DoStop in scatter_disort_flux.f before doing clear sky flux'
-        CALL doStop
-    !        CALL find_fluxes(raFreq,raaAbs,raVTemp,caFluxFile,
-    !     $              iOutNum,iAtm,iNumLayer,iaaRadLayer,
-    !     $              rTSpace,rTSurf,rSurfPress,raUseEmissivity,
-    !     $              rSatAngle,rFracTop,rFracBot,
-    !     $              iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,
-    !     $              raSurface,raSun,raThermal,raSunRefl,
-    !     $              raLayAngles,raSunAngles,kaFrStep(iTag),iTag,
-    !     $              raThickness,raPressLevels,iProfileLayers,pProf,
-    !     $              raTPressLevels,iKnowTP,
-    !     $              caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
-        GOTO 9876
-    END IF
+!    IF (iCloudySky < 0) THEN
+!        write (kStdWarn,*) 'This is a clear sky ... calling clear sky flux'
+!        write(kStdWarn,*) ' ---> Clear Sky Flux Computations ...'
+!        write(kStdErr,*) 'calling DoStop in scatter_disort_flux.f before doing clear sky flux'
+!        CALL doStop
+!    !        CALL find_fluxes(raFreq,raaAbs,raVTemp,caFluxFile,
+!    !     $              iOutNum,iAtm,iNumLayer,iaaRadLayer,
+!    !     $              rTSpace,rTSurf,rSurfPress,raUseEmissivity,
+!    !     $              rSatAngle,rFracTop,rFracBot,
+!    !     $              iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,
+!    !     $              raSurface,raSun,raThermal,raSunRefl,
+!    !     $              raLayAngles,raSunAngles,kaFrStep(iTag),iTag,
+!    !     $              raThickness,raPressLevels,iProfileLayers,pProf,
+!    !     $              raTPressLevels,iKnowTP,
+!    !     $              caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
+!        GOTO 9876
+!    END IF
 
 ! ------------ start out the same way as rad_flux.f -------------------------
 
@@ -565,20 +615,16 @@ CONTAINS
     rThermalRefl = 1.0/kPi
     IF (iaaOverrideDefault(2,3) == 10) rThermalRefl = 1.0   !! nick nalli
            
-    DO iFr=1,kMaxPts
-        DO iLay=1,kProfLayer
-            raaUpRad(iFr,iLay)   = 0.0
-            raaDownRad(iFr,iLay) = 0.0
-            raaFlux(iFr,iLay)    = 0.0
-        END DO
-    END DO
+    raaUpFlux   = 0.0
+    raaDownFlux = 0.0
+    raaFlux     = 0.0
 
 ! if iDoSolar = 0,1, then CANNOT include solar contribution so STOP
 ! if iDoSolar = -1, then solar contribution = 0
     iDoSolar = kSolar
     IF (iDoSolar >= 0) THEN    !set the solar reflectivity
-        write (kStdErr,*) 'DISORT cannot include sun!!! error!!!'
-        CALL DoStop
+      write (kStdErr,*) 'DISORT cannot include sun!!! error!!!'
+      CALL DoStop
     END IF
 
 ! no need to do this as already set in n_rad_jac_main.f
@@ -607,42 +653,42 @@ CONTAINS
 ! set the mixed path numbers for this particular atmosphere
 ! DO NOT SORT THESE NUMBERS!!!!!!!!
     IF ((iNumLayer > kProfLayer) .OR. (iNumLayer < 0)) THEN
-        write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
-        write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
-        CALL DoSTOP
+      write(kStdErr,*) 'Radiating atmosphere ',iAtm,' needs > 0, < '
+      write(kStdErr,*) kProfLayer,'mixed paths .. please check *RADFIL'
+      CALL DoSTOP
     END IF
     IF (iDownWard == 1) THEN   !no big deal
-        DO iLay=1,iNumLayer
-            iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iLay) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iLay) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iLay)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iLay) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iLay) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+          CALL DoSTOP
+        END IF
+      END DO
     ELSEIF (iDownWard == -1) THEN   !ooops ... gotta flip things!!!
-        DO iLay=1,iNumLayer
-            iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
-            IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-            IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
-                write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
-                write(kStdErr,*) 'Cannot include mixed path ', &
-                iaRadLayer(iNumLayer-iLay+1)
-                CALL DoSTOP
-            END IF
-        END DO
+      DO iLay=1,iNumLayer
+        iaRadLayer(iNumLayer-iLay+1)=iaaRadLayer(iAtm,iLay)
+        IF (iaRadLayer(iNumLayer-iLay+1) > iNpmix) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
+          write(kStdErr,*) 'Cannot include mixed path ', &
+          iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+        IF (iaRadLayer(iNumLayer-iLay+1) < 1) THEN
+          write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
+          write(kStdErr,*) 'Cannot include mixed path ', &
+          iaRadLayer(iNumLayer-iLay+1)
+          CALL DoSTOP
+        END IF
+      END DO
     END IF
             
 ! note raVT1 is the array that has the interpolated bottom and top temps
@@ -663,39 +709,38 @@ CONTAINS
     write(kStdWarn,*)'top temp interped to ',raVT1(iL)
 
     IF (kFlux == 2) THEN
-        avog = kAvog/1000                      !avogadro number
-        kb   = kBoltzmann                      !boltzmann constant
-    ! g 51 of KN Lious's book "Intro to Atmospheric Radiation"
-    ! ir : 78% N2, 21% O2 0.934% Ar 0.033% CO2   mass/mol
-        mass = (28*0.78084)+(32*0.20948) + (40*0.00934) + (44*0.00033)
-        mass = kAtmMolarMass
-        mass = mass/1000                      !change to kg mol-1
-        mass = mass/avog                      !change to kg/molecule
-        cp = 1.005e3      !specific heat, constant press, units in J kg-1 K-1
-        DO iFr=1,iNumLayer
-            iL=iaRadLayer(iFr)
-            rMPTemp=raVT1(iL)
-            iL=MOD(iL,kProfLayer)
-            IF (iL == 0) THEN
-                iL = kProfLayer
-            END IF
+      avog = kAvog/1000                      !avogadro number
+      kb   = kBoltzmann                      !boltzmann constant
+     !pg 51 of KN Lious's book "Intro to Atmospheric Radiation"
+     !air : 78% N2, 21% O2 0.934% Ar 0.033% CO2   mass/mol
+      mass = (28*0.78084)+(32*0.20948) + (40*0.00934) + (44*0.00033)
+      mass = kAtmMolarMass
+      mass = mass/1000                      !change to kg mol-1
+      mass = mass/avog                      !change to kg/molecule
+      cp = 1.005e3      !specific heat, constant press, units in J kg-1 K-1
+      DO iFr = 1,iNumLayer
+        iL = iaRadLayer(iFr)
+        rMPTemp = raVT1(iL)
+        iL = MOD(iL,kProfLayer)
+        IF (iL == 0) THEN
+          iL = kProfLayer
+        END IF
         ! Prof is in mb remember 1013 mb = 1 atm = 101325 Nm-2
-        ! ultiply mb by 100 to change to Nm-2
-        ! ultiply atm by 101325 to change to Nm-2
-            raDensity(iFr) = pProf(iL)*100/kb/rMPTemp  !change to molecules m-3
-            raDensity(iFr) = raDensity(iFr)*mass       !change to kg m-3
-            raDensity(iFr) = raDensity(iFr)*cp         !eqn 4.67 of Liou pg107
-             
-        ! ow multiply by layer thickness
-            IF (iFr == 1) THEN
-                raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracBot
-            ELSE IF (iFr == iNumLayer) THEN
-                raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracTop
-            ELSE
-                raDensity(iFr) = -raDensity(iFr)*raThickness(iL)
-            END IF
-             
-        END DO
+        ! multiply mb by 100 to change to Nm-2
+        ! multiply atm by 101325 to change to Nm-2
+        raDensity(iFr) = pProf(iL)*100/kb/rMPTemp  !change to molecules m-3
+        raDensity(iFr) = raDensity(iFr)*mass       !change to kg m-3
+        raDensity(iFr) = raDensity(iFr)*cp         !eqn 4.67 of Liou pg107
+           
+        !now multiply by layer thickness
+        IF (iFr == 1) THEN
+          raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracBot
+        ELSE IF (iFr == iNumLayer) THEN
+          raDensity(iFr) = -raDensity(iFr)*raThickness(iL)*rFracTop
+        ELSE
+          raDensity(iFr) = -raDensity(iFr)*raThickness(iL)
+        END IF        
+      END DO
     END IF
 
 ! highest layer that we need to output radiances for = iNumLayer
@@ -705,11 +750,11 @@ CONTAINS
     write(kStdWarn,*) 'topindex in atmlist where flux required =',iHigh
            
     DO iFr=1,kMaxPts
-    ! initialize the solar and thermal contribution to 0
-        raSun(iFr)=0.0
-        raThermal(iFr)=0.0
-    ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
-        raUp(iFr)=ttorad(raFreq(iFr),rTSurf)
+      ! initialize the solar and thermal contribution to 0
+      raSun(iFr)=0.0
+      raThermal(iFr)=0.0
+      ! compute the emission from the surface alone == eqn 4.26 of Genln2 manual
+      raUp(iFr)=ttorad(raFreq(iFr),rTSurf)
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^ compute upgoing flux at earth surface ^^^^^^^^^^^^^^^^^^
@@ -718,27 +763,27 @@ CONTAINS
 ! if rEmsty=1, then intensity need not be adjusted, as downwelling radiance
 ! from the top of atmosphere is not reflected
     IF (iDoThermal >= 0) THEN
-        CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
+      CALL BackGndThermal(raThermal,raVT1,rTSpace,raFreq, &
         raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,-1)
     ELSE
-        write(kStdWarn,*) 'no thermal backgnd to calculate'
+      write(kStdWarn,*) 'no thermal backgnd to calculate'
     END IF
 
 ! see if we have to add on the solar contribution
     IF (iDoSolar >= 0) THEN
-        CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
+      CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
     ELSE
-        write(kStdWarn,*) 'no solar backgnd to calculate'
+      write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
      
 ! now we have the total upwelling radiation at the surface, indpt of angle!!!!
 ! this is the radiation that will go upwards
     DO iFr=1,kMaxPts
-        raUp(iFr)=raUp(iFr)*raUseEmissivity(iFr)+ &
-        raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
-        raSun(iFr)*raSunRefl(iFr)
+      raUp(iFr) = raUp(iFr)*raUseEmissivity(iFr)+ &
+                  raThermal(iFr)*(1.0-raUseEmissivity(iFr))*rThermalRefl+ &
+                  raSun(iFr)*raSunRefl(iFr)
     END DO
 
 !^^^^^^^^^^^^^^^compute down going radiation to where instrument is ^^^^^^^^^
@@ -748,7 +793,7 @@ CONTAINS
 !        iaRadLayer(iL)=iaaRadLayer(iAtm,iL)
 !        END DO
     CALL Find_Radiance_TOA_to_instr(iaRadLayer,iNumLayer,raVTemp, &
-    rFracTop,raFreq,raaAbs,raDown)
+      rFracTop,raFreq,raaAbs,raDown)
 
 !      DO iFr = 1,kMaxPts,1000
 !        print *, raFreq(iFr),radtot(raFreq(iFr),raUp(iFr)),
@@ -763,13 +808,13 @@ CONTAINS
 ! initialize the radiation to that at the top of the atmosphere
 ! actually at where the "instrument" is or where TOA is
     DO iFr=1,kMaxPts
-        raKCDown(iFr) = raDown(iFr)
-        raKCUp(iFr)   = raUp(iFr)
+      raKCDown(iFr) = raDown(iFr)
+      raKCUp(iFr)   = raUp(iFr)
     END DO
 
     DO iFr=1,kMaxPts
-        raaUpRad(iFr,1)             = raUp(iFr)
-        raaDownRad(iFr,iNumlayer)   = raDown(iFr)
+      raaUpFlux(iFr,1)             = raUp(iFr)
+      raaDownFlux(iFr,iNumlayer)   = raDown(iFr)
     END DO
 
 !^^^^^^^^^ some initializations   ^^^^^^^^^^^^^^^^
@@ -789,60 +834,74 @@ CONTAINS
 ! loop over angles for downward flux which means this is for UPLOOK instr
 
     write(kStdWarn,*) 'starting to compute flux'
-    CALL SetMieTables_DISORT(raFreq, &
+    CALL SetMieTables_RTSPEC(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
-    iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    raPhasePoints,raComputedPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
+      iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+      iaPhase,raPhasePoints,raComputedPhase, &
+      iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
+        -1,              & !!!! iSergio
+        +1,              & !!!! iDisort
 !!!!!!!!!!!!!!!!!!these are the output variables
-    NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
-    TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
-    TABPHI2UP, TABPHI2DN, &
-    NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
-    IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
-    iCloudySky, IACLDTOP, IACLDBOT)
+      NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
+      TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
+      TABPHI2UP, TABPHI2DN, &
+      NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
+      IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
+      iCloudySky, IACLDTOP, IACLDBOT,iCldTopkCarta,iCldBotkCarta)
 
     CALL GetAbsProfileDISORT(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
-    iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
-    NABSNU, NLEV, TEMP, ABSPROF, &
-    ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raNumberDensity, &
-    raDensity,raLayerTemp, &
-    iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh)
+      iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
+      NABSNU, NLEV, TEMP, ABSPROF, &
+      ICLDTOP,iCLDBOT,IOBS,iDownWard,IWP(1),raNumberDensity, &
+      raDensity,raLayerTemp, &
+      iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh, &
+      rSatAngle,raLayAngles)
 
 ! set up some things for the instrument
     IF (iDownward == 1) THEN             !!down look instr
-        CALL Init_DownLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
+      CALL Init_DownLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
         rFracTop,raFreq,raaAbs,rSatAngle,iTag, &
         raTopIntensity,raSolarBeam,TOA_to_instr)
     ELSE
-        CALL Init_UpLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
+      CALL Init_UpLook(iAtm,iaaRadLayer,iNumLayer,raVTemp, &
         rFracTop,raFreq,raaAbs,rSatAngle,iTag, &
         raTopIntensity,raSolarBeam,TOA_to_instr)
     END IF
      
 ! set the temperature levels, changing to double precision
     DO iL=1,NLEV
-        temper(iL-1)=DBLE(temp(iL))
+      temper(iL-1)=DBLE(temp(iL))
     END DO
 
+! **************************** SPEED UP CODE ***************************
     nstr  = kDis_nstr   ! number of streams used by DISORT (2,4,8,16 ...)
     iStep = kDis_pts    ! number of wavenumber pts to use (1,2,...,10000)
 ! out of 10000
-    nstr = 4
+! **************************** SPEED UP CODE ***************************
     IF (iStep > kMaxPts) THEN
-        write(kStdWarn,*) 'Resetting kDis_Pts to kMaxPts'
-        iStep = kMaxPts
+      write(kStdWarn,*) 'Reset 20 <= kDis_Pts <= kMaxPts'
+      write(kStdErr,*)  'Reset 20 <= kDis_Pts <= kMaxPts'
+      iStep = kMaxPts
+      CALL DOStop
     END IF
-     
+
     IF (iStep < 20) THEN
-        write(kStdWarn,*) 'Resetting kDis_Pts to 20'
-        iStep = 20
+      write(kStdWarn,*) 'Reset 20 <= kDis_Pts <= kMaxPts'
+      write(kStdErr,*)  'Reset 20 <= kDis_Pts <= kMaxPts'
+      iStep = 20
+      CALL DOStop
+    END IF
+
+    IF (kDis_pts .NE. kMaxPts) THEN
+      write(kStdWarn,*) 'Computers fast enough now, just do kDis_Pts <= kMaxPts'
+      write(kStdErr,*)  'Computers fast enough now, just do kDis_Pts <= kMaxPts'
+      CALL DOStop
     END IF
      
-! f you want to do 10 pts out of 10000 pts, then you have to do rad
-! ransfer on points 1,1001,2001,3001,...10000
-! e step over 10000/iStep points
+! if you want to do 10 pts out of 10000 pts, then you have to do rad
+! transfer on points 1,1001,2001,3001,...10000
+! step over 10000/iStep points
     IF (kScatter /= 2) THEN
         iStep = iDiv(kMaxPts,iStep)
     END IF
@@ -850,53 +909,54 @@ CONTAINS
 ! set up array of wavenumber indices that we step thru, to do the rad transfer
 ! (as DISORT is quite slow, we will not use each and every point)
     iScatter = kScatter
+    iStep = 1
 !      CALL FluxWavenumberPoints(iStep,iaStep,iFFMax)
-     
+    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     DO iF = 1,kMaxPts,iStep
-
-        DO iL=1,NLEV-1
-            dtauc(iL) = DBLE(absprof(iL,iF))
-            raTau(iL) = absprof(iL,iF)
+      DO iL=1,NLEV-1
+        dtauc(iL) = DBLE(absprof(iL,iF))
+        raTau(iL) = absprof(iL,iF)
+      END DO
+       
+      wvnmlo = DBLE(raFreq(iF))
+      wvnmhi = DBLE(raFreq(iF)+kaFrStep(iTag))
+       
+      nlyr = nlev-1
+      DO iL=1,kProfLayer
+        ssalb(iL) = DBLE(0.0)
+        asym(iL)  = DBLE(0.0)
+        asym_rtspec(iL) = 0.0
+      END DO
+       
+      DO iL=0,maxmom
+        DO I = 1,maxcly
+          pmom(iL,I) = DBLE(0.0)
         END DO
+      END DO
          
-        wvnmlo = DBLE(raFreq(iF))
-        wvnmhi = DBLE(raFreq(iF)+kaFrStep(iTag))
+      ! to test no scattering, just replace following doloops with DO N = 1,-1
          
-        nlyr = nlev-1
-        DO iL=1,kProfLayer
-            ssalb(iL) = DBLE(0.0)
-            asym(iL)  = DBLE(0.0)
-            asym_rtspec(iL) = 0.0
-        END DO
-         
-        DO iL=0,maxmom
-            DO I = 1,maxcly
-                pmom(iL,I) = DBLE(0.0)
-            END DO
-        END DO
-         
-    ! to test no scattering, just replace following doloops with DO N = 1,-1
-         
-        IF (iRayleigh == -1) THEN     !want cloud, not Rayleigh scattering
-            CALL SetUpClouds(nstr,nmuobs(1),iaCloudWithThisAtm, &
+      IF (iRayleigh == -1) THEN     !want cloud, not Rayleigh scattering
+        CALL SetUpCloudsDISORT(nstr,nmuobs(1),iaCloudWithThisAtm, &
             iaCldTop,iaCldBot,iaCloudNumLayers,raFreq(iF), &
             iAtm,iaaRadLayer,iNumLayer, &
             IWP, DME, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, ISCATTAB, &
             extinct,dtauc,ssalb,asym,pmom)
-        ELSE IF (iRayleigh == +1) THEN   !want Rayleigh, not cloudscattering
-            CALL SetUpRayleigh(nlev,nstr,nmuobs(1),raFreq(iF),raDensity, &
+      ELSE IF (iRayleigh == +1) THEN   !want Rayleigh, not cloudscattering
+        CALL SetUpRayleigh(nlev,nstr,nmuobs(1),raFreq(iF),raDensity, &
             raThickness,dtauc,ssalb,asym,pmom)
-        END IF
+      END IF
          
-        dTotalOpticalDepth=DBLE(0.0)
-        DO iL=1,NLEV-1
-            dTotalOpticalDepth = dTotalOpticalDepth+dtauc(iL)
-        END DO
+      dTotalOpticalDepth=DBLE(0.0)
+      DO iL=1,NLEV-1
+        dTotalOpticalDepth = dTotalOpticalDepth+dtauc(iL)
+      END DO
 
-    !     note we do need flux here!!!!
-        iDoFlux = 1
-        CALL FinalInitialization( &
+      !     note we do need flux here!!!!
+      iDoFlux = 1
+      CALL FinalInitialization( &
         iDownWard,rSatAngle,raTopIntensity(iF),raSolarBeam(iF), &
         raUseEmissivity(iF),rSurfaceTemp, &
         dtauc,dTotalOpticalDepth,iDoFlux, nlyr+1,iNp,iaOp, &
@@ -905,121 +965,164 @@ CONTAINS
         ibcnd,lamber,albedo, &
         btemp,ttemp,temis,plank,onlyfl,accur,prnt,header)
 
-    !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
-        nmom = max(2*nmuobs(1) + 1,nstr)
-        nmom = min(maxmom,nmom)
+      !!!!!!!!!  need nmom >= nstr, nmom <= MaxMom !!!!!!!!!!!!
+      nmom = max(2*nmuobs(1) + 1,nstr)
+      nmom = min(maxmom,nmom)
+
+      IF (iF .EQ. 1) THEN
+        write(kStdWarn,'(A,F12.5,I7,I7,I3)') '  DISORT FluxCalc raFreq(1) : iFFMax,kDis_Pts,kScatter = ',&
+          raFreq(1),kMaxPts,kDis_Pts,kScatter
+      END IF
          
-        CALL DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, WVNMLO, &
+      iDebugPrint = +1
+      IF ((iDebugPrint > 0) .AND. (iF .EQ. 1))THEN
+        CALL InputPrintDebugDisort(raFREQ, NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, &
+             USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, UMU, NPHI, PHI, &
+             IBCND, FBEAM, UMU0, PHI0, FISOT, LAMBER, BTEMP, TTEMP, TEMIS, &           
+             PLANK, WVNMLO, WVNMHI, ONLYFL, ACCUR, PRNT, HEADER, &
+             ICLDTOP, ICLDBOT,iaaRadLayer(iAtm,:),iNumLayer,raPressLevels,rSurfPress)
+        write(kStdErr,*) 'Printed out DISORT FLUX input'
+      ENDIF
+
+      CALL DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, WVNMLO, &
         WVNMHI, USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, &
         UMU, NPHI, PHI, IBCND, FBEAM, UMU0, PHI0, &
         FISOT, LAMBER, ALBEDO, BTEMP, TTEMP, TEMIS, &
         PLANK, ONLYFL, ACCUR, PRNT, HEADER, RFLDIR, RFLDN, &
         FLUP, DFDT, UAVG, UU, ALBMED, TRNMED )
 
-    ! RFLDIR(LU)    Direct-beam flux (without delta-M scaling)
-    ! RFLDN(LU)     Diffuse down-flux (total minus direct-beam)
-    !               (without delta-M scaling)
-    ! FLUP(LU)      Diffuse up-flux
+      IF ((iDebugPrint > 0) .AND. (iF .EQ. 1)) THEN
+        DO iL = 1,NTAU
+          write(kStdWarn,'(A,1(I4),3(F12.4))') 'iL,FLUP,RFLDN,RFLDIR = ',iL,FLUP(iL),RFLDN(iLay),RFLDIR(iLay)
+          DO I = 1,NUMU
+            DO N = 1,NPHI
+              write(kStdWarn,'(A,3(I4),F12.4)') 'itau,iScanang,iScanAzi,intensity = ',iL,I,N,uu(N,I,iL)
+            END DO
+          END DO
+        END DO    
+      ENDIF
 
-    ! notice how we flip things to kCARTA layering so that
-    !     lay = 1 ==> gnd, lay = 100 ==> TOA
-        DO iLay = iNumLayer + 1, 1, -1
-            raaFlux(iF,(iNumlayer+1)-iLay+1) = &
-            SNGL(FLUP(iLay) - (RFLDN(iLay)+RFLDIR(iLay)))
+      ! RFLDIR(LU)    Direct-beam flux (without delta-M scaling)
+      ! RFLDN(LU)     Diffuse down-flux (total minus direct-beam)
+      !               (without delta-M scaling)
+      ! FLUP(LU)      Diffuse up-flux
+
+      ! notice how we flip things to kCARTA layering so that
+      !     lay = 1 ==> gnd, lay = 100 ==> TOA
+      ! remember DISORT does the angular integration over 2 pi and then gives results
+      !          PCLSAM does not do that till it prints out things
+      ! so to use the PRINT_RRTM routines, divide everything by 2 pi here
+      DO iLay = iNumLayer + 1, 1, -1
+        raaUpFlux(iF,(iNumlayer+1)-iLay+1) = SNGL(FLUP(iLay))/(2.0 * kPi)
+        raaDownFlux(iF,(iNumlayer+1)-iLay+1) = SNGL(RFLDN(iLay)+RFLDIR(iLay))/(2.0 * kPi)
+        raaFlux(iF,(iNumlayer+1)-iLay+1) = raaUpFlux(iF,(iNumlayer+1)-iLay+1)-raaDownFlux(iF,(iNumlayer+1)-iLay+1)
         !          print *,(iNumlayer+1)-iLay+1,iF,
         !     $                SNGL(FLUP(iLay)),SNGL(RFLDN(iLay)),SNGL(RFLDIR(iLay))
-        END DO
+      END DO
+    END DO             !!!     DO iF = 1,kMaxPts,iStep
 
-    END DO
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 
 ! -------------------------------------------------------------------------
 
-! iLay = 1 ==> gnd         iLay = 100 ==> TOA
-    iLay = 1
+!!!! iLay = 1 ==> gnd         iLay = 100 ==> TOA
+!!!!    iLay = 1
+!!!!
+!!!!    IF (iDownWard == 1) THEN
+!!!!      DO iLay = 2,iNumLayer+1
+!!!!        iL = iaRadLayer(iLay-1)
+!!!!        rMPTemp = raVT1(iL)
+!!!!        DO iFr = 1,kMaxPts
+!!!!          rPlanck = ttorad(raFreq(iFr),rMPTemp)
+!!!!          rAngleTrans = exp(-raaAbs(iFr,iL))  !use rCosAngle  =  1.0  =  nadir
+!!!!          rAngleEmission = (1.0-rAngleTrans)*rPlanck
+!!!!          raKCUp(iFr) = rAngleEmission+raKCUp(iFr)*rAngleTrans
+!!!!        END DO
+!!!!      END DO
+!!!!
+!!!!    ELSEIF (iDownWard == -1) THEN
+!!!!      DO iLay = 2,iNumLayer+1
+!!!!        iL = iaRadLayer((iNumlayer+1)-iLay+1)
+!!!!        rMPTemp = raVT1(iL)
+!!!!        DO iFr = 1,kMaxPts
+!!!!          rPlanck = ttorad(raFreq(iFr),rMPTemp)
+!!!!          rAngleTrans = exp(-raaAbs(iFr,iL))  !use rCosAngle = 1.0 = nadir
+!!!!          rAngleEmission = (1.0-rAngleTrans)*rPlanck
+!!!!          raKCUp(iFr) = rAngleEmission+raKCUp(iFr)*rAngleTrans
+!!!!          raaUpRad(iFr,iLay)  =  raKCUp(iFr)
+!!!!        END DO
+!!!!
+!!!!        iL = iaRadLayer(iLay-1)
+!!!!        rMPTemp = raVT1(iL)
+!!!!        DO iFr = 1,kMaxPts
+!!!!          rPlanck = ttorad(raFreq(iFr),rMPTemp)
+!!!!          rAngleTrans = exp(-raaAbs(iFr,iL))  !use rCosAngle = 1.0 = nadir
+!!!!          rAngleEmission = (1.0-rAngleTrans)*rPlanck
+!!!!          raKCDown(iFr) = rAngleEmission+raKCDown(iFr)*rAngleTrans
+!!!!          raaDownRad(iFr,iNumLayer+1-iLay+1) = raKCDown(iFr)
+!!!!        END DO
+!!!!
+!!!!        !          DO iFr=1,kMaxPts,iStep
+!!!!        !            print *,iStep,iLay,iFr,radtot(raFreq(iFr),raKCUp(iFr)),
+!!!!        !     $                       radtot(raFreq(iFr),raKCDown(iFr))
+!!!!        !            END DO
+!!!!
+!!!!      END DO
+!!!!    END IF   !!!!    IF (iDownWard == 1) THEN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    IF (iDownWard == 1) THEN
-        DO iLay = 2,iNumLayer+1
-            iL=iaRadLayer(iLay-1)
-            rMPTemp=raVT1(iL)
-            DO iFr=1,kMaxPts
-                rPlanck=ttorad(raFreq(iFr),rMPTemp)
-                rAngleTrans=exp(-raaAbs(iFr,iL))  !use rCosAngle = 1.0 = nadir
-                rAngleEmission=(1.0-rAngleTrans)*rPlanck
-                raKCUp(iFr)=rAngleEmission+raKCUp(iFr)*rAngleTrans
-            END DO
-        END DO
-
-    ELSEIF (iDownWard == -1) THEN
-        DO iLay = 2,iNumLayer+1
-            iL=iaRadLayer((iNumlayer+1)-iLay+1)
-            rMPTemp=raVT1(iL)
-            DO iFr=1,kMaxPts
-                rPlanck=ttorad(raFreq(iFr),rMPTemp)
-                rAngleTrans=exp(-raaAbs(iFr,iL))  !use rCosAngle = 1.0 = nadir
-                rAngleEmission=(1.0-rAngleTrans)*rPlanck
-                raKCUp(iFr)=rAngleEmission+raKCUp(iFr)*rAngleTrans
-                raaUpRad(iFr,iLay) = raKCUp(iFr)
-            END DO
-
-            iL=iaRadLayer(iLay-1)
-            rMPTemp=raVT1(iL)
-            DO iFr=1,kMaxPts
-                rPlanck=ttorad(raFreq(iFr),rMPTemp)
-                rAngleTrans=exp(-raaAbs(iFr,iL))  !use rCosAngle = 1.0 = nadir
-                rAngleEmission=(1.0-rAngleTrans)*rPlanck
-                raKCDown(iFr)=rAngleEmission+raKCDown(iFr)*rAngleTrans
-                raaDownRad(iFr,iNumLayer+1-iLay+1) = raKCDown(iFr)
-            END DO
-
-        !          DO iFr=1,kMaxPts,iStep
-        !            print *,iStep,iLay,iFr,radtot(raFreq(iFr),raKCUp(iFr)),
-        !     $                       radtot(raFreq(iFr),raKCDown(iFr))
-        !            END DO
-
-        END DO
-    END IF
-
-! we now have all the
-!       upgoing fluxes at all pressure levels 1,2,...,iNumLayer+1
-!     downgoing fluxes at all pressure levels 1,2,...,iNumLayer+1
-! now net flux density at each level = upgoing flux - downgoing flux
-    DO iLay = 1,iNumLayer+1
-        DO iFr=1,kMaxPts
-            raDown(iFr)=raaUpRad(iFr,iLay)-raaDownRad(iFr,iLay)
-        END DO
-        CALL InterpolateFlux(raaFlux,iLay,raDown,raFreq,iStep)
-    END DO
-    write(kStdWarn,*) 'ended compute flux'
-
-! so net loss of energy in layer I = flux density(I+1)-flux density(I)
-! there seems to be a factor of 2 missing in DISORT vs LIOU
-    DO iFr=1,kMaxPts
-        DO iLay=1,iNumLayer
-            raaFluxx(iFr,iLay)=2*(raaFlux(iFr,iLay+1)-raaFlux(iFr,iLay))
-        END DO
-    END DO
-
-    write(kStdWarn,*) ' '
-    IF (kFlux == 2) THEN
-    ! chage units from radiance units to K s-1 per (cm-1)
-        DO iFr=1,kMaxPts
-            DO iLay=1,iNumLayer
-                raaFluxx(iFr,iLay)=raaFluxx(iFr,iLay)/raDensity(iLay)
-            END DO
-        END DO
-    END IF
-
-! now print out the results
     rDelta = kaFrStep(iTag)
+    CALL printfluxRRTM(iIOUN,caFluxFile,iNumLayer,troplayer,iAtm, &
+      raFreq,rDelta,raaUpFlux,raaDownFlux,raDensityX,raDensity0, &
+      raThickness,raDeltaPressure,raPressLevels,iaRadLayer)
 
-    CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts), &
-    rDelta,iAtm,1,iNumLayer)
-    DO iLay=1,iNumLayer
-        DO iFr=1,kMaxPts
-            raTemp(iFr)=raaFluxx(iFr,iLay)
-        END DO
-        CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
-    END DO
+    CALL fill_raaFluxOut(raaDownFlux,raaUpFlux,raPressLevels, &
+      troplayer,iaRadLayer,iNumLayer,raaFluxOut)
+
+!!!!! we now have all the
+!!!!!       upgoing fluxes at all pressure levels 1,2,...,iNumLayer+1
+!!!!!     downgoing fluxes at all pressure levels 1,2,...,iNumLayer+1
+!!!!! now net flux density at each level = upgoing flux - downgoing flux
+!!!!    DO iLay = 1,iNumLayer+1
+!!!!      DO iFr = 1,kMaxPts
+!!!!        raDown(iFr) = raaUpFlux(iFr,iLay) - raaDownFlux(iFr,iLay)
+!!!!      END DO
+!!!!      !no need since we do all 10000 points
+!!!!      !CALL InterpolateFlux(raaFlux,iLay,raDown,raFreq,iStep)
+!!!!    END DO
+!!!!    write(kStdWarn,*) 'ended compute flux'
+!!!!
+!!!!! so net loss of energy in layer I = flux density(I+1)-flux density(I)
+!!!!! there seems to be a factor of 2 missing in DISORT vs LIOU
+!!!!    DO iFr = 1,kMaxPts
+!!!!      DO iLay = 1,iNumLayer
+!!!!        raaFluxx(iFr,iLay) = 2*(raaFlux(iFr,iLay+1)-raaFlux(iFr,iLay))
+!!!!      END DO
+!!!!    END DO
+!!!!
+!!!!    write(kStdWarn,*) ' '
+!!!!    IF (kFlux == 2) THEN
+!!!!      ! chage units from radiance units to K s-1 per (cm-1)
+!!!!      DO iFr=1,kMaxPts
+!!!!        DO iLay=1,iNumLayer
+!!!!          raaFluxx(iFr,iLay)=raaFluxx(iFr,iLay)/raDensity(iLay)
+!!!!        END DO
+!!!!      END DO
+!!!!    END IF
+!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!
+!!!!! now print out the results
+!!!!    rDelta = kaFrStep(iTag)
+!!!!
+!!!!    CALL wrtout_head(iIOUN,caFluxFile,raFreq(1),raFreq(kMaxPts), &
+!!!!                     rDelta,iAtm,1,iNumLayer)
+!!!!    DO iLay = 1,iNumLayer
+!!!!      DO iFr = 1,kMaxPts
+!!!!        raTemp(iFr) = raaFluxx(iFr,iLay)
+!!!!      END DO
+!!!!      CALL wrtout(iIOUN,caFluxFile,raFreq,raTemp)
+!!!!    END DO
 
     kScatter = iScatter0
      
@@ -1030,6 +1133,7 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine finds out which points to step thru
+! not really needed with faster computers, since now I use all kMaxPts points
     SUBROUTINE FluxWavenumberPoints(iStep,iaStep,iFFMax)
 
     IMPLICIT NONE

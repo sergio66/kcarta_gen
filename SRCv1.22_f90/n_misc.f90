@@ -355,13 +355,15 @@ CONTAINS
 !!!                      so this differs from iaaOverrideDefault(2,3) = 0,iaaOverrideDefault(2,4) = -1
 !!!                      where acos(3/5) is used in upper ayers, and accurate diffusive angle in lower layers
 !!!                   +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
-    iaaOverrideDefault(2,6) = +1    !!! iUsualUpwell = +1 for upwell RT with surface term, << DEFAULT >>
+    iaaOverrideDefault(2,6) = +1    
+!!! iUsualUpwell = +1 for upwell RT with surface term, << DEFAULT >>
 !!!                -1 with no surface,
 !!!                -2 to only dump downwelling backgnd
 !!!   see SUBR find_radiances in rad_main.f
-    iaaOverrideDefault(2,7) = -1    !!! iUseSnell = -1 for No  Snell law raytrace plus layer curvature effects, similar to SARTA (default)
+    iaaOverrideDefault(2,7) = -1    
+!!! iUseSnell = -1 for No  Snell law raytrace plus layer curvature effects, similar to SARTA <<<default >>>
 !!!           = +1 for Yes Snell law raytrace plus layer curvature effects
-!!!           = 0  for No  Snell law raytrace NO   layer curvature effects
+!!!           = 0  for No  Snell law raytrace NO   layer curvature effects  PLANE PARALLEL
 !!!   see SUBR FindLayerAngles in rad_angles.f
     iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
 !!!   see SUBR Get_Temp_Plevs in n_pth_mix.f

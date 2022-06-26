@@ -2432,7 +2432,7 @@ CONTAINS
       CALL DoStop
     END IF
 
-    IF ((kRTP >= 0) .AND. (kWhichScatterCode == 5)) THEN
+    IF ((kRTP >= 0) .AND. ((kWhichScatterCode == 5) .OR. (kWhichScatterCode == 3))) THEN
       !! write out cloud info, straight from RTP file and after manipulation
       DO iI = 1,160
         caFCloudName(iI:iI) = ' '
@@ -2445,7 +2445,7 @@ CONTAINS
         iJ = iJ + 1
         caFCloudName(iJ:iJ+3) = '_CLD'
               
-        caStrJunk(1) = 'typ '
+        caStrJunk(1) = 'type'
         caStrJunk(2) = 'ctop'
         caStrJunk(3) = 'cbot'
         caStrJunk(4) = 'cng '
@@ -2453,7 +2453,7 @@ CONTAINS
         caStrJunk(6) = 'frac'
         caStrJunk(7) = 'fr12'
         write(kStdWarn,*) ' '
-        write(kStdWarn,*)'  after expand_scatter'
+        write(kStdWarn,*)'               after expand_scatter'
         write(kStdWarn,*)'    Cloud1  (before/after)        Cloud2 (before/after)'
         write(kStdWarn,*)'-------------------------------------------------------'
         DO iI=1,7
@@ -2468,21 +2468,31 @@ CONTAINS
           write(kStdErr,*)'make sure the cloud dump file does not exist!'
           CALL DoSTOP
         END IF
+
         kTempUnitOpen = 1
         IF (k100layerCloud == +1) THEN
           write(iIOUN_Cloud,*) '% 100 layer cloud, but dumping out what was in rtp file for TWO SLAB CLOUD'
-        ELSE
-            write(iIOUN_Cloud,*) '% TWO SLAB CLOUD'
+        ELSEIF (kWhichScatterCode == 3) THEN
+          write(iIOUN_Cloud,*) '% DISORT CLOUDS'
+        ELSEIF (kWhichScatterCode == 5) THEN
+          write(iIOUN_Cloud,*) '% TWO SLAB CLOUDS'
         END IF
-        write(iIOUN_Cloud,*) '% rows 1-7 are ctype(101/201/301=W/I/A),cprtop(mb),cprbot(mb)'
+        write(iIOUN_Cloud,*) '% rows 1-7 are ctype(W 101/I 201/A 30),cprtop(mb),cprbot(mb)'
         write(iIOUN_Cloud,*) '% cngwat(g/m2),cpsize(um),cfrac and cfrac12'
         write(iIOUN_Cloud,*) '% cols 1-4 are CLOUD 1 (old/new) and CLOUD 2 (old/new)'
-        DO iI = 1, 7
-          write(iIOUN_Cloud,*) '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI), &
+        iI = 1
+        write(iIOUN_Cloud,'(A,A,4(F12.0))')      '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI), &
+          raaRTPCloudParamsF(2,iI)
+        DO iI = 2, 7
+          write(iIOUN_Cloud,'(A,A,4(F12.5))') '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI), &
           raaRTPCloudParamsF(2,iI)
         END DO
-        DO iI = 1, 7
-          write(iIOUN_Cloud,*) raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
+
+        iI = 1
+        write(iIOUN_Cloud,'(4(F12.0))')      raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI), &
+          raaRTPCloudParamsF(2,iI)
+        DO iI = 2, 7
+          write(iIOUN_Cloud,'(4(F12.5))') raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
         END DO
         CLOSE(iIOUN_Cloud)
         kTempUnitOpen = -1

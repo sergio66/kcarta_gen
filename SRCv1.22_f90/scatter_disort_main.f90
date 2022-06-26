@@ -423,6 +423,9 @@ CONTAINS
 
 ! this is if you want a funky dunky phase function
     REAL :: raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
+    INTEGER :: iCldTopkCarta,iCldBotkCarta
+    INTEGER :: iaCldTypes(kMaxClouds)  !! 101 201 or 301 for water, ice, aerosol
+    INTEGER :: iForceScatterCalc_EvenIfNoCld
 
     rSolarAngle = kSolarAngle
 
@@ -444,63 +447,74 @@ CONTAINS
 
     WRITE (kStdWarn,*) 'cos(rSatAngle),sfctemp = ',cos(rSatAngle*kPi/180.0),rSurfaceTemp
 
-    CALL SetMieTables_DISORT(raFreq, &
+    CALL SetMieTables_RTSPEC(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
       iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-      raaaCloudParams,iaaScatTable,caaaScatTable, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
       iaPhase,raPhasePoints,raComputedPhase, &
       iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
+      -1,              & !!!! iSergio
+      +1,              & !!!! iDisort
 !!!!!!!!!!!!!!!!!!these are the output variables
       NMUOBS, NDME, NWAVETAB, MUTAB,DMETAB,WAVETAB,MUINC, &
       TABEXTINCT, TABSSALB, TABASYM, TABPHI1UP, TABPHI1DN, &
       TABPHI2UP, TABPHI2DN, &
       NSCATTAB, NCLDLAY, ICLDTOP, ICLDBOT, IOBS, ISCATTAB, &
       IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
-      iCloudySky, IACLDTOP, IACLDBOT)
+      iCloudySky, IACLDTOP, IACLDBOT, iCldTopkCarta,iCldBotkCarta)
 
     CALL GetAbsProfileDISORT(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
       iAtm,iNpmix,rFracTop,rFracBot,raVTemp,rSurfaceTemp,rSurfPress, &
       NABSNU, NLEV, TEMP, ABSPROF, &
       ICLDTOP,iCLDBOT,IOBS, iDownward, iwp, raNumberDensity, &
       raDensity,raLayerTemp, &
-      iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh)
+      iProfileLayers, raPressLevels,raThickness,raThicknessRayleigh, &
+      rSatAngle,raLayAngles)
 
 !!!!!!! if iCloudSky .LT. 0 do clear sky rad transfer easily !!!!!!!
+!!!!!!! or to test DISORT, can force it to go ahead
+    iForceScatterCalc_EvenIfNoCld = +1
     IF (iCloudySky < 0) THEN
-      !!!!note that we do not care about background thermal accurately here
-      write (kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
-      DO iii = 1,iNp
+      IF (iForceScatterCalc_EvenIfNoCld < 0) THEN
+        !!!!note that we do not care about background thermal accurately here
+        write (kStdWarn,*) 'Atm # ',iAtm,' SetMieTables_RTSPEC says it is clear; doing easy clear sky rad'
+        DO iii = 1,iNp
+          DO iF = 1,kMaxPts
+            DO iL = 1,NLEV-1
+              raTau(iL)  = absprof(iL,iF)
+            END DO
+            CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
+              rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
+              raUseEmissivity(iF),raFreq(iF),raInten(iF),iaOp(iii), &
+              iProfileLayers,raPressLevels)
+          END DO     !! DO loop over iF
+        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+        END DO
+        GOTO 9876
+      ELSEIF (iForceScatterCalc_EvenIfNoCld > 0) THEN
+        kScatter = 1
+        write(kStdErr,'(A)')  'Even though no clouds, doing DISORT calc to test clear rads'
+        write(kStdWarn,'(A)') 'Even though no clouds, doing DISORT calc to test clear rads'
+      END IF
+    END IF
+
+    IF (kDis_pts < kMaxPts) THEN
+      write(kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
+      write(kStdWarn,*) 'for the clear <-> cloudy comparisons'
+      !this fills up raaNoScatterStep
+      DO iii = 1,iNumlayer
         DO iF = 1,kMaxPts
           DO iL = 1,NLEV-1
             raTau(iL)  = absprof(iL,iF)
           END DO
-        CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
-          rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
-          raUseEmissivity(iF),raFreq(iF),raInten(iF),iaOp(iii), &
-          iProfileLayers,raPressLevels)
-        END DO
-      CALL wrtout(iIOUN,caOutName,raFreq,raInten)
-      END DO
-    GOTO 9876
-    END IF
-
-    write(kStdWarn,*) 'Atm # ',iAtm,' clear; doing easy clear sky rad'
-    write(kStdWarn,*) 'for the clear <-> cloudy comparisons'
-! his fills up raaNoScatterStep
-    DO iii = 1,iNumlayer
-      DO iF = 1,kMaxPts
-        DO iL = 1,NLEV-1
-          raTau(iL)  = absprof(iL,iF)
-        END DO
-        CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
+          CALL NoScatterRadTransfer(iDownWard,raTau,raLayerTemp,nlev, &
             rSatAngle,rSolarAngle,rSurfaceTemp,rSurfPress, &
             raUseEmissivity(iF),raFreq(iF),raaNoScatterStep(iii,iF), &
             iaOp(iii),iProfileLayers,raPressLevels)
+        END DO
       END DO
-    END DO
-
-!!!!!!!!!! if iCloudSky .GT. 0 go thru and do the DISORT stuff !!!!!!!!
-    CALL SetCorrelatedK(iDownWard,raCorrelatedK,raaAbs,iaaRadLayer,iAtm,iNumLayer,ABSPROF)
+      CALL SetCorrelatedK(iDownWard,raCorrelatedK,raaAbs,iaaRadLayer,iAtm,iNumLayer,ABSPROF)
+    END IF
 
 ! set up some things for the instrument
     IF (iDownward == 1) THEN             !!down look instr
@@ -524,26 +538,43 @@ CONTAINS
 ! out of 10000
 ! **************************** SPEED UP CODE ***************************
     IF (iStep > kMaxPts) THEN
-      write(kStdWarn,*) 'Resetting kDis_Pts to kMaxPts'
+      write(kStdWarn,*) 'Reset 20 <= kDis_Pts <= kMaxPts'
+      write(kStdErr,*)  'Reset 20 <= kDis_Pts <= kMaxPts'
       iStep = kMaxPts
+      CALL DOStop
     END IF
 
     IF (iStep < 20) THEN
-      write(kStdWarn,*) 'Resetting kDis_Pts to 20'
+      write(kStdWarn,*) 'Reset 20 <= kDis_Pts <= kMaxPts'
+      write(kStdErr,*)  'Reset 20 <= kDis_Pts <= kMaxPts'
       iStep = 20
+      CALL DOStop
     END IF
 
-! f you want to do 10 pts out of 10000 pts, then you have to do rad
-! ransfer on points 1,1001,2001,3001,...10000
-! e step over 10000/iStep points
+    IF (kDis_pts .NE. kMaxPts) THEN
+      write(kStdWarn,*) 'Computers fast enough now, just do kDis_Pts <= kMaxPts'
+      write(kStdErr,*)  'Computers fast enough now, just do kDis_Pts <= kMaxPts'
+      CALL DOStop
+    END IF
+      
+! if you want to do 10 pts out of 10000 pts, then you have to do rad
+! transfer on points 1,1001,2001,3001,...10000
+! ie step over 10000/iStep points
     IF (kScatter /= 2) THEN
       iStep = iDiv(kMaxPts,iStep)
     END IF
 
 ! set up array of wavenumber indices that we step thru, to do the rad transfer
 ! (as DISORT is quite slow, we will not use each and every point)
-    iScatter = kScatter
-    CALL FindWavenumberPoints(iStep,iScatter,raCorrelatedK,iaStep,iFFMax)
+    IF (iStep < kMaxPts) THEN
+      iScatter = kScatter
+      CALL FindWavenumberPoints(iStep,iScatter,raCorrelatedK,iaStep,iFFMax)
+    ELSE
+      iFFMax = kMaxPts
+      DO iFF = 1,iFFMax      
+        iaStep(iFF) = iFF
+      END DO
+    END IF
 
     iStepPts = 0
     DO iFF = 1,iFFMax
@@ -570,10 +601,15 @@ CONTAINS
           pmom(iL,I) = DBLE(0.0)
         END DO
       END DO
+      
+      IF (iFF .EQ. 1) THEN
+        write(kStdWarn,'(A,F12.5,I7,I7,I3)') '  DISORT RadTrans raFreq(1) : iFFMax,kDis_Pts,kScatter = ',&
+          raFreq(1),iFFMax,kDis_Pts,kScatter
+      END IF
 
       ! to test no scattering, just replace following doloops with DO N = 1,-1
       IF (iRayleigh == -1) THEN     !want cloud, not Rayleigh scattering
-        CALL SetUpClouds(nstr,nmuobs(1),iaCloudWithThisAtm, &
+        CALL SetUpCloudsDISORT(nstr,nmuobs(1),iaCloudWithThisAtm, &
             iaCldTop,iaCldBot,iaCloudNumLayers,raFreq(iF), &
             iAtm,iaaRadLayer,iNumLayer, &
             IWP, DME, NDME, DMETAB, NWAVETAB, WAVETAB, &
@@ -609,8 +645,9 @@ CONTAINS
         CALL InputPrintDebugDisort(raFREQ, NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, &
              USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, UMU, NPHI, PHI, &
              IBCND, FBEAM, UMU0, PHI0, FISOT, LAMBER, BTEMP, TTEMP, TEMIS, &           
-             PLANK, WVNMLO, WVNMHI, ONLYFL, ACCUR, PRNT, HEADER)
-        write(kStdErr,*) 'Printed out DISORT input'
+             PLANK, WVNMLO, WVNMHI, ONLYFL, ACCUR, PRNT, HEADER, &
+             ICLDTOP, ICLDBOT,iaaRadLayer(iAtm,:),iNumLayer,raPressLevels,rSurfPress)
+        write(kStdErr,*) 'Printed out DISORT RAD input'
       ENDIF
 
       CALL DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, WVNMLO, &
@@ -620,7 +657,7 @@ CONTAINS
         PLANK, ONLYFL, ACCUR, PRNT, HEADER, RFLDIR, RFLDN, &
         FLUP, DFDT, UAVG, UU, ALBMED, TRNMED )
 
-      IF ((iDebugPrint > 0) .AND. (iFF .EQ. 1))THEN
+      IF ((iDebugPrint > 0) .AND. (iFF .EQ. 1)) THEN
         DO iL = 1,NTAU
           DO I = 1,NUMU
             DO N = 1,NPHI
@@ -640,23 +677,32 @@ CONTAINS
 ! ------------------------ END OF DISORT ---------------------------------
 
 !interpolate coarse step grid onto fine kCARTA grid
-    DO iii = 1,iNp
-      DO iF = 1,iStepPts
-        raIntenStep(iF)     = raaIntenStep(iii,iF)
-        raNoScatterStep(iF) = raaNoScatterStep(iii,iF)
-      END DO
-      CALL Interpolator(raFreqStep,rakStep,raIntenStep, &
-        raNoScatterSTEP,raaNoScatterStep,iii, &
-        iStepPts,iDownWard,nlev, &
-        iProfileLayers,raPressLevels, &
-        raCorrelatedK,raLayerTemp,absprof,raFreq, &
-        rSatAngle,rSolarAngle, &
-        rSurfaceTemp,rSurfPress,raUseEmissivity, &
-        raInten)
+    IF (iFFMax .LT. kMaxPts) THEN
+      DO iii = 1,iNp
+        DO iF = 1,iStepPts
+          raIntenStep(iF)     = raaIntenStep(iii,iF)
+          raNoScatterStep(iF) = raaNoScatterStep(iii,iF)
+        END DO
+        CALL Interpolator(raFreqStep,rakStep,raIntenStep, &
+          raNoScatterSTEP,raaNoScatterStep,iii, &
+          iStepPts,iDownWard,nlev, &
+          iProfileLayers,raPressLevels, &
+          raCorrelatedK,raLayerTemp,absprof,raFreq, &
+          rSatAngle,rSolarAngle, &
+          rSurfaceTemp,rSurfPress,raUseEmissivity, &
+          raInten)
         CALL wrtout(iIOUN,caOutName,raFreq,raInten)
         !        iF = 1
         !        print *,iii,iF,raIntenStep(iF),raNoScatterStep(iF),raInten(iF)
-    END DO
+      END DO
+    ELSE
+      DO iii = 1,iNp
+        raIntenStep = raaIntenStep(iii,:)
+        raNoScatterStep = raaNoScatterStep(iii,:)
+        raInten = raaIntenSTEP(iii,:)
+        CALL wrtout(iIOUN,caOutName,raFreq,raInten)
+      END DO
+    END IF
           
     9876 CONTINUE       !!!!we could have skipped here direct if NO clouds in atm
 
@@ -665,165 +711,6 @@ CONTAINS
 
     RETURN
     end SUBROUTINE interface_disort
-
-!************************************************************************
-!! see eg /home/sergio/KCARTA/SCATTERCODE/DISORT4.0.99/disort4.0.99/doc/DISORT.txt
-      SUBROUTINE InputPrintDebugDisort(raFreq, NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, &
-           USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, UMU, NPHI, PHI, &
-           IBCND, FBEAM, UMU0, PHI0, FISOT, LAMBER, BTEMP, TTEMP, TEMIS, &           
-           PLANK, WVNMLO, WVNMHI, ONLYFL, ACCUR, PRNT, HEADER)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/TempF90/scatterparam.f90'
-
-    INTEGER :: iI,iJ,iK
-
-    REAL :: raFreq(kMaxPts)
-    CHARACTER  header*127          !dumb comment
-          
-    LOGICAL :: lamber  !true  ==> isotropic reflecting lower bdry
-!          so need to specify albedo
-! alse ==> bidirectionally reflecting bottom bdry
-!      ==> need to specify fcn BDREF()
-    LOGICAL :: plank   !use the plank function for local emission
-    LOGICAL :: onlyfl  !true ==> return flux, flux divergence, mean intensitys
-! alsetrue ==> return flux, flux divergence, mean
-!              intensities and intensities
-    LOGICAL :: prnt(5) !prnt(1) = true, print input variables
-! rnt(2) = true, print fluxes
-! rnt(3) = true, intensities at user angles and levels
-! rnt(4) = true, print planar transmitivity and albedo
-! rnt(5) = true, print phase function moments PMOM
-    LOGICAL :: usrtau  !false ==> rad quantities return at every bdry
-! rue  ==> rad quantities return at NTAU optical depths
-!          which will be specified in utau(1:ntau)
-    LOGICAL :: usrang  !false ==> rad quantities returned at stream angles
-! rue  ==> rad quantities returned at user angles
-!          which will be specified in umu(1:numu)
-
-    INTEGER :: ibcnd            !0 ==> general case beam (fbeam), isotropic
-!      top illumination (fisot), thermal top
-!      emission (temis,ttemp),internal thermal
-!      sources (temper), reflection at bottom
-!      (lamber, albedo, bdref), thermal
-!      emission from bottom (btemp)
-!1 ==> return only albedo/trans of entire
-!      medium vs incident beam angle
-    INTEGER :: nmom             !number of legendre phase polynoms ie phase fcn
-    INTEGER :: nlyr             !number of computational layers in DISORT
-! o nlvl = nlyr + 1
-    INTEGER :: nstr             !number of radiation streams
-    INTEGER :: ntau             !associated with LOGICAL usrtau, print results
-! t this many optical depths
-    INTEGER :: numu             !associated with LOGICAL usrang, specifies how
-! any polar angles results to be printed (umu)
-    INTEGER :: nphi             !specifies how many azimuth angles results to
-! e printed (phi) .. can only be 0 if
-! nlyfl = .true.
-
-    DOUBLE PRECISION :: accur   !accuracy convergence criterion for azimuth
-! fourier cosine) series .. set between 0-0.01
-    DOUBLE PRECISION :: albedo  !bottom bdry albedo
-    DOUBLE PRECISION :: btemp   !bottom surface temp
-    DOUBLE PRECISION :: dtauc(maxcly)
-! ptical depths of computational layers
-    DOUBLE PRECISION :: fisot   !intensity of top bdry isotropic illumination
-    DOUBLE PRECISION :: fbeam   !intensity of incident // beam at TOA
-    DOUBLE PRECISION :: phi(maxphi)
-! he azimuthal phi's to output radiance
-    DOUBLE PRECISION :: pmom(0:maxmom,maxcly)
-! cattering phase fcn in legendre polynoms
-    DOUBLE PRECISION :: phi0    !solar azimuth
-    DOUBLE PRECISION :: ssalb(maxcly)
-! ingle scatter albedo of computational layers
-    DOUBLE PRECISION :: temper(0:maxcly) !temperature of the levels (0=TOA)
-    DOUBLE PRECISION :: temis            !emissivity of top bdry
-    DOUBLE PRECISION :: ttemp            !temperature of top bdry
-    DOUBLE PRECISION :: wvnmhi, wvnmlo   !bounds within which to do computations
-    DOUBLE PRECISION :: umu(maxumu)      !ang's at which to output results
-    DOUBLE PRECISION :: umu0         !polar angle cosine of incident solar beam
-    DOUBLE PRECISION :: utau(maxulv)     !tau's at which to output results
-
-    write(kStdWarn,*) ' '
-    write(kStdWarn,*) 'DISORT input for raFreq(1) = ',raFreq(1)
-    WRITE(kStdWarn,'(A,F12.5)') 'emissivity = ',TEMIS
-    write(kStdWarn,'(A,I4)') ' NLYR          Number of computational layers   = ',NLYR
-    write(kStdWarn,'(A,I4)') ' NMOM          Number of phase function moments = ',NMOM
-    write(kStdWarn,'(A)')    ' IC     TLEV     DTAUC    SSALB  PMOM(1)   PMOM(2)    PMOM(3)'
-    write(kStdWarn,'(A)')    ' IC     TEMPER   DTAUC    SSALB  PMOM(1)   PMOM(2)    PMOM(3)'
-    write(kStdWarn,'(A)')    ' -------------------------------------------------------------'
-    WRITE(kStdWarn,'(I3,F12.5)') 0,TTEMP 
-    DO iI = 1,NLYR
-      WRITE(kStdWarn,'(I3,F12.5,5(ES12.5))') iI,TEMPER(iI),DTAUC(iI),SSALB(iI),PMOM(1,iI),PMOM(2,iI),PMOM(3,iI)
-    END DO
-    WRITE(kStdWarn,'(I3,F12.5)') NLYR+1,BTEMP 
-    write(kStdWarn,'(A)')    ' IC     TEMPER     DTAUC    SSALB  PMOM(1)   PMOM(2)    PMOM(3)'
-    write(kStdWarn,'(A)')    ' -------------------------------------------------------------'
-    IF (LAMBER .EQ. .true.) THEN
-      write(kStdWarn,'(A)') 'LAMBER = true = isotropic reflecting boundary'
-    ELSE
-      write(kStdWarn,'(A)') 'LAMBER = false = bidirectional reflecting boundary'
-    END IF
-    IF (PLANK .EQ. .true.) THEN
-      write(kStdWarn,'(A)') 'PLANK = true = thermal emission'
-    ELSE
-      write(kStdWarn,'(A)') 'PLANK = false = no thermal emission !!!!!!!!!!!!!!!!!!'
-    END IF
-
-    write(kStdWarn,*) ' '
-    write(kStdWarn,'(A,I3)') 'NSTR = Number of computational polar angles to be used = streams',NSTR
-    
-    write(kStdWarn,*) ' '
-    IF (USRANG .EQ. .false.) THEN
-       write(kStdWarn,'(A)') 'USRANG = false, radiant quantities at gauss quad streams'
-    ELSE
-      write(kStdWarn,'(A,I3,A)') 'USRANG = true, return rads at ',NUMU,' specified cos(polar angle),polar angle : '
-      DO iI = 1,NUMU
-        WRITE(kStdWarn,'(I3,2(F12.5))') iI,UMU(iI),ACOS(UMU(iI))*180.0/kPi
-      END DO       
-    END IF
-
-    write(kStdWarn,*) ' '
-    write(kStdWarn,'(A,I3,A)') ' return rads at ',NPHI,' specified azimuth angs (0 ok only if ONLYFL = true)'
-    DO iI = 1,NPHI
-      WRITE(kStdWarn,'(I3,F12.5)') iI,PHI(iI)
-    END DO       
-
-    write(kStdWarn,*) ' '
-    IF (USRTAU .EQ. .false.) THEN
-       write(kStdWarn,'(A)') 'USRTAU = false, return rads at every layer'
-    ELSE
-      write(kStdWarn,'(A,I3,A)') 'USRTAU = true, return rads at ',NTAU,' specified layers/ODs : '
-      DO iI = 1,NTAU
-        WRITE(kStdWarn,'(I3,ES12.5)') iI,UTAU(iI)
-      END DO       
-    END IF
-
-    write(kStdWarn,*) ' '
-    IF (IBCND .EQ. 0) THEN
-      write(kStdWarn,'(A)') 'IBCND = 0    GENERAL CASE'
-    ELSEIF (IBCND .EQ. 1) THEN
-      write(kStdWarn,'(A)') 'IBCND = 1    Return alb/transmissivity (no Planck sources) = Re/Tr = PCRTM at UMU output angles'
-    END IF
-
-    write(kStdWarn,*) ' '
-    write(kStdWarn,'(A,3(ES12.5))') 'FBEAM intensity,cos(sol0),sol0,phi0',FBEAM,UMU0,acos(UMU0)*180/kPi,PHI0
-    write(kStdWarn,'(A,ES12.5)')    'FISOT intensity of top boundary illumination',FISOT
-
-    write(kStdWarn,*) ' '
-    write(kStdWarn,'(A,2(F12.5),A,ES12.5)')  'WAVENO ',WVNMLO,WVNMHI,' ACCUR',ACCUR
-    write(kStdWarn,'(A,L)') 'ONLYFL ',ONLYFL
-    write(kStdWarn,'(A,L)') 'PRNT 1 ',PRNT(1)
-    write(kStdWarn,'(A,L)') 'PRNT 2 ',PRNT(2)
-    write(kStdWarn,'(A,L)') 'PRNT 3 ',PRNT(3)
-    write(kStdWarn,'(A,L)') 'PRNT 4 ',PRNT(4)
-    write(kStdWarn,'(A,L)') 'PRNT 5 ',PRNT(5)
-
-    write(kStdWarn,*) ' '
-
-    RETURN
-    end SUBROUTINE InputPrintDebugDisort
 
 !************************************************************************
 

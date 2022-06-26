@@ -451,9 +451,9 @@ CONTAINS
     kWhichScatterCode = 0                   !set to kCARTA_CLEAR
     iWhichScatterCode0 = kWhichScatterCode  !set to kCARTA_CLEAR
 
-    kScatter  = 3          !if DISORT, then this says correlated k
-    kDis_nstr = 16         !number of streams for DISORT to use
-    kDis_Pts  = 50         !number of points to do radiance computations
+    kScatter  = 3          ! if DISORT, then this says correlated k
+    kDis_nstr = 16         ! number of streams for DISORT to use
+    kDis_Pts  = kMaxPts    ! number of points to do radiance computations, computers fast enough to do this
 
     kScatter  = 1          !if PCLSAM, this says use CHou correct scaling 
     kScatter  = 3          !if PCLSAM, this says use CHou correct scaling with scaling ajustment correction 
@@ -1867,7 +1867,14 @@ CONTAINS
         CALL DoStop
       END IF
 
-      IF ((kWhichScatterCode == 3) .AND. (kScatter < 0)) THEN
+      IF ((kWhichScatterCode == 3) .AND. (kDis_pts .NE. kMaxPts)) THEN
+        write(kStdWarn,'(A,2(I6))') 'Computers fast enough now, just do kDis_Pts <= kMaxPts',kDis_Pts,kMaxPts
+        write(kStdErr,'(A,2(I6))')  'Computers fast enough now, just do kDis_Pts <= kMaxPts',kDis_Pts,kMaxPts
+        CALL DoStop
+      END IF
+
+      IF ((kWhichScatterCode == 3) .AND. (kScatter < 0) .AND. (kDis_pts .NE. kMaxPts)) THEN
+        !!! if (kDis_pts == kMaxPts) then obviously no need for interpolation
         write(kStdErr,*) 'you specify iNclouds > 0, but no interpolation '
         write(kStdErr,*) 'type for DISORT. please check iNclouds, kScatter'
         CALL DoStop
