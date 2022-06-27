@@ -453,6 +453,7 @@ CONTAINS
     REAL ::    rCLrFrac               !! clear fraction
     INTEGER :: iaaCldLaySubPixel(kProfLayer,2*kProfLayer)
     INTEGER :: iDebugPrint
+    INTEGER :: iForceScatterCalc_EvenIfNoCld
 
     iIOUN = kStdkCarta
     IF (iColJacobOrRad_IOUN == +1) THEN
@@ -516,6 +517,15 @@ CONTAINS
     END IF
 
 !!! so this loop may not be run, depending on clear/PCLSAM col jacs
+    iForceScatterCalc_EvenIfNoCld = +1
+    IF ((iForceScatterCalc_EvenIfNoCld > 0) .AND. (iCloudySky < 0)) THEN
+      iCloudySky = +1
+      IF (kOuterLoop .EQ. 1) THEN
+        write(kStdErr,'(A)')  'Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdWarn,'(A)') 'Even though little or no clouds, doing PCLSAM calc to test clear rads'
+      END IF
+    END IF
+
     IF (iCloudySky < 0) THEN
       write(kStdWarn,*) 'CLEAR SKY IN PCLSAM RADTRANS',ICLDTOPKCARTA,ICLDBOTKCARTA
       CALL GetAbsProfileRTSPEC(raaAbs,raFreq,iNumLayer,iaaRadLayer, &
@@ -600,7 +610,7 @@ CONTAINS
             TABPHI1UP, TABPHI1DN, TABPHI2UP, TABPHI2DN)
 
         iDebugPrint = +1
-        IF (iDebugPrint > 0) THEN
+        IF ((iDebugPrint > 0) .AND. (kOuterLoop == 1)) THEN
           iaRadLayer = iaaRadLayer(iAtm,:)
           CALL InputPrintDebugPCLSAM(raFREQ,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             iNclouds,raUseEmissivity, &
@@ -965,7 +975,7 @@ CONTAINS
     INTEGER :: iI,iJ,iK
 
     write(kStdWarn,'(A,F12.5)') ' PCLSAM input for raFreq(1) = ',raFreq(1)
-    write(kStdWarn,'(A,F12.5)') ' emissoivity = ',raUseEmissivity(1)
+    write(kStdWarn,'(A,F12.5)') ' emissivity = ',raUseEmissivity(1)
     write(kStdWarn,'(A,I4)')    ' NLYR          Number of computational layers   = ',iNumlayer
     write(kStdWarn,'(A)') '   IC  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM '
     write(kStdWarn,'(A)') '-----------------------------------------------------------------------------------'

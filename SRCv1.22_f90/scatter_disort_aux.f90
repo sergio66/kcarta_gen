@@ -255,14 +255,14 @@ CONTAINS
     iAtm,iaaRadLayer,iNumLayer, &
     IWP, DME, NDME, DMETAB, NWAVETAB, WAVETAB, &
     TABEXTINCT, TABSSALB, TABASYM, ISCATTAB, &
-    extinct,dtauc,ssalb,asym,pmom)
+    extinct,dtauc,ssalb,asym,pmom,iFF)
 
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/scatterparam.f90'
 
 ! inputs
-    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
+    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iFF
     REAL :: rF                                 !wavenumber
     INTEGER :: iaCloudWithThisAtm(kMaxClouds)  !is this cloud in this atm?
     INTEGER :: IACLDTOP(kMaxClouds)            !cloud top layer
@@ -290,16 +290,17 @@ CONTAINS
     INTEGER :: iExtScaling,iSartaTables,iDefault
     REAL :: rE,rW,rG
 !>>>>>>>>>>>>>>>>>>>>>>>>>
-    iDefault = +1  !! use      the SARTA Tables as is (delta scaled)
-    iDefault = -1  !! usnscsle the SARTA Tables as is (no delta scaled)
+    iDefault = +1  !! use     the SARTA Tables as is (delta scaled)
+    iDefault = -1  !! unscale the SARTA Tables as is (no delta scaled)
 
-    iSartaTables = +1   !! SARTA Tscattering tables,  delta scaled
-    iSartaTables = -1   !! RRTM does not use delta scaling
+    iSartaTables = +1   !! SARTA scattering tables,  delta scaled
+    iSartaTables = -1   !! RRTM  does not use delta scaling
+    iSartaTables = iaaOverrideDefault(3,7)
 
-    IF (iSartaTables .NE. iDefault) THEN
+    IF ((iSartaTables .NE. iDefault) .AND. (kOuterLoop .EQ. 1) .AND. (iFF .EQ. 1)) THEN
       write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam_SergioChou rF = ',&
-                   iDefault,iSartaTables,rF,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'SetUpCloudsDISORT iDefault,iExtScaling = ',&
+                   iDefault,iSartaTables,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
 

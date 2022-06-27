@@ -515,9 +515,9 @@ CONTAINS
     caaTextOverrideDefault = caaTextOverride
     iaaOverrideOrig = iaaOverrideDefault
     IF (iaaOverride(2,1) /= iaaOverrideDefault(2,1)) THEN
-      write(kStdWarn,*) 'kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
-      write(kStdWarn,*) '  nml file : user set    iaaOverride(2,1) = ',iaaOverride(2,1)
-      write(kStdWarn,'(A,I2,A)') '  setting kTemperVary = iaaOverride(2,1) = ',iaaOverride(2,1),' ... '
+      write(kStdWarn,'(A,2(I3))') 'At beginning of n_main we set kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
+      write(kStdWarn,'(A,I3)') '       but                 in nml file : user set    iaaOverride(2,1) = ',iaaOverride(2,1)
+      write(kStdWarn,'(A,I3,A)') '                           now setting kTemperVary = iaaOverride(2,1) = ',iaaOverride(2,1),' ... '
       kTemperVary = iaaOverride(2,1)
     END IF
     iaaOverrideDefault = iaaOverride
@@ -567,7 +567,7 @@ CONTAINS
     iNclouds_RTP1    = iNclouds_RTP
     iWhichScatterCode_RTP1 = iWhichScatterCode_RTP
     iScatter_RTP1          = iScatter_RTP
-    ! if you use a 100 layer cloud cngwat profile throught the rtp file
+    ! if you use a 100 layer cloud cngwat profile through the rtp file
     ! then you must specify the (same in all layers) particle sizes
     DO iI = 1,iNClouds_RTP
       caaCloudFile1(iI) = caaCloudFile(iI)
@@ -1662,7 +1662,7 @@ CONTAINS
         Call DoStop
       END IF
 
-    ELSEIF ((cfrac > 0.001) .AND. (cngwat > 0.001) .AND. (iNclouds_RTP > 0)) THEN
+    ELSEIF ((cfrac > 1.0e-8) .AND. (cngwat > 1.0e-8) .AND. (iNclouds_RTP > 0)) THEN
       write (kStdWarn,*) 'successfully checked radnce .....'
       write(kStdWarn,*) ' '
       IF (caCloudPFname(1:5) == 'dummy') THEN

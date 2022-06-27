@@ -607,18 +607,38 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
-6/25/22         Have fixed DISORT flux calcs so now the same outputs as PCLSAM or CLEAR should be possible
-                Note if there are TwoSlab clouds, then PCLSAM will dump out 5 copies of things -- 
-                    clear, cld1, cld2 cld12, total weighted output
-                while DISORT will always only dmp out one thing .. the final number
+6/5/27          Was having problems with background thermal when asking for fluxes
+                a)  Plan to retire (iaaOverrideDefault(2,9) == 1) 
+                    since this is a LBLRTM high spectral res iTemperVary fix
+                    and now we have the options to do both (high spectral res database, kTemperVary = 43)
+                b) n_misc was doing a lot of resetting of kTemperVary to +43 if fluxes were being asked for
+                   but then NOT touching iaaOverrideDefault(2,1) to 43 or iaaOverrideDefault(2,4) to +2
+                   So now this is being done!!!
 
-                Also note if cngwat is very small, PCLSAM defaults to just doing one clear sky calc
-                while DISORT still can go ahead and do the DISORT radiance calc : see the variable
-                "iForceScatterCalc_EvenIfNoCld" which shows the window region calcs are very similar if
+6/5/25          iaaOverrideDefault(3,7) = +1 default : keep scattering tables delta scaled
+                                        = -1         : unscale them
+
+6/25/22         Note if cngwat is very small, now both PCLSAM and DISORT can either do just one clear calc, 
+                or go ahead and do the PCLSAM/DISORT radiance calc : see the variable
+                "iForceScatterCalc_EvenIfNoCld" 
+
+                For DISORT the clear sky window region calcs are very similar if
                 emissivity == 1, but the higher altitude calcs have differences (because kCARTA Clear Sky
                 defaults to no T variation across a later, and the AIRS 100 layers get thicker and thicker)
 
-                the 7 fluxchoices : nm_params and set kFlux = -1,1..7, with filenames appended as
+                see nm_main --- ((cfrac > 1.0e-8) .AND. (cngwat > 1.0e-8) .AND. (iNclouds_RTP > 0)) is the criterion
+                (before the numbers were 0.001 instead of 0.00000001)
+
+6/25/22         Have fixed DISORT flux calcs so now the same outputs as PCLSAM or CLEAR should be possible
+                Note if there is one TwoSlab clouds, then PCLSAM will dump out 3 copies of things -- 
+                    clear, cld1, total weighted output
+                while DISORT will always only dmp out one thing .. the final number
+                Note if there are Two Slab clouds, then PCLSAM will dump out 5 copies of things -- 
+                    clear, cld1, cld2 cld12, total weighted output
+                while DISORT will always only dmp out one thing .. the final number
+
+                the 7 fluxchoices : nm_params and set kFlux = -1,1..7, with filenames appended as, only
+                case 4 has been tested so far
                 1 = '_DOWN'  = dngoing flux at each level                          
                 2 = '_HEAT'  = up-dn heating rate at each layer
                 3 = '_UP'    = upgoing flux at each level

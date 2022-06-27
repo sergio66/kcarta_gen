@@ -3036,6 +3036,8 @@ CONTAINS
           write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileUPWELL_LINEAR_IN_TAU'
           IF (iaaOverrideDefault(2,9) == 1) THEN
             write(kStdWarn,*) ' adding on LBLRTM regression fix, satzen = ',raLayAngles(MP2Lay(iaRadLayer(1)))
+            write(kStdWarn,*) 'This has been RETIRED'
+            CALL DoStop
             CALL lblrtm_highres_regression_fix(real(cos(raLayAngles(MP2Lay(iaRadLayer(1)))*kPi/180.0)), &
                     rTSurf,raVT1,raaAbs,raUseEmissivity,raFreq,raInten)
           END IF

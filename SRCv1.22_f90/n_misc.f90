@@ -385,6 +385,8 @@ CONTAINS
                                     !!! else switch between -1 (no sun) 0 (ttorad(v,SunTemp) and +1 (tables)
                                     !!!   remember solar tables are at 0.0025 cm-1 so will have problems for 605-905 cm-1
                                     !!!   if iaKSolar = +1, so switch to iaKSolar = 0
+    iaaOverrideDefault(3,7) = +1    !!! SARTA scat tables are delta scaled, leave them scaled <DEFAULT>, -1 is to un delta scale
+                          
 
     RETURN
     end SUBROUTINE SetDefaultParams
@@ -579,6 +581,10 @@ CONTAINS
         iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
+    IF (iTemp > 0) THEN
+      write(kStdErr,'(A)') 'Plan to retire iEstimateHighRes iaaOverrideDefault(2,9)'
+      CALL DoStop
+    END IF
 
 !    iJ = iJ+1
 !    iTemp = iaaOverrideDefault(2,10)
@@ -655,6 +661,15 @@ CONTAINS
     IF ((abs(iTemp) /= 1) .AND. (iTemp .NE. 0) .AND. (iTemp .NE. -9999)) THEN
       write(kStdErr,'(A,I2,A,I2,A,I2)') &
         'Keep sun as -9999 or -1,0,+1 : need iaaOverrideDefault(',iI,',',iJ,') = +/-1,0,-9999 not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(3,7)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF ((abs(iTemp) /= 1)) THEN
+      write(kStdErr,'(A,I2)') &
+        'Keep scattering tables DeltaScaled (+1, default) or unscale them (-1) .. not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -969,16 +984,21 @@ CONTAINS
     IF (kFlux <= 0) THEN
       IF (iConstOrVary > 0) THEN
         kTemperVary = -1     !!!temperature in layer constant USE THIS!!!! DEFAULT for KCARTA/SARTA
-        write(kStdWarn,*) 'kFlux <= 0 so set kTemperVary = -1'
+        iaaOverrideDefault(2,1) = -1
+        write(kStdWarn,*) 'kFlux <= 0 so set kTemperVary,iaaOverrideDefault(2,1) to -1'
       ELSEIF (iConstOrVary < 0) THEN
         kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has
+        iaaOverrideDefault(2,1) = +43
+        iaaOverrideDefault(2,4) = +2
         !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
-        write(kStdWarn,*) 'kFlux < 0 but set kTemperVary = 43'
+        write(kStdWarn,*) 'kFlux < 0 but set kTemperVary, iaaOverrideDefault(2,1) to 43, iaaOverrideDefault(2,4) to +2'
       END IF
     ELSEIF (kFlux > 0) THEN
       kTemperVary = +43    !!!temperature in layer varies linearly, ala RRTM, LBLRTM, and has
+      iaaOverrideDefault(2,1) = +43
+      iaaOverrideDefault(2,4) = +2
       !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
-      write(kStdWarn,*) 'kFlux > 0 so set kTemperVary = 43'
+      write(kStdWarn,*) 'kFlux > 0 so set kTemperVary,iaaOverrideDefault(2,1) to 43; iaaOverrideDefault(2,4) to +2'
     END IF
 
 !!! new, do what the user wishes!!!

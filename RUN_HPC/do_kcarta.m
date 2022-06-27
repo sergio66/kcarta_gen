@@ -56,6 +56,16 @@ elseif iDoRad == 10  %% rads, using NNalli Emis
   sedder = [sedder ' template_Qrad0_NalliEmiss.nml  > ' outnml];      
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& ' outstat];
   
+elseif iDoRad == 20  %% rads, using DISORT
+  disp('do_kcarta.m here 20 DISORT')
+  outstat  = [outstat  '_' num2str(f1,'%04d')];
+  outnml   = [outnml  '_' num2str(f1,'%04d')];
+  outname  = [outname '_' num2str(f1,'%04d')];
+  type1nml = 'template_Qradcloud_2cloud_DISORT.nml';
+  type2nml = 'template_Qradcloud_2cloud_DISORT.nml';
+  sed_1_2_cloudfiles
+  kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& ' outstat];
+  
 elseif iDoRad == 1  %% individual gas OD
   disp('do_kcarta.m here 1')
   sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];
@@ -207,9 +217,11 @@ eval(loader);
 fprintf(1,'iiBin,exitcode = %6i %2i \n',iiBin,exitcode)
 
 rmer = ['!/bin/rm ' outnml ' ' outstat];  %%%% rmer = ['!/bin/rm ' outnml ' status' num2str(iiBin)];
+fprintf(1,'%s \n',rmer);
 % rmer = ['!/bin/rm ' outstat];
 eval(rmer);
 
 if iDoCloud == 100 
   rmer = ['!/bin/rm ' outcloud100]; eval(rmer);
 end
+

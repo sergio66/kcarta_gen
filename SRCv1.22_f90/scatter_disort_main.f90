@@ -493,8 +493,11 @@ CONTAINS
         GOTO 9876
       ELSEIF (iForceScatterCalc_EvenIfNoCld > 0) THEN
         kScatter = 1
-        write(kStdErr,'(A)')  'Even though no clouds, doing DISORT calc to test clear rads'
-        write(kStdWarn,'(A)') 'Even though no clouds, doing DISORT calc to test clear rads'
+        iCloudySky = +1
+        IF (kOuterLoop .EQ. 1) THEN
+          write(kStdErr,'(A)')  'Even though little or no clouds, doing DISORT calc to test clear rads'
+          write(kStdWarn,'(A)') 'Even though little or no clouds, doing DISORT calc to test clear rads'
+        END IF
       END IF
     END IF
 
@@ -614,7 +617,7 @@ CONTAINS
             iAtm,iaaRadLayer,iNumLayer, &
             IWP, DME, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, ISCATTAB, &
-            extinct,dtauc,ssalb,asym,pmom)
+            extinct,dtauc,ssalb,asym,pmom,iFF)
       ELSE IF (iRayleigh == +1) THEN   !want Rayleigh, not cloud scattering
         CALL SetUpRayleigh(nlev,nstr,nmuobs(1),raFreq(iF),raDensity, &
             raThicknessRayleigh,dtauc,ssalb,asym,pmom)
@@ -641,7 +644,7 @@ CONTAINS
       nmom = min(maxmom,nmom)
 
       iDebugPrint = +1
-      IF ((iDebugPrint > 0) .AND. (iFF .EQ. 1))THEN
+      IF ((iDebugPrint > 0) .AND. (iFF .EQ. 1) .AND. (kOuterLoop == 1)) THEN
         CALL InputPrintDebugDisort(raFREQ, NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, &
              USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, UMU, NPHI, PHI, &
              IBCND, FBEAM, UMU0, PHI0, FISOT, LAMBER, BTEMP, TTEMP, TEMIS, &           
@@ -657,7 +660,7 @@ CONTAINS
         PLANK, ONLYFL, ACCUR, PRNT, HEADER, RFLDIR, RFLDN, &
         FLUP, DFDT, UAVG, UU, ALBMED, TRNMED )
 
-      IF ((iDebugPrint > 0) .AND. (iFF .EQ. 1)) THEN
+      IF ((iDebugPrint > 0) .AND. (iFF .EQ. 1) .AND. (kOuterLoop == 1)) THEN
         DO iL = 1,NTAU
           DO I = 1,NUMU
             DO N = 1,NPHI

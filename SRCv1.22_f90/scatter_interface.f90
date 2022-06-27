@@ -345,9 +345,9 @@ CONTAINS
  1012 FORMAT(A31,I4,F10.5)
 
       write(kStdWarn,*) ' '
-      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'
-      write(kStdWarn,*) '  Cloudy Calcs, iAtm = ',iAtm   
-      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>'	
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) '  PCLSAM Cloudy Calcs, iAtm = ',iAtm   
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'	
 
       IF (iDoPCLSAM > 0) THEN
         !! this internally figures out 100 layer (cc = 0,1) or 100 layer (0 < cc < 1)
@@ -485,6 +485,11 @@ CONTAINS
           !! up and down flux at all levels
           iLayPrintFlux = 2*(iNumLayer+1)
         END IF
+
+        write(kStdWarn,*) ' '
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+        write(kStdWarn,*) '  PCLSAM Flux  Calcs, iAtm = ',iAtm   
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'	
                     
         IF (iDoPCLSAM > 0) THEN
           CALL scatterfluxes_pclsam( &
@@ -686,6 +691,12 @@ CONTAINS
       !write(kStdErr,*) 'Temporarily commented out'
       !CALL DoStop
       iDoFLux = -1
+
+      write(kStdWarn,*) ' '
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+      write(kStdWarn,*) '  DISORT Cloudy Calcs, iAtm = ',iAtm   
+      write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'	
+
       !x IF YOU UNCOMMENT THIS, MAKE SURE YOU ADD "USE MODULE DISORT" AT TOP OF THIS FILE
       CALL doscatter_disort(raFreq,                      &
              raaSumAbCoeff,raMixVertTemp,caOutName,      &
@@ -705,6 +716,12 @@ CONTAINS
         write(kStdWarn,*) ' ---> DISORT Flux Computations ...'
         !write(kStdErr,*) 'Temporarily commented out'
         !CALL DoStop
+
+        write(kStdWarn,*) ' '
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+        write(kStdWarn,*) '  DISORT Flux  Calcs, iAtm = ',iAtm   
+        write(kStdWarn,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'	
+
         CALL scatterfluxes_disort(raFreq,                &
               raaSumAbCoeff,raMixVertTemp,caOutName,     &
               iOutNum,iAtm,iNumLayer,iaaRadLayer,        &

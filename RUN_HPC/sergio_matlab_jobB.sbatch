@@ -13,6 +13,7 @@
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --exclude=cnode203,cnode267 --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
+# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-89       sergio_matlab_jobB.sbatch 9 789   to run DISORT for 89 chunks, profil 789 of the rtp file
 #
 # >>>>>>>>>>>>>>>>>>>>>>>>>
 # if putting ONE job per node (ie no loop)
@@ -119,4 +120,11 @@ elif [[ "$1" -eq "7" ]]; then
 elif [[ "$1" -eq "8" ]]; then
   # this loops over H2008,H2012,H2016
   matlab -nodisplay -r "clust_do_kcarta_driver_allHITRAN; exit"
+elif [[ "$1" -eq "9" ]]; then
+  # this loops over 25 cm-1 chunks for DISORT
+  if [[ $# -eq 1 ]]; then
+    matlab -nodisplay -r "clust_do_kcarta_driver_DISORT(1); exit"
+  elif [[ $# -eq 2 ]]; then
+    matlab -nodisplay -r "clust_do_kcarta_driver_DISORT($2); exit"
+  fi
 fi

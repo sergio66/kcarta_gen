@@ -49,6 +49,8 @@ else
 end
 %}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% kCARTA automatically reads in ctype1, ctype2 and then figures out which cloudtype to assign to what
 iNclouds = 2;
 iCloudType1 = ctype;

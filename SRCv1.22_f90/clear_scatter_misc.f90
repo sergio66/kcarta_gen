@@ -1051,7 +1051,7 @@ CONTAINS
 ! my canned EDDINGTON method, we have to unscale them!!!!!!!!
     IF (iSergio > 0) THEN
       DO I = 1, NSCATTAB
-        IF (iaScatTable_With_Atm(I) > 0) THEN
+        IF ((iaScatTable_With_Atm(I) > 0) .AND. (iaaOverrideDefault(3,7) .EQ. -1)) THEN 
           CALL UnScaleMie( &
                caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I), &
                 ndme(i)*nwavetab(i))
@@ -2189,22 +2189,23 @@ CONTAINS
 
     iExtScaling = kScatter
 
-    IF (iExtScaling .NE. iDefault) THEN
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam_SergioChou raFreq(1) = ',&
-                   iDefault,iExtScaling,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    IF ((iExtScaling .NE. iDefault) .AND. (kouterLoop .EQ. 0)) THEN
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'AddCloud_pclsam_SergioChou iDefault,iExtScaling = ',&
+                   iDefault,iExtScaling,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
-    iDefault = +1  !! use      the SARTA Tables as is (delta scaled)
-    iDefault = -1  !! usnscsle the SARTA Tables as is (no delta scaled)
+    iDefault = +1  !! use     the SARTA Tables as is (delta scaled)
+    iDefault = -1  !! unscale the SARTA Tables as is (no delta scaled)
 
     iSartaTables = +1   !! SARTA Tscattering tables,  delta scaled
     iSartaTables = -1   !! RRTM does not use delta scaling
+    iSartaTables = iaaOverrideDefault(3,7)
 
-    IF (iSartaTables .NE. iDefault) THEN
+    IF ((iSartaTables .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
       write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam_SergioChou raFreq(1) = ',&
-                   iDefault,iSartaTables,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'AddCloud_pclsam_SergioChou iDefault,iExtScaling = ',&
+                   iDefault,iSartaTables,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -2274,7 +2275,13 @@ CONTAINS
 !            write(kStdErr,'(A,6(F12.4))') 'Adjust SSA',waveno,taugas,TAUC_L,TAUC_L/TAUCG_L,SSALB(L),SSALB(L)*TAUC_L/TAUCG_L
 !          END IF
 !!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
+!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
+!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, this reduces the correction
+!!!!!!!!           relative to SSALB from AddCloud_pclsam_TangChou
           SSALB(L) = SSALB(L)*TAUC_L/TAUCG_L
+!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, this reduces the correction
+!!!!!!!!           relative to SSALB from AddCloud_pclsam_TangChou
+!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
 !!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
 
           raaScatTemp(iFr,iI) = SSALB(L)
@@ -2425,22 +2432,23 @@ CONTAINS
 
     iExtScaling = kScatter
 
-    IF (iExtScaling .NE. iDefault) THEN
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iExtScaling in AddCloud_pclsam raFreq(1) = ',&
-                   iDefault,iExtScaling,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    IF ((iExtScaling .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
+      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iExtScaling = ',&
+                   iDefault,iExtScaling,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
-    iDefault = +1  !! use      the SARTA Tables as is (delta scaled)
-    iDefault = -1  !! usnscsle the SARTA Tables as is (no delta scaled)
+    iDefault = +1  !! use     the SARTA Tables as is (delta scaled)
+    iDefault = -1  !! unscale the SARTA Tables as is (no delta scaled)
 
     iSartaTables = +1   !! SARTA Tscattering tables,  delta scaled
     iSartaTables = -1   !! RRTM does not use delta scaling
+    iSartaTables = iaaOverrideDefault(3,7)
 
-    IF (iSartaTables .NE. iDefault) THEN
+    IF ((iSartaTables .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
       write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'iDefault,iSartaTables in AddCloud_pclsam_SergioChou raFreq(1) = ',&
-                   iDefault,iSartaTables,raFreq(1),' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iExtScaling = ',&
+                   iDefault,iSartaTables,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -2535,8 +2543,14 @@ CONTAINS
           TAUCG_L  = TAUGAS + TAUC_L
           TAUTOT_N = TAUCG_L
 
+!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
+!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, keeping SSAL unchanged makes this 
+!!!!!!!!           correction larger relative to SSALB from AddCloud_pclsam_SergioChou
           SSALB0 = SSALB(L)
           SSALB(L) = SSALB0
+!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
+!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, keeping SSAL unchanged makes this 
+!!!!!!!!           correction larger relative to SSALB from AddCloud_pclsam_SergioChou
 
           raaScatTemp(iFr,iI) = SSALB(L)  !! uncchanged
 
@@ -3649,7 +3663,7 @@ CONTAINS
 
 ! Frank Evans code scales the Mie scattering parameters, so if we are using
 ! my canned EDDINGTON method, we have to unscale them!!!!!!!!
-    IF (iSergio > 0) THEN
+    IF ((iSergio > 0) .AND. (iaaOverrideDefault(3,7) == -1)) THEN
       DO I = 1, NSCATTAB
         IF (iaScatTable_With_Atm(I) > 0) THEN
           CALL UnScaleMie( &

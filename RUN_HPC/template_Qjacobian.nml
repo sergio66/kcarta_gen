@@ -12,6 +12,38 @@
  iaaOverride(1,8) = -1
  iaaOverride(1,8) = 1
 
+ !! ktempervary iLBLRTM RT (kTemperVary = 43) plus fixes for high res, -1 for no vary
+ iaaOverride(2,1) = 43    !! to do linear in tau
+ iaaOverride(2,1) = -1    !! to do const
+
+ !! use this, set by cluster
+ kCKD = CKDCKD
+ 
+ !short header
+ kLongOrShort = -1
+ kRTP = 1
+
+ ! turn off/on CO2/WV and CO2/N2 continuum function
+ !               iaaOverrideDefault(1,9) = +2 : do WV/CO2 continuum
+ !              iaaOverrideDefault(1,9) = +4 : do WV/N2  continuum	       
+ !              iaaOverrideDefault(1,9) = +6 : do WV/CO2 + WV/N2  continuum	        
+ ! iaaOverride(1,9) = 0/+2/+4/+6
+ !iaaOverride(1,9) = +6
+
+ !!! this is for kcarta paper, Reviewer 2, Q 1
+ !spline or linear interp, default = +1 to use Matlab style linear uncompress
+ !iaaOverride(1,4) = +1
+ !iaaOverride(1,4) = -1
+
+ !spline or linear interp, default = +1 to use Matlab style linear uncompress
+ !iaaOverride(1,2) = +1
+ !iaaOverride(1,2) = -1
+
+ !! override rtp freq header info with rf1,rf2
+ iaaOverride(1,8) = -1
+ iaaOverride(1,8) = 1
+
+ !caNMLReset_param_spectra = 'notset' 
  caNMLReset_param_spectra = 'template_reset_nm_spectra.nml' 
  
  $end

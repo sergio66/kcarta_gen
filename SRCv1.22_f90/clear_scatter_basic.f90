@@ -2400,11 +2400,13 @@ CONTAINS
       TABPHI1UP(1,I), TABPHI1DN(1,I), &
       TABPHI2UP(1,I), TABPHI2DN(1,I))
 
-!       !!!get rid of delta scaling
+!    IF (iaaOverrideDefault(3,7) .EQ. -1) THEN
+!      !!!get rid of delta scaling
 !      CALL UnScaleMie(
 !     $        caScale(I), TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I),
 !     $        ndme(i)*nwavetab(i))
-                 
+!    END IF          
+
     DO iF = 1,kMaxPts
       waveno = raFreq(iF)
       !  here we only need the simpler first choice as we are not messing
@@ -3323,10 +3325,9 @@ CONTAINS
     CLOSE (kTempUnit)
     kTempUnitOpen=-1
 
-    write(kStdWarn,*)'success : read in binary scattr data from file = '
-    write(kStdWarn,1020) scatfile
+    write(kStdWarn,'(A,A)') 'success : read in binary scattr data from file = ',scatfile
 
-    1020 FORMAT(A70)
+ 1020 FORMAT(A70)
 
     RETURN
     END SUBROUTINE READ_SSCATTAB_BINARY

@@ -943,7 +943,7 @@ CONTAINS
             iAtm,iaaRadLayer,iNumLayer, &
             IWP, DME, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, ISCATTAB, &
-            extinct,dtauc,ssalb,asym,pmom)
+            extinct,dtauc,ssalb,asym,pmom,iF)
       ELSE IF (iRayleigh == +1) THEN   !want Rayleigh, not cloudscattering
         CALL SetUpRayleigh(nlev,nstr,nmuobs(1),raFreq(iF),raDensity, &
             raThickness,dtauc,ssalb,asym,pmom)
@@ -975,7 +975,7 @@ CONTAINS
       END IF
          
       iDebugPrint = +1
-      IF ((iDebugPrint > 0) .AND. (iF .EQ. 1))THEN
+      IF ((iDebugPrint > 0) .AND. (iF .EQ. 1) .AND. (kOuterLoop == 1)) THEN
         CALL InputPrintDebugDisort(raFREQ, NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, &
              USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, UMU, NPHI, PHI, &
              IBCND, FBEAM, UMU0, PHI0, FISOT, LAMBER, BTEMP, TTEMP, TEMIS, &           
@@ -991,7 +991,7 @@ CONTAINS
         PLANK, ONLYFL, ACCUR, PRNT, HEADER, RFLDIR, RFLDN, &
         FLUP, DFDT, UAVG, UU, ALBMED, TRNMED )
 
-      IF ((iDebugPrint > 0) .AND. (iF .EQ. 1)) THEN
+      IF ((iDebugPrint > 0) .AND. (iF .EQ. 1) .AND. (kOuterLoop == 1)) THEN
         DO iL = 1,NTAU
           write(kStdWarn,'(A,1(I4),3(F12.4))') 'iL,FLUP,RFLDN,RFLDIR = ',iL,FLUP(iL),RFLDN(iLay),RFLDIR(iLay)
           DO I = 1,NUMU

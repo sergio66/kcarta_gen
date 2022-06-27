@@ -2646,7 +2646,7 @@ CONTAINS
       REAL :: raAdjust(kMaxPts)
 
 ! local 
-      REAL :: raZZ(kMaxPts),raYY(kMaxPts),raXX(kMaxPts),raBB(kMaxPts),raFactor(kMaxPts),rPCLSAMfact
+      REAL :: raZZ(kMaxPts),raYY(kMaxPts),raXX(kMaxPts),raBB(kMaxPts),raFactor(kMaxPts),rPCLSAMfact,r0p5fact
 
       !! RRTM uses the following angles and wgts , for x = 3.5g/m2 at 11 km gives about -1 % corrections to flux in window
       !! also asee Subroutine FindGauss2 in rad_angles.f90
@@ -2654,8 +2654,13 @@ CONTAINS
       !! 19.4620   43.6528   65.3921   81.9660
       !!  0.1335    0.2035    0.1299    0.03118
 
-      rPCLSAMfact = 0.0  !!! but Tang sets to 0
       rPCLSAMfact = 1.0  !!! should be true 
+      rPCLSAMfact = 0.0  !!! but Tang sets to 0 in RRTM
+
+      r0p5fact = 0.50     !! this is what they derive
+      r0p5fact = 0.30     !! this is what they say to use for Chou adjustment
+      r0p5fact = 0.40     !! this is what they say to use for smiliarity adjustment
+      r0p5fact = 0.35     !! << this is what I used for debugging, but maybe too small >>
 
       raBB = raaAsym(:,iL)
       raBB = 1 - (0.5 + 0.3738*raBB + 0.0076*(raBB**2) + 0.1186*(raBB**3))     !!! 1 - g
@@ -2677,7 +2682,7 @@ CONTAINS
       raAdjust = raXX - raZZ * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
 
       raYY = raaSSAlb(:,iL) * raBB / raFactor   !!! this is the multiplier
-      raAdjust = raAdjust * 0.35 * raaSSAlb(:,iL) * raBB/raFactor   !! Tang use 0.3 for one adjust and 0.4 for another
+      raAdjust = raAdjust * r0p5fact * raaSSAlb(:,iL) * raBB/raFactor   !! Tang use 0.3 for one adjust and 0.4 for another
 
 !!!     write(kStdErr,'(A,5(I3),7(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
 !!!           raFreq(1),raInten(1)-raAdjust(1),raAdjust(1),raFactor(1),raaSSAlb(1,iL),raBB(1),rPCLSAMfact*raaPCLSAMCorrection(1,iL)
@@ -2745,11 +2750,14 @@ CONTAINS
         raFactor = 1 - raaSSAlb(:,iL)*(1-raBB)                                 !!! 1 - wg
         raFactor = 1 - raaSSAlb(:,iL)*raaAsym(:,iL)                           !!! 1 - wg
       END IF
+      raYY = raaSSAlb(:,iL) * raBB / raFactor   !!! this is the multiplier
+
       raXX      = (rPCLSAMfact*raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) - &
-                 (rPCLSAMfact*raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))
+                  (rPCLSAMfact*raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))
+
 !     raAdjust = raXX * exp(-raFactor/muSat*raaExt(:,iL))
       raAdjust = raXX * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
-      raYY = raaSSAlb(:,iL) * raBB / raFactor   !!! this is the multiplier
+
       raAdjust = raAdjust * 0.35 * raaSSAlb(:,iL) * raBB/raFactor   !! Tang use 0.3 for one adjust and 0.4 for another
 
 !     write(kStdErr,'(A,5(I3),7(F12.4))') 'Chou ADJ',iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,&
