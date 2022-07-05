@@ -200,8 +200,10 @@ CONTAINS
          
 !         Check that parameter are in range of table
     IF (WAVENO < WAVETAB(1) .OR. WAVENO > WAVETAB(NWAVE)) THEN
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       write(kStdErr,*) WAVENO,WAVETAB(1),WAVETAB(NWAVE)
       write (kStdErr,*) 'INTERP_SCAT_TABLE3: wavenumber out of range.'
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       CALL DoStop
     ENDIF
 
@@ -359,8 +361,10 @@ CONTAINS
       READ (1,*) ABSNU1, ABSNU2, ABSDELNU, NABSNU
 
       IF (NABSNU > MAXABSNU) THEN
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
         write(kStdErr,*) 'NABSNU',NABSNU,MAXABSNU
         write(kStdErr,*) 'RTSPEC: MAXABSNU exceeded'
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
         CALL DOStop
       ENDIF
       READ (1,*) NLEV
@@ -449,7 +453,9 @@ CONTAINS
     END IF
 
     IF (iCase == -1) THEN
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       write(kStdErr,*)'In FastBDRYL2GDiffusive_rts, icase = -1'
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       CALL DoSTOP
     END IF
 
@@ -905,9 +911,11 @@ CONTAINS
       DO iJ=1,iaCloudNumLayers(iIn)
         iI = iaaScatTable(iIn,iJ)
         IF (iI > MAXSCAT) THEN
+          write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
           write(kStdErr,*)'unfortunately, in SetMieTables_RTPSEC find scattercode.param has set'
           write(kStdErr,*)'MAXSCAT = ',maxscat
           write(kStdErr,*)'please reset and retry'
+          write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
           CALL DoSTOP
         END IF
         caName = caaaScatTable(iIn,iJ)
@@ -956,7 +964,24 @@ CONTAINS
           iaCldTop(iIn)+1,' to ',iaCldBot(iIn)
         END IF
       END DO
-         
+
+      if (raaRTPCloudParamsF(iIn,1) > 100) then
+        !make sure you don't mess up things when the clear sky PCLSAM faction being computed!
+        raaRTPCloudParamsF(iIn,8) = iaCldtop(iIn)         
+        raaRTPCloudParamsF(iIn,9) = iaCldbot(iIn)         
+        IF ((iaCldtop(iIn) .GT. 0) .AND. (iaCldbot(iIn) .GT. 0)) THEN
+          iaCloudTypeProfile(iaCldtop(iIn):iaCldbot(iIn)) = raaRTPCloudParamsF(iIn,1)    !!! this is ctype
+        END IF
+      end if
+
+!      IF ((iaCldtop(iIn) .GT. 0) .AND. (iaCldbot(iIn) .GT. 0)) THEN
+!        print *,'>>>>>>>>>>>>>'
+!        print *,'this is so messed up >>>>',iIn,iaCldbot(iIn),iaCldtop(iIn)
+!        print *,iaCloudTypeProfile(iaCldtop(iIn):iaCldbot(iIn))
+!        print *,'>>>>>>>>>>>>>'
+!        print *,' '
+!      END IF
+    
     ! check to see which scattering tables to be used with this atm
         DO iJ = 1,iaCloudNumLayers(iIn)
           iI = iaaScatTable(iIn,iJ)
@@ -967,6 +992,9 @@ CONTAINS
       END DO
 
     END DO      !!!!!!!!main       DO iIn=1,iNclouds
+
+!print *,'mama1',raaRTPCloudParamsF(1,:)
+!print *,'mama2',raaRTPCloudParamsF(2,:)
 
 !     Only read in scattering tables that are needed for this atm
     iReadTable = 1
@@ -984,7 +1012,9 @@ CONTAINS
               TABPHI1UP(1,I), TABPHI1DN(1,I), &
               TABPHI2UP(1,I), TABPHI2DN(1,I))
             IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. (ABS(MUINC(2)-0.7887) > 0.001)) THEN
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               CALL DoStop
             END IF
             IF (iaPhase(I) > 0) THEN
@@ -1008,7 +1038,9 @@ CONTAINS
               TABPHI1UP(1,I), TABPHI1DN(1,I), &
               TABPHI2UP(1,I), TABPHI2DN(1,I))
             IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. (ABS(MUINC(2)-0.7887) > 0.001)) THEN
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               CALL DoStop
             END IF
             IF (iaPhase(I) > 0) THEN
@@ -1032,8 +1064,10 @@ CONTAINS
               TABPHI1UP(1,I), TABPHI1DN(1,I), &
               TABPHI2UP(1,I), TABPHI2DN(1,I))
             IF (iaPhase(I) > 0) THEN
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               write(kStdErr,*) 'Right now, incapapable of this silly task!!!'
               write(kStdErr,*) 'need iaPhase = 0 for iBinaryFIle = 0'
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               CALL DoStop
               DO iBlah = 1,NDME(I)
                 dmetab_phase(iBlah) = DMETAB(iBlah,I)
@@ -1081,10 +1115,12 @@ CONTAINS
         END IF
       END DO
       IF (int(iLayers*1.0/LL) /= nmuobs(II)) THEN
-        write (kStdErr,*) iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
+        write (kStdErr,'(A,4(I3))') 'number of cloud layers A, number of scattering tables B, A/B, num of angles used in Mie coeffs', iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
         write (kStdErr,*) 'Some of the Mie Scattering tables had different'
         write (kStdErr,*) 'number of angles used in computing Mie coeffs'
         write (kStdErr,*) 'Please recheck  sscatmie.x and rerun'
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
         CALL DoStop
       END IF
     ELSE
@@ -1178,8 +1214,10 @@ CONTAINS
           DO i=1,kProfLayer
             ! see if more than one cloud per layer
             IF (iaCldInLayer(i) > 1) THEN
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               write(kStdErr,*) 'More than one cloud in kLAYERS layer ',i
               write(kStdErr,*) 'Please check section SCATTR and retry'
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               CALL DoStop
             END IF
             ! see lowest, highest parts of different clouds simultaneously
@@ -1400,14 +1438,18 @@ CONTAINS
     DO iLay=1,iNumLayer
       iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
       IF (iaRadLayer(iLay) > iNpmix) THEN
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
         write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
         write(kStdErr,*) 'Only iNpmix=',iNpmix,' mixed paths set'
         write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
         CALL DoSTOP
       END IF
       IF (iaRadLayer(iLay) < 1) THEN
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
         write(kStdErr,*) 'Error in forward model for atmosphere ',iAtm
         write(kStdErr,*) 'Cannot include mixed path ',iaRadLayer(iLay)
+        write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
         CALL DoSTOP
       END IF
     END DO
@@ -1786,8 +1828,10 @@ CONTAINS
       GOTO 10
     END IF
     IF ((cScale == 'y') .OR. (cScale == 'Y')) THEN
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       write (kStdErr,*) 'Cannot invert the Mie parameters for ''y'' scaling'
       write (kStdErr,*) 'Please rerun sscatmie using n,g or h scaling'
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       CALL DoStop
     END IF
 
@@ -1886,8 +1930,10 @@ CONTAINS
       GOTO 10
     END IF
     IF ((cScale == 'y') .OR. (cScale == 'Y')) THEN
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       write (kStdErr,*) 'Cannot invert the Mie parameters for ''y'' scaling'
       write (kStdErr,*) 'Please rerun sscatmie using n,g or h scaling'
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       CALL DoStop
     END IF
 
@@ -3085,7 +3131,9 @@ CONTAINS
 
     OPEN (UNIT = kTempUnit, STATUS='OLD', FORM='FORMATTED',FILE=caPhaseFile, IOSTAT = iERR)
     IF (IERR /= 0) THEN
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       WRITE(kStdErr,1010) IERR, SCATFILE
+      write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
       CALL DoSTOP
     ENDIF
  1010 FORMAT('ERROR! number ',I5,' opening phase scatter data file:',/,A120)
@@ -3514,9 +3562,11 @@ CONTAINS
       DO iJ = 1,iaCloudNumLayers(iIn)
         iI = iaaScatTable(iIn,iJ)
         IF (iI > MAXSCAT) THEN
+          write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
           write(kStdErr,*)'unfortunately, in scatterparam.f90 we have '
           write(kStdErr,*)'MAXSCAT = ',maxscat
           write(kStdErr,*)'please reset and retry'
+          write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
           CALL DoSTOP
         END IF
         caName=caaaScatTable(iIn,iJ)
@@ -3596,7 +3646,9 @@ CONTAINS
               TABPHI1UP(1,I), TABPHI1DN(1,I), &
               TABPHI2UP(1,I), TABPHI2DN(1,I))
             IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. (ABS(MUINC(2)-0.7887) > 0.001)) THEN
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               CALL DoStop
             END IF
             IF (iaPhase(I) > 0) THEN
@@ -3621,7 +3673,9 @@ CONTAINS
               TABPHI2UP(1,I), TABPHI2DN(1,I))
 
             IF ((ABS(MUINC(1)-0.2113) > 0.001) .OR. (ABS(MUINC(2)-0.7887) > 0.001)) THEN
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               write(kStdErr,*) 'RTSPEC: Coded for incident mu=0.2113,0.7887'
+              write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
               CALL DoStop
             END IF
             IF (iaPhase(I) > 0) THEN
@@ -3646,8 +3700,10 @@ CONTAINS
              TABPHI2UP(1,I), TABPHI2DN(1,I))
 
              IF (iaPhase(I) > 0) THEN
+               write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
                write(kStdErr,*) 'Right now, incapapable of this silly task!!!'
                write(kStdErr,*) 'need iaPhase = 0 for iBinaryFIle = 0'
+               write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
                CALL DoStop
                DO iBlah = 1,NDME(I)
                  dmetab_phase(iBlah) = DMETAB(iBlah,I)

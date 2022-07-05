@@ -607,15 +607,21 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
-6/5/27          Was having problems with background thermal when asking for fluxes
+6/29/22          rHDO_Deplete placeholder for HDO .. might make it a profile later
+
+6/28/22          raaRTPCloudParamsF will have information about clouds so that AdjustChou can be parametrized
+
+6/27/22          Was having problems with background thermal when asking for fluxes
                 a)  Plan to retire (iaaOverrideDefault(2,9) == 1) 
-                    since this is a LBLRTM high spectral res iTemperVary fix
+                    since this is a LBLRTM high spectral res amd layer temp variation fix
                     and now we have the options to do both (high spectral res database, kTemperVary = 43)
-                b) n_misc was doing a lot of resetting of kTemperVary to +43 if fluxes were being asked for
+                b) iaaOverrideDefault(2,9) is now an integer 0 >= iaaOverrideDefault(2,9) >= 100
+                   and then the Chou adjustment factor = iaaOverrideDefault(2,9)/100
+                c) n_misc was doing a lot of resetting of kTemperVary to +43 if fluxes were being asked for
                    but then NOT touching iaaOverrideDefault(2,1) to 43 or iaaOverrideDefault(2,4) to +2
                    So now this is being done!!!
 
-6/5/25          iaaOverrideDefault(3,7) = +1 default : keep scattering tables delta scaled
+6/25/22          iaaOverrideDefault(3,7) = +1 default : keep scattering tables delta scaled
                                         = -1         : unscale them
 
 6/25/22         Note if cngwat is very small, now both PCLSAM and DISORT can either do just one clear calc, 

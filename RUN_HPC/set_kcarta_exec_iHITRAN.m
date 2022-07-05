@@ -56,5 +56,6 @@ if iDoFlux > 0 | iDoCloud > 0
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_H16'; %% H16, v1.21, allows raAltComprDirsScale, set to one thread test .. for 500-880,805-2830 cm-1
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_H16_orig605_805res'; %% H16, v1.21, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H16_orig605_805res'; %% H16, v1.22, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1, sun-earth dist modification
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20';                %% H20, v1.22, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1, sun-earth dist modification
 end
 

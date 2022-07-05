@@ -468,7 +468,7 @@ n_duplicate_sky.mod n_duplicate_sky.o : n_duplicate_sky.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_duplicate_sky.f90
 
 n_main.mod n_main.o : n_main.f90 $(PARAMS)
-	$(FORTRANX) -c $(FLAGS) $(UFLAG) $(TXTRTPFLAG) n_main.f90
+	$(FORTRANX) -fpp -c $(FLAGS) $(UFLAG) $(TXTRTPFLAG) n_main.f90
 
 n_mainTXT.mod n_mainTXT.o : n_mainTXT.f90 $(PARAMS)
 	$(FORTRANX) -c $(FLAGS) $(UFLAG) n_mainTXT.f90

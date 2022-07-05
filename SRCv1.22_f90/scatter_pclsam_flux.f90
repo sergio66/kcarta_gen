@@ -1184,7 +1184,7 @@ CONTAINS
 !    print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raFactor(1)
     IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
         (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
-      CALL ChouAdjust(iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
+      CALL ChouAdjust(iaRadLayer,iNumLayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
                       raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
       raInten = raInten + raAdjust    
     END IF
@@ -1203,7 +1203,7 @@ CONTAINS
 !      print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raAdjust(1)
       IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
           (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
-        CALL ChouAdjust(iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
+        CALL ChouAdjust(iaRadlayer,iNumlayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
                         raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
         raInten = raInten + raAdjust    
       END IF

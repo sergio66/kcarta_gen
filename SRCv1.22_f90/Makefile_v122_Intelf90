@@ -33,8 +33,8 @@ SHELL = /bin/sh
 
 #------------ STYLE ----------------
 # STYLE=PARALLEL  UGH DO NOT USE THIS AT ALL!!!!!
-# STYLE=DEBUG
-STYLE=USUAL
+STYLE=DEBUG
+#STYLE=USUAL
 
 $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
 $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
@@ -89,7 +89,8 @@ FORTRANX = ifort   ## GENERIC should always work since .bashrc automatically loa
 ### this gives relocation truncated to fit: R_X86_64_PC32 against symbol errors during link
 ### basic_common.o: In function `dostop':
 ###/umbc/xfs2/strow/asl/s1/sergio/home/KCARTA/SRCv1.20_f90/basic_common.f90:302: relocation truncated to fit: R_X86_64_PC32 against symbol `ob1' defined in COMMON section in basic_common.o if you forget to use -mcmodel=medium or large
-DEBUG_FLAGSA = -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
+### warning message 406 gives forrtl: warning (406): fort: (1): In call to I/O Write routine, an array temporary was created for argument #2
+DEBUG_FLAGSA =  -check noarg_temp_created -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
 DEBUG_FLAGS=$(DEBUG_FLAGSA)
 
 # >>>>>>>>>>>>>>>>>>> DEFAULT Intel parallelization >>>>>>>>>>>>>>>>>>>>>>>>>

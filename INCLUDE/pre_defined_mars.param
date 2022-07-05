@@ -261,9 +261,10 @@ c these are for overwriting the compressed database dirs (from SPECTRA)
       COMMON/ComBlock9/kAltComprDirs,kcaAltComprDirs
 
 c these are for seeing how cloud params are overwritten
-c raaRTPCloudParams0(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 from rtpfile
-c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 after kcarta resets
-      REAL raaRTPCloudParams0(2,7),raaRTPCloudParamsF(2,7)
+c raaRTPCloudParams0(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 -9999 -9999 from rtpfile
+c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 -9999 -9999 after kcarta resets
+c raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 iT iB       after SetMieTables
+      REAL raaRTPCloudParams0(2,9),raaRTPCloudParamsF(2,9)
       COMMON/ComBlockCloud/raaRTPCloudParams0,raaRTPCloudParamsF
 
 c 2016

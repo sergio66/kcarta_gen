@@ -494,14 +494,14 @@ CONTAINS
     END DO
 
 ! these are for seeing how cloud params are overwritten
-! raaRTPCloudParams0(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
-! raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
+! raaRTPCloudParams0(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12 iCldoTp iCLdBot  from rtpfile
+! raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12 iCldTop iCldBot  after kcarta resets
 ! this gets set in rtp_interface.f
-    raaRTPCloudParams0(1,1:7) = -1.0
-    raaRTPCloudParams0(2,1:7) = -1.0
-    raaRTPCloudParamsF(1,1:7) = -1.0
-    raaRTPCloudParamsF(2,1:7) = -1.0
-          
+    raaRTPCloudParams0(:,1:9) = -9999.0
+    raaRTPCloudParamsF(:,1:9) = -9999.0
+! this gets set correctly in SetMieTable_RTSPEC
+    iaCloudTypeProfile = -1          
+ 
 ! this is really for Mie scattering and VIS/UV ocean reflectance
     kSolAzi = 0.0
     kSatAzi = 0.0

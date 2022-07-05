@@ -1206,6 +1206,7 @@ CONTAINS
 ! note we can only have Cfrac = 0.0 or 1.0, for whatever cloud(s) in the atm
     REAL :: Cfrac,cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2,raCemis(kMaxClouds)
     REAL :: raaCloudFrac(kMaxClouds,3)
+    REAL :: cpsize1, cpsize2
 
     INTEGER :: ctype1,ctype2
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
@@ -1530,7 +1531,7 @@ CONTAINS
       iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
       iaNumLayer,iaaRadLayer,raProfileTemp, &
       raSatAzimuth,raSolAzimuth,raWindSpeed, &
-      cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
+      cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 #ELSE
     CALL radnceRTPorNML(iRTP,caPFname,iMPSetForRadRTP, &
@@ -1544,7 +1545,7 @@ CONTAINS
       iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
       iaNumLayer,iaaRadLayer,raProfileTemp, &
       raSatAzimuth,raSolAzimuth,raWindSpeed, &
-      cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
+      cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype,iNumNLTEGases)
 #ENDIF
 
@@ -1995,13 +1996,13 @@ CONTAINS
         iNatm = 3  !! need one cloudy (=ice/water) and one clear atmosphere, and then final calc weighted using tcc
                     
         write(kStdErr,*) 'Duplicate for PCLSAM 100 layer clouds : '
-        write(kStdErr,*) '  [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ', &
-             ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12
+        write(kStdErr,'(A,2(5(F12.5),I4))') '  [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ', &
+             ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
         write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
                     
         write(kStdWarn,*) 'Duplicate for PCLSAM 100 layer clouds : '
-        write(kStdWarn,*) '  [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ', &
-            ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12
+        write(kStdErr,'(A,2(5(F12.5),I4))') '  [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ', &
+            ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
         write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=100,iNatm=3'
                     
         IF (kMaxAtm < 3) THEN
@@ -2031,17 +2032,17 @@ CONTAINS
           iNatm    = 5    !! need rclr, r1,r2,r12 ... and then linear combination of these 4
                         
           write(kStdErr,*) 'Duplicate for TWO PCLSAM clouds : '
-          write(kStdErr,*) '  Cld1 [ctop1 cbot1 cngwat1 cfrac1 cfrac12 ctype1] = ', &
-                ctop1,cbot1,cngwat1,cfrac1,cfrac12,ctype1
-          write(kStdErr,*) '  Cld2 [ctop2 cbot2 cngwat2 cfrac2 cfrac12 ctype2] = ', &
-                ctop2,cbot2,cngwat2,cfrac2,cfrac12,ctype2
+          write(kStdErr,'(A,6(F12.5),I4)') '  Cld1 [ctop1 cbot1 cngwat1 cpsize1 cfrac1 cfrac12 ctype1] = ', &
+                ctop1,cbot1,cngwat1,cpsize1,cfrac1,cfrac12,ctype1
+          write(kStdErr,'(A,6(F12.5),I4)') '  Cld2 [ctop2 cbot2 cngwat2 cpsize2 cfrac2 cfrac12 ctype2] = ', &
+                ctop2,cbot2,cngwat2,cpsize2,cfrac2,cfrac12,ctype2
           write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=5'
                           
           write(kStdWarn,*) 'Duplicate for TWO PCLSAM clouds : '
-          write(kStdWarn,*) '  Cld1 [ctop1 cbot1 cngwat1 cfrac1 cfrac12 ctype1] = ', &
-                ctop1,cbot1,cngwat1,cfrac1,cfrac12,ctype1
-          write(kStdWarn,*) '  Cld2 [ctop2 cbot2 cngwat2 cfrac2 cfrac12 ctype2] = ', &
-                ctop2,cbot2,cngwat2,cfrac2,cfrac12,ctype2
+          write(kStdWarn,'(A,6(F12.5),I4)') '  Cld1 [ctop1 cbot1 cngwat1 cpsize1 cfrac1 cfrac12 ctype1] = ', &
+                ctop1,cbot1,cngwat1,cpsize1,cfrac1,cfrac12,ctype1
+          write(kStdWarn,'(A,6(F12.5),I4)') '  Cld2 [ctop2 cbot2 cngwat2 cpsize2 cfrac2 cfrac12 ctype2] = ', &
+                ctop2,cbot2,cngwat2,cpsize2,cfrac2,cfrac12,ctype2
           write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=5'
                           
           IF (kMaxAtm < 5) THEN
@@ -2055,13 +2056,13 @@ CONTAINS
           iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
                           
           write(kStdErr,*) 'Duplicate for ONE PCLSAM cloud : '
-          write(kStdErr,*) '  [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ', &
-            ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12
+          write(kStdErr,'(A,2(5(F12.5),I8),A,F12.5)') '  [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ', &
+            ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1, ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
           write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=3'
                           
           write(kStdWarn,*) 'Duplicate for ONE PCLSAM cloud : '
-          write(kStdWarn,*)'   [ctop1 cbot1 cngwat1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cfrac2 ctype2] = ', &
-            ctop1,cbot1,cngwat1,cfrac1,ctype1,ctop2,cbot2,cngwat2,cfrac2,ctype2,' cfrac12 = ',cfrac12
+          write(kStdWarn,'(A,2(5(F12.5),I8),A,F12.5)')'   [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ', &
+            ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1,  ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
           write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=3'
                     
           IF (kMaxAtm < 3) THEN
@@ -2221,7 +2222,8 @@ CONTAINS
                              raaaSetEmissivity,raaaSetSolarRefl,                    &
                              raaScatterPressure,raScatterDME,raScatterIWP,          &
                              raaaCloudParams,                                       &
-                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,                   & 
+                             cngwat1,cngwat2,cpsize1,cpsize2,                       &
                              ctop1,ctop2,cbot1,cbot2,                               &
                              raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
 
@@ -2234,7 +2236,8 @@ CONTAINS
                              raaaSetEmissivity,raaaSetSolarRefl,                    &
                              raaScatterPressure,raScatterDME,raScatterIWP,          &
                              raaaCloudParams,                                       &
-                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,                   & 
+                             cngwat1,cngwat2,cpsize1,cpsize2,                       &
                              ctop1,ctop2,cbot1,cbot2,                               &
                              raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
 
@@ -2358,7 +2361,7 @@ CONTAINS
     iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
     iaNumLayer,iaaRadLayer,raProfileTemp, &
     raSatAzimuth,raSolAzimuth,raWindSpeed, &
-    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
+    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
     raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
 
     IMPLICIT NONE
@@ -2400,7 +2403,7 @@ CONTAINS
     REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
     REAL :: raPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers
-    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,cngwat,raCemis(kMaxClouds)
+    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,cngwat,raCemis(kMaxClouds)
     INTEGER :: ctype1,ctype2
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
@@ -2424,6 +2427,12 @@ CONTAINS
     CHARACTER(160) :: caPFName
 
     INTEGER :: iI
+
+    cngwat1 = 0.0
+    cngwat2 = 0.0
+
+    cpsize1 = 0.0
+    cpsize2 = 0.0
           
     cfrac12 = -1.0
     cfrac1 = -1.0
@@ -2498,6 +2507,11 @@ CONTAINS
       raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
       raPressLevels,raLayerHeight, &
       iaKsolar,rakSolarAngle)
+
+    cngwat1 = raCngwat(1)
+    cngwat2 = raCngwat(2)
+    cpsize1 = raCpsize(1)
+    cpsize2 = raCpsize(2)
 
     RETURN
     end SUBROUTINE radnceNMLonly
@@ -2751,7 +2765,8 @@ CONTAINS
                              raaaSetEmissivity,raaaSetSolarRefl,                    &
                              raaScatterPressure,raScatterDME,raScatterIWP,          &
                              raaaCloudParams,                                       &
-                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,                   &
+                             cngwat1,cngwat2,cpsize1,cpsize2,                       &
                              ctop1,ctop2,cbot1,cbot2,                               &
                              raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
 
@@ -2773,7 +2788,8 @@ CONTAINS
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
-    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2
+    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,cpsize1,cpsize2
+    REAL :: ctop1,ctop2,cbot1,cbot2
     REAL :: raCemis(kMaxClouds)
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
@@ -3039,6 +3055,16 @@ CONTAINS
       write(kStdErr,*)  'cngwat2 is NaN '
       iErr = iErr + 1
     END IF
+    IF (ieee_is_nan(cpsize1)) THEN
+      write(kStdWarn,*) 'cpsize1 is NaN '
+      write(kStdErr,*)  'cpsize1 is NaN '
+      iErr = iErr + 1
+    END IF
+    IF (ieee_is_nan(cpsize2)) THEN
+      write(kStdWarn,*) 'cpsize2 is NaN '
+      write(kStdErr,*)  'cpsize2 is NaN '
+      iErr = iErr + 1
+    END IF
 !    IF (ieee_is_nan(cprtop1)) THEN
 !      write(kStdWarn,*) 'cprtop1 is NaN '
 !      write(kStdErr,*)  'cprtop1 is NaN '
@@ -3080,7 +3106,8 @@ CONTAINS
                              raaaSetEmissivity,raaaSetSolarRefl,                    &
                              raaScatterPressure,raScatterDME,raScatterIWP,          &
                              raaaCloudParams,                                       &
-                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,   &
+                             cfrac1,cfrac2,cfrac12,ctype1,ctype2,                   & 
+                             cngwat1,cngwat2,cpsize1,cpsize2,                       &
                              ctop1,ctop2,cbot1,cbot2,                               &
                              raCprtop,raCprbot,raCngwat,raCpsize,raCemis)
 
@@ -3102,7 +3129,7 @@ CONTAINS
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
     REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
-    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2
+    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2,cpsize1,cpsize2
     REAL :: raCemis(kMaxClouds)
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
@@ -3367,6 +3394,16 @@ CONTAINS
     IF (is_badnum(cngwat2)) THEN
       write(kStdWarn,*) 'cngwat2 is abnormal (inf?) '
       write(kStdErr,*)  'cngwat2 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(cpsize1)) THEN
+      write(kStdWarn,*) 'cpsize1 is abnormal (inf?) '
+      write(kStdErr,*)  'cpsize1 is abnormal (inf?) '
+      iErr = iErr + 1
+    END IF
+    IF (is_badnum(cpsize2)) THEN
+      write(kStdWarn,*) 'cpsize2 is abnormal (inf?) '
+      write(kStdErr,*)  'cpsize2 is abnormal (inf?) '
       iErr = iErr + 1
     END IF
 !    IF (is_badnum(cprtop1)) THEN

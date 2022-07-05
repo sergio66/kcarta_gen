@@ -287,9 +287,10 @@ c this is to account for planet orbit changes (ie planet-sun distance)
       COMMON/ComBlock9/kAltComprDirs,kcaAltComprDirs
 
 ! these are for seeing how cloud params are overwritten
-! raaRTPCloudParams0(1,:) = ctype cprtop/cprbot congwat cpsize cfra! cfrac12 from rtpfile
-! raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfra! cfrac12 after kcarta resets
-      REAL raaRTPCloudParams0(2,7),raaRTPCloudParamsF(2,7)
+! raaRTPCloudParams0(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 -9999 -9999 from rtpfile
+! raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 -9999 -9999 after kcarta resets
+! raaRTPCloudParamsF(1,:) = ctype cprtop/cprbot congwat cpsize cfrac cfrac12 iT iB       after SetMieTables
+      REAL raaRTPCloudParams0(2,9),raaRTPCloudParamsF(2,9)
       COMMON/comBlockCloud/raaRTPCloudParams0,raaRTPCloudParamsF
 
 ! 2016

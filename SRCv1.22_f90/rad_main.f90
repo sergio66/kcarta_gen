@@ -2635,16 +2635,22 @@ CONTAINS
     INTEGER :: iIOUN1,i0,i1,i2,i3,iErr,troplayer,iPrintBackThermal
     REAL :: raG2S(kMaxPts)
 
-    iDefault = -1
-    IF (abs(iaaOverrideDefault(2,9)) /= 1) THEN
-      write(kStdWarn,*) 'need iaaOverrideDefault(2,9) == -1 or +1'
-      write(kStdErr,*) 'need iaaOverrideDefault(2,9) == -1 or +1'
-      CALL DoStop
-    END IF
-    IF ((kOuterLoop == 1) .AND. (iaaOverrideDefault(2,9) /= iDefault)) THEN
-      write(kStdWarn,*) ' highres LBLRTM fix : iDefault = ',iDefault, '  iaaOverrideDefault(2,9) = ',iaaOverrideDefault(2,9)
-      write(kStdErr,*) ' highres LBLRTM fix : iDefault = ',iDefault, '  iaaOverrideDefault(2,9) = ',iaaOverrideDefault(2,9)
-    END IF
+!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!    iDefault = -1
+!!    IF (abs(iaaOverrideDefault(2,9)) /= 1) THEN
+!!      write(kStdWarn,*) 'need iaaOverrideDefault(2,9) == -1 or +1'
+!!      write(kStdErr,*) 'need iaaOverrideDefault(2,9) == -1 or +1'
+!!      CALL DoStop
+!!    END IF
+!!    IF ((kOuterLoop == 1) .AND. (iaaOverrideDefault(2,9) /= iDefault)) THEN
+!!      write(kStdWarn,*) ' highres LBLRTM fix : iDefault = ',iDefault, '  iaaOverrideDefault(2,9) = ',iaaOverrideDefault(2,9)
+!!      write(kStdErr,*) ' highres LBLRTM fix : iDefault = ',iDefault, '  iaaOverrideDefault(2,9) = ',iaaOverrideDefault(2,9)
+!!    END IF
+!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
           
     iLBLRTMZero = +2*iNumlayer
     !kLBLRTM_toa = 0.07
@@ -3034,13 +3040,21 @@ CONTAINS
             CALL RT_ProfileUPWELL(raFreq,raaAbs_LBLRTM_zeroUA,iL,ravt2,rCos,+1.0,-1,raInten)
           END IF
           write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileUPWELL_LINEAR_IN_TAU'
-          IF (iaaOverrideDefault(2,9) == 1) THEN
-            write(kStdWarn,*) ' adding on LBLRTM regression fix, satzen = ',raLayAngles(MP2Lay(iaRadLayer(1)))
-            write(kStdWarn,*) 'This has been RETIRED'
-            CALL DoStop
-            CALL lblrtm_highres_regression_fix(real(cos(raLayAngles(MP2Lay(iaRadLayer(1)))*kPi/180.0)), &
-                    rTSurf,raVT1,raaAbs,raUseEmissivity,raFreq,raInten)
-          END IF
+
+!!           use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!           use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!           use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!           IF (iaaOverrideDefault(2,9) == 1) THEN
+!!             write(kStdWarn,*) ' adding on LBLRTM regression fix, satzen = ',raLayAngles(MP2Lay(iaRadLayer(1)))
+!!             write(kStdWarn,*) 'This has been RETIRED'
+!!             CALL DoStop
+!!             CALL lblrtm_highres_regression_fix(real(cos(raLayAngles(MP2Lay(iaRadLayer(1)))*kPi/180.0)), &
+!!                     rTSurf,raVT1,raaAbs,raUseEmissivity,raFreq,raInten)
+!!           END IF
+!!           use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!           use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!           use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+
           CALL wrtout(iIOUN,caOutName,raFreq,raInten)
         END IF
       END IF

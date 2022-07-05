@@ -112,7 +112,7 @@ CONTAINS
     iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
     iaNumLayer,iaaRadLayer,raProfileTemp, &
     raSatAzimuth,raSolAzimuth,raWindSpeed, &
-    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
+    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
     raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype,iNumNLTEGases)
 
     IMPLICIT NONE
@@ -154,7 +154,7 @@ CONTAINS
     REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
     REAL :: raPressLevels(kProfLayer+1)
     INTEGER :: iProfileLayers
-    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,cbot1,cbot2,cngwat,raCemis(kMaxClouds)
+    REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,cbot1,cbot2,cngwat,raCemis(kMaxClouds)
     INTEGER :: ctype1,ctype2
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
@@ -263,6 +263,11 @@ CONTAINS
         raaPrBdry,iaNumlayer,iaaRadLayer,raSatHeight,raSatAngle, &
         raPressLevels,raLayerHeight, &
         iaKsolar,rakSolarAngle)
+
+    cngwat1 = raCngwat(1)
+    cngwat2 = raCngwat(2)
+    cpsize1 = raCpsize(1)
+    cpsize2 = raCpsize(2)
 
     RETURN
     end SUBROUTINE radnceRTPorNML
@@ -373,7 +378,7 @@ CONTAINS
       END IF
     ELSEIF ((kRTP >= 0) .AND. (kRTP <= 1)) THEN
       write(kStdWarn,*) 'new style RTP profile to be read is  : '
-      write(kStdWarn,5040) caPfname
+      write(kStdWarn,'(A)') caPfname
       write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
       CALL readRTP(raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
@@ -384,14 +389,14 @@ CONTAINS
       write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
     ELSEIF (kRTP == -10) THEN
       write(kStdWarn,*) 'LEVELS style TEXT profile to be read is  : '
-      write(kStdWarn,5040) caPfname
+      write(kStdWarn,'(A)') caPfname
       CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
     ELSEIF ((kRTP == -5) .OR. (kRTP == -6)) THEN
       write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
-      write(kStdWarn,5040) caPfname
+      write(kStdWarn,'(A)') caPfname
       CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
@@ -940,6 +945,8 @@ CONTAINS
       !      raaRTPCloudParamsF(1,5) = prof%cpsize
       !      raaRTPCloudParamsF(1,6) = prof%cfrac
       !      raaRTPCloudParamsF(1,7) = prof%cfrac12
+      !      raaRTPCloudParamsF(1,8) = -9999
+      !      raaRTPCloudParamsF(1,9) = -9999
       ! raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
       !      raaRTPCloudParamsF(2,1) = iaCtype(2)
       raaRTPCloudParamsF(2,2) = raaJunkCloudTB(2,1)
@@ -948,6 +955,8 @@ CONTAINS
       !      raaRTPCloudParamsF(2,5) = prof%cpsize2
       !      raaRTPCloudParamsF(2,6) = prof%cfrac2
       !      raaRTPCloudParamsF(2,7) = prof%cfrac12
+      !      raaRTPCloudParamsF(2,8) = -9999
+      !      raaRTPCloudParamsF(2,9) = -9999
 
       caStrJunk(1) = 'typ '
       caStrJunk(2) = 'ctop'
@@ -1596,10 +1605,9 @@ CONTAINS
 !! can only check upto 2 clouds from RTP file
     iactype_rtp(1) = prof%ctype
     IF (iNclouds >= 2) THEN
-      !        iactype_rtp(2) = prof%udef(17)
       iactype_rtp(2) = prof%ctype2
     END IF
-
+     
     IF ((iNclouds == 2) .AND. (prof%ctype2 < 100)) THEN
       write(kStdErr,*)  ' hmmm iNclouds == 2, prof%ctype2 < 100, reset iNclouds to 1'
       write(kStdWarn,*) ' hmmm iNclouds == 2, prof%ctype2 < 100, reset iNclouds to 1'
@@ -2721,6 +2729,9 @@ CONTAINS
     raaRTPCloudParams0(1,5) = rSize1
     raaRTPCloudParams0(1,6) = cfrac1
     raaRTPCloudParams0(1,7) = cfrac12
+    raaRTPCloudParams0(1,8) = -9999
+    raaRTPCloudParams0(1,9) = -9999
+
 ! raaRTPCloudParams0(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
     raaRTPCloudParams0(2,1) = ctype2
     raaRTPCloudParams0(2,2) = ctop2
@@ -2729,6 +2740,9 @@ CONTAINS
     raaRTPCloudParams0(2,5) = rSize2
     raaRTPCloudParams0(2,6) = cfrac2
     raaRTPCloudParams0(2,7) = cfrac12
+    raaRTPCloudParams0(2,8) = -9999
+    raaRTPCloudParams0(2,9) = -9999
+
 ! raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
 ! raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
           
@@ -2907,6 +2921,9 @@ CONTAINS
     raaRTPCloudParamsF(1,5) = prof%cpsize
     raaRTPCloudParamsF(1,6) = prof%cfrac
     raaRTPCloudParamsF(1,7) = prof%cfrac12
+    raaRTPCloudParamsF(1,8) = -9999
+    raaRTPCloudParamsF(1,9) = -9999
+
 ! raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   first reset
     raaRTPCloudParamsF(2,1) = iaCtype(2)
     raaRTPCloudParamsF(2,2) = prof%cprtop2
@@ -2915,6 +2932,8 @@ CONTAINS
     raaRTPCloudParamsF(2,5) = prof%cpsize2
     raaRTPCloudParamsF(2,6) = prof%cfrac2
     raaRTPCloudParamsF(2,7) = prof%cfrac12
+    raaRTPCloudParamsF(2,8) = -9999
+    raaRTPCloudParamsF(2,9) = -9999
 
 !      write(kStdErr,*) ' '
 !      write(kStdErr,*) 'initial readjusts (if needed) after reading in rtp file'
@@ -3347,6 +3366,11 @@ CONTAINS
     DO iNpath = 1,kMaxGas
       iaAlreadyIn(iNpath) = -1
     END DO
+
+!!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
+    rHDO_Deplete = prof%udef(19)
+    rHDO_Deplete = 0.0
+!!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
 
 ! set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
 ! so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then as
@@ -3954,6 +3978,11 @@ CONTAINS
     DO iNpath = 1,kMaxGas
       iaAlreadyIn(iNpath) = -1
     END DO
+
+!!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
+    rHDO_Deplete = prof%udef(19)
+    rHDO_Deplete = 0.0
+!!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
 
 ! set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
 ! so eg if the gases from MOLGAS.XSCGAS are 1 2 22 51 then as

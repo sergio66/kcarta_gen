@@ -17,11 +17,21 @@
  iaaOverride(1,8) = -1
  iaaOverride(1,8) = 1
 
+ !! keep mie params delta scaled
+ iaaOverride(3,7) = +1
+ !! no delta scaling ie undo what you did when making the scattering tables
+ iaaOverride(3,7) = -1
+
  !! ktempervary iLBLRTM RT (kTemperVary = 43) plus fixes for high res, -1 for no vary
  iaaOverride(2,1) = 43    !! to do linear in tau
  iaaOverride(2,1) = -1    !! to do const
 
  caNMLReset_param_spectra = 'template_reset_nm_spectra.nml' 
+
+ !! for heating rates
+ !kFlux = 6
+ !! for OLR and ILR
+ !kFlux = 4
  
  $end
 
@@ -76,7 +86,7 @@
  iScatter_RTP          =  1
 
  iWhichScatterCode_RTP =  3
- iScatter_RTP          =  2
+ iScatter_RTP          =  1
 
  !!!! iRTP = MMM !!! NOTE YOU HAVE TO FIX THE RTP PROF HERE
  iRTP = 1

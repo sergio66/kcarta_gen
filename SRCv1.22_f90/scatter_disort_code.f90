@@ -678,7 +678,8 @@ CONTAINS
             ANGCOS = -UMU0
             ANGCOSN(1) = ANGCOS
             !!!CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOS, SQT, YLM0 ) !!! ORIG CODE
-            CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOSN, SQT, YLM0 )
+            CALL LEPOLY( NCOS, MAZIM, MXCMU, NSTR-1, ANGCOSN, SQT, YLM0 )   !!! SERGIO FIX
+            CALL LEPOLY0( MAZIM, MAXCMU, NSTR-1, ANGCOS, SQT, YLM0 )        !!! disort4.0.99 fix
 
         END IF
 
@@ -5467,6 +5468,129 @@ CONTAINS
 
     RETURN
     END SUBROUTINE LEPOLY
+
+!************************************************************************
+      SUBROUTINE LEPOLY0(  M, MAXMU, TWONM1, MU, SQT, YLM )
+!       Special version of LEPOLY, now MU is a scalar
+!       Computes the normalized associated Legendre polynomial,
+!       defined in terms of the associated Legendre polynomial
+!       Plm = P-sub-l-super-m as
+!
+!             Ylm(MU) = sqrt( (l-m)!/(l+m)! ) * Plm(MU)
+!
+!       for fixed order m and all degrees from l = m to TWONM1.
+!       When m.GT.0, assumes that Y-sub(m-1)-super(m-1) is available
+!       from a prior call to the routine.
+!
+!       REFERENCE: Dave, J.V. and B.H. Armstrong, Computations of
+!                  High-Order Associated Legendre Polynomials,
+!                  J. Quant. Spectrosc. Radiat. Transfer 10,
+!                  557-562, 1970.  (hereafter D/A)
+!
+!       METHOD: Varying degree recurrence relationship.
+!
+!       NOTES:
+!       (1) The D/A formulas are transformed by setting M=n-1; L=k-1.
+!       (2) Assumes that routine is called first with  M = 0, then with
+!           M = 1, etc. up to  M = TWONM1.
+!
+!
+!  I N P U T     V A R I A B L E S:
+!
+!       NMU    :  Number of arguments of YLM
+!
+!       M      :  Order of YLM
+!
+!       MAXMU  :  First dimension of YLM
+!
+!       TWONM1 :  Max degree of YLM
+!
+!       MU  :  Arguments of YLM (i = 1 to NMU)
+!
+!       SQT(k) :  Square root of k
+!
+!       If M.GT.0, YLM(M-1,i) for i = 1 to NMU is assumed to exist
+!       from a prior call.
+!
+!
+!  O U T P U T     V A R I A B L E:
+!
+!       YLM(l) :  l = M to TWONM1, normalized associated Legendre
+!                   polynomials evaluated at argument MU
+!   Called by- DISORT, ALBTRN
+! +-------------------------------------------------------------------+
+
+!     .. Scalar Arguments ..
+
+      INTEGER   M, MAXMU, TWONM1
+!     ..
+!     .. Array Arguments ..
+
+      REAL      MU, YLM( 0:MAXMU ), SQT( * )
+!     ..
+!     .. Local Scalars ..
+
+      INTEGER   L
+      REAL      TMP1, TMP2
+!     ..
+
+
+      IF( M.EQ.0 ) THEN
+!                             ** Upward recurrence for ordinary
+!                             ** Legendre polynomials
+!         DO 20 I = 1, NMU
+            YLM( 0 ) = 1.0
+            YLM( 1 ) = MU
+!   20    CONTINUE
+
+
+         DO 40 L = 2, TWONM1
+
+!            DO 30 I = 1, NMU
+               YLM( L) = ( ( 2*L - 1 )*MU*YLM( L-1 ) - &
+                              ( L - 1 )*YLM( L-2 ) ) / L
+!   30       CONTINUE
+
+   40    CONTINUE
+
+
+      ELSE
+
+!         DO 50 I = 1, NMU
+!                               ** Y-sub-m-super-m; derived from
+!                               ** D/A Eqs. (11,12), STWL(58c)
+
+            YLM( M ) = - SQT( 2*M - 1 ) / SQT( 2*M )* &
+                           SQRT( 1.- MU**2 )*YLM( M-1 )
+
+!                              ** Y-sub-(m+1)-super-m; derived from
+!                              ** D/A Eqs.(13,14) using Eqs.(11,12),
+!                              ** STWL(58f)
+
+            YLM( M+1 ) = SQT( 2*M + 1 )*MU*YLM( M )
+
+!   50    CONTINUE
+
+!                                   ** Upward recurrence; D/A EQ.(10),
+!                                   ** STWL(58a)
+         DO 70 L = M + 2, TWONM1
+
+            TMP1  = SQT( L - M )*SQT( L + M )
+            TMP2  = SQT( L - M - 1 )*SQT( L + M - 1 )
+
+!            DO 60 I = 1, NMU
+       YLM( L ) = ( ( 2*L - 1 )*MU*YLM( L-1 ) - &
+                              TMP2*YLM( L-2 ) ) / TMP1
+!   60       CONTINUE
+
+   70    CONTINUE
+
+      END IF
+
+
+      RETURN
+      END
+
 
 !************************************************************************
 ! ergio this has been usurped; however, call this for the SLFTST

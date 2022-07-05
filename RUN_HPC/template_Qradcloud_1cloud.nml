@@ -21,6 +21,16 @@
  iaaOverride(2,1) = 43    !! to do linear in tau
  iaaOverride(2,1) = -1    !! to do const
 
+ !! keep mie params delta scaled
+ iaaOverride(3,7) = +1
+ !! no delta scaling ie undo what you did when making the scattering tables
+ iaaOverride(3,7) = -1
+
+ !! for heating rates
+ !kFlux = 6
+ !! for OLR and ILR
+ !kFlux = 4
+
  caNMLReset_param_spectra = 'template_reset_nm_spectra.nml' 
 
  $end
@@ -67,6 +77,15 @@
 
  iaNML_Ctype(1)  = iCloudType1
  caaCloudFile(1) = 'strCloudType1'
+
+ iWhichScatterCode_RTP =  3
+ iScatter_RTP          =  1
+
+ iWhichScatterCode_RTP =  5
+ iScatter_RTP          =  -1
+ iScatter_RTP          =  2
+ iScatter_RTP          =  1
+ iScatter_RTP          =  3
 
  iMPSetForRadRTP = 1
  caPFname = '/home/sergio/MATLABCODE/RANDOM_LARRABEE/bdry_layer_wv.rtp'

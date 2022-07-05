@@ -2481,16 +2481,15 @@ CONTAINS
         write(iIOUN_Cloud,*) '% cngwat(g/m2),cpsize(um),cfrac and cfrac12'
         write(iIOUN_Cloud,*) '% cols 1-4 are CLOUD 1 (old/new) and CLOUD 2 (old/new)'
         iI = 1
-        write(iIOUN_Cloud,'(A,A,4(F12.0))')      '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI), &
-          raaRTPCloudParamsF(2,iI)
+        write(iIOUN_Cloud,'(A,A,4(F12.0))') & 
+          '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
         DO iI = 2, 7
-          write(iIOUN_Cloud,'(A,A,4(F12.5))') '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI), &
-          raaRTPCloudParamsF(2,iI)
+          write(iIOUN_Cloud,'(A,A,4(F12.5))') &
+           '% ',caStrJunk(iI),raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
         END DO
 
         iI = 1
-        write(iIOUN_Cloud,'(4(F12.0))')      raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI), &
-          raaRTPCloudParamsF(2,iI)
+        write(iIOUN_Cloud,'(4(F12.0))') raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
         DO iI = 2, 7
           write(iIOUN_Cloud,'(4(F12.5))') raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
         END DO
