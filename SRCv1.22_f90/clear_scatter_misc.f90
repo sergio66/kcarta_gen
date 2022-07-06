@@ -2272,111 +2272,121 @@ CONTAINS
         L  = N-ICLDTOP+1
         I  = ISCATTAB(L)
         iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N+1)
-        DO iFr = 1,kMaxPts
-          waveno = raFreq(iFr)
-          taugas = raaExtTemp(iFr,iI)
-          rAbs   = taugas
-          !  here we only need the simpler first choice as we are not messing
-          !  around with the phase functions
-          CALL INTERP_SCAT_TABLE2 (WAVENO, DME(L), &
-            EXTINCT, SSALB(L), ASYM_RTSPEC(L), &
-            NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
-            TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
 
-          IF (iSartaTables .LT. 0) THEN
-            !!! new
-            rE = EXTINCT
-            rW = SSALB(L)
-            rG = ASYM_RTSPEC(L)
-            CALL UnScaleMieOne('G',rE,rW,rG)
-            EXTINCT = rE
-            SSALB(L) = rW
-            ASYM_RTSPEC(L) = rG    
-!            IF (iFr == 1) THEN 
-!              write(kStdErr,'(A,2(F12.5),3(ES12.5))') &
-!              ' iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
-!            END IF
-          END IF
+        IF (IWP(L) >= 1e-5) THEN
+          DO iFr = 1,kMaxPts
+            waveno = raFreq(iFr)
+            taugas = raaExtTemp(iFr,iI)
+            rAbs   = taugas
+            !  here we only need the simpler first choice as we are not messing
+            !  around with the phase functions
+            CALL INTERP_SCAT_TABLE2 (WAVENO, DME(L), &
+              EXTINCT, SSALB(L), ASYM_RTSPEC(L), &
+              NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
+              TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
+  
+            IF (iSartaTables .LT. 0) THEN
+              !!! new
+              rE = EXTINCT
+              rW = SSALB(L)
+              rG = ASYM_RTSPEC(L)
+              CALL UnScaleMieOne('G',rE,rW,rG)
+              EXTINCT = rE
+              SSALB(L) = rW
+              ASYM_RTSPEC(L) = rG    
 
-          !  Compute the optical depth of cloud layer, including gas
-          TAUC_L   = IWP(L)*EXTINCT/1000
-          TAUCG_L  = TAUGAS + TAUC_L
-          TAUTOT_N = TAUCG_L
+  !            IF (iFr == 1) THEN 
+  !              write(kStdErr,'(A,2(F12.5),3(ES12.5))') &
+  !              ' PCLSAM/RTSPEC iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
+  !            END IF
 
-!          IF (iFr == 1) THEN
-!            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
-!          END IF
+            END IF
+  
+            !  Compute the optical depth of cloud layer, including gas
+            TAUC_L   = IWP(L)*EXTINCT/1000
+            TAUCG_L  = TAUGAS + TAUC_L
+            TAUTOT_N = TAUCG_L
+  
+  !          IF (iFr == 1) THEN
+  !            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
+  !          END IF
+  
+            ! the scattering OD, not using this!!!
+            !!! rScat    = SSALB(L) * IWP(L)*EXTINCT/1000
+  
+  !!!!! this is to debug Tang 2018 JAS PCLSAM corrections
+  !          SSALB0 = SSALB(L)
+  !          SSALB(L) = SSALB(L)*TAUC_L/TAUCG_L
+  !          SSALB(L) = SSALB0
+  !!!!! this is to debug Tang 2018 JAS PCLSAM corrections
+  
+  !!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
+  !          IF (iFr .EQ. 1) THEN
+  !            write(kStdErr,'(A,6(F12.4))') 'Adjust SSA',waveno,taugas,TAUC_L,TAUC_L/TAUCG_L,SSALB(L),SSALB(L)*TAUC_L/TAUCG_L
+  !          END IF
+  !!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
+  !!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
+  !!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, this reduces the correction
+  !!!!!!!!           relative to SSALB from AddCloud_pclsam_TangChou
+            SSALB(L) = SSALB(L)*TAUC_L/TAUCG_L
+  !!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, this reduces the correction
+  !!!!!!!!           relative to SSALB from AddCloud_pclsam_TangChou
+  !!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
+  !!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
+  
+            raaScatTemp(iFr,iI) = SSALB(L)
+  
+            ! ---------------> now add on the backscattered part <--------------------
+            IF (iExtScaling .EQ. -1) THEN
+              !! the "correct" version is 
+              !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+              !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
+              !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
+              !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
+  
+              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
+              b = (1.0 - ASYM_RTSPEC(L))/2.0               
+   
+              !! CHOU SCALING TERM
+              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+              TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
+  
+            ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
+              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
+              b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+  
+              !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
+              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+              TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
+  
+            ELSEIF (iExtScaling .EQ. +2) THEN
+              !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
+              b = (1.0 + ASYM_RTSPEC(L))/2.0               
+  
+              !! CHOU SCALING TERM with similarity scaling adjustment
+              !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
+              TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*b) 
+  
+            END IF
+  
+            raaExtTemp(iFr,iI)  = TAUTOT_N
+            ! ---------------> now add on the backscattered part <--------------------
+  
+            IF (IWP(L) >= 1.0e-5) THEN
+              raaAsymTemp(iFr,iI) = ASYM_RTSPEC(L)
+            ELSE
+              raaAsymTemp(iFr,iI) = 0.0
+            END IF
+          END DO          !loop over freqs
 
-          ! the scattering OD, not using this!!!
-          !!! rScat    = SSALB(L) * IWP(L)*EXTINCT/1000
+        ELSE
+          raaScatTemp(:,iI) = 0.0              !! unchanged
+          raaExtTemp(:,iI)  = raaExtTemp(:,iI) !! unchanged
+          raaAsymTemp(:,iI) = 0.0              !! unchanged
+        END IF
 
-!!!!! this is to debug Tang 2018 JAS PCLSAM corrections
-!          SSALB0 = SSALB(L)
-!          SSALB(L) = SSALB(L)*TAUC_L/TAUCG_L
-!          SSALB(L) = SSALB0
-!!!!! this is to debug Tang 2018 JAS PCLSAM corrections
-
-!!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
-!          IF (iFr .EQ. 1) THEN
-!            write(kStdErr,'(A,6(F12.4))') 'Adjust SSA',waveno,taugas,TAUC_L,TAUC_L/TAUCG_L,SSALB(L),SSALB(L)*TAUC_L/TAUCG_L
-!          END IF
-!!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
-!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
-!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, this reduces the correction
-!!!!!!!!           relative to SSALB from AddCloud_pclsam_TangChou
-          SSALB(L) = SSALB(L)*TAUC_L/TAUCG_L
-!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, this reduces the correction
-!!!!!!!!           relative to SSALB from AddCloud_pclsam_TangChou
-!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
-!!!!!!!! >>>>>>>>> THIS IS CORRECT          REMMBER iF ICE CLD HIGH, THEN taugas ~ 0 in window region
-
-          raaScatTemp(iFr,iI) = SSALB(L)
-
-          ! ---------------> now add on the backscattered part <--------------------
-          IF (iExtScaling .EQ. -1) THEN
-            !! the "correct" version is 
-            !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
-            !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
-            !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
-            !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
-
-            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
-            b = (1.0 - ASYM_RTSPEC(L))/2.0               
- 
-            !! CHOU SCALING TERM
-            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
-            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
-            TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
-
-          ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
-            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
-            b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
-
-            !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
-            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
-            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
-            TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
-
-          ELSEIF (iExtScaling .EQ. +2) THEN
-            !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
-            b = (1.0 + ASYM_RTSPEC(L))/2.0               
-
-            !! CHOU SCALING TERM with similarity scaling adjustment
-            !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
-            TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*b) 
-
-          END IF
-
-          raaExtTemp(iFr,iI)  = TAUTOT_N
-          ! ---------------> now add on the backscattered part <--------------------
-
-          IF (IWP(L) >= 1.0e-5) THEN
-            raaAsymTemp(iFr,iI) = ASYM_RTSPEC(L)
-          ELSE
-            raaAsymTemp(iFr,iI) = 0.0
-          END IF
-
-        END DO          !loop over freqs
       END DO        !loop over cloud layers
     ENDIF
 
@@ -2492,7 +2502,7 @@ CONTAINS
     iSartaTables = iaaOverrideDefault(3,7)
 
     IF ((iSartaTables .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
-      write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
+      write(kStdErr,*) 'OH OH KEEP DELTA SCALE for AddCloud_pclsam_TangChou'
       write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iExtScaling = ',&
                    iDefault,iSartaTables,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
@@ -2515,102 +2525,115 @@ CONTAINS
         L  = N-ICLDTOP+1
         I  = ISCATTAB(L)
         iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N+1)
-        DO iFr = 1,kMaxPts
-          waveno = raFreq(iFr)
-          taugas = raaExtTemp(iFr,iI)
-          rAbs   = taugas
-          !  here we only need the simpler first choice as we are not messing
-          !  around with the phase functions
-          CALL INTERP_SCAT_TABLE2 (WAVENO, DME(L), &
-            EXTINCT, SSALB(L), ASYM_RTSPEC(L), &
-            NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
-            TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
 
-          IF (iSartaTables .LT. 0) THEN
-            rE = EXTINCT
-            rW = SSALB(L)
-            rG = ASYM_RTSPEC(L)
-            CALL UnScaleMieOne('G',rE,rW,rG)
-            EXTINCT = rE
-            SSALB(L) = rW
-            ASYM_RTSPEC(L) = rG
-!            IF (iFr == 1) THEN 
-!              write(kStdErr,'(A,2(F12.5),3(ES12.5))') &
-!              ' iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L)
-!            END IF
-          END IF
+        IF (IWP(L) >= 1e-5) THEN
 
-          !  Compute the optical depth of cloud layer, including gas
-          TAUC_L   = IWP(L)*EXTINCT/1000
+          DO iFr = 1,kMaxPts
+            waveno = raFreq(iFr)
+            taugas = raaExtTemp(iFr,iI)
+            rAbs   = taugas
+            !  here we only need the simpler first choice as we are not messing
+            !  around with the phase functions         
+            CALL INTERP_SCAT_TABLE2 (WAVENO, DME(L), &
+              EXTINCT, SSALB(L), ASYM_RTSPEC(L), &
+              NDME(I), DMETAB(1,I), NWAVETAB(I), WAVETAB(1,I), &
+              TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
+  
+            IF (iSartaTables .LT. 0) THEN
+              rE = EXTINCT
+              rW = SSALB(L)
+              rG = ASYM_RTSPEC(L)
+              CALL UnScaleMieOne('G',rE,rW,rG)
+              EXTINCT = rE
+              SSALB(L) = rW
+              ASYM_RTSPEC(L) = rG
 
-!          IF (iFr == 1) THEN
-!            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g before Chou Scale = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
-!          END IF
+  !            IF (iFr == 1) THEN 
+  !              write(kStdErr,'(A,2(F12.5),4(ES12.5))') &
+  !              ' PCLSAM/RTSPEC iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG IWP(L)',raFreq(1),DME(L),EXTINCT/1000,SSALB(L),ASYM_RTSPEC(L),IWP(L)
+  !            END IF
 
-          ! ---------------> now do Chou scaling of Cloud OD <--------------------
-          IF (iExtScaling .EQ. -1) THEN
-            !! the "correct" version is 
-            !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
-            !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
-            !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
-            !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
+           END IF
+  
+            !  Compute the optical depth of cloud layer, including gas
+            TAUC_L   = IWP(L)*EXTINCT/1000
+  
+  !          IF (iFr == 1) THEN
+  !            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g before Chou Scale = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
+  !          END IF
+  
+            ! ---------------> now do Chou scaling of Cloud OD <--------------------
+            IF (iExtScaling .EQ. -1) THEN
+              !! the "correct" version is 
+              !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+              !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
+              !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
+              !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
+  
+              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
+              b = (1.0 - ASYM_RTSPEC(L))/2.0               
+   
+              !! CHOU SCALING TERM
+              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+              TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
+  
+            ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
+              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
+              b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+  
+              !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
+              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+              TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
+  
+            ELSEIF (iExtScaling .EQ. +2) THEN
+              !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
+              b = (1.0 + ASYM_RTSPEC(L))/2.0               
+  
+              !! CHOU SCALING TERM with similarity scaling adjustment
+              !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
+              TAUC_L = TAUC_L * (1 - SSALB(L)*b) 
+  
+            END IF
+  
+  !          IF (iFr == 1) THEN
+  !            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g after Chou Scale  = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
+  !          END IF
+  
+            TAUCG_L  = TAUGAS + TAUC_L
+            TAUTOT_N = TAUCG_L
+  
+  !!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
+  !!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, keeping SSAL unchanged makes this 
+  !!!!!!!!           correction larger relative to SSALB from AddCloud_pclsam_SergioChou
+            IF (IWP(L) <= 1.0e-5) THEN
+              SSALB(L) = 0.0
+            END IF
+  
+            SSALB0 = SSALB(L)
+            SSALB(L) = SSALB0
+  !!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
+  !!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, keeping SSAL unchanged makes this 
+  !!!!!!!!           correction larger relative to SSALB from AddCloud_pclsam_SergioChou
+  
+            raaScatTemp(iFr,iI) = SSALB(L)  !! uncchanged
+            raaExtTemp(iFr,iI)  = TAUTOT_N
+  
+            ! ---------------> now add on the backscattered part <--------------------
+  
+            IF (IWP(L) >= 1.0e-5) THEN
+              raaAsymTemp(iFr,iI) = ASYM_RTSPEC(L)
+            ELSE
+              raaAsymTemp(iFr,iI) = 0.0
+            END IF
+          END DO          !loop over freqs
+        ELSE
+          raaScatTemp(:,iI) = 0.0              !! unchanged
+          raaExtTemp(:,iI)  = raaExtTemp(:,iI) !! unchanged
+          raaAsymTemp(:,iI) = 0.0              !! unchanged
+        END IF
 
-            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
-            b = (1.0 - ASYM_RTSPEC(L))/2.0               
- 
-            !! CHOU SCALING TERM
-            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
-            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
-            TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
-
-          ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
-            !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
-            b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
-
-            !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
-            !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
-            !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
-            TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
-
-          ELSEIF (iExtScaling .EQ. +2) THEN
-            !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
-            b = (1.0 + ASYM_RTSPEC(L))/2.0               
-
-            !! CHOU SCALING TERM with similarity scaling adjustment
-            !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
-            TAUC_L = TAUC_L * (1 - SSALB(L)*b) 
-
-          END IF
-
-!          IF (iFr == 1) THEN
-!            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g after Chou Scale  = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
-!          END IF
-
-          TAUCG_L  = TAUGAS + TAUC_L
-          TAUTOT_N = TAUCG_L
-
-!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
-!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, keeping SSAL unchanged makes this 
-!!!!!!!!           correction larger relative to SSALB from AddCloud_pclsam_SergioChou
-          SSALB0 = SSALB(L)
-          SSALB(L) = SSALB0
-!!!!!!!! >>>>>>>>> Chou scaling by itself does not need SSALB anymore
-!!!!!!!! >>>>>>>>> But since the Tang correction is proportional to SSALB, keeping SSAL unchanged makes this 
-!!!!!!!!           correction larger relative to SSALB from AddCloud_pclsam_SergioChou
-
-          raaScatTemp(iFr,iI) = SSALB(L)  !! uncchanged
-
-          raaExtTemp(iFr,iI)  = TAUTOT_N
-
-          ! ---------------> now add on the backscattered part <--------------------
-
-          IF (IWP(L) >= 1.0e-5) THEN
-            raaAsymTemp(iFr,iI) = ASYM_RTSPEC(L)
-          ELSE
-            raaAsymTemp(iFr,iI) = 0.0
-          END IF
-
-        END DO          !loop over freqs
       END DO        !loop over cloud layers
     ENDIF
 

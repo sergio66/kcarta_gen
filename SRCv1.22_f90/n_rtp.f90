@@ -2832,8 +2832,8 @@ CONTAINS
         IF ((raPressLevels(i) < ctop2) .AND. (raPressLevels(i) > 0))  iTop2 = i
       END DO
       IF ((iTop2-iTop1) < 2) THEN
-        write(kStdWarn,*) 'orig cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
-        write(kStdWarn,*) 'orig cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'orig cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'orig cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
         write(kStdWarn,*) 'ctop2,cbot1 maybe too close, need to try to adjust the BOTTOM layer of cloud1'
         IF ((iTop1-iBot1) >= 2) THEN
           prof%cprbot = raPressLevels(iBot1+1)-10
@@ -2849,8 +2849,8 @@ CONTAINS
         ELSE
           write(kStdWarn,*) 'ooooops : top AND Bot cloud too thin!!!'
         END IF
-        write(kStdWarn,*) 'final cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
-        write(kStdWarn,*) 'final cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'final cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'final cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
       END IF
     END IF
           

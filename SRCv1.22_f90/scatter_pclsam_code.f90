@@ -2682,7 +2682,11 @@ CONTAINS
         END IF
       END DO
       r0p5fact = ra0p5fact(iL)
-      write(kStdErr,'(A,2(I3),F12.5)') 'and the grand Chou adjustment factor for this layer is .... ',iLay,iL,r0p5fact
+
+      IF (kOuterLoop .EQ. 1) THEN
+        write(kStdWarn,'(A,3(I3),F12.5)') 'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iaCloudTypeProfile(iL),r0p5fact
+        write(kStdErr,'(A,3(I3),F12.5)')  'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iaCloudTypeProfile(iL),r0p5fact
+      END IF
 
       raBB = raaAsym(:,iL)
       raBB = 1 - (0.5 + 0.3738*raBB + 0.0076*(raBB**2) + 0.1186*(raBB**3))     !!! 1 - g

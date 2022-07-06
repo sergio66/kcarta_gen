@@ -977,7 +977,7 @@ CONTAINS
     write(kStdWarn,'(A,F12.5)') ' PCLSAM input for raFreq(1) = ',raFreq(1)
     write(kStdWarn,'(A,F12.5)') ' emissivity = ',raUseEmissivity(1)
     write(kStdWarn,'(A,I4)')    ' NLYR          Number of computational layers   = ',iNumlayer
-    write(kStdWarn,'(A)') '   IC  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM '
+    write(kStdWarn,'(A)') '   II  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM '
     write(kStdWarn,'(A)') '-----------------------------------------------------------------------------------'
     write(kStdWarn,'(I4,I4,I4,2(F12.5))') 0,0,0,0.0,rTSpace
     iI = iNumlayer
@@ -999,7 +999,7 @@ CONTAINS
     iK = iK + 1
     write(kStdWarn,'(I4,I4,I4,2(F12.5))') iNumlayer+1,iNumlayer+1,iK,rSurfPress,rSurfaceTemp
 
-    write(kStdWarn,'(A)') '  IC  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM'
+    write(kStdWarn,'(A)') '  II  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM'
     write(kStdWarn,'(A)') '---------------------------------------------------------------------------------' 
 
     RETURN

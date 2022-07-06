@@ -298,7 +298,7 @@ CONTAINS
     iSartaTables = iaaOverrideDefault(3,7)
 
     IF ((iSartaTables .NE. iDefault) .AND. (kOuterLoop .EQ. 1) .AND. (iFF .EQ. 1)) THEN
-      write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
+      write(kStdErr,*) 'OH OH KEEP DELTA SCALE for SetUpCloudsDISORT'
       write(kStdErr,'(A,I3,I3,A,I3,I3)') 'SetUpCloudsDISORT iDefault,iExtScaling = ',&
                    iDefault,iSartaTables,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
@@ -353,8 +353,10 @@ CONTAINS
             SSALB_RTSPEC(L) = rW
             ASYM_RTSPEC(L) = rG
 
-!            write(kStdErr,'(A,2(F12.5),3(ES12.5))') &
-!            ' iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG',rF,DME(L),EXTINCT/1000,SSALB_RTSPEC(L),ASYM_RTSPEC(L)
+!            IF (iFF .EQ. 1) THEN
+!              write(kStdErr,'(A,2(F12.5),4(ES12.5))') &
+!              ' DISORT iSartaTables = 1 : UNSCALED rF, rDME, rE rW rG IWP(L)',rF,DME(L),EXTINCT/1000,SSALB_RTSPEC(L),ASYM_RTSPEC(L),IWP(L)
+!            END IF
 
           END IF
 
@@ -2227,21 +2229,28 @@ CONTAINS
     WRITE(kStdWarn,'(A,F12.5)') ' emissivity = ',TEMIS
     write(kStdWarn,'(A,I4)') ' NLYR          Number of computational layers   = ',NLYR
     write(kStdWarn,'(A,I4)') ' NMOM          Number of phase function moments = ',NMOM
-    write(kStdWarn,'(A)')    '   IC                             TLEV     DTAUC    SSALB    PMOM(0)    PMOM(1)   PMOM(2)    PMOM(3)'
-    write(kStdWarn,'(A)')    ' ----------------------------------------------------------------------------------------------------'
-    WRITE(kStdWarn,'(3(I4),2(F12.5))') 0,0,0,0.0,TTEMP 
+    write(kStdWarn,'(A)')    '   IK  IJ  iI      PLEV        TLEV     DTAUC      SSALB      PMOM(0)      PMOM(1)     PMOM(2)      PMOM(3)'
+    write(kStdWarn,'(A)')    ' ------------------------------------------------------------------------------------------------------------'
+    WRITE(kStdWarn,'(3(I4),2(F12.5))') 0,0,0,0.0,TTEMP
+    iI = 1
+    iJ = iaRadLayer(iI)
+    iK = kProfLayer - iJ + 1
+    iI = iI - 1
+    iJ = iJ - 1
+    iK = iK + 1
+    write(kStdWarn,'(I4,I4,I4,2(F12.5))') iK,iJ,iI,raPressLevels(iK+(kProfLayer-iNumLayer)),TEMPER(iI)
     DO iI = 1,NLYR
       IJ = iaRadLayer(iI)
       iK = kProfLayer - iJ + 1
       IF ((iI .EQ. ICLDTOP) .OR. (iI .EQ. ICLDBOT)) THEN
-        write(kStdWarn,'(A)')    ' -----------------------------------------------------------------------------------------------'
+        write(kStdWarn,'(A)')    ' ------------------------------------------------------------------------------------------------------------'
       END IF
       WRITE(kStdWarn,'(3(I4),2(F12.5),6(ES12.5))') & 
-       iI,iJ,iK,raPressLevels(iK+(kProfLayer-iNumLayer)),TEMPER(iI),DTAUC(iI),SSALB(iI),PMOM(0,iI),PMOM(1,iI),PMOM(2,iI),PMOM(3,iI)
+       iK,iJ,iI,raPressLevels(iK+(kProfLayer-iNumLayer)),TEMPER(iI),DTAUC(iI),SSALB(iI),PMOM(0,iI),PMOM(1,iI),PMOM(2,iI),PMOM(3,iI)
     END DO
     WRITE(kStdWarn,'(3(I4),2(F12.5))') NLYR+1,NLYR+1,NLYR+1,rSurfPress,BTEMP 
-    write(kStdWarn,'(A)')    '   IC                             TLEV     DTAUC    SSALB    PMOM(0)    PMOM(1)   PMOM(2)    PMOM(3)'
-    write(kStdWarn,'(A)')    ' ---------------------------------------------------------------------------------------------------'
+    write(kStdWarn,'(A)')    '   IK  IJ  iI      PLEV        TLEV     DTAUC      SSALB      PMOM(0)      PMOM(1)     PMOM(2)      PMOM(3)'
+    write(kStdWarn,'(A)')    ' ------------------------------------------------------------------------------------------------------------'
 
     IF (LAMBER .EQ. .true.) THEN
       write(kStdWarn,'(A)') 'LAMBER = true = isotropic reflecting boundary'
