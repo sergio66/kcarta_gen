@@ -447,8 +447,9 @@ CONTAINS
 !************************************************************************
 ! this does the final initializations before calling DISORT
     SUBROUTINE FinalInitialization( &
-!!!!inputs
-    iDownWard,rSatAngle,rTopIntensity,rSolarBeam,emiss, &
+!!!!inputs, note dtauc     == input and output
+!!!!inputs, note rStaAngle == scanang at TOA!!! and not satzen at GND
+    iDownWard,rSatAngle,raLayAngles,rTopIntensity,rSolarBeam,emiss, &
     rSurfaceTemp,dtauc,dTotalOpticalDepth,iDoFlux,nlev, &
     iNp,iaOp, &
 !!!!outputs
@@ -465,7 +466,7 @@ CONTAINS
     INTEGER :: nlev,iNp,iaOp(kPathsOut)
     DOUBLE PRECISION :: dtauc(maxcly)    !optical depths; also used as INPUT
     DOUBLE PRECISION :: dTotalOpticalDepth
-    REAL :: rSatAngle,rTopIntensity,rSolarBeam,emiss,rSurfaceTemp
+    REAL :: rSatAngle,raLayAngles(kProfLayer),rTopIntensity,rSolarBeam,emiss,rSurfaceTemp
     INTEGER :: iDownWard,iDoFlux
 ! output variables
     INTEGER :: ntau,numu,nphi
@@ -485,7 +486,31 @@ CONTAINS
 ! local variables
     INTEGER :: iI,iJ
     DOUBLE PRECISION :: d1,d2,dCumulative(maxcly)
-         
+    REAL :: rGndSatzen,raDeltaAngle(kProfLayer),raODadjust(kProfLayer)
+
+!        Recall satzen at ground >= scanang at satellite 
+!        Let x0    = satzen at ground
+!            dx(z) = is how local satzen DECREASES
+!        cos(x0 - dx(z)) = cos(x0) cos(dx(z)) + sin(x0) sin(dx(z))
+!                        = cos(x0) [cos(dx(z)) + sin(x0)/cos(x0) sin(dx(z))]
+!                        = cos(x0) [cos(dx(z)) + tan(x0) sin(dx(z))]
+!        So obviously for nadir, dx(z) = 0 and  the adjustment = [cos(dx(z)) + tan(x0) sin(dx(z))] = 1
+!                     for x0 > 0, dx(z) > 0 and the adjustment = [cos(dx(z)) + tan(x0) sin(dx(z))] < 0
+!         eg if scanang at 705km = 40 deg, satzen at 100 km = 44.55 deg, satzen at gnd = 45.55 deg
+!                     adjustment = cos(1) + tan(45.55)sin(1) = 1.01 ~= 1% adjustment!!!!
+    raODadjust = 1.0
+
+!!!   rSatAngle = zenith angle at TOA, not scanang!!! SET in kcartamain.f90 in rSatAngleX
+!!!!  rSatAngle  = raLayAngles(kProfLayer)  !!!! << use SCANANG at TOA, not SATZEN at GND >>> !!!!
+    rGndSatzen = raLayAngles(kProfLayer-nlev+1)
+!    DO iI = 1,kProfLayer
+!      raDeltaAngle(iI) = rGndSatzen - raLayAngles(iI)
+!      raODadjust(iI) = cos(raDeltaAngle(iI)*kPi/180) + sin(raDeltaAngle(iI)*kPi/180)*tan(rGndSatzen*kPi/180)
+!!      print *,iI,raLayAngles(iI),rGndSatzen,raDeltaAngle(iI),raODadjust(iI)
+!      dtauc(nlev-iI+1) = dtauc(nlev-iI+1)/raODadjust(iI)
+!    END DO
+!    call dostop
+
     d1 = dtauc(1)
     d2 = dTotalOpticalDepth
 
@@ -497,9 +522,9 @@ CONTAINS
 
       !!!!allow more than one level
       ntau = iNp
+      dCumulative = 0
       dCumulative(1) = dtauc(1)
       DO iI = 2,nlev-1
-        dCumulative(iI) = 0.0
         dCumulative(iI) = dtauc(iI) + dCumulative(iI-1)
       END DO
 

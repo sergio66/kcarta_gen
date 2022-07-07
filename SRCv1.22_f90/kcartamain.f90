@@ -70,7 +70,8 @@
 !    calculation for (iAtm=1..iNatm)
 ! rTSpace is the temp of the backgrnd atmosphere, rTSurf is the surface temp
 ! rEmsty is the surface emissivity
-! raSatAngle is the satellite view angle
+! raSatAngle is the satellite viewangle
+!   which is set to be p.satzen but for plane parallel DISORT should be p.scanang
 ! raSatHeight is the satellite height
 ! the ia..., ra.. are the arrays holding the above parameters for the various
 ! atmospheres
@@ -80,7 +81,7 @@
     INTEGER :: iL_low,iL_high
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm)
-    REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
+    REAL :: raSatHeight(kMaxAtm),raSatAngle(kMaxAtm),rSatAngleX
 ! raS**Azimuth are the azimuth angles for solar beam single scatter
     REAL :: raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm)
     REAL :: raWindSpeed(kMaxAtm)
@@ -1338,13 +1339,29 @@
             ELSE IF ((abs(kWhichScatterCode) /= 0) .AND. (iaLimb(iAtm) < 0)) THEN
               ! %%%%%%%%%%%%% CLOUDY SKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               write(kStdWarn,*) ' ---> Cloud Sky Computations ...'
+              IF (iaaOverrideDefault(2,7) .EQ. 0) THEN
+                 rSatAngleX = raSatAngle(iAtm)    !!!! this is no ray tracing, just do things at p.scanang
+              ELSE
+                IF (kWhichScatterCode .EQ. 3) THEN
+                  !!!! this is for DISORT as it analytically integrates over Gaussina Angles to output at this angle
+                  rSatAngleX = raLayAngles(kProfLayer)
+                ELSE
+                  rSatAngleX = raSatAngle(iAtm)
+                END IF
+              END IF
+              IF (kOuterLoop .EQ. 1) THEN
+                write(kStdWarn,'(A,I4)') 'iaaOverride(2,7) = 0/+1/-1 for no/yes/yes plane parallel ',iaaOverrideDefault(2,7)
+                write(kStdWarn,'(A,F12.5,A,F12.5,A,I4)') &
+                  'raSatAngle(iAtm) = p.scanang = ',raSatAngle(iAtm), ' angle for radiance output ',rSatAngleX,' kWhichScatterCode = ',kWhichScatterCode
+              END IF
+
               CALL InterfaceScattering( &
                   raFreq,raaSumAbCoeff,raMixVertTemp,raNumberDensity, &
                   raaAmt,raaaAllDQ,raaaColDQ,raaAllDT,iaJacob,iJacob, &
                   iNumGases,iaGases,iNatm, &
                   caOutName,iOutNum,iAtm,iaNumLayer(iAtm),iaaRadLayer,raLayerHeight, &
                   raTSpace(iAtm),raTSurf(iAtm),rSurfPress,raUseEmissivity, &
-                  raSatAngle(iAtm),raFracTop(iAtm),raFracBot(iAtm), &
+                  rSatAngleX,raFracTop(iAtm),raFracBot(iAtm), &
                   iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten, &
                   raSurface,raSun,raThermal,raSunRefl, &
                   raLayAngles,raSunAngles, &

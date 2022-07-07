@@ -361,9 +361,9 @@ CONTAINS
 !!!                -2 to only dump downwelling backgnd
 !!!   see SUBR find_radiances in rad_main.f
     iaaOverrideDefault(2,7) = -1    
-!!! iUseSnell = -1 for No  Snell law raytrace plus layer curvature effects, similar to SARTA <<<default >>>
-!!!           = +1 for Yes Snell law raytrace plus layer curvature effects
-!!!           = 0  for No  Snell law raytrace NO   layer curvature effects  PLANE PARALLEL
+!!! iUseSnell = -1 for No  Snell law raytrace YES layer curvature effects, similar to SARTA <<<default >>>
+!!!           = +1 for Yes Snell law raytrace YES layer curvature effects
+!!!           = 0  for No  Snell law raytrace NO  layer curvature effects  PLANE PARALLEL
 !!!   see SUBR FindLayerAngles in rad_angles.f
     iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
 

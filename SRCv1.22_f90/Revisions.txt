@@ -607,21 +607,40 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
-6/29/22          rHDO_Deplete placeholder for HDO .. might make it a profile later
+7/6/22          Remember, can set iSnell = 0 (iaaOveride(2,7)) and the NO ray tracing due to curvature
+                is done. SO then PCLSAM angls will equal DISORT angles at all layers
+                Unfortunately DISORT does its Gaussian streams probably assuming nadir ODs are
+                sent in, with plane parallel assumptions
+                So technically cannot "preadjust" ODs but can try
+                Recall satzen at ground >= scanang at satellite 
+                Let x0    = satzen at ground
+                    dx(z) = is how local satzen DECREASES
+                cos(x0 - dx(z)) = cos(x0) cos(dx(z)) + sin(x0) sin(dx(z))
+                                = cos(x0) [cos(dx(z)) + sin(x0)/cos(x0) sin(dx(z))]
+                                = cos(x0) [cos(dx(z)) + tan(x0) sin(dx(z))]
+                So obviously for nadir, dx(z) = 0 and  the adjustment = [cos(dx(z)) + tan(x0) sin(dx(z))] = 1
+                             for x0 > 0, dx(z) > 0 and the adjustment = [cos(dx(z)) + tan(x0) sin(dx(z))] < 0
+                 eg if scanang at 705km = 40 deg, satzen at gnd = 45.55 deg
+                             adjustment = cos(5) + tan(45.55)sin(5) = 1.0850 ~= 10% adjustment!!!!
+                The biggest improvement for DISORT is to change rSatAngle from satzen at GND (raLayAngles(iaNumLayer(1))) 
+                to satzen at TOA ~ scanang (raLayAngles(iaNumLayer(iNumLayer)))
+                See the new lines of code in kcartamain.f90 before calling InterfaceScattering
 
-6/28/22          raaRTPCloudParamsF will have information about clouds so that AdjustChou can be parametrized
+6/29/22         rHDO_Deplete placeholder for HDO .. might make it a profile later
 
-6/27/22          Was having problems with background thermal when asking for fluxes
-                 a)  Plan to retire (iaaOverrideDefault(2,9) == 1) 
-                     since this is a LBLRTM high spectral res amd layer temp variation fix
-                     and now we have the options to do both (high spectral res database, kTemperVary = 43)
-                 b) iaaOverrideDefault(2,9) is now an integer 0 >= iaaOverrideDefault(2,9) >= 100
-                    and then the Chou adjustment factor = iaaOverrideDefault(2,9)/100
-                 c) n_misc was doing a lot of resetting of kTemperVary to +43 if fluxes were being asked for
-                    but then NOT touching iaaOverrideDefault(2,1) to 43 or iaaOverrideDefault(2,4) to +2
-                    So now this is being done!!!
+6/28/22         raaRTPCloudParamsF will have information about clouds so that AdjustChou can be parametrized
 
-6/25/22          iaaOverrideDefault(3,7) = +1 default : keep scattering tables delta scaled
+6/27/22         Was having problems with background thermal when asking for fluxes
+                a)  Plan to retire (iaaOverrideDefault(2,9) == 1) 
+                    since this is a LBLRTM high spectral res amd layer temp variation fix
+                    and now we have the options to do both (high spectral res database, kTemperVary = 43)
+                b) iaaOverrideDefault(2,9) is now an integer 0 >= iaaOverrideDefault(2,9) >= 100
+                   and then the Chou adjustment factor = iaaOverrideDefault(2,9)/100
+                c) n_misc was doing a lot of resetting of kTemperVary to +43 if fluxes were being asked for
+                   but then NOT touching iaaOverrideDefault(2,1) to 43 or iaaOverrideDefault(2,4) to +2
+                   So now this is being done!!!
+
+6/25/22         iaaOverrideDefault(3,7) = +1 default : keep scattering tables delta scaled
                                         = -1         : unscale them (ie no delta scaling)
 
 6/25/22         Note if cngwat is very small, now both PCLSAM and DISORT can either do just one clear calc, 
@@ -660,13 +679,7 @@ v1.22
                 So a 20 second run with PCLAM will take 30 minutes with DISORT on one processor
                 Each chunk (uncompressing database, PCLSAM RT) is about 1 secs at most for PCLSAM
                 So each chunk for DISORT would be about 100 second or 2 minutes
-
-                Remember, can set iSnell = 0 (iaaOveride(2,7)) and the NO ray tracing due to curvature
-                is done. SO then PCLSAM angls will equal DISORT angles at all layers
-                Unfortunately DISORT does it Gaussian streams probably assuming nadir ODs are
-                sent in, with plane parallel assumptions
-                So cannot "preadjust" ODs 
-
+                   
 6/9/22          Adding in PCLSAM scaling adjustments  
                 See "Improvement of the simulation of Cloud LW scattering in Broadband RTMs"
                 G. Tang, P. Yang, G. Kattawar, X. Huang, E. Mlawer, B. Baum, M. King

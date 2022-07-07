@@ -631,7 +631,7 @@ CONTAINS
       ! ++++++++++++++++ final initializations ++++++++++++++++++++++++++++++
       !     note we do not need flux here!!!!
       CALL FinalInitialization( &
-        iDownWard,rSatAngle,raTopIntensity(iF),raSolarBeam(iF), &
+        iDownWard,rSatAngle,raLayAngles,raTopIntensity(iF),raSolarBeam(iF), &
         raUseEmissivity(iF),rSurfaceTemp, &
         dtauc,dTotalOpticalDepth,iDoFlux,nlyr+1,iNp,iaOp, &
         usrtau,ntau,utau,usrang,numu,umu, &
