@@ -9,6 +9,7 @@ set_rtp
 set_gasOD_cumOD_rad_jac_flux_cloud_lblrtm
 
 disp('>>>>>')
+disp(' clust_do_kcarta_driver_DISORT')
 fprintf(1,'kcartaexec   = %s \n',kcartaexec);
 fprintf(1,'f1,f2 WILL BE RESET = %4i %4i \n',f1,f2);
 fprintf(1,'iDoRad       = %2i \n',iDoRad);
@@ -54,6 +55,7 @@ end
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));   %% PERTAINS TO WAVENUMBER CHUNK, NOT PROFILE
 %JOB = 46    %% can be between 1-89 for the 89 kCARTA chunks
+%JOB = 5
 
 if nargin == 0
   iiBin = 1;
@@ -63,7 +65,7 @@ f1 = 605 + (JOB-1)*25;
 f2 = f1 + 25;
 fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
 
-fprintf(1,'processing JOB %5i == same profile %5i \n',JOB,iiBin);
+fprintf(1,'processing kCARTA freq chunk JOB %5i profile %5i \n',JOB,iiBin);
 iDISORT = +1;
 do_kcarta
 

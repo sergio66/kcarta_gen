@@ -411,7 +411,7 @@ CONTAINS
         IF (kCO2_UMBCorHARTMAN > 0) THEN
           write(kStdWarn,*) ' kCO2_UMBCorHARTMAN is +1 for UMBC CO2 linemix',kCO2_UMBCorHARTMAN
           write(kStdWarn,*) ' ignore so NO chi fcns, since you are using LBLRTM CO2 database'
-          write(kStdErr,*)  ' ignore kCO2_UMBCorHARTMAN (+1) so NO chi fcns, for LBLRTM CO2 database'
+          write(kStdErr,'(A,F12.5)')  ' ignore kCO2_UMBCorHARTMAN (+1) so NO chi fcns, for LBLRTM CO2 database',raFreq(1)
           ! CO2_UMBCorHARTMAN = -1
         END IF
       END IF

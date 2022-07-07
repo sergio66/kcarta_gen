@@ -339,12 +339,14 @@ use_this_rtp = 'RTP/ecmwf_airicrad_day268_2021clear.rtp';
 
 use_this_rtp = '/home/chepplew/data/scratch/iasi_35987367.kla_1';
 use_this_rtp = '/home/sergio/KCARTA/IP_PROFILES/junk49_400ppm.op.rtp';              %% scanang = 22
+
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_nocld_USSTD.op.rtp';          %% testing DISORT
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_watercld_USSTD.op.rtp';       %% testing DISORT
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_tangtesticecld_USSTD.op.rtp'; %% testing DISORT
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_icecld_USSTD.op.rtp';         %% testing DISORT
-use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_watercld_USSTD_7cngwat.op.rtp'; %% testing PCLSAM with Chou adjustment
-use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_icecld_USSTD_7cngwat.op.rtp'; %% testing PCLSAM with Chou adjustment
+use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_icecld_USSTD_7cngwat.op.rtp';       %% testing PCLSAM with Chou adjustment
+use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_watercld_USSTD_7cngwat.op.rtp';     %% testing PCLSAM with Chou adjustment
+use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_iceNwatercld_USSTD_7cngwat.op.rtp'; %% testing PCLSAM with Chou adjustment 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m

@@ -2649,7 +2649,7 @@ CONTAINS
 ! local 
       REAL :: raZZ(kMaxPts),raYY(kMaxPts),raXX(kMaxPts),raBB(kMaxPts),raFactor(kMaxPts),rPCLSAMfact,r0p5fact
       REAL :: ra0p5fact(kProfLayer)
-      INTEGER :: iI,iJ,iK
+      INTEGER :: iI,iJ,iK,iVers
 
       !! RRTM uses the following angles and wgts , for x = 3.5g/m2 at 11 km gives about -1 % corrections to flux in window
       !! also asee Subroutine FindGauss2 in rad_angles.f90
@@ -2657,31 +2657,43 @@ CONTAINS
       !! 19.4620   43.6528   65.3921   81.9660
       !!  0.1335    0.2035    0.1299    0.03118
 
-      rPCLSAMfact = 1.0  !!! should be true 
-      rPCLSAMfact = 0.0  !!! but Tang sets to 0 in RRTM
+      iVers = 0 !! this is Tang paper use 0.3
+      iVers = 1 !! use iaaOverrideDefault(2,9)/100.0
+      iVers = 3 !! use tuned for ice/water clouds version
+      
+      IF (iVers .EQ. 1) THEN
+        rPCLSAMfact = 1.0  !!! should be true 
+        rPCLSAMfact = 0.0  !!! but Tang sets to 0 in RRTM
+  
+        r0p5fact = 0.50     !! this is what Tang/Yang/Huang derive
+        r0p5fact = 0.35     !! <<<<< this is what I used for debugging, but maybe too large >>>>
+        r0p5fact = 0.40     !! this is what Tang/Yang/Huang say to use for smiliarity adjustment
+        r0p5fact = 0.30     !! this is what Tang/Yang/Huang say to use for Chou adjustment, but probably ICE only!! WATER seems much smaller, 0.05
+      
+      ELSEIF (iVers .EQ. 2) THEN  
+        r0p5fact = iaaOverrideDefault(2,9)/100.0
 
-      r0p5fact = 0.50     !! this is what Tang/Yang/Huang derive
-      r0p5fact = 0.35     !! <<<<< this is what I used for debugging, but maybe too large >>>>
-      r0p5fact = 0.40     !! this is what Tang/Yang/Huang say to use for smiliarity adjustment
-      r0p5fact = 0.30     !! this is what Tang/Yang/Huang say to use for Chou adjustment, but probably ICE only!! WATER seems much smaller, 0.05
-
-      r0p5fact = iaaOverrideDefault(2,9)/100.0
-
-      !!!! note iL = iaRadLayer(iLay,iLay=1:iNumLayer)
-      !!!! so iI <--> iLay     iL <--> iJ
-      ra0p5fact = 0.0
-      DO iI = 1,iNumLayer
-        iJ = iaRadLayer(iI)
-        iK = iNumLayer - iI + 1
-        IF (iaCloudTypeProfile(iJ) == 101) THEN
-          ra0p5fact(iK) = 0.10
-!          write(kStdErr,'(A,5(I3),F12.5)') 'choud adjust',iLay,iL,iI,iJ,iK,ra0p5fact(iK)
-        ELSEIF (iaCloudTypeProfile(iJ) == 201) THEN
-          ra0p5fact(iK) = 0.30
-!          write(kStdErr,'(A,5(I3),F12.5)') 'choud adjust',iLay,iL,iI,iJ,iK,ra0p5fact(iK)
-        END IF
-      END DO
-      r0p5fact = ra0p5fact(iL)
+      ELSEIF (iVers .EQ. 3) THEN  
+        !!!! note iL = iaRadLayer(iLay,iLay=1:iNumLayer)
+        !!!! so iI <--> iLay     iL <--> iJ
+        ra0p5fact = 0.0
+        DO iI = 1,iNumLayer
+          iJ = iaRadLayer(iI)
+          iK = iNumLayer - iI + 1
+          IF ((iaCloudTypeProfile(iJ) == 101) .OR. (iaCloudTypeProfile(iJ) == 301)) THEN
+            !! water and aerosol typiclally lower in atmosphere
+            ra0p5fact(iK) = 0.10
+            ra0p5fact(iK) = 0.05
+            ! write(kStdErr,'(A,5(I3),F12.5)') 'choud adjust',iLay,iL,iI,iJ,iK,ra0p5fact(iK)
+          ELSEIF (iaCloudTypeProfile(iJ) == 201)  THEN
+            !! cirrus typically higher in atmosphere
+            ra0p5fact(iK) = 0.30
+            ra0p5fact(iK) = 0.20
+            ! write(kStdErr,'(A,5(I3),F12.5)') 'choud adjust',iLay,iL,iI,iJ,iK,ra0p5fact(iK)
+          END IF
+        END DO
+        r0p5fact = ra0p5fact(iL)
+      END IF
 
       IF (kOuterLoop .EQ. 1) THEN
         write(kStdWarn,'(A,3(I3),F12.5)') 'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iaCloudTypeProfile(iL),r0p5fact

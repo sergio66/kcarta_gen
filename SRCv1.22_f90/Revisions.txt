@@ -626,6 +626,8 @@ v1.22
                 to satzen at TOA ~ scanang (raLayAngles(iaNumLayer(iNumLayer)))
                 See the new lines of code in kcartamain.f90 before calling InterfaceScattering
 
+                Plus, there is always the PLANE PARALLEL option (iaaOverride(2,7) = 0) which works best for clear sky comparisons!
+
 6/29/22         rHDO_Deplete placeholder for HDO .. might make it a profile later
 
 6/28/22         raaRTPCloudParamsF will have information about clouds so that AdjustChou can be parametrized

@@ -576,7 +576,11 @@ CONTAINS
         kSolarAngle = kSolarAngle+1e-4
     END IF
     fbeam  = DBLE(rSolarBeam)
-    umu0   = DBLE(cos(kSolarAngle*kPi/180))
+    IF (kSolarAngle .LT. 90) THEN
+      umu0   = DBLE(cos(kSolarAngle*kPi/180))
+    ELSE
+      umu0   = DBLE(cos(89.9999*kPi/180))
+    END IF
     phi0   = DBLE(0.0)
 
     ibcnd = 0                   ! general case
@@ -2325,7 +2329,7 @@ CONTAINS
     END IF
 
     write(kStdWarn,*) ' '
-    write(kStdWarn,'(A,3(ES12.5))') 'FBEAM intensity,cos(sol0),sol0,phi0',FBEAM,UMU0,acos(UMU0)*180/kPi,PHI0
+    write(kStdWarn,'(A,4(ES12.5))') 'FBEAM intensity,cos(sol0),sol0,phi0',FBEAM,UMU0,acos(UMU0)*180/kPi,PHI0
     write(kStdWarn,'(A,ES12.5)')    'FISOT intensity of top boundary illumination',FISOT
 
     write(kStdWarn,*) ' '

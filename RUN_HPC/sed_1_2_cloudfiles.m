@@ -28,13 +28,13 @@ if iCloudTableVersion == -1
     iCloudType1 = ctype;
     if ctype == 101
       strCloudType1 = strWaterCloud
-    elseif ctype == 102
+    elseif ctype == 201
       strCloudType1 = strIceCloud;
     end
     iCloudType2 = ctype2;
     if ctype2 == 101
       strCloudType2 = strWaterCloud
-    else
+    elseif ctype2 == 201
       strCloudType2 = strIceCloud;
     end
     sedder = [sedder ' -e "s/iCloudType1/'     num2str(ctype) '/g"  -e "s/strCloudType1/'  strCloudType1 '/g"'];
