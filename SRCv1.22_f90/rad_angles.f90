@@ -164,8 +164,8 @@ CONTAINS
       CALL DoStop
     END IF
     if ((iDefault /= iUseSnell) .AND. (kOuterLoop == 1)) THEN
-      write(kStdWarn,*) 'not(-1)/using(+1) Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
-      write(kStdErr,*)  'not(-1)/using(+1) Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
+      write(kStdWarn,'(A,I3)') 'not(0)/using(+1,-1) Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
+      write(kStdErr,'(A,I3)')  'not(0)/using(+1,-1) Snell law in FindLayerAngles (raytrace thru layers)',iUseSnell
     END IF
           
     iMin = +1000000

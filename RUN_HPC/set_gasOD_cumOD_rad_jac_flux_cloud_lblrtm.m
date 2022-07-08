@@ -214,7 +214,7 @@ end
 
 strWaterCloud = '/asl/s1/sergio/CLOUDS_MIEDATA/WATER250/water_405_2905_250';
 strIceCloud   = '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta';
-strIceCloud   = '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRS_PYANG_MODIS_CERES/COARSE_RRTM/kcarta_200_3000_pingyang_modisL2.dat'
+%strIceCloud   = '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRS_PYANG_MODIS_CERES/COARSE_RRTM/kcarta_200_3000_pingyang_modisL2.dat'
 
 caComment = [date ' ' kcartaexec ' iDoRad=' num2str(iDoRad) ' iDoLBLRTM=' num2str(iDoLBLRTM) ' iDo_rt_1vs43=' num2str(iDo_rt_1vs43,'%02d')];
 caComment = [caComment ' iDoCloud=' num2str(iDoCloud)];

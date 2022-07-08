@@ -2649,7 +2649,7 @@ CONTAINS
 ! local 
       REAL :: raZZ(kMaxPts),raYY(kMaxPts),raXX(kMaxPts),raBB(kMaxPts),raFactor(kMaxPts),rPCLSAMfact,r0p5fact
       REAL :: ra0p5fact(kProfLayer)
-      INTEGER :: iI,iJ,iK,iVers
+      INTEGER :: iI,iJ,iK,iVers,iDefault
 
       !! RRTM uses the following angles and wgts , for x = 3.5g/m2 at 11 km gives about -1 % corrections to flux in window
       !! also asee Subroutine FindGauss2 in rad_angles.f90
@@ -2657,10 +2657,23 @@ CONTAINS
       !! 19.4620   43.6528   65.3921   81.9660
       !!  0.1335    0.2035    0.1299    0.03118
 
+      iDefault = 3
       iVers = 0 !! this is Tang paper use 0.3
       iVers = 1 !! use iaaOverrideDefault(2,9)/100.0
       iVers = 3 !! use tuned for ice/water clouds version
-      
+
+      iVers = 1 !! use iaaOverrideDefault(2,9)/100.0
+
+      IF ((kOuterLoop .EQ. 1) .AND. (iDefault .NE. iVers)) THEN
+        write(kStdErr,'(A,I3,I3)') 'ChouAdjust subroutine iDefault (tuned factor) vs  iVers = ',iDefault,iVers
+      END IF
+
+!      IF (iaaOverrideDefault(2,9) > 0 .AND. iaaOverrideDefault(2,9) < 100) THEN
+!        iVers = 1
+!      END IF
+!      print *,iVers,iaaOverrideDefault(2,9)
+!      call dostop
+   
       IF (iVers .EQ. 1) THEN
         rPCLSAMfact = 1.0  !!! should be true 
         rPCLSAMfact = 0.0  !!! but Tang sets to 0 in RRTM

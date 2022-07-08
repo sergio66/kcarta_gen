@@ -13,7 +13,9 @@
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --exclude=cnode203,cnode267 --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-89       sergio_matlab_jobB.sbatch 9 789   to run DISORT for 89 chunks, profil 789 of the rtp file
+# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-89       sergio_matlab_jobB.sbatch 9 789   to run DISORT seprately chunk by chunk, profile 789 of the rtp file
+#                                        submit_many_disort_runs.m   can launch multiple profiles then gather up results using read_disort_chunks
+# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 10      to run DISORT for 89 chunks, profil 789 of the rtp file, straighforward readkcstd
 #
 # >>>>>>>>>>>>>>>>>>>>>>>>>
 # if putting ONE job per node (ie no loop)
@@ -21,8 +23,11 @@
 #    where the %128 limits to 128 jobs at a go, to limit simultaneous resource need
 # if putting MANY jobs per node (ie loop)
 # run this with   /bin/rm batchout*.out batchout*.err JUNK/rad.dat*; sbatch --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2 << make sure you do Nprofs/iaChunkSize!!!!
-#                 rmer_slurm_JUNKrad.sc;  sbatch --partition=high_mem --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2 << make sure you do Nprofs/iaChunkSize!!!!
-#                 rmer_slurm_JUNKrad.sc;  sbatch --partition=cpu2021  --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2 << make sure you do Nprofs/iaChunkSize!!!!
+#                 rmer_slurm_JUNKrad.sc;  sbatch --partition=high_mem --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2       << make sure you do Nprofs/iaChunkSize!!!!
+#                 rmer_slurm_JUNKrad.sc;  sbatch --partition=cpu2021  --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2       << make sure you do Nprofs/iaChunkSize!!!!
+#                 rmer_slurm_JUNKrad.sc;  sbatch -p cpu2021           --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 11 78   << make sure you do Nprofs/iaChunkSize!!!! 
+#                                                                                                                                    << run DISORT for freqchunk 78, profiles (1:iaChunkSize) + (JOB-1)*iaChunkSize
+#                                        submit_many_disort_run_loops.m   can launch multiple profiles then gather up results using read_disort_chunks
 # >>>>>>>>>>>>>>>>>>>>>>>>>
 
 #  Name of the job:
@@ -57,8 +62,12 @@
 ##SBATCH --time=0:59:00
 
 # TwoSlab clouds jacs rads, loop 
+##SBATCH --qos=medium+
+##SBATCH --time=3:59:00
+
+# DISORT rads, using option 10 where we loop
 #SBATCH --qos=medium+
-#SBATCH --time=3:59:00
+#SBATCH --time=1:59:00
 
 ########################################################################
 
@@ -121,10 +130,20 @@ elif [[ "$1" -eq "8" ]]; then
   # this loops over H2008,H2012,H2016
   matlab -nodisplay -r "clust_do_kcarta_driver_allHITRAN; exit"
 elif [[ "$1" -eq "9" ]]; then
-  # this loops over 25 cm-1 chunks for DISORT
+  # this loops over 25 cm-1 chunks for DISORT, if you only have a handful of profiles this is fast since it breaks profiles/freqchunks for separate proceeors
   if [[ $# -eq 1 ]]; then
     matlab -nodisplay -r "clust_do_kcarta_driver_DISORT(1); exit"
   elif [[ $# -eq 2 ]]; then
     matlab -nodisplay -r "clust_do_kcarta_driver_DISORT($2); exit"
+  fi
+elif [[ "$1" -eq "10" ]]; then
+  # this is individual entire spectrum DISORT runs, 90+ minutes each, this is slow but straightforward
+  matlab -nodisplay -r "clust_do_kcarta_driver_DISORT_wholespectrum; exit"
+elif [[ "$1" -eq "11" ]]; then
+  # this loops over 25 cm-1 chunks for DISORT, this is complicated
+  if [[ $# -eq 1 ]]; then
+    matlab -nodisplay -r "iaChunkSize = 50; clust_do_kcarta_driver_DISORT_loop(1,iaChunkSize); exit"
+  elif [[ $# -eq 2 ]]; then
+    matlab -nodisplay -r "iaChunkSize = 50; clust_do_kcarta_driver_DISORT_loop($2,iaChunkSize); exit"
   fi
 fi

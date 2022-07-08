@@ -1,9 +1,11 @@
-function [] = clust_do_kcarta_driver_DISORT(iiBin)
 %% % /bin/rm slurm* JUNK/rad.dat*; ; sbatch --array=G1-G2 sergio_matlab_jobB.sbatch
 
 %% need to modify template_Qradcloud_2cloud_DISORT.nml CORRECTLY for the rtp file to process!
-%% read in the individual chunks and put together entire spectrum using read_disort_chunks
-%% launch many jobs using submit_many_disort_runs.m
+%% this takes at least 90 minutes per spectrum, but no complications!!!!!!!!
+
+%% read in the entire spectrum using readkcstd
+%% launch many jobs as you want, no complications .. just make sure slurm is medium queue/120 minutes
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 set_rtp
@@ -55,15 +57,12 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));   %% PERTAINS TO WAVENUMBER CHUNK, NOT PROFILE
-%JOB = 46    %% can be between 1-89 for the 89 kCARTA chunks
 %JOB = 5
 
-if nargin == 0
-  iiBin = 1;  
-end
+iiBin = JOB;
 
-f1 = 605 + (JOB-1)*25;
-f2 = f1 + 25;
+f1 = 605;
+f2 = 2830;
 fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
 
 fprintf(1,'processing kCARTA freq chunk JOB %5i profile %5i \n',JOB,iiBin);

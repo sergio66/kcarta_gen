@@ -24,7 +24,9 @@
  !! keep mie params delta scaled
  iaaOverride(3,7) = +1
  !! no delta scaling ie undo what you did when making the scattering tables
- iaaOverride(3,7) = -1
+
+ !plane parallel to test DISORT vs PCLSAM AT ANY ANGLE
+ iaaOverride(2,7) = 0
 
  !! for heating rates
  !kFlux = 6

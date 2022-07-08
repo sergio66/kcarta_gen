@@ -408,8 +408,10 @@ if nchunk ~= 1+highchunk-lowchunk
   error('readkc: chunk counts do not match!');
 end
 
-fprintf(2, 'readkc: %d chunks, %d ODBs, %d total rows\n', ...
-        nchunk, nODBs, sum(nODBrows));
+iQuiet = +1;
+if iQuiet < 0
+  fprintf(2, 'readkc: %d chunks, %d ODBs, %d total rows\n',nchunk, nODBs, sum(nODBrows));
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % initialize output file or array
@@ -478,8 +480,10 @@ for chunk = 1:nchunk
     flen    = fread(fin, 1, 'integer*4');
   
     if chunk == 1
-      fprintf(2, 'readkc: ODB type = %d, subtype = %d, rows = %d\n', ...
-                type, subtype, nrow);
+      if iQuiet < 0
+        fprintf(2, 'readkc: ODB type = %d, subtype = %d, rows = %d\n', ...
+                    type, subtype, nrow);
+      end
     end
 
     % sanity check

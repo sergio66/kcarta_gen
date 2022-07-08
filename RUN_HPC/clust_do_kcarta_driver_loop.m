@@ -64,22 +64,6 @@ for ix = 1 : length(iiBinAll)
   fprintf(1,'JOB = %4i index %2i of %2i : processing %5i \n',JOB,ix,length(iiBinAll),iiBin);
   outfilejunk = ['JUNK/individual_prof_convolved_kcarta_crisHI_' num2str(iiBin) '.mat'];
 
-  %{
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-  %% JUNK/AIRS_gridded_Oct2020_trendsonly/ -- 97 layer WV and O3 jacs
-  outfilejunk   = ['JUNK/individual_prof_convolved_kcarta_airs_' num2str(iiBin) '.mat'];
-  outfilejunkX  = ['JUNK/AIRS_gridded_Oct2020_trendsonly/individual_prof_convolved_kcarta_airs_' num2str(iiBin) '.mat'];
-  outfilejunkXJ = ['JUNK/AIRS_gridded_Oct2020_trendsonly/individual_prof_convolved_kcarta_airs_' num2str(iiBin) '_jac.mat'];
-
-  %% JUNK/AIRS_gridded_Oct2020_trendsonly/ -- col jacs
-  outfilejunk   = ['JUNK/individual_prof_convolved_kcarta_airs_' num2str(iiBin) '.mat'];
-  outfilejunkX  = ['JUNK/AIRS_gridded_Oct2020_trendsonly/individual_prof_convolved_kcarta_airs_' num2str(iiBin) '.mat'];
-  outfilejunkXJ = ['JUNK/AIRS_gridded_Oct2020_trendsonly/individual_prof_convolved_kcarta_airs_' num2str(iiBin) '_coljac.mat'];
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-
-  if ~exist(outfilejunk) & ~exist(outfilejunkXJ)
-  %}
-
   if ~exist(outfilejunk)
     do_kcarta
 

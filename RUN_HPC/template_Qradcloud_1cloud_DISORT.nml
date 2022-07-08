@@ -22,12 +22,12 @@
  !! no delta scaling ie undo what you did when making the scattering tables
  iaaOverride(3,7) = -1
 
- !plane parallel to test DISORT AT ANY ANGLE
- iaaOverride(2,7) = 0
-
  !! ktempervary iLBLRTM RT (kTemperVary = 43) plus fixes for high res, -1 for no vary
  iaaOverride(2,1) = 43    !! to do linear in tau
  iaaOverride(2,1) = -1    !! to do const
+
+ !plane parallel to test DISORT vs PCLSAM AT ANY ANGLE
+ iaaOverride(2,7) = 0
 
  caNMLReset_param_spectra = 'template_reset_nm_spectra.nml' 
 

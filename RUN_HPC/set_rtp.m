@@ -347,6 +347,7 @@ use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_Tang
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_icecld_USSTD_7cngwat.op.rtp';       %% testing PCLSAM with Chou adjustment
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_watercld_USSTD_7cngwat.op.rtp';     %% testing PCLSAM with Chou adjustment
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_iceNwatercld_USSTD_7cngwat.op.rtp'; %% testing PCLSAM with Chou adjustment 
+use_this_rtp = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/parametrize_pclsam_disort_AFGL_1.rp.rtp';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m
