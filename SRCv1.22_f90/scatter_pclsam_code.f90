@@ -2658,11 +2658,11 @@ CONTAINS
       !!  0.1335    0.2035    0.1299    0.03118
 
       iDefault = 3
-      iVers = 0 !! this is Tang paper use 0.3
-      iVers = 1 !! use iaaOverrideDefault(2,9)/100.0
+      iVers = 1 !! this is Tang paper use 0.3
+      iVers = 2 !! use iaaOverrideDefault(2,9)/100.0
       iVers = 3 !! use tuned for ice/water clouds version
 
-      iVers = 1 !! use iaaOverrideDefault(2,9)/100.0
+      iVers = 2 !! use iaaOverrideDefault(2,9)/100.0
 
       IF ((kOuterLoop .EQ. 1) .AND. (iDefault .NE. iVers)) THEN
         write(kStdErr,'(A,I3,I3)') 'ChouAdjust subroutine iDefault (tuned factor) vs  iVers = ',iDefault,iVers

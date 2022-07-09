@@ -1,3 +1,9 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+system_slurm_stats
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 use_this_rtp = '/home/sergio/MATLABCODE/RANDOM_LARRABEE/bdry_layer_wv.rtp';
 use_this_rtp = '/home/sergio/kcartaV118/WORK/test_sergio_fixzobs_clear.rtp';
 

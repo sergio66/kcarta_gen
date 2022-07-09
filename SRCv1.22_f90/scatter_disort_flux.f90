@@ -957,7 +957,7 @@ CONTAINS
       !     note we do need flux here!!!!
       iDoFlux = 1
       CALL FinalInitialization( &
-        iDownWard,rSatAngle,raTopIntensity(iF),raSolarBeam(iF), &
+        iDownWard,rSatAngle,raLayAngles,raTopIntensity(iF),raSolarBeam(iF), &
         raUseEmissivity(iF),rSurfaceTemp, &
         dtauc,dTotalOpticalDepth,iDoFlux, nlyr+1,iNp,iaOp, &
         usrtau,ntau,utau,usrang,numu,umu, &

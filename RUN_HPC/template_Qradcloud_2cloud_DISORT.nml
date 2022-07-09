@@ -22,7 +22,7 @@
  !! no delta scaling ie undo what you did when making the scattering tables
  iaaOverride(3,7) = -1
 
- !plane parallel to test DISORT AT ANY ANGLE
+ !plane parallel to test DISORT vs PCLSAM AT ANY ANGLE
  iaaOverride(2,7) = 0
 
  !! ktempervary iLBLRTM RT (kTemperVary = 43) plus fixes for high res, -1 for no vary
@@ -91,8 +91,7 @@
  iWhichScatterCode_RTP =  3
  iScatter_RTP          =  1
 
- iRTP = 1
- iRTP = MMM !!! NOTE YOU HAVE TO FIX THE RTP PROF HERE
+ iRTP = MMM 
  iMPSetForRadRTP = 1
  caPFname = '/home/sergio/MATLABCODE/RANDOM_LARRABEE/bdry_layer_wv.rtp'
  caPFname = 'XYZXYZ'

@@ -29,6 +29,9 @@
  !plane parallel to test DISORT vs PCLSAM AT ANY ANGLE
  iaaOverride(2,7) = 0
 
+ !Chou adjust factor/100
+ iaaOverride(2,9) = 05
+
  !! for heating rates
  !kFlux = 6
  !! for OLR and ILR
@@ -59,7 +62,6 @@
 
  $nm_prfile
  namecomment	=  '******* PRFILE section *******'
- iRTP = MMM
  iBinOrAsc    = 1
 
  iNclouds_RTP   = 2
@@ -92,6 +94,7 @@
  iaNML_Ctype(2)  = iCloudType2
  caaCloudFile(2) = 'strCloudType2'
 
+ iRTP = MMM
  iMPSetForRadRTP = 1
  caPFname = '/home/sergio/MATLABCODE/RANDOM_LARRABEE/bdry_layer_wv.rtp'
  caPFname = 'XYZXYZ'

@@ -169,8 +169,8 @@ iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac =
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;               %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2346;   iDoRad = 3; iDoJac = +100; iDoCloud = -1; %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2;      iDoJac = +1; iDoCloud = -1;               %% use LBLRTM ODs   ************************************* BEST DEFAULT
-iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT cldsky  PCLSAM no jacs
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 20; iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs, DISORT *********************** DISORT
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT cldsky  PCLSAM no jacs
 %              iHITRAN = 2012;
 %              iHITRAN = 2008;
 

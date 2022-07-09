@@ -91,8 +91,7 @@
  iWhichScatterCode_RTP =  3
  iScatter_RTP          =  1
 
- !!! iRTP = 1
- iRTP = MMM !!! NOTE YOU HAVE TO FIX THE RTP PROF HERE
+ iRTP = MMM
  iMPSetForRadRTP = 1
  caPFname = '/home/sergio/MATLABCODE/RANDOM_LARRABEE/bdry_layer_wv.rtp'
  caPFname = 'XYZXYZ'
