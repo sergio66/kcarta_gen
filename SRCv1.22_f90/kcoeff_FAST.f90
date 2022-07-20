@@ -75,11 +75,13 @@ CONTAINS
     INTEGER :: i1,i2
     INTEGER :: ix1,ix2,ix3
     REAL ::    rx1,rx2,rx3
+    INTEGER :: iy1,iy2,iy3
+    REAL ::    ry1,ry2,ry3
 
 ! these are to read in the original 100 layers AIRS ref profile for the gas
 ! these are to read in the new kProfLayers ref profile for the gas
     CHARACTER(160) :: caFName,caStr
-    INTEGER :: iE,iX
+    INTEGER :: iE,iX,iY
     REAL :: raOrig100A(kMaxLayer),raOrig100T(kMaxLayer)
     REAL :: raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer)
     REAL :: xPLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
@@ -111,20 +113,20 @@ CONTAINS
      
     write(kStdWarn,*) 'Figuring out the kComp Corner Weights ....'
     caStr = &
-    'Layer  P(mb)  span   wgtP1    T(K)  indx    wgtT1    water span   wgtQ1'
-    write(kStdWarn,*) caStr
+      'Layer  P(mb)  span   wgtP1    T(K)  indx    wgtT1    water span   wgtQ1'
+    write(kStdWarn,'(A)') caStr
+      caStr = &
+      '              indx1                                  amt   indx1'
+    write(kStdWarn,'(A)') caStr
     caStr = &
-    '              indx1                                  amt   indx1'
-    write(kStdWarn,*) caStr
+     '---------------------------------------------|-----------------------------------------|--------------------------------------'
+    write(kStdWarn,'(A)') caStr
     caStr = &
-    '-----------------------------|------------------------|------------------------'
-    write(kStdWarn,*) caStr
+     'iL       rP      iaP1    raP1   iaP2   raP2  |  rT     iaT11   raT11    iaT12   raT12  |   rQ       iaQ11  raQ11  iaQ22  raQ22'
+    write(kStdWarn,'(A)') caStr
     caStr = &
-    'iL     rP       iaP1    raP1 |  rT     iaT11   raT11  |   rQ       iaQ11  raQ11'
-    write(kStdWarn,*) caStr
-    caStr = &
-    '-----------------------------|------------------------|------------------------'
-    write(kStdWarn,*) caStr
+     '---------------------------------------------|-----------------------------------------|--------------------------------------'
+    write(kStdWarn,'(A)') caStr
 
 !      DO iL = 1,kProfLayer
 !        print *,iL,xPLEV_KCARTADATABASE_AIRS(iL),raOrig100P(iL),xPLEV_KCARTADATABASE_AIRS(iL+1)
@@ -308,6 +310,14 @@ CONTAINS
         rX1 = raP1(iL)
         rX2 = raT11(iL)
         rX3 = raQ11(iL)
+
+        iY1 = iaP2(iL)
+        iY2 = iaT12(iL)
+        iY3 = iaQ12(iL)
+        rY1 = raP2(iL)
+        rY2 = raT12(iL)
+        rY3 = raQ12(iL)
+
       ELSE
         iX1 = iaP2(iL)
         iX2 = iaT12(iL)
@@ -315,8 +325,16 @@ CONTAINS
         rX1 = raP2(iL)
         rX2 = raT12(iL)
         rX3 = raQ12(iL)
+
+        iY1 = iaP1(iL)
+        iY2 = iaT11(iL)
+        iY3 = iaQ11(iL)
+        rY1 = raP1(iL)
+        rY2 = raT11(iL)
+        rY3 = raQ12(iL)
       END IF
-      write(kStdWarn,100) iL,rP*1013.25,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
+      !write(kStdWarn,100) iL,rP*1013.25,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
+      write(kStdWarn,101) iL,rP*1013.25,iX1,rX1,iY1,rY1,rT,iX2,rX2,iY2,rY2,rQ,iX3,rX3,iY3,rY3
     END DO
 
     iL = (kProfLayer-iLowest+1)
@@ -447,6 +465,8 @@ CONTAINS
     111 FORMAT(I3,' ',3(F9.5,' ',I3,' ',F9.5,' '))
     100 FORMAT(I3,' ',1(ES12.4,' ',I3,' ',F9.5,' '),1(F9.5,' ',I3,' ',F9.5,' '), &
     &  1(ES12.4,' ',I3,' ',F9.5,' '))
+    101 FORMAT(I3,' ',1(ES12.4,' ',I3,' ',F9.5,' ',I3,' ',F9.5,'   '),1(F9.5,' ',I3,' ',F9.5,' ',I3,' ',F9.5,'   '), &
+    &  1(ES12.4,' ',I3,' ',F9.5,' ',I3,' ',F9.5,'   '))
 
     RETURN
     end SUBROUTINE xWeights

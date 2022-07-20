@@ -937,7 +937,7 @@ CONTAINS
       write(kStdWarn,222) caName
         END DO
 
-      ! raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+      ! raaRTPCloudParamsF(1,:) = ctype1,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12,iT,iB   second reset
       !      raaRTPCloudParamsF(1,1) = iaCtype(1)
       raaRTPCloudParamsF(1,2) = raaJunkCloudTB(1,1)
       raaRTPCloudParamsF(1,3) = raaJunkCloudTB(1,2)
@@ -947,7 +947,7 @@ CONTAINS
       !      raaRTPCloudParamsF(1,7) = prof%cfrac12
       !      raaRTPCloudParamsF(1,8) = -9999
       !      raaRTPCloudParamsF(1,9) = -9999
-      ! raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   second reset
+      ! raaRTPCloudParamsF(2,:) = ctype2,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12,iT,iB   second reset
       !      raaRTPCloudParamsF(2,1) = iaCtype(2)
       raaRTPCloudParamsF(2,2) = raaJunkCloudTB(2,1)
       raaRTPCloudParamsF(2,3) = raaJunkCloudTB(2,2)
@@ -2721,7 +2721,7 @@ CONTAINS
       i4ctype2 = -9999
     endif 
 
-! raaRTPCloudParams0(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
+! raaRTPCloudParams0(1,:) = ctype1,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12,-999,-999 /iT/iB   from rtpfile
     raaRTPCloudParams0(1,1) = ctype1
     raaRTPCloudParams0(1,2) = ctop1
     raaRTPCloudParams0(1,3) = cbot1
@@ -2732,7 +2732,7 @@ CONTAINS
     raaRTPCloudParams0(1,8) = -9999
     raaRTPCloudParams0(1,9) = -9999
 
-! raaRTPCloudParams0(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   from rtpfile
+! raaRTPCloudParams0(2,:) = ctype1,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12,-999,-999 /iT/iB   from rtpfile
     raaRTPCloudParams0(2,1) = ctype2
     raaRTPCloudParams0(2,2) = ctop2
     raaRTPCloudParams0(2,3) = cbot2
@@ -2743,8 +2743,8 @@ CONTAINS
     raaRTPCloudParams0(2,8) = -9999
     raaRTPCloudParams0(2,9) = -9999
 
-! raaRTPCloudParamsF(1,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
-! raaRTPCloudParamsF(2,:) = ctype1 cprtop/cprbot congwat cpsize cfrac cfrac12   after kcarta resets
+! raaRTPCloudParamsF(1,:) = ctype1,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12 /iT/iB  after kcarta resets
+! raaRTPCloudParamsF(2,:) = ctype1,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12 /iT/iB  after kcarta resets
           
 !!! look for black clouds
     iNclouds_RTP_black = 0

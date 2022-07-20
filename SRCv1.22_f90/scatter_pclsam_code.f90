@@ -14,6 +14,7 @@ USE clear_scatter_misc
 USE rad_diff_and_quad
 USE spline_and_sort_and_common
 USE rad_common
+USE kcoeff_FAST
 
 IMPLICIT NONE
 
@@ -430,9 +431,9 @@ CONTAINS
     END IF
 
     IF (iDefault /= iColJac) THEN
-     print *,'rad_main : col jacs : calculating numbers (slow) instead of '
-     print *,' dumping out zeros (fast)'
-     print *,'rad_main : col jacs : iDefault,iColJac = ',iDefault,iColJac
+     write(kStdWarn,*) 'rad_main : col jacs : calculating numbers (slow) instead of '
+     write(kStdWarn,*) ' dumping out zeros (fast)'
+     write(kStdWarn,*) 'rad_main : col jacs : iDefault,iColJac = ',iDefault,iColJac
     END IF
            
     IF (iColJac == +1) THEN
@@ -721,7 +722,7 @@ CONTAINS
     rWeight = 1.0
     IF ((kActualJacs == 100) .AND. (rFracX .GE. 0.0) .AND. (rFracX .LE. 1.0)) THEN
       rWeight = rFracX
-      print *,'hahahaha reset rWeight rad_UP_pclsam_solar ',rWeight
+      !print *,'hahahaha reset rWeight rad_UP_pclsam_solar ',rWeight
     END IF
        
     iDefault = +1         !!debugging,    use constant temp
@@ -1398,7 +1399,7 @@ CONTAINS
     DO iLay = 1,iNumLayer
       iL = iaRadLayer(iLay)
       IF (iaCldLayer(iLay) == 1) THEN
-        print *,iLay,iL,iaCldLayer(iLay),raG(1),raaExt(1,iL)
+        ! print *,iLay,iL,iaCldLayer(iLay),raG(1),raaExt(1,iL)
         raG2C = raG2C + raaExt(:,iL)
         raW   = max(raW,raaSSAlb(:,iL))
       END IF
@@ -2498,7 +2499,7 @@ CONTAINS
 ! clear sky
     IF (rClrfrac >= rEps) THEN
       IF (kOuterLoop == 1) write(kStdWarn,*) 'MRO : clrfrac = ',rClrfrac
-      print *,'MRO ClearFrac ',rClrfrac,' for ',raFreq(1),' cm-1'
+!      print *,'MRO ClearFrac ',rClrfrac,' for ',raFreq(1),' cm-1'
       CALL quick_clear_radtrans_downlook( &
         raFreq,raInten,raVTemp, &
         raaAbs,rTSpace,rTSurf,rSurfPress,raUseEmissivity,rSatAngle, &
@@ -2631,7 +2632,8 @@ CONTAINS
 !! this is Chou scaling factor adjustment
 !! to do PCLSAM correction by G. Tang, P. Yang, G. Kottowar, X. Huang, B. Baum, JAS 2018
       SUBROUTINE ChouAdjust(iaRadLayer,iNumLayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,& 
-                            raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
+                            raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,&
+                            muSat,raInten,raAdjust) 
 
       IMPLICIT NONE
 
@@ -2644,44 +2646,51 @@ CONTAINS
       REAL :: raaAsym(kMaxPts,kMixFilRows),raTPressLevels(kProfLayer+1)
       REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raFreq(kMaxPts),raInten(kMaxPts)
 ! output
-      REAL :: raAdjust(kMaxPts)
+      REAL :: raAdjust(kMaxPts),rX,rX0
 
 ! local 
       REAL :: raZZ(kMaxPts),raYY(kMaxPts),raXX(kMaxPts),raBB(kMaxPts),raFactor(kMaxPts),rPCLSAMfact,r0p5fact
       REAL :: ra0p5fact(kProfLayer)
       INTEGER :: iI,iJ,iK,iVers,iDefault
 
+      rPCLSAMfact = 1.0  !!! should be true 
+      rPCLSAMfact = 0.0  !!! but Tang sets to 0 in RRTM
+
+!print *,raaRTPCloudParamsF(1,8:9)
+!print *,raaRTPCloudParamsF(2,8:9)
+!do iI = 1,100
+!  write(kStdErr,'(7(I4))') ICLDBOTKCARTA,ICLDTOPKCARTA,iLay,iL,iI,iNumLayer - iI + 1,iaCloudTypeProfile(iI)
+!end do
+!call dostop
+   
       !! RRTM uses the following angles and wgts , for x = 3.5g/m2 at 11 km gives about -1 % corrections to flux in window
       !! also asee Subroutine FindGauss2 in rad_angles.f90
       !!  asec([1.0606 1.3821 2.4015 7.1551])*180/pi
       !! 19.4620   43.6528   65.3921   81.9660
       !!  0.1335    0.2035    0.1299    0.03118
 
-      iDefault = 3
+      iDefault = 4
       iVers = 1 !! this is Tang paper use 0.3
       iVers = 2 !! use iaaOverrideDefault(2,9)/100.0
       iVers = 3 !! use tuned for ice/water clouds version
+      iVers = 4 !! use lookuptables from running DISPRT vs PCLSAM
 
       iVers = 2 !! use iaaOverrideDefault(2,9)/100.0
+      iVers = 4 !! use lookuptables from running DISPRT vs PCLSAM
+
+      iK = iNumLayer-iL+1
+      iK = iNumLayer-iLay+1
 
       IF ((kOuterLoop .EQ. 1) .AND. (iDefault .NE. iVers)) THEN
         write(kStdErr,'(A,I3,I3)') 'ChouAdjust subroutine iDefault (tuned factor) vs  iVers = ',iDefault,iVers
       END IF
 
-!      IF (iaaOverrideDefault(2,9) > 0 .AND. iaaOverrideDefault(2,9) < 100) THEN
-!        iVers = 1
-!      END IF
-!      print *,iVers,iaaOverrideDefault(2,9)
-!      call dostop
-   
-      IF (iVers .EQ. 1) THEN
-        rPCLSAMfact = 1.0  !!! should be true 
-        rPCLSAMfact = 0.0  !!! but Tang sets to 0 in RRTM
-  
+      IF (iVers .EQ. 1) THEN  
+
         r0p5fact = 0.50     !! this is what Tang/Yang/Huang derive
         r0p5fact = 0.35     !! <<<<< this is what I used for debugging, but maybe too large >>>>
         r0p5fact = 0.40     !! this is what Tang/Yang/Huang say to use for smiliarity adjustment
-        r0p5fact = 0.30     !! this is what Tang/Yang/Huang say to use for Chou adjustment, but probably ICE only!! WATER seems much smaller, 0.05
+        r0p5fact = 0.30     !! Tang/Yang/Huang Chou adjustment, ICE only??? WATER seems much smaller, 0.10!!!
       
       ELSEIF (iVers .EQ. 2) THEN  
         r0p5fact = iaaOverrideDefault(2,9)/100.0
@@ -2693,6 +2702,7 @@ CONTAINS
         DO iI = 1,iNumLayer
           iJ = iaRadLayer(iI)
           iK = iNumLayer - iI + 1
+          iK = iNumLayer - iJ + 1
           IF ((iaCloudTypeProfile(iJ) == 101) .OR. (iaCloudTypeProfile(iJ) == 301)) THEN
             !! water and aerosol typiclally lower in atmosphere
             ra0p5fact(iK) = 0.10
@@ -2706,11 +2716,14 @@ CONTAINS
           END IF
         END DO
         r0p5fact = ra0p5fact(iL)
+
+      ELSEIF (iVers .EQ. 4) THEN  
+        r0p5fact = read_chou_scale_parametrized(raFreq,iL,iLay,iNumLayer,iK,iaCloudTypeProfile(iK),muSat)        
       END IF
 
       IF (kOuterLoop .EQ. 1) THEN
-        write(kStdWarn,'(A,3(I3),F12.5)') 'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iaCloudTypeProfile(iL),r0p5fact
-        write(kStdErr,'(A,3(I3),F12.5)')  'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iaCloudTypeProfile(iL),r0p5fact
+        write(kStdWarn,'(A,4(I5),F12.5)') 'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iK,iaCloudTypeProfile(iK),r0p5fact
+        write(kStdErr,'(A,4(I5),F12.5)')  'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iK,iaCloudTypeProfile(iK),r0p5fact
       END IF
 
       raBB = raaAsym(:,iL)
@@ -2726,8 +2739,8 @@ CONTAINS
         raFactor = 1 - raaSSAlb(:,iL)*(1-raBB)                                 !!! 1 - wg
         raFactor = 1 - raaSSAlb(:,iL)*raaAsym(:,iL)                            !!! 1 - wg
       END IF
-      raXX      = (rPCLSAMfact*raaPCLSAMCorrection(:,iL+1)-ttorad(raFreq,raTPressLevels(iL+1))) 
-      raZZ      = (rPCLSAMfact*raaPCLSAMCorrection(:,iL)-ttorad(raFreq,raTPressLevels(iL)))
+      raXX      = rPCLSAMfact*raaPCLSAMCorrection(:,iL+1) - ttorad(raFreq,raTPressLevels(iL+1)) 
+      raZZ      = rPCLSAMfact*raaPCLSAMCorrection(:,iL) - ttorad(raFreq,raTPressLevels(iL))
 
 !     raAdjust = raXX - raZZ * exp(-raFactor/muSat*raaExt(:,iL))
       raAdjust = raXX - raZZ * exp(-1/muSat*raaExt(:,iL))  !! remember subr AddCloud_pclsam already puts in raFactor into raaExt(:,iL)
@@ -2759,4 +2772,355 @@ CONTAINS
 
       END SUBROUTINE ChouAdjust
 !************************************************************************
+! read the binary files with the Chou scale
+      REAL FUNCTION read_chou_scale_parametrized(raFreq,iL,iLay,iNumLayer,iK,iCldType,muSat)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/TempF90/scatterparam.f90'
+
+! input vars
+      INTEGER :: iCldType,iL,iLay,iNumLayer,iK
+      REAL :: raFreq(kMaxPts),muSat
+  
+! local variables to do with the tables in the file
+      CHARACTER(160) :: ca160
+      INTEGER :: iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP,iLengthSCANANG
+      PARAMETER (iLengthCPSIZE = 7,iLengthCNGWAT = 7,iLengthCPRTOP = 9,iLengthSCANANG = 6)
+!!     REAL :: raaaaMatrI(7,7,9,6),raaaaMatrW(7,7,9,6)
+!!     REAL :: raaaaIndexI(7,7,9,6),raaaaIndexW(7,7,9,6)
+      REAL :: raaaaMatrI(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP),raaaaMatrW(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP),raaaaMatr(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP)
+      REAL :: raaaaIndexI(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP),raaaaIndexW(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP),raaaaIndex(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP)
+      REAL :: raCPSIZEI(iLengthCPSIZE),raCPSIZEW(iLengthCPSIZE),raCNGWAT(iLengthCNGWAT),raCPRTOP(iLengthCPRTOP),raSCANANG(iLengthSCANANG)
+
+      REAL :: f1,f2,rX,rX0
+      INTEGER :: ixLengthCPSIZE,ixLengthCNGWAT,ixLengthCPRTOP,ixLengthSCANANG
+      INTEGER :: iIOUN,IERR,iI,iDme0,iCng0,iCpr0,iAng0,iDme1,iCng1,iCpr1,iAng1
+      REAL :: rFrac1,rFrac2,rAns1,rAns2,rDX,rDY,rDZ,rDA
+      REAL :: P000,P100,P110,P010,P001,P101,P011,P111
+      REAL :: raC(8),raQ(8)
+
+      REAL :: rANG,rCNG,rCTOP,rDME,rFREQ
+      INTEGER :: iaCPRTOP0(kProfLayer),iaCPRTOP1(kProfLayer),iaSCANANG0(kProfLayer),iaSCANANG1(kProfLayer), &
+                 iaCPSIZE0(kProfLayer),iaCPSIZE1(kProfLayer),iaCNGWAT0(kProfLayer),iaCNGWAT1(kProfLayer)
+      INTEGER :: iWhichCloudraaRTP,iVers
+
+
+      IF ((raaRTPCloudParamsF(1,8) .LE. iK) .AND. (iK .LE. raaRTPCloudParamsF(1,9))) THEN
+        iWhichCloudraaRTP = 1
+      ElSEIF ((raaRTPCloudParamsF(2,8) .LE. iK) .AND. (iK .LE. raaRTPCloudParamsF(2,9))) THEN
+        iWhichCloudraaRTP = 2
+      ELSE
+        rX  = 0.0
+        GOTO 300
+      END IF
+      
+      !! see code in /home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/analyze_data.m, write_chou_matfor.m
+      !! can easily change the code to read in eg /home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/generic_0605_0805_I_W.bin
+      !!                                          /home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/generic_0805_0980_I_W.bin
+      !!                                          /home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/generic_0980_1080_I_W.bin etc
+      ca160 = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/generic_605_1655_I_W.bin'
+
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A160)
+      iIOUN = kTempUnit
+      OPEN(UNIT=iIOUN,FILE=ca160,STATUS='OLD',FORM='UNFORMATTED',IOSTAT=IERR)
+      IF (IERR /= 0) THEN
+        WRITE(kStdErr,*) 'In subroutine read_chou_scale_parametrized'
+        WRITE(kStdErr,1010) IERR, ca160
+        CALL DoSTOP
+      ENDIF
+
+      kTempUnitOpen = 1
+      READ (iIOUN) f1,f2
+
+      READ (iIOUN) ixLengthCPSIZE,ixLengthCNGWAT,ixLengthCPRTOP,ixLengthSCANANG
+      IF (ixLengthCPSIZE .NE. iLengthCPSIZE) THEN
+        write(kStdWarn,'(A,I4,I4)') 'ixLengthCPSIZE does not match',ixLengthCPSIZE,iLengthCPSIZE
+        write(kStdErr,'(A,I4,I4)') 'ixLengthCPSIZE does not match',ixLengthCPSIZE,iLengthCPSIZE
+        CALL DoStop
+      END IF
+      IF (ixLengthCNGWAT .NE. iLengthCNGWAT) THEN
+        write(kStdWarn,'(A,I4,I4)') 'ixLengthCNGWAT does not match',ixLengthCNGWAT,iLengthCNGWAT
+        write(kStdErr,'(A,I4,I4)') 'ixLengthCNGWAT does not match',ixLengthCNGWAT,iLengthCNGWAT
+        CALL DoStop
+      END IF
+      IF (ixLengthCPRTOP .NE. iLengthCPRTOP) THEN
+        write(kStdWarn,'(A,I4,I4)') 'ixLengthCPRTOP does not match',ixLengthCPRTOP,iLengthCPRTOP
+        write(kStdErr,'(A,I4,I4)') 'ixLengthCPRTOP does not match',ixLengthCPRTOP,iLengthCPRTOP
+        CALL DoStop
+      END IF
+      IF (ixLengthSCANANG .NE. iLengthSCANANG) THEN
+        write(kStdWarn,'(A,I4,I4)') 'ixLengthSCANANG does not match',ixLengthSCANANG,iLengthSCANANG
+        write(kStdErr,'(A,I4,I4)') 'ixLengthSCANANG does not match',ixLengthSCANANG,iLengthSCANANG
+        CALL DoStop
+      END IF
+
+      READ(iIOUN) (raCPSIZEI(iI),iI=1,iLengthCPSIZE)
+      READ(iIOUN) (raCPSIZEW(iI),iI=1,iLengthCPSIZE)
+      READ(iIOUN) (raCNGWAT(iI),iI=1,iLengthCNGWAT)
+      READ(iIOUN) (raCPRTOP(iI),iI=1,iLengthCPRTOP)
+      READ(iIOUN) (raSCANANG(iI),iI=1,iLengthSCANANG)
+
+      iVers = 0; !! cpsize cngwat cprtop scanang
+      iVers = 1; !! scanang cpsize cngwat cprtop
+
+      if (iVers == 0) THEN
+        DO iDme1 = 1,iLengthCPSIZE
+          DO iCng1 = 1,iLengthCNGWAT
+            DO iCpr1 = 1,iLengthCPRTOP
+              READ(iIOUN) (raaaaMatrI(iDme1,iCng1,iCpr1,iI),iI=1,iLengthSCANANG)
+            END DO
+          END DO
+        END DO
+  
+        DO iDme1 = 1,iLengthCPSIZE
+          DO iCng1 = 1,iLengthCNGWAT
+            DO iCpr1 = 1,iLengthCPRTOP
+              READ(iIOUN) (raaaaMatrW(iDme1,iCng1,iCpr1,iI),iI=1,iLengthSCANANG)
+            END DO
+          END DO
+        END DO
+
+        DO iDme1 = 1,iLengthCPSIZE
+          DO iCng1 = 1,iLengthCNGWAT
+            DO iCpr1 = 1,iLengthCPRTOP
+              READ(iIOUN) (raaaaIndexI(iDme1,iCng1,iCpr1,iI),iI=1,iLengthSCANANG)
+            END DO
+          END DO
+        END DO
+  
+        DO iDme1 = 1,iLengthCPSIZE
+          DO iCng1 = 1,iLengthCNGWAT
+            DO iCpr1 = 1,iLengthCPRTOP
+              READ(iIOUN) (raaaaIndexW(iDme1,iCng1,iCpr1,iI),iI=1,iLengthSCANANG)
+            END DO
+          END DO
+        END DO
+
+      ELSEIF (iVers == 1) THEN
+        DO iAng1 = 1,iLengthSCANANG
+          DO iDme1 = 1,iLengthCPSIZE
+            DO iCng1 = 1,iLengthCNGWAT
+              READ(iIOUN) (raaaaMatrI(iAng1,iDme1,iCng1,iI),iI=1,iLengthCPRTOP)
+            END DO
+          END DO
+        END DO
+  
+        DO iAng1 = 1,iLengthSCANANG
+          DO iDme1 = 1,iLengthCPSIZE
+            DO iCng1 = 1,iLengthCNGWAT
+              READ(iIOUN) (raaaaMatrW(iAng1,iDme1,iCng1,iI),iI=1,iLengthCPRTOP)
+            END DO
+          END DO
+        END DO
+
+        DO iAng1 = 1,iLengthSCANANG
+          DO iDme1 = 1,iLengthCPSIZE
+            DO iCng1 = 1,iLengthCNGWAT
+              READ(iIOUN) (raaaaIndexI(iAng1,iDme1,iCng1,iI),iI=1,iLengthCPRTOP)
+            END DO
+          END DO
+        END DO
+  
+        DO iAng1 = 1,iLengthSCANANG
+          DO iDme1 = 1,iLengthCPSIZE
+            DO iCng1 = 1,iLengthCNGWAT
+              READ(iIOUN) (raaaaIndexW(iAng1,iDme1,iCng1,iI),iI=1,iLengthCPRTOP)
+            END DO
+          END DO
+        END DO
+
+      END IF
+  
+      CLOSE(iIOUN)
+      kTempUnitOpen = -1
+
+!!print *,'raaaaMatrI,raaaaMatrW = ',raaaaMatrI(2,3,4,5),raaaaMatrW(2,1,3,4)
+!print *,'raaaaMatrI,raaaaMatrW = ',raaaaMatrI(2,3,4,5),raaaaMatrW(2,1,3,4)
+!print *,'raaaaIndexI,raaaaIndexW = ',raaaaIndexI(2,3,4,5),raaaaIndexW(2,1,3,4)
+!call dostop
+
+!n_rtp.f90:2916:! raaRTPCloudParamsF(1,:) = ctype1,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12,iT,iB
+!print *,raaRTPCloudParamsF(1,:)
+!print *,raaRTPCloudParamsF(2,:)
+!call dostop
+
+      IF (iCldType .EQ. 201) THEN
+        raaaaMatr = raaaaMatrI
+      ELSEIF (iCldType .EQ. 101) THEN
+        raaaaMatr = raaaaMatrW
+      END IF
+
+      !!! see SUBROUTINE xWeights in kcoeff_FAST.f90
+      rANG = acos(muSat)*180/kPi
+      rANG = min(max(abs(rANG),minval(raSCANANG)),maxval(raSCANANG))
+      iaSCANANG0(iL) = iFindMaxMin(+1,rANG,raSCANANG,6)
+      iaSCANANG1(iL) = iFindMaxMin(-1,rANG,raSCANANG,6)
+      IF (iaSCANANG1(iL) == iaSCANANG0(iL)) THEN
+        IF (iaSCANANG0(iL) == 6) THEN
+          iaSCANANG0(iL) = iaSCANANG0(iL) - 1 !!! move it down one
+        ELSE
+          iaSCANANG1(iL) = iaSCANANG1(iL) + 1 !!! move it up one
+        END IF
+      END IF
+
+      rCTOP = log10(raaRTPCloudParamsF(iWhichCloudraaRTP,2))
+      rCTOP = log10(raaRTPCloudParams0(iWhichCloudraaRTP,2))  !! notice I use original!!!
+      rCTOP = min(max(abs(rCTOP),minval(log10(raCPRTOP))),maxval(log10(raCPRTOP)))
+      iaCPRTOP0(iL) = iFindMaxMin(+1,rCTOP,log10(raCPRTOP),iLengthCPRTOP)
+      iaCPRTOP1(iL) = iFindMaxMin(-1,rCTOP,log10(raCPRTOP),iLengthCPRTOP)
+      IF (iaCPRTOP1(iL) == iaCPRTOP0(iL)) THEN
+        IF (iaCPRTOP0(iL) == iLengthCPRTOP) THEN
+          iaCPRTOP0(iL) = iaCPRTOP0(iL) - 1 !!! move it down one
+        ELSE
+          iaCPRTOP1(iL) = iaCPRTOP1(iL) + 1 !!! move it up one
+        END IF
+      END IF
+      rDZ = (rCTOP-log10(raCPRTOP(iaCPRTOP0(iL))))/(log10(raCPRTOP(iaCPRTOP1(iL)))-log10(raCPRTOP(iaCPRTOP0(iL))))
+
+      rCNG = log10(raaRTPCloudParamsF(iWhichCloudraaRTP,4))
+      rCNG = min(max(abs(rCNG),minval(log10(raCNGWAT))),maxval(log10(raCNGWAT)))
+      iaCNGWAT0(iL) = iFindMaxMin(+1,rCNG,log10(raCNGWAT),iLengthCNGWAT)
+      iaCNGWAT1(iL) = iFindMaxMin(-1,rCNG,log10(raCNGWAT),iLengthCNGWAT)
+      IF (iaCNGWAT1(iL) == iaCNGWAT0(iL)) THEN
+        IF (iaCNGWAT0(iL) == iLengthCNGWAT) THEN
+          iaCNGWAT0(iL) = iaCNGWAT0(iL) - 1 !!! move it down one
+        ELSE
+          iaCNGWAT1(iL) = iaCNGWAT1(iL) + 1 !!! move it up one
+        END IF
+      END IF
+      rDY = (rCNG-log10(raCNGWAT(iaCNGWAT0(iL))))/(log10(raCNGWAT(iaCNGWAT1(iL)))-log10(raCNGWAT(iaCNGWAT0(iL))))
+
+      IF (iCldType .EQ. 101) THEN
+        rDME = raaRTPCloudParamsF(iWhichCloudraaRTP,5)
+        iaCPSIZE0(iL) = iFindMaxMin(+1,rDME,raCPSIZEW,iLengthCPSIZE)
+        iaCPSIZE1(iL) = iFindMaxMin(-1,rDME,raCPSIZEW,iLengthCPSIZE)
+        IF (iaCPSIZE1(iL) == iaCPSIZE0(iL)) THEN
+          IF (iaCPSIZE0(iL) == iLengthCPSIZE) THEN
+            iaCPSIZE0(iL) = iaCPSIZE0(iL) - 1 !!! move it down one
+          ELSE
+            iaCPSIZE1(iL) = iaCPSIZE1(iL) + 1 !!! move it up one
+          END IF
+        END IF
+        print *,iaCPSIZE0(iL),iaCPSIZE1(iL),rDME
+        print *,raCPSIZEW
+        rDX = (rDME-raCPSIZEW(iaCPSIZE0(iL)))/(raCPSIZEW(iaCPSIZE1(iL))-raCPSIZEW(iaCPSIZE0(iL)))
+        print *,rDX
+      ELSEIF (iCldType .EQ. 201) THEN
+        rDME = raaRTPCloudParamsF(iWhichCloudraaRTP,5)
+        iaCPSIZE0(iL) = iFindMaxMin(+1,rDME,raCPSIZEI,iLengthCPSIZE)
+        iaCPSIZE1(iL) = iFindMaxMin(-1,rDME,raCPSIZEI,iLengthCPSIZE)
+        IF (iaCPSIZE1(iL) == iaCPSIZE0(iL)) THEN
+          IF (iaCPSIZE0(iL) == iLengthCPSIZE) THEN
+            iaCPSIZE0(iL) = iaCPSIZE0(iL) - 1 !!! move it down one
+          ELSE
+            iaCPSIZE1(iL) = iaCPSIZE1(iL) + 1 !!! move it up one
+          END IF
+        END IF
+        rDX = (rDME-raCPSIZEI(iaCPSIZE0(iL)))/(raCPSIZEI(iaCPSIZE1(iL))-raCPSIZEI(iaCPSIZE0(iL)))
+      END IF
+
+      iAng0 = iaSCANANG0(iL)
+      iDme0 = iaCPSIZE0(iL)
+      iCng0 = iaCNGWAT0(iL)
+      iCpr0 = iaCPRTOP0(iL)
+      iAng1 = iaSCANANG1(iL)
+      iDme1 = iaCPSIZE1(iL)
+      iCng1 = iaCNGWAT1(iL)
+      iCpr1 = iaCPRTOP1(iL)
+
+      raQ(1) = 1.0
+      raQ(2) = rDX
+      raQ(3) = rDY
+      raQ(4) = rDZ
+      raQ(5) = rDX*rDY
+      raQ(6) = rDY*rDZ
+      raQ(7) = rDX*rDZ
+      raQ(8) = rDX*rDY*rDZ
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      !! see https://spie.org/samples/PM159.pdf
+      !! first get  rAns1 (angle bdry1)  .. recall matrix indices are iAng,iDme,iCng,iCpr
+
+      P000 = raaaaMatr(iAng0,iDme0,iCng0,iCpr0)
+      P010 = raaaaMatr(iAng0,iDme0,iCng1,iCpr0)
+      P100 = raaaaMatr(iAng0,iDme1,iCng0,iCpr0)
+      P110 = raaaaMatr(iAng0,iDme1,iCng1,iCpr0)
+      P001 = raaaaMatr(iAng0,iDme0,iCng0,iCpr1)
+      P011 = raaaaMatr(iAng0,iDme0,iCng1,iCpr1)
+      P101 = raaaaMatr(iAng0,iDme1,iCng0,iCpr1)
+      P111 = raaaaMatr(iAng0,iDme1,iCng1,iCpr1)
+
+      raC(1) = P000
+      raC(2) = P100 - P000
+      raC(3) = P010 - P000
+      raC(4) = P001 - P000
+      raC(5) = P110 - P010 - P100 + P000
+      raC(6) = P011 - P001 - P010 + P000
+      raC(7) = P101 - P001 - P100 + P000
+      raC(8) = P111 - P011 - P101 - P110  + P100 + P001 + P010 - P000
+      rAns1 = dot_product(raC,raQ)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      !! see https://spie.org/samples/PM159.pdf
+      !! then  get  rAns2 (angle bdry2) .. recall matrix indices are iAng,iDme,iCng,iCpr
+
+      P000 = raaaaMatr(iAng1,iDme0,iCng0,iCpr0)
+      P010 = raaaaMatr(iAng1,iDme0,iCng1,iCpr0)
+      P100 = raaaaMatr(iAng1,iDme1,iCng0,iCpr0)
+      P110 = raaaaMatr(iAng1,iDme1,iCng1,iCpr0)
+      P001 = raaaaMatr(iAng1,iDme0,iCng0,iCpr1)
+      P011 = raaaaMatr(iAng1,iDme0,iCng1,iCpr1)
+      P101 = raaaaMatr(iAng1,iDme1,iCng0,iCpr1)
+      P111 = raaaaMatr(iAng1,iDme1,iCng1,iCpr1)
+
+      raC(1) = P000
+      raC(2) = P100 - P000
+      raC(3) = P010 - P000
+      raC(4) = P001 - P000
+      raC(5) = P110 - P010 - P100 + P000
+      raC(6) = P011 - P001 - P010 + P000
+      raC(7) = P101 - P001 - P100 + P000
+      raC(8) = P111 - P011 - P101 - P110  + P100 + P001 + P010 - P000
+      rAns2 = dot_product(raC,raQ)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      !! finally interpolate across angles
+      rDA = raSCANANG(iaSCANANG1(iL)) - raSCANANG(iaSCANANG0(iL))
+
+      rFrac1 = (rANG-raSCANANG(iaSCANANG0(iL)))/rDA
+      rFrac2 = (1-rFrac1)
+
+      rX = rFrac1*rAns2 + rFrac2*rAns1
+      rX0 = rX
+
+!  IF ((rX .LE. 4e-2) .AND. (iCldType .EQ. 101)) THEN 
+!     rX = 0.10
+!  ELSEIF ((rX .LE. 4e-2) .AND. (iCldType .EQ. 201)) THEN 
+!     rX = 0.30
+!  END IF
+
+      IF ((rX .LE. 4e-2) .AND. (10**rCTOP .LT. 500)) THEN 
+         !! high cloud
+         rX = 0.30
+      ELSEIF ((rX .LE. 4e-2) .AND. (10**rCTOP .GE. 500)) THEN 
+         !! low cloud
+         rX = 0.10
+      END IF
+
+      if (((iCldType == 101) .OR. (iCldType == 201)) .AND. (kOuterLoop == 1)) then
+        write(kStdErr,'(A,3(I4),/,A,4(F12.4))') '>>> read_chou_scale_parametrized : iL,iLay,iCldType ',iL,iLay,iCldType,'    rA1,rA2,rX0,rX  ',rAns1,rAns2,rX0,rX
+        write(kStdErr,'(A,5I8)')      'ang, sze, cng, cpr, raaaaIndexI/W  = ',iAng0,iDme0,iCng0,iCpr0,int(raaaaIndexW(iAng0,iDme0,iCng0,iCpr0))
+        write(kStdErr,'(A,5F12.4)')   'wang,wsze,wcng,wcpr,wraaaaIndexI/W = ',rFrac1,rDX,rDY,rDZ,raaaaMatr(iAng0,iDme0,iCng0,iCpr0)
+        write(kStdErr,'(A,4(F12.4))') '               rANG,DME,CNG,CTOP   = ',rANG,rDME,10**rCNG,10**rCTOP
+        write(kStdErr,'(A,4(F12.4))') '                orig sze,cng,cpr   = ',rANG,raaRTPCloudParams0(1,5),raaRTPCloudParams0(1,4),raaRTPCloudParams0(1,2)
+      end if
+
+  300 CONTINUE
+      read_chou_scale_parametrized = rX
+!call dostop
+
+      END FUNCTION read_chou_scale_parametrized
+!************************************************************************
+
 END MODULE scatter_pclsam_code

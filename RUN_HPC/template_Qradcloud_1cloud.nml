@@ -30,7 +30,7 @@
  iaaOverride(2,7) = 0
 
  !Chou adjust factor/100
- iaaOverride(2,9) = 05
+ iaaOverride(2,9) = 90
 
  !! for heating rates
  !kFlux = 6

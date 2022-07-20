@@ -2056,13 +2056,13 @@ CONTAINS
           iNatm    = 3    !! need rclr, r1 ... and then linear combination of these 2
                           
           write(kStdErr,*) 'Duplicate for ONE PCLSAM cloud : '
-          write(kStdErr,'(A,2(5(F12.5),I8),A,F12.5)') '  [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ', &
-            ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1, ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
+          write(kStdErr,'(A,5F12.5,I8,/A,5F12.5,I8,/A,F12.5)') ' [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1] = ',ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1, &
+                                                             ' [ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ',ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
           write(kStdErr,*)  'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=3'
                           
           write(kStdWarn,*) 'Duplicate for ONE PCLSAM cloud : '
-          write(kStdWarn,'(A,2(5(F12.5),I8),A,F12.5)')'   [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1    ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ', &
-            ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1,  ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
+          write(kStdWarn,'(A,5F12.5,I8,/A,5F12.5,I8,/A,F12.5)') ' [ctop1 cbot1 cngwat1 cpsize1 cfrac1 ctype1] = ',ctop1,cbot1,cngwat1,cpsize1,cfrac1,ctype1, &
+                                                              ' [ctop2 cbot2 cngwat2 cpsize2 cfrac2 ctype2] = ',ctop2,cbot2,cngwat2,cpsize2,cfrac2,ctype2,' cfrac12 = ',cfrac12
           write(kStdWarn,*) 'kWhichScatterCode = 5 (PCLSAM); SARTA-esqe calc; set iAtmLoop=10,iNatm=3'
                     
           IF (kMaxAtm < 3) THEN

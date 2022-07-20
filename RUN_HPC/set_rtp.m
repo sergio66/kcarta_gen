@@ -302,6 +302,10 @@ use_this_rtp = '/home/chepplew/data/sarta_tuning/frm_scott/tiasi_382co2_105o3_10
 use_this_rtp = '/home/chepplew/data/sarta_tuning/sorted/from_scott/sgp2_start.rtp';                                         % 8
 use_this_rtp = '/home/chepplew/data/sarta_tuning/sorted/from_scott/twp2_start.rtp';                                         % 5
 use_this_rtp = '/home/chepplew/data/sarta/validation/2018d152G013_levs.rtp';
+% chris h tests of sarta
+use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1100_400p_seaemis_8angs_pert_v2.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1100_400p_unitemis_8angs_pert.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1013_400p_unitemis_7angs_night.rtp';
 
 %% larrabee wants col gas jacs (actually stemp only)
 use_this_rtp = 'RTP/latbin20_45angles.op.rtp';

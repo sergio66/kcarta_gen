@@ -967,10 +967,10 @@ CONTAINS
 
       if (raaRTPCloudParamsF(iIn,1) > 100) then
         !make sure you don't mess up things when the clear sky PCLSAM faction being computed!
-        raaRTPCloudParamsF(iIn,8) = iaCldtop(iIn)         
+        raaRTPCloudParamsF(iIn,8) = iaCldtop(iIn)+1         
         raaRTPCloudParamsF(iIn,9) = iaCldbot(iIn)         
         IF ((iaCldtop(iIn) .GT. 0) .AND. (iaCldbot(iIn) .GT. 0)) THEN
-          iaCloudTypeProfile(iaCldtop(iIn):iaCldbot(iIn)) = raaRTPCloudParamsF(iIn,1)    !!! this is ctype
+          iaCloudTypeProfile(iaCldtop(iIn)+1:iaCldbot(iIn)) = raaRTPCloudParamsF(iIn,1)    !!! this is ctype
         END IF
       end if
 

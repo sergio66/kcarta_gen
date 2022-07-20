@@ -607,8 +607,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+7/20/22         raaRTPCloudParamsF will have information about clouds to parametrize AdjustChou
+                See subroutine read_chou_scale_parametrized
+
 7/6/22          Remember, can set iSnell = 0 (iaaOveride(2,7)) and the NO ray tracing due to curvature
-                is done. SO then PCLSAM angls will equal DISORT angles at all layers
+                is done. SO then PCLSAM angles will equal DISORT angles at all layers
                 Unfortunately DISORT does its Gaussian streams probably assuming nadir ODs are
                 sent in, with plane parallel assumptions
                 So technically cannot "preadjust" ODs but can try
@@ -626,11 +629,10 @@ v1.22
                 to satzen at TOA ~ scanang (raLayAngles(iaNumLayer(iNumLayer)))
                 See the new lines of code in kcartamain.f90 before calling InterfaceScattering
 
-                Plus, there is always the PLANE PARALLEL option (iaaOverride(2,7) = 0) which works best for clear sky comparisons!
+                *** The PLANE PARALLEL option (iaaOverride(2,7) = 0) works best for clear sky comparisons! ***
+                *** The PLANE PARALLEL option (iaaOverride(2,7) = 0) works best for clear sky comparisons! ***
 
 6/29/22         rHDO_Deplete placeholder for HDO .. might make it a profile later
-
-6/28/22         raaRTPCloudParamsF will have information about clouds so that AdjustChou can be parametrized
 
 6/27/22         Was having problems with background thermal when asking for fluxes
                 a)  Plan to retire (iaaOverrideDefault(2,9) == 1) 

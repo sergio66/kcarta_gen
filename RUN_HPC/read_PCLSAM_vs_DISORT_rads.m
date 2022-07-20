@@ -4,8 +4,9 @@ fprintf(1,'need to read in %5i profiles \n',length(p.stemp));
 
 rad = zeros(89*10000,length(p.stemp));
 
-iDorC = input('Enter DISORT (-1) or Chou/PCLASM (+1) : ');
+iDorP = input('Enter DISORT (-1) or Chou/PCLSAM (+1) : ');
 
+badfile = [];;
 for ii = 1 : length(p.stemp)
   if mod(ii,1000) == 0
     fprintf(1,'+')
@@ -13,17 +14,22 @@ for ii = 1 : length(p.stemp)
     fprintf(1,'.')
   end
 
-  if iDorC == -1
+  if iDorP == -1
     fname = ['JUNK/rad.dat' num2str(ii) '_0605'];
   else
     fname = ['JUNK/rad.dat' num2str(ii)];
   end
-  [d,w] = readkcstd(fname);
-  if iDorC == +1
-    [mm,nn] = size(d);
-    d = d(:,nn);
+  try 
+    [d,w] = readkcstd(fname);
+    if iDorP == +1
+      [mm,nn] = size(d);
+      d = d(:,nn);
+    end
+    rad(:,ii) = d;
+  catch
+    fprintf(1,'problem with file %s \n',fname)
+    badfile = [badfile ii];
   end
-  rad(:,ii) = d;
 end
 fprintf(1,'\n');
 disp('now save w rad into the filename you need ...')
@@ -31,7 +37,8 @@ disp('now save w rad into the filename you need ...')
 eg 
 save -v7.3 /home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/Prof1/Chou0.00/kcartarad.mat w rad
 radsing = single(rad);
-save -v7.3 /home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/Prof1/Chou0.00/kcartaradsing.mat w radsing
+wsing   = single(w);
+save -v7.3 /home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/Prof1/Chou0.00/kcartaradsing.mat wsing radsing
 %}
 
 i1231 = find(w >= 1231,1);
