@@ -2477,8 +2477,8 @@ CONTAINS
         ELSEIF (kWhichScatterCode == 5) THEN
           write(iIOUN_Cloud,*) '% TWO SLAB CLOUDS'
         END IF
-        write(iIOUN_Cloud,*) '% rows 1-7 are ctype(W 101/I 201/A 30),cprtop(mb),cprbot(mb)'
-        write(iIOUN_Cloud,*) '% cngwat(g/m2),cpsize(um),cfrac and cfrac12'
+        write(iIOUN_Cloud,*) '% rows 1-7 are ctype(W 101/I 201/A 301),cprtop(mb),cprbot(mb)'
+        write(iIOUN_Cloud,*) '%    cngwat(g/m2),cpsize(um),cfrac and cfrac12'
         write(iIOUN_Cloud,*) '% cols 1-4 are CLOUD 1 (old/new) and CLOUD 2 (old/new)'
         iI = 1
         write(iIOUN_Cloud,'(A,A,4(F12.0))') & 

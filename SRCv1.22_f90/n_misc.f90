@@ -367,17 +367,18 @@ CONTAINS
 !!!   see SUBR FindLayerAngles in rad_angles.f
     iaaOverrideDefault(2,8) = +1    !!! iInterpType = +1 to turn (pav,Tav) into (plevs,Tlevs), only used if kTemperVary = 43
 
-!!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
-!!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
-!!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
-!!!    see SUBR Get_Temp_Plevs in n_pth_mix.f
-!!!    iaaOverrideDefault(2,9) = -1    !!! iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
-!!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
-!!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
-!!!    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!! >>>> --- >>>    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!! >>>> --- >>>    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!! >>>> --- >>>    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!! >>>> --- >>>    see SUBR Get_Temp_Plevs in n_pth_mix.f
+!!! >>>> --- >>>    iaaOverrideDefault(2,9) = -1    !!! >>>> --->>> iLBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1, when kTemperVary = 43 << DEFAULT>>
+!!! >>>> --- >>>    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!! >>>> --- >>>    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
+!!! >>>> --- >>>    use of iaaOerrideDefault(2,9) for HighRes LayerInTemp adjustments has been retired July 2022
 
 ! see scatter_pclsam_code.f90, this is the adjust chou routine
-    iaaOverrideDefault(2,9) = 35    !!!! this is now used temporarily for ChouAdjust * 100
+    iaaOverrideDefault(2,9) = 35    !!!! this is now used for ChouAdjust * 100
+    iaaOverrideDefault(2,9) = -3    !!!! this is now used for ChouAdjust = parametrized routine
 
 !!!   see SUBR rad_trans_SAT_LOOK_DOWN_LIN_IN_TAU_VARY_LAY_ANG_EMISS in rad_main.f
 !!!   0 for ABS clouds, 2 for RTPSEC, 3 for DISORT
@@ -584,24 +585,25 @@ CONTAINS
       CALL DoStop
     END IF
 
-!!     iJ = iJ+1
-!!     iTemp = iaaOverrideDefault(2,9)
-!!     iTemp = iaaOverrideDefault(iI,iJ)
-!!     IF (abs(iTemp) /= 1) THEN
-!!       write(kStdErr,'(A,I2,A,I2,A,I2)') 'iEstimateHighRes : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
-!!         iaaOverrideDefault(iI,iJ)
-!!       CALL DoStop
-!!     END IF
-!!     IF (iTemp > 0) THEN
-!!       write(kStdErr,'(A)') 'Plan to retire iEstimateHighRes iaaOverrideDefault(2,9)'
-!!       CALL DoStop
-!!     END IF
+!!! >>>> --- >>> 
+!!! >>>> --- >>>     iJ = iJ+1
+!!! >>>> --- >>>     iTemp = iaaOverrideDefault(2,9)
+!!! >>>> --- >>>     iTemp = iaaOverrideDefault(iI,iJ)
+!!! >>>> --- >>>     IF (abs(iTemp) /= 1) THEN
+!!! >>>> --- >>>       write(kStdErr,'(A,I2,A,I2,A,I2)') 'iEstimateHighRes : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
+!!! >>>> --- >>>         iaaOverrideDefault(iI,iJ)
+!!! >>>> --- >>>       CALL DoStop
+!!! >>>> --- >>>     END IF
+!!! >>>> --- >>>     IF (iTemp > 0) THEN
+!!! >>>> --- >>>       write(kStdErr,'(A)') 'Plan to retire iEstimateHighRes iaaOverrideDefault(2,9)'
+!!! >>>> --- >>>       CALL DoStop
+!!! >>>> --- >>>     END IF
 
     iJ = iJ+1
     iTemp = iaaOverrideDefault(2,9)
     iTemp = iaaOverrideDefault(iI,iJ)
-    IF (iTemp .LT. 0 .OR. iTemp .GT. 100) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') 'iAdjustChou : need iaaOverrideDefault(',iI,',',iJ,') between 0 and 100, not ', &
+    IF (iTemp .LT. -3 .OR. iTemp .GT. 100) THEN
+      write(kStdErr,'(A,I2,A,I2,A,I8)') 'iAdjustChou : need iaaOverrideDefault(',iI,',',iJ,') between 0 and 100, or -1,-2,-3, not ', &
         iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF

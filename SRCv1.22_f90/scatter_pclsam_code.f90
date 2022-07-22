@@ -2669,14 +2669,25 @@ CONTAINS
       !! 19.4620   43.6528   65.3921   81.9660
       !!  0.1335    0.2035    0.1299    0.03118
 
-      iDefault = 4
-      iVers = 1 !! this is Tang paper use 0.3
-      iVers = 2 !! use iaaOverrideDefault(2,9)/100.0
-      iVers = 3 !! use tuned for ice/water clouds version
-      iVers = 4 !! use lookuptables from running DISPRT vs PCLSAM
+      iDefault = -3
+!      iVers = 0  !! use iaaOverrideDefault(2,9)/100.0
+!      iVers = -1 !! this is Tang paper use 0.3
+!      iVers = -2 !! use one tuned for ice/water clouds version
+!      iVers = -3 !! <<< use lookuptables from running DISPRT vs PCLSAM >>>
 
-      iVers = 2 !! use iaaOverrideDefault(2,9)/100.0
-      iVers = 4 !! use lookuptables from running DISPRT vs PCLSAM
+      IF (iaaOverrideDefault(2,9) >= 0 .AND. iaaOverrideDefault(2,9) <= 100) THEN
+        iVers = 0
+      ELSEIF (iaaOverrideDefault(2,9) == -1) THEN
+        iVers = -1
+      ELSEIF (iaaOverrideDefault(2,9) == -2) THEN
+        iVers = -2           
+      ELSEIF (iaaOverrideDefault(2,9) == -3) THEN
+        iVers = -3
+      ELSE
+        write(kStdErr,*) 'need iaaOverrideDefault(2,9) -3,-2,-1,0 ... 100, not ',iaaOverrideDefault(2,9)
+        write(kStdWarn,*) 'need iaaOverrideDefault(2,9) -3,-2,-1,0 ... 100, not ',iaaOverrideDefault(2,9)
+        CALL DOStop
+      END IF
 
       iK = iNumLayer-iL+1
       iK = iNumLayer-iLay+1
@@ -2685,17 +2696,16 @@ CONTAINS
         write(kStdErr,'(A,I3,I3)') 'ChouAdjust subroutine iDefault (tuned factor) vs  iVers = ',iDefault,iVers
       END IF
 
-      IF (iVers .EQ. 1) THEN  
-
+      IF (iVers .EQ. -1) THEN  
         r0p5fact = 0.50     !! this is what Tang/Yang/Huang derive
         r0p5fact = 0.35     !! <<<<< this is what I used for debugging, but maybe too large >>>>
         r0p5fact = 0.40     !! this is what Tang/Yang/Huang say to use for smiliarity adjustment
         r0p5fact = 0.30     !! Tang/Yang/Huang Chou adjustment, ICE only??? WATER seems much smaller, 0.10!!!
       
-      ELSEIF (iVers .EQ. 2) THEN  
+      ELSEIF (iVers .EQ. 0) THEN  
         r0p5fact = iaaOverrideDefault(2,9)/100.0
 
-      ELSEIF (iVers .EQ. 3) THEN  
+      ELSEIF (iVers .EQ. -2) THEN  
         !!!! note iL = iaRadLayer(iLay,iLay=1:iNumLayer)
         !!!! so iI <--> iLay     iL <--> iJ
         ra0p5fact = 0.0
@@ -2717,7 +2727,7 @@ CONTAINS
         END DO
         r0p5fact = ra0p5fact(iL)
 
-      ELSEIF (iVers .EQ. 4) THEN  
+      ELSEIF (iVers .EQ. -3) THEN  
         r0p5fact = read_chou_scale_parametrized(raFreq,iL,iLay,iNumLayer,iK,iaCloudTypeProfile(iK),muSat)        
       END IF
 
@@ -2804,7 +2814,6 @@ CONTAINS
       INTEGER :: iaCPRTOP0(kProfLayer),iaCPRTOP1(kProfLayer),iaSCANANG0(kProfLayer),iaSCANANG1(kProfLayer), &
                  iaCPSIZE0(kProfLayer),iaCPSIZE1(kProfLayer),iaCNGWAT0(kProfLayer),iaCNGWAT1(kProfLayer)
       INTEGER :: iWhichCloudraaRTP,iVers
-
 
       IF ((raaRTPCloudParamsF(1,8) .LE. iK) .AND. (iK .LE. raaRTPCloudParamsF(1,9))) THEN
         iWhichCloudraaRTP = 1
@@ -3002,10 +3011,10 @@ CONTAINS
             iaCPSIZE1(iL) = iaCPSIZE1(iL) + 1 !!! move it up one
           END IF
         END IF
-        print *,iaCPSIZE0(iL),iaCPSIZE1(iL),rDME
-        print *,raCPSIZEW
+!        print *,iaCPSIZE0(iL),iaCPSIZE1(iL),rDME
+!        print *,raCPSIZEW
         rDX = (rDME-raCPSIZEW(iaCPSIZE0(iL)))/(raCPSIZEW(iaCPSIZE1(iL))-raCPSIZEW(iaCPSIZE0(iL)))
-        print *,rDX
+!        print *,rDX
       ELSEIF (iCldType .EQ. 201) THEN
         rDME = raaRTPCloudParamsF(iWhichCloudraaRTP,5)
         iaCPSIZE0(iL) = iFindMaxMin(+1,rDME,raCPSIZEI,iLengthCPSIZE)

@@ -1004,7 +1004,7 @@ CONTAINS
         DO I = 1, NSCATTAB
           IF (iaScatTable_With_Atm(I) > 0) THEN
             write(kStdWarn,*) 'Reading binary scatter data for table #',I
-            write(kStdWarn,*) scatfile(I)
+            write(kStdWarn,'(A)') scatfile(I)
             CALL READ_SSCATTAB_BINARY(SCATFILE(I),   & !!!!!!MAXTAB, MAXGRID,
               caScale(I), NMUOBS(I), MUTAB(1,I), NDME(I), DMETAB(1,I), &
               NWAVETAB(I), WAVETAB(1,I), &

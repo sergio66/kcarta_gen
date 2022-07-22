@@ -17,10 +17,10 @@ c!!!                                                                  !!!
 c!!!  include '../INCLUDE/pre_defined_orig605_805res.param'           !!!
       include '../INCLUDE/TempF90/pre_definedparam_orig605_805res.f90'        !!!
 c!!!!!!      include '../INCLUDE/pre_defined.param'                   !!!
-c template file : template_kcartaV122_400_H2016_NLTEH2016.param       !!!
+c template file : template_kcartaV122_400_H2020_NLTEH2016.param       !!!
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
-      PARAMETER(caVersion='v1.22 21-06-04 template_kcartaV122_400_H2016_NLTEH2016.param')      !!!
+      PARAMETER(caVersion='v1.22 21-11-27 template_kcartaV122_400_H2020_NLTEH2016.param')      !!!
 c!!!                       v     YY MM DD template_kcartaV122_PPM_H20XY_NLTEH20AB.param')      !!!
 c!!!                                                                  !!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
@@ -44,17 +44,17 @@ c parameter kChiFIle tells the code where to look for necessary files
 c that improve the spectroscopy when multiplied with the kCompressed data
       CHARACTER(160) kXsecParamFile,kCompParamFile
       PARAMETER (kXsecParamFile = 
-     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param')
+     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2020/comp_ir605_2830.param')
      
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 
-c this has new H2016 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, TRIED AND TESTED UMBC CO2 linemixing
+c this has new H2020 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, TRIED AND TESTED UMBC CO2 linemixing
 c      PARAMETER (kCompParamFile = 
-c     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param')
+c     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2020/comp_ir605_2830.param')
       PARAMETER (kCompParamFile = 
-     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/all_15_450000_IRH2016.param')
+     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/all_15_450000_IRH2020.param')
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
@@ -70,8 +70,8 @@ c kCKDPath        == path to where the CKD lookup tables are
 c kCKD_compr_path == path to where the CKD compressed data files (gasID 101,102)
 c note : this is default, for the "r" or regular gases in 605-2830 cm-1 range
       CHARACTER*120 kWaterPath,kCompPath,kCKDPath,kCKD_compr_path
-      PARAMETER (kWaterPath      = '/asl/rta/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/')
-      PARAMETER (kCompPath       = '/asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/')
+      PARAMETER (kWaterPath      = '/asl/rta/kcarta/H2020.ieee-le/IR605/hdo.ieee-le/')
+      PARAMETER (kCompPath       = '/asl/rta/kcarta/H2020.ieee-le/IR605/etc.ieee-le/')
       PARAMETER (kCKDPath        = '/asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/')
       PARAMETER (kCKD_Compr_Path = '/asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/Compr/')
 
@@ -83,7 +83,7 @@ c >>>>>>> NOTE that ALL the water isotope datafiles are in kWaterIsotopePath
 c >>>>>>> so the  605-2830 cm-1 "rX_gY.dat" and 
 c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       CHARACTER(160) kWaterIsotopePath
-      PARAMETER (kWaterIsotopePath = '/asl/rta/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/')
+      PARAMETER (kWaterIsotopePath = '/asl/rta/kcarta/H2020.ieee-le/IR605/hdo.ieee-le/')
       INTEGER kWaterIsobandStart1,kWaterIsobandStop1
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
 c      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
@@ -398,9 +398,9 @@ c when kProfLayerJac,kMaxPtsJac are set to 1, this is "space saver" mode
 c      PARAMETER (kMaxDQ=1,kProfLayerJac=1,kMaxPtsJac=1)
 
 c this is if the user wants to do scattering computations
-c kMaxClouds = max number of clouds the user defines
+c kMaxClouds = max number of clouds the user defines, remember with TwoSlab can have 5 atmospheres
       INTEGER kMaxClouds
-      PARAMETER (kMaxClouds=3)
+      PARAMETER (kMaxClouds=5)
 c kMaxLayersPerCloud = max number of layers each cloud can occupy
 c set it to kProfLayer if you are reading in arbitrary ECMWF profiles
       INTEGER kCloudLayers

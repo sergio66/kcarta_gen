@@ -4,7 +4,10 @@ fprintf(1,'need to read in %5i profiles \n',length(p.stemp));
 
 rad = zeros(89*10000,length(p.stemp));
 
-iDorP = input('Enter DISORT (-1) or Chou/PCLSAM (+1) : ');
+iDorP = input('Enter DISORT (-1) or Chou/PCLSAM (+1, default) : ');
+if length(iDorP) == 0
+  iDorP = +1;
+end
 
 badfile = [];;
 for ii = 1 : length(p.stemp)

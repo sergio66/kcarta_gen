@@ -1,1 +1,3 @@
-sbatch -p high_mem --exclude=cnode040 --array=5999-6000 sergio_matlab_jobB.sbatch 1 
+sbatch -p high_mem --exclude=cnode013,cnode018,cnode019 --array=88-109,1576-1593,1595-1600,2599,2603,2642-2643,2667-2678,2681,2683,2688-2690,2697,2699-2700 sergio_matlab_jobB.sbatch 10
+
+sbatch -p cpu2021 --array=4005,4009,4031-4032,4063,4125,4297,6049-6102,6481-6534,6913-6966,7345-7398,7777-7830,7900,7902,8209-8262,8641-8694 sergio_matlab_jobB.sbatch 10

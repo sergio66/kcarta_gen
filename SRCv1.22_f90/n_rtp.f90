@@ -619,7 +619,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iJ1,iI,iIn,iJ,iScat,iaTemp(kMixFilRows),iTop,iBot,iNum,iErr
-    REAL :: rPT,rPB,rP1,rP2,rSwap,r1,r2,raaJunkCloudTB(2,2)
+    REAL :: rPT,rPB,rP1,rP2,rSwap,r1,r2,raaJunkCloudTB(2,2),cpsize1,cpsize2
     CHARACTER(120) :: caName
 ! these are to check that the scattering table names are unique
     INTEGER :: iaTable(kCloudLayers*kMaxClouds),iWhichScatterCode,iDefault
@@ -700,7 +700,7 @@ CONTAINS
       CALL DoStop
     END IF
 
-    IF ((iakSolar(1) >= 0)  .AND. (kWhichScatterCode == 4)) THEN
+    IF ((iakSolar(1) >= 0)  .AND. (Kwhichscattercode == 4)) THEN
       write(kStdErr,*) 'Cannot have sun and FIRST ORDER PERTURB scattering'
       CALL DoStop
     END IF
@@ -715,7 +715,14 @@ CONTAINS
     END IF
 
     iNclouds_RTPX = iNclouds_RTP
-          
+    IF (iaNML_Ctype(1) > 0 .AND. iaNML_Ctype(2) > 0 .AND. iaNML_Ctype(3) > 0) THEN
+      iNclouds_RTPX = 3
+    ELSEIF (iaNML_Ctype(1) > 0 .AND. iaNML_Ctype(2) > 0 .AND. iaNML_Ctype(3) < 0) THEN
+      iNclouds_RTPX = 2
+    ELSEIF (iaNML_Ctype(1) > 0 .AND. iaNML_Ctype(2) < 0 .AND. iaNML_Ctype(3) < 0) THEN
+      iNclouds_RTPX = 1
+    END IF
+
     IF ((ctype1 <= 0) .AND. (ctype2 <= 0)) THEN
       write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 0'
       iNclouds_RTP = 0
@@ -727,9 +734,11 @@ CONTAINS
       RETURN
     END IF
 
-    IF ((ctype1 <= 0) .AND. (ctype2 > 0)) THEN
-      write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 1'
-      write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' swapping info for clouds1,2'
+    IF ( ((ctype1 <= 0) .AND. (ctype2 > 0)) .OR. ((cngwat1 <= 0) .AND. (cngwat2 > 0)) )THEN
+      write(kStdWarn,*) 'cngwat1,cngwat2 = ',cngwat1,cngwat2,' setting iNclouds_RTP = 1, swapping cloud info'
+      write(kStdWarn,*) 'ctype1,ctype2   = ',ctype1,ctype2,'   setting iNclouds_RTP = 1, swapping cloud info'
+      write(kStdErr,*)  'cngwat1,cngwat2 = ',cngwat1,cngwat2,' setting iNclouds_RTP = 1, swapping cloud info'
+      write(kStdErr,*)  'ctype1,ctype2   = ',ctype1,ctype2,'   setting iNclouds_RTP = 1, swapping cloud info'
          
       ctype1       = ctype2
       cfrac1       = cfrac2
@@ -749,6 +758,9 @@ CONTAINS
       cfrac2       = 0.0
       cfrac12      = 0.0
     END IF
+
+    cpsize1 = raCpSize(1)
+    cpsize2 = raCpSize(2)
 
     IF ((ctype1 > 0) .AND. (ctype2 <= 0)) THEN
       write(kStdWarn,*) 'ctype1,ctype2 = ',ctype1,ctype2,' setting iNclouds_RTP = 1'
@@ -795,10 +807,10 @@ CONTAINS
     ELSEIF ((iNclouds_RTP == 3) .AND. (iFound1 <= 0) .AND. (iFound2 <= 0)) THEN
       write(kStdWarn,*) 'In nm_prfile, you set iNclouds_RTP = 3, found zero clouds, resetting'
       iNclouds_RTP = 0
-      ctype1 = -9999
-      iaCtype(1) = -9999
-      raCngwat(1) = 0.0
-      cngwat1     = 0.0
+      ctype1       = -9999
+      iaCtype(1)   = -9999
+      raCngwat(1)  = 0.0
+      cngwat1      = 0.0
       cfrac1       = 0.0
 
       ctype2       = -9999
@@ -873,7 +885,8 @@ CONTAINS
       iaPhase(iI)             = -1       !default to HG phase function
 
       write(kStdWarn,*)    'cloud info for RTP cloud # ',iI
-      write (KStdWarn,223) caaCloudFile(iI)
+      !write (KStdWarn,223) caaCloudFile(iI)
+      write (KStdWarn,223) caaaScatTable(iI,1)
       write (kStdWarn,*)   '  cloud top     = ',raCprtop(iI),' mb'
       write (kStdWarn,*)   '  cloud bot     = ',raCprbot(iI),' mb'
       write (kStdWarn,*)   '  cloud IWP     = ',raCngwat(iI),' gm m-2'
@@ -2721,6 +2734,73 @@ CONTAINS
       i4ctype2 = -9999
     endif 
 
+    IF (cngwat1 <= 0) THEN
+      cfrac12 = 0.0
+      cfrac1 = 0.0
+      ctype1  = -9999
+      ctop1   = -9999.99
+      cbot1   = -9999.99
+      rSize1  = 0.0
+      iaCtype(1) = ctype1
+    END IF
+    IF ((cngwat1 <= 0) .AND. (cngwat2 > 0)) THEN
+      write(kStdWarn,*) '(cngwat1 <= 0) .AND. (cngwat2 > 0) so swapping everything'
+      cngwat1 = cngwat2
+      cfrac12 = 0.0
+      cfrac1 = cfrac2
+      ctype1 = ctype2
+      ctop1 = ctop2
+      cbot1 = cbot2
+      rSize1 = rSize2
+      iaCtype(1) = ctype1
+
+      cngwat2 = 0.0
+      cfrac12 = 0.0
+      cfrac2 = 0.0
+      ctype2  = -9999
+      ctop2   = -9999.99
+      cbot2   = -9999.99
+      rSize2  = 0.0
+      iaCtype(2) = ctype2
+
+      !! update prof struct
+      prof%cfrac   = cfrac1
+      prof%cprtop  = ctop1
+      prof%cprbot  = cbot1
+      prof%cngwat  = prof%cngwat2
+      prof%cpsize  = prof%cpsize2
+      prof%ctype   = prof%ctype2
+      prof%cfrac2  = 0.0
+      prof%cngwat2 = 0.0
+      prof%cfrac12 = 0.0
+      prof%ctype2 = -9999
+    END IF
+
+    IF (cngwat2 <= 0) THEN
+      cfrac12 = 0.0
+      cfrac2 = 0.0
+      ctype2  = -9999
+      ctop2   = -9999.99
+      cbot2   = -9999.99
+      rSize2  = 0.0
+      iaCtype(2) = ctype2
+    END IF
+
+    
+    IF (ctype1 < 0 .AND. ctype2 < 0) THEN
+      iNclouds_RTP = 0
+      prof%ctype = ctype1
+      prof%ctype2 = ctype2
+    ELSEIF (ctype1 < 0 .AND. ctype2 > 0) THEN
+      iNclouds_RTP = 1
+      prof%ctype = ctype1
+    ELSEIF (ctype1 > 0 .AND. ctype2 < 0) THEN
+      iNclouds_RTP = 1
+      prof%ctype2 = ctype2
+    ELSEIF (ctype1 > 0 .AND. ctype2 > 0) THEN
+      iNclouds_RTP = 2
+    END IF
+
 ! raaRTPCloudParams0(1,:) = ctype1,cprtop,cprbot,congwat,cpsize,cfrac,cfrac12,-999,-999 /iT/iB   from rtpfile
     raaRTPCloudParams0(1,1) = ctype1
     raaRTPCloudParams0(1,2) = ctop1
@@ -2788,7 +2868,7 @@ CONTAINS
         prof%cprtop  = ctop1
         prof%cprbot  = ctop2
       ELSE
-        write(kStdErr,*) '  since cngwat1 <= 0, cfrac1 <=0, reset CLD2 -> CLD1'
+        write(kStdErr,*) '  since cngwat1 <= 0, cfrac1 <= 0, reset CLD2 -> CLD1'
         !! set cld2 --> cld1
         cngwat1  = cngwat2
         ctop1  = ctop2
@@ -2806,14 +2886,14 @@ CONTAINS
         !! update prof struct
         prof%cfrac   = cfrac1
         prof%cprtop  = ctop1
-        prof%cprbot  = ctop2
+        prof%cprbot  = cbot1
         prof%cngwat  = prof%cngwat2
         prof%cpsize  = prof%cpsize2
         prof%ctype   = prof%ctype2
         prof%cfrac2  = 0.0
         prof%cngwat2 = 0.0
         prof%cfrac12 = 0.0
-        prof%ctype2 = -1
+        prof%ctype2 = -9999
       END IF
     END IF
 

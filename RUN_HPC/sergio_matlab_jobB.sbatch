@@ -15,7 +15,7 @@
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
 # run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-89       sergio_matlab_jobB.sbatch 9 789   to run DISORT seprately chunk by chunk, profile 789 of the rtp file
 #                                        submit_many_disort_runs.m   can launch multiple profiles then gather up results using read_disort_chunks
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 10      to run DISORT for 89 chunks, profil 789 of the rtp file, straighforward readkcstd
+# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 10      to run DISORT for 89 chunks, traighforward readkcstd
 #
 # >>>>>>>>>>>>>>>>>>>>>>>>>
 # if putting ONE job per node (ie no loop)

@@ -2073,10 +2073,15 @@ CONTAINS
           END IF
 
         ELSE
-          write(kStdErr,*) 'Something wrong with (PCLSAM) clouds, cfrac12 = ',cfrac12
+          write(kStdWarn,'(A,3(F12.5))') 'Something wrong with (PCLSAM) clouds, cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
+          write(kStdWarn,*) 'iNatm has remained ',iNatm
+          write(kStdWarn,'(A,4(F12.4),I4)') 'ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1) = ',ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1)
+          write(kStdWarn,'(A,4(F12.4),I4)') 'ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2)
+
+          write(kStdErr,'(A,3(F12.5))') 'Something wrong with (PCLSAM) clouds, cfrac1,cfrac2,cfrac12 = ',cfrac1,cfrac2,cfrac12
           write(kStdErr,*) 'iNatm has remained ',iNatm
-          write(kStdErr,*) 'ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1) = ',ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1)
-          write(kStdErr,*) 'ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2)
+          write(kStdErr,'(A,4(F12.4),I4)') 'ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1) = ',ctop1,cbot1,cngwat1,cfrac1,iaCloudScatType(1)
+          write(kStdErr,'(A,4(F12.4),I4)') 'ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2) = ',ctop2,cbot2,cngwat2,cfrac2,iaCloudScatType(2)
           CALL DoStop
         END IF
                     
