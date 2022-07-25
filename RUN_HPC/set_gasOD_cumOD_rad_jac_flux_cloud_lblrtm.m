@@ -174,8 +174,8 @@ iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac =
 %              iHITRAN = 2008;
 
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;               %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
-iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT allsky  PCLSAM no jacs
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 20; iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs, DISORT *********************** DISORT
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT allsky  PCLSAM no jacs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -215,7 +215,9 @@ if iDoRad == 20
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20';
 end
 
-kcartaexec    = '/home/sergio/KCARTA/BIN/kcarta.x90';
+%%kcartaexec    = '/home/sergio/KCARTA/BIN/kcarta.x90';
+%%kcartaexec    = '/home/sergio/KCARTA/BIN/kcarta.x90_400ppmv_H16';
+%%kcartaexec    = '/home/sergio/KCARTA/BIN/bkcarta.x_f90_120_400ppmv_H16';
 strWaterCloud = '/asl/s1/sergio/CLOUDS_MIEDATA/WATER250/water_405_2905_250';
 strIceCloud   = '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta';
 %strIceCloud   = '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRS_PYANG_MODIS_CERES/COARSE_RRTM/kcarta_200_3000_pingyang_modisL2.dat'

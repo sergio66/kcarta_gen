@@ -234,6 +234,19 @@ for iReg = 1:14
     tbestW(:,iii) = bestspectra(iaInd,ii);
   end
 
+  if iReg == 1
+    bestI_1 = bestI;
+    bestW_1 = bestW;
+    xmatrI_1 = iaChouFac(bestI);
+    xmatrW_1 = iaChouFac(bestW);
+  else
+    xmatrI = iaChouFac(bestI);
+    xmatrW = iaChouFac(bestW);
+    junk = [sum(bestI(:)-bestI_1(:)) nanmean(abs(xmatrI_1(:)-xmatrI(:))) nanstd(abs(xmatrI_1(:)-xmatrI(:))) sum(bestW(:)-bestW_1(:)) nanmean(abs(xmatrW_1(:)-xmatrW(:))) nanstd(abs(xmatrW_1(:)-xmatrW(:))) ];
+    fprintf(1,'difference between 605-1655 cm-1 and this limited set I %8i %8.6f+/-%8.6f   W %8i %8.6f+/-%8.6f \n',junk);
+  end
+
+
   figure(9)  
   plot(f(iaInd),nanmean(t0p00(iaInd,:)-tdisort(iaInd,:),2),'b',f(iaInd),nanmean(tbest-tdisort(iaInd,:),2),'r',...
        f(iaInd),nanstd(t0p00(iaInd,:)-tdisort(iaInd,:),0,2),'c--',f(iaInd),nanstd(tbest-tdisort(iaInd,:),0,2),'m--',fairs(g2),nedt(g2),'k'); plotaxis2; title('BOTH')
@@ -250,29 +263,11 @@ for iReg = 1:14
   xlim([min(f(iaInd)) max(f(iaInd))])
   xlabel('Wavenumber cm-1'); ylabel('BT(K)')
 
-  if iReg == 1
-    fprintf(1,'ICE   scanang x cprtop x cngwat x cpsize = %4i x %4i x %4i x %4i \n',length(unique(p.scanang(booI))),length(unique(p.cprtop(booI))),length(unique(p.cngwat(booI))),  length(unique(p.cpsize(booI))))
-    fprintf(1,'WATER scanang x cprtop x cngwat x cpsize = %4i x %4i x %4i x %4i \n',length(unique(p.scanang(booW))),length(unique(p.cprtop(booW))),length(unique(p.cngwat(booW))),  length(unique(p.cpsize(booW))))
-    %% make a N dim matrix, one for Ice and one for Water,      Freq x scanang x cprtop x cngwat x cpsize
-    %% see ~/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/make_profiles.m
-    matrI  = reshape(iaChouFac(bestI),length(unique(p.cpsize(booI))),length(unique(p.cngwat(booI))),length(unique(p.cprtop(booI))),length(unique(p.scanang(booI))));
-    matrW  = reshape(iaChouFac(bestW),length(unique(p.cpsize(booW))),length(unique(p.cngwat(booW))),length(unique(p.cprtop(booW))),length(unique(p.scanang(booW))));
-    indexI = reshape(booI,length(unique(p.cpsize(booI))),length(unique(p.cngwat(booI))),length(unique(p.cprtop(booI))),length(unique(p.scanang(booI))));
-    indexW = reshape(booW,length(unique(p.cpsize(booW))),length(unique(p.cngwat(booW))),length(unique(p.cprtop(booW))),length(unique(p.scanang(booW))));
+  iVers = 0; %% Howard says this should work, with matr(a,b,c,d) having a as innermost loop, dummy!!!!
+  iVers = 1; %% ultimately I am sending in matr(cpsize,cngwat,cprtop,scanang) ie this transpoe etc works, but Howard says matr(a,b,c,d) with d as inner most loop is just plain wierd BUT I THINK IT IS CORRECT
 
-    matrI  = reshape(iaChouFac(bestI),length(unique(p.scanang(booI))),length(unique(p.cprtop(booI))),length(unique(p.cngwat(booI))),length(unique(p.cpsize(booI)))); matrI = permute(matrI,[ 4 3 2 1]);
-    matrW  = reshape(iaChouFac(bestW),length(unique(p.scanang(booI))),length(unique(p.cprtop(booI))),length(unique(p.cngwat(booI))),length(unique(p.cpsize(booI)))); matrW = permute(matrW,[ 4 3 2 1]); 
-    indexI = reshape(booI,length(unique(p.scanang(booI))),length(unique(p.cprtop(booI))),length(unique(p.cngwat(booI))),length(unique(p.cpsize(booI)))); indexI = permute(indexI,[ 4 3 2 1]);
-    indexW = reshape(booW,length(unique(p.scanang(booI))),length(unique(p.cprtop(booI))),length(unique(p.cngwat(booI))),length(unique(p.cpsize(booI)))); indexW = permute(indexW,[ 4 3 2 1]);
-
-    cpsizeI = unique(p.cpsize(booI));
-    cpsizeW = unique(p.cpsize(booW));
-    cprtop = unique(p.cprtop(booI));
-    cngwat = unique(p.cngwat(booI));
-    scanang = unique(p.scanang(booI));
-    comment = 'see reshape(bestI,length(unique(p.cpsize(booI))),length(unique(p.cngwat(booI))),length(unique(p.cprtop(booI))),length(unique(p.scanang(booI)))) and make_profiles.m';
-    save generic_605_1655_I_W.mat matrI matrW cpsizeI cpsizeW cprtop cngwat scanang comment indexI indexW
-    %% [matrII,matrWW,indexII,indexWW] = write_chou_matfor('generic_605_1655_I_W.mat','generic_605_1655_I_W.bin',605,2830);
+  if iReg > 0
+    save_the_matfile_matrices
   end
 
   jett = jet(64); jett = jett(32-24:32+24,:);

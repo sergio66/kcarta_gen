@@ -14,9 +14,6 @@
  !! iaaOverride(2,3) = +1
  !! iaaOverride(2,5) = +1
 
- !! LBLRTM_highres = -1 do not estimate/fix problems because use 0.0025 cm-1 ... silly fix not needed anymore
- !! iaaOverride(2,9) = -1
-
  !! ktempervary iLBLRTM RT (kTemperVary = 43) plus fixes for high res, -1 for no vary
  iaaOverride(2,1) = 43    !! to do linear in tau
  iaaOverride(2,1) = -1    !! to do const
@@ -67,7 +64,7 @@
  iaaOverride(2,4) = 1
 
  caNMLReset_param_spectra = 'notset' 
- !caNMLReset_param_spectra = 'template_reset_nm_spectra.nml' 
+ !!!caNMLReset_param_spectra = 'template_reset_nm_spectra.nml' 
  $end
 
  $nm_frqncy

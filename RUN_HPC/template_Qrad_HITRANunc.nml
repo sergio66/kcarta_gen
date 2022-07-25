@@ -13,7 +13,6 @@
 
  !! iLBLRTM RT (kTemperVary = 43) plus fixes for high res
  !! iaaOverride(2,1) = +43
- !! iaaOverride(2,9) = +1
 
  !Paths/mixed paths output is to be layer-to-space optical depth
  kLayer2Sp = 1

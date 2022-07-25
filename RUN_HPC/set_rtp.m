@@ -306,6 +306,8 @@ use_this_rtp = '/home/chepplew/data/sarta/validation/2018d152G013_levs.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1100_400p_seaemis_8angs_pert_v2.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1100_400p_unitemis_8angs_pert.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1013_400p_unitemis_7angs_night.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/r49_1013_400p_unitemis_7angs_night.rtp';
+use_this_rtp = 'RTP/r49_1013_400p_unitemis_7angs_night.rtp';
 
 %% larrabee wants col gas jacs (actually stemp only)
 use_this_rtp = 'RTP/latbin20_45angles.op.rtp';
@@ -359,6 +361,7 @@ use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_Tang
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_iceNwatercld_USSTD_7cngwat.op.rtp'; %% testing PCLSAM with Chou adjustment 
 use_this_rtp = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/parametrize_pclsam_disort_AFGL_1.rp.rtp';
 use_this_rtp = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/parametrize_pclsam_disort_AFGL_1_49.rp.rtp';
+use_this_rtp = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/parametrize_pclsam_disort_arbCZT_AFGL_1_49.rp.rtp';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m

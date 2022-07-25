@@ -20,6 +20,11 @@
  !iaaOverride(2,1) = 43
  !iaaOverride(2,4) = 1
  !iaaOverride(2,4) = 2
+
+ !! iaaOverride(2,9) =  Chou adjust factor/100, 0 for no adjustment, or -1,-2, <<-3 default >>
+ ! iaaOverride(2,9) = 90
+ !iaaOverride(2,9) = 0
+ iaaOverride(2,9) = -3
  
  $end
 
