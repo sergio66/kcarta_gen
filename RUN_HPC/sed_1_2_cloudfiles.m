@@ -27,13 +27,13 @@ if iCloudTableVersion == -1
     iNclouds = 2;
     iCloudType1 = ctype;
     if ctype == 101
-      strCloudType1 = strWaterCloud
+      strCloudType1 = strWaterCloud;
     elseif ctype == 201
       strCloudType1 = strIceCloud;
     end
     iCloudType2 = ctype2;
     if ctype2 == 101
-      strCloudType2 = strWaterCloud
+      strCloudType2 = strWaterCloud;
     elseif ctype2 == 201
       strCloudType2 = strIceCloud;
     end
@@ -46,15 +46,45 @@ if iCloudTableVersion == -1
     sedder = [sedder ' template_Qrad.nml  > ' outnml];        
 
   else
+%{
     iNclouds = 1;
     if ctype == 101
       strCloudType1 = strWaterCloud;
     elseif ctype == 201
       strCloudType1 = strIceCloud;
+    else
+      ctype
+      strCloudType1 = strIceCloud;      
     end
     sedder = [sedder ' -e "s/iCloudType1/'     num2str(ctype) '/g"  -e "s/strCloudType1/'  strCloudType1 '/g"'];
     sedder = [sedder ' -e "s/iCloudType2/'     num2str(ctype) '/g"  -e "s/strCloudType2/'  strCloudType1 '/g"'];
     sedder = [sedder ' ' type1nml '  > ' outnml];    
+%}
+
+    iNclouds = 2;
+    iCloudType1 = ctype;
+    if ctype == 101
+      strCloudType1 = strWaterCloud;
+    elseif ctype == 201
+      strCloudType1 = strIceCloud;
+    else
+      ctype = 101;
+      iCloudType1 = 101;
+      strCloudType1 = strWaterCloud;
+    end
+    iCloudType2 = ctype2;
+    if ctype2 == 101
+      strCloudType2 = strWaterCloud;
+    elseif ctype2 == 201
+      strCloudType2 = strIceCloud;
+    else
+      ctype2 = 201;
+      iCloudType2 = 201;
+      strCloudType2 = strIceCloud;
+    end
+    sedder = [sedder ' -e "s/iCloudType1/'     num2str(ctype) '/g"  -e "s/strCloudType1/'  strCloudType1 '/g"'];
+    sedder = [sedder ' -e "s/iCloudType2/'    num2str(ctype2) '/g"  -e "s/strCloudType2/'  strCloudType2 '/g"'];
+    sedder = [sedder ' ' type2nml '  > ' outnml];
 
   end
 
@@ -68,6 +98,9 @@ elseif iCloudTableVersion == +1
     strCloudType1 = strWaterCloud;
   elseif iCloudType1 == 201
     strCloudType1 = strIceCloud;
+  else
+    ctype
+    strCloudType1 = strIceCloud;      
   end
   
   iCloudType2 = ctype2;
@@ -75,6 +108,9 @@ elseif iCloudTableVersion == +1
   if iCloudType2 == 101
     strCloudType2 = strWaterCloud;
   elseif iCloudType2 == 201    
+    strCloudType2 = strIceCloud;
+  else
+    ctype2 
     strCloudType2 = strIceCloud;
   end
   

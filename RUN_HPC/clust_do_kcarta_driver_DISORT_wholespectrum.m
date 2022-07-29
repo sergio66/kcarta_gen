@@ -29,6 +29,7 @@ fprintf(1,'iHITRAN      = %2i \n',iHITRAN);
 fprintf(1,'iKCKD        = %2i \n',iKCKD);
 disp('>>>>>')
 
+disp('DISORT runs')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DO NOT TOUCH THESE LAST TWO LINES. EDIT set_convolver as needed
 use_this_rtp0 = use_this_rtp;
@@ -57,12 +58,23 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));   %% PERTAINS TO WAVENUMBER CHUNK, NOT PROFILE
-%JOB = 5
+%JOB = 1
 
 iiBin = JOB;
 
-f1 = 605;
-f2 = 2830;
+iIRorFIR = -1;
+iIRorFIR = +1;
+if iIRorFIR == +1
+  %% 89 chunks
+  f1 = 605;
+  f2 = 2830;
+  iKCKD = iKCKD;
+elseif iIRorFIR == -1
+  %% 20 chunks
+  f1 = 310;
+  f2 = 510;
+  iKCKD = 1;
+end
 fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
 
 fprintf(1,'processing kCARTA freq chunk JOB %5i profile %5i \n',JOB,iiBin);

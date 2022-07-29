@@ -25,6 +25,7 @@
 
  !! use this, set by cluster
  kCKD = CKDCKD
+ kCKD = 1
  
  !short header
  kLongOrShort = -1
@@ -36,6 +37,9 @@
 
  !listen to the frequency settings
   iaaOverride(1,8) = +1
+
+ !!! temperature variation : default is none
+ iaaOverride(2,1) = -1
   
  $end
 
@@ -100,7 +104,8 @@
  namecomment	=  '******* RADNCE section *******'
  !1 atmospheres
  iNatm          =  -1
- iTemperVary    = TTT
+ !iTemperVary    = TTT
+ !iTemperVary    = 43
  
  ! Atmos #1: no solar, with refl thermal, angle 0
  iaMPSetForRad(1)   =  1

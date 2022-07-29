@@ -62,8 +62,19 @@ if nargin == 0
   iiBin = 1;  
 end
 
-f1 = 605 + (JOB-1)*25;
-f2 = f1 + 25;
+iIRorFIR = +1;
+iIRorFIR = -1;
+if iIRorFIR == +1
+  %% 89 chunks
+  f1 = 605;
+  f2 = 2830;
+  iKCKD = iKCKD;
+elseif iIRorFIR == -1
+  %% 20 chunks
+  f1 = 310;
+  f2 = 510;
+  iKCKD = 1;
+end
 fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
 
 fprintf(1,'processing kCARTA freq chunk JOB %5i profile %5i \n',JOB,iiBin);

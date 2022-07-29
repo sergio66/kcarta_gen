@@ -11,6 +11,21 @@ else
   outstat    = fxstat;
 end
 
+iIRorFIR = -1;
+iIRorFIR = +1;
+if iIRorFIR == +1
+  %% 89 chunks
+  f1 = 605;
+  f2 = 2830;
+  iKCKD = iKCKD;
+elseif iIRorFIR == -1
+  %% 20 chunks
+  f1 = 310;
+  f2 = 510;
+  iKCKD = 1;
+end
+fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
+
 sedder = ['!sed -e "s/FF1/' num2str(f1) '/g"  -e "s/FF2/' num2str(f2) '/g" '];
 if ~exist('loop_allprofiles_onefile')
   %% generic usual stuff

@@ -72,10 +72,12 @@
  !iaNML_Ctype(2)  = 201
  ! caaCloudFile(2) =
  !      '/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_ICE_AGGREGATES/ice_agg_333_2980_forkcarta'
-
- !iaNML_Ctype(2)  = 201
  ! caaCloudFile(2) =
  !      '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta'
+ ! caaCloudFile(2) =
+ !      '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta'
+ ! caaCloudFile(2) =
+ !            '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'
 
  iWhichScatterCode_RTP =  3
  iScatter_RTP          =  1

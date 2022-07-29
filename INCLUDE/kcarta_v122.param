@@ -88,7 +88,7 @@ c >>>>>>>        2830-3555 cm-1 "sX_gY.dat" files should all be in that dir
       INTEGER kWaterIsobandStart2,kWaterIsobandStop2
 c      PARAMETER (kWaterIsobandStart1 = 0605, kWaterIsobandStop1 = 1955)
 c      PARAMETER (kWaterIsobandStart2 = 1955, kWaterIsobandStop2 = 3355)
-      PARAMETER (kWaterIsobandStart1 = 0500, kWaterIsobandStop1 = 1955)
+      PARAMETER (kWaterIsobandStart1 = 0510, kWaterIsobandStop1 = 1955)
       PARAMETER (kWaterIsobandStart2 = 1955, kWaterIsobandStop2 = 2830)
 c for testing; this will turn off new part of code and just use usual database
 c for testing; this will turn off new part of code and just use usual database

@@ -105,7 +105,7 @@ CONTAINS
 
     iNewIn = -1
     iNewIn = OutsideSpectra(iaGases(iGas),iNumNewGases,iaNewGasID,iNumAltComprDirs,iaAltComprDirs, &
-    rFileStartFr,rAltMinFr,rAltMaxFr,iTag)
+                            rFileStartFr,rAltMinFr,rAltMaxFr,iTag)
     IF (iNewIn < 0) THEN
       ! use kCompressed Database w/o worrying
       kAltComprDirs = -1   !! stick to kWaterPath,kCKD_Compr_Path,kWaterIsotopePath,kCO2Path,kCompPath

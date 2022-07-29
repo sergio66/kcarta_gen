@@ -61,7 +61,7 @@
  namecomment	=  '******* PRFILE section *******'
  iBinOrAsc    = 1
 
- iNclouds_RTP   = 1
+ iNclouds_RTP   = 2
  !iaNML_Ctype(1)  = 301
  ! caaCloudFile(1) =
  !       '/asl/s1/sergio/CLOUDS_MIEDATA/VOLCANO/andesite_405_2905_280'
@@ -72,10 +72,10 @@
  !iaNML_Ctype(2)  = 201
  ! caaCloudFile(2) =
  !      '/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_ICE_AGGREGATES/ice_agg_333_2980_forkcarta'
-
- !iaNML_Ctype(2)  = 201
  ! caaCloudFile(2) =
  !      '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta'
+ ! caaCloudFile(2) =
+ !            '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'
 
  iaNML_Ctype(1)  = iCloudType1
  caaCloudFile(1) = 'strCloudType1'

@@ -76,6 +76,25 @@ for ix = 1 : length(iiBinAll)
   f2 = f1 + 25;
   fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
 
+  iIRorFIR = +1;
+  iIRorFIR = -1;
+  if iIRorFIR == +1
+    %% 89 chunks
+    f1 = 605;
+    f2 = 2830;
+    f1 = 605 + (iFreqChunk_of_89-1)*25;
+    f2 = f1 + 25;
+    iKCKD = iKCKD;
+  elseif iIRorFIR == -1
+    %% 20 chunks
+    f1 = 310;
+    f2 = 510;
+    f1 = 310 + (iFreqChunk_of_89-1)*10;
+    f2 = f1 + 10;
+    iKCKD = 1;
+  end
+  fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
+
   outfile = ['JUNK/rad.dat' num2str(iiBin) '_' num2str(f1)];
 
   if ~exist(outfile)
