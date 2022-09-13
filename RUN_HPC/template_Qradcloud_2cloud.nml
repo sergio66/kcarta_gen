@@ -27,7 +27,7 @@
  iaaOverride(3,7) = -1
 
  !! plane parallel to test DISORT vs PCLSAM AT ANY ANGLE
- iaaOverride(2,7) = 0
+ ! iaaOverride(2,7) = 0
 
  !! for heating rates
  !kFlux = 6

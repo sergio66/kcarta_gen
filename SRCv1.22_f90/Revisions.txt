@@ -638,7 +638,11 @@ v1.22
                 *** The PLANE PARALLEL option (iaaOverride(2,7) = 0) works best for clear sky comparisons! ***
 
 6/29/22         rHDO_Deplete placeholder for HDO .. might make it a profile later
-
+                Use prof.udef(20) for this so that
+                !!! so if p.udef(20) = +1000, the scale factor = rHDO_Deplete = 2 = x2 HDO
+                !!! so if p.udef(20) = 0,     the scale factor = rHDO_Deplete = 1
+                !!! so if p.udef(20) = -1000, the scale factor = rHDO_Deplete = 0 = no HDO
+              
 6/27/22         Was having problems with background thermal when asking for fluxes
                 a)  retired (iaaOverrideDefault(2,9) == 1) 
                     since this is a LBLRTM high spectral res amd layer temp variation fix

@@ -3448,8 +3448,20 @@ CONTAINS
     END DO
 
 !!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
-    rHDO_Deplete = prof%udef(19)
-    rHDO_Deplete = 0.0
+!! deltaD = 1000 *{ [HDO/H2O]actual/[HDO/H2O]ref - 1}
+!! [HDO/H2O]actual = [HDO/H2O]ref * (deltaD/1000 + 1)
+    rHDO_Deplete = 1.0  !!! default
+    IF (prof%udef(20) >= -1000 .AND. prof%udef(20) <= +1000) THEN
+      rHDO_Deplete = (prof%udef(20)/1000 + 1)   
+      write(kStdWarn,*) 'rHDO_Deplete, prof%udef(20) = ',rHDO_Deplete,prof%udef(20)
+      write(kStdErr ,*) 'rHDO_Deplete, prof%udef(20) = ',rHDO_Deplete,prof%udef(20) 
+    ELSE
+      write(kStdWarn,*) 'prof%udef(20) wierd, leaving rHDO_Deplete = ',prof%udef(20),rHDO_Deplete
+      write(kStdErr,*)  'prof%udef(20) wierd, leaving rHDO_Deplete = ',prof%udef(20),rHDO_Deplete
+    END IF
+!!! so if p.udef(20) = +1000, the scale factor = rHDO_Deplete = 2 = x2 HDO
+!!! so if p.udef(20) = 0,     the scale factor = rHDO_Deplete = 1
+!!! so if p.udef(20) = -1000, the scale factor = rHDO_Deplete = 0 = no HDO
 !!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
 
 ! set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)
@@ -4060,8 +4072,20 @@ CONTAINS
     END DO
 
 !!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
-    rHDO_Deplete = prof%udef(19)
-    rHDO_Deplete = 0.0
+!! deltaD = 1000 *{ [HDO/H2O]actual/[HDO/H2O]ref - 1}
+!! [HDO/H2O]actual = [HDO/H2O]ref * (deltaD/1000 + 1)
+    rHDO_Deplete = 1.0  !!! default
+    IF (prof%udef(20) >= -1000 .AND. prof%udef(20) <= +1000) THEN
+      rHDO_Deplete = (prof%udef(20)/1000 + 1)   
+      write(kStdWarn,*) 'rHDO_Deplete, prof%udef(20) = ',rHDO_Deplete,prof%udef(20)
+      write(kStdErr ,*) 'rHDO_Deplete, prof%udef(20) = ',rHDO_Deplete,prof%udef(20) 
+    ELSE
+      write(kStdWarn,*) 'prof%udef(20) wierd, leaving rHDO_Deplete = ',prof%udef(20),rHDO_Deplete
+      write(kStdErr,*)  'prof%udef(20) wierd, leaving rHDO_Deplete = ',prof%udef(20),rHDO_Deplete
+    END IF
+!!! so if p.udef(20) = +1000, the scale factor = rHDO_Deplete = 2 = x2 HDO
+!!! so if p.udef(20) = 0,     the scale factor = rHDO_Deplete = 1
+!!! so if p.udef(20) = -1000, the scale factor = rHDO_Deplete = 0 = no HDO
 !!! place holder for HDO depletion, see ../INCLUDE/post_defined.param
 
 ! set up the input order .. assume they have to be sequential (MOLGAS,XSCGAS)

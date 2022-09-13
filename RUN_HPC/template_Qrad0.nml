@@ -345,6 +345,12 @@
  iaNp(1)        =   1
  iaaOp(1,1)      = 4
 
+ !dump out radiance at all layers
+ iaPrinter(1)   =    3
+ iaGPMPAtm(1)   =   -1
+ iaNp(1)        =    -1
+ raaOp(1,1)     =    0.0
+
  !dump out radiance at TOA
  iaPrinter(1)   =    3
  iaGPMPAtm(1)   =   -1

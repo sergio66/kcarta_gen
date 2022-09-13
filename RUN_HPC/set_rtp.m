@@ -338,12 +338,17 @@ use_this_rtp = '/asl/s1/sergio/MakeAvgProfs2002_2020_startSept2002/16dayAvgLatBi
 use_this_rtp = '/asl/s1/sergio/MakeAvgProfs2002_2020_startSept2002/16dayAvgLatBin32/all12monthavg_T_WV_grid_latbin_32_lonbin_12.rtp'; %% 25 T x WV grids
 %% alllsky profiles, averaged over longitudes
 use_this_rtp = '/~/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR_zonalavg/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_zonalavg64lats.rtp';
-use_this_rtp = 'RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_zonalavg64lats.rtp';
-%% ERA5 desc avg
-use_this_rtp = 'RTP/summary_19years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/SimulateTimeSeries/simulate64binsERA5_32.rp.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/SimulateTimeSeries/simulate64binsERA5_32.op.rtp'; %% 16416 profiles, no need to do ANY jacs
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/SimulateTimeSeries/simulate64binsERA5_15.op.rtp'; %% 16416 profiles, no need to do ANY jacs
+
+%% ERA5 desc avg
+%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
+use_this_rtp = 'RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_zonalavg64lats.rtp';
+use_this_rtp = 'RTP/summary_19years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp';
+use_this_rtp = 'RTP/summary_12years_all_lat_all_lon_2002_2014_monthlyERA5.rp.rtp';
+use_this_rtp = 'RTP/summary_07years_all_lat_all_lon_2012_2019_monthlyERA5.rp.rtp';
+%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
 
 use_this_rtp = '/home/chepplew/data/sarta/validation/sng_2020_subs_for_kcarta.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/validation/sng_2020_subs_for_kcarta_v2.rtp';
@@ -360,15 +365,26 @@ use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_Tang
 use_this_rtp = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/parametrize_pclsam_disort_AFGL_1.rp.rtp';
 use_this_rtp = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/parametrize_pclsam_disort_AFGL_1_49.rp.rtp';
 use_this_rtp = '/home/sergio/KCARTA/TEST/DISORT_vs_PCLSAM/PARAMETRIZE/parametrize_pclsam_disort_arbCZT_AFGL_1_49.rp.rtp';
-use_this_rtp = '/asl/s1/sergio/forITOVS_May2019/KCARTA_PCRTM_Tang//pcrtm_10.31.215_7chans_15min.op.rtp';
-use_this_rtp = '/asl/s1/sergio/forITOVS_May2019/KCARTA_PCRTM_Tang//pcrtm_11.01.064_7chans_15min.op.rtp';
-use_this_rtp = '/asl/s1/sergio/forITOVS_May2019/KCARTA_PCRTM_Tang//pcrtm_11.01.055_7chans_15min.op.rtp';
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_iceNwatercld_USSTD_7cngwat.op.rtp'; %% testing PCLSAM with Chou adjustment 
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_watercld_USSTD_7cngwat.op.rtp';     %% testing PCLSAM with Chou adjustment
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_icecld_USSTD_7cngwat.op.rtp';       %% testing PCLSAM with Chou adjustment
 use_this_rtp = '/home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/rrtm_lw_TAMU_v0/run_TangJAS2018/regr49_watercld_USSTD_7cngwat.op.rtp';     %% testing PCLSAM with Chou adjustment
+use_this_rtp = '/asl/s1/sergio/forITOVS_May2019/KCARTA_PCRTM_Tang//pcrtm_11.01.064_7chans_15min.op.rtp';
+use_this_rtp = '/asl/s1/sergio/forITOVS_May2019/KCARTA_PCRTM_Tang//pcrtm_11.01.055_7chans_15min.op.rtp';
+use_this_rtp = '/asl/s1/sergio/forITOVS_May2019/KCARTA_PCRTM_Tang//pcrtm_10.31.215_7chans_15min.op.rtp';
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/r49_1013_98lev_400p_unitemis_seaemis_7angs_night.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/ECMWF_SAF_137Profiles/save_SAF_704_profiles_29-Apr-2016_1100mb_400ppmv_unitemis.op.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/save_SAF_704_profiles_29-Apr-2016_1100mb_400ppmv_unitemis.op.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/test_3profs.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/test_9profiles.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/tigr_cris_fsr.rtp';
+use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/test_pert_gas1.rtp';
+
+use_this_rtp = 'RTP/summary_19years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp';
+use_this_rtp = 'RTP/summary_12years_all_lat_all_lon_2002_2014_monthlyERA5.rp.rtp';
+use_this_rtp = 'RTP/summary_07years_all_lat_all_lon_2012_2019_monthlyERA5.rp.rtp';
+
 %% moved to clust_do_kcarta_driver.m
 %% DO NOT TOUCH THESE LAST TWO LINES. EDIT set_convolver as needed
 %% use_this_rtp0 = use_this_rtp;

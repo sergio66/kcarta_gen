@@ -11,6 +11,7 @@
  !! iaaOverride(1,9) = 4
  !! iaaOverride(1,9) = 6 
  iaaOverride(1,9) = 0
+ !iaaOverride(1,9) = 6 
 
  !!! caNMLReset_param_spectra = 'breakout_reset_nm_spectra.nml'
 

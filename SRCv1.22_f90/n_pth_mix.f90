@@ -1091,6 +1091,11 @@ end
     write(kStdWarn,*) 'read in info for weighted set number ',iMPReadIn+1
     write(kStdWarn,*) 'the weights are : '
     DO iGas = 1,iNumGases
+      IF ((iaInputOrder(iGas) .EQ. 103) .AND. (rHDO_Deplete .NE. 1.0)) THEN
+        write(kStdWarn,*) 'rHDO_Deplete for prof.udef(20) supersedes what is in nm_weight',raStore(iaInputOrder(iGas))
+        write(kStdErr ,*) 'rHDO_Deplete for prof.udef(20) supersedes what is in nm_weight',raStore(iaInputOrder(iGas))
+        raStore(iaInputOrder(iGas)) = rHDO_Deplete
+      END IF
       write(kStdWarn,*)iGas,iaInputOrder(iGas),raStore(iaInputOrder(iGas))
     END DO
     write(kStdWarn,*) ' '

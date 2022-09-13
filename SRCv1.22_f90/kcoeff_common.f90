@@ -1058,6 +1058,7 @@ CONTAINS
       IF (iDoDQ >= -1) THEN
         IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
           write(kStdWarn,*) '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'	
+	  write(kStdWarn,*) 'oops please fix'
           write(kStdErr,*)  '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'
 	  write(kStdErr,*)  'oops please fix'
 	  call dostop

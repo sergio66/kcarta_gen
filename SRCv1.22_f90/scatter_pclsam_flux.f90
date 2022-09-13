@@ -1000,6 +1000,8 @@ CONTAINS
 ! to do PCLSAM correction by Tang 2018
     REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raAdjust(kMaxPts)
 
+    CHARACTER(160) :: caOutName      
+
     raaPCLSAMCorrection = 0.0
 
     rThermalRefl = 1.0/kPi
@@ -1185,7 +1187,8 @@ CONTAINS
     IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
         (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
       CALL ChouAdjust(iaRadLayer,iNumLayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
-                      raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
+                      raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection, &
+                      muSat,raInten,raAdjust,caOutName) 
       raInten = raInten + raAdjust    
     END IF
     raaTempX(:,iPutLay) = raaTempX(:,iPutLay) + raInten*rGaussWeight*muSat
@@ -1204,7 +1207,8 @@ CONTAINS
       IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
           (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
         CALL ChouAdjust(iaRadlayer,iNumlayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
-                        raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust) 
+                        raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection, &
+                        muSat,raInten,raAdjust,caOutName) 
         raInten = raInten + raAdjust    
       END IF
 

@@ -506,21 +506,26 @@ CONTAINS
     kStdDriverOpen = 1
 
     namecomment = '******* PARAMS section *******'
+    write(kStdWarn,*) 'before first pass though n_main, kTemperVary = ',kTemperVary
     read (iIOUN,nml = nm_params)
     write (kStdWarn,*) 'successfully read in params .....'
 ! these are global variables and so need to be checked
-! tset overrides
+! test overrides
     caNMLReset_param_spectra1 = caNMLReset_param_spectra   !! if caaNMLReset was defined here
     caaTextOverride1 = caaTextOverride   !! if caaTextOverride was defined here
     caaTextOverrideDefault = caaTextOverride
     iaaOverrideOrig = iaaOverrideDefault
+
     IF (iaaOverride(2,1) /= iaaOverrideDefault(2,1)) THEN
       write(kStdWarn,'(A,2(I3))') 'At beginning of n_main we set kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
       write(kStdWarn,'(A,I3)') '       but                 in nml file : user set    iaaOverride(2,1) = ',iaaOverride(2,1)
       write(kStdWarn,'(A,I3,A)') '                           now setting kTemperVary = iaaOverride(2,1) = ',iaaOverride(2,1),' ... '
       kTemperVary = iaaOverride(2,1)
     END IF
+
     iaaOverrideDefault = iaaOverride
+    write(kStdWarn,'(A,3(I3))') ' middle n_main, kTemperVary,iaaOverrideDefault,iaaOverride = ',kTemperVary,iaaOverrideDefault(2,1),iaaOverride(2,1)
+
     write(kStdWarn,*) 'default | final | diff override params'
     write(kStdWarn,*) '---------------------------------------'
     DO iI = 1,4
@@ -530,9 +535,13 @@ CONTAINS
       END DO
       write(kStdWarn,*) '---------------------------------------'
     END DO
+
     CALL Check_iaaOverrideDefault
     kTemperVary = iaaOverrideDefault(2,1)
+    write(kStdWarn,*) 'after first   pass though n_main, kTemperVary = ',kTemperVary
+
     CALL CheckParams
+    write(kStdWarn,*) 'after first+1 pass though n_main, kTemperVary = ',kTemperVary
     CALL printstar
 
     namecomment = '******* FRQNCY section *******'
@@ -831,6 +840,9 @@ CONTAINS
         iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1)
     END IF
 
+    iTemperVary  = kTemperVary 
+    write(kStdWarn,*) 'at end of TranslateNameListFile, iTemperVary = ',iTemperVary
+
     RETURN
     end SUBROUTINE TranslateNameListFile
 
@@ -923,6 +935,9 @@ CONTAINS
     iaaOverrideOrig = iaaOverrideDefault
 ! now go ahead and read in the new data
 
+    write(kStdWarn,*) ' '
+    write(kStdWarn,'(A,2(I3))') 'before OverrideNML_nmParam_nmSpectra, kTemperVary,iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
+
     read (iIOUN,nml = nm_params)
     write (kStdWarn,*) 'successfully read in params .....'
 ! these are global variables and so need to be checked
@@ -931,24 +946,46 @@ CONTAINS
     caaTextOverride1 = caaTextOverride   !! if caaTextOverride was defined here
     caaTextOverrideDefault = caaTextOverride
     IF (iaaOverride(2,1) /= iaaOverrideDefault(2,1)) THEN
-      write(kStdWarn,*) 'kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
-      write(kStdWarn,*) 'UserSet         iaaOverride(2,1) = ',iaaOverride(2,1)
+      write(kStdWarn,*) 'in OverrideNML_nmParam_nmSpectra : '
+      write(kStdWarn,*) '  kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
+      write(kStdWarn,*) '  UserSet         iaaOverride(2,1) = ',iaaOverride(2,1)
       kTemperVary = iaaOverride(2,1)
     END IF
 
+!    IF (iaaOverride(2,1) /= iaaOverrideDefault(2,1)) THEN
+!      write(kStdWarn,'(A,2(I3))') 'At beginning of n_main we set kTemperVary in, iaaOverrideDefault(2,1) = ',kTemperVary,iaaOverrideDefault(2,1)
+!      write(kStdWarn,'(A,I3)') '       but                 in nml file : user set    iaaOverride(2,1) = ',iaaOverride(2,1)
+!      write(kStdWarn,'(A,I3,A)') '                           now setting kTemperVary = iaaOverride(2,1) = ',iaaOverride(2,1),' ... '
+!      kTemperVary = iaaOverride(2,1)
+!    END IF
+
     iaaOverrideDefault = iaaOverride
+    write(kStdWarn,'(A,3(I3))') ' middle OverrideNML_nmParam_nmSpectra, kTemperVary,iaaOverrideDefault,iaaOverride = ',kTemperVary,iaaOverrideDefault(2,1),iaaOverride(2,1)
+
     write(kStdWarn,*) 'input | output | diff override params'
     write(kStdWarn,*) '---------------------------------------'
     DO iI = 1,4
-        write(kStdWarn,'(A,I2)') 'iI = ',iI
-        DO iJ = 1,10
-            write(kStdWarn,*) iaaOverrideOrig(iI,iJ),iaaOverrideDefault(iI,iJ),iaaOverrideOrig(iI,iJ)-iaaOverrideDefault(iI,iJ)
-        END DO
-        write(kStdWarn,*) '---------------------------------------'
+      write(kStdWarn,'(A,I2)') 'iI = ',iI
+      DO iJ = 1,10
+        write(kStdWarn,*) iaaOverrideOrig(iI,iJ),iaaOverrideDefault(iI,iJ),iaaOverrideOrig(iI,iJ)-iaaOverrideDefault(iI,iJ)
+      END DO
+      write(kStdWarn,*) '---------------------------------------'
     END DO
-    kTemperVary = iaaOverrideDefault(2,1)
-    CALL CheckParams
+
+!!!! orig
+!    kTemperVary = iaaOverrideDefault(2,1)
+!    write(kStdWarn,'(A,3(I3))') 'after OverrideNML_nmParam_nmSpectra+1, kTemperVary,iaaOverrideDefault,iaaOverride = ',kTemperVary,iaaOverrideDefault(2,1),iaaOverride(2,1)
+!    CALL CheckParams
+!    CALL Check_iaaOverrideDefault
+!    write(kStdWarn,'(A,3(I3))') 'after OverrideNML_nmParam_nmSpectra+2, kTemperVary,iaaOverrideDefault,iaaOverride = ',kTemperVary,iaaOverrideDefault(2,1),iaaOverride(2,1)
+!    CALL printstar
+
     CALL Check_iaaOverrideDefault
+    kTemperVary = iaaOverrideDefault(2,1)
+    write(kStdWarn,'(A,3(I3))') 'after OverrideNML_nmParam_nmSpectra+1, kTemperVary,iaaOverrideDefault,iaaOverride = ',kTemperVary,iaaOverrideDefault(2,1),iaaOverride(2,1)
+
+    CALL CheckParams
+    write(kStdWarn,'(A,3(I3))') 'after OverrideNML_nmParam_nmSpectra+2, kTemperVary,iaaOverrideDefault,iaaOverride = ',kTemperVary,iaaOverrideDefault(2,1),iaaOverride(2,1)
     CALL printstar
 
     namecomment = '******* SPECTRA section *******'
@@ -1388,6 +1425,8 @@ CONTAINS
       kActualJacs,kActualJacsB,kActualJacsT
     CALL Check_iaaOverrideDefault
     CALL printstar
+    iTemperVary  = kTemperVary !! this is new Sept 2022 and very important
+    write(kStdWarn,'(A,3(I3))') ' after end of check_params :  iTemperVary,kTemperVary,iaaOverrideDefault = ',iTemperVary,kTemperVary,iaaOverrideDefault(2,1)
 
 ! ******** FRQNCY section
     namecomment = '******* FRQNCY section *******'

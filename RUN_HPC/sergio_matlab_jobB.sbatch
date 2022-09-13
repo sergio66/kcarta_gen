@@ -57,10 +57,6 @@
 ##SBATCH --qos=medium+
 ##SBATCH --time=3:59:00
 
-# clear, or TwoSlab clouds, or fluxes
-##SBATCH --qos=short+
-##SBATCH --time=0:59:00
-
 # TwoSlab clouds jacs rads, loop 
 ##SBATCH --qos=medium+
 ##SBATCH --time=3:59:00
@@ -68,6 +64,10 @@
 # DISORT rads, using option 10 where we loop
 #SBATCH --qos=medium+
 #SBATCH --time=1:59:00
+
+# clear, or TwoSlab clouds, or fluxes
+##SBATCH --qos=short+
+##SBATCH --time=0:59:00
 
 ########################################################################
 
