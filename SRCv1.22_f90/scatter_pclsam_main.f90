@@ -519,6 +519,7 @@ CONTAINS
 !!! so this loop may not be run, depending on clear/PCLSAM col jacs
     iForceScatterCalc_EvenIfNoCld = +1
     iForceScatterCalc_EvenIfNoCld = -1
+    iForceScatterCalc_EvenIfNoCld = iaaOverrideDefault(3,5)
     IF ((iForceScatterCalc_EvenIfNoCld > 0) .AND. (iCloudySky < 0)) THEN
       iCloudySky = +1
       IF (kOuterLoop .EQ. 1) THEN

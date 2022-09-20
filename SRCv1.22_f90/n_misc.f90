@@ -392,13 +392,14 @@ CONTAINS
     iaaOverrideDefault(3,3) = -1    !!! iAddLBLRTM = -1 when gas profile missing from TAPE5/6, do not add it in
 ! plus EXTRA THINGS
     iaaOverrideDefault(3,4) = -1    !!! dump out surface terms (downwell therm, emiss, rho) : -1 = NO (default), +1 = yes
-    iaaOverrideDefault(3,5) = +1    !!! if there are clouds in rtp, keep them (TwoSlab); if this is -1, switch to clear sky
+    !iaaOverrideDefault(3,5) = +1   !!! if there are clouds in rtp, keep them (TwoSlab); if this is -1, switch to clear sky
+    iaaOverrideDefault(3,5) = 0     !!! 0 means do scatter/no scatter as set in rtp (default), works with iForceScatterCalc_EvenIfNoCld
+                                    !!! +1 = force scatter (PCLSAM/DISORT), -1 = force clear                         
     iaaOverrideDefault(3,6) = -9999 !!! if -9999 ignore this switch
                                     !!! else switch between -1 (no sun) 0 (ttorad(v,SunTemp) and +1 (tables)
                                     !!!   remember solar tables are at 0.0025 cm-1 so will have problems for 605-905 cm-1
                                     !!!   if iaKSolar = +1, so switch to iaKSolar = 0
     iaaOverrideDefault(3,7) = +1    !!! SARTA scat tables are delta scaled, leave them scaled <DEFAULT>, -1 is to un delta scale
-                          
 
     RETURN
     end SUBROUTINE SetDefaultParams
@@ -670,10 +671,15 @@ CONTAINS
     iJ = iJ+1
     iTemp = iaaOverrideDefault(3,5)
     iTemp = iaaOverrideDefault(iI,iJ)
-    IF (abs(iTemp) /= 1) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I2)') & 
-        'Keep rtp cloud info (+1) or switch to clear only (-1)  : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
-        iaaOverrideDefault(iI,iJ)
+    !IF (abs(iTemp) /= 1) THEN
+    !  write(kStdErr,'(A,I2,A,I2,A,I2)') & 
+    !    'Keep rtp cloud info (+1) or switch to clear only (-1)  : need iaaOverrideDefault(',iI,',',iJ,') = +/-1 not ', &
+    !    iaaOverrideDefault(iI,iJ)
+    !  CALL DoStop
+    !END IF
+    IF ((abs(iTemp) > 1)) THEN
+      write(kStdErr,'(A,I2)') &
+        'Can figure clear or scattering as in rtp file (0, default), force scattering calcs even if clear (+1), force clear calc even if clouds (-1) .. not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 

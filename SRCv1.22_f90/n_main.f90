@@ -1666,6 +1666,8 @@ CONTAINS
 !!!! see if the RTP file wants to set up a cloudy atmosphere
     iForceScatterCalc_EvenIfNoCld = +1
     iForceScatterCalc_EvenIfNoCld = -1
+    iForceScatterCalc_EvenIfNoCld = 0
+    iForceScatterCalc_EvenIfNoCld = iaaOverrideDefault(3,5)
     IF ((cfrac <= 0.0) .AND. (iNclouds_RTP <= 0)) THEN
       write (kStdWarn,*) 'successfully checked radnce .....'
       write(kStdWarn,*) ' '

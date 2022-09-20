@@ -474,6 +474,9 @@ CONTAINS
 !!!!!!! if iCloudSky .LT. 0 do clear sky rad transfer easily !!!!!!!
 !!!!!!! or to test DISORT, can force it to go ahead
     iForceScatterCalc_EvenIfNoCld = +1
+    iForceScatterCalc_EvenIfNoCld = -1
+    iForceScatterCalc_EvenIfNoCld = 0
+    iForceScatterCalc_EvenIfNoCld = iaaOverrideDefault(3,5)
     IF (iCloudySky < 0) THEN
       IF (iForceScatterCalc_EvenIfNoCld < 0) THEN
         !!!!note that we do not care about background thermal accurately here

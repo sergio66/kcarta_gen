@@ -1400,7 +1400,7 @@ CONTAINS
     kProfileUnitOpen = -1
 
 ! now see if there is a cloud to be used with this atmosphere
-    IF ((prof%cfrac > 0.0) .OR. (prof%cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
+    IF ((prof%cfrac > 0.0) .OR. (prof%cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       IF ((prof%cfrac <= 0) .AND. (cfrac1 > 0)) THEN
         write(kStdWarn,*) 'Looks like prof%cfrac = ',prof%cfrac,' while cfrac1 = ',cfrac1
         write(kStdWarn,*) 'Assuming it was reset in previous routine'
@@ -1456,6 +1456,24 @@ CONTAINS
         raCprbot(i) = prof%spres
       END DO
     END IF
+
+    IF (iaaOverrideDefault(3,5) .EQ. -1) THEN
+      write(kStdWarn,*) 'iaaOverrideDefault(3,5) .EQ. -1 so forcing clear sky calcs'
+      write(kStdErr,*)  'iaaOverrideDefault(3,5) .EQ. -1 so forcing clear sky calcs'
+      cfrac  =  0.0            !assume clear sky, use dummy values
+      cfrac1 =  0.0
+      cfrac2 =  0.0
+      ctype1 = -101
+      ctype2 = -101
+      DO i = 1,kMaxClouds
+        iaCtype(i) =  -101             !cloud type
+        raCemis(i)  = 0.0              !assume cloud totally emissive
+        raCngwat(i) = 0.0              !IWP
+        raCpsize(i) = 1.0              !in microns
+        raCprtop(i) = min(prof%plevs(1),prof%plevs(prof%nlevs))
+        raCprbot(i) = prof%spres
+      END DO
+    END IF    
 
 ! <----------------------------------------------------------------------->
 ! ow read the actual cloud profile ------------------->
@@ -2689,7 +2707,7 @@ CONTAINS
 !      write(kStdErr,*) '*********************************************************'
 !!! TEST DEBUG
       
-    if (iaaOverrideDefault(3,5) == +1) then
+    if (iaaOverrideDefault(3,5) >= 0) then
       cfrac12 = prof%cfrac12
   
       ctype1  = int(prof%ctype)
@@ -2828,28 +2846,28 @@ CONTAINS
           
 !!! look for black clouds
     iNclouds_RTP_black = 0
-    IF ((prof%ctype >= 0) .AND. (prof%ctype < 100) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
+    IF ((prof%ctype >= 0) .AND. (prof%ctype < 100) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       raCemis(1) =  prof%cemis(1)
       iNclouds_RTP_black = iNclouds_RTP_black + 1
     END IF
-    IF ((prof%ctype2 >= 0) .AND. (prof%ctype2 < 100) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
+    IF ((prof%ctype2 >= 0) .AND. (prof%ctype2 < 100) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       raCemis(2) =  prof%cemis2(1)
       iNclouds_RTP_black = iNclouds_RTP_black + 1
     END IF
-    IF (iNclouds_RTP_black > 0 .AND. iaaOverrideDefault(3,5) == +1) THEN
+    IF (iNclouds_RTP_black > 0 .AND. iaaOverrideDefault(3,5) >= 0) THEN
       write(kStdWarn,*) 'hmm, iNclouds_RTP_black > 0 so resetting iNclouds_RTP'
       iNclouds_RTP = iNclouds_RTP_black
     END IF
 
-    IF (((ctype1 < 100) .OR. (ctype1 >= 400)) .AND. (cfrac1 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
+    IF (((ctype1 < 100) .OR. (ctype1 >= 400)) .AND. (cfrac1 > 0) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       write(kStdWarn,*) 'ctype1 = ',ctype1,' outside range 100 <= ctype <= 399 '
       write(kStdWarn,*) 'so Cloud1 must be black cloud with emis,ctop ',raCemis(1),ctop1,' mb'
-    ELSEIF (((ctype2 < 100) .OR. (ctype2 >= 400)) .AND. (cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
+    ELSEIF (((ctype2 < 100) .OR. (ctype2 >= 400)) .AND. (cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       write(kStdWarn,*) 'ctype2 = ',ctype2,' outside range 100 <= ctype <= 399 '
       write(kStdWarn,*) 'so Cloud2 must be black cloud with emis,ctop ',raCemis(2),ctop2,' mb'
     END IF
 
-    IF ((cfrac1 <= 0) .AND. (cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) == +1)) THEN
+    IF ((cfrac1 <= 0) .AND. (cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       write(kStdErr,*) 'WARNING >>>>>>>>>'
       write(kStdErr,*) '  iNclouds_RTP = ',iNclouds_RTP
       write(kStdErr,*) '  kCARTA assumes if cfrac1 > 0 then cfrac2 >= 0'

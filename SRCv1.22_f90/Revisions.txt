@@ -438,13 +438,14 @@ computations, even with scattering (introduce a OLR computation) etc]
   n_gas_wt_spectra.f  iMethod = 2             Use polynm coeffs to predict NLTE
 
 (E) to force cloudy calc (PCLSAM, DISORT)
-    iForceScatterCalc_EvenIfNoCld
+    iForceScatterCalc_EvenIfNoCld === iaaOverrideDefault(3,5)
 
 6/25/22         Note if cngwat is very small, now both PCLSAM and DISORT can either do just one clear calc, 
                 or go ahead and do the PCLSAM/DISORT radiance calc : see the variable
-                "iForceScatterCalc_EvenIfNoCld" in n_main.f90,scatter_disort_main.f90,scatter_pclsam_main.f90
+                "iForceScatterCalc_EvenIfNoCld" in n_misc.f90,n_rtp.f90,n_main.f90,scatter_disort_main.f90,scatter_pclsam_main.f90
                 Also look at n_main.f90 where if iNclouds_RTP <= 0, I set 
                   kWhichScatterCode = 0                   !set to kCARTA_CLEAR
+                This is controlled by iaaOverrideDefault(3,5)
 
 03/31/14        kRTP = -10 reads in text based levels input
                 kRTP = -5 reads in LBLRTM based levels input (TAPE 5)
@@ -672,6 +673,7 @@ v1.22
 6/25/22         Note if cngwat is very small, now both PCLSAM and DISORT can either do just one clear calc, 
                 or go ahead and do the PCLSAM/DISORT radiance calc : see the variable
                 "iForceScatterCalc_EvenIfNoCld" 
+                This is controlled by iaaOverrideDefault(3,5)
 
                 For DISORT the clear sky window region calcs are very similar if
                 emissivity == 1, but the higher altitude calcs have differences (because kCARTA Clear Sky
@@ -768,9 +770,9 @@ v1.22
                 (stemp,T(z),gas(z) profiles, satellite and solar angles, 
                  emissivity, altitudes, cloud params)
 
-6/26/21         Introducing keeping cloud infro from rtp file (+1) 
-                        or switch to clear (-1)
-                set by iaaOverrideDefault(3,5) = +1 (default) or -1
+6/26/21         Introducing keeping cloud infro from rtp file (0) , force  cloud cals (+1)
+                        or force clear calcs (-1)
+                set by iaaOverrideDefault(3,5) = 0 (default) or +1/-1
                 Also the input length for caPFname, CaCloudPFname have 
                 been changed from 80 to 160 characters
 
