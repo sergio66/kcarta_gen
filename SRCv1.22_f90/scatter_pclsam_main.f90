@@ -518,11 +518,20 @@ CONTAINS
 
 !!! so this loop may not be run, depending on clear/PCLSAM col jacs
     iForceScatterCalc_EvenIfNoCld = +1
+    iForceScatterCalc_EvenIfNoCld = -1
     IF ((iForceScatterCalc_EvenIfNoCld > 0) .AND. (iCloudySky < 0)) THEN
       iCloudySky = +1
       IF (kOuterLoop .EQ. 1) THEN
-        write(kStdErr,'(A)')  'Even though little or no clouds, doing PCLSAM calc to test clear rads'
-        write(kStdWarn,'(A)') 'Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
       END IF
     END IF
 

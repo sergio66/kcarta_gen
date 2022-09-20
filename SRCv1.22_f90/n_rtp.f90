@@ -2941,7 +2941,7 @@ CONTAINS
     END IF
 
     IF (prof%cfrac > 0.0) THEN
-      !!!first cloud is easy to do
+      !!! first cloud is easy to do
       i = 1
       iaCtype(i) =  prof%ctype       !cloud type 1=cirrus 2=water etc
       IF ((prof%ctype >= 0) .AND. (prof%ctype < 100)) THEN
@@ -2960,6 +2960,7 @@ CONTAINS
       raCprtop(i) = prof%cprtop
       raCprbot(i) = prof%cprbot
               
+      !!! do second cloud
       i = 2
       iaCtype(i) =  prof%ctype2        !cloud type 1=cirrus 2=water etc
       IF ((prof%ctype2 >= 0) .AND. (prof%ctype2 < 100)) THEN
@@ -2984,7 +2985,7 @@ CONTAINS
       cngwat1 = 0.0
       cngwat2 = 0.0
       DO i = 1,kMaxClouds
-        iaCtype(i) =  0                !cloud type
+        iaCtype(i)  = -9999            !cloud type, this was 0 before Sept 20. 2022
         raCemis(i)  = 0.0              !assume cloud totally emissive
         raCngwat(i) = 0.0              !IWP
         raCpsize(i) = 1.0              !in microns

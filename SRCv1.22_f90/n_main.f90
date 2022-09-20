@@ -394,8 +394,7 @@ CONTAINS
 ! ssume we do not have cloud profile info for PCLSAM
     caCloudPFname = 'dummycloudfile_profile'
     iNclouds_RTP  = -1
-    
-       
+           
 ! default mixing table
     iNpmix=1                !assume one set of mixed paths to be used
     caaMixFileLines(1)='1 -1 1.0 0'
@@ -578,10 +577,11 @@ CONTAINS
     iScatter_RTP1          = iScatter_RTP
     ! if you use a 100 layer cloud cngwat profile through the rtp file
     ! then you must specify the (same in all layers) particle sizes
+    ! should really be     DO iI = 1,iNClouds_RTP
     DO iI = 1,iNClouds_RTP
       caaCloudFile1(iI) = caaCloudFile(iI)
       write(kSTdWarn,'(A,I2,A)') 'caaCloudFile(',iI,') =  ',caaCloudFile1(iI)
-    END DO  !! should really be     DO iI = 1,iNClouds_RTP
+    END DO  
     iaNML_Ctype1  = iaNML_Ctype
     write (kStdWarn,*) 'successfully read in prfile .....'
     CALL printstar
@@ -1256,6 +1256,8 @@ CONTAINS
 ! this is a local variable
     INTEGER :: iaNML_Ctype(kMaxClouds)
 
+    INTEGER :: iForceScatterCalc_EvenIfNoCld
+
 ! this is for new spectroscopy
 ! iNumNewGases   tells number of new gases
 ! iaNewGasID     tells which gases we want to update spectroscopy
@@ -1662,12 +1664,15 @@ CONTAINS
 !                   = 2  we do multiple runs, adding them together to do MRO (see ECMWF, M. Matricardi 2005, Report 474)
      
 !!!! see if the RTP file wants to set up a cloudy atmosphere
+    iForceScatterCalc_EvenIfNoCld = +1
+    iForceScatterCalc_EvenIfNoCld = -1
     IF ((cfrac <= 0.0) .AND. (iNclouds_RTP <= 0)) THEN
       write (kStdWarn,*) 'successfully checked radnce .....'
       write(kStdWarn,*) ' '
       IF ((kRTP == 0) .OR. (kRTP == 1))  THEN
         !!! went thru rtp file and found cfrac = 0
         write (kStdWarn,*) 'no scattering required .....'
+        IF (iForceScatterCalc_EvenIfNoCld < 0)   kWhichScatterCode = 0                   !set to kCARTA_CLEAR
       END IF
 
     ELSEIF ((cfrac > 0.0) .AND. (iNclouds_RTP > 0) .AND. (kAllowScatter < 0)) THEN
@@ -1688,6 +1693,7 @@ CONTAINS
         cfrac2 = -1.0
         ctype1 = -1
         ctype2 = -1
+        IF (iForceScatterCalc_EvenIfNoCld < 0)   kWhichScatterCode = 0                   !set to kCARTA_CLEAR
         write (kStdWarn,*) 'no scattering required .....'
       END IF
 

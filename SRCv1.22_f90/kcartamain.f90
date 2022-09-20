@@ -1350,7 +1350,7 @@
                 END IF
               END IF
               IF (kOuterLoop .EQ. 1) THEN
-                write(kStdWarn,'(A,I4)') 'iaaOverride(2,7) = 0/+1/-1 for no/yes/yes plane parallel ',iaaOverrideDefault(2,7)
+                write(kStdWarn,'(A,I4)') 'iaaOverride(2,7) = 0/+1/-1 for no snell and plane parallel/yes snell yes curvature/no snell yes curvature ',iaaOverrideDefault(2,7)
                 write(kStdWarn,'(A,F12.5,A,F12.5,A,I4)') &
                   'raSatAngle(iAtm) = p.scanang = ',raSatAngle(iAtm), ' angle for radiance output ',rSatAngleX,' kWhichScatterCode = ',kWhichScatterCode
               END IF

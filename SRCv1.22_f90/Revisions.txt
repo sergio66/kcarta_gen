@@ -437,6 +437,15 @@ computations, even with scattering (introduce a OLR computation) etc]
   knonlte.f           iDoCO2Continuum = -1    Use CO2 continuum or not
   n_gas_wt_spectra.f  iMethod = 2             Use polynm coeffs to predict NLTE
 
+(E) to force cloudy calc (PCLSAM, DISORT)
+    iForceScatterCalc_EvenIfNoCld
+
+6/25/22         Note if cngwat is very small, now both PCLSAM and DISORT can either do just one clear calc, 
+                or go ahead and do the PCLSAM/DISORT radiance calc : see the variable
+                "iForceScatterCalc_EvenIfNoCld" in n_main.f90,scatter_disort_main.f90,scatter_pclsam_main.f90
+                Also look at n_main.f90 where if iNclouds_RTP <= 0, I set 
+                  kWhichScatterCode = 0                   !set to kCARTA_CLEAR
+
 03/31/14        kRTP = -10 reads in text based levels input
                 kRTP = -5 reads in LBLRTM based levels input (TAPE 5)
                 kRTP = -6 reads in LBLRTM based layers input (TAPE 6, edited)

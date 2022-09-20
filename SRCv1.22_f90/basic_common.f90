@@ -772,7 +772,14 @@ CONTAINS
 ! but if eg iaRadLayer = 201..300, everything not ok with raPress
 
 ! check that thicknesses are making sense
-    iI = iaRadLayer(1)+2
+    IF (iaRadLayer(1) < kProfLayer) THEN
+      !!! this is downlook instr
+      iI = iaRadLayer(1) + 2
+    ELSEIF (iaRadLayer(1) .EQ. kProfLayer) THEN
+      !!! this is uplook instr
+      iI = iaRadLayer(iNumLayer) - 2
+    END IF
+
     if (raThickness(iI) < 0) then
       write(kSTdErr,*) 'in find_tropopauseNew looks like layer thickness are wrong'
       write(kStdErr,*) raThickness

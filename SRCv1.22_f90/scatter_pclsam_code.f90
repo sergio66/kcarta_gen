@@ -806,9 +806,8 @@ CONTAINS
 ! cccccccccccccccccc set these all important variables ****************
     iCloudLayerTop = -1
     iCloudLayerBot = -1
-    DO iLay = 1,kProfLayer
-      iaCldLayer(iLay) = -1
-    END DO
+    iaCldLayer = -1
+
     IF ((ICLDTOPKCARTA > 0) .AND. (ICLDBOTKCARTA > 0)) THEN
       IF (iaRadLayer(1) < kProfLayer) THEN
         iLocalCldTop = iaRadlayer(1) - iCldTopkCarta + 1
