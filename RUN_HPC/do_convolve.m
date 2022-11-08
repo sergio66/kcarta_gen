@@ -38,7 +38,7 @@ scanang = -1;
 satzen = -1;
 stemp = -1;
 use_this_rtp = 'junk.rp.rtp';
-if strcmp(outdir,'/JUNK')
+if strfind(outdir,'JUNK/') > 0
   set_rtp;
 end
 good = 1;

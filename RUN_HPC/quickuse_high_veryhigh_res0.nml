@@ -39,10 +39,10 @@
  iaaOverride(2,1) = 43    !! to do linear in tau
  iaaOverride(2,1) = -1    !! to do const
 
+ iaaOverride(3,5) = 0     !!! if there are clouds in rtp, keep them (TwoSlab); if this is -1, switch to clear sky, if this is +1, force allsky PCLSAM calcs
+ iaaOverride(3,5) = -1    !!! set any rtp cloud fields to CLEAR SKY
+
  iaaOverride(3,4) = -1    !!! dump out surface terms (downwell therm, emiss, rho)
- iaaOverride(3,5) = +1    !!! if there are clouds in rtp, keep them (TwoSlab); if this is -1, switch to clear sky
- ! set any rtp cloud fields to CLEAR SKY
- iaaOverride(3,5) = -1
  iaaOverride(3,4) = +1    !!! dump out surface terms (downwell therm, emiss, rho)
 
  !caNMLReset_param_spectra = 'template_reset_nm_spectra.nml'

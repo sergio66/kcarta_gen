@@ -4351,15 +4351,18 @@ CONTAINS
       write(kStdWarn,*) 'iNumberOfGasesRead(includes WV : 101,102,103) iNumGases needed',iNumberOfGasesRead,iNumGases
       write(kStdWarn,*) 'head.ptype = 1 profile did not have all the gases'
       write(kStdWarn,*) 'that MOLGAS, XSCGAS indicated it should have'
-      write(kStdWarn,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
+      write(kStdWarn,'(A,I3,A)') 'SUBROUTINE READRTP_1B : adding on AFGL Profile ',kAFGLProf,' for remaining gases'
 
       write(kStdErr,*) 'iNumberOfGasesRead(includes WV : 101,102,103) iNumGases needed',iNumberOfGasesRead,iNumGases
       write(kStdErr,*) 'head.ptype = 1 profile did not have all the gases'
       write(kStdErr,*) 'that MOLGAS, XSCGAS indicated it should have'
-      write(kStdErr,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
+      write(kStdErr,'(A,I3,A)') 'SUBROUTINE READRTP_1B : adding on AFGL Profile ',kAFGLProf,' for remaining gases'
+
       CALL AddOnAFGLProfile(kAFGLProf, &
           iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead, &
           raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
+      write(kStdWarn,*) 'finished adding AFGL Profile ',kAFGLProf,' for remaining gases'
+      
     END IF
     
     4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3)
@@ -4863,14 +4866,17 @@ CONTAINS
       write(kStdWarn,*) 'iNumberOfGasesRead iNumGases',iNumberOfGasesRead,iNumGases
       write(kStdWarn,*) 'head.ptype = 2 profile did not have all the gases'
       write(kStdWarn,*) 'that MOLGAS, XSCGAS indicated it should have'
-      write(kStdWarn,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
+      write(kStdWarn,'(A,I3,A)') 'SUBROUTINE READRTP_2 : adding on AFGL Profile ',kAFGLProf,' for remaining gases'
+
       write(kStdErr,*) 'iNumberOfGasesRead iNumGases',iNumberOfGasesRead,iNumGases
       write(kStdErr,*) 'head.ptype = 2 profile did not have all the gases'
       write(kStdErr,*) 'that MOLGAS, XSCGAS indicated it should have'
-      write(kStdErr,*) 'adding on AFGL Profile ',kAFGLProf,' for remaining gases'
+      write(kStdErr,'(A,I3,A)') 'SUBROUTINE READRTP_2 : adding on AFGL Profile ',kAFGLProf,' for remaining gases'
+
       CALL AddOnAFGLProfile(kAFGLProf, &
         iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead, &
         raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
+      write(kStdWarn,*) 'finished adding AFGL Profile ',kAFGLProf,' for remaining gases'
     END IF
 
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3)

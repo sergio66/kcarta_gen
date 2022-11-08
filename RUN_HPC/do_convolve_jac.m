@@ -22,7 +22,7 @@ addpath /asl/matlab2012/sconv
 %addpath /asl/matlab2012/fconv
 
 use_this_rtp = 'junk.rp.rtp';
-if strcmp(outdir,'/JUNK')
+if strfind(outdir,'JUNK/') > 0
   set_rtp;
 end
 
@@ -77,7 +77,10 @@ else
   error('huh? Need iDoJac == 1 or 100')
 end
 
+disp('after reading in raw data')
 whos w dall
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fprintf(1,' >>>> gg = %4i iDoCloud = %4i \n',gg,iDoCloud)
 if gg ~= 1001 & gg ~= 2346 & gg ~= 5912 & iDoJac == 1
@@ -95,14 +98,28 @@ elseif gg == 1001 & iDoJac == 1
   else
     nnlay = (nn-4)/(4+1+1+1+1+1);
   end
+  %% readkcjac: 89 chunks, 1 ODBs(num of atmos), 877 total rows  
+  %% readkcjac: ODB atm# = 5, subtype = 1, rows = 97     G1   (1:97)+0*97
+  %% readkcjac: ODB atm# = 5, subtype = 3, rows = 97     G3   (1:97)+1*97
+  %% readkcjac: ODB atm# = 5, subtype = 101, rows = 97   G101 (1:97)+2*97
+  %% readkcjac: ODB atm# = 5, subtype = 102, rows = 97   G102 (1:97)+3*97
+  %% readkcjac: ODB atm# = 5, subtype = 103, rows = 97   G103 (1:97)+4*97
+  %% readkcjac: ODB atm# = 5, subtype = 201, rows = 97   G201 (1:97)+5*97
+  %% readkcjac: ODB atm# = 5, subtype = 202, rows = 97   G202 (1:97)+6*97
+  %% readkcjac: ODB atm# = 5, subtype = 0, rows = 97     T    (1:97)+7*97
+  %% readkcjac: ODB atm# = 5, subtype = -10, rows = 97   WGT  (1:97)+8*97
+  %% readkcjac: ODB atm# = 5, subtype = -20, rows = 4    SURF (1:04)+9*97
   fprintf(1,'   do_convolve_jac.m : gg=%4i iDoCloud=%2i     iDoJac=%2i mm,nn=%10i %4i     nnlay=%8.6f \n',gg,iDoCloud,iDoJac,mm,nn,nnlay);
   jjuse = 1:nnlay;
   dall1001   = dall(:,jjuse+0*nnlay) + dall(:,jjuse+2*nnlay) + dall(:,jjuse+3*nnlay) + dall(:,jjuse+4*nnlay);
   dallO3     = dall(:,jjuse+1*nnlay);
-  dallT      = dall(:,jjuse+5*nnlay);
-  dallWgtFcn = dall(:,jjuse+6*nnlay);
-  dallSurf   = max(jjuse+6*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
-  %whos dall*
+  dallCld1   = dall(:,jjuse+5*nnlay);
+  dallCld2   = dall(:,jjuse+6*nnlay);
+  dallT      = dall(:,jjuse+7*nnlay);
+  dallWgtFcn = dall(:,jjuse+8*nnlay);
+  %%% dallSurf   = max(jjuse+6*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
+  dallSurf   = (1:4)+9*nnlay; dallSurf = dall(:,dallSurf);
+  %whos w dall*
   dall = [dall1001 dallO3 dallT dallWgtFcn dallSurf];
   ngases = 2;
 
@@ -134,7 +151,7 @@ elseif gg == 2346 & iDoJac == 1
   dallT      = dall(:,jjuse+6*nnlay);
   dallWgtFcn = dall(:,jjuse+7*nnlay);
   dallSurf   = max(jjuse+8*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
-  %whos dall*
+  %whos w dall*
   dall = [dall2 dall3 dall4 dall6 dall51 dall52 dallT dallWgtFcn dallSurf];
   ngases = 6;
 
@@ -159,14 +176,14 @@ elseif gg == 5912 & iDoJac == 1
   jjuse = 1:nnlay;
   dall5      = dall(:,jjuse+0*nnlay);
   dall9      = dall(:,jjuse+1*nnlay);
-  dall11      = dall(:,jjuse+2*nnlay);
+  dall11     = dall(:,jjuse+2*nnlay);
   dall12     = dall(:,jjuse+3*nnlay);
   dall61     = dall(:,jjuse+4*nnlay);
   dall103    = dall(:,jjuse+5*nnlay);
   dallT      = dall(:,jjuse+6*nnlay);
   dallWgtFcn = dall(:,jjuse+7*nnlay);
   dallSurf   = max(jjuse+8*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
-  %whos dall*
+  %whos w dall*
   dall = [dall5 dall9 dall11 dall12 dall61 dall103 dallT dallWgtFcn dallSurf];
   ngases = 6;
 
@@ -185,7 +202,7 @@ elseif gg == 5912 & iDoJac == 1
 %%  dallT      = dall(:,jjuse+7*nnlay);
 %%  dallWgtFcn = dall(:,jjuse+8*nnlay);
 %%  dallSurf   = max(jjuse+8*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
-%%  %whos dall*
+%%  %whos w dall*
 %%  dall = [dall1001 dallO3 dallT dallWgtFcn dallSurf];
 %%  ngases = 2;
 
@@ -227,7 +244,7 @@ else
   error('kjsklsjglkjgskjgs')
 end
 
-whos w dall
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [mm,nn] = size(dall);
 if iDoJac == 1
@@ -238,6 +255,12 @@ elseif iDoJac == 100
   fprintf(1,'col jacobian is of size %8i x %3i  \n',junk);
 end
 d = dall;
+
+disp('after summing together G1,101,102,103 and/or other gases as needed) ')
+whos w dall d
+fprintf(1,'numlay = %3i numgases = %3i \n',numlay,ngases)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if iInstr == 1
   clist = 1:2378;

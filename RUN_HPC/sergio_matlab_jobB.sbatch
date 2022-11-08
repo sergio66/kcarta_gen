@@ -10,12 +10,12 @@
 #
 # run this with   /bin/rm batchout*.* slurm* JUNK/individual_prof_convolved_kcarta* JUNK/rad.dat* JUNK/jac.dat*; sbatch -p high_mem --array=1-49 sergio_matlab_jobB.sbatch 1
 # run this with   /bin/rm batchout*.* slurm* JUNK/individual_prof_convolved_kcarta* JUNK/rad.dat*; sbatch -p high_mem --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p high_mem --exclude=cnode203,cnode267 --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-89       sergio_matlab_jobB.sbatch 9 789   to run DISORT seprately chunk by chunk, profile 789 of the rtp file
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p high_mem --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p high_mem --exclude=cnode203,cnode267 --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 1
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-89       sergio_matlab_jobB.sbatch 9 789   to run DISORT seprately chunk by chunk, profile 789 of the rtp file
 #                                        submit_many_disort_runs.m   can launch multiple profiles then gather up results using read_disort_chunks
-# run this with   rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 10      to run DISORT for 89 chunks, traighforward readkcstd
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p cpu2021                              --array=1-Nmax%128 sergio_matlab_jobB.sbatch 10      to run DISORT for 89 chunks, traighforward readkcstd
 #
 # >>>>>>>>>>>>>>>>>>>>>>>>>
 # if putting ONE job per node (ie no loop)
@@ -23,9 +23,9 @@
 #    where the %128 limits to 128 jobs at a go, to limit simultaneous resource need
 # if putting MANY jobs per node (ie loop)
 # run this with   /bin/rm batchout*.out batchout*.err JUNK/rad.dat*; sbatch --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2 << make sure you do Nprofs/iaChunkSize!!!!
-#                 rmer_slurm_JUNKrad.sc;  sbatch --partition=high_mem --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2       << make sure you do Nprofs/iaChunkSize!!!!
-#                 rmer_slurm_JUNKrad.sc;  sbatch --partition=cpu2021  --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2       << make sure you do Nprofs/iaChunkSize!!!!
-#                 rmer_slurm_JUNKrad.sc;  sbatch -p cpu2021           --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 11 78   << make sure you do Nprofs/iaChunkSize!!!! 
+#                 rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc;  sbatch --partition=high_mem --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2       << make sure you do Nprofs/iaChunkSize!!!!
+#                 rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc;  sbatch --partition=cpu2021  --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 2       << make sure you do Nprofs/iaChunkSize!!!!
+#                 rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc;  sbatch -p cpu2021           --array=1-Nprofs/iaChunksize sergio_matlab_jobB.sbatch 11 78   << make sure you do Nprofs/iaChunkSize!!!! 
 #                                                                                                                                    << run DISORT for freqchunk 78, profiles (1:iaChunkSize) + (JOB-1)*iaChunkSize
 #                                        submit_many_disort_run_loops.m   can launch multiple profiles then gather up results using read_disort_chunks
 # >>>>>>>>>>>>>>>>>>>>>>>>>

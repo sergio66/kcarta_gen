@@ -381,10 +381,16 @@ use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/test_9profiles.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/tigr_cris_fsr.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/test_pert_gas1.rtp';
 
+use_this_rtp = '/home/chepplew/data/Sergio/airs_2018d259.op.rtp';    %% comparing AIRS CriS IASI clear, 30000 fovs
+use_this_rtp = '/home/chepplew/data/Sergio/iasi2_20180916.op.rtp_1'; %% comparing AIRS CriS IASI clear, 34000 fovs
+use_this_rtp = '/home/chepplew/data/Sergio/j1_20190916.op.rtp';      %% comparing AIRS CriS IASI clear, 40500 fovs
+
 use_this_rtp = 'RTP/summary_19years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp';
 use_this_rtp = 'RTP/summary_12years_all_lat_all_lon_2002_2014_monthlyERA5.rp.rtp';
 use_this_rtp = 'RTP/summary_07years_all_lat_all_lon_2012_2019_monthlyERA5.rp.rtp';
+use_this_rtp = '/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/2012/all4608_era5_full12months_Qcumulative09.rtp'; % BT1231cld quants = [0 0.03 0.05 0.1 0.2 0.5 0.8 0.9 0.95 0.97 1.0];
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m
 %% DO NOT TOUCH THESE LAST TWO LINES. EDIT set_convolver as needed
 %% use_this_rtp0 = use_this_rtp;

@@ -61,22 +61,29 @@ JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 
 iiBin = JOB;
 fprintf(1,'processing JOB %5i == same profile %5i \n',JOB,iiBin);
-do_kcarta
+outfilejunk = ['JUNK/individual_prof_convolved_kcarta_*_' num2str(iiBin) '.mat'];
+junkdir = dir(outfilejunk);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if length(junkdir) == 0
+  do_kcarta
 
-fprintf(1,'kcarta exitcode = %3i  << iDoConvolve = %3i iInstr = %3i >> iDoRad = %3i \n',exitcode,iDoConvolve,iInstr,iDoRad);
-%  do_convolve(iInstr,iiBin);
-%  do_convolve_jac(iInstr,iiBin);
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac <= 0) & exitcode == 0
-  do_convolve(iInstr,iiBin,iDoRad);
-%if iDoConvolve > 0 & iDoRad == 3 & exitcode == 0
-%  do_convolve(iInstr,iiBin);
-%end
-elseif iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac == 1 | iDoJac == 100) & exitcode == 0
-  do_convolve(iInstr,iiBin);
-  fprintf(1,'jacobian gasID gg = %4i iDoJac = %4i iDoCLoud = %4i \n',gg,iDoJac,iDoCloud)
-  do_convolve_jac(gg,iInstr,iiBin,iDoJac,iDoCloud);
+  fprintf(1,'kcarta exitcode = %3i  << iDoConvolve = %3i iInstr = %3i >> iDoRad = %3i \n',exitcode,iDoConvolve,iInstr,iDoRad);
+  %  do_convolve(iInstr,iiBin);
+  %  do_convolve_jac(iInstr,iiBin);
+
+  if iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac <= 0) & exitcode == 0
+    do_convolve(iInstr,iiBin,iDoRad);
+  %if iDoConvolve > 0 & iDoRad == 3 & exitcode == 0
+  %  do_convolve(iInstr,iiBin);
+  %end
+  elseif iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac == 1 | iDoJac == 100) & exitcode == 0
+    do_convolve(iInstr,iiBin);
+    fprintf(1,'jacobian gasID gg = %4i iDoJac = %4i iDoCLoud = %4i \n',gg,iDoJac,iDoCloud)
+    do_convolve_jac(gg,iInstr,iiBin,iDoJac,iDoCloud);
+  end
+
+else
+  fprintf(1,'%5i %s already exists \n',iiBin,outfilejunk);
 end
-

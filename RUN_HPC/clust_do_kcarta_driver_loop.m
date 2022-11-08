@@ -63,8 +63,11 @@ for ix = 1 : length(iiBinAll)
   iiBin = iiBinAll(ix);
   fprintf(1,'JOB = %4i index %2i of %2i : processing %5i \n',JOB,ix,length(iiBinAll),iiBin);
   outfilejunk = ['JUNK/individual_prof_convolved_kcarta_crisHI_' num2str(iiBin) '.mat'];
+  outfilejunk = ['JUNK/individual_prof_convolved_kcarta_*_' num2str(iiBin) '.mat'];
+  junkdir = dir(outfilejunk);
 
-  if ~exist(outfilejunk)
+  %if ~exist(outfilejunk)
+  if length(junkdir) == 0
     do_kcarta
 
     fprintf(1,'done kcarta run ... iDoConvolve = %2i iDoRad = %2i iDoJac = %3i \n',iDoConvolve,iDoRad,iDoJac)

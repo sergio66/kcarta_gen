@@ -76,7 +76,7 @@ end
     INTEGER :: iI,iJ,iOffSet,iCO2_ind,iDefault,iInterpType
     REAL :: raT(kProfLayer),raP(kProfLayer),rX,rY,logP(kProfLayer),rPmin,rPmax,dx
     REAL :: grav0,grav,Re,Rd,raGeopotentialThick1(kProfLayer),raGeopotentialThick2(kProfLayer)
-    REAL :: rInt,raTX(10),raPX(10),rJunkHgt
+    REAL :: rInt,raTX(10),raPX(10),rJunkHgt,rPrevious,rDeltaPrevious
 
     iCO2_ind = 2                 !! assume we have CO2 in profile
 
@@ -106,6 +106,8 @@ end
       end if
     END DO
           
+    rDeltaPrevious = 0.0
+    rPrevious = 0.0
     rPmin = +1.0e10
     rPmax = -1.0e10
     iI = 75   !!! make this really high up
@@ -115,6 +117,15 @@ end
       DO iI = kProfLayer-iProfileLayers+1,kProfLayer
         iJ = iI-iOffSet
         raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
+        if (rPrevious .GT. raP(iJ)) THEN
+          write(kStdErr,'(A,I4,I4,1X,F12.4,1X,F12.4)')  'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI,iJ,raP(iJ),rPrevious = ',iI,iJ,raP(iJ),rPrevious           
+          write(kStdWarn,'(A,I4,I4,1X,F12.4,1X,F12.4)') 'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI,iJ,raP(iJ),rPrevious = ',iI,iJ,raP(iJ),rPrevious           
+          raP(iJ) = rPrevious + rDeltaPrevious
+          write(kStdErr,'(A,F12.4,1X,F12.4)')           'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious           
+          write(kStdWarn,'(A,F12.4,1X,F12.4)')          'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious           
+        END IF
+        rDeltaPrevious = abs(raP(iJ)-rPrevious)
+        rPrevious = raP(iJ)
         logP(iJ) = log(raP(iJ))
         raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
         IF (logP(iJ) > rPmax) rPmax = logP(iJ)
@@ -156,6 +167,11 @@ end
       write(kStdWarn,*) 'in Get_Temp_Plevs, default is take layer temps and spline interp them to plevs'
       write(kStdWarn,*) '                   we are   taking layer temps and linear interp them to plevs'
     END IF
+
+!print *,'iInterpType = ',iInterpType,rPmin,rPmax
+!DO iI = 1,iProfileLayers
+!  print *,iI,logP(iI),raT(iI),raPressLevels(iI)
+!end DO
 
     DO iI = 1,kProfLayer+1
       IF (raPressLevels(iI) > 0) THEN
@@ -599,7 +615,8 @@ end
       write(kStdWarn,*) 'your profile did not have all the gases'
       write(kStdWarn,*) 'that MOLGAS, XSCGAS indicated it should have'
       IF (iNeedMoreProfiles == 1) THEN
-        write(kStdWarn,*) 'adding on AFGL profile ',kAFGLProf, ' for remaining gases'
+        write(kStdWarn,*) 'readKLAYERS4 : adding on AFGL profile ',kAFGLProf, ' for remaining gases'
+        write(kStdErr,*)  'readKLAYERS4 : adding on AFGL profile ',kAFGLProf, ' for remaining gases'
         CALL AddOnAFGLProfile(kAFGLProf, &
             iNumberOfGasesRead,iNumGases,iaInputOrder,iaWhichGasRead, &
             raaAmt,raaTemp,raaPress,raaPartPress,raaHeight,raPressLevels,raThickness)
