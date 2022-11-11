@@ -210,7 +210,7 @@ elseif gg == 2346 & iDoJac == 100
   if iDoCloud <= 0
     fprintf(1,'doing clear sky COL jacobians for gasID %3i ==> 2 3 4 6 51 52 \n',2346)
   elseif iDoCloud == 1
-    fprintf(1,'doing clear sky COL jacobians for gasID %3i ==> 2 3 4 6 \n',2346)
+    fprintf(1,'doing clear sky COL jacobians for gasID %3i ==> 2 3 4 6 51 52 \n',2346)
   end
   %% remember also do T and WgtFcn  1:nn  and then 4 surface
   [mm,nn] = size(dall);
@@ -223,10 +223,18 @@ elseif gg == 2346 & iDoJac == 100
   dall6      = dall(:,4);
 
   if iDoCloud > 0
-    dallT      = dall(:,5);
-    dallST     = dall(:,6);
-    dall = [dall2 dall3 dall4 dall6 dallT dallST];
-    ngases = 4;
+    %dallT      = dall(:,5);
+    %dallST     = dall(:,6);
+    %dall = [dall2 dall3 dall4 dall6 dallT dallST];
+    %ngases = 4;
+
+    dall51     = dall(:,5);
+    dall52     = dall(:,6);
+    dallT      = dall(:,7);
+    dallST     = dall(:,8);
+    dall = [dall2 dall3 dall4 dall6 dall51 dall52 dallT dallST];
+    ngases = 6;
+
   elseif iDoCloud < 0
     dall51     = dall(:,5);
     dall52     = dall(:,6);
@@ -258,7 +266,9 @@ d = dall;
 
 disp('after summing together G1,101,102,103 and/or other gases as needed) ')
 whos w dall d
-fprintf(1,'numlay = %3i numgases = %3i \n',numlay,ngases)
+if iDoJac == 1
+  fprintf(1,'numlay = %3i numgases = %3i \n',numlay,ngases)
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

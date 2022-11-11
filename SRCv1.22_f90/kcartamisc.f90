@@ -1577,8 +1577,8 @@ CONTAINS
       ! NLTE avg layer press in lower atm = kCARTA profile
       pProfNLTE(iInt) = raTPress(iInt)*kAtm2mb
 
-      !       print *,'BB',iInt,pprof(iInt),raTPress(iInt)*kAtm2mb,
-      !     $              pprof(iInt)/(raTPress(iInt)*kAtm2mb)
+      !       print *,'BB',iInt,pprofNLTE(iInt),raTPress(iInt), &
+      !                   pprofNLTE(iInt)/(raTPress(iInt)*kAtm2mb)
 
       !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       !c  this stuff is to test the jacobians

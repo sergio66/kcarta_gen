@@ -885,6 +885,7 @@ CONTAINS
           !set top (stop) level as kProfLayer
           write(kStdWarn,*) 'rtp : downlook instr : Reset pressure of top level to ',rPressStop
         END IF
+
         IF (rPressStart > raPressLevels(kRTPBot)) THEN
           write(kSTdWarn,'(A,2(F12.5,1X),I3)') 'rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1 = ', &
             rPressStart,raPressLevels(kRTPBot+1),kRTPBot+1

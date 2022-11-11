@@ -1400,6 +1400,8 @@ CONTAINS
     kProfileUnitOpen = -1
 
 ! now see if there is a cloud to be used with this atmosphere
+    CALL  check_plevs(prof)
+
     IF ((prof%cfrac > 0.0) .OR. (prof%cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       IF ((prof%cfrac <= 0) .AND. (cfrac1 > 0)) THEN
         write(kStdWarn,*) 'Looks like prof%cfrac = ',prof%cfrac,' while cfrac1 = ',cfrac1
@@ -1992,6 +1994,8 @@ CONTAINS
 
     kSurfPress = prof%spres  ! mb
     kSurfAlt   = prof%salti  ! meters
+
+    CALL  check_plevs(prof)
 
 !!!then go ahead and look at variables prof%pobs
 !!!note that variable pobs is reset only if prof%pobs > 0, else it
@@ -3266,6 +3270,8 @@ CONTAINS
 
     kProfileUnitOpen = -1
 
+    CALL  check_plevs(prof)
+
     IF (prof.plevs(1) < prof.plevs(prof.nlevs)) THEN
       ! layers are from TOA to the bottom
       iDownWard = -1
@@ -3887,6 +3893,8 @@ CONTAINS
     status = rtpclose(rchan)
    !      write(kStdWarn,*)  'read close status = ', status
 
+    CALL  check_plevs(prof)
+
     kProfileUnitOpen = -1
     write(kStdWarn,*) 'iRTP,prof%nlevs,prof%stemp = ',iRTP,prof%nlevs,prof%stemp
     IF (prof%plevs(1) < prof%plevs(prof%nlevs)) THEN
@@ -4186,6 +4194,7 @@ CONTAINS
             rH   = prof%palts(i+1)
             if (i == 1) rHm1 = prof%palts(1)
           END IF
+          ! write(kSTdErr,'(A,3(I3,1X),ES12.4,1X,2(F12.4,1X),2(ES12.4,1X),2(F12.4,1X))') 'zoo',i,iG,iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
 
           ! READ (caStr,*,ERR=13,END=13) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
           CALL FindError(rAmt,rT,rP,rPP,rZ,iIDgas,iaNpathCounter(iIDgas))
@@ -4529,6 +4538,8 @@ CONTAINS
     kProfileUnitOpen = -1
 
     prof%nlevs = prof%nlevs + 1   !!this really was number of LAYERS
+
+    CALL  check_plevs(prof)
 
     IF (prof%plevs(1) < prof%plevs(prof%nlevs)) THEN
       ! reset prof%plevs so it has ALL the AIRS levels(1:101), rather than
@@ -5000,21 +5011,22 @@ CONTAINS
         rPP = 0.0
         rAmt = 0.0
         ! CALL DoStop
-      END IF
-  
+      END IF  
+
     END IF
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     IF (iError == 1) THEN
       write(kStdWarn,4320) iIDGas,iCnt,rAmt0,rT0,rP0,rPP0
       IF (kPlanet == 03) THEN
-        rP = 1.0e3
+        rP = 1.0e3/1000.0 !! remember we want atm  %% actually we'd prefer the pav nearest to the [1013.948  986.0666] bdries???
         rT = 300.0	
         rPP = 1.0e-3
         rPP = 0.0	
         rAmt = 0.000000
       ELSEIF (kPlanet == 04) THEN
-        rP = 10.0
+        rP = 10.0/10.0  !! remember we want atm oooo errr
         rT = 250.0	
         rPP = 1.0e-3
         rPP = 0.0	
@@ -5256,5 +5268,50 @@ CONTAINS
       end SUBROUTINE intersectI_v0
 
 !************************************************************************
+!!! warning this is a very dangerous routine, as it resets prof.plevs
+!!! this usually happens after I average many Antartic profiles together to make one profile : 
+!!!   the lowest levels can be messed up eg 904.9, 931.5, 958.6, 986.1, 540.8   WOW
+      SUBROUTINE check_plevs(prof)
 
+      IMPLICIT NONE      
+
+    include '../INCLUDE/TempF90/scatterparam.f90'
+    include 'rtpdefs.f90'
+    include '../INCLUDE/TempF90/airslevelsparam.f90'
+
+      record /RTPPROF/ prof
+      integer i,iFix,iGood
+
+! hmm /asl/packages/rtpV201/include/rtpdefs.f has MAXLEV = 120 ....
+!      if (size(DATABASELEV) .EQ. size(prof%plevs)) then
+!        print *,size(DATABASELEV)
+!      else
+!        print *,size(DATABASELEV),size(prof%plevs)
+!      end if
+
+      iFix = +1  !! this is if we anticipate problems, and are willing to fix them
+      iFix = -1  !! safer this way, let klayers do the fixing; let kCARTA do the checking
+      iGood = 0
+
+      do i = 1,prof%nlevs
+        if (abs(prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)) <= 0.5) then
+          iGood = iGood + 1
+        end if
+
+        if (abs(prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)) > 0.5) then
+          if ((iFix .GT. 0) .AND. (iGood .GE. prof%nlevs-3)) THEN
+            write(kStdWarn,'(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            write(kStdErr, '(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            prof%plevs(i) = DATABASELEV(kMaxLayer+1-i+1)
+          else
+            write(kStdWarn,'(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs but iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database) >>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            write(kStdErr, '(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs but iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database)>>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            CALL DoStop
+          end if
+        end if
+      end do
+
+      RETURN
+      END SUBROUTINE check_plevs
+!************************************************************************
 END MODULE n_rtp

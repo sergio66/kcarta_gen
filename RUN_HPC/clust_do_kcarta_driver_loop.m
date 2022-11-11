@@ -53,7 +53,7 @@ end
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 %JOB = 49;
 %JOB = 2222;
-%JOB = 308
+%JOB = 1
 
 % iaChunkSize = 30; %% assume 30 jobs will take 30 x 1.5 = 45 mins, set in sbatch script
 % obviously if iChunkSize == 1 then each node processes only ONE profile

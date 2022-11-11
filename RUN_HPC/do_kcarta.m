@@ -151,10 +151,12 @@ elseif iDoJac == 1 & iDoFlux < 0 & iDoCloud == 1 & gg == 2346
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
 
 elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud == 1 & gg == 2346
-  disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G2,3,4,6)')
+  disp('do_kcarta.m here A5 (allsky rads and col jacs, for G2,3,4,6,51,52)')
   %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
   type1nml = 'template_Qcol2346cldjacobian_1cloud.nml';
   type2nml = 'template_Qcol2346cldjacobian_2cloud.nml';
+  type1nml = 'template_Qcol2346_51_52_cldjacobian_1cloud.nml';
+  type2nml = 'template_Qcol2346_51_52_cldjacobian_2cloud.nml';
   sed_1_2_cloudfiles
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
   

@@ -134,6 +134,11 @@ CONTAINS
 !      print *,p1LEV,rP,p2LEV,' ',p1,p2
 !      call dostop
           
+!    DO iL = iLowest,kProfLayer
+!      print *,'mamamama',iL,pProf(iL)
+!    end DO
+!call dostop
+
     DO iL = iLowest,kProfLayer
       !!!!!!!!!!!!!!!!!!!!!! pressure !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       rP = pProf(iL)/1013.25
@@ -176,7 +181,7 @@ CONTAINS
         raP1(iL) = 0.0
       END IF
               
-      !      write(kStdErr,456) ,iL,p1,rp,p2,p1-p2,raP1(iL),raP2(iL)
+!!      write(kStdErr,456) ,iL,p1*kAtm2mb,rp*kAtm2mb,p2*kAtm2mb,(p1-p2)*kAtm2mb,raP1(iL),raP2(iL)
 
       !! want raP2(iL) > raP1(iL)
       IF (raP1(iL) < raP2(iL)) THEN
@@ -187,6 +192,7 @@ CONTAINS
         iaP1(iL) = iaP2(iL)
         iaP2(iL) = iSwap
       END IF
+
       IF (abs(iSplinetype) == +2) THEN
         CALL Check_xWeights_iSplinetype(iL,iaP1,iaP2,raP1,raP2)
       END IF
@@ -513,15 +519,26 @@ CONTAINS
 
 !! if kRTP == 6, the pavg is coming straight from LBLRTM layers code,
 !! which may not agree with KLAYERS code
+
     IF (abs(rP-0.0) >= 1.0e-3) THEN
-      write(kStdErr,*) 'WARNING need the smaller weight ~ 0, not ',rP
+      write(kStdErr,*) 'Check_xWeights_iSplinetype : need the smaller weight ~ 0, not ',rP
+      write(kStdErr,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+
+      write(kStdWarn,*) 'Check_xWeights_iSplinetype : need the smaller weight ~ 0, not ',rP
+      write(kStdWarn,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+
       IF (kRTP /= -6) THEN
         CALL DoStop
       END IF
     END IF
 
     IF (abs(rQ-1.0) >= 1.0e-3) THEN
-      write(kStdErr,*) 'WARNING need the larger weight ~ 1, not ',rQ
+      write(kStdErr,*) 'Check_xWeights_iSplinetype : need the larger weight ~ 1, not ',rQ
+      write(kStdErr,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+
+      write(kStdWarn,*) 'Check_xWeights_iSplinetype : need the larger weight ~ 1, not ',rQ
+      write(kStdWarn,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+
       IF (kRTP /= -6) THEN
           CALL DoStop
        END IF
