@@ -105,6 +105,14 @@
  caPFname = '/asl/s1/sergio/MakeAvgProfs2002_2020_startSept2002/16dayAvgLatBin64/all12monthavg_T_WV_grid_latbin_64_lonbin_12nan.rtp'
  caPFname = '/asl/s1/sergio/MakeAvgProfs2002_2020_startSept2002/LatBin64/summary_latbin_64_lonbin_12.rtp'
  caPFname = '/home/sergio/KCARTA/IP_PROFILES/junk49.op.rtp'
+ caPFname = 'RTP/summary_atm_N_cld_20years_all_lat_all_lon_2002_2022_monthlyERA5.rp.rtp'
+
+ iRTP = 1
+ caPFname = '/home/chepplew/data/sarta/validation/iasi2_2020d081g099_op.rtp'
+ iRTP = 2
+ caPFname = '/asl/s1/sergio/JUNK/iasi2_2020d081g099_op.rtp'
+ iRTP = 1
+ caPFname = '/asl/s1/sergio/JUNK/iasi2_2020d081g099_opX.rtp'
  $end
 
  $nm_weight

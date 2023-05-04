@@ -82,3 +82,44 @@
 ##   rm xsecdata.dat                                                      ##
 ##   ln -s xsecdata.dat.XXXXX xsecdata.dat                                ##
 ############################################################################
+
+To profile the code, try (eg for Absoft)
+Makefile_v118_Absoft:66:# after compiling the code with f77 -P, a file "gmon.out" is produced
+Makefile_v118_Absoft:67:# so then do     gprof ../BIN/bkcarta.x gmon.out >& ugh; more ugh
+
+Makefile_ifort : -profile-functions or -profile-loops
+Makefile_gfortran : -p -pg
+  add -pg to all OPTS, including the final one to make kcarta.x
+So for example in SARTA make file I have
+OPT = -O2 -convert big_endian -extend-source 132 -pg
+sarta:  $(OBJS)                                        
+        $(F77) -pg $(OBJS) $(RTPLIB) $(HDFLIB) $(FLIB) 
+# Compile source to object files                       
+.f.o:                                                  
+        $(F77) -c $(OPT) $(RTPINC) $*.f                
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if you do profiling, need to compile with eg (SARTA jacobian code)
+
+F77 = ifort
+FLIB =
+OPTEXEC =
+
+OPT = -O2 -convert big_endian -extend-source 132 -pg
+OPTEXEC = -pg
+
+sarta:  $(OBJS)
+        $(F77) $(OPTEXEC) $(OBJS) $(RTPLIB) $(HDFLIB) $(FLIB)
+
+# Compile source to object files
+.f.o:
+        $(F77) -c $(OPT) $(RTPINC) $*.f
+
+   time ../bin/jac_airs_l1c_2834_cloudy_may19_prod_debug fin=junk.op.rtp fout=newdayx.rtp
+   gprof ../bin/jac_airs_l1c_2834_cloudy_may19_prod_debug gmon.out >& ughnew
+ and if you profile eg Scotts code
+   time ../bin/airs_l1c_2834_cloudy_may19_prod_debug fin=junk.op.rtp fout=origdayx.rtp
+   gprof ../bin/airs_l1c_2834_cloudy_may19_prod_debug gmon.out >& ughnew
+ then compare Scotts code vs My code using Matlab and 
+   compare_gprof_profiler_output('ughorig','ughnew');

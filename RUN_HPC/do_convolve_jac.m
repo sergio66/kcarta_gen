@@ -28,7 +28,7 @@ end
 
 % iInstr = input('enter (1) AIRS (2) IASI+IASING (3) CrIS lo (4) CrIS hi (14) AIRS and CRIS Hi : ');
 
-%% ~/KCARTA/SRCv1.21_f90/Revisions.txt
+%% ~/KCARTA/SRCv1.21_f90/Revisions.txt, see kDefaultToffset and kDefaultColMult in ../INCLUDE/pre_defined.param
 %6/25/19        Changed the column jac mult    from 0.1 to 0.001
 %               Changed the column temp offset from 1.0 to 0.01
 
@@ -111,14 +111,23 @@ elseif gg == 1001 & iDoJac == 1
   %% readkcjac: ODB atm# = 5, subtype = -20, rows = 4    SURF (1:04)+9*97
   fprintf(1,'   do_convolve_jac.m : gg=%4i iDoCloud=%2i     iDoJac=%2i mm,nn=%10i %4i     nnlay=%8.6f \n',gg,iDoCloud,iDoJac,mm,nn,nnlay);
   jjuse = 1:nnlay;
-  dall1001   = dall(:,jjuse+0*nnlay) + dall(:,jjuse+2*nnlay) + dall(:,jjuse+3*nnlay) + dall(:,jjuse+4*nnlay);
-  dallO3     = dall(:,jjuse+1*nnlay);
-  dallCld1   = dall(:,jjuse+5*nnlay);
-  dallCld2   = dall(:,jjuse+6*nnlay);
-  dallT      = dall(:,jjuse+7*nnlay);
-  dallWgtFcn = dall(:,jjuse+8*nnlay);
-  %%% dallSurf   = max(jjuse+6*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
-  dallSurf   = (1:4)+9*nnlay; dallSurf = dall(:,dallSurf);
+  if iDoCloud > 0
+    dall1001   = dall(:,jjuse+0*nnlay) + dall(:,jjuse+2*nnlay) + dall(:,jjuse+3*nnlay) + dall(:,jjuse+4*nnlay);
+    dallO3     = dall(:,jjuse+1*nnlay);
+    dallCld1   = dall(:,jjuse+5*nnlay);
+    dallCld2   = dall(:,jjuse+6*nnlay);
+    dallT      = dall(:,jjuse+7*nnlay);
+    dallWgtFcn = dall(:,jjuse+8*nnlay);
+    %%% dallSurf   = max(jjuse+6*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
+    dallSurf   = (1:4)+9*nnlay; dallSurf = dall(:,dallSurf);
+  else
+    dall1001   = dall(:,jjuse+0*nnlay) + dall(:,jjuse+2*nnlay) + dall(:,jjuse+3*nnlay) + dall(:,jjuse+4*nnlay);
+    dallO3     = dall(:,jjuse+1*nnlay);
+    dallT      = dall(:,jjuse+5*nnlay);
+    dallWgtFcn = dall(:,jjuse+6*nnlay);
+    %%% dallSurf   = max(jjuse+4*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
+    dallSurf   = (1:4)+7*nnlay; dallSurf = dall(:,dallSurf);
+  end
   %whos w dall*
   dall = [dall1001 dallO3 dallT dallWgtFcn dallSurf];
   ngases = 2;
@@ -223,11 +232,13 @@ elseif gg == 2346 & iDoJac == 100
   dall6      = dall(:,4);
 
   if iDoCloud > 0
+    %before Nov 2022
     %dallT      = dall(:,5);
     %dallST     = dall(:,6);
     %dall = [dall2 dall3 dall4 dall6 dallT dallST];
     %ngases = 4;
 
+    %after Nov 2022
     dall51     = dall(:,5);
     dall52     = dall(:,6);
     dallT      = dall(:,7);

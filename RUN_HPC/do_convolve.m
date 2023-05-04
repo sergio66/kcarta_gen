@@ -21,6 +21,8 @@ addpath /home/sergio/MATLABCODE/FFTCONV/
 addpath /asl/matlab2012/sconv
 %addpath /asl/matlab2012/fconv
 
+addpath /home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES
+
 [djunk,w,caVers] = readkcstd_smart([outdir '/rad.dat' num2str(ii)]);
 [mm,nn] = size(djunk);  %% if cloudy calc, could have 890000 x 5 rads
 fprintf(1,'read in %s and found size of kcdata = %6i x %6i \n',[outdir '/rad.dat' num2str(ii)],mm,nn)
@@ -78,19 +80,27 @@ elseif iInstr == 4 | iInstr == 14 | iInstr == 124
   mod20 = ceil(iMax/20);
 
   toptsHI.user_res = 'hires';
-  [hi_fcris,hi_rcris_all] = convolve_cris_all_chooseres(w,dall,toptsHI);
+  [hi_fcris,hi_rcris_all,hi_fcris_sinc,hi_rcris_all_sinc] = convolve_cris_all_chooseres(w,dall,toptsHI);
 
   toptsMED.user_res = 'midres';
-  [med_fcris,med_rcris_all] = convolve_cris_all_chooseres(w,dall,toptsMED);
+  [med_fcris,med_rcris_all,med_fcris_sinc,med_rcris_all_sinc] = convolve_cris_all_chooseres(w,dall,toptsMED);
 
   toptsLO.user_res = 'lowres';
-  [lo_fcris,lo_rcris_all] = convolve_cris_all_chooseres(w,dall,toptsLO);
+  [lo_fcris,lo_rcris_all,lo_fcris_sinc,lo_rcris_all_sinc] = convolve_cris_all_chooseres(w,dall,toptsLO);
 
   %solzen = p.solzen;
   %scanang = p.scanang;
   %satzen = p.satzen;
   %stemp = p.stemp;
-  saver = ['save ' outdir '/individual_prof_convolved_kcarta_crisHI_crisMED_' num2str(ii) '.mat *rcris_all *fcris use_this_rtp solzen scanang satzen stemp caVers good'];
+
+  comment = 'note : xrcris_all_sinc is always sinc apodization for CRIS; xrcris_all is typically sinc2hamm apodization if if toptsX.iHammApod = 0,1 (default) .. but it could remain as sinc if toptsX.iHammApod = -1';
+  if  iInstr == 4
+    saver = ['save ' outdir '/individual_prof_convolved_kcarta_crisHI_crisMED_'           num2str(ii) '.mat *rcris_all* *fcris* use_this_rtp solzen scanang satzen stemp caVers good comment'];
+  elseif  iInstr == 14
+    saver = ['save ' outdir '/individual_prof_convolved_kcarta_airs_crisHI_crisMED_'      num2str(ii) '.mat *rcris_all* *fcris* use_this_rtp solzen scanang satzen stemp caVers good comment'];
+  elseif  iInstr == 124
+    saver = ['save ' outdir '/individual_prof_convolved_kcarta_airs_iasi_crisHI_crisMED_' num2str(ii) '.mat *rcris_all* *fcris* use_this_rtp solzen scanang satzen stemp caVers good comment'];
+  end
 
   if iInstr == 14 | iInstr == 124
     disp('also doing AIRS')
@@ -99,7 +109,8 @@ elseif iInstr == 4 | iInstr == 14 | iInstr == 124
     sfile = '/asl/matlab2012/srftest/srftables_m140f_withfake_mar08.hdf';
     airs_convolve_file_numchans  %% gives latest clist/sfile
     [fKc,rKc] = convolve_airs(w,dall,clist,sfile);
-    %saver = ['save ' outdir '/individual_prof_convolved_kcarta_AIRS_crisHI_crisMED_' num2str(ii) '.mat *rcris_all *fcris use_this_rtp solzen scanang satzen stemp caVers good'];
+
+    %%%%saver = ['save ' outdir '/individual_prof_convolved_kcarta_crisHI_crisMED_' num2str(ii) '.mat *rcris_all *fcris use_this_rtp solzen scanang satzen stemp caVers good'];
     saver = [saver ' fKc rKc sfile'];
   end
 

@@ -96,9 +96,9 @@ for i = 1
   [rtmp, frqSW] = kc2cris(userSW, rkc, vkc, optSW);
   radSW = [radSW, rtmp];
 
-  if mod(i, 100) == 0, fprintf(1, '.'), end
+%  if mod(i, 100) == 0, fprintf(1, '.'), end
 end
-fprintf(1, '\n')
+%fprintf(1, '\n')
 
 %save cal_flat radLW radMW radSW frqLW frqMW frqSW ...
 %              userLW userMW userSW optLW optMW optSW

@@ -23,6 +23,23 @@
 
 # see Readme_MakefileCommentsA
 
+# after compiling the code with ifort -profile-functions or -profile-loops, a file "gmon.out" is produced
+
+#   add -pg to all OPTS, including the final one to make kcarta.x
+# So for example in SARTA make file I have
+# OPT = -O2 -convert big_endian -extend-source 132 -pg
+# sarta:  $(OBJS)                                        
+#         $(F77) -pg $(OBJS) $(RTPLIB) $(HDFLIB) $(FLIB) 
+# # Compile source to object files                       
+# .f.o:                                                  
+#         $(F77) -c $(OPT) $(RTPINC) $*.f                
+# 
+# then run           ../BIN/bkcarta.x test.nml test.dat
+# which will produce test.dat and gmon.out
+# then do            gprof ../BIN/bkcarta.x gmon.out >& ugh; more ugh
+#
+# and if you have eg profiles Scotts original SARTA, and now rewriting it, then can use Matlab to do
+#   compare_gprof_profiler_output('ughorig','ughnew');
 ########################################################################
 ## if this does not work, just delete following line and bring in
 ## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"

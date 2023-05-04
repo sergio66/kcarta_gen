@@ -652,7 +652,19 @@ v1.22
                 !!! so if p.udef(20) = +1000, the scale factor = rHDO_Deplete = 2 = x2 HDO
                 !!! so if p.udef(20) = 0,     the scale factor = rHDO_Deplete = 1
                 !!! so if p.udef(20) = -1000, the scale factor = rHDO_Deplete = 0 = no HDO
-              
+                In other words the units are per mil    delta = (r/rstd - 1)* 10000 %o
+                The "%o" indices this is not percent but permil
+                
+                Remember HITRAN automatically scales the isotope line strength
+                so rstd = xHDO/xWV = 0.000313 is the Vienna Standard Mean Ocean Water (VSMOW) 
+                (Craig, 1961), and so in the equation                 
+                   d = depletion = (r/rRVSMOW - 1) * 1000 %o
+                where R is the HDO / H2O ratio, subscript “m” denotes the
+                measurement, and RVSMOW (0.00031152, Craig, 1961) is the
+                HDO / H2O ratio in Vienna Standard Mean Ocean Water.
+
+                we really have ((xHDO/xWV) / (xHDO/xWVstd) - 1) = ((yHDO*3.1152e-4/yWV) / (3.1152e-4) - 1) = (r-1) * 1000
+
 6/27/22         Was having problems with background thermal when asking for fluxes
                 a)  retired (iaaOverrideDefault(2,9) == 1) 
                     since this is a LBLRTM high spectral res amd layer temp variation fix
