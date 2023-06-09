@@ -233,7 +233,7 @@ CONTAINS
       caaScatter,raaScatterPressure,raScatterDME,raScatterIWP)
 
     IF ((iChunk_DoNLTE == 1) .AND. (iSetBloat > 0)) THEN
-      print *,'ack limb not done'
+      print *,'ack limb NLTE not done'
       CALL dostop
 !      CALL radiances_bloat( &
 !        raFreq,raMixVertTemp,caOutBloatFile, &
@@ -1046,6 +1046,7 @@ CONTAINS
     ! and also surface!!!
     raSurface = 0.0
     raInten = ttorad(raFreq,rMPTemp)
+!    print *,'DEBUG LIMB SURF',rMPTemp,raInten(1)
 
 ! compute the emission of the individual mixed path layers in iaRadLayer
 ! NOTE THIS IS ONLY GOOD AT SATELLITE VIEWING ANGLE THETA!!!!!!!!!
@@ -1062,6 +1063,7 @@ CONTAINS
         raPlanck = ttorad(raFreq,rMPTemp) * raaPlanckCoeff(:,iL)
         raaEmission(:,iLay) = (1.0-raaLayTrans(:,iLay))*raPlanck
       END IF
+!      write(*,'(A,3(I4,1X),4(F12.4,1X))') 'moooo ',iLay,iL,iNLTEStart,rMPTemp,raLayAngles(MP2Lay(iL)),raaLayTrans(1,iLay),raaEmission(1,iLay)
     END DO
 
     IF (iMode == +1) GOTO 1234    !!ie go from TANGENT POINT to INSTR
@@ -1071,6 +1073,7 @@ CONTAINS
       iL = iaRadLayer(iLay)
       rMPTemp = raVT1(iL)
       raInten = raInten*raaLayTrans(:,iLay) + raaEmission(:,iLay)*(1-raaLayTrans(:,iLay))
+!      write(*,'(A,I4,4(F12.4,1X))') 'DEBUG LIMB PART 1',iLay,rMPTemp,raInten(1),raaLayTrans(1,iLay),raaEmission(1,iLay)
     END DO
 
 ! see if we have to add on the solar contribution
@@ -1078,6 +1081,8 @@ CONTAINS
     IF (iDoSolar >= 0) THEN
       CALL Solar(iDoSolar,raSun,raFreq,raSunAngles, &
         iNumLayer,iaRadLayer,raaAbs,rFracTop,rFracBot,iTag)
+      print *,'raInten and raSun = ',raInten(1),raSun(1)
+      raInten = raInten + raSun
     ELSE
       write(kStdWarn,*) 'no solar backgnd to calculate'
     END IF
@@ -1086,6 +1091,7 @@ CONTAINS
 
     raInten = raInten + raSun
     raLimbTangentRad = raInten
+!    print *,'DEBUG LIMB END PART 1',rMPTemp,iLay,raInten(1)
 
     IF (iMode == -1) GOTO 777   !! from TOA to TANGENT POINT, skip all else
 
@@ -1121,6 +1127,7 @@ CONTAINS
       ELSE
         CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCos,rFracBot,iVary,raInten)
       END IF
+!      print *,'DEBUG LIMB PART 2',rMPTemp,iLay,raInten(1)
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1152,6 +1159,7 @@ CONTAINS
         !! well there are other options
         CALL RT_ProfileUPWELL(raFreq,raaAbs,iL,ravt2,rCos,+1.0,iVary,raInten)
       END IF
+!      print *,'DEBUG LIMB PART 2',rMPTemp,iLay,raInten(1)
     END DO
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1207,6 +1215,7 @@ CONTAINS
 
     END DO
 !^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
+!    print *,'DEBUG LIMB THEN END',rMPTemp,iLay,raInten(1)
 
     RETURN
     end SUBROUTINE rad_trans_LIMB_VARY

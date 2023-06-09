@@ -149,6 +149,9 @@ CONTAINS
 
     write(kStdWarn,'(A,I3,2(ES12.5))') 'FindLayerAngles : iAtm,rSatAngle,rSatHeight = ',iAtm,rSatAngle,rSatHeight
 
+    IF (rSatAngle .LT. 0.0)     rSatAngle = abs(rSatAngle)
+    IF (rSatAngle .GT. 90-0.01) rSatAngle = 90-0.01
+
     raLayAngles      = rSatAngle
     raLayAnglesSnell = rSatAngle
 
@@ -256,7 +259,8 @@ CONTAINS
               raLayAngles(iI) = raLayAnglesNoSnell(iI)  !!! scott/SARTA, only use layer curvature
             END IF
 
-            IF (rSatAngle < 0.0) raLayAngles(iI) = -raLayAngles(iI)
+            IF (raLayAngles(iI) > 90-0.01) raLayAngles(iI) = 90-0.01
+
             IF (kOuterLoop == 1) THEN
               IF (iI >= iMin .AND. iX <= iMax) THEN
                 iX = (iI - iMin + 1)
@@ -264,7 +268,7 @@ CONTAINS
                 iX = -1
               END IF
               IF (iX == 1) THEN
-                write(kStdWarn,'(A,I3)') '------------>>> these RAY TRACE SPPHERICAL SHELL layer angles are used by Atmosphere, Downlook Instr ',iAtm
+                write(kStdWarn,'(A,I3)') '------------>>> these RAY TRACE SPHERICAL SHELL layer angles are used by Atmosphere, Downlook Instr ',iAtm
                 write(kStdWarn,*) 'Downlook Instr'
                 write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
                 write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)

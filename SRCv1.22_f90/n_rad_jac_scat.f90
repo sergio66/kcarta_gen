@@ -42,7 +42,7 @@ CONTAINS
       IF (iaLimb(iA) > 0) THEN
         kThermal      = -1
         kThermalJacob = -1
-        raTsurf(iA) = 0.0             !! no need to have any stemp;
+        raTsurf(iA) = 0.1      !! no need to have any stemp; but we do need this for rad2bt(v,Ts)
         !! besides we have emiss = 0
         IF (raSatHeight(iA) < 0) THEN
           raSatHeight(iA) = 705000 !! AIRS height, m

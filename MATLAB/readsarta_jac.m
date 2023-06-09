@@ -2,14 +2,22 @@ function [w,d,iaProf,iaNumLay] = readsarta_jac(fname,iGID)
 
 %% see s_writefile.f90 line 2516
 
+%{
 if iGID == 100
   disp('expecting ST +  temperature jacs')
 elseif iGID == 200
   disp('expecting WGT FCNS')
+elseif iGID == 300
+  disp('expecting CLD JACS')
 elseif length(intersect(iGID,[1 2 3 4 5 6 9 12])) == 1
   disp('expecting gas jacs')
 else
-  error('iGID = [1 2 3 4 5 6 9 12]  [100,200] for WV,OZ,WGTFCN,TZ jacs')
+  error('iGID = [1 2 3 4 5 6 9 12] for for [WV,OZ,...HNO3]     or  [100,200,300] for  [TZ,WGTFCN,CLD] jacs')
+end
+%}
+
+if length(intersect(iGID,[100 200 300 1 2 3 4 5 6 9 12])) == 0
+  error('iGID = [1 2 3 4 5 6 9 12] for for [WV,OZ,...HNO3]     or  [100,200,300] for  [TZ,WGTFCN,CLD] jacs')
 end
 
 if ~exist(fname)
@@ -30,11 +38,15 @@ flen    = fread(fin, 1, 'integer*4');
 numchan = fread(fin, 1, 'integer*4');
 flen    = fread(fin, 1, 'integer*4');
 
-fprintf(1,'expecting %5i profiles with %4i channels \n',numprof,numchan)
+%fprintf(1,'expecting %5i profiles with %4i channels \n',numprof,numchan)
 
 w = [];
 if iGID == 100
   d = zeros(numprof,numchan,101);
+elseif iGID == 300
+  d = zeros(numprof,numchan,7);  %% cfrac1,amt1,sze1,cfrac2,amt2,sze2,cfrac12
+  d = zeros(numprof,numchan,11); %% cfrac1,amt1,sze1,top1,bot2,cfrac2,amt2,sze2,top2,bot2,cfrac12
+  d = zeros(numprof,numchan,12); %% cfrac1,amt1,sze1,top1,bot2,cfrac2,amt2,sze2,top2,bot2,cfrac12,stemp
 else
   d = zeros(numprof,numchan,100);
 end
@@ -68,3 +80,4 @@ for iP = 1 : numprof
 end
 
 fclose(fin);
+
