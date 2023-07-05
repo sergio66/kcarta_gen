@@ -53,7 +53,7 @@ end
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 % JOB = 49;
-% JOB = 1;
+ JOB = 1;
 % JOB = 269
 % JOB = 705;
 % JOB = 16

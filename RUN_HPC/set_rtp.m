@@ -60,7 +60,7 @@ use_this_rtp = '/asl/s1/sergio/home/PCRTM_XIANGLEI/RUN/for_kcarta_241_pcrtm_clou
 %% testing new sarta
 use_this_rtp = '/asl/s1/sergio/pin_feb2002_sea_airsnadir_rp.so2.latlon.const_emiss.rtp';
 use_this_rtp = '/asl/s1/sergio/pin_feb2002_sea_airsnadir_rp.so2.latlon.const_emiss_0.8.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/RUN_KCARTA/REGR49_400ppm/xyzregr49_1013_400ppm.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/xyzregr49_1013_400ppm.op.rtp';
 use_this_rtp = 'xyzregr49_1013_400ppm.op.rtp';
 use_this_rtp = 'cris_hr_ecmwf_csarta_g2s4_d20160120_clear_night_ocean.op.rtp';
 use_this_rtp = '/home/chepplew/projects/sarta/cris_hr/SAF704_regrprofs_25May2016_xmb_2235g4.op.rtp';
@@ -71,7 +71,7 @@ use_this_rtp = '/home/sergio/SARTA_CLOUDY/SARTA_CRIS_HiRes/src/test.op.rtp';
 %use_this_rtp = '/home/sergio/SARTA_CLOUDY/SARTA_CRIS_HiRes/src/test_820km.op.rtp';
 
 use_this_rtp = '/asl/s1/sergio/TIGR_ALL/tigr1_600_1200.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/RUN_KCARTA/AIRS_TUNING/AIRS_TUNING_RTP/pert_tune_tunmlt_jan18_2016_6000tropicalprofiles.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/AIRS_TUNING/AIRS_TUNING_RTP/pert_tune_tunmlt_jan18_2016_6000tropicalprofiles.op.rtp';
 use_this_rtp = 'pert_tune_tunmlt_jan18_2016_6000tropicalprofiles.op.rtp';
 
 %% Larrabee, AIRS STM Mar 2016 and Oct 2017
@@ -92,19 +92,19 @@ use_this_rtp = '/home/strow/Work/Rta/sarta/test/rtp_drivers/SAF_6angs_704profs_1
 %% chris is trying to get SARTA-CRIS hires going
 
 %% for background thermal
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/RUN_KCARTA/REGR49_400ppm/regr49_1013_400ppm.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/regr49_1013_400ppm.op.rtp';
 use_this_rtp = 'regr49_1013_400ppm.op.rtp';
 
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/RUN_KCARTA/REGR49_400ppm/regr_rtp_6angs_49profs_2surfaces.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/regr_rtp_6angs_49profs_2surfaces.rtp';
 use_this_rtp = 'regr_rtp_6angs_49profs_2surfaces.rtp';
 use_this_rtp = 'regr_rtp_6angs_49profs_1013mb_unitemis.rtp';
 use_this_rtp = 'regr_rtp_6angs_49profs_1013mb_seaemis.rtp';
 use_this_rtp = 'regr_rtp_6angs_49profs_1080mb_seaemis.rtp';
 use_this_rtp = 'regr_rtp_6angs_49profs_1080mb_unitemis.rtp';
 use_this_rtp = 'save_SAF_6angs_704profs_1013mb_unitemis.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/save_SAF_6angs_704profs_1013mb_seaemis.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/save_SAF_6angs_704profs_1013mb_unitemis.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/save_SAF_6angs_704profs_1013mb_0p8emis.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/save_SAF_6angs_704profs_1013mb_seaemis.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/save_SAF_6angs_704profs_1013mb_unitemis.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/save_SAF_6angs_704profs_1013mb_0p8emis.rtp';
 use_this_rtp = 'regr_rtp_6angs_49profs_1013mb_0p8emis.rtp';
 
 %% testing CO2
@@ -115,12 +115,12 @@ use_this_rtp = '/home/chepplew/projects/sarta/cris_hr/regr49_1013_420ppm.op.rtp'
 use_this_rtp = '/home/chepplew/projects/sarta/cris_hr/regr49_1013_400ppm.op.rtp';
 
 use_this_rtp = '/home/chepplew/projects/sarta/cris_hr/regr49_1013_2235.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES/RUN_KCARTA/REGR49/regr49_1013_385ppm.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49/regr49_1013_385ppm.op.rtp';
 use_this_rtp = 'regr49_1013_385ppm.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES//ECMWF_SAF_137Profiles/save_SAF_704_profiles_25-May-2016_xmb_zeroemiss.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA//ECMWF_SAF_137Profiles/save_SAF_704_profiles_25-May-2016_xmb_zeroemiss.op.rtp';
 use_this_rtp = 'save_SAF_704_profiles_25-May-2016_xmb_zeroemiss.op.rtp';
 use_this_rtp = '/home/chepplew/projects/sarta/cris_hr/regr49_1100_400ppm_2235_e1rh0.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/testperturb.rp.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA_SARTA/RUN_KCARTA/testperturb.rp.rtp';
 
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/CO_Tuning/cris_mean_hires_a2v4_ref_2018_clear_desc_ocean.op.rtp';
 use_this_rtp = 'RTP/cris_mean_hires_a2v4_ref_2018_clear_desc_ocean.op.rtp';
@@ -132,7 +132,7 @@ use_this_rtp = 'RTP/era_airxbcal_2017_day031_clear_ocean_night.op.rtp';
 use_this_rtp = 'RTP/era_retr_era_airxbcal_day031_clear_4.z4sergio_clear_retrieve_allfov.rtp';
 
 %% chris NH3 tests
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Mar2018_NH3/stdNH3_1100mb_op_400ppm.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Mar2018_NH3/stdNH3_1100mb_op_400ppm.rtp';
 use_this_rtp = 'RTP/stdNH3_1100mb_op_400ppm.rtp';
 use_this_rtp = 'RTP/stdNH3_1100mb_op_400ppm_zeroemiss.rtp';
 use_this_rtp = 'RTP/stdNH3_1100mb_op_400ppm_unitemiss.rtp';
@@ -141,7 +141,7 @@ use_this_rtp = '/home/strow/Work/Rta/cris_testin_nh3.rtp';
 use_this_rtp = 'RTP/cris_testin_nh3_x40.rtp';
 
 % chris is testing his new sarta for AIRS
-%cp /home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Sept2018_AIRS2645/regr49_1013_400ppm_unitemiss.op.rtp .
+%cp /home/sergio/MATLABCODE/REGR_PROFILES_SARTA_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Sept2018_AIRS2645/regr49_1013_400ppm_unitemiss.op.rtp .
 use_this_rtp = 'regr49_1013_400ppm_unitemiss.op.rtp';
 use_this_rtp = 'regr49_1100_400ppm_unitemiss.op.rtp';
 
@@ -377,7 +377,7 @@ use_this_rtp = '/asl/s1/sergio/forITOVS_May2019/KCARTA_PCRTM_Tang//pcrtm_10.31.2
 
 iInstr = 124;
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/r49_1013_98lev_400p_unitemis_seaemis_7angs_night.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/ECMWF_SAF_137Profiles/save_SAF_704_profiles_29-Apr-2016_1100mb_400ppmv_unitemis.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA_SARTA/ECMWF_SAF_137Profiles/save_SAF_704_profiles_29-Apr-2016_1100mb_400ppmv_unitemis.op.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/save_SAF_704_profiles_29-Apr-2016_1100mb_400ppmv_unitemis.op.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/test_3profs.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/test_9profiles.rtp';
@@ -427,11 +427,23 @@ use_this_rtp = 'RTP/summary_atm_N_cld_20years_all_lat_all_lon_2002_2022_monthlyE
 clear iInstr iDoConvolve
 iInstr = 2; iDoConvolve = +1;
 use_this_rtp = '/home/chepplew/data/sarta/validation/iasi2_2020d081g099_op.rtp';
-use_this_rtp = '/home/chepplew/data/sarta/validation/iasi_1_2016d246_clear_sea_gn173_dep108.rtp_1'
-use_this_rtp = '/home/chepplew/data/sarta/validation/iasi_1_2016d246_clear_sea_gn173_dep0.rtp_1'
+use_this_rtp = '/home/chepplew/data/sarta/validation/iasi_1_2016d246_clear_sea_gn173_dep108.rtp_1';
+use_this_rtp = '/home/chepplew/data/sarta/validation/iasi_1_2016d246_clear_sea_gn173_dep0.rtp_1';
 use_this_rtp = '/home/chepplew/data/sarta/validation/hdo/hdo_test_prf_frm_jpl.rtp_1';
-use_this_rtp = '/home/chepplew/data/scratch/mktemp_N2dzVSCD_airs_001_kl.rtp'
-use_this_rtp = '/home/chepplew/data/scratch/mktemp_N2dzVSCD_airs_001_kl.rtp_1'
+use_this_rtp = '/home/chepplew/data/scratch/mktemp_N2dzVSCD_airs_001_kl.rtp';
+use_this_rtp = '/home/chepplew/data/scratch/mktemp_N2dzVSCD_airs_001_kl.rtp_1';
+
+clear iInstr iDoConvolve
+iInstr = 1; iDoConvolve = +1;
+use_this_rtp = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/srcF77_jac/newdayx_1_100_12150.op.rtp';
+use_this_rtp = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/srcF77_jac/cloudy_airs_l1c_ecm_sarta_baum_ice.2018.06.29.086_cumsum_-1.op.rtp';
+use_this_rtp = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/srcF77_jac/newdayx_clr.op.rtp';
+use_this_rtp = '/home/chepplew/data/scratch/mktemp_gLJIFbf4_kl2.op.rtp';
+
+clear iInstr iDoConvolve
+iInstr = 4; iDoConvolve = +1;
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/xyzregr49_1013_400ppm.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE_Git/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Feb2020_AIRS2834_CHIRP/regr49_1013_400ppm_unitemiss.op.rtp';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m

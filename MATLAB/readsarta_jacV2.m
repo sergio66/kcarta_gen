@@ -44,20 +44,21 @@ flen    = fread(fin, 1, 'integer*4');
 
 w = [];
 if iGID == 100
-  d = zeros(numprof,numchan,101);
+  d = zeros(101,numchan,numprof,'single');
 elseif iGID == 300
-  d = zeros(numprof,numchan,7);  %% cfrac1,amt1,sze1,cfrac2,amt2,sze2,cfrac12
-  d = zeros(numprof,numchan,11); %% cfrac1,amt1,sze1,top1,bot2,cfrac2,amt2,sze2,top2,bot2,cfrac12
-  d = zeros(numprof,numchan,12); %% cfrac1,amt1,sze1,top1,bot2,cfrac2,amt2,sze2,top2,bot2,cfrac12,stemp
+  d = zeros(07,numchan,numprof,'single'); %% cfrac1,amt1,sze1,cfrac2,amt2,sze2,cfrac12
+  d = zeros(11,numchan,numprof,'single'); %% cfrac1,amt1,sze1,top1,bot2,cfrac2,amt2,sze2,top2,bot2,cfrac12
+  d = zeros(12,numchan,numprof,'single'); %% cfrac1,amt1,sze1,top1,bot2,cfrac2,amt2,sze2,top2,bot2,cfrac12,stemp
 else
-  d = zeros(numprof,numchan,100);
+  d = zeros(100,numchan,numprof,'single');
 end
 
 flen = fread(fin, 1, 'integer*4');
 w = fread(fin,numchan,'real*4');
+w = single(w);
 flen = fread(fin, 1, 'integer*4');
 
-%disp('looking at basic memory usage in readsarta_jac.m, d=zeros(numprof,numchan,X) where X=100 for profile or eg 12 for clds')
+%disp('looking at basic memory usage in readsarta_jac.m, d=zeros(X,numchan,numprof) where X=100 for profile or eg 12 for clds')
 %whos d w
 %monitor_memory_whos
 %disp('looking at basic memory usage in readsarta_jac.m')
@@ -81,7 +82,7 @@ for iP = 1 : numprof
   for iL = 1 : iaNumLay(iP)
     flen = fread(fin, 1, 'integer*4');
     junk = fread(fin,numchan,'real*4');
-    d(iP,:,iL) = junk;
+    d(iL,:,iP) = single(junk');
     flen = fread(fin, 1, 'integer*4');
   end
 
