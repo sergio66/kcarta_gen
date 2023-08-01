@@ -732,7 +732,7 @@ CONTAINS
     SUBROUTINE SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
     iSergio, &
@@ -751,7 +751,7 @@ CONTAINS
      
 ! iSergio INTEGER that tells if this is RTSPEC or SERGIO's code
     INTEGER :: iSergio,iDisort
-    INTEGER :: iaCldTypes(kMaxClouds)  !! 101 201 or 301 for water, ice, aerosol
+    INTEGER :: iaCldTypes(kMaxClouds),iaWorIorA(kProfLayer)  !! 101 201 or 301 for water, ice, aerosol
     REAL :: raFreq(kMaxPts)
 ! ---------------- inputs needed to read scattering tables -------------------
 ! this is which atm number is being used, and whether these are binary files
@@ -770,7 +770,7 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this is just to set everything about clouds relative to TOA layer
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
 ! this tells if there is phase info associated with the cloud; else use HG
@@ -1152,16 +1152,16 @@ CONTAINS
           iT = i
           ncldlay = ncldlay + iaCloudNumLayers(i)
           write(kStdWarn,*) 'Cloud #, num layers = ',i,iaCloudNumLayers(i)
-          write(kStdWarn,*) 'L  KCLay iwp  dme  iscattab             : '
-          write(kStdWarn,*) '-----------------------------------------'
+          write(kStdWarn,*) 'L   AIRSLay   iwp      dme    iscattab  iaWorIorA'
+          write(kStdWarn,*) '-------------------------------------------------'
           DO iStep = 1, iaCloudNumLayers(i)
             iLayers = iLayers+1
             IWP(iLayers) = raaaCloudParams(i,iStep,1)
             DME(iLayers) = raaaCloudParams(i,iStep,2)
             ISCATTAB(iLayers) = iaaScatTable(i,iStep)
             raCldLayer(iLayers) = +1.0 * iaaCloudWhichLayers(i,iStep)
-            write(kStdWarn,*) iLayers,int(raCldLayer(iLayers)),iwp(iLayers),dme(iLayers), &
-              iscattab(iLayers)
+            write(kStdWarn,'(I3,5X,I3,1X,2(F10.3,1X),3X,2(I3,3X))') iLayers,int(raCldLayer(iLayers)),iwp(iLayers),dme(iLayers), &
+              iscattab(iLayers),iaWorIorA(int(raCldLayer(iLayers)))
             IWP0(iLayers) = raaaCloudParams(i,iStep,1)
             DME0(iLayers) = raaaCloudParams(i,iStep,2)
             ISCATTAB0(iLayers) = iaaScatTable(i,iStep)
@@ -2171,18 +2171,19 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! note that by algebra you can show that
-! AddCloud_pclsam_SergioChou == AddCloud_pclsam_TanoChou
+! AddCloud_pclsam_SergioChou == AddCloud_pclsam_TangChou
 ! here we first do TauTotal = TauGas + TauCld
 !                  w --> w' = (w)(TauCld)/(TauGas + TauCld)
 !                  TauTotal --> (TauToal (1 - w' g)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    SUBROUTINE AddCloud_pclsam_SergioChou(raFreq, &
+    SUBROUTINE AddCloud_pclsam_SergioChou_Unused(raFreq, &
     raaExtTemp,raaScatTemp,raaAsymTemp, &
     iaaRadLayer,iAtm,iNumlayer, &
     rFracTop,rFracBot, &
     ICLDTOPKCARTA, ICLDBOTKCARTA, &
-    NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+    NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, & 
+    ISCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
     NSCATTAB, MUINC, &
     NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
     TABEXTINCT, TABSSALB, TABASYM, &
@@ -2205,7 +2206,7 @@ CONTAINS
 ! mie scattering tables
     INTEGER :: NCLDLAY, ICLDTOP, ICLDBOT, ISCATTAB(MAXNZ)
     REAL ::    IWP(MAXNZ), DME(MAXNZ)
-    INTEGER ::  NSCATTAB
+    INTEGER ::  NSCATTAB, CTYPE1, CTYPE2, iaWorIorA(kProfLayer)
     INTEGER ::  NMUOBS(NSCATTAB), NDME(NSCATTAB), NWAVETAB(NSCATTAB)
     REAL ::     MUTAB(MAXGRID,NSCATTAB)
     REAL ::     DMETAB(MAXGRID,NSCATTAB), WAVETAB(MAXGRID,NSCATTAB)
@@ -2216,28 +2217,31 @@ CONTAINS
     REAL ::     TABPHI2UP(MAXTAB,NSCATTAB), TABPHI2DN(MAXTAB,NSCATTAB)
 
 ! local variables
-    INTEGER :: iL,iFr,iI,N,L,I,ikcCldtop,ikcCldbot
+    INTEGER :: iL,iFr,iI,N,L,I,ikcCldtop,ikcCldbot, CTYPE
     INTEGER :: i1,i2,iFixHere
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b,rE,rW,rG
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
     REAL :: dmedme,albedo,asymmetry,rAbs,rAlbedo,rScat,SSALB0
-    INTEGER :: iExtScaling,iSartaTables,iDefault
+    INTEGER :: iScaling,iSartaTables,iDefault
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
-    iDefault = +1  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
+    iDefault = +2  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
 
-    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake/small error in b
-    iExtScaling = +1 !! this is correct Chou scaling == 1-w(1-b)
-    iExtScaling = +2 !! this is Chou with similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
-    iExtScaling = +3 !! this is Chou with            scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+    iScaling = -10 !! this is what I err have been using till May 1999, which is same as +1 (see Bk 47)
+    iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
+    iScaling = +2  !! this is Chou       scaling == 1-w(1-b)
+    iScaling = +3  !! this is Maestri/Martinazzo scaling with NO TANG SCALING
+    iScaling = +4  !! this is similarity scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+    iScaling = +5  !! this is Chou       scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
 
-    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake
+    iScaling = -10 !! this is what I err have been using till May 1999, a minus sign mistake
+    iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
 
-    iExtScaling = kScatter
+    iScaling = kScatter
 
-    IF ((iExtScaling .NE. iDefault) .AND. (kouterLoop .EQ. 0)) THEN
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'AddCloud_pclsam_SergioChou iDefault,iExtScaling = ',&
-                   iDefault,iExtScaling,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    IF ((iScaling .NE. iDefault) .AND. (kouterLoop .EQ. 0)) THEN
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'AddCloud_pclsam_SergioChou iDefault,iScaling = ',&
+                   iDefault,iScaling,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2250,7 +2254,7 @@ CONTAINS
 
     IF ((iSartaTables .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
       write(kStdErr,*) 'OH OH KEEP DELTA SCALE'
-      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'AddCloud_pclsam_SergioChou iDefault,iExtScaling = ',&
+      write(kStdErr,'(A,I3,I3,F10.3,A,I3,I3)') 'AddCloud_pclsam_SergioChou iDefault,iScaling = ',&
                    iDefault,iSartaTables,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2272,6 +2276,7 @@ CONTAINS
         L  = N-ICLDTOP+1
         I  = ISCATTAB(L)
         iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N+1)
+        CTYPE = iaWorIorA(iI)
 
         IF (IWP(L) >= 1e-5) THEN
           DO iFr = 1,kMaxPts
@@ -2336,40 +2341,7 @@ CONTAINS
   
             raaScatTemp(iFr,iI) = SSALB(L)
   
-            ! ---------------> now add on the backscattered part <--------------------
-            IF (iExtScaling .EQ. -1) THEN
-              !! the "correct" version is 
-              !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
-              !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
-              !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
-              !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
-  
-              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
-              b = (1.0 - ASYM_RTSPEC(L))/2.0               
-   
-              !! CHOU SCALING TERM
-              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
-              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
-              TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
-  
-            ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
-              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
-              b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
-  
-              !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
-              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
-              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
-              TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*(1.0-b)) 
-  
-            ELSEIF (iExtScaling .EQ. +2) THEN
-              !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
-              b = (1.0 + ASYM_RTSPEC(L))/2.0               
-  
-              !! CHOU SCALING TERM with similarity scaling adjustment
-              !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
-              TAUTOT_N = TAUTOT_N * (1 - SSALB(L)*b) 
-  
-            END IF
+            include 'backscatter.f90'
   
             raaExtTemp(iFr,iI)  = TAUTOT_N
             ! ---------------> now add on the backscattered part <--------------------
@@ -2415,7 +2387,7 @@ CONTAINS
     END IF
 
     RETURN
-    end SUBROUTINE AddCloud_pclsam_SergioChou
+    end SUBROUTINE AddCloud_pclsam_SergioChou_unused
 
 !************************************************************************
 ! this subroutine adds on the absorptive part of cloud extinction
@@ -2425,7 +2397,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! note that by algebra you can show that
-! AddCloud_pclsam_SergioChou == AddCloud_pclsam_TanoChou
+! AddCloud_pclsam_SergioChou_Unused == AddCloud_pclsam_TangChou
 ! here we first do TauCld --> TauCld(1-wg) and keep w the same, then say
 !                  TauTotal = TauCld'+ TauGas
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2435,7 +2407,8 @@ CONTAINS
     iaaRadLayer,iAtm,iNumlayer, &
     rFracTop,rFracBot, &
     ICLDTOPKCARTA, ICLDBOTKCARTA, &
-    NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+    NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, &
+    ISCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
     NSCATTAB, MUINC, &
     NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
     TABEXTINCT, TABSSALB, TABASYM, &
@@ -2452,13 +2425,13 @@ CONTAINS
     REAL :: raaScatTemp(kMaxPts,kMixFilRows)   !scattering temporary copy
     REAL :: raaAsymTemp(kMaxPts,kMixFilRows)   !asymmetry temporary copy
     REAL :: raFreq(kMaxPts)                    !wavenumber grid
-    INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA    !kcarta cloud top/bottoms
+    INTEGER :: ICLDTOPKCARTA, ICLDBOTKCARTA    !kcarta cloud top/bottoms    
     REAL :: rFracTop,rFracBot                  !layer fractions at TOA,GND
 
 ! mie scattering tables
     INTEGER :: NCLDLAY, ICLDTOP, ICLDBOT, ISCATTAB(MAXNZ)
     REAL ::    IWP(MAXNZ), DME(MAXNZ)
-    INTEGER ::  NSCATTAB
+    INTEGER ::  NSCATTAB, CTYPE1, CTYPE2, iaWorIorA(kProfLayer)
     INTEGER ::  NMUOBS(NSCATTAB), NDME(NSCATTAB), NWAVETAB(NSCATTAB)
     REAL ::     MUTAB(MAXGRID,NSCATTAB)
     REAL ::     DMETAB(MAXGRID,NSCATTAB), WAVETAB(MAXGRID,NSCATTAB)
@@ -2474,23 +2447,26 @@ CONTAINS
     REAL :: tauc_L,taucg_L,tautot_n,taugas,waveno,b,rE,rW,rG
     REAL :: extinct,SSALB(MAXNZ), ASYM_RTSPEC(MAXNZ)
     REAL :: dmedme,albedo,asymmetry,rAbs,rAlbedo,rScat,SSALB0
-    INTEGER :: iExtScaling,iSartaTables,iDefault
+    INTEGER :: iScaling,iSartaTables,iDefault,CTYPE
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
-    iDefault = +1  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
+    iDefault = +2  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
 
-    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake/small error in b
-    iExtScaling = +1 !! this is correct Chou scaling == 1-w(1-b)
-    iExtScaling = +2 !! this is Chou with similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
-    iExtScaling = +3 !! this is Chou with            scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+    iScaling = -10 !! this is what I err have been using till May 1999, which is same as +1 (see Bk 47)
+    iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
+    iScaling = +2  !! this is Chou       scaling == 1-w(1-b)
+    iScaling = +3  !! this is Maestri/Martinazzo scaling with NO TANG SCALING
+    iScaling = +4  !! this is similarity scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+    iScaling = +5  !! this is Chou       scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
 
-    iExtScaling = -1 !! this is what I err have been using till May 1999, a minus sign mistake
+    iScaling = -10 !! this is what I err have been using till May 1999, a minus sign mistake
+    iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
 
-    iExtScaling = kScatter
+    iScaling = kScatter
 
-    IF ((iExtScaling .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
-      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iExtScaling = ',&
-                   iDefault,iExtScaling,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    IF ((iScaling .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
+      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iScaling = ',&
+                   iDefault,iScaling,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2503,7 +2479,7 @@ CONTAINS
 
     IF ((iSartaTables .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
       write(kStdErr,*) 'OH OH KEEP DELTA SCALE for AddCloud_pclsam_TangChou'
-      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iExtScaling = ',&
+      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iScaling = ',&
                    iDefault,iSartaTables,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
     END IF
 !>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2525,6 +2501,7 @@ CONTAINS
         L  = N-ICLDTOP+1
         I  = ISCATTAB(L)
         iI = iFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N+1)
+        CTYPE = iaWorIorA(iI)
 
         IF (IWP(L) >= 1e-5) THEN
 
@@ -2540,6 +2517,7 @@ CONTAINS
               TABEXTINCT(1,I), TABSSALB(1,I), TABASYM(1,I))
   
             IF (iSartaTables .LT. 0) THEN
+              !!! new
               rE = EXTINCT
               rW = SSALB(L)
               rG = ASYM_RTSPEC(L)
@@ -2562,23 +2540,36 @@ CONTAINS
   !            write(kStdErr,'(A,F12.5,4(ES12.5))') 'f,tg,tc,w,g before Chou Scale = ',waveno,TAUGAS,TAUC_L,SSALB(L),ASYM_RTSPEC(L)
   !          END IF
   
+! backscatter coeffs, see Maestr/Martinazzo Journal of Quantitative Spectroscopy & Radiative Transfer 271 (2021) 107739
+! Assessment of the accuracy of scaling methods for radiance simulations at far and mid infrared wavelengths
+! Michele Martinazzoa, Davide Magurnoa, William Cossicha, Carmine Seriob, Guido Masiellob, Tiziano Maestri
+
             ! ---------------> now do Chou scaling of Cloud OD <--------------------
-            IF (iExtScaling .EQ. -1) THEN
-              !! the "correct" version is 
-              !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
-              !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
-              !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
-              !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
+            IF ((iScaling .EQ. +1) .OR. (iScaling .EQ. +4)) THEN
+              !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
+              b = (1.0 + ASYM_RTSPEC(L))/2.0               
   
-              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
-              b = (1.0 - ASYM_RTSPEC(L))/2.0               
-   
-              !! CHOU SCALING TERM
-              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
-              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
-              TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
+              !! CHOU SCALING TERM with similarity scaling adjustment
+              !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
+              TAUC_L = TAUC_L * (1 - SSALB(L)*b) 
   
-            ELSEIF ((iExtScaling .EQ. +1) .OR. (iExtScaling .EQ. +3)) THEN
+
+!            ELSEIF (iScaling .EQ. -10) THEN
+!              !! the "correct" version is 
+!              !!  b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+!              !! or b ~~ (1-0.5) - 0.3738*ASYM_RTSPEC(L)
+!              !!      ~~ 1/2 - (0.3738+0.1262)x +0.1262x
+!              !!      ~~ (1 - x)/2 + 0.1262x so pretty close to what I used till May 2022
+!  
+!              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), till May 2022 incorect?
+!              b = (1.0 - ASYM_RTSPEC(L))/2.0               
+!   
+!              !! CHOU SCALING TERM
+!              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+!              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+!              TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
+  
+            ELSEIF ((iScaling .EQ. +2) .OR. (iScaling .EQ. +5)) THEN
               !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022          
               b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
   
@@ -2587,13 +2578,24 @@ CONTAINS
               !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
               TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
   
-            ELSEIF (iExtScaling .EQ. +2) THEN
-              !! Tang 2018, Eqn 15    dt' = dt (1-f) = dt(1-w(1-b))
-              b = (1.0 + ASYM_RTSPEC(L))/2.0               
+            ELSEIF ((iScaling .EQ. +3) .AND. ((CTYPE .GE. 100) .AND. (CTYPE .LE. 199))) THEN
+              !! !!!! uniboWAT scaling, Table 3 of Maertri/Martinazzo paper, JSQRT 2021
+              b = 1.0 - (0.5 + 0.2884*ASYM_RTSPEC(L) + 0.5545*(ASYM_RTSPEC(L)**2) - 0.3429*(ASYM_RTSPEC(L)**3))   
+              TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
   
-              !! CHOU SCALING TERM with similarity scaling adjustment
-              !! Tang 2018, Eqn 14    dt' = dt(1-w/2(1+g))
-              TAUC_L = TAUC_L * (1 - SSALB(L)*b) 
+            ELSEIF ((iScaling .EQ. +3) .AND. ((CTYPE .GE. 200) .AND. (CTYPE .LE. 299))) THEN
+              !! !!!! uniboICE scaling, Table 3 of Maertri/Martinazzo paper, JSQRT 2021
+              b = 1.0 - (0.5 + 0.4452*ASYM_RTSPEC(L) - 0.3189*(ASYM_RTSPEC(L)**2) + 0.3737*(ASYM_RTSPEC(L)**3))   
+              TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
+
+            ELSEIF ((iScaling .EQ. +3) .AND. (CTYPE .GE. 300)) THEN
+              !! Chou 1999, Eqn 11 with i=1 (ignore other terms), after June 2022, use for AEROSOL       
+              b = 1.0 - (0.5 + 0.3738*ASYM_RTSPEC(L)+0.0076*(ASYM_RTSPEC(L)**2) + 0.1186*(ASYM_RTSPEC(L)**3))   
+  
+              !! CHOU SCALING TERM, and CHOU with SCALING ADJUSTMENT
+              !! Chou 1999, Eqn 12,13 dt' = dt (1-f) = dt(1-w(1-b))
+              !! Tang 2018, Eqn 14    dt' = dt (1-f) = dt(1-w(1-b))
+              TAUC_L = TAUC_L * (1 - SSALB(L)*(1.0-b)) 
   
             END IF
   
@@ -2628,6 +2630,7 @@ CONTAINS
               raaAsymTemp(iFr,iI) = 0.0
             END IF
           END DO          !loop over freqs
+
         ELSE
           raaScatTemp(:,iI) = 0.0              !! unchanged
           raaExtTemp(:,iI)  = raaExtTemp(:,iI) !! unchanged
@@ -3448,7 +3451,7 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this is just to set everything about clouds relative to TOA layer
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
 ! this tells if there is phase info associated with the cloud; else use HG
@@ -3870,7 +3873,8 @@ CONTAINS
     iaaRadLayer,iAtm,iNumlayer,iNclouds, &
     rFracTop,rFracBot, &
     ICLDTOPKCARTA, ICLDBOTKCARTA, &
-    NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB, &
+    NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, &
+    iaaSCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
     NSCATTAB, MUINC, &
     NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
     TABEXTINCT, TABSSALB, TABASYM, &
@@ -3905,6 +3909,7 @@ CONTAINS
     REAL ::     TABASYM(MAXTAB,NSCATTAB)
     REAL ::     TABPHI1UP(MAXTAB,NSCATTAB), TABPHI1DN(MAXTAB,NSCATTAB)
     REAL ::     TABPHI2UP(MAXTAB,NSCATTAB), TABPHI2DN(MAXTAB,NSCATTAB)
+    INTEGER ::  CTYPE1, CTYPE2, iaWorIorA(kProfLayer)
 
 ! local variables
     INTEGER :: iL,iFr,iI,N,L,I,ikcCldtop,ikcCldbot
@@ -3918,6 +3923,7 @@ CONTAINS
     REAL :: raaGAll(kMaxClouds,kMaxPts,kProfLayer), raG(kMaxPts)
     INTEGER :: iDMEVary
     REAL :: raaGasAbs(kMaxPts,kProfLayer),raX(kMaxPts),raY(kMaxPts)
+    INTEGER :: iDefault, iScaling, CTYPE
 
     iDMEVary = +1    !! if dme varies   across 100 layers, do things slowly
     iDMEVary = -1    !! if dme constant across 100 layers, do things fast
@@ -3925,6 +3931,28 @@ CONTAINS
     DO N = 1,kProfLayer
       raaGasAbs(:,N) = raaExtTemp(:,N)
     END DO
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>
+    iDefault = +2  !! this is the correct chou scaling, Eqn 11 and Eqn 13 of Chou 1999 paper
+
+    iScaling = -10 !! this is what I err have been using till May 1999, which is same as +1 (see Bk 47)
+    iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
+    iScaling = +2  !! this is Chou       scaling == 1-w(1-b)
+    iScaling = +3  !! this is Maestri/Martinazzo scaling with NO TANG SCALING
+    iScaling = +4  !! this is similarity scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+    iScaling = +5  !! this is Chou       scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+
+    iScaling = -10 !! this is what I err have been using till May 1999, a minus sign mistake
+    iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
+
+    iScaling = kScatter
+
+    IF ((iScaling .NE. iDefault) .AND. (kOuterLoop .EQ. 1)) THEN
+      write(kStdErr,'(A,I3,I3,A,I3,I3)') 'AddCloud_pclsam_TangChou iDefault,iScaling = ',&
+                   iDefault,iScaling,' kWhichScatterCode,kScatter = ',kWhichScatterCode,kScatter
+    END IF
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>
 
 ! --------------------------------->     <----------------------------------
 ! oddly there is an offset of 1 compared to SUBROUTINE AddCloud_pclsam :
@@ -3937,6 +3965,8 @@ CONTAINS
     iKcCldTop = IFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
     N = iCldBot-1
     iKcCldBot = IFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
+
+    CTYPE = CTYPE1      !!!!! this means, for kScatter=3, Maestri/Martinazzo is ALWAYS assuming ice??????
 
     DO iG = 1,iNclouds
       !! read for "one" cloud layer
@@ -4019,7 +4049,7 @@ CONTAINS
       raaGall(1,:,iI) = raaAsymTemp(:,iL)
     END DO
 ! ---->> flip things for the code to work well : flip the layers!!!! <<----
-            
+
 ! --------------------------->
 ! now add GAS abs coeffs + CLOUD abs coeffs
 ! temporarily save things in raaWAll,raaGAll,raaEall for later flip
@@ -4037,9 +4067,16 @@ CONTAINS
         TAUTOT_N = TAUCG_L
         ! the SSALB coeff
         raaScatTemp(iFr,iI) = raaWall(1,iFr,iI)*TAUC_L/TAUCG_L
+
         ! now add on the backscattered part
-        b = (1.0 - raaGall(1,iFr,iI))/2.0
-        TAUTOT_N = TAUTOT_N * (1 - raaScatTemp(iFr,iI)*(1.0-b))
+        !b = (1.0 - raaGall(1,iFr,iI))/2.0
+        !TAUTOT_N = TAUTOT_N * (1 - raaScatTemp(iFr,iI)*(1.0-b))
+
+        ASYM_RTSPEC(L) = raaGall(1,iFr,iI)
+        SSALB(L)       = raaWall(1,iFr,iI)        
+        ! now add on the backscattered part        
+        include 'backscatter.f90'
+
         raaExtTemp(iFr,iI)  = TAUTOT_N
       END DO          !loop over freqs
     END DO        !loop over cloud layers

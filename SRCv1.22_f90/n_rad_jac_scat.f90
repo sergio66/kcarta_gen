@@ -1146,7 +1146,7 @@ CONTAINS
     raaaCloudParams,iaaScatTable,caaaScatTable, &
     iaCloudNumAtm,iaaCloudWhichAtm,iaCloudScatType,raCloudFrac, &
     raPressLevels,iProfileLayers,iNatm,raaPrBdry, &
-    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctype1,ctype2)
+    cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctype1,ctype2,iaWorIorA)
 
     IMPLICIT NONE
 
@@ -1168,8 +1168,8 @@ CONTAINS
 ! iaaCloudWhichLayers tells which layers each cloud occupies
     INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
     INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
-! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+! raaaCloudParams stores IWP, cloud mean particle size,fraction within AIRS layer
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
 ! caaCloudName is the furry little things name
@@ -1191,7 +1191,7 @@ CONTAINS
     REAL :: raExp(kMaxClouds)
     INTEGER :: iNatm
 ! cloud info
-    INTEGER :: ctype1, ctype2
+    INTEGER :: ctype1, ctype2,iaWorIorA(kProfLayer)
     REAL :: cfrac12,cfrac1,cfrac2,cngwat1,cngwat2
 
 ! local variables
@@ -1365,7 +1365,7 @@ CONTAINS
           
     CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB, &
       caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable, &
-      iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp, &
+      iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp,ctype1,ctype2,iaWorIorA, &
       raPressLevels,iProfileLayers, &
       raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
      
@@ -1709,7 +1709,7 @@ CONTAINS
 ! this subroutine will expand the number of cloud layers from 1 to whatever
     SUBROUTINE ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB, &
     caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable, &
-    iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp, &
+    iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp,ctype1,ctype2,iaWorIorA, &
     raPressLevels,iProfileLayers, &
     raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
      
@@ -1723,8 +1723,9 @@ CONTAINS
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers),raCprtop(kMaxClouds)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers),raCprbot(kMaxClouds)
     CHARACTER(120) :: caaCloudName(kMaxClouds)
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2),raExp(kMaxClouds)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3),raExp(kMaxClouds)
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: ctype1,ctype2,iaWorIorA(kProfLayer)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
     INTEGER :: iaaCloudWhichAtm(kMaxClouds,kMaxAtm),iNclouds
     REAL :: raFracTop(kMaxAtm),raFracBot(kMaxAtm)
@@ -1734,7 +1735,7 @@ CONTAINS
     REAL :: raaPCloudTopT(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBotT(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaCloudNameT(kMaxClouds)
-    REAL :: raaaCloudParamsT(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParamsT(kMaxClouds,kCloudLayers,3)
     INTEGER :: iaaScatTableT(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTableT(kMaxClouds,kCloudLayers)
     INTEGER :: iaaCloudWhichAtmT(kMaxClouds,kMaxAtm),iNatm
@@ -1744,15 +1745,18 @@ CONTAINS
     INTEGER :: iIn,iJ1,iScat,iJ2,iIndex,iSkipper
     INTEGER :: iTop,iBot,iNum
     REAL :: rPT,rPB,rSwap,rP1,rP2,rIWP,rIWP0,rPBot,rPTop,rIWPSum,rIWP_mod
+    REAL :: rPT0,rPB0
     CHARACTER(120) :: caName
     REAL :: rCld,rXCld,rCldFull,rCldPart,rFrac1,rFrac2,rPtopX,rPbotX
-    REAL :: raSurfPres(kMaxAtm)
+    REAL :: raSurfPres(kMaxAtm),sumfrac
+
+    iaWorIorA = 0
 
     write(kStdWarn,*) ' '
     write(kStdWarn,*) ' <<<<<<<<<<<<<<<<<        EXPAND SCATTER               >>>>>>>>>>>>>>> '
     DO iJ = 1,iNatm
       raSurfPres(iJ) = max(raPressStart(iJ),raPressStop(iJ))
-      write(kStdWarn,*) '   surf pres(',iJ,') in ExpandScatter = ',raSurfPres(iJ)
+      write(kStdWarn,'(A,I3,A,F12.4)') '   surf pres(',iJ,') in ExpandScatter = ',raSurfPres(iJ)
     END DO
           
 ! first figure out the temp variables to be set
@@ -1778,7 +1782,8 @@ CONTAINS
 
 ! now start checking the info ...as you go along, fill out the *T variables
     write (kStdWarn,*) ' in ExpandScatter ... check Initial Cloud Info .....'
-    DO iIn = 1,iNclouds
+    DO iIn = 1,iNclouds 
+      sumfrac = 0.0
       caName = caaCloudName(iIn)
       iJ = iaCloudNumLayers(iIn)
 
@@ -1786,7 +1791,7 @@ CONTAINS
       iaCloudNumLayersT(iIn) = iJ
       iaCloudNumAtmT(iIn)    = iaCloudNumAtm(iIn)
 
-      write(kStdWarn,*) 'cloud number ',iIn,' has ',iJ,' layers : '
+      write(kStdWarn,'(A,I3,A,I3)') 'cloud number ',iIn,' has ',iJ,' layers : '
       iSkipper = 0
 
       ! set individual cloud layer parameters but STRETCH the cloud out as necessary
@@ -1803,7 +1808,7 @@ CONTAINS
           rPB   = rSwap
           write (kStdWarn,*) 'Swapped cloud top & bottom pressures'
         END IF
-
+         
         !set these two variables, assuming that we need to "expand" cloud
         rPBot = rPB
         rPTop = rPT
@@ -1816,6 +1821,12 @@ CONTAINS
         write (KStdWarn,*) 'cloud #, layer #',iIn,iJ1
         write (kStdWarn,*) 'top pressure, pressure layer = ',rPT,iTop
         write (kStdWarn,*) 'bot pressure, pressure layer = ',rPB,iBot
+        IF (iIn .EQ. 1) THEN 
+          iaWorIorA(iBot:iTop) = ctype1
+        ELSEIF (iIn .EQ. 2) THEN 
+          iaWorIorA(iBot:iTop) = ctype2
+        ENDIF
+
         IF ((iTop - iBot) < 0) THEN
           write (kStdErr,*) 'the top of your cloud is below the bottom'
           CALL DoStop
@@ -1860,6 +1871,7 @@ CONTAINS
           END IF
           raaaCloudParamsT(iIn,iJ1,1) = rP1/rIWP_Mod        !IWP
           raaaCloudParamsT(iIn,iJ1,2) = rP2                 !mean size
+          raaaCloudParamsT(iIn,iJ1,3) = 1.0                 !IWP fraction in layer
           iaaScatTableT(iIn,iJ1)  = iScat
           caaaScatTableT(iIn,iJ1) = caName
 
@@ -1954,6 +1966,10 @@ CONTAINS
             END IF
             raaaCloudParamsT(iIn,iIndex,1) = rIWP
             raaaCloudParamsT(iIn,iIndex,2) = raaaCloudParams(iIn,iJ1,2)
+            raaaCloudParamsT(iIn,iIndex,3) = (raPressLevels(iK)-raPressLevels(iK+1))/(rPBot-rPTop) !!! like SARTA
+            sumfrac = sumfrac + (raPressLevels(iK)-raPressLevels(iK+1))/(rPBot-rPTop)
+c            print *,'timmy',iIn,iIndex,(raPressLevels(iK)-raPressLevels(iK+1))/(rPBot-rPTop)
+
             caaaScatTableT(iIn,iIndex)     = caaaScatTable(iIn,iJ1)
             iaaScatTableT(iIn,iIndex)      = iaaScatTable(iIn,iJ1)
 
@@ -1970,7 +1986,7 @@ CONTAINS
 
             iK = iK - 1
           END DO
-
+           
           IF (abs(raExp(iIn)) > 0.001) THEN
             DO iJ2 = 1,(iTop-iBot)+1
               iIndex = iJ1+(iJ2-1)+iSkipper
@@ -1982,6 +1998,7 @@ CONTAINS
           iSkipper = iTop - iBot
         END IF
       END DO
+c      print *,'timmy2 ',iIn,sumfrac
     END DO
 
     222 FORMAT(' name = ',A80)

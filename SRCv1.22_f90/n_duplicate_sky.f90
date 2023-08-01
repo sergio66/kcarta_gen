@@ -291,7 +291,7 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)
 ! iScatBinaryFile tells us if scattering file is binary (+1) or text (-1)
@@ -522,7 +522,7 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)
 ! iScatBinaryFile tells us if scattering file is binary (+1) or text (-1)

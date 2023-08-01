@@ -1358,7 +1358,7 @@
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaCloudName(kMaxClouds)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! raPCloudTop,raPCloudBot define cloud top and bottom pressures
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)

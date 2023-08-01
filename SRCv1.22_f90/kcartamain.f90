@@ -130,7 +130,7 @@
     INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
     INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
 ! these give info about cloud type and cloud fracs, from rtp file
-    INTEGER :: ctype1,ctype2
+    INTEGER :: ctype1,ctype2,iaWorIorA(kProfLayer)
     REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,ctop1,ctop2,raCemis(kMaxClouds)
 ! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
 ! iaCloudWhichAtm stores which cloud is to be used with which atmospheres
@@ -141,7 +141,7 @@
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 ! this gives us the cloud profile info
@@ -469,7 +469,7 @@
     iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,iaCldTypes,caaaScatTable,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm, &
-    cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis, &
+    cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,iaWorIorA, &
     iCldProfile,raaKlayersCldAmt, &
     iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, &
     iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
@@ -1370,7 +1370,7 @@
                   cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis, &
                   iCldProfile,iaCldTypes,raaKlayersCldAmt, &
                   iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-                  raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+                  raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
                   iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag, &
                   iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
                   iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &

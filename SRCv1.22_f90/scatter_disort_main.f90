@@ -43,17 +43,17 @@ CONTAINS
 ! iNp is # of layers to be printed (if < 0, print all), iaOp is list of
 !     layers to be printed
 ! caOutName gives the file name of the unformatted output
-    SUBROUTINE doscatter_disort(raFreq,                        &
-    raaAbs,raVTemp,caOutName,                                  & 
-    iOutNum,iAtm,iNumLayer,iaaRadLayer,                        &
-    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,           & 
-    rSatAngle,rFracTop,rFracBot,                               &
-    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,              &
-    raSurface,raSun,raThermal,raSunRefl,                       &
-    raLayAngles,raSunAngles,                                   &
-    raThickness,raPressLevels,iProfileLayers,pProf,            &
-    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,        &
+    SUBROUTINE doscatter_disort(raFreq,                           &
+    raaAbs,raVTemp,caOutName,                                     & 
+    iOutNum,iAtm,iNumLayer,iaaRadLayer,                           &
+    rTSpace,rSurfaceTemp,rSurfPress,raUseEmissivity,              & 
+    rSatAngle,rFracTop,rFracBot,                                  &
+    iNpmix,iFileID,iNp,iaOp,raaOp,raaMix,raInten,                 &
+    raSurface,raSun,raThermal,raSunRefl,                          &
+    raLayAngles,raSunAngles,                                      &
+    raThickness,raPressLevels,iProfileLayers,pProf,               &
+    iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,    &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,iDoFlux)
 
     IMPLICIT NONE
@@ -112,10 +112,10 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaWorIorA(kProfLayer)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: rAngle
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
@@ -193,7 +193,7 @@ CONTAINS
       raLayAngles,iDoFlux, &
       raThickness,raPressLevels,iProfileLayers,pProf, &
       iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-      raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
       iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity)
      
     RETURN
@@ -214,7 +214,7 @@ CONTAINS
     raLayAngles,iDoFlux, &
     raThickness,raPressLevels,iProfileLayers,pProf, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag,raNumberDensity)
 
     IMPLICIT NONE
@@ -268,10 +268,10 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaWorIorA(kProfLayer)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 
@@ -450,7 +450,7 @@ CONTAINS
     CALL SetMieTables_RTSPEC(raFreq, &
 !!!!!!!!!!!!!!!!!these are the input variables
       iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-      raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+      raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
       iaPhase,raPhasePoints,raComputedPhase, &
       iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
       -1,              & !!!! iSergio

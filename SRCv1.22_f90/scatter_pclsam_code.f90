@@ -1522,7 +1522,7 @@ CONTAINS
     REAL :: raCC(kProfLayer),rC
     REAL :: rWeight
 
-! to do PCLSAM correction by Tang 2018
+! to do PCLSAM correction by Tang 2018 if kScatter = 4,5 (Similarity or Chou backscatter polynomial)
     REAL :: raaPCLSAMCorrection(kMaxPts,kProfLayer+1),raAdjust(kMaxPts)
 
     raaPCLSAMCorrection = 0.0
@@ -1780,7 +1780,8 @@ CONTAINS
     iL = iaRadLayer(iLay)
     raAdjust(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
 !    print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raFactor(1)
-    IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
+!    do PCLSAM correction by Tang 2018 if kScatter = 4,5 (Similarity or Chou backscatter polynomial)
+    IF ((kScatter .GE. 4) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
         (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
       CALL ChouAdjust(iaRadLayer,iNumLayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
                       raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust,caOutName) 
@@ -1821,7 +1822,8 @@ CONTAINS
 
       raAdjust(1) = maxval(raaSSAlb(:,iL)) !! chack max single scatter albedo to see if this is a scattering layer
 !      print *,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,kScatter,raAdjust(1)
-      IF ((kScatter .GE. 2) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
+!      do PCLSAM correction by Tang 2018 if kScatter = 4,5 (Similarity or Chou backscatter polynomial)
+      IF ((kScatter .GE. 4) .AND. (raAdjust(1) .GT. 1.0e-4) .AND. &
           (iL .GE. ICLDBOTKCARTA) .AND. (iL .LE. ICLDTOPKCARTA)) THEN 
         CALL ChouAdjust(iaRadLayer,iNumLayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA, &
                         raFreq,raaExt,raaSSAlb,raaAsym,raTPressLevels,raaPCLSAMCorrection,muSat,raInten,raAdjust,caOutName) 
@@ -2628,6 +2630,7 @@ CONTAINS
     end SUBROUTINE BackGndThermalSaveLayers
 
 !************************************************************************
+!! to do PCLSAM correction by Tang 2018 if kScatter = 4,5 (Similarity or Chou backscatter polynomial)
 !! this is Chou scaling factor adjustment
 !! to do PCLSAM correction by G. Tang, P. Yang, G. Kottowar, X. Huang, B. Baum, JAS 2018
       SUBROUTINE ChouAdjust(iaRadLayer,iNumLayer,iLay,iL,ICLDBOTKCARTA,ICLDTOPKCARTA,& 

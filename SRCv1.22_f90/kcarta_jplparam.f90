@@ -87,7 +87,7 @@
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
       CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
 ! raaaCloudParams stores IWP, cloud mean particle size 
-      REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
+      REAL raaaCloudParams(kMaxClouds,kCloudLayers,3) 
 ! this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
 ! this gives us the cloud profile info

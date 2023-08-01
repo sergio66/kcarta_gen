@@ -79,8 +79,8 @@ CONTAINS
     raTPressLevels,iKnowTP, &
     raLayerHeight,raaPrBdry, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
+    iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag, &
     iCldProfile,iaCldTypes,raaKlayersCldAmt, &
     iLayPrintFlux,raaFluxOut)
          
@@ -143,9 +143,9 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
-    INTEGER :: iaPhase(kMaxClouds)
+    INTEGER :: iaPhase(kMaxClouds),ctype1,ctype2,iaWorIorA(kProfLayer)
 ! this gives us the cloud profile info
     INTEGER :: iCldProfile
     REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
@@ -247,7 +247,7 @@ CONTAINS
         raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
         raLayerHeight,raaPrBdry, &
         iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
         iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
         iCldProfile,iaCldTypes,raaKlayersCldAmt, &
         iLayPrintFlux,raaFluxOut)
@@ -263,7 +263,7 @@ CONTAINS
         raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
         raLayerHeight,raaPrBdry, &
         iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
         iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
         iCldProfile,iaCldTypes,raaKlayersCldAmt, &
         iLayPrintFlux,raaFluxOut)
@@ -279,7 +279,7 @@ CONTAINS
         raThickness,raPressLevels,iProfileLayers,pProf, &
         raTPressLevels,raLayerHeight,raaPrBdry, &
         iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
         iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
         iCldProfile,iaCldTypes,raaKlayersCldAmt, &
         iLayPrintFlux,raaFluxOut)
@@ -339,7 +339,7 @@ CONTAINS
     raLayerHeight,raaPrBdry, &
 ! then the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
     iCldProfile,iaCldTypes,raaKlayersCldAmt, &
     iLayPrintFlux,raaFluxOut)
@@ -397,12 +397,12 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaWorIorA(kProfLayer)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
-    INTEGER :: iaPhase(kMaxClouds)
+    INTEGER :: iaPhase(kMaxClouds),ctype1,ctype2
 ! this gives us the cloud profile info
     INTEGER :: iCldProfile,iaCldTypes(kMaxClouds)
     REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
@@ -590,7 +590,7 @@ CONTAINS
       CALL SetMieTables_RTSPEC(raFreq, &
         !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
@@ -653,7 +653,8 @@ CONTAINS
           raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
           iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
           ICLDTOPKCARTA, ICLDBOTKCARTA, &
-          NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+          NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, &
+          ISCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
           NSCATTAB, MUINC, &
           NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
           TABEXTINCT, TABSSALB, TABASYM, &
@@ -664,7 +665,8 @@ CONTAINS
           raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
           iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
           ICLDTOPKCARTA, ICLDBOTKCARTA, &
-          NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB, &
+          NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, & 
+          iaaSCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
           NSCATTAB, MUINC, &
           NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
           TABEXTINCT, TABSSALB, TABASYM, &
@@ -1550,7 +1552,7 @@ CONTAINS
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
     raLayerHeight,raaPrBdry, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
     iCldProfile,iaCldTypes,raaKlayersCldAmt, &
     iLayPrintFlux,raaFluxOut)
@@ -1611,9 +1613,9 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
-    INTEGER :: iaPhase(kMaxClouds)
+    INTEGER :: iaPhase(kMaxClouds),ctype1,ctype2,iaWorIorA(kProfLayer)
 ! this gives us the cloud profile info
     INTEGER :: iCldProfile
     REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
@@ -1815,7 +1817,7 @@ CONTAINS
       CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
@@ -1872,7 +1874,8 @@ CONTAINS
       CALL AddCloud_pclsam_TangChou(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
-        NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+        NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, &
+        ISCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
         NSCATTAB, MUINC, &
         NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
         TABEXTINCT, TABSSALB, TABASYM, &
@@ -1883,7 +1886,8 @@ CONTAINS
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
-        NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB, &
+        NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, & 
+        iaaSCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
         NSCATTAB, MUINC, &
         NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
         TABEXTINCT, TABSSALB, TABASYM, &
@@ -2084,7 +2088,7 @@ CONTAINS
     raThickness,raPressLevels,iProfileLayers,pProf, &
     raTPressLevels,raLayerHeight,raaPrBdry, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
     iCldProfile,iaCldTypes,raaKlayersCldAmt, &
     iLayPrintFlux,raaFluxOut)
@@ -2145,9 +2149,9 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
-    INTEGER :: iaPhase(kMaxClouds)
+    INTEGER :: iaPhase(kMaxClouds),ctype1,ctype2,iaWorIorA(kProfLayer)
 ! this gives us the cloud profile info
     INTEGER :: iCldProfile,iLayPrintFlux
     REAL :: raaKlayersCldAmt(kProfLayer,kMaxClouds)
@@ -2379,7 +2383,7 @@ CONTAINS
       CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
@@ -2436,7 +2440,8 @@ CONTAINS
       CALL AddCloud_pclsam_TangChou(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
-        NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+        NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, &
+        ISCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
         NSCATTAB, MUINC, &
         NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
         TABEXTINCT, TABSSALB, TABASYM, &
@@ -2447,7 +2452,8 @@ CONTAINS
         raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
         iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
         ICLDTOPKCARTA, ICLDBOTKCARTA, &
-        NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB, &
+        NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, & 
+        iaaSCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
         NSCATTAB, MUINC, &
         NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
         TABEXTINCT, TABSSALB, TABASYM, &

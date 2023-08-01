@@ -42,7 +42,7 @@ CONTAINS
     cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis, &
     iCldProfile,iaCldTypes,raaKlayersCldAmt, &
     iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag, &
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
@@ -109,10 +109,10 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaWorIorA(kProfLayer)
     CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! iScatBinaryFile tells us if scattering file is binary (+1) or text (-1)
     INTEGER :: iScatBinaryFile
     REAL :: rAngle
@@ -252,7 +252,7 @@ CONTAINS
       !x     $         raThickness,raPressLevels,iProfileLayers,pProf,
       !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
       !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
-      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
+      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag,
       !x     $         iNLTEStart,raaPlanckCoeff,
       !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
       !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE,
@@ -276,7 +276,7 @@ CONTAINS
         !x     $           raLayerHeight,raaPrBdry,
         !x     $           iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
         !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
-        !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iTag,
+        !x     $           iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag,
         !x     $           iCldProfile,iaCldTypes,raaKlayersCldAmt)
         !x          CALL PrintPound
       END IF
@@ -297,7 +297,7 @@ CONTAINS
         !x     $           raThickness,raPressLevels,iProfileLayers,pProf,
         !x     $           iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
         !x     $           raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,
-        !x     $           iaCloudNumAtm,iaaCloudWhichAtm,iTag,iNpmix,
+        !x     $           iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag,iNpmix,
         !x     $           iNLTEStart,raaPlanckCoeff,
         !x     $           iCldProfile,iaCldTypes,raaKlayersCldAmt)
         !x          CALL PrintPound
@@ -369,7 +369,8 @@ CONTAINS
             raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
             raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-            iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
+            iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iaWorIorA, &
+            iTag, &
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -505,8 +506,8 @@ CONTAINS
                 raTPressLevels,iKnowTP, &
                 raLayerHeight,raaPrBdry, &
                 iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-                raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-                iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
+                raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
+                iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag, &
                 iCldProfile,iaCldTypes,raaKlayersCldAmt, &
                 iLayPrintFlux,raaFluxX)
           write(kStdWarn,1011) iAtm,rFracX
@@ -549,7 +550,7 @@ CONTAINS
             kaFrStep(iTag), &
             raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-            raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+            raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
             iaCloudNumAtm,iaaCloudWhichAtm,iNpmix, &
             iNLTEStart,raaPlanckCoeff, &
             iCldProfile,iaCldTypes,raaKlayersCldAmt, &
@@ -641,7 +642,8 @@ CONTAINS
             raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
             raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-            iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
+            iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iaWorIorA, &
+            iTag, &
             iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
             iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
             raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -673,7 +675,7 @@ CONTAINS
       !x     $         raThickness,raPressLevels,iProfileLayers,pProf,
       !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
       !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
-      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
+      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag,
       !x     $         iNLTEStart,raaPlanckCoeff,
       !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
       !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
@@ -708,7 +710,7 @@ CONTAINS
              raLayAngles,raSunAngles,                                       &
              raThickness,raPressLevels,iProfileLayers,pProf,                &
              iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-             raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
+             raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA,  &
              iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,iDoFlux)
       CALL PrintPound
           
@@ -732,7 +734,7 @@ CONTAINS
               raLayAngles,raSunAngles,                   &
               raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf, &
               iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-              raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,            &
+              raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA,  &
               iaCloudNumAtm,iaaCloudWhichAtm,iTag,raNumberDensity,           &
               raLayerHeight,raaPrBdry, &
               iCldProfile,iaCldTypes,raaKlayersCldAmt, &
@@ -786,7 +788,7 @@ CONTAINS
         raLayAngles,raSunAngles, &
         raThickness,raPressLevels,iProfileLayers,pProf, &
         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,iaWorIorA,&
         iaCloudNumAtm,iaaCloudWhichAtm,iTag)
         CALL PrintPound
 
@@ -802,7 +804,7 @@ CONTAINS
             raLayAngles,raSunAngles, &
             raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-            raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
+            raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,iaWorIorA, &
             iaCloudNumAtm,iaaCloudWhichAtm,iTag)
         CALL PrintPound
       END IF
@@ -847,7 +849,7 @@ CONTAINS
       !x     $         raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,
       !x     $         iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers,
       !x     $         raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,
-      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,iTag,
+      !x     $         iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag,
       !x     $         iNLTEStart,raaPlanckCoeff,
       !x     $         iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff,
       !x     $         raUpperPress,raUpperTemp,iDoUpperAtmNLTE)
@@ -916,7 +918,7 @@ CONTAINS
     rDelta, &
     raThickness,raPressLevels,raTPresslevels,iProfileLayers,pProf, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNpmix, &
     iNLTEStart,raaPlanckCoeff, &
     iCldProfile,iaCldTypes,raaKlayersCldAmt, &
@@ -990,10 +992,10 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaWorIorA(kProfLayer)
     CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
     REAL :: rAngle
@@ -1122,7 +1124,7 @@ CONTAINS
       CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things ok
@@ -1316,8 +1318,8 @@ CONTAINS
     raLayAngles,raSunAngles,rDelta, &
     raThickness,raPressLevels,raTPresslevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iTag,iActualTag,iNpmix, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase,iaWorIorA, &
+    iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iTag,iActualTag,iNpmix, &
     iNLTEStart,raaPlanckCoeff)
 
     IMPLICIT NONE
@@ -1382,10 +1384,10 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),ctype1,ctype2,iaWorIorA(kProfLayer)
     CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
     REAL :: rAngle
@@ -1501,7 +1503,7 @@ CONTAINS
       CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 as this is MY code

@@ -80,6 +80,7 @@ CONTAINS
     IF ((rSatHeight > 0.0) .AND. (abs(rSunAngle) > 1.0e-4)) THEN
       !have to find layer dependent angles
       IF (rPrBdry1 > rPrBdry2) THEN !downward looking instr
+        write(kStdWarn,*)'sun: lay#/rad# lay/surfhgt, localzen/traced angle '
         DO iI=1,kProfLayer
           IF (rSatHeight > raLayHgt(iI)) THEN
             raSunAngles(iI) = saconv_sun(abs(rSunAngle),rSurfHeight/1000,raLayHgt(iI)/1000)
@@ -91,8 +92,7 @@ CONTAINS
                 iX = -1
               END IF
               IF (iX == 1) write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
-              write(kStdWarn,*)'sun: lay#/rad# lay/surfhgt, localzen/traced angle ', &
-                        iI,iX,raLayHgt(iI)/1000,rSurfHeight/1000,rSunAngle,raSunAngles(iI)
+              write(kStdWarn,'(2(I3,1X),4(F12.5,1X))') iI,iX,raLayHgt(iI)/1000,rSurfHeight/1000,rSunAngle,raSunAngles(iI)
             END IF
           END IF
         END DO

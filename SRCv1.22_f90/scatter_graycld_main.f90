@@ -121,7 +121,7 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: rAngle
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds),iaCldTypes(kMaxClouds)
@@ -323,7 +323,7 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 ! this is to do with NLTE

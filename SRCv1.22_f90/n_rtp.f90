@@ -555,7 +555,7 @@ CONTAINS
     cfrac,cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2, &
     ctop1,ctop2,cbot1,cbot2,iNclouds_RTP,iaKsolar, &
     caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype, &
+    raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaWorIorA, &
     iBinORasc,caaCloudFile,iaNML_Ctype, &
     iScatBinaryFile,iNclouds,iaCloudNumLayers,caaCloudName, &
     raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
@@ -575,7 +575,7 @@ CONTAINS
     REAL :: ctop1,ctop2,cbot1,cbot2
     REAL :: raCprtop(kMaxClouds),  raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds),  raCpsize(kMaxClouds)
-    INTEGER :: iaCtype(kMaxClouds),iBinORasc,iNclouds_RTP
+    INTEGER :: iaCtype(kMaxClouds),iBinORasc,iNclouds_RTP,iaWorIorA(kProfLayer)
     CHARACTER(160) :: caaCloudFile(kMaxClouds)
     INTEGER :: iaNML_Ctype(kMaxClouds)
 ! output params,
@@ -596,7 +596,7 @@ CONTAINS
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaCloudName(kMaxClouds)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! raPCloudTop,raPCloudBot define cloud top and bottom pressures
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)
@@ -893,15 +893,17 @@ CONTAINS
       write (kStdWarn,*)   '  particle size = ',raCpsize(iI),' um'
       IF (iI == 1) THEN
         write (kStdWarn,*)   '  cloud frac    = ',cfrac1
+        write (kStdWarn,*)   '  cloud type    = ',ctype1
       ELSEIF (iI == 2) THEN
         write (kStdWarn,*)   '  cloud frac    = ',cfrac2
+        write (kStdWarn,*)   '  cloud type    = ',ctype2
       END IF
     END DO
 
 ! now have to stretch out the cloud if necessary
     CALL ExpandScatter(iaCloudNumLayers,raaPCloudTop,raaPCloudBot,raaJunkCloudTB, &
       caaCloudName,raaaCloudParams,iaaScatTable,caaaScatTable, &
-      iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp, &
+      iaaCloudWhichAtm,iaCloudNumAtm,iNclouds,raExp,ctype1,ctype2,iaWorIorA, &
       raPressLevels,iProfileLayers, &
       raFracTop,raFracBot,raPressStart,raPressStop,iNatm)
 
@@ -1214,7 +1216,7 @@ CONTAINS
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaCloudName(kMaxClouds)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! raPCloudTop,raPCloudBot define cloud top and bottom pressures
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)

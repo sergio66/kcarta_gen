@@ -236,8 +236,8 @@ CONTAINS
     CHARACTER(160) :: caaCloudName(kMaxClouds)
     CHARACTER(160) :: caaCloudName1(kMaxClouds)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
-    REAL :: raaaCloudParams1(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
+    REAL :: raaaCloudParams1(kMaxClouds,kCloudLayers,3)
 ! raPCloudTop,raPCloudBot define cloud top and bottom pressures
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)
@@ -1062,7 +1062,7 @@ CONTAINS
     iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,iaCloudScatType,caaaScatTable,iaPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm, &
-    cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis, &
+    cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,iaWorIorA, &
 ! scatter cloudprofile info
     iCldProfile,raaKlayersCldAmt, &
 ! new spectroscopy
@@ -1230,7 +1230,7 @@ CONTAINS
     CHARACTER(160) :: caaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(160) :: caaCloudName(kMaxClouds)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! raPCloudTop,raPCloudBot define cloud top and bottom pressures
     REAL :: raaPCloudTop(kMaxClouds,kCloudLayers)
     REAL :: raaPCloudBot(kMaxClouds,kCloudLayers)
@@ -1245,7 +1245,7 @@ CONTAINS
     REAL :: raaCloudFrac(kMaxClouds,3)
     REAL :: cpsize1, cpsize2
 
-    INTEGER :: ctype1,ctype2
+    INTEGER :: ctype1,ctype2,iaWorIorA(kProfLayer)
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)
     REAL :: raCngwat(kMaxClouds), raCpsize(kMaxClouds)
     INTEGER :: iaCtype(kMaxClouds),iBinOrAsc,iMPSetForRadRTP,iNclouds_RTP,iAFGLProf,iWhichScatterCode_RTP,iScatter_RTP
@@ -1319,7 +1319,7 @@ CONTAINS
 ! this local variable keeps track of the GAS ID's read in by *PRFILE
     INTEGER :: iNpath
     CHARACTER(1) :: cYorN
-    CHARACTER(50) :: FMT
+    CHARACTER(80) :: FMT
     INTEGER :: iResetCldFracs
 ! this is is we have 100 layer clouds
     INTEGER :: iIOUNX,iErrX,iMRO,iNumLaysX
@@ -1608,10 +1608,25 @@ CONTAINS
     IF (cfrac12 >= cfrac) cfrac12 = cfrac
 
     IF ((kRTP == 0) .OR. (kRTP == 1))  THEN
-      FMT = '(A,F12.5,1X,F12.5,1X,I6,1X,F12.5,1X,F12.5,1X)'
+      IF (kWhichScatterCode .EQ. 0) THEN
+        write(kStdWarn,*) 'ABSORPTION only scattering model : ',kWhichScatterCode
+        write(kStdErr,*)  'ABSORPTION only scattering model : ',kWhichScatterCode
+      ELSEIF (kWhichScatterCode .EQ. 2) THEN
+        write(kStdWarn,*) 'RTSPEC scattering model : ',kWhichScatterCode
+        write(kStdErr,*)  'RTSPEC scattering model : ',kWhichScatterCode
+      ELSEIF (kWhichScatterCode .EQ. 3) THEN
+        write(kStdWarn,'(A,I3,A,I3)') 'DISORT scattering model : ',kWhichScatterCode,' Nstreams = ',kScatter
+        write(kStdErr,'(A,I3,A,I3)')  'DISORT scattering model : ',kWhichScatterCode,' Nstreams = ',kScatter
+      ELSEIF (kWhichScatterCode .EQ. 5) THEN
+        write(kStdWarn,'(A,I3,A,I3)') 'PCLSAM scattering model : ',kWhichScatterCode,' (+1/+2/+3/+4/+5 = Similarity,Chou,Maestri,Similarity+Tang,Chou+Tang) ',kScatter
+        write(kStdErr,'(A,I3,A,I3)')  'PCLSAM scattering model : ',kWhichScatterCode,' (+1/+2/+3/+4/+5 = Similarity,Chou,Maestri,Similarity+Tang,Chou+Tang) ',kScatter
+      END IF
+      FMT = '(A, F12.5,1X, F12.5,1X, F12.5,1X, I6,1X, F12.5,1X, F12.5,1X)'
       write(kStdWarn,*) 'cfrac12 = ',cfrac12
-      write(kStdWarn,FMT) 'cfrac1,cngwat1,ctype1,ctop1,cbot1 = ',cfrac1,cngwat1,ctype1,ctop1,cbot1
-      write(kStdWarn,FMT) 'cfrac2,cngwat2,ctype2,ctop2,cbot2 = ',cfrac2,cngwat2,ctype2,ctop2,cbot2
+      write(kStdWarn,FMT) 'cfrac1,cpsize1(um),cngwat1(g/m2),ctype1,ctop1(mb),cbot1(mb) = ', &
+         cfrac1,cpsize1,cngwat1,ctype1,ctop1,cbot1
+      write(kStdWarn,FMT) 'cfrac2,cpsize2(um),cngwat2(g/m2),ctype2,ctop2(mb),cbot2(mb) = ', &
+         cfrac2,cpsize2,cngwat2,ctype2,ctop2,cbot2
       write(kStdWarn,*) 'iNclouds_RTP = ',iNclouds_RTP
     END IF
 
@@ -1732,7 +1747,7 @@ CONTAINS
             ctop1,ctop2,cbot1,cbot2, &
             iNclouds_RTP,iaKsolar, &
             caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-            raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype, &
+            raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaWorIorA, &
             iBinOrAsc,caaCloudFile,iaNML_Ctype, &
             iScatBinaryFile,iNclouds,iaCloudNumLayers,caaCloudName, &
             raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
@@ -1963,7 +1978,7 @@ CONTAINS
         raaaCloudParams,iaaScatTable,caaaScatTable, &
         iaCloudNumAtm,iaaCloudWhichAtm,iaCloudScatType,raaCloudFrac, &
         raPressLevels,iProfileLayers,iNatm,raaPrBdry, &
-        cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctype1,ctype2)
+        cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,ctype1,ctype2,iaWorIorA)
 
       !        print *,(raaCloudFrac(iInt,1),iInt=1,kMaxClouds)
       !        print *,(raaCloudFrac(iInt,2),iInt=1,kMaxClouds)
@@ -2838,7 +2853,7 @@ CONTAINS
     REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,cpsize1,cpsize2
     REAL :: ctop1,ctop2,cbot1,cbot2
     REAL :: raCemis(kMaxClouds)
@@ -3179,7 +3194,7 @@ CONTAINS
     REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
     REAL :: raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
     REAL :: raScatterIWP(kMaxAtm)
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: cfrac1,cfrac2,cfrac12,cngwat1,cngwat2,cngwat,ctop1,ctop2,cbot1,cbot2,cpsize1,cpsize2
     REAL :: raCemis(kMaxClouds)
     REAL :: raCprtop(kMaxClouds), raCprbot(kMaxClouds)

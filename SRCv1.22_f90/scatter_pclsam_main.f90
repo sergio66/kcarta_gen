@@ -57,7 +57,8 @@ CONTAINS
     raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iTag, &
+    iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iaWorIorA, &
+    iTag, &
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
     raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -131,8 +132,9 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: rAngle
+    INTEGER :: ctype1,ctype2,iaWorIorA(kProfLayer)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 ! this gives us the cloud profile info
@@ -240,7 +242,8 @@ CONTAINS
       raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
       iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
       raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-      iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
+      iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iaWorIorA, &
+      iDownward,iTag, &
       iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
       iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
       raUpperPress,raUpperTemp,iDoUpperAtmNLTE, &
@@ -292,7 +295,8 @@ CONTAINS
 ! then the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
     raaaCloudParams,iaaScatTable,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag, &
+    iaCloudNumAtm,iaaCloudWhichAtm,ctype1,ctype2,iaWorIorA, &
+    iDownward,iTag, &
 ! then the nlte variables
     iNLTEStart,rCO2MixRatio,raaPlanckCoeff, &
     iUpper,raaUpperPlanckCoeff,raaUpperNLTEGasAbCoeff, &
@@ -365,6 +369,7 @@ CONTAINS
 ! iaaCloudWhichLayers tells which kCARTA layers each cloud occupies
     INTEGER :: iNClouds,iaCloudNumLayers(kMaxClouds)
     INTEGER :: iaaCloudWhichLayers(kMaxClouds,kCloudLayers)
+    INTEGER :: ctype1,ctype2,iaWorIorA(kProfLayer)
 ! iaCloudNumAtm stores which cloud is to be used with how many atmosphere
 ! iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
@@ -373,7 +378,7 @@ CONTAINS
     INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 ! this is to do with NLTE
@@ -465,11 +470,11 @@ CONTAINS
     WRITE (kStdWarn,*) 'No layer temperature profile effects in clear sky'
 
     IF (iaCloudNumLayers(1) < iNumLayer) THEN
-      write(kStdWarn,*) '  >> Setting cloud params for TwoSlab PCLSAM'
+      write(kStdWarn,*) '  >> Setting cloud params for TwoSlab PCLSAM : SetMieTables_RTSPEC'
       CALL SetMieTables_RTSPEC(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+        raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
         iaPhase,raPhasePoints,raComputedPhase, &
         iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWard,iaaRadLayer, &
         -1,              & !!!!iSergio = -1 to make things OK
@@ -482,7 +487,7 @@ CONTAINS
         IWP,DME,iaCloudWithThisAtm,iaScatTable_With_Atm, &
         iCloudySky, IACLDTOP, IACLDBOT, ICLDTOPKCARTA, ICLDBOTKCARTA)
     ELSE
-      write(kStdWarn,*) '  >> Setting cloud params for 100 layer PCLSAM'
+      write(kStdWarn,*) '  >> Setting cloud params for 100 layer PCLSAM : SetMieTables_RTSPEC_100layer'
       CALL SetMieTables_RTSPEC_100layer(raFreq, &
     !!!!!!!!!!!!!!!!!these are the input variables
         iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
@@ -524,14 +529,14 @@ CONTAINS
       iCloudySky = +1
       IF (kOuterLoop .EQ. 1) THEN
         write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
-        write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
         write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
         write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
-        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
         write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
-        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
         write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
-        write(kStdErr,'(A)')  ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
+        write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
         write(kStdWarn,'(A)') ' >>>>>>> Even though little or no clouds, doing PCLSAM calc to test clear rads'
       END IF
     END IF
@@ -613,7 +618,8 @@ CONTAINS
         CALL AddCloud_pclsam_TangChou(raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             iaaRadLayer,iAtm,iNumlayer,rFracTop,rFracBot, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
-            NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, ISCATTAB, &
+            NCLDLAY, ICLDTOP, ICLDBOT, IWP, DME, &
+            ISCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
             NSCATTAB, MUINC, &
             NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, &
@@ -623,11 +629,11 @@ CONTAINS
         IF ((iDebugPrint > 0) .AND. (kOuterLoop == 1)) THEN
           iaRadLayer = iaaRadLayer(iAtm,:)
           CALL InputPrintDebugPCLSAM(raFREQ,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-            iNclouds,raUseEmissivity, &
+            iNclouds,raUseEmissivity,iaWorIorA, &
             raVTemp,raTPressLevels,rTSpace,rSurfaceTemp,rSurfPress,rFracTop,rFracBot, &
             ICLDTOPKCARTA, ICLDBOTKCARTA,iaRadLayer,iNumlayer,raPressLevels)
-        write(kStdErr,*) 'Printed out PCLSAM input'
-      ENDIF
+          write(kStdErr,*) 'Printed out PCLSAM input'
+        ENDIF
 
       ELSE
         write(kStdWarn,*) '    --- 100Slab cloud layers ---'
@@ -635,7 +641,8 @@ CONTAINS
             raFreq,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
             iaaRadLayer,iAtm,iNumlayer,iNclouds,rFracTop,rFracBot, &
             ICLDTOPKCARTA, ICLDBOTKCARTA, &
-            NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, iaaSCATTAB, &
+            NCLDLAY, ICLDTOP, ICLDBOT, raCC, raaIWP, raaDME, & 
+            iaaSCATTAB, CTYPE1, CTYPE2, iaWorIorA, &
             NSCATTAB, MUINC, &
             NMUOBS, MUTAB, NDME, DMETAB, NWAVETAB, WAVETAB, &
             TABEXTINCT, TABSSALB, TABASYM, &
@@ -966,7 +973,7 @@ CONTAINS
     end SUBROUTINE doMROcfrac
 !************************************************************************
    SUBROUTINE InputPrintDebugPCLSAM(raFREQ,raaExtTemp,raaSSAlbTemp,raaAsymTemp, &
-            iNclouds,raUseEmissivity, &
+            iNclouds,raUseEmissivity,iaWorIorA, &
             raVTemp,raTPressLevels,rTSpace,rSurfaceTemp,rSurfPress,rFracTop,rFracBot, &
             ICLDTOPKCARTA, ICLDBOTKCARTA,iaRadLayer,iNumLayer,raPressLevels)
 
@@ -980,15 +987,16 @@ CONTAINS
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows)
     REAL :: raTPressLevels(kProfLayer+1),raPressLevels(kProfLayer+1),raUseEmissivity(kMaxPts)
     REAL :: rTSpace,rSurfaceTemp,rFracTop,rFracBot,rSurfPress
-    INTEGER :: iAtm,iNumlayer,iNclouds,ICLDTOPKCARTA, ICLDBOTKCARTA,iaRadLayer(kMaxLayer)
+    INTEGER :: iAtm,iNumlayer,iNclouds,ICLDTOPKCARTA, ICLDBOTKCARTA,iaRadLayer(kMaxLayer),iaWorIorA(kProfLayer)
 
     INTEGER :: iI,iJ,iK
 
     write(kStdWarn,'(A,F12.5)') ' PCLSAM input for raFreq(1) = ',raFreq(1)
     write(kStdWarn,'(A,F12.5)') ' emissivity = ',raUseEmissivity(1)
     write(kStdWarn,'(A,I4)')    ' NLYR          Number of computational layers   = ',iNumlayer
-    write(kStdWarn,'(A)') '   II  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM '
-    write(kStdWarn,'(A)') '-----------------------------------------------------------------------------------'
+    write(kStdWarn,'(A)') '---------------------------------------------------------------------------------------------'
+    write(kStdWarn,'(A)') '   II  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM     CTYPEX'
+    write(kStdWarn,'(A)') '---------------------------------------------------------------------------------------------'
     write(kStdWarn,'(I4,I4,I4,2(F12.5))') 0,0,0,0.0,rTSpace
     iI = iNumlayer
     iJ = iaRadLayer(iI)
@@ -999,18 +1007,20 @@ CONTAINS
     DO iI = iNumlayer,1,-1
       iJ = iaRadLayer(iI)
       iK = iK + 1
-      IF ((iJ .EQ. ICLDTOPKCARTA) .OR. (iJ .EQ. ICLDBOTKCARTA) .OR. (iJ .EQ. ICLDBOTKCARTA-1)) THEN
+!      IF ((iJ .EQ. ICLDTOPKCARTA) .OR. (iJ .EQ. ICLDBOTKCARTA) .OR. (iJ .EQ. ICLDBOTKCARTA-1)) THEN
+      IF ((iJ .EQ. ICLDTOPKCARTA) .OR. (iJ .EQ. ICLDBOTKCARTA-1)) THEN
         write(kStdWarn,'(A)') '-----------------------------------------------------------------------------------'
       END IF
-      write(kStdWarn,'(I4,I4,I4,3(F12.5),4(ES12.5))') iI,iJ,iK, &
+      write(kStdWarn,'(I4,I4,I4,3(F12.5),3(ES12.5),I4)') iI,iJ,iK, &
         raPressLevels(iJ),raTPressLevels(iJ),raVTemp(iJ), &
-        raaExtTemp(1,iJ),raaSSAlbTemp(1,iJ),raaAsymTemp(1,iJ)
+        raaExtTemp(1,iJ),raaSSAlbTemp(1,iJ),raaAsymTemp(1,iJ),iaWorIorA(iJ)
     END DO
     iK = iK + 1
     write(kStdWarn,'(I4,I4,I4,2(F12.5))') iNumlayer+1,iNumlayer+1,iK,rSurfPress,rSurfaceTemp
 
-    write(kStdWarn,'(A)') '  II  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM'
-    write(kStdWarn,'(A)') '---------------------------------------------------------------------------------' 
+    write(kStdWarn,'(A)') '---------------------------------------------------------------------------------------------'
+    write(kStdWarn,'(A)') '   II  iJ  iK      PLEV      TLEV        TLAY        DTAUC       SSALB        ASYM     CTYPEX'
+    write(kStdWarn,'(A)') '---------------------------------------------------------------------------------------------'
 
     RETURN
     end SUBROUTINE InputPrintDebugPCLSAM

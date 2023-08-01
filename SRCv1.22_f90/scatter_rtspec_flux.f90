@@ -48,7 +48,7 @@ CONTAINS
     raLayAngles,raSunAngles, &
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iTag)
 
     IMPLICIT NONE
@@ -104,10 +104,10 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaWorIorA(kProfLayer)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
     REAL :: rAngle
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
@@ -179,7 +179,7 @@ CONTAINS
     raLayAngles,raSunAngles, &
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag)
      
     RETURN
@@ -241,7 +241,7 @@ CONTAINS
     raThickness,raPressLevels,raTPressLevels,iProfileLayers,pProf,raLayerHeight, &
 ! hen the necessary scattering variables
     iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaPhase,iaWorIorA, &
     iaCloudNumAtm,iaaCloudWhichAtm,iDownward,iTag)
 
     IMPLICIT NONE
@@ -301,10 +301,10 @@ CONTAINS
     INTEGER :: iaCloudNumAtm(kMaxClouds),iaaCloudWhichAtm(kMaxClouds,kMaxAtm)
 ! iaaScatTable associates a file number with each scattering table
 ! caaaScatTable associates a file name with each scattering table
-    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers)
+    INTEGER :: iaaScatTable(kMaxClouds,kCloudLayers),iaWorIorA(kProfLayer)
     CHARACTER(120) :: caaaScatTable(kMaxClouds,kCloudLayers)
 ! raaaCloudParams stores IWP, cloud mean particle size
-    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,2)
+    REAL :: raaaCloudParams(kMaxClouds,kCloudLayers,3)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase(kMaxClouds)
 
@@ -413,7 +413,7 @@ CONTAINS
     CALL SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
          iSergio, &
@@ -704,7 +704,7 @@ CONTAINS
     CALL SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
          iSergio, &
@@ -838,7 +838,7 @@ CONTAINS
     CALL SetMieTables_RTSPEC(raFreq, & 
 !!!!!!!!!!!!!!!!!these are the input variables
     iAtm,iBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes, &
+    raaaCloudParams,iaaScatTable,caaaScatTable,iaCldTypes,iaWorIorA, &
     iaPhase,raPhasePoints,raComputedPhase, &
     iaCloudNumAtm,iaaCloudWhichAtm,iNumLayer,iDownWardOrig,iaaRadLayer, &
          iSergio, &

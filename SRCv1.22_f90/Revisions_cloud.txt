@@ -6,6 +6,29 @@ iaNML_Ctype(iI=1,2,3) in nm_prfile .... and assign correct scattering table/file
 So set iNclouds_RTP = 2 even if you only have one or zero cloud (ie cfrac = 0 for other cloud(s))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+v1.22   Fixed interface of DISORT into KCARTA
+                The biggest improvement for DISORT is to change rSatAngle from satzen at GND (raLayAngles(iaNumLayer(1))) 
+                to satzen at TOA ~ scanang (raLayAngles(iaNumLayer(iNumLayer)))
+                See the new lines of code in kcartamain.f90 before calling InterfaceScattering
+
+        Implemented the G. Tang/P. Yang fix to the Chou scattering scaling algorithm
+                b) <<< iaaOverrideDefault(2,9) is now an integer to control Chou adjustment>>>
+                       0 >= iaaOverrideDefault(2,9) >= 100 : Chou adjustment factor = iaaOverrideDefault(2,9)/100
+                       -1 : use Tang 0.3
+                       -2 : use Tang = 0.10 for water clouds, 0.30 for ice cloud
+                       -3 : use parametrized Tang
+
+6/9/22          Adding in PCLSAM scaling adjustments by Tang and Yang : clear_scatter_misc.f90
+                See "Improvement of the simulation of Cloud LW scattering in Broadband RTMs"
+                G. Tang, P. Yang, G. Kattawar, X. Huang, E. Mlawer, B. Baum, M. King
+                J. Atmos. Sci., July 2018
+    iDefault = +2
+    iScaling = -10 !! this is what I err have been using till May 1999, which is same as +1 (see Bk 47)
+    iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)
+    iScaling = +2  !! this is Chou       scaling == 1-w(1-b)
+    iScaling = +3  !! this is Maestri/Martinazzo scaling with NO TANG SCALING
+    iScaling = +4  !! this is similarity scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
+    iScaling = +5  !! this is Chou       scaling with Tang scaling adjustment, Eqn 21 of Tang paper == 1-w(1-b)
 
 v1.18   PCLSAM clouds are now same as SARTA (ie two slab, with
            r = c1' * r1 + c2' * r2 + c12 * r12 + clr*rclr
