@@ -2,6 +2,9 @@
 
 %% need to modify template_QXYZ.nml CORRECTLY for the rtp file to process!
 
+addpath /home/sergio/MATLABCODE
+system_slurm_stats
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 set_rtp
@@ -53,7 +56,7 @@ end
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 % JOB = 49;
- JOB = 1;
+% JOB = 1;
 % JOB = 269
 % JOB = 705;
 % JOB = 16

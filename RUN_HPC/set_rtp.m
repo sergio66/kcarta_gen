@@ -411,20 +411,6 @@ clear iInstr iDoConvolve
 iInstr = 124; use_this_rtp = '/home/sergio/KCARTA/WORK/wierd_jpss2.op.rtp'; 
 
 clear iInstr iDoConvolve
-iInstr = 1; iDoConvolve = +1;
-%% ERA5 desc avg
-%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
-%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
-use_this_rtp = 'RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_zonalavg64lats.rtp';
-use_this_rtp = '/asl/s1/sergio/MakeAvgProfs2002_2020_startSept2002/summary_17years_all_lat_all_lon_2002_2019.rtp'; %% actually has clouds
-use_this_rtp = 'RTP/summary_19years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp';
-use_this_rtp = 'RTP/summary_12years_all_lat_all_lon_2002_2014_monthlyERA5.rp.rtp';
-use_this_rtp = 'RTP/summary_07years_all_lat_all_lon_2012_2019_monthlyERA5.rp.rtp';
-use_this_rtp = 'RTP/summary_20years_all_lat_all_lon_2002_2022_monthlyERA5.rp.rtp';            %% only clear
-use_this_rtp = 'RTP/summary_atm_N_cld_20years_all_lat_all_lon_2002_2022_monthlyERA5.rp.rtp';  %% has clouds
-%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
-
-clear iInstr iDoConvolve
 iInstr = 2; iDoConvolve = +1;
 use_this_rtp = '/home/chepplew/data/sarta/validation/iasi2_2020d081g099_op.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/validation/iasi_1_2016d246_clear_sea_gn173_dep108.rtp_1';
@@ -434,16 +420,34 @@ use_this_rtp = '/home/chepplew/data/scratch/mktemp_N2dzVSCD_airs_001_kl.rtp';
 use_this_rtp = '/home/chepplew/data/scratch/mktemp_N2dzVSCD_airs_001_kl.rtp_1';
 
 clear iInstr iDoConvolve
+iInstr = 4; iDoConvolve = +1;
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/xyzregr49_1013_400ppm.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE_Git/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Feb2020_AIRS2834_CHIRP/regr49_1013_400ppm_unitemiss.op.rtp';
+
+clear iInstr iDoConvolve
 iInstr = 1; iDoConvolve = +1;
 use_this_rtp = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/srcF77_jac/newdayx_1_100_12150.op.rtp';
 use_this_rtp = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/srcF77_jac/cloudy_airs_l1c_ecm_sarta_baum_ice.2018.06.29.086_cumsum_-1.op.rtp';
 use_this_rtp = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/srcF77_jac/newdayx_clr.op.rtp';
 use_this_rtp = '/home/chepplew/data/scratch/mktemp_gLJIFbf4_kl2.op.rtp';
+use_this_rtp = '/home/chepplew/data/scratch/mktemp_xwCLnR3G_airs_l1c__op.rtp';
 
 clear iInstr iDoConvolve
-iInstr = 4; iDoConvolve = +1;
-use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/xyzregr49_1013_400ppm.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE_Git/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Feb2020_AIRS2834_CHIRP/regr49_1013_400ppm_unitemiss.op.rtp';
+iInstr = 1; iDoConvolve = +1;
+%% ERA5 desc avg
+%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
+%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
+use_this_rtp = 'RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_zonalavg64lats.rtp';
+use_this_rtp = '/asl/s1/sergio/MakeAvgProfs2002_2020_startSept2002/summary_17years_all_lat_all_lon_2002_2019.rtp'; %% actually has clouds
+use_this_rtp = 'RTP/summary_19years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp';
+use_this_rtp = 'RTP/summary_12years_all_lat_all_lon_2002_2014_monthlyERA5.rp.rtp';
+use_this_rtp = 'RTP/summary_07years_all_lat_all_lon_2012_2019_monthlyERA5.rp.rtp';
+use_this_rtp = 'RTP/summary_atm_N_cld_20years_all_lat_all_lon_2002_2022_monthlyERA5.rp.rtp';  %% clouds
+%%%
+use_this_rtp = 'RTP/summary_20years_all_lat_all_lon_2002_2022_monthlyERA5.rp.rtp';            %% clear, raw,  see /home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/read_fileMean17years.m
+use_this_rtp = 'RTP/summary_20years_all_lat_all_lon_2002_2022_monthlyERA5_pert.rp.rtp';       %% clear, pert, see /home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/driver_read_kcarta_fluxes_for_paper.m
+%%% 
+%% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m

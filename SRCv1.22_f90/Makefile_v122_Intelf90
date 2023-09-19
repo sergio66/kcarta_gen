@@ -16,7 +16,7 @@
 # the array checking and crank up the optimization.
 
 # Things to do before typing "Make"
-# (1) set the "style" = debug,usual,parallel (does not owrk right now)
+# (1) set the "style" = debug,usual
 # (2) Remember all .param and include files are in ../INCLUDE (kcarta.param, 
 #     scatter.param, pre_defined.param, gauss.param) while for rtpdefs.f, we 
 #     have a Makefile directive for the include file (see RTP section below)
@@ -49,9 +49,8 @@ include Makefile_intel_hdf_rtp
 SHELL = /bin/sh
 
 #------------ STYLE ----------------
-# STYLE=PARALLEL  UGH DO NOT USE THIS AT ALL!!!!!
-#STYLE=DEBUG
-STYLE=USUAL
+STYLE=DEBUG
+#STYLE=USUAL
 
 $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
 $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
@@ -109,22 +108,6 @@ FORTRANX = ifort   ## GENERIC should always work since .bashrc automatically loa
 ### warning message 406 gives forrtl: warning (406): fort: (1): In call to I/O Write routine, an array temporary was created for argument #2
 DEBUG_FLAGSA =  -check noarg_temp_created -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
 DEBUG_FLAGS=$(DEBUG_FLAGSA)
-
-# >>>>>>>>>>>>>>>>>>> DEFAULT Intel parallelization >>>>>>>>>>>>>>>>>>>>>>>>>
-# DEBUG TOO MUCH INFO BUT EXCELLENT: see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
-PARALLEL_FLAGSA = -openmp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp_created -gen-interfaces -warn interfaces  -mcmodel=medium
-# DEBUG GOOD/EASY/GOOD/EASY : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
-PARALLEL_FLAGSB = -openmp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
-
-# Option -openmp enables OpenMP processing.
-# Option -parallel enables automatic parallelization.
-# Option -par-report3 is useful to see what it does.
-PARALLEL_FLAGSC = -fpp -parallel -par_report3 -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
-#https://software.intel.com/en-us/node/532813
-PARALLEL_FLAGSD = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared-intel 
-PARALLEL_FLAGSE = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291  -check bounds -mcmodel=medium -shared-intel 
-PARALLEL_FLAGS=PARALLEL_FLAGSE
-#
 
 ### happy and you know it, use the preprocessor >>>>>>>>>>>>>>>>>>
 ### happy and you know it, use the preprocessor, Note that -O2/-O3 are paralleliization UGH, so -O1 is safer; also cut out any threads

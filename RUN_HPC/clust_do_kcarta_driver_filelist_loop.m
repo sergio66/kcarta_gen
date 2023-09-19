@@ -2,6 +2,9 @@
 
 %% need to modify template_Qrad.nml CORRECTLY for the rtp file to process!
 
+addpath /home/sergio/MATLABCODE
+system_slurm_stats
+
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 list_of_profiles_to_process = 'JUNK/notdone.txt';

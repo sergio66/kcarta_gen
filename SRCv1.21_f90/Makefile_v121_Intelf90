@@ -103,15 +103,15 @@ PARALLEL_FLAGSB = -openmp -implicitnone -msse2 -extend-source 132 -O1 -names low
 # Option -par-report3 is useful to see what it does.
 PARALLEL_FLAGSC = -fpp -parallel -par_report3 -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays
 #https://software.intel.com/en-us/node/532813
-PARALLEL_FLAGSD = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared_intel 
-PARALLEL_FLAGSE = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291  -check bounds -mcmodel=medium -shared_intel 
+PARALLEL_FLAGSD = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared-intel 
+PARALLEL_FLAGSE = -openmp -qopt-report-phase=vec -qopt-report=2 -openmp-report=2 -fpp -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291  -check bounds -mcmodel=medium -shared-intel 
 PARALLEL_FLAGS=PARALLEL_FLAGSE
 #
 
 ### happy and you know it, use the preprocessor >>>>>>>>>>>>>>>>>>
 ### happy and you know it, use the preprocessor, Note that -O2/-O3 are paralleliization UGH, so -O1 is safer; also cut out any threads
 USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -nothreads -noreentrancy
-USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared_intel 
+USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared-intel 
 ### happy and you know it, use the preprocessor
 ### happy and you know it, use the preprocessor>>>>>>>>>>>>>>>>>>>
 
@@ -121,7 +121,7 @@ USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase 
 # with new f90 implicit, getting error ld: failed to convert GOTPCREL relocation; relink with --no-relax
 #
 #OR
-# use -mcmodel=medium -shared_intel
+# use -mcmodel=medium -shared-intel
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #UFLAG = 

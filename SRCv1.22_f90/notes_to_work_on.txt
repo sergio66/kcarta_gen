@@ -1,0 +1,6 @@
+8/1/23 : n_rad_jac_scat.f90 : subroutine ExpandScatter : need sumfrac = 1 so it
+         is like Scott SARTA frac partitioning of cfrac
+
+8/1/23 : clear_scatter_misc.f90 :
+         subroutine AddCloud_pclsam_SunShine_100layerclouds, if kScatter = 3, alwats uses
+         uniICE backscatter coeffs

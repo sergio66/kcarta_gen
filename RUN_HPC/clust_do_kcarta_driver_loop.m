@@ -2,6 +2,9 @@
 
 %% need to modify template_QXYZ.nml CORRECTLY for the rtp file to process!
 
+addpath /home/sergio/MATLABCODE
+system_slurm_stats
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 set_rtp

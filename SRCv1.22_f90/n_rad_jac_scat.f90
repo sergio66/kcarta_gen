@@ -1968,7 +1968,7 @@ CONTAINS
             raaaCloudParamsT(iIn,iIndex,2) = raaaCloudParams(iIn,iJ1,2)
             raaaCloudParamsT(iIn,iIndex,3) = (raPressLevels(iK)-raPressLevels(iK+1))/(rPBot-rPTop) !!! like SARTA
             sumfrac = sumfrac + (raPressLevels(iK)-raPressLevels(iK+1))/(rPBot-rPTop)
-c            print *,'timmy',iIn,iIndex,(raPressLevels(iK)-raPressLevels(iK+1))/(rPBot-rPTop)
+!            print *,'timmy',iIn,iIndex,(raPressLevels(iK)-raPressLevels(iK+1))/(rPBot-rPTop)
 
             caaaScatTableT(iIn,iIndex)     = caaaScatTable(iIn,iJ1)
             iaaScatTableT(iIn,iIndex)      = iaaScatTable(iIn,iJ1)
@@ -1998,7 +1998,7 @@ c            print *,'timmy',iIn,iIndex,(raPressLevels(iK)-raPressLevels(iK+1))/
           iSkipper = iTop - iBot
         END IF
       END DO
-c      print *,'timmy2 ',iIn,sumfrac
+!      print *,'timmy2 ',iIn,sumfrac
     END DO
 
     222 FORMAT(' name = ',A80)

@@ -251,6 +251,8 @@ for iBand = 1 : length(kcbands)-1
 end
 toc
 
+fprintf(1,'iDoRad = %2i iDoFlux = %2i \n',iDoRad,iDoFlux)
+
 if iDoRad == 3  & iDoFlux < 0
   saver = ['save JUNK/allkcbands_prof' num2str(JOB) '.mat wall dall kcbands'];
 elseif iDoRad == 3  & iDoFlux == 5
