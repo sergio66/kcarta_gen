@@ -36,7 +36,7 @@ if iDoJac == 1
   fjac = ['JUNK/jac.dat' num2str(ii)];
   [dall,w,natmos, numlay, ngases] = readkcjac([outdir '/jac.dat' num2str(ii)]);
 
-elseif iDoJac == 100 & iDoCloud <= 0
+elseif iDoJac == 100 & iDoCloud <= 0 & gg ~= 1001
   %% g2,4,5,6,51,52,T(z),ST
   fjac = [outdir '/jac.dat' num2str(ii) '_COL'];
   [radall,w] = readkcstd([outdir '/rad.dat' num2str(ii)]);    
@@ -48,11 +48,30 @@ elseif iDoJac == 100 & iDoCloud <= 0
   dall = rad2bt(w,dall)-rad2bt(w,radall);
 
   %% trace gas jacs
-  iii = 1 : nnnj-2
+  iii = 1 : nnnj-2;
   dall(:,iii) = dall(:,iii)/log(1.001);
 
   %% T(z) and ST jac
-  iii = nnnj-1 : nnnj
+  iii = nnnj-1 : nnnj;
+  dall(:,iii) = dall(:,iii)/0.01;
+
+elseif abs(iDoJac) == 100 & iDoCloud <= 0 & gg == 1001
+  %% g1,101,102,103,T(z),ST
+  fjac = [outdir '/jac.dat' num2str(ii) '_COL'];
+  [radall,w] = readkcstd([outdir '/rad.dat' num2str(ii)]);    
+  [dall,w]   = readkcBasic([outdir '/jac.dat' num2str(ii) '_COL']);  
+
+  [mmm,nnnj] = size(dall);
+  [mmm,nnnr] = size(radall);
+  radall = radall(:,nnnr) * ones(1,nnnj);
+  dall = rad2bt(w,dall)-rad2bt(w,radall);
+
+  %% trace gas jacs
+  iii = 1 : nnnj-2;
+  dall(:,iii) = dall(:,iii)/log(1.001);
+
+  %% T(z) and ST jac
+  iii = nnnj-1 : nnnj;
   dall(:,iii) = dall(:,iii)/0.01;
 
 elseif iDoJac == 100 & iDoCloud == 1
@@ -66,11 +85,11 @@ elseif iDoJac == 100 & iDoCloud == 1
   dall = rad2bt(w,dall)-rad2bt(w,radall);
 
   %% trace gas jacs
-  iii = 1 : nnnj-2
+  iii = 1 : nnnj-2;
   dall(:,iii) = dall(:,iii)/log(1.001);
 
   %% T(z) and ST jac
-  iii = nnnj-1 : nnnj
+  iii = nnnj-1 : nnnj;
   dall(:,iii) = dall(:,iii)/0.01;
 
 else
@@ -85,6 +104,57 @@ whos w dall
 fprintf(1,' >>>> gg = %4i iDoCloud = %4i \n',gg,iDoCloud)
 if gg ~= 1001 & gg ~= 2346 & gg ~= 5912 & iDoJac == 1
   fprintf(1,'doing jacobians for gasID %3i \n',gg)
+elseif gg == 1001 & abs(iDoJac) == 100
+  if iDoCloud <= 0
+    fprintf(1,'doing clear sky col jacobians for gasID %3i ==> WV 1+101+102+103 ... add together\n',1001)
+    if iDoJac == -100
+      disp('UPLOOK JACS')
+    end
+  elseif iDoCloud == 1
+    fprintf(1,'doing allsky jacobians for gasID %3i ==> WV 1+101+102+103 ... add together \n',1001)
+  end
+  %% remember do g1,101,102,103  and T and ST
+  [mm,nn] = size(dall);
+  if iDoCloud <= 0
+    nnlay = (nn-4)/(4+1+1+1);
+  else
+    nnlay = (nn-4)/(4+1+1+1+1+1);
+  end
+  %% readkcjac: 89 chunks, 1 ODBs(num of atmos), 877 total rows  
+  %% readkcjac: ODB atm# = 5, subtype = 1, rows = 97     G1   (1:97)+0*97
+  %% readkcjac: ODB atm# = 5, subtype = 101, rows = 97   G101 (1:97)+2*97
+  %% readkcjac: ODB atm# = 5, subtype = 102, rows = 97   G102 (1:97)+3*97
+  %% readkcjac: ODB atm# = 5, subtype = 103, rows = 97   G103 (1:97)+4*97
+  %% readkcjac: ODB atm# = 5, subtype = 201, rows = 97   G201 (1:97)+5*97
+  %% readkcjac: ODB atm# = 5, subtype = 202, rows = 97   G202 (1:97)+6*97
+  %% readkcjac: ODB atm# = 5, subtype = 0, rows = 97     T    (1:97)+7*97
+  %% readkcjac: ODB atm# = 5, subtype = -10, rows = 97   WGT  (1:97)+8*97
+  %% readkcjac: ODB atm# = 5, subtype = -20, rows = 4    SURF (1:04)+9*97
+  fprintf(1,'   do_convolve_jac.m : gg=%4i iDoCloud=%2i     iDoJac=%2i mm,nn=%10i %4i     nnlay=%8.6f \n',gg,iDoCloud,iDoJac,mm,nn,nnlay);
+  jjuse = 1:nnlay;
+  if iDoCloud > 0
+    error('oioio')
+    dall1001   = dall(:,jjuse+0*nnlay) + dall(:,jjuse+2*nnlay) + dall(:,jjuse+3*nnlay) + dall(:,jjuse+4*nnlay);
+    dallO3     = dall(:,jjuse+1*nnlay);
+    dallCld1   = dall(:,jjuse+5*nnlay);
+    dallCld2   = dall(:,jjuse+6*nnlay);
+    dallT      = dall(:,jjuse+7*nnlay);
+    dallWgtFcn = dall(:,jjuse+8*nnlay);
+    %%% dallSurf   = max(jjuse+6*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
+    dallSurf   = (1:4)+9*nnlay; dallSurf = dall(:,dallSurf);
+  else
+    dall1001   = dall(:,1) + dall(:,2) + dall(:,3) + dall(:,4);
+    dallT      = dall(:,5);
+    dallSurf   = dall(:,6);
+  end
+  %whos w dall*
+  dall = [dall1001 dallT dallSurf];
+  ngases = 1;
+
+  addpath /home/sergio/MATLABCODE
+  [fc,qc] = quickconvolve(w,dall1001,1,1);
+  figure(1); plot(fc,qc(:,1)); title('WV coljac'); pause(0.1);
+
 elseif gg == 1001 & iDoJac == 1
   if iDoCloud <= 0
     fprintf(1,'doing clear sky jacobians for gasID %3i ==> WV 1+101+102+103 ... add together and then O3 \n',1001)
@@ -289,11 +359,11 @@ if iInstr == 1
   sfile = '/asl/matlab2012/srftest/srftables_m140f_withfake_mar08.hdf'; 
   airs_convolve_file_numchans  %% gives latest clist/sfile
   [fKc,rKc] = convolve_airs(w,dall,clist,sfile);
-  whos dall fKc rKc
+  %whos dall fKc rKc
 
   if iDoJac == 1
     saver = ['save ' outdir '/individual_prof_convolved_kcarta_airs_' num2str(ii) '_jac.mat fKc rKc sfile  use_this_rtp '];
-  elseif iDoJac == 100
+  elseif abs(iDoJac) == 100
     saver = ['save ' outdir '/individual_prof_convolved_kcarta_airs_' num2str(ii) '_coljac.mat fKc rKc sfile  use_this_rtp '];
   end
   eval(saver)

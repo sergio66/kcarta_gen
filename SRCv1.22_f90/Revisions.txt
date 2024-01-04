@@ -930,8 +930,12 @@ v1.21
 6/25/19        Changed the column jac mult    from 0.1 to 0.001
                Changed the column temp offset from 1.0 to 0.01
                column jac perturbations : see kDefaultToffset and kDefaultColMult in INLUDE/*.param
-                 (in 2019/2020 reset to 1.0 and 0.001)
-
+               (in 2019/2020 reset to 1.0 and 0.001)
+                   [sergio@taki-usr2 SRCv1.22_f90]$ grep -in kDefaultToffset ../INCLUDE/TempF90/*param.f90
+                   ../INCLUDE/TempF90/pre_definedparam.f90:251:      REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult,kDefaultToffset
+                   ../INCLUDE/TempF90/pre_definedparam.f90:258:!     PARAMETER (kDefaultToffset = 1.00) !!! till June 2019
+                   ../INCLUDE/TempF90/pre_definedparam.f90:260:      PARAMETER (kDefaultToffset = 0.01) !!! after June 2019
+     
 5/21/19        Made iAtmLoop = 3 more consistent with other code;
                now it assumes the angle == scanag for downlook
 

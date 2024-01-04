@@ -16,6 +16,8 @@
 # the array checking and crank up the optimization.
 
 # Things to do before typing "Make"
+# (0) if having problems with MakefileX, usually because of tabes
+#     cat -e -t -v MakefileX      shows you ^I (tabs) and $ (end of line)
 # (1) set the "style" = debug,usual
 # (2) Remember all .param and include files are in ../INCLUDE (kcarta.param, 
 #     scatter.param, pre_defined.param, gauss.param) while for rtpdefs.f, we 
@@ -50,7 +52,7 @@ SHELL = /bin/sh
 
 #------------ STYLE ----------------
 STYLE=DEBUG
-#STYLE=USUAL
+STYLE=USUAL
 
 $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
 $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)

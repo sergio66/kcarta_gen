@@ -449,6 +449,11 @@ use_this_rtp = 'RTP/summary_20years_all_lat_all_lon_2002_2022_monthlyERA5_pert.r
 %%% 
 %% >>>>>>>>>> see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_makeavgprofile_ERA5_monthly_desc_or_asc.m
 
+use_this_rtp = 'RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_zonalavg64lats.rtp';
+
+use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/dnwell.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/upwell.op.rtp';
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m
 %% DO NOT TOUCH THESE LAST TWO LINES. EDIT set_convolver as needed

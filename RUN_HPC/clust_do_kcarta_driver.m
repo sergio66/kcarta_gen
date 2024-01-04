@@ -55,6 +55,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+if length(JOB) == 0
+  JOB = 1;
+end
+
 % JOB = 49;
 % JOB = 1;
 % JOB = 269
@@ -76,15 +80,16 @@ if length(junkdir) == 0
   %  do_convolve(iInstr,iiBin);
   %  do_convolve_jac(iInstr,iiBin);
 
-  if iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac <= 0) & exitcode == 0
+  if iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac == -1) & exitcode == 0
     do_convolve(iInstr,iiBin,iDoRad);
   %if iDoConvolve > 0 & iDoRad == 3 & exitcode == 0
   %  do_convolve(iInstr,iiBin);
   %end
-  elseif iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac == 1 | iDoJac == 100) & exitcode == 0
+  elseif iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac == 1 | abs(iDoJac) == 100) & exitcode == 0
     do_convolve(iInstr,iiBin);
     fprintf(1,'jacobian gasID gg = %4i iDoJac = %4i iDoCLoud = %4i \n',gg,iDoJac,iDoCloud)
     do_convolve_jac(gg,iInstr,iiBin,iDoJac,iDoCloud);
+
   end
 
 else

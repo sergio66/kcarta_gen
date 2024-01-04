@@ -400,7 +400,7 @@ CONTAINS
 !! raaX = raaXO - raaGas + 1.1raaGas = = raaXO + 0.1raaGas    
     DO iJ = 1,iJacob
       write(kStdWarn,*) ' '
-      write(kStdWarn,*) ' ---> Doing rQj : ColJac for gas ',iaJacob(iJ)
+      write(kStdWarn,'(A,I3,A,F12.5)') ' ---> Doing rQj : ColJac for gas ',iaJacob(iJ), ' with kDefaultColMult = ',rDefaultColMult
       raaTemp = 0.0
       DO iL = 1,iaNumLayer(iAtm)
         iI = iaaRadLayer(iAtm,iL)
@@ -449,7 +449,7 @@ CONTAINS
       iI = iaaRadLayer(iAtm,iL)
       IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
         !! remember we perturb layers WRT surface, so use iL in this if-then comparison
-        write(kStdWarn,FMT) 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
+        write(kStdWarn,'(A,I3,A,I3,A,F12.5)') 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI,' kDefaultToffset = ',kDefaultToffset
 !        raVTemp2(iI) = raVTemp(iI) + 1.0               ! till June 2019
         raVTemp2(iI) = raVTemp(iI) + kDefaultToffset    ! after June 2019
       ELSE
@@ -466,7 +466,7 @@ CONTAINS
         !! remember we perturb layers WRT surface, so use iL in this if-then comparison
         write(kStdWarn,FMT) 'dOD(z)/dT pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI
         !! recall deltaT = 1 K (ie technically need to multiply raaAllDt(:,iI) by deltaT)
-        raaTemp(:,iI) = raaSumAbCoeff(:,iI) + raaAllDt(:,iI)
+        raaTemp(:,iI) = raaSumAbCoeff(:,iI) + raaAllDt(:,iI) * kDefaultToffset
       ELSE
         ! no need to perturb layer
         raaTemp(:,iI) = raaSumAbCoeff(:,iI)
@@ -497,7 +497,7 @@ CONTAINS
 
 !! do the stemp jacobian radiance
     write(kStdWarn,*) ' '
-    write(kStdWarn,*) ' ---> Doing rST : STemp Jacobian calcs ...'
+    write(kStdWarn,*) ' ---> Doing rST : STemp Jacobian calcs ...kDefaultToffset = ',kDefaultToffset
     CALL find_radiances(raFreq,-1, &
       raaSumAbCoeff,raVTemp,caJacobFile2, &
       iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &

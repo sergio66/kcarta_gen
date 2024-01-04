@@ -123,6 +123,18 @@ elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg ~= 1001 & gg ~= 2346 & gg
   sedder = [sedder ' template_Qcoljacobian.nml  > ' outnml];      
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
   
+elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg == 1001
+  disp('do_kcarta.m here A4 (clr sky rads and col jacs, WV1,101,102,103)')
+  %%% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
+  sedder = [sedder ' template_QcolWV_jacobian.nml  > ' outnml];      
+  kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
+  
+elseif iDoJac == -100 & iDoFlux < 0 & iDoCloud < 0 & gg == 1001
+  disp('do_kcarta.m here A4 (UPLOOK clr sky rads and col jacs, WV1,101,102,103)')
+  %%% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
+  sedder = [sedder ' template_QcolWV_uplook_jacobian.nml  > ' outnml];      
+  kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
+  
 elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg == 2346
   disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G2,3,4,6,51,52)')
   %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
@@ -217,7 +229,7 @@ elseif iDoJac < 0 & iDoFlux < 0 & iDoCloud == 100
 else
   disp(' ')
   fprintf(1,'iDoJac  iDoFlux iDoCLoud = %4i %4i %4i \n',iDoJac,iDoFlux,iDoCloud)
-  error('hmmmmm did not find specis to go grab a template nml file')
+  error('hmmmmm did not find specs to go grab a template nml file')
 end
 
 sedder
@@ -238,7 +250,7 @@ fprintf(1,'%s \n',rmer);
 % rmer = ['!/bin/rm ' outstat];
 eval(rmer);
 
-if iDoCloud == 100 
+if iDoCloud == 100
   rmer = ['!/bin/rm ' outcloud100]; eval(rmer);
 end
 

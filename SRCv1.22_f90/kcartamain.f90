@@ -482,6 +482,8 @@
     iDoUpperAtmNLTE,caaUpperMixRatio,caPlanckUAfile,caOutUAfile, &
     caOutName)
 
+    write(kStdWarn,'(A,F15.6,F15.6)') 'if COLJACS computed then kDefaultToffset,kDefaultColMult = ',kDefaultToffset,kDefaultColMult
+
     !! so at this point raaPress is layer avg press (play) in atm. raPressLevels (plevs) is in mb
     !! raLayerheight,raThickness are in meters
     !! raPressLevels(iDummy) and raLayerheight(iDummy) are exactly from p.plevs,p.palts in rtp
