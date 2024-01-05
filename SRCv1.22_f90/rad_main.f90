@@ -378,7 +378,7 @@ CONTAINS
     REAL :: raaTemp(kMaxPts,kMixFilRows),raJunk(kMaxPts)
  
     INTEGER :: iIOUN_USE,iJacT,iJacB
-    REAL :: rDefaultColMult,raVTemp2(kMixFilRows)
+    REAL :: rDefaultColMult,raVTemp2(kMixFilRows),rMult
     CHARACTER*50 FMT
 
     FMT = '(A,I3,A,I3)'
@@ -401,6 +401,11 @@ CONTAINS
     DO iJ = 1,iJacob
       write(kStdWarn,*) ' '
       write(kStdWarn,'(A,I3,A,F12.5)') ' ---> Doing rQj : ColJac for gas ',iaJacob(iJ), ' with kDefaultColMult = ',rDefaultColMult
+      rMult = 1.0
+      if (iaJacob(iJ) .EQ. 101) THEN
+        rMult = 2.0    !! remember SelfContinuum = k(q^2) ===> k((q+dq)^2) = k(q + 2dq)
+        write(kStdWarn,'(A)') 'this is G101 = self continuum, so add twice the deltaOD (account for square dependence)'
+      end if
       raaTemp = 0.0
       DO iL = 1,iaNumLayer(iAtm)
         iI = iaaRadLayer(iAtm,iL)
@@ -413,7 +418,7 @@ CONTAINS
 	  !  call dostop
 	  !endif
 	  
-          raaTemp(:,iI) = raaSumAbCoeff(:,iI) + rDefaultColMult*raaaColDQ(iJ,:,iI)
+          raaTemp(:,iI) = raaSumAbCoeff(:,iI) + rMult*rDefaultColMult*raaaColDQ(iJ,:,iI)
         ELSE
           ! no need to perturb layer
           raaTemp(:,iI) = raaSumAbCoeff(:,iI)

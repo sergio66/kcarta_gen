@@ -1,7 +1,8 @@
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 
 %%%\usepackage{lucbr,graphicx,fancyhdr,longtable}
-\usepackage{lucidabr,graphicx,fancyhdr,longtable}
+%\usepackage{lucidabr,graphicx,fancyhdr,longtable}
+\usepackage{graphicx,fancyhdr,longtable}
 
 \newcommand{\kc}{\textsf{kCARTA}\xspace}
 \newcommand{\cm}{\hbox{cm}}
@@ -31,7 +32,7 @@
 
 \lhead{\textbf{\textsf{DRAFT}}}
 \chead{kCARTA}
-\rhead{\textsf{Version 1.11,1.12}}
+\rhead{\textsf{Version 1.11,1.12,1.14,1.22}}
 \lfoot{UMBC}
 \cfoot{}
 \rfoot{\thepage}
@@ -66,10 +67,12 @@ University of Maryland Baltimore County\\Baltimore, MD 21250 USA\\
 
 \vspace{0.5in}
 \begin{center}
-Copyright 2002 \\
+Copyright 1996-2018 \\
 University of Maryland Baltimore County \\
 All Rights Reserved\\
-v1.11,1.12  \today\\
+v1.11,1.12,1.14,1.15,1.16,1.18 (f77)\\
+v1.20, 1.21, 1.22 (f90)\\
+\today\\
 \end{center}
 
 \vfill
@@ -102,8 +105,12 @@ do clear sky radiative transfer computations, or radiative transfer
 computations in the presence of scattering.
 
 In the case of clear sky radiative transfer, \kc can compute and output 
-analytic Jacobians with respect to temperature and gas amount.  
- The user can easily change satellite viewing angles
+analytic Jacobians with respect to temperature and gas amount.  As well
+as the layer Jacobians being output, \kc dumps out a separate file which
+contains the $surface$ $temp$ and $column gas$ jacobians (for a x0.1 
+column gas amount perturbation).
+
+The user can easily change satellite viewing angles
 and surface boundary conditions.  As the absorptions coefficients have
 been precomputed, the spline interpolations required to compute the
 optical depths for arbitrary gas profiles can be done very rapidly, as
@@ -150,7 +157,7 @@ This document is very much a work in progress.  Some major omissions
 include references, significant examples of \kc output, and
 comparisons of \kc output to observed spectra.  These omissions will
 be rectified in the future.  Please give us your feedback on both the
-code and the documentation!  This manual should work for both v1.11 and v1.12.
+code and the documentation!  This manual should work for v1.11+.
 
 \newpage
 \section{Introduction}
@@ -189,7 +196,64 @@ a Singular Value Decomposition ({\sf SVD}) technique, to produce our
 profile, the look-up tables are (cubic) spline interpolated in
 temperature, and scaled in gas absorber amount.  These splines allow
 us to easily compute the analytic temperature derivatives, from
-which we can compute temperature Jacobians.
+which we can compute temperature Jacobians. \kc also dumpus out an adiditional
+file which has radiances computed assuming the surface temperature and 
+gas column amounts have increased by 1K and a factor of 0.1 respectively
+(this second file can be read in using $readkcBasic.m$).
+
+\textcolor{red}{SRCv1.XX/Revisions.txt is the more up-to-date manuscript regarding important changes}
+
+Taking into account the view angle correction, if $\tau_{i}$ is the optical 
+depth due to gas G at layer $i$, given by $\tau_{i} = q_{i} K_{i}/\mu{i}$ 
+where the symbols respectively stand for optical depth (dimensionless), gas 
+amount (kmoles/cm2), gas absorption (cm2/kmol) and $cos(view angle)$, then 
+the finite diference colum gas jacobian is 
+given by the difference between the new and unperturbed radiances 
+$\delta r$ = $r_{new} - r_{0}$ when the gas amounts in layers $1$ to $N$ are 
+perturbed by a fraction $\delta$. The (finite differences) column jacobians 
+can be obtained from the (gas) layer analytic jacobians using
+\[
+\delta r = \frac{\partial r}{\partial q_1} \delta q_1 + 
+           \frac{\partial r}{\partial q_2} \delta q_2 + ... + 
+           \frac{\partial r}{\partial q_N} \delta q_N
+\] 
+or 
+\[
+\delta r = J_{1} \delta q_1 + J_{2} \delta q_2 + ...
+               J_{N} \delta q_N
+\]
+Usually we take a constant perturbation to the column ie $q_{l} \rightarrow 
+q_{1}(1 + f)$ where $f \ll 1$. Then $\delta q_{l} \rightarrow f q_{l}$ and
+$\delta r = f \{ J_{1} q_1 + J_{2} q_2 + ... + J_{N} q_N \} $. For example, 
+for a 2 layer atmosphere the upwelling radiance (without background thermal 
+or solar terms)jacobian terms $J_{l}$ is 
+\begin{eqnarray*}
+r = & \epsilon B(T_{s}) exp(-q_{1} K_{1}/\mu_{1})exp(-q_{2} K_{2}/\mu_{2}) +\\
+    & B(1)(1-exp(-q_{1} K_{1}/\mu_{1}))exp(-q_{2} K_{2}/\mu_{2}) + \\
+    & B(2)(1-exp(-q_{2} K_{2}/\mu_{2}))
+\end{eqnarray*}
+from which the layer jacobian terms $J_{i}$ reduce to
+\begin{eqnarray*}
+J_{1} = \frac{\partial r}{\partial q_1} = & 
+ -\frac{K_1}{\mu_1}\epsilon B(T_{s})exp(-q_1 K_1/\mu_1)exp(-q_2 K_2/\mu_2) + \\
+&-\frac{K_1}{\mu_1} B(1)(exp(-q_{1} K_{1}/\mu{1})exp(-q_{2} K_{2}/\mu{2})
+\end{eqnarray*}
+\begin{eqnarray*}
+J_{2} = \frac{\partial r}{\partial q_2} = & 
+-\frac{K_2}{\mu_2}\epsilon B(T_{s})exp(-q_1 K_1/\mu_1)exp(-q_2 K_2/\mu_2) + \\
+& -\frac{K_2}{\mu_2} B(1)exp(-q_{1} K_{1}/\mu{1})exp(-q_{2} K_{2}/\mu{2}) + \\
+& -\frac{K_2}{\mu_2} B(2)exp(-q_{2} K_{2}/\mu{2})
+\end{eqnarray*}
+The output order is same as in regular jac file ie gases followed by T(z) then STEMP.
+The size of the perturbations is given by
+\begin{verbatim}
+   column jac perturbations : see kDefaultToffset and kDefaultColMult in INLUDE/*.param
+   (in 2019/2020 reset to 1.0 and 0.001)
+       [sergio@taki-usr2 SRCv1.22_f90]$ grep -in kDefaultToffset ../INCLUDE/TempF90/*param.f90
+       ../INCLUDE/TempF90/pre_definedparam.f90:251:      REAL kSolarAngle,kThermalAngle,kSolarRefl,kDefaultColMult,kDefaultToffset
+       ../INCLUDE/TempF90/pre_definedparam.f90:258:!     PARAMETER (kDefaultToffset = 1.00) !!! till June 2019
+       ../INCLUDE/TempF90/pre_definedparam.f90:260:      PARAMETER (kDefaultToffset = 0.01) !!! after June 2019
+\end{verbatim}
 
 The current database spans 605 \wn to 2805 \wn, broken up into chunks
 that are 25 \wn wide.  One hundred pressure layers are used to generate the 
@@ -240,7 +304,12 @@ We are also working on a perturbative solution to the radiative transfer
 equation, but it has stalled (till Mathematica can solve one of the integrals).
 In addition we have used the PCLSAM (Parameterization of Cloud Longwave 
 Scattering for use in Atmospheric Models) implementation of Chou, Lee, Tsay 
-and Fu's method.
+and Fu's method, as well as adding in gray emissive clouds tuned to working
+with the AIRS L2 cloud products (ie no cloud overlap, with 
+0 $\le$ cfrac1 + cfrac2 $\le$ 1). Note that the black/gray cloud can only be
+initiated with rtp files, and requires ctype = ctype2 = 0, cfrac, cfrac2 satisfying
+the above inequality, and cprtop and cprtop2; in addition it needs one data point
+for each of cemis and cemis2.
 
 To run any of these scattering  codes, one needs the MIE scattering tables 
 generated by F. Evans ``sccatmie'' code. While DISORT is very well tested, it 
@@ -255,7 +324,7 @@ variables. If not, then edit file ``scatter\_disort\_code.f'' and change all
 occurences of real to double precision}
 
 \textcolor{red}
-{The \kc Makefile produces two different executables. 
+{The \kc Makefile produces three different executables. 
 \begin{itemize}
 \item $kcarta.x$ contains all the features of kCARTA (optical depths, clear 
 sky radiative transfer, clear sky jacobians and fluxes, $SCATTERING$ 
@@ -263,8 +332,17 @@ radiances and fluxes. However, this version uses a $LOT$ of memory
 \item $bkcarta.x$ contains only the most basic features of kCARTA 
 (optical depths and clear sky radiative transfer). This version uses 
 very little memory.
+\item $kcarta\_sa.x$ is a "stand-alone" version that contains only the
+most basic features of kCARTA (optical depths and clear sky radiative
+transfer), also uses very little memory.
 \end{itemize}
 }
+
+In addition, a "txt" version of the all three files can be made, where the
+profile that is read in comes in from a text file; this way a user can supply
+a LBLRTM-based levels profile and have kCARTA run (technically, kcarta\_saTXT.x is the
+same as kcarta\_sa.x as the input profile/scan angle/surface params comes from arguments
+supplied to the stand-alone routine).
 
 The speed and features of the code make it an appealing alternative to other
 existing ``line by line'' codes such as {\sf GENLN2} and {\sf LBLRTM}.
@@ -310,6 +388,37 @@ choose to output the optical depths of any of the gases read in from
 the profile.  Once a \kc run has ended, the user can read in the data
 using the supplied readers, or modify the readers to convolve the data
 over wanted instrument response functions.
+
+\section{Updates from v1.14}
+Main change is that this code \\
+a) uses the new HITRAN 2008 database, rather than the 2004 database,\\
+b) the compressed database for other bands eg FIR, NIR, VIS, UV have been tested 
+   for clear sky.\\
+
+\section{Updates from v1.16}
+Main change is that this code \\
+a) now uses the same uncompression and jacobian routines that are in the Matlab
+   package. This makes the code cleaner. \\
+b) the code can do limb view calcs; achieved by setting raSpres (at the equivalent 
+   tangent height) and raSetEmissivity(iAtm) .GT. 1 if iRTP = -1, or 
+     p.nemis(iAtm) = 1, p.emis(iAtm) .GT. 1, and p.spres(iAtm) as appropriate.\\
+   The code calculates the scanang by using spres information\newline
+c) uses the new HITRAN 2012 database
+
+\section{Newest Important Features (v1.18,v1.20+)}
+Uses the new HITRAN 2016 database \newline
+f90 modular source code now available \newline
+\begin{itemize}
+\item 2/27/18 : In nm\_spectra, raAltComprDirsScale allows you to scale the
+                optical depths you read in from supplementary compressed tables
+\item 11/25/16 : caaTextOverride in nm\_params allows text file cloud params for 100
+                 layer clouds
+\item 11/16/16 : Can also dump out L2G ODs and transmittances; kThermalAngle (diffusvie
+                 angle) can be set in nm\_params so this angle can be controlled when
+		 you are driving the code with rtp files
+\item 10/8/16 : iaaOverride allows you to control many parameters; see kcartamisc.f
+\item 3/2/16  : TwoSlab clouds now similar to SARTA (4 sub-pixel streams/FOV)          
+\end{itemize}
 
 \section{Installing and running \kc}
 This is for the user that wants to install and use \kc as quickly as possible. 
@@ -412,8 +521,7 @@ KCARTA/BIN directory
 \begin{itemize}
 \item $kcarta.x$ contains all the features of kCARTA (optical depths, clear 
 sky radiative transfer, clear sky jacobians and fluxes, $SCATTERING$ radiances
-and fluxes. However, this version can use a $LOT$ of 
-memory
+and fluxes. However, this version can use a $LOT$ of memory
 \textcolor{red}
 {\item $bkcarta.x$ contains only the most basic features of kCARTA 
 (optical depths and clear sky radiative transfer). This version uses 
@@ -484,7 +592,7 @@ This seems to work fine with SGI Fortran and g77 on Linux, but causes grief
 if used with Absoft.
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/example_109.eps}
+\includegraphics[width=5.5in]{FIG/example_109}
 \caption{Translating the output file.}
 \label{translatingfiles}
 \end{figure}
@@ -593,9 +701,16 @@ filling the field of view.  Jacobians will be computed and output
 for all the three atmospheres.
 
 We have now added on scattering routines and the ability to import line by 
-line spectra computed by an external code. In the example below, we use 
+line spectra computed by an external code. You can either \newline
+(a) compute spectra for the particular atmospheric profile you are working with
+    and ask \kc to read in those spectra or \newline
+(b) compute an entire compressed database for the gas you are interested in,
+    and ask \kc to use that new compressed database for the gas(es) you are
+    want to substitute \newline
+In the example below, we use 
 externally generated spectra for some CO2 regions and for some N2O regions. 
-In addition, a two layer cloud is also specified.
+In addition, a two layer cloud is also specified. $iNumAltComprDirs$ also 
+tells the code to use alternate compressed databases for CO2,O3,CH4,O2 and N2
 
 The output section asks \kc to output radiances for all three
 atmospheres (at different pressure levels), output all layer-to-space
@@ -646,7 +761,26 @@ Here is the sample namelist river file (which we name example.nml) :
 
  $nm_prfile
  namecomment    =  '******* PRFILE section *******'
+ iBinOrAsc    = 1
+ iMPSetForRadRTP = 1
+
+ !this case assumes info for 2 clouds is given as slab info in caPfname
+ iNclouds_RTP  = 3
+
+ iaNML_Ctype(1)  = 301
+ caaCloudFile(1) = 
+     '/asl/s1/sergio/CLOUDS_MIEDATA/VOLCANO/andesite_405_2905_280'
+
+ iaNML_Ctype(1)  = 101
+ caaCloudFile(1) = '/asl/s1/sergio/CLOUDS_MIEDATA/WATER250/water_405_2905_250'
+
+ iaNML_Ctype(2)  = 201
+ caaCloudFile(2) = 
+  '/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_ICE_AGGREGATES/ice_agg_333_2980_forkcarta'
+
  caPfname       =  'testprof0.op.rtp'
+ iRTP            = 1
+
  $end
 
  $nm_weight
@@ -663,8 +797,8 @@ Here is the sample namelist river file (which we name example.nml) :
 
  $nm_radnce
  namecomment    =  '******* RADNCE section *******'
- !define 3 atmospheres
- iNatm          =  3
+ !define 4 atmospheres
+ iNatm          =  4
 
  !use WEIGHT set number 1 (from above, this is all gases weighted by 1.0). 
  !The pressure endpts are from 971 to 0.0 mb (so radiation is travelling 
@@ -677,13 +811,14 @@ Here is the sample namelist river file (which we name example.nml) :
  raTSpace(1)        =   2.960000
  raTSurf(1)         =  308.3
  raSatAngle(1)      =  0.0000000E+00
- raSatHeight(1)     =   1.00
+ raSatHeight(1)     =   -1.00
  ! turn off solar (-1), solar angle=0.0, use surface emiss(-1.0),
  ! turn on thermal diff approx, (0), thermal angle=53 degrees (-1),
  !include thermal background if Jacobians are computed (1)
  iakSolar(1)        =  -1
  rakSolarAngle(1)   =  0.0000000E+00
  cakSolarRefl(1)    =  'NONESPECIFIED'
+ raKSolarRefl(1)    = 0.1234
  iakThermal(1)      =   0
  rakThermalAngle(1) =  -1.000000
  iakThermalJacob(1) =   1
@@ -709,6 +844,7 @@ Here is the sample namelist river file (which we name example.nml) :
  iakSolar(2)        =  1
  rakSolarAngle(2)   =  0.0000000E+00
  cakSolarRefl(2)    =  '../DATA/General/sunrefl.dat'
+ raKSolarRefl(2)    = -1
  iakThermal(2)      =   1
  rakThermalAngle(2) =  -1.000000
  iakThermalJacob(2) =   1
@@ -727,17 +863,42 @@ Here is the sample namelist river file (which we name example.nml) :
  raTSpace(3)        =  2.96.0000
  raTSurf(3)         =  303.34
  raSatAngle(3)      =  10.0000000E+00
- raSatHeight(3)     =   705.0
+ raSatHeight(3)     =   705000
  ! as we have upward looking instrument, just give six dummy values
  iakSolar(3)        =  1
  rakSolarAngle(3)   =  0.0000000E+00
  cakSolarRefl(3)    =  'dummysun'
+ raKSolarRefl(3)    = -1
  iakThermal(3)      =   0
  rakThermalAngle(3) =  -1.000000
  iakThermalJacob(3) =   1
  ! as we have upward looking instrument, just give a dummy emissivity
  caEmissivity(3)    =   'dummy'
  raSetEmissivity(3) =  0.9
+
+ !use WEIGHT set number 1 (from above, this is 2 -1 1.0 -1, which means all 
+ ! gases weighted by 1.0). The pressure endpts are from 500.0 to 0.0 mb
+ ! (so radiation is travelling downwards, to the up looking instr)
+ ! Notice emissivity = +10 ==> limb view
+ !space temp=5600k (iakSolar = +1, sun fills FOV), dummy surface temp=303.34k, 
+ !satel view angle=10 degrees,  include geometry effects in angle
+ iaMPSetForRad(4)   =  1
+ raPressStart(4)    =  500.0000
+ raPressStop(4)     =  0.0
+ raTSpace(4)        =  2.96.0000
+ raTSurf(4)         =  253.34
+ raSatAngle(4)      =  10.0000000E+00
+ raSatHeight(4)     =   705000
+ iakSolar(4)        =  -1
+ rakSolarAngle(4)   =  130.0000000E+00
+ cakSolarRefl(4)    =  'dummysun'
+ raKSolarRefl(4)    = -1
+ iakThermal(4)      =   0
+ rakThermalAngle(4) =  -1.000000
+ iakThermalJacob(4) =   1
+ ! as we have LIMB looking instrument, give > 1 emissivity
+ caEmissivity(4)    =   'dummy'
+ raSetEmissivity(4) =  100
  $end
 
  $nm_jacobn
@@ -761,7 +922,7 @@ Here is the sample namelist river file (which we name example.nml) :
  !use externally generated LBL spectra for two gases
  iNumNewGases   =             2
 
- !the girst gas has ID = 2 (CO2), with 6 new chunks of data
+ !the first gas has ID = 2 (CO2), with 6 new chunks of data
  iaNewGasID(1)  =             2
  iaNewData(1)   =             6
    iaaNewChunks(1,1)    =           2305
@@ -777,13 +938,27 @@ Here is the sample namelist river file (which we name example.nml) :
    caaaNewChunks(1,5)    =   '../DATANEW/co2_2405'
    caaaNewChunks(1,6)    =   '../DATANEW/co2_2430'
 
- !the girst gas has ID = 4 (N20), with 2 new chunks of data
+ !the second gas has ID = 4 (N20), with 2 new chunks of data
  iaNewGasID(2)  =             6
  iaNewData(2)   =             1
    iaaNewChunks(2,1)    =           2255
    iaaNewChunks(2,1)    =           2280
    caaaNewChunks(2,1)     =   '../DATANEW/nitrousoxide2255'
    caaaNewChunks(2,1)     =   '../DATANEW/nitrousoxide2280'
+
+ !use new databases
+ iNumAltComprDirs = 5
+ iaAltComprDirs(1) = 2
+ iaAltComprDirs(2) = 3
+ iaAltComprDirs(3) = 6
+ iaAltComprDirs(4) = 7
+ iaAltComprDirs(5) = 22
+ caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(4)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(5)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+
  $end
 
  $nm_nonlte 
@@ -974,6 +1149,11 @@ Here is the sample namelist river file (which we name example.nml) :
  raaOp(5,3)     =    980.0
  raaOp(5,4)     =    985.0
 
+ ! output one radiance for the last atmosphere, at TOA
+ iaPrinter(6)   =    3
+ iaAtmPr(6)     =    4
+ iaNp(6)        =    1
+ raaOp(6,1)     =    0.0
  $end
 
  $nm_endinp
@@ -994,7 +1174,7 @@ A simple flow diagram that pulls together the different files required to
 run \kc, is shown below.
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/flow.eps}
+\includegraphics[width=5.5in]{FIG/flow}
 \caption{Files needed to run \kc.}
 \end{figure}
 
@@ -1012,18 +1192,18 @@ the next two with DISORT and RTSPEC used for an atmosphere where there is
 aerosol near the ground, and a cirrus cloud at 11 km.
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/show2.eps}
+\includegraphics[width=5.5in]{FIG/show2}
 \caption{Sample output radiance spectrum.}
 \label{sampleplot}
 \end{figure}
 
-Plotted next in Figure ~\ref{samplerads}, the clear sky radiative transfer 
-algorithm was used to produce a radiance plot. 
-\begin{figure}
-\includegraphics[width=5.5in]{FIG/show.eps}
-\caption{Sample output radiance spectrum.}
-\label{samplerads}
-\end{figure}
+%Plotted next in Figure ~\ref{samplerads}, the clear sky radiative transfer 
+%algorithm was used to produce a radiance plot. 
+%\begin{figure}
+%\includegraphics[width=5.5in]{FIG/show}
+%\caption{Sample output radiance spectrum.}
+%\label{samplerads}
+%\end{figure}
 
 \section{New Spectroscopy used by \kc}
 Most of the compressed optical path database that is used by \kc, is generated
@@ -1080,7 +1260,9 @@ Output radiances are in blackbody radiance units ($\hbox{\em milliwatts}
 \;\ m^{-2} sr^{-1}/\cm^{-1}$).  Jacobians can be output in one of three
 modes : an example is $d(\hbox{\em rad})/ds_{m}$, where $s_{m}$ is the
 temperature or gas amount in layer $m$. Fluxes are output in one of two 
-modes : radiance * angle units, or $K day^{-1} /cm^{-1}$
+modes : radiance * angle units, or $K day^{-1} /cm^{-1}$\\
+(note the smaller, second Jacobian file only dumps out radiances assuming the
+atmosphere was perturbed using a stemp/gas column perturbations).
 
 The following terms will be found in various places throughout the document.
 \begin{longtable}{|l|p{\colwidth}|}
@@ -1157,7 +1339,7 @@ $nm\_jacobn$ & optional section in \kc driver namelist file.  Once the user
               layers can be 
               studied by computing the Jacobians and weighting functions. Note
               these sensitivities are for clear skies only. At present, the 
-              code does not allow the user to compute radiances using 
+              code does allow the user to compute radiances using the $PCLASM$
               scattering models, and then compute jacobians.
               In addition, since the code computes temperature jacobians while
               it is uncompressing the kCompressed Database, it cannot compute
@@ -1213,17 +1395,23 @@ across the infrared spectrum, but just outputs the monochromatic ``flux''. The
 user will read in this flux, and ``add all the points, multiplied by 0.0025.''
 
 If the user supplies a name $filename$ for the usual radiance 
-results to be output, then the flux results (kFLux = 1,2) are in 
-$filename\_FLUX$ (or if kFLux = 3,4 $filename\_OLR$); otherwise
-they will stored in flux.dat. Note that if kFlux=1,2,3,4 and if a radiance for
+results to be output, then the flux results (kFlux = 1,2,3) are in 
+$filename\_DOWN, filename\_HEAT, filename\_UP$ respectively, 
+or if kFLux = 4,5, the results would be $filename\_OLR$ and $filename\_OLR3$); 
+if kFlux = 6, the results would be in $filename\_ALL$; 
+otherwise they will stored in flux.dat. Note only if kFlux=1,2,3,4,5,6 and a radiance for
 an atmosphere is to be output, then the fluxes will be computed. This is 
 independent of whether or not Jacobians are to be computed. 
 
-If kFlux=1, the fluxes are simply an integral of radiance over 
-$2 \pi \mu d\mu$, which means the units will be radiance units $\times$ s
-teradians, or mW m-2/cm-1. 
+If kFlux=1, only DOWNWELLING fluxes at the BOTTOM of each layer are saved. These
+are simply an integral of downwelling radiance over $2 \pi \mu d\mu$, which means the units will 
+be radiance units $\times$ steradians, or mW m-2/cm-1. 
 
-If kFlux=2, the fluxes are an integral of radiance over $2\pi \mu d\mu$, and 
+If kFlux=3, only UPWELLING fluxes at the TOP of each layer are saved. These
+are simply an integral of upwelling radiance over $2 \pi \mu d\mu$, which means the units will 
+be radiance units $\times$ steradians, or mW m-2/cm-1. 
+
+If kFlux=2, the (up-down) fluxes are integrated over $2\pi \mu d\mu$, and 
 then divided by $-c_{p} \;\; \rho \delta z$ where $c_{p}$ is the specific heat
 at constant pressure, $\rho$ is the density and $\delta z$ is the layer 
 thickness. This means the units will be $Kelvin$ per $day$ per$cm^{-1}$. 
@@ -1236,28 +1424,43 @@ by 0.0025 $cm^{-1}$} (as this is the same as integrating $I(\nu) d\nu$) to
 get the correct flux units (the factor of 86400 has already been accounted 
 for, so the units are ``correct.''). 
 
-If kFlux=3, only outgoing radiation at the top of each layer is computed; so 
-the units are the same as for kFlux=1 case, namely  mW m-2 per wavenumber 
-point. If the user is only interested in OLR at the top of the atmosphere, 
+If the user is only interested in OLR at the top of the atmosphere, 
 then kFlux=4 only outputs upgoing flux at TOA (thus making the binary output 
-files approximately 100 times smaller than fluxes outout at $all$ layers).
-For kFlux = 3,4
+files approximately 100 times smaller than fluxes output at $all$ layers).
+
+If the user is only interested in OLR at TOA, tropopause and the ILR at GND, 
+then kFlux=5 only outputs downgoing flux at GND and upgoing flux at 
+tropopause and TOA (thus making the binary output files approximately 33 times
+smaller than fluxes output at $all$ layers). This way the user can compute the
+greenhouse forcing parameter(s) \cite{fre:96,sod:95}
+\[
+g = \frac{\sigma T_{surf}^4 - OLR_{clearsky}}{\sigma T_{surf}^4}
+\]
+\[
+G = \frac{\sigma T_{surf}^4}{OLR_{clearsky}}
+\]
+
+If kFlux=6, UPWELLING fluxes at the TOP of each layer are saved, as are 
+DOWNWELLING fluxes at the BOTTOM of each layer are saved (HUGE FILES!)). These
+are simply an integral of downwelling radiance over $2 \pi \mu d\mu$, which means the units will 
+be radiance units $\times$ steradians, or mW m-2/cm-1. 
+
+For kFlux = 1,2,3,4,5,6
 \textcolor{red}{don't forget to multiply by d(nu) = 0.0025 cm-1 
                 when doing the (Matlab) integral over frequency (and divide 
-                the result by 1000 to change from mW to W if kFlux = 1,3)!!!!}
-
+                the result by 1000 to change from mW to W if kFlux = 1,3,4,5,6)}
 
 A sample flux plot is shown below, in Figure ~\ref{sampleflux}
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/coolrate.eps}
+\includegraphics[width=5.5in]{FIG/coolrate}
 \caption{Sample flux computation.}
 \label{sampleflux}
 \end{figure}
 
 \section{Using KLAYERS : change point profile to layer averaged profile}
 See the KLAYERS documentation. It is supplied to default to the AIRS 100 layers
-but the user can rest the pressure levels as necessary.
+but the user can reset the pressure levels as necessary.
 
 \subsection{Compiling kcarta}
 Once the user has successfully run klayers.x as described above, he/she should
@@ -1467,7 +1670,9 @@ cross section gases, and a lookup table format for the CKD computations.
 \item {\sf jac\_up.f} : jacobian code for up looking instrument
 \item {\sf jac\_down.f} : jacobian code for down looking instrument
 
-\item {\sf kcartamain.f} : main \kc source file
+\item {\sf kcartamain.f} : main \kc source file, with scattering flux jacobians
+\item {\sf kcartabasic.f} : main \kc source file, with flux jacobians
+\item {\sf kcartajpl.f} : standalone \kc source file, with flux jacobians
 \item {\sf kcartamisc.f} : misc routines eg splines
 
 \item {\sf kcoeffMAIN.f} : set up calls to compute LTE absorption coefficients
@@ -1652,6 +1857,69 @@ program starts running in earnest, making use of files {\sf comp97.param,
 %\end{picture}
 %\end{center}
 
+\section{\kc BANDS}
+\kc was originally developed for modelling IR instruments such as AIRS, IASI and
+CRiS. This means the original compressed database was only required to span
+605 - 2830 \wn. The paths kWaterPath,kCompPath,kCKDPath tell \kc where to look
+for the compressed files for this wavelength span. The files are identified by 
+having an ``r'' prefix, and the point spacing is 0.0025 \wn.
+
+\kc now has databases (UNVALIDATED!!!) that span either end of this original
+region. Currently (as of 01/29/2010) the span is from 80 \wn (FIR) to 25000 \wn 
+(UV). The point spacing changes from band to band, going from 0.00025 \wn at the 
+large wavelength (low freq) to 0.05 \wn at the small wavelength (high freq) 
+end. The bands, with the prefixes, are as follows  : 
+
+\begin{verbatim}
+     v = 12000-25000 cm-1, at 0.05000 cm-1 spacing (= 500 cm-1 chunk span)
+     o = 8250-12250 cm-1,  at 0.02500 cm-1 spacing (= 250 cm-1 chunk span)
+     n = 5550-8350 cm-1,   at 0.01500 cm-1 spacing (= 150 cm-1 chunk span)
+     m = 3550-5700 cm-1,   at 0.01000 cm-1 spacing (= 100 cm-1 chunk span)
+     s = 2830-3580 cm-1,   at 0.00250 cm-1 spacing (= 025 cm-1 chunk span)
+ *** r =  605-2830 cm-1,   at 0.00250 cm-1 spacing (= 025 cm-1 chunk span)
+     q =  500- 605 cm-1,   at 0.00150 cm-1 spacing (= 015 cm-1 chunk span)
+     p =  300- 510 cm-1,   at 0.00100 cm-1 spacing (= 010 cm-1 chunk span)
+     k =  140- 310 cm-1,   at 0.00050 cm-1 spacing (= 005 cm-1 chunk span)
+     j =  080- 150 cm-1,   at 0.00025 cm-1 spacing (= 2.5 cm-1 chunk span)
+\end{verbatim}
+
+This means the paths to the databases need to be specified at compile time.
+For example kWaterPathj,kCompPathj,kCKDPathj need to be set to tell the code
+where to find the FIR database for 80-150 \wn. 
+
+\textcolor{red}{It is best to divide \kc into runtime chunks. So for example if
+the user wishes to get spectra between 605-3330 \wn, do two separate runs, one
+from 605-2830\wn and the other between 2830-3330 \wn}. This is because the
+resolution of the spectra changes as you move from band to band.
+
+\textcolor{red}{The default radiative transfer in the NIR/VIS/UV is clear 
+sky .. not even accounting for Rayleigh. So beware! Also, in the UV the xsec
+databases (from HITRAN) for O3 mysteriously ended at around 40800 \wn, and so 
+ozone absorption from the tail end of the band is missing. Bad, bad, bad!!!}
+
+\section{Water isotopes}
+The HDO isotope is highly variable spatially. This is seen most clearly in the
+SW band of IASI (2600-2800 \wn). \kc defines a region  bounded by 
+[kWaterIsoBandStart,kWaterIsoBandStop] ~ [2405,3330] \wn. This encompasses the 
+``r'' band (2405-2830 \wn) and the ``s'' band (2830 - 3530 \wn) regions of the 
+database. Water is seprated into gasIDs 1,103 where 1 is almost the usual HITRAN
+gasID for water, and 103 signifies heavy water (seprated or ``broken out'' on;y
+within the above mentioned region).
+
+To model water, kCARTA uses \\
+I) gasID = 1 = water with ALL isotopes (HITRAN  nomenclature 1,2,3,4,5,6)
+OUTSIDE this band region and \\
+II) gasID = 103 = water for HDO (HITRAN nomenclature = 4) \\
+gasID = 1 = water with ALL OTHER isotopes (HITRAN  nomenclature 1,2,3,4,6)
+INSIDE this region.
+
+Outside this region, when ``water'' is uncompressed, it contains all the 
+isotopes in compressed file b1\_wxyz.dat. Within this region, it uncompresses
+HDO as gasID = 103 and H2O(isotopes 1,2,3,4,6) as gasID = 1
+
+To complete the optical depth due to water, the self and foreign (gasIDs 101,102)
+continuums must be added in as well. The CKD model needs to be chosen for this.
+
 \section{Compile time file {\sf kcarta.param}}
 
 Before compiling the code, the user has to tell \kc what size arrays
@@ -1673,6 +1941,8 @@ for this file.  Recommended settings are given in the table; the user
 should not set his/her parameters indiscriminately. Note that the datafiles
 that are pointed to by the paths, need to be for the correct endian versions.
 
+\newpage
+
 %\begin{small}
 %\begin{table}
 \begin{longtable}{|l|p{\colwidth}|}
@@ -1691,6 +1961,8 @@ kWaterPath & Path to the compressed data files for Water.\\
            & Typically {\sf ../DATA/WaterDataBase}\\ 
 kCO2Path   & Path to the compressed data files for linemix CO2.\\
            & Typically {\sf ../DATA/CompDataBase}\\ 
+kCO2\_UMBCorHARTMAN  & +1 if using UMBC linemixing, -1 if using Hartman linemixing.\\
+           & Typically +1 (so kCO2\_UMBCorHARTMAN helps turn on some tuning)\\
 kCousin\_CO2Path   & Path to the compressed data files for cousin CO2.\\
            & If available, typically {\sf ../DATA/CompDataBaseOld/}\\ 
            & If unavailable, set to {\sf ../DATA/CompDataBase/} and ignore\\ 
@@ -1756,6 +2028,35 @@ kXsecFormat   & tells the code if minor cross section gases data are in
                the kCompressed files for these gases\\
              \hline
            & \\
+
+kWaterIsoBandStart & tells the code where heavy water band starts \\
+kWaterIsoBandStop  & tells the code where heavy water band stops \\
+kWaterIsotopePath  & tells the codes where to find heavy water (gasID=103)
+                     and water w/o isotope 4 (still refereed to as gasID = 1)
+                     exist \\
+             \hline
+           & \\
+
+kWaterPathj & Path to the compressed data files for Water for 80-150 \wn.\\ 
+kCompPathj  & Path to the compressed data files for RestOfGases for 80-150 \wn\\
+kCKDPathj   & Path to the CKD continuum data files (Water Self and Foreign)
+              for 80-150 \wn\\
+           & \\
+
+kWaterPathk & Path to the compressed data files for Water for 140-310 \wn.\\ 
+kCompPathk  & Path to the compressed data files for RestOfGases for 140-310 \wn\\
+kCKDPathk   & Path to the CKD continuum data files (Water Self and Foreign)
+              for 140-310 \wn\\
+ ...        & ... \\
+
+kWaterPathv & Path to the compressed data files for Water for 12000-25000 \wn.\\ 
+kCompPathv  & Path to the compressed data files for RestOfGases for 12000-25000
+              \wn\\
+kCKDPathv   & Path to the CKD continuum data files (Water Self and Foreign)
+              for 12000-25000 \wn\\
+             \hline
+           & \\
+
 kBoxCarUse & tells the code how many points to BLOAT the NLTE calcs by.\\
 kRegrProf  & tells the code how many regression training profiles used \\
 kMaxPtsBox & tells the code how much space to save for NLTE optical depths\\
@@ -1795,7 +2096,17 @@ kNLTEPolyfits & if kCARTA tries to put in its own vib temp profile based on
                polynomial fits from the regression profiles, it needs to know 
                where to pick up the coefficients for the bands and QVs \\
                \hline
+%Just get rid of this, since these are the same profiles as in kOrigRefPath
+%kUSStdPath & if kCARTA reads in a AIRS pseudo lveles rtp file (h.ptype = 2) 
+%              then profiles for only a few variable gases are given; kCARTA 
+%              then has to add on (US Std) profiles for the remaining gases;
+%              these profiles are stored in kUSStdPath \\
+%             \hline
 \end{longtable}
+
+At the end of kcarta.param, there are a whole bunch of planet-centric parameters;
+for example radius=6400 km, gravity=9.8m/s2, atmospheric molecular mass-28.9 g/mol etc. 
+These not be changed unless for example the user wishes to compute a Mars spectrum.
 
 To keep memory sizes manageable, the jacobian parameter declarations in this
 file might be set to ``1''. To allow \kc to perform jacobian computations, 
@@ -1853,7 +2164,7 @@ running of \kc.  Note that
    \item the namelist file is divided into about 12 separate sections. For
       example, $nm\_prfile$ contains the profile name, while 
       $nm\_frqncy$ contains the start and stop frequencies.
-   \item if at most the profile is driven by an RTP file (kRTP = -2,-1,0) then 
+   \item if at most the profile is driven by an RTP file (kRTP = +1,0) then 
          keywords MOLGAS, FRQNCY, PRFILE, OUTPUT are required  
    \item if the RTP file drives almost everything (kRTP = 1) then 
          keywords MOLGAS, PRFILE, OUTPUT are required  
@@ -1877,8 +2188,15 @@ each of the $nm\_keywords$.
 
 \subsection{$nm\_params$ (optional)}
 
-Here the user can reset values of parameters specific to a
-particular run.  All lines beginning with ``{\tt !}'' are considered
+\textcolor{red}{We note here there are a number of preset
+parameters that kCARTA currently uses, such as kTemperVary = -1 for constant
+layer temeperture during Radiative Transfer, or using splines for uncompressing
+the database. The values can be switched by the user, but at the user's risk.
+For this reason, the "hidden" parameters iaOverride are not mentioned here,
+but can be seen in subroutine SetDefaultParams in kcartamisc.f}.
+
+Below we define and explain how the user can reset values of other "safer" parameters,
+for a particular run. All lines beginning with ``{\tt !}'' are considered
 comment lines and are ignored.  If the value of a parameter is not
 set here, it defaults to the defined value below.  These parameters affect 
 the entire run of the program (including parsing in the
@@ -1953,16 +2271,18 @@ over all gases.\\
    &        & {\bf -1}    & {\bf do weighted gas average}\\
    &        & 1           &  use CO2 layer temperatures (if present)\\\hline
 
-4  & {\sf kLongOrShort} &-1,0,1    & (integer) whether or not to output all 
+4  & {\sf kLongOrShort} &-2,-1,0,+1,+2    & (integer) whether or not to output all 
 driver namelist file information (including path profiles and weighting table 
 lines) into output binary file header, or to output only essential 
-information 
-into the header \\
-   &  & {\bf 1}  & {\bf output complete header info to output binary file} \\
-   &             & -1 & output summary header info to output binary file
-                    (does not repeat mixing table/gas profile info)\\
-   &             & 0 & output bare minimum header info, and bare data\\ \hline
-5 & {\sf kJacobOutput} & -1,0,1 & (integer) one of 3 output styles for 
+information into the header \\
+   &  & {\bf 2}   & {\bf output complete header info to output binary file, SHORT warning.msg} \\
+   &  & 1        & output complete header info to output binary file, LONG warning.msg \\
+   &  & 0        & output bare minimum header info, and bare data\\
+   &  & -1       & output summary header info to output binary file
+                    (does not repeat mixing table/gas profile info), LONG warning.msg\\
+   &  & -2       & output summary header info to output binary file
+                    (does not repeat mixing table/gas profile info), SHORT warning.msg\\  \hline
+5 & {\sf kJacobOutput} & -1,0,1,2 & (integer) one of 3 output styles for 
     Jacobians.  They can be in raw $dR/ds_{m}$, $dR/ds_{m} \Delta s_{m}$ or 
     $d(BT)/ds_{m} \Delta s_{m}$ where $R$ is radiance, $s_{m}$ is layer gas 
     amount or temperature for layer $m$ and $BT$ is the brightness 
@@ -1971,21 +2291,34 @@ into the header \\
   &      & -1        & output dR/dq,dR/dT\\
   &      & 0         & output dR/dq * q, dR/dT\\
   &      & {\bf 1}   & {\bf output d(BT)/dq * q, d(BT)/dT
-                       where q is the gas profile being perturbed.}\\ \hline
-6 & {\sf kFlux}   & -1,1,2,3 & (integer) to calculate flux (+1,+2), outgoing
-radiation(+3) or nothing (-1). There are 2 different output styles for the 
-computed ``fluxes.'' Note that the user has to read in the computed ``flux'' 
-for each layer, and then sum over the computed fluxes, at the output 
-resolution, to get the correct units. Also note that at present, only clear
-sky fluxes, or single cloud layer twostream fluxes, or multiple cloud layer 
-pclsam fluxes, are possible\\
+                       where q is the gas profile being perturbed.}\\ 
+  &      &           & \textcolor{red}{Note d(BT)/d(ln(q)) = q d(BT)/dq} \\
+  &      & 2         & output d(BT)/dq, d(BT)/dT \\
+   & & & Independent of the value of kJacobOutput, the second smaller Jacobian
+         file always contains $radiances$ computed at $surftemp$,$column$ $gas$
+         perturbation values of 1.0K and 0.1 respectively.\\
+  \hline
+6 & {\sf kFlux}   & -1,1,2,3,4,5 & (integer) to calculate flux (+1,+2), 
+    outgoing radiation at all levels(+3), OLR at TOA (+4), OLR at TOA and
+    ILR at GND(+5) or nothing (-1). There are 2 different output styles for 
+    the computed ``fluxes.'' Note that the user has to read in the computed 
+   ``flux'' for each layer, and then sum over the computed fluxes, at the 
+    output resolution, to get the correct units. Also note that at present, 
+    only clearsky fluxes, or single cloud layer twostream fluxes, or multiple 
+    cloud layer pclsam fluxes, are possible\\
    &  & {\bf -1}  & {\bf no flux computations} \\
-   &             & 1 & flux computations : output units are radiance * angle\\
-   &             & 2 & flux computations : output units are Kelvin/day\\ 
-   &             & 3 & OLR  computations : output units are radiance * angle\\
+   &             & 1 & DNWELL flux at BOTTOM of each layer : radiance * angle\\
+   &             & 2 & flux at all levels : Kelvin/day\\ 
+   &             & 3 & UPWELL flux at TOP of each layer : radiance * angle\\
+   &             & 4 & OLR  at TOA : radiance * angle\\
+   &             & 5 & ILR at gnd; OLR at tropopause and TOA : radiance*angle\\
+   &             & 6 & UPWELL at TOP of each layer, followed by DOWNWELL at BOTTOM of each layer : radiance * angle\\
 \hline
 6a & {\sf kFlux}   & 0,-1,1,2,3 & (integer) to output Planck modifiers if NLTE 
-computations are being done (+1), or nothing output (-1). \\
+computations are being done (+1), or nothing output (-1). The output modifiers are
+for layers 1:N (for usual atm) and N+1:M (for upper atm), where M-N+1 is the number of
+layers for the upper atmosphere\\
+   
    &  & {\bf -1}    & {\bf no output planck modifiers} \\
    &  & 0           & output planck modifers\\
    &  & 1,2,3       & no output planck modifiers \\
@@ -2013,21 +2346,40 @@ calculating the Jacobians for an uplook instrument) \\
                               should not mess up gas amount jacobians \\
   &              & {-2}  & use temp dependence only in Planck. Note this
                               should not mess up gas amount jacobians \\ \hline
-9 & {\sf kRTP}   & -2,-1,0,1   & (integer) whether or not to use an RTP file. 
+9 & {\sf kRTP}   & -10,-6,-5,-2,-1,0,1,2  & (integer) whether or not to use an RTP file. 
                                  Can have arbitrary number of layers per gas in
                                  each profile, as long as N <= kProfLayer 
-                                 (except fpr the kRPT=-1 case, where number of
+                                 (except for the kRPT=-1 case, where number of
                                   layers per gas must equal kProflayer \\
+  &              & {+2}      & standalone version, where profile and scan angles etc comes in via argument list \\
   &              & {\bf +1}  & {\bf RTP style profile, RTP atmosphere, 
                                 scatter defn}\\
-  &              & {0}       & {\bf RTP style profile, user atmosphere, 
-                                scatter defn}\\
-  &              & {-1}      & {\bf old style ``klayers'' profile, user 
+  &              & {0}       & RTP style profile, user atmosphere, 
+                                scatter defn\\
+  &              & {-1}      & old style ``klayers'' profile, user 
                                  atmosphere, scatter defn. This case NEEDS 
-                                 number of layers in profile == kProfLayer }\\
-  &              & {-2}      & {\bf GENLN4 style ``layers'' profile, user 
-                                 atmosphere, scatter defn}\\
-   \hline
+                                 number of layers in profile == kProfLayer\\
+  &              & {-2}      & GENLN4 style ``layers'' profile, user 
+                                 atmosphere, scatter defn\\ 
+  &              & {-5}     & LEVELS INPUT LBLRTM TAPE5; sets missing gas amts to 0\\
+  &              & {-6}     & LAYERS INPUT LBLRTM modified TAPE6; sets missing gas amts to 0\\
+  &              & {-10}     & LEVELS INPUT text file profile, user 
+                                 atmosphere, scatter defn\\ \hline
+10 & {\sf kActualJacs}  & -1,20,30,40,50,100  & (integer) how many jacs to 
+  actually do (dump zeros for the rest). Default (-1) is to compute all 
+  profile jacobians; others (20:50) dump out zeros for stuff not computed\\
+  &              &           & option 100 dumps column gas, stemp jacobians \\
+  &              & {\bf -1}  &{\bf do ALL profile jacobians (gases(z),temp(z),
+                               wgt(z),surface)}\\
+  &              & {20}        & only do Q(z) jacs\\
+  &              & {30}        & only do T(z) jacs\\
+  &              & {40}        & only do W(z) jacs\\
+  &              & {50}        & only do S jacs\\   
+  &              & {100}       & only do column and stemp jacs\\
+  &              & {100ABCXYZ} & only do column and stemp jacs, with 
+                   radiating atmosphere perturbed between layers ABC to XYZ\\
+  &              &             &  read with ``readkcbasic.m()\\   \hline
+  \hline
 \end{longtable}
 \end{small}
 
@@ -2038,10 +2390,40 @@ set to the temperatures of the CO2 If CO2 is not present in the
 profile, or if the parameter is set to -1, the layer temperature that
 is used is a weighted average over the gases.
 
+Options -1,20,30,40,50 for Parameter 10 ({\sf kActualJacs}) produces (large) 
+jacobian profile files, to be read in by ``readkcjac.m''. If the user wishes 
+to only dump out column gas jacobians, and stemp jacobian, a much smaller 
+file that can be read in using ``readkcbasic.m'' is produced when option 100
+is used. The relationship between the column and profile jacobians is
+\[
+\displaystyle\sum_{l=GND}^{TOA} J^{q}_{l}(n) = Jcol^{q}(n)
+\]
+where $q$ is the  gas ID, $l$ is the layer and $n$ is the frequency index
+
+If you use {\sf kActualJacs} = 100; then it perturbs the entire atmosphere.
+If you use {\sf kActualJacs} = 100ABCXYZ; then it perturbs the radiating 
+atmosphere between ABC and XYZ wrt surface. So eg if the atmosphere was 
+defined from 
+(surface) 1013 mb to (TOA) 0 mb, the radiating layers correspond to 
+KCARTA/KLAYER layers = 4:100. So if {\sf kActualJacs} = 100001004, the first 
+four of these radiating layers are used in the jacobian, which are 4,5,6,7.
+Code also does this for UPLOOK instrument : if the atmosphere was defined from 
+(TOA) 0 mb to (surface) 1013 mb, the radiating layers correspond to 
+KCARTA/KLAYER layers = 100:4. So if {\sf kActualJacs} = 100001004, the first 
+four of these radiating layers WRT surface are used in the jacobian, 
+which again are 4,5,6,7 (instead of first four in the defn of the atmosphere, 
+which would be 100,99,98,97).
+\textcolor{red}{WARNING : 100ABCXYZ = column gas/temp from *radiating* layers 
+wrt surface ABC to XYZ, and stemp. Note d/dT(i) in this case accounts for 
+layer temp changes, and includes the OD changes due to temp changes; 
+so it maybe a very good estimate, as it does radiative transfer
+with correct background thermal}
+
 \subsection{$nm\_frqncy$ (mandatory)}
 
-This section specifies the frequency start/stop endpoints.  If kRTP = -2,-1,0 
-the user has to speciy the start/stop wavenumbers that kCARTA has to process. 
+This section specifies the frequency start/stop endpoints.  If kRTP = -10,-5,-6,-2,-1,0 
+the user has to speciy the start/stop wavenumbers that kCARTA has to process (while
+if kRTP = +2, the code automatically uses 605 to 2830 \wn)
 The format here is
 
 \medskip
@@ -2103,14 +2485,19 @@ This section specifies molecular gas ID's.  The format is
 
 \smallskip
 {\sf
-\ttab{\sf iNgas = -1}
+\ttab{\sf iNgas = -1, -5/-6}
 }
 
 \medskip\noindent 
-{\sf iNgas} specifies how many molecular gas ID's to read in.  If {\sf
-iNgas = -1}, then the program automatically includes all gases that exist
-in the compressed database.  If {\sf iNgas $>$ 0 then the program
-requires a list of {\sf iaGasesNL} valid GasID's (between 1and 28)
+{\sf iNgas} specifies how many molecular gas ID's to read in.
+
+If {\sf iNgas = -1}, then the program automatically includes all gases that exist
+in the compressed database. \newline
+If {\sf iNgas = -5/-6}, then the program automatically includes the first 38 gases, to
+emulate LBLRTM \newline
+
+If {\sf iNgas $>$ 0 then the program requires a list of {\sf iaGasesNL} valid GasID's
+(between 1 and 40)
 
 Note there is a a subtle point here, the water continuum. If $kCKD \ge 0$ then 
 the user wants water vapor plus continuum. Hence gasIDs 101 and 102 will also
@@ -2138,7 +2525,7 @@ above,
 
 \smallskip
 {\sf 
-\ttab iNxsec = -1
+\ttab iNxsec = -1, -5/-6
 }
 
 \smallskip
@@ -2151,10 +2538,16 @@ above,
 
 \medskip\noindent 
 where {\sf iNXsec} specifies how many cross-section gasID's to read in.
+
 If {\sf iNXsec} $ = -1$, then the program automatically includes all gases
-that exist in the cross-section database.  If {\sf iNXsec}$> 0$ then the
-program requires a list of {\sf iaNxsecNL} valid GasID's (between 51 and
-63).  If {\sf iNXsec} = 0 then no cross section gases will be used.
+that exist in the cross-section database (gasIDs 51-81).\newline
+If {\sf iNXsec} $ = -5/-6$, then the program automatically includes gases 51-63 to
+emulate LBLRTM \newline
+
+If {\sf iNXsec}$> 0$ then the program requires a list of {\sf
+iaNxsecNL} valid GasID's (between 51 and 81). \newline
+
+If {\sf iNXsec} = 0 then no cross section gases will be used. \newline
 
 The total number of gases to be used in building up the atmosphere is
 
@@ -2164,6 +2557,56 @@ The total number of gases to be used in building up the atmosphere is
 \subsection{$nm\_prfile$ (mandatory)}
 
 \label{inprofile}
+
+If kRTP = +2, then the profile comes in via arguments to the main calling routine (see kcartajpl.f).
+8 gases are assumed for now, namely WV,CO2,O3,N2O,Co,CH4,SO2, HN03; in addition the temperature
+profilem emissivities, surface parameters )(pressure, temperature, emissivity, reflectivity) also
+need to be supplied.
+
+If kRTP = -5 or -6, then kCARTA reads in a text LBLRTM file; TAPE5 in the first case and
+modified TAPE6 in the second case. The reader is simple, so not guaranteed to read in 
+any and all TAPE5 correctly. Similarly the modified TAPE6 reader expects first few lines
+from TAPE5 header (so it can set eg viewangle, stemp, pressure layering, number of
+mol gases, number of xsec gases) and then TAPE6 from \newline
+  "P(MB)       T(K)    ALPHL    ALPHD    ALPHV   ZETA" \newline
+and cut and paste the info. NOTES  \newline
+a) if kRTP = -5, then kCARTA will take LBLRTM input levels T(z),Q(z) profile and convert to 
+layers (see kRTP = -10 case below) \newline
+b) if kRTP = -6, then kCARTA will take LBLRTM output layers T(z),Q(z) profile and use use 
+these amounts; make sure they were computed on the AIRS pressure layering!!! \newline
+c) if kRTP = -5,-6, then all "missing" gases will have
+gas amount set to 0.0, so kCARTA truly duplicates profile gas amounts and temperatures 
+from LBLRTM\newline
+
+If kRTP = -10, this means the user is going to use the built in levels $\rightarrow$ layers
+program that kCARTA has; in this case the user can totally ignore the RTP libraries during
+compilation and linking, as the input files are text based namelist, levels profile and
+possibly emissivity. The built in levels $\rightarrow$ layers agrees with the regular 
+kLAYERS, such that biases are within about 0.25 K in the high altitude CO2/O3 regions, and 
+within 0.15 K everywhere else (after convolution with eg gaussians of 0.5 cm-1 width). If 
+the user does not provide Earth profiles for CO2 and CH4, then CO2 is adjusted according
+to $ 370.0 + (rYear-2002)*2.00 $ while CH4 is set to 1.8 ppb. The text levels file is of 
+the format
+\begin{verbatim}
+caStr80   = comment
+numlevs   = number of levels
+Psurf,TSurf,HSurf = surface pressure (mb) and temperature (K) and height (km)
+year lat lon     = year of obs (for co2 MR) and gravity adjust (not yet implemented)
+                    if year < 0, ignore
+                    if year > 0 and kPlanet = 3, then if adding on Gas2=CO2, adjust for ppmv
+numgases  = number of gases
+gasIDS    = which gases
+gasUNITS  = eg MR, g/g, RH, same as klayers
+  p1     T1   g1_1  g2_1 .... gG_1
+  p2     T2   g1_2  g2_2 .... gG_2
+  p3     T3   g1_3  g2_3 .... gG_3
+  p4     T4   g1_4  g2_4 .... gG_4
+
+  pN     TN   g1_N  g2_N .... gG_N
+
+where p(i) is in mb, T(i) is in K and MR are dimensionless 0 < MR < 1
+and N <= kProfLayer*2
+\end{verbatim}
 
 If kRTP = -2,-1, this means the user wishes to use an old style (text) GELN4/
 kLAYERS file for the profile. So in addition the user simply has to specify 
@@ -2244,20 +2687,47 @@ This variable gives the MP set that is used to construct the atmosphere. For
 further information, the reader is referred to the namelist section 
 $nm\_radnce$  (see below).
 
+NOTE: if gases are expected (from nm\_molgas and/or nm\_xscgas) but are not present
+in the .rtp profile, the code automatically includes gas layer profiles from 
+one of six AFGL profiles. Parameter iAPGFProf controls this, and the default
+setting is 1 for STD; other settings are 2=TRP, 3=MLS, 4=MLW, 5=SAS, 6 = SAW.
+
 Additionally, in this section, if the RTP file drives \kc to include a cloud 
-scattering computation, then two more variables must be set at this point \\
+scattering computation, then three more variables must be set at this
+point. Case 1 allows for the main RTP file to set the cloud parameters for two
+cloud slabs, each between $ptop,pbot$ for $iwp,dme$ combinations, and only
+requires the following three variables (in addition to the above info in the
+RTP file) \\
 {\sf 
-\ttab caCloudFile = \\
+\ttab iNclouds\_RTP = \\
 \ttab iBinORAsc= \\
+}
+The first (integer) variable tells kCARTA how many clouds to expect. The second 
+(integer) parameter tells the code whether the files are in ascii format or 
+binary format (-1/+1). 
+
+Finally the user needs to specify the names of the scattering files, as well
+as associate a type (typically 101 = water cloud, 201 = ice cloud, 301 = aerosol)
+that should match up with p.ctype, p.ctype2 in the rtp file.
+{\sf 
+\ttab caaCloudFile (iX) = \\
+\ttab iaNML\_Ctype(iX)  = \\
 }
 The first (character*80) variable gives the name of the file that contains 
 the cloud scattering information (such as asymmetry, single scattering albedo 
-and extinction). The second (integer) parameter tells the code whether the 
-file is in ascii format or binary format (-1/+1). 
+and extinction), while the second is an integer that signifies the type . The 
+scattering iles need to be in 
+the same format (producde by running Frank Evans' Mie scattering code) as that
+used to drive the scattering computations in the namelist section 
+$nm\_scattr$ (see below), to which the user is referred to.
 
-This file needs to be in the same format (producde by running Frank Evans' 
-Mie scattering code) as that used to drive the scattering computations in the 
-namelist section $nm\_scattr$ (see below), to which the user is referred to.
+If the user sets 100 layers cloud profiles using KLAYERS, the usual cprtop,cngwat
+etc variable are redundant. Only variables that are used would be cfrac, cfrac2,
+cfrac12 and cpsize,cpsize2. This is because the cloud layer info comes in via 
+the same RTP profile containing the atmospheric profile, but also has gases 
+201,202,203 for water, ice, aerosol respectively. While running, the 100 layer
+profiles are merged so that we could eg have bith ice and water particles at thr
+440 - 460 mb layer.
 
 \subsection{$nm\_weight$ (optional)}
 
@@ -2416,6 +2886,29 @@ that no Jacobian or flux calculations will be done for that atmosphere.
 Satellite angles are with respect to the vertical.
 
 \medskip
+For any one given profile/set of mixed paths, the default behaviour of \kc is to only do one set
+of calculations eg radiance, flux, jacobians. However there are instances when one would want
+to use mostly the same parameters, and repeat calculations for one parameter. For example one
+might want to keep all view angles and emissivity the same, but repeat the calculation for
+different surface temperatures. This can be done by using the following parameters \newline
+iAtmLoop = -1,1,2,3,4 : stand for do one calc (default) or vary \newline
+  (1) surface pressure (2) stop pressure (3) satzen (which code internally converts to scanang) (4) solar zenith
+  (5) emissivity $\rightarrow$ emissivity + $\delta$ \newline
+The user can then use raAtmLoop(1..5) to set upto 5 values (termination is when the array
+value is less than 0).
+
+So for example the following sets three view angles (which are gaussian quadrature for fluxes)
+\newline
+\begin{verbatim}
+  iAtmLoop = 3
+  raAtmLoop(1) = 24.2988
+  raAtmLoop(2) = 53.8051
+  raAtmLoop(3) = 77.7405
+  raAtmLoop(4) = -1.00
+  raAtmLoop(5) = -1.00
+\end{verbatim}
+
+\medskip
 If $kRTP = -2,-1,0$ this means the user will be defining the atmosphere, 
 using the specifications stated below. If $kRTP = +1$ then \kc will use the 
 atmosphere definitions specified in the RTP file that contains the profile; 
@@ -2451,6 +2944,7 @@ and the emissivity. Thus this section would look like\\
 \ttab iakSolar(1)        = \\
 \ttab rakSolarAngle(1)   = \\
 \ttab cakSolarRefl(1)    = \\
+\ttab rakSolarRefl(1)    = \\
 \ttab iakThermal(1)      = \\
 \ttab rakThermalAngle(1) = \\
 \ttab rakThermalJacob(1) = \\
@@ -2467,6 +2961,7 @@ and the emissivity. Thus this section would look like\\
 \ttab iakSolar(2)        = \\
 \ttab rakSolarAngle(2)   = \\
 \ttab cakSolarRefl(2)    = \\
+\ttab rakSolarRefl(2)    = \\
 \ttab iakThermal(2)      = \\
 \ttab rakThermalAngle(2) = \\
 \ttab rakThermalJacob(2) = \\
@@ -2488,6 +2983,7 @@ and the emissivity. Thus this section would look like\\
 \ttab iakSolar        = i1,i2, ... \\
 \ttab rakSolarAngle   = r1,r2, ...\\
 \ttab cakSolarRefl    = ca1,ca2, ...\\
+\ttab rakSolarRefl    = r1,r2, ...\\
 \ttab iakThermal      = i1,i2, ...\\
 \ttab rakThermalAngle = r1,r2, ...\\
 \ttab rakThermalJacob = r1,r2, ...\\
@@ -2536,7 +3032,7 @@ specifying the pressures that constitute the upper/ lower boundaries.
   dummy values for the program to read in.
 \item the start and stop pressures are flexible enough to allow the
   user to be able to define fractional top and bottom layers.  Please
-  refer to Section \cite{Fractional Layers} below
+  refer to Section \cite{FractionalLayers} below
 \end{itemize}
 
 \item[{\sf raTSpace(iI)}] is a real number, stating the blackbody 
@@ -2563,7 +3059,7 @@ earth.  For an upward looking instrument, this is the angle between where the
 satellite is looking at and the local vertical.
 
 \item[{\sf raSatHeight(i)}] is a real number that specifies
-the satellite height (in km).  This accounts for the slight change
+the satellite height (in m).  This accounts for the slight change
 of angle wrt vertical, as radiation travels between the earth's
 surface and satellite, due to the intrinsic curvature of the earth's
 surface.
@@ -2591,7 +3087,7 @@ tells the program whether or not to include solar radiation for up
 or downlooking instruments
 \begin{itemize} 
 \item (+1) : include solar radiation, using actual solar spectral data
-\item (0)  : include solar radiation, using T=5600K
+\item (0)  : include solar radiation, using T=5800K
 \item (-1) : do not include solar radiation
 \item Obviously, if the sun angle and the satellite view angle are different 
       for an uplook instrument, then the sun being on will have no effect if
@@ -2603,13 +3099,16 @@ degrees.  It has to be between 0.0 and +90.0, or iaKSolar will be reset to -1
 
 \item[{\sf cakSolarRefl(iI)}] is a character allowing the user to assign a 
 file to read sun reflectance values from. If this is not specified, then 
-$(1-\epsilon)/\pi$ is used across the spectrum.
+  \begin{itemize}
+    \item if raKSolarRefl $\le$ 0, $(1-\epsilon)/\pi$ is used across the spectrum.
+    \item if raKSolarRefl $\ge$ 0, this value is used across the spectrum.
+  \end{itemize}
 \begin{itemize}
 \item If DISORT scattering code is used, then the solar reflectance cannot be
   set by the user ie it is always $(1-\epsilon)/\pi$ 
 \item If the filename specified is DISORT scattering code is used, then the 
   solar reflectance can be set by the user, and so can violate
-  $refl + (1-\epsilon)/\pi = 1$ 
+  $refl = (1-\epsilon)/\pi$ 
 \end{itemize}
 
 \item[{\sf iakThermal(iI)}] is an integer {\bf( limited to -1, 0 or 1)} that
@@ -2634,11 +3133,16 @@ using Gaussian quadrature.
 \begin{itemize}
 \item If the user specifies a positive value between 0.0 and +90.0,
   this angle will be used at all layers.
-\item If the user specifies a negative value, a value of acos(3/5)
+\item If the user specifies -1  a value of acos(3/5)
   will be used at the upper layers, while our optimum diffusive angle
   will be used at lower layers, the combination of which is a better
-  approximation than using a single diffusive angle at {\em all}
-  layers.
+  approximation than using a single diffusive angle at {\em all} layers.
+  This uses CONST in $\tau$ layer temperature variation (kcarta default)
+\item If the user specifies -2  a value of acos(3/5)
+  will be used at the upper layers, while our optimum diffusive angle
+  will be used at lower layers, the combination of which is a better
+  approximation than using a single diffusive angle at {\em all} layers.
+  This uses LBLRTM in $\tau$ layer temperature variation (lblrtm style)
 \item If JACOBN is set, then this could lead to some discrepancies. The clear
 sky jacobian assumes all angles are $acos(3/5)$, while the radiative transfer 
 will use whichever angles it needs, as set by rakThermalAngle
@@ -2651,15 +3155,17 @@ layers the diffusive angle $acos(3/5)$ is used for the reflected
 thermal, while for the lower layers, a parameterized optimum
 diffusivity angle is used.  If it is set at a positive value, then for
 all layers, the diffusive angle $acos(x)$ is used for the
-reflected thermal.
+reflected thermal. acos(3/5) = 53.1301 degrees
 
 \begin{small}
 \begin{longtable}{|l|lp{\colwidth}|}
 \caption{Diffusivity Options.}\\
 \hline
-kThermalAngle& -x  & use parameterized optimum diffusivity angle at \\
-             &     & lower layers, acos(3/5) at higher layers\\
-             & +x  & user specified value (in degrees) at ALL layers\\
+kThermalAngle & -1  & use parameterized optimum diffusivity angle at \\
+              &     & lower layers, acos(3/5) at higher layers CONST In $\tau$\\
+              & -2  & use parameterized optimum diffusivity angle at \\
+              &     & lower layers, acos(3/5) at higher layers LINEAR In $\tau$\\
+              & +x  & user specified value (in degrees) at ALL layers\\
 \hline
 \end{longtable}
 \end{small}
@@ -2687,7 +3193,8 @@ emissivity (constant at all wavenumbers). If a emissivity file is to be read
 in then raSetEmissivity(iI) $MUST$ be set to a negative value; if it is set
 to a positive value, this is what will be used across the entire wavenumber
 range. For an upward looking instrument, the surface
-emissivity file/values are read in and ignored.  
+emissivity file/values are read in and ignored.  For a limb view, need to set
+the emissivity to greater than 1.
 
 To summarize,
 
@@ -2701,10 +3208,12 @@ To summarize,
 \ttab  {\sf raTSpace} is the space blackbody temperature (~2.6k)\\
 \ttab  {\sf raTsurf} is the surface temperature\\
 \ttab  {\sf raSatAngle} is the satellite angle (in degrees)\\
-\ttab  {\sf raSatHeight} (in km) indicates whether to modify {\sf SatAngle}\\
+\ttab  {\sf raSatHeight} (in m) indicates whether to modify {\sf SatAngle}\\
 \ttab  {\sf iakSolar} (-1, 0 or 1) sets solar radiation on/off\\
 \ttab  {\sf rakSolarAngle} sets the solar zenith angle\\
-\ttab  {\sf cakSolarRefl} sets the solar reflectance\\
+\ttab  {\sf cakSolarRefl} is a file for the solar reflectance\\
+\ttab  {\sf rakSolarRefl} sets the solar reflectance (-1 means use (1-e)/pi
+                or cakSolarRefl)\\
 \ttab  {\sf iakThermal} (-1, 0 or 1) sets the reflected thermal on/off\\
 \ttab  {\sf rakThermalAngle} sets the diffusivity angle\\
 \ttab  {\sf iakThermalJacob} sets thermal background inclusion in 
@@ -2792,7 +3301,8 @@ the radiating/emitting/absorbing atmosphere are set as follows.
   to a constant emissivity); two or more points correspond to a spectrally
   varying emissivity
                 g) iaKThermal(iC)   = 0  
-                   raKThermalAngle(iC) = -1.0  
+                   raKThermalAngle(iC) = -1.0  CONST  in $\tau$
+                   raKThermalAngle(iC) = -2.0  LINEAR in $\tau$		   
                    iakThermalJacob(iC) = 1  
                 h) iaSetEms(iC) = prof.nemis  
                    DO i=1,iaSetEms(iC)   
@@ -2852,7 +3362,7 @@ pressures (corresponding to highest and lowest altitudes), $pLow$ and $pHigh$
 \end{itemize}
 
 \subsubsection{Fractional Layers}
-\label{Fractional Layers}
+\label{FractionalLayers}
 
 Depending on the user requirements, such as surface pressure or
 position of a downward looking instrument, the start and stop
@@ -2870,6 +3380,7 @@ have the following namelist initializations for this section : \\
 \ttab iakSolar(1)        = -1\\
 \ttab rakSolarAngle(1)   = -1.0\\
 \ttab cakSolarRefl(1)    = 'NONEDEFINED'\\
+\ttab rakSolarRefl(1)   = -1.0\\
 \ttab iakThermal(1)      = 0\\
 \ttab rakThermalAngle(1) = -1.0\\
 \ttab rakThermalJacob(1) = 1\\
@@ -2882,10 +3393,11 @@ have the following namelist initializations for this section : \\
 \ttab raTspace(2)        = 2.7.0\\
 \ttab raTsurf(2)         = 303.34\\
 \ttab raSatAngle(2)      = 10.0\\
-\ttab raSatHeight(2)     = 705.0\\
+\ttab raSatHeight(2)     = 705000.0\\
 \ttab iakSolar(2)        = 1\\
 \ttab rakSolarAngle(2)   = 0.0\\
 \ttab cakSolarRefl(2)    = 'dummysun'\\
+\ttab rakSolarRefl(1)   = -1.0\\
 \ttab iakThermal(2)      = -1\\
 \ttab rakThermalAngle(2) = 35.0\\
 \ttab rakThermalJacob(2) = 1\\
@@ -3107,13 +3619,13 @@ optical depth in the same region is due to water(self); other gases will have
 an appreciable contribution to the total optical depth}
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/water_tropical.eps}
+\includegraphics[width=5.5in]{FIG/water_tropical}
 \caption{Water and total optical depths in 10 um window.}
 \label{watertrp}
 \end{figure}
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/water_subarticwinter.eps}
+\includegraphics[width=5.5in]{FIG/water_subarticwinter}
 \caption{Water and total optical depths in 10 um window.}
 \label{watersaw}
 \end{figure}
@@ -3537,6 +4049,20 @@ Also note how if iaPrinter(iI) = 1,2 we had to specify the gas paths
 or mixed paths in iaaOp(i,j), but if iaPrinter(iI) = 3 we had to specify the 
 pressure levels in raaOp(i,j)
 
+\textcolor{blue}
+{USEFUL NOTE : default to TOA or GND}
+
+If a print option for an entire atmosphere (spres to 0 mb) is \\
+\medskip
+\ttab iaPrinter(1) = 3\\
+\ttab iaGPMPAtm(1) = 1\\
+\ttab iaNp(1)      = 1\\
+\ttab raaOp(1,1)   = -1\\
+implying that one radiance, is to be output, then
+the program automatically determines the direction of radiation travel, and 
+then sets raaOp(1,1) = SPRES for an uplook instrument, or raaOp(1,1) = 0.0
+for a downlook instrument.
+
 \subsection{$nm\_jacobn$ (optional)}
 
 This keyword turns on/off Jacobian calculations.  
@@ -3628,7 +4154,7 @@ parameters and data supplied below.
 The information required in this section is of the following form\\
 \medskip
 \ttab iNumNLTEGases             = \\
-\ttab iNLTE_SlowORFast          = \\
+\ttab iNLTE\_SlowORFast         = \\
 \ttab iaNLTEGasID(1..N)         = \\
 \ttab raLTEStrength(1..N)       = \\
 \ttab raNLTEstart(1..N)         = \\
@@ -3642,11 +4168,12 @@ The information required in this section is of the following form\\
 \ttab caaNLTEBands(1..N,1..P)   = \\
 \ttab
 
-\noindent $iNLTE_SlowORFast$ tells the code whether to use the slow accurate
-LBL model (+1) or regression coefficients used by the fast model (-1). If you
-use the Fast Version (+1), then the only namelist parameters you need to 
-set are iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID(),iaNLTEChunks(a),
-                  iaaNLTEChunks(a,b)
+\noindent $iNLTE_SlowORFast$ tells the code whether to use the slow
+accurate LBL model (+1) or regression coefficients used by the fast
+compressed model (-2) or the SARTA NLTE Fast Model (-1) which is the DEFAULT. If
+you use the Fast Version (-2), then the only namelist parameters you
+need to set are iNumNLTEGases,iNLTE\_SlowORFast,iaNLTEGasID(),iaNLTEChunks(a),
+iaaNLTEChunks(a,b)
 
 \noindent $iNumNLTEGases$ tells the code the number of gases that are in NLTE.
 If NLTEGases = -1, then all gases are in LTE (no gas in NLTE). The code uses 
@@ -3661,11 +4188,11 @@ based on information specified further in this section.
 
 \noindent $iSetBloat$ tells code whether to use default (-1) 0.0025 \wn 
 spacing or to use bloted (+1) 0.0005 \wn resolution.\\
-If iNLTE_SlowORFast = +1, this is automatically (re)set to -1
+If iNLTE\_SlowORFast = +1, this is automatically (re)set to -1
 
 \noindent $iDoUpperAtmNLTE$ tells code whether to do NLTE calcs upto 80 km 
 (default (-1) or upto 120 km (+1)\\
-If iNLTE_SlowORFast = +1, this is automatically (re)set to -1
+If iNLTE\_SlowORFast = +1, this is automatically (re)set to -1
 
 \noindent $raNLTEstart(1..N)$ tells for each gas in NLTE, at which height 
 (in km) to start the NLTE computations. This height information is turned into
@@ -3747,6 +4274,13 @@ CO2; else they will just be Voigt}
 \noindent $caaNLTETemp(1..N)$ for each of the $N$ gases in NLTE, give
 the file that has the NONLTE temperatures and vibrational partition function 
 terms, in GENLN2 style. 
+See the f90 programs supplied by M. Lopez-Puertas and B. Funke in
+  KCARTA/SRCv1.12/NONLTE2/sergio/VIBTEMPS\_Puertas/ORIGCODE \\
+as well as \\
+ /KCARTA/SRCv1.12/NONLTE2/sergio/AIRSDATA\_NLTE\_VIBTEMPS\_Puertas/do\_makeVT.m
+for a script that takes in an input kinetic temp profile and dumps out the
+NLTE temperature profiles
+
 If the user puts the name 'nlteguess', kCARTA will use a polynomial guess
 of the NLTE temps, and output the guessed profile into \\
    caOutName\_VTX     : this is the GENLN2 style file \\
@@ -3760,10 +4294,18 @@ the isotopic sigmasigma, pipi, deltadelta NLTEs.
 The example below is primed for the 4 um CO2 band. \\
 \begin{itemize}
 \item iNumNLTEGases = +1 : says that one gas is in NLTE
-\item iNLTE_SlowORFast = +1 : says that slow accurate LBL model
+\item iNLTE\_SlowORFast = +1 : says that slow accurate LBL model
 \item  iaNLTEGasID(1)    = 2 : says the gasID of the gas is ``2'' (CO2)
 \item  raNLTEstrength(1) = +1.0 : says use a weight of 1.0 for all the
-                          upper layer optical depths computed for this gas
+                          upper layer optical depths computed for this gas.\\
+                          Together with parameter kCousin\_CO2path, this lets 
+                          kCARTA do cousin lineshape computations via the
+                          following fudge : if raNLTEstrength(X) = -1.1212 and
+                          iaNLTEGasID(X) = 2, kCARTA not do NLTE but instead 
+                          swaps the linemix uncompressed spectra for cousin 
+                          uncompressed spectra in the layers above that 
+                          specified by raNONLTEstart(X)\\
+                          Otherwise raNLTEstrength is really not used
 \item  raNLTEstart(1)   =  45.0 : tells the code to start the NLTE 
                      computations above 45.0 km (which is about layer 90 for 
                      the standard AIRS layers)
@@ -3856,7 +4398,7 @@ with the TOA at about 85 km. The main CO2 Sigma-Sigma, Delta-Delta, Pi-Pi
 bands are in NLTE while the weak background lines are in LTE. 
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/nlte.eps}
+\includegraphics[width=5.5in]{FIG/nlte}
 \caption{NLTE plots : Comparison of kCARTA, GENLN to actual AIRS data.}
 \label{nlte}
 \end{figure}
@@ -4219,7 +4761,7 @@ with kDis\_Pts = 200, for a downlook instrument, sun on, takes about
 To speed up the code, the user can do one or both of the following. In the 
 input namelist file, one can reduce the number of streams used in the 
 computation (kDis\_nstr, preset to 16), or decrease the number of points at 
-which radiances are computed (kDis\_Pts, preset at 5).}
+which radiances are computed (kDis\_Pts, preset at 400).}
 
 \textcolor{blue}
 {WARNING 4: For a downlook instrument, iakThermal(i) is only relevant 
@@ -4237,7 +4779,7 @@ and fourth is aersol dust at ground. Mean particle sizes of 10 um were used
 for all three scattering cases,  while the particle concentrations were
 1.0,1.0,10.0 g/m2 respectively.
 \begin{figure}
-\includegraphics[width=4in]{FIG/down_rtspec.eps}
+\includegraphics[width=4in]{FIG/down_rtspec}
 \caption{Scatter plots : Downlook instrument using RTSPEC}
 \label{rtspec_down}
 \end{figure}
@@ -4245,7 +4787,7 @@ for all three scattering cases,  while the particle concentrations were
 Figure ~\ref{twostream_up} is a plot of the brightness temperatures for the 
 same 4 cases, using the TWOSTREAM code (sun on). The instrument is uplooking. 
 \begin{figure}
-\includegraphics[width=4in]{FIG/up_two.eps}
+\includegraphics[width=4in]{FIG/up_two}
 \caption{Scatter plots : Uplook instrument using TWOSTREAM}
 \label{twostream_up}
 \end{figure}
@@ -4303,7 +4845,40 @@ The information required in this section is of the following form\\
 \ttab ...\\
 \ttab }
 
-$iaNewGasIDIiI)$ is the HITRAN gasID of the gas that the user is supplying 
+and 
+
+{\sf 
+\ttab iNumAltComprDirs   = \\
+\ttab iaAltComprDirs(iI)  = \\
+\ttab iaAltComprDirs(iI)   = \\ 
+\ttab \ttab   caaAltComprDirs(1)    =  \\
+\ttab \ttab   caaAltComprDirs(2)    =  \\
+\ttab \ttab   caaAltComprDirs(3)    =  \\
+\ttab ...\\
+\ttab }
+
+Note you cannot have both iNumNewgases and iNumAltCOmprDirs set positive ie 
+either one or the other is allowed, not both.
+
+The user specifies that he/she wants to supply compressed databases
+for $iNumAltComprDirs$.  $iaAltComprDirs(iI)$ is the HITRAN gasID of
+the gas that the user is supplying externally computed compressed
+databases for, while $caaAltComprDirs(iI)$ is a character array
+telling the code in which directory the new compressed tables lie. So
+for example 
+\newline
+\medskip
+\ttab  iNumAltComprDirs   =             2 \\
+\ttab  iaAltComprDirs(1)  =             1\\
+\ttab  iaAltComprDirs(2)   =            5\\
+\ttab  \ttab      caaAltComprDirs(1)     =   '../DATA/Compressed/gas1/'\\
+\ttab  \ttab      caaAltComprDirs(2)     =   '../DATA/Compressed/gas5/'\\
+tells the ocde that there are 2 alternate compressed databases, one
+for gas 1 and the other for gas 5; the directories are also specified.
+
+The user specifies that he/she wants to supply spectral tables for 
+$iNumNewGases$.
+$iaNewGasIDI(iI)$ is the HITRAN gasID of the gas that the user is supplying 
 externally computed absorption spectra for. $iaNewData(iI)$ is an integer 
 value denoting the number of kCompressed chunks that the data will be 
 supplied for. For each of these new chunks, $iaaNewChunks(iI,iJ)$ 
@@ -4793,7 +5368,16 @@ This section describes the FORTRAN output binary file that results from a \kc
 run. This will allow a user to write his/her own reader. It might behoove the 
 user to refer to our supplied $FORTRAN$ readers {\sf readkcarta.f, 
 readjacob.f, readfkux.f} and/or the  $MATLAB$ readers {\sf readkcstd.m, 
-readkcjac.m, readkcflux.m}. 
+readkcjac.m, readkcflux.m, readkcBasic.m} for the standard output binary 
+file(s), jacobian file(s), flux file(s) and simple output binary files.
+
+In addition if the user is interested in examing the NLTE outputs, the
+following files will be useful : {\sf readkcBloat.m, readkcplanck.m,
+readkcUA.m} for reading in the bloated output files (at 0.0005 \wn resolution), 
+the Planck multipliers and the UA radiances/output ODs. Note in files read in
+using readkcUA.m, the output ODS are dumped out first, then the radiance at 0.005
+mb (usual atm with NLTE upto that 80 km level), and finally the NLTE radiance at
+0.00005 mb (final radiance at 120 km).
 
 As a further hint, if the user still has problems writing reader code after 
 perusing this section, the user should refer to
@@ -5006,6 +5590,8 @@ list of mixed paths to be output\\
 -------------ATMOSPHERE INFO-------------\\
 \begin{small}
 \begin{longtable}{llp{\colwidth}}
+{\sf integer} &iTemperVary & Const (-1) or LBLRTM linear-in-tau (43) \\
+              &      & layer temperature variation \\
 {\sf integer} &iNatm & Number of Atmospheres \\
               &      & specified in $nm\_radnce$\\
 {\sf integer} &kEmsRegions & Number of different \\
@@ -5173,7 +5759,7 @@ atm2,rad1     & & (raRad2\_1(iFr),iFr=1,kMaxPts)\\
 
 \subsection{ The Jacobian file}
 
-If kJacobian == 1 then an auxiliary data file, with 'JAC' appended to it,
+If kJacobian == 1 then an auxiliary data file (could have 'JAC' appended to it)
 will be produced.  It has the same header info as the main output file, and
 is in the format General Header, Special Header, Data.  As usual, the
 output Jacobian  file is in the following binary format\\
@@ -5359,10 +5945,10 @@ parameter jacobian always has 4 items that are output.
 
 \subsection{ The Flux file}
 
-If kFlux = 1,2,3 then an auxiliary data file, with 'FLUX' appended to it,
-will be produced.  It has the same header info as the Jacobian file, and
-is in the format General Header, Special Header, Data.  As usual, the
-output Flux   file is in the following binary format\\
+If kFlux = 1,2,3,4,5,6 then an auxiliary data file, with eg 'FLUX' or 'OLR' 
+appended to it, will be produced.  It has the same header info as the 
+Jacobian file, and is in the format General Header, Special Header, Data.  
+As usual, the output Flux file is in the following binary format\\
 MAIN HEADER\\
 DATA\\
 
@@ -5580,7 +6166,12 @@ The {\sf MATLAB} Jacobian readers proceed in exactly the same fashion as the
 the {\sf MATLAB} \kc readers described above, while {\sf readjacob.x} will 
 produce a file of the same binary format as {\sf readkcarta.x} above.  
 
-The only difference would be that the jacobian data file is read in. 
+Note that the finite difference jacobians (column gas amounts) is dumped out
+in the same format as a ``basic'' \kc file, and so can be read in using
+readKcBasic.m or readKcBasic.f (described above)
+
+However, the main (layers) jacobian data file is dumped out in a slightly 
+different format, and so needs to be read in differently.
 Suppose there was only one atmosphere in the \kc run, 
 and that it had 80 layers, with the user asking for 3 gas Jacobians.  
 Then for each 10000 point chunk, there would be (3*80) gas jacobians, 
@@ -6462,7 +7053,7 @@ calculations, with the TOA at about 85 km. The main CO2 $\Sigma-\Sigma,
 in LTE. The Cousin lineshape is used in the simulations.
 
 \begin{figure}
-\includegraphics{/home/sergio/KCARTA/DOC/FIG/nlte.eps}
+\includegraphics{/home/sergio/KCARTA/DOC/FIG/nlte}
   \caption{Example of a NLTE computation using kCARTA and GENLN2}
   \label{fig:nlte} 
 \end{figure} 
@@ -6827,7 +7418,7 @@ The namelist $nm_scattr$ section has been slightly extended, so that \\
        kDis\_nstr  (defaulted to 16)\\
 
   4) for DISORT to run fast, we can set the number of wavenumber points 
-     stepped over kDis\_Pts (defaulted to 50)\\
+     stepped over kDis\_Pts (defaulted to 400)\\
 
   5) Introduced a new parameter into *SCATTR, raExp(j), where j is
      the cloud under consideration. If set to 0 and a cloud is 

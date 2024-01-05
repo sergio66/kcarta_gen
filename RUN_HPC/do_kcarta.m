@@ -135,6 +135,12 @@ elseif iDoJac == -100 & iDoFlux < 0 & iDoCloud < 0 & gg == 1001
   sedder = [sedder ' template_QcolWV_uplook_jacobian.nml  > ' outnml];      
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
   
+elseif iDoJac == -100 & iDoFlux < 0 & iDoCloud < 0 & gg == 1003
+  disp('do_kcarta.m here A4 (UPLOOK clr sky rads and col jacs, WV1,101,102,103 and G3)')
+  %%% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
+  sedder = [sedder ' template_QcolWV_uplook_jacobian3.nml  > ' outnml];      
+  kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
+  
 elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg == 2346
   disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G2,3,4,6,51,52)')
   %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian

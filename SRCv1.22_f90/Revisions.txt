@@ -619,6 +619,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+1/5/24          rad_main.f90 : subr find_radiances_coljac : if gasID = 101, then instead of
+                  od --> od + delta * od = od (1 * delta)
+                we need to account for square dependence of OD on gas amount, so
+                  od --> od (1 + delta)^2 = od (1 + 2 delta)
+                  od --> od + 2 * delta * od
 
 8/1/23          Made significant changes to backscatter parametrization, so as to fall into the
                 Martinazzo/Maestri JQSRT paradigm. This is foloowed through in RTSPEC, PCLSAM and DISORT,

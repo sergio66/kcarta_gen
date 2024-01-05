@@ -45,10 +45,11 @@ do_kcarta
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if iDoConvolve > 0 & (iDoRad == 3 | iDoRad == 10) & exitcode == 0
+%% if iDoConvolve > 0 & (iDoRad == 3 | iDoRad == 10) & exitcode == 0
+if iDoConvolve > 0 & (iDoRad == 0 | iDoRad == 3 | iDoRad == 10) & (iDoJac == -1) & exitcode == 0
   do_convolve(iInstr,iiBin);
 end
-if iDoConvolve > 0 & (iDoRad == 3 | iDoRad == 10) & (iDoJac == 1 | iDoJac == 100) & exitcode == 0
+if iDoConvolve > 0 & (iDoRad == 3 | iDoRad == 10) & (iDoJac == 1 | abs(iDoJac) == 100) & exitcode == 0
   fprintf(1,'jacobian gasID gg = %4i iDoJac = %4i iDoCLoud = %4i \n',gg,iDoJac,iDoCloud)
   do_convolve_jac(gg,iInstr,iiBin,iDoJac,iDoCloud);
 end

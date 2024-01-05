@@ -89,7 +89,6 @@ if length(junkdir) == 0
     do_convolve(iInstr,iiBin);
     fprintf(1,'jacobian gasID gg = %4i iDoJac = %4i iDoCLoud = %4i \n',gg,iDoJac,iDoCloud)
     do_convolve_jac(gg,iInstr,iiBin,iDoJac,iDoCloud);
-
   end
 
 else

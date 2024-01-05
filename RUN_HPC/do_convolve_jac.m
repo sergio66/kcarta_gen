@@ -55,8 +55,8 @@ elseif iDoJac == 100 & iDoCloud <= 0 & gg ~= 1001
   iii = nnnj-1 : nnnj;
   dall(:,iii) = dall(:,iii)/0.01;
 
-elseif abs(iDoJac) == 100 & iDoCloud <= 0 & gg == 1001
-  %% g1,101,102,103,T(z),ST
+elseif abs(iDoJac) == 100 & iDoCloud <= 0 & (gg == 1003 | gg == 1001)
+  %% g1,[g2 3 4 5 6],101,102,103,T(z),ST
   fjac = [outdir '/jac.dat' num2str(ii) '_COL'];
   [radall,w] = readkcstd([outdir '/rad.dat' num2str(ii)]);    
   [dall,w]   = readkcBasic([outdir '/jac.dat' num2str(ii) '_COL']);  
@@ -150,6 +150,68 @@ elseif gg == 1001 & abs(iDoJac) == 100
   %whos w dall*
   dall = [dall1001 dallT dallSurf];
   ngases = 1;
+
+  addpath /home/sergio/MATLABCODE
+  [fc,qc] = quickconvolve(w,dall1001,1,1);
+  figure(1); plot(fc,qc(:,1)); title('WV coljac'); pause(0.1);
+
+elseif gg == 1003 & abs(iDoJac) == 100
+  if iDoCloud <= 0
+    fprintf(1,'doing clear sky col jacobians for gasID %3i ==> O3 WV 1+101+102+103 ... add together\n',1003)
+    if iDoJac == -100
+      disp('UPLOOK JACS')
+    end
+  elseif iDoCloud == 1
+    fprintf(1,'doing allsky jacobians for gasID %3i ==> O3 WV 1+101+102+103 ... add together \n',1003)
+  end
+  %% remember do g1,g3,101,102,103  and T and ST
+  [mm,nn] = size(dall);
+  if iDoCloud <= 0
+    nnlay = (nn-4)/(4+1+1+1);
+  else
+    nnlay = (nn-4)/(4+1+1+1+1+1);
+  end
+  %% readkcjac: 89 chunks, 1 ODBs(num of atmos), 877 total rows  
+  %% readkcjac: ODB atm# = 5, subtype = 1, rows = 97     G1   (1:97)+0*97
+  %% readkcjac: ODB atm# = 5, subtype = 101, rows = 97   G101 (1:97)+2*97
+  %% readkcjac: ODB atm# = 5, subtype = 102, rows = 97   G102 (1:97)+3*97
+  %% readkcjac: ODB atm# = 5, subtype = 103, rows = 97   G103 (1:97)+4*97
+  %% readkcjac: ODB atm# = 5, subtype = 201, rows = 97   G201 (1:97)+5*97
+  %% readkcjac: ODB atm# = 5, subtype = 202, rows = 97   G202 (1:97)+6*97
+  %% readkcjac: ODB atm# = 5, subtype = 0, rows = 97     T    (1:97)+7*97
+  %% readkcjac: ODB atm# = 5, subtype = -10, rows = 97   WGT  (1:97)+8*97
+  %% readkcjac: ODB atm# = 5, subtype = -20, rows = 4    SURF (1:04)+9*97
+  fprintf(1,'   do_convolve_jac.m : gg=%4i iDoCloud=%2i     iDoJac=%2i mm,nn=%10i %4i     nnlay=%8.6f \n',gg,iDoCloud,iDoJac,mm,nn,nnlay);
+  jjuse = 1:nnlay;
+  if iDoCloud > 0
+    error('oioio')
+    dall1001   = dall(:,jjuse+0*nnlay) + dall(:,jjuse+2*nnlay) + dall(:,jjuse+3*nnlay) + dall(:,jjuse+4*nnlay);
+    dallO3     = dall(:,jjuse+1*nnlay);
+    dallCld1   = dall(:,jjuse+5*nnlay);
+    dallCld2   = dall(:,jjuse+6*nnlay);
+    dallT      = dall(:,jjuse+7*nnlay);
+    dallWgtFcn = dall(:,jjuse+8*nnlay);
+    %%% dallSurf   = max(jjuse+6*nnlay); dallSurf = dallSurf+1:nn; dallSurf = dall(:,dallSurf);
+    dallSurf   = (1:4)+9*nnlay; dallSurf = dall(:,dallSurf);
+  else
+    dall1001   = dall(:,1) + dall(:,3) + dall(:,4) + dall(:,5);
+    dallO3     = dall(:,2);   %% THIS MIGHT BE A CO2 JAC, check template_QcolWV_uplook_jacobian3.nml
+    dallT      = dall(:,6);
+    dallSurf   = dall(:,7);
+%    dall1001   = dall(:,1) + dall(:,5) + dall(:,6) + dall(:,7);
+%    dallCO2    = dall(:,2);
+%    dallO3     = dall(:,3);
+%    dallCH4    = dall(:,4);
+%    dallT      = dall(:,8);
+%    dallSurf   = dall(:,9);
+  end
+  %whos w dall*
+
+  dall = [dall1001 dallO3 dallT dallSurf];
+  ngases = 2;
+
+  %dall = [dall1001 dallCO2 dallO3 dallCH4 dallT dallSurf];
+  %ngases = 4;
 
   addpath /home/sergio/MATLABCODE
   [fc,qc] = quickconvolve(w,dall1001,1,1);
@@ -339,7 +401,7 @@ end
 if iDoJac == 1
   junk = [mm nn natmos numlay ngases];
   fprintf(1,'jacobian is of size %8i x %3i for %2i atmospheres each with %3i layers and %3i gases \n',junk);
-elseif iDoJac == 100
+elseif abs(iDoJac) == 100
   junk = [mm nn];
   fprintf(1,'col jacobian is of size %8i x %3i  \n',junk);
 end
@@ -349,6 +411,8 @@ disp('after summing together G1,101,102,103 and/or other gases as needed) ')
 whos w dall d
 if iDoJac == 1
   fprintf(1,'numlay = %3i numgases = %3i \n',numlay,ngases)
+elseif abs(iDoJac) == 100
+  fprintf(1,'numgases = %3i \n',ngases)
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -89,8 +89,19 @@
  $nm_jacobn
  namecomment	=  '******* JACOBN section *******'
 
- iJacob    =  4
+ !iJacob    =  7
+ !iaJacob(1) = 1
+ !iaJacob(2) = 2
+ !iaJacob(3) = 3
+ !iaJacob(6) = 6
+ !iaJacob(7) = 101
+ !iaJacob(8) = 102
+ !iaJacob(9) = 103
+
+ iJacob    =  5
  iaJacob(1) = 1
+ iaJacob(2) = 2
+ !iaJacob(2) = 3
  iaJacob(3) = 101
  iaJacob(4) = 102
  iaJacob(5) = 103
