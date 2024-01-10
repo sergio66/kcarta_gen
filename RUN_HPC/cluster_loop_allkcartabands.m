@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath /home/sergio/KCARTA/MATLAB
 addpath /asl/matlib/h4tools
+addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 
 set_rtp
 set_gasOD_cumOD_rad_jac_flux_cloud_lblrtm
@@ -63,6 +64,9 @@ end
 %c                    25000.0000,  44000.0000  /
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+if length(JOB) == 0
+  JOB = 1;
+end
 % JOB = 49;
 % JOB = 1;
 % JOB = 269
@@ -71,13 +75,21 @@ JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 % JOB = 20
 
 [hjunk,hajunk,pjunk,pajunk] = rtpread(use_this_rtp0);
-ctype  = pjunk.ctype(JOB);
-ctype2 = pjunk.ctype2(JOB);
+mmw = mmwater_rtp(hjunk,pjunk);
+emiss900 = interp1(pjunk.efreq(1:pjunk.nemis(JOB),JOB),pjunk.emis(1:pjunk.nemis(JOB),JOB),900);
+surf_properties = [pjunk.stemp(JOB) mmw(JOB) emiss900 pjunk.rlat(JOB) pjunk.rlon(JOB)];
 
-if pjunk.ctype(JOB) > 0 | pjunk.ctype2(JOB) > 0
-  iCldORClr = +1;
-else
-  iCldORClr = -1;
+ctype = -9999;
+ctype2 = -9999;
+iCldORClr = -1;
+if isfield(pjunk,'ctype')
+  ctype  = pjunk.ctype(JOB);
+  ctype2 = pjunk.ctype2(JOB);
+  if pjunk.ctype(JOB) > 0 | pjunk.ctype2(JOB) > 0
+    iCldORClr = +1;
+  else
+    iCldORClr = -1;
+  end
 end
 
 strWaterCloud = '/asl/s1/sergio/CLOUDS_MIEDATA/WATER250/water_405_2905_250';
@@ -109,6 +121,7 @@ kcbands = [15 30 50 80 140 300 500 605 805 2830];
 tic
 iiBin = JOB;
 fluxall = [];
+jall = [];
 dall = [];
 wall = [];
 
@@ -126,129 +139,36 @@ for iBand = 1 : length(kcbands)-1
   sedder = [sedder ' -e "s/XYZXYZ/'  use_this_rtp   '/g"'];  %%%<<<-- to sed rtpfname
   sedder = [sedder ' -e "s/CKDCKD/'  num2str(iKCKD) '/g"'];
   sedder = [sedder ' -e "s/DOLBLRTM/' num2str(iDoLBLRTM) '/g"'];
-  
+  if iDoJac == -100
+    sedder = [sedder ' -e "s/DOOUTPRESSLEVEL/' num2str(1200) '/g"'];
+  elseif iDoJac == +100
+    sedder = [sedder ' -e "s/DOOUTPRESSLEVEL/' num2str(0) '/g"'];
+  end
+
   outnml  = ['kcband' num2str(iBand) '.nml_' num2str(iiBin)];
   outname = ['JUNK/kcband' num2str(iBand) '.dat_' num2str(iiBin)];  
 
-  if iDoRad == 3  & iDoFlux < 0
-    if iCldORClr == -1 | iBand < 7
-      %% can only do clear
-      sedder = [sedder ' template_Qrad_allbands.nml  > ' outnml];
-    elseif iCldORClr == +1 & iBand >= 7
-      sedder = [sedder ' ' sedderC ' '];
-      sedder = [sedder ' template_Qrad_2cloud_allbands.nml  > ' outnml];
-    end
-    eval(sedder)
-    kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& status' num2str(iiBin)];
-    if exist(outname)
-      rmer = ['!/bin/rm ' outname];
-      eval(rmer);
-    end    
-    eval(kcartaer)
-  
-    if iCldORClr == -1  | iBand < 7
-      %% can only do clear
-      [d,w] = readkcstd(outname);
-      dall = [dall; d];
-      wall = [wall w];
-    elseif iCldORClr == +1 & iBand >= 7
-      %cldparamsname = [outname '_CLD'];
-      %cunk = load(cldparamsname);
-      %[djunk,w] = readkcstd_twoslabclds(outname,cldparamsname);
-
-      [d,w] = readkcstd(outname);
-      [mmjunk,nnjunk] = size(d);
-      dall = [dall; d(:,nnjunk)];
-      wall = [wall w];
-    end
-
-  elseif iDoRad == 3 & iDoFlux == 5  
-    if iCldORClr == -1 | iBand < 7
-      %% can only do clear
-      sedder = [sedder ' template_Qflux5_allbands.nml  > ' outnml];
-    elseif iCldORClr == +1 & iBand >= 7
-      sedder = [sedder ' ' sedderC ' '];
-      sedder = [sedder ' template_Qflux5_2cloud_allbands.nml  > ' outnml];
-    end
-    eval(sedder)
-    kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& status' num2str(iiBin)];
-    if exist(outname)
-      rmer = ['!/bin/rm ' outname];
-      eval(rmer);
-    end    
-    eval(kcartaer)
-
-    if iCldORClr == -1 | iBand < 7
-      %% can only do clear
-      [d,w] = readkcstd(outname);
-      dall = [dall; d];
-      wall = [wall w];
-
-      [fx,w] = readkcflux([outname '_OLR3']);
-      fluxall = [fluxall; fx];
-
-    elseif iCldORClr == +1 & iBand >= 7  
-      %cldparamsname = [outname '_CLD'];
-      %cunk = load(cldparamsname);
-      %[djunk,w] = readkcstd_twoslabclds(outname,cldparamsname);
-
-      [d,w] = readkcstd(outname);
-      [mmjunk,nnjunk] = size(d);
-      dall = [dall; d(:,nnjunk)];
-      wall = [wall w];
-
-      [fx,w] = readkcflux([outname '_OLR3']);
-      fluxall = [fluxall; squeeze(fx(nnjunk,:,:))];
-    end
-
-  elseif iDoRad == 3 & iDoFlux == 7  
-    if iCldORClr == -1 | iBand < 7
-      %% can only do clear
-      sedder = [sedder ' template_Qflux7_allbands.nml  > ' outnml];
-    elseif iCldOrClr == +1 &  iBand >= 7
-      sedder = [sedder ' ' sedderC ' '];
-      sedder = [sedder ' template_Qflux7_2cloud_allbands.nml  > ' outnml];
-    end
-    eval(sedder)
-    kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& status' num2str(iiBin)];
-    if exist(outname)
-      rmer = ['!/bin/rm ' outname];
-      eval(rmer);
-    end    
-    eval(kcartaer)
-
-    if iCldORClr == -1 | iBand < 7
-      %% can only do clear
-      [d,w] = readkcstd(outname);
-      dall = [dall; d];
-      wall = [wall w];
-
-      [fx,w] = readkcflux([outname '_IOLR3']);
-      fluxall = [fluxall; fx];
-
-    elseif iCldORClr == +1 & iBand >= 7  
-      %cldparamsname = [outname '_CLD'];
-      %cunk = load(cldparamsname);
-      %[djunk,w] = readkcstd_twoslabclds(outname,cldparamsname);
-
-      [d,w] = readkcstd(outname);
-      [mmjunk,nnjunk] = size(d);
-      dall = [dall; d(:,nnjunk)];
-      wall = [wall w];
-
-      [fx,w] = readkcflux([outname '_IOLR3']);
-      fluxall = [fluxall; squeeze(fx(nnjunk,:,:))];
-    end
-  
-  else
-    fprintf(1,'iDoRad = %3i iDoFlux = %3i \n',iDoRad,iDoFlux)
-    error('huh?? unknown combo of iDoRad/iDoFlux!!!')
+  if iDoJac ~= -1
+    outjacname = ['JUNK/kcband' num2str(iBand) '.jac_' num2str(iiBin)];  
+    outjacnameCOL = [outjacname '_COL'];
   end
-  
-  figure(2); plot(wall,rad2bt(wall,dall)); pause(0.1)
-  rmer = ['!/bin/rm ' outnml ' status' num2str(iiBin)]; eval(rmer)
 
+  %%%%%%%%%%%%%%%%%%%%%%%%%
+  if exist(outname)
+    rmer = ['!/bin/rm ' outname ' ' outjacnameCOL];
+    eval(rmer);
+  end    
+  if iDoJac == -1
+    loop_all_kcartabands_radsNFlux
+  elseif iDoJac == +1
+    disp('not very wise, huge 100 layer jac files will be concatenated together, try column jacs')
+    error('loop_all_kcartabands_radsNFlux_100layerjac, see loop_all_kcartabands_radsNFlux_coljac')
+  elseif abs(iDoJac) == +100
+    loop_all_kcartabands_radsNFlux_coljac
+    rmer = ['!/bin/rm ' outname ' ' outjacnameCOL]; eval(rmer);
+  end    
 end
+
 toc
 
 fprintf(1,'iDoRad = %2i iDoFlux = %2i \n',iDoRad,iDoFlux)
@@ -261,6 +181,19 @@ elseif iDoRad == 3  & iDoFlux == 5
 elseif iDoRad == 3  & iDoFlux == 7
   saver = ['save JUNK/all7kcbands_prof' num2str(JOB) '.mat wall dall fluxall kcbands'];
 end
+if abs(iDoJac) == +100
+  %% 9 column jacs : [gid(1 2 3 6 101 102 103)     T ST]  --> 6 column jacs [gid(1 = (1 101 102 103), 2 3 6)     T ST]
+  jallx = zeros(length(jall),6);
+  jallx(:,1)       = sum(jall(:,[1 5 6 7]),2);
+  jallx(:,[2 3 4]) = jall(:,[2 3 4]);
+  jallx(:,[5 6])   = jall(:,[8 9]);
+  jac_comment = ['gid 1,2,3,6  T,ST   where gid1 = sum of 1,101,102,103'];
+  jall = jallx;
+  saver = [saver ' jall jac_comment'];
+end
+surf_prop_comment = 'stemp mmw emiss(900cm-1)  rlat rlon';
+saver = [saver ' surf_prop_comment surf_properties'];
+
 eval(saver)
 
 %{

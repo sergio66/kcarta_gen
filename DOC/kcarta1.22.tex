@@ -98,11 +98,12 @@ L.~Larrabee~Strow:   \>        strow@umbc.edu\\
 \begin{center}
 {\bf ABSTRACT}
 \end{center}
+
 \kc is a radiative transfer code for a non-scattering Earth's
 atmosphere.  It can be used to output monochromatic gas optical
-depths, layer-to-space transmittances and radiances.  In addition, it can also 
-do clear sky radiative transfer computations, or radiative transfer 
-computations in the presence of scattering.
+depths, layer-to-space transmittances and radiances.  In addition, it
+can also do clear sky radiative transfer computations, or radiative
+transfer computations in the presence of scattering.
 
 In the case of clear sky radiative transfer, \kc can compute and output 
 analytic Jacobians with respect to temperature and gas amount.  As well
@@ -157,7 +158,9 @@ This document is very much a work in progress.  Some major omissions
 include references, significant examples of \kc output, and
 comparisons of \kc output to observed spectra.  These omissions will
 be rectified in the future.  Please give us your feedback on both the
-code and the documentation!  This manual should work for v1.11+.
+code and the documentation!  This manual should work for v1.22+.
+
+References for work accomplished using the kCARTA code inude \cite{mac:19,mac:17*2,str:02*2}.
 
 \newpage
 \section{Introduction}
@@ -1449,6 +1452,23 @@ For kFlux = 1,2,3,4,5,6
 \textcolor{red}{don't forget to multiply by d(nu) = 0.0025 cm-1 
                 when doing the (Matlab) integral over frequency (and divide 
                 the result by 1000 to change from mW to W if kFlux = 1,3,4,5,6)}
+
+
+This is summarized in Table \ref{tab:fluxopt}
+
+\begin{longtable}{|c|c|p{\colwidth}|}
+\caption{Flux computation options}\\
+\hline
+   1 & '\_DOWN'  & dngoing flux at each level \\
+   2 & '\_HEAT'  & up-dn heating rate at each layer \\
+   3 & '\_UP'    & upgoing flux at each level \\
+   4 & '\_OLR'   & OLR at TOA \\
+   5 & '\_OLR3'  & ILR at gnd, OLR at topopause/TOA \\
+   6 & '\_ALL'   & up/dn flux at each level \\
+   7 & '\_IOLR3' & ILR at gnd,tropopause,toa \\
+     &           & OLR at gnd,tropopause,toa \\
+\hline
+\end{longtable}
 
 A sample flux plot is shown below, in Figure ~\ref{sampleflux}
 
@@ -3032,7 +3052,7 @@ specifying the pressures that constitute the upper/ lower boundaries.
   dummy values for the program to read in.
 \item the start and stop pressures are flexible enough to allow the
   user to be able to define fractional top and bottom layers.  Please
-  refer to Section \cite{FractionalLayers} below
+  refer to Section \ref{FractionalLayers} below
 \end{itemize}
 
 \item[{\sf raTSpace(iI)}] is a real number, stating the blackbody 
@@ -6796,7 +6816,7 @@ where the double sum is over the singular vectors and the gases.
 While doing the spline interpolations of the coefficients $c_{l(g)}$,
 the derivatives $\frac{\partial c_{l(g)}}{\partial T_{m}}$,
 $\frac{\partial c_{l(w)}}{\partial q_{m(w)}}$ can be obtained
-concurrently \cite{wil:89*2} in the compressed space.   (These
+concurrently \cite{wil:89} in the compressed space.   (These
 Jacobians can also be calculated, in compressed space, but by
 ``perturbing'' the gas amounts/layer temperatures and then doing a
 finite difference derivative, before performing the uncompression).
@@ -7481,6 +7501,8 @@ for doing the same for $RTSPEC$. Thanks also go to Pat Arnott of the Desert
 Research Institute, for advice regarding the twostream code. Ji Gou (UMBC) and 
 Szu-Chia Lee (SSEC/U-Wisc) were amongst the innocent users that reported
 bugs that required fixes!
+
+\bibliographystyle{plain} \bibliography{/home/sergio/texmf/bibtex/bib/atmspec2017}
 
 \end{document}
 

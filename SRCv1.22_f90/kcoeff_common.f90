@@ -1753,40 +1753,42 @@ CONTAINS
 
     IF (abs(dv-real(dFStep)) > 1.0e-6) THEN
       iErr = 6
-      write(kStdErr,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
-      write(kStdErr,'(A,I3,F15.8,F15.8)') &
-        'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep ',&
-        iTag,dv,dFStep
-
-      write(kStdWarn,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
-      write(kStdWarn,'(A,I3,F15.8,F15.8)') &
-       'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep ', &
-       iTag,dv,dFStep
+      IF (kOuterLoop .EQ. 1) THEN
+        write(kStdErr,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
+        write(kStdErr,'(A,I3,F15.8,F15.8)') &
+          'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep ',&
+          iTag,dv,dFStep
+  
+        write(kStdWarn,'(A,F15.8,F15.8,F15.8)') 'dv = (raFreq(kmaxPts)-raFreq(1))/kMaxPts',raFreq(1),raFreq(kmaxPts),dv
+        write(kStdWarn,'(A,I3,F15.8,F15.8)') &
+         'spectral resolution - raFreq vs database file - are different : iTag : dv (from raFreq(1:kMaxPts)) : dFStep ', &
+         iTag,dv,dFStep
+      END IF
     END IF
 !!! end sanity check !!!
 
     IF (iErr .EQ. 1) THEN
-      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer ',caFName
+      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer ',caFName
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 2) THEN
-      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong ',caFName
+      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong ',caFName
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 3) THEN
-      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong ',caFName
+      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong ',caFName
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 4) THEN
-      WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong ',caFName
+      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong ',caFName
       WRITE(kStdWarn,'(A,A)') 'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong ',caFName
 !      CALL DoStop
     ELSEIF (iErr .EQ. 5) THEN
-      WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong ',caFName
+      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong ',caFName
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 6) THEN
-      WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong ',caFName
+      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong ',caFName
       WRITE(kStdWarn,'(A,A)') 'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong ',caFName
 !      CALL DoStop
     END IF

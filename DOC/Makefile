@@ -9,7 +9,9 @@ all:kcarta1.22.pdf kcarta1.12.pdf ReadMeFirst.pdf
 
 kcarta1.22.pdf: kcarta1.22.tex ASL_defs.tex
 	$(TEXHOME)latex kcarta1.22.tex && \
-	$(TEXHOME)latex kcarta1.22.tex 
+	$(TEXHOME)latex kcarta1.22.tex && \
+	bibtex kcarta1.22 && \
+	$(TEXHOME)latex kcarta1.22.tex
 
 kcarta1.12.pdf: kcarta1.12.tex ASL_defs.tex
 	$(TEXHOME)latex kcarta1.12.tex && \

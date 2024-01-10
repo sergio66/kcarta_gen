@@ -1,0 +1,370 @@
+ $nm_params
+ namecomment	=  '******* PARAMS section *******'
+
+ !! just want thermal background
+ !! iaaOverride(2,6) = -2
+ 
+ !! backgnd thermal computed at acos(3/5)
+ !! iaaOverride(2,4) = +1
+
+ !! gaussian quadrature instead of fast accurate approx
+ !! iaaOverride(2,3) = +1
+ !! iaaOverride(2,5) = +1
+
+ !! iLBLRTM RT (kTemperVary = 43) plus fixes for high res
+ !! iaaOverride(2,1) = +43
+
+ !Paths/mixed paths output is to be layer-to-space optical depth
+ kLayer2Sp = 1
+
+ !water continuum mtCKD 1.0 with Scott/my tuning
+ !kCKD = 6    
+
+ !latest and greatest CKD from AER
+ !kCKD = 25
+
+ !! use this, set by cluster
+ kCKD = CKDCKD
+ kCKD = 1
+ 
+ !short header
+ kLongOrShort = -1
+ kRTP = 1
+
+ ! turn off/on CO2/WV and CO2/N2 continuum function
+ ! iaaOverride(1,9) = 0/+2/+4/+6
+ ! iaaOverride(1,9) = +2
+
+ !listen to the frequency settings
+  iaaOverride(1,8) = +1
+
+ !!! temperature variation : default is none
+ iaaOverride(2,1) = -1
+
+ !kActualJacs = 100010030
+ !kActualJacs = 102
+ !kActualJacs = -1
+ !column jacobians
+ kActualJacs = 100
+  
+ $end
+
+ $nm_frqncy
+ namecomment	=  '******* FRQNCY section *******'
+ !ignored as vcmin,vcmax set these
+ rf1	        = FF1
+ rf2    	= FF2
+ $end
+
+ $nm_molgas
+ namecomment	=  '******* MOLGAS section *******'
+ !use all gases in MOLGAS
+ iNGas	=            -1
+ $end
+
+ $nm_xscgas
+ namecomment	=  '******* XSCGAS section *******'
+ !use all gases in XSCGAS
+ iNxsec = -1
+
+ !use NONE of gases in XSCGAS, testing against GEISA
+ !iNxsec = 0
+ $end
+
+ $nm_prfile
+ namecomment	=  '******* PRFILE section *******'
+ iRTP = MMM
+ !iBinOrAsc    = 1
+ 
+ iNclouds_RTP = -1
+ !caaCloudFile  =  'ice_bin_agg_333_2985_unsc'
+ 
+ iMPSetForRadRTP = 1
+ caPFname = '/home/sergio/MATLABCODE/RANDOM_LARRABEE/bdry_layer_wv.rtp'
+ caPFname = 'XYZXYZ'
+ $end
+
+ $nm_weight
+ namecomment	=  '******* WEIGHT section *******'
+ !!!!372/385 = 0.9662 for the 2002 TWP sonde comparison, 
+ !!!since gas2 does not exist so kcarta fills it with 385 ppmv CO2 ODs
+ !caaMixFileLines(1)	= 
+ !   '1   -1    1.0    1'
+ !caaMixFileLines(2)	= 
+ !   '2   0.9662'
+
+ !this is to develop fast forward models
+ iNpmix	=             1
+ caaMixFileLines(1)	= 
+    '1   -1    1.0    -1'
+
+ !!!!400/385 = 1.039 foer using LBLRTM12.4 SPECTRA
+ !caaMixFileLines(1)	= 
+ !   '1   -1    1.0    1'
+ !caaMixFileLines(2)	= 
+ !   '2   1.039'
+
+ $end
+
+ $nm_radnce
+ namecomment	=  '******* RADNCE section *******'
+ !1 atmospheres
+ iNatm          =  -1
+ !iTemperVary    = TTT
+ !iTemperVary    = 43
+ 
+ ! Atmos #1: no solar, with refl thermal, angle 0
+ iaMPSetForRad(1)   =  1
+ raPressStart(1)    =  913.9476
+ raPressStop(1)     =  000.0
+ raTSpace(1)        =   2.960000
+ raTSurf(1)         =  275.0
+ raSatAngle(1)      =  0.0
+ raSatHeight(1)     =   -1.000000
+ iakSolar(1)        =  -1
+ rakSolarAngle(1)   =  0.0000000E+00
+ iakThermal(1)      =   0
+ rakThermalAngle(1) =  -1.000000
+ iakThermalJacob(1) =   1
+ caEmissivity(1)    =   'dummyfilename'
+ raSetEmissivity(1) =  0.850
+ $end
+
+ $nm_jacobn
+ namecomment	=  '******* JACOBN section *******'
+ !no jacobians
+ iJacob	=     7
+ iaJacob(1) = 1
+ iaJacob(2) = 2
+ iaJacob(3) = 3
+ iaJacob(4) = 6
+ iaJacob(5) = 101
+ iaJacob(6) = 102
+ iaJacob(7) = 103
+ $end
+
+ $nm_spectr
+ namecomment	=  '******* SPECTRA section ******'
+ !no external spectra
+ iNumNewGases	=             -1
+
+ !use new databases from GENLN2 >>>>>>>>>>>>>>>>>>>>>>
+ !iNumAltComprDirs = 1
+ !iaAltComprDirs(1) = 2
+ !caaAltComprDirs(1)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/glab/'
+
+ !use new LBLRTM databases >>>>>>>>>>>>>>>>>>>>>>
+ iaAltComprDirs(1) = 2
+ iaAltComprDirs(2) = 3
+ iaAltComprDirs(3) = 6
+ iaAltComprDirs(4) = 7
+ iaAltComprDirs(5) = 22
+ caaAltComprDirs(1)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(2)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(3)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(4)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(5)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+
+ !use new databases from LBLRTM >>>>>>>>>>>>>>>>>>>>>>
+ iNumAltComprDirs = 5
+ iNumAltComprDirs = -1
+ iNumAltComprDirs = DOLBLRTM
+
+ !! the database below was generated with 385ppm CO2 but the default UMBC CO2 database is 400 ppm so 400/385 is ...
+ raAltComprDirsScale(1) = 1.038961
+ iaAltComprDirs(1) = 2
+ caaAltComprDirs(1)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(1)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+
+ iaAltComprDirs(2) = 3
+ raAltComprDirsScale(2) = 1.000 
+ caaAltComprDirs(2)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(2)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/WOBASEMENT/'
+ caaAltComprDirs(2)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+ 
+ iaAltComprDirs(3) = 6
+ caaAltComprDirs(3)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(3)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+ 
+ iaAltComprDirs(4) = 5
+ caaAltComprDirs(4)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+
+ iaAltComprDirs(5) = 22
+ caaAltComprDirs(5)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+
+ !iaAltComprDirs(6) = 7
+ !caaAltComprDirs(6)= '/asl/data/kcarta_sergio/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+
+ !use new databases from LBLRTM >>>>>>>>>>>>>> see ~/MATLABCODE/REGR_PROFILES/RUN_KCARTA/template_downwell.nml
+ iNumAltComprDirs = 5
+ iNumAltComprDirs = -1
+ iNumAltComprDirs = DOLBLRTM
+
+ !! the database below was generated with 385ppm CO2 but the default UMBC CO2 database is 400 ppm so 400/385 is ...
+ raAltComprDirsScale(1) = 1.038961 
+ iaAltComprDirs(1) = 2
+ caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+ raAltComprDirsScale(1) = 1.038961
+ caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/CO2_385ppmv/'
+
+ ! lblrtm12.4
+ ! other gases /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.4/etc.ieee-le
+ ! CO2         /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.4/etc.ieee-le /CO2_400ppmv
+
+ ! lblrtm12.8
+ ! other gases /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le
+ ! CO2         /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le /CO2_400ppmv
+  
+ raAltComprDirsScale(1) = 1.00000000000
+ caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/CO2_400ppmv/'
+ caaAltComprDirs(1)= '/asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/' 
+
+ iaAltComprDirs(2) = 6
+ caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+ caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/'
+ caaAltComprDirs(2)= '/asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/' 
+
+ iaAltComprDirs(3) = 3
+ caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/WOBASEMENT/'
+ caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+ caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/'
+
+ iaAltComprDirs(4) = 5
+ caaAltComprDirs(4)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+ caaAltComprDirs(4)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/'
+
+ iaAltComprDirs(5) = 22
+ caaAltComprDirs(5)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
+ caaAltComprDirs(5)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/'
+
+ !iaAltComprDirs(5) = 7
+ !caaAltComprDirs(5)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
+ !caaAltComprDirs(5)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/'
+
+ !use new databases from HITRAN2016 UNCERTAINTY -- see template_Qrad_HITRANunc.nml
+ 
+ $end
+
+ $nm_nonlte
+ namecomment    =  '******* NONLTE section ******'
+ iNumNLTEGases   =             +1
+
+ !!use the fast COMPRESSED KCARTA model
+ iNLTE_SlowORFast =             -2
+ !!use the fast SARTA model
+ iNLTE_SlowORFast =             1
+ !!use the fast SARTA model
+ iNLTE_SlowORFast =             -1
+
+ iSetBloat = +1
+ iSetBloat = -1
+
+ iDoUpperAtmNLTE    = +1
+ iAllLayersLTE      = -1
+ iUseWeakBackGnd    = +1
+
+ iaNLTEGasID(1)      = 2
+ raNLTEstrength(1)   = 1.000
+ raNLTEstart(1)      = 30.0
+
+ caaNLTETemp(1)     =
+  '/home/sergio/KCARTA/SRCv1.14/NONLTE/sergio/VT_48PROFILES_120_370ppmv/sergio_merge/vtPROF_sSOL.prf'
+ caaNLTETemp(1)     =
+  '../SRCv1.14/NONLTE/sergio/VT_48PROFILES_120_370ppmv/sergio_merge/vt1_s40.prf'
+ caaNLTETemp(1)     = '../SRCv1.18/NONLTE/vt_1.prf'
+
+ caaUpperMixRatio   = '/home/sergio/KCARTADATA/NLTE/UA/atm_md.ipGAGAGAGA'
+ caaUpperMixRatio   = '/home/sergio/KCARTADATA/NLTE/UA/std_gasID_2.ip'
+ caaUpperMixRatio   = '/asl/data/kcarta/KCARTADATA/NLTE/UA/std_gasID_2.ip'
+
+ caaStrongLines(1) =
+      '/asl/data/kcarta/KCARTADATA/NLTE/AIRSCO2/CO2_BANDS_PARAM/co2_4um_bands.txt'
+ caaStrongLines(1) =
+       '/asl/data/kcarta/KCARTADATA/NLTE/AIRSCO2/CO2_BANDS_PARAM2/co2_4um_allbands.txt'
+
+ iaNLTEChunks(1)     =         11
+ iaaNLTEChunks(1,1)  =         2205
+ iaaNLTEChunks(1,2)  =         2230
+ iaaNLTEChunks(1,3)  =         2255
+ iaaNLTEChunks(1,4)  =         2280
+ iaaNLTEChunks(1,5)  =         2305
+ iaaNLTEChunks(1,6)  =         2330
+ iaaNLTEChunks(1,7)  =         2355
+ iaaNLTEChunks(1,8)  =         2380
+ iaaNLTEChunks(1,9)  =         2405
+ iaaNLTEChunks(1,10) =         2430
+ iaaNLTEChunks(1,11) =         2455
+
+ iaNLTEBands(1)     = 19
+ !!! uses strongest  sigma-sigma, pi-pi, delta-delta
+ !!! 2350 .. 2354 = sigma-sigma
+ !!! 2320 .. 2322 = pi-pi
+ !!! 2310 .. 2312 = delta-delta
+ !!!                 GASID   GASIso  iLSGQ     iUSGQ   run7lblID
+ caaaNLTEBands(1,1) ='2        1       1         9        2350'
+ caaaNLTEBands(1,2) ='2        2       1         9        2351'
+ caaaNLTEBands(1,3) ='2        3       1         9        2352'
+ caaaNLTEBands(1,4) ='2        4       1         9        2355'
+ caaaNLTEBands(1,5) ='2        1       2         16       2320'
+ caaaNLTEBands(1,6) ='2        2       2         16       2321'
+ caaaNLTEBands(1,7) ='2        1       4         24       2310'
+ caaaNLTEBands(1,8) ='2        2       4         24       2311'
+ caaaNLTEBands(1,9) ='2        1       3         23       2353'
+ caaaNLTEBands(1,10)='2        1       5         25       2354'
+
+ !!!these are the ones Manuel suggested adding on; some isotopes of above
+ caaaNLTEBands(1,11)='2        2       3         23       2253'
+ caaaNLTEBands(1,12)='2        2       5         25       2254'
+ !!!these are the others Manuel suggested adding on
+ caaaNLTEBands(1,13)='2        1       2         15       2110'
+ caaaNLTEBands(1,14)='2        1       3         25       2120'
+ caaaNLTEBands(1,15)='2        1       5         23       2140'
+ caaaNLTEBands(1,16)='2        1       6         36       2160'
+ caaaNLTEBands(1,17)='2        1       7         37        2170'
+ caaaNLTEBands(1,18)='2        1       8         38       2180'
+ caaaNLTEBands(1,19)='2        3       2         16       2322'
+
+ !!!these one never seems to exist in the NLTE profiles
+ caaaNLTEBands(1,20)='2        1       3         22       2150'
+ caaaNLTEBands(1,21)='2        1       4         22       2130'
+      
+ $end
+
+ $nm_scattr
+ namecomment	=  '******* SCATTR section *******'
+ !no scattering
+ iNclouds	  =             0
+ $end
+
+ $nm_output
+ namecomment	=  '******* OUTPUT section *******'
+ caComment      = 'data for reflected thermal fit'
+ caComment      = 'COMMENTCOMMENT' 
+ caLogFile      = 'warning.msgMMM'
+ caLogFile      = '/dev/null'
+ 
+ !! KLayer2Sp = 1
+ !iaPrinter(1)   =    2
+ !iaGPMPAtm(1)   =   -1
+ !iaNp(1)        =   -1
+
+ !!! KLayer2Sp = 1
+ iaPrinter(1)   =    2
+ iaGPMPAtm(1)   =   1
+ iaNp(1)        =   1
+ iaaOp(1,1)      = 4
+
+ !dump out radiance at TOA
+ iaPrinter(1)   =    3
+ iaGPMPAtm(1)   =   -1
+ iaNp(1)        =    1
+ raaOp(1,1)     =    DOOUTPRESSLEVEL.0
+
+ $end
+
+ $nm_endinp
+ namecomment	=  '******* ENDINP section *******'
+ $end

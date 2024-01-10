@@ -451,7 +451,7 @@ use_this_rtp = 'RTP/summary_20years_all_lat_all_lon_2002_2022_monthlyERA5_pert.r
 
 use_this_rtp = 'RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_zonalavg64lats.rtp';
 
-use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/dnwell.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/dnwell.op.rtp';  %% this is really TOA
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/upwell.op.rtp';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
