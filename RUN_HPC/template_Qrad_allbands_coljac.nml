@@ -46,7 +46,7 @@
  !kActualJacs = -1
  !column jacobians
  kActualJacs = 100
-  
+
  $end
 
  $nm_frqncy
@@ -86,23 +86,10 @@
 
  $nm_weight
  namecomment	=  '******* WEIGHT section *******'
- !!!!372/385 = 0.9662 for the 2002 TWP sonde comparison, 
- !!!since gas2 does not exist so kcarta fills it with 385 ppmv CO2 ODs
- !caaMixFileLines(1)	= 
- !   '1   -1    1.0    1'
- !caaMixFileLines(2)	= 
- !   '2   0.9662'
-
  !this is to develop fast forward models
  iNpmix	=             1
  caaMixFileLines(1)	= 
     '1   -1    1.0    -1'
-
- !!!!400/385 = 1.039 foer using LBLRTM12.4 SPECTRA
- !caaMixFileLines(1)	= 
- !   '1   -1    1.0    1'
- !caaMixFileLines(2)	= 
- !   '2   1.039'
 
  $end
 
@@ -110,8 +97,6 @@
  namecomment	=  '******* RADNCE section *******'
  !1 atmospheres
  iNatm          =  -1
- !iTemperVary    = TTT
- !iTemperVary    = 43
  
  ! Atmos #1: no solar, with refl thermal, angle 0
  iaMPSetForRad(1)   =  1
@@ -360,7 +345,7 @@
  !dump out radiance at TOA
  iaPrinter(1)   =    3
  iaGPMPAtm(1)   =   -1
- iaNp(1)        =    1
+ iaNp(1)        =   -1
  raaOp(1,1)     =    DOOUTPRESSLEVEL.0
 
  $end

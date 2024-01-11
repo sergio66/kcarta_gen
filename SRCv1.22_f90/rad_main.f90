@@ -348,7 +348,7 @@ CONTAINS
 
 ! these are to do with the arbitrary pressure layering
     REAL :: raThickNess(kProfLayer),pProf(kProfLayer), &
-    raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
+            raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1),raTPressLevelsPert(kProfLayer+1)
     INTEGER :: iProfileLayers,iKnowTP
 ! this is to do with NLTE
     INTEGER :: iNLTEStart,iDumpAllUARads
@@ -394,6 +394,7 @@ CONTAINS
       ! uplook instrument : radiation going DOWN to instrument
       !! got to swap things
       iJacT = iaNumlayer(iAtm)-kActualJacsB+1
+      !iJacT = iaNumlayer(iAtm)-kActualJacsT+1  !! new, we only want one layer
       iJacB = iaNumlayer(iAtm)-kActualJacsT+1
     END IF
         
@@ -443,12 +444,12 @@ CONTAINS
 
 !! do the column temperature jacobian radiance
     write(kStdWarn,*) ' '
-    write(kStdWarn,*) ' ---> Doing rTz : Temp(z) Jacobian calcs ...'
-    write(kStdWarn,*) ' ---> Note : only includes change in BT(T+dT) and not'
-    write(kStdWarn,*) ' --->   change in OD(T+dT) so not completely accurate'
+    write(kStdWarn,'(A)') ' ---> Doing rTz : Temp(z) Jacobian calcs ...'
+    write(kStdWarn,'(A)') ' ---> Note : includes change in both layer temperature BT(T+dT) and OD(T+dT)'
     raVTemp2 = raVTemp
 
-! erturb the temperature of the necessary layers
+! perturb the temperature of the necessary layers
+    raTPressLevelsPert = raTPressLevels + kDefaultToffset
     raaTemp = raaSumAbCoeff
     DO iL = 1,iaNumLayer(iAtm)
       iI = iaaRadLayer(iAtm,iL)
@@ -494,7 +495,7 @@ CONTAINS
       raSurface,raSun,raThermal,raSunRefl, &
       raLayAngles,raSunAngles,iTag, &
       raThickness,raPressLevels,iProfileLayers,pProf,raLayerHeight, &
-      raTPressLevels,iKnowTP, &
+      raTPressLevelsPert,iKnowTP, &
       rCO2MixRatio,iNLTEStart,raaPlanckCoeff,iDumpAllUARads, &
       iUpper,raaUpperPlanckCoeff,raaUpperSumNLTEGasAbCoeff, &
       raUpperPress,raUpperTemp,iDoUpperAtmNLTE,iChunk_DoNLTE, &
@@ -4397,8 +4398,8 @@ CONTAINS
 ! need to find the highest integer i.e. if we have to output radiances
 ! at the 10,20 and 99 th layers in the atmosphere, we better loop down to
 ! the 99th mixed path (which happens to be the layer just above ground)
-    iLow=-1
-    DO iLay=1,iNp
+    iLow = -1
+    DO iLay = 1,iNp
       IF (iaOp(iLay) > iLow) THEN
         iLow = iaOp(iLay)
       END IF
@@ -4505,7 +4506,8 @@ CONTAINS
       ELSE
         rFracX = 1.0
       END IF
-              
+
+      rJunk = raInten(1)              
       IF (iVary >= 2) THEN
         CALL RT_ProfileDNWELL_LINEAR_IN_TAU(raFreq,raaAbs_LBLRTM_zeroUA,iL,raTPressLevels,raVT1, &
             rCos,rFracX, &
@@ -4515,7 +4517,8 @@ CONTAINS
       END IF
 
       IF (iDp == 1) THEN
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileDNWELL_LINEAR_IN_TAU'
+        write(kStdWarn,'(A,I3,A,I3,A,I3)')   ' output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileDNWELL_LINEAR_IN_TAU; iVary = ',iVary
+        write(kStdWarn,'(A,2F12.4,A,2F12.4)') ' T(z),Tlev(z) = ',rMPTemp,raTPressLevels(iL),' radiance before/after interp = ',rJunk,raInten(1)
         CALL wrtout(iIOUN,caOutName,raFreq,raInten)
       END IF
 

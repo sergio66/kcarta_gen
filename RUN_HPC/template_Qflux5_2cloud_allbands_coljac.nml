@@ -47,7 +47,6 @@
  !column jacobians
  kActualJacs = 100
 
-
  $end
 
  $nm_frqncy

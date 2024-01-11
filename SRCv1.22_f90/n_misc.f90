@@ -1028,8 +1028,8 @@ CONTAINS
       iaaOverrideDefault(2,1) = +43
       iaaOverrideDefault(2,4) = +2
       !!!  x/6 as x-->0 compared to kTemperVary = +42 ****
-      write(kStdWarn,*) 'kFlux > 0 so set kTemperVary,iaaOverrideDefault(2,1) to 43; iaaOverrideDefault(2,4) to +2'
-      write(kStdErr,*)  'kFlux > 0 so set kTemperVary,iaaOverrideDefault(2,1) to 43; iaaOverrideDefault(2,4) to +2'
+      write(kStdWarn,'(A)') 'kFlux > 0 so set kTemperVary,iaaOverrideDefault(2,1) to 43; iaaOverrideDefault(2,4) to +2'
+      write(kStdErr,'(A)')  'kFlux > 0 so set kTemperVary,iaaOverrideDefault(2,1) to 43; iaaOverrideDefault(2,4) to +2'
     END IF
 
 !!! new, do what the user wishes!!!

@@ -329,7 +329,7 @@ CONTAINS
     CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level  XXXXX this we want XXXXX
     CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
     !! (which is NOT necessarily average of above 2)
-    IF (kOuterLoop == 1) THEN
+    IF (kOuterLoop == -1) THEN        !! originally was   IF (kOuterLoop == 1) THEN
       write(kStdWarn,2345) iL,TEMPLEV(iBeta),TEMPLAY(iBeta),TEMPLEV(iBeta+1)
     END IF
           
@@ -624,12 +624,11 @@ CONTAINS
 
     IF (iVary >= 4) THEN
       !! new option
-      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)      !! ttorad of lower level  XXXX what we want XXXXX
-      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)   !! ttorad of upper level
-      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)     !! ttorad of lower level XXXX what we want XXXX
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)   !! ttorad of Tlayer
       !! (which is NOT necessarily average of above 2)
-
-      IF (kOuterLoop == 1) THEN
+      IF (kOuterLoop == -1) THEN   !!! used to be    IF (kOuterLoop == 1) THEN
         write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
       END IF
     END IF
@@ -855,11 +854,11 @@ CONTAINS
                                                                  
     IF (iVary >= 4) THEN
       !! new option
-      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX what we want XXXXXXXX
-      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1) !! ttorad of upper level
-      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)  !! ttorad of Tlayer
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)     !! ttorad of lower level XXXX what we want XXXX
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)   !! ttorad of Tlayer
       !! (which is NOT necessarily average of above 2)
-      IF (kOuterLoop == 1) THEN
+      IF (kOuterLoop == -1) THEN   !!! used to be    IF (kOuterLoop == 1) THEN
         write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
       END IF
     END IF
@@ -1097,11 +1096,11 @@ CONTAINS
                                                                  
     IF (iVary >= 4) THEN
       !! new option
-      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)    !! ttorad of lower level XXXX this is the one we want XXXXXXXX
+      CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta),raIntenP)     !! ttorad of lower level XXXX what we want XXXX
       CALL ttorad_oneBT2array(raFreq,TEMPLEV(iBeta+1),raIntenP1)  !! ttorad of upper level
-      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)    !! ttorad of Tlayer
+      CALL ttorad_oneBT2array(raFreq,TEMPLAY(iBeta),raIntenAvg)   !! ttorad of Tlayer
       !! (which is NOT necessarily average of above 2)
-      IF (kOuterLoop == 1) THEN
+      IF (kOuterLoop == -1) THEN   !!! used to be    IF (kOuterLoop == 1) THEN
         write(kStdWarn,2345) iL,TEMPLEV(iBeta+1),TEMPLAY(iBeta),TEMPLEV(iBeta)
       END IF
     END IF

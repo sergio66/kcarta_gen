@@ -3,6 +3,18 @@ addpath /home/sergio/KCARTA/MATLAB
 addpath /asl/matlib/h4tools
 addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 
+JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+if length(JOB) == 0
+  JOB = 1;
+  JOB = 20;
+end
+% JOB = 49;
+% JOB = 1;
+% JOB = 269
+% JOB = 705;
+% JOB = 16
+% JOB = 20
+
 set_rtp
 set_gasOD_cumOD_rad_jac_flux_cloud_lblrtm
 
@@ -63,21 +75,14 @@ end
 %c                    3580.0000,  5650.0000,  8400.0000,  12250.0000,
 %c                    25000.0000,  44000.0000  /
 
-JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-if length(JOB) == 0
-  JOB = 1;
-end
-% JOB = 49;
-% JOB = 1;
-% JOB = 269
-% JOB = 705;
-% JOB = 16
-% JOB = 20
-
 [hjunk,hajunk,pjunk,pajunk] = rtpread(use_this_rtp0);
 mmw = mmwater_rtp(hjunk,pjunk);
+o3du = dobson_rtp(hjunk,pjunk);
+[~,co2ppmv] = layers2ppmv(hjunk,pjunk,JOB,2);
+[~,ch4ppmv] = layers2ppmv(hjunk,pjunk,JOB,6);
+
 emiss900 = interp1(pjunk.efreq(1:pjunk.nemis(JOB),JOB),pjunk.emis(1:pjunk.nemis(JOB),JOB),900);
-surf_properties = [pjunk.stemp(JOB) mmw(JOB) emiss900 pjunk.rlat(JOB) pjunk.rlon(JOB)];
+surf_properties = [pjunk.stemp(JOB) mmw(JOB) co2ppmv o3du(JOB) ch4ppmv emiss900 pjunk.rlat(JOB) pjunk.rlon(JOB)];
 
 ctype = -9999;
 ctype2 = -9999;
@@ -117,6 +122,10 @@ sedderC = [sedderC ' -e "s/iCloudType2/'    num2str(ctype2) '/g"  -e "s/strCloud
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 kcbands = [15 30 50 80 140 300 500 605 805 2830];
+
+% kcbands = [605 2305];  iDoFlux = -1;
+% kcbands = [1505 1530]; iDoFlux = -1; 
+% kcbands = [605 2805];
 
 tic
 iiBin = JOB;
@@ -182,18 +191,27 @@ elseif iDoRad == 3  & iDoFlux == 7
   saver = ['save JUNK/all7kcbands_prof' num2str(JOB) '.mat wall dall fluxall kcbands'];
 end
 if abs(iDoJac) == +100
-  %% 9 column jacs : [gid(1 2 3 6 101 102 103)     T ST]  --> 6 column jacs [gid(1 = (1 101 102 103), 2 3 6)     T ST]
+  %% 9 column jacs : [gid(1 2 3 6 101 102 103)     T ST]  --> 6 column jacs [gid(1 = (1 101 102 103), 2 3 6)     T ST]  
   jallx = zeros(length(jall),6);
+
+  %% see  /home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/aeri_upwell_sims_40profiles.m
+  %% be very careful about WV!   Let R0 = original rad, then R1, R101, R102, R103 are the rads when the individual components are perturbed
+  %% one way to do the WV jac would be :::: [(R1-R0) + (R101-R0) + (R102-R0) + (R103-R0)]/dQ = [(R1+R101+R102+R103)-4R0]/dQ
   jallx(:,1)       = sum(jall(:,[1 5 6 7]),2);
+
+  %% see  /home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/aeri_upwell_sims_40profiles.m
+  %% be very careful about WV!   Let R0 = original rad, then R1, R101, R102, R103 are the rads when the individual components are perturbed
+  %%  or you can also do the WV jac as :::: [(R1-R0) + (R101-R0) + (R102-R0) + (R103-R0)]/dQ = [(R1+R101+R102+R103)-4R0]/dQ = [(R1+R101+R102+R103)/4-R0] * 4/dQ
+  jallx(:,1)       = sum(jall(:,[1 5 6 7]),2)/4;
+
   jallx(:,[2 3 4]) = jall(:,[2 3 4]);
   jallx(:,[5 6])   = jall(:,[8 9]);
   jac_comment = ['gid 1,2,3,6  T,ST   where gid1 = sum of 1,101,102,103'];
   jall = jallx;
   saver = [saver ' jall jac_comment'];
 end
-surf_prop_comment = 'stemp mmw emiss(900cm-1)  rlat rlon';
+surf_prop_comment = 'stemp mmw co2ppm o3du ch4ppm emiss(900cm-1)  rlat rlon';
 saver = [saver ' surf_prop_comment surf_properties'];
-
 eval(saver)
 
 %{
@@ -201,7 +219,7 @@ for Oct 2018  AIRS STM
 set_rtp;
 [h,ha,p,pa] = rtpread(use_this_rtp);
 stemp = p.stemp(iiBin);
-figure(2); plot(wall,dall,wall,ttorad(wall,p.stemp(iiBin)));
+figure(1); plot(wall,dall,wall,ttorad(wall,p.stemp(iiBin)));
 save /home/sergio/IR_NIR_VIS_UV_RTcodes/RRTM/v3.3/rrtm_lw/Clouds_Flux_Rates/kcarta_flux_trop.mat wall dall stemp
 %}
 

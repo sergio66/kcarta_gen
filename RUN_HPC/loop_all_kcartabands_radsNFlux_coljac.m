@@ -1,5 +1,5 @@
 if iDoRad == 3  & iDoFlux < 0
-  if (iCldORClr == -1 | iBand < 7)
+  if iCldORClr == -1 | iBand < 7
     %% can only do clear
     sedder = [sedder ' template_Qrad_allbands_coljac.nml  > ' outnml];
   elseif iCldORClr == +1 & iBand >= 7
@@ -75,7 +75,7 @@ elseif iDoRad == 3 & iDoFlux == 7
   if iCldORClr == -1 | iBand < 7
     %% can only do clear
     sedder = [sedder ' template_Qflux7_allbands_coljac.nml  > ' outnml];
-  elseif iCldOrClr == +1 &  iBand >= 7
+  elseif iCldORClr == +1 &  iBand >= 7
     sedder = [sedder ' ' sedderC ' '];
     sedder = [sedder ' template_Qflux7_2cloud_allbands_coljac.nml  > ' outnml];
   end
@@ -117,5 +117,5 @@ else
   error('huh?? unknown combo of iDoRad/iDoFlux!!!')
 end
 
-figure(2); plot(wall,rad2bt(wall,dall)); pause(0.1)
+figure(1); plot(wall,rad2bt(wall,dall)); pause(0.1)
 rmer = ['!/bin/rm ' outnml ' status' num2str(iiBin)]; eval(rmer)
