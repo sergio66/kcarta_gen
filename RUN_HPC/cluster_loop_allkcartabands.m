@@ -5,7 +5,7 @@ addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
-  JOB = 1;
+  % JOB = 1;
   JOB = 20;
 end
 % JOB = 49;
@@ -76,6 +76,10 @@ end
 %c                    25000.0000,  44000.0000  /
 
 [hjunk,hajunk,pjunk,pajunk] = rtpread(use_this_rtp0);
+if ~isfield(pjunk,'upwell')
+  pjunk.upwell(JOB) = +1;  %% assume TOA downlook instr
+end
+
 mmw = mmwater_rtp(hjunk,pjunk);
 o3du = dobson_rtp(hjunk,pjunk);
 [~,co2ppmv] = layers2ppmv(hjunk,pjunk,JOB,2);
@@ -121,7 +125,13 @@ sedderC = [sedderC ' -e "s/iCloudType1/'     num2str(ctype) '/g"  -e "s/strCloud
 sedderC = [sedderC ' -e "s/iCloudType2/'    num2str(ctype2) '/g"  -e "s/strCloudType2/'  strCloudType2 '/g"'];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-kcbands = [15 30 50 80 140 300 500 605 805 2830];
+kcbands = [15 30 50 80  140 300 500 605 805 2830];
+
+kcbands = [         100 140 300 500 605 805 2830];  %% kCKD 25 and 32 only extend to 100 cm-1, about 1.5% error when cold, 0.5% error when hot
+% wah1 = 30:0.0025:3000; wah2 = 100:0.0025:3000; (sum(ttorad(wah1,300))-sum(ttorad(wah2,300)))/sum(ttorad(wah1,300))
+%    0.0046
+% wah1 = 30:0.0025:3000; wah2 = 100:0.0025:3000; (sum(ttorad(wah1,200))-sum(ttorad(wah2,200)))/sum(ttorad(wah1,200))
+%    0.0140
 
 % kcbands = [605 2305];  iDoFlux = -1;
 % kcbands = [1505 1530]; iDoFlux = -1; 
@@ -148,9 +158,17 @@ for iBand = 1 : length(kcbands)-1
   sedder = [sedder ' -e "s/XYZXYZ/'  use_this_rtp   '/g"'];  %%%<<<-- to sed rtpfname
   sedder = [sedder ' -e "s/CKDCKD/'  num2str(iKCKD) '/g"'];
   sedder = [sedder ' -e "s/DOLBLRTM/' num2str(iDoLBLRTM) '/g"'];
-  if iDoJac == -100
+
+  if iDoJac == -100 & pjunk.upwell(JOB) == 1
+    error('iDoJac == -100 ==> uplook instr    but    pjunk.upwell(JOB) == 1 ==> downlook instr');
+  end
+  if iDoJac == +100 & pjunk.upwell(JOB) == 2
+    error('iDoJac == +100 ==> dnlook instr    but    pjunk.upwell(JOB) == 2 ==> uplook instr');
+  end
+
+  if iDoJac == -100 | pjunk.upwell(JOB) == 2
     sedder = [sedder ' -e "s/DOOUTPRESSLEVEL/' num2str(1200) '/g"'];
-  elseif iDoJac == +100
+  elseif iDoJac == +100 | pjunk.upwell(JOB) == 1
     sedder = [sedder ' -e "s/DOOUTPRESSLEVEL/' num2str(0) '/g"'];
   end
 
@@ -162,9 +180,19 @@ for iBand = 1 : length(kcbands)-1
     outjacnameCOL = [outjacname '_COL'];
   end
 
+  outOLRX = [outname '_*LR*'];
+  lser = dir(outOLRX);
+  if length(lser) > 0
+    rmer = ['!/bin/rm ' outOLRX];
+    eval(rmer);
+  end
+
   %%%%%%%%%%%%%%%%%%%%%%%%%
-  if exist(outname)
+  if exist(outname) & iDoJac ~= -1
     rmer = ['!/bin/rm ' outname ' ' outjacnameCOL];
+    eval(rmer);
+  elseif exist(outname) & iDoJac == -1
+    rmer = ['!/bin/rm ' outname];
     eval(rmer);
   end    
   if iDoJac == -1

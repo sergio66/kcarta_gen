@@ -199,6 +199,8 @@ iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac =
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -100; gg = 1001;  %% clrsky, use LBLRTM ODs  ******* UPLOOK *************** COL CLR JACS eg for 64x72 grids : does G1,101,101,103,T(z),ST
 
 iDoFlux = +5;
+iKCKD =  25; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;   gg = 1003;  %% clrsky, use LBLRTM ODs  ******* UPLOOK *************** COL CLR RADS eg for 64x72 grids : does G1,G2,G3,G4,G5,G6,101,101,103,T(z),ST
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;   gg = 1003;  %% clrsky, use LBLRTM ODs  ******* UPLOOK *************** COL CLR RADS eg for 64x72 grids : does G1,G2,G3,G4,G5,G6,101,101,103,T(z),ST
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -100; gg = 1003;  %% clrsky, use LBLRTM ODs  ******* UPLOOK *************** COL CLR JACS eg for 64x72 grids : does G1,G2,G3,G4,G5,G6,101,101,103,T(z),ST
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -6,6 +6,9 @@
  !water continuum mtCKD 1.0 with my tuning
  KCKD = 25
  KCKD = 6
+ !! use this, set by cluster
+ kCKD = 1
+ kCKD = CKDCKD
  
  !short header
  kLongOrShort = -1
@@ -175,6 +178,7 @@ $end
  $nm_output
  namecomment	=  '******* OUTPUT section *******'
  caComment      = 'data for reflected thermal fit'
+ caLogFile      = 'warning.msgMMM'
  caLogFile      = '/dev/null'
  
  !! KLayer2Sp = 1

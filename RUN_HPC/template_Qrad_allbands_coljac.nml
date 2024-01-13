@@ -345,7 +345,7 @@
  !dump out radiance at TOA
  iaPrinter(1)   =    3
  iaGPMPAtm(1)   =   -1
- iaNp(1)        =   -1
+ iaNp(1)        =   +1
  raaOp(1,1)     =    DOOUTPRESSLEVEL.0
 
  $end

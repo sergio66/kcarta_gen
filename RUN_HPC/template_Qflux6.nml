@@ -2,11 +2,13 @@
  namecomment	=  '******* PARAMS section *******'
  !Paths/mixed paths output is to be layer-to-space optical depth
  KLayer2Sp = 1
- 
- !water continuum mtCKD 1.0 with my tuning
- KCKD = 32
- KCKD = 6
- 
+
+ !kCKD = 6     !water continuum mtCKD 1.0 with Scott/my tuning
+ !kCKD = 25    !latest and greatest CKD from AER
+ !! use this, set by cluster
+ kCKD = 1
+ kCKD = CKDCKD
+  
  !short header
  kLongOrShort = -1
  kRTP = 1
@@ -172,7 +174,7 @@ $end
  iaPrinter(1)   =    3
  iaGPMPAtm(1)   =   -1
  iaNp(1)        =    1
- raaOp(1,1)     =    0.0
+ raaOp(1,1)     =    DOOUTPRESSLEVEL.0
 
  $end
 
