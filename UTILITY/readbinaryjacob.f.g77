@@ -1,44 +1,44 @@
-c************************ READS IN JACOBIANS ****************************
-c************************************************************************
-c************* READ IN THE k-compressed files ***************************
-c************************************************************************
-c this reads in the main header information
+!************************ READS IN JACOBIANS ****************************
+!************************************************************************
+!************* READ IN THE k-compressed files ***************************
+!************************************************************************
+! this reads in the main header information
       SUBROUTINE readmainjacobheader(iIOUN,rFr1,rFr2,iNumLayers)
 
-c iIOUN      = file number
-c rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
+! iIOUN      = file number
+! rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
       INTEGER iIOUN,iNumLayers
       REAL rFr1,rFr2 
 
-c caComment  = comment assocaiated with data run
-c iSetLow    = integer index (between 1 and 89) of kcomp files start point
-c iSetHigh   = integer index (between 1 and 89) of kcomp files end point
-c iNumLayers = number of layers in each gas profile
+! caComment  = comment assocaiated with data run
+! iSetLow    = integer index (between 1 and 89) of kcomp files start point
+! iSetHigh   = integer index (between 1 and 89) of kcomp files end point
+! iNumLayers = number of layers in each gas profile
       INTEGER iSetLow,iSetHigh
       CHARACTER*80 caComment
 
-c read comment
+! read comment
       read(iIOUN) caComment
 
-c read number of layers
+! read number of layers
       read(iIOUN) iNumLayers
 
-c read start,stop frequency  iSetLo,iSetHi
+! read start,stop frequency  iSetLo,iSetHi
       read(iIOUN) rFr1,rFr2 
       read(iIOUN) iSetLow,iSetHigh
 
       RETURN
       END
-c************************************************************************
-c this reads in the additional Jacobian info
+!************************************************************************
+! this reads in the additional Jacobian info
       SUBROUTINE readjacobinfo(iIOUN,iNumgases,iNatm,iaNumLayers)
 
       include 'convolve.param'
 
-c iIOUN       = file number
-c iNumgases   = number of gases
-c iNatm       = number of atmosphers
-c iaNumLayers = number of layers per atmosphere
+! iIOUN       = file number
+! iNumgases   = number of gases
+! iNatm       = number of atmosphers
+! iaNumLayers = number of layers per atmosphere
       INTEGER iIOUN,iNumGases,iNatm,iaNumLayers(kMaxAtm)
 
       INTEGER ii
@@ -50,26 +50,26 @@ c iaNumLayers = number of layers per atmosphere
       RETURN
       END
 
-c************************************************************************
-c this function reads in the individual gas profiles from the jacobian file
+!************************************************************************
+! this function reads in the individual gas profiles from the jacobian file
       SUBROUTINE readgasjacob(iIOUN,iNumGasesDQ,iNumLayers)
 
       include 'convolve.param'
 
-c iIOUN          = file ioUNIT number
-c iNumLayers     = number of layers in each gas profile
-c iNumGasesDQ    = number of gases whose d/dq is output
+! iIOUN          = file ioUNIT number
+! iNumLayers     = number of layers in each gas profile
+! iNumGasesDQ    = number of gases whose d/dq is output
       INTEGER iIOUN,iNumLayers,iNumGasesDQ
 
-c local variables
-c iaGasID        = array containing ID's of gases for Jacobian calcs
-c raaAmt,raaTemp = matrices containing the gas amts,temperatures
+! local variables
+! iaGasID        = array containing ID's of gases for Jacobian calcs
+! raaAmt,raaTemp = matrices containing the gas amts,temperatures
       REAL rAmt,rTemp
       REAL raaTemp(kProfLayer,kGasStore),raaAmt(kProfLayer,kGasStore)
       INTEGER iPath,iGasID,ii,jj,iaGasId(kGasStore)
 
       
-c now read the PathNum GasID Temperature Amount for each path in the profile
+! now read the PathNum GasID Temperature Amount for each path in the profile
         DO ii=1,iNumGasesDQ
           DO jj=1,iNumLayers
             read(iIOUN) iGasID,rTemp,rAmt
@@ -82,14 +82,14 @@ c now read the PathNum GasID Temperature Amount for each path in the profile
       RETURN
       END
 
-c************************************************************************
-c this subroutine reads in the data
+!************************************************************************
+! this subroutine reads in the data
       SUBROUTINE readdata(iIOUN,iDataSize,raEntire,iDataPoints,iTotal)
 
       include 'convolve.param'
 
-c iDataSize=number of bytes from start of data in this block, to same start 
-c           of data in next kcomp block (so we can directly jump there)
+! iDataSize=number of bytes from start of data in this block, to same start 
+!           of data in next kcomp block (so we can directly jump there)
       INTEGER iIOUN,iDataSize,iDataPoints,iTotal
       REAL raEntire(kMaxEntire)
 
@@ -106,15 +106,15 @@ c           of data in next kcomp block (so we can directly jump there)
           raEntire(iDataPoints)=raTemp(iJ)
           END DO
 
-        IF (iI. NE. iTotal) THEN
+        IF (iI .NE. iTotal) THEN
           CALL fseek(iIOUN,idatasize,1)         !!!!if using g77
           END IF
 
         END DO
 
-c      print *,(raTemp(iJ),iJ=9991,10000) 
+!      print *,(raTemp(iJ),iJ=9991,10000) 
       !this is the last piece of borsh and nonsense
 
       RETURN
       END
-c************************************************************************
+!************************************************************************

@@ -6,7 +6,7 @@
 #        fseek/ftell, but I could never get things to work correctly!
 #        so I use g77 or PDF Fortran for the readers.
 # OTOH, the RTP files have structures in them, which g77 does not support, so
-#       makeRTPfile.f90 has to be compiled with Absoft
+#       makeRTPfile.f has to be compiled with Absoft
 
 ### for Linux with g77 and other (eg Absoft, PDF) compilers, the RTP stuff is 
 ### compiled with Absoft or PDF (hence we have RTPF77,RTPFLAGS,RTPLIBS etc),
@@ -17,9 +17,40 @@
 
 ### worked fine with RTPv103 ...
 
-include Makefile_intel_hdf_rtp
-
 SHELL = /bin/sh
+
+# RTP flags
+# ---------
+# RTPLIB : point this to the lib you created in RTP
+#
+# sgi
+# RTPLIB = -L/asl/packages/rtpV105/lib -lrtp
+#
+# linux
+RTPLIB = -L/asl/packages/rtpV105/lib -lrtp
+
+# ---------------
+# RTP include dir
+# ---------------
+# this is where the RTP package files are stored
+RTPINC = -I/asl/packages/rtpV105/include
+RTPDEFS_FILE = /asl/packages/rtpV105/include/rtpdefs.f
+
+# ---------
+# HDF flags
+# ---------
+# HDF_INSTALL : set this to point to the HDF location
+# HDFLIB : hdf library, relative to install path above
+# 
+# linux
+HDF_INSTALL = /home/motteler/asl/hdf/HDF4.1r3/NewHDF
+HDF_INSTALL = /usr/local/hdf
+HDF_INSTALL = /asl/opt
+HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
+#
+# sgi
+#HDF_INSTALL = /salsify/users/motteler/hdftest
+#HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
 
 ## ------------------------ COMPILER TYPES --------------------------
 
@@ -103,14 +134,6 @@ RTPLIBS =
 #RTPLIBS = 
 
 ## ------------------------ ifort --------------------------
-# ------------
-# -u  : turn off implicit typing of variables
-# -g  : generate debugging information (turns off optimization)
-# -C  : do run time subscript range checking
-# -w0 : inform about unused variables or -warn unused
-# -O3 : heavy optimization
-# -64 : 64-bit objects (libraries must match)
-# -us : puts trailing underscore
 F77 = ifort
 FLAGS = -extend-source 132 -check bounds -O2
 LIBS = 
@@ -156,44 +179,44 @@ readjacob.x : readjacob.o readbinaryjacob.o
 readflux.x : readflux.o readbinaryjacob.o
 	$(F77) -o readflux.x $(FLAGS) readflux.o readbinaryjacob.o $(RTPLIBS)
 
-compdatabase.x: compdatabase.f90
-	$(F77) -o compdatabase.x $(FLAGS) compdatabase.f90
+compdatabase.x: compdatabase.f
+	$(F77) -o compdatabase.x $(FLAGS) compdatabase.f
 
-makeinp.x: makeinp.f90
-	$(F77) -o makeinp.x $(FLAGS) makeinp.f90
+makeinp.x: makeinp.f
+	$(F77) -o makeinp.x $(FLAGS) makeinp.f
 
 # object files
-makeRTPfile.o : makeRTPfile.f90 $(RTPDEFS_FILE) 
-	$(RTPF77) -c makeRTPfile.f90 $(RTPINC) $(RTPFLAGS) makeRTPfile.f90
+makeRTPfile.o : makeRTPfile.f $(RTPDEFS_FILE) 
+	$(RTPF77) -c makeRTPfile.f $(RTPINC) $(RTPFLAGS) makeRTPfile.f
 
-readbinary.o : readbinary.f90 $(PARAMS)
-	$(F77) -c $(FLAGS) readbinary.f90
+readbinary.o : readbinary.f $(PARAMS)
+	$(F77) -c $(FLAGS) readbinary.f
 
-readbinaryjacob.o : readbinaryjacob.f90 $(PARAMS)  
-	$(F77) -c $(FLAGS) readbinaryjacob.f90
+readbinaryjacob.o : readbinaryjacob.f $(PARAMS)  
+	$(F77) -c $(FLAGS) readbinaryjacob.f
 
-responsefcns11.o : responsefcns11.f90 $(PARAMS)
-	$(F77) -c $(FLAGS) responsefcns11.f90
+responsefcns11.o : responsefcns11.f $(PARAMS)
+	$(F77) -c $(FLAGS) responsefcns11.f
 
-readkcarta.o : readkcarta.f90 $(PARAMS)
-	$(F77) -c $(FLAGS) readkcarta.f90
+readkcarta.o : readkcarta.f $(PARAMS)
+	$(F77) -c $(FLAGS) readkcarta.f
 
-readkcBasic.o : readkcBasic.f90 $(PARAMS)
-	$(F77) -c $(FLAGS) readkcBasic.f90
+readkcBasic.o : readkcBasic.f $(PARAMS)
+	$(F77) -c $(FLAGS) readkcBasic.f
 
-readjacob.o : readjacob.f90 $(PARAMS)
-	$(F77) -c $(FLAGS) readjacob.f90
+readjacob.o : readjacob.f $(PARAMS)
+	$(F77) -c $(FLAGS) readjacob.f
 
-readflux.o : readflux.f90 $(PARAMS)
-	$(F77) -c $(FLAGS) readflux.f90
+readflux.o : readflux.f $(PARAMS)
+	$(F77) -c $(FLAGS) readflux.f
 
 #not needed for SRCv1.02+
-#makeprofile.x: makeprofile.f90
-#	$(F77) -o makeprofile.x $(FLAGS) makeprofile.f90
+#makeprofile.x: makeprofile.f
+#	$(F77) -o makeprofile.x $(FLAGS) makeprofile.f
 #readjacob2.x : readjacob2.o readbinaryjacob.o
 #	$(F77) -o readjacob2.x $(FLAGS) readjacob2.o readbinaryjacob.o
-#sturner_offset.o : sturner_offset.f90 
-#	$(F77) -c $(FLAGS) sturner_offset.f90
+#sturner_offset.o : sturner_offset.f 
+#	$(F77) -c $(FLAGS) sturner_offset.f
 #offset.x : sturner_offset.o
 #	$(F77) -o offset.x $(FLAGS) sturner_offset.o 
 

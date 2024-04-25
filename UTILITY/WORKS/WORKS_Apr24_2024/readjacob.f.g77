@@ -1,26 +1,26 @@
-! this program takes in UNFORMATTED flux output from kcarta.x and allows the
-! user to read the output
-! this is the SAME as readjacob.f, except thar we do not need to read
-! gas profiles and temps!!!!  have changed iNumGases --> iNumFluxes
+c this program takes in UNFORMATTED jacob output from atmos.x and allows the
+c user to read the output
 
-! NOTE : Absoft behaves very wierdly with fseek,ftell
-! so for Linux machines, use g77 or PDF Fortran
-! wherever you see g77 in this file and readbinary.f, comment out 
-!      iDummy = fseek(iIOUN,idatasize,1)    !!!!if using PDF(Linux) or SGI
-! and use the 
-!      CALL fseek(iIOUN,idatasize,1)         !!!!if using g77
+c the main rudiments of the program are the SAME AS readkcarta.f
+
+c NOTE : Absoft behaves very wierdly with fseek,ftell
+c so for Linux machines, use g77 or PDF Fortran
+c wherever you see g77 in this file and readbinary.f, comment out 
+c      iDummy = fseek(iIOUN,idatasize,1)    !!!!if using PDF(Linux) or SGI
+c and use the 
+c      CALL fseek(iIOUN,idatasize,1)         !!!!if using g77
 
       IMPLICIT NONE
 
       include 'convolve.param'
 
-! the definitions of all these variables are found in the subroutines
+c the definitions of all these variables are found in the subroutines
       CHARACTER*80 caInName
       INTEGER iIOUN
       INTEGER iNatm,iSave,iOk,iChoice
       REAL rFr1,rFr2
 
-      INTEGER iExtra,iNumFluxes,iaNumLayers(kMaxAtm),iNumLayers
+      INTEGER iExtra,iNumGases,iaNumLayers(kMaxAtm),iNumLayers
 
       INTEGER iInstr,rInPointSp,rInStart,rFWHM,iBinOrText
       INTEGER iLorS,iNOAA,iInstrType
@@ -43,39 +43,42 @@
       read 1000,caInName
  1000 FORMAT(A80)
 
-! first read header to figure out iStore ******************
+c first read header to figure out iStore ******************
       iIOUN=10
       OPEN(UNIT=iIOUN,FILE=caInName,STATUS='OLD',FORM='UNFORMATTED')
 
       CALL readmainjacobheader(iIOUN,rFr1,rFr2,iNumLayers)
 
-      CALL readjacobinfo(iIOUN,iNumFluxes,iNatm,iaNumLayers)
+      CALL readjacobinfo(iIOUN,iNumGases,iNatm,iaNumLayers)
 
-! do not need this
-! CALL readgasjacob(iIOUN,iNumFluxes,iNumLayers)
+      CALL readgasjacob(iIOUN,iNumGases,iNumLayers)
 
       print *,'SUCCESSFULLY READ IN THE HEADER ... ON TO THE DATA' 
 
-! this is the number of paths/mixed paths/layers that will be output each chunk
+c this is the number of paths/mixed paths/layers that will be output each chunk
 
-! this is the number of flux stuff that will be output each chunk
-! iStore=(iNumFluxes) .. multiply by iNumLayers, (no extra d/dblahs)
-      iExtra=0
+c this is the number of jacobian stuff that will be output each chunk
+c iStore=(iNumGases+2) as d/dq for each gas, plus temp jac, plus wgt fcn ... 
+c multiply by iNumLayers, and add 3  because we also do d/d(surface Temp), 
+c d/d(surfaceemis), d(thermal)/d(surace emis)
+      iExtra=4
       iStore=0
       DO ii=1,iNatm
         iStore=iStore+iaNumLayers(ii)
         END DO
-      iStore=iNumFluxes*iStore
+      iStore=(iNumGases+2)*iStore + (iExtra*iNatm)
 
       IF (iBinOrText .LT. 0) THEN 
         print *,'For each k-comp file used in the kcarta.x run ... '
-        print *,'Total number of up/down fluxes = ',iNumFluxes
+        print *,'Total number of gases = ',iNumGases
+        print *,'Total number of layers to output = ',iStore
+        print *,'Total number of surface temp/emiss to output = ',4
         print *,'GRAND total to be output = ',iStore
         print *,'Enter which of the above you want to store : ' 
         read *,iWhichStore 
         END IF 
       
-! the following info is for each k-comp file 
+c the following info is for each k-comp file 
 
       read(iIOUN) iTotal,iOutNumber,iImportant 
       read(iIOUN) (iaNumOut(iI),iI=1,iOutNumber) 
@@ -95,54 +98,61 @@
           END IF
         END DO 
  
-! figure out the frequencies 
-      CALL findfreqsflux(iIOUN,iFreqPts,iDataSize,iImportant,iaNumOut,iOutNumber,iTotal,raFreq) 
+c figure out the frequencies 
+      CALL findfreqsjacob(iIOUN,iFreqPts,iDataSize,iImportant,
+     $                     iaNumOut,iOutNumber,iTotal,raFreq) 
 
-! set up the artificial structure to mimic that of readkcarta.f
+c set up the artificial structure to mimic that of readkcarta.f
       iArtificial=0
       DO iJ=1,iNatm
-        DO iI=1,iImportant    !these are number of fluxes for this atm
+        DO iI=1,iImportant    !these are number of gas jacobs for this atm
           iArtificial=iArtificial+1
           iaArtificial(iArtificial)=iaNumOut(iJ)
           END DO
+        iArtificial=iArtificial+1               !tempr jacob
+        iaArtificial(iArtificial)=iaNumOut(iJ)
+        iArtificial=iArtificial+1               !wgt fcn
+        iaArtificial(iArtificial)=iaNumOut(iJ)
+        iArtificial=iArtificial+1               !surface jacob
+        iaArtificial(iArtificial)=4
         END DO
  
-! now  iArtificial  <---> iOutNumber
-! now iaArtificial  <---> iaNumOut
+c now  iArtificial  <---> iOutNumber
+c now iaArtificial  <---> iaNumOut
 
       iLoop=0 
       DO iJ=1,iArtificial
  
-! jump to point in file where main data blocks start 
-        CALL fseek(iIOUN,iStartOffset,0)   !!!!!if using g77
-
+c jump to point in file where main data blocks start 
+        CALL fseek(iIOUN,iStartOffSet,0)         !!!!if using g77
+ 
         iJump=0 
         DO iI=1,iJ-1 
-! jump to point in file where data for output option iJ starts  
-!        READ(iIOUN) iMainType,iSubMainType,iNumberOut   
-!c        READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta   
+c jump to point in file where data for output option iJ starts  
+cc        READ(iIOUN) iMainType,iSubMainType,iNumberOut   
+cc        READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta   
           iJump=iJump+4+(3*4)+4           
           iJump=iJump+(4+(4*4)+4)        !this reads the above 2 header lines 
           !this reads all the data in iaArtificial(iI) 
           iJump=iJump+(4+(kMaxPts*4)+4)*iaArtificial(iI) 
           END DO 
-        CALL fseek(iIOUN,iJump,1)   !!!!!if using g77
- 
-! now skip over frequency header 
-!      READ(iIOUN) iMainType,iSubMainType,iNumberOut   
-!      READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta   
+        CALL fseek(iIOUN,iJump,1)         !!!!if using g77
+
+c now skip over frequency header 
+cc      READ(iIOUN) iMainType,iSubMainType,iNumberOut   
+cc      READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta   
         iJump=4+(3*4)+4           
         iJump=iJump+(4+(4*4)+4)        !this reads the above 2 header lines 
-        CALL fseek(iIOUN,iJump,1)   !!!!!if using g77
- 
+        CALL fseek(iIOUN,iJump,1)         !!!!if using g77
+
         iStart=ftell(iIOUN) 
  
         print *,'outoption  ',iJ, ' of ',iArtificial
  
         DO iK = 1,iaArtificial(iJ) 
-          CALL fseek(iIOUN,iStart,0)   !!!!!if using g77
+          CALL fseek(iIOUN,iStart,0)     !!!!if using g77
           iJump=(4+(kMaxPts*4)+4)*(iK-1) 
-          CALL fseek(iIOUN,iJump,1)   !!!!!if using g77
+          CALL fseek(iIOUN,iJump,1)     !!!!if using g77
  
           CALL ReadData(iIOUN,iDataSize,raEntire,iDataPoints,iTotal) 
  
@@ -151,10 +161,12 @@
             STOP 
             END IF 
               
-! this is to test the reading functions! 
-! if iLoop==1 then print the header info at top of output data file 
+c this is to test the reading functions! 
+c if iLoop==1 then print the header info at top of output data file 
           iLoop=iLoop+1 
-          CALL output2(raFreq,iFreqPts,raEntire,iStore,caInName,iLoop,iBinOrText,iWhichStore) 
+          CALL output2(raFreq,iFreqPts,raEntire,iStore, 
+     $                  caInName, 
+     $                  iLoop,iBinOrText,iWhichStore) 
  
           END DO 
         END DO 
@@ -162,9 +174,10 @@
 
       END 
 
-!************************************************************************
-! this subroutine reads the freqs 
-      SUBROUTINE findfreqsflux(iIOUN,iFreqPts,iDataSize,iImportant,iaNumOut,iOutNumber,iTotal,raFreq) 
+c************************************************************************
+c this subroutine reads the freqs 
+      SUBROUTINE findfreqsjacob(iIOUN,iFreqPts,iDataSize,iImportant,
+     $           iaNumOut,iOutNumber,iTotal,raFreq) 
  
       include 'convolve.param' 
  
@@ -181,9 +194,9 @@
       iF=0 
       DO iI=1,iTotal 
         iWhere=FTELL(iIOUN) 
-        DO iJ=1,iOutnumber         !loop over atmospheres 
+        DO iJ=1,iOutnumber          !loop over atmospheres 
 
-          DO iL=1,iImportant     !iImportant Gases,one temp, one weight fcn
+          DO iL=1,iImportant+2      !iImportant Gases,one temp, one weight fcn
             READ(iIOUN) iMainType,iSubMainType,iNumberOut 
             READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta 
             IF (iNumberOut .NE. iaNumOut(iJ)) THEN
@@ -191,8 +204,17 @@
               STOP
               END IF
             offset=(ikMaxPts*4 + 2*4)*iaNumOut(iJ) 
-            CALL fseek(iIOUN,offset,1)   !!!!!if using g77
+            CALL fseek(iIOUN,offset,1)         !!!!if using g77
             END DO
+          !surface jacobians
+          READ(iIOUN) iMainType,iSubMainType,iNumberOut 
+          READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta 
+          IF (iNumberOut .NE. 4) THEN
+            print *,'iNumberOut .NE. 4, iJ = ',iJ
+            STOP
+            END IF
+          offset=(ikMaxPts*4 + 2*4)*4 
+          CALL fseek(iIOUN,offset,1)         !!!!if using g77
 
           END DO 
 
@@ -216,8 +238,9 @@
       RETURN 
       END 
  
-!************************************************************************ 
-      SUBROUTINE output2(raFreq,iFreqPts,raEntire,iStore,caInName,iLoop,iBinOrText,iWhichStore) 
+c************************************************************************ 
+      SUBROUTINE output2(raFreq,iFreqPts,raEntire, 
+     $       iStore,caInName,iLoop,iBinOrText,iWhichStore) 
  
       include 'convolve.param' 
  
@@ -226,36 +249,39 @@
       INTEGER iWhichStore 
       CHARACTER*80 caInName 
  
-! local variables 
+c local variables 
       CHARACTER*80 caOutName 
       INTEGER iI,iJ,iIOUN 
  
       iIOUN=11 
        
-! get the name of output file 
+c get the name of output file 
       CALL GetOutName2(caInName,caOutName,iBinOrText) 
  
       IF (iBinOrText .EQ. 1) THEN            !binary format for rdairs.m 
-! put in the header info ... iI tells how many spectra to expect 
-! only need to save this header when we are outputting the VERY first spectra 
+c put in the header info ... iI tells how many spectra to expect 
+c only need to save this header when we are outputting the VERY first spectra 
         IF (iLoop .EQ. 1) THEN 
           ii=iStore 
-          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',FORM='UNFORMATTED') 
+          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW', 
+     $         FORM='UNFORMATTED') 
           write(iIOUN) 1,iFreqPts,iI 
           write(iIOUN) (raFreq(iI),iI=1,iFreqPts) 
           CLOSE(iIOUN) 
           END IF 
-! now output!!! 
-        OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='OLD',FORM='UNFORMATTED',ACCESS='APPEND') 
+c now output!!! 
+        OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='OLD', 
+     $     FORM='UNFORMATTED',ACCESS='APPEND') 
           write(iIOUN) (raEntire(iJ),iJ=1,iFreqPts) 
         CLOSE(iIOUN) 
         END IF 
  
       IF (iBinOrText .EQ. -1) THEN     !column text format for rdairs.m 
-! put in the header info ... iI tells how many spectra to expect 
-! only need to save this header when we are outputting the VERY first spectra 
+c put in the header info ... iI tells how many spectra to expect 
+c only need to save this header when we are outputting the VERY first spectra 
         IF (iLoop .EQ. iWhichStore) THEN 
-          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',FORM='FORMATTED') 
+          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW', 
+     $         FORM='FORMATTED') 
           DO iJ=1,iFreqPts 
             write(iIOUN,5050) raFreq(iJ),raEntire(iJ) 
             END DO 
@@ -267,9 +293,9 @@
       RETURN 
       END    
  
-!************************************************************************ 
-! this takes the input file name, finds the root (before .dat or .datJAC) 
-! and appends .datCON
+c************************************************************************ 
+c this takes the input file name, finds the root (before .dat or .datJAC) 
+c and appends .datCON
       SUBROUTINE GetOutName(caInName,caOutName)
 
       CHARACTER*80 caInName,caOutName
@@ -280,7 +306,7 @@
         caOutName(iI:iI)=' '
         END DO
 
-! search for the .dat in caInName
+c search for the .dat in caInName
       iI=80
  15   CONTINUE
       IF ((caInName(iI:iI) .NE. '.') .AND. (iI .GT. 1)) THEN
@@ -297,9 +323,9 @@
 
       RETURN
       END
-!************************************************************************
-! this takes the input file name, finds the root (before .dat or .datJAC)  
-! and appends .datCON 
+c************************************************************************
+c this takes the input file name, finds the root (before .dat or .datJAC)  
+c and appends .datCON 
       SUBROUTINE GetOutName2(caInName,caOutName,iBinOrText) 
  
       CHARACTER*80 caInName,caOutName 
@@ -311,7 +337,7 @@
         caOutName(iI:iI)=' ' 
         END DO 
  
-! search for the .dat in caInName 
+c search for the .dat in caInName 
       iI=80 
  15      CONTINUE 
       IF ((caInName(iI:iI) .NE. '.') .AND. (iI .GT. 1)) THEN 
@@ -325,14 +351,14 @@
  
       caOutName(1:iI-1)=caInName(1:iI-1) 
       IF (iBinOrText .GT. 0) THEN 
-        caOutName(iI:iI+10)='FLUX.datCON' 
+        caOutName(iI:iI+9)='JAC.datCON' 
       ELSE 
-        caOutName(iI:iI+10)='FLUX.datTXT' 
+        caOutName(iI:iI+9)='JAC.datTXT' 
         END IF 
  
       RETURN 
       END 
-!*********************************************************************** 
+c************************************************************************ 
 
 
 

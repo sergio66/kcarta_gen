@@ -1,4 +1,24 @@
-function [w,d,iaProf,iaNumLay] = readsarta_jac(fname,iGID)
+function [w,d,iaProf,iaNumLay] = readsarta_jac(fname,iGID,rThreshold)
+
+if nargin == 2
+  %% comparing performance of /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/RODGERS/RODGERS21
+  %%   when using finite diff jacs vs analystic jacs, the former is
+  %%   better, since the jacs whose magnitude < 1e-4 are set to 0
+
+  %{
+  %% in MATLABCODE/CRODGERS_FAST_CLOUD after restart21A with ChrisSarta or SergioSarta, see compare_finitediff_analytic_jacresults_HALO_2019_04_25.m
+  chris = load('chris_AIRS_HALO_2019_04_25_sarta_jac.mat');
+  sergio = load('sergio_AIRS_HALO_2019_04_25_sarta_jac.mat');
+
+  figure(100);
+  iii = 10; semilogy(1:594,sergio.jacA(iii,:),'b.-',1:594,chris.jacA(iii,:),'rx-',1:594,jacA(iii,:),'g.-'); grid; boo=chris.jacA(iii,:); boo(boo < eps) = nan; nanmin(boo)
+  ans = 1.5259e-04
+  %}
+
+  rThreshold = 1.0e-5;
+  rThreshold = 1.0e-3;
+  rThreshold = 4.0e-4;
+end
 
 %% see s_writefile.f90 line 2516
 %%   readsarta_jac.m   : output is (numprof,numchan,numlay,'double')  [natural]
@@ -95,3 +115,4 @@ end
 
 fclose(fin);
 
+d(abs(d) < rThreshold) = 0.0;

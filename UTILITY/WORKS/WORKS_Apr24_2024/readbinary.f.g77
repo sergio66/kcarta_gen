@@ -1,27 +1,27 @@
-!*********** THIS IS THE LONG+SHORT VERSION *****************************
-! i.e. complete or partial data header saved !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!************************************************************************
-!************* READ IN THE k-compressed files ***************************
-!************************************************************************
-! this reads in the main header information
+c*********** THIS IS THE LONG+SHORT VERSION *****************************
+c i.e. complete or partial data header saved !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c************************************************************************
+c************* READ IN THE k-compressed files ***************************
+c************************************************************************
+c this reads in the main header information
       SUBROUTINE readmainheader(iIOUN,rFr1,rFr2,iLorS)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
 
-! iLorS      = which version data header was saved in
-! iIOUN      = file number
-! iSetLow    = integer index (between 1 and 89) of kcomp files start point
-! iSetHigh   = integer index (between 1 and 89) of kcomp files end point
-! rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
+c iLorS      = which version data header was saved in
+c iIOUN      = file number
+c iSetLow    = integer index (between 1 and 89) of kcomp files start point
+c iSetHigh   = integer index (between 1 and 89) of kcomp files end point
+c rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
       INTEGER iIOUN,iLorS
       REAL rFr1,rFr2,raParams(kMaxUserSet)
       CHARACTER*80 caVers
 
-! iCKD       = water continuum version
-! caComment  = comment assocaiated with data run
-! iNumLayers = number of layers in each gas profile
+c iCKD       = water continuum version
+c caComment  = comment assocaiated with data run
+c iNumLayers = number of layers in each gas profile
       CHARACTER*80 caComment
       INTEGER iCKD,iI,iNumLayers,iSetLow,iSetHigh,ia6(6)
       INTEGER iKMaxUserSet,char2num,iNumParams
@@ -34,7 +34,7 @@
       print *,caVers
 
       read(iIOUN) iNumLayers
-!      print *,iNumLayers
+c      print *,iNumLayers
 
       read(iIOUN) iKmaxUserSet
       IF (iKmaxUserSet .NE. kMaxUserSet) THEN
@@ -44,19 +44,19 @@
         END IF
       read(iIOUN) (raParams(iI),iI=1,iKmaxUserSet)
 
-! read comment
+c read comment
       read(iIOUN) caComment
-! read start,stop frequency  iSetLo,iSetHi
+c read start,stop frequency  iSetLo,iSetHi
       read(iIOUN) rFr1,rFr2 
       read(iIOUN) iSetLow,iSetHigh
-! read how data was saved
+c read how data was saved
       read(iIOUN) iLorS
       IF (iLorS .EQ. 0) THEN
         print *,'Sorry .. use readkcBasic.f to read in this file .... '
         STOP
         END IF
 
-! process STRING vx.xx into REAL
+c process STRING vx.xx into REAL
       ca3(1:1)=caVers(2:2)
       ca3(2:3)=caVers(4:5)
       rVers=0.0
@@ -79,34 +79,35 @@
         read(iIOUN) (pProf(iI),iI=1,kProfLayer)   !!fixed by Larry McMillin
         end if
 
-!      print *,'read in mainheader .......'
+c      print *,'read in mainheader .......'
 
       RETURN
       END
-!************************************************************************
-! this reads in the main header information for iLorS = 0 (readkcBasic.f)
-      SUBROUTINE readmainheaderSHORT(iIOUN,rFr1,rFr2,rDelta,iSetLow,iSetHigh,iTotalStuff)
+c************************************************************************
+c this reads in the main header information for iLorS = 0 (readkcBasic.f)
+      SUBROUTINE readmainheaderSHORT(iIOUN,rFr1,rFr2,rDelta,iSetLow,iSetHigh,
+     $                               iTotalStuff)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
-! iSetLow,iSetHigh = Chunk start, stop index
-! rDelta     = point spacing
-! iIOUN      = file number
-! rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
-! iChunks    = number of 10000 pr chunks that kCARTA deemed to process
-! iTotal     = number of outputs per 10000 points
+c iSetLow,iSetHigh = Chunk start, stop index
+c rDelta     = point spacing
+c iIOUN      = file number
+c rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
+c iChunks    = number of 10000 pr chunks that kCARTA deemed to process
+c iTotal     = number of outputs per 10000 points
       INTEGER iIOUN,iLorS,iChunks,iTotalStuff,iSetLow,iSetHigh
       REAL rFr1,rFr2,raParams(kMaxUserSet),rDelta
       CHARACTER*80 caVers
 
-! local variables
-! iSetLow    = integer index (between 1 and 89) of kcomp files start point
-! iSetHigh   = integer index (between 1 and 89) of kcomp files end point
-! iLorS      = which version data header was saved in
-! iCKD       = water continuum version
-! caComment  = comment assocaiated with data run
-! iNumLayers = number of layers in each gas profile
+c local variables
+c iSetLow    = integer index (between 1 and 89) of kcomp files start point
+c iSetHigh   = integer index (between 1 and 89) of kcomp files end point
+c iLorS      = which version data header was saved in
+c iCKD       = water continuum version
+c caComment  = comment assocaiated with data run
+c iNumLayers = number of layers in each gas profile
       CHARACTER*80 caComment
       INTEGER iCKD,iI,iNumLayers,ia6(6)
       INTEGER iKMaxUserSet,char2num
@@ -124,33 +125,33 @@
         END IF
       read(iIOUN) (raParams(iI),iI=1,iKmaxUserSet)
 
-! read comment
+c read comment
       read(iIOUN) caComment
-! read start,stop frequency  iSetLo,iSetHi
+c read start,stop frequency  iSetLo,iSetHi
       read(iIOUN) rFr1,rFr2 
       read(iIOUN) iSetLow,iSetHigh
-! read how data was saved
+c read how data was saved
       read(iIOUN) iLorS
       IF (iLorS .NE. 0) THEN
         print *,'Sorry .. use readkcarta.f to read in this file .... '
         STOP
         END IF
 
-! read frequency step size
+c read frequency step size
       read(iIOUN) rdelta
-! read chunk size = rDelta*10000
+c read chunk size = rDelta*10000
       read(iIOUN) rBlocks
-! read how many output options saved per 10000 point chunk
+c read how many output options saved per 10000 point chunk
       read(iIOUN) iTotalStuff
 
       iChunks = iSetHigh - iSetLow + 1   !!!number of 10000 pt chunks to read
 
-!      print *,'read in mainheader .......'
+c      print *,'read in mainheader .......'
 
       RETURN
       END
-!************************************************************************
-! this function takes a character in a string, and gives Roman numeral
+c************************************************************************
+c this function takes a character in a string, and gives Roman numeral
       INTEGER FUNCTION char2num(ca3,iI)
 
       IMPLICIT NONE 
@@ -186,38 +187,38 @@
       RETURN
       END
         
-!************************************************************************
-! this function reads in the individual gas paths, and list of 
-! paths to be output
+c************************************************************************
+c this function reads in the individual gas paths, and list of 
+c paths to be output
       SUBROUTINE readgaspaths(iIOUN,iNumPathsOut,iLorS)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
 
-! iIOUN          = file ioUNIT number
-! iNumPathsOut   = number of single gas paths to be output
-! iLorS          = Long or Short header format
+c iIOUN          = file ioUNIT number
+c iNumPathsOut   = number of single gas paths to be output
+c iLorS          = Long or Short header format
       INTEGER iIOUN,iNumPathsOUt,iLorS
 
-! iaOutPaths     = array containing the paths to be output
-! raaAmt,raaTemp = matrices containing the gas amts,temperatures
-! iaGasID        = array containing ID's of gases (kcomp and xsec)
-! iNumLayers     = number of layers in each gas profile
-! iNumPaths      = total number of gas paths == iNumGases*iNumLayers
+c iaOutPaths     = array containing the paths to be output
+c raaAmt,raaTemp = matrices containing the gas amts,temperatures
+c iaGasID        = array containing ID's of gases (kcomp and xsec)
+c iNumLayers     = number of layers in each gas profile
+c iNumPaths      = total number of gas paths == iNumGases*iNumLayers
       INTEGER iNumLayers,iNumPaths,iaGasId(kGasStore)
       REAL rAmt,rTemp
       INTEGER iPath,iGasID,iNumGases,ii,jj,iaOutPaths(kPathsOut)
       REAL raaTemp(kProfLayer,kGasStore),raaAmt(kProfLayer,kGasStore)
 
       iNumLayers=kProfLayer
-! read iNumPaths=iNumGases*iNumLayers
-! -------- optional due to iLorS ----------------
+c read iNumPaths=iNumGases*iNumLayers
+c -------- optional due to iLorS ----------------
       IF (iLorS .GT. 0) THEN
         read(iIOUN) iNumPaths
         iNumGases=iNumPaths/iNumLayers
 
-! now read the PathNum GasID Temperature Amount for each path in the profile
+c now read the PathNum GasID Temperature Amount for each path in the profile
         DO ii=1,iNumGases
           DO jj=1,iNumLayers
             read(iIOUN) iPath,iGasID,rTemp,rAmt
@@ -227,78 +228,78 @@
          iaGasID(ii)=iGasID
          END DO
        END IF
-! -------- end optional due to iLorS ----------------
+c -------- end optional due to iLorS ----------------
 
-! read in Number of Paths to be output each time
+c read in Number of Paths to be output each time
        read(iIOUN) iNumPathsOut
        IF (iLorS .LT.  0) THEN
          iNumPaths=iNumPathsOut
          END IF
 
-!       print *,'output the following paths',iNumPathsOut
+c       print *,'output the following paths',iNumPathsOut
        IF ((iNumPathsOut .LT. 0).OR.(iNumPathsOut .GT. iNumPaths)) THEN
           print *,'Mistake in number of paths to be output!!!'
           STOP
           END IF
       IF (iNumPathsOut .GT.  0) THEN
-! read in paths
+c read in paths
         read(iIOUN) (iaOutPaths(ii), ii=1,iNumPathsOut)
         END IF
 
-!       print *,'the total number of gas paths is ',iNumPaths
-!       print *,'which gives num of gases',iNumGases
-!       print *,'Read in the Path nums, gasIDs, amts, temps'
+c       print *,'the total number of gas paths is ',iNumPaths
+c       print *,'which gives num of gases',iNumGases
+c       print *,'Read in the Path nums, gasIDs, amts, temps'
 
       RETURN
       END
 
-!************************************************************************
-! now read in the mixed path info
+c************************************************************************
+c now read in the mixed path info
       SUBROUTINE readmixedpaths(iIOUN,iNpmix,iNumMixPathsOut,iLorS)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
 
-! iIOUN          = file IOUNIT number
-! iNpmix         = number of mixed paths
-! iNumMixPathsOut= number of mixed paths to be output
-! iLorS          = long or short data header
+c iIOUN          = file IOUNIT number
+c iNpmix         = number of mixed paths
+c iNumMixPathsOut= number of mixed paths to be output
+c iLorS          = long or short data header
       INTEGER iIOUN,iNpmix,iNumMixPathsOut,iLorS
 
-! local variables
-! iaOutMixPaths  = integer array containing list of paths to be output
-! iMixFileLines  = number of lines containing character description of MP's
-! caaMixedPathInfo == character description of mixed path info
-! raMixTemp      = array containing the Mixed Path Temperatures
+c local variables
+c iaOutMixPaths  = integer array containing list of paths to be output
+c iMixFileLines  = number of lines containing character description of MP's
+c caaMixedPathInfo == character description of mixed path info
+c raMixTemp      = array containing the Mixed Path Temperatures
       INTEGER iaOutMixPaths(kPathsOut),iMixFileLines
       REAL raMixTemp(kMixFilRows)
       CHARACTER*130 caaMixedPathInfo(kMixFilRows)
       INTEGER ii,kk
       CHARACTER*130 caMixedPathInfo
 
-! read in number of mixed paths in *MIXFIL
+c read in number of mixed paths in *MIXFIL
       read(iIOUN) iNpmix
 
-! -------- optional due to iLorS ----------------
+c -------- optional due to iLorS ----------------
       IF (iLorS .GT. 0) THEN
-! read in #of lines that have info in *MIXFIL
+c read in #of lines that have info in *MIXFIL
         read(iIOUN) iMixFileLines
 
         IF  (iNpmix .GT. 0) THEN
-! read in the mixing table
+c read in the mixing table
           DO ii=1,iMixFileLines
             read(iIOUN) caMixedPathInfo
-!           caaMixedPathInfo(ii,1:130)=caMixedPathInfo(1:130)
+c           caaMixedPathInfo(ii,1:130)=caMixedPathInfo(1:130)
             END DO
 
-! read in mixed path temperatures
+c read in mixed path temperatures
           read(iIOUN) (raMixTemp(ii), ii=1,iNpmix)
           END IF
         END IF
-! -------- end optional due to iLorS ----------------
+c -------- end optional due to iLorS ----------------
 
-! read in Number of mixed paths to be output each time
+c read in Number of mixed paths to be output each time
       IF (iNpmix .GT. 0) THEN
         read(iIOUN) iNumMixPathsOut
         IF ((iNumMixPathsOut.LT.0).OR.(iNumMixPathsOut.GT.iNpmix)) THEN
@@ -307,48 +308,49 @@
             END IF
 
         IF (iNumMixPathsOut .GT. 0) THEN
-! read in paths
+c read in paths
           read(iIOUN) (iaOutMixPaths(ii),ii=1,iNumMixPathsOut)
           END IF
 
         END IF
 
-!      print *,'Number of Mixed Paths = ',iNpmix
-!      print *,'Number of lines in MIXFIL to read = ',iMixFileLines
+c      print *,'Number of Mixed Paths = ',iNpmix
+c      print *,'Number of lines in MIXFIL to read = ',iMixFileLines
 
       RETURN
       END
 
-!************************************************************************  
-! this subroutine reads in the atmosphere information
-      SUBROUTINE readatmospheres(iIOUN,iNpmix,iNatm,iaNumLayersInAtm,iaNumLayersOut)
+c************************************************************************  
+c this subroutine reads in the atmosphere information
+      SUBROUTINE readatmospheres(iIOUN,iNpmix,iNatm,
+     $           iaNumLayersInAtm,iaNumLayersOut)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
 
-! iIOUN         = file unit number
-! iNpmix        = number of mixed paths (from readmixedpaths)
-! iNatm         = number of atmospheres
-! iaNumLayersInAtm = integer array with number of layers in each atmosphere
-! iaNumLayersOut= integer array with number of layers out per atmosphere
+c iIOUN         = file unit number
+c iNpmix        = number of mixed paths (from readmixedpaths)
+c iNatm         = number of atmospheres
+c iaNumLayersInAtm = integer array with number of layers in each atmosphere
+c iaNumLayersOut= integer array with number of layers out per atmosphere
       INTEGER iaNumLayersOut(kMaxAtm),iaNumLayersInAtm(kMaxAtm)
       INTEGER iIOUN,iNpmix,iNatm
 
-! local variables
-! raaOutPress   = matrix containing pressures where radiances are output
-! iaAtmNum      = integer array with atmospher number (1..iNatm)
-! iaaRadLayer   = for each atmosphere, this lists which layers build up the atm
-! iaaOutRadPaths= for each atmosphere, list which layers are to be output
-! raTbdy,raTinit,raSat = for each atmosphere, these arrays contain atm temp,
-!                          surface temp and satellite viewing angle
-! raaaEms      =emissivity
-! rakSolarAngle = solar angles for the atmospheres
-! rakThermalAngle=thermal diffusive angle
-! rakSolarRefl   =solar reflectance
-! iakthermal,iaksolar = turn on/off solar and thermal
-! iakthermaljacob=turn thermal jacobians on/off      
-! raheight = height of instrument above earth
+c local variables
+c raaOutPress   = matrix containing pressures where radiances are output
+c iaAtmNum      = integer array with atmospher number (1..iNatm)
+c iaaRadLayer   = for each atmosphere, this lists which layers build up the atm
+c iaaOutRadPaths= for each atmosphere, list which layers are to be output
+c raTbdy,raTinit,raSat = for each atmosphere, these arrays contain atm temp,
+c                          surface temp and satellite viewing angle
+c raaaEms      =emissivity
+c rakSolarAngle = solar angles for the atmospheres
+c rakThermalAngle=thermal diffusive angle
+c rakSolarRefl   =solar reflectance
+c iakthermal,iaksolar = turn on/off solar and thermal
+c iakthermaljacob=turn thermal jacobians on/off      
+c raheight = height of instrument above earth
       INTEGER iNumPathsAtmos,iAtm,iNumLayersOut,ii,jj,kk
       REAL rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
       REAL rakSolarRefl(kMaxAtm),raHeight(kMaxAtm)
@@ -361,18 +363,18 @@
       INTEGER iaEms(kMaxAtm)
       INTEGER iaaOutRadPaths(kMaxAtm,kPathsOut)
 
-!      print *,' reading in the atmospheres info .... '
+c      print *,' reading in the atmospheres info .... '
 
-! read in number of atmospheres in *RADFIL
+c read in number of atmospheres in *RADFIL
       read(iIOUN) iNatm
-! read in kEmsRegions
+c read in kEmsRegions
       read(iIOUN) ii                       
       IF (ii .NE. kEmsRegions) THEN
         print *,'please recompile code ... kEmsRegions incorrect'
         STOP
         END IF
 
-!      print *,'There are atmospheres in RADFIL ',iNatm
+c      print *,'There are atmospheres in RADFIL ',iNatm
 
       IF (iNatm .GT. 0) THEN
         DO ii=1,iNatm
@@ -395,43 +397,45 @@
          END DO
 
        DO ii=1,iNatm
-!         print *,'reading in info for atm num ',ii
+c         print *,'reading in info for atm num ',ii
 
-! read in atmosphere number, # of mixed paths in atmosphere
+c read in atmosphere number, # of mixed paths in atmosphere
          read(iIOUN) iAtm,iNumPathsAtmos
          iaNumLayersInAtm(ii)=iNumPathsAtmos
-!         print *,'Num of Paths in Atmosphere = ',iNumPathsAtmos
+c         print *,'Num of Paths in Atmosphere = ',iNumPathsAtmos
 
-!         IF((iNumPathsAtmos.LT.0).OR.(iNumPathsAtmos.GT.iNpmix)) THEN
+c         IF((iNumPathsAtmos.LT.0).OR.(iNumPathsAtmos.GT.iNpmix)) THEN
          IF((iNumPathsAtmos.LT.0).OR.(iNumPathsAtmos.GT.kProfLayer)) THEN
            print *,'Mistake in num of mixed paths used in atmosphere !'
            STOP
            END IF
         IF (iNumPathsAtmos .GT.  0) THEN
-!          print *,'Reading the Mixed Path numbers ...'
-! read in paths making up atmosphere
+c          print *,'Reading the Mixed Path numbers ...'
+c read in paths making up atmosphere
           read(iIOUN) (iaaRadLayer(ii,jj),jj=1,iNumPathsAtmos) 
           read(iIOUN) raTbdy(ii),raTinit(ii),raSat(ii),raHeight(ii)
-          read(iIOUN) iakSolar(iI),rakSolarAngle(iI),rakSolarRefl(iI),iakThermal(iI),rakThermalAngle(iI),iakThermalJacob(iI)
+          read(iIOUN) iakSolar(iI),rakSolarAngle(iI),
+     $       rakSolarRefl(iI),iakThermal(iI),
+     $       rakThermalAngle(iI),iakThermalJacob(iI)
           read(iIOUN) iaEms(ii)
           DO jj=1,iaEms(ii)
             read(iIOUN) raaaEms(ii,jj,1),raaaEms(ii,jj,2)
             END DO
 
-! now read in layers to be output
+c now read in layers to be output
           read(iIOUN) iNumLayersOut
           iaNumLayersOut(ii)=iNumLayersOut
-!          print *,'This atm has layers to be output',iNumLayersOut
+c          print *,'This atm has layers to be output',iNumLayersOut
 
       IF((iNumLayersOut.LT.0).OR.(iNumLayersOut.GT.iNumPathsAtmos))THEN 
         print *,'Mistake in number of layers to be output for Atm#!',ii
         STOP
         END IF
           IF (iNumLayersOut .GT. 0) THEN
-! read in mixed paths to be output
+c read in mixed paths to be output
             read(iIOUN) (iaaOutRadPaths(ii,jj),jj=1,iNumLayersOut)
             read(iIOUN) (raaOutPress(ii,jj),jj=1,iNumLayersOut)
-!            print *,(iaaOutRadPaths(ii,jj),jj=1,iNumLayersOut)
+c            print *,(iaaOutRadPaths(ii,jj),jj=1,iNumLayersOut)
             END IF
           END IF
 
@@ -440,26 +444,27 @@
 
       RETURN
       END
-!************************************************************************
-! this prints out a summary of the saved paths/MP/layers
-      SUBROUTINE printsummary(iaOutPaths,iaOutMixPaths,iNatm,iaNumLayersOut,iaaOutRadPaths,ii1,ii2)
+c************************************************************************
+c this prints out a summary of the saved paths/MP/layers
+      SUBROUTINE printsummary(iaOutPaths,iaOutMixPaths,iNatm,
+     $                     iaNumLayersOut,iaaOutRadPaths,ii1,ii2)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
-! iaOutPaths     = integer array with list of gas   paths to be output
-! iaOutMixPaths  = integer array with list of mixed paths to be output
-! iNatm          = number of atmospheres
-! iaNumLayersOut = for each atmosphere, how many layers to be output
-! iaaOutRadPaths = for each atmosphere, list of layers to be output
-! ii1            =iNumPathsOut
-! ii2            =iNumMixPathsOut
+c iaOutPaths     = integer array with list of gas   paths to be output
+c iaOutMixPaths  = integer array with list of mixed paths to be output
+c iNatm          = number of atmospheres
+c iaNumLayersOut = for each atmosphere, how many layers to be output
+c iaaOutRadPaths = for each atmosphere, list of layers to be output
+c ii1            =iNumPathsOut
+c ii2            =iNumMixPathsOut
       INTEGER iaOutPaths(kPathsOut),iaOutMixPaths(kPathsOut),iNatm
       INTEGER iaNumLayersOut(kMaxAtm)
       INTEGER iaaOutRadPaths(kMaxAtm,kPathsOut)
       INTEGER ii1,ii2
 
-! local variables
+c local variables
       INTEGER ii,iit,ind(kPathsOut),jj,kk
 
       print *,'summarizing output info ....'
@@ -502,41 +507,41 @@
       RETURN
       END
 
-!************************************************************************
-! this reads in a "block" of data
+c************************************************************************
+c this reads in a "block" of data
       SUBROUTINE readblock(iFrLow,iFrHigh,rL,rH,ra,iIOUN,iBlSz)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
 
-! iFrLow,iFrHigh = integer index of output start/stop point (1--10000)
-! rL,rH          = freq start/stop points, corresponding to above two indices
-! iBlSz          = block size == number of points to be read in (400 or 10000)
-! iIOUN          = file IOUNIT number
-! ra             = real array containing the data that is read in
+c iFrLow,iFrHigh = integer index of output start/stop point (1--10000)
+c rL,rH          = freq start/stop points, corresponding to above two indices
+c iBlSz          = block size == number of points to be read in (400 or 10000)
+c iIOUN          = file IOUNIT number
+c ra             = real array containing the data that is read in
       INTEGER iFrLow,iFrHigh,iIOUN,iBlSz,ii
       REAL rL,rH,ra(kMaxPts)
 
-! first read the header
+c first read the header
       read(iIOUN) iFrLow,iFrHigh,rL,rH
 
-! now read the data
+c now read the data
       read(iIOUN) (ra(ii),ii=1,iBlSz)
 
       RETURN
       END
-!************************************************************************
-! this subroutine reads in the data
+c************************************************************************
+c this subroutine reads in the data
       SUBROUTINE readdata(iIOUN,iDataSize,raEntire,iDataPoints,iTotal)
 
       IMPLICIT NONE 
 
       include 'convolve.param'
 
-! iDataSize=number of bytes from start of data in this block, 
-!           to same start of data
-!           in next kcomp block (so we can directly jump there)
+c iDataSize=number of bytes from start of data in this block, 
+c           to same start of data
+c           in next kcomp block (so we can directly jump there)
       INTEGER iIOUN,iDataSize,iDataPoints,iTotal
       REAL raEntire(kMaxEntire)
 
@@ -553,7 +558,7 @@
           raEntire(iDataPoints)=raTemp(iJ)
           END DO
 
-        IF (iI .NE. iTotal) THEN
+        IF (iI. NE. iTotal) THEN
           CALL fseek_local(iIOUN,idataSize,1)       !!!!if using g77
           END IF
 
@@ -561,8 +566,8 @@
 
       RETURN
       END
-!************************************************************************
-! this subroutine does the command line stuff
+c************************************************************************
+c this subroutine does the command line stuff
       SUBROUTINE DoCommandLine(caInName,caOutName,iTextOrBinary,iWhich)
 
       IMPLICIT NONE 
@@ -578,20 +583,20 @@
       CHARACTER*80 caWhich 
       INTEGER iDummy,iError 
  
-!      print *,'Enter INPUT binary file name '
-!      read 1000,caInName
-!      print *,'Do you want TEXT (-1) or BINARY (+1) output?'
-!      read *,iTextOrBinary
-!      IF (iTextOrBinary .EQ. -1) THEN
-!        print *,'input file has ',iTotalStuff,' outputs'
-!        print *,'which one do you want output???'
-!        read *,iWhich
-!        END IF
-!      print *,'Enter OUTPUT file name '
-!      read 1000,caOutName
+c      print *,'Enter INPUT binary file name '
+c      read 1000,caInName
+c      print *,'Do you want TEXT (-1) or BINARY (+1) output?'
+c      read *,iTextOrBinary
+c      IF (iTextOrBinary .EQ. -1) THEN
+c        print *,'input file has ',iTotalStuff,' outputs'
+c        print *,'which one do you want output???'
+c        read *,iWhich
+c        END IF
+c      print *,'Enter OUTPUT file name '
+c      read 1000,caOutName
 
-! this is the number of args
-      INTEGER iarg! 
+c this is the number of args
+      INTEGER iargc 
 
       !use command line stuff 
       iDummy = iargc() 
@@ -633,7 +638,7 @@
 
       RETURN
       END
-!************************************************************************
+c************************************************************************
       SUBROUTINE GetNumber(caName,iW)
 
       CHARACTER*80 caName
@@ -643,7 +648,7 @@
       INTEGER iR,iL,iInt,iFactor,iI
       CHARACTER c
 
-! find the "right" length of the input root name
+c find the "right" length of the input root name
       iR=len(caName)
  11   continue
       IF (caName(iR:iR) .eq. ' ') THEN
@@ -651,7 +656,7 @@
         GO TO 11      
         END IF
 
-! find the "left" length of the input root name
+c find the "left" length of the input root name
       iL=1
  12   continue
       IF (caName(iL:iL) .eq. ' ') THEN
@@ -659,14 +664,14 @@
         GO TO 12      
         END IF
 
-! thus the entered word exists between iL:iR
+c thus the entered word exists between iL:iR
       IF (iL .GT. iR) THEN
         print *, 'Fatal Error! Invalid (blank) string in file !'
         STOP
         END IF
 
-! now rearrange the string, so that it is right padded with blanks
-! this is basically equivalent to  ADJUSTR(caName)
+c now rearrange the string, so that it is right padded with blanks
+c this is basically equivalent to  ADJUSTR(caName)
       DO iInt=1,80
         caTempName(iInt:iInt)=' '
         END DO
@@ -680,7 +685,7 @@
         END DO
 
       DO iInt = 1,iR-iL+1
-        ! = caName(iInt:iInt)        
+        c = caName(iInt:iInt)        
         READ(c,13) iI
         iW = iW + iFactor*iI
         iFactor = iFactor/10
@@ -692,28 +697,28 @@
       END
 
 
-!************************************************************************
-! this is the fseek function, as defined by PGI F77
-! fseek
+c************************************************************************
+c this is the fseek function, as defined by PGI F77
+c fseek
 
-! Position file at offset.
+c Position file at offset.
 
-! Synopsis
+c Synopsis
 
-! integer function fseek(lu, offset, from)
-! integer lu
-! integer offset
-! integer from
+c integer function fseek(lu, offset, from)
+c integer lu
+c integer offset
+c integer from
 
-! fseek repositions a file connected to logical unit lu. offset is an 
-! offset in bytes relative to the position specified by :
+c fseek repositions a file connected to logical unit lu. offset is an 
+c offset in bytes relative to the position specified by :
 
-! 0    beginning of the file 
-! 1    current position 
-! 2    end of the file
+c 0    beginning of the file 
+c 1    current position 
+c 2    end of the file
 
-! If successful, the value returned by fseek will be zero; otherwise, 
-! it's a system error code. 
+c If successful, the value returned by fseek will be zero; otherwise, 
+c it's a system error code. 
       SUBROUTINE fseek_local(iIOUN,iStep,iFrom)
 
       IMPLICIT NONE 
@@ -727,11 +732,11 @@
       CHARACTER cC
       REAL raX(kMaxPts)
 
-!      CALL fseek(iIOUN,iStep,iFrom)   !!if built in g77 works
+c      CALL fseek(iIOUN,iStep,iFrom)   !!if built in g77 works
 
-! this is to test if thisngs work
-! stopped working on Absift v10.0
-! seems to work on PGI F77
+c this is to test if thisngs work
+c stopped working on Absift v10.0
+c seems to work on PGI F77
       iDebug = -1
       IF (iDebug  .GT. 0) THEN
         iL = ftell(iIOUN)
@@ -739,19 +744,19 @@
 
         iFrom = 1      
         iX = fseek(iIOUN,0,iFrom)
-!        call fseek(iIOUN,0,iFrom)
+c        call fseek(iIOUN,0,iFrom)
         iL = ftell(iIOUN)
             print *,'----------1 >>>>>>><<<<<< ???',iIOUN,iX,iL
 
         iFrom = 0      
         iX = fseek(iIOUN,0,iFrom)
-!        call fseek(iIOUN,0,iFrom)
+c        call fseek(iIOUN,0,iFrom)
         iL = ftell(iIOUN)
           print *,'----------0 >>>>>>><<<<<< ???',iIOUN,iX,iL
 
         iFrom = 2      
         iX = fseek(iIOUN,0,iFrom)
-!        call fseek(iIOUN,0,iFrom)
+c        call fseek(iIOUN,0,iFrom)
         iL = ftell(iIOUN)
           print *,'----------2 >>>>>>><<<<<< ???',iIOUN,iX,iL
           stop
@@ -770,7 +775,7 @@
         DO iL = 1,iStep
           iX = ftell(iIOUN)
           print *,'----------loop >>>>>>><<<<<<',iIOUN,iL,iX
-!         read(iIOUN) cC
+c          read(iIOUN) cC
           read(iIOUN) (raX(iI),iI=1,kMaxPts)
           print *,'----------     >>>>>>>      ',iIOUN,iL,iStep,cC
           END DO
@@ -781,4 +786,4 @@
       RETURN
       END
 
-!************************************************************************
+c************************************************************************
