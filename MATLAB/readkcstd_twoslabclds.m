@@ -496,6 +496,8 @@ end
 % read "output data blocks"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+printarray(nODBrows,'nODBrows = ')
+
 for chunk = 1:nchunk
 
   cumODBrow = 1;
@@ -515,7 +517,11 @@ for chunk = 1:nchunk
     frhigh  = fread(fin, 1, 'real*4');    % high freq of chunk
     frinc   = fread(fin, 1, 'real*4');    % frequency increment
     flen    = fread(fin, 1, 'integer*4');
-  
+
+    if chunk <= 3 | chunk >= nchunk - 2
+      fprintf(1,'chunk = %2i odb = %2i frlow/frhigh = %12.6f %12.6f \n',chunk,odb,frlow,frhigh)
+    end
+
     if chunk == 1
       fprintf(2, 'readkc: ODB type = %d, subtype = %d, rows = %d\n', ...
                 type, subtype, nrow);
@@ -581,7 +587,16 @@ ilen = 1 : length(wnums);
 wnums = floor(wnums(1)) + (ilen-1)*dvx;
 
 if nn == 4
+  fprintf(1,'2 clds : frac12,xclusive1frac,xclusive2frac,clrfrac = %8.6f %8.6f %8.6f %8.6f \n',bfrac,xifrac,xwfrac,clrfrac)
   finaldata = bfrac*data(:,1)   + xifrac*data(:,2) + xwfrac*data(:,3) + clrfrac*data(:,4);
+  sumdata = data(:,5);
 else
+  fprintf(1,'1 clds : cfrac,clrfrac = %8.6f %8.6f \n',xifrac,clrfrac)
   finaldata = xifrac*data(:,1) + clrfrac*data(:,2);
+  sumdata = data(:,4);
 end
+
+fprintf(1,'nODBs = %2i \n',nODBs)
+plot(wnums,finaldata,wnums,sumdata)
+fprintf(1,'sumdata-finaldata = %12.6f \n',sum(sumdata-finaldata))
+plot(wnums,rad2bt(wnums,finaldata)-rad2bt(wnums,sumdata))

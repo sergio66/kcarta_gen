@@ -1,27 +1,27 @@
-! this program takes in the UNFORMATTED output from kcarta.x and allows the
-! user to convolve the final radiance and save to a FORMATTED file
+c this program takes in the UNFORMATTED output from kcarta.x and allows the
+c user to convolve the final radiance and save to a FORMATTED file
 
-! usage #1 : readkcBasic.x infile.dat outfile.bin
-!       #2 : readkcBasic.x infile.dat outfile.txt iWhich
-! usage    : readkcBasic.x arg1 arg2 [optional integer]
-! where aerg1,arg2 are names of input and output files; if third argument is
-! specified, the output file will be a text file that stores the iWhich th row
-! of data; else the output file is a binary file
+c usage #1 : readkcBasic.x infile.dat outfile.bin
+c       #2 : readkcBasic.x infile.dat outfile.txt iWhich
+c usage    : readkcBasic.x arg1 arg2 [optional integer]
+c where aerg1,arg2 are names of input and output files; if third argument is
+c specified, the output file will be a text file that stores the iWhich th row
+c of data; else the output file is a binary file
 
-! NOTE : Absoft behaves very wierdly with fseek,ftell
-! so for Linux machines, use g77 or PDF Fortran
-! while for SGI, you can use the supplied software
+c NOTE : Absoft behaves very wierdly with fseek,ftell
+c so for Linux machines, use g77 or PDF Fortran
+c while for SGI, you can use the supplied software
 
-! wherever you see g77 in this file and readbinary.f, comment out 
-!      iDummy = fseek(iIOUN,idatasize,1)    !!!!if using PDF (Linux) or SGI
-! and use the 
-!      CALL fseek(iIOUN,idatasize,1)         !!!!if using g77
+c wherever you see g77 in this file and readbinary.f, comment out 
+c      iDummy = fseek(iIOUN,idatasize,1)    !!!!if using PDF (Linux) or SGI
+c and use the 
+c      CALL fseek(iIOUN,idatasize,1)         !!!!if using g77
 
       IMPLICIT NONE
 
       include 'convolve.param'
 
-! the definitions of all these variables are found in the subroutines
+c the definitions of all these variables are found in the subroutines
       CHARACTER*80 caInName,caOutName
       INTEGER iIOUN,iE,iB,iTotalStuff
       REAL rFr1,rFr2,rDv
@@ -40,7 +40,8 @@
 
       IF (iTextOrBinary .EQ. -1) THEN
         IF (iWhich .GT. iTotalStuff) THEN
-          write(*,'(A,I3,A,I3,A)') 'You want output # ',iWhich,' from file which has ',iTotalStuff,' outputs!!! Impossible!!!'
+          print *,'You want output # ',iWhich,' from file which has ',
+     $      iTotalStuff,' outputs!!! Impossible!!!'
           STOP
           END IF
         OPEN(UNIT=iIOUN2,FILE=caOutName,STATUS='NEW',FORM='FORMATTED')
@@ -53,7 +54,7 @@
 
       iChunks = iE - iB + 1
 
-!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
       IF (iTextOrBinary .EQ. -1) THEN       !!dump selected text output
         DO iI = 1,iChunks
@@ -69,7 +70,7 @@
           END DO
         END IF
 
-!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       IF (iTextOrBinary .NE. -1) THEN       !!dump all binary output
         DO iK = 1,iChunks*kMaxPts
           raFreq(iK) = rFr1 + (ik-1)*rDv
@@ -84,7 +85,7 @@
           END DO
         END IF
 
-!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       CLOSE(iIOUN)
       CLOSE(iIOUN2)
 
@@ -92,9 +93,9 @@
 
 
       END
-!************************************************************************
-! this subroutine simply rewinds to beginning of file
-! and then repositions to the data we want to start reading
+c************************************************************************
+c this subroutine simply rewinds to beginning of file
+c and then repositions to the data we want to start reading
       SubRoutine ReWinderSEEK(iIOUN,iJ)
 
       IMPLICIT NONE
@@ -103,11 +104,11 @@
 
       INTEGER iIOUN,iJ
 
-! local variables
+c local variables
       INTEGER iE,iB,iTotalStuff,iI,iK,iDummy,iDataSize
       REAL rFr1,rFr2,rDv,raData(kMaxPts)
 
-!     iDummy=ftell(iIOUN)
+ccc     iDummy=ftell(iIOUN)
 
       REWIND(iIOUN)
 
@@ -118,9 +119,9 @@
 
       RETURN
       END
-!************************************************************************
-! this subroutine reads in the data we need!!!!!!! 
-! more easily done using fseeks
+c************************************************************************
+c this subroutine reads in the data we need!!!!!!! 
+c more easily done using fseeks
        SUBROUTINE ReaderSEEK(iIOUN,raEntire,iJ,iTotalStuff,iChunks)
 
       IMPLICIT NONE
@@ -129,7 +130,7 @@
       INTEGER iIOUN,iJ,iChunks,iTotalStuff
       REAL raEntire(kMaxEntire)
 
-! local variables
+c local variables
       REAL raData(kMaxPts)
       INTEGER iI,iK,iL,iDummy,iDataSize
 
@@ -149,5 +150,5 @@
 
       RETURN
       END
-!***********************************************************************
+c************************************************************************
       

@@ -449,12 +449,15 @@ CONTAINS
         END IF
 
       ELSEIF (iDoPCLSAM < 0) THEN
+        write(kStdWarn,'(A,I3)') 'output linear combo NLTE PCLSAM rads : iIOUN = ',iIOUNX
         IF ((iAtm == 5) .AND. (ctype2 > 0) .AND. (k100layerCloud < 0)) THEN
-          write(kStdWarn,*) 'Add PCLSAM two cloud case : writing out linear combo of rads'
+          write(kStdWarn,*) '  doing TwoSlab 5 of 5 : linear addition of 2 clds + overlap + clr'
+          write(kStdWarn,*) '  Add PCLSAM two cloud case : writing out linear combo of rads'
         ELSEIF ((iAtm == 3) .AND. (ctype2 <= 10) .AND. (k100layerCloud < 0)) THEN
-          write(kStdWarn,*) 'Add PCLSAM one cloud case : writing out linear combo of rads'
+          write(kStdWarn,*) '  doing TwoSlab 3 of 3 : linear addition of 1 cld  + clr'
+          write(kStdWarn,*) '  Add PCLSAM one cloud case : writing out linear combo of rads'
         ELSEIF ((iAtm == 3) .AND. (k100layerCloud == 1)) THEN
-          write(kStdWarn,*) 'Add PCLSAM 100 layer cloud case : writing out linear combo of rads'
+          write(kStdWarn,*) '  Add PCLSAM 100 layer cloud case : writing out linear combo of rads'
         END IF
         iIOUNX = kStdkCarta
 

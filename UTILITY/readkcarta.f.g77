@@ -61,7 +61,8 @@
         iNumMixPathsOut=0
         END IF
 
-      CALL readatmospheres(iIOUN,iNpmix,iNatm,iaNumLayersInAtm,iaNumLayersOut)
+      CALL readatmospheres(iIOUN,iNpmix,iNatm,iaNumLayersInAtm,
+     $                     iaNumLayersOut)
 
       IF (iNatm .EQ. 0) THEN
         DO ii=1,iNatm
@@ -115,7 +116,8 @@
       print *,'jhs',iStartOffset
 
 ! figure out the frequencies
-      CALL findfreqs(iIOUN,iFreqPts,iDataSize,iaNumOut,iOutNumber,iTotal,raFreq)
+      CALL findfreqs(iIOUN,iFreqPts,iDataSize,
+     $                     iaNumOut,iOutNumber,iTotal,raFreq)
       print *,'klm'
 
 !      IF (abs(rFr1-raFreq(1)) .GT. 0.02) THEN
@@ -176,7 +178,9 @@
 ! this is to test the reading functions!
 ! if iLoop==1 then print the header info at top of output data file
           iLoop=iLoop+1
-          CALL output2(raFreq,iFreqPts,raEntire,iStore,caInName,iLoop,iBinOrText,iWhichStore)
+          CALL output2(raFreq,iFreqPts,raEntire,iStore,
+     $                  caInName,
+     $                  iLoop,iBinOrText,iWhichStore)
 
           END DO
         END DO
@@ -184,9 +188,10 @@
 
       END 
 
-!************************************************************************
+c************************************************************************
 ! this subroutine reads the freqs
-      SUBROUTINE findfreqs(iIOUN,iFreqPts,iDataSize,iaNumOut,iOutNumber,iTotal,raFreq)
+      SUBROUTINE findfreqs(iIOUN,iFreqPts,iDataSize,
+     $           iaNumOut,iOutNumber,iTotal,raFreq)
 
       include 'convolve.param'
 
@@ -233,8 +238,9 @@
       RETURN
       END
 
-!************************************************************************
-      SUBROUTINE output2(raFreq,iFreqPts,raEntire,iStore,caInName,iLoop,iBinOrText,iWhichStore)
+c************************************************************************
+      SUBROUTINE output2(raFreq,iFreqPts,raEntire,
+     $       iStore,caInName,iLoop,iBinOrText,iWhichStore)
 
       include 'convolve.param'
 
@@ -257,14 +263,16 @@
 ! only need to save this header when we are outputting the VERY first spectra
         IF (iLoop .EQ. 1) THEN
           ii=iStore
-          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',FORM='UNFORMATTED')
+          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',
+     $         FORM='UNFORMATTED')
           write(iIOUN) 1,iFreqPts,iI
           write(iIOUN) (raFreq(iI),iI=1,iFreqPts)
           CLOSE(iIOUN)
           END IF
 ! now output!!!
-        OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='OLD',FORM='UNFORMATTED',ACCESS='APPEND')
-        write(iIOUN) (raEntire(iJ),iJ=1,iFreqPts)
+        OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='OLD',
+     $     FORM='UNFORMATTED',ACCESS='APPEND')
+          write(iIOUN) (raEntire(iJ),iJ=1,iFreqPts)
         CLOSE(iIOUN)
         END IF
 
@@ -272,7 +280,8 @@
 ! put in the header info ... iI tells how many spectra to expect
 ! only need to save this header when we are outputting the VERY first spectra
         IF (iLoop .EQ. iWhichStore) THEN
-          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',FORM='FORMATTED')
+          OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='NEW',
+     $         FORM='FORMATTED')
           DO iJ=1,iFreqPts
             write(iIOUN,5050) raFreq(iJ),raEntire(iJ)
             END DO
@@ -284,7 +293,7 @@
       RETURN
       END   
 
-!************************************************************************
+c************************************************************************
 ! this takes the input file name, finds the root (before .dat or .datJAC) 
 ! and appends .datCON
       SUBROUTINE GetOutName(caInName,caOutName)
@@ -314,7 +323,7 @@
 
       RETURN
       END
-!************************************************************************
+c************************************************************************
 ! this takes the input file name, finds the root (before .dat or .datJAC) 
 ! and appends .datCON
       SUBROUTINE GetOutName2(caInName,caOutName,iBinOrText)
@@ -349,7 +358,7 @@
 
       RETURN
       END
-!************************************************************************
+c************************************************************************
 
 
 

@@ -42,7 +42,7 @@ c
         fname = 'makeRTPfile.ip.rtp'
 
         status = rtpopen(fname, mode, head, hatt, patt, rchan)
-        !print *, 'open status = ', status
+        print *, 'open status,rchan = ', status,rchan
         status = rtpwrite(rchan, prof)
         !print *, 'write status = ', status
         status = rtpclose(rchan)
@@ -167,7 +167,7 @@ c now loop iNpath/iNumGases  times for each gas in the user supplied profile
 c set HEAD values
       head.ptype = LEVPRO
       head.pfields = PROFBIT
-      head.mrho = 0
+c      head.mrho = 0
       head.memis = 0
       head.ngas = ngas
       do iI = 1,ngas
@@ -178,8 +178,8 @@ c set HEAD values
       head.nchan = 0
       head.pmin = pmin
       head.pmax = pmax
-      head.udef1 = -9999
-      head.udef2 = -9999
+c      head.udef1 = -9999
+c      head.udef2 = -9999
 
       RETURN
       END

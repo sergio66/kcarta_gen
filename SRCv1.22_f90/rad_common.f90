@@ -323,7 +323,7 @@ CONTAINS
           END IF
         ELSE
           IF (iDp == 1) THEN
-            write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+            write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
 
             suncos = raSunAngles(iaRadLayer(1))           !! at surface
             scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA

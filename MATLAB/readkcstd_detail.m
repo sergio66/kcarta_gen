@@ -488,6 +488,10 @@ for chunk = 1:nchunk
 
     flen    = fread(fin, 1, 'integer*4');
   
+    if chunk <= 3 | chunk >= nchunk - 2
+      fprintf(1,'chunk = %2i odb = %2i frlow/frhigh = %12.6f %12.6f \n',chunk,odb,frlow,frhigh)
+    end
+
     if chunk == 1
       %{
       fprintf(2, 'readkc: ODB type = %d, subtype = %d, rows = %d\n', ...

@@ -22,6 +22,7 @@
 #HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
 
 ################## more recent Jan 2016
+## this hdf1 may not exist
 HDF_INSTALL1 = /usr/cluster/contrib/hdf4/4.2.11
 HDFLIB1   = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz       ## -lmfhdf
 
@@ -31,6 +32,15 @@ HDF_INSTALL2 = /usr/ebuild/software/Szip/2.1.1-GCCcore-6.4.0
 HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
 
 HDFLIB = $(HDFLIB1) $(HDFLIB2)
+
+#---------------------
+#nf-config -help
+#nf-config --fc
+#nf-config --fflags
+#nf-config --flibs
+
+NETCDFLIBS = -I/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include -L/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/lib -lnetcdff -L/usr/ebuild/software/icc/2018.3.222-GCC-7.3.0-2.30/lib/intel64 -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/lib -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/mkl/lib/intel64 -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/lib -L/usr/ebuild/software/netCDF/4.6.1-intel-2018b/lib64 -lnetcdf -lnetcdf -liomp5 -lpthread 
+
 
 # ---------
 # RTP flags
@@ -52,8 +62,15 @@ HDFLIB = $(HDFLIB1) $(HDFLIB2)
 #
 ### rtpV201 on compiled with ifort
 #RTPHOME = /home/sergio/maya_home/git/rtp/rtpV201
-RTPHOME = /home/sergio/OTHERSTUFF/git/rtp/rtpV201
+
+## freshly 2024 compiled ifort F90 rtpdef.f90
+#RTPHOME = /home/sergio/OTHERSTUFF/git/rtp/rtpV201  HMM THIS IS WHERE I THOUGHT I SHOULD BE
+RTPHOME = /home/sergio/git/rtp/rtpV201/
 RTPLIB = -L$(RTPHOME)/lib -lrtp90
+
+## ancient 2015 compiled ifort rtpdef.f
+#RTPHOME = /home/sergio/git/rtp/rtpV201/
+#RTPLIB = -L$(RTPHOME)/lib -lrtp
 #
 
 # ---------------

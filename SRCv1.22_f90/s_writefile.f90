@@ -175,7 +175,7 @@ CONTAINS
     REAL :: raF(kMaxPts),raInten(kMaxPts)
 
     DO iLoop = 1,kBoxCarUse
-      DO iInt=1,kMaxPts
+      DO iInt = 1,kMaxPts
         iIntOffSet    = iInt + (iLoop-1)*kMaxPts
         raF(iInt)     = raFreqBloat(iIntOffSet)
         raInten(iInt) = raIntenBloat(iIntOffset)
@@ -216,7 +216,7 @@ CONTAINS
       iGasPosn  = 1   !!!! corresponds to water
     END IF
 
-    iM1=(iLowest-1) + iM
+    iM1 = (iLowest-1) + iM
 
     IF (kJacobOutput /= -1) THEN !oh well, do this
       IF ((iGasID > 0) .AND. (iGasID <= 200)) THEN
@@ -536,7 +536,7 @@ CONTAINS
 !                  these need not correspond to 1,10000)
 ! raaGasAbs  = single gas abs coeffs
 ! iPrinter   = 1,2 or 3 ... will be 1 if this routine is called
-! iFileID       = which of the 25 cm-1 k-comp files is being processed
+! iFileID    = which of the 25 cm-1 k-comp files is being processed
 ! caOutName  = name of binary file that output goes to
 ! iaPath     = list of the paths corresponding to the current gas
 ! iNp        = total number of paths to be output
@@ -795,7 +795,7 @@ CONTAINS
 ! raaSumAbs  = mixed path sum of the abs coeffs
 ! iPrinter   = 1,2 or 3 ... will be 2 if this routine is called
 ! iNpmix     = number of mixed paths
-! iFileID       = which of the 25 cm-1 k-comp files is being processed
+! iFileID    = which of the 25 cm-1 k-comp files is being processed
 ! caOutName  = name of binary file that output goes to
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
@@ -1005,7 +1005,7 @@ CONTAINS
 ! raaSumAbs  = mixed path sum of the abs coeffs
 ! iPrinter   = 1,2 or 3 ... will be 2 if this routine is called
 ! iNpmix     = number of mixed paths
-! iFileID       = which of the 25 cm-1 k-comp files is being processed
+! iFileID    = which of the 25 cm-1 k-comp files is being processed
 ! caOutName  = name of binary file that output goes to
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
@@ -1110,7 +1110,7 @@ CONTAINS
 ! raaSumAbs  = mixed path sum of the abs coeffs
 ! iPrinter   = 1,2 or 3 ... will be 2 if this routine is called
 ! iNpmix     = number of mixed paths
-! iFileID       = which of the 25 cm-1 k-comp files is being processed
+! iFileID    = which of the 25 cm-1 k-comp files is being processed
 ! caOutName  = name of binary file that output goes to
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
@@ -1211,7 +1211,7 @@ CONTAINS
 ! raaSumAbs  = mixed path sum of the abs coeffs
 ! iPrinter   = 1,2 or 3 ... will be 2 if this routine is called
 ! iNpmix     = number of mixed paths
-! iFileID       = which of the 25 cm-1 k-comp files is being processed
+! iFileID    = which of the 25 cm-1 k-comp files is being processed
 ! caOutName  = name of binary file that output goes to
     REAL :: raFreq(kMaxPts),rFrLow,rFrHigh
     REAL :: raaSumAbs(kMaxPts,kMixFilRows)
@@ -1924,13 +1924,13 @@ CONTAINS
 ! caComment   = comment that the user put into *RADNCE
 ! iJacob      = number of d/dq we will output (>=1)
 ! iaJacob     = list of GasID's whose  d/dq we will output
-! caDriver     = root name of input file (not really needed here)
+! caDriver    = root name of input file (not really needed here)
 ! caOutName   = name of output binary file, specified in *OUTPUT
 ! caDummyFile = name of output binary file, to save Dummy stuff
 ! rFrLow      = lower wavenumber bound
 ! rFrHigh     = upper wavenumber bound
-! iFileIDLo      = from rFrLow, lower file index (1-kNumkFile)
-! iFileIDHi      = from rFrHigh, upper file index (1-kNumkFile)
+! iFileIDLo   = from rFrLow, lower file index (1-kNumkFile)
+! iFileIDHi   = from rFrHigh, upper file index (1-kNumkFile)
 ! iNumGases   = number of gases read in from *GASFIL + *XSCFIL
 ! iaGases     = integer array containig the GAS ID's
 ! raaAmt      = array containing amount profiles for each gas
@@ -2211,8 +2211,8 @@ CONTAINS
     iP=0
     DO iI=1,iOutTypes
       IF (iaPrinter(iI) == 1) THEN
-        iP=iP+1
-        iOutputOptionNum=iI
+        iP = iP+1
+        iOutputOptionNum = iI
         IF (iaNp(iI) > iNumGases*kProfLayer) THEN
           write(kStdErr,*)'Cannot have more paths to be output than '
           write(kStdErr,*)'iNumGases*kProfLayer'
@@ -2220,7 +2220,7 @@ CONTAINS
           CALL DoSTOP
         END IF
         IF (iaNp(iI) > 0) THEN
-          iEnd=iaNp(iI)
+          iEnd = iaNp(iI)
           iTotalStuff = iTotalStuff + iEnd
           WRITE(iIOUN,*) 'Number of Paths to be output=',iEnd
           WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
@@ -2230,8 +2230,8 @@ CONTAINS
           WRITE(iIOUN,*) 'Number of Paths to be output=',iEnd
           WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
         END IF
-        iaOutNumbers(iI)=iEnd
-        iNumLay=iEnd
+        iaOutNumbers(iI) = iEnd
+        iNumLay = iEnd
       END IF
     END DO
 
@@ -2262,7 +2262,7 @@ CONTAINS
     WRITE(iIOUN,*) 'Number of uncommented lines in mixtable=', &
     iMixFileLines
     IF (iNpMix > 0) THEN
-      DO iI=1,iMixFileLines
+      DO iI = 1,iMixFileLines
         WRITE(iIOUN,*) caaMixFileLines(iI)
       END DO
 
@@ -2271,29 +2271,29 @@ CONTAINS
       WRITE(iIOUN,*) (raMixVT(iI),iI=1,iNpmix)
       ! then output list of mixed paths to be printed
       WRITE(iIOUN,*) 'list of mixed paths to be output ...'
-      iP=0
-      DO iI=1,iOutTypes
+      iP = 0
+      DO iI = 1,iOutTypes
         IF (iaPrinter(iI) == 2) THEN
           iP=iP+1
-          iOutputOptionNum=iI
+          iOutputOptionNum = iI
           IF (iaNp(iI) > iNpmix) THEN
             write(kStdErr,*)'Error! Cannot print out more mixed paths'
             write(kStdErr,*)'than iIpmix'
             CALL DoSTOP
           END IF
           IF (iaNp(iI) > 0) THEN
-            iEnd=iaNp(iI)
+            iEnd = iaNp(iI)
             iTotalStuff = iTotalStuff + iEnd
             WRITE(iIOUN,*) '# mixed paths to be output=',iEnd
             WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
           ELSE
-            iEnd=iNpmix
+            iEnd = iNpmix
             iTotalStuff = iTotalStuff + iEnd
             WRITE(iIOUN,*) '# mixed paths to be output=',iEnd
             WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
           END IF
-          iNumLay=iEnd
-          iaOutNumbers(iI)=iEnd
+          iNumLay = iEnd
+          iaOutNumbers(iI) = iEnd
         END IF
       END DO
       IF (iP > 1) THEN
@@ -2320,8 +2320,8 @@ CONTAINS
     ! now print the atmosphere information -------------------------------------
     WRITE(iIOUN,*) '***********************************************'
     WRITE(iIOUN,*) 'ATMOSPHERES'
-    WRITE(iIOUN,*) 'Numb of atmospheres read from *RADFIL = ',iNatm
-    WRITE(iIOUN,*) 'Max numb of emiss. pts = ',kEmsRegions
+    WRITE(iIOUN,*) 'Number of atmospheres read from *RADFIL = ',iNatm
+    WRITE(iIOUN,*) 'Max number of emiss. pts = ',kEmsRegions
     IF (iNatm < iNatm2) THEN
       write(kStdErr,*)'RADFIL had information for ',iNatm,' atmospheres'
       write(kStdErr,*)'OUTPUT says there is info for ',iNatm2,' atms!'
@@ -2329,7 +2329,7 @@ CONTAINS
       CALL DoSTOP
     END IF
 
-    DO iI=1,iNatm
+    DO iI = 1,iNatm
       IF (iaNumLayers(iI) > iNpmix) THEN
         write(kStdErr,*)'atm#',iI,' has too many layers!! (> ',iNpmix,')'
         CALL DoSTOP
@@ -2350,11 +2350,11 @@ CONTAINS
         WRITE(iIOUN,*)raaaSetEmissivity(iI,iJ,1),raaaSetEmissivity(iI,iJ,2)
       END DO
       ! now output the list of radiances to be printed, for this atmosphere
-      iP=0
-      DO iJ=1,iOutTypes
+      iP = 0
+      DO iJ = 1,iOutTypes
         IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN
-        iP=iP+1
-        iOutputOptionNum=iJ
+        iP = iP+1
+        iOutputOptionNum = iJ
         IF (iaNp(iJ) <= -1) THEN  !!!dumping out rads for ALL layers
           IF ((iDumpAllUARads > 1) .AND. (iDoUpperAtmNLTE <= 0))THEN
             write(kStdErr,*) 'this is too complicated!!!'
@@ -2371,16 +2371,17 @@ CONTAINS
           CALL DoSTOP
         END IF
         IF (iaNp(iJ) > 0) THEN
-          iEnd=iaNp(iJ)
-          iaOutNumbers(iJ)=iEnd
+          iEnd = iaNp(iJ)
+          iaOutNumbers(iJ) = iEnd
           iTotalStuff = iTotalStuff + iEnd
-          WRITE(iIOUN,*) '# of radiances to be printed=',iEnd
+!!!          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd                                  !! for N years
+          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
           WRITE(iIOUN,*) (iaaOp(iJ,iK),iK=1,iEnd)
           WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
-          iOk=1
-          DO iK=1,iEnd
+          iOk = 1
+          DO iK = 1,iEnd
             IF ((iaaOp(iJ,iK) > iaNumLayers(iI)) .OR.(iaaOp(iJ,iK) <= 0))  THEN
-              iOk=-1
+              iOk = -1
             END IF
           END DO
           IF (iOk < 0) THEN
@@ -2388,16 +2389,17 @@ CONTAINS
             CALL DoSTOP
           END IF
         ELSE
-          iEnd=iaNumLayers(iI)
-          iaOutNumbers(iJ)=iEnd
+          iEnd = iaNumLayers(iI)
+          iaOutNumbers(iJ) = iEnd
           iTotalStuff = iTotalStuff + iEnd
-          WRITE(iIOUN,*) '# of radiances to be printed=',iEnd
+!!!          WRITE(iIOUN,*) '# of radiances to be printed=',iEnd                                   !! for N years
+          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
           ! note how we are flipping between iI and iJ here
           ! and instead of outting iaaOp, we are outputting iaaRadLayer
           WRITE(iIOUN,*) (iaaRadLayer(iI,iK),iK=1,iEnd)
           WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
         END IF
-        iNumLay=iEnd
+        iNumLay = iEnd
       END IF
     END DO
     IF (iP == 0) THEN
@@ -2509,7 +2511,7 @@ CONTAINS
     END IF
  103 FORMAT('ERROR! number ',I5,' opening binary data file : ',/,A80)
 
-    kStdkCartaOpen=1
+    kStdkCartaOpen = 1
     write(kStdWarn,*) 'Opened following file for general binary output : '
     write(kStdWarn,*) caOutName
            
@@ -2559,25 +2561,25 @@ CONTAINS
 ! then output path ID stuff ------------------------------------------
     IF (kLongOrShort > 0) THEN
       WRITE(iIOUN1) iNumGases*kProfLayer
-      DO iI=1,iNumGases
-        DO iJ=1,kProfLayer
-          iP=(iI-1)*kProfLayer+iJ
+      DO iI = 1,iNumGases
+        DO iJ = 1,kProfLayer
+          iP = (iI-1)*kProfLayer+iJ
           WRITE(iIOUN1)iP,iaGases(iI),raaTemp(iJ,iI),raaAmt(iJ,iI)
         END DO
       END DO
     END IF
 ! then output list of paths to be output
-    iP=0
-    DO iI=1,iOutTypes
+    iP = 0
+    DO iI = 1,iOutTypes
       IF (iaPrinter(iI) == 1) THEN
-        iP=iP+1
+        iP = iP+1
         IF (iaNp(iI) > iNumGases*kProfLayer) THEN
           write(kStdErr,*)'Error! Cannot have more paths to be output than '
           write(kStdErr,*)'iNumGases*kProfLayer'
           CALL DoSTOP
         END IF
         IF (iaNp(iI) > 0) THEN
-          iEnd=iaNp(iI)
+          iEnd = iaNp(iI)
           WRITE(iIOUN1) iEnd
           WRITE(iIOUN1) (iaaOp(iI,iJ),iJ=1,iEnd)
         ELSE
@@ -2585,7 +2587,7 @@ CONTAINS
            WRITE(iIOUN1) iEnd
            WRITE(iIOUN1) (iaaOp(iI,iJ),iJ=1,iEnd)
          END IF
-         iaOutNumbers(iI)=iEnd
+         iaOutNumbers(iI) = iEnd
        END IF
     END DO
     IF (iP > 1) THEN
@@ -2606,7 +2608,7 @@ CONTAINS
     IF (kLongOrShort > 0) THEN
       WRITE(iIOUN1) iMixFileLines
       IF (iNpMix > 0) THEN
-        DO iI=1,iMixFileLines
+        DO iI = 1,iMixFileLines
           WRITE(iIOUN1) caaMixFileLines(iI)
         END DO
         ! then output list of mixed paths temperatures
@@ -2617,25 +2619,25 @@ CONTAINS
 ! this is EXTRA if statement, since above one was commented out
     IF (iNpMix > 0) THEN
       ! then output list of mixed paths to be printed
-      iP=0
-      DO iI=1,iOutTypes
+      iP = 0
+      DO iI = 1,iOutTypes
         IF (iaPrinter(iI) == 2) THEN
-          iP=iP+1
+          iP = iP+1
           IF (iaNp(iI) > iNpmix) THEN
             write(kStdErr,*)'Error! Cannot print out more mixed paths'
             write(kStdErr,*)'than iIpmix'
             CALL DoSTOP
           END IF
           IF (iaNp(iI) > 0) THEN
-            iEnd=iaNp(iI)
+            iEnd = iaNp(iI)
             WRITE(iIOUN1) iEnd
             WRITE(iIOUN1) (iaaOp(iI,iJ),iJ=1,iEnd)
           ELSE
-            iEnd=iNpmix
+            iEnd = iNpmix
             WRITE(iIOUN1) iEnd
             WRITE(iIOUN1) (iaaOp(iI,iJ),iJ=1,iEnd)
           END IF
-          iaOutNumbers(iI)=iEnd
+          iaOutNumbers(iI) = iEnd
         END IF
       END DO
 
@@ -2656,7 +2658,7 @@ CONTAINS
 ! now print the atmosphere information -------------------------------------
     WRITE(iIOUN1) iNatm
     WRITE(iIOUN1) kEmsRegions
-    DO iI=1,iNatm
+    DO iI = 1,iNatm
       IF (iaNumLayers(iI) > iNpmix) THEN
         write(kStdErr,*)'atm#',iI,' has too many layers!! (> ',iNpmix,')'
         CALL DoSTOP
@@ -2672,14 +2674,14 @@ CONTAINS
 
       ! output the emissivities for this atmosphere, first freq pt then ems
       WRITE(iIOUN1) iaSetEms(iI)
-      DO iJ=1,iaSetEms(iI)
+      DO iJ = 1,iaSetEms(iI)
         WRITE(iIOUN1)raaaSetEmissivity(iI,iJ,1),raaaSetEmissivity(iI,iJ,2)
       END DO
       ! now output the list of mixed paths to be printed, for this atmosphere
-      iP=0
-      DO iJ=1,iOutTypes
+      iP = 0
+      DO iJ = 1,iOutTypes
         IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN
-          iP=iP+1
+          iP = iP+1
           IF (iaNp(iJ) > iNpmix) THEN
             write(kStdErr,*)'Atm #',iI,' has too many layers to be printed!'
             CALL DoSTOP
@@ -2689,15 +2691,15 @@ CONTAINS
             CALL DoSTOP
           END IF
           IF (iaNp(iJ) > 0) THEN
-            iEnd=iaNp(iJ)
-            iaOutNumbers(iJ)=iEnd
+            iEnd = iaNp(iJ)
+            iaOutNumbers(iJ) = iEnd
             WRITE(iIOUN1) iEnd
             WRITE(iIOUN1) (iaaOp(iJ,iK),iK=1,iEnd)
             WRITE(iIOUN1) (raaUserPress(iJ,iK),iK=1,iEnd)
-            iOk=1
-            DO iK=1,iEnd
+            iOk = 1
+            DO iK = 1,iEnd
               IF ((iaaOp(iJ,iK) > iaNumLayers(iI)) .OR. (iaaOp(iJ,iK) <= 0))  THEN
-                iOk=-1
+                iOk = -1
               END IF
             END DO
             IF (iOk < 0) THEN
@@ -2705,9 +2707,9 @@ CONTAINS
               CALL DoSTOP
             END IF
           ELSE !!this is the case when ALL levels need to be printed
-            iEnd=iaNumLayers(iI)
+            iEnd = iaNumLayers(iI)
             WRITE(iIOUN1) iEnd
-            iaOutNumbers(iJ)=iEnd
+            iaOutNumbers(iJ) = iEnd
             ! note how we are flipping between iI and iJ here
             ! and instead of outting iaaOp, we are outputting iaaRadLayer
             WRITE(iIOUN1) (iaaRadLayer(iI,iK),iK=1,iEnd)
@@ -2723,10 +2725,10 @@ CONTAINS
               write(kStdErr,*) 'NLTE code assumes ONE radiating atmosphere'
               CALL DoStop
             END IF
-
           END IF
         END IF
       END DO
+
       IF (iP == 0) THEN
         ! inform user no mixed paths to be output for this atmosphere
         WRITE(iIOUN1) iP
@@ -2772,7 +2774,7 @@ CONTAINS
  403 FORMAT('ERROR! number ',I5,' opening COL JACOBIAN binary file : &
         ',/,A80)
 
-      kStdJacob2Open=1
+      kStdJacob2Open = 1
       write(kStdWarn,*) 'Opened file for col jacobian binary output : '
       write(kStdWarn,*) caJacobFile2
 
@@ -2865,15 +2867,15 @@ CONTAINS
       ! then figure out, of the atmospheres that have been read in, which actually
       ! have a radiance and hence jacobian calculation associated with them
       ! assume all error checking done in section above (when blah.dat is created)
-      iNatmJac=0
-      DO iI=1,iNatmCldEffective
+      iNatmJac = 0
+      DO iI = 1,iNatmCldEffective
         ! now output the list of mixed paths to be printed, for this atmosphere
-        DO iJ=1,iOutTypes
+        DO iJ = 1,iOutTypes
           IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN
-            iNatmJac=iNatmJac+1
+            iNatmJac = iNatmJac+1
             IF ((iaNp(iJ) > 0) .OR. (iaNp(iJ) == -1)) THEN
               ! set the number of layers in this atmosphere
-              iaLayerJac(iNatmJac)=iaNumLayers(iI)
+              iaLayerJac(iNatmJac) = iaNumLayers(iI)
             END IF
           END IF
         END DO
@@ -2885,27 +2887,27 @@ CONTAINS
       write(kStdWarn,*)'had',iNatmJac,' out of',iNatm,' atm to output'
       write(kStdWarn,*) (iaLayerJac(iI),iI=1,iNatmJac)
 
-      iI=1
+      iI = 1
   205 CONTINUE
       iP = DoGasJacob(iaGases(iI),iaJacob,iJacob)
       IF ((iI <= iNumGases) .AND. (iP > 0)) THEN
-        DO iJ=1,kProfLayer
+        DO iJ = 1,kProfLayer
           WRITE(iIOUN2)iaGases(iI),raaTemp(iJ,iI),raaAmt(iJ,iI)
         END DO
-        iI=iI+1
+        iI = iI+1
         GOTO 205
       END IF
       IF (iI < iNumGases) THEN
-        iI=iI+1
+        iI = iI+1
         GOTO 205
       END IF
 
       ! check to see if we are outputting d/d(DME), d/d(IWP)
       IF ((kJacobian > 0) .AND. (kScatter > 0)) THEN
-        DO iJ=1,kProfLayer
+        DO iJ = 1,kProfLayer
           WRITE(iIOUN2) 201,-300.0,01.0
         END DO
-        DO iJ=1,kProfLayer
+        DO iJ = 1,kProfLayer
           WRITE(iIOUN2) 201,-300.0,01.0
         END DO
       END IF
@@ -2929,7 +2931,7 @@ CONTAINS
       iIOUN_Flux = kStdFlux
 
       IF (iOutFileName < 0) THEN  !std kcarta output dumped to screen
-        caFluxFile='flux.dat'
+        caFluxFile = 'flux.dat'
       ELSE !std kcarta output dumped to file, so find flux file name
         CALL FluxName(caFluxFile,caOutName)
       END IF
@@ -2946,7 +2948,7 @@ CONTAINS
  303 FORMAT('ERROR! number ',I5,' opening FLUX binary file : &
         ',/,A80)
 
-      kStdFluxOpen=1
+      kStdFluxOpen = 1
       write(kStdWarn,*) 'Opened following file for flux ouput : '
       write(kStdWarn,*) caFluxFile
 
@@ -2969,9 +2971,9 @@ CONTAINS
       ! have a radiance and hence jacobian calculation associated with them
       ! assume all error checking done in section above (when blah.dat is created)
       iNatmJac = 0
-      DO iI=1,iNatm
+      DO iI = 1,iNatm
         ! now output the list of mixed paths to be printed, for this atmosphere
-        DO iJ=1,iOutTypes
+        DO iJ = 1,iOutTypes
           IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN
             iNatmJac = iNatmJac+1
             IF (iaNp(iJ) /= 0) THEN   !!ie it is -1 or a positive number
@@ -3084,7 +3086,7 @@ CONTAINS
       iIOUN_Planck = kStdPlanck
 
       IF (iOutFileName < 0) THEN  !std kcarta output dumped to screen
-        caPlanckFile='planck.dat'
+        caPlanckFile = 'planck.dat'
       ELSE !std kcarta output dumped to file, so find planck file name
         CALL PlanckName(caPlanckFile,caOutName)
       END IF
@@ -3101,7 +3103,7 @@ CONTAINS
 
  304 FORMAT('ERROR! number ',I5,' opening PLANCK binary file :',/,A80)
 
-      kStdPlanckOpen=1
+      kStdPlanckOpen = 1
       write(kStdWarn,*) 'Opened following file for planck output :'
       write(kStdWarn,*) caPlanckFile
 
@@ -3116,15 +3118,15 @@ CONTAINS
       ! c        WRITE(iIOUN_Planck) iImportant
       ! c        write(kStdWarn,*) ' iImportant gases = ',iImportant
       ! figure out how many types of plancks to output (duh!!!!!!!)
-      iImportant=1
+      iImportant = 1
       WRITE(iIOUN_Planck) iImportant
                 
-      iNatmJac=0
+      iNatmJac = 0
       DO iI=1,iNatm
         ! now output the list of mixed paths to be printed, for this atmosphere
-        DO iJ=1,iOutTypes
+        DO iJ = 1,iOutTypes
           IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN
-            iNatmJac=iNatmJac+1
+            iNatmJac = iNatmJac+1
             IF (iaNp(iJ) /= 0) THEN   !!ie it is -1 or a positive number
               ! set the number of layers in this atmosphere
               iaLayerJac(iNatmJac)=iaNumLayers(iI)

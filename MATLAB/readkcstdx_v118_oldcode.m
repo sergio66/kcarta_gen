@@ -1,11 +1,4 @@
-function [data, wnums, caVersion] = readkcstd(kfile, dfile)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% YOU DO NOT NEED eg readkcstd_twoslabclds.m AS LAST COLUMN OF data IN
-%%%   [data, wnums] = = readkcstd(kfile)
-%%% is output by kCARTA with the addition already done!!!!
-%% ie look at data(:,lastcol) for final result !!!
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [data, wnums, caVersion] = readkcstdx_v118_oldcode(kfile, dfile)
 
 % function [data, wnums, caVersion] = readkcstd(kfile, dfile)
 %
@@ -66,7 +59,7 @@ caVersion.include_param = char(version');
 version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 
-version_number = str2num(version(2:5));
+version_number=str2num(version(2:5));
 
 % number of layers
 flen   = fread(fin, 1, 'integer*4');
@@ -86,10 +79,9 @@ caVersion.ckd = rparams(2);
 
 % comment
 flen    = fread(fin, 1, 'integer*4');
-if  (version_number >= 1.22)
-  comment = fread(fin, 160, 'char');
-elseif  (version_number >= 1.18)
-  comment = fread(fin, 120, 'char');
+if  (version_number >= 1.18)
+  %comment = fread(fin, 120, 'char');
+  comment = fread(fin, 80, 'char');  
 else
   comment = fread(fin, 80, 'char');
 end  
@@ -150,9 +142,9 @@ elseif ((version_number >= 1.09))
   raP  = fread(fin,nlayer,'real*4');
   flen = fread(fin,1,'integer*4');
 
-  if (version_number >= 1.18)
+  if (version_number >= 1.19)
     flen    = fread(fin, 1, 'integer*4');
-    junk  = fread(fin, 10, 'integer*4');
+    junk  = fread(fin, 10, 'integer*4')
     flen    = fread(fin, 1, 'integer*4');
     iaaParams(1,:) = junk;
     flen    = fread(fin, 1, 'integer*4');
@@ -408,10 +400,8 @@ if nchunk ~= 1+highchunk-lowchunk
   error('readkc: chunk counts do not match!');
 end
 
-iQuiet = +1;
-if iQuiet < 0
-  fprintf(2, 'readkc: %d chunks, %d ODBs, %d total rows\n',nchunk, nODBs, sum(nODBrows));
-end
+fprintf(2, 'readkc: %d chunks, %d ODBs, %d total rows\n', ...
+        nchunk, nODBs, sum(nODBrows));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % initialize output file or array
@@ -480,10 +470,8 @@ for chunk = 1:nchunk
     flen    = fread(fin, 1, 'integer*4');
   
     if chunk == 1
-      if iQuiet < 0
-        fprintf(2, 'readkc: ODB type = %d, subtype = %d, rows = %d\n', ...
-                    type, subtype, nrow);
-      end
+      fprintf(2, 'readkc: ODB type = %d, subtype = %d, rows = %d\n', ...
+                type, subtype, nrow);
     end
 
     % sanity check

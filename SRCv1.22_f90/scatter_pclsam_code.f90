@@ -919,7 +919,7 @@ CONTAINS
       IF (iDp > 0) THEN
         ! note this really messes up if it is a scattering layer, as it does not use
         ! cloudy sky rad transfer. Else it is fine for clear sky
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
         DO iFr=1,iDp
           CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raThermal,raInten2, &
@@ -1029,7 +1029,7 @@ CONTAINS
       IF (iDp > 0) THEN
         ! note this really messes up if it is a scattering layer, as it does not use
         ! cloudy sky rad transfer. Else it is fine for clear sky
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
         DO iFr=1,iDp
           CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raThermal,raInten2, &
@@ -1096,7 +1096,7 @@ CONTAINS
       IF (iDp > 0) THEN
         ! note this really messes up if it is a scattering layer, as it does not use
         ! cloudy sky rad transfer. Else it is fine for clear sky
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
         DO iFr=1,iDp
           CALL RadianceInterPolate(-1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raThermal,raInten2, &
@@ -1753,7 +1753,7 @@ CONTAINS
       ! since we might have to do fractions!
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
         DO iFr=1,iDp
           CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raInten,raInten2, &
@@ -1799,7 +1799,7 @@ CONTAINS
       ! since we might have to do fractions!
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
         DO iFr=1,iDp
           CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExt,raInten,raInten2, &
@@ -1845,7 +1845,7 @@ CONTAINS
 
       IF (iDoSolar < 0) THEN
         IF (iDp > 0) THEN
-          write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+          write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' LTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
             DO iFr=1,iDp
               CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                     raVTemp,muSat,iLay,iaRadLayer,raaExt,raInten,raInten2, &
@@ -1855,18 +1855,12 @@ CONTAINS
               iNumOutX = iNumOutX + 1
               raInten2 = raInten2 * rWeight
               raaRadsX(:,iNumOutX) = raInten2
-
-!raInten2 = raaPCLSAMCorrection(:,iaRadLayer(1))
-!raInten = raInten2
-!raaRadsX(:,iNumOutX) = raInten2
-!print *,'nana',raInten2(1)
-
               CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
             END DO
           END IF
         ELSE
           IF (iDp == 1) THEN
-            write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+            write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
 
             suncos = raSunAngles(iaRadLayer(1))           !! at surface
             scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
@@ -1883,11 +1877,6 @@ CONTAINS
             iNumOutX = iNumOutX + 1
             raInten2 = raInten2 * rWeight
             raaRadsX(:,iNumOutX) = raInten2
-                    
-!raInten2 = raaPCLSAMCorrection(:,iaRadLayer(1))
-!raInten = raInten2
-!raaRadsX(:,iNumOutX) = raInten2
-!print *,'nana2',raInten2(1)
 
             CALL wrtout(iIOUN,caOutName,raFreq,raInten2)
         ELSEIF (iDp > 1) THEN
@@ -2247,7 +2236,7 @@ CONTAINS
       ! since we might have to do fractions!
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
         DO iFr=1,iDp
           CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExtWeighted,raIntenWeighted,raInten2, &
@@ -2284,7 +2273,7 @@ CONTAINS
       ! since we might have to do fractions!
       CALL DoOutPutRadiance(iDp,raOutFrac,iLay,iNp,iaOp,raaOp,iOutNum)
       IF (iDp > 0) THEN
-        write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
         DO iFr=1,iDp
           CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                 raVTemp,muSat,iLay,iaRadLayer,raaExtWeighted,raIntenWeighted,raInten2, &
@@ -2326,7 +2315,7 @@ CONTAINS
 
       IF (iDoSolar < 0) THEN
         IF (iDp > 0) THEN
-          write(kStdWarn,*) 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+          write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' rads at',iLay,' th rad layer : iIOUN = ',iIOUN
           DO iFr=1,iDp
             CALL RadianceInterPolate(1,raOutFrac(iFr),raFreq, &
                     raVTemp,muSat,iLay,iaRadLayer,raaExtWeighted,raIntenWeighted,raInten2, &
@@ -2341,7 +2330,7 @@ CONTAINS
         END IF
       ELSE
         IF (iDp == 1) THEN
-          write(kStdWarn,*) 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
+          write(kStdWarn,'(A,I3,A,I3,A,I3)') 'output',iDp,' NLTE PCLSAM rads at',iLay,' th rad layer : iIOUN = ',iIOUN
 
           suncos = raSunAngles(iaRadLayer(1))           !! at surface
           scos1  = raSunAngles(iaRadLayer(iNumLayer))   !! at TOA
