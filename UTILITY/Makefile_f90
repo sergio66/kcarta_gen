@@ -82,7 +82,7 @@ FLAGS = -Mextend -Mbounds -Mnoupcase -O2
 LIBS = 
 RTPF77 = pgf77
 RTPFLAGS = -Mextend -Mbounds -Mnoupcase -O2
-RTPLIBS = 
+#RTPLIBS = 
 
 ## ------------------------ SUN f77 --------------------------
 # SunOS fortran supports fseek and structures, and so can be used to 
@@ -112,7 +112,7 @@ UFLAG =
 ### FLAGS = -Mextend -Mnoupcase -O3
 ### FLAGS_RTP = -Mextend -Mnoupcase -O3
 ### -fdec-structure : allows structures??????
-FLAGS = -cpp -ffixed-line-length-none -fdec-structure
+FLAGS = -cpp -ffixed-line-length-none -fdec-structure -fno-underscoring
 RTPFLAGS = $(FLAGS)
 LIBS = 
 FDOUBLE = -R8
@@ -125,14 +125,17 @@ FDOUBLE = -R8
 # -O3 : heavy optimization
 # -64 : 64-bit objects (libraries must match)
 # -us : puts trailing underscore
-FLAGSDEBUG = -check noarg_temp_created -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
+# -names lowercase
+FLAGSDEBUG = -extend-source 132 -check bounds -O1 -names lowercase -check noarg_temp_created -implicitnone -msse2  -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
+FLAGSDEBUG = -extend-source 132 -check bounds -O1 -names lowercase -check noarg_temp_created -implicitnone -msse2                       -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
 F77 = ifort
 RTPF77 = ifort
 FLAGSNODEBUG = -extend-source 132 -check bounds -O2
 LIBS = 
 RTPLIBS = 
 
-FLAGS = $(FLAGSNODEBUG)
+FLAGS = $(FLAGSDEBUG)
+#FLAGS = $(FLAGSNODEBUG)
 RTPFLAGS = $(FLAGS)
 
 ### sergio@taki-usr2 UTILITY]$ rpm -ql netcdf

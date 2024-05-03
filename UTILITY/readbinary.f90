@@ -35,7 +35,6 @@
 ! few lines later vcaVers is parsed for eg 1.03, 1.22 etc
 
       read(iIOUN) iNumLayers
-      print *,iNumLayers
 
       read(iIOUN) iKmaxUserSet
       IF (iKmaxUserSet .NE. kMaxUserSet) THEN
@@ -56,8 +55,8 @@
 
 ! read how data was saved
       read(iIOUN) iLorS
-      IF (iLorS .EQ. 0) THEN
-        print *,'Sorry .. iLorS = 0 ... use readkcBasic.f to read in this file .... '
+      if (iLorS .EQ. 0) THEN
+        print *,'iLorS = 0, use readkcBasic.f'
         STOP
       END IF
 
@@ -90,6 +89,7 @@
         end if
       end if
 
+ 9999 CONTINUE
 !      print *,'read in mainheader .......'
 
       RETURN
@@ -145,7 +145,7 @@
       IF (iLorS .NE. 0) THEN
         print *,'Sorry .. use readkcarta.f to read in this file .... '
         STOP
-        END IF
+      END IF
 
 ! read frequency step size
       read(iIOUN) rdelta
@@ -574,7 +574,7 @@
 
 !************************************************************************
 ! this subroutine reads in the data
-      SUBROUTINE readdata2(iIOUN,iJ,iOutNumber,raFreq,raaEntire)
+      SUBROUTINE readdata2(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire)
 
       IMPLICIT NONE 
 
@@ -583,33 +583,61 @@
 ! iDataSize=number of bytes from start of data in this block, 
 !           to same start of data
 !           in next kcomp block (so we can directly jump there)
-      INTEGER iIOUN,iJ,iOutNumber    !!! typically iTotal = 89 (chunks) and iOutNumber = 5 (TwoSlab rads)
+!!! typically iTotalChunks = 89 (chunks) 
+      INTEGER iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut    
       REAL raaEntire(kMaxEntire,100),raFreq(kMaxEntire)
 
       INTEGER iMainType,iSubMainType,iNumberOut,ikMaxPts
       REAL rFrLow,rFrHigh,rDelta
 
       REAL raTemp(kMaxPts)
-      INTEGER iI,iX,iDummy
+      INTEGER iI,iCnt,iX,iDummy
       INTEGER iaIndX(kMaxPts),iaInd(kMaxPts)
 
 
       iaIndX = (/(iI,iI=1,kMaxPts)/)
       iaInd = iaIndX + (iJ-1)*10000
 
-      DO iI=1,iOutNumber
+      iCnt = 0
+
+      IF (iNumGasPathsOut .GT. 0) THEN
         READ(iIOUN) iMainType,iSubMainType,iNumberOut
         READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta
-!        write(*,'(5(I10),3(F20.12))') iJ,iOutNumber,iMainType,iSubMainType,iNumberOut,rFrLow,rFrHigh,rDelta
-        write(*,'(2(I10),1(F20.12))') iJ,iOutNumber,rFrLow
-
+!       write(*,'(5(I10),3(F20.12))') iJ,iNumGasPathsOut,iMainType,iSubMainType,iNumberOut,rFrLow,rFrHigh,rDelta
+        write(*,'(A,2(I10),1(F20.12))') 'GASOD ',iJ,iNumGasPathsOut,rFrLow
         raFreq(iaInd) = rFrLow + (iaIndX-1)*rDelta
+        DO iI=1,iNumGasPathsOut
+          iCnt = iCnt + 1
+          read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
+          raaEntire(iaInd,iCnt) = raTemp
+        END DO
+      END IF
 
-!        print *,'Freq Chunk iJ = ',iJ,'local loop iI = ',iI,' of ',iOutNumber
-        read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
-!        print *,'  ',raTemp(1),raTemp(kMaxPts)
-        raaEntire(iaInd,iI) = raTemp
-      END DO
+      IF (iNumMixPathsOut .GT. 0) THEN
+        READ(iIOUN) iMainType,iSubMainType,iNumberOut
+        READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta
+!       write(*,'(5(I10),3(F20.12))') iJ,iNumMixPathsOut,iMainType,iSubMainType,iNumberOut,rFrLow,rFrHigh,rDelta
+        write(*,'(A,2(I10),1(F20.12))') 'MIXOD ',iJ,iNumMixPathsOut,rFrLow
+        raFreq(iaInd) = rFrLow + (iaIndX-1)*rDelta
+        DO iI=1,iNumMixPathsOut
+          iCnt = iCnt + 1
+          read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
+          raaEntire(iaInd,iCnt) = raTemp
+        END DO
+      END IF
+
+      IF (iNumRadsOut .GT. 0) THEN
+        DO iI=1,iNumRadsOut
+          iCnt = iCnt + 1 
+          READ(iIOUN) iMainType,iSubMainType,iNumberOut
+          READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta
+!          write(*,'(5(I10),3(F20.12))') iJ,iNumRadsOut,iMainType,iSubMainType,iNumberOut,rFrLow,rFrHigh,rDelta
+          write(*,'(A,2(I10),1(F20.12))') 'RADS  ',iJ,iNumRadsOut,rFrLow
+          raFreq(iaInd) = rFrLow + (iaIndX-1)*rDelta
+          read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
+          raaEntire(iaInd,iCnt) = raTemp
+        END DO
+      END IF
 
       RETURN
       END

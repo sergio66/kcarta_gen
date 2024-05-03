@@ -619,6 +619,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+3/5/24          Have retired kLongOrShort = 0 since UTILITY/readkcarta2.x can produce netcdf files
+                which nicely separate gasODs, mixedpathODs, radiances .. which is not possible with
+                kLongOrShort = 0
+
 1/10/24         Found a bug in column temperature jacobians when iVary is not -1 is it is varying
                 The layer temp was perturbed, but the levels temp was kept the same; now levels temp 
                 is also perturbed

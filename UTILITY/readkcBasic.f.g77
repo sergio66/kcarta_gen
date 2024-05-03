@@ -64,17 +64,17 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
               DO iK = 1,kMaxpts   
                 rF = rFr1 + ((iI-1)*kMaxPts + iK-1)*rDv
                 write(iIOUN2,*) rF,raData(iK)
-                END DO
-              END IF
-            END DO
+              END DO
+            END IF
           END DO
-        END IF
+        END DO
+      END IF
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       IF (iTextOrBinary .NE. -1) THEN       !!dump all binary output
         DO iK = 1,iChunks*kMaxPts
           raFreq(iK) = rFr1 + (ik-1)*rDv
-          END DO
+        END DO
         write(iIOUN2) (raFreq(iK),iK=1,iChunks*kMaxPts)
 
         iChunks = iE - iB + 1
@@ -82,8 +82,8 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
           CALL ReWinderSEEK(iIOUN,iJ)
           CALL ReaderSEEK(iIOUN,raEntire,iJ,iTotalStuff,iChunks)
           write(iIOUN2) (raEntire(iK),iK=1,iChunks*kMaxPts)
-          END DO
-        END IF
+        END DO
+      END IF
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       CLOSE(iIOUN)

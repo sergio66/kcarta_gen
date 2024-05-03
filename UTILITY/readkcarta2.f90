@@ -22,9 +22,9 @@
 ! the definitions of all these variables are found in the subroutines
       CHARACTER*80 caInName
       CHARACTER*130 caaMixedPathInfo(kMixFilRows)
-      INTEGER iIOUN,iNumPathsOut
-      INTEGER iNpmix,iNumMixPathsOut,iNatm
-      INTEGER iaNumLayersOut(kMaxAtm),iaNumLayersInAtm(kMaxAtm)
+      INTEGER iIOUN,iNumGasPathsOut
+      INTEGER iNpmix,iNumMixPathsOut
+      INTEGER iNatm,iaNumLayersOut(kMaxAtm),iaNumLayersInAtm(kMaxAtm),iNumRadsOut
 
       REAL rFr1,rFr2
 
@@ -34,8 +34,8 @@
 
       INTEGER iMainType,iSubMainType,iNumberOut,ikMaxPts,iWhichStore
       REAL rFrLow,rFrHigh,rDelta
-      INTEGER iOutNumber,iaNumOut(kMaxPrint),iDummy,iDatapoints
-      INTEGER iTotal,iStart,iStore,iFreqPts
+      INTEGER iOutputNumber,iaNumOut(kMaxPrint),iDummy,iDatapoints
+      INTEGER iTotalChunks,iStart,iStore,iFreqPts
       REAL rTemp,raFreq(kMaxEntire)
       REAL raaEntire(kMaxEntire,100),raConvolve(kMaxEntire)
       INTEGER iI,iJ,iK,iLoop,iStartOffset,iJump,iDataSize,iFileWhere
@@ -59,7 +59,8 @@
 !      ------------
        IOERR = 6
        FIN =  'kcarta.dat'           ! input filename
-       FOUT = 'kcarta.txt'           ! output filename
+       FOUT = '+1'                   ! output filen = netcdf
+       iBinOrNC = +1
 
 !      -----------------------------------------------------------------
 !      Loop on program parameters
@@ -72,7 +73,7 @@
  1010     FORMAT('readkcarta.f90 must be run with at least 1 argument')
           WRITE(IOERR,1011)
  1011     FORMAT('   fin  = <filename> txt input file  {mandatory}','//'    &
-                 '   fout = <filename> rtp output file {optional, set to kcarta.txt}')
+                 '   fout = +1,0,-1 for netcdf/text/binary {optional, set to +1}')
           STOP
        ENDIF
 
@@ -97,9 +98,10 @@
 !            Big "IF" to set parameters
 !            ----------------------------
              IF (VAR(1:3) .EQ. 'FIN') THEN
-                FIN=VAL
+                FIN = VAL
              ELSEIF (VAR(1:4) .EQ. 'FOUT') THEN
-                FOUT=VAL
+                FOUT = VAL
+                read(VAL,*) iBinOrNC
              ELSE
                 WRITE(IOERR,1020) VAR
  1020           FORMAT('Unknown command-line argument: ',A6)
@@ -110,15 +112,15 @@
           ENDIF
        ENDDO  ! end of loop over command-line arguments
        write(*,'(A,A)') 'input  file name = ',fin
-       write(*,'(A,A)') 'output file name = ',fout
+       write(*,'(A,I2)') 'output file name = ',iBinOrNC
 
 !************************************************************************
 
  90   CONTINUE
       iInstrtype=0
 
-      print *,'Do you want a (+1) binary output (0) text output (-1) netcdf output? '
-      read *,iBinOrNC
+!      print *,'Do you want a (-1) binary output (0) text output (+1) netcdf output? '
+!      read *,iBinOrNC
 
        caInName = fin
 
@@ -129,9 +131,10 @@
 
       CALL readmainheader(iIOUN,rFr1,rFr2,iLorS)
 
-      CALL readgaspaths(iIOUN,iNumPathsOut,iLorS)
-
-      CALL readmixedpaths(iIOUN,iNpmix,iNumMixPathsOut,iLorS)
+      IF (iLorS .GT. 0) THEN
+        CALL readgaspaths(iIOUN,iNumGasPathsOut,iLorS)
+        CALL readmixedpaths(iIOUN,iNpmix,iNumMixPathsOut,iLorS)
+      END IF
 
       IF (iNpmix .EQ. 0) THEN
         iNumMixPathsOut=0
@@ -157,25 +160,21 @@
       iStore=0
       DO ii=1,iNatm
         iStore=iStore+iaNumLayersOut(ii)
-      END DO                                 !num of radiances to output
+      END DO                                     ! num of radiances to output
 
-      iWhichStore=iNumPathsOut+iNumMixPathsOut !num of paths/MP to output
-      iStore=iStore+iWhichStore                !total num to output
-
-      print *,'For each k-comp file used in the atmos.x run '
-      print *,'Total # of paths to output       = ',iNumPathsOut
-      print *,'Total # of mixed paths to output = ',iNumMixPathsOut
-      print *,'Total # of radiances to output   = ',iStore-iWhichStore
-      print *,'GRAND total to be output         = ',iStore
+      iWhichStore = iNumGasPathsOut+iNumMixPathsOut ! num of paths/MP to output
+      iStore = iStore+iWhichStore                ! total num to output
+      iNumRadsOut = iStore-iWhichStore           ! iNumRads to output
 
 ! the following info is for each k-comp file
 
 ! cccccccc this is the summary info that HAS to be read in!!!!!!!!
-      read(iIOUN) iTotal,iOutNumber     !!! typically iTotal = 89 (chunks) and iOutNumber = 5 (TwoSlab rads)
-      read(iIOUN) (iaNumOut(iI),iI=1,iOutNumber)
+      !!! typically iTotalChunks = 89 (chunks) and iOutputNumber = number of rads (eg 5 for TwoSlab rads) = 0/1 OD + 0/1 MP
+      read(iIOUN) iTotalChunks,iOutputNumber     
+      read(iIOUN) (iaNumOut(iI),iI=1,iOutputNumber)
 
       iJ=0
-      DO iI=1,iOutNumber
+      DO iI=1,iOutputNumber
         iJ=iJ+iaNumOut(iI)
         END DO
       IF (iJ .NE. iStore) THEN
@@ -183,22 +182,29 @@
         STOP
       END IF
 
-      print *,'kMaxEntire,kMaxPts = ',kMaxEntire,kMaxPts
-      DO iJ = 1,iTotal
-        CALL ReadData2(iIOUN,iJ,iOutNumber,raFreq,raaEntire)
+      DO iJ = 1,iTotalChunks
+        CALL ReadData2(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire)
       END DO
       CLOSE(iIOUN)
 
-      call output2(caInName,raFreq,raaEntire,iTotal,iOutNumber,iBinORNC)
+      print *,'For each k-comp file used in the atmos.x run '
+      print *,'Total # of paths to output       = ',iNumGasPathsOut
+      print *,'Total # of mixed paths to output = ',iNumMixPathsOut
+      print *,'Total # of radiances to output   = ',iNumRadsOut
+      print *,'GRAND total to be output         = ',iStore
+      write(*,'(A,I3,A,I4,I4)') 'iTotalChunks = ',iTotalChunks,' iOutputNumber,iStore = ',iOutputNumber,iStore
+      print *,(iaNumOut(iI),iI=1,iOutputNumber)
+
+      call output2(caInName,raFreq,raaEntire,iTotalChunks,iOutputNumber,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,iBinORNC)
 
       END PROGRAM
 
 !************************************************************************
-!!! typically iTotal = 89 (chunks) and iOutNumber = 5 (TwoSlab rads)
-      SUBROUTINE output2(caInName,raFreq,raaEntire,iTotal,iOutNumber,iBinOrNC)
+!!! typically iTotalChunks = 89 (chunks) and iOutputNumber = 5 (TwoSlab rads)
+      SUBROUTINE output2(caInName,raFreq,raaEntire,iTotalChunks,iOutputNumber,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,iBinOrNC)
 
+!      use /usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include/netcdf.mod
       use netcdf
-
 
       IMPLICIT NONE
 
@@ -206,7 +212,8 @@
 
       CHARACTER*80 caInName
       REAL raaEntire(kMaxEntire,100),raFreq(kMaxEntire)
-      INTEGER iTotal,iOutNumber,iBinOrNC
+      INTEGER iTotalChunks,iOutputNumber,iBinOrNC
+      INTEGER iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
 
 ! local variables
       CHARACTER(LEN=80) caOutName
@@ -216,25 +223,25 @@
       INTEGER :: ncid,ndims
 
       iIOUN=11
-      iFreqPts = kMaxPts * iTotal
+      iFreqPts = kMaxPts * iTotalChunks
 
 ! get the name of output file
       CALL GetOutName2(caInName,caOutName,iBinOrNC)
 
       print *,'opening caOutName ',caOutName
 
-      IF (iBinOrNC .EQ. 1) THEN            !binary format for rdairs.m
+      IF (iBinOrNC .EQ. -1) THEN            !binary format for rdairs.m
 ! put in the header info ... iI tells how many spectra to expect
 ! only need to save this header when we are outputting the VERY first spectra
         
-        ii = iOutNumber
+        ii = iOutputNumber
         OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='UNKNOWN',FORM='UNFORMATTED')
         write(iIOUN) 1,iFreqPts,iI
         write(iIOUN) (raFreq(iI),iI=1,iFreqPts)
         CLOSE(iIOUN)
 ! now output data!!!
         OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='OLD',FORM='UNFORMATTED',ACCESS='APPEND')
-        DO iK = 1,iOutNumber 
+        DO iK = 1,iNumGasPathsOut+iNumMixPathsOut+iNumRadsOut
           write(iIOUN) (raaEntire(iJ,iK),iJ=1,iFreqPts)
         END DO
         CLOSE(iIOUN)
@@ -243,7 +250,7 @@
 ! put in the header info ... iI tells how many spectra to expect
 ! only need to save this header when we are outputting the VERY first spectra
         OPEN(UNIT=iIOUN,FILE=caOutName,STATUS='UNKNOWN',FORM='FORMATTED')
-        DO iK = 1,iOutNumber
+        DO iK = 1,iNumGasPathsOut+iNumMixPathsOut+iNumRadsOut
           write(iIOUN,5050) -9999.0,-9999.0
           DO iJ=1,iFreqPts
             write(iIOUN,5050) raFreq(iJ),raaEntire(iJ,iK)
@@ -252,13 +259,13 @@
         CLOSE(iIOUN)
  5050 FORMAT(f10.4,'  ',1pe12.5)
 
-      ELSEIF (iBinOrNC .EQ. -1) THEN     !column text format for rdairs.m
+      ELSEIF (iBinOrNC .EQ. +1) THEN     !column text format for rdairs.m
 
         !! https://home.chpc.utah.edu/~thorne/computing/Examples_netCDF.pdf for f90)        
         !! call f90_netcdf 
 
         !! https://www.unidata.ucar.edu/software/netcdf/examples/programs/sfc_pres_temp_wr.f for f77
-        call f77_netcdf(caOutName,raFreq,raaEntire,iTotal,iOutNumber)
+        call f77_netcdf(caOutName,raFreq,raaEntire,iTotalChunks,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut)
 
       END IF
 
@@ -294,9 +301,9 @@
       caOutName(1:iI)=caInName(1:iI)
       IF (iBinOrNC .EQ. 0) THEN
         caOutName(iI+1:iI+6) = 'datTXT'
-      ELSEIF (iBinOrNC .GT. 0) THEN
-        caOutName(iI+1:iI+6) = 'datBIN'
       ELSEIF (iBinOrNC .LT. 0) THEN
+        caOutName(iI+1:iI+6) = 'datBIN'
+      ELSEIF (iBinOrNC .GT. 0) THEN
         caOutName(iI+1:iI+2) = 'nc'
       END IF
 
@@ -341,18 +348,19 @@
 !     Full documentation of the netCDF Fortran 77 API can be found at:
 !     http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-f77
 
-!     $Id: sfc_pres_temp_wr.f,v 1.9 2007/01/24 19:31:54 russ Exp $
+!!! typically iTotalChunks = 89 (chunks) and iOutputNumber = 5 (TwoSlab rads)
 
-!!! typically iTotal = 89 (chunks) and iOutNumber = 5 (TwoSlab rads)
+      SUBROUTINE f77_netcdf(caOutName,raFreq,raaEntire,iTotalChunks,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut)
 
-      SUBROUTINE f77_netcdf(caOutName,raFreq,raaEntire,iTotal,iOutNumber)
       implicit none
-      include 'netcdf.inc'
+      include '/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include/netcdf.inc'
+!      include 'netcdf.inc'
+
       include 'convolve.param'
 
       REAL rTemp,raFreq(kMaxEntire)
       REAL raaEntire(kMaxEntire,100)
-      INTEGER iTotal,iOutNumber
+      INTEGER iTotalChunks,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
 
 !     This is the name of the data file we will create.
       character*(*) caOutname
@@ -369,104 +377,203 @@
 !     We are writing 2D data
       integer NDIMS
       parameter (NDIMS=2)
-      integer NFREQ, NRADLAY
+      integer NFREQ, NRADLAY, NGASODLAY, NMIXODLAY
+      character*(20) FREQ_NAME,  RAD_NAME,  GASOD_NAME,  MIXOD_NAME
+      character*(20) FREQ_UNITS, RAD_UNITS, GASOD_UNITS, MIXOD_UNITS
 
 !     When we create netCDF files, variables and dimensions, we get an ID for each one.
-      integer ncid, varid, dimids(NDIMS)
-      integer x_dimid, y_dimid
+      integer ncid, freq_varid, data1_varid, data2_varid, data3_varid, dimids1(NDIMS), dimids2(NDIMS), dimids3(NDIMS)
+      integer freq_dimid, radout_dimid, gasod_dimid, mixod_dimid
 
 !     This is the data array we will write. 
 !      REAL data_out(NRADLAY, NFREQ) which is TRANSPOSE of raaEntire
 
 !     Loop indexes, and error handling.
-      integer x, y, retval
+      integer iI, retval,ind(1:1000), lenind, ixS1,ixE1, ixS2,ixE2, ixS3,ixE3, ixS,ixE
 
-!!! typically iTotal = 89 (chunks) and iOutNumber = 5 (TwoSlab rads)
-      NFREQ   = iTotal * kMaxPts
-      NRADLAY = iOutNumber
+!     It's good practice for each variable to carry a "units" attribute.
+      character*(20) UNITS
+      parameter (UNITS = 'units')
 
+!!! typically iTotalChunks = 89 (chunks) and iGasOutNumber = 0 and iMixOutNumber = 0 and iOutputNumber = 5 (TwoSlab rads)
+      NFREQ   = iTotalChunks * kMaxPts
+      FREQ_NAME  = 'Wavenumber'
+      FREQ_UNITS = 'cm-1'
+      ixS  = 0
+      ixE  = 0
+
+      NGASODLAY = iNumGasPathsOut
+      GASOD_NAME  = 'GAS_PATH_ODs'
+      GASOD_UNITS = 'NONE'
+      ixS1 = 0
+      ixE1 = 0
+
+      NMIXODLAY = iNumMixPathsOut
+      MIXOD_NAME  = 'MIXED_PATH_ODs'
+      MIXOD_UNITS = 'NONE'
+      ixS2 = 0
+      ixE2 = 0
+
+      NRADLAY = iNumRadsOut
+      RAD_NAME  = 'Radiance'
+      RAD_UNITS = 'mW/cm2/sr/cm-1'
+      ixS3 = 0
+      ixE3 = 0
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!
 !     Create some pretend data. If this wasn't an example program, we
 !     would have some real data to write, for example, model output.
-!      data_out = raaEntire(1:iOutnumber,1:iTotal)
+!      data_out = raaEntire(1:iGasPath+iMixedPath+iradOut,1:iTotalChunks)
 
 !     Create the netCDF file. The nf_clobber parameter tells netCDF to
 !     overwrite this file, if it already exists.
       retval = nf_create(caOutName, NF_CLOBBER, ncid)
       if (retval .ne. nf_noerr) call handle_err(retval)
+      print *,'boo 0-3'
 
+! freqs
 !     Define the dimensions. NetCDF will hand back an ID for each.
-      retval = nf_def_dim(ncid, "x", NFREQ, x_dimid)
+      retval = nf_def_dim(ncid,  FREQ_NAME, NFREQ, freq_dimid)
       if (retval .ne. nf_noerr) call handle_err(retval)
-      retval = nf_def_dim(ncid, "y", NRADLAY, y_dimid)
-      if (retval .ne. nf_noerr) call handle_err(retval)
+      print *,'boo 0-2'
 
-!     The dimids array is used to pass the IDs of the dimensions of
-!     the variables. Note that in fortran arrays are stored in
-!     column-major format.
-      dimids(2) = x_dimid
-      dimids(1) = y_dimid
-
-!     Define the variable. The type of the variable in this case is
-!     NF_INT  (4-byte integer).
-!     NF_REAL (4-byte real).
-      retval = nf_def_var(ncid, "data", NF_REAL, NDIMS, dimids, varid)
+!     Define the variables.
+      retval = nf_def_var(ncid, FREQ_NAME,   NF_REAL, 1, freq_dimid, freq_varid)
       if (retval .ne. nf_noerr) call handle_err(retval)
+      print *,'boo 0'
+
+!     Assign units attributes
+      retval = nf_put_att_text(ncid, freq_varid, UNITS, len(FREQ_UNITS), FREQ_UNITS)
+      if (retval .ne. nf_noerr) call handle_err(retval)
+      print *,'boo 0-1'
+
+! gasOD
+      if (iNumGasPathsOut .GT. 0) THEN
+        ixS = ixE + 1
+        ixE = ixS + (iNumGasPathsOut-1)
+        ixS1 = ixS
+        ixE1 = ixE
+
+        retval = nf_def_dim(ncid,  GASOD_NAME, NGASODLAY, gasod_dimid)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+
+!       The dimids array is used to pass the IDs of the dimensions of
+!       the variables. Note that in fortran arrays are stored in
+!       column-major format.
+        dimids1(2) = freq_dimid
+        dimids1(1) = gasod_dimid
+
+        retval = nf_def_var(ncid, GASOD_NAME, NF_REAL, NDIMS, dimids1, data1_varid)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+
+        retval = nf_put_att_text(ncid, data1_varid, UNITS, len(GASOD_UNITS), GASOD_UNITS)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+      END IF
+      print *,'boo 1'
+
+! mixed path
+      if (iNumMixPathsOut .GT. 0) THEN
+        ixS = ixE + 1
+        ixE = ixS + (iNumMixPathsOut-1)
+        ixS2 = ixS
+        ixE2 = ixE
+
+        retval = nf_def_dim(ncid,  MIXOD_NAME, NMIXODLAY, MIXOD_dimid)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+
+!       The dimids array is used to pass the IDs of the dimensions of
+!       the variables. Note that in fortran arrays are stored in
+!       column-major format.
+        dimids2(2) = freq_dimid
+        dimids2(1) = mixod_dimid
+
+        retval = nf_def_var(ncid, MIXOD_NAME, NF_REAL, NDIMS, dimids2, data2_varid)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+
+        retval = nf_put_att_text(ncid, data2_varid, UNITS, len(MIXOD_UNITS), MIXOD_UNITS)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+      END IF
+      print *,'boo 2'
+
+! radiances
+      if (iNumRadsOut .GT. 0) THEN
+        ixS = ixE + 1
+        ixE = ixS + (iNumRadsOut-1)
+        ixS3 = ixS
+        ixE3 = ixE
+
+        retval = nf_def_dim(ncid,  RAD_NAME, NRADLAY, radout_dimid)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+
+!       The dimids array is used to pass the IDs of the dimensions of
+!       the variables. Note that in fortran arrays are stored in
+!       column-major format.
+        dimids3(2) = freq_dimid
+        dimids3(1) = radout_dimid
+
+        retval = nf_def_var(ncid, RAD_NAME, NF_REAL, NDIMS, dimids3, data3_varid)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+
+        retval = nf_put_att_text(ncid, data3_varid, UNITS, len(RAD_UNITS),RAD_UNITS)
+        if (retval .ne. nf_noerr) call handle_err(retval)
+      END IF
+      print *,'boo 3'
 
 !     End define mode. This tells netCDF we are done defining metadata.
       retval = nf_enddef(ncid)
       if (retval .ne. nf_noerr) call handle_err(retval)
+!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!     Write the pretend data to the file. Although netCDF supports
+!     Write the data to the file. Although netCDF supports
 !     reading and writing subsets of data, in this case we write all the
 !     data in one operation.
-      retval = nf_put_var_real(ncid, varid, transpose(raaEntire(1:NFREQ,1:iOutnumber)))
+
+      retval = nf_put_var_real(ncid, freq_dimid, raFreq(1:NFREQ))
       if (retval .ne. nf_noerr) call handle_err(retval)
+      print *,'boo 4'
+
+      ind = (/(iI,iI=1,size(ind))/)
+
+      if (iNumGasPathsOut .GT. 0) THEN
+        print *,'ODs : ',ixS1,ixE1
+        retval = nf_put_var_real(ncid, data1_varid, transpose(raaEntire(1:NFREQ,ind(ixS1:ixE1))))
+        if (retval .ne. nf_noerr) call handle_err(retval)
+      END IF
+      print *,'boo 5'
+
+      if (iNumMixPathsOut .GT. 0) THEN
+        print *,'MPs : ',ixS2,ixE2
+        retval = nf_put_var_real(ncid, data2_varid, transpose(raaEntire(1:NFREQ,ind(ixS2:ixE2))))
+        if (retval .ne. nf_noerr) call handle_err(retval)
+      END IF
+      print *,'boo 6'
+
+      if (iNumRadsOut .GT. 0) THEN
+        print *,'RADs : ',ixS3,ixE3
+        retval = nf_put_var_real(ncid, data3_varid, transpose(raaEntire(1:NFREQ,ind(ixS3:ixE3))))
+        if (retval .ne. nf_noerr) call handle_err(retval)
+      END IF
+      print *,'boo 7'
 
 !     Close the file. This frees up any internal netCDF resources
 !     associated with the file, and flushes any buffers.
       retval = nf_close(ncid)
       if (retval .ne. nf_noerr) call handle_err(retval)
 
-      print *,'*** SUCCESS writing example file ',caOutName,iTotal,iOutNumber
+      write(*,'(A,A)') '*** SUCCESS writing example file ',caOutName
       end
 
 
 !************************************************************************
-!SUBROUTINE f90_netcdf !! https://home.chpc.utah.edu/~thorne/computing/Examples_netCDF.pdf for f90)
-
-! USE netcdf
-! IMPLICIT NONE
-! REAL(KIND=4), DIMENSION(NX), INTENT(IN) :: xpos
-! REAL(KIND=4), DIMENSION(NY), INTENT(IN) :: ypos
-! REAL(KIND=4), DIMENSION(NX,NY), INTENT(IN) :: idata
-! INTEGER(KIND=4) :: ncid, x_dimid, y_dimid
-! INTEGER(KIND=4) :: x_varid, y_varid, varid
-! INTEGER(KIND=4), DIMENSION(2) :: dimids
-! INTEGER(KIND=4), INTENT(IN) :: NX, NY
-! CHARACTER(LEN=50), INTENT(IN) :: outfile
-! !Create the netCDF file.
-! CALL check(nf90_create(outfile, NF90_CLOBBER, ncid))
-! !Define the dimensions.
-! CALL check(nf90_def_dim(ncid, "lon", NX, x_dimid))
-! CALL check(nf90_def_dim(ncid, "lat", NY, y_dimid))
-! !Define coordinate variables
-! CALL check(nf90_def_var(ncid, "lon", NF90_REAL, x_dimid, x_varid))
-! CALL check(nf90_def_var(ncid, "lat", NF90_REAL, y_dimid, y_varid))
-! dimids = (/ x_dimid, y_dimid /)
-! !Define variable
-! CALL check(nf90_def_var(ncid, "Perturbations", NF90_FLOAT, dimids, varid))
-! CALL check(nf90_enddef(ncid)) !End Definitions
-! !Write Data
-! CALL check(nf90_put_var(ncid, x_varid, xpos))
-! CALL check(nf90_put_var(ncid, y_varid, ypos))
-! CALL check(nf90_put_var(ncid, varid, idata))
-! CALL check(nf90_close(ncid))
-
-! END SUBROUTINE writegrid
-!=====================================================
       subroutine handle_err(errcode)
+
       implicit none
-      include 'netcdf.inc'
+
+      include '/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include/netcdf.inc'
+!      include 'netcdf.inc'
+
       integer errcode
 
       print *, 'Error: ', nf_strerror(errcode)
