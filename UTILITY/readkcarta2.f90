@@ -33,6 +33,7 @@
       INTEGER iBinOrNC
 
       INTEGER iMainType,iSubMainType,iNumberOut,ikMaxPts,iWhichStore
+      INTEGER iSetLow,iSetHigh
       REAL rFrLow,rFrHigh,rDelta
       INTEGER iOutputNumber,iaNumOut(kMaxPrint),iDummy,iDatapoints
       INTEGER iTotalChunks,iStart,iStore,iFreqPts
@@ -112,15 +113,12 @@
           ENDIF
        ENDDO  ! end of loop over command-line arguments
        write(*,'(A,A)') 'input  file name = ',fin
-       write(*,'(A,I2)') 'output file name = ',iBinOrNC
+       write(*,'(A,I2)') 'output file type (+1 = .nc, 0 = TXT, -1 = BIN)  ',iBinOrNC
 
 !************************************************************************
 
  90   CONTINUE
-      iInstrtype=0
-
-!      print *,'Do you want a (-1) binary output (0) text output (+1) netcdf output? '
-!      read *,iBinOrNC
+      iInstrtype = 0
 
        caInName = fin
 
@@ -129,62 +127,72 @@
 !      OPEN(UNIT=iIOUN,FILE=caInName,STATUS='OLD',FORM='UNFORMATTED',RECL=4)
       OPEN(UNIT=iIOUN,FILE=caInName,STATUS='OLD',FORM='UNFORMATTED')
 
-      CALL readmainheader(iIOUN,rFr1,rFr2,iLorS)
+      CALL readmainheaderLorS(iIOUN,rFr1,rFr2,iLorS, &
+         iTotalChunks,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut, &
+         rDelta,iSetLow,iSetHigh)
 
       IF (iLorS .GT. 0) THEN
         CALL readgaspaths(iIOUN,iNumGasPathsOut,iLorS)
         CALL readmixedpaths(iIOUN,iNpmix,iNumMixPathsOut,iLorS)
-      END IF
 
-      IF (iNpmix .EQ. 0) THEN
-        iNumMixPathsOut=0
-      END IF
+        IF (iNpmix .EQ. 0) THEN
+          iNumMixPathsOut=0
+        END IF
 
-      CALL readatmospheres(iIOUN,iNpmix,iNatm,iaNumLayersInAtm,iaNumLayersOut)
+        CALL readatmospheres(iIOUN,iNpmix,iNatm,iaNumLayersInAtm,iaNumLayersOut)
 
-      IF (iNatm .EQ. 0) THEN
-        DO ii=1,iNatm
-          iaNumLayersOut(ii)=0
+        IF (iNatm .EQ. 0) THEN
+          DO ii=1,iNatm
+            iaNumLayersOut(ii)=0
+          END DO
+        END IF
+  
+        IF (iNatm .GT.  0) THEN
+          DO ii=1,iNatm
+            IF (iaNumLayersOut(ii) .EQ. -1) THEN
+              iaNumLayersOut(ii)=iaNumLayersInAtm(ii)
+            END IF
+          END DO
+        END IF
+  
+        ! this is the number of paths/mixed paths/layers that will be output each chunk
+        iStore = 0
+        DO ii = 1,iNatm
+          iStore = iStore+iaNumLayersOut(ii)
+        END DO                                     ! num of radiances to output
+
+        iWhichStore = iNumGasPathsOut+iNumMixPathsOut ! num of paths/MP to output
+        iStore = iStore+iWhichStore                ! total num to output
+        iNumRadsOut = iStore-iWhichStore           ! iNumRads to output
+
+       ! the following info is for each k-comp file
+       ! cccccccc this is the summary info that HAS to be read in!!!!!!!!
+       ! typically iTotalChunks = 89 (chunks) and iOutputNumber = number of rads (eg 5 for TwoSlab rads) = 0/1 OD + 0/1 MP
+        read(iIOUN) iTotalChunks,iOutputNumber     
+        read(iIOUN) (iaNumOut(iI),iI=1,iOutputNumber)
+
+        iJ=0
+        DO iI=1,iOutputNumber
+          iJ=iJ+iaNumOut(iI)
+          END DO
+        IF (iJ .NE. iStore) THEN
+          print *,'hmm : number of things to read  aintcha jivin'
+          STOP
+        END IF
+
+        print *,'read in LONG preamble, now reading in data for ',iTotalChunks,' 10000 pt chunks'
+        DO iJ = 1,iTotalChunks
+          CALL ReadData2L(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire)
         END DO
+      ELSE
+        print *,'read in SHORT preamble, now reading in data for ',iTotalChunks,' 10000 pt chunks'
+        print *,'iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut = ',iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
+        print *,rFr1,rFr2,rDelta
+        DO iJ = 1,iTotalChunks
+          print *,'iJ,rFrLow = ',iJ,rFr1
+          CALL ReadData2S(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire,rDelta,rFr1)
+        END DO         
       END IF
-
-      IF (iNatm .GT.  0) THEN
-        DO ii=1,iNatm
-          IF (iaNumLayersOut(ii) .EQ. -1) THEN
-            iaNumLayersOut(ii)=iaNumLayersInAtm(ii)
-          END IF
-        END DO
-      END IF
-
-! this is the number of paths/mixed paths/layers that will be output each chunk
-      iStore=0
-      DO ii=1,iNatm
-        iStore=iStore+iaNumLayersOut(ii)
-      END DO                                     ! num of radiances to output
-
-      iWhichStore = iNumGasPathsOut+iNumMixPathsOut ! num of paths/MP to output
-      iStore = iStore+iWhichStore                ! total num to output
-      iNumRadsOut = iStore-iWhichStore           ! iNumRads to output
-
-! the following info is for each k-comp file
-
-! cccccccc this is the summary info that HAS to be read in!!!!!!!!
-      !!! typically iTotalChunks = 89 (chunks) and iOutputNumber = number of rads (eg 5 for TwoSlab rads) = 0/1 OD + 0/1 MP
-      read(iIOUN) iTotalChunks,iOutputNumber     
-      read(iIOUN) (iaNumOut(iI),iI=1,iOutputNumber)
-
-      iJ=0
-      DO iI=1,iOutputNumber
-        iJ=iJ+iaNumOut(iI)
-        END DO
-      IF (iJ .NE. iStore) THEN
-        print *,'hmm : number of things to read  aintcha jivin'
-        STOP
-      END IF
-
-      DO iJ = 1,iTotalChunks
-        CALL ReadData2(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire)
-      END DO
       CLOSE(iIOUN)
 
       print *,'For each k-comp file used in the atmos.x run '

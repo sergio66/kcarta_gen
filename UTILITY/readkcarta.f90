@@ -142,7 +142,7 @@
       iFileWhere = ftell(iIOUN)
       print *,'location 0 : just opened file iFileWhere = ',iFileWhere
 
-      CALL readmainheader(iIOUN,rFr1,rFr2,iLorS)
+      CALL readmainheaderLONG(iIOUN,rFr1,rFr2,iLorS)
 
       iFileWhere = ftell(iIOUN)
       print *,'location 1 : readmainheader -  iFileWhere = ',iFileWhere

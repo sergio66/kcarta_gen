@@ -3,8 +3,9 @@
 !************************************************************************
 !************* READ IN THE k-compressed files ***************************
 !************************************************************************
+
 ! this reads in the main header information
-      SUBROUTINE readmainheader(iIOUN,rFr1,rFr2,iLorS)
+      SUBROUTINE readmainheaderLONG(iIOUN,rFr1,rFr2,iLorS)
 
       IMPLICIT NONE 
 
@@ -15,23 +16,23 @@
 ! iSetLow    = integer index (between 1 and 89) of kcomp files start point
 ! iSetHigh   = integer index (between 1 and 89) of kcomp files end point
 ! rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
-      INTEGER iIOUN,iLorS,iaJunk(10)
-      REAL rFr1,rFr2,raParams(kMaxUserSet)
-      CHARACTER*80 caVers
-
+      INTEGER iIOUN,iLorS
+      REAL rFr1,rFr2
+      
 ! iCKD       = water continuum version
 ! caComment  = comment assocaiated with data run
 ! iNumLayers = number of layers in each gas profile
+      CHARACTER*80 caVers
       CHARACTER*80 caComment
-      INTEGER iCKD,iI,iNumLayers,iSetLow,iSetHigh,ia6(6),versNum
+      INTEGER iCKD,iI,iNumLayers,iSetLow,iSetHigh,ia6(6),versNum,iaJunk(10)
       INTEGER iKMaxUserSet,char2num,iNumParams
       CHARACTER*3 ca3
-      REAL rVers,rTen,pProf(kProfLayer+1),rr
+      REAL rVers,rTen,pProf(kProfLayer+1),rr,raParams(kMaxUserSet)
 
       read(iIOUN) caVers
 !      print*,'123456789012345678901234567890123456789012345678901234567890123456789012'
 !      print *,'0         1         2         3         4         5         6         7         '
-      print *,caVers
+!      print *,caVers
 ! few lines later vcaVers is parsed for eg 1.03, 1.22 etc
 
       read(iIOUN) iNumLayers
@@ -89,14 +90,14 @@
         end if
       end if
 
- 9999 CONTINUE
 !      print *,'read in mainheader .......'
 
       RETURN
       END
 !************************************************************************
 ! this reads in the main header information for iLorS = 0 (readkcBasic.f)
-      SUBROUTINE readmainheaderSHORT(iIOUN,rFr1,rFr2,rDelta,iSetLow,iSetHigh,iTotalStuff)
+      SUBROUTINE readmainheaderSHORT(iIOUN,rFr1,rFr2,rDelta,iSetLow,iSetHigh, &
+                      iTotalStuff,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut)
 
       IMPLICIT NONE 
 
@@ -107,6 +108,7 @@
 ! rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
 ! iChunks    = number of 10000 pr chunks that kCARTA deemed to process
 ! iTotal     = number of outputs per 10000 points
+      INTEGER iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
       INTEGER iIOUN,iLorS,iChunks,iTotalStuff,iSetLow,iSetHigh
       REAL rFr1,rFr2,raParams(kMaxUserSet),rDelta
       CHARACTER*80 caVers
@@ -125,6 +127,11 @@
       REAL rVers,rTen,pProf(kProfLayer+1),rr,rBlocks
 
       read(iIOUN) caVers
+!      print*,'123456789012345678901234567890123456789012345678901234567890123456789012'
+!      print *,'0         1         2         3         4         5         6         7         '
+!      print *,caVers
+! few lines later vcaVers is parsed for eg 1.03, 1.22 etc
+
       read(iIOUN) iNumLayers
 
       read(iIOUN) iKmaxUserSet
@@ -137,6 +144,7 @@
 
 ! read comment
       read(iIOUN) caComment
+
 ! read start,stop frequency  iSetLo,iSetHi
       read(iIOUN) rFr1,rFr2 
       read(iIOUN) iSetLow,iSetHigh
@@ -153,6 +161,7 @@
       read(iIOUN) rBlocks
 ! read how many output options saved per 10000 point chunk
       read(iIOUN) iTotalStuff
+      read(iIOUN) iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
 
       iChunks = iSetHigh - iSetLow + 1   !!!number of 10000 pt chunks to read
 
@@ -160,7 +169,124 @@
 
       RETURN
       END
+
 !************************************************************************
+! this combines Long Short
+      SUBROUTINE readmainheaderLorS(iIOUN,rFr1,rFr2,iLorS, &
+                      iChunks,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut, &
+                      rDelta,iSetLow,iSetHigh)
+
+      IMPLICIT NONE 
+
+      include 'convolve.param'
+! iSetLow,iSetHigh = Chunk start, stop index
+! rDelta     = point spacing
+! iIOUN      = file number
+! rFR1,rFr2  = frequency srtart/stop pts (in cm-1)
+! iChunks    = number of 10000 pr chunks that kCARTA deemed to process
+! iTotal     = number of outputs per 10000 points
+      INTEGER iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
+      INTEGER iIOUN,iLorS,iChunks,iTotalStuff,iSetLow,iSetHigh
+      REAL rFr1,rFr2,raParams(kMaxUserSet),rDelta
+      CHARACTER*80 caVers
+
+! local variables
+! iSetLow    = integer index (between 1 and 89) of kcomp files start point
+! iSetHigh   = integer index (between 1 and 89) of kcomp files end point
+! iLorS      = which version data header was saved in
+! iCKD       = water continuum version
+! caComment  = comment assocaiated with data run
+! iNumLayers = number of layers in each gas profile
+      CHARACTER*80 caComment
+      INTEGER iCKD,iI,iNumLayers,ia6(6),iaJunk(10)
+      INTEGER iKMaxUserSet,char2num
+      CHARACTER*3 ca3
+      REAL rVers,rTen,pProf(kProfLayer+1),rr,rBlocks
+
+      iChunks = -1
+      iTotalStuff = -9999
+      iNumGasPathsOut = -9999
+      iNumMixPathsOut = -9999
+      iNumRadsOut = -9999
+      rDelta = -9999.0
+      iSetLow = -9999
+      iSetHigh = -9999
+
+      read(iIOUN) caVers
+!      print*,'123456789012345678901234567890123456789012345678901234567890123456789012'
+!      print *,'0         1         2         3         4         5         6         7         '
+!      print *,caVers
+! few lines later vcaVers is parsed for eg 1.03, 1.22 etc
+
+      read(iIOUN) iNumLayers
+
+      read(iIOUN) iKmaxUserSet
+      IF (iKmaxUserSet .NE. kMaxUserSet) THEN
+        print *,'Whoops! wrong reader version!! have different number'
+        print *,'of parameters in *PARAMS'
+        STOP
+        END IF
+      read(iIOUN) (raParams(iI),iI=1,iKmaxUserSet)
+
+! read comment
+      read(iIOUN) caComment
+
+! read start,stop frequency  iSetLo,iSetHi
+      read(iIOUN) rFr1,rFr2 
+      read(iIOUN) iSetLow,iSetHigh
+! read how data was saved
+      read(iIOUN) iLorS
+
+      IF (iLorS .EQ. 0) THEN
+        print *,'this is SHORT version'
+
+! read frequency step size
+        read(iIOUN) rdelta
+! read chunk size = rDelta*10000
+        read(iIOUN) rBlocks
+! read how many output options saved per 10000 point chunk
+        read(iIOUN) iTotalStuff
+        read(iIOUN) iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
+
+        iChunks = iSetHigh - iSetLow + 1   !!!number of 10000 pt chunks to read
+
+      ELSE
+! process STRING vx.xx into REAL
+        print *,'this is LONG version'
+        ca3(1:1)=caVers(2:2)
+        ca3(2:3)=caVers(4:5)
+        rVers=0.0
+        rTen=1.0
+        DO iI=1,3
+          rr=char2num(ca3,iI)
+          rVers=rVers+rr/rTen
+          rTen=rTen*10.0
+          END DO
+        print *,'kCARTA version = ',rVers
+        if ((rVers .GE. 1.03) .and. (rVers .LE. 1.05)) THEN
+          print *,'reading in MsubLayer, MThickLayer info ....'
+          read(iIOUN) (ia6(iI),iI=1,6)
+          read(iIOUN) (pProf(iI),iI=1,kProfLayer+1)   !!wrong hehehe
+        elseif ((rVers .GE. 1.06) .and. (rVers .LE. 1.08)) THEN
+          print *,'reading in MsubLayer, MThickLayer info ....'
+          read(iIOUN) (ia6(iI),iI=1,6)
+          read(iIOUN) (pProf(iI),iI=1,kProfLayer)   !!fixed by Larry McMillin
+        elseif (rVers .GE. 1.09) THEN
+          read(iIOUN) (pProf(iI),iI=1,kProfLayer)   !!fixed by Larry McMillin
+          if (rVers .GE. 1.18) THEN
+            !!! read iaaParams
+            read(iIOUN) (iaJunk(iI),iI=1,10)
+            read(iIOUN) (iaJunk(iI),iI=1,10)
+            read(iIOUN) (iaJunk(iI),iI=1,10)
+          end if
+        end if
+      END IF
+       
+      RETURN
+      END
+
+!************************************************************************
+
 ! this function takes a character in a string, and gives Roman numeral
       INTEGER FUNCTION char2num(ca3,iI)
 
@@ -573,8 +699,64 @@
       END
 
 !************************************************************************
-! this subroutine reads in the data
-      SUBROUTINE readdata2(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire)
+! this subroutine reads in the data for iLorS == 0
+      SUBROUTINE ReadData2S(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire,rDelta,rFrLow)
+
+      IMPLICIT NONE 
+
+      include 'convolve.param'
+
+! iDataSize=number of bytes from start of data in this block, 
+!           to same start of data
+!           in next kcomp block (so we can directly jump there)
+!!! typically iTotalChunks = 89 (chunks) 
+      INTEGER iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut    
+      REAL raaEntire(kMaxEntire,100),raFreq(kMaxEntire),rDelta,rFrLow
+
+      INTEGER iMainType,iSubMainType,iNumberOut,ikMaxPts
+
+      REAL raTemp(kMaxPts)
+      INTEGER iI,iCnt,iX,iDummy
+      INTEGER iaIndX(kMaxPts),iaInd(kMaxPts)
+
+      iaIndX = (/(iI,iI=1,kMaxPts)/)
+      iaInd = iaIndX + (iJ-1)*10000
+
+      raFreq(iaInd) = rFrLow + (iaIndX-1)*rDelta
+      rFrLow = rFrLow + rDelta*kMaxPts
+
+      iCnt = 0
+
+      IF (iNumGasPathsOut .GT. 0) THEN
+        DO iI=1,iNumGasPathsOut
+          iCnt = iCnt + 1
+          read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
+          raaEntire(iaInd,iCnt) = raTemp
+        END DO
+      END IF
+
+      IF (iNumMixPathsOut .GT. 0) THEN
+        DO iI=1,iNumMixPathsOut
+          iCnt = iCnt + 1
+          read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
+          raaEntire(iaInd,iCnt) = raTemp
+        END DO
+      END IF
+
+      IF (iNumRadsOut .GT. 0) THEN
+        DO iI=1,iNumRadsOut
+          iCnt = iCnt + 1 
+          read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
+          raaEntire(iaInd,iCnt) = raTemp
+        END DO
+      END IF
+
+      RETURN
+      END
+
+!************************************************************************
+! this subroutine reads in the data for iLorS > 0
+      SUBROUTINE ReadData2L(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire)
 
       IMPLICIT NONE 
 
@@ -593,7 +775,6 @@
       REAL raTemp(kMaxPts)
       INTEGER iI,iCnt,iX,iDummy
       INTEGER iaIndX(kMaxPts),iaInd(kMaxPts)
-
 
       iaIndX = (/(iI,iI=1,kMaxPts)/)
       iaInd = iaIndX + (iJ-1)*10000

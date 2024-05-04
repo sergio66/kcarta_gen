@@ -134,8 +134,8 @@ FLAGSNODEBUG = -extend-source 132 -check bounds -O2
 LIBS = 
 RTPLIBS = 
 
-FLAGS = $(FLAGSDEBUG)
-#FLAGS = $(FLAGSNODEBUG)
+#FLAGS = $(FLAGSDEBUG)
+FLAGS = $(FLAGSNODEBUG)
 RTPFLAGS = $(FLAGS)
 
 ### sergio@taki-usr2 UTILITY]$ rpm -ql netcdf

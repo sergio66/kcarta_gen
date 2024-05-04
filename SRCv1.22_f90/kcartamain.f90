@@ -360,9 +360,9 @@
 !          very useful so program easily knows r630_g1.dat etc
 ! raBlock  tells the current kComp wavenumber block
 ! raFileStep tells you the current wavenumber step size*10000
-! iaList   has the final list of iTotal files that should be uncompressed
+! iaList   has the final list of iChunkTotal files that should be uncompressed
 ! iTotalStuff is the number of outputs per chunk
-    INTEGER :: iaList(kNumkCompT),iTotal,iTotalStuff,iOuterLoop
+    INTEGER :: iaList(kNumkCompT),iChunkTotal,iTotalStuff,iOuterLoop
     INTEGER :: iTag,iActualTag,iDoAdd
     REAL :: raFiles(kNumkCompT),raFileStep(kNumkCompT)
     INTEGER :: iaActualTag(kNumkCompT),iaTagIndex(kNumkCompT)
@@ -535,7 +535,7 @@
     CALL GetFreq(rFreqStart,rFreqEnd, &
       iFileIDLo,iFileIDHi, &
       raBlock,raFiles,iaTagIndex,iaActualTag, &
-      raFileStep,iaList,iTotal)
+      raFileStep,iaList,iChunkTotal)
 
     IF ((iakSolar(1) >= 0) .AND. (rFreqStart >= 50000.0) .AND. &
       (raKsolarAngle(1) <= 90) .AND. (raKsolarAngle(1) >= 0)) THEN
@@ -621,7 +621,7 @@
       iOutTypes,iaPrinter,iaGPMPAtm,iaNp,iaaOp,raaUserPress, &
       iJacob,iaJacob, &
       iakSolar,rakSolarAngle,rakSolarRefl,iakThermal, &
-      rakThermalAngle,iakThermalJacob,iaOutNumbers,iTotal,iTotalStuff, &
+      rakThermalAngle,iakThermalJacob,iaOutNumbers,iChunkTotal,iTotalStuff, &
       iDoUpperAtmNLTE,iDumpAllUASpectra,iDumpAllUARads)
     WRITE(kStdWarn,*) 'called PrepareOutput .......'
     CALL printstar
@@ -693,7 +693,7 @@
 !c          very useful so program easily knows r630_g1.dat etc
 !c raBlock  tells the current kComp wavenumber block
 !c raFileStep tells you the current wavenumber step size*10000
-!c iaList   has the final list of iTotal files that should be uncompressed
+!c iaList   has the final list of iChunkTotal files that should be uncompressed
 
 !******************
 ! set the kCmp Interp Wgts
@@ -761,7 +761,7 @@
 
 ! LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
 ! outermost loop over the 10000 pt freq chunks
-    DO iOuterLoop=1,iTotal
+    DO iOuterLoop=1,iChunkTotal
       kOuterLoop = iOuterLoop
       call PrintStar
       write (kStdwarn,*) 'Processing new kCompressed Block ....'
@@ -772,7 +772,7 @@
       iActualTag   = iaActualTag(iFileID)
 
       write(kStdWarn,*) '  '
-      write(kStdWarn,*) 'iOuterLoop = ',iOuterLoop,' out of ',iTotal
+      write(kStdWarn,*) 'iOuterLoop = ',iOuterLoop,' out of ',iChunkTotal
       write(kStdWarn,*) 'Currently processing k-comp block# ',iFileID
       write(kStdWarn,*) 'which has StartFreq = ',rFileStartFr
       write(kStdWarn,'(A,I4,I4,ES12.5)') 'File iTagIndex, ActualTag, freqspacing = ', &
@@ -1390,14 +1390,14 @@
       END IF
 
       ! go to the next wavenumber range
-      IF (iOuterLoop < iTotal) THEN
+      IF (iOuterLoop < iChunkTotal) THEN
         rFileStartFr = rFileStartFr+raFileStep(iFileID)
         iFileID      = iFileID+1
         iTag         = iaTagIndex(iFileID)
         iActualTag   = iaActualTag(iFileID)
       END IF
 
-    END DO               !!!!!!iOuterLoop=1,iTotal
+    END DO               !!!!!!iOuterLoop=1,iChunkTotal
           
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)

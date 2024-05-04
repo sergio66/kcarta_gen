@@ -1,4 +1,4 @@
-! Copyright 1997
+! Copyright 1997-20XY
 ! University of Maryland Baltimore County
 ! All Rights Reserved
 
@@ -1912,7 +1912,7 @@ CONTAINS
     iJacob,iaJacob, &
     iakSolar,rakSolarAngle,rakSolarRefl,iakThermal, &
     rakThermalAngle,iakThermalJacob,iaOutNumbers, &
-    iTotal,iTotalStuff, &
+    iChunkTotal,iTotalStuff, &
     iDoUpperAtmNLTE,iDumpAllUASpectra,iDumpAllUARads)
 
     IMPLICIT NONE
@@ -1962,7 +1962,7 @@ CONTAINS
 ! iakthermal,iaksolar = turn on/off solar and thermal
 ! iakthermaljacob=turn thermal jacobians on/off
 ! iaOutNumbers = how many of each print option there are to output
-! iTotal = how many of the kcomp files are gonna be unchunked
+! iChunkTotal = how many of the kcomp files are gonna be unchunked
 ! iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
     REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
     REAL :: rakSolarRefl(kMaxAtm)
@@ -1974,7 +1974,7 @@ CONTAINS
     INTEGER :: iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iOutTypes,iMixFileLines
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iFileIDLo,iFileIDHi
-    INTEGER :: iNumGases,iaGases(kMaxGas),iNpmix,iTotal
+    INTEGER :: iNumGases,iaGases(kMaxGas),iNpmix,iChunkTotal
     REAL :: raMixVT(kMixFilRows),raaUserPress(kMaxPrint,kProfLayer)
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm),raSatAngle(kMaxAtm)
     REAL :: raSatHeight(kMaxAtm),raPressLevels(kProfLayer+1)
@@ -1991,6 +1991,7 @@ CONTAINS
     INTEGER :: iIOUN,iIOUN1,iIOUN2,iIOUN_JAC2,iI,iJ,iK,iFileErr,iEnd,iP,iOk
     INTEGER :: iOutputOptionNum,iNumLay
     CHARACTER(160) :: caJacobFile,caJacobFile2,caFluxFile,caPlanckFile
+    INTEGER iNumGasOD,iNumMPOD,iNumRadOD
 
     INTEGER :: iImportant
     INTEGER :: iNatmJac,iaLayerJac(kMaxAtm),iIOUN_Flux,iIOUN_Planck,iIOUN_Cloud
@@ -2063,11 +2064,11 @@ CONTAINS
     iIOUN =  kStdWarn
     iIOUN1 = kStdkCarta
 
-    IF ( kLongOrShort .EQ. 0) THEN
-      write(kStdErr,*)  's_writefile.f90 : kLongOrShort = 0 has been retired ...'
-      write(kStdWarn,*) 's_writefile.f90 : kLongOrShort = 0 has been retired ...'
-      CALL DoStop
-    END IF
+!    IF ( kLongOrShort .EQ. 0) THEN
+!      write(kStdErr,*)  's_writefile.f90 : kLongOrShort = 0 has been retired ...'
+!      write(kStdWarn,*) 's_writefile.f90 : kLongOrShort = 0 has been retired ...'
+!      CALL DoStop
+!    END IF
 
     iTotalStuff = 0 !total num of spectra,mixed spectra, radiances to output
 
@@ -2109,10 +2110,26 @@ CONTAINS
 ! if kLongOrShort = -1, output shortened version of binary file, SHORT warning.msg
 ! if kLongOrShort = -2, output shortened version of binary file, SHORT warning.msd
 
+    iTag = -1
+    DO iI = 1,kW
+      IF ((rFrLow >= kaMinFr(iI)) .AND. (rFrHigh <= kaMaxFr(iI))) THEN
+        iTag = iI
+      END IF
+    END DO
+    IF ((iTag < 1) .OR. (iTag > kW)) THEN
+      write (kStdErr,*) 'Could not find kaTag for FreqStart,FreqStop!!'
+      CALL DoStop
+    END IF
+
+
 ! first open summary text file as a fresh file to be written to
+    CALL compute_iTotalStuff(iTotalStuff,iNumGasOD,iNumMPOD,iNumRadOD, &
+       iOutTypes,iaPrinter,iaNp,iNumGases,iNpMix,iaOutnumbers,iaNumLayers,iNatm,iaAtmPr,iaaOp, &
+       iDoUpperAtmNLTE,iNumNLTEGases,iDumpAllUARads,iDumpAllUASpectra)
+
     IF (kLongOrShort >= 0) THEN
-      CALL write_preamble_summarytxtfile(iIOUN,&
-        rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
+      CALL write_preamble_summarytxtfile(iIOUN, &
+        iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
         iNumGases,iaGases,raaAmt,raaTemp,raaPress,raaPartPress, &
         raaRAmt,       raaRPartPress, &
         raPressLevels,iProfileLayers, &
@@ -2124,19 +2141,8 @@ CONTAINS
         iJacob,iaJacob, &
         iakSolar,rakSolarAngle,rakSolarRefl,iakThermal, &
         rakThermalAngle,iakThermalJacob,iaOutNumbers, &
-        iTotal,iTotalStuff, &
+        iChunkTotal,iTotalStuff,iNumGasOD,iNumMPOD,iNumRadOD, &
         raParams,raPActualAvg,iOutputOptionNum)
-    END IF
-
-    iTag = -1
-    DO iI = 1,kW
-      IF ((rFrLow >= kaMinFr(iI)) .AND. (rFrHigh <= kaMaxFr(iI))) THEN
-        iTag = iI
-      END IF
-    END DO
-    IF ((iTag < 1) .OR. (iTag > kW)) THEN
-      write (kStdErr,*) 'Could not find kaTag for FreqStart,FreqStop!!'
-      CALL DoStop
     END IF
 
     IF ((kRTP >= 0) .AND. ((kWhichScatterCode == 5) .OR. (kWhichScatterCode == 3))) THEN
@@ -2162,7 +2168,7 @@ CONTAINS
     write(kStdWarn,*) caOutName
 
     CALL write_preamble_binaryfile(iIOUN1,&
-      rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
+      iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
       iNumGases,iaGases,raaAmt,raaTemp,raaPress,raaPartPress, &
       raaRAmt,       raaRPartPress, &
       raPressLevels,iProfileLayers, &
@@ -2174,7 +2180,7 @@ CONTAINS
       iJacob,iaJacob, &
       iakSolar,rakSolarAngle,rakSolarRefl,iakThermal, &
       rakThermalAngle,iakThermalJacob,iaOutNumbers, &
-      iTotal,iTotalStuff, &
+      iChunkTotal,iTotalStuff,iNumGasOD,iNumMPOD,iNumRadOD, &
       raParams,raPActualAvg,iOutputOptionNum)
 
 !--------------- COL JACOBIAN BINARY FILE --------------------------------
@@ -2277,7 +2283,7 @@ CONTAINS
       write(kStdWarn,*) 'Opened following file for jacobian binary output : '
       write(kStdWarn,*) caJacobFile
       CALL write_preamble_jacfile(iIOUN2, &
-        rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iTotal,iaNumLayers,&
+        iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iChunkTotal,iaNumLayers,&
         iNatm,iJacob,iaJacob,iNatmCldEffective,iaGases,iNumGases,raaAmt,raaTemp)
 
     END IF
@@ -2312,7 +2318,7 @@ CONTAINS
       write(kStdWarn,*) caFluxFile
 
       call write_preamble_fluxfile(iIOUN_Flux, &
-        rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, iTotal,iaNumLayers,iNatm)
+        iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, iChunkTotal,iaNumLayers,iNatm)
 
     END IF
 
@@ -2384,7 +2390,7 @@ CONTAINS
       ! many things to expect :
       ! total num kcomp files, total num of output options=iNatm,number of planckes
       ! for each atmosphere, how many layers
-      write(iIOUN_Planck) iTotal,iNatmJac,iImportant
+      write(iIOUN_Planck) iChunkTotal,iNatmJac,iImportant
       write(iIOUN_Planck) (iaLayerJac(iI),iI=1,iNatmJac)
 
     END IF
@@ -2759,9 +2765,155 @@ CONTAINS
     RETURN
     end SUBROUTINE wrtout_head_uafile
 !************************************************************************
+    SUBROUTINE compute_iTotalStuff(iTotalStuff,iNumGasOD,iNumMPOD,iNumRadOD, &
+       iOutTypes,iaPrinter,iaNp,iNumGases,iNpMix,iaOutnumbers,iaNumLayers,iNatm,iaAtmPr,iaaOp, &
+       iDoUpperAtmNLTE,iNumNLTEGases,iDumpAllUARads,iDumpAllUASpectra)
+
+    implicit none 
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+! input
+    INTEGER iOutTypes,iaPrinter(kMaxPrint),iaNp(kMaxPrint),iNumGases,iNpMix
+    INTEGER iaOutNumbers(kMaxPrint),iaNumLayers(kMaxAtm),iNatm,iaAtmPr(kMaxPrint),iaaOp(kMaxPrint,kPathsOut)
+    INTEGER :: iDoUpperAtmNLTE,iNumNLTEGases,iDumpAllUARads,iDumpAllUASpectra
+
+! output
+    INTEGER iTotalStuff,iNumGasOD,iNumMPOD,iNumRadOD
+    
+! local
+    INTEGER iP,iI,iOutputOptionNum,iOK,iK,iJ,iEnd,iNumLay
+
+    iTotalStuff = 0
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!
+    iP=0
+    DO iI=1,iOutTypes
+      IF (iaPrinter(iI) == 1) THEN
+        iP = iP+1
+        iOutputOptionNum = iI
+        IF (iaNp(iI) > iNumGases*kProfLayer) THEN
+          write(kStdErr,*)'Cannot have more paths to be output than '
+          write(kStdErr,*)'iNumGases*kProfLayer'
+          write(kStdErr,*)iI,iaNp(iI)
+          CALL DoSTOP
+        END IF
+        IF (iaNp(iI) > 0) THEN
+          iEnd = iaNp(iI)
+          iTotalStuff = iTotalStuff + iEnd
+!          WRITE(iIOUN,*) 'Number of Paths to be output=',iEnd
+!          WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
+        ELSE
+          iEnd = kProfLayer*iNumGases
+          iTotalStuff = iTotalStuff + iEnd
+!          WRITE(iIOUN,*) 'Number of Paths to be output=',iEnd
+!          WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
+        END IF
+        iaOutNumbers(iI) = iEnd
+        iNumLay = iEnd
+      END IF
+    END DO
+    iNumGasOD = iTotalStuff
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!
+
+!    WRITE(iIOUN,*) 'list of mixed paths to be output ...'
+    iP = 0
+    DO iI = 1,iOutTypes
+      IF (iaPrinter(iI) == 2) THEN
+        iP=iP+1
+        iOutputOptionNum = iI
+        IF (iaNp(iI) > iNpmix) THEN
+          write(kStdErr,*)'Error! Cannot print out more mixed paths'
+          write(kStdErr,*)'than iIpmix'
+          CALL DoSTOP
+        END IF
+        IF (iaNp(iI) > 0) THEN
+          iEnd = iaNp(iI)
+          iTotalStuff = iTotalStuff + iEnd
+!          WRITE(iIOUN,*) '# mixed paths to be output=',iEnd
+!          WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
+        ELSE
+          iEnd = iNpmix
+          iTotalStuff = iTotalStuff + iEnd
+!          WRITE(iIOUN,*) '# mixed paths to be output=',iEnd
+!          WRITE(iIOUN,*) (iaaOp(iI,iJ),iJ=1,iEnd)
+        END IF
+        iNumLay = iEnd
+        iaOutNumbers(iI) = iEnd
+      END IF
+    END DO
+
+    iNumMPOD = iTotalStuff - iNumGasOD
+    !!!!!!!!!!!!!!!!!!!!!!!!!
+
+    DO iI = 1,iNatm
+      iP = 0
+      DO iJ = 1,iOutTypes
+        IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN
+          iP = iP+1
+          iOutputOptionNum = iJ
+          IF (iaNp(iJ) <= -1) THEN  !!!dumping out rads for ALL layers
+            IF ((iDumpAllUARads > 1) .AND. (iDoUpperAtmNLTE <= 0))THEN
+              write(kStdErr,*) 'this is too complicated!!!'
+              write(kStdErr,*) 'NLTE code assumes ONE radiating atm'
+              CALL DoStop
+            END IF
+          END IF
+          IF (iaNp(iJ) > iaNumLayers(iI)) THEN
+            write(kStdErr,*)'Atm #',iI,'too many radiances to be printed!'
+            CALL DoSTOP
+          END IF
+          IF (iaNp(iJ) == 0) THEN
+            write(kStdErr,*) 'Atm #',iI,' has 0 radiances to be printed!'
+            CALL DoSTOP
+          END IF
+          IF (iaNp(iJ) > 0) THEN
+            iEnd = iaNp(iJ)
+            iaOutNumbers(iJ) = iEnd
+            iTotalStuff = iTotalStuff + iEnd
+    !!!          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd                                !! for N years
+!            WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
+!            WRITE(iIOUN,*) (iaaOp(iJ,iK),iK=1,iEnd)
+!            WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
+            iOk = 1
+            DO iK = 1,iEnd
+              IF ((iaaOp(iJ,iK) > iaNumLayers(iI)) .OR.(iaaOp(iJ,iK) <= 0))  THEN
+                iOk = -1
+              END IF
+            END DO
+            IF (iOk < 0) THEN
+              write(kStdErr,*)'Atm# ',iI,' has invalid radiance to output!'
+              CALL DoSTOP
+            END IF
+          ELSE
+            iEnd = iaNumLayers(iI)
+            iaOutNumbers(iJ) = iEnd
+            iTotalStuff = iTotalStuff + iEnd
+    !!!          WRITE(iIOUN,*) '# of radiances to be printed=',iEnd                                 !! for N years
+!            WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
+            ! note how we are flipping between iI and iJ here
+            ! and instead of outting iaaOp, we are outputting iaaRadLayer
+!            WRITE(iIOUN,*) (iaaRadLayer(iI,iK),iK=1,iEnd)
+!            WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
+          END IF
+          iNumLay = iEnd
+        END IF
+      END DO !! iJ = 1,iOutTypes
+    END DO !! iI = 1,iNatm
+    iNumRadOD = iTotalStuff - (iNumMPOD + iNumGasOD)
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!
+
+    write(kStdWarn,*) 'iNumGasOD,iNumMPOD,iNumRadOD = ',iNumGasOD,iNumMPOD,iNumRadOD
+    write(kStdWarn,*) 'iTotalStuff = ',iTotalStuff
+    
+    END SUBROUTINE compute_iTotalStuff
+
+!************************************************************************
+
 !! the good, the bad, the ugly
     SUBROUTINE write_preamble_summarytxtfile(iIOUN,&
-    rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
+    iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
     iNumGases,iaGases,raaAmt,raaTemp,raaPress,raaPartPress, &
     raaRAmt,       raaRPartPress, &
     raPressLevels,iProfileLayers, &
@@ -2773,7 +2925,7 @@ CONTAINS
     iJacob,iaJacob, &
     iakSolar,rakSolarAngle,rakSolarRefl,iakThermal, &
     rakThermalAngle,iakThermalJacob,iaOutNumbers, &
-    iTotal,iTotalStuff, &
+    iChunkTotal,iTotalStuff,iNumGasOD,iNumMPOD,iNumRadOD, &
     raParams,raPActualAvg,iOutputOptionNum)
 
     implicit none 
@@ -2823,11 +2975,11 @@ CONTAINS
 ! iakthermal,iaksolar = turn on/off solar and thermal
 ! iakthermaljacob=turn thermal jacobians on/off
 ! iaOutNumbers = how many of each print option there are to output
-! iTotal = how many of the kcomp files are gonna be unchunked
+! iChunkTotal = how many of the kcomp files are gonna be unchunked
 ! iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
     REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
     REAL :: rakSolarRefl(kMaxAtm)
-    INTEGER :: iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName
+    INTEGER :: iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName,iTag
     INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
     CHARACTER(160) :: caDriver,caOutName
     CHARACTER(160) :: caComment
@@ -2835,7 +2987,7 @@ CONTAINS
     INTEGER :: iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iOutTypes,iMixFileLines
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iFileIDLo,iFileIDHi
-    INTEGER :: iNumGases,iaGases(kMaxGas),iNpmix,iTotal
+    INTEGER :: iNumGases,iaGases(kMaxGas),iNpmix,iChunkTotal
     REAL :: raMixVT(kMixFilRows),raaUserPress(kMaxPrint,kProfLayer)
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm),raSatAngle(kMaxAtm)
     REAL :: raSatHeight(kMaxAtm),raPressLevels(kProfLayer+1)
@@ -2848,17 +3000,20 @@ CONTAINS
     INTEGER :: iaSetEms(kMaxAtm),iProfileLayers
     INTEGER :: iDoUpperAtmNLTE,iNumNLTEGases,iDumpAllUARads,iDumpAllUASpectra
     REAL raParams(kMaxUserSet),raPActualAvg(kProfLayer)
+    INTEGER :: iNumGasOD,iNumMPOD,iNumRadOD,iTotalStuff
 
     INTEGER iIOUN,iOutputOptionNum
 
 ! local vars
 !!!!!!!!!!!!!!!!!!!!!!!!!
-    INTEGER iI,iP,iJ,iK,iTotalStuff,iEnd,iNumLay,iOK
+    INTEGER iI,iP,iJ,iK,iEnd,iNumLay,iOK
     REAL rP
     CHARACTER(120) :: caStr1,caStr2,caStr3
     REAL :: raSumTotalGasAmt(kMaxGas)
 
     include '../INCLUDE/TempF90/gasIDnameparam.f90'
+
+    iTotalStuff = 0
 
     DO iI = 1, kMaxGas
       raSumTotalGasAmt(iI) = 0.0
@@ -2903,13 +3058,13 @@ CONTAINS
         '             (mb )      (mb )        wet         dry          (K)  (molecule/cm2) ||       (mb ) (molecule/cm2)     '
     caStr3 = &
         '----------------------------------------------------------------------------------||--------------------------------'
-    DO iI=1,iNumGases
+    DO iI = 1,iNumGases
       write(iIOUN,234) iI,iaGases(iI),caGID(iaGases(iI))
       WRITE(iIOUN,7169) caStr1
       WRITE(iIOUN,7169) caStr2
       WRITE(iIOUN,7169) caStr3
-      DO iJ=kProfLayer-iProfileLayers+1,kProfLayer
-        iP=(iI-1)*kProfLayer+iJ
+      DO iJ = kProfLayer-iProfileLayers+1,kProfLayer
+        iP = (iI-1)*kProfLayer+iJ
         raSumTotalGasAmt(iaGases(iI)) = raSumTotalGasAmt(iaGases(iI)) + raaAmt(iJ,iI)
         ! this is writing pressures in mb
         WRITE(iIOUN,7170)iP,iaGases(iI),raPActualAvg(iJ),raaPartPress(iJ,iI)*kAtm2mb, &
@@ -2924,7 +3079,7 @@ CONTAINS
       END DO
       write(kStdWarn,*) '++++++++++++++++++++++++++++++++'
     END DO
-    DO iI=2,iNumGases
+    DO iI = 2,iNumGases
       write(iIOUN,234) iI,iaGases(iI),caGID(iaGases(iI))
       WRITE(iIOUN,7169) caStr1
       WRITE(iIOUN,7169) caStr2
@@ -2954,10 +3109,11 @@ CONTAINS
       write(iIOUN,7172) iI,iaGases(iI),caGID(iaGases(iI)),raSumTotalGasAmt(iaGases(iI))*kAvog
     END DO
     write(iIOUN,*) '--------------------------------------------------'
-       
+    
+    !!!!!!!!!!!!!!!!!!!!!!!!!   
     ! then output list of paths to be output
     WRITE(iIOUN,*) 'list of paths to be output ...'
-    iP=0
+    iP = 0
     DO iI=1,iOutTypes
       IF (iaPrinter(iI) == 1) THEN
         iP = iP+1
@@ -3004,6 +3160,7 @@ CONTAINS
       END IF
     END IF
                   
+    !!!!!!!!!!!!!!!!!!!!!!!!!   
     ! then output mixed paths -----------------------------------------------
     WRITE(iIOUN,*) '***********************************************'
     WRITE(iIOUN,*) 'MIXED PATHS'
@@ -3066,6 +3223,7 @@ CONTAINS
       END IF
     END IF
 
+    !!!!!!!!!!!!!!!!!!!!!!!!!   
     ! now print the atmosphere information -------------------------------------
     WRITE(iIOUN,*) '***********************************************'
     WRITE(iIOUN,*) 'ATMOSPHERES'
@@ -3098,71 +3256,73 @@ CONTAINS
       DO iJ=1,iaSetEms(iI)
         WRITE(iIOUN,*)raaaSetEmissivity(iI,iJ,1),raaaSetEmissivity(iI,iJ,2)
       END DO
+
       ! now output the list of radiances to be printed, for this atmosphere
       iP = 0
       DO iJ = 1,iOutTypes
         IF ((iaPrinter(iJ) == 3) .AND. (iaAtmPr(iJ) == iI)) THEN
-        iP = iP+1
-        iOutputOptionNum = iJ
-        IF (iaNp(iJ) <= -1) THEN  !!!dumping out rads for ALL layers
-          IF ((iDumpAllUARads > 1) .AND. (iDoUpperAtmNLTE <= 0))THEN
-            write(kStdErr,*) 'this is too complicated!!!'
-            write(kStdErr,*) 'NLTE code assumes ONE radiating atm'
-            CALL DoStop
-          END IF
-        END IF
-        IF (iaNp(iJ) > iaNumLayers(iI)) THEN
-          write(kStdErr,*)'Atm #',iI,'too many radiances to be printed!'
-          CALL DoSTOP
-        END IF
-        IF (iaNp(iJ) == 0) THEN
-          write(kStdErr,*) 'Atm #',iI,' has 0 radiances to be printed!'
-          CALL DoSTOP
-        END IF
-        IF (iaNp(iJ) > 0) THEN
-          iEnd = iaNp(iJ)
-          iaOutNumbers(iJ) = iEnd
-          iTotalStuff = iTotalStuff + iEnd
-!!!          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd                                  !! for N years
-          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
-          WRITE(iIOUN,*) (iaaOp(iJ,iK),iK=1,iEnd)
-          WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
-          iOk = 1
-          DO iK = 1,iEnd
-            IF ((iaaOp(iJ,iK) > iaNumLayers(iI)) .OR.(iaaOp(iJ,iK) <= 0))  THEN
-              iOk = -1
+          iP = iP+1
+          iOutputOptionNum = iJ
+          IF (iaNp(iJ) <= -1) THEN  !!!dumping out rads for ALL layers
+            IF ((iDumpAllUARads > 1) .AND. (iDoUpperAtmNLTE <= 0))THEN
+              write(kStdErr,*) 'this is too complicated!!!'
+              write(kStdErr,*) 'NLTE code assumes ONE radiating atm'
+              CALL DoStop
             END IF
-          END DO
-          IF (iOk < 0) THEN
-            write(kStdErr,*)'Atm# ',iI,' has invalid radiance to output!'
+          END IF
+          IF (iaNp(iJ) > iaNumLayers(iI)) THEN
+            write(kStdErr,*)'Atm #',iI,'too many radiances to be printed!'
             CALL DoSTOP
           END IF
-        ELSE
-          iEnd = iaNumLayers(iI)
-          iaOutNumbers(iJ) = iEnd
-          iTotalStuff = iTotalStuff + iEnd
+          IF (iaNp(iJ) == 0) THEN
+            write(kStdErr,*) 'Atm #',iI,' has 0 radiances to be printed!'
+            CALL DoSTOP
+          END IF
+          IF (iaNp(iJ) > 0) THEN
+            iEnd = iaNp(iJ)
+            iaOutNumbers(iJ) = iEnd
+            iTotalStuff = iTotalStuff + iEnd
+!!!          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd                                  !! for N years
+            WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
+            WRITE(iIOUN,*) (iaaOp(iJ,iK),iK=1,iEnd)
+            WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
+            iOk = 1
+            DO iK = 1,iEnd
+              IF ((iaaOp(iJ,iK) > iaNumLayers(iI)) .OR.(iaaOp(iJ,iK) <= 0))  THEN
+                iOk = -1
+              END IF
+            END DO
+            IF (iOk < 0) THEN
+              write(kStdErr,*)'Atm# ',iI,' has invalid radiance to output!'
+              CALL DoSTOP
+            END IF
+          ELSE
+            iEnd = iaNumLayers(iI)
+            iaOutNumbers(iJ) = iEnd
+            iTotalStuff = iTotalStuff + iEnd
 !!!          WRITE(iIOUN,*) '# of radiances to be printed=',iEnd                                   !! for N years
-          WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
-          ! note how we are flipping between iI and iJ here
-          ! and instead of outting iaaOp, we are outputting iaaRadLayer
-          WRITE(iIOUN,*) (iaaRadLayer(iI,iK),iK=1,iEnd)
-          WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
+            WRITE(iIOUN,*) '# of radiances to be printed =',iEnd,' for num atmospheres = ',iNatm     !! April 2024
+            ! note how we are flipping between iI and iJ here
+            ! and instead of outting iaaOp, we are outputting iaaRadLayer
+            WRITE(iIOUN,*) (iaaRadLayer(iI,iK),iK=1,iEnd)
+            WRITE(iIOUN,*) (raaUserPress(iJ,iK),iK=1,iEnd)
+          END IF
+          iNumLay = iEnd
         END IF
-        iNumLay = iEnd
+      END DO !!! iJ = 1,iOutTypes
+
+      IF (iP == 0) THEN
+        ! inform user no mixed paths to be output for this atmosphere
+        WRITE(iIOUN,*) iP
       END IF
-    END DO
-    IF (iP == 0) THEN
-      ! inform user no mixed paths to be output for this atmosphere
-      WRITE(iIOUN,*) iP
-    END IF
-    IF (iP > 1) THEN
-      write(kStdErr,*)'Have found more than 1 set of options in *OUTPUT '
-      write(kStdErr,*)'where iDat set to 3 (outputting radiances)'
-      write(kStdErr,*)'for atmosphere #',iI,'... exiting program!'
-      CALL DoSTOP
-    END IF
-             
-    END DO
+      IF (iP > 1) THEN
+        write(kStdErr,*)'Have found more than 1 set of options in *OUTPUT '
+        write(kStdErr,*)'where iDat set to 3 (outputting radiances)'
+        write(kStdErr,*)'for atmosphere #',iI,'... exiting program!'
+        CALL DoSTOP
+      END IF             
+    END DO  !! iI = 1,iNatm
+
     ! ccc        CLOSE(iIOUN)
     WRITE(iIOUN,*) 'END SUMMARY OF INPUT DRIVER FILE ... '
     WRITE(iIOUN,*) '     '
@@ -3261,9 +3421,9 @@ CONTAINS
     END SUBROUTINE
 
 !************************************************************************
- 
+! writes the headers etc for the binary file 
     SUBROUTINE write_preamble_binaryfile(iIOUN1,  &
-    rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
+    iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, &
     iNumGases,iaGases,raaAmt,raaTemp,raaPress,raaPartPress, &
     raaRAmt,       raaRPartPress, &
     raPressLevels,iProfileLayers, &
@@ -3275,7 +3435,7 @@ CONTAINS
     iJacob,iaJacob, &
     iakSolar,rakSolarAngle,rakSolarRefl,iakThermal, &
     rakThermalAngle,iakThermalJacob,iaOutNumbers, &
-    iTotal,iTotalStuff, &
+    iChunkTotal,iTotalStuff,iNumGasOD,iNumMPOD,iNumRadOD, &
     raParams,raPActualAvg,iOutputOptionNum)
 
     implicit none 
@@ -3325,11 +3485,11 @@ CONTAINS
 ! iakthermal,iaksolar = turn on/off solar and thermal
 ! iakthermaljacob=turn thermal jacobians on/off
 ! iaOutNumbers = how many of each print option there are to output
-! iTotal = how many of the kcomp files are gonna be unchunked
+! iChunkTotal = how many of the kcomp files are gonna be unchunked
 ! iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
     REAL :: rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
     REAL :: rakSolarRefl(kMaxAtm)
-    INTEGER :: iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName
+    INTEGER :: iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName,iTag
     INTEGER :: iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
     CHARACTER(160) :: caDriver,caOutName
     CHARACTER(160) :: caComment
@@ -3337,7 +3497,7 @@ CONTAINS
     INTEGER :: iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
     INTEGER :: iaaOp(kMaxPrint,kPathsOut),iOutTypes,iMixFileLines
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iFileIDLo,iFileIDHi
-    INTEGER :: iNumGases,iaGases(kMaxGas),iNpmix,iTotal
+    INTEGER :: iNumGases,iaGases(kMaxGas),iNpmix,iChunkTotal
     REAL :: raMixVT(kMixFilRows),raaUserPress(kMaxPrint,kProfLayer)
     REAL :: raTSpace(kMaxAtm),raTSurf(kMaxAtm),raSatAngle(kMaxAtm)
     REAL :: raSatHeight(kMaxAtm),raPressLevels(kProfLayer+1)
@@ -3350,18 +3510,28 @@ CONTAINS
     INTEGER :: iaSetEms(kMaxAtm),iProfileLayers
     INTEGER :: iDoUpperAtmNLTE,iNumNLTEGases,iDumpAllUARads,iDumpAllUASpectra
     REAL raParams(kMaxUserSet),raPActualAvg(kProfLayer)
+    INTEGER iNumGasOD,iNumMPOD,iNumRadOD
 
     INTEGER iIOUN1,iOutputOptionNum
 
 ! local vars
 !!!!!!!!!!!!!!!!!!!!!!!!!
-    INTEGER iI,iP,iJ,iK,iTotalStuff,iEnd,iNumLay,iOK,iTag,iImportant
+    INTEGER iI,iP,iJ,iK,iTotalStuff,iEnd,iNumLay,iOK,iImportant
     REAL rP
 !    CHARACTER(120) :: caStr1,caStr2,caStr3
 !    REAL :: raSumTotalGasAmt(kMaxGas)
 !    include '../INCLUDE/TempF90/gasIDnameparam.f90'
-           
+    
     IF (kLongOrShort == 0) THEN
+
+      WRITE(kStdWarn,*) 'doing the SHORT BASIC version : ......'
+      WRITE(kStdWarn,*) '  '
+      WRITE(kStdWarn,*) caVersion               !!kcarta version number
+      WRITE(kStdWarn,*) rFrLow,rFrHigh          !!start and stop wavenumber
+      WRITE(kStdWarn,*) kaFrStep(iTag)          !!freq step size
+      WRITE(kStdWarn,*) kaBlSize(iTag)          !!10000 point freq block size
+      WRITE(kStdWarn,*) iImportant              !!number of outputs
+
       WRITE(iIOUN1) caVersion               !!kcarta version number
       WRITE(iIOUN1) kProfLayer
       WRITE(iIOUN1) kMaxUserSet
@@ -3374,15 +3544,7 @@ CONTAINS
       WRITE(iIOUN1) kaFrStep(iTag)          !!freq step size
       WRITE(iIOUN1) kaBlSize(iTag)          !!10000 point freq block size
       WRITE(iIOUN1) iTotalStuff             !!number of outputs
-
-      WRITE(kStdWarn,*) 'doing the SHORT BASIC version : ......'
-      WRITE(kStdWarn,*) '  '
-      WRITE(kStdWarn,*) caVersion               !!kcarta version number
-      WRITE(kStdWarn,*) rFrLow,rFrHigh          !!start and stop wavenumber
-      WRITE(kStdWarn,*) kaFrStep(iTag)          !!freq step size
-      WRITE(kStdWarn,*) kaBlSize(iTag)          !!10000 point freq block size
-      WRITE(kStdWarn,*) iImportant              !!number of outputs
-
+      WRITE(iIOUN1) iNumGasOD,iNumMPOD,iNumRadOD  !! number of gasODs, MPODs, RADS, new May 2024
       GOTO 9999
     END IF
             
@@ -3591,7 +3753,7 @@ CONTAINS
 ! having gotten this far, this tells the reader how many things to expect
 ! total num kcomp files, total number of output options
 ! for each output option, how many prints to expect
-    write(iIOUN1) iTotal,iOutTypes
+    write(iIOUN1) iChunkTotal,iOutTypes
     write(iIOUN1) (iaOutNumbers(iI),iI=1,iOutTypes)
 
     4000 FORMAT(A130)
@@ -3602,14 +3764,14 @@ CONTAINS
 !************************************************************************
 
     SUBROUTINE write_preamble_fluxfile(iIOUN_Flux,  &
-      rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, iTotal,iaNumLayers,iNatm)
+      iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment, iChunkTotal,iaNumLayers,iNatm)
 
     implicit none 
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
     REAL rFrLow,rFrHigh
-    INTEGER iFileIDLo,iFileIDHi,iNatm,iaNumLayers(kMaxAtm),iTotal
+    INTEGER iFileIDLo,iFileIDHi,iNatm,iaNumLayers(kMaxAtm),iChunkTotal
     CHARACTER(160) :: caComment
     CHARACTER(130) :: caaMixFileLines(kProfLayer)
     INTEGER :: iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
@@ -3670,7 +3832,7 @@ CONTAINS
       ! how many things to expect :
       ! total num kcomp files, total number of output options=iNatm,number of fluxes
       ! for each atmosphere, dump OLR AND ILR
-      write(iIOUN_Flux) iTotal,iNatmJac,iImportant
+      write(iIOUN_Flux) iChunkTotal,iNatmJac,iImportant
       write(iIOUN_Flux) (iaJunkFLux(iI),iI=1,iNatmJac)
 
     ELSEIF (kFLux == 4) THEN   !!! outputting only OLR at TOA
@@ -3688,7 +3850,7 @@ CONTAINS
       ! many things to expect :
       ! total num kcomp files, total number of output options=iNatm,number of fluxes
       ! for each atmosphere, how many layers
-      write(iIOUN_Flux) iTotal,iNatmJac,iImportant
+      write(iIOUN_Flux) iChunkTotal,iNatmJac,iImportant
       write(iIOUN_Flux) (iaLayerFLux(iI),iI=1,iNatmJac)
 
     ELSEIF (kFLux == 5) THEN   !!! outputting only OLR at TOA/TRPause and ILR at GND
@@ -3706,7 +3868,7 @@ CONTAINS
       ! many things to expect :
       ! total num kcomp files, total number of output options=iNatm,number of fluxes
       ! for each atmosphere, dump OLR AND ILR
-      write(iIOUN_Flux) iTotal,iNatmJac,iImportant
+      write(iIOUN_Flux) iChunkTotal,iNatmJac,iImportant
       write(iIOUN_Flux) (iaLayerFLux(iI),iI=1,iNatmJac)
 
     ELSEIF (kFLux == 6) THEN   !!! outputing OLR/ILR at each layer, plus GND and TOA
@@ -3723,7 +3885,7 @@ CONTAINS
       ! how many things to expect :
       ! total num kcomp files, total number of output options=iNatm,number of fluxes
       ! for each atmosphere, dump OLR AND ILR
-      write(iIOUN_Flux) iTotal,iNatmJac,iImportant
+      write(iIOUN_Flux) iChunkTotal,iNatmJac,iImportant
       write(iIOUN_Flux) (iaJunkFLux(iI),iI=1,iNatmJac)
 
     ELSEIF (kFLux == 7) THEN   !!! outputting only OLR/ILR at TOA/GND/TRPause
@@ -3741,7 +3903,7 @@ CONTAINS
       ! many things to expect :
       ! total num kcomp files, total number of output options=iNatm,number of fluxes
       ! for each atmosphere, dump OLR AND ILR
-      write(iIOUN_Flux) iTotal,iNatmJac,iImportant
+      write(iIOUN_Flux) iChunkTotal,iNatmJac,iImportant
       write(iIOUN_Flux) (iaLayerFLux(iI),iI=1,iNatmJac)
 
     END IF
@@ -3750,7 +3912,7 @@ CONTAINS
 
 !************************************************************************
       SUBROUTINE write_preamble_jacfile(iIOUN2, &
-      rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iTotal,iaNumLayers,&
+      iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iChunkTotal,iaNumLayers,&
       iNatm,iJacob,iaJacob,iNatmCldEffective,iaGases,iNumGases,raaAmt,raaTemp)
 
     implicit none 
@@ -3759,7 +3921,7 @@ CONTAINS
 
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL rFrLow,rFrHigh
-    INTEGER iFileIDLo,iFileIDHi,iNatm,iaNumLayers(kMaxAtm),iTotal
+    INTEGER iFileIDLo,iFileIDHi,iNatm,iaNumLayers(kMaxAtm),iChunkTotal
     CHARACTER(160) :: caComment
     CHARACTER(130) :: caaMixFileLines(kProfLayer)
     INTEGER :: iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
@@ -3842,7 +4004,7 @@ CONTAINS
     ! having gotten this far, this tells the reader how many things to expect
     ! total num kcomp files, total number of output options=iNatm,number of gases
     ! for each atmosphere, how many layers
-    write(iIOUN2) iTotal,iNatmJac,iImportant
+    write(iIOUN2) iChunkTotal,iNatmJac,iImportant
     write(iIOUN2) (iaLayerJac(iI),iI=1,iNatmJac)
 
     END SUBROUTINE write_preamble_jacfile

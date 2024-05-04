@@ -125,13 +125,23 @@ flen  = fread(fin, 1, 'integer*4');
 iOut  = fread(fin, 1, 'integer*4');
 flen  = fread(fin, 1, 'integer*4');
 
+% new May 2024
+% read total number of GasODs,MPOD,RADS per 10000 pt chunk
+flen  = fread(fin, 1, 'integer*4');
+iNumGasOD = fread(fin, 1, 'integer*4');
+iNumMPOD  = fread(fin, 1, 'integer*4');
+iNumRadOD = fread(fin, 1, 'integer*4');
+flen  = fread(fin, 1, 'integer*4');
+
+fprintf(1,'iNumGasOD,iNumMPOD,iNumRadOD = %4i %4i %4i iOutTotal = %4i \n',iNumGasOD,iNumMPOD,iNumRadOD,iOut)
+
 %%%%%%%%%%%%%%%%%%%%% have read header info ... create arrays/matrices %%%%%
 iChunks = highchunk - lowchunk + 1;
 
 fprintf(1,'Number of kCarta chunks     = %4i \n',iChunks);
 fprintf(1,'Number of outputs per chunk = %4i \n',iOut);
 
-ii=(1:10000*iChunks) - 1;
+ii = (1:10000*iChunks) - 1;
 wnums = fmin + dv*ii;
 
 data = zeros(10000*iChunks,iOut);

@@ -338,7 +338,7 @@ CONTAINS
     iFileIDLo,iFileIDHi, &
     raBlock,raFiles, &
     iaTagIndex,iaActualTag, &
-    raFileStep,iaList,iTotal)
+    raFileStep,iaList,iChunkTotal)
 
     IMPLICIT NONE
 
@@ -357,8 +357,8 @@ CONTAINS
 !          very useful so program easily knows r630_g1.dat etc
 ! raBlock  tells the current kComp wavenumber block
 ! raFileStep tells you the current wavenumber step size*10000
-! iaList   has the final list of iTotal files that should be uncompressed
-    INTEGER :: iaList(kNumkCompT),iTotal
+! iaList   has the final list of iChunkTotal files that should be uncompressed
+    INTEGER :: iaList(kNumkCompT),iChunkTotal
     REAL :: raFileStep(kNumkCompT),raFiles(kNumkCompT)
     INTEGER :: iaActualTag(kNumkCompT),iaTagIndex(kNumkCompT)
     REAL :: raBlock(kNumkCompT)
@@ -419,15 +419,15 @@ CONTAINS
       rFileStartFrLo,rFileStartFrHi,iFileIDLo,iFileIDHi, &
       raBlock,raFiles, &
       iaTagIndex,iaActualTag, &
-      raFileStep,iaList,iTotal)
+      raFileStep,iaList,iChunkTotal)
 
     rFrLow = rLow
     rFrHigh = rHigh
     write(kStdWarn,*) ' '
     write(kStdWarn,*) 'rFrLow,rFrHigh after = ',rFrLow,rFrHigh
-    write(kStdWarn,*) 'num chunks = ',iTotal
+    write(kStdWarn,*) 'num chunks = ',iChunkTotal
     write(kStdWarn,*) 'Start/Stop FileTags = ', &
-    iaActualTag(iaList(1)),iaActualTag(iaList(iTotal))
+    iaActualTag(iaList(1)),iaActualTag(iaList(iChunkTotal))
     write(kStdWarn,*) 'compfile 1: freq,FileID ',rFileStartFrLo,iFileIDLo
     write(kStdWarn,*) 'compfile N: freq,FileID ',rFileStartFrHi,iFileIDHi
 
@@ -441,9 +441,9 @@ CONTAINS
     END DO
     111 FORMAT(I4,2(' ',F10.4),2(' ',I3),' ',F10.4,' ',I5)
      
-    IF (iaActualTag(iaList(1)) /= iaActualTag(iaList(iTotal))) THEN
+    IF (iaActualTag(iaList(1)) /= iaActualTag(iaList(iChunkTotal))) THEN
       write(kStdWarn,*) 'Start file tag = ',iaActualTag(iaList(1))
-      write(kStdWarn,*) 'Stop  file tag = ',iaActualTag(iaList(iTotal))
+      write(kStdWarn,*) 'Stop  file tag = ',iaActualTag(iaList(iChunkTotal))
 
       write(kStdErr,*) 'program requires you choose start/stop freqs'
       write(kStdErr,*) 'that only span one wavenumber spacing, as '
@@ -473,7 +473,7 @@ CONTAINS
     SUBROUTINE filebounds(rL,rH, &
     rFileStartFrLo,rFileStartFrHi,iFileIDLo,iFileIDHi, &
     raBlock,raFiles, &
-    iaTagIndex,iaActualTag,raFileStep,iaList,iTotal)
+    iaTagIndex,iaActualTag,raFileStep,iaList,iChunkTotal)
 
     IMPLICIT NONE
 
@@ -496,8 +496,8 @@ CONTAINS
 ! raFileStep tells you the current wavenumber step size*10000
 ! raBlock  tells the current kComp wavenumber block (ie start freq)
 
-! iaList   has the final list of iTotal files that should be uncompressed
-    INTEGER :: iaList(kNumkCompT),iTotal
+! iaList   has the final list of iChunkTotal files that should be uncompressed
+    INTEGER :: iaList(kNumkCompT),iChunkTotal
     REAL :: raFileStep(kNumkCompT),raFiles(kNumkCompT)
     INTEGER :: iaActualTag(kNumkCompT),iaTagIndex(kNumkCompT)
     REAL :: raBlock(kNumkCompT),rL,rH
@@ -614,30 +614,30 @@ CONTAINS
 ! thus if we know iFileID we know everything!!!!!
     IF (iaActualTag(iFileIDLo) == iaActualTag(iFileIDHi)) THEN
       !very easy everything is in either q or r or s database
-      iTotal = 0
+      iChunkTotal = 0
       DO iInt = 1,(iFileIDHi-iFileIDLo+1)
-        iTotal = iTotal+1
-        iaList(iTotal) = iFileIDLo+(iInt-1)     !save file ID
+        iChunkTotal = iChunkTotal+1
+        iaList(iChunkTotal) = iFileIDLo+(iInt-1)     !save file ID
         IF  (abs(kLongOrShort) <= 1) THEN  !! verbose printing
-          write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
-              raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
+          write(kStdWarn,*) iChunkTotal,iaActualTag(iaList(iChunkTotal)), &
+              raBlock(iaList(iChunkTotal)),raBlockEnd(iaList(iChunkTotal))
         END IF
       END DO
     ELSE
       !very hard : mixing of q,r,s databases
-      iTotal = 0
-      iTotal = iTotal+1
-      iaList(iTotal) = iFileIDLo                !save file ID
-      rEnd = raBlockEnd(iaList(iTotal))
-      write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
-      raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
+      iChunkTotal = 0
+      iChunkTotal = iChunkTotal+1
+      iaList(iChunkTotal) = iFileIDLo                !save file ID
+      rEnd = raBlockEnd(iaList(iChunkTotal))
+      write(kStdWarn,*) iChunkTotal,iaActualTag(iaList(iChunkTotal)), &
+      raBlock(iaList(iChunkTotal)),raBlockEnd(iaList(iChunkTotal))
       DO iInt = 2,(iFileIDHi-iFileIDLo+1)
         IF (rEnd < raBlockEnd(iFileIDLo+iInt-1)) THEN
-          iTotal = iTotal+1
-          iaList(iTotal) = iFileIDLo+(iInt-1)   !save file ID
-          write(kStdWarn,*) iTotal,iaActualTag(iaList(iTotal)), &
-            raBlock(iaList(iTotal)),raBlockEnd(iaList(iTotal))
-          rEnd = raBlockEnd(iaList(iTotal))
+          iChunkTotal = iChunkTotal+1
+          iaList(iChunkTotal) = iFileIDLo+(iInt-1)   !save file ID
+          write(kStdWarn,*) iChunkTotal,iaActualTag(iaList(iChunkTotal)), &
+            raBlock(iaList(iChunkTotal)),raBlockEnd(iaList(iChunkTotal))
+          rEnd = raBlockEnd(iaList(iChunkTotal))
         END IF
       END DO
     END IF
