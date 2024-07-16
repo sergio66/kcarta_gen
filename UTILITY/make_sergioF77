@@ -1,0 +1,16 @@
+make clean
+
+rm makeRTPfile77.x makeRTPfile90.x
+
+module load HDF/4.2.14-GCCcore-8.3.0
+ifort -c makeRTPfile.f -I/home/motteler/shome/rtp/include -extend-source 132 -check bounds -O2
+
+ifort -o makeRTPfile77.x -extend-source 132 -check bounds -O2 makeRTPfile.o \
+   -L/home/motteler/shome/rtp/lib -lrtp \
+   -L/usr/ebuild/software/HDF/4.2.14-GCCcore-8.3.0/lib -ldf
+
+echo "compiled file"
+
+makeRTPfile77.x fin=day_py4cats.atmX fout=junk77.ip.rtp
+
+/home/sergio/git/rtp/rtpV201/utils/rtpdump -h -p junk77.ip.rtp >& ugh77

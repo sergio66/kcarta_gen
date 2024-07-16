@@ -2,41 +2,51 @@
 !      Sergio De Souza-Machado
 !      very closely linked to the ftest1.f file that Howard Motteler wrote
 !
-! so eg      makeRTPfile.x fin=day_py4cats.atmX                      will produce  makeRTPfile.ip.rtp
-! so eg      makeRTPfile.x fin=day_py4cats.atmX fout=junk.ip.rtp     will produce  junk.ip.rtp
-
-      program makeRTPfile
-      implicit none
+! make clean; make -f Makefile_f77 makeRTPfile.x
+!
+        program makeRTPfile
+        implicit none
 
 ! RTP declarations
-      include 'rtpdefs.f90'
-      integer rtpopen, rtpread, rtpwrite, rtpclose
-      record /RTPHEAD/ head
-      record /RTPPROF/ prof,profR,profR1
-      record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
+        include 'rtpdefs.f'
+        integer rtpopen, rtpread, rtpwrite, rtpclose
+        record /RTPHEAD/ head
+        record /RTPPROF/ prof
+        record /RTPATTR/ hatt(MAXNATTR), patt(MAXNATTR)
 
 ! other variables
-      integer status, IOPCI, IOPCO, iPreSet, iI, iP
+        integer status, rchan, iPreSet
+        character*80 mode
+        CHARACTER*80 FIN, FOUT
 
-! for vararg
-      CHARACTER*80 FIN, FOUT, mode
-      INTEGER IARGC, IOERR
-      INTEGER J
-      INTEGER NARGS
- 
-      CHARACTER*80 BUF
-      CHARACTER*80 VAL
-      CHARACTER*80 VAR
+        INTEGER NARGS, iI, J
+        INTEGER IARGC, IOERR
+        CHARACTER*80 BUF
+        CHARACTER*80 VAL
+        CHARACTER*80 VAR
+
+        iPreset = -1
+        if (iPreset .gt. 0) then
+! set only one header attribute
+          hatt(1).fname = 'glist'//char(0)
+          hatt(1).aname = 'note'//char(0)
+          hatt(1).atext = 'translated from text sonde profiles'//char(0)
+! set some sample profile attributes
+          patt(1).fname = 'ptemp'//char(0)
+          patt(1).aname = 'units'//char(0)
+          patt(1).atext = 'degrees K'//char(0)
+        else
+          CALL rtpinit(head,prof) 
+        endif
 
 !************************************************************************
-! see /asl/packages/rtpV201/utils/rdinfo_subset.f
+! command line argument processing, from Scott's earlier codes
 !      ------------
 !      Set defaults
 !      ------------
        IOERR = 6
        FIN =  'profile.txt'           ! input filename
-       FOUT = 'makeRTPfile.ip.rtp'    ! output filename
-       FOUT = 'profile_ip.rtp'        ! output filename
+       FOUT = 'profile_ip90.rtp'      ! output filename
 
 !      -----------------------------------------------------------------
 !      Loop on program parameters
@@ -48,7 +58,7 @@
           WRITE(IOERR,1010)
  1010     FORMAT('makeRTPfile.f90 must be run with at least 1 argument')
           WRITE(IOERR,1011)
- 1011     FORMAT('   fin  = <filename> txt input file  {mandatory}','//'    &
+ 1011     FORMAT('   fin  = <filename> txt input file  {mandatory}','//'  &
                  '   fout = <filename> rtp output file {optinal, set to profile_ip.rtp}')
           STOP
        ENDIF
@@ -90,132 +100,72 @@
        write(*,'(A,A)') 'output file name = ',fout
 
 !************************************************************************
-      iPreset = -1
-      IF (iPreset .gt. 0) THEN
-! set only one header attribute
-        hatt(1).fname = 'glist'//char(0)
-        hatt(1).aname = 'note'//char(0)
-        hatt(1).atext = 'translated from text sonde profiles'//char(0)
-! set some sample profile attributes
-        patt(1).fname = 'ptemp'//char(0)
-        patt(1).aname = 'units'//char(0)
-        patt(1).atext = 'degrees K'//char(0)
-      ELSE
-        CALL RTPINIT(head,prof)
-      END IF
-
-!      print *,FIN
-!      print *,FOUT
 
 ! read in the point profile
-      CALL ReadProfile(prof,head,FIN)
-      print *,'head ngas  = ',head.ngas
-      print *,'     glist = ',head.glist(1:head.ngas)
-      print *,'     gunit = ',head.gunit(1:head.ngas)
-      write(*,'(A,I3,2(F12.4),ES12.4)') 'prof  nlevs,stemp,spres,sum(WV) = ', &
-        prof.nlevs,prof.stemp,prof.spres,sum(prof.gamnt(1:prof.nlevs,1))
-      print *,'     rlat,rlon                 = ',prof.rlat,prof.rlon
-      print *,'        iI      P(z)           T(z)           WV(z)'
-      print *,'-----------------------------------------------------------'
-      do iI = 1,prof.nlevs
-        print *,'write',iI,prof.plevs(iI),prof.ptemp(iI),prof.gamnt(iI,1)
-      end do
-      print *,'-----------------------------------------------------------'
-
-! create the file, write the attributes, write the (mostly unfilled) 
-! profile structure, and close the file
-! 'c'=create, 'r'=read : see eg /home/sergio/OTHERSTUFF/rtpV201/src/rtpopen.c
-      mode = 'c'
-      write(*,'(A,A)') 'Writing output in running dir .. output name = ',FOUT
-
-!      IOPCO = 1
-      status = rtpopen(FOUT, mode, head, hatt, patt, IOPCO)
-      print *, 'write open status, IOPCO  = ', status,IOPCO
-      status = rtpwrite(IOPCO, prof)
-      print *, 'write status = ', status
-      status = rtpclose(IOPCO)
-      print *, 'write close status = ', status
-
-      print *,' '
-      print *,' '
-      print *,' '
-
-!************************************************************************
-
-      IP = +1
-      if (iP > 0) THEN
-        mode = 'r'
-!       FOUT = 'pin_feb2002_sea_airs45deg_op.so2.latlon.const_emiss_0.9.rtp'
-        write(*,'(A,A)') 'now reading in file ',FOUT
-        status = rtpopen(FOUT, mode, head, hatt, patt, IOPCI)
-        print *, 'read open status, IOPCI  = ', status,IOPCI
-
-        iP = 0
-        do while (.true.)
-          status = rtpread(IOPCI, profR1)
-          if (status .eq. -1) goto 22
-
-          profR = profR1
-          iP = iP + 1
-          write(*,'(A,I3,2(F12.4),ES12.4)') 'xprof nlevs,xstemp,xspres,sum(WV) = ', &
-           profR.nlevs,profR.stemp,profR.spres,sum(profR.gamnt(1:profR.nlevs,1))
-          print *,'     rlat,rlon                 = ',profR.rlat,profR.rlon
-
-!           do iI = 1,profR.nlevs
-!             print *,'read',iI,profR.plevs(iI),profR.ptemp(iI),profR.gamnt(iI,1)
-!           end do
-
-        end do
-  22    continue
-        write(*,'(A,I3,A)') 'successfully read ',iP,' profiles .... here is P(z),T(z),WV(z) for last one'
-        write(*,'(A,I3,2(F12.4),ES12.4)') 'xprof nlevs,xstemp,xspres,sum(WV) = ', & 
-          profR.nlevs,profR.stemp,profR.spres,sum(profR.gamnt(1:profR.nlevs,1))
-        print *,'     rlat,rlon                 = ',profR.rlat,profR.rlon
+        CALL ReadProfile(prof,head,fin)
+        print *,'head ngas  = ',head.ngas
+        print *,'     glist = ',head.glist(1:head.ngas)
+        print *,'     gunit = ',head.gunit(1:head.ngas)
+        write(*,'(A,I3,2(F12.4),ES12.4)') 'prof  nlevs,stemp,spres,sum(WV) = ', &
+              prof.nlevs,prof.stemp,prof.spres,sum(prof.gamnt(1:prof.nlevs,1))
+        print *,'     rlat,rlon                 = ',prof.rlat,prof.rlon
         print *,'        iI      P(z)           T(z)           WV(z)'
         print *,'-----------------------------------------------------------'
-        do iI = 1,profR.nlevs
-          print *,'read',iP,iI,profR.plevs(iI),profR.ptemp(iI),profR.gamnt(iI,1)
+        do iI = 1,prof.nlevs
+          print *,'before write',iI,prof.plevs(iI),prof.ptemp(iI),prof.gamnt(iI,1)
         end do
+        print *,'before write : nlevs = ',prof.nlevs
+!        do iI = 1+prof.nlevs,MAXLEV
+!          print *,'before write',iI,prof.plevs(iI),prof.ptemp(iI),prof.gamnt(iI,1)
+!        end do
         print *,'-----------------------------------------------------------'
+        
+! create the file, write the attributes, write the (mostly unfilled) 
+! profile structure, and close the file
+!
+        mode = 'c'
+        print *,'Writing output in running dir ..'
+        print *,'output name = ',fout
 
-        status = rtpclose(IOPCI)
-        print *, 'read close status = ', status
-      end if
+        status = rtpopen(fout, mode, head, hatt, patt, rchan)
+        print *, 'open status f77 code,rchan = ', status,rchan
+        status = rtpwrite(rchan, prof)
+        !print *, 'write status F77 code = ', status
+        status = rtpclose(rchan)
+        !print *, 'close status F77 code = ', status
 
-      stop
-      end
+        stop
+        end
 
 !************************************************************************
 ! this subroutine prompts the user for the name of the point profile,
 ! opens it, reads in the info and saves it in the "prof" record
 
 ! the info in the levels profile is as follows 
-! !!! first few lines are comments, starting with ! or % or #
-! cType,nlevs,ngas    where cType = 'p' or 'P'
+! !!! first few lines are comments
+! cType,mlevs,ngas    where cType = 'p' or 'P'
 ! gasID list
 ! lat lon
-! spres stemp         -9999 if just set it to max pres, temp at max pres
-! loop   ii = 1 : nlevs
-!   rPress,rTemp,rDensity,(raGasAmts(iI),iI = 1,ngas)
+! rPress,rTemp,rDensity,(raGasAmts(iI),iI = 1,ngas)
 
       SUBROUTINE ReadProfile(prof,head,caFname)
 
       implicit none
 
-      include 'rtpdefs.f90'
+      include 'rtpdefs.f'
 
       record /RTPHEAD/ head
       record /RTPPROF/ prof
 
-      INTEGER ngas,nlevs,glist(MaxGas),thetype,ispres,istemp
-      REAL pmin,pmax
-      CHARACTER*80 caFName
+      INTEGER ngas,nlevs,glist(MaxGas),ispres,istemp,thetype
+      REAL pmin,pmax,spres,stemp
+      CHARACTER*80 caFname
       CHARACTER*280 caStr
       INTEGER iIOUN2,iErrIO
-      INTEGER iI,iZ
-      REAL rLat,rLon,spres,stemp
-      REAL rPress,rTemp,rDensity,raGasAmts(MAXGAS),rZ
-      CHARACTER*1 cType
+      INTEGER iI,iZ,iL
+      REAL rLat,rLon,rZ
+      REAL rPress,rTemp,rDensity,raGasAmts(MAXGAS)
+      CHARACTER cType
 
       pmin = 1.0e30
       pmax = -1.0e30
@@ -223,12 +173,12 @@
       iIOUN2 = 15
 
 ! now loop iNpath/iNumGases  times for each gas in the user supplied profile 
-!      print *,caFName
+!      print *,caFname
 
-      OPEN(UNIT=iIOun2,FILE=caFName,STATUS='OLD',FORM='FORMATTED',IOSTAT=iErrIO) 
+      OPEN(UNIT=iIOun2,FILE=caFname,STATUS='OLD',FORM='FORMATTED',IOSTAT=iErrIO) 
       IF (iErrIO .NE. 0) THEN 
-        WRITE(*,1070) iErrIO
-      END IF 
+          WRITE(*,1070) iErrIO
+        ENDIF 
  1070 FORMAT('Error number ',I5,' opening your profile')
 
       !!!!!!!! go thru the comments at the top of the file
@@ -244,24 +194,26 @@
         print *,'Error : makeRTPfile assumes pressure info in the file'
         CLOSE(iIOUN2)
         STOP
-      END IF
+      ENDIF
+
       IF ((cType .EQ. 'p') .OR. (cType .EQ. 'P')) THEN
         thetype = 1
       ELSEIF ((cType .EQ. 'h') .OR. (cType .EQ. 'H')) THEN
         thetype = 2
       END IF
-      
+      print *,'reading in textfile : thetype = ',thetype
+ 
       IF (ngas .GT. MAXGAS) THEN
         print *,'Error : makeRTPfile can only handle ',MAXGAS,' gases'
         CLOSE(iIOUN2)
         STOP
-      END IF
+      ENDIF
 
       IF (nlevs .GT. MAXLEV) THEN
         print *,'Error : makeRTPfile can only handle ',MAXLEV,' levels'
         CLOSE(iIOUN2)
         STOP
-      END IF
+      ENDIF
 
       !! read the gasID list
       READ (iIOUN2,5030,ERR=13,END=13) caStr 
@@ -278,13 +230,21 @@
       READ (caStr,*,ERR=13,END=13) spres,stemp
       if (spres > 0) ispres = +1
       if (stemp > 0) istemp = +1
-        
-      prof.rlat = rLat
-      prof.rlon = rLon
+
       prof.nlevs = nlevs
+      head.mlevs = nlevs
+        
+      prof.rlat = rlat
+      prof.rlon = rlon
+      prof.rtime = 2.0e9
+      prof.plat = rlat
+      prof.plon = rlon
+      prof.ptime = 2.0e9
 
       !!read the profile info
-      DO iZ = 1,nlevs
+      DO iL = 1,nlevs
+        iZ = nlevs + 1 - iL  ! reverse order of loop index
+
         READ (iIOUN2,5030,ERR=13,END=13) caStr
         IF (thetype .EQ. 1) THEN
           READ (caStr,*,ERR=13,END=13) rPress,rTemp,rDensity,(raGasAmts(iI),iI = 1,ngas)
@@ -297,7 +257,8 @@
         prof.plevs(iZ) = rPress
         prof.ptemp(iZ) = rTemp
         IF (thetype .EQ. 2) THEN
-          prof.palts(iZ) = rZ
+          prof.palts(iZ) = rZ * 1000.0
+          print *,'palts',iZ,prof.palts(iZ),rPress,rTemp
         END IF
 
         DO iI = 1,ngas
@@ -321,33 +282,61 @@
       prof.spres = spres
       prof.stemp = stemp
 
+      prof.scanang = -10.0
+      prof.satzen  = 15.0
+      prof.solzen  = 130.0
+
+      prof.zobs = 705000.0
+      prof.scanang = 0.0
+      prof.satzen  = 0.0
+      prof.solzen  = 130.0
+
+!!!!! blah blah
+!      prof.nemis = 2
+!      prof.efreq(1) = 600.0
+!      prof.efreq(2) = 3000.0
+!      prof.emis(1) = 0.9
+!      prof.emis(2) = 0.9
+
+!!! realistic ocean emiss : [h,ha,p,pa] = rtpread('/asl/s1/sergio/RTP_pin_feb2002/pin_feb2002_sea_airsnadir_op.rtp');
+      prof.nemis = 19
+      prof.efreq(1:19) = (/0.7692,0.8000,0.8333,0.8696,0.9091,0.9524,1.0000,1.0417,1.0870,1.1364,1.1905,1.2500,2.4390,2.5000,2.5641,2.6316,2.7027,2.7778,2.8571/) * 1000;
+      prof.emis(1:19)  = (/0.9767,0.9829,0.9889,0.9919,0.9925,0.9913,0.9891,0.9875,0.9863,0.9851,0.9840,0.9831,0.9776,0.9770,0.9764,0.9756,0.9745,0.9733,0.9715/)
+
+      prof.rho = (1-prof.emis)/3.1415
+      prof.rho = (1-prof.emis)/3.1415
+
 ! set HEAD values
       head.ptype = LEVPRO
       head.pfields = PROFBIT
 !      head.mrho = 0
-      head.memis = 0
+      head.memis = 19
+      
+      if (head.memis .NE. prof.nemis) then
+        write(*,'(A,I3,I3)') 'head.memis .NE. prof.nemis : STOPPING ',head.memis,prof.nemis
+        STOP
+      END IF
+
       head.ngas = ngas
 ! see /asl/packages/klayersV205/Doc/gas_units_code.txt     10 = ppmv     
-      DO iI = 1,ngas
+      do iI = 1,ngas
         head.glist(iI) = glist(iI)
         head.gunit(iI) = 10
-      END DO
+      end do
 
-      prof.nlevs = nlevs
-      head.nchan = 0
+      head.nchan = 2
+      head.ichan(1) = 1520
+      head.vchan(1) = 1231.22
+      head.ichan(2) = 1820
+      head.vchan(2) = 1419.9
       head.pmin = pmin
       head.pmax = pmax
-!      head.udef = -9999
-!      head.udef = -9999
+!      head.iudef = -9999
+!      head.itype = -9999
 
-      print*,'<----------- SUMMARY of INPUT TXT file -----------> '
-      print *,' the gasIDs are : '
-      print *, (glist(iI),iI = 1,ngas)
-      print *,'  rLat,rLon = ', prof.rLat,prof.rLon
-      print *,'  number of levels, number of gases =', prof.nlevs,head.ngas
-      print *,'  surf pres, surf temp = ', prof.spres,prof.stemp
-      print*,'<----------- SUMMARY of INPUT TXT file -----------> '
-      print *,'  '
+      prof.salti = 0.0
+      write(*,'(A,I3,4(F12.5))') 'inside ReadProf : nlevs, rlat, rlon, stemp, spres = ', &
+             prof.nlevs,prof.rlon,prof.rlat,prof.stemp,prof.spres  
 
       RETURN
       END

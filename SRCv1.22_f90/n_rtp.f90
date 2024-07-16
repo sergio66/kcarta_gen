@@ -6,6 +6,9 @@
 ! scientific format ESW.n   http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap05/format.html
 
 ! see Makefile for rtpdefs.f90 ... Makefile_intel_hdf_rtp
+!    Note in June 2024 Howard rewrote things so both .f and .f90 can use the rtp libs   with rtpdefs.f
+!    see home/sergio/git/rtp/rtpV221/l
+! so     include 'rtpdefs.f90' --->     include 'rtpdefs.f'
 
 MODULE n_rtp
 
@@ -34,7 +37,7 @@ CONTAINS
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
 
 ! output
     REAL :: rf1,rf2           !the low and high end wavenumbers
@@ -74,6 +77,7 @@ CONTAINS
     IF (head.ngas > MAXGAS) THEN
       !! see /home/sergio/git/rtp/rtpV201/include/rtpdefs.f90
       !! see /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90    
+      !! see /home/sergio/git/rtp/rtpV221/include/rtpdefs.f
       write(kStdErr,*) ' SUBR  IdentifyChannelsRTP >>>> number of gases in RTP     file = ',head.ngas
       write(kStdErr,*) '                           >>>> number of gases in RTPDEFS      = ',MAXGAS
       Call DoStop
@@ -1166,7 +1170,7 @@ CONTAINS
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/scatterparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
     INTEGER :: iplev
     INTEGER :: inatm   ! Added ESM
     INTEGER :: iProfilelayers2   ! Added ESM
@@ -1862,7 +1866,7 @@ CONTAINS
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
 
 ! caSetEmissivity= array that gives name of emissivity files (if any)
 ! raSetEmissivity= array that gives constant emissivity value (if set)
@@ -3070,7 +3074,7 @@ CONTAINS
     implicit none
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
     INTEGER :: iplev
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
@@ -3177,7 +3181,7 @@ CONTAINS
     implicit none
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
     INTEGER :: iplev
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
@@ -3803,7 +3807,7 @@ CONTAINS
     implicit none
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
     INTEGER :: iplev
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
@@ -4447,7 +4451,7 @@ CONTAINS
     implicit none
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
     INTEGER :: iplev
     include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
     include '../INCLUDE/TempF90/airslevelheightsparam.f90'
@@ -5278,7 +5282,7 @@ CONTAINS
       IMPLICIT NONE      
 
     include '../INCLUDE/TempF90/scatterparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
     include '../INCLUDE/TempF90/airslevelsparam.f90'
 
       record /RTPPROF/ prof

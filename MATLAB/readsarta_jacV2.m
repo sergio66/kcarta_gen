@@ -15,9 +15,11 @@ if nargin == 2
   ans = 1.5259e-04
   %}
 
-  rThreshold = 1.0e-5;
   rThreshold = 1.0e-3;
-  rThreshold = 4.0e-4;
+  rThreshold = 4.0e-4;    %% Apr 2024
+  rThreshold = 1.0e-6;
+  rThreshold = 1.0e-12;
+  rThreshold = 1.0e-32;
 end
 
 %% see s_writefile.f90 line 2516
@@ -90,6 +92,9 @@ for iP = 1 : numprof
   iNC          = fread(fin, 1, 'integer*4');
   iWhich       = fread(fin, 1, 'integer*4');
   flen = fread(fin, 1, 'integer*4');
+
+%  printarray([iP iaNumLay(iP) numprof])
+
   if iNC ~= numchan
     [iNC numchan]
     error('iNC (inside file) and numchan (head of file) are different!!!')

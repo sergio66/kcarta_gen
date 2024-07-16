@@ -92,6 +92,10 @@ $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
 # $ module load intel/mkl/64
 # $ module load szip/2.1
 
+# get HDF libs and Intel compilers, Howard June 2024
+# module load HDF/4.2.14-GCCcore-8.3.0
+# module load intel-compilers/2021.4.0
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #FORTRANX = /cm/shared/apps/intel/composer_xe/2015.3.187/bin/intel64/ifort  before Apr 2016
 #FORTRANX = /cm/shared/apps/intel/composer_xe/2015.5.223/bin/intel64/ifort  after April 2016

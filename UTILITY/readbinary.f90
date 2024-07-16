@@ -785,7 +785,9 @@
         READ(iIOUN) iMainType,iSubMainType,iNumberOut
         READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta
 !       write(*,'(5(I10),3(F20.12))') iJ,iNumGasPathsOut,iMainType,iSubMainType,iNumberOut,rFrLow,rFrHigh,rDelta
-        write(*,'(A,2(I10),1(F20.12))') 'GASOD ',iJ,iNumGasPathsOut,rFrLow
+        IF (iJ .EQ. 1) THEN
+          write(*,'(A,2(I10),1(F20.12))') 'GASOD ',iJ,iNumGasPathsOut,rFrLow
+        END IF
         raFreq(iaInd) = rFrLow + (iaIndX-1)*rDelta
         DO iI=1,iNumGasPathsOut
           iCnt = iCnt + 1
@@ -798,7 +800,9 @@
         READ(iIOUN) iMainType,iSubMainType,iNumberOut
         READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta
 !       write(*,'(5(I10),3(F20.12))') iJ,iNumMixPathsOut,iMainType,iSubMainType,iNumberOut,rFrLow,rFrHigh,rDelta
-        write(*,'(A,2(I10),1(F20.12))') 'MIXOD ',iJ,iNumMixPathsOut,rFrLow
+        IF (iJ .EQ. 1) THEN
+          write(*,'(A,2(I10),1(F20.12))') 'MIXOD ',iJ,iNumMixPathsOut,rFrLow
+        END IF
         raFreq(iaInd) = rFrLow + (iaIndX-1)*rDelta
         DO iI=1,iNumMixPathsOut
           iCnt = iCnt + 1
@@ -813,11 +817,17 @@
           READ(iIOUN) iMainType,iSubMainType,iNumberOut
           READ(iIOUN) ikMaxPts,rFrLow,rFrHigh,rDelta
 !          write(*,'(5(I10),3(F20.12))') iJ,iNumRadsOut,iMainType,iSubMainType,iNumberOut,rFrLow,rFrHigh,rDelta
-          write(*,'(A,2(I10),1(F20.12))') 'RADS  ',iJ,iNumRadsOut,rFrLow
+          IF ((iI .EQ. 1) .AND. (iJ .EQ. 1)) THEN
+            write(*,'(A,2(I10),1(F12.5),A,I3)') 'RADS  ',iJ,iNumRadsOut,rFrLow,' need to read ',iNumRadsOut
+          END IF
           raFreq(iaInd) = rFrLow + (iaIndX-1)*rDelta
           read(iIOUN) (raTemp(iX),iX=1,kMaxPts)
           raaEntire(iaInd,iCnt) = raTemp
         END DO
+      END IF
+
+      IF (iJ .GT. 1) THEN
+        write(*,'(A,I3,A,F12.5)') 'chunk iJ = ',iJ,' has start freq rFrLow = ',raFreq(1)
       END IF
 
       RETURN

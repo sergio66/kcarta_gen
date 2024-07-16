@@ -161,13 +161,15 @@ all: $(EXECS) Makefile
 # executables
 #
 
+#TXTRTPFLAG= -DTXTsetting
+
 ##RTP creator
 makeRTPfile.x: makeRTPfile.o 
 	$(RTPF77) -o makeRTPfile.x $(RTPFLAGS) makeRTPfile.o \
 	$(RTPLIB) $(RTPLIBS) $(HDFLIB) 
 
 readkcarta.x : readkcarta.o readbinary.o
-	$(F77) -o readkcarta.x $(FLAGS) readkcarta.o readbinary.o -fpp -D IFORT $(RTPLIBS)
+	$(F77) -o readkcarta.x $(FLAGS) readkcarta.o readbinary.o -fpp -DIFORT $(RTPLIBS)
 
 readkcarta2.x : readkcarta2.o readbinary.o
 	$(F77) -o readkcarta2.x $(FLAGS) readkcarta2.o readbinary.o $(NETCDFLIBS)

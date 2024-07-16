@@ -6,6 +6,9 @@
 ! scientific format ESW.n   http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/chap05/format.html
 
 ! see Makefile for rtpdefs.f90 ... Makefile_intel_hdf_rtp
+!    Note in June 2024 Howard rewrote things so both .f and .f90 can use the rtp libs   with rtpdefs.f
+!    see home/sergio/git/rtp/rtpV221/l
+! so     include 'rtpdefs.f90' --->     include 'rtpdefs.f'
 
 MODULE rtp_interface_f90
 
@@ -43,7 +46,7 @@ CONTAINS
     implicit none
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
-    include 'rtpdefs.f90'
+    include 'rtpdefs.f'
 
 ! the 48 regression profile kinetic temperatures
     REAL :: raa48Temp(kMaxLayer,kRegrProf)

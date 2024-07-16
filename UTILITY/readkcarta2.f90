@@ -12,6 +12,12 @@
 !
 ! example : ../BIN/readkcarta.x fin=../WORK/junk.dat
 
+
+!nf-config -help
+!nf-config --fc
+!nf-config --fflags
+!nf-config --flibs
+
       PROGRAM readkcarta
 !      use ifport             ! for getenv, fseek, ftell
 
@@ -180,16 +186,16 @@
           STOP
         END IF
 
-        print *,'read in LONG preamble, now reading in data for ',iTotalChunks,' 10000 pt chunks'
+        write(*,'(A,I3,A)') 'read in LONG preamble, now reading in data for ',iTotalChunks,' chunks'
         DO iJ = 1,iTotalChunks
           CALL ReadData2L(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire)
         END DO
       ELSE
-        print *,'read in SHORT preamble, now reading in data for ',iTotalChunks,' 10000 pt chunks'
-        print *,'iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut = ',iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
-        print *,rFr1,rFr2,rDelta
+        write(*,'(A,I3,A)') 'read in SHORT preamble, now reading in data for ',iTotalChunks,' chunks'
+        write(*,'(A,3(I4))') 'iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut = ',iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut
+        write(*,'(A,3(F12.6))') 'rFr1,rFr2,rDelta = ',rFr1,rFr2,rDelta
         DO iJ = 1,iTotalChunks
-          print *,'iJ,rFrLow = ',iJ,rFr1
+          write(*,'(A,I3,A,F12.5)') 'chunk iJ = ',iJ,' has start freq rFrLow = ',rFr1
           CALL ReadData2S(iIOUN,iJ,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut,raFreq,raaEntire,rDelta,rFr1)
         END DO         
       END IF
@@ -439,23 +445,19 @@
 !     overwrite this file, if it already exists.
       retval = nf_create(caOutName, NF_CLOBBER, ncid)
       if (retval .ne. nf_noerr) call handle_err(retval)
-      print *,'boo 0-3'
 
 ! freqs
 !     Define the dimensions. NetCDF will hand back an ID for each.
       retval = nf_def_dim(ncid,  FREQ_NAME, NFREQ, freq_dimid)
       if (retval .ne. nf_noerr) call handle_err(retval)
-      print *,'boo 0-2'
 
 !     Define the variables.
       retval = nf_def_var(ncid, FREQ_NAME,   NF_REAL, 1, freq_dimid, freq_varid)
       if (retval .ne. nf_noerr) call handle_err(retval)
-      print *,'boo 0'
 
 !     Assign units attributes
       retval = nf_put_att_text(ncid, freq_varid, UNITS, len(FREQ_UNITS), FREQ_UNITS)
       if (retval .ne. nf_noerr) call handle_err(retval)
-      print *,'boo 0-1'
 
 ! gasOD
       if (iNumGasPathsOut .GT. 0) THEN
@@ -479,7 +481,6 @@
         retval = nf_put_att_text(ncid, data1_varid, UNITS, len(GASOD_UNITS), GASOD_UNITS)
         if (retval .ne. nf_noerr) call handle_err(retval)
       END IF
-      print *,'boo 1'
 
 ! mixed path
       if (iNumMixPathsOut .GT. 0) THEN
@@ -503,7 +504,6 @@
         retval = nf_put_att_text(ncid, data2_varid, UNITS, len(MIXOD_UNITS), MIXOD_UNITS)
         if (retval .ne. nf_noerr) call handle_err(retval)
       END IF
-      print *,'boo 2'
 
 ! radiances
       if (iNumRadsOut .GT. 0) THEN
@@ -527,7 +527,6 @@
         retval = nf_put_att_text(ncid, data3_varid, UNITS, len(RAD_UNITS),RAD_UNITS)
         if (retval .ne. nf_noerr) call handle_err(retval)
       END IF
-      print *,'boo 3'
 
 !     End define mode. This tells netCDF we are done defining metadata.
       retval = nf_enddef(ncid)
@@ -540,30 +539,26 @@
 
       retval = nf_put_var_real(ncid, freq_dimid, raFreq(1:NFREQ))
       if (retval .ne. nf_noerr) call handle_err(retval)
-      print *,'boo 4'
 
       ind = (/(iI,iI=1,size(ind))/)
 
       if (iNumGasPathsOut .GT. 0) THEN
-        print *,'ODs : ',ixS1,ixE1
+        print *,'ODs  : start/stop = ',ixS1,ixE1
         retval = nf_put_var_real(ncid, data1_varid, transpose(raaEntire(1:NFREQ,ind(ixS1:ixE1))))
         if (retval .ne. nf_noerr) call handle_err(retval)
       END IF
-      print *,'boo 5'
 
       if (iNumMixPathsOut .GT. 0) THEN
-        print *,'MPs : ',ixS2,ixE2
+        print *,'MPs  : start/stop = ',ixS2,ixE2
         retval = nf_put_var_real(ncid, data2_varid, transpose(raaEntire(1:NFREQ,ind(ixS2:ixE2))))
         if (retval .ne. nf_noerr) call handle_err(retval)
       END IF
-      print *,'boo 6'
 
       if (iNumRadsOut .GT. 0) THEN
-        print *,'RADs : ',ixS3,ixE3
+        print *,'RADs : start/stop = ',ixS3,ixE3
         retval = nf_put_var_real(ncid, data3_varid, transpose(raaEntire(1:NFREQ,ind(ixS3:ixE3))))
         if (retval .ne. nf_noerr) call handle_err(retval)
       END IF
-      print *,'boo 7'
 
 !     Close the file. This frees up any internal netCDF resources
 !     associated with the file, and flushes any buffers.
