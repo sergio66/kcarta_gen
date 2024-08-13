@@ -14,7 +14,7 @@ iaX = input('Enter profiles to launch ... be nice and launch at most 100 - 250 p
 iS = iaX(1);
 iE = iaX(2);
 for ii = iS: iE
-  launcher = ['!sbatch -p high_mem                              --array=1-89       sergio_matlab_jobB.sbatch 9 ' num2str(ii)];
+  launcher = ['!sbatch -p high_mem  --array=1-89  sergio_matlab_jobB.sbatch 12 ' num2str(ii)];
   fprintf(1,'%s \n',launcher);
   eval(launcher)
   pause(0.1)

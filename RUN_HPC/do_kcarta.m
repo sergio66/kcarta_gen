@@ -3,28 +3,43 @@ if ~exist('loop_allprofiles_onefile')
   outname    = ['JUNK/rad.dat' num2str(iiBin)];
   outnamejac = ['JUNK/jac.dat'  num2str(iiBin)];
   outnml     = ['run_nml'  num2str(iiBin)];
+  if exist('iDISopt')
+    outnml     = ['run_nml'  num2str(iiBin) '_iDISopt_' num2str(iDISopt,'%02i')];
+  end
   outstat    = ['status'  num2str(iiBin)];
 else
   outname    = fxrad;
   outnamejac = fxjac;
   outnml     = fxnml;
+  if exist('iDISopt')
+    outnml     = [outnml '_iDISopt_' num2str(iDISopt,'%02i')];
+  end
   outstat    = fxstat;
 end
 
-iIRorFIR = -1;
-iIRorFIR = +1;
-if iIRorFIR == +1
-  %% 89 chunks
-  f1 = 605;
-  f2 = 2830;
-  iKCKD = iKCKD;
-elseif iIRorFIR == -1
-  %% 20 chunks
-  f1 = 310;
-  f2 = 510;
-  iKCKD = 1;
+if ~exist('%iIRorFIR')
+  iIRorFIR  = -1;
+  iIRorFIR = +1;
 end
-fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
+if ~exist('iDISopt')
+   iDISopt = -1;
+end
+if iDISopt ~= 11 & iDISopt ~= 12
+  if iIRorFIR == +1
+    %% 89 chunks
+    f1 = 605;
+    f2 = 2830;
+    iKCKD = iKCKD;
+  elseif iIRorFIR == -1
+    %% 20 chunks
+    f1 = 310;
+    f2 = 510;
+    iKCKD = 1;
+  end
+  fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
+else
+  fprintf(1,'DISORT chunking : f1,f2 REMAINS at %4i %4i \n',f1,f2);
+end
 
 sedder = ['!sed -e "s/FF1/' num2str(f1) '/g"  -e "s/FF2/' num2str(f2) '/g" '];
 if ~exist('loop_allprofiles_onefile')
@@ -41,7 +56,7 @@ fprintf(1,'outname = %s \n outnml = %s \n',outname,outnml)
 
 if length(uncstr) == 2
   fprintf(1,'uncstr = %s \n',uncstr)
-  sedder = [sedder ' -e "s/UNCUNC/'  uncstr '/g"']
+  sedder = [sedder ' -e "s/UNCUNC/'  uncstr '/g"'];
 end
 
 if iDoLBLRTM > 0
@@ -75,7 +90,7 @@ elseif iDoRad == 20  %% rads, using DISORT
   disp('do_kcarta.m here 20 DISORT')
   outstat  = [outstat  '_' num2str(f1,'%04d')];
   outnml   = [outnml  '_' num2str(f1,'%04d')];
-  outname  = [outname '_' num2str(f1,'%04d')];
+  outname  = [outname '_' num2str(f1,'%04d') '_iDISopt_' num2str(iDISopt,'%02i')];
   type1nml = 'template_Qradcloud_2cloud_DISORT.nml';
   type2nml = 'template_Qradcloud_2cloud_DISORT.nml';
   sed_1_2_cloudfiles
@@ -238,7 +253,6 @@ else
   error('hmmmmm did not find specs to go grab a template nml file')
 end
 
-sedder
 fprintf(1,'sedder str   = %s \n',sedder)
 fprintf(1,'kcartaer str = %s \n',kcartaer)
 
@@ -251,9 +265,10 @@ loader = ['exitcode = load(''' junk ''');'];
 eval(loader);
 fprintf(1,'iiBin,exitcode = %6i %2i \n',iiBin,exitcode)
 
-rmer = ['!/bin/rm ' outnml ' ' outstat];  %%%% rmer = ['!/bin/rm ' outnml ' status' num2str(iiBin)];
+rmer = ['!/bin/rm ' outnml ' ' outstat];  
+  rmer = ['!/bin/rm ' outnml ' status' num2str(iiBin)];
 fprintf(1,'%s \n',rmer);
-% rmer = ['!/bin/rm ' outstat];
+rmer = ['!/bin/rm ' outstat];
 eval(rmer);
 
 if iDoCloud == 100

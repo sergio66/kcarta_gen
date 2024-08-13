@@ -1,4 +1,14 @@
 pjunk = hdfread(use_this_rtp0,'profiles','Fields',{'cfrac','cfrac2','cfrac12','ctype','ctype2','cngwat','cngwat2','cprtop','cprtop2','cprbot','cprbot2','cpsize','cpsize2'});
+%% iiBin === profile number!!!!!
+
+if iiBin > length(pjunk{1})
+  disp(' ')
+  fprintf(1,' rtp file %s has %5i profiles \n  but you want me to process profile iiBin = %5i \n',use_this_rtp0,length(pjunk{1}),iiBin);
+  disp('if this is clust_do_kcarta_driver_DISORT($2)            check that profile number')
+  disp('if this is clust_do_kcarta_driver_DISORT_wholespectrum  check the JOB')
+  error('cannot process this profile')
+end
+
 cfrac   = pjunk{1}(iiBin);
 cfrac2  = pjunk{2}(iiBin);  
 cfrac12 = pjunk{3}(iiBin);

@@ -357,6 +357,9 @@
  iaNp(1)        =    1
  raaOp(1,1)     =    0.0
 
+ !! Jonah SHaw profiles testing wihth RTTOVS
+ !raaOp(1,1)     =    0.12
+ !raaOp(1,1)     =    12.0
  $end
 
  $nm_endinp

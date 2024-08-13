@@ -1,9 +1,8 @@
 function [] = clust_do_kcarta_driver_DISORT_loop(iFreqChunk_of_89,iaChunkSize)
-%% % /bin/rm slurm* JUNK/rad.dat*; ; sbatch --array=G1-G2 sergio_matlab_jobB.sbatch
+%% % /bin/rm slurm* JUNK/rad.dat*; ; sbatch --array=G1-G2 sergio_matlab_jobB.sbatch 12
 
 %% need to modify template_Qradcloud_2cloud_DISORT.nml CORRECTLY for the rtp file to process!
 %% read in the individual chunks and put together entire spectrum using read_disort_chunks
-%% launch many jobs using submit_many_disort_runs_loop.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -56,7 +55,12 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));   %% PERTAINS TO PROFILE
-%JOB = 5
+if length(JOB) == 0
+  JOB = 1;
+end
+
+iDISopt = 12;
+iDISORT = +1;
 
 if nargin == 0
   iFreqChunk_of_89 = 1;  
@@ -70,7 +74,7 @@ end
 
 iiBinAll = (1:iaChunkSize) + (JOB-1)*iaChunkSize;
 for ix = 1 : length(iiBinAll)
-  iiBin = iiBinAll(ix);
+  iiBin = iiBinAll(ix);  %% THIS IS THE BIN OR PROFILE in the RTPFIL, used in sed_1_2_cloudfiles.m
 
   f1 = 605 + (iFreqChunk_of_89-1)*25;
   f2 = f1 + 25;

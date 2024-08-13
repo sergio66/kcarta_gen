@@ -139,12 +139,10 @@ use_this_rtp = 'RTP/stdNH3_1100mb_op_400ppm_unitemiss.rtp';
 %% strow NH3 test
 use_this_rtp = '/home/strow/Work/Rta/cris_testin_nh3.rtp';
 use_this_rtp = 'RTP/cris_testin_nh3_x40.rtp';
-
 % chris is testing his new sarta for AIRS
 %cp /home/sergio/MATLABCODE/REGR_PROFILES_SARTA_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Sept2018_AIRS2645/regr49_1013_400ppm_unitemiss.op.rtp .
 use_this_rtp = 'regr49_1013_400ppm_unitemiss.op.rtp';
 use_this_rtp = 'regr49_1100_400ppm_unitemiss.op.rtp';
-
 % chris is testing SNOs
 %{
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
@@ -316,6 +314,7 @@ use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1100_400p_unitem
 use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1013_400p_unitemis_7angs_night.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/r49_1013_400p_unitemis_7angs_night.rtp';
 use_this_rtp = 'RTP/r49_1013_400p_unitemis_7angs_night.rtp';
+use_this_rtp = '/home/chepplew/projects/study_topics/nonlte/xnte_vs_nte/cris_ec_cs_clr_20230212_sub_kc.op.rtp';
 
 %% larrabee wants col gas jacs (actually stemp only)
 use_this_rtp = 'RTP/latbin20_45angles.op.rtp';
@@ -457,6 +456,11 @@ use_this_rtp = '/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES
 use_this_rtp = '/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/latbin1_40.op_400ppm_uplook.rtp';       %% to test uplook radiation and jacobians
 use_this_rtp = '/home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/upwell.op.rtp';
 
+use_this_rtp = 'RTP/testRTTOVS.op.rtp';
+
+use_this_rtp = '/home/chepplew/projects/study_topics/nonlte/xnte_vs_nte/cris_ec_cs_clr_20230212_sub_kc.op.rtp'; iInstr = 4;
+
+use_this_rtp = '//home/sergio/MATLABCODE/QUICKTASKS_TELECON/Pengwang_SOS/KCARTA/pengwang_test_watercloud.op.rtp'; iInstr = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m
 %% DO NOT TOUCH THESE LAST TWO LINES. EDIT set_convolver as needed

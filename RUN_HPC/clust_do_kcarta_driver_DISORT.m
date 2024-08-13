@@ -1,9 +1,13 @@
-function [] = clust_do_kcarta_driver_DISORT(iiBin)
-%% % /bin/rm slurm* JUNK/rad.dat*; ; sbatch --array=G1-G2 sergio_matlab_jobB.sbatch
+function [] = clust_do_kcarta_driver_DISORT(iProf)
+%% % /bin/rm slurm* JUNK/rad.dat*; ; sbatch --array=G1-G2 sergio_matlab_jobB.sbatch 09
 
 %% need to modify template_Qradcloud_2cloud_DISORT.nml CORRECTLY for the rtp file to process!
 %% read in the individual chunks and put together entire spectrum using read_disort_chunks
-%% launch many jobs using submit_many_disort_runs.m
+
+%% this is basically same as clust_do_kcarta_driver_DISORT_wholespectrum and has been retired
+%% this is basically same as clust_do_kcarta_driver_DISORT_wholespectrum and has been retired
+%% this is basically same as clust_do_kcarta_driver_DISORT_wholespectrum and has been retired
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 set_rtp
@@ -27,6 +31,7 @@ fprintf(1,'iHITRAN      = %2i \n',iHITRAN);
 fprintf(1,'iKCKD        = %2i \n',iKCKD);
 disp('>>>>>')
 
+disp('DISORT runs')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DO NOT TOUCH THESE LAST TWO LINES. EDIT set_convolver as needed
 use_this_rtp0 = use_this_rtp;
@@ -54,16 +59,28 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));   %% PERTAINS TO WAVENUMBER CHUNK, NOT PROFILE
-%JOB = 46    %% can be between 1-89 for the 89 kCARTA chunks
-%JOB = 5
+JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));   %% PERTAINS TO NOTHING
+if length(JOB) == 0
+  JOB = 12;  %% do the 905-930 cm-1 chunk
+  JOB = -99999999;
+end
+JOB = -99999999;
+disp('JOB is irrelevant in this clust_do_kcarta_driver_DISORT.m : does either 605-2830 cm-1 or 310-510 cm-1') 
+disp('JOB is irrelevant in this clust_do_kcarta_driver_DISORT.m : does either 605-2830 cm-1 or 310-510 cm-1') 
+disp('JOB is irrelevant in this clust_do_kcarta_driver_DISORT.m : does either 605-2830 cm-1 or 310-510 cm-1') 
+
+disp('try clust_do_kcarta_driver_DISORT_individualprofile_clusterchunks.m ... you ive it a profile and JOB is the chunk number')
+disp('try clust_do_kcarta_driver_DISORT_individualprofile_clusterchunks.m ... you ive it a profile and JOB is the chunk number')
+disp('try clust_do_kcarta_driver_DISORT_individualprofile_clusterchunks.m ... you ive it a profile and JOB is the chunk number')
+%error('this is kinda retired ... use clust_do_kcarta_driver_DISORT_wholespectrum.m since there JOB ======= iProf')
 
 if nargin == 0
-  iiBin = 1;  
+  disp('no arguments, iProf == iProf = 1')
+  iProf = 1;  
 end
 
-iIRorFIR = +1;
 iIRorFIR = -1;
+iIRorFIR = +1;
 if iIRorFIR == +1
   %% 89 chunks
   f1 = 605;
@@ -77,16 +94,20 @@ elseif iIRorFIR == -1
 end
 fprintf(1,'f1,f2 RESET TO %4i %4i \n',f1,f2);
 
-fprintf(1,'processing kCARTA freq chunk JOB %5i profile %5i \n',JOB,iiBin);
+%%% fprintf(1,'processing kCARTA freq chunk JOB %5i profile %5i iDoRad = %3i \n',JOB,iProf,iDoRad);
+iiBin = iProf;   %% THIS IS THE BIN OR PROFILE in the RTPFIL, used in sed_1_2_cloudfiles.m
+fprintf(1,'processing kCARTA freq chunk %5i-%5i profile %5i iDoRad = %3i \n',f1,f2,iProf,iDoRad);
 iDISORT = +1;
+iDISopt = 09;
+
 do_kcarta
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-disp('NOW READ IN THE SEPARATE FREQ CHUNKS "read_disort_chunks" and then YOU call parts of do_convolve');
-outnameCLD = [outname '_CLD'];
-rmerCLD = ['!/bin/rm ' outnameCLD];
-eval(rmerCLD);
+% disp('NOW READ IN THE SEPARATE FREQ CHUNKS "read_disort_chunks" and then YOU call parts of do_convolve');
+% outnameCLD = [outname '_CLD'];
+% rmerCLD = ['!/bin/rm ' outnameCLD];
+% eval(rmerCLD);
 return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

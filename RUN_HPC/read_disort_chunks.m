@@ -1,6 +1,11 @@
 addpath /home/sergio/KCARTA/MATLAB
 wdis = zeros(89*10000,1);
 
+iDISopt = input('Enter iDISopt (11/Default) is just one profile, 12 is multiple profiles : ');
+if length(iDISopt) == 0
+  iDISopt = 11;
+end
+
 iaProf = input('Enter rtp profile number list (one for only one, 2 for (Start: Stop) : ');
 
 if length(iaProf) == 1
@@ -18,7 +23,7 @@ for iPP = 1 : length(iaList)
   for ii = 1 : 89
     ind = (1:10000) + (ii-1)*10000;
     f1 = 605 + (ii-1)*25;
-    fname = ['JUNK/rad.dat' num2str(iProf) '_' num2str(f1,'%04d')];
+    fname = ['JUNK/rad.dat' num2str(iProf) '_' num2str(f1,'%04d') '_iDISopt_' num2str(iDISopt,'%02i') ];
     %fprintf(1,'%4i %s %3i \n',f1,fname,exist(fname));
     if exist(fname)
       thedir = dir(fname);
@@ -69,7 +74,7 @@ elseif sum(iaaFound(:))/89/length(iaList) < 1
       end       
       fprintf(1,'%4i %s %4i \n',ii,fname,thedir);
 
-      launcher = ['sbatch -p high_mem    --array=' num2str(nn(ii)) ' sergio_matlab_jobB.sbatch 9 ' num2str(iProf)];
+      launcher = ['sbatch -p high_mem    --array=' num2str(nn(ii)) ' sergio_matlab_jobB.sbatch 11 ' num2str(iProf)];
       fprintf(fid,'%s \n',launcher);
       if exist(fname)
         rmer = ['!/bin/rm ' fname];
@@ -88,10 +93,12 @@ elseif sum(iaaFound(:))/89/length(iaList) < 1
   end      %% if iDelete > 0
 end        %%  start loop of deleting missing files
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 iSave = input('Save the data??? (-1/+1) : ');
 if iSave > 0
-  badprofx  = mm+(iaList(1)-1);
-  badchunkx = nn;
-  saver = ['save disort_profs_' num2str(iaList(1),'%05d') '_' num2str(iaList(end),'%05d') '.mat wdis raddis iaList badmmx badnnx'];
+  %badprofx  = mm + (iaList(1)-1);
+  %badchunkx = nn;
+  saver = ['save disort_profs_iDISopt_' num2str(iDISopt,'%02i') '_' num2str(iaList(1),'%05d') '_' num2str(iaList(end),'%05d') '.mat wdis raddis iaList'];
   eval(saver)
 end
