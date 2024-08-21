@@ -6,7 +6,10 @@ if length(iDISopt) == 0
   iDISopt = 11;
 end
 
-iaProf = input('Enter rtp profile number list (one for only one, 2 for (Start: Stop) : ');
+iaProf = input('Enter rtp profile number list ([defulat = nothing, becomes profile 1], one number for only a sigle profile, two numbers for (Start: Stop) : ');
+if length(iaProf) == 0
+  iaProf = 1;
+end
 
 if length(iaProf) == 1
   iaList = iaProf;
@@ -48,7 +51,7 @@ for iPP = 1 : length(iaList)
   end
 end
 figure(1); plot(wdis,nanmean(rad2bt(wdis,raddis),2));
-sum(iaaFound(:))/89/length(iaList)
+%sum(iaaFound(:))/89/length(iaList)
 if length(iaList) > 1
   figure(2); imagesc(1:89,iaList,iaaFound); colorbar; ylabel('Profile #'); xlabel('kCARTA chunk')
 end

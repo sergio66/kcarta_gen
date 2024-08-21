@@ -27,9 +27,10 @@
 #   this needs a call to read_disort_chunks after it runs
 ## 
 ## so to run just ONE profile PQR can do one or the other of these
-## sbatch -p cpu2021  --array=1111         sergio_matlab_jobB.sbatch 9 PQR
-## sbatch -p cpu2021  --array=PQR          sergio_matlab_jobB.sbatch 10
-## sbatch -p cpu2021  --array=1-89         sergio_matlab_jobB.sbatch 11 PQR
+## rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc;
+##   sbatch -p cpu2021  --array=1111         sergio_matlab_jobB.sbatch 9 PQR      ONE profile, VEDY VEDY SLOW, one processor
+##   sbatch -p cpu2021  --array=PQR          sergio_matlab_jobB.sbatch 10         ONE profile, VEDY VEDY SLOW, one processor
+##   sbatch -p cpu2021  --array=1-89         sergio_matlab_jobB.sbatch 11 PQR     <<< ONE profile, VERY FAST, 89 processors >>>
 ##
 ## or to run multiple profiles, different chunks 1-89 
 #   this needs a call to read_disort_chunks after it runs

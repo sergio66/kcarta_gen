@@ -460,7 +460,10 @@ use_this_rtp = 'RTP/testRTTOVS.op.rtp';
 
 use_this_rtp = '/home/chepplew/projects/study_topics/nonlte/xnte_vs_nte/cris_ec_cs_clr_20230212_sub_kc.op.rtp'; iInstr = 4;
 
-use_this_rtp = '//home/sergio/MATLABCODE/QUICKTASKS_TELECON/Pengwang_SOS/KCARTA/pengwang_test_watercloud.op.rtp'; iInstr = 1;
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/Pengwang_SOS/KCARTA/pengwang_test_watercloud.op.rtp';      iInstr = 1;
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/Pengwang_SOS/KCARTA/pengwang_test_watercloud_day.op.rtp';  iInstr = 1;
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/Pengwang_SOS/KCARTA/pengwang_test_watercloud2_day.op.rtp'; iInstr = 1;
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/Pengwang_SOS/KCARTA/pengwang_test_watercloud2.op.rtp';     iInstr = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% moved to clust_do_kcarta_driver.m
 %% DO NOT TOUCH THESE LAST TWO LINES. EDIT set_convolver as needed

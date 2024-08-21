@@ -29,6 +29,12 @@
  
  $end
 
+ $nm_prfile
+ namecomment	=  '******* PRFILE section *******'
+ !iRTP = MMM
+ !caPFname = 'XYZXYZ'
+ $end
+
  $nm_spectr
  namecomment	=  '******* SPECTRA section ******'
  !no external spectra

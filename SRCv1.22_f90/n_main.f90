@@ -116,6 +116,8 @@ CONTAINS
 !                     to fill in missing gas profiles
     CHARACTER(160) :: caPFname,caPFName1,caCloudPFname,caCloudPFName1
     INTEGER :: iRTP,iRTP1,iNcloudRTP,iNcloud_RTP1,iAFGLProf,iAFGLProf1
+    INTEGER :: iMPSetForRadRTP1,iMPSetForRadRTP   !!these are used if kRTP = 1
+    INTEGER :: iBinOrAsc, iBinOrAsc1              !! this is for cloud profiles
 
 ! this is for nm_WEIGHT
 ! iNpmix        = number of mixed paths
@@ -166,7 +168,6 @@ CONTAINS
     REAL :: raSolAzimuth(kMaxAtm),raSolAzimuth1(kMaxAtm)
     REAL :: raWindSpeed(kMaxAtm),raWindSpeed1(kMaxAtm)
     INTEGER :: iakSolar1(kMaxAtm),iakThermalJacob1(kMaxAtm)
-    INTEGER :: iMPSetForRadRTP1,iMPSetForRadRTP   !!these are used if kRTP = 1
 ! assuming purely absorptive scattering
     CHARACTER(160) :: caaScatter1(kMaxAtm),caaScatter(kMaxAtm)
     REAL :: raaScatterPressure1(kMaxAtm,2),raaScatterPressure(kMaxAtm,2)
@@ -217,7 +218,7 @@ CONTAINS
     REAL :: raExp(kMaxClouds),raExp1(kMaxClouds)
 ! this tells if there is phase info associated with the cloud; else use HG
     INTEGER :: iaPhase1(kMaxClouds),iaPhase(kMaxClouds)
-    INTEGER :: iBinOrAsc, iBinOrAsc1,iNClouds_RTP,iNClouds_RTP1
+    INTEGER :: iNClouds_RTP,iNClouds_RTP1
     INTEGER :: iWhichScatterCode_RTP,iScatter_RTP,iWhichScatterCode_RTP1,iScatter_RTP1
 ! this associate the RTP cloud code to the caaCloudFile
     INTEGER :: iaNML_Ctype(kMaxClouds),iaNML_Ctype1(kMaxClouds)
@@ -837,7 +838,8 @@ CONTAINS
     IF ((caNMLReset_param_spectra1  /= 'notset') .AND. (caNMLReset_param_spectra1  /= 'NOTSET')) THEN
       CALL OverrideNML_nmParam_nmSpectra(caNMLReset_param_spectra1,                      &
         iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1, &
-        iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1)
+        iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1, &
+        iRTP1,caPFName1)
     END IF
 
     iTemperVary  = kTemperVary 
@@ -856,7 +858,8 @@ CONTAINS
     SUBROUTINE OverrideNML_nmParam_nmSpectra(caNMLReset_param_spectra, &
 ! new spectroscopy
     iNumNewGases1,iaNewGasID1,iaNewData1,iaaNewChunks1,caaaNewChunks1, &
-    iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1)
+    iNumAltComprDirs1,iaAltComprDirs1,raAltComprDirsScale1,caaAltComprDirs1,rAltMinFr1,rAltMaxFr1,&
+    iRTP1,caPFName1)
 
     IMPLICIT NONE
 
@@ -897,13 +900,29 @@ CONTAINS
     CHARACTER(160) :: caaAltComprDirs1(kGasStore)
     REAL :: rAltMinFr1,rAltMaxFr1,rAltMinFr,rAltMaxFr
 
+! this is for nm_PRFILE
+! gives the name of input file containing profiles,
+!                   input file containing cloud params
+!                   which of the rtp profiles to use, number of clouds
+!                   if not all gases present in caPFname, then use AFGL profile
+!                     to fill in missing gas profiles
+    CHARACTER(160) :: caPFname,caPFName1,caCloudPFname,caCloudPFName1
+    INTEGER :: iRTP,iRTP1,iNcloudRTP,iNcloud_RTP1,iAFGLProf,iAFGLProf1
+    INTEGER :: iMPSetForRadRTP1,iMPSetForRadRTP   !!these are used if kRTP = 1
+    INTEGER :: iBinOrAsc, iBinOrAsc1              !! this is for cloud profiles
+! this associate the RTP cloud code to the caaCloudFile
+    CHARACTER(160) :: caaCloudFile(kMaxClouds),caaCloudFile1(kMaxClouds)
+    INTEGER :: iWhichScatterCode_RTP,iScatter_RTP,iWhichScatterCode_RTP1,iScatter_RTP1
+    INTEGER :: iaNML_Ctype(kMaxClouds),iaNML_Ctype1(kMaxClouds)
+    INTEGER :: iNClouds_RTP,iNClouds_RTP1
+
 ! define the namelists!!!!!!!!
 
 ! local variables
     INTEGER :: iI,iJ,iIOUN,iErr
     CHARACTER(30) :: namecomment
     CHARACTER(50) :: FMT
-          
+
     NAMELIST /nm_params/namecomment,kLayer2Sp,kCKD,kGasTemp,kLongOrShort, &
     kJacobOutput,kFlux,kSurfTemp,kTempJac,kRTP,kActualJacs, &
     kThermalAngle,iaaOverride,caaTextOverride
@@ -911,6 +930,9 @@ CONTAINS
     iaaNewChunks,caaaNewChunks, &
     iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs, &
     rAltMinFr,rAltMaxFr
+    NAMELIST /nm_prfile/namecomment,caPFName,iRTP,iAFGLProf, &
+    iMPSetForRadRTP,iBinOrAsc, &
+    caaCloudFile,iNClouds_RTP,iWhichScatterCode_RTP,iScatter_RTP,iaNML_Ctype
     NAMELIST /nm_endinp/namecomment
 
 ! *************** read input name list file *********************************
@@ -988,8 +1010,20 @@ CONTAINS
     write(kStdWarn,'(A,3(I3))') 'after OverrideNML_nmParam_nmSpectra+2, kTemperVary,iaaOverrideDefault,iaaOverride = ',kTemperVary,iaaOverrideDefault(2,1),iaaOverride(2,1)
     CALL printstar
 
+!!!!!!!!!!!!!!!!!!!!!!!!!
+    namecomment = '******* PRFILE section *******'
+    ! this is the initialization
+    iRTP = iRTP1
+    caPFname = caPFname1
+
+    ! now go ahead and read in the new data
+    read (iIOUN,nml = nm_prfile)
+    iRTP1 = iRTP
+    caPFname1 = caPFname
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
     namecomment = '******* SPECTRA section *******'
-! this is the initialization
+    ! this is the initialization
     iNumNewGases = iNumNewGases1
     iaNewGasID = iaNewGasID1
     iaNewData = iaNewData1
@@ -1001,8 +1035,8 @@ CONTAINS
     caaAltComprDirs = caaAltComprDirs1
     rAltMinFr = rAltMinFr1
     rAltMaxFr = rAltMaxFr1
-! now go ahead and read in the new data
 
+    ! now go ahead and read in the new data
     read (iIOUN,nml = nm_spectr)
     iNumNewGases1 = iNumNewGases
     iaNewGasID1 = iaNewGasID
@@ -1018,6 +1052,7 @@ CONTAINS
     write (kStdWarn,*) 'successfully read in spectra2 .....'
     CALL printstar
 
+!!!!!!!!!!!!!!!!!!!!!!!!!
     namecomment = '******* ENDINP section *******'
     read (iIOUN,nml = nm_endinp)
     write (kStdWarn,*) 'successfully read in endinp2 .....'
