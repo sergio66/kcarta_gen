@@ -139,22 +139,27 @@ iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2;     iDoRad = 3; iDoJac = +100; iDoCloud = -1; %% use LBLRTM ODs   ***************************** col jac BEST DEFAULT
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 5912;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2456;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1; %% use LBLRTM ODs   ************************************* BEST DEFAULT
 
 %%%%%%% note when I do this,I have changed convolver so only AIRS 2834 chans are done, else waste time convolving!!!  so reset set_convolver.m after this!!!! %%%%%%%%%%
-iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +100; iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +100; iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,3,4,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2456;  iDoRad = 3; iDoJac = +100; iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;   iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* CLR JACS 97 layers eg for 64x72 grids
-iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +100; iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* COL CLD JACS eg for 64x72 grids : does G2,4,5,6,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +100; iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* COL CLD JACS eg for 64x72 grids : does G2,3,4,6,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 2456;  iDoRad = 3; iDoJac = +100; iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* COL CLD JACS eg for 64x72 grids : does G2,4,5,6,T(z),ST
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;   iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* CLD JACS 97 layers eg for 64x72 grids
 
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 0;  iDoCloud = +1; iDoJac = -1;               %% use LBLRTM ODs   ************************************* BEST DEFAULT, but does "special"
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 0;  iDoCloud = -1; iDoJac = -1;               %% use LBLRTM ODs   ************************************* BEST DEFAULT, but does "special"
-iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +100; gg = 2346;  iDoCloud = -1; %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +100; gg = 2346;  iDoCloud = -1; %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,3,4,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +100; gg = 2456;  iDoCloud = -1; %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +1;   gg = 1001;  iDoCloud = -1; %% clrsky, use LBLRTM ODs   ************************************* CLR JACS 97 layers eg for 64x72 grids
 
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 0;  iDoCloud = +1; iDoJac = -1;               %% use LBLRTM ODs   ************************************* BEST DEFAULT, but does "special"
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 0;  iDoCloud = -1; iDoJac = -1;               %% use LBLRTM ODs   ************************************* BEST DEFAULT, but does "special"
-iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +100; gg = 2346; iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +100; gg = 2346; iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,3,4,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +100; gg = 2456; iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoJac = +1;   gg = 1001; iDoCloud = -1;  %% clrsky, use LBLRTM ODs   ************************************* CLR JACS 97 layers eg for 64x72 grids
 
 %%%%%%% note when I do this,I have changed convolver so only AIRS 2834 chans are done, else waste time convolving!!!  so reset set_convolver.m after this!!!! %%%%%%%%%%
@@ -169,10 +174,12 @@ iKCKD =  06; iHITRAN = 2008; iDoLBLRTM = -1; iDoRad = 3;  iDoCloud = -1; iDoJac 
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = -1; iDoJac = -1;              %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 1001;   %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 2346;   %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 2456;   %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = -1; iDoJac = +1; gg = 5912;   %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = -1; iDoJac = -1;              %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = -1; iDoJac = -1;              %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky        no jacs
-iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3;  iDoJac = +100; gg = 2346;iDoCloud = -1;  %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3;  iDoJac = +100; gg = 2346;iDoCloud = -1;  %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G2,3,4,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3;  iDoJac = +100; gg = 2456;iDoCloud = -1;  %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
 iKCKD =  32; iHITRAN = 2016; iDoLBLRTM = 2;  iDoRad = 3;  iDoJac = +1;   gg = 2;  iDoCloud = -1;   %% use LBLRTM ODs   ************************************* BEST DEFAULT
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2;  iDoRad = 3;  iDoCloud = +1; iDoJac = -1;              %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT allsky  PCLSAM no jacs
 %              iHITRAN = 2012;
@@ -182,15 +189,18 @@ iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 20; iDoCloud = +1; iDoJac =
 
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 5912;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids this does G 5,9,12
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 2346;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids this doess G 2,3,4,6,51,52
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 2456;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids this doess G 2,4,5,6,51,52
 
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;   iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* CLD JACS 97 layers eg for 64x72 grids
-iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +100; iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* COL CLD JACS eg for 64x72 grids : does G2,4,5,6,T(z),ST
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; gg = 2346;  iDoRad = 3; iDoJac = +100; iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* COL CLD JACS eg for 64x72 grids : does G2,3,4,6,T(z),ST
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; gg = 2456;  iDoRad = 3; iDoJac = +100; iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* COL CLD JACS eg for 64x72 grids : does G2,4,5,6,T(z),ST
 
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 1001;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids *** USE THIS FOR WV,O3,T ****
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;   iDoCloud = +1;  %% allsky, use LBLRTM ODs   ************************************* CLD JACS 97 layers eg for 64x72 grids
 
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 1001;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids *** USE THIS FOR WV,O3,T ****
-iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +100; gg = 2346;  %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +100; gg = 2346;  %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G2,3,4,6,51,52,T(z),ST
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +100; gg = 2456;  %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G2,4,5,6,51,52,T(z),ST
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +100; gg = 1001;  %% clrsky, use LBLRTM ODs  ****************************** COL CLR JACS eg for 64x72 grids : does G1,101,101,103,T(z),ST
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -100; gg = 1001;  %% clrsky, use LBLRTM ODs  ******* UPLOOK *************** COL CLR JACS eg for 64x72 grids : does G1,101,101,103,T(z),ST
 
@@ -203,6 +213,10 @@ iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; gg = 1001;  iDoRad = 3; iDoJac = +1;
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;               %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky         no jacs
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs  ****************************** BEST DEFAULT allsky  PCLSAM no jacs
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 20; iDoCloud = +1; iDoJac = -1;               %% allsky, use LBLRTM ODs, DISORT *********************** DISORT                      no jacs
+
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 2346;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids this doess G 2,4,5,6,51,52
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 2456;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids this doess G 2,3,4,6,51,52
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 1001;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids *** USE THIS FOR WV,O3,T ****
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

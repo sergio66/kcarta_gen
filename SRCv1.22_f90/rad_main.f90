@@ -1848,7 +1848,7 @@ CONTAINS
     REAL :: raLayerHeight(kProfLayer)
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSatAngle,rFracTop,rTSurf,rPSurf
     REAL :: raInten(kMaxPts),rTSpace,raUseEmissivity(kMaxPts)
-    REAL :: raaAbs(kMaxPts,kMixFilRows),raSun(kMaxPts),rFracBot
+    REAL :: raaAbs(kMaxPts,kMixFilRows),raSun(kMaxPts),raSunX(kMaxPts),rFracBot
     REAL :: raaMix(kMixFilRows,kGasStore),raaOp(kMaxPrint,kProfLayer)
     INTEGER :: iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN_IN
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
@@ -1882,7 +1882,7 @@ CONTAINS
     REAL :: raThermal(kMaxPts),raVT1(kMixFilRows)
 
 ! for the sun contribution
-    REAL :: rSunAngle,rSunTemp,raSurface(kMaxPts),raSunRefl(kMaxPts)
+    REAL :: rSunAngle,rSunTemp,raSurface(kMaxPts),raSunRefl(kMaxPts),rOmegaSun
 
     INTEGER :: iDoSolar
     REAL :: rCos,raInten2(kMaxPts)
@@ -1992,10 +1992,26 @@ CONTAINS
       raSun = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       CALL ReadSolarData(raFreq,raSun,iTag)
+!      rSunTemp = kSunTemp
+!      raSunX = ttorad(raFreq,rSunTemp)
+!      write(kStdErr,'(A,4(F12.5,1X))') 'Solar radiance C',raFreq(1),raSunX(1)/1000,raSun(1)/1000,kForP
     ELSE
       raSun = 0.0
     END IF
-    raSun = raSun*kOmegaSun
+
+!! now do the solid angle correction
+    raSun = raSun*kOmegaSun  !!! old, till Aug 2024
+
+! <<< do NOT need this since this is looking UP >>>
+! angle the sun subtends at the earth = area of sun/(dist to sun)^2
+!    rOmegaSun = kOmegaSun
+!    rSunAngle = raSunAngles(MP2Lay(iaRadLayer(1)))
+! change to radians  .... 
+!    rSunAngle = rSunAngle*kPi/180.0
+!    rCos      = cos(rSunAngle)           
+! now adjust raSun by cos(rSunAngle) * rSolidAngle
+!    raSun = raSun*rCos*rOmegaSun      !!!!this is correct
+! <<< do NOT need this since this is looking UP >>>
 
 ! INTIALIZE the emission seen at satellite to 0.0
     raInten = 0.0

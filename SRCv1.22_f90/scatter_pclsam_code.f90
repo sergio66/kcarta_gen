@@ -672,7 +672,7 @@ CONTAINS
     REAL :: raLayerHeight(kProfLayer)
     REAL :: rSatAzimuth,rSolAzimuth,rFracX
     REAL :: raSurFace(kMaxPts),raThermal(kMaxPts)
-    REAL :: raSunScatter(kMaxPts),raSun(kMaxPts)
+    REAL :: raSunScatter(kMaxPts),raSunScatterX(kMaxPts),raSun(kMaxPts)
     REAL :: raSunRefl(kMaxPts),raaOp(kMaxPrint,kProfLayer)
     REAL :: raFreq(kMaxPts),raVTemp(kMixFilRows),rSatAngle
     REAL :: raInten(kMaxPts),rTSpace,raUseEmissivity(kMaxPts),rTSurf
@@ -870,6 +870,9 @@ CONTAINS
       raSunScatter = ttorad(raFreq,rSunTemp)
     ELSEIF (iDoSolar == 1) THEN
       CALL ReadSolarData(raFreq,raSunScatter,iTag)
+!      rSunTemp = kSunTemp
+!      raSunScatterX = ttorad(raFreq,rSunTemp)
+!      write(kStdErr,'(A,4(F12.5,1X))') 'Solar radiance A',raFreq(1),raSunScatterX(1)/1000,raSunScatter(1)/1000,kForP
     ELSE
       raSunScatter = 0.0
     END IF
@@ -965,12 +968,13 @@ CONTAINS
           raNoScale = 1.0/(1.0 - raaSSAlb(:,iL)/2*(1.0+raaAsym(:,iL)))
           raSolarScatter  = rahg2_real(-muSun,-muSat,raaAsym(:,iL)) * &
               (exp(-raNoScale*raTau/muSat) - exp(-raNoScale*raTau/muSun))
-          raSolarScatter  = raSolarScatter*raaSSAlb(:,iL)*raSunScatter*muSun/(muSat-muSun)/kForP
+!          raSolarScatter  = raSolarScatter*raaSSAlb(:,iL)*raSunScatter*muSun/(muSat-muSun)/kForP   !! orig till Aug 2024
+          raSolarScatter  = raSolarScatter*raaSSAlb(:,iL)*raSunScatter*muSun/(muSat-muSun)
           raThermal = raThermal + raSolarScatter
         END IF
       END IF
     END DO
-
+   
 ! ------------------------------------------------------------------------>
     raRad1 = raThermal
 

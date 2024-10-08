@@ -41,7 +41,7 @@ function [data, wnums, natmos, numlay, ngases] = readkcjac(kfile, dfile)
 if fin == -1
   error(['error opening input file\n', msg]);
   end
-fid=fin;                    %<------------- my modification
+fid = fin;                    %<------------- my modification
 %%%%%%%%%%%%%%%%%%%%%%
 % READ HEADER RECORDS
 %%%%%%%%%%%%%%%%%%%%%%
@@ -55,7 +55,7 @@ flen    = fread(fin, 1, 'integer*4');
 
 flen    = fread(fin, 1, 'integer*4');
 version = setstr(version');
-version_number=str2num(version(2:5));
+version_number = str2num(version(2:5));
 if  (version_number >= 1.22)
   comment = fread(fin, 160, 'char');
 elseif  (version_number >= 1.18)
@@ -70,7 +70,7 @@ flen    = fread(fin, 1, 'integer*4');
 flen   = fread(fin, 1, 'integer*4');
 nlayer = fread(fin, 1, 'integer*4');
 flen   = fread(fin, 1, 'integer*4');
-iNumLayers=nlayer;              %<------------- my modification
+iNumLayers = nlayer;              %<------------- my modification
 
 % start, stop frequency
 flen = fread(fin, 1, 'integer*4');
@@ -103,24 +103,24 @@ flen   = fread(fin, 1, 'integer*4');
 % PROFILE INFO ABOUT GASES WHOSE JACOBIAN IS COMPUTED
 iNumGases=ngases;
 %now read the PathNum GasID Temperature Amount for each path in the profile 
-for ii=1:iNumGases 
-  for jj=1:iNumLayers 
-    fmjunk1=fread(fid,1,'integer*4'); 
-    iGasID=fread(fid,1,'integer*4');
-    rTemp=fread(fid,1,'real*4'); 
-    rAmt=fread(fid,1,'real*4'); 
-    fmjunk1=fread(fid,1,'integer*4'); 
-    raaAmt(jj,ii)=rAmt; 
-    raaTemp(jj,ii)=rTemp; 
+for ii = 1:iNumGases 
+  for jj = 1:iNumLayers 
+    fmjunk1 = fread(fid,1,'integer*4'); 
+    iGasID = fread(fid,1,'integer*4');
+    rTemp = fread(fid,1,'real*4'); 
+    rAmt = fread(fid,1,'real*4'); 
+    fmjunk1 = fread(fid,1,'integer*4'); 
+    raaAmt(jj,ii) = rAmt; 
+    raaTemp(jj,ii) = rTemp; 
     end  
-  iaGasID(ii)=iGasID; 
+  iaGasID(ii) = iGasID; 
   end 
  
 %%%%%%%%%%%%%%%%%%%%%%
 % DATA RECORD SUMMARY
 %%%%%%%%%%%%%%%%%%%%%%
 
-nchunk=highchunk-lowchunk+1;         %number of 10000 pt chunks
+nchunk = highchunk-lowchunk+1;         %number of 10000 pt chunks
 
 flen   = fread(fin, 1, 'integer*4');
 iTotal = fread(fin, 1, 'integer*4'); % total number of chunks
@@ -146,12 +146,13 @@ if ngases ~= iGasDQ;
 end
 
 blah  = ngases+1+1;                  %ngases d/dq and d/dT,weight fcns
-for jj=1:natmos       
-  nODBrows(jj)=blah*numlay(jj)+4; 
-  end
+for jj = 1:natmos       
+  nODBrows(jj) = blah*numlay(jj)+4; 
+end
+whos nODBrows
 
-nODBs=natmos;                        %jacobians computed for each atmos
-nOBDs=natmos*(blah+1);               %in blah, also have 4 d/d(surface params)
+nODBs = natmos;                        %jacobians computed for each atmos
+nODBs = natmos*(blah+1);               %in blah, also have 4 d/d(surface params)
 fprintf(2, 'readkcjac: %d chunks, %d ODBs(num of atmos), %d total rows\n', ...
         nchunk, nODBs, sum(nODBrows));
 
@@ -203,7 +204,7 @@ end
 
 for chunk = 1:nchunk
   cumODBrow = 1;
-  for atmospheres=1:iNumAtm   %%%%%go atm by atm
+  for atmospheres = 1:iNumAtm   %%%%%go atm by atm
 
     for jacobItem = 1:iGasDQ+3    %%%%read the gas d/dqs + d/Dt + wgt + surface
       % read ODB header
@@ -229,9 +230,9 @@ for chunk = 1:nchunk
       %%%%%% to read in numlay(atmospheres) sets of data  
       %%%%%% but for surface d/dsurface we only read in 4 sets of data
       if jacobItem <= (iGasDQ+2)
-        ODBrowmax=numlay(atmospheres);
+        ODBrowmax = numlay(atmospheres);
       else
-        ODBrowmax=4;
+        ODBrowmax = 4;
         end
 
       % sanity check 

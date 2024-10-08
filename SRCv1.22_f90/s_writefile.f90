@@ -2283,7 +2283,8 @@ CONTAINS
       write(kStdWarn,*) 'Opened following file for jacobian binary output : '
       write(kStdWarn,*) caJacobFile
       CALL write_preamble_jacfile(iIOUN2, &
-        iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iChunkTotal,iaNumLayers,&
+        iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iChunkTotal,iaNumLayers, &
+        iaPrinter,iaAtmPr,iaNp,iOutTypes, &
         iNatm,iJacob,iaJacob,iNatmCldEffective,iaGases,iNumGases,raaAmt,raaTemp)
 
     END IF
@@ -3912,7 +3913,8 @@ CONTAINS
 
 !************************************************************************
       SUBROUTINE write_preamble_jacfile(iIOUN2, &
-      iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iChunkTotal,iaNumLayers,&
+      iTag,rFrLow,rFrHigh,iFileIDLo,iFileIDHi,caComment,iChunkTotal,iaNumLayers, &
+      iaPrinter,iaAtmPr,iaNp,iOutTypes, &
       iNatm,iJacob,iaJacob,iNatmCldEffective,iaGases,iNumGases,raaAmt,raaTemp)
 
     implicit none 
@@ -3952,6 +3954,7 @@ CONTAINS
     ! then figure out, of the atmospheres that have been read in, which actually
     ! have a radiance and hence jacobian calculation associated with them
     ! assume all error checking done in section above (when blah.dat is created)
+    write(kStdWarn,*) 'write_preamble_jacfile : iNatmCldEffective,iOutTypes = ',iNatmCldEffective,iOutTypes
     iNatmJac = 0
     DO iI = 1,iNatmCldEffective
       ! now output the list of mixed paths to be printed, for this atmosphere
@@ -3969,7 +3972,7 @@ CONTAINS
     WRITE(iIOUN2) iNatmJac
     WRITE(iIOUN2) (iaLayerJac(iI),iI=1,iNatmJac)
 
-    write(kStdWarn,*)'had',iNatmJac,' out of',iNatm,' atm to output'
+    write(kStdWarn,'(A,I2,A,I2,A,I3)')' for jacobians we have',iNatmJac,' out of',iNatm,' atm to output; number of layers in first atm = ',iaLayerJac(1)
     write(kStdWarn,*) (iaLayerJac(iI),iI=1,iNatmJac)
 
     iI = 1

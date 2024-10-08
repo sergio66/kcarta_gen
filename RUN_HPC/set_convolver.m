@@ -24,4 +24,5 @@ if ~exist('iInstr')
   iDoConvolve = +1; iInstr = 124; % AIRS + IASI + CRIS hi/CHIRP/CrIS lo
   iDoConvolve = +1; iInstr = 1;   % AIRS
 end
+
   

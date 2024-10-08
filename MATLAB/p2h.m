@@ -6,15 +6,23 @@ function ht = p2h(pin)
 load /home/sergio/MATLABCODE/airsheights.dat
 load /home/sergio/MATLABCODE/airslevels.dat
 
-h=airsheights;
-p=airslevels;
+h = airsheights;
+p = airslevels;
 for ii=1:100
-  pavg(ii)=(p(ii+1)-p(ii))/log(p(ii+1)/p(ii));
-  end
+  pavg(ii) = (p(ii+1)-p(ii))/log(p(ii+1)/p(ii));
+end
 %plot(h,pavg)
 
-ht=interp1(pavg,h,pin);
+%ht = interp1(pavg,h,pin);
+ht = interp1(pavg,h,pin,[],'extrap');
 
-if ((isnan(ht)) | ht > 7.05e4)
-  ht = 8.09e4;
-  end
+% boo = find(~isfinite(ht) | ht > 7.5e4);
+% ht(boo) = 7.5e4;
+% if ((isnan(ht)) | ht > 7.05e4)
+%   ht = 8.09e4;
+% end
+
+hmax = 90e3;  %% 90 km
+boo = find(~isfinite(ht) | ht > hmax);
+ht(boo) = hmax;
+

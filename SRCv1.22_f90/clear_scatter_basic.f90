@@ -1493,7 +1493,7 @@ CONTAINS
 ! iExtraSun = if the top of atmosphere is ABOVE instrument, need to
 !             calculate the attenuation due to the extra terms
 ! raExtraSun = solar radiation incident at posn of instrument NOT USED!
-    REAL :: raExtraSun(kMaxPts)
+    REAL :: raExtraSun(kMaxPts),raSunX(kMaxPts)
     REAL :: rSunTemp,rOmegaSun,rSunAngle
     REAL :: r1,r2,rPlanck,rCos,raKabs(kMaxPts)
     INTEGER :: iDoSolar,iL,iI,iFr,iExtraSun
@@ -1513,6 +1513,9 @@ CONTAINS
         write(kStdWarn,*) 'Setting Sun Radiance at TOA from Data Files'
         !read in data from file
         CALL ReadSolarData(raFreq,raSun,iTag)
+!        rSunTemp = kSunTemp
+!        raSunX = ttorad(raFreq,rSunTemp)
+!        write(kStdErr,'(A,4(F12.5,1X))') 'Solar radiance B',raFreq(1),raSunX(1)/1000,raSun(1)/1000,kForP
       ELSEIF (raFreq(1) < 605) THEN
         !! solar contribution is so small at these wavenumbers
         write(kStdWarn,*) 'Setting Sun Temperature = ',rSunTemp,' K'
@@ -1648,7 +1651,7 @@ CONTAINS
 
     iIOUN = kTempUnit
     CALL GetSolarFileName(fname,raFreq(1))
-    write(kStdWarn,*) 'solar data file = ',fname
+    write(kStdWarn,'(A,A)') 'solar data file = ',fname
     OPEN(UNIT = iIOUN,FILE=fname,STATUS='OLD',FORM='UNFORMATTED',IOSTAT = iL)
     IF (IL /= 0) THEN
       WRITE(kStdErr,1010) IL, FNAME

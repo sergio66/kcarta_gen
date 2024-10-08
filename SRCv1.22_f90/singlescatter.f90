@@ -194,6 +194,9 @@ CONTAINS
 !!! ---------------->                     <------------------------
 !!! ---------------->                     <------------------------
 !!! now do the actual scattering intensity computation
+!!! kForP is in eg ../INCLUDE/TempF90/pre_definedparam_orig605_805res.f90
+!!! kForP is in eg ../INCLUDE/TempF90/pre_definedparam_orig605_805res.f9
+!!! kForP is in eg ../INCLUDE/TempF90/pre_definedparam_orig605_805res.f90
     IF (iSolarRadOrJac == +1) THEN  !!! do stuff for rads
       DO iLay=1,iNumLayer
         iL = iaRadLayer(iLay)
@@ -203,7 +206,8 @@ CONTAINS
           raNoScale = 1.0/(1.0 - raaSSAlb(:,iL)/2*(1.0+raaAsym(:,iL)))
           raU   = raaExt(:,iL)*(1.0/abs(muSat) + 1.0/abs(muSun))
           raU   = 1.0-exp(-raU*raNoScale)
-          raU   = raU * muSun * raaSSAlb(:,iL)/kForP/(muSat+muSun)
+!          raU   = raU * muSun * raaSSAlb(:,iL)/kForP/(muSat+muSun) !! orig till Aug 2024
+          raU   = raU * muSun * raaSSAlb(:,iL)/(muSat+muSun)/2.0
           raU   = raU * rahg2_azimuth_real(-muSun,muSat,rSolAzimuth,rSatAzimuth,raaAsym(:,iL))
           raaSolarScatterX(:,iL) = raaSolarScatterX(:,iL)*raU
         ELSE
@@ -211,6 +215,8 @@ CONTAINS
           raaSolarScatterX(:,iL) = 0.0
         END IF
       END DO
+
+      print *,'mooo raFreq singlescatter.f90',raFreq(1)
 
     ELSEIF (iSolarRadOrJac == -1) THEN  !!!
       !accumulate scattered solar rad. Not used anywhere ...
