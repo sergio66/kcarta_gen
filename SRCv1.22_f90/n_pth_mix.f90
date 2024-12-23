@@ -295,7 +295,7 @@ end
 ! also, we have to read in the gasamount for WATER for gases 101,102,103 so
 ! things have to be done slightly differently
 ! also added on gas 103 (heavy water isotope 4  HOD = 162)
-    SUBROUTINE readKLAYERS4(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE readKLAYERS4(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
     iNpath,caPfName,raPressLevels,raThickness)
 
@@ -309,11 +309,13 @@ end
 ! raaAmt/Temp/Press/PartPress = current gas profile parameters
 ! iNumGases = total number of gases read in from *GASFIL + *XSCFIL
 ! iaGases   = array that tracks which gasID's should be read in
-! iaWhichGasRead = array that tracks which gases ARE read in
+! iaWhichGasRead = array that tracks which gases ARE read in == iaProfFromRTP
 ! iNpath    = total number of paths to be read in (iNumGases*kProfLayers)
 ! caPfName  = name of file containing user supplied profiles
 ! raLayerHeight = heights of layers in KM!!!!!!
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
@@ -537,6 +539,7 @@ end
         raaHeight(iaGasPathCounter(iIDgas),iGasIndex) = rH*1000 !!change to m!
 
         iaWhichGasRead(iIDgas) = 1
+        iaProfFromRTP(iIDgas) = 1
         iaCont(iIDgas) = 1       !continuum "always" included
         !water is a special case
         IF ((iIDGas == 1) .AND. (kCKD >=  0)) THEN
@@ -560,7 +563,7 @@ end
 ! note that the gases read in MUST have been entered in GASFIL or XSCFIL
 ! to count toward the tally ...
     IF (iaGases(iIDgas) > 0) THEN
-      iNumberOfGasesRead = iNumberOfGasesRead+1
+      iNumberOfGasesRead = iNumberOfGasesRead + 1
       !so that this gas is not "reread" in from ReadOtherGases
       iaAlreadyIn(iNumberOfGasesRead) = iIDGas
     ELSE
@@ -581,6 +584,7 @@ end
         write(kStdWarn,*)'Using water profile for gasID ',iIDGas
         iNumberOfGasesRead = iNumberOfGasesRead+1
         iaWhichGasRead(iIDgas) = 1
+        iaProfFromRTP(iIDgas) = 1
         iFound = -1
         iGasIndex = 1
  777    CONTINUE
@@ -1234,7 +1238,7 @@ end
 ! (2) no CON,LINSHAPE params
 ! also, we have to read in the gasamount for WATER for gases 101,102 so
 ! things have to be done slightly differently
-    SUBROUTINE readGENLN4LAYERS(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE readGENLN4LAYERS(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
     iNpath,caPfName,raPressLevels,raThickness,raTPressLevels, &
     iNumLayers)
@@ -1252,6 +1256,8 @@ end
 ! raLayerHeight = heights of layers in KM!!!!!!
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
 ! iNumLayers = how many layers this profile set puts in (<= kProfLayers)
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     REAL :: raTPressLevels(kProfLayer+1)
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases,iNumLayers
@@ -1566,6 +1572,7 @@ end
         raaHeight(iaGasPathCounter(iIDgas),iGasIndex) = (h1+h2)/2*1000  !!in m
 
         iaWhichGasRead(iIDgas) = 1
+        iaProfFromRTP(iIDgas) = 1
         iaCont(iIDgas) = 1       !continuum "always" included
         !water is a special case
         IF ((iIDGas == 1) .AND. (kCKD >= 0)) THEN
@@ -1610,6 +1617,7 @@ end
         write(kStdWarn,*)'Using water profile for gasID ',iIDGas
         iNumberOfGasesRead = iNumberOfGasesRead+1
         iaWhichGasRead(iIDgas) = 1
+        iaProfFromRTP(iIDgas) = 1
         iFound = -1
         iGasIndex = 1
  777    CONTINUE
@@ -1931,7 +1939,7 @@ end
 ! raaAmt in moles/cm2, raaPress,raaPartPress in atm, raaTemp in K, raPlevs in mb
 ! raaAmt in moles/cm2, raaPress,raaPartPress in atm, raaTemp in K, raPlevs in mb
 
-    SUBROUTINE UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE UserLevel_to_layers(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
     iNPath,caPfName,iRTP, &
     iProfileLayers,raPressLevels,raTPressLevels,raThickness)
@@ -1956,6 +1964,8 @@ end
     INTEGER :: iProfileLayers,iKnowTP,iAFGLProf
     REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iaWhichGasRead(kMaxGas),iNumGases,iZbndFinal
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
 
 ! local var
     REAL :: raPbndFinal(kProfLayer+1),raTbndFinal(kProfLayer+1)
@@ -2100,7 +2110,7 @@ end
 !!! in reading in the WaterLayers  Profile from RTP or LBLRTM
     CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead, &
       iaInputOrder,iNumGases, &
-      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+      iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
 ! now got to add in the missing gases, see READRTP_1B
 ! this was the original code
@@ -2490,13 +2500,13 @@ end
 ! if the user wants the effects of water continuum added on
     SUBROUTINE AddWaterContinuumProfile(iaGases,iNumberofGasesRead, &
     iaWhichGasRead,iaInputOrder,iNumGases, &
-    raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+    iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-    INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
+    INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases,iaProfFromRTP(kMaxGas)
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore),raaHeight(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
@@ -2509,6 +2519,7 @@ end
         write(kStdWarn,*)'Using water profile for gasID ',iIDGas
         iNumberOfGasesRead     = iNumberOfGasesRead + 1
         iaWhichGasRead(iIDgas) = 1
+        iaProfFromRTP(iIDgas) = 1
         iFound    = -1
         iGasIndex = 1
     777 CONTINUE
@@ -2528,7 +2539,7 @@ end
           raaHeight(iP,iGasIndex)    = raaHeight(iP,1)
         END DO
       ELSEIF ((iaGases(iIDGas) == 1) .AND. (iaGases(1) < 1)) THEN
-        write(kStdErr,*) 'Cannot have continuum gas (101,102) w/o water'
+        write(kStdErr,*) 'Cannot have continuum gas (101,102) or HDO (103) w/o water'
         write(kStdErr,*) 'If you need to turn off water, but have continuum'
         write(kStdErr,*) 'you need to use the mixing table, not MOLGAS'
         CALL DoStop
@@ -3044,5 +3055,31 @@ end
     RETURN
     end FUNCTION iFindJ
 
+!************************************************************************
+    SUBROUTINE SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP,&
+                             raRAmt,raRTemp,raRPress,raRPartPress, &
+                             raaAmt,raaPartPress)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! input
+    REAL :: raRAmt(kProfLayer),raRTemp(kProfLayer),raRPress(kProfLayer),raRPartPress(kProfLayer)
+    INTEGER :: iGas  !! index
+    INTEGER :: iaGases(kMaxGas)
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! did I read the gas from RTP or just put in US Std Profile
+! input/output
+    REAL :: raaAmt(kProfLayer,kGasStore),raaPartPress(kProfLayer,kGasStore)
+
+! local
+    INTEGER :: iI
+    
+    raaAmt(:,iGas)       = raRAmt
+    raaPartPress(:,iGas) = raRPartPress
+
+    RETURN
+    END SUBROUTINE SetQ_NotInRTP
+  
 !************************************************************************
 END MODULE n_pth_mix

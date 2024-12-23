@@ -374,12 +374,28 @@
             CALL FindReferenceName(caFName,iGasX,-1)
             CALL ReadRefProf(caFName,kMaxLayer,raR100Amt, &
             raR100Temp,raR100Press,raR100PartPress,iError)
-            CALL MakeRefProf(raRAmt,raRTemp,raRPress,raRPartPress, &
-            raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
-            raaPress,iGas,iGasX,iProfileLayers, &
-            raPressLevels,raThickness,iSplineType,-1,iError)
-            CALL StoreReference(raRAmt,raRTemp,raRPress,raRPartPress, &
+
+          IF (iaaOverrideDefault(3,8) .GT. 0) THEN
+            CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
+              raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+              raaPress,iGas,iGasX,iProfileLayers, &
+              raPressLevels,raThickness,iSplineType,-1,iError)
+          ELSEIF (iaaOverrideDefault(3,8) .LT. 0) THEN
+            CALL MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
+              raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+              raaPress,iGas,iGasX,iProfileLayers, &
+              raPressLevels,raThickness,iSplineType,-1,iError)
+          END IF
+          CALL StoreReference(raRAmt,raRTemp,raRPress,raRPartPress, &
             raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas,iaGases)
+  
+          IF ((iaaOverrideDefault(3,8) .LT. 0) .AND. (iaGases(iGas) .GT. 0) .AND. (iaProfFromRTP(iGas) .LE. 0)) THEN
+            write(kStdWarn,'(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas#, gasID ',iGas,iaGases(iGas)
+            write(kStdErr, '(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas ',iGas,iaGases(iGas)
+            Call SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP, &
+                               raRAmt,raRTemp,raRPress,raRPartPress, &
+                               raaAmt,raaPartPress)
+          END IF
         END IF
     END DO
     WRITE(kStdWarn,*) 'Computed the reference profiles .......'

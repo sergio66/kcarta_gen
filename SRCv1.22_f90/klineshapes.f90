@@ -727,11 +727,18 @@ CONTAINS
     iLowerOrUpper = +1
     CALL FindReferenceName(caFName,iGasID,+1)
     CALL ReadRefProf(caFName,kMaxLayer, &
-    raR100Amt,raR100Temp,raR100Press,raR100PartPress,iError)
-    CALL MakeRefProf(raRAmt,raRTemp,raRPress,raRPartPress, &
-    raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
-    raaPress,iGas,iGasID,iNumLayers, &
-    raUpperPressLevels,raDummyThickness,iSplineType,+1,iError)
+                     raR100Amt,raR100Temp,raR100Press,raR100PartPress,iError)
+    IF (iaaOverrideDefault(3,8) .GT. 0) THEN
+      CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
+                         raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+                         raaPress,iGas,iGasID,iNumLayers, &
+                         raUpperPressLevels,raDummyThickness,iSplineType,+1,iError)
+    ELSEIF (iaaOverrideDefault(3,8) .LT. 0) THEN
+      CALL MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
+                         raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+                         raaPress,iGas,iGasID,iNumLayers, &
+                         raUpperPressLevels,raDummyThickness,iSplineType,+1,iError)
+    END IF
 
     RETURN
     end SUBROUTINE upper_co2_default_profile

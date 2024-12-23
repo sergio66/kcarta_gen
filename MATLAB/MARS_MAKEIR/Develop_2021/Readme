@@ -1,0 +1,39 @@
+Develop_2021/Readme
+
+this is a new cut at MARS pressure levels, based on /home/sergio/OTHERSTUFF/klayersV205_Mars/
+see /home/sergio/OTHERSTUFF/klayersV205_Mars//Matlab/make_airs_std_p_T.m
+which references a profile by a 12th grader  https://www.grc.nasa.gov/www/k-12/airplane/atmosmrm.html
+
+-rw-r--r-- 1 sergio pi_strow 4869 May 28 08:04 driver_produce_kcarta_paramfiles_2021.m
+  calls these
+-rw-r--r-- 1 sergio pi_strow 1451 May 28 08:00 make_kcarta_airslevelheights_upper.m
+-rw-r--r-- 1 sergio pi_strow 1505 May 28 07:59 make_kcarta_airslevels_upper.m
+-rw-r--r-- 1 sergio pi_strow 1742 May 28 07:59 make_kcarta_airsheights_upper.m
+-rw-r--r-- 1 sergio pi_strow 1649 May 28 07:58 make_kcarta_airsheights.m
+-rw-r--r-- 1 sergio pi_strow 1438 May 28 07:58 make_kcarta_airslevels.m
+-rw-r--r-- 1 sergio pi_strow 1322 May 28 07:58 make_kcarta_airslevelheights.m
+-rw-r--r-- 1 sergio pi_strow 1318 May 28 07:57 make_KCARTA_database.m
+
+-rw-rw-r-- 1 sergio pi_strow 6314 May 27 15:27 mars_sergio_rtp.m
+copied from /home/sergio/OTHERSTUFF/klayersV205_Mars/Data/mars_sergio_rtp.m, and makes the "standard" profile as an rtp
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Develop_2014/Readme
+Hello Sergio,
+
+Great, thanks. Will look through. In the meantime, here is my first
+cut at a composite Mars atmosphere from MCD (Mars Climate DB). First 5
+lines are comments -- mostly to protect against my memory :-)
+
+The next 90 rows are for layering (km) that extend from 2 m to 250
+km. Pressure (mb) is column 2, and column 3 is temperature (K). It is
+unlikely that we will need this level of resolution or extent for the
+layers. However, at this point, I thought it better to look at a more
+careful layering especially near the surface.
+
+Tilak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+

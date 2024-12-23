@@ -38,15 +38,26 @@ if [[ -L airslevels_upper.param ]] ;       then rm airslevels_upper.param ; fi
 if [[ -L KCARTA_database.param ]] ;        then rm KCARTA_database.param ; fi
 if [[ -L airslevelheights.param ]] ;       then rm airslevelheights.param ; fi
 if [[ -L airslevels.param ]] ;             then rm airslevels.param ; fi
+if [[ -L airsTZ_STD.param ]] ;             then rm airsTZ_STD.param ; fi
 if [[ -L gasIDnameparam.param ]] ;         then rm gasIDnameparam.param ; fi
 
+echo "linking airsheights_upper.param"
 ln -s ../EARTH_database_params/airsheights_upper.param_earth      airsheights_upper.param       
+echo "linking airsheight.param"
 ln -s ../EARTH_database_params/airsheights.param_earth            airsheights.param
+echo "linking airslevlheights_upper.param"
 ln -s ../EARTH_database_params/airslevelheights_upper.param_earth airslevelheights_upper.param
+echo "linking airslevels_upper.param"
 ln -s ../EARTH_database_params/airslevels_upper.param_earth       airslevels_upper.param
+echo "linking KCARTA_database.param"
 ln -s ../EARTH_database_params/KCARTA_database.param_earth        KCARTA_database.param
+echo "linking airslevelheights.param"
 ln -s ../EARTH_database_params/airslevelheights.param_earth       airslevelheights.param
+echo "linking airslevels.param"
 ln -s ../EARTH_database_params/airslevels.param_earth             airslevels.param
+echo "linking airsTZ_STD.param"
+ln -s ../EARTH_database_params/airsTZ_STD.param_earth             airsTZ_STD.param
+echo "linking gasIDnameparam.param"
 ln -s ../EARTH_database_params/gasIDname.param_earth              gasIDnameparam.param
 
 ########################################################################
@@ -73,16 +84,27 @@ if [[ -L airslevels_upper.param ]] ;       then rm airslevels_upper.param ; fi
 if [[ -L KCARTA_database.param ]] ;        then rm KCARTA_database.param ; fi
 if [[ -L airslevelheights.param ]] ;       then rm airslevelheights.param ; fi
 if [[ -L airslevels.param ]] ;             then rm airslevels.param ; fi
+if [[ -L airsTZ_STD.param ]] ;             then rm airsTZ_STD.param ; fi
 if [[ -L gasIDnameparam.param ]] ;         then rm gasIDnameparam.param ; fi
 
+echo "linking airsheights_upper.param"
 ln -s ../../EARTH_database_params/airsheights_upper.param_earth      airsheights_upper.param       
+echo "linking airsheight.param"
 ln -s ../../EARTH_database_params/airsheights.param_earth            airsheights.param
+echo "linking airslevlheights_upper.param"
 ln -s ../../EARTH_database_params/airslevelheights_upper.param_earth airslevelheights_upper.param
+echo "linking airslevels_upper.param"
 ln -s ../../EARTH_database_params/airslevels_upper.param_earth       airslevels_upper.param
+echo "linking KCARTA_database.param"
 ln -s ../../EARTH_database_params/KCARTA_database.param_earth        KCARTA_database.param
+echo "linking airslevelheights.param"
 ln -s ../../EARTH_database_params/airslevelheights.param_earth       airslevelheights.param
+echo "linking airslevels.param"
 ln -s ../../EARTH_database_params/airslevels.param_earth             airslevels.param
-ln -s ../../EARTH_database_params/gasIDname_earth.param              gasIDnameparam.param
+echo "linking airsTZ_STD.param"
+ln -s ../../EARTH_database_params/airsTZ_STD.param_earth             airsTZ_STD.param
+echo "linking gasIDnameparam.param"
+ln -s ../../EARTH_database_params/gasIDname.param_earth              gasIDnameparam.param
 
 ########################################################################
 
@@ -92,5 +114,10 @@ cd ../../EARTH_database_params
 echo " "
 echo " current dir = "
 pwd
+echo "   Now going to run cp_param_files_to_f90_v122.sc ... which translates the .param_earth files to .f90 files"
+echo "   Now going to run cp_param_files_to_f90_v122.sc ... which translates the .param_earth files to .f90 files"
+echo "   Now going to run cp_param_files_to_f90_v122.sc ... which translates the .param_earth files to .f90 files"
+echo " "
 echo "Done"
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+read -p "Press [Enter] key to continue ..."

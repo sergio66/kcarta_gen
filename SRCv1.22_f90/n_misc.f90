@@ -400,7 +400,14 @@ CONTAINS
                                     !!!   remember solar tables are at 0.0025 cm-1 so will have problems for 605-905 cm-1
                                     !!!   if iaKSolar = +1, so switch to iaKSolar = 0
     iaaOverrideDefault(3,7) = +1    !!! SARTA scat tables are delta scaled, leave them scaled <DEFAULT>, -1 is to un delta scale
-
+    iaaOverrideDefault(3,8) = +1    !!! the pressure levels in "klayers.op.rtp,klayers.rp.rtp" and "../INCLUDE/TempF90/KCARTA_databaseparam.f90" agree
+                                    !!! default = +1
+                                    !!!   see eg Makefile_tar_objs_data_f90_datafix for 
+                                    !!!            Earth AIRS STD  100 and rtp from /asl/packages/klayersV205/BinV201/klayers_airs_wetwater
+                                    !!!            Earth AIRS PBL  100 and rtp from /home/chepplew/gitLib/klayersV205/Src_rtpV201/oco2
+                                    !!!            Mars  CIRAS STD 100 and rtp from /home/sergio//SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/klayersV205_Mars
+                                    !!! if set to -1, then for example compiled assuming 
+                                    !!!            Earth AIRS STD  100 and rtp from /home/chepplew/gitLib/klayersV205/Src_rtpV201/oco2
     RETURN
     end SUBROUTINE SetDefaultParams
 
@@ -698,6 +705,15 @@ CONTAINS
     IF ((abs(iTemp) /= 1)) THEN
       write(kStdErr,'(A,I2)') &
         'Keep scattering tables DeltaScaled (+1, default) or unscale them (-1) .. not ',iaaOverrideDefault(iI,iJ)
+      CALL DoStop
+    END IF
+
+    iJ = iJ+1
+    iTemp = iaaOverrideDefault(3,8)
+    iTemp = iaaOverrideDefault(iI,iJ)
+    IF ((abs(iTemp) /= 1)) THEN
+      write(kStdErr,'(A,I2)') &
+        'use ../INCLUDE/TempF90/KCARTA_databaseparam.f90 : PLEV_KCARTADATABASE_AIRS consistent with klayers grid (+1/default) or not (-1)',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 

@@ -821,8 +821,13 @@ CONTAINS
     DO iI = 1,iNumLayer
       iL = iaRadLayer(iI)
       raT(iL) = raTemp(iL)   !!note storing into raT(iL) instead of raT(iI)
-      radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raThickness(iL))/1000.0)
-      radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raZCenterAlts(iL)-raZCenterAlts(iL-1))/1000.0)
+      IF (iL .GT. 1) THEN 
+        radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raThickness(iL))/1000.0)
+        radTdz(iL) = -(raTemp(iL)-raTemp(iL-1))/((raZCenterAlts(iL)-raZCenterAlts(iL-1))/1000.0)
+      ELSE
+        radTdz(iL) = -(raTemp(iL+1)-raTemp(iL))/((raThickness(iL))/1000.0)
+        radTdz(iL) = -(raTemp(iL+1)-raTemp(iL))/((raZCenterAlts(iL+1)-raZCenterAlts(iL))/1000.0)
+      END IF
       !!!! OLD write(*,'(2(I4,1x),4(F12.5,1x))') ,iI,iL,raPress(iL),raT(iL),raThickness(iL),radTdz(iL)
 !      write(*,'(2(I4,1x),4(F12.5,1x))') ,iI,iL,pProf(iL),raZCenterAlts(iL),raT(iL),radTdz(iL)
     END DO

@@ -1,10 +1,38 @@
 #!/bin/bash
+KCOMPDATA_H2020='/asl/ftp/pub/packages/water_hdo_etc_H2020_IR_v1.ieee-le.tar'
 KCOMPDATA_H2016='/asl/ftp/pub/packages/water_hdo_etc_H2016_IR_v1.ieee-le.tar'
 KCOMPDATA_LBLRTM12p8='/asl/ftp/pub/packages/co2_ch4_lblrtm12p8.tar'
+KREFGAS2016='/asl/ftp/pub/packages/refgasH2016.tar'
+
+touch $KCOMPDATA_H2020
+#rm ${KCOMPDATA_H2020} 2> /dev/null || true;	\
+echo "tar -cvf ${KCOMPDATA_H2020}			\
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/r*_g2.dat \
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/r*g6.dat \
+  /asl/rta/kcarta/H2020.ieee-le/IR605/hdo.ieee-le/*.dat	   \
+  /asl/rta/kcarta/H2020.ieee-le/IR605/etc.ieee-le/*.dat    \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*.dat   \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*32.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*25.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin" 
+tar -cf ${KCOMPDATA_H2020}			\
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/r*_g2.dat \
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/r*g6.dat \
+  /asl/rta/kcarta/H2020.ieee-le/IR605/hdo.ieee-le/*.dat	   \
+  /asl/rta/kcarta/H2020.ieee-le/IR605/etc.ieee-le/*.dat    \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*.dat   \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CT-N2*  \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*32.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*25.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin \
+  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin 
 
 touch $KCOMPDATA_H2016
 #rm ${KCOMPDATA_H2016} 2> /dev/null || true;	\
 echo "tar -cvf ${KCOMPDATA_H2016}			\
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/r*_g2.dat \
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/r*g6.dat \
   /asl/rta/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/*.dat	   \
   /asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/*.dat    \
   /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*.dat   \
@@ -13,6 +41,8 @@ echo "tar -cvf ${KCOMPDATA_H2016}			\
   /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin \
   /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/CKDFor1.bin" 
 tar -cf ${KCOMPDATA_H2016}			\
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/r*_g2.dat \
+  /asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/r*g6.dat \
   /asl/rta/kcarta/H2016.ieee-le/IR605/hdo.ieee-le/*.dat	   \
   /asl/rta/kcarta/H2016.ieee-le/IR605/etc.ieee-le/*.dat    \
   /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*.dat   \
@@ -37,6 +67,14 @@ tar -cf ${KCOMPDATA_LBLRTM12p8}			\
   /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv \
   /asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/*g6.dat
 #chmod 664 ${KCOMPDATA_LBLRTM12p8}
+
+touch $KREFGAS2016
+#rm ${KREFGAS2016} 2> /dev/null || true;	\
+echo "tar -cvf ${KREFGAS2016}			\
+  /asl/rta/kcarta_sergio/KCDATA/RefProf_July2010.For.v115up_CO2ppmv400"
+tar -cf ${KREFGAS2016}			\
+  /asl/rta/kcarta_sergio/KCDATA/RefProf_July2010.For.v115up_CO2ppmv400
+#chmod 664 ${KREFGAS2016}
 
 # just use MT CKD3.2 its the latest, and no need for the compressed CKD files ....
 #  /asl/rta/kcarta_sergio/KCDATA/General/CKDieee_le/*25.bin \ 

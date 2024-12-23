@@ -26,7 +26,6 @@ CONTAINS
     iaQ11,iaQ12,raQ11,raQ12, &
     iaQ21,iaQ22,raQ21,raQ22)
 
-
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
@@ -111,22 +110,10 @@ CONTAINS
     raPPoffSet(5) = 10.0
     456 FORMAT(I3,6(' ',ES12.5))
      
-    write(kStdWarn,*) 'Figuring out the kComp Corner Weights ....'
-    caStr = &
-      'Layer  P(mb)  span   wgtP1    T(K)  indx    wgtT1    water span   wgtQ1'
-    write(kStdWarn,'(A)') caStr
-      caStr = &
-      '              indx1                                  amt   indx1'
-    write(kStdWarn,'(A)') caStr
-    caStr = &
-     '---------------------------------------------|-----------------------------------------|--------------------------------------'
-    write(kStdWarn,'(A)') caStr
-    caStr = &
-     'iL       rP      iaP1    raP1   iaP2   raP2  |  rT     iaT11   raT11    iaT12   raT12  |   rQ       iaQ11  raQ11  iaQ22  raQ22'
-    write(kStdWarn,'(A)') caStr
-    caStr = &
-     '---------------------------------------------|-----------------------------------------|--------------------------------------'
-    write(kStdWarn,'(A)') caStr
+    CALL print_xWeights_header_info(kStdWarn)
+    IF (iaaOverrideDefault(3,8) .EQ. -1) then
+      CALL print_xWeights_header_info(kStdErr)
+    END IF
 
 !      DO iL = 1,kProfLayer
 !        print *,iL,xPLEV_KCARTADATABASE_AIRS(iL),raOrig100P(iL),xPLEV_KCARTADATABASE_AIRS(iL+1)
@@ -141,34 +128,36 @@ CONTAINS
 
     DO iL = iLowest,kProfLayer
       !!!!!!!!!!!!!!!!!!!!!! pressure !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      rP = pProf(iL)/1013.25
+      rP = pProf(iL)/1013.25    !! this is LAYER avg pressure, in atmospheres
 
       !! get pressure bounding interval [p1 p2]
-      !! replaced .... raOrig100P,kMaxLayer) with
-      !!          .... xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
+      !! replaced .... raOrig100P,kMaxLayer) with             in atmospheres
+      !!          .... xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1) in atmospheres
       !! this was code till Dec 2015
       iaP1(iL) = iFindMaxMin(+1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
       iaP2(iL) = iFindMaxMin(-1,rP,xPLEV_KCARTADATABASE_AIRS,kMaxLayer+1)
 
       !! this is newer code, Jan 2016
+      !! >>>>>>>>>>> now switch from LEVELS to average LAY pressure <<<<<<<<<
       iaP1(iL) = iFindMaxMin(+1,rP,raOrig100P,kMaxLayer)
       iaP2(iL) = iFindMaxMin(-1,rP,raOrig100P,kMaxLayer)
 
-      !! >>>>>>>>>>> now switch from LEVELS to average LAY pressure <<<<<<<<<
       IF (iaP1(iL) > kMaxLayer) iaP1(iL) = kMaxLayer
       IF (iaP2(iL) > kMaxLayer) iaP2(iL) = kMaxLayer
-      p1 = raOrig100P(iaP1(iL))  !! lower avg press bound (so upper in hgt)
 
-      !! if iSplineType ~ 2 weight should be ~ 0
-      !! as should be iL=iaP2(iL) should be 1
-      !! ie they are OFFSET and NOT the same layer
+      p1 = raOrig100P(iaP1(iL))  !! lower avg press bound (so upper in hgt)
       p2 = raOrig100P(iaP2(iL))  !! upper avg press bound (so lower in hgt)
 
-      !! if iSplineType ~ 2 weight should be ~ 1
+      !! if iSplineType ~ 2 weight raP1 should be ~ 0
+      !! as should be iL=iaP2(iL) should be 1
+      !! ie they are OFFSET and NOT the same layer
+
+      !! if iSplineType ~ 2 weight raP2 should be ~ 1
       !! as should be one-> one correspondance
       !! between iL and iaP2(iL)
-      p1LEV = xPLEV_KCARTADATABASE_AIRS(iaP1(iL))
-      p2LEV = xPLEV_KCARTADATABASE_AIRS(iaP2(iL))
+
+      !! p1LEV = xPLEV_KCARTADATABASE_AIRS(iaP1(iL))
+      !! p2LEV = xPLEV_KCARTADATABASE_AIRS(iaP2(iL))
               
       !! pressure interp weight
       !! oops this originally was 1e-3. but the <p> and rp are in atm, so can range from 1013/1013 to 0.005/1013
@@ -183,8 +172,18 @@ CONTAINS
               
 !!      write(kStdErr,456) ,iL,p1*kAtm2mb,rp*kAtm2mb,p2*kAtm2mb,(p1-p2)*kAtm2mb,raP1(iL),raP2(iL)
 
-      !! want raP2(iL) > raP1(iL)
-      IF (raP1(iL) < raP2(iL)) THEN
+!! want te weights raP2(iL) > raP1(iL), not sure why!!!!!
+! lets see what happens Dec 2024 if we turn this off
+!      IF (raP1(iL) < raP2(iL)) THEN
+!        rSwap = raP1(iL)
+!        raP1(iL) = raP2(iL)
+!        raP2(iL) = rSwap
+!        iSwap = iaP1(iL)
+!        iaP1(iL) = iaP2(iL)
+!        iaP2(iL) = iSwap
+!      END IF
+! and instead force iaP1 < iaP2
+      IF (iaP1(iL) < iaP2(iL)) THEN
         rSwap = raP1(iL)
         raP1(iL) = raP2(iL)
         raP2(iL) = rSwap
@@ -199,6 +198,8 @@ CONTAINS
 
       rSumWgt1 = rSumWgt1 + raP1(iL)
       rSumWgt2 = rSumWgt2 + raP2(iL)
+
+!!!!      write(kStdWarn,101) iL,rP*1013.25,iX1,rX1,iY1,rY1,rT,iX2,rX2,iY2,rY2,rQ,iX3,rX3,iY3,rY3
 
       !!!!!!!!!!!!!!!!!!!!!! temperature !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       rT = raPTemp(iL)
@@ -341,6 +342,9 @@ CONTAINS
       END IF
       !write(kStdWarn,100) iL,rP*1013.25,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
       write(kStdWarn,101) iL,rP*1013.25,iX1,rX1,iY1,rY1,rT,iX2,rX2,iY2,rY2,rQ,iX3,rX3,iY3,rY3
+      IF (iaaOverrideDefault(3,8) .EQ. -1) THEN
+        write(kStdErr,101) iL,rP*1013.25,iX1,rX1,iY1,rY1,rT,iX2,rX2,iY2,rY2,rQ,iX3,rX3,iY3,rY3
+      END IF
     END DO
 
     iL = (kProfLayer-iLowest+1)
@@ -1323,6 +1327,33 @@ CONTAINS
            
     RETURN
     end SUBROUTINE xCKDgases
+
+!************************************************************************
+    SUBROUTINE print_xWeights_header_info(iFile_Err_or_Warn)
+
+    INTEGER iFile_Err_or_Warn
+    CHARACTER*132 caStr
+
+    write(iFile_Err_or_Warn,*) 'Figuring out the kComp Corner Weights ....'
+
+    caStr = &
+      'Layer  P(mb)  span   wgtP1    T(K)  indx    wgtT1    water span   wgtQ1'
+    write(iFile_Err_or_Warn,'(A)') caStr
+      caStr = &
+      '              indx1                                  amt   indx1'
+    write(iFile_Err_or_Warn,'(A)') caStr
+    caStr = &
+     '---------------------------------------------|-----------------------------------------|--------------------------------------'
+    write(iFile_Err_or_Warn,'(A)') caStr
+    caStr = &
+     'iL       rP      iaP1    raP1   iaP2   raP2  |  rT     iaT11   raT11    iaT12   raT12  |   rQ       iaQ11  raQ11  iaQ22  raQ22'
+    write(iFile_Err_or_Warn,'(A)') caStr
+    caStr = &
+     '---------------------------------------------|-----------------------------------------|--------------------------------------'
+    write(iFile_Err_or_Warn,'(A)') caStr
+
+    RETURN
+    END  SUBROUTINE print_xWeights_header_info
 
 !************************************************************************
 END MODULE kcoeff_FAST

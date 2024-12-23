@@ -619,6 +619,32 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+
+12/20/24        Fixed lots of bugs for ARBITRARY PLEVS; in particualr if gas
+                is NOT in rtp profile, simply reading in the AFGL US
+                Stad AIRS 101 layer amounts as reference, is wrong;
+                this needs to be modified!!! See "SetQ_NotInRTP"
+                called in kcartamain.f90 or kcartabasic.f90
+
+12/17/24        ARBITRARY PLEVS : subr xWeights
+                n_rtp.f90 checks to see how "close" the mean prssure levels in 
+                   PLEV_KCARTADATABASE_AIRS (from ../INCLUDE/TempF90/KCARTA_databaseparam.f90) 
+                and
+                   raPressLevels (from p.plevs, from reading in the rtp file)
+                are. 
+
+                Then on checking iaaOverrideDefault(3,8), the code proceeds or halts
+                  iaaOverrideDefault(3,8) = +1 means klayers plevs must agree   with included ODdatabase plevs
+                  iaaOverrideDefault(3,8) = -1 means klayers plevs can disagree with included ODdatabase plevs
+                So if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = +1 ... yay
+                      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = +1 ... boo
+                while
+                   if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = -1 ... yay, can go ahead (the code will interpolate in T)
+                      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = -1 ... yay the code will interpolate in T and P
+
+                After this the code automatically calls SUBROUTINE xWeights to figure out how to weight the kCompressed Databse layers
+
+
 3/5/24          kLongOrShort = 0 was retired but then brought back : UTILITY/readkcarta2.x can produce netcdf files
                 which nicely separate gasODs, mixedpathODs, radiances .. which is now possible with
                 kLongOrShort = 0
@@ -1422,7 +1448,8 @@ c          real*4     clwc(MAXLEV)         ! cloud liq water content
                 "linear in tau" when only doing RT, look at that routine
 		If doing fluxes, then kTemperVary always set to +43 == what LBLRTM does
 		  
-1/14/16         Cleaned up/improved subr MakeRefProf (especially for arbitrary layers)
+1/14/16         ARBITRARY PLEVS : subr xWeights
+                Cleaned up/improved subr MakeRefProf (especially for arbitrary layers)
                 Found/fixed a bug in subr xWeights (for arbitrary pressure layers)
 		-- now use 100 <Pavg> to find the layers to do interpoation onto aritrary p_in
 		    (rather than 101 <Plevels>
@@ -2094,7 +2121,8 @@ v1.16
 03/24/11        Co2_4um_fudge was not being properly called (as the checking 
                 function needed integer, not real, argument)
 
-03/18/11        Faster version of v1.15 : the uncompression routines have been 
+03/18/11        ARBITRARY PLEVS : subr xWeights
+                Faster version of v1.15 : the uncompression routines have been 
                 rewritten to take advantage of the fact that profile remains
                 the same ==> T offset indices remain the same. This duplicates
                 the Matlab version, including the fact that we use linear 
@@ -3909,7 +3937,8 @@ Two main updates in this version :
                 pressure <= 10.0 mb, else it halts and asks user to rethink 
                 pressure levels in KLAYERS
 
-11/16/01        While splining KCARTA database defn (mypref.op) onto the 
+11/16/01        ARBITRARY PLEVS
+                While splining KCARTA database defn (mypref.op) onto the 
                 arbitrary pressure levels in the klayers file, it needs to make
                 up a new reference profile set of P,PP,T,A for each gas. This
                 is easily done by splining (old_avgP,oldVar,new_avgP) where 

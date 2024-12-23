@@ -6890,6 +6890,23 @@ R_{layer emission} (\nu) &  = &
 & = &\Sigma_{i=1}^{i=N} B(T_{i},\nu) W_{i}(\nu)
 \end{eqnarray*}
 
+\textcolor{red}{NOTE : For clear sky, the RTA integral is
+\[
+r(\nu) = \epsilon(\nu) B(\nu,T_s) e^{-\tau_{total}(\nu)} + \int_{psurface}^{0} B(T(p)) \frac{\partial \tau}{\partial p} dp
+\]
+which for numerical integration reduces to 
+\[
+r(\nu) = \epsilon(\nu) B(\nu,T_s) e^{-\tau_{total}(\nu)} + \sum B(T(i)) \frac{(1-e^{-\tau_i}) e^{-\tau_{i+1 \rightarrow TOA}(\nu)}}{\delta p} \delta p
+\]
+\[
+r(\nu) = \epsilon(\nu) B(\nu,T_s) e^{-\tau_{total}(\nu)} + \sum B(T(i)) (1-e^{-\tau_i}) e^{-\tau_{i+1 \rightarrow TOA}(\nu)}
+\]
+where $B$ is the planck function. The weighting functions we save are
+simply the term in front of $B(T(i))$ ie $ (1-e^{-\tau_i})
+e^{-\tau_{i+1 \rightarrow TOA}(\nu)} = \delta \tau_{i \rightarrow
+  TOA}(\nu)$ . You still need to divide the output weighting function by $\delta(pressure)$ at each
+layer to get the true weighting function.}
+
 \subsection{Miscellaneous notes about kCARTA Jacobians}
 In addition to the gas amount/layer temperature Jacobians and
 weighting functions described above, the Jacobians with respect to the
@@ -7349,13 +7366,55 @@ in either direction, and use that to compute the radiation exiting the cloud
 at the viewing angle. The final stage of the computation is to propagate the 
 radiation through the remaining clear sky to the instrument.
 
-\section{Significant Changes from v1.10 to v1.11}
+\section{Arbitrary Pressure Layers}
+
+\begin{verbatim}
+
+ARBITRARY PLEVS : subr xWeights
+n_rtp.f90 checks to see how "close" the mean prssure levels in 
+   PLEV_KCARTADATABASE_AIRS (from ../INCLUDE/TempF90/KCARTA_databaseparam.f90) 
+and
+   raPressLevels (from p.plevs, from reading in the rtp file)
+are. 
+
+Then on checking iaaOverrideDefault(3,8), the code proceeds or halts
+  iaaOverrideDefault(3,8) = +1 means klayers plevs must agree   with included ODdatabase plevs
+  iaaOverrideDefault(3,8) = -1 means klayers plevs can disagree with included ODdatabase plevs
+
+So if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = +1 ... yay
+      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = +1 ... boo
+while
+   if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = -1 ... yay, can go ahead (the code will interpolate in T)
+      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = -1 ... yay the code will interpolate in T and P
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Significant Changes from v1.01 to v1.22}
+See Revisions.txt in SRCv1.22_f90. Changed from f77 to f90 in about v1.20 \newline
+Also did the Mars kCARTA (without database hmmmm!) \newline
+And debugged the arbitrary pressure layering
+
+\subsection{Significant Changes from v1.21 to v1.22}
+Improved interface to DISORT
+Fixed lots of bugs
+
+\subsection{Significant Changes from v1.20 to v1.21}
+Solidifying using F90
+
+\subsection{Significant Changes from v1.18 to v1.20}
+Started using F90
+
+\cesction{Small incremental updates from 1.11 to 1.16}
+See Revisions.txt
+
+\subsection{Significant Changes from v1.10 to v1.11}
 Main improvement is to introduce NONLTE capability for the 4 um CO2. This will
 significantly slow down kCARTA, as a line by line computation is now done on
 the fly for the strongest bands, for the necessary layers. Most of this 
 NonLTE code has been developed using the GENLN3 ideas.
 
-\section{Significant Changes from v1.09 to v1.10}
+\subsection{Significant Changes from v1.09 to v1.10}
 Input profile, frequency bound settings and atmosphere definitions can now be
 set either through the namelist file, or through an AIRS RTP file. The 
 appropriate libraries for the RTP file format can be obtained using our 
@@ -7366,7 +7425,7 @@ parameters and chi functions for the CO2 4 um region, and an improved water
 vapor continuum in the 6.7 um region. Other than this, the usual small bug 
 fixes expected inherent with such a large project, were done as necessary.
 
-\section{Significant Changes from v1.08 to v1.09}
+\subsection{Significant Changes from v1.08 to v1.09}
 This version has gone away from any dependancy on the AIRS layering. In order 
 to do this, klayers.x was rewritten (by Scott Hannon) so that cpblev.f 
 contains the block data statement of the new layering. layout.f was modified 
@@ -7401,7 +7460,7 @@ do fluxes, jacobians or scattering computations. So the arrays in kcarta.param
 and scatter.param can be scaled back to size 1, to allow for this (they have
 been labelled with the comment ``space saver dimensions.''
 
-\section{Significant Changes from v1.07 to v1.08}
+\subsection{Significant Changes from v1.07 to v1.08}
 This version now has both DISORT and RTSPEC interfaced to the code, to allow 
 for scattering computations. When in RTSPEC mode, solar cannot be included
 either for up or down looking instruments. 
@@ -7479,7 +7538,7 @@ automatically figure out that there are more than 1 kLAYERS
 layers used by this cloud. As long as the cloud has sequential
 layering, from TOP to BOTTOM, the code is happy .
 
-\section{Significant Changes from v1.06 to v1.07}
+\subsection{Significant Changes from v1.06 to v1.07}
 
 The major change is to create gasIDs 101 and 102 for the self and foreign
 water continuum. The water continuum is computed using a lookup table based

@@ -18,6 +18,8 @@ sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/pos
 
 #########################
 
+/bin/cp ../INCLUDE/TempF90/Earth/airsTZ_STD.param             ../INCLUDE/TempF90/JunkTempDir/airsTZ_STDparam_earth.f;            fixcon ../INCLUDE/TempF90/JunkTempDir/airsTZ_STDparam_earth.f            ../INCLUDE/TempF90/airsTZ_STDparam.f90;             rm ../INCLUDE/TempF90/JunkTempDir/airsTZ_STDparam_earth.f
+
 /bin/cp ../INCLUDE/TempF90/Earth/airsheights.param             ../INCLUDE/TempF90/JunkTempDir/airsheightsparam_earth.f;            fixcon ../INCLUDE/TempF90/JunkTempDir/airsheightsparam_earth.f            ../INCLUDE/TempF90/airsheightsparam.f90;             rm ../INCLUDE/TempF90/JunkTempDir/airsheightsparam_earth.f
 
 /bin/cp ../INCLUDE/TempF90/Earth/airslevels.param              ../INCLUDE/TempF90/JunkTempDir/airslevelsparam_earth.f;             fixcon ../INCLUDE/TempF90/JunkTempDir/airslevelsparam_earth.f             ../INCLUDE/TempF90/airslevelsparam.f90;              rm ../INCLUDE/TempF90/JunkTempDir/airslevelsparam_earth.f

@@ -734,7 +734,7 @@ CONTAINS
 
     IF (((iaaOverrideDefault(1,9) .EQ. 2) .OR. (iaaOverrideDefault(1,9) .EQ. 6)) .AND. (iGasID .EQ. 2)) THEN
       CALL add_co2_wv_continuum(iGasID,raFreq,daaAbsCoeff,raTemp,raPress,raaPartPress,raThickness, &
-                                    daaDQ,daaDT,iDoDQ,iDoWVjac,daaDQWV,iYesNoCO2WVContinuum)
+                                daaDQ,daaDT,iDoDQ,iDoWVjac,daaDQWV,iYesNoCO2WVContinuum)
     END IF
     
     IF (((iaaOverrideDefault(1,9) .EQ. 4) .OR. (iaaOverrideDefault(1,9) .EQ. 6)) .AND. (iGasID .EQ. 22)) THEN
@@ -1427,7 +1427,7 @@ CONTAINS
 ! this subroutine will take in 100 AIRS layering stuff and interpolate to
 ! the new arbitrary layering
 ! WARNING : this assumes that the user has not mucked up KLAYERS layering
-!           such that highest Z pressure (lowest pressure) is NOT TOA
+!           such that highest Z pressure (lowest altitude) is NOT TOA
 !           ie still need lowest pressure (highest z) = 0.005 mb!!!!!
 ! do the lower atm (usual -1) or upper atm (NLTE +1)
 
@@ -1438,7 +1438,7 @@ CONTAINS
 ! originally in kcartamisc.f90
 
 ! see subr AddOnAFGLProfile_arblevels in n_pth_mix.f
-    SUBROUTINE MakeRefProf(raRAmt,raRTemp,raRPress,raRPartPress, &
+    SUBROUTINE MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
     raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
     raaPress,iGas,iGasID,iNumLayers, &
     raPressLevels,raThickness,iSplineType,iLowerOrUpper,iError)
@@ -1599,7 +1599,7 @@ CONTAINS
  345 FORMAT(I3,2(' ',F10.3),2(' ',I3,F10.3,' ',F10.3))    
           
 ! now that we know the weights and boundaries, off we go!!!
-! remember pV = nRT ==> p(z) dz/ r T(z) = dn(z)/V = dq(z) ==> Q = sum(p Z / R T)
+! remember pV = nRT ==> p(z) dz/ R T(z) = dn(z)/V = dq(z) ==> Q = sum(p Z / R T)
 ! so for these fractional combined layers (i), Qnew = sum(p(i) zfrac(i) / R T(i)) = sum(p(i) zfrac(i)/Z(i) Z(i) / RT(i))
 !                                                   = sum(p(i)Z(i)/RT(i) zfrac(i)/Z(i))
 ! or Qnew = sum(frac(i) Q(i))
@@ -1655,7 +1655,206 @@ CONTAINS
   1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
 
     RETURN
-    end SUBROUTINE MakeRefProf
+    end SUBROUTINE MakeRefProfV0
+
+!************************************************************************
+! this subroutine will take in 100 AIRS layering stuff and interpolate to
+! the new arbitrary layering
+! WARNING : this assumes that the user has not mucked up KLAYERS layering
+!           such that highest Z pressure (lowest altitude) is NOT TOA
+!           ie still need lowest pressure (highest z) = 0.005 mb!!!!!
+! do the lower atm (usual -1) or upper atm (NLTE +1)
+
+! kcoeffSPL, kcoeffSPLJAC divide out gas amount from the optical depths,
+! so at arbitrary pressure layering, it deals with abs coeffs
+! so we do not need raRamt
+! but we do need the interpolated temp and partial pressures
+! originally in kcartamisc.f90
+
+! see subr AddOnAFGLProfile_arblevels in n_pth_mix.f
+    SUBROUTINE MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
+    raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+    raaPress,iGas,iGasID,iNumLayers, &
+    raPressLevels,raThickness,iSplineType,iLowerOrUpper,iError)
+
+    IMPLICIT NONE
+
+    INTEGER :: iPLEV
+          
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
+    include '../INCLUDE/TempF90/airsTZ_STDparam.f90'
+
+! comment out these other include files, since we need to set them according to iLowerOrUpper
+!    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
+!    include '../INCLUDE/TempF90/airslevelheightsparam.f90'
+          
+!  kCARTA levels include P(1)=0.005, P(101) = 1100, P(38)=300
+!  P(x)=(ax^2+bx+c)7/2 formula, with the above 3 b.c.
+! The above equation and 3 data points define the 101 AIRS levels, which
+! are in airslevelsparam.f90
+!
+! but this is ARBITRARY pressure lvels so we bneed to know the way to compute the reerence profile gas amounts
+
+! input
+! do the lower atm (usual -1) or upper atm (NLTE +1)
+    INTEGER :: iLowerOrUpper
+! these are the individual reference profiles, at kMaxLayer layers
+    REAL :: raR100Amt(kMaxLayer),raR100Temp(kMaxLayer)
+    REAL :: raR100PartPress(kMaxLayer),raR100Press(kMaxLayer)
+! these are the arbitrary profiles stored in matrices
+    REAL :: raaPress(kProfLayer,kGasStore)
+    INTEGER :: iError,iGas,iGasID,iNumLayers,iSplineType
+! these are the kLAYERS pressure levels, layer thick for the current profile
+    REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
+!  output
+! these are the individual reference profiles, at kProfLayer layers
+    REAL :: raRAmt(kProfLayer),raRTemp(kProfLayer),raRMixRatio(kProfLayer)
+    REAL :: raRPartPress(kProfLayer),raRPress(kProfLayer)
+    REAL :: pMax100,pMin100
+
+! local variables
+    INTEGER :: iI,iJ,iL,iG,iZbndFinal,iStart,iX,iY
+    REAL :: raWorkT(kMaxLayer),raWorkMR(kMaxLayer),raXgivenP(kMaxLayer), &
+            raTgivenP(kMaxLayer),raT2P(kMaxLayer), &
+            raMRgivenP(kMaxLayer),raMR2P(kMaxLayer),raQALLgivenP(kMaxLayer)
+    REAL :: raWork(kMaxTemp),rYP1,rYPN,rXPT,r,r0,r2,rPPWgt
+    REAL :: raSortPressLevels(kMaxLayer+1)
+    REAL :: raSortPressHeights(kMaxLayer+1)
+    REAL :: raPPX2(kProfLayer),raQX2(kProfLayer)
+
+    REAL :: raDatabaseHeight(kMaxLayer)
+    REAL :: PLEV_KCARTADATABASE_AIRS(kMaxLayer+1)
+    
+    REAL :: raDatabaseHeightLA(kMaxLayer)
+    REAL :: DATABASELEVHEIGHTSLA(kMaxLayer+1)
+    REAL :: PLEV_KCARTADATABASE_AIRSLA(kMaxLayer+1)
+    REAL :: PAVG_KCARTADATABASE_AIRSLA(kMaxLayer)    
+    INTEGER :: iTopLA
+    REAL :: rMinLA
+    
+    INTEGER :: iaBnd(kProfLayer+1,2)
+    REAL :: raBndFrac(kProfLayer+1,2)
+    REAL :: raPP(kMaxLayer),rWgt,raMR(kMaxLayer),rFrac,rMolecules,rHeight,rQtot,rPP,rMR
+
+    REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer)
+    REAL :: raR100MR(kProfLayer),raQZ(kProfLayer),raR100Amt0(kMaxLayer)
+
+    raR100Amt0 = raR100Amt
+!! this is at AIRS 100 layers (or whatever DEFAULT is being used), ref amount is in kilomoles/cm2
+
+!if (igasID .EQ. 2) then
+!    DO iL = 1,kMaxLayer
+!      print *,'CO2 : ',raR100Press(iL),raR100Temp(iL),raR100Amt(iL)
+!    END DO
+!end if
+  
+    CALL databasestuff(iLowerOrUpper, DATABASELEVHEIGHTS,PLEV_KCARTADATABASE_AIRS,raDatabaseHeight)
+
+    IF (kProfLayer /= kMaxLayer) THEN
+      !! we do not really need this, but go for it
+      CALL getUArefprofile(1,iGasID,raUA_refP,raUA_refPP,raUA_refT,raUA_refQ)
+      CALL databasestuff(-1, DATABASELEVHEIGHTSLA,PLEV_KCARTADATABASE_AIRSLA,raDatabaseHeightLA)      
+
+      raUA_refP  = raUA_refP * katm2mb
+      raUA_refPP = raUA_refPP * katm2mb
+      raPP = PLEV_KCARTADATABASE_AIRSLA(1:kMaxLayer)-PLEV_KCARTADATABASE_AIRSLA(2:kMaxLayer+1)
+      raMR = log(PLEV_KCARTADATABASE_AIRSLA(1:kMaxLayer)/PLEV_KCARTADATABASE_AIRSLA(2:kMaxLayer+1))
+      PAVG_KCARTADATABASE_AIRSLA = raPP/raMR
+
+      iTopLA = kProfLayer
+      rMinLA = PLEV_KCARTADATABASE_AIRSLA(kMaxLayer+1)
+      DO iL = kProfLayer+1,kProfLayer-iNumLayers,-1
+        IF ((raPressLevels(iL) > 0) .AND. (raPressLevels(iL) <= rMinLA)) iTopLA = iL
+      END DO
+    END IF
+        
+    DO iL = 1,kMaxLayer
+      raQZ(kMaxLayer-iL+1) = DatabaseQZ(iL)
+    END DO
+
+    raR100MR(1:iStart) = 0.0
+    raR100MR(iStart+1:kProfLayer) = raR100Amt(iStart+1:kProfLayer)/(raQZ(iStart+1:kProfLayer))
+    raR100MR(1:kProfLayer) = raR100Amt(1:kProfLayer)/(raQZ(1:kProfLayer))
+
+! pressure variables!!!!! ----------------->
+! raaPress in atm
+
+!! this tells how many layers are NOT dumped out by kLAYERS, iStart is reset below
+    iStart = kProfLayer-iNumLayers
+
+! simply put in the pressures
+    ! these are "junk"
+    raRPress(1:iStart) = raaPress(iStart+1,iGas)
+    ! these are "correct"
+    raRPress(iStart+1:kProfLayer) = raaPress(iStart+1:kProfLayer,iGas)
+
+! now just happily spline everything on!!!!!! for the temps
+    DO iI = 1,kMaxLayer
+      raXgivenP(iI)  = log(raR100Press(kMaxLayer-iI+1))
+      raXgivenP(iI)  = raR100Press(kMaxLayer-iI+1)
+      raTgivenP(iI)  = raR100Temp(kMaxLayer-iI+1)
+      raMRgivenP(iI) = raR100MR(kMaxLayer-iI+1)
+    END DO
+    
+!   Assign values for interpolation
+!   Set rYP1 and rYPN for "natural" derivatives of 1st and Nth points
+    rYP1 = 1.0E+16
+    rYPN = 1.0E+16
+    CALL sply2(raXgivenP,raTgivenP, kMaxLayer,rYP1,rYPN,raT2P, raWorkT)
+    CALL sply2(raXgivenP,raMRgivenP,kMaxLayer,rYP1,rYPN,raMR2P,raWorkMR)
+    
+    raRTemp(1:iStart) = +999.999
+    DO iI = iStart+1,kProfLayer
+      rxpt = log(raaPress(iI,iGas))
+      rxpt = raaPress(iI,iGas)
+
+      IF (iSplineType == +1) THEN
+        CALL splin(raXgivenP,raTgivenP,raT2P,kMaxLayer,rxpt,r)
+      ELSE
+        CALL linear_one(raXgivenP,raTgivenP,kMaxLayer,rxpt,r)
+      END IF
+      raRTemp(iI) = r
+
+      IF (iSplineType == +1) THEN
+        CALL splin(raXgivenP,raMRgivenP,raMR2P,kMaxLayer,rxpt,r)
+      ELSE
+        CALL linear_one(raXgivenP,raMRgivenP,kMaxLayer,rxpt,r)
+      END IF
+      raRMixRatio(iI) = r
+
+    END DO
+          
+    raRAmt = 0.0
+    raRPartPress = 0.0
+    raQALLgivenP = raaPress(:,iGas) * 1013.25 * 100         !! P(atm)--> P(mb) --> P(N/m2)        
+    raQALLgivenP = raQALLgivenP * raThickness/8.31/raRTemp  !! moles/m2
+    raQALLgivenP = raQALLgivenP/1e4                         !! moles/cm2
+    raQALLgivenP = raQALLgivenP/1000*6.023e23               !! kilomolecules/cm2
+    raRAmt       = raQALLgivenP * raRMixRatio
+
+  print *,'new layering column sum for GAS ID = ',iGasID,sum(raR100amt0)*6.023e23,sum(raRAmt)
+
+!if (iGasID .EQ. 1) then
+!  DO iI = 1,kProfLayer
+!   write(*,'(I4,7(F12.5),ES12.5)') iI,raR100Press(iI),raTgivenP(kProfLayer-iI+1),raR100MR(iI) * 1e6, raaPress(iI,iGas), raRTemp(iI), raRMixRatio(iI)*1e6, raThickness(iI),raQALLgivenP(iI)
+!  END DO
+!  print *,'new layering column sum for GAS ID = ',iGasID,sum(raR100amt0),sum(raRAmt)
+!  call dostop
+!end if
+
+    raRAmt = raRAmt/6.023e23
+    DO iI = 1,kProfLayer
+      raRAmt(iI) = max(0.0,raRAmt(iI))
+      raRMixRatio(iI) = max(0.0,raRMixRatio(iI))
+    END DO
+    raRPartPress = raaPress(:,iGas) * raRMixRatio
+         
+  5678 FORMAT(3(' ',I3),2(' ',F10.3),1(' ',E10.5))
+  1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
+
+    RETURN
+    end SUBROUTINE MakeRefProfV1
 
 !************************************************************************
 ! this gets UA refprof for GASID 1,2,3,4,5,6,7,22

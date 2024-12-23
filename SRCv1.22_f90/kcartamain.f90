@@ -305,6 +305,7 @@
     REAL :: raTAmt(kProfLayer),raTTemp(kProfLayer)
     REAL :: raTPartPress(kProfLayer),raTPress(kProfLayer)
 ! these are the user specified layer profiles stored in matrices
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! did I read the gas from RTP or just put in US Std Profile
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
@@ -451,7 +452,7 @@
 ! read in the driver namelist file and profile
 
     CALL ReadNameListFile(iaGases,iNumGases,rFreqStart,rFreqEnd, &
-    raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont, &
+    iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont, &
     iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP, &
     iNatm,raTSpace,raTSurf,raSatAngle,raSatHeight, &
     iaNumLayer,iaaRadLayer, &
@@ -584,6 +585,12 @@
 
 ! read in the reference profiles if the GasID <= kGasComp ... if it is
 ! kWaterSelf,kWaterFor, no need to do this
+
+!    print *,'kGasStore,kMaxGas,iNumGases = ',kGasStore,kMaxGas,iNumGases
+!    do iGas = 1,kGasStore
+!      print *,'before',iGas,iNumGases,iaGases(iGas),iaProfFromRTP(iGas),raaAmt(50,iGas)/raaAmt(50,1)
+!    end do
+
     CALL FindAvgLayerPressure(raPressLevels,iProfileLayers,pProf)
     DO iGas=1,iNumGases
       IF ((iaGases(iGas) <= kGasXsecHi) .OR. (iaGases(iGas) == kNewGasHi+1)) THEN
@@ -596,15 +603,35 @@
         CALL FindReferenceName(caFName,iGasX,-1)
         CALL ReadRefProf(caFName,kMaxLayer,raR100Amt, &
           raR100Temp,raR100Press,raR100PartPress,iError)
-        CALL MakeRefProf(raRAmt,raRTemp,raRPress,raRPartPress, &
-          raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
-          raaPress,iGas,iGasX,iProfileLayers, &
-          raPressLevels,raThickness,iSplineType,-1,iError)
+        IF (iaaOverrideDefault(3,8) .GT. 0) THEN
+          CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
+            raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+            raaPress,iGas,iGasX,iProfileLayers, &
+            raPressLevels,raThickness,iSplineType,-1,iError)
+        ELSEIF (iaaOverrideDefault(3,8) .LT. 0) THEN
+          CALL MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
+            raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+            raaPress,iGas,iGasX,iProfileLayers, &
+            raPressLevels,raThickness,iSplineType,-1,iError)
+        END IF
         CALL StoreReference(raRAmt,raRTemp,raRPress,raRPartPress, &
           raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas,iaGases)
+
+        IF ((iaaOverrideDefault(3,8) .LT. 0) .AND. (iaGases(iGas) .GT. 0) .AND. (iaProfFromRTP(iGas) .LE. 0)) THEN
+          write(kStdWarn,'(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas#, gasID ',iGas,iaGases(iGas)
+          write(kStdErr, '(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas ',iGas,iaGases(iGas)
+          Call SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP, &
+                             raRAmt,raRTemp,raRPress,raRPartPress, &
+                             raaAmt,raaPartPress)
+        END IF
       END IF
     END DO
     WRITE(kStdWarn,*) 'Computed the reference profiles .......'
+
+!    do iGas = 1,kGasStore
+!      print *,'after',iGas,iNumGases,iaProfFromRTP(iGas),raaAmt(50,iGas)/raaAmt(50,1)
+!    end do
+! call dostop
 
 ! set up the output binary file and the output header text file
     CALL printstar

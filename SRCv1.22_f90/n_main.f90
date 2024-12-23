@@ -1072,7 +1072,7 @@ CONTAINS
 ! gas types for MOLGAS,XSCGAS, and start stop freqs from *FRQNCY
     iaGases,iNumGases,rf_low,rf_high, &
 ! gas profiles and layer info
-    raaAmt,raaTemp,raaPress,raaPartPress,raLayerHeight,iaCont, &
+    iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raLayerHeight,iaCont, &
     iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP, &
 ! atmosphere info
     iNatm,raTSpace,raTSurf,raSatAngle,raSatHeight, &
@@ -1142,6 +1142,8 @@ CONTAINS
 ! raaAmt/Temp/Press/PartPress = for each gas, the parameter profiles
 ! raLayerHeight = layer heights
 ! caPFName = name of profile file
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raLayerHeight(kProfLayer)
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
@@ -1529,16 +1531,27 @@ CONTAINS
 ! ******** PRFILE section
     namecomment = '******* PRFILE section *******'
     
+    iaProfFromRTP = 0  !!! assume no gases were found in rtp file, boohoo
+
 #IF (TXTsetting)
-    CALL pthfil4NMLonly(raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
+    CALL pthfil4NMLonly(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
       raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
       iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
 #ELSE
-    CALL pthfil4RTPorNML(raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
+    CALL pthfil4RTPorNML(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
       raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
       iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
 #ENDIF
 
+    iaProfFromRTP(iNumGases-2:iNumGases) = 1  !!! make sure gases 101,102,103 are set as "read in from rtp"
+
+!    do iInt = 1,kMaxGas
+!      print *,'check boohoo1',iInt,iaGases(iInt),iaWhichGasRead(iInt),iaProfFromRTP(iInt)
+!    end do
+!    do iInt = 1,kGasStore
+!      print *,iInt,iNumGases,raaAmt(50,iInt)/raaAmt(50,1)
+!    end do
+ 
     write(kStdWarn,*) 'kCKD in n_main.f90 = ',kCKD
     IF (iKnowTP < 0) THEN
       CALL Get_Temp_Plevs(iProfileLayers,iaGases,raaTemp,raaPress, &
@@ -2619,7 +2632,7 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine deals with the 'PTHFIL' keyword
-    SUBROUTINE pthfil4NMLonly(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE pthfil4NMLonly(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     caPFName,iRTP,iAFGLProf, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
     iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
@@ -2640,9 +2653,11 @@ CONTAINS
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
 ! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
 ! iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4)
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raTPressLevels(kProfLayer+1)
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
-    INTEGER :: iProfileLayers,iKnowTP,iAFGLProf
+    INTEGER :: iProfileLayers,iKnowTP,iAFGLProf,ia
     REAL :: raLayerHeight(kProfLayer)
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
     INTEGER :: iNpath,iRTP
@@ -2701,7 +2716,7 @@ CONTAINS
       IF (iGenln4 < 0) THEN
         write(kStdWarn,*) 'Scott Hannon "Klayers" Profile to be read is  : '
         write(kStdWarn,*) caPfname
-        CALL readKLAYERS4(raaAmt,raaTemp,raaPress,raaPartPress, &
+        CALL readKLAYERS4(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iNpath,caPfName,raPressLevels,raThickness)
         iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
@@ -2709,7 +2724,7 @@ CONTAINS
         write(kStdWarn,*) 'Dave Edwards "Layers" Profile to be read is  : '
         write(kStdWarn,*) caPfname
         iKnowTP = +1
-        CALL readGENLN4LAYERS(raaAmt,raaTemp,raaPress,raaPartPress, &
+        CALL readGENLN4LAYERS(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iNpath,caPfName,raPressLevels,raThickness,raTPressLevels, &
             iProfileLayers)
@@ -2718,24 +2733,24 @@ CONTAINS
     ELSEIF (kRTP >= 0) THEN
       write(kStdErr,*) 'this does NOT want RTP setup'
       CALL DoStop
-      write(kStdWarn,*) 'new style RTP profile to be read is  : '
-      write(kStdWarn,5040) caPfname
-      write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
-      !        CALL readRTP(raaAmt,raaTemp,raaPress,raaPartPress,
+      !write(kStdWarn,*) 'new style RTP profile to be read is  : '
+      !write(kStdWarn,5040) caPfname
+      !write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
+      !        CALL readRTP(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,
       !     $      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,
       !     $      iNpath,caPfName,iRTP,
       !     $      iProfileLayers,raPressLevels,raThickness)
     ELSEIF (kRTP == -10) THEN
       write(kStdWarn,*) 'LEVELS style TEXT profile to be read is  : '
       write(kStdWarn,5040) caPfname
-      CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+      CALL UserLevel_to_layers(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
     ELSEIF ((kRTP == -5) .OR. (kRTP == -6)) THEN
       write(kStdWarn,*) 'LBLRTM style TEXT profile to be read is  : '
       write(kStdWarn,5040) caPfname
-      CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+      CALL UserLevel_to_layers(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
@@ -2775,6 +2790,12 @@ CONTAINS
     caStr='<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>> &
     >>>>>>>>>>>'
     IF ((iLBLDIS > 0) .AND. (abs(kLongOrShort) <= 1)) THEN
+      IF (iaaOverrideDefault(3,8) .EQ. -1) THEN
+        write(kStdWarn,'(A)') 'ohoh iLBLDIS > 0 but we are using nonstandard rtp file (iaaOverrideDefault(3,8) .EQ. -1) and raaAmt may later be modified in SetQ_NotInRTP'
+        write(kStdErr,'(A)')  'ohoh iLBLDIS > 0 but we are using nonstandard rtp file (iaaOverrideDefault(3,8) .EQ. -1) and raaAmt may later be modified in SetQ_NotInRTP'
+        CALL DoStop 
+      END IF
+
       write(kStdWarn,5040) caStr
       write(kStdWarn,*) 'LBLRTM TAPE7 --- start cut below this line ----'
       write(kStdWarn,5040) caPFName

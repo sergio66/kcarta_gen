@@ -278,7 +278,7 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine deals with the 'PTHFIL' keyword
-    SUBROUTINE pthfil4RTPorNML(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE pthfil4RTPorNML(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     caPFName,iRTP,iAFGLProf, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
     iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
@@ -299,6 +299,8 @@ CONTAINS
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
 ! iProfileLayers = tells how many layers read in from RTP or KLAYERS file
 ! iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4)
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raTPressLevels(kProfLayer+1)
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     INTEGER :: iProfileLayers,iKnowTP,iAFGLProf
@@ -338,7 +340,7 @@ CONTAINS
 !!!kRTP =  0  : read RTP style     kLAYERS profile; set atm from namelist
 !!!kRTP = +1  : read RTP style     kLAYERS profile; set atm from RTP file
 !!!kRTP = +2  : use JPL/NOAA style LAYERS profile; set atm from namelist
-    iNumLinesRead=0
+    iNumLinesRead = 0
     IF ((kRTP < 0) .AND. (kRTP > -3) .AND. (iGenln4 > 0)) THEN
       write(kStdWarn,*) 'KCARTA expecting text GENLN4 style input profile'
     ELSEIF ((kRTP < 0) .AND. (kRTP > -3) .AND. (iGenln4 < 0)) THEN
@@ -363,11 +365,11 @@ CONTAINS
       kAFGLProf = iAFGLProf
     END IF
 
-    IF ((kRTP < 0) .AND. (kRTP >= -2)) THEN
+    IF ((kRTP >= -2) .AND. (kRTP < 0)) THEN
       IF (iGenln4 < 0) THEN
         write(kStdWarn,*) 'Scott Hannon "Klayers" Profile to be read is  : '
         write(kStdWarn,*) caPfname
-        CALL readKLAYERS4(raaAmt,raaTemp,raaPress,raaPartPress, &
+        CALL readKLAYERS4(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iNpath,caPfName,raPressLevels,raThickness)
             iProfileLayers = kProfLayer !!!!!expect kProfLayer layers
@@ -375,33 +377,37 @@ CONTAINS
         write(kStdWarn,*) 'Dave Edwards "Layers" Profile to be read is  : '
         write(kStdWarn,*) caPfname
         iKnowTP = +1
-        CALL readGENLN4LAYERS(raaAmt,raaTemp,raaPress,raaPartPress, &
+        CALL readGENLN4LAYERS(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iNpath,caPfName,raPressLevels,raThickness,raTPressLevels, &
             iProfileLayers)
       END IF
+
     ELSEIF ((kRTP >= 0) .AND. (kRTP <= 1)) THEN
       write(kStdWarn,*) 'new style RTP profile to be read is  : '
       write(kStdWarn,'(A)') caPfname
       write(kStdWarn,*) 'within this file, we will read profile # ',iRTP
-      CALL readRTP(raaAmt,raaTemp,raaPress,raaPartPress, &
+      CALL readRTP(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raThickness)
     ELSEIF (kRTP == 2) THEN
-      write(kStdWarn,*) 'NOAA/JPL layers profile '
+      write(kStdErr,*) 'NOAA/JPL layers profile '
       write(kStdErr,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
+      write(kStdWarn,*) 'NOAA/JPL layers profile '
+      write(kStdWarn,*) 'hmm, this should not be called!!! pthfil4JPL should have been called for kRTP = 2'
+      CALL DOSTOP
     ELSEIF (kRTP == -10) THEN
       write(kStdWarn,*) 'LEVELS style TEXT profile to be read is  : '
       write(kStdWarn,'(A)') caPfname
-      CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+      CALL UserLevel_to_layers(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
     ELSEIF ((kRTP == -5) .OR. (kRTP == -6)) THEN
       write(kStdWarn,*) 'LBLRTM style TEXT TAPE5/6 profile to be read is  : '
       write(kStdWarn,'(A)') caPfname
-      CALL UserLevel_to_layers(raaAmt,raaTemp,raaPress,raaPartPress, &
+      CALL UserLevel_to_layers(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPressLevels,raTPressLevels,raThickness)
@@ -1406,7 +1412,12 @@ CONTAINS
     kProfileUnitOpen = -1
 
 ! now see if there is a cloud to be used with this atmosphere
-    CALL  check_plevs(prof)
+    if (prof%plevs(1) .GT. prof%plevs(prof%nlevs)) then
+      iDownWard = +1
+    else
+      iDownWard = -1
+    end if
+    CALL  check_plevs(prof,iDownward)
 
     IF ((prof%cfrac > 0.0) .OR. (prof%cfrac2 > 0) .AND. (iaaOverrideDefault(3,5) >= 0)) THEN
       IF ((prof%cfrac <= 0) .AND. (cfrac1 > 0)) THEN
@@ -1951,7 +1962,7 @@ CONTAINS
     character(1) :: mode
     character(160) :: fname
     real :: rf1,rf2
-    integer :: iI
+    integer :: iI,iDownWard
           
     fname(1:160) = caPFName(1:160)
 
@@ -2001,7 +2012,12 @@ CONTAINS
     kSurfPress = prof%spres  ! mb
     kSurfAlt   = prof%salti  ! meters
 
-    CALL  check_plevs(prof)
+    if (prof%plevs(1) .GT. prof%plevs(prof%nlevs)) then
+      iDownWard = +1
+    else
+      iDownWard = -1
+    end if
+    CALL  check_plevs(prof,iDownWard)
 
 !!!then go ahead and look at variables prof%pobs
 !!!note that variable pobs is reset only if prof%pobs > 0, else it
@@ -2739,9 +2755,9 @@ CONTAINS
 
     elseif (iaaOverrideDefault(3,5) == -1) then
       write (kStdWarn,'(A)') & 
-        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
+        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp cloud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
       write (kStdErr,'(A)')  &
-        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp floud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
+        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp cloud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
       cfrac12 = 0.0
   
       ctype1  = -9999
@@ -3066,7 +3082,7 @@ CONTAINS
 ! things have to be done slightly differently
 
 ! now we have an additional format to deal with, which should be MUCH simpler
-    SUBROUTINE READRTP(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE READRTP(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
     iNpath,caPfName,iRTP, &
     iProfileLayers,raPresslevels,raThickness)
@@ -3088,6 +3104,8 @@ CONTAINS
 ! raLayerHeight = heights of layers in km
 ! iRTP = which profile to read in
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     INTEGER :: iRTP,iProfileLayers
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -3135,7 +3153,7 @@ CONTAINS
       IF (head.ngas >= iNumGases) THEN
         ! read in rtp profile; hope all gas profiles are there
         write(kStdWarn,*) 'Calling READRTP_1A since all expected gas profiles should be in rtp profile ...'
-        CALL READRTP_1A(raaAmt,raaTemp,raaPress,raaPartPress, &
+        CALL READRTP_1A(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iaCld100Read,raaCld100Amt, &
             iNpath,caPfName,iRTP, &
@@ -3143,7 +3161,7 @@ CONTAINS
       ELSEIF (head.ngas < iNumGases) THEN
         ! read in rtp profile; augment profiles using US Std
         write(kStdWarn,*) 'Calling READRTP_1B since not all expected gas profiles are in rtp profile ...'
-        CALL READRTP_1B(raaAmt,raaTemp,raaPress,raaPartPress, &
+        CALL READRTP_1B(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
             raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
             iaCld100Read,raaCld100Amt, &
             iNpath,caPfName,iRTP, &
@@ -3151,7 +3169,7 @@ CONTAINS
       END IF
     ELSEIF (iPtype == 2) THEN
       !! pseudolevels profile
-      CALL READRTP_2(raaAmt,raaTemp,raaPress,raaPartPress, &
+      CALL READRTP_2(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
         raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
         iNpath,caPfName,iRTP, &
         iProfileLayers,raPresslevels,raThickness)
@@ -3172,7 +3190,7 @@ CONTAINS
 ! things have to be done slightly differently
 
 ! now we have an additional format to deal with, which should be MUCH simpler
-    SUBROUTINE READRTP_1A(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE READRTP_1A(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
     iaCld100Read,raaCld100Amt, &
     iNpath,caPfName,iRTP, &
@@ -3195,6 +3213,8 @@ CONTAINS
 ! raLayerHeight = heights of layers in km
 ! iRTP = which profile to read in
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     INTEGER :: iRTP,iProfileLayers
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -3204,6 +3224,7 @@ CONTAINS
     CHARACTER(160) :: caPfname
     REAL :: rCC, raCC(kProfLayer),raJunk(kProfLayer+1)
 
+! local variables
     REAL :: raaHeight(kProfLayer,kGasStore),MGC,delta1
     REAL :: raH1(kProfLayer),raP1(kProfLayer+1)
     REAL :: rAmt,rT,rP,rPP,rH,rHm1,rdP,rdT,rZ
@@ -3222,7 +3243,7 @@ CONTAINS
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
     integer :: i,j,k,iG,iPtype,iCO2PPM
-    REAL :: raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer),salti
+    REAL :: raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer),salti,meanPLEVSdiff
 
     INTEGER :: iNpathCounterJunk,iaCld100Read(3)
     REAL :: raaCld100Amt(kProfLayer,3)
@@ -3236,6 +3257,8 @@ CONTAINS
     character(1) :: mode
     character(160) :: fname
     !logical :: isfinite,is_goodnum
+
+    iaProfFromRTP = 0
 
     MGC = kMGC
 
@@ -3276,7 +3299,12 @@ CONTAINS
 
     kProfileUnitOpen = -1
 
-    CALL  check_plevs(prof)
+    if (prof%plevs(1) .GT. prof%plevs(prof%nlevs)) then
+      iDownWard = +1
+    else
+      iDownWard = -1
+    end if
+    CALL  check_plevs(prof,iDownWard)
 
     IF (prof.plevs(1) < prof.plevs(prof.nlevs)) THEN
       ! layers are from TOA to the bottom
@@ -3375,10 +3403,37 @@ CONTAINS
       raPressLevels(j) = prof%plevs(i)                !!!! in mb
       raJunk(j)  = prof%ptemp(j)                      !!!! junk T
     END DO
+
     if (prof.nlevs .EQ. kProfLayer) THEN
       raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
       raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
     end if
+
+    !! now check
+    meanPLEVSdiff = 0.0
+    do i = 1,prof%nlevs
+      j = iFindJ(kProfLayer+1,I,iDownWard)
+      !print *,i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+      meanPLEVSdiff = meanPLEVSdiff + abs(raPressLevels(j) - PLEV_KCARTADATABASE_AIRS(j))
+    end do
+    meanPLEVSdiff = meanPLEVSdiff/prof.nlevs
+    if (meanPLEVSdiff .GT. 0.5) THEN
+      do i = 1,prof%nlevs
+        j = iFindJ(kProfLayer+1,I,iDownWard)
+        write(kStdWarn,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+        write(kStdErr,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+      end do
+      write(kStdWarn,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdErr,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
+        call DoStop
+      ELSE
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+      END IF
+    END IF
 
     DO i = 1,prof%nlevs-1
       !j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
@@ -3511,14 +3566,14 @@ CONTAINS
     END DO
 
 ! now loop iNpath/iNumGases  times for each gas in the user supplied profile
-! make sure you only do things for gases 1- 63
+! make sure you only do things for gases 1- 80
     DO iG = 1, iGasInRTPFile
       iIDGas = head.glist(iG)
       IF ((iIDGas > kGasXsecHi) .AND. (iIDGAS < kNewCloudLo)) THEN
         write(kStdWarn,*) ' ---------------------------------------------'
         write(kStdWarn,*) 'iIDGas,kGasXsecHi = ',iIDGas,kGasXsecHi
         write(kStdWarn,*) 'this is something we may ignore for "gas" profs'
-        write(kStdWarn,*) 'as it looks like continuum (101,102)'
+        write(kStdWarn,*) 'as it looks like continuum (101,102) or HDO'
       ELSEIF (iIDGas <= kGasXsecHi) THEN
         write(kStdWarn,*) ' ---------------------------------------------'
         write(kStdWarn,*) ' Reading Gas number ',iG ,' of ',iGasInRTPFile,' : ID = ',iIDGas
@@ -3594,6 +3649,7 @@ CONTAINS
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
                 if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
               END IF
+              iaProfFromRTP(iIDgas) = 1
               iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
@@ -3633,6 +3689,7 @@ CONTAINS
                 raaPress(j,iGasIndex)     = rP
                 raaPartPress(j,iGasIndex) = rPP
                 raaHeight(j,iGasIndex)    = rH
+                iaProfFromRTP(iIDgas) = 1
                 iaWhichGasRead(iIDgas) = 1
               END IF
             END IF
@@ -3730,7 +3787,7 @@ CONTAINS
 ! now see if we have to chunk on WaterSelf, WaterFor from water profile
     CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead, &
       iaInputOrder,iNumGases, &
-      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+      iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
 ! first check to see if all required gases found in the user supplied profile
     IF (iNumberOfGasesRead < iNumGases) THEN
@@ -3798,7 +3855,7 @@ CONTAINS
 ! things have to be done slightly differently
 
 ! now we have an additional format to deal with, which should be MUCH simpler
-    SUBROUTINE READRTP_1B(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE READRTP_1B(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
     iaCld100Read,raaCld100Amt, &
     iNpath,caPfName,iRTP, &
@@ -3821,6 +3878,8 @@ CONTAINS
 ! raLayerHeight = heights of layers in km
 ! iRTP = which profile to read in
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     INTEGER :: iRTP,iProfileLayers
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -3850,7 +3909,7 @@ CONTAINS
     REAL :: raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer),salti
 
     INTEGER :: iNpathCounterJunk,iaCld100Read(3)
-    REAL :: raaCld100Amt(kProfLayer,3)
+    REAL :: raaCld100Amt(kProfLayer,3),meanPLEVSdiff
 
     integer :: rtpopen, rtpread, rtpwrite, rtpclose
     record /RTPHEAD/ head
@@ -3899,7 +3958,12 @@ CONTAINS
     status = rtpclose(rchan)
    !      write(kStdWarn,*)  'read close status = ', status
 
-    CALL  check_plevs(prof)
+    if (prof%plevs(1) .GT. prof%plevs(prof%nlevs)) then
+      iDownWard = +1
+    else
+      iDownWard = -1
+    end if
+    CALL  check_plevs(prof,iDownWard)
 
     kProfileUnitOpen = -1
     write(kStdWarn,*) 'iRTP,prof%nlevs,prof%stemp = ',iRTP,prof%nlevs,prof%stemp
@@ -4003,6 +4067,7 @@ CONTAINS
       raPressLevels(j) = 0.0                          !!!! in mb, safer !!!!		
       raJunk(j)  = 0.0                                !!!! junk T
     END DO
+
     if (prof%nlevs .EQ. kProfLayer) THEN
       raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
       raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
@@ -4017,6 +4082,32 @@ CONTAINS
       write(kStdWarn,'(A,I3,A,I3,1X,I3,A,3(F12.5,1X))') 'iDownward = ',iDownward,' i,j = ',i,j,' hgt p T = ', &
          raHeight(j),raPressLevels(j),raJunk(j)
     END DO
+
+    !! now check
+    meanPLEVSdiff = 0.0;
+    do i = 1,prof%nlevs
+      j = iFindJ(kProfLayer+1,I,iDownWard)
+      print *,i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+      meanPLEVSdiff = meanPLEVSdiff + abs(raPressLevels(j) - PLEV_KCARTADATABASE_AIRS(j))
+    end do
+    meanPLEVSdiff = meanPLEVSdiff/prof.nlevs
+    if (meanPLEVSdiff .GT. 0.5) THEN
+      do i = 1,prof%nlevs
+        j = iFindJ(kProfLayer+1,I,iDownWard)
+        write(kStdWarn,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+        write(kStdErr,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+      end do
+      write(kStdWarn,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdErr,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
+        call DoStop
+      ELSE
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+      END IF
+    END IF
         
     DO i = 1,prof%nlevs-1
 !      j = iFindJ(kProfLayer+1,I,iDownWard)
@@ -4221,6 +4312,7 @@ CONTAINS
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
                 if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
               END IF
+              iaProfFromRTP(iIDgas) = 1
               iaWhichGasRead(iIDgas) = 1
             END IF
           END IF
@@ -4262,6 +4354,7 @@ CONTAINS
              raaPress(j,iGasIndex)     = rP
              raaPartPress(j,iGasIndex) = rPP
              raaHeight(j,iGasIndex)    = rH
+             iaProfFromRTP(iIDgas) = 1
              iaWhichGasRead(iIDgas) = 1
            END IF
          END IF
@@ -4358,7 +4451,7 @@ CONTAINS
 ! now see if we have to chunk on WaterSelf, WaterFor from water profile
     CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead, &
       iaInputOrder,iNumGases, &
-      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+      iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
 ! first check to see if all required gases found in the user supplied profile
     IF (iNumberOfGasesRead < iNumGases) THEN
@@ -4443,7 +4536,7 @@ CONTAINS
 ! things have to be done slightly differently
 
 ! now we have an additional format to deal with, which should be MUCH simpler
-    SUBROUTINE READRTP_2(raaAmt,raaTemp,raaPress,raaPartPress, &
+    SUBROUTINE READRTP_2(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress, &
     raLayerHeight,iNumGases,iaGases,iaWhichGasRead, &
     iNpath,caPfName,iRTP, &
     iProfileLayers,raPresslevels,raThickness)
@@ -4466,6 +4559,8 @@ CONTAINS
 ! raLayerHeight = heights of layers in km
 ! iRTP = which profile to read in
 ! raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
+! iaProfFromRTP = which gas profiles were actually read from user supplied (rtp/text/whatever) file
+    INTEGER :: iaProfFromRTP(kMaxGas)  !! was gas from RTP or just put in US Std Profile; also see iaWhichGasRead
     REAL :: raPressLevels(kProfLayer+1),raThickness(kProfLayer)
     INTEGER :: iRTP,iProfileLayers
     INTEGER :: iaGases(kMaxGas),iaWhichGasRead(kMaxGas),iNumGases
@@ -4545,7 +4640,12 @@ CONTAINS
 
     prof%nlevs = prof%nlevs + 1   !!this really was number of LAYERS
 
-    CALL  check_plevs(prof)
+    if (prof%plevs(1) .GT. prof%plevs(prof%nlevs)) then
+      iDownWard = +1
+    else
+      iDownWard = -1
+    end if
+    CALL  check_plevs(prof,iDownWard)
 
     IF (prof%plevs(1) < prof%plevs(prof%nlevs)) THEN
       ! reset prof%plevs so it has ALL the AIRS levels(1:101), rather than
@@ -4813,6 +4913,7 @@ CONTAINS
                 raaHeight(j+1,iGasIndex)  = rH                        !already in meters, note j+1
                 if (i == 1) raaHeight(j,iGasIndex) = rHm1  !set lowest altitude
               END IF
+              iaProfFromRTP(iIDgas) = 1
               iaWhichGasRead(iIDgas)    = 1
             END IF
           END IF
@@ -4852,6 +4953,7 @@ CONTAINS
                 raaPress(j,iGasIndex)     = rP
                 raaPartPress(j,iGasIndex) = rPP
                 raaHeight(j,iGasIndex)    = rH
+                iaProfFromRTP(iIDgas) = 1
                 iaWhichGasRead(iIDgas)    = 1
               END IF
             END IF
@@ -4875,7 +4977,7 @@ CONTAINS
 ! now see if we have to chunk on WaterSelf, WaterFor from water profile
     CALL AddWaterContinuumProfile(iaGases,iNumberofGasesRead,iaWhichGasRead, &
       iaInputOrder,iNumGases, &
-      raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
+      iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raaHeight)
 
 ! first check to see if all required gases found in the user supplied profile
     IF (iNumberOfGasesRead < iNumGases) THEN
@@ -5277,16 +5379,19 @@ CONTAINS
 !!! warning this is a very dangerous routine, as it resets prof.plevs
 !!! this usually happens after I average many Antartic profiles together to make one profile : 
 !!!   the lowest levels can be messed up eg 904.9, 931.5, 958.6, 986.1, 540.8   WOW
-      SUBROUTINE check_plevs(prof)
+      SUBROUTINE check_plevs(prof,iDownWard)
 
       IMPLICIT NONE      
 
     include '../INCLUDE/TempF90/scatterparam.f90'
     include 'rtpdefs.f'
     include '../INCLUDE/TempF90/airslevelsparam.f90'
+    include '../INCLUDE/TempF90/KCARTA_databaseparam.f90'
 
       record /RTPPROF/ prof
-      integer i,iFix,iGood
+      integer i,j,iFix,iGood,iDownWard
+      real meanPLEVSdiff
+      real raPressLevels(kProfLayer+1)
 
 ! hmm /asl/packages/rtpV201/include/rtpdefs.f has MAXLEV = 120 ....
 !      if (size(DATABASELEV) .EQ. size(prof%plevs)) then
@@ -5294,6 +5399,39 @@ CONTAINS
 !      else
 !        print *,size(DATABASELEV),size(prof%plevs)
 !      end if
+
+    DO i = 1,prof.nlevs
+      j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
+      raPressLevels(j) = prof%plevs(i)                !!!! in mb
+!      raHeight(j) = prof%palts(i)                     !!!! in meters
+!      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+    END DO
+
+    !! now check
+    meanPLEVSdiff = 0.0
+    do i = 1,prof%nlevs
+      j = iFindJ(kProfLayer+1,I,iDownWard)
+      !print *,i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+      meanPLEVSdiff = meanPLEVSdiff + abs(raPressLevels(j) - PLEV_KCARTADATABASE_AIRS(j))
+    end do
+    meanPLEVSdiff = meanPLEVSdiff/prof.nlevs
+    if (meanPLEVSdiff .GT. 0.5) THEN
+      do i = 1,prof%nlevs
+        j = iFindJ(kProfLayer+1,I,iDownWard)
+        write(kStdWarn,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+        write(kStdErr, '(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+      end do
+      write(kStdWarn,'(A,F12.4,A)') 'check_plevs : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdErr, '(A,F12.4,A)') 'check_plevs : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
+        call DoStop
+      ELSE
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+      END IF
+    END IF
 
       iFix = +1  !! this is if we anticipate problems, and are willing to fix them
       iFix = -1  !! safer this way, let klayers do the fixing; let kCARTA do the checking
@@ -5306,13 +5444,20 @@ CONTAINS
 
         if (abs(prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)) > 0.5) then
           if ((iFix .GT. 0) .AND. (iGood .GE. prof%nlevs-3)) THEN
-            write(kStdWarn,'(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
-            write(kStdErr, '(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            write(kStdWarn,'(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>', &
+              i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            write(kStdErr, '(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>', &
+              i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
             prof%plevs(i) = DATABASELEV(kMaxLayer+1-i+1)
-          else
-            write(kStdWarn,'(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs but iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database) >>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
-            write(kStdErr, '(A,I3,I3,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs but iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database)>>>>>>',i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
-            CALL DoStop
+          elseif ((iFix .LT. 0) .and. (iaaOverrideDefault(3,8) .EQ. +1)) then
+            write(kStdWarn,'(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs as iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database) >>>>>>', &
+              i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            write(kStdErr, '(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs as iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database)>>>>>>', &
+              i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
+            if (iaaOverrideDefault(3,8) .EQ. +1) CALL DoStop
+          elseif ((iFix .LT. 0) .and. (iaaOverrideDefault(3,8) .EQ. -1)) then
+            write(kStdWarn,'(A)') '<<<<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'
+            write(kStdErr, '(A)') '<<<<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'
           end if
         end if
       end do
