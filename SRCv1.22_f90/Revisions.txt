@@ -629,6 +629,8 @@ v1.22
                 And set iaaOverride(3,8) = -1 in your namelist file, esp if 
                   PLEVS_klayers is NOT same as PLEVS_100_AIRSlayers
 
+                iaaOverrideDefault(3,8) = -1 DEFAULT means klayers plevs can disagree with included ODdatabase plevs
+
 12/23/24        ARBITRARY PLEVS : made MakeRefProfV1 the default 
 
 12/20/24        ARBITRARY PLEVS : 

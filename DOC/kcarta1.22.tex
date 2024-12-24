@@ -7370,9 +7370,29 @@ radiation through the remaining clear sky to the instrument.
 
 \begin{verbatim}
 
+ARBITRARY PLEVS : to go back to the code from Nov 2024, grep for 
+  "to go back to orig ARB PLEVS with MakeRefProfV0 code"
+in kcartamain.f90 and in n\_rtp.f90
+comment out the Call DoStop      in n\_rtp.f90       (four of them)
+make sure you call MakeRefProfV0 in kcartamain.f90  (one of them)
+make sure you call MakeRefProfV0 in kcartabasic.f90 (one of them)
+And set iaaOverride(3,8) = -1 in your namelist file, esp if 
+  PLEVS\_klayers is NOT same as PLEVS\_100\_AIRSlayers
+
+iaaOverrideDefault(3,8) = -1 DEFAULT means klayers plevs can disagree with included ODdatabase plevs
+
+ARBITRARY PLEVS : made MakeRefProfV1 the default 
+
+ARBITRARY PLEVS : 
+Fixed lots of bugs for ARBITRARY PLEVS; in particualr if gas
+is NOT in rtp profile, simply reading in the AFGL US
+Stad AIRS 101 layer amounts as reference, is wrong;
+this needs to be modified!!! See "SetQ\_NotInRTP"
+called in kcartamain.f90 or kcartabasic.f90
+
 ARBITRARY PLEVS : subr xWeights
-n_rtp.f90 checks to see how "close" the mean prssure levels in 
-   PLEV_KCARTADATABASE_AIRS (from ../INCLUDE/TempF90/KCARTA_databaseparam.f90) 
+n\_rtp.f90 checks to see how "close" the mean prssure levels in 
+   PLEV\_KCARTADATABASE\_AIRS (from ../INCLUDE/TempF90/KCARTA\_databaseparam.f90) 
 and
    raPressLevels (from p.plevs, from reading in the rtp file)
 are. 
@@ -7381,23 +7401,24 @@ Then on checking iaaOverrideDefault(3,8), the code proceeds or halts
   iaaOverrideDefault(3,8) = +1 means klayers plevs must agree   with included ODdatabase plevs
   iaaOverrideDefault(3,8) = -1 means klayers plevs can disagree with included ODdatabase plevs
 
-So if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = +1 ... yay
-      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = +1 ... boo
+So if PLEV\_KCARTADATABASE\_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = +1 ... yay
+      PLEV\_KCARTADATABASE\_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = +1 ... boo
 while
-   if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = -1 ... yay, can go ahead (the code will interpolate in T)
-      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = -1 ... yay the code will interpolate in T and P
+   if PLEV\_KCARTADATABASE\_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = -1 ... yay, can go ahead (the code will interpolate in T)
+      PLEV\_KCARTADATABASE\_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = -1 ... yay the code will interpolate in T and P
 \end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Significant Changes from v1.01 to v1.22}
-See Revisions.txt in SRCv1.22_f90. Changed from f77 to f90 in about v1.20 \newline
+See Revisions.txt in SRCv1.22\_f90. Changed from f77 to f90 in about v1.20 \newline
 Also did the Mars kCARTA (without database hmmmm!) \newline
 And debugged the arbitrary pressure layering
 
 \subsection{Significant Changes from v1.21 to v1.22}
-Improved interface to DISORT
-Fixed lots of bugs
+Improved interface to DISORT \newline
+Improved arbitrary PLEVS interface (eg using the standard AIRS 100 layer kCompressed Database with eg finer resolution PBL klayers) \newline
+Fixed lots of bugs, improved code
 
 \subsection{Significant Changes from v1.20 to v1.21}
 Solidifying using F90
@@ -7405,7 +7426,7 @@ Solidifying using F90
 \subsection{Significant Changes from v1.18 to v1.20}
 Started using F90
 
-\cesction{Small incremental updates from 1.11 to 1.16}
+\subsection{Small incremental updates from 1.11 to 1.16}
 See Revisions.txt
 
 \subsection{Significant Changes from v1.10 to v1.11}

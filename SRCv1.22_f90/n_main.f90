@@ -2791,6 +2791,7 @@ CONTAINS
     >>>>>>>>>>>'
     IF ((iLBLDIS > 0) .AND. (abs(kLongOrShort) <= 1)) THEN
       IF (iaaOverrideDefault(3,8) .EQ. -1) THEN
+        !!!! may need to modify this part of the code
         write(kStdWarn,'(A)') 'ohoh iLBLDIS > 0 but we are using nonstandard rtp file (iaaOverrideDefault(3,8) .EQ. -1) and raaAmt may later be modified in SetQ_NotInRTP'
         write(kStdErr,'(A)')  'ohoh iLBLDIS > 0 but we are using nonstandard rtp file (iaaOverrideDefault(3,8) .EQ. -1) and raaAmt may later be modified in SetQ_NotInRTP'
         CALL DoStop 

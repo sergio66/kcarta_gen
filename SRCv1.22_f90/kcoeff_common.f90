@@ -1499,6 +1499,10 @@ CONTAINS
     REAL :: raPP(kMaxLayer),rWgt,raMR(kMaxLayer),rFrac,rMolecules,rHeight,rQtot,rPP,rMR
 
     REAL :: raUA_refP(kMaxLayer),raUA_refPP(kMaxLayer),raUA_refT(kMaxLayer),raUA_refQ(kMaxLayer)
+
+    REAL :: raR100MR(kProfLayer),raQZ(kProfLayer),raR100Amt0(kMaxLayer)
+
+    raR100Amt0 = raR100Amt
     
     CALL databasestuff(iLowerOrUpper, DATABASELEVHEIGHTS,PLEV_KCARTADATABASE_AIRS,raDatabaseHeight)
 
@@ -1650,6 +1654,9 @@ CONTAINS
       !!  write(*,5678),iGasID,iX,kProfLayer,raBndFrac(iX,1),raBndFrac(iX,2),raRPartPress(iX) 
 
     END DO
+
+    write(kStdWarn,'(A,I4,A,3(ES12.4,ES12.4))') 'GAS ID = ',iGasID,' column sum : orig PLEVS vs new PLEVS layering and ratio', sum(raR100amt0(iStart+1:kProfLayer)),sum(raRAmt(iStart+1:kProfLayer)), &
+      sum(raRAmt(iStart+1:kProfLayer))/(sum(raR100amt0(iStart+1:kProfLayer)))
      
   5678 FORMAT(3(' ',I3),2(' ',F10.3),1(' ',E10.5))
   1234 FORMAT(2(' ',I3),3(' ',F10.3),2(' ',I3),3(' ',E10.3))
@@ -1833,7 +1840,8 @@ CONTAINS
     raQALLgivenP = raQALLgivenP/1000*6.023e23               !! kilomolecules/cm2
     raRAmt       = raQALLgivenP * raRMixRatio
 
-  print *,'new layering column sum for GAS ID = ',iGasID,sum(raR100amt0)*6.023e23,sum(raRAmt)
+    write(kStdWarn,'(A,I4,A,3(ES12.4,ES12.4))') 'GAS ID = ',iGasID,' column sum : orig PLEVS vs new PLEVS layering and ratio', sum(raR100amt0(iStart+1:kProfLayer))*6.023e23,sum(raRAmt(iStart+1:kProfLayer)), &
+      sum(raRAmt(iStart+1:kProfLayer))/(sum(raR100amt0(iStart+1:kProfLayer))*6.023e23)
 
 !if (iGasID .EQ. 1) then
 !  DO iI = 1,kProfLayer
