@@ -1844,6 +1844,7 @@ CONTAINS
 !end if
 
     raRAmt = raRAmt/6.023e23
+
     DO iI = 1,kProfLayer
       raRAmt(iI) = max(0.0,raRAmt(iI))
       raRMixRatio(iI) = max(0.0,raRMixRatio(iI))

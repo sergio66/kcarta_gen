@@ -3428,7 +3428,8 @@ CONTAINS
       IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
-        call DoStop
+!! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
+      call DoStop
       ELSE
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
@@ -4102,7 +4103,8 @@ CONTAINS
       IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
-        call DoStop
+!! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
+      call DoStop
       ELSE
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
@@ -5426,7 +5428,8 @@ CONTAINS
       IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
-        call DoStop
+!! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
+      call DoStop
       ELSE
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
@@ -5454,7 +5457,10 @@ CONTAINS
               i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
             write(kStdErr, '(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs as iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database)>>>>>>', &
               i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
-            if (iaaOverrideDefault(3,8) .EQ. +1) CALL DoStop
+            if (iaaOverrideDefault(3,8) .EQ. +1) THEN 
+!! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
+            call DoStop
+            END IF
           elseif ((iFix .LT. 0) .and. (iaaOverrideDefault(3,8) .EQ. -1)) then
             write(kStdWarn,'(A)') '<<<<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'
             write(kStdErr, '(A)') '<<<<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'

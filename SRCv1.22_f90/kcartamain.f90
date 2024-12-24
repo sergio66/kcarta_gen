@@ -603,17 +603,26 @@
         CALL FindReferenceName(caFName,iGasX,-1)
         CALL ReadRefProf(caFName,kMaxLayer,raR100Amt, &
           raR100Temp,raR100Press,raR100PartPress,iError)
-        IF (iaaOverrideDefault(3,8) .GT. 0) THEN
-          CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
-            raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
-            raaPress,iGas,iGasX,iProfileLayers, &
-            raPressLevels,raThickness,iSplineType,-1,iError)
-        ELSEIF (iaaOverrideDefault(3,8) .LT. 0) THEN
-          CALL MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
-            raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
-            raaPress,iGas,iGasX,iProfileLayers, &
-            raPressLevels,raThickness,iSplineType,-1,iError)
-        END IF
+
+!!!       IF (iaaOverrideDefault(3,8) .GT. 0) THEN
+!!!         CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
+!!!           raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+!!!           raaPress,iGas,iGasX,iProfileLayers, &
+!!!           raPressLevels,raThickness,iSplineType,-1,iError)
+!!!       ELSEIF (iaaOverrideDefault(3,8) .LT. 0) THEN
+!!!         CALL MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
+!!!           raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+!!!           raaPress,iGas,iGasX,iProfileLayers, &
+!!!           raPressLevels,raThickness,iSplineType,-1,iError)
+!!!       END IF
+
+!! to go back to orig ARB PLEVS with MakeRefProfV0 code, set this to MakeRefProfV0 (MakeRefProfV1 is the newer, better code)
+!!        CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
+        CALL MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
+           raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
+           raaPress,iGas,iGasX,iProfileLayers, &
+           raPressLevels,raThickness,iSplineType,-1,iError)
+
         CALL StoreReference(raRAmt,raRTemp,raRPress,raRPartPress, &
           raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas,iaGases)
 
