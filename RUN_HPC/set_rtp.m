@@ -479,4 +479,15 @@ use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/Pengwang_SOS/KCARTA/p
 %%  iInstr = 124; % AIRS + IASI + CRIS all hi/CHIRP/CrIS lo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-use_this_rtp = '/home/sergio/KCARTA/IP_PROFILES/junk49.op.rtp'; iInstr = 2;               %% scanang = 22, sea emiss
+clear iInstr iDoConvolve
+iInstr = 4; iDoConvolve = +1;
+use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/xyzregr49_1013_400ppm.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE_Git/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Feb2020_AIRS2834_CHIRP/regr49_1013_400ppm_unitemiss.op.rtp';
+
+clear iInstr iDoConvolve
+iInstr = 1; iDoConvolve = +1;
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_pbl_1013.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_pbl_1013_22deg.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.op.rtp';
+

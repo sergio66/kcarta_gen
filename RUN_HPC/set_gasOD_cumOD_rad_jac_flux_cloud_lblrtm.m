@@ -218,6 +218,8 @@ iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac =
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 2456;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids this doess G 2,3,4,6,51,52
 iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = +1;   gg = 1001;  %% clrsky, use LBLRTM ODs  ****************************** CLR JACS 97 layers eg for 64x72 grids *** USE THIS FOR WV,O3,T ****
 
+iKCKD =  32; iHITRAN = 2020; iDoLBLRTM = 2; iDoRad = 3;  iDoCloud = -1; iDoJac = -1;               %% clrsky, use LBLRTM ODs  ****************************** BEST DEFAULT clrsky         no jacs
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -111,6 +111,18 @@ CONTAINS
 ! this calls subroutine to do pressure, temperature interpolations, then
 ! does the uncompression
 ! this is for gases other than water
+
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+! eg SUBROUTINE othergases in kcoeffMAIN.f90 calls : 
+! (1) SUBROUTINE SplineTempInterpolateNOJAC : first does a pressure interpolation
+!   daaaKx(kMaxK,kMaxTemp,kMaxLayer) ---> daaaKxNew(kMaxK,kMaxTemp,kProfLayer)
+! then temperature interpolation
+!   daaaKxNew(kMaxK,kMaxTemp,kProfLayer) --> daaKpro(kMaxk,kProfLayer)
+! (2) CALL RaisePower(daaAbsCoeff)      ie gets (abscoeff_scaled)^(1/4)
+! (3) now this is in correct units  1/(molecules/cm2)
+! (4) OD = CALL AmtScale(daaAbsCoeff,raPAmt)
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+
     SUBROUTINE GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx,daaUx, &
     raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
     pProf,iProfileLayers,iSPlineType,iLowerOrUpper)
@@ -166,7 +178,7 @@ CONTAINS
 !************************************************************************
 ! this subroutine does the interpolation of a compressed matrix
 ! note we only worry about ABS COEFFS and not OPTICAL DEPTHS here
-! first it does a pressure interpolation
+! SUBROUTINE SplineTempInterpolateNOJAC : first does a pressure interpolation
 !   daaaKx(kMaxK,kMaxTemp,kMaxLayer) ---> daaaKxNew(kMaxK,kMaxTemp,kProfLayer)
 ! then temperature interpolation
 !   daaaKxNew(kMaxK,kMaxTemp,kProfLayer) --> daaKpro(kMaxk,kProfLayer)

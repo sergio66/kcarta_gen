@@ -195,9 +195,11 @@ Future plans
   -------------------------------------------------------------------------- 
   | Test and run  NLTE Compressed ODs                                      |
   -------------------------------------------------------------------------- 
+
 v1.22   Mars suite developed more fully
         Fixed interface of DISORT into KCARTA
         Implemented the G. Tang/P. Yang fix to the Chou scattering scaling algorithm
+        Improved the ARBITRARY plevs results wrt US Standard 100 plevs
 
 v1.21   f90 version, using implied do loops, function/subroutine overloads!
         Brought back the basic 1D limb view calcs
@@ -619,6 +621,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+
+12/29/24        ARBITRARY PLEVS : MakeRefProfV1 now reads in the STD ARB PLEVS info
+                using include '../INCLUDE/TempF90/arbitrary_TZ_STDparam.f90'
+                and iUSE_ARB_STD_for_Accuracy = 1
 
 12/23/24        ARBITRARY PLEVS : to go back to the code from Nov 2024, grep for 
                   "to go back to orig ARB PLEVS with MakeRefProfV0 code"

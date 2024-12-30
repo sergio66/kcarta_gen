@@ -582,6 +582,18 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine computes the contribution of Gases 1-kGasComp (if present)
+
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+! eg SUBROUTINE othergases in kcoeffMAIN.f90 calls : 
+! (1) SUBROUTINE SplineTempInterpolateNOJAC : first does a pressure interpolation
+!   daaaKx(kMaxK,kMaxTemp,kMaxLayer) ---> daaaKxNew(kMaxK,kMaxTemp,kProfLayer)
+! then temperature interpolation
+!   daaaKxNew(kMaxK,kMaxTemp,kProfLayer) --> daaKpro(kMaxk,kProfLayer)
+! (2) CALL RaisePower(daaAbsCoeff)      ie gets (abscoeff_scaled)^(1/4)
+! (3) now this is in correct units  1/(molecules/cm2)
+! (4) OD = CALL AmtScale(daaAbsCoeff,raPAmt)
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+
     SUBROUTINE compressed(iCount,iGasID,iRefLayer,raRAmt,raRTemp,raRPress, &
     raRPartPress,iL,iU,raVTemp,iVTSet,rFileStartFr,iTag,iActualTag, &
     raFreq,iErr,raTAmt,raTTemp,raTPress,raTPart,iaCont, &
@@ -858,6 +870,18 @@ CONTAINS
 ! have to send in ref temp, amount and profile temp,amount
 ! the spline is done wrt partial pressure, while the scaling is done
 ! wrt partial pressure
+
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+! eg SUBROUTINE othergases in kcoeffMAIN.f90 calls : 
+! (1) SUBROUTINE SplineTempInterpolateNOJAC : first does a pressure interpolation
+!   daaaKx(kMaxK,kMaxTemp,kMaxLayer) ---> daaaKxNew(kMaxK,kMaxTemp,kProfLayer)
+! then temperature interpolation
+!   daaaKxNew(kMaxK,kMaxTemp,kProfLayer) --> daaKpro(kMaxk,kProfLayer)
+! (2) CALL RaisePower(daaAbsCoeff)      ie gets (abscoeff_scaled)^(1/4)
+! (3) now this is in correct units  1/(molecules/cm2)
+! (4) OD = CALL AmtScale(daaAbsCoeff,raPAmt)
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+
     SUBROUTINE water(iGasID,raFreq,rFileStartFr,iTag,iActualTag,iProfLayer,iL,iU, &
     raPAmt,raRAmt,raPPart,raRPart,raPTemp,raRTemp, &
     iErr,iDoDQ,pProf,iProfileLayers, &
@@ -1093,6 +1117,18 @@ CONTAINS
 ! this subroutine calls the routines to read in the k-compressed data
 ! iGasID tells which gas type, rFileStartFr identifies the frequency range
 ! have to send in ref temp, amount and profile temp,amount
+
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+! eg SUBROUTINE othergases in kcoeffMAIN.f90 calls : 
+! (1) SUBROUTINE SplineTempInterpolateNOJAC : first does a pressure interpolation
+!   daaaKx(kMaxK,kMaxTemp,kMaxLayer) ---> daaaKxNew(kMaxK,kMaxTemp,kProfLayer)
+! then temperature interpolation
+!   daaaKxNew(kMaxK,kMaxTemp,kProfLayer) --> daaKpro(kMaxk,kProfLayer)
+! (2) CALL RaisePower(daaAbsCoeff)      ie gets (abscoeff_scaled)^(1/4)
+! (3) now this is in correct units  1/(molecules/cm2)
+! (4) OD = CALL AmtScale(daaAbsCoeff,raPAmt)
+! >>>>>>>>>>>>>>>>>>>>>>>>>
+
     SUBROUTINE othergases(iGasID,raFreq,rFileStartFr,iTag,iActualTag, &
     iProfLayer,iL,iU, &
     raPAmt,raRAmt,raPTemp,raRTemp,iErr,iDoDQ,pProf,iProfileLayers, &

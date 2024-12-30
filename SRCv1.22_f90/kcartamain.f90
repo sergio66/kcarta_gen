@@ -616,9 +616,17 @@
 !!!           raPressLevels,raThickness,iSplineType,-1,iError)
 !!!       END IF
 
+!        IF (raaPrBdry(iAtm,1) < raaPrBdry(iAtm,2)) THEN
+!          DISORTsurfPress = raaPrBdry(iAtm,2)
+!          rSurfPress = raaPrBdry(iAtm,2)          
+!        ELSE
+!          DISORTsurfPress = raaPrBdry(iAtm,1)
+!          rSurfPress = raaPrBdry(iAtm,1)
+!        END IF
+
 !! to go back to orig ARB PLEVS with MakeRefProfV0 code, set this to MakeRefProfV0 (MakeRefProfV1 is the newer, better code)
 !!        CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
-        CALL MakeRefProfV1(raRAmt,raRTemp,raRPress,raRPartPress, &
+        CALL MakeRefProfV01(raRAmt,raRTemp,raRPress,raRPartPress, &
            raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
            raaPress,iGas,iGasX,iProfileLayers, &
            raPressLevels,raThickness,iSplineType,-1,iError)
@@ -629,10 +637,11 @@
         IF ((iaaOverrideDefault(3,8) .LT. 0) .AND. (iaGases(iGas) .GT. 0) .AND. (iaProfFromRTP(iGas) .LE. 0)) THEN
           write(kStdWarn,'(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas#, gasID ',iGas,iaGases(iGas)
           write(kStdErr, '(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas ',iGas,iaGases(iGas)
-          Call SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP, &
+         Call SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP, &
                              raRAmt,raRTemp,raRPress,raRPartPress, &
                              raaAmt,raaPartPress)
         END IF
+
       END IF
     END DO
     WRITE(kStdWarn,*) 'Computed the reference profiles .......'
