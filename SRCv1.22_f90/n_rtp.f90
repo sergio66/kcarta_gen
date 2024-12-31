@@ -254,9 +254,9 @@ CONTAINS
 
     DO iI = 1,iNatm
       IF ((iaKsolar(iI) < 0) .AND. ((rakSolarAngle(iI) >= 00.0) .AND. (rakSolarAngle(iI) <= 90.0))) THEN
-        write(kStdWarn,'(A,I3,I3,F10.3)') 'n_rtp.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+        write(kStdWarn,'(A,I4,I4,F10.3)') 'n_rtp.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
             iI,iaKsolar(iI),rakSolarAngle(iI)
-        write(kStdErr,'(A,I3,I3,F10.3)') 'n_rtp.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
+        write(kStdErr,'(A,I4,I4,F10.3)') 'n_rtp.f90 : Inconsistent solar info : iAtm, iaKsolar raKsolarAngle : ', &
             iI,iaKsolar(iI),rakSolarAngle(iI)
         CALL DoStop
       END IF
@@ -3297,8 +3297,6 @@ CONTAINS
     status = rtpclose(rchan)
     !      write(kStdWarn,*)  'read close status = ', status
 
-    kProfileUnitOpen = -1
-
     if (prof%plevs(1) .GT. prof%plevs(prof%nlevs)) then
       iDownWard = +1
     else
@@ -3306,7 +3304,9 @@ CONTAINS
     end if
     CALL  check_plevs(prof,iDownWard)
 
-    IF (prof.plevs(1) < prof.plevs(prof.nlevs)) THEN
+    kProfileUnitOpen = -1
+    write(kStdWarn,*) 'iRTP,prof%nlevs,prof%stemp = ',iRTP,prof%nlevs,prof%stemp
+    IF (prof%plevs(1) < prof%plevs(prof%nlevs)) THEN
       ! layers are from TOA to the bottom
       iDownWard = -1
       kRTP_pBot = prof%plevs(prof%nlevs)
@@ -3397,17 +3397,29 @@ CONTAINS
       write (kStdWarn,*) 'Will add on dummy info to UPPER layers'
     END IF
 
-    DO i = 1,prof.nlevs
+    ! fill this for fun (below the surface)
+    DO i = prof%nlevs+1,kProfLayer+1
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
       raHeight(j) = prof%palts(i)                     !!!! in meters
       raPressLevels(j) = prof%plevs(i)                !!!! in mb
-      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+      raPressLevels(j) = 0.0                          !!!! in mb, safer !!!!		
+      raJunk(j)  = 0.0                                !!!! junk T
     END DO
 
     if (prof.nlevs .EQ. kProfLayer) THEN
       raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
       raPressLevels(kProfLayer+1) = PLEV_KCARTADATABASE_AIRS(1)
     end if
+
+    DO i = 1,prof.nlevs
+      j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
+      raHeight(j) = prof%palts(i)                     !!!! in meters
+      raPressLevels(j) = prof%plevs(i)                !!!! in mb
+      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+      raJunk(j)  = prof%ptemp(i)                      !!!! junk T
+      write(kStdWarn,'(A,I3,A,I3,1X,I3,A,3(F12.5,1X))') 'iDownward = ',iDownward,' i,j = ',i,j,' hgt p T = ', &
+         raHeight(j),raPressLevels(j),raJunk(j)
+    END DO
 
     !! now check
     meanPLEVSdiff = 0.0
@@ -3437,9 +3449,10 @@ CONTAINS
     END IF
 
     DO i = 1,prof%nlevs-1
-      !j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
-      !pProf(j) = raPressLevels(i) - raPressLevels(i+1)
-      !pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+!      j = iFindJ(kProfLayer+1,I,iDownWard)
+!      pProf(j) = raPressLevels(i) - raPressLevels(i+1)
+!      pProf(j) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
+!      write(kStdErr,*) i,j,iDownWard,raHeight(j),raPressLevels(j),pProf(j)
        pProf(i) = raPressLevels(i) - raPressLevels(i+1)
        pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
     END DO
@@ -3638,7 +3651,8 @@ CONTAINS
           IF (iaGases(iIDgas) > 0) THEN
             Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
             IF (iFound > 0) THEN
-              !write(kStdWarn,4321) iIDGas,j,rAmt,rT,rP,rPP
+              ! write(kStdWarn,4321) iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
+              ! write(*,'(A,I4,I4,ES12.5,3(F12.5))') 'moo 1A', iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
               raaAmt(j,iGasIndex)       = rAmt
               raaTemp(j,iGasIndex)      = rT
               raaPress(j,iGasIndex)     = rP
@@ -3685,6 +3699,7 @@ CONTAINS
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
               IF (iFound > 0) THEN
                 write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0',iIDGas,'gindx,layer ',iGasIndex,i
+                ! write(*,'(A,I4,I4,ES12.5,3(F12.5))') 'moo 1A', iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
                 raaAmt(j,iGasIndex)       = rAmt
                 raaTemp(j,iGasIndex)      = rT
                 raaPress(j,iGasIndex)     = rP
@@ -3759,6 +3774,11 @@ CONTAINS
             raaCld100Amt(j,iGasIndex) = rAmt
             iaCld100Read(iGasIndex)   = 1
           END DO              !DO i = 1, prof%nlevs - 1 for klayers info
+          IF (sum(raaCld100Amt(:,iGasIndex)) .LE. 1.0e-8) THEN
+            write(kStdWarn,'(A,I3)') 'sum(raaCld100Amt(:,iGasIndex)) .LE. 1.0e-8) for iGasIndex = ',iGasIndex
+            write(kStdErr ,'(A,I3)') 'sum(raaCld100Amt(:,iGasIndex)) .LE. 1.0e-8) for iGasIndex = ',iGasIndex
+            k100layerCloud = -1
+          END IF
 
           !!! then fill bottom of atm with zeros for gas amt, partial pressure
           DO i = prof%nlevs, kProfLayer
@@ -3921,6 +3941,8 @@ CONTAINS
     character(1) :: mode
     character(160) :: fname
     !logical :: isfinite,is_goodnum
+
+    iaProfFromRTP = 0
 
     MGC = kMGC
 
@@ -4088,7 +4110,7 @@ CONTAINS
     meanPLEVSdiff = 0.0;
     do i = 1,prof%nlevs
       j = iFindJ(kProfLayer+1,I,iDownWard)
-      print *,i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
+      !print *,i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
       meanPLEVSdiff = meanPLEVSdiff + abs(raPressLevels(j) - PLEV_KCARTADATABASE_AIRS(j))
     end do
     meanPLEVSdiff = meanPLEVSdiff/prof.nlevs
@@ -4119,6 +4141,20 @@ CONTAINS
        pProf(i) = raPressLevels(i) - raPressLevels(i+1)
        pProf(i) = pProf(i)/log(raPressLevels(i)/raPressLevels(i+1))
     END DO
+
+! check that spres lies withn plevs(nlevs) and plevs(nlevs-1)
+    IF ((prof%plevs(prof%nlevs) > prof%spres) .AND. &
+    (prof%plevs(prof%nlevs-1) > prof%spres)) THEN
+      write(kStdErr,*) 'p.nlevs | p.plevs(p.nlevs) p.spres p.plevs(p.nlevs-1)'
+      write(kStdErr,*) prof%nlevs,prof%plevs(prof%nlevs),prof%spres,prof%plevs(prof%nlevs-1)
+      write(kStdErr,*) 'spres not between p.plevs(nlevs) and p.plevs(nlevs-1)'
+      write(kStdErr,*) 'i       raP(i)          raPavg(i)        raP(i+1)    spres'
+      write(kStdErr,*) '----------------------------------------------------------'
+      DO i = 1,prof%nlevs-1
+        write(kStdErr,*) i,raPressLevels(i),pProf(i),raPressLevels(i+1),prof%spres
+      END DO
+      CALL DoStop
+    END IF
 
     IF (iDownWard == -1) THEN
       !!!add on dummy stuff
@@ -4167,7 +4203,7 @@ CONTAINS
     END DO
 
 ! this variable keeps track of how many gases in the file have been read in
-    iFileGasesReadIn=0
+    iFileGasesReadIn = 0
 
 ! this variable keeps track of how many gases should be read in
     iNeed2Read = iNumGases
@@ -4302,7 +4338,8 @@ CONTAINS
           IF (iaGases(iIDgas) > 0) THEN
             Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
             IF (iFound > 0) THEN
-              ! write(kStdWarn,4321) iIDGas,j,rAmt,rT,rP,rPP
+              ! write(kStdWarn,4321) iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
+              ! write(*,'(A,I4,I4,ES12.5,3(F12.5))') 'moo 1B', iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
               raaAmt(j,iGasIndex)       = rAmt
               raaTemp(j,iGasIndex)      = rT
               raaPress(j,iGasIndex)     = rP
@@ -4423,6 +4460,11 @@ CONTAINS
           raaCld100Amt(j,iGasIndex) = rAmt
           iaCld100Read(iGasIndex)   = 1
         END DO              !DO i = 1, prof%nlevs - 1 for klayers info
+        IF (sum(raaCld100Amt(:,iGasIndex)) .LE. 1.0e-8) THEN
+          write(kStdWarn,'(A,I3)') 'sum(raaCld100Amt(:,iGasIndex)) .LE. 1.0e-8) for iGasIndex = ',iGasIndex
+          write(kStdErr ,'(A,I3)') 'sum(raaCld100Amt(:,iGasIndex)) .LE. 1.0e-8) for iGasIndex = ',iGasIndex
+          k100layerCloud = -1
+        END IF
 
         !!! then fill bottom of atm with zeros for gas amt, partial pressure
         DO i = prof%nlevs, kProfLayer
@@ -4903,7 +4945,8 @@ CONTAINS
           IF (iaGases(iIDgas) > 0) THEN
             Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
             IF (iFound > 0) THEN
-              ! rite(kStdWarn,4321) iIDGas,j,rAmt,rT,rP,rPP
+              ! write(kStdWarn,4321) iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
+              ! write(*,'(A,I4,I4,ES12.5,3(F12.5))') 'moo 2', iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
               raaAmt(j,iGasIndex)       = rAmt
               raaTemp(j,iGasIndex)      = rT
               raaPress(j,iGasIndex)     = rP

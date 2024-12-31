@@ -44,6 +44,7 @@ NETCDFLIBS = $(NETCDFX)
 #RTPHOME = /home/sergio/OTHERSTUFF/git/rtp/rtpV201  HMM THIS IS WHERE I THOUGHT I SHOULD BE
 #RTPHOME = /home/sergio/git/rtp/rtpV201/
 RTPHOME = /home/sergio/git/rtp/rtpV221/
+RTPHOME = /home/sergio/git/rtp/rtpV221_80gases/
 
 #RTPLIB = -L$(RTPHOME)/lib -lrtp90
 RTPLIB = -L$(RTPHOME)/lib -lrtp

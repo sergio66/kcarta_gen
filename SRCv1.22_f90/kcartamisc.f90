@@ -1847,5 +1847,55 @@ CONTAINS
    RETURN
    END SUBROUTINE DateTimeX
 !************************************************************************
+   SUBROUTINE DoDump_REF_ACTUAL_profiles(iNumGases,iaGases,iaProfFromRTP,raaPress,raaTemp,raaAmt,raaRAmt)
+
+   IMPLICIT   NONE
+   include '../INCLUDE/TempF90/kcartaparam.f90'
+
+   ! input
+   INTEGER :: iNumGases,iaGases(kMaxGas),iaProfFromRTP(kMaxGas)
+   REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore),raaRAmt(kProfLayer,kGasStore)
+   REAL :: raaPress(kProfLayer,kGasStore)
+
+   ! local
+   INTEGER :: iGas,iL,iIOUN_Junk,iFileErr
+   CHARACTER*80 :: caIOUN_Junk
+
+   caIOUN_Junk = 'warning_prof.tmp'
+   iIOUN_Junk = kTempUnit
+   OPEN(UNIT=iIOUN_Junk,FILE=caIOUN_Junk,FORM='FORMATTED',STATUS='UNKNOWN',IOSTAT=iFileErr)
+   IF (iFileErr /= 0) THEN
+     write(kStdErr,'(A,I4,A)')'error ',iFileErr,' opening ',caIOUN_Junk
+     CALL DoSTOP
+   END IF
+
+   kTempUnitOPEN = +1
+   write(kTempUnit,*) iNumGases
+
+!    do iGas = 1,kGasStore
+!      write(kTempUnit,*) iaGases(iGas),iaProfFromRTP(iGas)
+!    END DO
+!    DO iL = 1,kProfLayer
+!      write(kTempUnit,'(I4,F12.5,F12.5)') ,iL,raaPress(iL,1),raaTemp(iL,1)
+!    END DO
+!    DO iL = 1,kProfLayer
+!      write(kTempUnit,*) (raaAmt(iL,iGas),iGas=1,kGasStore)
+!    END DO
+!    DO iL = 1,kProfLayer
+!      write(kTempUnit,*) (raaRAmt(iL,iGas),iGas=1,kGasStore)
+!    END DO
+
+   DO iGas = 1,kGasStore
+     DO iL = 1,kProfLayer
+       write(kTempUnit,'(3(I4),I4,F12.5,F12.5,ES12.5,ES12.5,F12.5)') ,iGas,iaGases(iGas),iaProfFromRTP(iGas),iL,raaPress(iL,1),raaTemp(iL,1),raaAmt(iL,iGas),raaRAmt(iL,iGas),raaAmt(iL,iGas)/(raaRAmt(iL,iGas)+1.0e-15)
+     END DO
+   END DO
+
+   CLOSE(UNIT=iIOUN_Junk)
+   kTempUnitOPEN = -1
+
+   RETURN
+   END SUBROUTINE DoDump_REF_ACTUAL_profiles
+!************************************************************************
 
 END MODULE kcartamisc

@@ -11,5 +11,9 @@ echo " "
 
 make -f Makefile_v122_Intelf90 scat
 ls -lt ../BIN/kcarta.x90
-mv ../BIN/kcarta.x90 /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
-ls -lt /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
+
+#mv ../BIN/kcarta.x90 /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
+#ls -lt /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
+
+mv ../BIN/kcarta.x90 ../BIN/kcarta.x_f90_122_400ppmv_H20
+ls -lt ../BIN/kcarta.x_f90_122_400ppmv_H20

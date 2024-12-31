@@ -426,7 +426,34 @@ f90 modular source code now available \newline
 \section{Installing and running \kc}
 This is for the user that wants to install and use \kc as quickly as possible. 
 
-\subsection{Distributing \kc}
+\subsection{Distributing \kc : github}
+
+This is on my UMBC computer
+\begin{verbatim}
+git remote -v
+  github   git@github.com:sergio66/kcarta_gen.git (fetch)
+  github   git@github.com:sergio66/kcarta_gen.git (push)
+\end{verbatim}
+
+So if I want to clone a copy on eg \newline
+  cd /asl/s1/sergio/JUNK/gitjunk7/ 
+
+I have to do \newline
+  git clone git@github.com:sergio66/kcarta\_gen.git
+
+Then after cloning kcarta.gen I do \newline
+\begin{verbatim}
+first make these files
+  cd /asl/s1/sergio/JUNK/gitjunk7/kcarta_gen/SRCv1.22_f90
+  mkdir ../INCLUDE/TempF90/JunkTempDir
+  cp ../INCLUDE/TempF90/scatterparam.f90 ../INCLUDE/scatterparam.f90 
+
+then
+  cd /asl/s1/sergio/JUNK/gitjunk7/kcarta_gen/SRCv1.22_f90
+  make clean; ifort_compile_onefile.sc
+\end{verbatim}
+
+\subsection{Distributing \kc : tarfiles}
 The distribution is divided into three parts :
 
 \begin{itemize}

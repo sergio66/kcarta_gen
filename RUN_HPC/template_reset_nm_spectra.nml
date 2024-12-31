@@ -29,6 +29,8 @@
 
  !! arbitrary PLEVS, this is already default
  !! iaaOverride(3,8) = -1
+
+ !!!!! iaaOverride( 2, 9) = -1  !!! needed for kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20_orig605_805res';
  
  $end
 

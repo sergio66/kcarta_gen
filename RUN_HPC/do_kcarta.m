@@ -278,10 +278,13 @@ eval(loader);
 fprintf(1,'iiBin,exitcode = %6i %2i \n',iiBin,exitcode)
 
 rmer = ['!/bin/rm ' outnml ' ' outstat];  
-%rmer = ['!/bin/rm ' outnml ' status' num2str(iiBin)];
+rmer = ['!/bin/rm ' outnml ' status' num2str(iiBin)];
 fprintf(1,'%s \n',rmer);
-% rmer = ['!/bin/rm ' outstat];
-%eval(rmer);
+eval(rmer)
+
+rmer = ['!/bin/rm ' outstat];
+fprintf(1,'%s \n',rmer);
+eval(rmer);
 
 if iDoCloud == 100
   rmer = ['!/bin/rm ' outcloud100]; eval(rmer);

@@ -491,3 +491,9 @@ use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013.op.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.op.rtp';
 
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_pbl_plevs.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_airs_plevs.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_pbl_plevs_22deg.op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_airs_plevs_22deg.op.rtp';
+
+% /home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod fin=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.op.rtp fout=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.rp.rtp

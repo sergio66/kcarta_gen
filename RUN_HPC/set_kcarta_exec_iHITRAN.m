@@ -47,7 +47,14 @@ elseif iHITRAN == 2018
 elseif iHITRAN == 2020
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20_orig605_805res';
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20_MakeRefProfV0';
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20_Oct08_2024_commit_fe1acd67455c713658a4db9108915a186e5bcf7f'; %% see /asl/s1/sergio/JUNK/gitjunk7/kcarta_gen/SRCv1.22_f90
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20'; 
+
+%commit b0a442e10a3ff85d7525036dcae29a96a8a7f8af
+%Author: Sergio Machado <sergio@umbc.edu>
+%Date:   Sat Nov 27 06:28:03 2021 -0500
+%    SSM : SRCV1.22_f90 can now handle H2020 for main gases in the IR, still used H2016 for NLTE
+
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

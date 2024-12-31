@@ -391,7 +391,7 @@
 
 ! these are actually used
     INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
-    INTEGER :: iFr,ID
+    INTEGER :: iFr,ID,iMeanDeltaP
     INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
@@ -628,13 +628,13 @@
 !!        CALL MakeRefProfV0(raRAmt,raRTemp,raRPress,raRPartPress, &
         CALL MakeRefProfV01(raRAmt,raRTemp,raRPress,raRPartPress, &
            raR100Amt,raR100Temp,raR100Press,raR100PartPress, &
-           raaPress,iGas,iGasX,iProfileLayers, &
-           raPressLevels,raThickness,iSplineType,-1,iError)
+           raaPress,iGas,iGasX,iProfileLayers,iaaRadLayer, &
+           raPressLevels,raThickness,iSplineType,-1,iError,iMeanDeltaP)
 
         CALL StoreReference(raRAmt,raRTemp,raRPress,raRPartPress, &
           raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas,iaGases)
 
-        IF ((iaaOverrideDefault(3,8) .LT. 0) .AND. (iaGases(iGas) .GT. 0) .AND. (iaProfFromRTP(iGas) .LE. 0)) THEN
+        IF ((iaaOverrideDefault(3,8) .LT. 0) .AND. (iaGases(iGas) .GT. 0) .AND. (iaProfFromRTP(iGas) .LE. 0) .AND. (iMeanDeltaP .EQ. 1)) THEN
           write(kStdWarn,'(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas#, gasID ',iGas,iaGases(iGas)
           write(kStdErr, '(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas ',iGas,iaGases(iGas)
          Call SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP, &
@@ -646,12 +646,10 @@
     END DO
     WRITE(kStdWarn,*) 'Computed the reference profiles .......'
 
-!    do iGas = 1,kGasStore
-!      print *,'after',iGas,iNumGases,iaProfFromRTP(iGas),raaAmt(50,iGas)/raaAmt(50,1)
-!    end do
-! call dostop
+    CALL DoDump_REF_ACTUAL_profiles(iNumGases,iaGases,iaProfFromRTP,raaPress,raaTemp,raaAmt,raaRAmt)
+    ! call dostop
 
-! set up the output binary file and the output header text file
+    ! set up the output binary file and the output header text file
     CALL printstar
     CALL PrepareOutput(caDriverName,caOutName,caJacobFile,caJacobFile2, &
       caFluxFile,caPlanckFile,iOutFileName,iNumNLTEGases, &
