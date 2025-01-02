@@ -1847,19 +1847,21 @@ CONTAINS
    RETURN
    END SUBROUTINE DateTimeX
 !************************************************************************
-   SUBROUTINE DoDump_REF_ACTUAL_profiles(iNumGases,iaGases,iaProfFromRTP,raaPress,raaTemp,raaAmt,raaRAmt)
+   SUBROUTINE DoDump_REF_ACTUAL_profiles(iNumGases,iaGases,iaProfFromRTP,raaPress,raaTemp,raaAmt,raaRAmt,iaNumLayer,iaaRadLayer)
 
    IMPLICIT   NONE
    include '../INCLUDE/TempF90/kcartaparam.f90'
 
    ! input
+   INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
    INTEGER :: iNumGases,iaGases(kMaxGas),iaProfFromRTP(kMaxGas)
    REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore),raaRAmt(kProfLayer,kGasStore)
    REAL :: raaPress(kProfLayer,kGasStore)
 
    ! local
-   INTEGER :: iGas,iL,iIOUN_Junk,iFileErr
+   INTEGER :: iGas,iL,iJ,iIOUN_Junk,iFileErr,i1,i2
    CHARACTER*80 :: caIOUN_Junk
+   REAL :: ra1,ra2
 
    caIOUN_Junk = 'warning_prof.tmp'
    iIOUN_Junk = kTempUnit
@@ -1870,8 +1872,8 @@ CONTAINS
    END IF
 
    kTempUnitOPEN = +1
-   write(kTempUnit,*) iNumGases
-
+   write(kTempUnit,*) '% numgases = ',iNumGases
+   write(kTempUnit,*) '% iGas  iaGases  iaProfFromRTP raPress raaTemp raaAmt raaRAmt  raaAmt/raaRamt'
 !    do iGas = 1,kGasStore
 !      write(kTempUnit,*) iaGases(iGas),iaProfFromRTP(iGas)
 !    END DO
@@ -1885,10 +1887,16 @@ CONTAINS
 !      write(kTempUnit,*) (raaRAmt(iL,iGas),iGas=1,kGasStore)
 !    END DO
 
+   ra1 = 0.0
+   ra2 = 0.0
    DO iGas = 1,kGasStore
-     DO iL = 1,kProfLayer
-       write(kTempUnit,'(3(I4),I4,F12.5,F12.5,ES12.5,ES12.5,F12.5)') ,iGas,iaGases(iGas),iaProfFromRTP(iGas),iL,raaPress(iL,1),raaTemp(iL,1),raaAmt(iL,iGas),raaRAmt(iL,iGas),raaAmt(iL,iGas)/(raaRAmt(iL,iGas)+1.0e-15)
+     DO iL = 1,iaNumLayer(1)
+       iJ = iaaRadLayer(1,iL)
+       write(kTempUnit,'(3(I4),I4,I4,F12.5,F12.5,ES12.5,ES12.5,ES12.5)') ,iGas,iaGases(iGas),iaProfFromRTP(iGas),iL,iJ,raaPress(iJ,1),raaTemp(iJ,1),raaAmt(iJ,iGas),raaRAmt(iJ,iGas),raaAmt(iJ,iGas)/(raaRAmt(iJ,iGas)+1.0e-15)
      END DO
+     i1 = minval(iaaRadLayer(1,1:iaNumLayer(1)))
+     i2 = maxval(iaaRadLayer(1,1:iaNumLayer(1)))
+     write(kTempUnit,'(A,I4,I4,ES12.5,ES12.5,F12.5)') '% column Q, column Qref,ratio :  ',iGas,iaGases(iGas),sum(raaAmt(i1:i2,iGas)),sum(raaRAmt(i1:i2,iGas)),sum(raaAmt(i1:i2,iGas))/(1.0e-35+sum(raaRAmt(i1:i2,iGas)))
    END DO
 
    CLOSE(UNIT=iIOUN_Junk)

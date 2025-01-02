@@ -615,7 +615,7 @@
     END DO
     WRITE(kStdWarn,*) 'Computed the reference profiles .......'
 
-    CALL DoDump_REF_ACTUAL_profiles(iNumGases,iaGases,iaProfFromRTP,raaPress,raaTemp,raaAmt,raaRAmt)
+    CALL DoDump_REF_ACTUAL_profiles(iNumGases,iaGases,iaProfFromRTP,raaPress,raaTemp,raaAmt,raaRAmt,iaNumLayer,iaaRadLayer)
     ! call dostop
 
     ! set up the output binary file and the output header text file

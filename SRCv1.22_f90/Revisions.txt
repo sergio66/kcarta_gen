@@ -184,22 +184,25 @@ As per the wishes of the climate community, can easily handle multilayer clouds
 in PCLSAM scattering code. Have not yet transferred this to TWOSTREAM or 
 RTSPEC algorithms.
 
+Implemented the G. Tang/P. Yang fix to the Chou scattering scaling algorithm into SRCv1.22_f90
+
 Major updates to various kCARTA versions
 =========================================
-
- ============================================================================
- | These are  "research versions" of kCARTA, mainly for UMBC purposes only  |
- ============================================================================
 
 Future plans
   -------------------------------------------------------------------------- 
   | Test and run  NLTE Compressed ODs                                      |
   -------------------------------------------------------------------------- 
 
+ ============================================================================
+ | These are  "research versions" of kCARTA, mainly for UMBC purposes only  |
+ ============================================================================
+
 v1.22   Mars suite developed more fully
         Fixed interface of DISORT into KCARTA
         Implemented the G. Tang/P. Yang fix to the Chou scattering scaling algorithm
         Improved the ARBITRARY plevs results wrt US Standard 100 plevs
+        Link code to rtpV221_g80 so can now use output from klayers_g80 
 
 v1.21   f90 version, using implied do loops, function/subroutine overloads!
         Brought back the basic 1D limb view calcs
@@ -621,6 +624,12 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
+
+12/31/24        MakeRefProfV01 automatically decides betweem MakeRefProfV0 (usual 
+                kCompressed database pressure layers) or MakeRefProfV1 (new layering)
+                depending on rtp file read in. If new arbitrary layers, it also checks 
+                that the layering/levels corresponds to what is in 
+                  '../INCLUDE/TempF90/arbitrary_TZ_STDparam.f90'
 
 12/29/24        ARBITRARY PLEVS : MakeRefProfV1 now reads in the STD ARB PLEVS info
                 using include '../INCLUDE/TempF90/arbitrary_TZ_STDparam.f90'
