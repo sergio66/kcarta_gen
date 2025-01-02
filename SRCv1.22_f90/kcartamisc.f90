@@ -1865,6 +1865,7 @@ CONTAINS
 
    caIOUN_Junk = 'warning_prof.tmp'
    iIOUN_Junk = kTempUnit
+
    OPEN(UNIT=iIOUN_Junk,FILE=caIOUN_Junk,FORM='FORMATTED',STATUS='UNKNOWN',IOSTAT=iFileErr)
    IF (iFileErr /= 0) THEN
      write(kStdErr,'(A,I4,A)')'error ',iFileErr,' opening ',caIOUN_Junk
@@ -1872,8 +1873,6 @@ CONTAINS
    END IF
 
    kTempUnitOPEN = +1
-   write(kTempUnit,*) '% numgases = ',iNumGases
-   write(kTempUnit,*) '% iGas  iaGases  iaProfFromRTP raPress raaTemp raaAmt raaRAmt  raaAmt/raaRamt'
 !    do iGas = 1,kGasStore
 !      write(kTempUnit,*) iaGases(iGas),iaProfFromRTP(iGas)
 !    END DO
@@ -1887,16 +1886,19 @@ CONTAINS
 !      write(kTempUnit,*) (raaRAmt(iL,iGas),iGas=1,kGasStore)
 !    END DO
 
+   write(kTempUnit,*) '% numgases = ',iNumGases
+   write(kTempUnit,'(A)') '% iL iJ=iaRadLayer(iL) iGas  iaGases(iGas)=iGasID  iaProfFromRTP raPress raaTemp raaAmt raaRAmt  raaAmt/raaRamt'
+
    ra1 = 0.0
    ra2 = 0.0
    DO iGas = 1,kGasStore
      DO iL = 1,iaNumLayer(1)
        iJ = iaaRadLayer(1,iL)
-       write(kTempUnit,'(3(I4),I4,I4,F12.5,F12.5,ES12.5,ES12.5,ES12.5)') ,iGas,iaGases(iGas),iaProfFromRTP(iGas),iL,iJ,raaPress(iJ,1),raaTemp(iJ,1),raaAmt(iJ,iGas),raaRAmt(iJ,iGas),raaAmt(iJ,iGas)/(raaRAmt(iJ,iGas)+1.0e-15)
+       write(kTempUnit,'(5(I4),F12.5,F12.5,ES12.5,ES12.5,ES12.5)') ,iL,iJ,iGas,iaGases(iGas),iaProfFromRTP(iGas),raaPress(iJ,1),raaTemp(iJ,1),raaAmt(iJ,iGas),raaRAmt(iJ,iGas),raaAmt(iJ,iGas)/(raaRAmt(iJ,iGas)+1.0e-15)
      END DO
      i1 = minval(iaaRadLayer(1,1:iaNumLayer(1)))
      i2 = maxval(iaaRadLayer(1,1:iaNumLayer(1)))
-     write(kTempUnit,'(A,I4,I4,ES12.5,ES12.5,F12.5)') '% column Q, column Qref,ratio :  ',iGas,iaGases(iGas),sum(raaAmt(i1:i2,iGas)),sum(raaRAmt(i1:i2,iGas)),sum(raaAmt(i1:i2,iGas))/(1.0e-35+sum(raaRAmt(i1:i2,iGas)))
+     write(kTempUnit,'(A,I4,I4,I4,ES12.5,ES12.5,F12.5)') '% iG, iGasID, fromRTP file, column Q, column Qref,ratio :  ',iGas,iaGases(iGas),iaProfFromRTP(iGas),sum(raaAmt(i1:i2,iGas)),sum(raaRAmt(i1:i2,iGas)),sum(raaAmt(i1:i2,iGas))/(1.0e-35+sum(raaRAmt(i1:i2,iGas)))
    END DO
 
    CLOSE(UNIT=iIOUN_Junk)
