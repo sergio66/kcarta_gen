@@ -209,6 +209,7 @@
  !!!!! >>>>>>>>>>> testing HITRAN LM <<<<<<<<<<<<<<<<<<<<<<
 
  raAltComprDirsScale(1) = 1.00000000000
+ iaAltComprDirs(1) = 2
  caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/CO2_400ppmv/'
  caaAltComprDirs(1)= '/asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/'
 

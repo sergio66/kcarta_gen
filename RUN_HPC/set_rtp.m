@@ -484,16 +484,39 @@ iInstr = 4; iDoConvolve = +1;
 use_this_rtp = '/home/sergio/MATLABCODE/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm/xyzregr49_1013_400ppm.op.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE_Git/REGR_PROFILES_SARTA/RUN_KCARTA/REGR49_400ppm_H2016_Feb2020_AIRS2834_CHIRP/regr49_1013_400ppm_unitemiss.op.rtp';
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% /home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod fin=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.op.rtp fout=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.rp.rtp
+
 clear iInstr iDoConvolve
 iInstr = 1; iDoConvolve = +1;
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_pbl_1013.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_pbl_1013_22deg.op.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.op.rtp';
-
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_pbl_plevs.op.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_airs_plevs.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_pbl_plevs_22deg.op.rtp';
-use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_airs_plevs_22deg.op.rtp';
 
-% /home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod fin=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.op.rtp fout=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.rp.rtp
+use_this_rtp = '/umbc/xfs2/strow/asl/s1/sergio/rtp/rtp_airicrad_v6/2011/03/11/clear_airs_l1c_test_2011.03.11.039_cumsum_-1_noclds_pbl.op.rtp';
+use_this_rtp = '/umbc/xfs2/strow/asl/s1/sergio/rtp/rtp_airicrad_v6/2011/03/11/clear_airs_l1c_test_2011.03.11.039_cumsum_-1_noclds_airs.op.rtp';
+use_this_rtp = '/umbc/xfs2/strow/asl/s1/sergio/rtp/rtp_airicrad_v6/2011/03/11/night_clear_airs_l1c_test_2011.03.11.039_cumsum_-1_noclds_airs.op.rtp';
+use_this_rtp = '/umbc/xfs2/strow/asl/s1/sergio/rtp/rtp_airicrad_v6/2011/03/11/night_clear_airs_l1c_test_2011.03.11.039_cumsum_-1_noclds_pbl.op.rtp';
+
+%% <<<< see home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/JUNK/Test_ArbPLEVS_PBL/driver_check_AIRS.m >>>>
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_pbl_1013_22deg.op.rtp';            %% yay
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_airs_1013_22deg.op.rtp';           %% yippee yay
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_airs_plevs_22deg.op.rtp'; %% yay
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/regr49_1013_g80_pbl_plevs_22deg.op.rtp';  %% yay
+%% <<<< see home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/JUNK/Test_ArbPLEVS_PBL/driver_check_AIRS.m >>>>
+
+% /home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod fin=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_op.rtp fout=/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_rp.rtp
+
+use_this_rtp = '/home/chepplew/data/scratch/sub6000clr_airs_g12_op.rtp';
+use_this_rtp = '/home/chepplew/data/scratch/sub6000clr_pbl_g80_op.rtp';
+use_this_rtp = '/home/chepplew/data/scratch/sub6000clr_airs_g80_op.rtp';
+use_this_rtp = '/home/chepplew/data/scratch/sub6000clr_pbl_g12_op.rtp';
+
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_pbl_g12_op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g80_op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_op.rtp';
+use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_pbl_g80_op.rtp';
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
