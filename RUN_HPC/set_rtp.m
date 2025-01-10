@@ -313,8 +313,8 @@ use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1100_400p_seaemi
 use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1100_400p_unitemis_8angs_pert.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2019/generic/r49_1013_400p_unitemis_7angs_night.rtp';
 use_this_rtp = '/home/chepplew/data/sarta/prod_2022/generic/r49_1013_400p_unitemis_7angs_night.rtp';
-use_this_rtp = 'RTP/r49_1013_400p_unitemis_7angs_night.rtp';
 use_this_rtp = '/home/chepplew/projects/study_topics/nonlte/xnte_vs_nte/cris_ec_cs_clr_20230212_sub_kc.op.rtp';
+use_this_rtp = 'RTP/r49_1013_400p_unitemis_7angs_night.rtp'; %% see JUNK/ChrisH/sarta_prod_2022_REGR49/r49_1013_400p_unitemis_7angs_night/*.mat
 
 %% larrabee wants col gas jacs (actually stemp only)
 use_this_rtp = 'RTP/latbin20_45angles.op.rtp';
@@ -518,5 +518,11 @@ use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g80_op.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_op.rtp';
 use_this_rtp = '/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_pbl_g80_op.rtp';
+iInstr = 4; iDoConvolve = 1;
+iInstr = 1; iDoConvolve = 1;
+use_this_rtp = 'RTP/r49_1013_400p_unitemis_7angs_night.rtp'; %% see JUNK/ChrisH/sarta_prod_2022_REGR49/r49_1013_400p_unitemis_7angs_night/*.mat
 
+iInstr = 1; iDoConvolve = 1;
+iInstr = 4; iDoConvolve = 1;
+use_this_rtp = 'JUNK/ChrisH/sarta_prod_2022_REGR49_BestTest/r49_1013_98lev_400p_unitemis_seaemis_7angs_night.rtp';    %% Chris say this is his best test, 343 profles of sea emis, 343 profiles of unit emis (49 regr x 7 scanang x 2 emissivity)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

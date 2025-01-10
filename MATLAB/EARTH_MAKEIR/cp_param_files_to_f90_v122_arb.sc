@@ -1,3 +1,7 @@
+echo " current dir (should be KCARTA/MATLAB/EARTH_MAKEIR) = "
+pwd
+read -p "Press [Enter] key to continue ..."
+
 /bin/cp arbitrary_TZ_STDparam_earth     ../../INCLUDE/TempF90/JunkTempDir/arbitrary_TZ_STDparam_earth.f;            
 cd ../../SRCv1.22_f90
 pwd

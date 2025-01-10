@@ -1,4 +1,5 @@
 pwd
+
 /bin/rm ../INCLUDE/TempF90/*.f90 ../INCLUDE/TempF90/*.param
 
 /bin/cp ../INCLUDE/scatter.param  ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f; fixcon ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f ../INCLUDE/TempF90/JunkTempDir/xscatterparam.f90
@@ -41,6 +42,18 @@ sed -e "s/pre_defined.param/pre_definedparam.f90/g" -e "s/post_defined.param/pos
 /bin/cp ../INCLUDE/gauss.param                   ../INCLUDE/TempF90/JunkTempDir/gaussparam_earth.f;                  fixcon ../INCLUDE/TempF90/JunkTempDir/gaussparam_earth.f                  ../INCLUDE/TempF90/gaussparam.f90;                   rm ../INCLUDE/TempF90/JunkTempDir/gaussparam_earth.f
 
 ########################################################################
+
+pwd
+cd ../MATLAB/EARTH_MAKEIR ;\
+pwd ;\
+cp_param_files_to_f90_v122_arb.sc ;\
+
+cd ../../SRCv1.22_f90
+pwd
+
+########################################################################
 echo "showing files in ../INCLUDE/TempF90/ .. should be todays date"
 ls -lt ../INCLUDE/TempF90/*.f90 ../INCLUDE/TempF90/*.param
 read -p "Press [Enter] key to continue ..."
+
+
