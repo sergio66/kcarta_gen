@@ -7,7 +7,7 @@
 
 ! see Makefile for rtpdefs.f90 ... Makefile_intel_hdf_rtp
 !    Note in June 2024 Howard rewrote things so both .f and .f90 can use the rtp libs   with rtpdefs.f
-!    see home/sergio/git/rtp/rtpV221/l
+!    see /home/sergio/git/rtp/rtpV221/
 ! so     include 'rtpdefs.f90' --->     include 'rtpdefs.f'
 
 MODULE n_rtp
@@ -2450,7 +2450,7 @@ CONTAINS
       write(kStdErr,*)  '  as we are doing Nick Nalli ocean approx for refl them'
     END IF
 
-    IF ((abs(raKThermalAngle(iC) - +1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
+    IF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
       write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
       write(kStdWarn,'(A90)') '---->         : this sets kSetThermalAngle = +1 for SUBR DoDiffusivityApprox in n_rtp   '
       write(kStdErr,'(A90)')  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
@@ -2458,7 +2458,7 @@ CONTAINS
       raKThermalAngle(iC) = +53.13
       raKThermalAngle(iC) = kThermalAngle  !!! already set to 53.13 deg default (in nm_params or subr SetDefaultParams)
       kSetThermalAngle = +1   !use acos(3/5)
-    ELSEIF ((abs(raKThermalAngle(iC) - +1.0) <= 0.000001) .AND. (kTemperVary == 43)) THEN
+    ELSEIF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary == 43)) THEN
       write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary == 43'
       write(kStdWarn,'(A90)') '---->         : this sets kSetThermalAngle = +2 for SUBR DoDiffusivityApprox in n_rtp   '
       write(kStdErr,'(A90)')  '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary == 43'
@@ -2755,9 +2755,9 @@ CONTAINS
 
     elseif (iaaOverrideDefault(3,5) == -1) then
       write (kStdWarn,'(A)') & 
-        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp cloud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
+       '<<< -- iaaOverrideDefault(3,5) : ignore all cloud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
       write (kStdErr,'(A)')  &
-        '<<< -- iaaOverrideDefault(3,5) so ignoring all rtp cloud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
+       '<<< -- iaaOverrideDefault(3,5) : ignore all cloud fields (cfrac,cngwat,cprtop/bot,cpsize,ctype) to do CLEAR RUN ONLY -- >>>'
       cfrac12 = 0.0
   
       ctype1  = -9999
@@ -2956,8 +2956,10 @@ CONTAINS
         IF ((raPressLevels(i) < ctop2) .AND. (raPressLevels(i) > 0))  iTop2 = i
       END DO
       IF ((iTop2-iTop1) < 2) THEN
-        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'orig cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
-        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'orig cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'orig cloud1 : ctop1,cbot1 = ', &
+          ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'orig cloud2 : ctop2,cbot2 = ', &
+          ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
         write(kStdWarn,*) 'ctop2,cbot1 maybe too close, need to try to adjust the BOTTOM layer of cloud1'
         IF ((iTop1-iBot1) >= 2) THEN
           prof%cprbot = raPressLevels(iBot1+1)-10
@@ -2973,8 +2975,10 @@ CONTAINS
         ELSE
           write(kStdWarn,*) 'ooooops : top AND Bot cloud too thin!!!'
         END IF
-        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'final cloud1 : ctop1,cbot1 = ',ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
-        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'final cloud2 : ctop2,cbot2 = ',ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'final cloud1 : ctop1,cbot1 = ', &
+          ctop1,cbot1,iTop1,iBot1,raPressLevels(iTop1),raPressLevels(iBot1)
+        write(kStdWarn,'(A,2F12.4,2I3,2F12.4)') 'final cloud2 : ctop2,cbot2 = ', &
+          ctop2,cbot2,iTop2,iBot2,raPressLevels(iTop2),raPressLevels(iBot2)
       END IF
     END IF
           
@@ -3435,16 +3439,18 @@ CONTAINS
         write(kStdWarn,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
         write(kStdErr,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
       end do
-      write(kStdWarn,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
-      write(kStdErr,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdWarn,'(A,F12.4,A)') & 
+        'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdErr,'(A,F12.4,A)')  &
+        'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
       IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
 !! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
       call DoStop
       ELSE
-        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
-        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interped to PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interped to PLEV_KCARTADATABASE_AIRS'
       END IF
     END IF
 
@@ -3608,13 +3614,13 @@ CONTAINS
             rAmt = get_co2_us_std(prof%co2ppm,i,11)
           END IF
 
-          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rAmt) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
           rT   = prof%ptemp(i)
           ! write(kStdErr,*) 'READRTP_1A 1 gasid lay rT ',iIDgas,i,rT
-          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rT) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
@@ -3739,13 +3745,13 @@ CONTAINS
             ! write(kStdErr,*) i,rCC
                           
             rAmt = prof%gamnt(i,iG)
-            IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+            IF (is_goodnum(rAmt) .EQV. .FALSE. ) THEN
               write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
               CALL dostop
             END IF
             rT   = prof%ptemp(i)
             ! write(kStdErr,'(A,I2,A,F12.4,A,I3)') 'READRTP_1A 2 gasid lay rT ',iIDgas,i,rT
-            IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+            IF (is_goodnum(rT) .EQV. .FALSE. ) THEN
               write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
               CALL dostop
             END IF
@@ -4120,16 +4126,18 @@ CONTAINS
         write(kStdWarn,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
         write(kStdErr,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
       end do
-      write(kStdWarn,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
-      write(kStdErr,'(A,F12.4,A)') 'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdWarn,'(A,F12.4,A)') &
+        'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdErr,'(A,F12.4,A)')  & 
+        'READRTP_1A : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
       IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
 !! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
       call DoStop
       ELSE
-        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
-        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interped to PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interped to PLEV_KCARTADATABASE_AIRS'
       END IF
     END IF
         
@@ -4294,13 +4302,13 @@ CONTAINS
             rAmt = get_co2_us_std(prof%co2ppm,i,11)
           END IF
 
-          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rAmt) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
           rT   = prof%ptemp(i)
           ! write(kStdErr,*) 'READRTP_1B 1 gasid lay rT ',iIDgas,i,rT
-          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rT) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
@@ -4424,13 +4432,13 @@ CONTAINS
           iNpathCounterJunk = iNpathCounterJunk + 1
 
           rAmt = prof%gamnt(i,iG)
-          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rAmt) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
           rT   = prof%ptemp(i)
           ! write(kStdErr,*) 'READRTP_1B 2 gasid lay rT ',iIDgas,i,rT
-          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rT) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
@@ -4900,7 +4908,7 @@ CONTAINS
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
 
           rAmt = prof%gamnt(i,iG) / kAvog
-          IF (is_goodnum(rAmt) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rAmt) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rAmt = BAD INPUT ',rAmt, ' lay = ',i
             CALL dostop
           END IF
@@ -4908,7 +4916,7 @@ CONTAINS
           rT   = prof%ptemp(i)
           rT   = raActualLayTemps(i)         !use this instead of prof%ptemp
           ! write(kStdErr,*) 'READRTP_2 1 gasid lay rT ',iIDgas,i,rT
-          IF (is_goodnum(rT) .EQ. .FALSE. ) THEN
+          IF (is_goodnum(rT) .EQV. .FALSE. ) THEN
             write(kStdErr,'(A,I2,A,F12.4,A,I3)') ' OOOPS Gas ID = ', iIDGas, ' rTemp = BAD INPUT ',rT, ' lay = ',i
             CALL dostop
           END IF
@@ -5466,16 +5474,18 @@ CONTAINS
         write(kStdWarn,'(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
         write(kStdErr, '(I5,I5,F12.4,F12.4)') i,j,raPressLevels(j),PLEV_KCARTADATABASE_AIRS(j)
       end do
-      write(kStdWarn,'(A,F12.4,A)') 'check_plevs : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
-      write(kStdErr, '(A,F12.4,A)') 'check_plevs : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdWarn,'(A,F12.4,A)') & 
+        'check_plevs : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
+      write(kStdErr, '(A,F12.4,A)') & 
+        'check_plevs : raPressLevels, PLEV_KCARTADATABASE_AIRS differ by ',meanPLEVSdiff,' mb on average'
       IF (iaaOverrideDefault(3,8) .EQ. +1) THEN
         write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
         write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = +1 so need raPressLevels from RTP == PLEV_KCARTADATABASE_AIRS'
 !! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
       call DoStop
       ELSE
-        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
-        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so aPressLevels from RTP can be interpolated to PLEV_KCARTADATABASE_AIRS'
+        write(kStdWarn,'(A)') 'iaaOverrideDefault(3,8) = -1 so raPressLevels from RTP can be interped to PLEV_KCARTADATABASE_AIRS'
+        write(kStdErr,'(A)')  'iaaOverrideDefault(3,8) = -1 so raPressLevels from RTP can be interped to PLEV_KCARTADATABASE_AIRS'
       END IF
     END IF
 
@@ -5490,23 +5500,27 @@ CONTAINS
 
         if (abs(prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)) > 0.5) then
           if ((iFix .GT. 0) .AND. (iGood .GE. prof%nlevs-3)) THEN
-            write(kStdWarn,'(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>', &
+            write(kStdWarn,'(A,I5,I5,F15.5,F15.5,F15.5)') & 
+            '<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>', &
               i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
-            write(kStdErr, '(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>>>>', &
+            write(kStdErr, '(A,I5,I5,F15.5,F15.5,F15.5)') & 
+            '<<< fixing prof%plevs in lowest levels (level,nlevs,plevs,database,plevs-database) >>>', &
               i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
             prof%plevs(i) = DATABASELEV(kMaxLayer+1-i+1)
           elseif ((iFix .LT. 0) .and. (iaaOverrideDefault(3,8) .EQ. +1)) then
-            write(kStdWarn,'(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs as iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database) >>>>>>', &
+            write(kStdWarn,'(A,I5,I5,F15.5,F15.5,F15.5)') & 
+            '<<< need to fix prof%plevs as iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database) >>>', &
               i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
-            write(kStdErr, '(A,I5,I5,F15.5,F15.5,F15.5)') '<<<<<< need to fix prof%plevs as iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database)>>>>>>', &
+            write(kStdErr, '(A,I5,I5,F15.5,F15.5,F15.5)') & 
+            '<<< need to fix prof%plevs as iFix = -1 or iGood < 0.95*prof%nlevs (level,nlevs,plevs,database,plevs-database)>>>', &
               i,prof%nlevs,prof%plevs(i),DATABASELEV(kMaxLayer+1-i+1),prof%plevs(i)-DATABASELEV(kMaxLayer+1-i+1)
             if (iaaOverrideDefault(3,8) .EQ. +1) THEN 
 !! to go back to orig ARB PLEVS with MakeRefProfV0 code, comment out this CALL DoStop
             call DoStop
             END IF
           elseif ((iFix .LT. 0) .and. (iaaOverrideDefault(3,8) .EQ. -1)) then
-            write(kStdWarn,'(A)') '<<<<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'
-            write(kStdErr, '(A)') '<<<<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'
+            write(kStdWarn,'(A)') '<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'
+            write(kStdErr, '(A)') '<<< no need to fix prof%plevs as iFix = -1 or iaaOverrideDefault(3,8) .EQ. -1'
           end if
         end if
       end do

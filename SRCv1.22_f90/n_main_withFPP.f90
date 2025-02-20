@@ -1455,13 +1455,13 @@ call dostop
     iaKeyWord = -1
 
 ! *************** check input name list file *********************************
-!#IF (TXTsetting) & (kRTP >= 0)
-!      write(kStdWarn,*) 'kRTP >= 0 & TXTsetting == 1'
-!      write(kStdWarn,*) '  so you have set Makefile TXTsetting > 0 but still want to read RTP file??' 
-!      write(kStdErr,*) 'kRTP >= 0 & TXTsetting == 1'
-!      write(kStdErr,*) '  so you have set Makefile TXTsetting > 0 but still want to read RTP file??' 
-!      CALL DOSTOP
-!#ENDIF
+#IF (TXTsetting) & (kRTP >= 0)
+      write(kStdWarn,*) 'kRTP >= 0 & TXTsetting == 1'
+      write(kStdWarn,*) '  so you have set Makefile TXTsetting > 0 but still want to read RTP file??' 
+      write(kStdErr,*) 'kRTP >= 0 & TXTsetting == 1'
+      write(kStdErr,*) '  so you have set Makefile TXTsetting > 0 but still want to read RTP file??' 
+      CALL DOSTOP
+#ENDIF
     
 ! ******** PARAMS section
     namecomment = '******* PARAMS section *******'
@@ -1495,12 +1495,12 @@ call dostop
     ELSEIF ((kRTP > 0) .AND. (iaaOverrideDefault(1,8) == 1)) THEN
       ! no need to check freqs as this is done in kcartamain.f (GetFreq)
     ELSEIF ((kRTP > 0) .AND. (iaaOverrideDefault(1,8) == -1)) THEN
-!#IF (TXTsetting)
-!      write(kStdErr,*) 'this does NOT want RTP setup'
-!      CALL DoStop
-!#ELSE      
+#IF (TXTsetting)
+      write(kStdErr,*) 'this does NOT want RTP setup'
+      CALL DoStop
+#ELSE      
       CALL IdentifyChannelsRTP(rf_low,rf_high,iRTP,caPFName)
-!#ENDIF      
+#ENDIF      
     END IF
 
     write (kStdWarn,*) 'successfully checked freqs .....'
@@ -1554,15 +1554,15 @@ call dostop
     
     iaProfFromRTP = 0  !!! assume no gases were found in rtp file, boohoo
 
-!#IF (TXTsetting)
-!    CALL pthfil4NMLonly(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
-!      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
-!      iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
-!#ELSE
+#IF (TXTsetting)
+    CALL pthfil4NMLonly(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
+      raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
+      iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
+#ELSE
     CALL pthfil4RTPorNML(iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,caPFname,iRTP,iAFGLProf, &
       raLayerHeight,iNumGases,iaGases,iaWhichGasRead,iNpath, &
       iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP)
-!#ENDIF
+#ENDIF
 
     iaProfFromRTP(iNumGases-2:iNumGases) = 1  !!! make sure gases 101,102,103 are set as "read in from rtp"
 
@@ -1628,21 +1628,21 @@ call dostop
     !write(kStdWarn,*) 'kTemperVary at location 10 = ',kTemperVary
 
     kSurfAlt = -9.9e10
-!#IF (TXTsetting)
-!    CALL radnceNMLonly(iRTP,caPFname,iMPSetForRadRTP, &
-!      iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
-!      raPressLevels,iProfileLayers, &
-!      raFracTop,raFracBot,raaPrBdry, &
-!      raTSpace,raTSurf,raSatAngle,raSatHeight,raLayerHeight, &
-!      raaaSetEmissivity,iaSetEms,caEmissivity,raSetEmissivity, &
-!      raaaSetSolarRefl,iaSetSolarRefl,cakSolarRefl, &
-!      iakSolar,rakSolarAngle,rakSolarRefl, &
-!      iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
-!      iaNumLayer,iaaRadLayer,raProfileTemp, &
-!      raSatAzimuth,raSolAzimuth,raWindSpeed, &
-!      cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
-!      raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
-!#ELSE
+#IF (TXTsetting)
+    CALL radnceNMLonly(iRTP,caPFname,iMPSetForRadRTP, &
+      iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
+      raPressLevels,iProfileLayers, &
+      raFracTop,raFracBot,raaPrBdry, &
+      raTSpace,raTSurf,raSatAngle,raSatHeight,raLayerHeight, &
+      raaaSetEmissivity,iaSetEms,caEmissivity,raSetEmissivity, &
+      raaaSetSolarRefl,iaSetSolarRefl,cakSolarRefl, &
+      iakSolar,rakSolarAngle,rakSolarRefl, &
+      iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+      iaNumLayer,iaaRadLayer,raProfileTemp, &
+      raSatAzimuth,raSolAzimuth,raWindSpeed, &
+      cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,ctype1,ctype2,iNclouds_RTP, &
+      raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype)
+#ELSE
     CALL radnceRTPorNML(iRTP,caPFname,iMPSetForRadRTP, &
       iNpmix,iNatm,iaMPSetForRad,raPressStart,raPressStop, &
       raPressLevels,iProfileLayers, &
@@ -1656,7 +1656,7 @@ call dostop
       raSatAzimuth,raSolAzimuth,raWindSpeed, &
       cfrac12,cfrac1,cfrac2,cngwat1,cngwat2,cpsize1,cpsize2,ctop1,ctop2,cbot1,cbot2,ctype1,ctype2,iNclouds_RTP, &
       raCemis,raCprtop,raCprbot,raCngwat,raCpsize,iaCtype,iaNML_Ctype,iNumNLTEGases)
-!#ENDIF
+#ENDIF
 
     IF (kSurfAlt < -1.0e3) THEN
       kSurfAlt = raLayerHeight(iaaRadLayer(1,1))
@@ -1803,10 +1803,10 @@ call dostop
       IF (caCloudPFname(1:5) == 'dummy') THEN
         write (kStdWarn,*) 'setting some parameters for RTP CLOUD SLABS .....'
 
-!#IF (TXTsetting)
-!        write(kStdErr,*) 'this does NOT want RTP setup'
-!        CALL DoStop
-!#ELSE
+#IF (TXTsetting)
+        write(kStdErr,*) 'this does NOT want RTP setup'
+        CALL DoStop
+#ELSE
         !in this subroutine, iNclouds is set equal to Nclouds_RTP
 !        DO iI = 1,iNClouds_RTP
 !          write(kSTdWarn,'(A,I2,A)') 'just before SetRTPCloud caaCloudFile(',iI,') =  ',caaCloudFile(iI)
@@ -1831,7 +1831,7 @@ call dostop
 !        DO iI = 1,iNClouds_RTP
 !          write(kSTdWarn,'(A,I2,A)') 'just after SetRTPCloud caaCloudFile(',iI,') =  ',caaCloudFile(iI)
 !        END DO  !! should really be     DO iI = 1,iNClouds_RTP
-!#ENDIF	    
+#ENDIF	    
         iaCloudScatType(1) = iaCtype(1)
         iaCloudScatType(2) = iaCtype(2)
         iSetRTPCld  = +1   !!cld stuff set in RTP
@@ -1882,10 +1882,10 @@ call dostop
         iaCloudScatType(2) = ctype2
         iaCloudScatType(3) = -9999
 
-!#IF (TXTsetting)
-!        write(kStdErr,*) 'this does NOT want RTP setup'
-!        CALL DoStop
-!#ELSE
+#IF (TXTsetting)
+        write(kStdErr,*) 'this does NOT want RTP setup'
+        CALL DoStop
+#ELSE
         CALL READRTP_CLD100LAYER(iRTP,iProfileLayers, &
             caPFname,caCloudPfName,iNclouds_RTP, &
             caaCloudFile,iaNML_Ctype,iaCloudScatType, &
@@ -1899,7 +1899,7 @@ call dostop
             raaPCloudTop,raaPCloudBot,raaaCloudParams,raExp,iaPhase, &
             iaaScatTable,caaaScatTable,iaCloudNumAtm,iaaCloudWhichAtm, &
             iaaCloudWhichLayers,iNatm,raaPrBdry,raPressLevels,iProfileLayers)
-!#ENDIF	    
+#ENDIF	    
         iNclouds_RTP = iNclouds
         iCldProfile  = +1   !!this has 100 layer cloud profile(s)
         iSetRTPCld   = +1   !!cld stuff set in RTP

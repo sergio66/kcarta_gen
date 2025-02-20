@@ -206,7 +206,7 @@ CONTAINS
               iX = -1
             END IF
             IF (iX == 1) THEN
-              write(kStdWarn,'(A,I3)') '------------>>> these PLANE PARALLEL layer angles are used by Atmosphere, Downlook instr ',iAtm
+              write(kStdWarn,'(A,I3)') '--------->> these PLANE PARALLEL layer angles are used by Atmosphere, Downlook instr ',iAtm
               write(kStdWarn,*) 'Downlook Instr'
               write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
               write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
@@ -220,7 +220,7 @@ CONTAINS
       ELSEIF ((rSatHeight > 0.0) .AND. (abs(rSatAngle) <= 1.0e-4) .AND. (abs(iUseSnell) == 1)) THEN
         ! no need to do anything much, the angles are so close to nadir
         iX = -1
-        write(kStdWarn,'(A,I3)') '------------>>> these ALMOST NADIR angles are used by Atmosphere, Downlook instr ',iAtm
+        write(kStdWarn,'(A,I3)') '--------->> these ALMOST NADIR angles are used by Atmosphere, Downlook instr ',iAtm
         write(kStdWarn,*) 'Downlook Instr'
         write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
         write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
@@ -268,7 +268,8 @@ CONTAINS
                 iX = -1
               END IF
               IF (iX == 1) THEN
-                write(kStdWarn,'(A,I3)') '------------>>> these RAY TRACE SPHERICAL SHELL layer angles are used by Atmosphere, Downlook Instr ',iAtm
+                write(kStdWarn,'(A,I3)') &
+                  '--------->> these RAY TRACE SPHERICAL SHELL layer angles are used by Atmosphere, Downlook Instr ',iAtm
                 write(kStdWarn,*) 'Downlook Instr'
                 write(kStdWarn,*) 'Surf Pressure (mb), Surf Altitude (m) = ',kSurfPress,kSurfAlt
                 write(kStdWarn,*) 'TOA scanang, GND satzen = ',abs(rSatAngle),vaconv(abs(rSatAngle),kSurfAlt/1000,rSatHeight/1000)
@@ -294,7 +295,7 @@ CONTAINS
             iX = -1
           END IF
           IF (iX == 1) THEN
-            write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+            write(kStdWarn,*) '--------->> these are used by Atmosphere ',iAtm
             write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
           END IF
           write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)
@@ -320,7 +321,7 @@ CONTAINS
               iX = -1
             END IF
             IF (iX == 1) THEN
-              write(kStdWarn,*) '------------>>> these are used by Atmosphere ',iAtm
+              write(kStdWarn,*) '--------->> these are used by Atmosphere ',iAtm
               write(kStdWarn,*)'up : lay#/rad# lay/sat hgt, local satzen/layer iI angle'
             END IF
             write(kStdWarn,999) iI,iX,raLayHgt(iI)/1000,rSatHeight/1000,rSatAngle,raLayAngles(iI)

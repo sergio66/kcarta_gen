@@ -989,20 +989,28 @@ CONTAINS
       write(kStdWarn,'(A,I5,A,I3,A)') '  ', nint(raFreq(1)),' is a NLTE chunk but ',iaGases(iGas),' is NOT a NLTE gas'
     ELSE
       IF (iDoWeakBackGndLA < 0) THEN
-        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak LA backgnd added in'
-        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak LA backgnd added in'
+        write(kStdWarn,'(A,I5,A,I5,A)') &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak LA backgnd added in'
+        write(kStdErr,'(A,I5,A,I5,A)')  &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak LA backgnd added in'
       END IF
       IF (iDoWeakBackGndUA < 0) THEN
-        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak UA backgnd added in'
-        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak UA backgnd added in'
+        write(kStdWarn,'(A,I5,A,I5,A)') &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak UA backgnd added in'
+        write(kStdErr,'(A,I5,A,I5,A)')  &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no weak UA backgnd added in'
       END IF
       IF (iDoLBL_LA < 0) THEN
-        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for LA'
-        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for LA'      
+        write(kStdWarn,'(A,I5,A,I5,A)') &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for LA'
+        write(kStdErr,'(A,I5,A,I5,A)')  &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for LA'      
       END IF
       IF (iDoLBL_UA < 0) THEN
-        write(kStdWarn,'(A,I5,A,I5,A)') 'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for UA'
-        write(kStdErr,'(A,I5,A,I5,A)')  'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for UA'      
+        write(kStdWarn,'(A,I5,A,I5,A)') &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for UA'
+        write(kStdErr,'(A,I5,A,I5,A)')  &
+          'WARNING : for NLTE gasid ',iaGases(iGas),' in NLTE chunk ',nint(raFreq(1)),' no LBL added in for UA'      
       END IF    
     END IF
     
@@ -1013,7 +1021,8 @@ CONTAINS
         raNLTEstrength(iLTEIn) = rCO2mult
         !! change the coeffs to coeff*rCO2mult, because all the coeffs
         !! that are computed, have this factor
-        write(kStdWarn,'(A,I5,A,I3,A,F7.2)') '  ',nint(raFreq(1)),' is a NLTE chunk,',iaGases(iGas),' is NLTE gas, use mult',rCO2mult
+        write(kStdWarn,'(A,I5,A,I3,A,F7.2)') &
+          '  ',nint(raFreq(1)),' is a NLTE chunk,',iaGases(iGas),' is NLTE gas, use mult',rCO2mult
         iDoNLTE = +1
         daaGasAbCoeff = daaGasAbCoeff * rCO2mult
       END IF

@@ -656,6 +656,8 @@ CONTAINS
         write(kStdErr,*) 'Printed out DISORT RAD input'
       ENDIF
 
+!      print *,'dag, gfortran cannot compile these and says they should all be double'
+!      call dostop
       CALL DISORT( NLYR, DTAUC, SSALB, NMOM, PMOM, TEMPER, WVNMLO, &
         WVNMHI, USRTAU, NTAU, UTAU, NSTR, USRANG, NUMU, &
         UMU, NPHI, PHI, IBCND, FBEAM, UMU0, PHI0, &

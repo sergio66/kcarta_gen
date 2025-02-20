@@ -989,7 +989,8 @@ CONTAINS
     iVary = -1
 !!!do default stuff; set temperatures at layers
     IF (iVary == -1) THEN
-      raVT2(1:kMixFilRows) = raVTemp(1:kMixFilRows)
+      !raVT2(1:kMixFilRows) = raVTemp(1:kMixFilRows)
+      raVT2(1:kMaxLayer)   = raVTemp(1:kMaxLayer)
 
       iL = iaRadLayer(iNumLayer)
       raVt2(iL) = raVT1(iL)    !!!!set fractional bot layer tempr correctly

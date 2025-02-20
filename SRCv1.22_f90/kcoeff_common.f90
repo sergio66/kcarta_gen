@@ -1655,7 +1655,9 @@ CONTAINS
 
     END DO
 
-    write(kStdWarn,'(A,I4,A,2(ES12.4),F12.4)') 'V0 GAS ID = ',iGasID,' column sum : orig PLEVS vs new PLEVS layering and ratio', sum(raR100amt0(iStart+1:kProfLayer)),sum(raRAmt(iStart+1:kProfLayer)), &
+    write(kStdWarn,'(A,I4,A,2(ES12.4),F12.4)') 'V0 GAS ID = ',iGasID ,& 
+       ' column sum : orig PLEVS vs new PLEVS layering and ratio', & 
+      sum(raR100amt0(iStart+1:kProfLayer)),sum(raRAmt(iStart+1:kProfLayer)), &
       sum(raRAmt(iStart+1:kProfLayer))/(sum(raR100amt0(iStart+1:kProfLayer)))
      
   5678 FORMAT(3(' ',I3),2(' ',F10.3),1(' ',E10.5))
@@ -1776,7 +1778,9 @@ CONTAINS
 if (igasID .EQ. 1) then
 ! this is input PLEVS,PLAYS
     DO iL = 1,kMaxLayer
-      write(*,'(A,I4,3(F12.4),2(F12.4),F12.4,ES12.4)') 'MakeRefProfV1 WV : ',IL,PLEV_KCARTADATABASE_AIRS(iL),1013.25*raR100Press(iL),PLEV_KCARTADATABASE_AIRS(iL+1),raPressLevels(iL),raPressLevels(iL+1),raR100Temp(iL),raR100Amt(iL)
+      write(*,'(A,I4,3(F12.4),2(F12.4),F12.4,ES12.4)') 'MakeRefProfV1 WV : ', &
+        IL,PLEV_KCARTADATABASE_AIRS(iL),1013.25*raR100Press(iL),PLEV_KCARTADATABASE_AIRS(iL+1), &
+        raPressLevels(iL),raPressLevels(iL+1),raR100Temp(iL),raR100Amt(iL)
     END DO
 ! call dostop
 end if
@@ -1895,8 +1899,8 @@ end if
     raRAmt       = raQALLgivenP * raRMixRatio               !! kilomolecules/cm2
     raRAmt       = raRAmt/6.023e23                          !! kilomoles/cm2
 
-    write(kStdWarn,'(A,I4,A,2(ES12.4),F12.4)') 'v1 GAS ID = ',iGasID,' column sum : orig PLEVS vs new PLEVS layering and ratio', sum(raR100amt0(if0:kProfLayer)),sum(raRAmt(if1:kProfLayer)), &
-      sum(raRAmt(if1:kProfLayer))/(sum(raR100amt0(if0:kProfLayer)))
+    write(kStdWarn,'(A,I4,A,2(ES12.4),F12.4)') 'v1 GAS ID = ',iGasID,' column sum : orig PLEVS vs new PLEVS layering and ratio', & 
+      sum(raR100amt0(if0:kProfLayer)),sum(raRAmt(if1:kProfLayer)),sum(raRAmt(if1:kProfLayer))/(sum(raR100amt0(if0:kProfLayer)))
 
 if ((iGasID .EQ. 1) .AND. (iDebug > 0)) then
   caJunkStr = '(I4,3(F12.5),ES12.5,3(F12.5),ES12.5,2(F12.5))'
@@ -1906,8 +1910,8 @@ if ((iGasID .EQ. 1) .AND. (iDebug > 0)) then
      1000*abs(DATABASELEVHEIGHTS(iI)-DATABASELEVHEIGHTS(iI+1)),raThickness(iI)
   END DO
   caJunkStr = '(A,I4,A,2(ES12.4),F12.4))'
-  write(kStdErr,caJunkStr) 'V1 special GAS ID = ',iGasID,' column sum : orig PLEVS vs new PLEVS layering and ratio', sum(raR100amt0(if0:kProfLayer)),sum(raRAmt(if1:kProfLayer)), &
-      sum(raRAmt(if1:kProfLayer))/(sum(raR100amt0(if0:kProfLayer)))
+  write(kStdErr,caJunkStr) 'V1 special GAS ID = ',iGasID,' column sum : orig PLEVS vs new PLEVS layering and ratio', & 
+      sum(raR100amt0(if0:kProfLayer)),sum(raRAmt(if1:kProfLayer)),sum(raRAmt(if1:kProfLayer))/(sum(raR100amt0(if0:kProfLayer)))
   call dostop
 end if
 
@@ -2023,7 +2027,8 @@ end if
         !rMean = 1013.25*abs(raaPress(iJ,iGas) - ARBDATABASEPLEVS(iJ)/1013.25) + rMean
         !write(kStdWarn,*) 'check raaPress/ARBDATABASEPLEVS',iJ,1013.35*raaPress(iJ,iGas),ARBDATABASEPLEVS(iJ)
         rMean = abs(raPressLevels(iJ) - ARBDATABASEPLEVS((kProfLayer+1)-iJ+1)) + rMean
-        write(kStdWarn,'(A,I4,I4,2(F12.4))') 'check iGas=1 raPressLevels/ARBDATABASEPLEVS',iI,iJ,raPressLevels(iJ),ARBDATABASEPLEVS((kProfLayer+1)-iJ+1)
+        write(kStdWarn,'(A,I4,I4,2(F12.4))') 'check iGas=1 raPressLevels/ARBDATABASEPLEVS',iI,iJ, &
+         raPressLevels(iJ),ARBDATABASEPLEVS((kProfLayer+1)-iJ+1)
       END DO
       rMean = rMean/(iNumLayers+1)
       IF (rMean .GT. 0.25) THEN
@@ -2170,29 +2175,42 @@ end if
 !!! end sanity check !!!
 
     IF (iErr .EQ. 1) THEN
-      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer ',caFName
+      IF (kOuterLoop .EQ. 1) THEN
+        WRITE(kStdErr,'(A,A)') 'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer ',caFName
+      END IF
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 1 --> iNLay /= kMaxLayer ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 2) THEN
-      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong ',caFName
+      IF (kOuterLoop .EQ. 1) THEN
+        WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong ',caFName
+      END IF
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 2 --> iGasID = wrong ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 3) THEN
-      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong ',caFName
+      IF (kOuterLoop .EQ. 1) THEN 
+        WRITE(kStdErr,'(A,A)')  & 
+        'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong ',caFName
+      END IF
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 3 --> startFr = wrong ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 4) THEN
-      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong ',caFName
+      IF (kOuterLoop .EQ. 1) THEN
+        WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong ',caFName
+      END IF
       WRITE(kStdWarn,'(A,A)') 'WARN Found problems with data in compressed datafile : iErr = 4 --> deltaFr = wrong ',caFName
-!      CALL DoStop
+!!!     CALL DoStop
     ELSEIF (iErr .EQ. 5) THEN
-      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong ',caFName
+      IF (kOuterLoop .EQ. 1) THEN
+        WRITE(kStdErr,'(A,A)')  'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong ',caFName
+      END IF
       WRITE(kStdWarn,'(A,A)') 'Found problems with data in compressed datafile : iErr = 5 --> startFr2 = wrong ',caFName
       CALL DoStop
     ELSEIF (iErr .EQ. 6) THEN
-      if (kOuterLoop .EQ. 1) WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong ',caFName
+      IF (kOuterLoop .EQ. 1) THEN
+        WRITE(kStdErr,'(A,A)')  'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong ',caFName
+      END IF
       WRITE(kStdWarn,'(A,A)') 'WARN Found problems with data in compressed datafile : iErr = 6 --> deltaFr2 = wrong ',caFName
-!      CALL DoStop
+!!!      CALL DoStop
     END IF
   
     RETURN

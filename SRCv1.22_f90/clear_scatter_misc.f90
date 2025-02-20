@@ -1116,7 +1116,9 @@ CONTAINS
       END DO
       IF (int(iLayers*1.0/LL) /= nmuobs(II)) THEN
         write (kSTdErr,*) '\-\-\-\-\-\-\-\-\-\/-/-/-/-/-/-/-/-/-/-/'
-        write (kStdErr,'(A,4(I3))') 'number of cloud layers A, number of scattering tables B, A/B, num of angles used in Mie coeffs', iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
+        write (kStdErr,'(A,4(I3))') &
+          'number of cloud layers A, number of scattering tables B, A/B, num of angles used in Mie coeffs',&
+          iLayers,LL,int(iLayers*1.0/LL),nmuobs(II)
         write (kStdErr,*) 'Some of the Mie Scattering tables had different'
         write (kStdErr,*) 'number of angles used in computing Mie coeffs'
         write (kStdErr,*) 'Please recheck  sscatmie.x and rerun'

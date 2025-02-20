@@ -2258,8 +2258,10 @@ CONTAINS
     WRITE(kStdWarn,'(A,F12.5)') ' emissivity = ',TEMIS
     write(kStdWarn,'(A,I4)') ' NLYR          Number of computational layers   = ',NLYR
     write(kStdWarn,'(A,I4)') ' NMOM          Number of phase function moments = ',NMOM
-    write(kStdWarn,'(A)')    '   IK  IJ  iI      PLEV        TLEV     DTAUC      SSALB      PMOM(0)      PMOM(1)     PMOM(2)      PMOM(3)'
-    write(kStdWarn,'(A)')    ' ------------------------------------------------------------------------------------------------------------'
+    write(kStdWarn,'(A)')    &
+     '   IK  IJ  iI      PLEV        TLEV     DTAUC      SSALB      PMOM(0)      PMOM(1)     PMOM(2)      PMOM(3)'
+    write(kStdWarn,'(A)')    &
+     ' ------------------------------------------------------------------------------------------------------------'
     WRITE(kStdWarn,'(3(I4),2(F12.5))') 0,0,0,0.0,TTEMP
     iI = 1
     iJ = iaRadLayer(iI)
@@ -2272,21 +2274,25 @@ CONTAINS
       IJ = iaRadLayer(iI)
       iK = kProfLayer - iJ + 1
       IF ((iI .EQ. ICLDTOP) .OR. (iI .EQ. ICLDBOT)) THEN
-        write(kStdWarn,'(A)')    ' ------------------------------------------------------------------------------------------------------------'
+        write(kStdWarn,'(A)')    &
+          ' ------------------------------------------------------------------------------------------------------------'
       END IF
       WRITE(kStdWarn,'(3(I4),2(F12.5),6(ES12.5))') & 
-       iK,iJ,iI,raPressLevels(iK+(kProfLayer-iNumLayer)),TEMPER(iI),DTAUC(iI),SSALB(iI),PMOM(0,iI),PMOM(1,iI),PMOM(2,iI),PMOM(3,iI)
+       iK,iJ,iI,raPressLevels(iK+(kProfLayer-iNumLayer)),&
+       TEMPER(iI),DTAUC(iI),SSALB(iI),PMOM(0,iI),PMOM(1,iI),PMOM(2,iI),PMOM(3,iI)
     END DO
     WRITE(kStdWarn,'(3(I4),2(F12.5))') NLYR+1,NLYR+1,NLYR+1,rSurfPress,BTEMP 
-    write(kStdWarn,'(A)')    '   IK  IJ  iI      PLEV        TLEV     DTAUC      SSALB      PMOM(0)      PMOM(1)     PMOM(2)      PMOM(3)'
-    write(kStdWarn,'(A)')    ' ------------------------------------------------------------------------------------------------------------'
+    write(kStdWarn,'(A)')    &
+      '   IK  IJ  iI      PLEV        TLEV     DTAUC      SSALB      PMOM(0)      PMOM(1)     PMOM(2)      PMOM(3)'
+    write(kStdWarn,'(A)')    &
+      ' ------------------------------------------------------------------------------------------------------------'
 
-    IF (LAMBER .EQ. .true.) THEN
+    IF (LAMBER .EQV. .true.) THEN
       write(kStdWarn,'(A)') 'LAMBER = true = isotropic reflecting boundary'
     ELSE
       write(kStdWarn,'(A)') 'LAMBER = false = bidirectional reflecting boundary'
     END IF
-    IF (PLANK .EQ. .true.) THEN
+    IF (PLANK .EQV. .true.) THEN
       write(kStdWarn,'(A)') 'PLANK = true = thermal emission'
     ELSE
       write(kStdWarn,'(A)') 'PLANK = false = no thermal emission !!!!!!!!!!!!!!!!!!'
@@ -2296,7 +2302,7 @@ CONTAINS
     write(kStdWarn,'(A,I3)') 'NSTR = Number of computational polar angles to be used = streams',NSTR
     
     write(kStdWarn,*) ' '
-    IF (USRANG .EQ. .false.) THEN
+    IF (USRANG .EQV. .false.) THEN
        write(kStdWarn,'(A)') 'USRANG = false, radiant quantities at gauss quad streams'
     ELSE
       write(kStdWarn,'(A,I3,A)') 'USRANG = true, return rads at ',NUMU,' specified cos(polar angle),polar angle : '
@@ -2312,7 +2318,7 @@ CONTAINS
     END DO       
 
     write(kStdWarn,*) ' '
-    IF (USRTAU .EQ. .false.) THEN
+    IF (USRTAU .EQV. .false.) THEN
        write(kStdWarn,'(A)') 'USRTAU = false, return rads at every layer'
     ELSE
       write(kStdWarn,'(A,I3,A)') 'USRTAU = true, return rads at ',NTAU,' specified layers/ODs : '

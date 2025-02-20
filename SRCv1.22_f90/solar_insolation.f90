@@ -774,8 +774,9 @@ CONTAINS
 !**** Current year is a leap frog year
 !****
   100 DAY1Y = DAY4Y
-      Do 120 M=1,11
-  120 If (DAY1Y < JDSUML(M+1))  GoTo 130
+      Do M=1,11
+        If (DAY1Y < JDSUML(M+1))  GoTo 130
+      END DO
 !     M=12
   130 JYEAR  = 2000 + N4CENT*400 + N1CENT*100 + N4YEAR*4 + N1YEAR
       JMONTH = M
@@ -785,8 +786,9 @@ CONTAINS
 !**** Current year is not a leap frog year
 !****
   200 DAY1Y  = DAY4Y - N1YEAR*JDAY1Y - 1
-  210 Do 220 M=1,11
-  220 If (DAY1Y < JDSUMN(M+1))  GoTo 230
+  210 Do M=1,11
+        If (DAY1Y < JDSUMN(M+1))  GoTo 230
+      END DO
 !     M=12
   230 JYEAR  = 2000 + N4CENT*400 + N1CENT*100 + N4YEAR*4 + N1YEAR
       JMONTH = M

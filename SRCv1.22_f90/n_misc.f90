@@ -614,8 +614,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(2,9)
     iTemp = iaaOverrideDefault(iI,iJ)
     IF (iTemp .LT. -3 .OR. iTemp .GT. 100) THEN
-      write(kStdErr,'(A,I2,A,I2,A,I8)') 'iAdjustChou : need iaaOverrideDefault(',iI,',',iJ,') between 0 and 100, or -1,-2,-3, not ', &
-        iaaOverrideDefault(iI,iJ)
+      write(kStdErr,'(A,I2,A,I2,A,I8)') & 
+        'iAdjustChou : need iaaOverrideDefault(',iI,',',iJ,') between 0 and 100, or -1,-2,-3, not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -689,7 +689,8 @@ CONTAINS
     !END IF
     IF ((abs(iTemp) > 1)) THEN
       write(kStdErr,'(A,I2)') &
-        'Can figure clear or scattering as in rtp file (0, default), force scattering calcs even if clear (+1), force clear calc even if clouds (-1) .. not ',iaaOverrideDefault(iI,iJ)
+        'Can figure clear or scattering as in rtp file (0, default), force scattering calcs even if clear (+1), & 
+         force clear calc even if clouds (-1) .. not ',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 
@@ -716,7 +717,8 @@ CONTAINS
     iTemp = iaaOverrideDefault(iI,iJ)
     IF ((abs(iTemp) /= 1)) THEN
       write(kStdErr,'(A,I2)') &
-        'use ../INCLUDE/TempF90/KCARTA_databaseparam.f90 : PLEV_KCARTADATABASE_AIRS consistent with klayers grid (+1/default) or not (-1)',iaaOverrideDefault(iI,iJ)
+        'use ../INCLUDE/TempF90/KCARTA_databaseparam.f90 : PLEV_KCARTADATABASE_AIRS consistent & 
+        with klayers grid (+1/default) or not (-1)',iaaOverrideDefault(iI,iJ)
       CALL DoStop
     END IF
 

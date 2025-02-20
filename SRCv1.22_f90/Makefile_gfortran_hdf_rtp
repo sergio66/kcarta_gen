@@ -1,0 +1,60 @@
+############################################################################
+##          set up the appropriate RTP and HDF paths and libraries        ##
+##          current options are SGI and LINUX                             ##
+############################################################################
+# ---------
+# HDF flags : see hdf_rtp_old
+# ---------
+
+## from Howard May 2024
+#HDF_INSTALL3 = /usr/ebuild/software/HDF/4.2.14-GCCcore-8.3.0/
+#HDFLIB3 = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz
+#HDFLIB = $(HDFLIB3) 
+
+HDFHOME = /usr/ebuild/software/HDF/4.2.14-GCCcore-8.3.0
+HDFINC = -I$(HDFHOME)/include/hdf
+HDFLIB = -L$(HDFHOME)/lib -ldf
+
+########################################################################
+########################################################################
+########################################################################
+
+#---------------------
+#nf-config -help
+#nf-config --fc
+#nf-config --fflags
+#nf-config --flibs
+
+NETCDFI = -I/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include 
+NETCDFX = -I/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include -L/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/lib -lnetcdff -L/usr/ebuild/software/icc/2018.3.222-GCC-7.3.0-2.30/lib/intel64 -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/lib -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/mkl/lib/intel64 -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/lib -L/usr/ebuild/software/netCDF/4.6.1-intel-2018b/lib64 -lnetcdf -lnetcdf -liomp5 -lpthread 
+
+NETCDFLIBS = $(NETCDFX)
+
+########################################################################
+########################################################################
+########################################################################
+
+# ---------
+# RTP flags : see hdf_rtp_old
+# ---------
+
+# RTPLIB : point this to the lib you created in RTP/Src_rtp
+
+## freshly 2024 compiled ifort F90 rtpdef.f90
+#RTPHOME = /home/sergio/OTHERSTUFF/git/rtp/rtpV201  HMM THIS IS WHERE I THOUGHT I SHOULD BE
+#RTPHOME = /home/sergio/git/rtp/rtpV201/
+RTPHOME = /home/sergio/git/rtp/rtpV221/
+RTPHOME = /home/sergio/git/rtp/rtpV221_80gases/
+RTPHOME = /home/sergio/git/rtp/rtpV221_80gases_gfortran/
+
+#RTPLIB = -L$(RTPHOME)/lib -lrtp90
+RTPLIB = -L$(RTPHOME)/lib -lrtp
+
+# ---------------
+# RTP include dir
+# ---------------
+# this is where the RTP package files are stored
+#
+#
+RTPINC = -I$(RTPHOME)/include
+RTPDEFS_FILE = $(RTPHOME)/include/rtpdefs.f

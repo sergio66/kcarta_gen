@@ -1,7 +1,8 @@
 %% see /asl/s1/sergio/rtp/rtp_airicrad_v6/2011/03/11/make_clear_rtp_039.m, copied here
 
 %% done by Chris??????? or Sergio?????
-[hC,ha,psarta_clr_rad_airs,pa] = rtpread('/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_sartaH2020_rp.rtp'); %% H2020
+[hC,ha,psarta_clr_rad_airs,pa] = rtpread('/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_sartaH2020_rp.rtp');     %% H2020
+[hC,ha,psarta_clr_rad_airs,pa] = rtpread('/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_sartaH2020_rp_NEW.rtp'); %% H2020 fixed, see check_H2020_sartajac_nojacsarta.m
 tsarta_clr_rad_airs0 = rad2bt(hC.vchan,psarta_clr_rad_airs.rcalc);
 if ~exist('/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_sartaH2020_chrisexec_rp.rtp')
   cd /home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/
@@ -12,7 +13,8 @@ end
 [hC,ha,psarta_clr_rad_airsX,pa] = rtpread('/home/sergio/MATLABCODE/QUICKTASKS_TELECON/PBL_BillIrion_klayers/PROFILES/sub6000clr_airs_g12_sartaH2020_chrisexec_rp.rtp'); %% H2020
 tsarta_clr_rad_airsX = rad2bt(hC.vchan,psarta_clr_rad_airsX.rcalc);
 
-tsarta_clr_rad_airs = tsarta_clr_rad_airsX;
+tsarta_clr_rad_airs = tsarta_clr_rad_airsX; %% chris exec, NLTE
+tsarta_clr_rad_airs = tsarta_clr_rad_airs0; %% sarta exec, NLTE fixed
 
 %% done by Sergio
 [hS,ha,psarta_clr_rad_airs2,pa] = rtpread('/home/chepplew/projects/klayers_wrk/sergio_sub6000clr_airs_g12_sar_may19.rtp');                                                     %% H2016 WIERD CHANS
@@ -229,10 +231,10 @@ for ii = 1 : length(raLat)-1
   lte_solzen(ii) = nanmean(p.solzen(oo));
 end
 
-plot(meanvaluebin(raLat),nltebias,'r',meanvaluebin(raLat),ltebias,'b',meanvaluebin(raLat),four_um_bias,'k','linewidth',2)
-  xlabel('Latitude'); ylabel('KCARTA-SARTA'); legend('day/ocean','night/ocean','D/N/L/O=ALL','location','best','fontsize',10)
 plot(meanvaluebin(raLat),nlte_solzen,'r',meanvaluebin(raLat),lte_solzen,'b',meanvaluebin(raLat),four_um_solzen,'k','linewidth',2)
   xlabel('Latitude'); ylabel('SOLZEN'); legend('day/ocean','night/ocean','D/N/L/O=ALL','location','best','fontsize',10)
+plot(meanvaluebin(raLat),nltebias,'r',meanvaluebin(raLat),ltebias,'b',meanvaluebin(raLat),four_um_bias,'k','linewidth',2)
+  xlabel('Latitude'); ylabel('KCARTA-SARTA'); legend('day/ocean','night/ocean','D/N/L/O=ALL','location','best','fontsize',10)
 
 plot(p.solzen,tairs(i2326,:)-tsarta_clr_rad_airs(i2326,:),'.')
 xlabel('Solzen'); ylabel('KCARTA-SARTA'); title('BTD at 2326 cm-1')

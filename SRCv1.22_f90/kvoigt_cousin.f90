@@ -294,11 +294,15 @@ CONTAINS
       write(kStdWarn,*) '<<<< debugging SUBR voigt_ch >>>>'
       write(kStdWarn,*) 'iFreqPts,iLineMix,dVibCenter = ',iFreqPts,iLineMix,dVibCenter
       write(kStdWarn,fmt5) 'dP,dPP,dLineShift,dMass,dBroad = ',dP,dPP,dLineShift,dMass,dBroad
-      write(kStdWarn,fmt3) 'daFreq(1),daFreq(nint(iFreqPts/2)),daFreq(iFreqPts) = ',daFreq(1),daFreq(nint(iFreqPts/2.0)),daFreq(iFreqPts)
-      write(kStdWarn,fmt3) 'daFudge(1),daFudge(nint(iFreqPts/2)),daFudge(iFreqPts) = ',daFudge(1),daFudge(nint(iFreqPts/2.0)),daFudge(iFreqPts)
+      write(kStdWarn,fmt3) &
+        'daFreq(1),daFreq(nint(iFreqPts/2)),daFreq(iFreqPts) = ',daFreq(1),daFreq(nint(iFreqPts/2.0)),daFreq(iFreqPts)
+      write(kStdWarn,fmt3) &
+        'daFudge(1),daFudge(nint(iFreqPts/2)),daFudge(iFreqPts) = ',daFudge(1),daFudge(nint(iFreqPts/2.0)),daFudge(iFreqPts)
       write(kStdWarn,*) 'iNptsBirn = ',iNptsBirn
-      write(kStdWarn,fmt3) 'xBirn(1),xBirn(nint(iFreqPts/2)),xBirn(iFreqPts) = ',xBirn(1),xBirn(nint(iFreqPts/2.0)),xBirn(iFreqPts)
-      write(kStdWarn,fmt3) 'chiBirn(1),chiBirn(nint(iFreqPts/2)),chiBirn(iFreqPts) = ',chiBirn(1),chiBirn(nint(iFreqPts/2.0)),chiBirn(iFreqPts)
+      write(kStdWarn,fmt3) &
+        'xBirn(1),xBirn(nint(iFreqPts/2)),xBirn(iFreqPts) = ',xBirn(1),xBirn(nint(iFreqPts/2.0)),xBirn(iFreqPts)
+      write(kStdWarn,fmt3) &
+        'chiBirn(1),chiBirn(nint(iFreqPts/2)),chiBirn(iFreqPts) = ',chiBirn(1),chiBirn(nint(iFreqPts/2.0)),chiBirn(iFreqPts)
     END IF
     
     iTooFar = -1
@@ -324,7 +328,8 @@ CONTAINS
     IF (iUseJan2017orApr2018 == 0) THEN
       !!! this is almost correct, except the wavenumber array should have length kMaxPtsBox      
       !!CALL DoVoigt(daLineshape,daImag,daFreq,dLineShift,dLTE,dMass,dBroad,iN,dP,dPP)
-      write(kStdErr,*) 'f90 compiler .... error #7983: The storage extent of the dummy argument exceeds that of the actual argument.   [DAFREQ]'
+      write(kStdErr,*) &
+        'f90 compiler .... error #7983: The storage extent of the dummy argument exceeds that of the actual argument.   [DAFREQ]'
       CALL DoStop
     ELSE
       !!! compute the voigt lineshape using larger raFreqWavenumbers array
@@ -376,8 +381,12 @@ CONTAINS
 
     IF (iDebug > 0) THEN
       write(kStdWarn,*) ' '
-      write(kStdWarn,fmt3) 'daFreq(1),daFreq(nint(iFreqPts/2)),daFreq(iFreqPts) = ',daFreq(1),daFreq(nint(iFreqPts/2.0)),daFreq(iFreqPts)
-      write(kStdWarn,fmt3) 'daLineshape(1),daLineshape(nint(iFreqPts/2)),daLineshape(iFreqPts) = ',daLineshape(1),daLineshape(nint(iFreqPts/2.0)),daLineshape(iFreqPts)
+      write(kStdWarn,fmt3) &
+        'daFreq(1),daFreq(nint(iFreqPts/2)),daFreq(iFreqPts) = ',&
+        daFreq(1),daFreq(nint(iFreqPts/2.0)),daFreq(iFreqPts)
+      write(kStdWarn,fmt3) &
+         'daLineshape(1),daLineshape(nint(iFreqPts/2)),daLineshape(iFreqPts) = ',&
+         daLineshape(1),daLineshape(nint(iFreqPts/2.0)),daLineshape(iFreqPts)
       write(kStdWarn,*) '<<<< finish debugging SUBR voigt_ch >>>>'      
       CALL DoStop
     END IF

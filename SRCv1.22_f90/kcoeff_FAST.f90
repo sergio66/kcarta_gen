@@ -526,10 +526,12 @@ CONTAINS
 
     IF (abs(rP-0.0) >= 1.0e-3) THEN
       write(kStdErr,*) 'Check_xWeights_iSplinetype : need the smaller weight ~ 0, not ',rP
-      write(kStdErr,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+      write(kStdErr,'(A,3(I3,1X),4(F12.5,1X))') &
+        'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
 
       write(kStdWarn,*) 'Check_xWeights_iSplinetype : need the smaller weight ~ 0, not ',rP
-      write(kStdWarn,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+      write(kStdWarn,'(A,3(I3,1X),4(F12.5,1X))') &
+        'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
 
       IF (kRTP /= -6) THEN
         CALL DoStop
@@ -538,10 +540,12 @@ CONTAINS
 
     IF (abs(rQ-1.0) >= 1.0e-3) THEN
       write(kStdErr,*) 'Check_xWeights_iSplinetype : need the larger weight ~ 1, not ',rQ
-      write(kStdErr,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+      write(kStdErr,'(A,3(I3,1X),4(F12.5,1X))') &
+        'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
 
       write(kStdWarn,*) 'Check_xWeights_iSplinetype : need the larger weight ~ 1, not ',rQ
-      write(kStdWarn,'(A,3(I3,1X),4(F12.5,1X))') 'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
+      write(kStdWarn,'(A,3(I3,1X),4(F12.5,1X))') &
+        'iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ = ',iL,iaP1(iL),iaP2(iL),raP1(iL),raP2(iL),rP,rQ
 
       IF (kRTP /= -6) THEN
           CALL DoStop
@@ -1343,13 +1347,16 @@ CONTAINS
       '              indx1                                  amt   indx1'
     write(iFile_Err_or_Warn,'(A)') caStr
     caStr = &
-     '---------------------------------------------|-----------------------------------------|--------------------------------------'
+     '---------------------------------------------|&
+      -----------------------------------------|--------------------------------------'
     write(iFile_Err_or_Warn,'(A)') caStr
     caStr = &
-     'iL       rP      iaP1    raP1   iaP2   raP2  |  rT     iaT11   raT11    iaT12   raT12  |   rQ       iaQ11  raQ11  iaQ22  raQ22'
+     'iL       rP      iaP1    raP1   iaP2   raP2  |&
+      rT     iaT11   raT11    iaT12   raT12  |   rQ       iaQ11  raQ11  iaQ22  raQ22'
     write(iFile_Err_or_Warn,'(A)') caStr
     caStr = &
-     '---------------------------------------------|-----------------------------------------|--------------------------------------'
+     '---------------------------------------------|&
+     -----------------------------------------|--------------------------------------'
     write(iFile_Err_or_Warn,'(A)') caStr
 
     RETURN

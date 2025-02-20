@@ -3410,9 +3410,11 @@ CONTAINS
     END DO
 
     iI = 1
-    write(iIOUN_Cloud,'(4(F12.0))') raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
+    write(iIOUN_Cloud,'(4(F12.0))') raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),& 
+                                    raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
     DO iI = 2, 7
-      write(iIOUN_Cloud,'(4(F12.5))') raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI),raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
+      write(iIOUN_Cloud,'(4(F12.5))') raaRTPCloudParams0(1,iI),raaRTPCloudParamsF(1,iI), &
+                                      raaRTPCloudParams0(2,iI),raaRTPCloudParamsF(2,iI)
     END DO
     CLOSE(iIOUN_Cloud)
     kTempUnitOpen = -1
@@ -3972,7 +3974,8 @@ CONTAINS
     WRITE(iIOUN2) iNatmJac
     WRITE(iIOUN2) (iaLayerJac(iI),iI=1,iNatmJac)
 
-    write(kStdWarn,'(A,I2,A,I2,A,I3)')' for jacobians we have',iNatmJac,' out of',iNatm,' atm to output; number of layers in first atm = ',iaLayerJac(1)
+    write(kStdWarn,'(A,I2,A,I2,A,I3)')' for jacobians we have',iNatmJac,' out of',iNatm, &
+                          ' atm to output; number of layers in first atm = ',iaLayerJac(1)
     write(kStdWarn,*) (iaLayerJac(iI),iI=1,iNatmJac)
 
     iI = 1

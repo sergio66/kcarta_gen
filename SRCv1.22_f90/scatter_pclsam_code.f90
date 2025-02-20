@@ -2729,8 +2729,12 @@ CONTAINS
       END IF
 
       IF (kOuterLoop .EQ. 1) THEN
-        write(kStdWarn,'(A,4(I5),F12.5)') 'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iK,iaCloudTypeProfile(iK),r0p5fact
-        write(kStdErr,'(A,4(I5),F12.5)')  'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',iLay,iL,iK,iaCloudTypeProfile(iK),r0p5fact
+        write(kStdWarn,'(A,4(I5),F12.5)') &
+          'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',&
+          iLay,iL,iK,iaCloudTypeProfile(iK),r0p5fact
+        write(kStdErr,'(A,4(I5),F12.5)')  &
+          'and the grand Chou adjustment factor for this layer is iLay iL=iaRadLayer(iLay) ctype fact .... ',&
+          iLay,iL,iK,iaCloudTypeProfile(iK),r0p5fact
       END IF
 
       raBB = raaAsym(:,iL)
@@ -2799,11 +2803,14 @@ CONTAINS
       PARAMETER (iLengthCPSIZE = 7,iLengthCNGWAT = 7,iLengthCPRTOP = 9,iLengthSCANANG = 6)
 !!     REAL :: raaaaMatrI(7,7,9,6),raaaaMatrW(7,7,9,6)
 !!     REAL :: raaaaIndexI(7,7,9,6),raaaaIndexW(7,7,9,6)
-      REAL :: raaaaMatrI(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP),raaaaMatrW(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP), &
+      REAL :: raaaaMatrI(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP),& 
+              raaaaMatrW(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP), &
               raaaaMatr(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP)
-      REAL :: raaaaIndexI(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP),raaaaIndexW(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP), &
+      REAL :: raaaaIndexI(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP), &
+              raaaaIndexW(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP), &
               raaaaIndex(iLengthSCANANG,iLengthCPSIZE,iLengthCNGWAT,iLengthCPRTOP)
-      REAL :: raCPSIZEI(iLengthCPSIZE),raCPSIZEW(iLengthCPSIZE),raCNGWAT(iLengthCNGWAT),raCPRTOP(iLengthCPRTOP),raSCANANG(iLengthSCANANG)
+      REAL :: raCPSIZEI(iLengthCPSIZE),raCPSIZEW(iLengthCPSIZE),raCNGWAT(iLengthCNGWAT),&
+              raCPRTOP(iLengthCPRTOP),raSCANANG(iLengthSCANANG)
 
       REAL :: f1,f2,rX,rX0
       INTEGER :: ixLengthCPSIZE,ixLengthCNGWAT,ixLengthCPRTOP,ixLengthSCANANG
@@ -3133,11 +3140,16 @@ CONTAINS
           CALL DoSTOP
         END IF
 
-        write(kStdErr,'(A,3(I4),/,A,4(F12.4))') '>>> read_chou_scale_parametrized : iL,iLay,iCldType ',iL,iLay,iCldType,'    rA1,rA2,rX0,rX  ',rAns1,rAns2,rX0,rX
-        write(kStdErr,'(A,5I12)')     'ang, sze, cng, cpr, raaaaIndexI/W  = ',iAng0,iDme0,iCng0,iCpr0,int(raaaaIndexW(iAng0,iDme0,iCng0,iCpr0))
-        write(kStdErr,'(A,5F12.4)')   'wang,wsze,wcng,wcpr,wraaaaIndexI/W = ',rFrac1,rDX,rDY,rDZ,raaaaMatr(iAng0,iDme0,iCng0,iCpr0)
-        write(kStdErr,'(A,4(F12.4))') '               rANG,DME,CNG,CTOP   = ',rANG,rDME,10**rCNG,10**rCTOP
-        write(kStdErr,'(A,4(F12.4))') '            orig ang,sze,cng,cpr   = ',rANG,raaRTPCloudParams0(1,5),raaRTPCloudParams0(1,4),raaRTPCloudParams0(1,2)
+        write(kStdErr,'(A,3(I4),/,A,4(F12.4))') &
+          '>>> read_chou_scale_parametrized : iL,iLay,iCldType ',iL,iLay,iCldType,'    rA1,rA2,rX0,rX  ',rAns1,rAns2,rX0,rX
+        write(kStdErr,'(A,5I12)')     &
+          'ang, sze, cng, cpr, raaaaIndexI/W  = ',iAng0,iDme0,iCng0,iCpr0,int(raaaaIndexW(iAng0,iDme0,iCng0,iCpr0))
+        write(kStdErr,'(A,5F12.4)')   &
+          'wang,wsze,wcng,wcpr,wraaaaIndexI/W = ',rFrac1,rDX,rDY,rDZ,raaaaMatr(iAng0,iDme0,iCng0,iCpr0)
+        write(kStdErr,'(A,4(F12.4))') & 
+          '               rANG,DME,CNG,CTOP   = ',rANG,rDME,10**rCNG,10**rCTOP
+        write(kStdErr,'(A,4(F12.4))') & 
+          '            orig ang,sze,cng,cpr   = ',rANG,raaRTPCloudParams0(1,5),raaRTPCloudParams0(1,4),raaRTPCloudParams0(1,2)
 
         !write(iIOUN_Cloud,'(A,3(I4),/,A,4(F12.4))') '>>> read_chou_scale_parametrized : iL,iLay,iCldType ',iL,iLay,iCldType,'    rA1,rA2,rX0,rX  ',rAns1,rAns2,rX0,rX
         !write(iIOUN_Cloud,'(A,5I12)')     'ang, sze, cng, cpr, raaaaIndexI/W  = ',iAng0,iDme0,iCng0,iCpr0,int(raaaaIndexW(iAng0,iDme0,iCng0,iCpr0))
@@ -3145,7 +3157,10 @@ CONTAINS
         !write(iIOUN_Cloud,'(A,4(F12.4))') '               rANG,DME,CNG,CTOP   = ',rANG,rDME,10**rCNG,10**rCTOP
         !write(iIOUN_Cloud,'(A,4(F12.4))') '            orig ang,sze,cng,cpr   = ',rANG,raaRTPCloudParams0(1,5),raaRTPCloudParams0(1,4),raaRTPCloudParams0(1,2)
 
-        write(iIOUN_Cloud,'(3(I4),8(F12.4))') iL,iLay,iCldType,rANG,raaRTPCloudParams0(iWhichCloudraaRTP,5),raaRTPCloudParams0(iWhichCloudraaRTP,4),raaRTPCloudParams0(iWhichCloudraaRTP,2),rDME,10**rCNG,10**rCTOP,rX
+        write(iIOUN_Cloud,'(3(I4),8(F12.4))') iL,iLay,iCldType,rANG,&
+            raaRTPCloudParams0(iWhichCloudraaRTP,5),raaRTPCloudParams0(iWhichCloudraaRTP,4),& 
+            raaRTPCloudParams0(iWhichCloudraaRTP,2),&
+            rDME,10**rCNG,10**rCTOP,rX
 
         CLOSE(iIOUN_CLOUD)
       END IF

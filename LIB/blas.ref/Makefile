@@ -31,6 +31,11 @@ F77 = /cm/shared/apps/intel/composer_xe/2015.1.133/bin/intel64/ifort
 F77 = ifort
 FFLAGS = -names lowercase -extend-source 132 -check bounds -msse2 -nothreads -noreentrancy
 
+#linux with gfortran
+#-------------------------
+F77 = /usr/ebuild/software/GCCcore/11.2.0/bin/gfortran
+FFLAGS = -ffixed-line-length-none -O3 -fbounds-check
+
 libblas.a:
 	$(F77) -c $(FFLAGS) *.f
 	ar -rcs libblas.a *.o

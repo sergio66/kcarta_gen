@@ -3860,8 +3860,11 @@ CONTAINS
                 SUM  = 0.0
                 DO 40 K = 1, NMUG
                     SUM  = SUM + GWT( K ) * &
+!                    DBDREF( DBLE(WVNMLO), DBLE(WVNMHI), DBLE(CMU(IQ)), DBLE(CMU(JQ)), &
+!                    DBLE(PI*GMU(K)) ) * COS( MAZIM*PI*GMU( K ) )
                     DBDREF( WVNMLO, WVNMHI, CMU(IQ), CMU(JQ), &
                     PI*GMU(K) ) * COS( MAZIM*PI*GMU( K ) )
+
                 40 END DO
 
                 BDR( IQ, JQ ) = 0.5 * ( 2. - DELM0 ) * SUM
@@ -3874,6 +3877,8 @@ CONTAINS
                 SUM  = 0.0
                 DO 60 K = 1, NMUG
                     SUM  = SUM + GWT( K ) * &
+!                    DBDREF( DBLE(WVNMLO), DBLE(WVNMHI), DBLE(CMU(IQ)), DBLE(UMU0), &
+!                    DBLE(PI*GMU(K)) ) * COS( MAZIM*PI*GMU( K ) )
                     DBDREF( WVNMLO, WVNMHI, CMU(IQ), UMU0, &
                     PI*GMU(K) ) * COS( MAZIM*PI*GMU( K ) )
                 60 END DO
@@ -3901,6 +3906,8 @@ CONTAINS
                     SUM  = 0.0
                     DO 80 K = 1, NMUG / 2
                         SUM  = SUM + GWT( K ) * GMU( K ) * &
+!                        DBDREF( DBLE(WVNMLO), DBLE(WVNMHI), DBLE(CMU(IQ)), DBLE(GMU(K)), &
+!                        DBLE(PI*GMU(JG)) )
                         DBDREF( WVNMLO, WVNMHI, CMU(IQ), GMU(K), &
                         PI*GMU(JG) )
                     80 END DO
@@ -3944,6 +3951,8 @@ CONTAINS
                         SUM  = 0.0
                         DO 120 K = 1, NMUG
                             SUM  = SUM + GWT( K ) * &
+!                            DBDREF( DBLE(WVNMLO), DBLE(WVNMHI), DBLE(UMU(IU)), DBLE(CMU(IQ)), &
+!                            DBLE(PI*GMU(K)) ) * &
                             DBDREF( WVNMLO, WVNMHI, UMU(IU), CMU(IQ), &
                             PI*GMU(K) ) * &
                             COS( MAZIM*PI*GMU( K ) )
@@ -3958,6 +3967,8 @@ CONTAINS
                         SUM  = 0.0
                         DO 140 K = 1, NMUG
                             SUM  = SUM + GWT( K ) * &
+!                            DBDREF( DBLE(WVNMLO), DBLE(WVNMHI), DBLE(UMU(IU)), DBLE(UMU0), &
+!                            DBLE(PI*GMU(K)) ) * &
                             DBDREF( WVNMLO, WVNMHI, UMU(IU), UMU0, &
                             PI*GMU(K) ) * &
                             COS( MAZIM*PI*GMU( K ) )
@@ -3982,6 +3993,8 @@ CONTAINS
                             SUM  = 0.0
                             DO 150 K = 1, NMUG / 2
                                 SUM  = SUM + GWT( K )*GMU( K )* &
+!                                DBDREF( DBLE(WVNMLO), DBLE(WVNMHI), DBLE(UMU(IU)), &
+!                                DBLE(GMU(K)), DBLE(PI*GMU(JG)) )
                                 DBDREF( WVNMLO, WVNMHI, UMU(IU), &
                                 GMU(K), PI*GMU(JG) )
                             150 END DO
@@ -5332,7 +5345,8 @@ CONTAINS
     !                       ** Loop over angle of reflection
         DO 20 K = 1, NMUG / 2
             SUM  = SUM + GWT( K )*GMU( K )* &
-            DBDREF( WVNMLO, WVNMHI, GMU( K ), MU, PI*GMU( JG ) )
+!            DBDREF(DBLE(WVNMLO), DBLE(WVNMHI), DBLE(GMU( K )), DBLE(MU),DBLE( PI*GMU( JG )) )
+            DBDREF(WVNMLO, WVNMHI, GMU( K ), MU, PI*GMU( JG ) )
         20 END DO
 
         DREF = DREF + GWT( JG )*SUM

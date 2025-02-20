@@ -512,9 +512,12 @@ CONTAINS
 	write(kStdWarn,*) ' >>> NOTE if the CO2 mix ratios do not agree, this routine'
 	write(kStdWarn,*) ' >>> will modify the input MR so they are same as US STd by end of this subr'
 	write(kStdWarn,*) ' '
-        ca120B = '|                profile                                                       |   US STd UA reference   |            |'
-        ca120C = '|lay    p (mb)         pp(mb)         Tk(K)    TNLTE(k)   Q(mol/cm2)   CO2 ppm |  Tstd(K)   CO2Std(ppm)  | CO2Std/CO2 |'
-        ca120D = '-----------------------------------------------------------------------------------------------------------------------'
+        ca120B = &
+ '|                profile                                                       |   US STd UA reference   |            |'
+        ca120C = & 
+ '|lay    p (mb)         pp(mb)         Tk(K)    TNLTE(k)   Q(mol/cm2)   CO2 ppm |  Tstd(K)   CO2Std(ppm)  | CO2Std/CO2 |'
+        ca120D = &
+ '-----------------------------------------------------------------------------------------------------------------------'
         write(kStdWarn,'(A)') ca120B
         write(kStdWarn,'(A)') ca120C
         write(kStdWarn,'(A)') ca120D      
@@ -915,7 +918,8 @@ CONTAINS
 
             write(kStdWarn,*) '  '
             write(kStdWarn,'(A)') 'Comparing current NLTE profile to US STD NLTE 2350 Band Profile in kreadVTprofiles.f90 '
-            write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2';
+            write(kSTdWarn,'(A)') 'see subr GetUSSTD_2350 : '
+            write(kSTdWarn,'(A)') '  This comes from /asl/data/kcarta_sergio/KCDATA/NLTE/LA/xnlte_1_1_1_6_sol_0.genln2'
             write(KStdWarn,'(A)') 'actual NLTE profiles read in using name stored in caaNLTETemp in nm_nonlte'
             write(kStdWarn,*) ' '
             write(kStdWarn,*) ' Comparisons of Tk,tNLTE vs USSTD : '

@@ -235,8 +235,9 @@ CONTAINS
         CALL DoSTOP
       END IF
       IF ((iaNewData(iCount) < 1) .OR. (iaNewData(iCount) > kNumkCompT)) THEN
-        write(kStdErr,*)'cannot have so many kCARTA chunks in *SPECTRA!!'
-        write(kStdErr,*)'please check and retry!'
+        write(kStdErr,*) 'iCount,iaNewData(iCount),kNumkCompT = ',iCount,iaNewData(iCount),kNumkCompT
+        write(kStdErr,*) 'cannot have zero/so many kCARTA chunks in *SPECTRA!!'
+        write(kStdErr,*) 'please check and retry!'
         CALL DoSTOP
       END IF
     END DO
@@ -629,13 +630,14 @@ CONTAINS
     DO iLTEIn = 1,iNumNLTEGases
       IF ((iaNLTEGasID(iLTEIn) < 1) .OR. (iaNLTEGasID(iLTEIn) > kMaxGas)) THEN
         write(kStdErr,*)'iaNLTEGasID(',iLTEIn,') = ',iaNLTEGasID(iLTEIn)
-        write(kStdErr,*)'need a valid gas ID in *SPECTRA!!'
-        write(kStdErr,*)'please check and retry (subr nonlteSLOW_LBL)!'
+        write(kStdErr,*)'need a valid gas ID in *NONLTE!!'
+        write(kStdErr,*)'please check and retry (subr nonlteSLOW_LBL)!!'
         CALL DoSTOP
       END IF
       IF ((iaNLTEChunks(iLTEIn) < 1) .OR. (iaNLTEChunks(iLTEIn) > kNumkCompT)) THEN
-        write(kStdErr,*)'cannot have so many kCARTA chunks in *SPECTRA!!'
-        write(kStdErr,*)'please check and retry!'
+        write(kStdErr,*) 'iLTEIn,iaNLTEChunks(iLTEIn),kNumkCompT = ',iLTEIn,iaNLTEChunks(iLTEIn),kNumkCompT
+        write(kStdErr,*) 'cannot have zero/so many kCARTA NLTE chunks in *NONLTE ((subr nonlteSLOW_LBL)!!'
+        write(kStdErr,*) 'please check and retry!'
         CALL DoSTOP
       END IF
     END DO
@@ -983,13 +985,14 @@ CONTAINS
     DO iLTEIn=1,iNumNLTEGases
       IF ((iaNLTEGasID(iLTEIn) < 1) .OR. (iaNLTEGasID(iLTEIn) > kMaxGas)) THEN
         write(kStdErr,*)'iaNLTEGasID(',iLTEIn,') = ',iaNLTEGasID(iLTEIn)
-        write(kStdErr,*)'need a valid gas ID in *SPECTRA!!'
-        write(kStdErr,*)'please check and retry (subr nonlteFAST_KCOMP)!'
+        write(kStdErr,*)'need a valid gas ID in *NONLTE!!'
+        write(kStdErr,*)'please check and retry (subr nonlteFAST_KCOMP)!!'
         CALL DoSTOP
       END IF
       IF ((iaNLTEChunks(iLTEIn) < 1) .OR. (iaNLTEChunks(iLTEIn) > kNumkCompT)) THEN
-        write(kStdErr,*)'cannot have so many kCARTA chunks in *SPECTRA!!'
-        write(kStdErr,*)'please check and retry!'
+        write(kStdErr,*) 'iLTEIn,iaNLTEChunks(iLTEIn),kNumkCompT = ',iLTEIn,iaNLTEChunks(iLTEIn),kNumkCompT
+        write(kStdErr,*) 'cannot have zero/so many kCARTA chunks in *NONLTE (subr nonlteFAST_LBL)!! '
+        write(kStdErr,*) 'please check and retry!'
         CALL DoSTOP
       END IF
     END DO

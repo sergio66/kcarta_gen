@@ -4,7 +4,8 @@
 
     PROGRAM kcartamain
     use omp_lib            ! Fortran 90; omp_get_thread_num, omp_get_num_threads
-    use ifport             ! for getenv
+! print *,'dag, gfortran cannot compile these and says they should all be double' "
+!    use ifport             ! for getenv
 
     use basic_common       ! misc routines
     use kcartamisc         ! more misc routines
@@ -405,7 +406,8 @@
 !************************************************************************
 !************************************************************************
     double precision :: wtime
-    wtime = omp_get_wtime ( )
+! print *,'dag, gfortran cannot compile these and says they should all be double' "
+!    wtime = omp_get_wtime ( )
 
 !!! ifort starts taking over the machine : Howard says 1 is 
 !!! very very pleasant to everyone, 4 is better (but still limits to about one processor)
@@ -413,10 +415,13 @@
 !
 !!! setting 4 threads seems to limit to one processor
 !    call mkl_set_num_threads(4)     
-!!! setting 1 threads really limits to one processor
-    call mkl_set_num_threads(1)     
 !!! setting 32 threads seems to limit to 32 processors haha
 !    call mkl_set_num_threads(32)     
+
+! print *,'dag, gfortran cannot compile these and says they should all be double' "
+!!! setting 1 threads really limits to one processor
+!    call mkl_set_num_threads(1)     
+
 
 ! allow scattering computations if in .nml or RTP file
     kAllowScatter = +1
@@ -634,10 +639,11 @@
         CALL StoreReference(raRAmt,raRTemp,raRPress,raRPartPress, &
           raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas,iaGases)
 
-        IF ((iaaOverrideDefault(3,8) .LT. 0) .AND. (iaGases(iGas) .GT. 0) .AND. (iaProfFromRTP(iGas) .LE. 0) .AND. (iMeanDeltaP .EQ. 1)) THEN
+        IF ((iaaOverrideDefault(3,8) .LT. 0) .AND. (iaGases(iGas) .GT. 0) .AND. & 
+         (iaProfFromRTP(iGas) .LE. 0) .AND. (iMeanDeltaP .EQ. 1)) THEN
           write(kStdWarn,'(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas#, gasID ',iGas,iaGases(iGas)
           write(kStdErr, '(A,I3,I3)') 'need to reset profile (use rejigged reference profile) for gas ',iGas,iaGases(iGas)
-         Call SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP, &
+          Call SetQ_NotInRTP(iGas,iaGases,iaProfFromRTP, &
                              raRAmt,raRTemp,raRPress,raRPartPress, &
                              raaAmt,raaPartPress)
         END IF
@@ -955,7 +961,8 @@
           IF ((iaGases(iGas) .EQ. 2) .AND. ((iaaOverrideDefault(1,9) .EQ. 2) .OR. (iaaOverrideDefault(1,9) .EQ. 6))) THEN
             CALL add_co2_wv_n2_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness, &
                                             daaDQ,daaDT,iDoDQ,DoGasJacob(1,iaJacob,iJacob),daaDQWV,iYesNoCO2WVContinuum)
-	    IF ((DoGasJacob(1,iaJacob,iJacob) .EQ. 1) .AND. (iYesNoCO2WVContinuum > 0) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
+	    IF ((DoGasJacob(1,iaJacob,iJacob) .EQ. 1) .AND. (iYesNoCO2WVContinuum > 0) &
+              .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
               write(kStdWarn,*) '   including CO2/WV continuum d/dq for gasID 1 in Jacob list using CO2/WV jac'	
               write(kStdErr,*)  '   including CO2/WV continuum d/dq for gasID 1 in Jacob list using CO2/WV jac'
               CALL DoSet(daaDQWV,raaaAllDQ,1,iDoAdd)                   		    
@@ -965,7 +972,8 @@
           IF ((iaGases(iGas) .EQ. 22) .AND. ((iaaOverrideDefault(1,9) .EQ. 4) .OR. (iaaOverrideDefault(1,9) .EQ. 6))) THEN
             CALL add_co2_wv_n2_continuum(iaGases(iGas),raFreq,daaGasAbCoeff,raTTemp,raTPress,raaPartPress,raThickness, &
                                             daaDQ,daaDT,iDoDQ,DoGasJacob(1,iaJacob,iJacob),daaDQWV,iYesNoCO2WVContinuum)
-	    IF ((DoGasJacob(1,iaJacob,iJacob) .EQ. 1) .AND. (iYesNoCO2WVContinuum > 0) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
+	    IF ((DoGasJacob(1,iaJacob,iJacob) .EQ. 1) .AND. (iYesNoCO2WVContinuum > 0) & 
+             .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
               write(kStdWarn,*) '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'	
               write(kStdErr,*)  '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'
               CALL DoSet(daaDQWV,raaaAllDQ,1,iDoAdd)                   		    
@@ -1395,9 +1403,12 @@
                 END IF
               END IF
               IF (kOuterLoop .EQ. 1) THEN
-                write(kStdWarn,'(A,I4)') 'iaaOverride(2,7) = 0/+1/-1 for no snell and plane parallel/yes snell yes curvature/no snell yes curvature ',iaaOverrideDefault(2,7)
+                write(kStdWarn,'(A,I4)') & 
+                  'iaaOverride(2,7) = 0/+1/-1 for no snell and plane parallel/yes snell yes curvature/no snell yes curvature ', &
+                  iaaOverrideDefault(2,7)
                 write(kStdWarn,'(A,F12.5,A,F12.5,A,I4)') &
-                  'raSatAngle(iAtm) = p.scanang = ',raSatAngle(iAtm), ' angle for radiance output ',rSatAngleX,' kWhichScatterCode = ',kWhichScatterCode
+                  'raSatAngle(iAtm) = p.scanang = ',raSatAngle(iAtm), ' angle for radiance output ',rSatAngleX,'& 
+                   kWhichScatterCode = ',kWhichScatterCode
               END IF
 
               CALL InterfaceScattering( &
@@ -1445,9 +1456,10 @@
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
     CALL DateTimeX('kcartamain.x')
-    wtime = omp_get_wtime ( ) - wtime
-    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
-    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
+! print *,'dag, gfortran cannot compile these and says they should all be double' "
+!    wtime = omp_get_wtime ( ) - wtime
+!    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
+!    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
 
     write(kStdWarn,*) 'end of run!!!!!!!!!!!'
     CLOSE(UNIT = kStdWarn)

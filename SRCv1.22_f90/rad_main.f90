@@ -455,7 +455,8 @@ CONTAINS
       iI = iaaRadLayer(iAtm,iL)
       IF ((iL >= iJacB) .AND. (iL <= iJacT)) THEN
         !! remember we perturb layers WRT surface, so use iL in this if-then comparison
-        write(kStdWarn,'(A,I3,A,I3,A,F12.5)') 'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI,' kDefaultToffset = ',kDefaultToffset
+        write(kStdWarn,'(A,I3,A,I3,A,F12.5)') & 
+         'T(z) pert : radiating atmosphere layer ',iL,' = kCARTA comprs layer ',iI,' kDefaultToffset = ',kDefaultToffset
 !        raVTemp2(iI) = raVTemp(iI) + 1.0               ! till June 2019
         raVTemp2(iI) = raVTemp(iI) + kDefaultToffset    ! after June 2019
       ELSE
@@ -4533,8 +4534,10 @@ CONTAINS
       END IF
 
       IF (iDp == 1) THEN
-        write(kStdWarn,'(A,I3,A,I3,A,I3)')   ' output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileDNWELL_LINEAR_IN_TAU; iVary = ',iVary
-        write(kStdWarn,'(A,2F12.4,A,2F12.4)') ' T(z),Tlev(z) = ',rMPTemp,raTPressLevels(iL),' radiance before/after interp = ',rJunk,raInten(1)
+        write(kStdWarn,'(A,I3,A,I3,A,I3)') &
+         ' output',iDp,' rads at',iLay,' th rad layer, after RT_ProfileDNWELL_LINEAR_IN_TAU; iVary = ',iVary
+        write(kStdWarn,'(A,2F12.4,A,2F12.4)') &
+          ' T(z),Tlev(z) = ',rMPTemp,raTPressLevels(iL),' radiance before/after interp = ',rJunk,raInten(1)
         CALL wrtout(iIOUN,caOutName,raFreq,raInten)
       END IF
 

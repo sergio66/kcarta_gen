@@ -73,7 +73,7 @@ end
     REAL :: raTPressLevels(kProfLayer+1)
 
 ! local
-    INTEGER :: iI,iJ,iOffSet,iCO2_ind,iDefault,iInterpType
+    INTEGER :: iI,iI2,iJ,iOffSet,iCO2_ind,iDefault,iInterpType
     REAL :: raT(kProfLayer),raP(kProfLayer),rX,rY,logP(kProfLayer),rPmin,rPmax,dx
     REAL :: grav0,grav,Re,Rd,raGeopotentialThick1(kProfLayer),raGeopotentialThick2(kProfLayer)
     REAL :: rInt,raTX(10),raPX(10),rJunkHgt,rPrevious,rDeltaPrevious
@@ -100,10 +100,10 @@ end
     iOffSet = kProfLayer-iProfileLayers
 
     DO iI = 1,kProfLayer
-      if (raThickness(iI) < 0) THEN
+      IF (raThickness(iI) < 0) THEN
         write(kSTdErr,*) iI,raThickness(iI)
         call dostopmesg('rathickness < 0 in Get_Temp_Plevs$')
-      end if
+      END IF
     END DO
           
     rDeltaPrevious = 0.0
@@ -114,15 +114,19 @@ end
     IF ((raaPress(iI,iCO2_ind) > raaPress(iI+1,iCO2_ind)) .AND. &
       (raaPress(iI+1,iCO2_ind) > raaPress(iI+2,iCO2_ind))) THEN
       !! pressures decreasing with index; use CO2 temps and pressures
-      DO iI = kProfLayer-iProfileLayers+1,kProfLayer
-        iJ = iI-iOffSet
+      DO iI2 = kProfLayer-iProfileLayers+1,kProfLayer
+        iJ = iI2-iOffSet
         raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
         if (rPrevious .GT. raP(iJ)) THEN
-          write(kStdErr,'(A,I4,I4,1X,F12.4,1X,F12.4)')  'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI,iJ,raP(iJ),rPrevious = ',iI,iJ,raP(iJ),rPrevious           
-          write(kStdWarn,'(A,I4,I4,1X,F12.4,1X,F12.4)') 'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI,iJ,raP(iJ),rPrevious = ',iI,iJ,raP(iJ),rPrevious           
+          write(kStdErr,'(A,I4,I4,1X,F12.4,1X,F12.4)')  & 
+            'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI2,iJ,raP(iJ),rPrevious = ',iI2,iJ,raP(iJ),rPrevious           
+          write(kStdWarn,'(A,I4,I4,1X,F12.4,1X,F12.4)') & 
+            'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI2,iJ,raP(iJ),rPrevious = ',iI2,iJ,raP(iJ),rPrevious           
           raP(iJ) = rPrevious + rDeltaPrevious
-          write(kStdErr,'(A,F12.4,1X,F12.4)')           'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious           
-          write(kStdWarn,'(A,F12.4,1X,F12.4)')          'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious           
+          write(kStdErr,'(A,F12.4,1X,F12.4)')           & 
+            'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious           
+          write(kStdWarn,'(A,F12.4,1X,F12.4)')          & 
+            'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious           
         END IF
         rDeltaPrevious = abs(raP(iJ)-rPrevious)
         rPrevious = raP(iJ)
@@ -130,13 +134,13 @@ end
         raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
         IF (logP(iJ) > rPmax) rPmax = logP(iJ)
         IF (logP(iJ) < rPmin) rPmin = logP(iJ)
-        ! print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
+        ! print *,'a',iI2,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
       END DO
     ELSEIF ((raaPress(iI,iCO2_ind) < raaPress(iI+1,iCO2_ind)) .AND. &
       (raaPress(iI+1,iCO2_ind) < raaPress(iI+2,iCO2_ind))) THEN
       !! pressures increasing with index; use CO2 temps and pressures
-      DO iI = kProfLayer-iProfileLayers+1,kProfLayer
-        iJ = iI-iOffSet
+      DO iI2 = kProfLayer-iProfileLayers+1,kProfLayer
+        iJ = iI2-iOffSet
         raP(iJ) = raaPress(iJ,iCO2_ind)*kAtm2mb
         logP(iJ) = log(raP(iJ))
         raT(iJ) = raaTemp(iJ,iCO2_ind)
