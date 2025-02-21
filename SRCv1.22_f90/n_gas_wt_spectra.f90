@@ -812,6 +812,9 @@ CONTAINS
       caOutUAFile(iG:iG+2)  = '_UA'
       caPlanckUAFile(iG:iG+9) = '_UA_PLANCK'
 
+      write(kStdWarn,'(A,A)') 'nonlteSLOW_LBL : caOutUAFile = ',caOutUAFile
+      write(kStdWarn,'(A,A)') 'nonlteSLOW_LBL : caPlanckUAFile = ',caPlanckUAFile
+
     END IF
 
 ! really no more error checking possible, as we have to actually go ahead and
@@ -1023,6 +1026,8 @@ CONTAINS
       caOutUAFile(iG:iG+2)  = '_UA'
       caPlanckUAFile(iG:iG+9) = '_UA_PLANCK'
 
+      write(kStdWarn,'(A,A)') 'nonlteFAST_KCOMP : caOutUAFile = ',caOutUAFile
+      write(kStdWarn,'(A,A)') 'nonlteFAST_KCOMP : caPlanckUAFile = ',caPlanckUAFile
     END IF
 
 ! really no more error checking possible, as we have to actually go ahead and

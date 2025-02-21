@@ -1861,7 +1861,7 @@ CONTAINS
    ! local
    INTEGER :: iGas,iL,iJ,iIOUN_Junk,iFileErr,i1,i2
    CHARACTER*80 :: caIOUN_Junk
-   REAL :: ra1,ra2
+   REAL :: ra1,ra2,rJunk1,rJunk2
 
    caIOUN_Junk = 'warning_prof.tmp'
    iIOUN_Junk = kTempUnit
@@ -1886,7 +1886,7 @@ CONTAINS
 !      write(kTempUnit,*) (raaRAmt(iL,iGas),iGas=1,kGasStore)
 !    END DO
 
-   write(kTempUnit,*) '% numgases = ',iNumGases
+   write(kTempUnit,'(A,I3)') '% numgases = ',iNumGases
    write(kTempUnit,'(A)') & 
     '% iL iJ=iaRadLayer(iL) iGas  iaGases(iGas)=iGasID  iaProfFromRTP raPress raaTemp raaAmt raaRAmt  raaAmt/raaRamt'
 
@@ -1895,16 +1895,32 @@ CONTAINS
    DO iGas = 1,kGasStore
      DO iL = 1,iaNumLayer(1)
        iJ = iaaRadLayer(1,iL)
+       IF (iaGases(iGas) .LT. 100) THEN
+         rJunk1 = raaRAmt(iJ,iGas)         
+         rJunk2 = raaAmt(iJ,iGas)/max(rJunk1,1.0e-15)
+       ELSE
+         rJunk1 = raaRAmt(iJ,1)         
+         rJunk2 = raaAmt(iJ,iGas)/max(rJunk1,1.0e-15)
+       END IF
        write(kTempUnit,'(5(I4),F12.5,F12.5,ES12.5,ES12.5,ES12.5)') & 
-        iL,iJ,iGas,iaGases(iGas),iaProfFromRTP(iGas),raaPress(iJ,1),raaTemp(iJ,1), &
-        raaAmt(iJ,iGas),raaRAmt(iJ,iGas),raaAmt(iJ,iGas)/(raaRAmt(iJ,iGas)+1.0e-15)
+         iL,iJ,iGas,iaGases(iGas),iaProfFromRTP(iGas),& 
+        raaPress(iJ,1),raaTemp(iJ,1),raaAmt(iJ,iGas),rJunk1,rJunk2
      END DO
-     i1 = minval(iaaRadLayer(1,1:iaNumLayer(1)))
+
+     i1 = minval(iaaRadLayer(1,1:iaNumLayer(1)))+1
      i2 = maxval(iaaRadLayer(1,1:iaNumLayer(1)))
+     IF (iaGases(iGas) .LT. 100) THEN
+       rJunk1 = sum(raaRAmt(i1:I2,iGas))         
+       rJunk2 = sum(raaAmt(i1:i2,iGas))/max(rJunk1,1.0e-15)
+     ELSE
+       rJunk1 = sum(raaRAmt(i1:I2,1))         
+       rJunk2 = sum(raaAmt(i1:i2,iGas))/max(rJunk1,1.0e-15)
+     END IF
      write(kTempUnit,'(A,I4,I4,I4,ES12.5,ES12.5,F12.5)') &
-       '% iG, iGasID, fromRTP file, column Q, column Qref,ratio :  ',&
-        iGas,iaGases(iGas),iaProfFromRTP(iGas),sum(raaAmt(i1:i2,iGas)), &
-        sum(raaRAmt(i1:i2,iGas)),sum(raaAmt(i1:i2,iGas))/(1.0e-35+sum(raaRAmt(i1:i2,iGas)))
+       '% iG, iGasID, fromRTP file, column Q, column Qref,ratio :  ',   &
+        iGas,iaGases(iGas),iaProfFromRTP(iGas),                         & 
+        sum(raaAmt(i1:i2,iGas)),rJunk1,rJunk2
+
    END DO
 
    CLOSE(UNIT=iIOUN_Junk)

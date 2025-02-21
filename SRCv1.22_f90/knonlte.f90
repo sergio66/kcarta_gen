@@ -675,10 +675,11 @@ CONTAINS
       IF (kNLTEOutUAOpen == -1) THEN
         !!! open the output file etc
         iType = +1
+        write(kStdWarn,'(A,A)') 'subr NLTE_Fast_Compressed : opening caOutUAFile = ',caOutUAFile
         CALL OpenUAFile(iType,iUpper,caOutUAFile,rFreqStart,rFreqEnd, &
-        iDumpAllUASpectra,iDumpAllUARads, &
-        iFileIDLo,iFileIDHi,iTag, &
-        iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
+          iDumpAllUASpectra,iDumpAllUARads, &
+          iFileIDLo,iFileIDHi,iTag, &
+          iNumNLTEGases,iaNLTEChunks,iaaNLTEChunks)
         IF (iDumpAllUARads > 0) THEN
           iNumberUA_NLTEOut = 1 + iUpper
         ELSEIF (iDumpAllUARads <= 0) THEN
@@ -1946,6 +1947,7 @@ CONTAINS
     IF (kNLTEOutUAOpen == -1) THEN
       !!! open the output file etc
       iType = +1
+      write(kStdWarn,'(A,A)') 'subr lte_spectra_upper : opening caOutUAFile = ',caOutUAFile
       CALL OpenUAFile(iType,iUpper,caOutUAFile,rFrLow,rFrHigh, &
         iDumpAllUASpectra,iDumpAllUARads, &
         iFileIDLo,iFileIDHi,iTag, &
@@ -2307,6 +2309,7 @@ CONTAINS
     IF (kNLTEOutUAOpen == -1) THEN
       !!! open the output file etc
       iType = +1
+      write(kStdWarn,'(A,A)') 'subr UpHigh_Nonlte_Spectra : opening caOutUAFile = ',caOutUAFile
       CALL OpenUAFile(iType,iUpper,caOutUAFile,rFrLow,rFrHigh, &
         iDumpAllUASpectra,iDumpAllUARads, &
         iFileIDLo,iFileIDHi,iTag, &

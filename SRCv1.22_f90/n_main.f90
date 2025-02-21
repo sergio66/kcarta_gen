@@ -736,6 +736,7 @@ CONTAINS
 
     namecomment = '******* NONLTE section *******'
     read (iIOUN,nml = nm_nonlte)
+
     iNumNLTEGases1    = iNumNLTEGases
     IF (iNumNLTEGases >= 1) THEN
       iNLTE_SlowORFast1 = iNLTE_SlowORFast
@@ -747,14 +748,6 @@ CONTAINS
       iaNLTEGasID1      = iaNLTEGasID
       iaNLTEChunks1     = iaNLTEChunks
       raNLTEstrength1   = raNLTEstrength
-
-print *,iNumNLTEGases,iNLTE_SlowORFast,iDoUpperAtmNLTE,iSetBloat,iAllLayersLTE,iUseWeakBackGnd
-print *,' '
-print *,iaNLTEChunks
-!print *,' '
-!print *,iaaNLTEChunks
-print *,' stopping in n_main.f90'
-call dostop
 
       DO iI = 1,kGasStore
         IF (raNLTEstrength1(iI) > 0) THEN

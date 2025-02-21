@@ -494,7 +494,7 @@ CONTAINS
     REAL :: raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
     REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
     REAL :: rDefault
-    CHARACTER(130) :: caEmsFile
+    CHARACTER(160) :: caEmsFile
     CHARACTER(160) :: caSetSolarRefl(kMaxAtm),caE
     REAL :: raSetSolarRefl(kMaxAtm)
 
@@ -502,7 +502,9 @@ CONTAINS
     INTEGER :: iNumLinesRead,iIOUN3,iI,iErrIO,iErr,iSwap
     REAL :: rEms,r1,raX(kEmsRegions),raY(kEmsRegions),raSwap(kEmsRegions),rX
     CHARACTER(7) :: caWord
+    CHARACTER*1 caBlank
 
+    caBlank = ' '
     caWord = '*RADNCE'
     iNumLinesRead = 0
 
@@ -558,7 +560,8 @@ CONTAINS
       ! get the name of the file in which the emissivity parameters are
       caE = caSetSolarRefl(iAtm)
       DO iI = 1,130
-        caEmsFile = ' '
+!       caEmsFile = ' '
+        caEmsFile(iI:iI) = caBlank(1:1)
       END DO
       DO iI = 1,160
         caEmsFile(iI:iI) = caE(iI:iI)
@@ -655,7 +658,7 @@ CONTAINS
 ! iaSetEms eventually has number of wavenumber emiss regions
     INTEGER :: iaSetEms(kMaxAtm),iAtm
     REAL :: raaaSetEmissivity(kMaxAtm,kEmsRegions,2),rDefault
-    CHARACTER(130) :: caEmsFile
+    CHARACTER(160) :: caEmsFile
     CHARACTER(160) :: caEmissivity(kMaxAtm),caE
     REAL :: raSetEmissivity(kMaxAtm)
 
@@ -663,6 +666,9 @@ CONTAINS
     INTEGER :: iNumLinesRead,iIOUN3,iI,iErrIO,iErr,iSwap
     REAL :: rEms,r1,raX(kEmsRegions),raY(kEmsRegions),raSwap(kEmsRegions)
     CHARACTER(7) :: caWord
+    CHARACTER(1) :: caBlank
+
+    caBlank = ' '
 
     caWord = '*RADNCE'
     iNumLinesRead = 0
@@ -700,10 +706,12 @@ CONTAINS
       ! get the name of the file in which the emissivity parameters are
       caE = caEmissivity(iAtm)
       DO iI = 1,130
-        caEmsFile = ' '
+!       caEmsFile = ' '
+        caEmsFile(iI:iI) = caBlank(1:1)
       END DO
       DO iI = 1,160
         caEmsFile(iI:iI) = caE(iI:iI)
+!        caEmsFile(iI) = caE(iI)
       END DO
 
       CALL rightpad130(caEmsFile)

@@ -4,8 +4,9 @@
 
     PROGRAM kcartamain
     use omp_lib            ! Fortran 90; omp_get_thread_num, omp_get_num_threads
-! print *,'dag, gfortran cannot compile these and says they should all be double' "
-!    use ifport             ! for getenv
+
+! print *,'dag, gfortran does not know this' "
+    use ifport             ! for getenv
 
     use basic_common       ! misc routines
     use kcartamisc         ! more misc routines
@@ -406,8 +407,8 @@
 !************************************************************************
 !************************************************************************
     double precision :: wtime
-! print *,'dag, gfortran cannot compile these and says they should all be double' "
-!    wtime = omp_get_wtime ( )
+! print *,'dag, gfortran does not know this'
+    wtime = omp_get_wtime ( )
 
 !!! ifort starts taking over the machine : Howard says 1 is 
 !!! very very pleasant to everyone, 4 is better (but still limits to about one processor)
@@ -418,10 +419,11 @@
 !!! setting 32 threads seems to limit to 32 processors haha
 !    call mkl_set_num_threads(32)     
 
-! print *,'dag, gfortran cannot compile these and says they should all be double' "
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! setting 1 threads really limits to one processor
-!    call mkl_set_num_threads(1)     
-
+! print *,'dag, gfortran does not know this'
+    call mkl_set_num_threads(1)     
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! allow scattering computations if in .nml or RTP file
     kAllowScatter = +1
@@ -984,6 +986,14 @@
           iLTEIn = -1
           dDeltaFreqNLTE = 0.0025d0
           dDeltaFreqNLTE = dble(kaFrStep(iTag))
+
+    !!!! to test NLTE ie heck if things make sense
+    !print *,' ' 
+    !print *, 'raFreq(1),iaGases(iGas) = ',raFreq(1),iaGases(iGas)
+    !write(*,'(A,A)'),'caOutUAFile = ',caOutUAFile
+    !print *,'iNLTE_SlowORFast,iDoUpperAtmNLTE = ',iNLTE_SlowORFast,iDoUpperAtmNLTE
+    !print *,'iChunk_DoNLTE = ',iChunk_DoNLTE
+
           IF ((iChunk_DoNLTE == 1) .OR. (iChunk_DoNLTE == 3)) THEN
             CALL NLTEDriver( &
               iGas,iaGases,iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID, &
@@ -1456,10 +1466,10 @@
 !!!!!!!close all units
     CALL TheEnd(iaGases,iNumGases,iaList,raFiles)
     CALL DateTimeX('kcartamain.x')
-! print *,'dag, gfortran cannot compile these and says they should all be double' "
-!    wtime = omp_get_wtime ( ) - wtime
-!    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
-!    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
+! print *,'dag, gfortran does not know this'
+    wtime = omp_get_wtime ( ) - wtime
+    write (kStdWarn, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0
+    write (kStdErr, '(a,g14.6,g14.6)' ) '  Elapsed wall clock time (seconds and minutes) = ', wtime,wtime/60.0    
 
     write(kStdWarn,*) 'end of run!!!!!!!!!!!'
     CLOSE(UNIT = kStdWarn)

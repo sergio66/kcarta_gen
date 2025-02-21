@@ -21,14 +21,32 @@
 #    have a Makefile directive for the include file (see RTP section below)
 
 # see Readme_MakefileCommentsA
+# (1) set the "style" = debug,usual
 
 ########################################################################
 ## if this does not work, just delete following line and bring in
 ## "Makefile_intel_hdf_rtp" or "Makefile_generic_hdf_rtp"
+# include Makefile_intel_hdf_rtp
 
-include Makefile_intel_hdf_rtp
+include Makefile_gfortran_hdf_rtp
 
 SHELL = /bin/sh
+
+STYLE=DEBUG
+STYLE=USUAL
+
+$(info    <<<<  Makefile_v122_gnu is using flags for $(STYLE) >>>)
+$(info    <<<<  Makefile_v122_gnu is using flags for $(STYLE) >>>)
+$(info    <<<<  Makefile_v122_gnu is using flags for $(STYLE) >>>)
+
+$(info    <<< kcartamain.f90 : make sure you have commented out the lines after dag, gfortran does not know this .... use ifport, omp_get_wtime, mkl_set_num_threads >>>)
+$(info    <<< kcartamain.f90 : make sure you have commented out the lines after dag, gfortran does not know this .... use ifport, omp_get_wtime, mkl_set_num_threads >>>)
+$(info    <<< kcartamain.f90 : make sure you have commented out the lines after dag, gfortran does not know this .... use ifport, omp_get_wtime, mkl_set_num_threads >>>)
+
+$(info    <<<<  Makefile_v122_gnu SEEMS NOT TO COMPILE (Feb 2025) so AVOID THIS script >>>)
+$(info    <<<<  Makefile_v122_gnu SEEMS NOT TO COMPILE (Feb 2025) so AVOID THIS script >>>)
+$(info    <<<<  Makefile_v122_gnu SEEMS NOT TO COMPILE (Feb 2025) so AVOID THIS script >>>)
+
 
 ############################################################################
 ## set up the appropriate compiler and its options                        ##
@@ -48,7 +66,30 @@ SHELL = /bin/sh
 # every variable auto-rolled to lower case
 
 FORTRANX=/usr/ebuild/software/GCCcore/7.3.0/bin/f95
-FLAGS= -ffixed-line-length-120 -fdec-structure
+
+## usual, fast
+USUAL_FLAGS     = -ffixed-line-length-none -fdec-structure -O2 -mcmodel=medium
+USUAL_FLAGS_RTP = -ffixed-line-length-none -fdec-structure -O2 -mcmodel=medium
+
+## slow, debug
+DEBUG_FLAGS     = -fbounds-check -fsanitize=address -ffixed-line-length-none -fdec-structure    -mcmodel=medium
+DEBUG_FLAGS_RTP = -fbounds-check -fsanitize=address -ffixed-line-length-none -fdec-structure    -mcmodel=medium
+DEBUG_FLAGS     = -fbounds-check -ffixed-line-length-none -fdec-structure    -mcmodel=medium
+DEBUG_FLAGS_RTP = -fbounds-check -ffixed-line-length-none -fdec-structure    -mcmodel=medium
+
+# https://gcc.gnu.org/legacy-ml/fortran/2016-11/msg00176.html
+#> What compiler options best get gfortran to behave like other compilers
+#> with the -r8 flag?
+#-freal-4-real-8 should do the trick.
+#You can also try -fdefault-real-8 -fdefault-double-8
+#FDOUBLE = -R8
+FDOUBLE = -freal-4-real-8
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+FLAGS=$($(STYLE)_FLAGS)
+FLAGS_RTP=$($(STYLE)_FLAGS_RTP)
+
+LIBS = -L ../LIB/blas.ref -lblas  -mkl 
 LIBS = -L ../LIB -lblas
 
 #UFLAG = 
@@ -57,14 +98,7 @@ LIBS = -L ../LIB -lblas
 LIBS  = -lblas 
 LIBS  = -L ../LIB -lblas 
 
-# https://gcc.gnu.org/legacy-ml/fortran/2016-11/msg00176.html
-#> What compiler options best get gfortran to behave like other compilers
-#> with the -r8 flag?
-#-freal-4-real-8 should do the trick.
-#You can also try -fdefault-real-8 -fdefault-double-8
-
-#FDOUBLE = -R8
-FDOUBLE = -freal-4-real-8
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 ########################################################################
 ## if this does not work, just delete following line and bring in "Makefile_tar_objs_data_f90"
