@@ -800,8 +800,11 @@ CONTAINS
     END DO
  2345 CONTINUE
     IF ((iFound2 <= 0) .AND. (ctype2 > 0)) THEN
-      write(kStdErr,*) 'ctype2 cfrac2 cngwat2 cfrac12 = ',ctype2,cfrac2,cngwat2, cfrac12
-      write(kStdErr,*) 'Could not find a match between ctype2 = ',ctype2,' and iaNML_Ctype'
+      write(kStdErr,'(A,I4,3(F12.5))') 'ctype2 cfrac2 cngwat2 cfrac12 = ',ctype2,cfrac2,cngwat2, cfrac12
+      write(kStdErr,'(A,I4,A)') 'Could not find a match between ctype2 = ',ctype2,' and iaNML_Ctype, which we have as'
+      DO iI = 1,iNclouds_RTPX
+        write(kStdErr,'(I2,I4)'),iI,iaNML_Ctype(iI)
+      END DO
       CALL DoStop
     END IF
 

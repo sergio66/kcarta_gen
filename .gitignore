@@ -100,5 +100,6 @@ SRCv1.10/scatter_*.f
 F77toF90/
 IP_PROFILES/
 LIB/libblas.a.ifort_threadsmaybe
+SRCv1.22_f90/sarta_nte_pengwang.f90
 
 ########################################################################

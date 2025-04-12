@@ -26,76 +26,79 @@ CONTAINS
 !        !! read in alt/press/temp/upper mix ratio from caaUpperMixRatio
 !        !! this is DIFFERENT from the UA NLTE compressed database!
 
-    SUBROUTINE MixRatio(iGasID,rCO2mult,iLTEIn,caaUpperMixRatio, &
-    raUpper_Pres,raUpper_MixRatio,iNumVibLevels, &
-    raUpperPress_Std,raUpperMixRatio_Std,raUpperDZ_Std, &
-    raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
+      SUBROUTINE MixRatio(iGasID,rCO2mult,iLTEIn,caaUpperMixRatio, &
+      raUpper_Pres,raUpper_MixRatio,iNumVibLevels, &
+      raUpperPress_Std,raUpperMixRatio_Std,raUpperDZ_Std, &
+      raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
 
-    IMPLICIT NONE
-     
-    include '../INCLUDE/TempF90/kcartaparam.f90'
-
+      IMPLICIT NONE
+       
+      include '../INCLUDE/TempF90/kcartaparam.f90'
+  
 ! input vars
-    CHARACTER(160) :: caaUpperMixRatio(kGasStore)
-    INTEGER :: iGasID, iLTEIn
-    REAL :: rCO2mult
+      CHARACTER(160) :: caaUpperMixRatio(kGasStore)
+      INTEGER :: iGasID, iLTEIn
+      REAL :: rCO2mult
 ! output vars
-    REAL :: raUpper_Pres(2*kProfLayer),raUpper_MixRatio(2*kProfLayer)
-    INTEGER :: iNumVibLevels
+      REAL :: raUpper_Pres(2*kProfLayer),raUpper_MixRatio(2*kProfLayer)
+      INTEGER :: iNumVibLevels
 ! this is if we want to see what a std US profile looks like about 0.005 mb
 ! it assumes the lower atm has CO2 ~ 385 ppmv
-    REAL :: raUpperPress_Std(kProfLayer),raUpperMixRatio_Std(kProfLayer)
-    REAL :: raUpperDZ_Std(kProfLayer),raUpperCO2Amt_Std(kProfLayer)
-    REAL :: raUpperTemp_Std(kProfLayer)
-    INTEGER :: iUpperStd_Num
+      REAL :: raUpperPress_Std(kProfLayer),raUpperMixRatio_Std(kProfLayer)
+      REAL :: raUpperDZ_Std(kProfLayer),raUpperCO2Amt_Std(kProfLayer)
+      REAL :: raUpperTemp_Std(kProfLayer)
+      INTEGER :: iUpperStd_Num
 
 ! local vars
-    CHARACTER(160) :: caFname,caStr
-    INTEGER :: iIOUN,iI,iErr
-    REAL :: rH,rP,rT,rPPMV,rX,rCO2Mix,raTemp(2*kProfLayer),rMax
-    INTEGER :: iDefault,iCurrent
+      CHARACTER(160) :: caFname,caStr
+      INTEGER :: iIOUN,iI,iErr
+      REAL :: rH,rP,rT,rPPMV,rX,rCO2Mix,raTemp(2*kProfLayer),rMax
+      INTEGER :: iDefault,iCurrent
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    rCO2Mix = 370            !!!as of 2005, this is what was used to
+      rCO2Mix = 370            !!!as of 2005, this is what was used to
 !!!  make the kCARTA database
 !!!however, see for2mat2for_CO2_370_385.m in
 !!! KCARTA/UTILITY, as the database can easily
 !!! be scaled to make eg 385 ppmv the default
-    rCO2Mix = kCO2ppmv * rCO2mult  !!! this is how much the input profile
+      rCO2Mix = kCO2ppmv * rCO2mult  !!! this is how much the input profile
 !!! wants CO2 to be enhanced by, relative
 !!! to the background
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    caFName = caaUpperMixRatio(iLteIn)
+      caFName = caaUpperMixRatio(iLteIn)
 
-    GOTO 777
+      GOTO 777
 
-    100 write(kStdErr,*) 'Error reading UpperMixRatio info : filename = '
-    WRITE(kStdErr,1070) iErr, caFName
-    CALL DoStop
+ 100  write(kStdErr,*) 'Error reading UpperMixRatio info : filename = '
+      WRITE(kStdErr,1070) iErr, caFName
+      CALL DoStop
 
-    777 CONTINUE
-    iIOun = kTempUnit
-    OPEN(UNIT=iIOun,FILE=caFName,FORM='formatted',STATUS='OLD',IOSTAT=iErr, &
-    ERR = 100)
-    IF (iErr /= 0) THEN
-        write (kStdErr,*) 'in subroutine upper_mix_ratio, '
-        write (kStdErr,*) 'error reading file  ... '
-        WRITE(kStdErr,1070) iErr, caFName
-        CALL DoSTOP
-    END IF
-    kTempUnitOpen = +1
-
-    rMax = -1.0
-    iI = 0
-
-    555 CONTINUE
-    read(iIOUN,123) caStr
-    IF (caStr(1:1) == '!') THEN
-    !!!these are comments at beginning of file, so skip
+ 777  CONTINUE
+      iIOun = kTempUnit
+      OPEN(UNIT=iIOun,FILE=caFName,FORM='formatted',STATUS='OLD',IOSTAT=iErr, &
+           ERR = 100)
+      IF (iErr /= 0) THEN
+          write (kStdErr,*) 'in subroutine upper_mix_ratio, '
+          write (kStdErr,*) 'error reading file  ... '
+          WRITE(kStdErr,1070) iErr, caFName
+          CALL DoSTOP
+      ELSE
+        write(kStdWarn,*) 'opened caaUpperMixRatio file = ',caFName
+!        write(kStdErr,*)  'opened caaUpperMixRatio file = ',caFName
+      END IF
+      kTempUnitOpen = +1
+  
+      rMax = -1.0
+      iI = 0
+  
+ 555  CONTINUE
+      read(iIOUN,123) caStr
+      IF ((caStr(1:1) == '!' ) .OR. (caStr(1:1) == '%' )) THEN
+        !!!these are comments at beginning of file, so skip
         GOTO 555
-    ELSE
+      ELSE
         READ (caStr,*) rH,rP,rT,rPPMV,rX
         iI = iI + 1
         raUpper_Pres(iI) = rP
@@ -103,85 +106,95 @@ CONTAINS
         IF (rPPMV > rMax) THEN
             rMax = rPPMV
         END IF
-    END IF
-
-    20 CONTINUE
-    READ(iIOUN,123,END=199) caStr
-    READ (caStr,*) rH,rP,rT,rPPMV,rX
-    iI = iI + 1
-    raUpper_Pres(iI) = rP
-    raUpper_MixRatio(iI) = rPPMV
-    IF (rPPMV > rMax) THEN
+!        print *,iI,rP,rPPMV
+      END IF
+  
+ 20   CONTINUE
+      READ(iIOUN,123,END=199) caStr
+      READ (caStr,*) rH,rP,rT,rPPMV,rX
+      iI = iI + 1
+      raUpper_Pres(iI) = rP
+      raUpper_MixRatio(iI) = rPPMV
+      IF (rPPMV > rMax) THEN
         rMax = rPPMV
-    END IF
-    GOTO 20
+      END IF
+!      print *,iI,rP,rPPMV
+      IF (iI .GT. kProfLayer) THEN
+        write(kStdWarn,'(A,i3,A,I3)') 'ERROR : caaUpperMixRatio already has',iI,' levels, more than kProfLayer',kProfLayer
+        CALL DoStop
+      END IF
 
-    199 CONTINUE
-    close (iIOUN)
-    kTempUnitOpen = -1
+      GOTO 20
 
-    iNumVibLevels = iI
+  
+ 199  CONTINUE
+      close (iIOUN)
+      kTempUnitOpen = -1
+      iNumVibLevels = iI
 
-    iCurrent = +1   !! if we are using eg 385 ppmv lower atm database, make sure
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      iCurrent = +1   !! if we are using eg 385 ppmv lower atm database, make sure
 !! the UA CO2 mixing ratios read in from caaUpperMixRatio
 !! in the namelist file, are approx this value. This is the
 !! default case eg when looking at current AIRS/IASI obs
+
     iCurrent = -1   !! whatever lower atm CO2 database we are using, assume the
 !! mixing ratios in caaUpperMixRatio are correct, and do not
 !! adjust them. This is the case when eg developing NLTE
 !! compressed database
-    iDefault = +1
-    IF  (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-    (abs(kLongOrShort) <= 1)) THEN
+      iDefault = +1
+      IF  (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
+          (abs(kLongOrShort) <= 1)) THEN
         IF (iDefault /= iCurrent) THEN
-            write(kStdErr,*) 'In MixRatio, iDefault,iCurrent are unequal',iDefault,iCurrent
-            write(kStdErr,*) 'kCARTA will use CO2 MixRatios specified in caaUpperMixRatio'
+          write(kStdErr,*) 'In MixRatio, iDefault,iCurrent are unequal',iDefault,iCurrent
+          write(kStdErr,*) 'kCARTA will use CO2 MixRatios specified in caaUpperMixRatio'
         END IF
-    END IF
-
+      END IF
+  
 !! this is mainly for testing purposes
 !! eventually may want to move this to pre_defined.param or kcartaparam.f90
-    CALL GetUS_Std_UA(raUpperPress_Std,raUpperMixRatio_Std, &
-    raUpperDZ_Std,raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
-
-    IF (iCurrent == +1) THEN
+      CALL GetUS_Std_UA(raUpperPress_Std,raUpperMixRatio_Std, &
+            raUpperDZ_Std,raUpperCO2Amt_Std,raUpperTemp_Std,iUpperStd_Num)
+  
+      IF (iCurrent == +1) THEN
         DO iI = 1,iNumVibLevels
-        !!! rescale stuff to be more current, as scaled by
-        !!! kCO2ppmv/mixtable rCO2Mult
-            raUpper_MixRatio(iI) = raUpper_MixRatio(iI) * rCO2Mix/rMax
-            write(kStdWarn,*) 'new MR',raUpper_Pres(iI),raUpper_MixRatio(iI),rCO2Mix/rMax
+          !!! rescale stuff to be more current, as scaled by
+          !!! kCO2ppmv/mixtable rCO2Mult
+          raUpper_MixRatio(iI) = raUpper_MixRatio(iI) * rCO2Mix/rMax
+          write(kStdWarn,*) 'new MR',raUpper_Pres(iI),raUpper_MixRatio(iI),rCO2Mix/rMax
         END DO
-    ELSEIF (iCurrent == -1) THEN
+      ELSEIF (iCurrent == -1) THEN
         IF (abs(rCO2Mult - 1.0) > 1.0e-05) THEN
-            DO iI = 1,iNumVibLevels
+          DO iI = 1,iNumVibLevels
             !!! rescale the stuff to that specified in mixing table
-                raUpper_MixRatio(iI) = raUpper_MixRatio(iI) * rCO2mult
-                write(kStdWarn,*) 'new MR',raUpper_Pres(iI),raUpper_MixRatio(iI),rCO2Mix/rMax
-            END DO
+            raUpper_MixRatio(iI) = raUpper_MixRatio(iI) * rCO2mult
+            write(kStdWarn,*) 'new MR',raUpper_Pres(iI),raUpper_MixRatio(iI),rCO2Mix/rMax
+          END DO
         END IF
-    END IF
-
+      END IF
+  
 ! now see if we need to swap values (from small to large)
-    IF (raUpper_Pres(1) > raUpper_Pres(iNumVibLevels)) THEN
+      IF (raUpper_Pres(1) > raUpper_Pres(iNumVibLevels)) THEN
         DO iI = 1,iNumVibLevels
-            raTemp(iI) = raUpper_Pres(iNumVibLevels-iI+1)
+          raTemp(iI) = raUpper_Pres(iNumVibLevels-iI+1)
         END DO
         DO iI = 1,iNumVibLevels
-            raUpper_Pres(iI) = raTemp(iI)
+          raUpper_Pres(iI) = raTemp(iI)
         END DO
         DO iI = 1,iNumVibLevels
-            raTemp(iI) = raUpper_MixRatio(iNumVibLevels-iI+1)
+          raTemp(iI) = raUpper_MixRatio(iNumVibLevels-iI+1)
         END DO
         DO iI = 1,iNumVibLevels
-            raUpper_MixRatio(iI) = raTemp(iI)
+          raUpper_MixRatio(iI) = raTemp(iI)
         END DO
-    END IF
+      END IF
+  
+ 123  FORMAT(A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening MixRatio atm profile:',/,A80)
 
-    123 FORMAT(A80)
-    1070 FORMAT('ERROR! number ',I5,' opening MixRatio atm profile:',/,A80)
-
-    RETURN
-    end SUBROUTINE MixRatio
+      RETURN
+      end SUBROUTINE MixRatio
 
 !************************************************************************
 ! this subroutine reads in the NLTE profiles

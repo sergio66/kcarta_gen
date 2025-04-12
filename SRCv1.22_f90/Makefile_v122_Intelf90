@@ -79,6 +79,9 @@ $(info    <<<<  Makefile_v122_Intelf90 is using flags for $(STYLE) >>>)
 # -64 : 64-bit objects (libraries must match)
 # -us : puts trailing underscore
 #
+# <<<<< math kernel library : mkl : used for dgemm >>>>>
+# <<<<< math kernel library : mkl : used for dgemm >>>>>
+# <<<<< math kernel library : mkl : used for dgemm >>>>>
 # see https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 # -i8 -I${MKLROOT}/include/mic/ilp64 -I${MKLROOT}/include -mmic
 # see http://fulla.fnal.gov/acml/html/Intro.html#Intro,
@@ -135,6 +138,8 @@ USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase 
 FLAGS=$($(STYLE)_FLAGS)
 LIBS  = -lblas -qmkl
 LIBS  = -L ../LIB -lblas -qmkl
+#LIBS  = -lblas 
+#LIBS  = -L ../LIB -lblas 
 FDOUBLE = -r8
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
