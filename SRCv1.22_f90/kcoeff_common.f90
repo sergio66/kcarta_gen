@@ -1057,19 +1057,19 @@ CONTAINS
       !! Qco2 = Xdryco2 * qtot = raCO2MRdry(iI) * (raRho(iI)*raThickness(iI)*100.0)      
       IF (iDoDQ >= -1) THEN
         IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
-          write(kStdWarn,*) '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'	
-	  write(kStdWarn,*) 'oops please fix'
-          write(kStdErr,*)  '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'
-	  write(kStdErr,*)  'oops please fix'
-	  call dostop
+          write(kStdWarn,'(A)') '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'	
+	  write(kStdWarn,'(A)') '<<<<<< <<<<<< <<<<<<  oops not stopping but please fix the 0.0 multiplier for using N2/WV jac>>>>>> >>>>>> >>>>>>'
+          write(kStdErr,'(A)')  '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'
+	  write(kStdErr,'(A)')  '<<<<<< <<<<<< <<<<<< oops not stopping but please fix the 0.0 multiplier for using N2/WV jac >>>>>> >>>>>> >>>>>>'
+
           ! the gas amount jacobians
           DO iI=1,kProfLayer
             PH2O = raaPartPress(iI,1)
             PN2  = raPress(iI) * 0.78	
 	    PTOT = raPress(iI)
 	    T    = raTemp(iI)
-            daaDQ(:,iI)   = daaDQ(:,iI) + daaOD_continuum_WV_N2(:,iI)/PN2
-            daaDQWV(:,iI) =               daaOD_continuum_WV_N2(:,iI)/PH2O
+            daaDQ(:,iI)   = daaDQ(:,iI) + 0*daaOD_continuum_WV_N2(:,iI)/PN2
+            daaDQWV(:,iI) =               0*daaOD_continuum_WV_N2(:,iI)/PH2O
           END DO
         END IF
       END IF

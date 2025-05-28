@@ -1,10 +1,20 @@
 ### new res : 500-805 cm-1 at 0.0005 cm-1, 805-2830 cm-1 at 0.0025 cm-1
 
 # executables live in ../BIN; note you need to set the DISTDIR
+
+# till about 2018
 #DISTDIR    = /asl/data/kcarta
 #DISTDIRGEN = /asl/data/kcarta_sergio
-DISTDIR    = /asl/rta/kcarta
-DISTDIRGEN = /asl/rta/kcarta_sergio
+
+# 2018 - April 2025
+#DISTDIR    = /asl/rta/kcarta
+#DISTDIRGEN = /asl/rta/kcarta_sergio
+
+# April 2025 - 
+DISTDIR    = /home/sergio/asl/rta/kcarta
+DISTDIRGEN = /home/sergio/asl/rta/kcarta_sergio
+
+########################################################################
 
 ###      $(warning "datafix400_v122_H2020 looks similar to datafix400_v122origres_H2020")
 datafix400_v122_H2020:

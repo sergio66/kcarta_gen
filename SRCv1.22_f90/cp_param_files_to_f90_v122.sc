@@ -53,6 +53,8 @@ pwd
 
 ########################################################################
 echo "showing files in ../INCLUDE/TempF90/ .. should be todays date"
+ls -lt ../INCLUDE/kcarta_v122.param
+ls -lt ../INCLUDE/kcarta.param
 ls -lt ../INCLUDE/TempF90/*.f90 ../INCLUDE/TempF90/*.param
 read -p "Press [Enter] key to continue ..."
 

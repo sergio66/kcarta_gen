@@ -2916,7 +2916,7 @@ end
 !   caFname0 = kUSStd
     caFname0 = kOrigRefPath
 
-    iLen = 80
+    iLen = 160
  100 CONTINUE
     IF (caFname0(iLen:iLen) == ' ') THEN
       iLen = iLen - 1
@@ -2925,7 +2925,7 @@ end
 
     cnameX = 'us_std_gas_'
     cnameX = 'refgas'
-    iLenX = 80
+    iLenX = 160
     200 CONTINUE
     IF (cnameX(iLenX:iLenX) == ' ') THEN
       iLenX = iLenX - 1
@@ -2978,13 +2978,13 @@ end
       write(kStdErr,*) 'need to add on US Std for ',iIDgas,' LBLRTM set raQ=0, reset and add profile'
     END IF
 
- 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A100)
     iIOUN = kTempUnit
     OPEN(UNIT=iIOUN,FILE=caFname,STATUS='OLD',FORM='FORMATTED',IOSTAT=IERR)
     IF (IERR /= 0) THEN
-      WRITE(kStdErr,*) 'In subroutine get_us_std have file I/O error'
-      write(kStdErr,*) 'reference path = ',caFname0
-      write(kStdErr,*) 'gasID = ',iIDGas
+      WRITE(kStdErr,'(A)')    'In subroutine get_us_std have file I/O error'
+      write(kStdErr,'(A,A)')  'reference path = ',caFname0
+      write(kStdErr,'(A,3I)') 'gasID = ',iIDGas
       WRITE(kStdErr,1010) IERR, caFname
       CALL DoSTOP
     ENDIF

@@ -525,4 +525,21 @@ use_this_rtp = 'RTP/r49_1013_400p_unitemis_7angs_night.rtp'; %% see JUNK/ChrisH/
 iInstr = 1; iDoConvolve = 1;
 iInstr = 4; iDoConvolve = 1;
 use_this_rtp = 'JUNK/ChrisH/sarta_prod_2022_REGR49_BestTest/r49_1013_98lev_400p_unitemis_seaemis_7angs_night.rtp';    %% Chris say this is his best test, 343 profles of sea emis, 343 profiles of unit emis (49 regr x 7 scanang x 2 emissivity)
+
+iInstr = 124; iDoConvolve = 1;
+% these are levels, 1568 profoles = 49 profs x 8 ang 8 solzen 8 2 surfaces
+%  cp /home/chepplew/data/sarta/prod_2025/generic/r49_1013_400ppm_8angs_2sfc_2sols_pbl.rtp .
+%  cp /home/chepplew/data/sarta/prod_2025/generic/r49_1013_400p_8x2x2_2834_airslay.rtp .
+% these are layers, 1568 profoles = 49 profs x 8 ang 8 solzen 8 2 surfaces
+%  cp /home/chepplew//projects/sarta/prod_2025/r49_1013_400p_8x2x2_2834_pbl.rtp RTP/.        JUNK/Test_ArbPLEVS_PBL/TEST1_Jan29_2025
+%  cp /home/chepplew//projects/sarta/prod_2025/r49_1013_400p_8x2x2_2834_airslay.rtp RTP/.    JUNK/Test_ArbPLEVS_PBL/TEST1_Jan29_2025
+use_this_rtp = 'RTP/r49_1013_400p_8x2x2_2834_pbl.rtp';     %% 49 profiles x 2 surfaces x 8 view  angles * 2 sol angles
+use_this_rtp = 'RTP/r49_1013_400p_8x2x2_2834_airslay.rtp'; %% 49 profiles x 2 surfaces x 8 view  angles * 2 sol angles
+% cp /home/chepplew/data/sarta/prod_2025/generic/r49_1013_400p_pbl_unitemis_8angs_gas_pert_v1.rtp RTP/.
+% It took me a while to check the PBL Layers file for gas column
+%  perturbation test (I have often forgotten to include some fields
+%  needed by kCARTA) and I checked the new SARTA CrIS.HR.PBL ran ok -
+%  shown here sample difference average 49 profiles with 10% O3
+%  compared to original 49
+use_this_rtp = 'RTP/r49_1013_400p_pbl_unitemis_8angs_gas_pert_v1.rtp';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
