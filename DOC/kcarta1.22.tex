@@ -108,8 +108,8 @@ transfer computations in the presence of scattering.
 In the case of clear sky radiative transfer, \kc can compute and output 
 analytic Jacobians with respect to temperature and gas amount.  As well
 as the layer Jacobians being output, \kc dumps out a separate file which
-contains the $surface$ $temp$ and $column gas$ jacobians (for a x0.1 
-column gas amount perturbation).
+contains the $surface$ $temp$ and $column gas$ jacobians (for a dQ $\sim$ 0.001, dT $\sim$ 0.01 K) 
+column gas amount/temprature perturbation).
 
 The user can easily change satellite viewing angles
 and surface boundary conditions.  As the absorptions coefficients have
@@ -201,7 +201,7 @@ temperature, and scaled in gas absorber amount.  These splines allow
 us to easily compute the analytic temperature derivatives, from
 which we can compute temperature Jacobians. \kc also dumpus out an adiditional
 file which has radiances computed assuming the surface temperature and 
-gas column amounts have increased by 1K and a factor of 0.1 respectively
+gas column amounts have increased by $\sim$ 0.01K and a factor of $\sim$ 0.001 respectively
 (this second file can be read in using $readkcBasic.m$).
 
 \textcolor{red}{SRCv1.XX/Revisions.txt is the more up-to-date manuscript regarding important changes}
@@ -257,6 +257,46 @@ The size of the perturbations is given by
        ../INCLUDE/TempF90/pre_definedparam.f90:258:!     PARAMETER (kDefaultToffset = 1.00) !!! till June 2019
        ../INCLUDE/TempF90/pre_definedparam.f90:260:      PARAMETER (kDefaultToffset = 0.01) !!! after June 2019
 \end{verbatim}
+
+\subsection{Water Vapor total column gas jacobian from indiviual gas jacobians}
+
+The column temperature jacobian (entire column perturbed by dT K) is
+quite straightforwardly computed from the raw radiance (BT) and
+perturbed radiance (BT).  For any gas other than water, if R0 is the
+original (unperturbed) radiance and RX is the radiance with perturbed
+gas colum $Q \rightarrow Q(1+dQ)$ the column gas jacobian is
+
+\begin{eqnarray*}
+Jcolrad(Q) = \frac{RX-R0}{log(1+dQ)} \\
+JcolBT(Q) = \frac{BTX-BT0}{log(1+dQ)} \\
+\end{eqnarray*}
+\begin{eqnarray*}
+Jcolrad(T) = \frac{RT-R0}{dT} \\
+JcolBT(T) = \frac{BTT-BT0}{dT} \\
+\end{eqnarray*}
+
+Be very careful about WV!  Let R0 = original rad, then R1, R101, R102,
+R103 are the rads when the individual components are perturbed (1 =
+water lines other than HDO, 101/102 = self/foreign continuum, 103 =
+HDO). So the WV jac iin terms of d/dQ,d/d(lnQ) = 1/log(1+dQ) is
+
+\begin{eqnarray*}
+Jrad  & = & [(R1-R0) + (R101-R0) + (R102-R0) + (R103-R0)]/dQ \\
+   & = & [(R1+R101+R102+R103)-4R0]/dQ \\
+   & = & [(R1+R101+R102+R103)/4-R0] * 4/dQ \\
+JBT  & = & [(BT1-BT0) + (BT101-BT0) + (BT102-BT0) + (BT103-BT0)]/dQ \\
+   & = & [(BT1+BT101+BT102+BT103)-4BT0]/dQ \\
+   & = & [(BT1+BT101+BT102+BT103)/4-BT0] * 4/dQ\\
+\end{eqnarray*}
+
+\begin{eqnarray*}
+Jrad  & = & [(R1-R0) + (R101-R0) + (R102-R0) + (R103-R0)]/log(1+dQ) \\
+   & = & [(R1+R101+R102+R103)-4R0]/log(1+dQ) \\
+   & = & [(R1+R101+R102+R103)/4-R0] * 4/log(1+dQ) \\
+JBT  & = & [(BT1-BT0) + (BT101-BT0) + (BT102-BT0) + (BT103-BT0)]/log(1+dQ) \\
+   & = & [(BT1+BT101+BT102+BT103)-4BT0]/log(1+dQ) \\
+   & = & [(BT1+BT101+BT102+BT103)/4-BT0] * 4/log(1+dQ)\\
+\end{eqnarray*}
 
 The current database spans 605 \wn to 2805 \wn, broken up into chunks
 that are 25 \wn wide.  One hundred pressure layers are used to generate the 
@@ -6963,6 +7003,22 @@ One can use either the analytic or the finite difference methods to
 calculate the Jacobians, or set any of the three modes to output the
 Jacobian results.  In addition these computations can be performed for
 both down and up looking instruments.
+
+Finally, we repeat parts of the column jacobian note from the
+Introduction. With column perturbations of dT and dQ for temperature
+(or surface temperartyre) and gas other than water, the jacobians are
+
+\begin{eqnarray*}
+Jcolrad(Q) = \frac{RX-R0}{log(1+dQ)} \\
+Jcolrad(T) = \frac{RT-R0}{dT} \\
+\end{eqnarray*}
+
+while that for total water (1 = water lines other than HDO, 101/102 = self/foreign continuum, 103 = HDO)
+\begin{eqnarray*}
+Jrad  & = & [(R1-R0) + (R101-R0) + (R102-R0) + (R103-R0)]/log(1+dQ) \\
+   & = & [(R1+R101+R102+R103)-4R0]/log(1+dQ) \\
+   & = & [(R1+R101+R102+R103)/4-R0] * 4/log(1+dQ) \\
+\end{eqnarray*}
 
 \section{Science : NLTE and TWOSTREAM scattering}
 \subsection{Non LTE computations}

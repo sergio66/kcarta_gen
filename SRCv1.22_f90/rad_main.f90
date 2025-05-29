@@ -426,6 +426,8 @@ CONTAINS
         END IF
       END DO
                 
+      write(kStdWarn,'(A,2(F12.6))') 'kDefaultColMult, kDefaultToffset = ',kDefaultColMult, kDefaultToffset
+
       CALL find_radiances(raFreq,-1, &
         raaTemp,raVTemp,caJacobFile2, &
         iOutNum,iAtm,iaNumLayer(iAtm),iaaRadlayer, &

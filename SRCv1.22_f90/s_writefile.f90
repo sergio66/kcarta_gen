@@ -2213,6 +2213,7 @@ CONTAINS
       write(kStdWarn,*) caJacobFile2
 
       ! now essentially dump out header that resembles kLongOrShort == 0
+      !!!!! see write_preamble_binaryfile !!!!
       WRITE(iIOUN_Jac2) caVersion               !!kcarta version number
       WRITE(iIOUN_Jac2) kProfLayer
       WRITE(iIOUN_Jac2) kMaxUserSet
@@ -2221,9 +2222,11 @@ CONTAINS
       WRITE(iIOUN_Jac2) rFrLow,rFrHigh
       WRITE(iIOUN_Jac2) iFileIDLo,iFileIDHi
       WRITE(iIOUN_Jac2) 0            !! should be kLongOrShort, but use 0
+
       !!!this is new stuff, to tell reader how many chunks to read
       WRITE(iIOUN_Jac2) kaFrStep(iTag)          !!freq step size
       WRITE(iIOUN_Jac2) kaBlSize(iTag)          !!10000 point freq block size
+
       iImportant = iJacob+1+1                   !!r(gasQ'),r(temp'),r(stemp')
       IF (kWhichScatterCode == 5) THEN
         iImportant = iImportant*iNatm             !! repeated for EACH atmosphere
@@ -2234,9 +2237,10 @@ CONTAINS
         write(kStdErr,*) '  '
         write(kStdErr,*)  'Cloudy PCLSAM 2slab ==> repeat column jac for each subpixel'
         write(kStdErr,*) '  '
-
       END IF
-      WRITE(iIOUN_Jac2) iImportant              !!number of outputs
+
+    WRITE(iIOUN_Jac2) iImportant              !!number of outputs
+    WRITE(iIOUN_Jac2) 0,0,0                   !! pseudo iNumGasOD,iNumMPOD.iNumRadOD
 
     END IF
 !--------------- JACOBIAN BINARY FILE --------------------------------
@@ -3543,6 +3547,7 @@ CONTAINS
       WRITE(iIOUN1) rFrLow,rFrHigh
       WRITE(iIOUN1) iFileIDLo,iFileIDHi
       WRITE(iIOUN1) kLongOrShort
+
       !!!this is new stuff, to tell reader how many chunks to read
       WRITE(iIOUN1) kaFrStep(iTag)          !!freq step size
       WRITE(iIOUN1) kaBlSize(iTag)          !!10000 point freq block size

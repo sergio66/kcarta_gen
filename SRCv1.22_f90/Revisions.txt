@@ -625,6 +625,17 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.22 
 ----- 
 
+05/26/25        Reminder about column jacs for WV
+                %% see  /home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/aeri_upwell_sims_40profiles.m
+  
+                Be very careful about WV!  Let R0 = original rad, then R1, R101,
+                R102, R103 are the rads when the individual components are
+                perturbed
+  
+                So the WV jac is :::: [(R1-R0) + (R101-R0) + (R102-R0) + (R103-R0)]/dQ
+		                    = [(R1+R101+R102+R103)-4R0]/dQ
+				    = [(R1+R101+R102+R103)/4-R0] * 4/dQ
+  
 12/31/24        MakeRefProfV01 automatically decides betweem MakeRefProfV0 (usual 
                 kCompressed database pressure layers) or MakeRefProfV1 (new layering)
                 depending on rtp file read in. If new arbitrary layers, it also checks 

@@ -58,12 +58,13 @@ version = caVersion.include_param;
 flen    = fread(fin, 1, 'integer*4');
 
 version_number=str2num(version(2:5));
-
+fprintf(1,'version number = %8.4f \n',version_number)
+	
 % number of layers
 flen   = fread(fin, 1, 'integer*4');
 nlayer = fread(fin, 1, 'integer*4');
 flen   = fread(fin, 1, 'integer*4');
-iNumLayers=nlayer;              %<------------- my modification
+iNumLayers = nlayer;              %<------------- my modification
 
 % number of params 
 flen    = fread(fin, 1, 'integer*4');
@@ -87,6 +88,7 @@ end
 comment = setstr(comment');
 flen    = fread(fin, 1, 'integer*4');
 caVersion.comment = comment;
+fprintf(1,'comment = %s \n',comment);
 
 % start, stop frequency
 flen = fread(fin, 1, 'integer*4');
@@ -133,7 +135,7 @@ iNumMPOD  = fread(fin, 1, 'integer*4');
 iNumRadOD = fread(fin, 1, 'integer*4');
 flen  = fread(fin, 1, 'integer*4');
 
-fprintf(1,'iNumGasOD,iNumMPOD,iNumRadOD = %4i %4i %4i iOutTotal = %4i \n',iNumGasOD,iNumMPOD,iNumRadOD,iOut)
+fprintf(1,'iNumGasOD,iNumMPOD,iNumRadOD (could all be 0 if column jac) = %4i %4i %4i iOutTotal = %4i \n',iNumGasOD,iNumMPOD,iNumRadOD,iOut)
 
 %%%%%%%%%%%%%%%%%%%%% have read header info ... create arrays/matrices %%%%%
 iChunks = highchunk - lowchunk + 1;
@@ -144,17 +146,24 @@ fprintf(1,'Number of outputs per chunk = %4i \n',iOut);
 ii = (1:10000*iChunks) - 1;
 wnums = fmin + dv*ii;
 
+iQuiet = +1;
 data = zeros(10000*iChunks,iOut);
 for ii = 1 : iChunks
-  fprintf(1,'  reading in chunk number %4i .... \n',ii);
+  if iQuiet < 0
+    fprintf(1,'  reading in chunk number %4i .... \n',ii);
+  end
   index = (1:10000) + (ii-1)*10000;
   for jj = 1 : iOut
     flen  = fread(fin, 1, 'integer*4');
     ra    = fread(fin, 10000, 'real*4');
     flen  = fread(fin, 1, 'integer*4');
-    data(index,jj) = ra;
+    data(index(1:length(ra)),jj) = ra;
+    if length(ra) ~= 10000
+      fprintf(1,'oh oh readkcBasic.m length(ra) = %4i at chunk %2i iOut = %2i \n',length(ra),ii,jj)
+      error('why oh why')
     end
   end
+end
 
 fclose(fin);
 
