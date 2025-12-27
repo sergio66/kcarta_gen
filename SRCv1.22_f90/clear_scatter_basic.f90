@@ -3659,7 +3659,7 @@ CONTAINS
 
     IMPLICIT NONE 
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !      Supplies surface bi-directional reflectivity.
 
@@ -3875,7 +3875,7 @@ CONTAINS
 
     IMPLICIT NONE 
 
-    include '../INCLUDE/scatterparam.f90'
+    include '../INCLUDE/TempF90/scatterparam.f90'
 
 !      Supplies surface bi-directional reflectivity.
 

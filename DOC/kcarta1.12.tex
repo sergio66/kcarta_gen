@@ -3628,7 +3628,7 @@ parameters and data supplied below.
 The information required in this section is of the following form\\
 \medskip
 \ttab iNumNLTEGases             = \\
-\ttab iNLTE_SlowORFast          = \\
+\ttab iNLTE\_SlowORFast          = \\
 \ttab iaNLTEGasID(1..N)         = \\
 \ttab raLTEStrength(1..N)       = \\
 \ttab raNLTEstart(1..N)         = \\
@@ -3645,7 +3645,7 @@ The information required in this section is of the following form\\
 \noindent $iNLTE_SlowORFast$ tells the code whether to use the slow accurate
 LBL model (+1) or regression coefficients used by the fast model (-1). If you
 use the Fast Version (+1), then the only namelist parameters you need to 
-set are iNumNLTEGases,iNLTE_SlowORFast,iaNLTEGasID(),iaNLTEChunks(a),
+set are iNumNLTEGases,iNLTE\_SlowORFast,iaNLTEGasID(),iaNLTEChunks(a),
                   iaaNLTEChunks(a,b)
 
 \noindent $iNumNLTEGases$ tells the code the number of gases that are in NLTE.
@@ -3661,11 +3661,11 @@ based on information specified further in this section.
 
 \noindent $iSetBloat$ tells code whether to use default (-1) 0.0025 \wn 
 spacing or to use bloted (+1) 0.0005 \wn resolution.\\
-If iNLTE_SlowORFast = +1, this is automatically (re)set to -1
+If iNLTE\_SlowORFast = +1, this is automatically (re)set to -1
 
 \noindent $iDoUpperAtmNLTE$ tells code whether to do NLTE calcs upto 80 km 
 (default (-1) or upto 120 km (+1)\\
-If iNLTE_SlowORFast = +1, this is automatically (re)set to -1
+If iNLTE\_SlowORFast = +1, this is automatically (re)set to -1
 
 \noindent $raNLTEstart(1..N)$ tells for each gas in NLTE, at which height 
 (in km) to start the NLTE computations. This height information is turned into
@@ -3760,7 +3760,7 @@ the isotopic sigmasigma, pipi, deltadelta NLTEs.
 The example below is primed for the 4 um CO2 band. \\
 \begin{itemize}
 \item iNumNLTEGases = +1 : says that one gas is in NLTE
-\item iNLTE_SlowORFast = +1 : says that slow accurate LBL model
+\item iNLTE\_SlowORFast = +1 : says that slow accurate LBL model
 \item  iaNLTEGasID(1)    = 2 : says the gasID of the gas is ``2'' (CO2)
 \item  raNLTEstrength(1) = +1.0 : says use a weight of 1.0 for all the
                           upper layer optical depths computed for this gas

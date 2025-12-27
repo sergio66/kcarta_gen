@@ -4,6 +4,7 @@ SHELL = /bin/sh
 TEXHOME = /salsify/packages/teTeX/bin/
 TEXHOME = /usr/bin/
 TEXHOME = /usr/cluster/contrib/texlive2018/bin/x86_64-linux/pdf
+TEXHOME = /cm/shared/apps/texLive/2025/bin/x86_64-linux/pdf
 
 all:kcarta1.22.pdf kcarta1.12.pdf ReadMeFirst.pdf
 

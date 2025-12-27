@@ -11,6 +11,14 @@ subdirectory and print copies of
 
   - bkcarta1.10.ps, which is the user manual for the basic features of KCARTA.
 
+  - kcarta1.22.pdf is our latest and greatest
+
+You will also need to do some "little things" after cloning the package
+a) mkdir ../INCLUDE/TempF90/JunkTempDir
+b) edit +54 SRCv1.22_F90/Makefile_intel_hdf_rtp and make rtpdir point to eg
+     /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/KLAYERS_RTPv221_150levs_120km/rtpV221_80gases
+c) go to LIB, make BLAS and point to that symbolically
+  
 To run kCARTA, you need the coefficient database, the source code and the 
 auxiliary data files; all these are distributed separately.  The current 
 version of the source code is distributed as kcarta1.10.tar. which will
