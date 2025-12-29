@@ -625,6 +625,10 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.22 
 ----- 
 
+12/27/25        Reminder about testing versus finite different jacobians : see kcartamisc.f90,
+                subroutine Set_Ref_Current_Profs
+                See  rDerivTemp, rDerivAmt   and uncomment as needed
+
 05/26/25        Reminder about column jacs for WV
                 %% see  /home/sergio/MATLABCODE/oem_pkg_run/AIRS_gridded_STM_May2021_trendsonlyCLR/aeri_upwell_sims_40profiles.m
   
