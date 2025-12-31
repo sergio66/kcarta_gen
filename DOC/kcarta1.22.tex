@@ -662,7 +662,8 @@ This seems to work fine with SGI Fortran and g77 on Linux, but causes grief
 if used with Absoft.
 
 \begin{figure}
-\includegraphics[width=5.5in]{FIG/example_109}
+%\includegraphics[width=5.5in]{FIG/example_109}
+\includegraphics[width=5.5in]{FIG/example.1.09}  
 \caption{Translating the output file.}
 \label{translatingfiles}
 \end{figure}
@@ -1535,6 +1536,7 @@ This is summarized in Table \ref{tab:fluxopt}
    7 & '\_IOLR3' & ILR at gnd,tropopause,toa \\
      &           & OLR at gnd,tropopause,toa \\
 \hline
+\label{tab:fluxopt}   
 \end{longtable}
 
 A sample flux plot is shown below, in Figure ~\ref{sampleflux}
@@ -3701,7 +3703,7 @@ Figure ~\ref{watertrp}, which illustrates this for the tropical (wet) profile.
 One can see that in between the lines (eg at 894 \cm, the water without 
 basement (blue) and water foreign (red) have a  negligible contribution; the 
 water self (green) contributes the most to the overall optical depth (cyan).
-Conversely, Figure ~\ref(watersaw) for the sub artic 
+Conversely, Figure ~\ref{watersaw} for the sub artic 
 winter (dry) profile will demonstrate that only about 1/2 to 2/3 of the 
 optical depth in the same region is due to water(self); other gases will have 
 an appreciable contribution to the total optical depth}
@@ -6031,65 +6033,6 @@ Notice how for each atmospher, the gas jacobian, temperature jacobian and
 weighting function have the required number of layers, while the surface
 parameter jacobian always has 4 items that are output.
 
-\subsection{Analytic vs Finite Difference Jacobians}
-
-kCARTA has been checked quite thoroughtly, for
-\begin{itemize}
-\item single layer dr/dq, dBT/dq  analytic versus finite differente jacobians 
-\item single layer q dr/dq, q dBT/dq  analytic versus finite differente jacobians
-\item combined many layer dr/dq, dBT/dq  analytic versus finite differente jacobians 
-\item combined many layer q dr/dq, q dBT/dq  analytic versus finite differente jacobians
-\item See subroutine Set\_Ref\_Current\_Profs in kcartamisc.f
-\item Also see ../MATLAB/compare\_sumlayer\_jac\_dRdq\_vs\_qdRdq.m
-\end{itemize}
-
-In order to do single layer dr/dq or dBT/dq via finite differences you need to
-\begin{itemize}
-\item set kJacobOutput = -1 or +2 in nml file
-\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers  
-\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
-\item uncomment the ``jacob test amount jacobian, new'' code
-\item run KCARTA to produce r1(v), note what dq is for layer <<J>>
-\item finite difference Jfinite = (r1(v)-r0(v))/dq  [or use BT instead of r]
-\item compare to Janalytic(:,J)
-\end{itemize}
-
-In order to do many adjacent layers dr/dq or dBT/dq via finite differences you need to
-\begin{itemize}
-\item set kJacobOutput = -1 or +2 in nml file
-\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers
-\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
-\item uncomment the ``jacob test amount jacobian, new'' code
-\item run KCARTA to produce r2(v), note what cumulative dq(total) is for layer <<J1:JM>>
-\item finite difference Jfinite = (r2(v)-r0(v))/dq(total)/length(J1:JM)  [or use BT instead of r]
-\item compare to sum(Janalytic(:,J1:JM),2)
-\end{itemize}
-
-In order to do single layer q dr/dq or q dBT/dq via finite differences you need to
-\begin{itemize}
-\item set kJacobOutput = 0 or +1 in nml file
-\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers  
-\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
-\item uncomment the ``jacob test amount jacobian, new'' code
-\item run KCARTA to produce r1(v), note what dq is for layer <<J>>
-\item Note what $\delta = dq/q$ is
-\item finite difference Jfinite = (r1(v)-r0(v))/log(1+$\delta$)  [or use BT instead of r]
-\item compare to Janalytic(:,J)
-\end{itemize}
-
-In order to do many adjacent layers q dr/dq or q dBT/dq via finite differences you need to
-\begin{itemize}
-\item set kJacobOutput = 0 or +1 in nml file
-\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers
-\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
-\item uncomment the ``jacob test amount jacobian, new'' code
-\item run KCARTA to produce r2(v), note what cumulative dq(total) is for layer <<J1:JM>>
-\item Note what $\delta = dq/q$ is
-\item finite difference Jfinite = (r2(v)-r0(v))/log(1+$\delta$)  [or use BT instead of r]  
-\item compare to sum(Janalytic(:,J1:JM),2)
-\end{itemize}
-
-
 \subsection{ The Flux file}
 
 If kFlux = 1,2,3,4,5,6 then an auxiliary data file, with eg 'FLUX' or 'OLR' 
@@ -7034,6 +6977,64 @@ e^{-\tau_{i+1 \rightarrow TOA}(\nu)} = \delta \tau_{i \rightarrow
   TOA}(\nu)$ . You still need to divide the output weighting function by $\delta(pressure)$ at each
 layer to get the true weighting function.}
 
+\subsection{Analytic vs Finite Difference Jacobians}
+
+\noindent kCARTA has been checked quite thoroughtly, for
+\begin{itemize}
+\item single layer dr/dq, dBT/dq  analytic versus finite difference jacobians 
+\item single layer q dr/dq, q dBT/dq  analytic versus finite difference jacobians
+\item combined many layer dr/dq, dBT/dq  analytic versus finite difference jacobians 
+\item combined many layer q dr/dq, q dBT/dq  analytic versus finite difference jacobians
+\item See subroutine Set\_Ref\_Current\_Profs in kcartamisc.f
+\item Also see ../MATLAB/compare\_sumlayer\_jac\_dRdq\_vs\_qdRdq.m
+\end{itemize}
+
+\noindent In order to check \emph{single layer dr/dq or dBT/dq via finite differences} you need to
+\begin{itemize}
+\item set kJacobOutput = -1 or +2 in nml file
+\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers  
+\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
+\item uncomment the ``jacob test amount jacobian, new'' code
+\item run KCARTA to produce r1(v), note what dq is for layer \emph{J}
+\item finite difference $J_{finite} = \frac{(r1(v)-r0(v))}{dq}$ \emph{or use BT instead of r}
+\item compare to $J_{analytic}(:,J)$
+\end{itemize}
+
+\noindent In order to check \emph{many adjacent layers dr/dq or dBT/dq via finite differences} you need to
+\begin{itemize}
+\item set kJacobOutput = -1 or +2 in nml file
+\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers
+\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
+\item uncomment the ``jacob test amount jacobian, new'' code
+\item run KCARTA to produce r2(v), note what cumulative dq(total) is for layer \emph{J1:JM}
+\item finite difference $J_{finite} = \frac{(r2(v)-r0(v))}{dq(total)/length(J1:JM)}$  \emph{or use BT instead of r}
+\item compare to sum($J_{analytic}(:,J1:JM),2$)
+\end{itemize}
+
+\noindent In order to check \emph{single layer q dr/dq or q dBT/dq via finite differences} you need to
+\begin{itemize}
+\item set kJacobOutput = 0 or +1 in nml file
+\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers  
+\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
+\item uncomment the ``jacob test amount jacobian, new'' code
+\item run KCARTA to produce r1(v), note what dq is for layer \emph{J}
+\item Note what $\delta = dq/q$ is
+\item finite difference $J_{finite} = \frac{(r1(v)-r0(v))}{log(1+\delta)}$  \emph{or use BT instead of r}
+\item compare to $J_{analytic}(:,J)$
+\end{itemize}
+
+\noindent In order to check \emph{many adjacent layers q dr/dq or q dBT/dq via finite differences} you need to
+\begin{itemize}
+\item set kJacobOutput = 0 or +1 in nml file
+\item run KCARTA and produce r0(v) and J(v,:) which is the raw TOA radiance and jacobain for eg L=1 to 97 layers
+\item go to Set\_Ref\_Current\_Profs, set iJax,iJax2,iGasJac as needed
+\item uncomment the ``jacob test amount jacobian, new'' code
+\item run KCARTA to produce r2(v), note what cumulative dq(total) is for layer \emph{J1:JM}
+\item Note what $\delta = dq/q$ is
+\item finite difference $J_{finite} = \frac{(r2(v)-r0(v))}{log(1+\delta)}$  \emph{or use BT instead of r}
+\item compare to sum($J_{analytic}(:,J1:JM),2$)
+\end{itemize}
+
 \subsection{Miscellaneous notes about kCARTA Jacobians}
 In addition to the gas amount/layer temperature Jacobians and
 weighting functions described above, the Jacobians with respect to the
@@ -7233,7 +7234,7 @@ calculations, with the TOA at about 85 km. The main CO2 $\Sigma-\Sigma,
 in LTE. The Cousin lineshape is used in the simulations.
 
 \begin{figure}
-\includegraphics{/home/sergio/KCARTA/DOC/FIG/nlte}
+\includegraphics{FIG/nlte}
   \caption{Example of a NLTE computation using kCARTA and GENLN2}
   \label{fig:nlte} 
 \end{figure} 
