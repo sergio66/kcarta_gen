@@ -1,0 +1,11 @@
+1) Make ../BIN
+2) Make ../WORK
+3) See eg ../INCLUDE/Templates_V122/template_kcartaV122_400_H2020_NLTEH2016.param
+   if you want 605-2830 cm-1 as 0.0025 cm-1 resolution or
+               500-805 as 0.0005 cm-1, 805-2830 as 0.0025 cm-1 resolution	     
+
+Also
+a) mkdir ../INCLUDE/TempF90/JunkTempDir
+b) edit +54 SRCv1.22_F90/Makefile_intel_hdf_rtp and make rtpdir point to eg
+     /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/KLAYERS_RTPv221_150levs_120km/rtpV221_80gases
+c) go to LIB, make BLAS and point to that symbolically

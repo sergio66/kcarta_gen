@@ -394,7 +394,8 @@
 ! these are actually used
     INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
     INTEGER :: iFr,ID,iMeanDeltaP
-    INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
+    INTEGER :: iJax,iJax2,iGasJac
+    INTEGER :: iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 ! these are temporary dumy variables
@@ -459,37 +460,37 @@
 ! read in the driver namelist file and profile
 
     CALL ReadNameListFile(iaGases,iNumGases,rFreqStart,rFreqEnd, &
-    iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont, &
-    iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP, &
-    iNatm,raTSpace,raTSurf,raSatAngle,raSatHeight, &
-    iaNumLayer,iaaRadLayer, &
-    raFracTop,raFracBot,raaPrBdry, &
-    raaMix,iNpmix,caaMixFileLines,iMixFileLines, &
-    iOutTypes,iaPrinter,iaGPMPAtm, &
-    iaNp,iaaOp,raaOp,raaUserPress,iNatm2, &
-    caDriverName,caComment,iError, &
-    iJacob,iaJacob, &
-    iaSetEms,raaaSetEmissivity,iaSetSolarRefl,raaaSetSolarRefl, &
-    iakSolar,rakSolarAngle,rakSolarRefl, &
-    iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
-    raSatAzimuth,raSolAzimuth,raWindSpeed, &
-    caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
-    iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
-    raaaCloudParams,iaaScatTable,iaCldTypes,caaaScatTable,iaPhase, &
-    iaCloudNumAtm,iaaCloudWhichAtm, &
-    cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,iaWorIorA, &
-    iCldProfile,raaKlayersCldAmt, &
-    iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, &
-    iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
-    raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast, &
-    iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks, &
-    caaStrongLines,iaNLTEBands, &
-    iaNLTEStart,iaNLTEStart2350,caaaNLTEBands,caaNLTETemp, &
-    iAllLayersLTE,iUseWeakBackGnd, &
-    iSetBloat,caPlanckBloatFile,caOutBloatFile,caOutUABloatFile, &
-    iDoUpperAtmNLTE,caaUpperMixRatio,caPlanckUAfile,caOutUAfile, &
-    caOutName)
-
+      iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont, &
+      iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP, &
+      iNatm,raTSpace,raTSurf,raSatAngle,raSatHeight, &
+      iaNumLayer,iaaRadLayer, &
+      raFracTop,raFracBot,raaPrBdry, &
+      raaMix,iNpmix,caaMixFileLines,iMixFileLines, &
+      iOutTypes,iaPrinter,iaGPMPAtm, &
+      iaNp,iaaOp,raaOp,raaUserPress,iNatm2, &
+      caDriverName,caComment,iError, &
+      iJacob,iaJacob, &
+      iaSetEms,raaaSetEmissivity,iaSetSolarRefl,raaaSetSolarRefl, &
+      iakSolar,rakSolarAngle,rakSolarRefl, &
+      iakThermal,rakThermalAngle,iakThermalJacob,iaSetThermalAngle, &
+      raSatAzimuth,raSolAzimuth,raWindSpeed, &
+      caaScatter,raaScatterPressure,raScatterDME,raScatterIWP, &
+      iScatBinaryFile,iNclouds,iaCloudNumLayers,iaaCloudWhichLayers, &
+      raaaCloudParams,iaaScatTable,iaCldTypes,caaaScatTable,iaPhase, &
+      iaCloudNumAtm,iaaCloudWhichAtm, &
+      cfrac1,cfrac2,cfrac12,ctype1,ctype2,cngwat1,cngwat2,ctop1,ctop2,raCemis,iaWorIorA, &
+      iCldProfile,raaKlayersCldAmt, &
+      iNumNewGases,iaNewGasID,iaNewData,iaaNewChunks,caaaNewChunks, &
+      iNumAltComprDirs,iaAltComprDirs,raAltComprDirsScale,caaAltComprDirs,rAltMinFr,rAltMaxFr, &
+      raNLTEstrength,iNumNLTEGases,iNLTE_SlowORFast, &
+      iaNLTEGasID,iaNLTEChunks,iaaNLTEChunks, &
+      caaStrongLines,iaNLTEBands, &
+      iaNLTEStart,iaNLTEStart2350,caaaNLTEBands,caaNLTETemp, &
+      iAllLayersLTE,iUseWeakBackGnd, &
+      iSetBloat,caPlanckBloatFile,caOutBloatFile,caOutUABloatFile, &
+      iDoUpperAtmNLTE,caaUpperMixRatio,caPlanckUAfile,caOutUAfile, &
+      caOutName)
+  
     write(kStdWarn,'(A,F15.6,F15.6)') 'if COLJACS computed then kDefaultToffset,kDefaultColMult = ',kDefaultToffset,kDefaultColMult
 
     !! so at this point raaPress is layer avg press (play) in atm. raPressLevels (plevs) is in mb
@@ -762,6 +763,17 @@
     END DO
     raFreq = raBlock(iFileID) + iaInt*real(kaFrStep(iTag))
 
+    ! for testing finite difference jacs if needed
+    iJax = 5
+    iJax = 12  !! for JACK CO
+    iJax = 7   !! for STROW CO2
+    iJax2 = iJax+5    !!! can alter this to do dQ for many adjacent layers
+    iJax2 = iJax+0    !!! can alter this to do dQ for many adjacent layers
+    rDerivAmt  = 0.1
+    rDerivTemp = 0.1
+    rDerivAmt  = 0.01
+    rDerivTemp = 0.01
+
     iGas = 1
     CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag, &
     iDoAdd,iErr)
@@ -771,12 +783,9 @@
       write(kStdErr,*) kCompParamFile	
       CALL DoStop
     ELSE
-      rDerivAmt  = 0.1
-      rDerivTemp = 0.1
-      iJax = 5
       !! set up the ref and current profiles
       CALL Set_Ref_Current_Profs( &
-        iJax,rDerivTemp,rDerivAmt, &
+        iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt, &
         iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
         raaAmt,raaTemp,raaPress,raaPartPress, &
         raRAmt,raRTemp,raRPress,raRPartPress, &
@@ -919,13 +928,9 @@
         IF (iDoAdd > 0) THEN
           ! edit Set_Ref_Current_Profs,
           ! for testing finite difference jacs if needed
-          iJax = 12  !! for JACK CO
-          iJax = 7   !! for STROW CO2
-          rDerivAmt  = 0.1
-          rDerivTemp = 0.1
           !! set up the ref and current profiles
           CALL Set_Ref_Current_Profs( &
-            iJax,rDerivTemp,rDerivAmt, &
+            iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt, &
             iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
             raaAmt,raaTemp,raaPress,raaPartPress, &
             raRAmt,raRTemp,raRPress,raRPartPress, &

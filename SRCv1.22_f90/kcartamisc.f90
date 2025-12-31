@@ -1448,7 +1448,7 @@ CONTAINS
 
     IF (iJ <= 0) THEN
       write(kStdErr,*) '>>layer number ',iI,'gas ID ',iGasID
-      Call DoStopMesg(' >>oops iJ <= 0 in PPThruLayers, so will have problems in next line$')
+      Call DoStopMesg(' >>oops iJ <= 0 in PPThruLayers, so will have problems in next line')
     END IF
         
 !!! case 1 : current layer is INSIDE one database layer
@@ -1519,7 +1519,7 @@ CONTAINS
 !************************************************************************
 ! this is called by kcartamain and kcartabasic, to set up the profiles
     SUBROUTINE Set_Ref_Current_Profs( &
-    iJax,rDerivTemp,rDerivAmt, &
+    iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt, &
     iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
     raaAmt,raaTemp,raaPress,raaPartPress, &
     raRAmt,raRTemp,raRPress,raRPartPress, &
@@ -1531,9 +1531,12 @@ CONTAINS
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
-    INTEGER :: iJax                   !! when testing jacobians
+    INTEGER :: iJax,iJax2             !! when testing jacobians
+    INTEGER :: iGasJac                !! which gas to perturb (-1 for temperature)
+
     REAL :: rDerivTemp,rDerivAmt      !! when testing jacobians
     INTEGER :: iGas,iaGases(kMaxGas)  !! gasID stored in order they were read in
+    INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
 ! these are the reference profiles stored in matrices
     REAL :: raaRAmt(kProfLayer,kGasStore),raaRTemp(kProfLayer,kGasStore)
     REAL :: raaRPress(kProfLayer,kGasStore)
@@ -1559,15 +1562,93 @@ CONTAINS
     REAL :: pProfNLTE(kProfLayer),rDummy
 
 ! local vars
-    INTEGER :: iInt
+    INTEGER :: iInt,iAtm,iX,iX2,dq_Const_between_layers,iStartKeepTrack
+    REAL :: rDQ_Track_Cumulative,rDQ_Track,rAdjust_rDerivAmt,rJunk,rUseDQ
+
+    iAtm = 1
 
 ! get the reference profile for the current gas if GAS ID <= kGasXsecHi
     IF ((iaGases(iGas) <= kGasXsecHi) .OR. (iaGases(iGas) == kNewGasHi+1)) THEN
       CALL SetReference(raRAmt,raRTemp,raRPress,raRPartPress, &
         raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas)
     END IF
-          
+
+! ************************************************************************
+
+    !  also see ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
+    !  also see ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
+    !  also see ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
+    
+    rDQ_Track_Cumulative = 0.0 
+
+    iStartKeepTrack = -1
+    rAdjust_rDerivAmt = 1.0
+    IF ((kJacobOutput .EQ. 0) .OR. (kJacobOutput .EQ. 1)) THEN
+      !! q dR/dq or q dBT/dq
+      !! want dq1 = dq2 = dq3 = .... dqm 
+      !!   therefore Q1 gammaQ1 = Q2 gammQ2 = Q3 gammaQ3 = ..... Qm gammaQm
+      !!   therefore gammQ2/gammaQ1 = Q1/Q2      gammQ3/gammaQ1 = Q1/Q3 .....      gammQm/gammaQ1 = Q1/Qm   
+      !! see detailed notes, Book 46 of my spiral bound notebooks
+      dq_Const_between_layers = +1  
+      rDQ_Track = 1.0
+    ELSEIF ((kJacobOutput .EQ. -1) .OR. (kJacobOutput .EQ. 2)) THEN
+      !! dR/dq or dBT/dq
+      dq_Const_between_layers = -1
+      rDQ_Track = 1.0
+    END IF
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    !! overwrite iJax,iJax2,iGasJac
+    iJax = 76
+    iJax = 85
+    iGasJac = 3
+
+    !! overwrite iJax,iJax2,iGasJac
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+
+    iJax = 52
+    iGasJac = 6
+
+    !! overwrite iJax,iJax2,iGasJac
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+
+    iJax = 6
+    iGasJac = 2
+
+    !! overwrite iJax,iJax2,iGasJac
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+
+    iJax = 52
+    iGasJac = 1
+
+    !! overwrite iJax,iJax2,iGasJac
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    !! overwrite iJax,iJax2,iGasJac
+
+    iJax2 = iJax+0    !!! can alter this to do dQ for many adjacent layers
+    iJax2 = iJax+5    !!! can alter this to do dQ for many adjacent layers
+! ************************************************************************
+
+    DO iInt=1,iaNumLayer(iAtm)
+!      print *,iInt,iaaRadLayer(iAtm,iInt)
+      IF (iaaRadLayer(iAtm,iInt) .EQ. iJax) THEN
+        iX = iInt
+!        print *,'A',iInt,iaaRadLayer(iAtm,iInt),iJax
+      END IF
+      IF (iaaRadLayer(iAtm,iInt) .EQ. iJax2) THEN
+        iX2 = iInt
+!        print *,'B',iInt,iaaRadLayer(iAtm,iInt),iJax2
+      END IF       
+    END DO    
+!    print *,'iJax,iJax2,iX,iX2 = ',iJax,iJax2,iX,iX2
+
     DO iInt=1,kProfLayer
+!      print *,'lkjslksjglsjglsjg',iInt
       raTAmt(iInt)          = raaAmt(iInt,iGas)
       raTTemp(iInt)         = raaTemp(iInt,iGas)
       raTPress(iInt)        = raaPress(iInt,iGas)
@@ -1577,28 +1658,29 @@ CONTAINS
       ! NLTE avg layer press in lower atm = kCARTA profile
       pProfNLTE(iInt) = raTPress(iInt)*kAtm2mb
 
-      !       print *,'BB',iInt,pprofNLTE(iInt),raTPress(iInt), &
-      !                   pprofNLTE(iInt)/(raTPress(iInt)*kAtm2mb)
+      !!       print *,'BB',iInt,pprofNLTE(iInt),raTPress(iInt), &
+      !!                   pprofNLTE(iInt)/(raTPress(iInt)*kAtm2mb)
+
+      !!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      !!c  this stuff is to test the temperature jacobians
+      !!          raTTemp(iInt)=rDerivTemp+raTTemp(iInt)
+      !!          raMixVertTemp(iInt)=rDerivTemp+raTTemp(iInt)
+      !!          raMixVertTemp(iInt)=raTTemp(iInt)
+
+      !!c jacob test temperature jacobian ... old
+      !!          IF (iInt .EQ. iJax) THEN
+      !!            raTTemp(iInt) = raaTemp(iInt,iGas)+rDerivTemp
+      !!            raMixVertTemp(iInt)=raTTemp(iInt)
+      !!          END IF
+      !!          IF ((iInt .EQ. iJax) .AND. (iGas .EQ. 1)) THEN
+      !!            rDummy        = raMixVertTemp(iInt)
+      !!            raMixVertTemp(iInt) = rDummy+rDerivTemp
+      !! c          raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
+      !! c          raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
+      !!            print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
+      !!          END IF
 
       !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      !c  this stuff is to test the jacobians
-      !          raTTemp(iInt)=rDerivTemp+raTTemp(iInt)
-      !          raMixVertTemp(iInt)=rDerivTemp+raTTemp(iInt)
-      !          raMixVertTemp(iInt)=raTTemp(iInt)
-
-      !c jacob test temperature jacobian ... old
-      !          IF (iInt .EQ. iJax) THEN
-      !            raTTemp(iInt) = raaTemp(iInt,iGas)+rDerivTemp
-      !            raMixVertTemp(iInt)=raTTemp(iInt)
-      !          END IF
-      !          IF ((iInt .EQ. iJax) .AND. (iGas .EQ. 1)) THEN
-      !            rDummy        = raMixVertTemp(iInt)
-      !            raMixVertTemp(iInt) = rDummy+rDerivTemp
-      ! c          raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
-      ! c          raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
-      !            print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
-      !          END IF
-
       !c jacob test column gas  jacobian
       !          IF (iGas .EQ. 1) THEN
       !            rDummy        = raMixVertTemp(iInt)
@@ -1608,27 +1690,61 @@ CONTAINS
       !            print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
       !          END IF
 
-      !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      !c jacob test jacobian ... new, could also be column
-      !          iJax = -1
-      !           iJax = 65
+      !c jacob test temperature jacobian ... new, could also be column
       !          rDerivTemp = 1.0
-      !          IF ((iInt .EQ. iJax) .OR. (iJax .EQ. -1)) THEN
+      !          IF (((iInt .GE. iJax) .AND. (iInt .LE. iJax2)) .OR. (iJax .EQ. -1)) THEN
       !            raTTemp(iInt) = raaTemp(iInt,iGas)+rDerivTemp
       !            raMixVertTemp(iInt)=raTTemp(iInt)
       !            print *,iJax,raaTemp(iInt,iGas),rDerivTemp,raMixVertTemp(iInt)
       !          END IF
 
       !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      !c jacob test amount jacobian
-      !         iJax = 65
-      !         IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 2)) THEN
+      !c jacob test amount jacobian, orig
+      !         IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. iGasJac)) THEN
       !           raTAmt(iInt)=raaAmt(iInt,iGas)*(1.0+rDerivAmt)
       !           print *,'iJax, dq = ',iJax,raaAmt(iInt,iGas)*rDerivAmt
       !         END IF
       ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+      !c jacob test amount jacobian, new
+      !c jacob test amount jacobian, new
+      !c jacob test amount jacobian, new
+      !    depending on kJacobOutput (-1,2 for dr/dq/dBT/dq) and (0,1 for q dr/dq, q dBT/dq) 
+      !    this varies rAdjust_rDerivAmt so that    rUseDQ = constant for each layer, so dQ/Q   varies layer by layer for the layers iJax..iJax2    if kJacobOutput = -1,2  dr/dq,     dBT/dq
+      !                                             dQ/Q = constant for each layer,   so rUseDQ varies layer by layer for the layers iJax..iJax2    if kJacobOutput = 0,1   q dr/dq, q dBT/dq
+      !
+      !          IF ((iInt .GE. iJax) .AND. (iInt .LE. iJax2) .AND. (iaGases(iGas) .EQ. iGasJac)) THEN
+      ! 
+      !            IF (dq_Const_between_layers .LT. 0) THEN
+      !              !! dR/dq or dBT/dq
+      !              IF (iStartKeepTrack .LT. 0) THEN
+      !                iStartKeepTrack = +1
+      !                rDQ_Track = raaAmt(iInt,iGas)*rDerivAmt
+      !                rAdjust_rDerivAmt = 1.0
+      !              ELSEIF (iStartKeepTrack .GT. 0) THEN
+      !                rJunk = raaAmt(iInt,iGas)*rDerivAmt
+      !                rAdjust_rDerivAmt = rDQ_Track/rJunk
+      !              END IF
+      !            ELSE
+      !              !! q dR/dq or q dBT/dq
+      !              rAdjust_rDerivAmt = 1.0
+      !            END IF 
+      ! 
+      !            rUseDQ               = rDerivAmt * rAdjust_rDerivAmt
+      !            raTAmt(iInt)         = raaAmt(iInt,iGas) * (1.0+rUseDQ)
+      !            raTPartPress(iInt)   = raaPartPress(iInt,iGas) * (1.0+rUseDQ)
+      !            rDQ_Track_Cumulative = rDQ_Track_Cumulative + raaAmt(iInt,iGas) * rUseDQ
+      ! 
+      !            !!! recall kMaxLayer = 100 so we look 001-100 ..... but the atmosphere is eg from 1013 mb so we have iNumLayer = 97 and the radiating layers are (4,5,6 ... 100)
+      !            !!!    so when we read in the 97 layer jacobins, eg here index iInt = 6 will correspond to radiating layer 3, so the dq here is for J3 of 97
+      !            write(kStdErr,'(A,I3.3,1X,A,I3.3,A,A,1X,4(ES12.5))') 'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer) : ',iInt,'<',iX + (iInt-iJax),'>', &
+      !                                                                 '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
+      !          END IF
+      ! ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     END DO
+
+!    print *,'nananana'
+!    if (iaGases(iGas) .EQ. 2) call dostop
 
     RETURN
     end SUBROUTINE Set_Ref_Current_Profs
@@ -1887,12 +2003,19 @@ CONTAINS
 !    END DO
 
    write(kTempUnit,'(A,I3)') '% numgases = ',iNumGases
-   write(kTempUnit,'(A)') & 
-    '% iL iJ=iaRadLayer(iL) iGas  iaGases(iGas)=iGasID  iaProfFromRTP raPress raaTemp raaAmt raaRAmt  raaAmt/raaRamt'
 
    ra1 = 0.0
    ra2 = 0.0
    DO iGas = 1,kGasStore
+      write(kTempUnit,'(A)') &
+      '%'
+      write(kTempUnit,'(A)') &
+      '% iL     iJ         iGas  iaGases(iGas)  iaProf   raPress    raTemp      raAmt     raRAmt    raAmt/raaRamt'
+      write(kTempUnit,'(A)') &
+      '%    iaRadLayer(iL)          iGasID      FromRTP'
+      write(kTempUnit,'(A)') &
+      '%--------------------------------------------------------------------------------------------------------'
+
      DO iL = 1,iaNumLayer(1)
        iJ = iaaRadLayer(1,iL)
        IF (iaGases(iGas) .LT. 100) THEN
@@ -1902,7 +2025,7 @@ CONTAINS
          rJunk1 = raaRAmt(iJ,1)         
          rJunk2 = raaAmt(iJ,iGas)/max(rJunk1,1.0e-15)
        END IF
-       write(kTempUnit,'(5(I4),F12.5,F12.5,ES12.5,ES12.5,ES12.5)') & 
+       write(kTempUnit,'(5(I4,5X),2(F12.5),3(ES12.5))') & 
          iL,iJ,iGas,iaGases(iGas),iaProfFromRTP(iGas),& 
         raaPress(iJ,1),raaTemp(iJ,1),raaAmt(iJ,iGas),rJunk1,rJunk2
      END DO

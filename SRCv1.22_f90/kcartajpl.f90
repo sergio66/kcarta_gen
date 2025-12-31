@@ -309,6 +309,16 @@
         raFreq(iInt) = raBlock(iFileID)+(iInt-1)*kaFrStep(iTag)
     END DO
 
+    iJax = 5
+    iJax = 12  !! for JACK CO
+    iJax = 7   !! for STROW CO2
+    iJax2 = iJax+5    !!! can alter this to do dQ for many adjacent layers
+    iJax2 = iJax+0    !!! can alter this to do dQ for many adjacent layers
+    rDerivAmt  = 0.1
+    rDerivTemp = 0.1
+    rDerivAmt  = 0.01
+    rDerivTemp = 0.01
+
     iGas = 1
     CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag, &
     iDoAdd,iErr)
@@ -316,11 +326,9 @@
         write(kStdErr,*) 'need other than gid = 1 to set kComp Interp Wgts'
         CALL DoStop
     ELSE
-        rDerivAmt  = 0.1
-        rDerivTemp = 0.1
     !! set up the ref and current profiles
         CALL Set_Ref_Current_Profs( &
-        iJax,rDerivTemp,rDerivAmt, &
+        iJax,iJax2,rDerivTemp,rDerivAmt, &
         iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
         raaAmt,raaTemp,raaPress,raaPartPress, &
         raRAmt,raRTemp,raRPress,raRPartPress, &
@@ -605,13 +613,9 @@
 
             IF (iDoAdd > 0) THEN
             ! edit Set_Ref_Current_Profs,
-            ! for testing finite difference jacs if needed
-                iJax = 20
-                rDerivAmt  = 0.1
-                rDerivTemp = 0.1
             !! set up the ref and current profiles
                 CALL Set_Ref_Current_Profs( &
-                iJax,rDerivTemp,rDerivAmt, &
+                iJax,iJax2,rDerivTemp,rDerivAmt, &
                 iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
                 raaAmt,raaTemp,raaPress,raaPartPress, &
                 raRAmt,raRTemp,raRPress,raRPartPress, &

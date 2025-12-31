@@ -625,6 +625,18 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.22 
 ----- 
 
+12/30/25        Subroutine Set_Ref_Current_Profs (in kcartamisc.f90) has been modified so that you
+                can send in iJax,iJax2 to specify which adjacent layers to perturb, or can stick to
+		perturbing only one layer, of gas iGasJac.
+		Quite a bit of work has gone into it, so that if you do
+		  kJacobOutput = -1,+2  (dr/dq, dBT/dq)     for one or more adjacenet layers,
+		    it keeps dq the same for all layers, dq/q varies layer by layer
+		  kJacobOutput = 0,+1   (q dr/dq, q dBT/dq) for one or more adjacenet layers,
+		    it keeps dq/q the same for all layers, dq varies layer by layer
+		This way you can sum over the relevant jacobian layers and easily compare to a
+		finite difference jacobian. This is documented in ../DOC/kcarta1.22.tex		  
+		Also look at ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
+		
 12/27/25        Reminder about testing versus finite different jacobians : see kcartamisc.f90,
                 subroutine Set_Ref_Current_Profs
                 See  rDerivTemp, rDerivAmt   and uncomment as needed

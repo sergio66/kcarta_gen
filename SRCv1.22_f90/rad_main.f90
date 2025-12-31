@@ -48,8 +48,8 @@ CONTAINS
 !      iaaOverrideDefault(2,4) = -1   !!! SUBR radnce4RTP in rtp_interface.f
 !                                     !!!   raKThermalAngle(iC) = iaaOverrideDefault(2,4) in rtp_interface.f
 !                                     !!!     = -1, fast accurate diffusive background at acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
-!                                    !!!     = +1, fast           diffusive background at acos(x)   in all layers eg 53.130
-!                              !!!                               = +1 constant acos(3/5) in all layers
+!                                     !!!     = +1, fast          diffusive background at acos(x)   in all layers eg 53.130
+!                              !!!                                = +1 constant acos(3/5) in all layers
 !                              !!! This sets  kSetThermalAngle = -1 for acos(3/5) in upper layers, accurate in lower layers << DEFAULT >>
 !                              !!!                             = +1 for constant angle (typically acos(3/5)) in all layers
 !                              !!!                             = -2 for same as -1, except linear-in-tau T variation
@@ -63,8 +63,7 @@ CONTAINS
 !                                     !!!                  0 for accurate diffusivity                   (FAST DEFAULT)
 !                                     !!!                 +1 for gausslegendre w(i) at theta(i)         (QUITE SLOW)
 !                                     !!!   SUBR IntegrateOverAngles in rad_quad.f
-
-                                                                                              
+                            
 !************************************************************************
 !************** This file has the forward model routines  ***************
 !************************************************************************
@@ -1252,9 +1251,9 @@ CONTAINS
     ENDIF
 
     if (iaaOverrideDefault(3,4) == +1) then
-      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 1',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdErr, '(A12,8(F15.8))') 'DBGSURF 1 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
-      write(kStdWarn,'(A9,8(F15.8))') 'DBGSURF 1',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdWarn,'(A12,8(F15.8))') 'DBGSURF 1 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
 
@@ -1698,9 +1697,9 @@ CONTAINS
     END IF
 
     if (iaaOverrideDefault(3,4) == +1) then
-      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 2',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdErr, '(A12,8(F15.8))') 'DBGSURF 2 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
-      write(kStdWarn,'(A9,8(F15.8))') 'DBGSURF 2',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdWarn,'(A12,8(F15.8))') 'DBGSURF 2 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
 
@@ -2915,9 +2914,9 @@ CONTAINS
     rJunk = raInten(1)
 
     if (iaaOverrideDefault(3,4) == +1) then
-      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 3',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdErr, '(A12,8(F15.8))') 'DBGSURF 3 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
-      write(kStdWarn,'(A9,8(F15.8))') 'DBGSURF 3',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdWarn,'(A12,8(F15.8))') 'DBGSURF 3 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
 
@@ -3524,9 +3523,9 @@ CONTAINS
     rJunk = raInten(1)
 
     if (iaaOverrideDefault(3,4) == +1) then
-      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 4',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdErr, '(A12,8(F15.8))') 'DBGSURF 4 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
-      write(kStdWarn,'(A9,8(F15.8))') 'DBGSURF 4',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdWarn,'(A12,8(F15.8))') 'DBGSURF 4 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
 
@@ -4052,9 +4051,9 @@ CONTAINS
     rJunk = raInten(1)
 
     if (iaaOverrideDefault(3,4) == +1) then
-      write(kStdErr,'(A9,8(F15.8))') 'DBGSURF 5',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdErr, '(A12,8(F15.8))') 'DBGSURF 5 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
-      write(kStdWarn,'(A9,8(F15.8))') 'DBGSURF 5',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
+      write(kStdWarn,'(A12,8(F15.8))') 'DBGSURF 5 : ',raFreq(1),raUseEmissivity(1),raSunRefl(1),rThermalRefl, &
                           raSurface(1),raThermal(1),raSun(1),raInten(1)
     end if
           

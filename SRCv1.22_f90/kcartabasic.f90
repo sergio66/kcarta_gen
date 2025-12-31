@@ -392,7 +392,7 @@
 ! these are actually used
     INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
     INTEGER :: iFr,ID,iMeanDeltaP
-    INTEGER :: iJax,iOutNum,iCO2,iMicroSoft
+    INTEGER :: iJax,iJax2,iOutNum,iCO2,iMicroSoft
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 ! these are temporary dumy variables
@@ -721,6 +721,11 @@
     END DO
     raFreq = raBlock(iFileID) + iaInt*real(kaFrStep(iTag))
 
+    rDerivAmt  = 0.1
+    rDerivTemp = 0.1
+    iJax = 5
+    iJax2 = iJax + 0
+
     iGas = 1
     CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag, &
     iDoAdd,iErr)
@@ -730,12 +735,9 @@
       write(kStdErr,*) kCompParamFile
       CALL DoStop
     ELSE
-      rDerivAmt  = 0.1
-      rDerivTemp = 0.1
-      iJax = 5
       !! set up the ref and current profiles
       CALL Set_Ref_Current_Profs( &
-        iJax,rDerivTemp,rDerivAmt, &
+        iJax,iJax2,rDerivTemp,rDerivAmt, &
         iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
         raaAmt,raaTemp,raaPress,raaPartPress, &
         raRAmt,raRTemp,raRPress,raRPartPress, &
@@ -875,14 +877,9 @@
 
         IF (iDoAdd > 0) THEN
           ! edit Set_Ref_Current_Profs,
-          ! for testing finite difference jacs if needed
-          iJax = 12  !! for JACK CO
-          iJax = 7   !! for STROW CO2
-          rDerivAmt  = 0.1
-          rDerivTemp = 0.1
           !! set up the ref and current profiles
           CALL Set_Ref_Current_Profs( &
-                iJax,rDerivTemp,rDerivAmt, &
+                iJax,iJax2,rDerivTemp,rDerivAmt, &
                 iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
                 raaAmt,raaTemp,raaPress,raaPartPress, &
                 raRAmt,raRTemp,raRPress,raRPartPress, &
