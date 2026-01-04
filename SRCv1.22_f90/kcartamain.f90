@@ -914,6 +914,7 @@
       ! un k-compress the absorption coefficients, gas by gas,
       ! for present frequency block
       DO iGas=1,iNumGases
+        write(kStdWarn,*) ' '
         write(kStdWarn,*) ' //////////// new gas ////////////////////'
         CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag,iDoAdd,iErr)
          

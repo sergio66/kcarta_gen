@@ -568,7 +568,7 @@ CONTAINS
       iDp = DoOutputLayer(iPath,iNp,iaOp)
       IF (iDp > 0) THEN
         IF (kLayer2Sp == -1) THEN
-          write(kStdWarn,*)'output GAS OD : iPath,P,T,A,OD = ', &
+          write(kStdWarn,'(A,I4,2(F12.5),2(ES12.5))')'output GAS OD : iPath,P,T,A,OD = ', &
             iPath,raTPress(iLay)*kAtm2mb,raTTemp(iLay),raTAmt(iLay),raaGasAbs(1,iLay)
           DO iInt = 1,kMaxPts
             raL2S(iInt) = raaGasAbs(iInt,iLay)

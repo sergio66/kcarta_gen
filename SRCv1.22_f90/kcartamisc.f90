@@ -1610,28 +1610,38 @@ CONTAINS
     iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
 
     iJax = 52
-    iGasJac = 6
+    iGasJac = 1
 
     !! overwrite iJax,iJax2,iGasJac
     iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
 
     iJax = 6
+    iJax = 16
     iGasJac = 2
 
     !! overwrite iJax,iJax2,iGasJac
     iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
 
     iJax = 52
-    iGasJac = 1
+    iJax = 32
+    iGasJac = 6
 
-    !! overwrite iJax,iJax2,iGasJac
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-    !! overwrite iJax,iJax2,iGasJac
 
-    iJax2 = iJax+0    !!! can alter this to do dQ for many adjacent layers
+    !! *************************
+    !! *************************
+    !! *************************
+
+    !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+    !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+    !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+    iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+    !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+    !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+
     iJax2 = iJax+5    !!! can alter this to do dQ for many adjacent layers
+    iJax2 = iJax+0    !!! can alter this to do dQ for many adjacent layers
 ! ************************************************************************
 
     DO iInt=1,iaNumLayer(iAtm)
@@ -1739,6 +1749,7 @@ CONTAINS
       !            write(kStdErr,'(A,I3.3,1X,A,I3.3,A,A,1X,4(ES12.5))') 'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer) : ',iInt,'<',iX + (iInt-iJax),'>', &
       !                                                                 '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
       !          END IF
+
       ! ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     END DO

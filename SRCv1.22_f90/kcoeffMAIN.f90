@@ -431,8 +431,15 @@ CONTAINS
         iaQ21,iaQ22,raQ21,raQ22)
 
       IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
-        write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+        !see kCARTA paper : k(v,L) = q/q0 raAltComprDirsScale x SVD_uncompress
+        !see kCARTA paper : therefore dk/dq = 1/q0 raAltComprDirsScale x SVD_uncompress = k/q
+        !see KCARTA paper, eqn 11 : dr/dq --> dk/dq = k/q == very simple!!!!!!   but we need kcorrect
+        !so we NEED         daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
+        write(kStdWarn,'(A,I3,A,F12.5)') '  GasContributionAlternateDatabase : scale factor for MOLGAS ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+!        print *,'daaTempo 0 ',daaTemp(1:10,10)
         daaTemp = daaTemp * raAltComprDirsScale(iNewIN)
+        daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
+!        print *,'daaTempo F ',daaTemp(1:10,10)
       END IF												    
     END IF
 
@@ -452,8 +459,13 @@ CONTAINS
             iaQ21,iaQ22,raQ21,raQ22)
 
         IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
-          write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+          !see kCARTA paper : k(v,L) = q/q0 raAltComprDirsScale x SVD_uncompress
+          !see kCARTA paper : therefore dk/dq = 1/q0 raAltComprDirsScale x SVD_uncompress = k/q
+          !see KCARTA paper, eqn 11 : dr/dq --> dk/dq = k/q == very simple!!!!!!   but we need kcorrect
+          !so we NEED         daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
+          write(kStdWarn,'(A,I3,A,F12.5)') '  GasContributionAlternateDatabase : scale factor for XSCGAS ',iGasID,' is ',raAltComprDirsScale(iNewIN)
           daaTemp = daaTemp * raAltComprDirsScale(iNewIN)
+          daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
         END IF												    
       ELSE
         write(kStdWarn,*) ' xsec gas : using old style binary file format'
@@ -1073,7 +1085,7 @@ CONTAINS
     DOUBLE PRECISION :: daaCousin(kMaxPts,kProfLayer)
 
     IF (iGasID /= 2) THEN
-      write(kStdErr,*) 'This subroutine is onlty for CO2!!!'
+      write(kStdErr,*) 'This subroutine is only for CO2!!!'
       CALL DoStop
     END IF
 
@@ -1213,6 +1225,7 @@ CONTAINS
     CALL AmtScale(daaAbsCoeff,raPAmt)
           
     IF (iGasID == 2) THEN
+      write(kStdWarn,*) 'subr othergases : gas = 2 so calling multiply_co2_chi_functions'
       CALL multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
     END IF
 

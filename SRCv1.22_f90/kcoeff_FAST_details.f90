@@ -143,23 +143,23 @@ CONTAINS
     DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
     DOUBLE PRECISION :: daaDQ(kMaxPtsJac,kProfLayerJac)
     DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer), &
-    daToffset(kMaxTemp),daaaKx(kMaxK,kMaxTemp,kMaxLayer), &
-    daaUx(kMaxPts,kMaxK)
+      daToffset(kMaxTemp),daaaKx(kMaxK,kMaxTemp,kMaxLayer), &
+      daaUx(kMaxPts,kMaxK)
     INTEGER :: iaTsort(kMaxTemp),iNk,iKm,iKn,iUm,iUn,iDoDQ,iGasID
     INTEGER :: iProfileLayers,iSplineType
 
     INTEGER :: iaP1(kProfLayer),iaP2(kProfLayer)
     REAL ::    raP1(kProfLayer),raP2(kProfLayer)
     INTEGER :: iaT11(kProfLayer),iaT12(kProfLayer), &
-    iaT21(kProfLayer),iaT22(kProfLayer)
+      iaT21(kProfLayer),iaT22(kProfLayer)
     REAL ::    raT11(kProfLayer),raT12(kProfLayer), &
-    raT21(kProfLayer),raT22(kProfLayer)
+      raT21(kProfLayer),raT22(kProfLayer)
     REAL ::    raJT11(kProfLayer),raJT12(kProfLayer), &
-    raJT21(kProfLayer),raJT22(kProfLayer)
+      raJT21(kProfLayer),raJT22(kProfLayer)
     INTEGER :: iaQ11(kProfLayer),iaQ12(kProfLayer), &
-    iaQ21(kProfLayer),iaQ22(kProfLayer)
+      iaQ21(kProfLayer),iaQ22(kProfLayer)
     REAL ::    raQ11(kProfLayer),raQ12(kProfLayer), &
-    raQ21(kProfLayer),raQ22(kProfLayer)
+      raQ21(kProfLayer),raQ22(kProfLayer)
 
 !     for DGEMM (BLAS matrix times matrix multiply)
     INTEGER :: iLDA,iLDB,iLDC
@@ -199,7 +199,7 @@ CONTAINS
     END IF
 
     IF  ((kJacobian > 0)  .AND. (iDoDQ > 0) .AND. ((kActualJacs == -1) .OR. (kActualJacs == 20))) THEN
-      daaDQ(1:kMaxPtsJac,1:kProfLayerJac)=daaAbsCoeff(1:kMaxPtsJac,1:kProfLayerJac)
+      daaDQ(1:kMaxPtsJac,1:kProfLayerJac) = daaAbsCoeff(1:kMaxPtsJac,1:kProfLayerJac)
     END IF
 
     RETURN

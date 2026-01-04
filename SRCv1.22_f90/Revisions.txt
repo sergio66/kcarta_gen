@@ -625,6 +625,17 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.22 
 ----- 
 
+01/03/26        Need to check if lower in the amospjhere, CO2 atmosphere used for LBLRTM CO2
+                OD generation is SAME as what is used as reference profile; the ratio of finite
+		difference jacs to analytic jacs is 400/385
+		While it is close to one above about layer 30
+		In other words, in nm_spctra section of nml file, if I use an LBLRTM  file
+		which claims it used 400 ppmv, together with a KCARTA version that claims it is for 385 pmv,
+		then setting
+		  raAltComprDirsScale(1) = 1.03896103896103896103
+		fixs the finite diff vs analytic jacs comparisons for layers above about 20, but is about a ratio
+		of 1.03 in the lower layers ...
+		
 12/30/25        Subroutine Set_Ref_Current_Profs (in kcartamisc.f90) has been modified so that you
                 can send in iJax,iJax2 to specify which adjacent layers to perturb, or can stick to
 		perturbing only one layer, of gas iGasJac.
@@ -634,9 +645,20 @@ v1.22
 		  kJacobOutput = 0,+1   (q dr/dq, q dBT/dq) for one or more adjacenet layers,
 		    it keeps dq/q the same for all layers, dq varies layer by layer
 		This way you can sum over the relevant jacobian layers and easily compare to a
-		finite difference jacobian. This is documented in ../DOC/kcarta1.22.tex		  
+		finite difference jacobian. This is documented in ../DOC/kcarta1.22.tex
 		Also look at ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
-		
+
+                In kcoeffMAIN.f90, subr GasContributionAlternateDatabase, have tested and verified 
+                  IF (abs(raAltComprDirsScale(iNewIN)-1.0) .GE. 1.0e-8) THEN
+                    !see kCARTA paper : k(v,L) = q/q0 raAltComprDirsScale x SVD_uncompress
+                    !see kCARTA paper : therefore dk/dq = 1/q0 raAltComprDirsScale x SVD_uncompress = k/q
+                    !see KCARTA paper, eqn 11 : dr/dq --> dk/dq = k/q == very simple!!!!!!   but we need kcorrect
+                    !so we NEED         daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
+                    write(kStdWarn,*) '  scale factor for ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+                    daaTemp = daaTemp * raAltComprDirsScale(iNewIN)
+                    daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)		    
+                  END IF
+
 12/27/25        Reminder about testing versus finite different jacobians : see kcartamisc.f90,
                 subroutine Set_Ref_Current_Profs
                 See  rDerivTemp, rDerivAmt   and uncomment as needed
