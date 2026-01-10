@@ -89,7 +89,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -101,7 +101,7 @@ c iaCloudWhichAtm stores which cloud is to be used with which atmospheres
 c iaaScatTable associates a file number with each scattering table 
 c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
 c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
       REAL rAngle
@@ -289,7 +289,7 @@ c             -1 ==> upward looking instrument
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iDownWard,iBinaryFile
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -301,7 +301,7 @@ c iaaCloudWhichAtm stores which cloud is to be used with which atmospheres
 c iaaScatTable associates a file number with each scattering table 
 c caaaScatTable associates a file name with each scattering table 
       INTEGER iaaScatTable(kMaxClouds,kCloudLayers) 
-      CHARACTER*80 caaaScatTable(kMaxClouds,kCloudLayers) 
+      CHARACTER*120 caaaScatTable(kMaxClouds,kCloudLayers) 
 c raaaCloudParams stores IWP, cloud mean particle size 
       REAL raaaCloudParams(kMaxClouds,kCloudLayers,2) 
 c this tells if there is phase info associated with the cloud; else use HG

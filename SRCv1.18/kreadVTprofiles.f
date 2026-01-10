@@ -15,7 +15,7 @@ c output
       REAL raRPPressX(kMaxLayer)
 
 c local
-      CHARACTER*80 caFname,caStr
+      CHARACTER*120 caFname,caStr
       INTEGER iIOUN,iI,iErr,iX
       REAL r1,r2,r3,r4
 
@@ -68,8 +68,8 @@ c local
       close (iIOUN)
       kTempUnitOpen = -1 
 
- 123  FORMAT(A80)
- 1070 FORMAT('ERROR! number ',I5,' opening loweAtmNLTE profile:',/,A80) 
+ 123  FORMAT(A120)
+ 1070 FORMAT('ERROR! number ',I5,' opening loweAtmNLTE profile:',/,A120) 
 
       RETURN
       END
@@ -96,7 +96,7 @@ c
       include '../INCLUDE/kcarta.param' 
 
 c input vars
-      CHARACTER*80 caaUpperMixRatio(kGasStore)
+      CHARACTER*120 caaUpperMixRatio(kGasStore)
       INTEGER iGasID, iLTEIn
       REAL rCO2mult
 c output vars
@@ -110,7 +110,7 @@ c it assumes the lower atm has CO2 ~ 385 ppmv
       INTEGER iUpperStd_Num
 
 c local vars
-      CHARACTER*80 caFname,caStr
+      CHARACTER*120 caFname,caStr
       INTEGER iIOUN,iI,iErr
       REAL rH,rP,rT,rPPMV,rX,rCO2Mix,raTemp(2*kProfLayer),rMax
       INTEGER iDefault,iCurrent
@@ -237,8 +237,8 @@ c now see if we need to swap values (from small to large)
         END DO
       END IF
 
- 123  FORMAT(A80)
- 1070 FORMAT('ERROR! number ',I5,' opening MixRatio atm profile:',/,A80) 
+ 123  FORMAT(A120)
+ 1070 FORMAT('ERROR! number ',I5,' opening MixRatio atm profile:',/,A120) 
 
       RETURN
       END
@@ -317,7 +317,7 @@ c        print *,iI+1,iUpperStd_Num,r1,r2,r3,r4,r5
       iUpperStd_Num = iI
 
  123  FORMAT(A120)
- 1070 FORMAT('ERROR! number ',I5,' opening US Std UA profile:',/,A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening US Std UA profile:',/,A120) 
 
       RETURN
       END
@@ -493,7 +493,7 @@ c this subroutine reads in the NLTE profiles
 c input params
       REAL pProf(kProfLayer),raPressLevels(kProfLayer+1)
       REAL raLayerHeight(kProfLayer),raThickness(kProfLayer)
-      CHARACTER*80 caFname
+      CHARACTER*120 caFname
       DOUBLE PRECISION daJU(kHITRAN),daJL(kHITRAN)
       INTEGER iaJ_UorL(kHITRAN),iGasID,iISO,iAllOrSome,iNLTEStart
 c output params
@@ -685,7 +685,7 @@ c daJL,daJU are the gas lower, upper quantum numbers
       REAL pProf(kProfLayer),raPresslevels(kProfLayer+1)
       REAL raLayerHeight(kProfLayer),raThickness(kProfLayer)
       INTEGER iLTEIn,iBand,iGasID,iNLTEStart
-      CHARACTER*80 caaNLTETemp(kGasStore) 
+      CHARACTER*120 caaNLTETemp(kGasStore) 
 c these are the input mixing ratios from Dave Edwards
       REAL raUpper_Pres(2*kProfLayer),raUpper_MixRatio(2*kProfLayer)
       INTEGER iNumMixRatioLevs
@@ -709,7 +709,7 @@ c local variables
       INTEGER iI,iErr,iIOUN,iLay,iFound,iJ,iUpper0,iVibs,iVibs0
       DOUBLE PRECISION daJU(kHITRAN),daJL(kHITRAN)
       INTEGER iaJ_UorL(kHITRAN)
-      CHARACTER*80 caFname
+      CHARACTER*120 caFname
       DOUBLE PRECISION dVibCenter            !!! vib center from GENLN2 file
 
       iUpper = -1               !!!assume nothing up on high
@@ -821,8 +821,8 @@ c thus p(g) = (p(total)/(1e6+ppmv)) ppmv
         END IF
       END DO
 
- 1070 FORMAT('ERROR! number ',I5,' opening upper atm NONLTE profile:',/,A80) 
- 6543 FORMAT(I4,' ',1(E9.4,' '),1(F9.3,' '),1(E9.4,' '),1(F8.3,' '))
+ 1070 FORMAT('ERROR! number ',I5,' opening upper atm NONLTE profile:',/,A120) 
+ 6543 FORMAT(I4,' ',1(E12.5,' '),1(F9.3,' '),1(E12.5,' '),1(F10.3,' '))
 
       RETURN
       END
@@ -857,7 +857,7 @@ c daJL,daJU are the gas lower, upper quantum numbers
       REAL pProf(kProfLayer),raPresslevels(kProfLayer+1)
       REAL raLayerHeight(kProfLayer),raThickness(kProfLayer)
       INTEGER iLTEIn,iBand,iGasID,iNLTEStart,iISO,iAllLayersLTE
-      CHARACTER*80 caaNLTETemp(kGasStore) 
+      CHARACTER*120 caaNLTETemp(kGasStore) 
 c these are the input mixing ratios from Dave Edwards
       REAL raUpper_Pres(2*kProfLayer),raUpper_MixRatio(2*kProfLayer)
       INTEGER iNumMixRatioLevs
@@ -890,8 +890,8 @@ c local variables
       INTEGER iI,iErr,iIOUN,iLay,iFound,iJ,iUpper0,iVibs,iVibs0,iAllOrSome
       INTEGER iNumVibLevels
       REAL p,pp,q,t,raUAMixRatio(kNLTEProfLayer)
-      CHARACTER*80 caFname
-      CHARACTER*80 caStr
+      CHARACTER*120 caFname
+      CHARACTER*120 caStr
       CHARACTER*3  ca3
       CHARACTER*105 ca105A,ca105B,ca105C,ca105D
 
@@ -994,10 +994,10 @@ ccccc 200 2 0.93681E-05 0.34536E-08   198.16440  0.14706E-09
         END DO
       END IF
 
- 1070 FORMAT('ERROR! number ',I5,' opening upper atm NONLTE profile:',/,A80) 
- 1080 FORMAT(I4,' ',2(E9.4,'  '),1(F10.4,'  '),E12.5,F10.4)
- 9876 FORMAT(I4,' ',E9.4,' ',F9.4,' ',E9.4,' ',F9.4,' | ',4(F9.4,' '),' | ',F9.4)
- 4321 FORMAT(I4,' ',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')),'|',1(E9.4,' ',F9.4,' ',E9.4,' ',2(F9.4,' ')))
+ 1070 FORMAT('ERROR! number ',I5,' opening upper atm NONLTE profile:',/,A120) 
+ 1080 FORMAT(I4,' ',2(E12.5,'  '),1(F10.4,'  '),E12.5,F10.4)
+ 9876 FORMAT(I4,' ',E12.5,' ',F12.5,' ',E12.5,' ',F12.5,' | ',4(F12.5,' '),' | ',F12.5)
+ 4321 FORMAT(I4,' ',1(E12.5,' ',F12.5,' ',E12.5,' ',2(F12.5,' ')),'|',1(E12.5,' ',F12.5,' ',E12.5,' ',2(F12.5,' ')))
   105 FORMAT(A105)
   
       RETURN
@@ -1034,7 +1034,7 @@ c daJL,daJU are the gas lower, upper quantum numbers
       REAL raTAmt(kProfLayer)     !!actual gas amounts
       REAL raTPress(kProfLayer),raTPartPress(kProfLayer) !!actual p,pp
       INTEGER iLTEIn,iBand,iGasID,iISO,iAllLayersLTE,iProfileLayers
-      CHARACTER*80 caaNLTETemp(kGasStore) 
+      CHARACTER*120 caaNLTETemp(kGasStore) 
 c output params are nonLTE temperatures, and Qtips_vib interpolated to profile
       REAL raNLTETemp(kProfLayer)   !!!NLTE temperatures
       REAL raLTETemp(kProfLayer)    !!!want to send this is from the vib-temp
@@ -1053,7 +1053,7 @@ c read the VibTemp profiles(p,LTE,NLTE,qvib) info into these variables
       INTEGER iI,iErr,iIOUN,iLay,iFound,iJ,iVibs,iVibs0,iStart
       INTEGER i1,i2,iNumVibLevels,iLogOrLinear,iLP,iDefault
       REAL rP,rPP,rQ,rT,rFac
-      CHARACTER*80 caFname
+      CHARACTER*120 caFname
       CHARACTER*100 ca1,ca2
       REAL raNLTE_STD(kProfLayer),raLTE_STD(kProfLayer)
 
@@ -1157,9 +1157,9 @@ c      call dostop
 
  1234 FORMAT(I3,' ',2(F10.5,' '),A1,' ',2(F10.5,' '),A1,' ',2(F10.5,' '),A1)
  1250 FORMAT(I3,' ',4(F10.5,' '),A1,' ',3(F10.5,' '))
- 1070 FORMAT('ERROR! number ',I5,' opening NONLTE profile:',/,A80) 
- 987  FORMAT(I4,' ',1(E9.4,' '),1(F9.3,' '),1(E9.4,' '),1(F8.3,' '),'||',1(F8.3,' '),
-     $       1(F6.3,' '),'|',2(F8.3,' '),'|',E8.3)
+ 1070 FORMAT('ERROR! number ',I5,' opening NONLTE profile:',/,A120) 
+ 987  FORMAT(I4,' ',1(E12.5,' '),1(F9.3,' '),1(E12.5,' '),1(F10.3,' '),'||',1(F10.3,' '),
+     $       1(F6.3,' '),'|',2(F10.3,' '),'|',E10.3)
 
       RETURN
       END
@@ -1308,7 +1308,7 @@ c a warning because it replaces the not-found data with raKineticVT
       include '../INCLUDE/kcarta.param' 
 
 c input params
-      CHARACTER*80 caFname                !!! file to read
+      CHARACTER*120 caFname                !!! file to read
       DOUBLE PRECISION daJU(kHITRAN),daJL(kHITRAN) !!! quantum numbers
       INTEGER iGasID, iISO                !!! what to read
       INTEGER iAllOrSome                  !!! read NLTE (+1) or LTE (-1) stuff?
@@ -1320,7 +1320,7 @@ c output params
 
 c local variables
       REAL p,pp,q,t,match_band_energy2
-      CHARACTER*80 caStr
+      CHARACTER*120 caStr
       CHARACTER*3  ca3
       REAL raQtipsXVT(kNLTEProfLayer),rDummyVibEnergy
       INTEGER iIOUN,iErr,iInputJU,iInputJL,iSetQVT
@@ -1370,7 +1370,7 @@ c local variables
       write(kStdWarn,*) ' from user supplied profile(s) in ',caFName
      
       !! Dave Edwards info does start GND = 1, TOA = 120 so things are fine
- 123  FORMAT(A80)
+ 123  FORMAT(A120)
 
  555  CONTINUE
       read(iIOUN,123) caStr
@@ -1542,7 +1542,7 @@ c      CALL DoStop
       CALL Add005mblevel(iNumVibLevels,
      $                   raPressVT,raKineticVT,raQtipsVT,raNLTETempVT)
 
- 1070 FORMAT('ERROR! number ',I5,' opening Read GENLN2 nlte profile:',/,A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening Read GENLN2 nlte profile:',/,A120) 
 
       RETURN
       END

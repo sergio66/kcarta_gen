@@ -923,6 +923,8 @@ CONTAINS
     INTEGER :: iNumGases,iaGases(kMaxGas),iaList(kNumkCompT)
     REAL :: raFiles(kNumkCompT)
     INTEGER :: iI,iJ,iG,iaSum(kMaxGas),iaCount(kMaxGas),iSum,iaJunk(kMaxGas)
+    CHARACTER*50 FMTX
+    CHARACTER*3  str3
 
     write(kStdWarn,*) '*****************************************'
     write(kStdWarn,*) 'kComp stats ..............'
@@ -980,7 +982,10 @@ CONTAINS
           iaJunk(iSum) = iG
         END IF
       END DO
-      write(kStdWarn,*) '  Chunk = ',raFiles(iaList(iJ)), ' numgases = ',iSum,' gasIDs are .... '
+      write (str3, '(i3)') iSum
+      !FMTX = ''(' // str3 // '(I3,1X)'')'
+      write(kStdWarn,'(A,F12.5,A,I3,A)') '  Chunk = ',raFiles(iaList(iJ)), ' numgases = ',iSum,' gasIDs are .... '
+      !write(kStdWarn,FMTX) (iaJunk(iI),iI=1,iSum)
       write(kStdWarn,*) (iaJunk(iI),iI=1,iSum)
     END DO
     17 FORMAT(I3,' ')
@@ -1602,6 +1607,13 @@ CONTAINS
     !!!!!!!!!!!!!!!!!!!!!!!!!!
 
     !! overwrite iJax,iJax2,iGasJac
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+
+    iJax = 52
+    iJax = 32
+    iGasJac = 6
+
+    !! overwrite iJax,iJax2,iGasJac
     iJax = 76
     iJax = 85
     iGasJac = 3
@@ -1609,24 +1621,21 @@ CONTAINS
     !! overwrite iJax,iJax2,iGasJac
     iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
 
-    iJax = 52
+    iJax = 30
+    iJax = 20
+    iJax = 10
+    iJax = 5
+    iJax = 4
     iGasJac = 1
 
     !! overwrite iJax,iJax2,iGasJac
     iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
 
     iJax = 6
-    iJax = 16
+    iJax = 20
+    iJax = 5
     iGasJac = 2
 
-    !! overwrite iJax,iJax2,iGasJac
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-
-    iJax = 52
-    iJax = 32
-    iGasJac = 6
-
-
     !! *************************
     !! *************************
     !! *************************
@@ -1634,8 +1643,8 @@ CONTAINS
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
-    iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+!    iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+!    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
@@ -1658,7 +1667,6 @@ CONTAINS
 !    print *,'iJax,iJax2,iX,iX2 = ',iJax,iJax2,iX,iX2
 
     DO iInt=1,kProfLayer
-!      print *,'lkjslksjglsjglsjg',iInt
       raTAmt(iInt)          = raaAmt(iInt,iGas)
       raTTemp(iInt)         = raaTemp(iInt,iGas)
       raTPress(iInt)        = raaPress(iInt,iGas)
@@ -1722,33 +1730,35 @@ CONTAINS
       !    this varies rAdjust_rDerivAmt so that    rUseDQ = constant for each layer, so dQ/Q   varies layer by layer for the layers iJax..iJax2    if kJacobOutput = -1,2  dr/dq,     dBT/dq
       !                                             dQ/Q = constant for each layer,   so rUseDQ varies layer by layer for the layers iJax..iJax2    if kJacobOutput = 0,1   q dr/dq, q dBT/dq
       !
-      !          IF ((iInt .GE. iJax) .AND. (iInt .LE. iJax2) .AND. (iaGases(iGas) .EQ. iGasJac)) THEN
-      ! 
-      !            IF (dq_Const_between_layers .LT. 0) THEN
-      !              !! dR/dq or dBT/dq
-      !              IF (iStartKeepTrack .LT. 0) THEN
-      !                iStartKeepTrack = +1
-      !                rDQ_Track = raaAmt(iInt,iGas)*rDerivAmt
-      !                rAdjust_rDerivAmt = 1.0
-      !              ELSEIF (iStartKeepTrack .GT. 0) THEN
-      !                rJunk = raaAmt(iInt,iGas)*rDerivAmt
-      !                rAdjust_rDerivAmt = rDQ_Track/rJunk
-      !              END IF
-      !            ELSE
-      !              !! q dR/dq or q dBT/dq
-      !              rAdjust_rDerivAmt = 1.0
-      !            END IF 
-      ! 
-      !            rUseDQ               = rDerivAmt * rAdjust_rDerivAmt
-      !            raTAmt(iInt)         = raaAmt(iInt,iGas) * (1.0+rUseDQ)
-      !            raTPartPress(iInt)   = raaPartPress(iInt,iGas) * (1.0+rUseDQ)
-      !            rDQ_Track_Cumulative = rDQ_Track_Cumulative + raaAmt(iInt,iGas) * rUseDQ
-      ! 
-      !            !!! recall kMaxLayer = 100 so we look 001-100 ..... but the atmosphere is eg from 1013 mb so we have iNumLayer = 97 and the radiating layers are (4,5,6 ... 100)
-      !            !!!    so when we read in the 97 layer jacobins, eg here index iInt = 6 will correspond to radiating layer 3, so the dq here is for J3 of 97
-      !            write(kStdErr,'(A,I3.3,1X,A,I3.3,A,A,1X,4(ES12.5))') 'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer) : ',iInt,'<',iX + (iInt-iJax),'>', &
-      !                                                                 '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
-      !          END IF
+                IF ((iInt .GE. iJax) .AND. (iInt .LE. iJax2) .AND. (iaGases(iGas) .EQ. iGasJac)) THEN
+       
+                  IF (dq_Const_between_layers .LT. 0) THEN
+                    !! dR/dq or dBT/dq
+                    IF (iStartKeepTrack .LT. 0) THEN
+                      iStartKeepTrack = +1
+                      rDQ_Track = raaAmt(iInt,iGas)*rDerivAmt
+                      rAdjust_rDerivAmt = 1.0
+                    ELSEIF (iStartKeepTrack .GT. 0) THEN
+                      rJunk = raaAmt(iInt,iGas)*rDerivAmt
+                      rAdjust_rDerivAmt = rDQ_Track/rJunk
+                    END IF
+                  ELSE
+                    !! q dR/dq or q dBT/dq
+                    rAdjust_rDerivAmt = 1.0
+                  END IF 
+       
+                  rUseDQ               = rDerivAmt * rAdjust_rDerivAmt
+                  raTAmt(iInt)         = raaAmt(iInt,iGas) * (1.0+rUseDQ)
+                  raTPartPress(iInt)   = raaPartPress(iInt,iGas) * (1.0+rUseDQ)
+                  rDQ_Track_Cumulative = rDQ_Track_Cumulative + raaAmt(iInt,iGas) * rUseDQ
+       
+                  !!! recall kMaxLayer = 100 so we look 001-100 ..... but the atmosphere is eg from 1013 mb so we have iNumLayer = 97 and the radiating layers are (4,5,6 ... 100)
+                  !!!    so when we read in the 97 layer jacobins, eg here index iInt = 6 will correspond to radiating layer 3, so the dq here is for J3 of 97
+                  write(kStdErr,'(A,I3.3,1X,A,I3.3,A,1X,I3.3,A,1X,4(ES12.5))') &
+                   'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101): ', &
+                   iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, &
+                   '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
+                END IF
 
       ! ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 

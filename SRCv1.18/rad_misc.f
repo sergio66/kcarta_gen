@@ -20,7 +20,7 @@ c output var
 
 c local vars
       INTEGER iIOUN,iL,iFlip,iI
-      CHARACTER*80 fname,caLine
+      CHARACTER*120 fname,caLine
       REAL raW(kMaxPts),raR(kMaxPts),r1,r2,r3,r4,r5,raTemp(kMaxPts)
 
       !fname = sun view d(phi) windspeed
@@ -29,7 +29,7 @@ c local vars
       OPEN(UNIT = iIOUN,FILE=fname,STATUS='OLD',FORM='FORMATTED',IOSTAT = iL)
       IF (IL .NE. 0) THEN 
         WRITE(kStdErr,1010) IL, FNAME
- 1010          FORMAT('ERROR! number ',I5,' openning data file:',/,A80) 
+ 1010          FORMAT('ERROR! number ',I5,' openning data file:',/,A120) 
         CALL DoSTOP 
       ENDIF
 
@@ -67,7 +67,7 @@ c local vars
       write(kStdWarn,*) 'specular refl (1) = ',raFreq(1),raSpecularRefl(1)
       write(kStdWarn,*) 'for mu_angles ',r2*180/kPi,r3*180/kPi,r4*180/kPi
 
- 5020 FORMAT(A80)
+ 5020 FORMAT(A120)
 
       RETURN 
       END 
@@ -1215,7 +1215,7 @@ c iTag     = 1,2,3 and tells what the wavenumber spacing is
       INTEGER iTag
       REAL raSun(kMaxPts),raFreq(kMaxPts) 
  
-      CHARACTER*80 fname
+      CHARACTER*120 fname
       INTEGER iIOUN,iL,iU,iFr
       DOUBLE PRECISION fs,fe,df,daSun(kMaxPts)
 
@@ -1225,7 +1225,7 @@ c iTag     = 1,2,3 and tells what the wavenumber spacing is
       OPEN(UNIT = iIOUN,FILE=fname,STATUS='OLD',FORM='UNFORMATTED',IOSTAT = iL)
       IF (IL .NE. 0) THEN 
         WRITE(kStdErr,1010) IL, FNAME
- 1010   FORMAT('ERROR! number ',I5,' openning data file:',/,A80) 
+ 1010   FORMAT('ERROR! number ',I5,' openning data file:',/,A120) 
         CALL DoSTOP 
       ENDIF
 
@@ -1268,7 +1268,7 @@ c now map the data
 c        write (6,2000) iFr,raFreq(iFr),raSun(iFr)
       END DO
 
- 2000 FORMAT(I6,' ',f10.5,' ',e10.5)
+ 2000 FORMAT(I6,' ',F12.5,' ',E12.5)
       RETURN
       END
 

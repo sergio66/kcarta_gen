@@ -406,7 +406,7 @@ c      END DO
 	rAngleTr               = rAngleTr + raMeanOD(iL)
         write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),654654
       END DO
- 321  FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
+ 321  FORMAT(F10.2,'  ',I4,3(' ',ES12.5,' '),I8)
       
 c after grepping the warning.msg file eg
 c grep 654654  ~sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/warning.msg > diffusive_angles

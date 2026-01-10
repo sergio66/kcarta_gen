@@ -445,6 +445,10 @@ CONTAINS
       CALL DoSTOP
     END IF
 
+!    print *,'mamama',kThermalAngle
+!    print *,(raFreqAngle(iLay)*180/kPi,iLay=1,10)
+!    call dostop
+
     IF (iUpDown > 0) THEN
       DO iLay = iS,iS
         iL = iaRadLayer(iLay)

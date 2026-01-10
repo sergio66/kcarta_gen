@@ -72,7 +72,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -267,7 +267,7 @@ c             -1 ==> upward looking instrument
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iDownWard,iBinaryFile
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -319,7 +319,7 @@ C         Radiative transfer variables:
       REAL    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
       REAL  ABSNU1, ABSNU2, ABSDELNU
       REAL  WAVENO
-      CHARACTER*80 SCATFILE(MAXSCAT)
+      CHARACTER*120 SCATFILE(MAXSCAT)
       CHARACTER*1   RTMODEL
       CHARACTER*1 caScale(MAXSCAT)
 c      CHARACTER*24  OUTUNITS, OUTAVERAGING
@@ -331,7 +331,7 @@ c new local variables
       INTEGER iCldTopKcarta,iCldBotkCarta
 
       INTEGER iaTable(kMaxClouds*kCloudLayers)
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       INTEGER iIn,iJ,iI,iCloud,iScat,iIOUN,iFr,iL
       REAL TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
       INTEGER iBdry,FindBoundary,iaRadLayer(kProfLayer)

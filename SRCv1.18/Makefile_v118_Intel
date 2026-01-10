@@ -69,14 +69,17 @@ FORTRANX = ifort   ## GENERIC< should always work!!!
 # DEBUG TOO MUCH INFO BUT EXCELLENT: see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
 #FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -check arg_temp#_created -gen-interfaces -warn interfaces  -mcmodel=medium
 # DEBUG GOOD : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
-#FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
+FLAGS = -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check
+FLAGS = -check noarg_temp_created -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
+# DEBUG GOOD : see https://software.intel.com/en-us/articles/determining-root-cause-of-sigsegv-or-sigbus-errors/
 #
 # ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT
-FLAGS = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -mcmodel=medium -shared_intel
+#FLAGS = -implicitnone -msse2 -extend-source 132 -O3 -names lowercase -assume nounderscore -heap-arrays -mcmodel=medium -shared-intel
 # ALL COOL  >>>>>>>>>>>>>>>>>>> DEFAULT
 #
 #UFLAG = 
 LIBS  = -lblas -mkl
+LIBS  = -L ../LIB -lblas -qmkl
 FDOUBLE = -r8
 
 ########################################################################

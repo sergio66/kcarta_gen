@@ -277,7 +277,7 @@ c     $     .AND. (kMaxLayer .LE. kProfLayer)) THEN
         END IF
 
       END IF
- 100  FORMAT(I3,' ',F10.5,' ',F10.5,' ',E10.5,' +++ ',F10.5,' ',F10.5,' ',E10.5)
+ 100  FORMAT(I3,' ',F10.5,' ',F10.5,' ',E12.5,' +++ ',F10.5,' ',F10.5,' ',E12.5)
 
       RETURN
       END
@@ -314,7 +314,7 @@ c these are what is in kCO2ppmvFile
       REAL raR100Amt1(kMaxLayer),raR100Temp1(kMaxLayer)
       REAL raR100PartPress1(kMaxLayer),raR100Press1(kMaxLayer)
 
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       REAL rMeanT,rMeanA,rMeanP,rMeanPP,rDirectPPMV0,rDirectPPMV1
       REAL rCO2ppmv
       INTEGER iI,iJ,iGasID,iError,iIPMIX,strfind
@@ -445,7 +445,7 @@ c -------------------------
 c        CALL DoStop
       END IF
 
- 100  FORMAT(A25,A80)
+ 100  FORMAT(A25,A120)
  101  FORMAT(A65,F12.8) 
       IF ((rMeanA/kMaxLayer .LE. 0.9995) .OR.
      $    (rMeanA/kMaxLayer .GE. 1.0005)) THEN
@@ -829,7 +829,7 @@ c  of the error/warning log file
       include '../INCLUDE/kcarta.param'
 
 c this is the driver file name from the command line arguments
-      CHARACTER*80 caDriverName
+      CHARACTER*120 caDriverName
 
       CHARACTER*30 namecomment
 
@@ -849,8 +849,8 @@ c iNatm2        = number of atmospheres that *OUTPUT thinks there is
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint)
       INTEGER iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint)
       INTEGER iIOUN,iErr
-      CHARACTER*80 caComment,caComment1
-      CHARACTER*80 caLogFile,caLogFile1
+      CHARACTER*120 caComment,caComment1
+      CHARACTER*120 caLogFile,caLogFile1
       REAL raaOp(kMaxPrint,kProfLayer),raaOp1(kMaxPrint,kProfLayer)
 
       NAMELIST /nm_output/namecomment,caLogFile,caComment,iaPrinter,
@@ -863,7 +863,7 @@ c iNatm2        = number of atmospheres that *OUTPUT thinks there is
           write (kStdErr,*) 'in subroutine ErrorLogName, error reading'
           write (kStdErr,*) 'namelist file to find name of logfile ... '
           WRITE(kStdErr,1070) iErr, caDriverName 
- 1070     FORMAT('ERROR! number ',I5,' opening namelist file:',/,A80) 
+ 1070     FORMAT('ERROR! number ',I5,' opening namelist file:',/,A120) 
           CALL DoSTOP 
         ENDIF 
       END IF 
@@ -995,14 +995,14 @@ c this subroutine does the command line stuff
       include '../INCLUDE/kcarta.param'
 
 c caDriverName is the name of the driver file to be processed 
-      CHARACTER*80 caDriverName 
+      CHARACTER*120 caDriverName 
 c caOutName is the name of the unformatted output file name 
 c integer iOutFileName tells whether or not there is a driver name, or 
 c dump output to Unit 6 
       INTEGER iOutFileName 
-      CHARACTER*80 caOutName 
+      CHARACTER*120 caOutName 
 c caJacobFile is the name of the unformatted output file name for Jacobians 
-      CHARACTER*80 caJacobFile 
+      CHARACTER*120 caJacobFile 
 c this tells if we have MS Product ie no command line stuff!
       INTEGER iMicroSoft
 c this is the number of args
@@ -2157,6 +2157,8 @@ c ----------------------------------------------------------------------------
      $    .AND. (kCKD .NE. 1) .AND. (kCKD .NE. 4) .AND. (kCKD .NE. 6)
      $    .AND. (kCKD .NE. 25) .AND. (kCKD .NE. 27))
      $ THEN 
+        write(kStdErr,*) 'You have entered (in nml file) kCKD = ',kCKD
+        write(kStdErr,*) ' '
         write(kStdErr,*) 'In *PARAMS, need kCKD = [-1] for no continuum OR'
         write(kStdErr,*) '                 CKD    versions 0,21,23 or 24'
         write(kStdErr,*) '              MT_CKD    versions 1,  [4,6]'
@@ -3124,7 +3126,7 @@ c rP            = pressure at which we want the temperature
 c************************************************************************
 c this is called by kcartamain and kcartabasic, to set up the profiles
       SUBROUTINE Set_Ref_Current_Profs(
-     $      iJax,rDerivTemp,rDerivAmt,
+     $      iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt,
      $      iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress,
      $                   raaAmt,raaTemp,raaPress,raaPartPress,
      $                   raRAmt,raRTemp,raRPress,raRPartPress,
@@ -3136,9 +3138,13 @@ c this is called by kcartamain and kcartabasic, to set up the profiles
       include '../INCLUDE/kcarta.param'
 
 c input params
-      INTEGER iJax                   !! when testing jacobians
+      INTEGER iJax,iJax2             !! when testing jacobians
+      INTEGER iGasJac                !! which gas to perturb (-1 for temperature)
+
       REAL rDerivTemp,rDerivAmt      !! when testing jacobians
       INTEGER iGas,iaGases(kMaxGas)  !! gasID stored in order they were read in
+      INTEGER iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
+
 c these are the reference profiles stored in matrices
       REAL raaRAmt(kProfLayer,kGasStore),raaRTemp(kProfLayer,kGasStore)
       REAL raaRPress(kProfLayer,kGasStore)
@@ -3164,7 +3170,11 @@ c of optical depth (no units)
       REAL pProfNLTE(kProfLayer),rDummy
 
 c local vars
-      INTEGER iInt
+      INTEGER iInt,iStartKeepTrack,iX,iX2,iAtm
+      REAL dq_Const_between_layers
+      REAL rDQ_Track_Cumulative,rDQ_Track,rAdjust_rDerivAmt,rJunk,rUseDQ
+     
+      iAtm = 1
 
 c get the reference profile for the current gas if GAS ID <= kGasXsecHi
       IF ((iaGases(iGas) .LE. kGasXsecHi) .OR. 
@@ -3172,6 +3182,81 @@ c get the reference profile for the current gas if GAS ID <= kGasXsecHi
         CALL SetReference(raRAmt,raRTemp,raRPress,raRPartPress,
      $            raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas)
       END IF
+
+! ************************************************************************
+
+!  also see ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
+!  also see ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
+!  also see ../MATLAB/compare_sumlayer_jac_dRdq_vs_qdRdq.m
+
+      rDQ_Track_Cumulative = 0.0
+  
+      iStartKeepTrack = -1
+      rAdjust_rDerivAmt = 1.0
+      IF ((kJacobOutput .EQ. 0) .OR. (kJacobOutput .EQ. 1)) THEN
+        !! q dR/dq or q dBT/dq
+        !! want dq1 = dq2 = dq3 = .... dqm
+        !!   therefore Q1 gammaQ1 = Q2 gammQ2 = Q3 gammaQ3 = ..... Qm gammaQm
+        !!   therefore gammQ2/gammaQ1 = Q1/Q2      gammQ3/gammaQ1 = Q1/Q3 .....      gammQm/gammaQ1 = Q1/Qm
+        !! see detailed notes, Book 46 of my spiral bound notebooks
+        dq_Const_between_layers = +1
+        rDQ_Track = 1.0
+      ELSEIF ((kJacobOutput .EQ. -1) .OR. (kJacobOutput .EQ. 2)) THEN
+        !! dR/dq or dBT/dq
+        dq_Const_between_layers = -1
+        rDQ_Track = 1.0
+      END IF
+  
+      !!!!!!!!!!!!!!!!!!!!!!!!!!
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+      !!!!!!!!!!!!!!!!!!!!!!!!!!
+    
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 76
+      iJax = 85
+      iGasJac = 3
+    
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+  
+      iJax = 6
+      iJax = 20
+      iJax = 5
+      iGasJac = 2
+  
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+  
+      iJax = 52
+      iJax = 32
+      iGasJac = 6
+
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+  
+      iJax = 30
+      iJax = 20
+      iJax = 10
+      iJax = 4
+      iJax = 5
+      iGasJac = 1
+
+      !! *************************
+      !! *************************
+      !! *************************
+  
+      !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+      !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+      !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+!      iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+!      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+      !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+      !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+      !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
+  
+      iJax2 = iJax+5    !!! can alter this to do dQ for many adjacent layers
+      iJax2 = iJax+0    !!! can alter this to do dQ for many adjacent layers
+! ************************************************************************
 
 cjacob
 c get actual profiles for the current gas
@@ -3197,7 +3282,20 @@ c      Do iInt = 1,80
 c        print *,iInt,raaTemp(90,iInt)
 c      end do
 c      call dostopmesg('stop in Set_Ref_Current_Profs$')
-      
+
+      DO iInt=1,iaNumLayer(iAtm)      
+!       print *,iInt,iaaRadLayer(iAtm,iInt)
+        IF (iaaRadLayer(iAtm,iInt) .EQ. iJax) THEN
+          iX = iInt
+!          print *,'A',iInt,iaaRadLayer(iAtm,iInt),iJax
+        END IF
+        IF (iaaRadLayer(iAtm,iInt) .EQ. iJax2) THEN
+          iX2 = iInt
+!          print *,'B',iInt,iaaRadLayer(iAtm,iInt),iJax2
+        END IF
+        END DO
+!      print *,'iJax,iJax2,iX,iX2 = ',iJax,iJax2,iX,iX2
+
       DO iInt=1,kProfLayer
         raTAmt(iInt)          = raaAmt(iInt,iGas)
         raTTemp(iInt)         = raaTemp(iInt,iGas)
@@ -3274,6 +3372,48 @@ c [fc,qc] = quickconvolve(w,jac,0.25,0.25);
 c pcolor(fc,1:iL,qc(:,(1:iL)+iL*0)'); shading flat; colorbar  %% Q jacobian
 c pcolor(fc,1:iL,qc(:,(1:iL)+iL*1)'); shading flat; colorbar  %% T jacobian
 c pcolor(fc,1:iL,qc(:,(1:iL)+iL*2)'); shading flat; colorbar  %% WGT fcn
+
+      ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+      !c jacob test amount jacobian, new
+      !c jacob test amount jacobian, new
+      !c jacob test amount jacobian, new
+      !    depending on kJacobOutput (-1,2 for dr/dq/dBT/dq) and (0,1 for q dr/dq, q dBT/dq)
+      !    this varies rAdjust_rDerivAmt so that    rUseDQ = constant for each layer, so dQ/Q   varies layer by layer for the layers iJax..iJax2    if kJacobOutput = -1,2  dr/dq,     dBT/dq
+      !                                             dQ/Q = constant for each layer,   so rUseDQ varies layer by layer for the layers iJax..iJax2    if kJacobOutput = 0,1   q dr/dq, q dBT/dq
+      !
+                IF ((iInt .GE. iJax) .AND. (iInt .LE. iJax2) .AND. (iaGases(iGas) .EQ. iGasJac)) THEN
+
+                  IF (dq_Const_between_layers .LT. 0) THEN
+                    !! dR/dq or dBT/dq
+                    IF (iStartKeepTrack .LT. 0) THEN
+                      iStartKeepTrack = +1
+                      rDQ_Track = raaAmt(iInt,iGas)*rDerivAmt
+                      rAdjust_rDerivAmt = 1.0
+                    ELSEIF (iStartKeepTrack .GT. 0) THEN
+                      rJunk = raaAmt(iInt,iGas)*rDerivAmt
+                      rAdjust_rDerivAmt = rDQ_Track/rJunk
+                    END IF
+                  ELSE
+                    !! q dR/dq or q dBT/dq
+                    rAdjust_rDerivAmt = 1.0
+                  END IF
+
+                  rUseDQ               = rDerivAmt * rAdjust_rDerivAmt
+                  raTAmt(iInt)         = raaAmt(iInt,iGas) * (1.0+rUseDQ)
+                  raTPartPress(iInt)   = raaPartPress(iInt,iGas) * (1.0+rUseDQ)
+                  raNumberDensity(iInt) = raTPress(iInt)*kAtm2mb*100.0/(kBoltzmann * 
+     $                              raTTemp(iInt))*1e-6
+                  rDQ_Track_Cumulative = rDQ_Track_Cumulative + raaAmt(iInt,iGas) * rUseDQ
+
+                  !!! recall kMaxLayer = 100 so we look 001-100 ..... but the atmosphere is eg from 1013 mb so we have iNumLayer = 97 and the radiating layers are (4,5,6 ... 100)
+                  !!!    so when we read in the 97 layer jacobins, eg here index iInt = 6 will correspond to radiating layer 3, so the dq here is for J3 of 97
+                  write(kStdErr,'(A,I3.3,1X,A,I3.3,A,1X,I3.3,A,1X,4(ES12.5))') 
+     &               'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101): ', 
+     &               iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, 
+     &               '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
+                END IF
+
+      ! ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
       END DO
 
@@ -3461,7 +3601,7 @@ c raaPrBdry = pressure start/stop
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
       REAL rakSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm)
-      CHARACTER*80 caEmissivity(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm)
 c rakSolarAngle = solar angles for the atmospheres
 c rakThermalAngle=thermal diffusive angle
 c iakthermal,iaksolar = turn on/off solar and thermal
@@ -3750,7 +3890,7 @@ c raaPrBdry = pressure start/stop
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
       REAL rakSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm)
-      CHARACTER*80 caEmissivity(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm)
 c rakSolarAngle = solar angles for the atmospheres
 c rakThermalAngle=thermal diffusive angle
 c iakthermal,iaksolar = turn on/off solar and thermal
@@ -3983,7 +4123,7 @@ c raaPrBdry = pressure start/stop
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
       REAL rakSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm)
-      CHARACTER*80 caEmissivity(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm)
 c rakSolarAngle = solar angles for the atmospheres
 c rakThermalAngle=thermal diffusive angle
 c iakthermal,iaksolar = turn on/off solar and thermal

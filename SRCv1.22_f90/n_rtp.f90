@@ -803,7 +803,7 @@ CONTAINS
       write(kStdErr,'(A,I4,3(F12.5))') 'ctype2 cfrac2 cngwat2 cfrac12 = ',ctype2,cfrac2,cngwat2, cfrac12
       write(kStdErr,'(A,I4,A)') 'Could not find a match between ctype2 = ',ctype2,' and iaNML_Ctype, which we have as'
       DO iI = 1,iNclouds_RTPX
-        write(kStdErr,'(I2,I4)'),iI,iaNML_Ctype(iI)
+        write(kStdErr,'(I2,I4)') iI,iaNML_Ctype(iI)
       END DO
       CALL DoStop
     END IF
@@ -1951,10 +1951,10 @@ CONTAINS
 
 ! local variables : all copied from ftest1.f (Howard Motteler's example)
     integer :: i,j,k,iG,upwell,iOKscanang,iOKzobs,iOKsatzen
-    REAL :: raHeight(kProfLayer+1),raThickness(kProfLayer),pobs,pobs1,pTemp,rSURFaltitude
+    REAL :: raHeight(kProfLayer+1),raThickness(kProfLayer),pobs,pobs1,pTemp,rSURFaltitude,rKLMThermalAngle
     REAL :: r1,rEms,rAngleX,rAngleY
     INTEGER*4 :: i4CTYPE1,i4CTYPE2,iNclouds_RTP_black
-    CHARACTER*50 FMT
+    CHARACTER*50 FMT,FMTX
     
     integer :: rtpopen, rtpread, rtpwrite, rtpclose
     record /RTPHEAD/ head
@@ -2413,7 +2413,7 @@ CONTAINS
 ! use the solar on/off, thermal on/off etc.
 ! sun is only on if 0 < prof%solzen < 90
 ! rakSolarAngle(iC) = abs(prof%sunang)   !!!RTP v 097-
-    rakSolarAngle(iC) = prof%solzen          !!!RTP v 098+
+    rakSolarAngle(iC) = prof%solzen      !!!RTP v 098+
     IF (is_badnum(prof%solzen)) THEN    
       write(kStdErr,*) 'prof.solzen in rtp = ',prof%solzen
       CALL DoStop
@@ -2427,17 +2427,49 @@ CONTAINS
     ELSE
       iakSolar(iC) = -1
     END IF
+
+    !!!! defaults
     raKSolarRefl(iC) = -1.0
     iaKThermal(iC)   = 0
     raKThermalAngle(iC) = -1.0
 
-!      write(kStdErr,*) 'kSetThermalAngle = ',kSetThermalAngle,iaaOverrideDefault(2,4),kThermalAngle
+    FMTX = '(A,3(I3,1X),F12.5)'
+    write(kStdErr,FMTX) &
+         'in radnce4rtp : posn(A) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
           
 !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
+!!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 = acos(3/5) << DEFAULT >>
+!!!           this can be controlled by kThermalAngle, either in nm_params for kRTP = +1
+!!!                                                   or rakThermalAngle() for kRTP = 0,-1
+!!!           so in nm_params : set iaaOverride(2,4) = 1, kThermalAngle = 50.0 and that works!!!
+
+    IF (abs(kThermalAngle - (-1)) < 0.0000000001) THEN
+      rKLMThermalAngle = acos(3.0/5.0)*180.0/kPi    
+    ELSE
+      rKLMThermalAngle = kThermalAngle
+    ENDIF
+    print *,'rKLMThermalAngle = ',rKLMThermalAngle
+
     raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
-    IF (iaaOverrideDefault(2,4) == 1) THEN
+    IF ((iaaOverrideDefault(2,4) == 1) .OR. (iaaOverrideDefault(2,4) == 2)) THEN
       kThermalAngle = abs(kThermalAngle)
+      !! new Jan 2026
+      kThermalAngle = rKLMThermalAngle
+      raKThermalAngle(iC) = rKLMThermalAngle
     END IF
+
+    !!! new jan 2026, to make sure we have constant acos(3/5) background thermal angle
+    IF ((iaaOverrideDefault(2,3) == 0) .AND. (iaaOverrideDefault(2,4) == 1)) THEN
+      kSetThermalAngle = +1
+      kThermalAngle    = rKLMThermalAngle
+      iaKThermal(iC)   = +1
+      raKThermalAngle(iC) = +1
+    END IF
+
+    write(kStdErr,FMTX) &
+         'in radnce4rtp : posn(B) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
     IF ((iaaOverrideDefault(2,4) == 1) .AND. (iaaOverrideDefault(2,3) == 10)) THEN
       kThermalAngle = abs(kThermalAngle)
@@ -2452,6 +2484,10 @@ CONTAINS
       write(kStdErr,*)  'setting kThermalAngle = p.satzen = ',kThermalAngle
       write(kStdErr,*)  '  as we are doing Nick Nalli ocean approx for refl them'
     END IF
+
+    write(kStdErr,FMTX) &
+         'in radnce4rtp : posn(C) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
     IF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
       write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
@@ -2472,6 +2508,13 @@ CONTAINS
       kSetThermalAngle = +2      ! use accurate angles lower down in atm, linear in tau temp variation, 3 angle calc
       iaKThermal(iC) = kThermal  ! this is new June 20, 2020
     END IF
+
+    write(kStdErr,FMTX) &
+      'in radnce4rtp : posn(D) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+
+!    print *,raKThermalAngle(iC)
+!    call dostop
 
     iakThermalJacob(iC) = 1
     ! use the solar on/off, thermal on/off etc.
@@ -2495,7 +2538,11 @@ CONTAINS
     kThermalAngle = raKThermalAngle(iC)
     kThermalJacob = iakThermalJacob(iC)
 
-    FMT = '(A,4(I3,1X),F8.3)'
+    write(kStdErr,FMTX) &
+      'in radnce4rtp : posn(E) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+
+    FMT = '(A,4(I3,1X),F12.5)'
     write(kStdWarn,FMT) '(1) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',&
       kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
 
@@ -2515,7 +2562,11 @@ CONTAINS
       END IF
     END IF
 
-    FMT = '(A,4(I3,1X),F8.3)'
+    write(kStdErr,FMTX) &
+      'in radnce4rtp : posn(F) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+
+    FMT = '(A,4(I3,1X),F12.5)'
     write(kStdWarn,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',&
       kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle
 !    write(kStdErr,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ', &
@@ -2549,6 +2600,10 @@ CONTAINS
       END IF
     END IF
 
+    write(kStdErr,FMTX) &
+         'in radnce4rtp : posn(G) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+
     IF (iDirection < 0) THEN
       IF ((kWhichScatterCode == 2) .OR. (kWhichScatterCode == 4)) THEN
         ! set to nonsense values for uplooking instrument RTSPEC SCAT
@@ -2577,6 +2632,10 @@ CONTAINS
         kThermalJacob = -1
       END IF
     END IF
+
+    write(kStdErr,FMTX) &
+      'in radnce4rtp : posn(H) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
 ! So if {\sf iakThermal(iI) = 0}, then {\sf rakThermalAngle(iI)} should be used
 ! with care.  If it is set at a negative value $x$, then for the upper
@@ -3354,18 +3413,18 @@ CONTAINS
     IF (iCO2ppm < 0) THEN
       IF (kPlanet == 3 .AND. (prof.co2ppm >= 350 .AND. prof.co2ppm <= 450)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') &
+        write(kStdWarn,'(A,F12.5,A)') &
           'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)')  &
+        write(kStdErr,'(A,F12.5,A)')  &
           'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSEIF (kPlanet == 4 .AND. (prof.co2ppm >= 0.90*1e6 .AND. prof.co2ppm <= 0.99*1e6)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') &
+        write(kStdWarn,'(A,F12.5,A)') &
           'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)')  &
+        write(kStdErr,'(A,F12.5,A)')  &
           'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof.co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
@@ -4040,25 +4099,27 @@ CONTAINS
     IF (iCO2ppm < 0) THEN
       IF (kPlanet == 3 .AND. (prof%co2ppm >= 350 .AND. prof%co2ppm <= 450)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') &
+        write(kStdWarn,'(A,F12.5,A)') &
           'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)') &
+        write(kStdErr,'(A,F12.5,A)') &
           'CO2 profile in rtp file : Planet Earth : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSEIF (kPlanet == 4 .AND. (prof%co2ppm >= 0.90*1e6 .AND. prof%co2ppm <= 0.99*1e6)) THEN
         iCO2ppm = +11   !!! ppmv for mean trop-strat CO2 mix ratio
-        write(kStdWarn,'(A,F8.3,A)') 'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
-        write(kStdErr,'(A,F8.3,A)')  'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
+        write(kStdWarn,'(A,F12.5,A)') &
+          'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
+        write(kStdErr,'(A,F12.5,A)')  &
+          'CO2 profile in rtp file : Planet Mars : CO2 colavg ppm is set in rtp file',prof%co2ppm,' ppmv'
         iGasInRTPFile = iGasInRTPFile + 1
         head.gunit(iGasInRTPFile) = 10
         head.glist(iGasInRTPFile) = 2
       ELSE
         write(kStdWarn,'(A,I3,A)') &
-          'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+         'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
         write(kStdErr,'(A,I3,A)')  &
-          'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
+         'CO2 profile in rtp file : did not find CO2 in h.glist nor p.co2ppm .. use Standard Profile which is ',kCO2ppmv,' ppmv'
       ENDIF
     END IF
 

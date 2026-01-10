@@ -100,7 +100,7 @@ c iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
       INTEGER iakThermal(kMaxAtm),iaSetThermalAngle(kMaxAtm)
       INTEGER iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -140,7 +140,7 @@ c caaaNewChunks  tells the name of the files associated with the chunks
 c iNewIn         is just a variable that tells us if new gas to be used
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore)
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT),iNewIn
-      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT)
+      CHARACTER*120 caaaNewChunks(kGasStore,kNumkCompT)
 c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
 c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
@@ -148,7 +148,7 @@ c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by B
 c raAltComprDirsScale tells the scaling (eg if you claim the current default CO2 databse is 370 ppm but you made LBLRTM
 c                     databse using 400 ppm, then scaling is 370/ppm so that refprof can be correctly used)
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
-      CHARACTER*80 caaAltComprDirs(kGasStore)
+      CHARACTER*120 caaAltComprDirs(kGasStore)
       REAL          rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 c this is for nonLTE
@@ -167,8 +167,8 @@ c iChunk_DoNLTE    tells if for the overall chunk, need to do NLTE
 c iSetBloat        tells us if we need to "bloat" up the resolution, and what 
 c                  files to store things to 
 c the daaXBloat are matrices, at high resolution, done if iSetBloat > 0
-      CHARACTER*80 caPlanckUAfile,caOutUAfile
-      CHARACTER*80 caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
+      CHARACTER*120 caPlanckUAfile,caOutUAfile
+      CHARACTER*120 caPlanckBloatFile,caOutBloatFile,caOutUABloatFile
       REAL  raaRestOfLTEGases(kMaxPts,kProfLayer)
       REAL  raaCO2_LTE(kMaxPts,kProfLayer)
       DOUBLE PRECISION daaSumNLTEGasAbCoeffBloat(kBloatPts,kProfLayer)
@@ -183,7 +183,7 @@ c the daaXBloat are matrices, at high resolution, done if iSetBloat > 0
       DOUBLE PRECISION daaSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
       INTEGER iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore)
       INTEGER iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT),iLTEIn
-      CHARACTER*80 caaStrongLines(kGasStore)
+      CHARACTER*120 caaStrongLines(kGasStore)
 c iaNLTEBands       tells for each gas, how many are the NON LTE bands bad boys
 c iaNLTEStart     tells for each gas, lowest layer in NONLTE for minor bands
 c iaNLTEStart2350 for each gas, lowest layer in NONLTE for strongest band
@@ -191,11 +191,11 @@ c caaaNLTEBands tells the name of the files containing the line parameters
 c caaNLTETemp   tells the name of the files containing the nonLTE temps
       INTEGER iaNLTEBands(kGasStore)
       INTEGER iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-      CHARACTER*80 caaaNLTEBands(kGasStore,kNumkCompT) 
-      CHARACTER*80 caaNLTETemp(kGasStore) 
+      CHARACTER*120 caaaNLTEBands(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaNLTETemp(kGasStore) 
 c if we do NLTE above the kCARTA database (p < 0.005 mb), we need the mixing
 c ratio profiles from GENLN2
-      CHARACTER*80 caaUpperMixRatio(kGasStore) 
+      CHARACTER*120 caaUpperMixRatio(kGasStore) 
 c tells the nonscattering code, at which layer to start NONLTE rad transfer
       INTEGER iNLTEStart 
 c are we playing with funny COUSIN stuff???????
@@ -243,19 +243,19 @@ c raaaColDQ has the abs coeffs for current freq block for each jacobian gas
       REAL raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
 
 c caDriverName is the name of the driver file to be processed
-      CHARACTER*80 caDriverName
+      CHARACTER*120 caDriverName
 c caOutName is the name of the unformatted output file name
 c integer iOutFileName tells whether or not there is a driver name, or
 c dump output to Unit 6
       INTEGER iOutFileName
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c caJacobFile  is the name of the unformatted output file name for Jacobians
 c caJacobFile2 is the name of the unformatted output file name for colJacobians
-      CHARACTER*80 caJacobFile,caJacobFile2
+      CHARACTER*120 caJacobFile,caJacobFile2
 c caFluxFile is the name of the unformatted output file name for fluxes
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c caPlanckFile is the name of the unformatted output file name for planckes
-      CHARACTER*80 caPlanckFile
+      CHARACTER*120 caPlanckFile
 c this is used when calling DISORT
       INTEGER iDoFlux
 
@@ -266,7 +266,7 @@ c caComment is the comment the user puts into *OUTPUT
 
 c the rest of the variables have to do with reading in the reference profile
 c and the vertical temperature profile
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
 c this sets the vertical temp profile, to be checked for all gases
       REAL raVertTemp(kProfLayer)
       INTEGER iVertTempSet
@@ -373,7 +373,7 @@ c these are for Matlab style kCOmp Corner Weights
 c these are actually used
       INTEGER iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
       INTEGER iFr,ID,OMP_GET_THREAD_NUM
-      INTEGER DoOutputLayer,iJax,iOutNum,iCO2,iMicroSoft
+      INTEGER DoOutputLayer,iJax,iJax2,iGasJac,iOutNum,iCO2,iMicroSoft
       INTEGER IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 c these are temporary dumy variables
@@ -676,6 +676,14 @@ c set the frequency range for the current file block
         raFreq(iInt) = raBlock(iFileID)+(iInt-1)*real(kaFrStep(iTag))
       END DO
 
+      rDerivAmt  = 0.1
+      rDerivTemp = 0.1
+      rDerivAmt  = 0.01
+      rDerivTemp = 0.01
+      iJax = 5
+      iJax2 = 5
+      iGasJac = 1
+
       iGas = 1
       CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag,
      $                       iDoAdd,iErr)
@@ -683,12 +691,9 @@ c set the frequency range for the current file block
         write(kStdErr,*) 'need other than gid = 1 to set kComp Interp Wgts'
         CALL DoStop
       ELSE
-        rDerivAmt  = 0.1
-        rDerivTemp = 0.1
-        iJax = 5
         !! set up the ref and current profiles
         CALL Set_Ref_Current_Profs(
-     $    iJax,rDerivTemp,rDerivAmt,
+     $    iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt,
      $    iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress,
      $                   raaAmt,raaTemp,raaPress,raaPartPress,
      $                   raRAmt,raRTemp,raRPress,raRPartPress,
@@ -837,13 +842,9 @@ c for present frequency block
         IF (iDoAdd .GT. 0) THEN
           ! edit Set_Ref_Current_Profs, 
           ! for testing finite difference jacs if needed
-          iJax = 12  !! for JACK CO
-          iJax = 7   !! for STROW CO2
-          rDerivAmt  = 0.1
-          rDerivTemp = 0.1
           !! set up the ref and current profiles
           CALL Set_Ref_Current_Profs(
-     $      iJax,rDerivTemp,rDerivAmt,
+     $      iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt,
      $      iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress,
      $                   raaAmt,raaTemp,raaPress,raaPartPress,
      $                   raRAmt,raRTemp,raRPress,raRPartPress,

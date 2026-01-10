@@ -19,7 +19,7 @@ c for me in the RTP file!
 c output
       REAL rf1,rf2           !the low and high end wavenumbers
 c input
-      CHARACTER*80 caPFname !the RTP file to peruse
+      CHARACTER*120 caPFname !the RTP file to peruse
       INTEGER iRTP           !which profile to read
       INTEGER inpath
 c local variables for RTP file
@@ -30,7 +30,7 @@ c local variables for RTP file
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
 
 c other local variables
       integer i
@@ -158,7 +158,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raCprtop(kMaxClouds), raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds), raCpsize(kMaxClouds)
       INTEGER iaCtype(kMaxClouds),iNclouds_RTP,iaNML_Ctype(kMaxClouds)
-      CHARACTER*80 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm) 
       INTEGER iaMPSetForRad(kMaxAtm),iMPSetForRadRTP
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -174,7 +174,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       INTEGER iRTP
-      CHARACTER*80 caPFName
+      CHARACTER*120 caPFName
 
       INTEGER iI
 
@@ -268,7 +268,7 @@ c this subroutine deals with the 'PTHFIL' keyword
       include '../INCLUDE/kcarta.param'
 
 c iAFGLProf  = which AFGL prof to use? 1 .. 6
-c caPFName = character*80 profile name
+c caPFName = character*120 profile name
 c raaAmt/Temp/Press/PartPress = current gas profile parameters
 c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
 c iaGases   = array that tracks which gas ID's should be read in
@@ -288,14 +288,14 @@ c iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4)
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
 
 c local variables
       CHARACTER*7 caWord
       INTEGER iNumLinesRead,iaDispGasID(12),iCount
       INTEGER iGenln4,iL,iLBLDIS
       REAL rP,rPP
-      CHARACTER*80 caStr
+      CHARACTER*120 caStr
       CHARACTER*160 caStr160
 
       iKnowTP = -1
@@ -414,11 +414,11 @@ c notice here that gA == first gas in the MOLGAS, usually water
       !!!! this is for LBLDIS =======================<<<<<<< >>>>=============
       !!!! pressures in mb, temps in K, heights in km, gas amounts in mol/cm2
       !!!! only dump gases(1:7) for "var" gases, gas 22 (N2) as the broadener
- 9879   FORMAT(9(E14.8,' '))
- 9878 FORMAT(8(E14.8,' '))
- 9877 FORMAT(7(E14.8,' '))
- 9876 FORMAT(6(E14.8,' '))
- 9872 FORMAT(2(E14.8,' '))
+ 9879 FORMAT(9(E15.8,' '))
+ 9878 FORMAT(8(E15.8,' '))
+ 9877 FORMAT(7(E15.8,' '))
+ 9876 FORMAT(6(E15.8,' '))
+ 9872 FORMAT(2(E15.8,' '))
 
       caStr='<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>
      $>>>>>>>>>>>'
@@ -519,9 +519,9 @@ c notice here that gA == first gas in the MOLGAS, usually water
       END DO
 
  5030 FORMAT(A160)
- 5040 FORMAT(A80)
- 5050 FORMAT(I3,' ',6(E11.5,' ')) 
- 5060 FORMAT(I3,' ',11(E11.5,' ')) 
+ 5040 FORMAT(A120)
+ 5050 FORMAT(I3,' ',6(E12.5,' ')) 
+ 5060 FORMAT(I3,' ',11(E12.5,' ')) 
 
       RETURN
       END
@@ -565,7 +565,7 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
 c for 100 layer clouds
       INTEGER iaCld100Read(3)
       REAL raaCld100Amt(kProfLayer,3)
@@ -580,7 +580,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
 
       fname(1:80) = caPFName(1:80)
 
@@ -669,7 +669,7 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
       REAL rCC, raCC(kProfLayer)
 
       REAL raaHeight(kProfLayer,kGasStore),MGC,delta1
@@ -702,7 +702,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
       logical isfinite
 
       MGC = kMGC
@@ -1105,7 +1105,7 @@ c first check to see if all required gases found in the user supplied profile
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3) 
  6000 FORMAT('Gas molecular ID ',I2,' not set from GASFIL or XSCFIL')
  5030 FORMAT(A130)
- 4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
+ 4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E12.5,' '))
 
 c now set raLayerHeight
       DO iFound = 1,kProfLayer
@@ -1191,7 +1191,7 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
 
       REAL raaHeight(kProfLayer,kGasStore),MGC,delta1
       REAL raH1(kProfLayer),raP1(kProfLayer+1)
@@ -1223,7 +1223,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
       logical isfinite
 
       MGC = kMGC
@@ -1614,7 +1614,7 @@ c first check to see if all required gases found in the user supplied profile
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3) 
  6000 FORMAT('Gas molecular ID ',I2,' not set from GASFIL or XSCFIL')
  5030 FORMAT(A130)
- 4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
+ 4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E12.5,' '))
 
 c now set raLayerHeight
       DO iFound = 1,kProfLayer
@@ -1698,7 +1698,7 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
 
       REAL raaHeight(kProfLayer,kGasStore),MGC,delta1
       REAL raH1(kProfLayer),raP1(kProfLayer+1)
@@ -1728,7 +1728,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
       logical isfinite
 
       MGC = kMGC
@@ -2088,7 +2088,7 @@ c first check to see if all required gases found in the user supplied profile
  4000 FORMAT('read in ',I4,' atm layers for gas ID ',I3) 
  6000 FORMAT('Gas molecular ID ',I2,' not set from GASFIL or XSCFIL')
  5030 FORMAT(A130)
- 4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
+ 4321 FORMAT('RTP info gID,#,rA/T/P/PP ',I3,' ',I3,' ',4(E12.5,' '))
 
 c now set raLayerHeight
       DO iFound = 1,kProfLayer
@@ -2191,7 +2191,7 @@ c raPressLevels are the actual pressure levels from the KLAYERS file
       INTEGER iNclouds_RTP     !!!tells how many clouds
       INTEGER iaNML_Ctype(kMaxClouds)
 
-      CHARACTER*80 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm) 
       INTEGER iaMPSetForRad(kMaxAtm)
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -2208,7 +2208,7 @@ c raPressLevels are the actual pressure levels from the KLAYERS file
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       REAL raSatAzimuth(kMaxAtm),raSolAzimuth(kMaxAtm),raWindSpeed(kMaxAtm)
       INTEGER iRTP     !!!tells which profile info, radiance info, to read
-      CHARACTER*80  caPFName !!!tells which profile 
+      CHARACTER*120  caPFName !!!tells which profile 
 
 c local variables
       CHARACTER*7 caWord
@@ -2232,7 +2232,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
       real rf1,rf2
       integer iI
       
@@ -3256,7 +3256,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       INTEGER iNatm
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -3827,8 +3827,8 @@ c local vars
  1081 FORMAT('negative or bad gas temp in PRFILE profile file')
  1082 FORMAT('negative or bad layer pressure in PRFILE profile file')
  1083 FORMAT('negative or bad gas partial press in PRFILE profile file')
- 4320 FORMAT('Orig  RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' ')) 
- 4321 FORMAT('Reset RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E10.5,' '))
+ 4320 FORMAT('Orig  RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E12.5,' ')) 
+ 4321 FORMAT('Reset RTP gID # rA/T/P/PP ',I3,' ',I3,' ',4(E12.5,' '))
 
       RETURN
       END
@@ -3893,7 +3893,7 @@ c   iNclouds_RTP   = how many clouds are claimed to be in the new .rtp file
       INTEGER iRTP,iProfileLayers,iNclouds_RTP,iBinOrAsc
       INTEGER iNclouds2, iNclouds3  ! added ESM
       INTEGER iaCloudScatType(kMaxCLouds)
-      CHARACTER*80 caPFname,caCloudPfname
+      CHARACTER*120 caPFname,caCloudPfname
       CHARACTER*120 caaCloudFile(kMaxClouds)
 c output params  -------------------------------------------------->
 c   kMaxClouds == 5
@@ -3930,7 +3930,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
       REAL cfrac1,cfrac2
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
       INTEGER iaCtype(kMaxClouds)
@@ -3961,7 +3961,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
 
       DO iI = 1,kMaxClouds
         caaCloudFileX(iI) = caaCloudFile(iI)
@@ -4506,9 +4506,9 @@ c now set the auxiliary info as in SetRTPCloud
       END DO
       write(kStdWarn,*) ' ---------------------------------------------'
 
- 222  FORMAT(A80) 
- 100  FORMAT('  ',I3,'    ',A1,'      ',I3,'      ',A80)
- 110  FORMAT('  ',I3,'    ',A1,'      ',I3,'       ',I3,'      ',I3,'   ',A80)
+ 222  FORMAT(A120) 
+ 100  FORMAT('  ',I3,'    ',A1,'      ',I3,'      ',A120)
+ 110  FORMAT('  ',I3,'    ',A1,'      ',I3,'       ',I3,'      ',I3,'   ',A120)
  333  CONTINUE
 
 c! added ESM
@@ -4552,7 +4552,7 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer status
       integer rchan
       character*1 mode
-      character*80 fname
+      character*120 fname
 
       MGC = kMGC
 

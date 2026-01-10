@@ -76,7 +76,7 @@ c        write(caStr,5) iInt
       END
 
 c************************************************************************
-c this subroutine conactenates two ca80 strings together
+c this subroutine conactenates two ca120 strings together
 c ca1 + ca2 = ca2       (storing the result in ca2)
       SUBROUTINE ConcatCA80(ca1,ca2)
 
@@ -84,7 +84,7 @@ c ca1 + ca2 = ca2       (storing the result in ca2)
 
       include '../INCLUDE/kcarta.param'
 
-      CHARACTER*80 ca1,ca2
+      CHARACTER*880 ca1,ca2
       INTEGER iGasID
 
 c local variables
@@ -112,6 +112,90 @@ c do some initializations
       END DO
 
       DO iI=1,80
+        ca2(iI:iI) = caSum(iI:iI)
+      END DO
+
+      RETURN
+      END
+c************************************************************************ 
+c this subroutine conactenates two ca120 strings together
+c ca1 + ca2 = ca2       (storing the result in ca2)
+      SUBROUTINE ConcatCA120(ca1,ca2)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+      CHARACTER*120 ca1,ca2
+      INTEGER iGasID
+
+c local variables
+      INTEGER iI,i1,i2,iJ,iLeftjust_lenstr
+      CHARACTER*120 caSum
+
+ccccc user supplied info
+c here give the directory path to where the reference profiles are
+c note we need all layers read in (kProfLayer >= kMaxLayer)
+
+c do some initializations
+      i1 = iLeftjust_lenstr(ca1,len(ca1))
+      i2 = iLeftjust_lenstr(ca2,len(ca1))
+
+      CALL blankstr(caSum,len(caSum))
+
+      DO iI=1,i1
+        caSum(iI:iI) = ca1(iI:iI)
+      END DO
+
+      iJ = i1+1
+      DO iI=1,i2
+        caSum(iJ:iJ) = ca2(iI:iI)
+        iJ = iJ + 1
+      END DO
+
+      DO iI=1,120
+        ca2(iI:iI) = caSum(iI:iI)
+      END DO
+
+      RETURN
+      END
+c************************************************************************ 
+c this subroutine conactenates two ca120 strings together
+c ca1 + ca2 = ca2       (storing the result in ca2)
+      SUBROUTINE ConcatCA160(ca1,ca2)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/kcarta.param'
+
+      CHARACTER*160 ca1,ca2
+      INTEGER iGasID
+
+c local variables
+      INTEGER iI,i1,i2,iJ,iLeftjust_lenstr
+      CHARACTER*160 caSum
+
+ccccc user supplied info
+c here give the directory path to where the reference profiles are
+c note we need all layers read in (kProfLayer >= kMaxLayer)
+
+c do some initializations
+      i1 = iLeftjust_lenstr(ca1,len(ca1))
+      i2 = iLeftjust_lenstr(ca2,len(ca1))
+
+      CALL blankstr(caSum,len(caSum))
+
+      DO iI=1,i1
+        caSum(iI:iI) = ca1(iI:iI)
+      END DO
+
+      iJ = i1+1
+      DO iI=1,i2
+        caSum(iJ:iJ) = ca2(iI:iI)
+        iJ = iJ + 1
+      END DO
+
+      DO iI=1,160
         ca2(iI:iI) = caSum(iI:iI)
       END DO
 
@@ -249,12 +333,12 @@ c iLowerOrUpper  = open lower atm AIRS (100 layer) file (-1)
 c                   or  upper atm AIRS (100 layer) file (+1)
 c iGasID         = current ID of gas to be processed
 c caFName        = name of file that contains reference profile
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       INTEGER iGasID,iLowerOrUpper
 
 c local variables
       CHARACTER*2 caString,caTemp
-      CHARACTER*80 caDir
+      CHARACTER*120 caDir
       INTEGER iInt,iLenDir,iLeftjust_lenstr
 c      CHARACTER*(*) adjustl
 
@@ -324,8 +408,8 @@ c now concatenate all this together in caFname
         ENDIF
       END IF
 
- 2000 FORMAT('lower atm 100 AIRS layer Reference datafile name is : ',/,A80)
- 2010 FORMAT('upper atm 100 AIRS layer Reference datafile name is : ',/,A80)
+ 2000 FORMAT('lower atm 100 AIRS layer Reference datafile name is : ',/,A120)
+ 2010 FORMAT('upper atm 100 AIRS layer Reference datafile name is : ',/,A120)
 
       RETURN
       END
@@ -865,7 +949,7 @@ c this subroutine gets the solar file name
 
       include '../INCLUDE/kcarta.param'
 
-      CHARACTER*80 fname
+      CHARACTER*120 fname
       REAL rFileStartFr
 
       CHARACTER*5 caString5,caTemp5
@@ -918,7 +1002,7 @@ c basically the same as GetSolarFileName
  
       include '../INCLUDE/kcarta.param' 
 
-      CHARACTER*80 caWeak,caWeakFr
+      CHARACTER*120 caWeak,caWeakFr
       REAL raWaves(kMaxPts)
       INTEGER iGasID
 
@@ -1002,7 +1086,7 @@ c output
 c local vars
       INTEGER iNumMystery,iIOUN,iErr,iFr
       REAL raXadj(kMaxPts),raYadj(kMaxPts)
-      CHARACTER*80 caMystery
+      CHARACTER*120 caMystery
 
       IF (iWhichGas .EQ. 0) THEN
         caMystery = '/asl/data/kcarta/KCARTADATA/General/mystery.dat'
@@ -1015,7 +1099,7 @@ c local vars
         CALL DoStop
       END IF
 
- 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80) 
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120) 
       iIOUN = kTempUnit 
       OPEN(UNIT=iIOUN,FILE=caMystery,STATUS='OLD',FORM='FORMATTED', 
      $    IOSTAT=IERR) 
@@ -1193,27 +1277,27 @@ c input
       CHARACTER*(*) caStr1,caStr2
 
 c local vars
-      CHARACTER*120 caStr1x,caStr2x,caStr1y,caStr2y,caJunk
+      CHARACTER*160 caStr1x,caStr2x,caStr1y,caStr2y,caJunk
       INTEGER iFind,iSizeStr1,iSizeStr2,i1,i2,iJunk
-      INTEGER iaFound(80)
+      INTEGER iaFound(160)
       
       iFind = -1
 
-      IF (len(caStr1) .GT. 120) THEN
-        write(kStdErr,*) 'len(caStr1) > 120'
+      IF (len(caStr1) .GT. 160) THEN
+        write(kStdErr,*) 'len(caStr1) > 160'
         CALL DoStop
       ELSE
-        DO i1 = 1,120
+        DO i1 = 1,160
           caStr1y(i1:i1) = ' '
 	END DO
 	caStr1y(1:len(caStr1)) = caStr1(1:len(caStr1))
       END IF
 
-      IF (len(caStr2) .GT. 120) THEN
-        write(kStdErr,*) 'len(caStr2) > 120'
+      IF (len(caStr2) .GT. 160) THEN
+        write(kStdErr,*) 'len(caStr2) > 160'
         CALL DoStop
       ELSE
-        DO i1 = 1,120
+        DO i1 = 1,160
           caStr2y(i1:i1) = ' '
 	END DO
 	caStr2y(1:len(caStr2)) = caStr2(1:len(caStr2))

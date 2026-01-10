@@ -65,7 +65,7 @@ c pressure, and then interpolated in temperature
 
 c these are to read in the original 100 layers AIRS ref profile for the gas
 c these are to read in the new kProfLayers ref profile for the gas
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       INTEGER iE
       REAL raOrig100A(kMaxLayer),raOrig100T(kMaxLayer) 
       REAL raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer) 

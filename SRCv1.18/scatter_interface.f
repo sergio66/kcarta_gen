@@ -77,7 +77,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -111,11 +111,11 @@ c this is to do with NLTE
       REAL raaUpperSumNLTEGasAbCoeff(kMaxPts,kProfLayer)
 
 c caJacobFile is the name of the unformatted output file name for Jacobians
-      CHARACTER*80 caJacobFile,caJacobFile2
+      CHARACTER*120 caJacobFile,caJacobFile2
 c caFluxFile is the name of the unformatted output file name for fluxes
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c caPlanckFile is the name of the unformatted output file name for planckes
-      CHARACTER*80 caPlanckFile
+      CHARACTER*120 caPlanckFile
 
       REAL raaAmt(kProfLayer,kGasStore)
       REAL raNumberDensity(kProfLayer)
@@ -809,7 +809,7 @@ c FracTop,rFracBot are the upper layer/lower layer fractions
       INTEGER iJacob,iaJacob(kMaxDQ)
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -867,7 +867,7 @@ c local variables
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
 
       INTEGER iaTable(kMaxClouds*kCloudLayers)
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       INTEGER iIn,iJ,iI,iG,iCloud,iScat,iIOUN,iF,iL
       REAL TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
       INTEGER iaRadLayer(kProfLayer)
@@ -1201,7 +1201,7 @@ c FracTop,rFracBot are the upper layer/lower layer fractions
       INTEGER iJacob,iaJacob(kMaxDQ)
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -1248,7 +1248,7 @@ c local variables
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
 
       INTEGER iaTable(kMaxClouds*kCloudLayers)
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       INTEGER iIn,iJ,iI,iCloud,iScat,iIOUN,iF,iL
       REAL TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
       INTEGER iaRadLayer(kProfLayer)

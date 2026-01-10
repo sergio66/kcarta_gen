@@ -42,6 +42,7 @@
 ########################################################################
 
 385_H12_default:
+	echo "making 385_H12_default"
 	make -f Makefile datafix385_H2012
 	make -f Makefile
 	make -f Makefile scat		

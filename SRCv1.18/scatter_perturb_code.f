@@ -68,7 +68,7 @@ c TEMP        = tempertaure profile in terms of pressure levels
       INTEGER iNp,iaOp(kPathsOut),iOutNum,ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL Temp(MAXNZ)
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
@@ -259,7 +259,7 @@ c                   user specified value if positive
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
       INTEGER iProfileLayers
@@ -781,7 +781,7 @@ c                   user specified value if positive
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer)
       INTEGER iProfileLayers

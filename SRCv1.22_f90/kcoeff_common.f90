@@ -1058,9 +1058,9 @@ CONTAINS
       IF (iDoDQ >= -1) THEN
         IF ((kActualJacs == -1) .OR. (kActualJacs == 20)) THEN
           write(kStdWarn,'(A)') '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'	
-	  write(kStdWarn,'(A)') '<<<<<< <<<<<< <<<<<<  oops not stopping but please fix the 0.0 multiplier for using N2/WV jac>>>>>> >>>>>> >>>>>>'
+	  write(kStdWarn,'(A)') '<<<<<< <<<<<<  oops not stopping but please fix the 0.0 multiplier for using N2/WV jac>>>>>> >>>>>>'
           write(kStdErr,'(A)')  '   including N2/WV continuum d/dq for gasID 1 in Jacob list using N2/WV jac'
-	  write(kStdErr,'(A)')  '<<<<<< <<<<<< <<<<<< oops not stopping but please fix the 0.0 multiplier for using N2/WV jac >>>>>> >>>>>> >>>>>>'
+	  write(kStdErr,'(A)')  '<<<<<< <<<<<< oops not stopping but please fix the 0.0 multiplier for using N2/WV jac >>>>>> >>>>>>'
 
           ! the gas amount jacobians
           DO iI=1,kProfLayer

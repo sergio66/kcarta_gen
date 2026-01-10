@@ -61,7 +61,7 @@ c      END DO
       IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND.
      $    (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) THEN
         !! pressures decreasing with index; use CO2 temps and pressures
-        DO iI = kProfLayer-iProfileLayers+1,kProfLayer
+        DO iI = kProfLayer-iProfileLayers+1,kProfLayer-2
           iJ = iI-iOffSet
           raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
           logP(iJ) = log(raP(iJ))
@@ -262,7 +262,7 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
 
 c local variables for our klayers files
 c READ (caStr,*) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -354,7 +354,7 @@ c so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
           iErr=1
           WRITE(kStdErr,1070) iErrIO, caPfname
  1070     FORMAT('ERROR! number ',I5,' opening PRFILE path profile file'
-     $            ,/,A80)
+     $            ,/,A160)
           CALL DoSTOP
       ENDIF
       kProfileUnitOpen=1
@@ -624,7 +624,7 @@ c about layer thicknesses and presslevels
       include '../INCLUDE/KCARTA_database.param'
 
 c parameters
-      CHARACTER*80 caPFname
+      CHARACTER*120 caPFname
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
 
 c local variables      
@@ -664,7 +664,7 @@ c local variables
       ENDIF
       kProfileUnitOpen=1
  1070 FORMAT('ERROR! number ',I5,' opening PRFILE path profile file'
-     $            ,/,A80)
+     $            ,/,A160)
 
  25   FORMAT(F8.3,A2,F8.3) 
       iNumP = 0
@@ -932,7 +932,7 @@ c caFName   = name of file that has the profile
 c iNlay     = number of layers that are read in
 c raProA/T/P/PP = profile amout, temperature,pressure,partial pressure
 c iErrOut   = error count (usually associated with file I/O)
-       CHARACTER*80 caFname
+       CHARACTER*120 caFname
        INTEGER iNlayIn,iErrOut 
        REAL raProA(*),raProT(*)
        REAL raProP(*),raProPP(*)
@@ -1193,7 +1193,7 @@ c do initializations ...
 c      DO iInt = 1,10
 c        write(*,6000) caaMixFileLines(iInt)
 c      END DO
-c 6000 FORMAT(A80)
+c 6000 FORMAT(A160)
 
 c remember there are three possibilities when defining a mixed path set
 c  (a) iN  list of weights       ... individually define weights
@@ -1364,7 +1364,7 @@ c increment iLinesStop by 1 each time this loop is called
 
       iLines = iLinesStop+1
 
- 6000 FORMAT(I3,' ',A80)
+ 6000 FORMAT(I3,' ',A160)
       RETURN
       END
 
@@ -1399,7 +1399,7 @@ c iNumLayers = how many layers this profile set puts in (<= kProfLayers)
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore),raLayerHeight(kProfLayer)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
 
 c local variables for our klayers files
 c READ (caStr,*) iIDgas,rAmt,rT,rdT,rP,rdP,rPP,rH
@@ -1416,7 +1416,7 @@ c extra variables for GENLN4 "layers" files
 c READ (caStr,*) iMfil,iIDgas,iISO,rAmt,rT,rTU,rTL,rP,rPT,rPB,rPP,rV
       REAL rTU,rTL,rPT,rPB,rV  !!upper,lower level temp and pressure, velocity
       INTEGER iMFil,iISO,iInFile,iPathOffset
-      CHARACTER*80 caLine
+      CHARACTER*120 caLine
       CHARACTER*6 ex,path
       CHARACTER*9 heights,gas,gas2,gas3
       CHARACTER*4 star,star2,km,mb
@@ -1513,7 +1513,7 @@ c so iaInputOrder would  be 1,2,22,51,-1,-1,-1 ...
           iErr=1
           WRITE(kStdErr,1070) iErrIO, caPfname
  1070     FORMAT('ERROR! number ',I5,' opening PRFILE path profile file'
-     $            ,/,A80)
+     $            ,/,A160)
           CALL DoSTOP
       ENDIF
       kProfileUnitOpen=1
@@ -1831,7 +1831,7 @@ c about layer thicknesses and presslevels
       include '../INCLUDE/KCARTA_database.param'
 
 c parameters
-      CHARACTER*80 caPFname
+      CHARACTER*120 caPFname
       REAL raPressLevels(kProfLayer+1),raThickness(kProfLayer)
       INTEGER iPathOffSet
 
@@ -1872,7 +1872,7 @@ c local variables
       ENDIF
       kProfileUnitOpen=1
  1070 FORMAT('ERROR! number ',I5,' opening PRFILE path profile file'
-     $            ,/,A80)
+     $            ,/,A160)
 
  25   FORMAT(F8.3,A2,F8.3) 
       iNumP = iPathOffSet
@@ -2113,7 +2113,7 @@ c
       include '../INCLUDE/KCARTA_database.param'
 
 c input
-      CHARACTER*80 caPfName
+      CHARACTER*120 caPfName
       INTEGER iNpath,iRTP
       INTEGER iaGases(kMaxGas)
 c output
@@ -2738,7 +2738,7 @@ c output var
 
 c local vars
       INTEGER i1,i2,iLenX,iLen,iLay,iX, iioun, ierr  ! added ESM iioun, ierr
-      CHARACTER*120 caFname0,caFname,cnameX
+      CHARACTER*160 caFname0,caFname,cnameX
       CHARACTER c1,c2
       CHARACTER*2 c12
       CHARACTER*100 caLine
@@ -2747,9 +2747,9 @@ c local vars
         caFname0(iLen:iLen) = ' '
       END DO
       
-      caFname0(1:80) = kOrigRefPath
+      caFname0(1:160) = kOrigRefPath
 
-      iLen = 120
+      iLen = 160
  100  CONTINUE
       IF (caFname0(iLen:iLen) .EQ. ' ') THEN
         iLen = iLen - 1
@@ -2811,7 +2811,7 @@ c local vars
       END DO
       write(kStdWarn,*) 'need to add on AFGL for ',iIDgas
 
- 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)  
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A160)  
       iIOUN = kTempUnit  
       OPEN(UNIT=iIOUN,FILE=caFname,STATUS='OLD',FORM='FORMATTED',  
      $    IOSTAT=IERR)  
@@ -3069,7 +3069,7 @@ c output var
 
 c local vars
       INTEGER i1,i2,iLenX,iLen,iLay,iX, iioun, ierr  ! added ESM iioun, ierr
-      CHARACTER*80 caFname0,caFname,cnameX
+      CHARACTER*160 caFname0,caFname,cnameX
       CHARACTER c1,c2
       CHARACTER*2 c12
       CHARACTER*100 caLine
@@ -3078,7 +3078,7 @@ c local vars
 c      caFname0 = kUSStd
       caFname0 = kOrigRefPath
 
-      iLen = 80
+      iLen = 160
  100  CONTINUE
       IF (caFname0(iLen:iLen) .EQ. ' ') THEN
         iLen = iLen - 1
@@ -3087,7 +3087,7 @@ c      caFname0 = kUSStd
 
       cnameX = 'us_std_gas_'
       cnameX = 'refgas'
-      iLenX = 80
+      iLenX = 160
  200  CONTINUE
       IF (cnameX(iLenX:iLenX) .EQ. ' ') THEN
         iLenX = iLenX - 1
@@ -3113,7 +3113,7 @@ c      caFname0 = '/home/sergio/KCARTADATA/USSTD/us_std_gas_'
         c2 = CHAR(i2+48)
         c12 = c2//c1
       END IF
-      DO i1 = 1,80
+      DO i1 = 1,160
         caFname(i1:i1) = ' '
       END DO
       DO i1 = 1,iLen
@@ -3142,13 +3142,13 @@ c       write(kStdWarn,*) 'need to add on US Std for ',iIDgas, ' from ',caFname
         write(kStdErr,*) 'need to add on US Std for ',iIDgas,' LBLRTM set raQ=0, reset and add profile'
       END IF
 
- 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)  
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A160)  
       iIOUN = kTempUnit  
       OPEN(UNIT=iIOUN,FILE=caFname,STATUS='OLD',FORM='FORMATTED',  
      $    IOSTAT=IERR)  
       IF (IERR .NE. 0) THEN  
         WRITE(kStdErr,*) 'In subroutine get_us_std have file I/O error'  
-        write(kStdErr,*) 'reference path = ',caFname0
+        write(kStdErr,'(A,A)') 'reference path = ',caFname0
         write(kStdErr,*) 'gasID = ',iIDGas
         WRITE(kStdErr,1010) IERR, caFname
         CALL DoSTOP  

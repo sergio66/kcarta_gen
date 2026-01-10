@@ -139,7 +139,9 @@ FLAGS=$($(STYLE)_FLAGS)
 LIBS  = -lblas -qmkl
 LIBS  = -L ../LIB -lblas -qmkl
 #LIBS  = -lblas 
-#LIBS  = -L ../LIB -lblas 
+#LIBS  = -L ../LIB -lblas
+
+FDOUBLE = -double-size 64
 FDOUBLE = -r8
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

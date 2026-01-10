@@ -624,7 +624,29 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 ----- 
-
+01/09/26        Modiifield n_rtp.f90, subr radnce4rtp to have
+                IF (abs(kThermalAngle - (-1)) < 0.0000000001) THEN
+                  rKLMThermalAngle = acos(3.0/5.0)*180.0/kPi    
+                ELSE
+                  rKLMThermalAngle = kThermalAngle
+                ENDIF
+                raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
+                IF ((iaaOverrideDefault(2,4) == 1) .OR. (iaaOverrideDefault(2,4) == 2)) THEN
+                  kThermalAngle = abs(kThermalAngle)
+                  !! new Jan 2026
+                  kThermalAngle = rKLMThermalAngle
+                  raKThermalAngle(iC) = rKLMThermalAngle
+                END IF
+          
+                !!! new jan 2026, to make sure we have constant acos(3/5) background thermal angle
+                IF ((iaaOverrideDefault(2,3) == 0) .AND. (iaaOverrideDefault(2,4) == 1)) THEN
+                  kSetThermalAngle = +1
+                  kThermalAngle    = +1
+                  iaKThermal(iC)   = +1
+                  raKThermalAngle(iC) = kThermalAngle
+                  END IF		
+		see also Revisions_backgndtherm.txt
+		
 01/03/26        Need to check if lower in the amospjhere, CO2 atmosphere used for LBLRTM CO2
                 OD generation is SAME as what is used as reference profile; the ratio of finite
 		difference jacs to analytic jacs is 400/385
@@ -635,6 +657,8 @@ v1.22
 		  raAltComprDirsScale(1) = 1.03896103896103896103
 		fixs the finite diff vs analytic jacs comparisons for layers above about 20, but is about a ratio
 		of 1.03 in the lower layers ...
+		See eg /home/sergio/git/HITRAN2UMBCLBL/MAKEIR/H2016_G2015/MAKEIR_CO2_O3_N2O_CO_CH4_othergases_LBLRTM12p8/kcomp_co2_385_to_400.m
+		See eg /home/sergio/git/HITRAN2UMBCLBL/MAKEIR/H2016_G2015/MAKEIR_CO2_O3_N2O_CO_CH4_othergases_LBLRTM12p8/Readme
 		
 12/30/25        Subroutine Set_Ref_Current_Profs (in kcartamisc.f90) has been modified so that you
                 can send in iJax,iJax2 to specify which adjacent layers to perturb, or can stick to

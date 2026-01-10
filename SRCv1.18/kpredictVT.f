@@ -16,7 +16,7 @@ c input params
       INTEGER iRegr               !!!which regr profile this is closest to
       INTEGER iRTP                !!!which of the rtp files processed
 c output parameters
-      CHARACTER*80 caVTFile       !!!temp file name where VT profiles are
+      CHARACTER*120 caVTFile       !!!temp file name where VT profiles are
                                   !!!created and stored if not given by user
 
 c local vars
@@ -28,8 +28,8 @@ c kMaxK = 50
       REAL raaKinetic(MXXTMP,kNLTEProfLayer) 
       REAL raaaVibPartFcn(MXXTMP,kMaxUserSet,kNLTEProfLayer)
       REAL raaaVibTemp(MXXTMP,kMaxK,kNLTEProfLayer)
-      CHARACTER*80 caFName
-      CHARACTER*80 caaComments(kMaxLayer)
+      CHARACTER*120 caFName
+      CHARACTER*120 caaComments(kMaxLayer)
       INTEGER iNumComments
 c to dump out the profiles
       REAL raaVibPartFcn(kMaxUserSet,kNLTEProfLayer)
@@ -208,13 +208,13 @@ c in the format that GENLN2 and kCARTA like
       include '../INCLUDE/kcarta.param'
  
 c input vars 
-      CHARACTER*80 caFname                          !i/o file name 
+      CHARACTER*120 caFname                          !i/o file name 
       INTEGER iAngle                                !which angle profile
       REAL raaPressure(MXXTMP,kNLTEProfLayer)
       REAL raaKinetic(MXXTMP,kNLTEProfLayer) 
       REAL raaVibPartFcn(kMaxUserSet,kNLTEProfLayer)
       REAL raaVibTemp(kMaxK,kNLTEProfLayer)
-      CHARACTER*80 caaComments(kMaxLayer)
+      CHARACTER*120 caaComments(kMaxLayer)
       INTEGER iNumComments
       INTEGER iGasesInFile,iNumVibLevels            !gases,levels in file
       INTEGER iGasID,iVibPF                         !gas ID, number of isotopes
@@ -225,7 +225,7 @@ c input vars
 c local vars 
       CHARACTER*3 ca3
       CHARACTER*1 ca1
-      CHARACTER*80 caStr
+      CHARACTER*120 caStr
       INTEGER i1,i2,iIOUN,iErr,iI,iJ,iDummy1,iDummyGasID,iDummyISO
       INTEGER iNV,iZero
       REAL raP2(kNLTEProfLayer),raT2(kNLTEProfLayer)
@@ -293,14 +293,14 @@ c local vars
       CLOSE(iIOUN)
       kTempUnitOpen = -1
 
- 10   FORMAT(A80) 
+ 10   FORMAT(A120) 
  11   FORMAT('! ',A70) 
  12   FORMAT(A70,I5) 
  13   FORMAT(A70) 
- 20   FORMAT(I4,'    ',I5,'  ',I7,' ',I6,'   ',F11.5) 
+ 20   FORMAT(I4,'    ',I5,'  ',I7,' ',I6,'   ',F12.5) 
  99   FORMAT(A3,'   ',4(I3,' ')) 
 
- 123  FORMAT(A80)
+ 123  FORMAT(A120)
 
       RETURN
       END
@@ -318,14 +318,14 @@ c in the format that GENLN2 and kCARTA like
       include '../INCLUDE/kcarta.param'
  
 c input vars 
-      CHARACTER*80 caFname                          !i/o file name 
+      CHARACTER*120 caFname                          !i/o file name 
       INTEGER iAngle                                !which angle profile
 c output vars
       REAL raaPressure(MXXTMP,kNLTEProfLayer)
       REAL raaKinetic(MXXTMP,kNLTEProfLayer) 
       REAL raaaVibPartFcn(MXXTMP,kMaxUserSet,kNLTEProfLayer)
       REAL raaaVibTemp(MXXTMP,kMaxK,kNLTEProfLayer)
-      CHARACTER*80 caaComments(kMaxLayer)
+      CHARACTER*120 caaComments(kMaxLayer)
       INTEGER iNumComments
       INTEGER iGasesInFile,iNumVibLevels            !gases,levels in file
       INTEGER iGasID,iVibPF                         !gas ID, number of isotopes
@@ -336,7 +336,7 @@ c output vars
 c local vars 
       CHARACTER*3 ca3
       CHARACTER*1 ca1
-      CHARACTER*80 caStr
+      CHARACTER*120 caStr
       INTEGER i1,i2,iIOUN,iErr,iI,iJ,iDummy1,iDummyGasID,iDummyISO
 
       iIOUN = kTempUnit
@@ -418,7 +418,7 @@ c local vars
       CLOSE(iIOUN)
       kTempUnitOpen = -1
 
- 123  FORMAT(A80)
+ 123  FORMAT(A120)
  456  FORMAT(A3,'   ',4(I3,' ')) 
  789  FORMAT(A1,'   ',I3)
 
@@ -480,11 +480,11 @@ c local vars
         END IF 
       END IF 
  
- 11   FORMAT(5(E11.5,' ')) 
- 12   FORMAT(5(E11.5,' ')) 
- 13   FORMAT(5(E11.5,' ')) 
- 14   FORMAT(5(E11.5,' ')) 
- 15   FORMAT(5(E11.5,' ')) 
+ 11   FORMAT(5(E12.5,' ')) 
+ 12   FORMAT(5(E12.5,' ')) 
+ 13   FORMAT(5(E12.5,' ')) 
+ 14   FORMAT(5(E12.5,' ')) 
+ 15   FORMAT(5(E12.5,' ')) 
  
       RETURN 
       END 
@@ -495,7 +495,7 @@ c this function takes string s1 and adds info to it, based on iProf,iSol
  
       IMPLICIT NONE 
  
-      CHARACTER*80 caS1 
+      CHARACTER*120 caS1 
       INTEGER iProf,iSol 
  
       INTEGER i1 
@@ -678,11 +678,11 @@ c input
       REAL raPressLevels(kProfLayer+1)  !!!pressure levels
       INTEGER iNumLayers                !!!number of layers
       REAL rSolarAngle                  !!!solar angle for atm #1 
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       INTEGER iRTP                      !!!which iRTP prof read in 
 c output
       INTEGER iRegr               !!!which regr profile this is closest to
-      CHARACTER*80 caVTFile       !!!temp file name where VT profiles are
+      CHARACTER*120 caVTFile       !!!temp file name where VT profiles are
                                   !!!created and stored if not given by user
 
 c local vars
@@ -781,7 +781,7 @@ c based on imput (raLayPress,raKinetic)
       include '../INCLUDE/kcarta.param'
 
 c input params
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raTemp3(kProfLayerP3)           !!!kinetic temp profile
       REAL raLayPress3(kProfLayerP3)       !!!layering
       INTEGER iNumPts3                     !!!number of points in the arrays
@@ -789,7 +789,7 @@ c input params
       INTEGER iRegr                        !!! closest regr prof number (1:48)
       INTEGER iRTP                         !!!which iRTP prof read in 
 c output param
-      CHARACTER*80  caVTfile
+      CHARACTER*120  caVTfile
 
 c local vars
       CHARACTER*120 caDir,caFnamePoly
@@ -852,7 +852,7 @@ c just dumps stuff to a file
       include '../INCLUDE/kcarta.param'
 
 c input params
-      CHARACTER*80 caVTfile,caSummaryFile
+      CHARACTER*120 caVTfile,caSummaryFile
       REAL raaCompute(kNLTEProfLayer,12)
       REAL raTemp3(kProfLayerP3)           !!!kinetic temp profile
       REAL raLayPress3(kProfLayerP3)       !!!layering
@@ -958,14 +958,14 @@ c local vars
       CLOSE(iIOUN)
       kTempUnitOpen = -1
 
- 10   FORMAT(A80) 
+ 10   FORMAT(A120) 
  11   FORMAT('! ',A70) 
  12   FORMAT(A70,I5) 
  13   FORMAT(A70) 
- 20   FORMAT(I4,'    ',I5,'  ',I7,' ',I6,'   ',F11.5) 
+ 20   FORMAT(I4,'    ',I5,'  ',I7,' ',I6,'   ',F12.5) 
  99   FORMAT(A3,'   ',4(I3,' ')) 
  111  FORMAT(I4,' ',14(F12.5,' '))
- 123  FORMAT(A80)
+ 123  FORMAT(A120)
  
       RETURN
       END
@@ -1358,11 +1358,11 @@ c input
       REAL raPressLevels(kProfLayer+1)  !!!pressure levels
       INTEGER iNumLayers                !!!number of layers
       REAL rSolarAngle                  !!!solar angle for atm #1 
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       INTEGER iRTP                      !!!which of the rtp files processed
 c output
       INTEGER iRegr               !!!which regr profile this is closest to
-      CHARACTER*80 caVTFile       !!!temp file name where VT profiles are
+      CHARACTER*120 caVTFile       !!!temp file name where VT profiles are
                                   !!!created and stored if not given by user
 
 c local vars

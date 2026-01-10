@@ -98,7 +98,7 @@ c usual stuff
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -130,9 +130,9 @@ c this is to do with NLTE
 
 c this are column jacs
 c this is to do with flux
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is to do with jacobians
-      CHARACTER*80 caJacobFile,caJacobFile2
+      CHARACTER*120 caJacobFile,caJacobFile2
       INTEGER iNumGases,iaGases(kMaxGas),iNatm
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -338,7 +338,7 @@ c             -1 ==> upward looking instrument
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iDownWard,iBinaryFile
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -370,9 +370,9 @@ c this is when we have array of clouds from KLAYERS
       REAL      raaIWP(MAXNZ,kMaxCLouds), raaDME(MAXNZ,kMaxClouds)  
 c this are column jacs
 c this is to do with flux
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is to do with jacobians
-      CHARACTER*80 caJacobFile,caJacobFile2
+      CHARACTER*120 caJacobFile,caJacobFile2
       INTEGER iNumGases,iaGases(kMaxGas),iNatm
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -405,7 +405,7 @@ C         Radiative transfer variables:
       REAL    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
       REAL  ABSNU1, ABSNU2, ABSDELNU
       REAL  WAVENO
-      CHARACTER*80 SCATFILE(MAXSCAT)
+      CHARACTER*120 SCATFILE(MAXSCAT)
       CHARACTER*1   RTMODEL
       CHARACTER*1 caScale(MAXSCAT)
 
@@ -415,7 +415,7 @@ C         Radiative transfer variables:
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
 
       INTEGER iaTable(kMaxClouds*kCloudLayers)
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       INTEGER iIn,iJ,iI,iCloud,iScat,iIOUN,iF,iL
       REAL TAUGAS(kProfLayer),TOA_to_instr(kMaxPts)
       INTEGER iaRadLayer(kProfLayer)
@@ -620,7 +620,7 @@ c MRO output
       
 c local vars
       INTEGER iIOUNX,iERRX,iCountLay,iNlaysInFile,iJunkX,raPCC(kProfLayer),iTest
-      CHARACTER*80 caJunk80
+      CHARACTER*120 caJunk80
 
       write(kStdWarn,*) 'looking for and opening caaTextOverride (from nm_params)'
       iIOUNX = kTempUnit
@@ -629,7 +629,7 @@ c local vars
       IF (IERRX .NE. 0) THEN
         WRITE(kStdErr,*) 'k100layerCloud : make sure file exists'
         WRITE(kStdErr,1020) IERRX, caaTextOverrideDefault
- 1020   FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1020   FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
         CALL DoSTOP
       ENDIF
       kTempUnitOpen = 1	
@@ -679,7 +679,7 @@ c  with plays(1) > plays(2) etc etc ie pressures decreasing!!!!!!!
 c now based on iMRO = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
 c                   = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc
 c                   = 0  we do multiple runs, adding them together to do MRO (see ECMWF, M. Matricardi 2005, Report 474)
- 1022 FORMAT(A80)
+ 1022 FORMAT(A120)
 
 c this is testing
       iTest = -1

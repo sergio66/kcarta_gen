@@ -346,7 +346,7 @@ CONTAINS
 !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 = acos(3/5) << DEFAULT >>
 !!!           this can be controlled by kThermalAngle, either in nm_params for kRTP = +1
 !!!                                                   or rakThermalAngle() for kRTP = 0,-1
-!!!           so in nm_params : set iaaOverride(2,4) = 1, kThermalAngle = 50.0 and thay works!!!
+!!!           so in nm_params : set iaaOverride(2,4) = 1, kThermalAngle = 50.0 and that works!!!
 !!!     = -2 fast diffusive background at acos(3/5) in upper layers, accurate in lower layers, linear in tau T
 !!!     = +2 diffusive background using LBLRTM style 3 exponetial gauss quad, not yet implemented
     iaaOverrideDefault(2,5) = 0     !!! SUBR IntegrateOverAngles in rad_quad.f, called by SUBR BackGndThermal

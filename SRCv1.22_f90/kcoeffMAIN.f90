@@ -435,7 +435,8 @@ CONTAINS
         !see kCARTA paper : therefore dk/dq = 1/q0 raAltComprDirsScale x SVD_uncompress = k/q
         !see KCARTA paper, eqn 11 : dr/dq --> dk/dq = k/q == very simple!!!!!!   but we need kcorrect
         !so we NEED         daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
-        write(kStdWarn,'(A,I3,A,F12.5)') '  GasContributionAlternateDatabase : scale factor for MOLGAS ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+        write(kStdWarn,'(A,I3,A,F12.5)') &
+          '  GasContributionAlternateDatabase : scale factor for MOLGAS ',iGasID,' is ',raAltComprDirsScale(iNewIN)
 !        print *,'daaTempo 0 ',daaTemp(1:10,10)
         daaTemp = daaTemp * raAltComprDirsScale(iNewIN)
         daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
@@ -463,7 +464,8 @@ CONTAINS
           !see kCARTA paper : therefore dk/dq = 1/q0 raAltComprDirsScale x SVD_uncompress = k/q
           !see KCARTA paper, eqn 11 : dr/dq --> dk/dq = k/q == very simple!!!!!!   but we need kcorrect
           !so we NEED         daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
-          write(kStdWarn,'(A,I3,A,F12.5)') '  GasContributionAlternateDatabase : scale factor for XSCGAS ',iGasID,' is ',raAltComprDirsScale(iNewIN)
+          write(kStdWarn,'(A,I3,A,F12.5)') &
+              ' GasContributionAlternateDatabase : scale factor for XSCGAS ',iGasID,' is ',raAltComprDirsScale(iNewIN)
           daaTemp = daaTemp * raAltComprDirsScale(iNewIN)
           daaDQ   = daaDQ * raAltComprDirsScale(iNewIN)
         END IF												    

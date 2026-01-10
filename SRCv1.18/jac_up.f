@@ -79,7 +79,7 @@ c raSunAngles are the layer dependent sun view angles
       INTEGER iJacob,iaJacob(kMaxDQ),iProfileLayers
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas),iTag,iActualJac
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
 
 c local variables
       REAL raaLay2Gnd(kMaxPtsJac,kProfLayerJac),raResults(kMaxPtsJac)

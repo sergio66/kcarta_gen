@@ -364,6 +364,8 @@ CONTAINS
 !        they could conflict ugh
     kTemperVary  = -1          !assume const-in-tau temperature variation  till Oct 2019
     kTemperVary  = +43         !assume linear-in-tau temperature variation after Oct 2019
+!    kThermalAngle = acos(3.0/5.0)*180.0/kPi  !!! new Jan 2025
+!    raKThermalAngle = kThermalAngle          !!! new Jan 2025
 
 ! presume no Limb calcs, AIRS satellite hgts
     iaLimb = -1

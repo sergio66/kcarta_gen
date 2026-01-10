@@ -191,6 +191,21 @@ OBJS_TXT = n_mainTXT.o
 DISTDIR    = /asl/data/kcarta
 DISTDIRGEN = /asl/data/kcarta_sergio
 
+
+# till about 2018
+#DISTDIR    = /asl/data/kcarta
+#DISTDIRGEN = /asl/data/kcarta_sergio
+
+# 2018 - April 2025
+#DISTDIR    = /asl/rta/kcarta
+#DISTDIRGEN = /asl/rta/kcarta_sergio
+
+# April 2025 -
+DISTDIR    = /home/sergio/asl/rta/kcarta
+DISTDIRGEN = /home/sergio/asl/rta/kcarta_sergio
+
+#########################
+
 ## this just updates the cource code
 #EXECS = basic scat basicTXT scatTXT
 EXECS = basic basicTXT
@@ -259,8 +274,11 @@ datafix385_H2012_LBLRTM:
       cd ../SRCv1.18
 
 datafix385_H2012:
+	pwd; \
+	echo "Makefile_tar_objs_data in SRCv1.18 : in datafix385_H2012"; \
 	sed -e 's|\#|$(DISTDIR)|g' -e 's|\^|$(DISTDIRGEN)|g' ../INCLUDE/Templates_V118/template_kcartaV118_385_H2012_NLTEH2008.param > \
-      ../INCLUDE/kcarta_v118.param; \
+	../INCLUDE/kcarta_v118.param; \
+	ls -lt ../INCLUDE/kcarta.param; \
       rm ../INCLUDE/kcarta.param; \
       cd ../INCLUDE; \
       ln -s kcarta_v118.param kcarta.param; \

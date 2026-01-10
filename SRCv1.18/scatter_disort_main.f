@@ -80,7 +80,7 @@ c raNumberDensity = P/RT == number of particles in each layer of atm
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile,iDoFlux
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which layers each cloud occupies 
@@ -238,7 +238,7 @@ C       TABPHI??? are phase function info for incident directions
      
 ccc      INTEGER  MAXTAB, MAXGRID, MAXSCAT
 ccc      PARAMETER (MAXTAB=10*25*500, MAXGRID=10000, MAXSCAT=5)
-      CHARACTER*80 SCATFILE(MAXSCAT)
+      CHARACTER*120 SCATFILE(MAXSCAT)
 
       INTEGER  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
       REAL     MUTAB(MAXGRID,MAXSCAT)
@@ -265,7 +265,7 @@ c ---------------------------- local variables ----------------------------
       REAL    dmetab_phase(kProfLayer)
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA 
 
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       CHARACTER*1 caScale(MAXSCAT)
 
       !initialise all scattering info to null
@@ -569,7 +569,7 @@ c   GND --------------------------
 
       iobs=(iNumLayer+1)-iobs+1
 
- 30   FORMAT(I3,' ',A80)
+ 30   FORMAT(I3,' ',A120)
 
       RETURN
       END
@@ -1160,7 +1160,7 @@ c             -1 ==> upward looking instrument
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iTag,iDoFlux
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iDownWard,iBinaryFile
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which layers each cloud occupies 
@@ -1179,7 +1179,7 @@ c this tells if there is phase info associated with the cloud; else use HG
       INTEGER iaPhase(kMaxClouds)
 
 c local variables
-      CHARACTER*80 SCATFILE(MAXSCAT)
+      CHARACTER*120 SCATFILE(MAXSCAT)
 
       INTEGER  NMUOBS(MAXSCAT), NDME(MAXSCAT), NWAVETAB(MAXSCAT)
       REAL     MUTAB(MAXGRID,MAXSCAT)
@@ -1297,7 +1297,7 @@ c this is to do "correlated k" computations
 
 c more local variables
       INTEGER iaStep(kMaxPts),iDiv,iScatter
-      CHARACTER*80 caName
+      CHARACTER*120 caName
       INTEGER iIn,iJ,iI,iScat,iIOUN,iF,iFF,iFFMax,iL
       REAL TOA_to_instr(kMaxPts)
       INTEGER iaRadLayer(kProfLayer)

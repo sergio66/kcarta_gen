@@ -996,7 +996,7 @@ c iErr      = errors (mainly associated with file I/O)
 c iDoDQ     = -2 if no amt,temp jacs, -1 if no amt jacs, > 0 if amt,temp jacs 
 c kFrStep  = kFreqStep 
       INTEGER iaCont(kMaxGas),iDoDQ 
-      CHARACTER*80 caXsecName 
+      CHARACTER*120 caXsecName 
       DOUBLE PRECISION daaTemp(kMaxPts,kProfLayer) 
       INTEGER iGasID,iL,iU,iErr,iRefLayer,iCount,iVTSet 
       REAL raTPress(kProfLayer),raTPart(kProfLayer),kFrStep 
@@ -1207,7 +1207,7 @@ c this are the temperature corrected coeffs
       DOUBLE PRECISION daaCKD1Mult(kMaxPts,kProfLayer)
 
 c local vars
-      CHARACTER*80 FNAM
+      CHARACTER*120 FNAM
       INTEGER iL,iFr,iN,iIOUN,iErr
       DOUBLE PRECISION daXT(kMaxLayer),daXK(kMaxLayer)
       DOUBLE PRECISION dT,daX(kMaxLayer),daM(kMaxPts),x,y,daFreq(kMaxPts)
@@ -1219,7 +1219,7 @@ c local vars
      $    IOSTAT=IERR)
       IF (IERR .NE. 0) THEN
           WRITE(kStdErr,1010) IERR, FNAM
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
         ENDIF
       kTempUnitOpen=1

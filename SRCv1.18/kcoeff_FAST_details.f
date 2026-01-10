@@ -273,7 +273,7 @@ C     for DGEMM (BLAS matrix times matrix multiply)
 
 c these are to read in the original 100 layers AIRS ref profile for the gas
 c these are to read in the new kProfLayers ref profile for the gas
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       REAL raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
       REAL raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
       REAL raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer) 
@@ -465,7 +465,7 @@ c this is to calculate d/dq,d/dT
 
 c these are to read in the original 100 layers AIRS ref profile for the gas
 c these are to read in the new kProfLayers ref profile for the gas
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       REAL raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
       REAL raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
       REAL raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer) 
@@ -671,7 +671,7 @@ c pressure, and then interpolated in temperature
 
 c these are to read in the original 100 layers AIRS ref profile for the gas
 c these are to read in the new kProfLayers ref profile for the gas
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       REAL raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
       REAL raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
       REAL raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer) 
@@ -842,7 +842,7 @@ c pressure, and then interpolated in temperature
 
 c these are to read in the original 100 layers AIRS ref profile for the gas
 c these are to read in the new kProfLayers ref profile for the gas
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       INTEGER iE
       REAL raOrig100A(kMaxLayer),raOrig100T(kMaxLayer) 
       REAL raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer) 

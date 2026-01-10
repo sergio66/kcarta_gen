@@ -54,8 +54,9 @@ c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 c ******* make sure this agrees with the IR CO2 database set in kCO2Path
 
 c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) using compressed data from LBLRTMv12.2
-      PARAMETER (kCompParamFile = 
-     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_lblrtm')
+      PARAMETER (kCompParamFile =
+     $   '/home/sergio/git/kcarta_gen/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_lblrtm')      
+c     $   '/home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_TEMP/testH2012_lblrtm')
 c this has new H2012 for all bands (FIR7,FIR6 .. FIR1,IR,NIR1) and old, working CO2 linemixing
 
 c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

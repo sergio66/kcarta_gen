@@ -388,7 +388,8 @@ CONTAINS
         END IF
     END IF
 
-    write(kStdWarn,*) 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
+    write(kStdWarn,'(A,F12.5)') 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
+    write(kStdWarn,'(A)')       'raFreq(1)  iLay   MeanOD   TechnicallyMeanOD   AvgDownAngle   Code' 
     raAngleTr = 0.0    !!! this acts as Space2Gnd OD
     DO iLay = 1,iS0
       iL = iaRadLayer(iLay)
@@ -397,7 +398,7 @@ CONTAINS
       raAngleTr(iL)          = raAngleTr(iL) + raMeanOD(iL)
       write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),raAngleTr(iL),raAvgAnglePerLayer(iL),654654
     END DO
-321 FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
+321 FORMAT(F10.2,'  ',I4,1(' ',ES12.6,' '),2(' ',F12.5,' '),I8)
           
 ! after grepping the warning.msg file eg
 ! grep 654654  ~sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/warning.msg > diffusive_angles
@@ -666,11 +667,12 @@ CONTAINS
 
     REAL :: rThetaEff,raIntenAtmos(kMaxPts)
     REAL :: raTemp(kMaxPts),raFreqAngle(kMaxPts)
-    INTEGER :: iFr
+    INTEGER :: iFr,iL,iLay
 
 ! this is the diffusivity approx angle, in radians
     rThetaEff = kThermalAngle*kPi/180.0
-    !      rThetaEff = acos(3.0/5.0)
+!    rThetaEff = acos(3.0/5.0)
+!    rThetaEff = rakThermalAngle(1)*kPi/180.0  !! new Jan 2026
 
 !**** note that CALL RadiativeTranfer(a,b,...,iWeightFactor) has
 ! iWeightFactor === 1. All the factors of "0.5" are taken care of in
@@ -680,6 +682,13 @@ CONTAINS
 
 ! ORIG CODE : at ALL layers 1 .. iNumLayer, use ONE diffusivity angle for
 ! entire wavenumber spread (acos(3/5) at each layer)
+
+    write(kStdWarn,'(A,F12.5)') 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
+    write(kStdWarn,'(A)')       'raFreq(1)  iLay  AvgDownAngle   Code' 
+    DO iLay = 1,iaRadLayer(iNumLayer)
+      iL = iaRadLayer(iLay)
+      write(kStdWarn,'(F10.2,3X,I4,3X,F10.2,3X,I9)') raFreq(1),iL,kThermalAngle,-111111
+    END DO
 
     IF (iExtraThermal < 0) THEN
       ! go from top of atmosphere to gnd
@@ -979,35 +988,36 @@ CONTAINS
           
 ! now loop over the layers, for the particular angle
     IF (iDiffmethod == 1) THEN
-      write(kStdWarn,*)'back gnd thermal  : using acos(3/5) everywhere, all layers'
+      write(kStdWarn,'(A)')'back gnd thermal  : using acos(3/5) everywhere, all layers'
       CALL Diffusivity_AllAnglesEqual(raThermal,raVT1,rTSpace, &
         raFreq,raUseEmissivity, &
         iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot, &
         iaRadLayerTemp,iT,iExtraThermal,raExtraThermal)
     ELSE IF (iDiffmethod == -1) THEN
-      write(kStdWarn,*)'<DEFAULT> back gnd thermal  : using fast accurate approx, const layer temp'
-      write(kStdWarn,*)'                            : acos(3/5) upper layers, lower angles use accurate angle'
+      write(kStdWarn,'(A)')'<DEFAULT> back gnd thermal  : using fast accurate approx, const layer temp'
+      write(kStdWarn,'(A)')'                            : acos(3/5) upper layers, lower angles use accurate angle'
       CALL orig_const_in_tau_Diff_LowerAngAccurate(raThermal,raVT1,rTSpace, &
         raFreq,raUseEmissivity,iProfileLayers,raPressLevels, &
         iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot, &
         iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-1)
     ELSE IF (iDiffmethod == -2) THEN
-      write(kStdWarn,*)'back gnd thermal  : using fast accurate approx, linear in tau layer temp'
+      write(kStdWarn,'(A)')'back gnd thermal  : using fast accurate approx, linear in tau layer temp'
       CALL new_linear_in_tau_Diff_LowerAngAccurate(raThermal,raVT1,rTSpace, &
         raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot, &
         iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-2)
     ELSE IF (iDiffmethod == +2) THEN
-!      write(kStdErr,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
-!      write(kStdWarn,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
+!      write(kStdErr,'(A)') 'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
+!      write(kStdWarn,'(A)')'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH????'
 !      Call DoStop
-      write(kStdErr,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH???? WILL DO iDiffmethod == -2 INSTEAD'
-      write(kStdWarn,*)'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH???? WILL DO iDiffmethod == -2 INSTEAD'
+      write(kStdErr,'(A)') &
+        'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH???? WILL DO iDiffmethod == -2 INSTEAD'
+      write(kStdWarn,'(A)') &
+        'back gnd thermal  : doing LBLRTM style 3 angle downwell flux calc HUH???? WILL DO iDiffmethod == -2 INSTEAD'
       CALL new_linear_in_tau_Diff_LowerAngAccurate(raThermal,raVT1,rTSpace, &
         raFreq,raUseEmissivity,iProfileLayers,raPressLevels,raTPressLevels, &
         iNumLayer,iaRadLayer,raaAbsCoeff,rFracTop,rFracBot, &
         iaRadLayerTemp,iT,iExtraThermal,raExtraThermal,-2)
-
     END IF
 
 ! this is the thermal diffusive approx ==> multiply by 0.5
@@ -2179,7 +2189,8 @@ CONTAINS
       raTemp              = raTemp+raPlanck*(raAngleTr_m1-raAngleTr)
     END IF
 
-    write(kStdWarn,*) 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
+    write(kStdWarn,'(A,F12.5)') 'Mean/L2S ODs and diffusive angles per layer for chunk starting at ',raFreq(1)
+    write(kStdWarn,'(A)')       'raFreq(1)  iLay   MeanOD   TechnicallyMeanOD   AvgDownAngle   Code' 
     raAngleTr = 0.0    !!! this acts as Space2Gnd OD
     DO iLay = 1,iS
       iL = iaRadLayer(iLay)
@@ -2188,7 +2199,7 @@ CONTAINS
       raAngleTr(iL)          = raAngleTr(iL) + raMeanOD(iL)
       write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),raAngleTr(iL),raAvgAnglePerLayer(iL),987987
     END DO
-    321 FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
+321 FORMAT(F10.2,'  ',I4,1(' ',ES12.6,' '),2(' ',F12.5,' '),I8)
 
     RETURN
     end SUBROUTINE ExactL2GDiffusiveApprox

@@ -89,7 +89,7 @@ c FracTop,rFracBot are the upper layer/lower layer fractions
       INTEGER iJacob,iaJacob(kMaxDQ),iTag,iActualTag
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
 c this is for NLTE weight fcns
       INTEGER iNLTEStart
       REAL raaPlanckCoeff(kMaxPts,kProfLayer)
@@ -200,7 +200,7 @@ c raaMix is the mixing table
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaAllDT(kMaxPtsJac,kProfLayerJac)
       REAL raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
       INTEGER iJacob,iaJacob(kMaxDQ),iProfileLayers,iTag,iActualTag
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)
@@ -517,7 +517,7 @@ c raaMix is the mixing table
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaAllDT(kMaxPtsJac,kProfLayerJac)
       REAL raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
       INTEGER iJacob,iaJacob(kMaxDQ),iProfileLayers,iTag,iActualTag
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)
@@ -842,7 +842,7 @@ c raaMix is the mixing table
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaAllDT(kMaxPtsJac,kProfLayerJac)
       REAL raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
       INTEGER iJacob,iaJacob(kMaxDQ),iProfileLayers,iTag,iActualTag
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)

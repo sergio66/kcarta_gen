@@ -30,7 +30,7 @@ c                                                         -20         for surf J
 c              = +1 for upward flux, -1 for downward flux
 c iNumberOut   = number of the relevant spectra to look for
 
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL rFrLow,rFrHigh,rDelta
       INTEGER iMainType,iSubMainType,iNumberOut,iIOUN
 
@@ -67,7 +67,7 @@ c caOutName  = binary output file name
 
       INTEGER iIOUN
       REAL raFreq(kMaxPts),raInten(kMaxPts)
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iInt
@@ -92,7 +92,7 @@ c input variables
       INTEGER iAtm,iUpper
       REAL raaUpperPlanckCoeff(kMaxPts,kProfLayer)
       REAL raFreq(kMaxPts),rDelta !!array and spacing
-      CHARACTER*80 caPlanckFile
+      CHARACTER*120 caPlanckFile
 
 c local variables
       INTEGER iFr,iL,iLay,iIOUN,iBeta
@@ -129,7 +129,7 @@ c input variables
       INTEGER iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iAtm
       REAL raaPlanckCoeff(kMaxPts,kProfLayer)
       REAL raFreq(kMaxPts),rDelta !!array and spacing
-      CHARACTER*80 caPlanckFile
+      CHARACTER*120 caPlanckFile
 
 c local variables
       INTEGER iFr,iL,iLay,iIOUN,iBeta
@@ -172,7 +172,7 @@ c input variables
       INTEGER iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer),iAtm
       REAL raaPlanckCoeff(kMaxPts,kProfLayer)
       REAL raFreq(kMaxPts),rDelta !!array and spacing
-      CHARACTER*80 caPlanckFile
+      CHARACTER*120 caPlanckFile
 
 c local variables
       INTEGER iFr,iL,iLay,iIOUN,iBeta
@@ -214,7 +214,7 @@ c input variables
       INTEGER iAtm,iUpper
       REAL raaUpperPlanckCoeff(kMaxPts,kProfLayer)
       REAL raFreq(kMaxPts),rDelta !!array and spacing
-      CHARACTER*80 caPlanckFile
+      CHARACTER*120 caPlanckFile
 
 c local variables
       INTEGER iFr,iL,iLay,iIOUN,iBeta
@@ -367,7 +367,7 @@ c iaOp       = list of the paths to be output
       REAL raaGasAbs(kMaxPts,kProfLayer)
       INTEGER iPrinter,iFileID
       INTEGER iNp,iaOp(kPathsOut),iaPath(kProfLayer)
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raTAmt(kProfLayer),raTTemp(kProfLayer),raTPress(kProfLayer),raTPartPress(kProfLayer)
 
 c local variables
@@ -423,7 +423,7 @@ c        END IF
       END DO
 
 c      WRITE (6,1001)caOutName
-c 1001 FORMAT('Successfully saved unformatted PATH results to ',/,A80)
+c 1001 FORMAT('Successfully saved unformatted PATH results to ',/,A120)
      
       RETURN
       END
@@ -444,7 +444,7 @@ c input params
       INTEGER iFound,iPrinter,iNpmix,iFileID,iNp,iaOp(kPathsOut)
       REAL raFreq(kMaxPts),rFreqStart,rFreqEnd
       REAL raaSumAbCoeff(kMaxPts,kMixFilRows) 
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local vars 
       INTEGER iDummy,iIpmix,DoOutputLayer
@@ -553,7 +553,7 @@ c caOutName  = name of binary file that output goes to
       REAL raFreq(kMaxPts),rFrLow,rFrHigh
       REAL raaSumAbs(kMaxPts,kMixFilRows)
       INTEGER iPrinter,iIpmix,iNpmix,iFileID
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iInt,iPath,iIOUN
@@ -590,7 +590,7 @@ c this is for mixed paths
       END IF  
 
 c      WRITE (6,1001)caOutName
-c 1001 FORMAT('Successfully saved unformatted MP results to ',/,A80)
+c 1001 FORMAT('Successfully saved unformatted MP results to ',/,A120)
      
       RETURN
       END
@@ -625,11 +625,11 @@ c caOutName  = name of binary file that output goes to
       REAL raFreq(kMaxPts),rFrLow,rFrHigh
       REAL raaSumAbs(kMaxPts,kMixFilRows)
       INTEGER iPrinter,iNpmix,iFileID
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iPath,iIOUN,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax,iI
-      REAL raL2S(kMaxPts),raaTempArray(kMaxPts,kProfLayer)
+      REAL raL2S(kMaxPts),raaTempArray(kMaxPts,kProfLayer+1)
 
       iIOUN = kStdkCarta
 
@@ -746,11 +746,11 @@ c caOutName  = name of binary file that output goes to
       REAL raFreq(kMaxPts),rFrLow,rFrHigh
       REAL raaSumAbs(kMaxPts,kMixFilRows)
       INTEGER iPrinter,iNpmix,iFileID
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iPath,iIOUN,iI,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax
-      REAL raL2S(kMaxPts),raaTempArray(kMaxPts,kProfLayer)
+      REAL raL2S(kMaxPts),raaTempArray(kMaxPts,kProfLayer+1)
 
       iIOUN = kStdkCarta
 
@@ -867,7 +867,7 @@ c caOutName  = name of binary file that output goes to
       REAL raFreq(kMaxPts),rFrLow,rFrHigh
       REAL raaSumAbs(kMaxPts,kMixFilRows)
       INTEGER iPrinter,iNpmix,iFileID
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iPath,iIOUN,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax,iI
@@ -988,7 +988,7 @@ c caOutName  = name of binary file that output goes to
       REAL raFreq(kMaxPts),rFrLow,rFrHigh
       REAL raaSumAbs(kMaxPts,kMixFilRows)
       INTEGER iPrinter,iNpmix,iFileID
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iPath,iIOUN,iI,iAtmBlocks,iWarn,iA,iFr,iLay,iAmax
@@ -1105,7 +1105,7 @@ c caOutName  = name of binary file that output goes to
       REAL raFreq(kMaxPts),rFrLow,rFrHigh
       REAL raaSumAbs(kMaxPts,kMixFilRows)
       INTEGER iPrinter,iNpmix,iFileID
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iIOUN,iI,iFr
@@ -1149,7 +1149,7 @@ c caOutName  = name of binary file that output goes to
       REAL raFreq(kMaxPts),rFrLow,rFrHigh
       REAL raaSumAbs(kMaxPts,kMixFilRows)
       INTEGER iPrinter,iNpmix,iFileID
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
 c local variables
       INTEGER iI,iFr,iIOUN
@@ -1558,7 +1558,7 @@ c this is when we use regression to try to predict the best NLTE temps
 
       IMPLICIT NONE
 
-      CHARACTER*80 caOutName,caVTFile
+      CHARACTER*120 caOutName,caVTFile
       INTEGER iRegr
  
       CHARACTER*2 caString
@@ -1609,7 +1609,7 @@ c this subroutine appends _RTP_irtp to end of caOutName to get caVTName
 
       IMPLICIT NONE
 
-      CHARACTER*80 caOutName,caVTFile
+      CHARACTER*120 caOutName,caVTFile
       INTEGER iRtp
  
       CHARACTER*5 caString
@@ -1666,10 +1666,10 @@ c this bloody thing DOES NOT WORK!!!!
       IMPLICIT NONE
 
 c input params
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       INTEGER iRTP
 c output params
-      CHARACTER*80 caVTFile
+      CHARACTER*120 caVTFile
  
       CHARACTER*5 caString
       INTEGER iInt,iInt1,iI,iJ
@@ -1728,7 +1728,7 @@ c this subroutine appends _COL to end of caOutName to get "new" caJacobFileName
 
       include '../INCLUDE/kcarta.param'
 
-      CHARACTER*80 caJacobFile,caJacobFile2
+      CHARACTER*120 caJacobFile,caJacobFile2
  
       INTEGER iInt
 
@@ -1757,7 +1757,7 @@ c this subroutine appends _FLUX to end of caOutName to get caFluxName
 
       include '../INCLUDE/kcarta.param'
 
-      CHARACTER*80 caOutName,caFluxFile
+      CHARACTER*120 caOutName,caFluxFile
  
       INTEGER iInt
 
@@ -1812,7 +1812,7 @@ c this subroutine appends _PLANCK to end of caOutName to get caPlanckName
 
       IMPLICIT NONE
 
-      CHARACTER*80 caOutName,caPlanckFile
+      CHARACTER*120 caOutName,caPlanckFile
  
       INTEGER iInt
 
@@ -1914,7 +1914,7 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       REAL rakSolarRefl(kMaxAtm)
       INTEGER iakThermal(kMaxAtm),iaOutNumbers(kMaxPrint),iOutFileName
       INTEGER iakSolar(kMaxAtm),iakThermalJacob(kMaxAtm)
-      CHARACTER*80 caDriver,caOutName
+      CHARACTER*120 caDriver,caOutName
       CHARACTER*120 caComment
       CHARACTER*130 caaMixFileLines(kProfLayer)
       INTEGER iaPrinter(kMaxPrint),iaAtmPr(kMaxPrint),iaNp(kMaxPrint)
@@ -1935,13 +1935,13 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
 
       INTEGER iIOUN,iIOUN1,iIOUN2,iIOUN_JAC2,iI,iJ,iK,iFileErr,iEnd,iP,iOk
       INTEGER iOutputOptionNum,iNumLay,DoGasJacob
-      CHARACTER*80 caJacobFile,caJacobFile2,caFluxFile,caPlanckFile
+      CHARACTER*120 caJacobFile,caJacobFile2,caFluxFile,caPlanckFile
 
       INTEGER CheckDoubleEntry,iImportant
       INTEGER iNatmJac,iaLayerJac(kMaxAtm),iIOUN_Flux,iIOUN_Planck,iIOUN_Cloud
       REAL raParams(kMaxUserSet),raPActualAvg(kProfLayer),rP
       CHARACTER*4 caStrJunk(7)
-      CHARACTER*80 caFCloudName
+      CHARACTER*120 caFCloudName
       REAL raSumTotalGasAmt(kMaxGas)
       
       !this is for kLongOrShort = 0
@@ -2012,7 +2012,7 @@ c iDumpAllUARads = do we dump rads for all layers (-1) or a specific number?
       END DO
        
  800  FORMAT(A1)
- 801  FORMAT(A80)
+ 801  FORMAT(A120)
 
       iIOUN =  kStdWarn
       iIOUN1 = kStdkCarta
@@ -2434,7 +2434,7 @@ c if file error, inform user and stop program
           CALL DoSTOP
         END IF
       END IF
- 103  FORMAT('ERROR! number ',I5,' opening binary data file : ',/,A80)
+ 103  FORMAT('ERROR! number ',I5,' opening binary data file : ',/,A120)
 
       kStdkCartaOpen=1
       write(kStdWarn,*) 'Opened following file for general binary output : '
@@ -2706,7 +2706,7 @@ c if file error, inform user and stop program
         END IF
 
  403  FORMAT('ERROR! number ',I5,' opening COL JACOBIAN binary file : 
-     $      ',/,A80)
+     $      ',/,A120)
 
         kStdJacob2Open=1
         write(kStdWarn,*) 'Opened file for col jacobian binary output : '
@@ -2747,7 +2747,7 @@ c if file error, inform user and stop program
         END IF
 
  203  FORMAT('ERROR! number ',I5,' opening JACOBIAN binary file : 
-     $      ',/,A80)
+     $      ',/,A120)
 
         kStdJacobOpen=1
         write(kStdWarn,*) 'Opened following file for jacobian binary output : '
@@ -2851,7 +2851,7 @@ c if file error, inform user and stop program
         END IF
 
  303  FORMAT('ERROR! number ',I5,' opening FLUX binary file : 
-     $      ',/,A80)
+     $      ',/,A120)
 
         kStdFluxOpen=1
         write(kStdWarn,*) 'Opened following file for flux ouput : '
@@ -2993,7 +2993,7 @@ c if file error, inform user and stop program
         END IF
 
  304    FORMAT('ERROR! number ',I5,' opening PLANCK binary file : 
-     $      ',/,A80)
+     $      ',/,A120)
 
         kStdPlanckOpen=1
         write(kStdWarn,*) 'Opened following file for planck output :'
@@ -3066,10 +3066,10 @@ c                          but unfortunately it moves everything, so have to neg
 c http://docs.oracle.com/cd/E19957-01/805-4939/z40007437a2e/index.html
 c ../DOC/F77FormatSpecifiers.pdf
  7169 FORMAT(A104)
-c 7170 FORMAT(I4,' ',I4,' ',1(F11.5,' '),2(1P E11.4,' '),0PF11.5,'  ',(1P E11.4),A2,2(1P E11.4,' '),0PF11.7)
- 7170 FORMAT(I4,' ',I4,' ',1(F11.5,' '),2(ES11.4,' '),F11.5,'  ',(ES11.4),A2,2(ES11.4,' '),F11.7)    
- 7171 FORMAT(I4,' ',I4,' ',3(1P E11.5,' '),0PF11.5,'  ',1P E11.5,A2,2(' ',E11.5),1(' ',E11.3))  
- 7172 FORMAT(I3,' ',I3,' ',A20,' ',ES11.5)
+c 7170 FORMAT(I4,' ',I4,' ',1(F12.5,' '),2(1P E11.4,' '),0PF12.5,'  ',(1P E11.4),A2,2(1P E11.4,' '),0PF11.7)
+ 7170 FORMAT(I4,' ',I4,' ',1(F12.5,' '),2(ES11.4,' '),F12.5,'  ',(ES11.4),A2,2(ES11.4,' '),F11.7)    
+ 7171 FORMAT(I4,' ',I4,' ',3(1P E12.5,' '),0PF12.5,'  ',1P E12.5,A2,2(' ',E12.5),1(' ',E11.3))  
+ 7172 FORMAT(I3,' ',I3,' ',A20,' ',ES12.5)
 
       RETURN
       END
@@ -3100,7 +3100,7 @@ c    this is if iDumpAllUARads == +1
 
       include '../INCLUDE/kcarta.param'
 
-      CHARACTER*80 caUAFile
+      CHARACTER*120 caUAFile
       REAL rFrLow,rFrHigh
       INTEGER iFileIDLo,iFileIDHi,iTag,iDumpAllUARads,iDumpAllUASpectra
 
@@ -3197,7 +3197,7 @@ c if file error, inform user and stop program
       WRITE(kStdWarn,*) r1,r2               !!start/stop freqs for NLTE chunks 
 
  304  FORMAT('ERROR! number ',I5,' unit ',I3,' opening BLOATED binary file : 
-     $      ',/,A80)
+     $      ',/,A120)
 
       IF (iType .GT. 0) THEN
         kNLTEOutUAOpen = 1
@@ -3251,7 +3251,7 @@ c    this is if iDumpAllUARads == +1
 
       include '../INCLUDE/kcarta.param'
 
-      CHARACTER*80 caOutUABloatFile
+      CHARACTER*120 caOutUABloatFile
       REAL rFrLow,rFrHigh
       INTEGER iFileIDLo,iFileIDHi,iTag,iDumpAllUARads
 
@@ -3345,7 +3345,7 @@ c if file error, inform user and stop program
       write(kStdWarn,*) ' '
 
  304  FORMAT('ERROR! number ',I5,' unit ',I3,' opening BLOATED binary file : 
-     $      ',/,A80)
+     $      ',/,A120)
 
       IF (iType .GT. 0) THEN
         kBloatNLTEOutUAOpen = 1
@@ -3407,7 +3407,7 @@ c              = +1 for upward flux, -1 for downward flux
 c iNumberOut   = number of the relevant spectra to look for
 c iPathOrRad   = +1 for CO2 ua path, +3 for ua rad
 
-      CHARACTER*80 caOutUAFile
+      CHARACTER*120 caOutUAFile
       REAL rFrLow,rFrHigh,raFreq(kMaxPts)
       INTEGER iTag,iNumberNLTEOut,iPathORRad
 

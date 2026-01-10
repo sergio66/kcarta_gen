@@ -78,7 +78,7 @@ c raaMix is the mixing table
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaAllDT(kMaxPtsJac,kProfLayerJac)
       REAL raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
-      CHARACTER*80 caJacobFile
+      CHARACTER*120 caJacobFile
       INTEGER iJacob,iaJacob(kMaxDQ),iProfileLayers,iTag,iActualTag
       INTEGER iNumLayer,iaaRadLayer(kMaxAtm,kProfLayer),iFileID
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)

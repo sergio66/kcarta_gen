@@ -575,7 +575,7 @@ c local variables
       INTEGER iIoun,I,J,iErr, iL, iFr
       INTEGER IDGAS, NPTS, NLAY
       DOUBLE PRECISION SFREQ, FSTEP
-      CHARACTER*80 FNAM
+      CHARACTER*120 FNAM
       CHARACTER*4 ca4
       DOUBLEPRECISION df,sf,dK
       INTEGER iDefault
@@ -615,7 +615,7 @@ c local variables
       IF (IERR .NE. 0) THEN
           WRITE(kStdErr,*) 'In subroutine ReadFixedDataWeakBack_Bloat'
           WRITE(kStdErr,1010) IERR, FNAM
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
           ENDIF
       kCompUnitOpen=1
@@ -674,7 +674,7 @@ c this opens the bloated file four output
 
       include '../INCLUDE/kcarta.param'
 
-      CHARACTER*80 caBloatFile
+      CHARACTER*120 caBloatFile
       REAL rFrLow,rFrHigh
       INTEGER iFileIDLo,iFileIDHi,iTag,iTotalStuff
 
@@ -761,7 +761,7 @@ c if file error, inform user and stop program
       write(kStdWarn,*) ' '
 
  304  FORMAT('ERROR! number ',I5,' unit ',I3,' opening BLOATED binary file : 
-     $      ',/,A80)
+     $      ',/,A120)
 
       IF (iType .GT. 0) THEN
         kBloatOutOpen = 1
@@ -816,12 +816,12 @@ c iNp        = total number of paths to be output
 c iaOp       = list of the paths to be output
       REAL             rFrLow,rFrHigh
       DOUBLE PRECISION daFreqBloat(kBloatPts)
-      CHARACTER*80 caOutFile
+      CHARACTER*120 caOutFile
       INTEGER iTag,iType
 
 c local vars
       INTEGER iIOUN1,iI,iJump,ifloor,i10000
-      CHARACTER*80 caOut
+      CHARACTER*120 caOut
       DOUBLE PRECISION daStart(kBoxCarUse),daEnd(kBoxCarUse)
       DOUBLE PRECISION daStartBox(kBoxCarUse),daEndBox(kBoxCarUse)
 
@@ -876,7 +876,7 @@ c this subroutine just dumps out kBoxCarUse worth of chunks of data
 c input vars
       REAL         raFreqBloat(kBloatPts),raIntenBloat(kBloatPts)
       INTEGER      iIOUN
-      CHARACTER*80 caOutBloatFile
+      CHARACTER*120 caOutBloatFile
 
 c local vars
       INTEGER iLoop,iInt,iIntOffSet
@@ -924,13 +924,13 @@ c iaOp       = list of the paths to be output
       DOUBLE PRECISION daaPlanckCoeffBloat(kBloatPts,kProfLayer)
       INTEGER iPrinter,iFileID,iType
       INTEGER iNp,iaOp(kPathsOut),iaPath(kProfLayer)
-      CHARACTER*80 caPlanckBloatFile,caOutBloatFile
+      CHARACTER*120 caPlanckBloatFile,caOutBloatFile
 
 c local variables
       INTEGER iIntOffset,iStart
       INTEGER iInt,iDiv,iDp,iPath,iLay,DoOutputLayer,iIOUN,iLoop,iL
       REAL raL2S(kMaxPts),raF(kMaxPts)
-      CHARACTER*80 caOut
+      CHARACTER*120 caOut
 
       IF (iType .GT. 0) THEN
         iIOUN = kBloatNLTEOut
@@ -1048,14 +1048,14 @@ c iaOp       = list of the paths to be output
       DOUBLE PRECISION daaPlanckCoeffBloat(kBloatPts,kProfLayer)
       INTEGER iPrinter,iFileID,iType
       INTEGER iNp,iaOp(kPathsOut),iaPath(kProfLayer)
-      CHARACTER*80 caPlanckBloatFile,caOutBloatFile
+      CHARACTER*120 caPlanckBloatFile,caOutBloatFile
       INTEGER iAtm,iNumLayers,iaaRadLayer(kMaxAtm,kProfLayer)
 
 c local variables
       INTEGER iIntOffset,iaRadLayer(kProfLayer)
       INTEGER iInt,iDiv,iDp,iPath,iLay,DoOutputLayer,iIOUN,iLoop,iL
       REAL raL2S(kMaxPts),raF(kMaxPts)
-      CHARACTER*80 caOut
+      CHARACTER*120 caOut
 
       IF (iType .GT. 0) THEN
         write(kStdErr,*) 'Should be calling out_bloat'
@@ -1150,7 +1150,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag,iDumpAllUARads
-      CHARACTER*80 caOutBloatFile
+      CHARACTER*120 caOutBloatFile
 c these are to do with the arbitrary pressure layering
       REAL raThickNess(kProfLayer),pProf(kProfLayer),
      $     raPressLevels(kProfLayer+1),raTPressLevels(kProfLayer+1)
@@ -1615,7 +1615,7 @@ c then do the topmost layer (could be fractional)
         END DO
 c^^^^^^^^^^^^^^^^^^^^^^^^^VVVVVVVVVVVVVVVVVVVV^^^^^^^^^^^^^^^^^^^^^^^^
 
- 3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
+ 3579 FORMAT(I4,' ',F10.5,' ',5(E12.5,' '))
 
       RETURN
       END
@@ -1656,7 +1656,7 @@ c local variables
       INTEGER iFr,iL,iIOUN
       DOUBLE PRECISION dEmission,dTrans,rMu,daInten0(kBloatPts)
       REAL raIntenBloat(kBloatPts),ttorad
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 
       caOutName = 'DumDum'
       iIOUN = kBloatNLTEOutUA
@@ -1724,7 +1724,7 @@ c local variables
         END DO
 
  11   FORMAT(I3,' ',9(E15.8,' '))
- 3579 FORMAT(I4,' ',F10.5,' ',5(E11.6,' '))
+ 3579 FORMAT(I4,' ',F10.5,' ',5(E12.5,' '))
 
       RETURN
       END

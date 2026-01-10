@@ -63,12 +63,12 @@ c  non LTE
       include '../INCLUDE/kcarta.param'
 
 c this is the driver file name
-      CHARACTER*80 caDriverName
+      CHARACTER*120 caDriverName
 
 c this is for overriding the defaults
       INTEGER iaaOverride(4,10),iaaOverrideOrig(4,10)
 c this is a dummy, but could in useful eg when giving the 100 layer cloud fracs for scattering      
-      CHARACTER*80 caaTextOverride,caaTextOverride1
+      CHARACTER*120 caaTextOverride,caaTextOverride1
 
 c this is for MOLGAS
       INTEGER iNGas,iaGasesNL(kGasComp)
@@ -87,7 +87,7 @@ c                   input file containing cloud params
 c                   which of the rtp profiles to use, number of clouds
 c                   if not all gases present in caPFname, then use AFGL profile
 c                     to fill in missing gas profiles
-      CHARACTER*80 caPFname,caPFName1,caCloudPFname,caCloudPFName1
+      CHARACTER*120 caPFname,caPFName1,caCloudPFname,caCloudPFName1
       INTEGER iRTP,iRTP1,iNcloudRTP,iNcloud_RTP1,iAFGLProf,iAFGLProf1
 
 c this is for WEIGHT
@@ -127,8 +127,8 @@ c iTemperVary     = -1 for kCARTA const-in-tau layer variation, +43 for LBLRTM l
      $     raTSurf1(kMaxAtm),raTSpace1(kMaxAtm)
       REAL raSatAngle(kMaxAtm),raSatHeight(kMaxAtm),
      $     raSatAngle1(kMaxAtm),raSatHeight1(kMaxAtm)
-      CHARACTER*80 caEmissivity(kMaxAtm),caEmissivity1(kMaxAtm)
-      CHARACTER*80 cakSolarRefl(kMaxAtm),cakSolarRefl1(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm),caEmissivity1(kMaxAtm)
+      CHARACTER*120 cakSolarRefl(kMaxAtm),cakSolarRefl1(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm),raSetEmissivity1(kMaxAtm)
       REAL rakSolarRefl(kMaxAtm),rakSolarRefl1(kMaxAtm)
       REAL rakSolarAngle(kMaxAtm),rakThermalAngle(kMaxAtm)
@@ -141,7 +141,7 @@ c iTemperVary     = -1 for kCARTA const-in-tau layer variation, +43 for LBLRTM l
       INTEGER iakSolar1(kMaxAtm),iakThermalJacob1(kMaxAtm)
       INTEGER iMPSetForRadRTP1,iMPSetForRadRTP   !!these are used if kRTP = 1
 c this is assuming purely absorptive scattering
-      CHARACTER*80 caaScatter1(kMaxAtm),caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter1(kMaxAtm),caaScatter(kMaxAtm)
       REAL raaScatterPressure1(kMaxAtm,2),raaScatterPressure(kMaxAtm,2)
       REAL raScatterDME1(kMaxAtm),raScatterDME(kMaxAtm)
       REAL raScatterIWP1(kMaxAtm),raScatterIWP(kMaxAtm)
@@ -165,7 +165,7 @@ c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint)
       INTEGER iaaOp1(kMaxPrint,kPathsOut),iaNp1(kMaxPrint)
       CHARACTER*120 caComment,caComment1
-      CHARACTER*80 caLogFile,caLogFile1
+      CHARACTER*120 caLogFile,caLogFile1
       REAL raaOp(kMaxPrint,kPathsOut),raaOp1(kMaxPrint,kPathsOut)
 
 c this is for JACOBN
@@ -227,15 +227,15 @@ c caaaNewChunks  tells the name of the files associated with the chunks
       INTEGER iaNewGasID1(kGasStore),iaNewData1(kGasStore) 
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
       INTEGER iNumNewGases1,iaaNewChunks1(kGasStore,kNumkCompT)
-      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
-      CHARACTER*80 caaaNewChunks1(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaNewChunks(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaNewChunks1(kGasStore,kNumkCompT) 
 c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltDirs      tells which gases we want to use alternate compressed files
 c caaaAltDirs    tells the name of the files associated with the alternate compressed files
       INTEGER iaAltDirs(kGasStore),iNumAltDirs
       INTEGER iaAltDirs1(kGasStore),iNumAltDirs1
-      CHARACTER*80 caaaAltDirs(kGasStore,kNumkCompT) 
-      CHARACTER*80 caaaAltDirs1(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaAltDirs(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaAltDirs1(kGasStore,kNumkCompT) 
      
 c this is for non LTE
 c raNLTEstrength    tells how strongly to add on the LTE files
@@ -257,8 +257,8 @@ c iSetBloat        tells to stay at 0.0025 cm-1 (default) or go to 0.0005 cm-1
       INTEGER iaNLTEGasID1(kGasStore),iaNLTEChunks1(kGasStore) 
       INTEGER iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
       INTEGER iNumNLTEGases1,iaaNLTEChunks1(kGasStore,kNumkCompT)
-      CHARACTER*80 caaStrongLines(kGasStore) 
-      CHARACTER*80 caaStrongLines1(kGasStore) 
+      CHARACTER*120 caaStrongLines(kGasStore) 
+      CHARACTER*120 caaStrongLines1(kGasStore) 
       REAL    raNLTEstrength(kGasStore),raNLTEstrength1(kGasStore) 
 c iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 c raNLTEstart   tells for each gas, which is start height of NONLTE
@@ -266,13 +266,13 @@ c caaaNLTEBands tells the name of the files containing the line parameters
 c caaNLTETemp  tells the name of the files containing the nonLTE temps
       INTEGER iaNLTEBands(kGasStore),iaNLTEBands1(kGasStore) 
       REAL raNLTEstart(kGasStore),raNLTEstart1(kGasStore) 
-      CHARACTER*80 caaaNLTEBands(kGasStore,kNumkCompT) 
-      CHARACTER*80 caaaNLTEBands1(kGasStore,kNumkCompT) 
-      CHARACTER*80 caaNLTETemp(kGasStore) 
-      CHARACTER*80 caaNLTETemp1(kGasStore) 
+      CHARACTER*120 caaaNLTEBands(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaNLTEBands1(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaNLTETemp(kGasStore) 
+      CHARACTER*120 caaNLTETemp1(kGasStore) 
 c this is the gas amount/LTE profile that Dave Edwards uses for GENLN2
-      CHARACTER*80 caaUpperMixRatio(kGasStore) 
-      CHARACTER*80 caaUpperMixRatio1(kGasStore)       
+      CHARACTER*120 caaUpperMixRatio(kGasStore) 
+      CHARACTER*120 caaUpperMixRatio1(kGasStore)       
 
 c define the namelists!!!!!!!!
 
@@ -457,7 +457,7 @@ c *************** read input name list file *********************************
         OPEN(UNIT=iIOun,FILE=caDriverName,STATUS='OLD',IOSTAT=iErr) 
         IF (iErr .NE. 0) THEN 
           WRITE(kStdErr,1070) iErr, caDriverName 
- 1070     FORMAT('ERROR! number ',I5,' opening namelist file:',/,A80) 
+ 1070     FORMAT('ERROR! number ',I5,' opening namelist file:',/,A120) 
           CALL DoSTOP 
         ENDIF 
       END IF 
@@ -888,14 +888,14 @@ c basic output file
       include '../INCLUDE/kcarta.param'
 
 c main output filename
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c iaGases       = integer array with list of gasID's in order they were read in
 c iErr          = error count (mainly associated with file I/O)
 c iNumGases     = total number of gases read in from *MOLGAS + *XSCGAS
 c iaCont        = array indicating whther or not to do continuum/no continuum 
       INTEGER iErr,iaCONT(kMaxGas)
 c caFfileName   = name of input file
-      CHARACTER*80 caDriverName
+      CHARACTER*120 caDriverName
 c this is for MOLGAS
       INTEGER iNGas,iaGasesNL(kGasComp)
 c this is for xscfil
@@ -915,7 +915,7 @@ c caPFName = name of profile file
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPFname,caCloudPFName
+      CHARACTER*120 caPFname,caCloudPFName
       INTEGER iRTP
 c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
 c iProfileLayers = tells how many layers read in from RTP or KLAYERS file
@@ -972,8 +972,8 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
       REAL raaaSetSolarRefl(kMaxAtm,kEmsRegions,2)
       INTEGER iaSetEms(kMaxAtm),iaSetSolarRefl(kMaxAtm)
-      CHARACTER*80 caEmissivity(kMaxAtm)
-      CHARACTER*80 cakSolarRefl(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm)
+      CHARACTER*120 cakSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm),rakSolarRefl(kMaxAtm)
       INTEGER iaMPSetForRad(kMaxAtm) 
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -987,7 +987,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       INTEGER iNatm,iaNumlayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
       INTEGER iSetRTPCld,iTemperVary
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 c this is for looping over obne particular atmopheric parameter
@@ -1008,7 +1008,7 @@ c iNatm2        = number of radiating atmospheres that *OUTPUT thinks there is
       INTEGER iaPrinter(kMaxPrint),iaGPMPAtm(kMaxPrint),iNatm2
       INTEGER iaaOp(kMaxPrint,kPathsOut),iaNp(kMaxPrint),iOutTypes
       CHARACTER*120 caComment
-      CHARACTER*80 caLogFile      
+      CHARACTER*120 caLogFile      
       REAL raaOp(kMaxPrint,kPathsOut),raaUserPress(kMaxPrint,kProfLayer)
 
 c this is for JACOBN
@@ -1067,19 +1067,19 @@ c iaaNewChunks   tells which data chunks to read in
 c caaaNewChunks  tells the name of the files associated with the chunks 
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore) 
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
-      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT)
+      CHARACTER*120 caaaNewChunks(kGasStore,kNumkCompT)
 c iNumAltComprDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltComprDirs      tells which gases we want to use alternate compressed files
 c caaAltComprDirs     tells the name of the files associated with the alternate compressed files
 c rAltMinFr,rAltMaxFr tell the min.max wavenumbers to replace (better to do by BAND eg 605-2830 or 500-605)
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
-      CHARACTER*80 caaAltComprDirs(kGasStore)
+      CHARACTER*120 caaAltComprDirs(kGasStore)
       REAL          rAltMinFr,rAltMaxFr      
 c iNumAltDirs    tells how many gases have "alternate" compressed dirs to use
 c iaAltDirs      tells which gases we want to use alternate compressed files
 c caaaAltDirs    tells the name of the files associated with the alternate compressed files
       INTEGER iaAltDirs(kGasStore),iNumAltDirs
-      CHARACTER*80 caaaAltDirs(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaAltDirs(kGasStore,kNumkCompT) 
 
 c this is for nonLTE
 c raNLTEstrength   tells how strongly to add on the new files (default 1.0)
@@ -1094,23 +1094,23 @@ c iAllLayersLTE        tells the code if all layers assumed to be at LTE
 c iUseWeakBackGnd tells the code if use weak background lines as well, or not
 c iSetBloat tells whether or not to bloat up to 0.0005 cm-1 or not
       INTEGER iDoUpperAtmNLTE,iAllLayersLTE,iUseWeakBackGnd,iSetBloat
-      CHARACTER*80 caPlanckBloatFile,caOutBloatFile
+      CHARACTER*120 caPlanckBloatFile,caOutBloatFile
       REAL raNLTEstrength(kGasStore)
       INTEGER iaNLTEGasID(kGasStore),iaNLTEChunks(kGasStore),iNLTE_SlowORFast
       INTEGER iNumNLTEGases,iaaNLTEChunks(kGasStore,kNumkCompT)
-      CHARACTER*80 caaStrongLines(kGasStore) 
+      CHARACTER*120 caaStrongLines(kGasStore) 
 c iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 c iaNLTEstart   tells the lowest layers that is in NONLTE
 c caaaNLTEBands tells the name of the files containing the line parameters
 c caaNLTETemp  tells the name of the files containing the nonLTE temps
       INTEGER iaNLTEBands(kGasStore)
       INTEGER iaNLTEStart(kGasStore),iaNLTEStart2350(kGasStore)
-      CHARACTER*80 caaaNLTEBands(kGasStore,kNumkCompT) 
-      CHARACTER*80 caaNLTETemp(kGasStore) 
+      CHARACTER*120 caaaNLTEBands(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaNLTETemp(kGasStore) 
 c if we do NLTE above the kCARTA database (p < 0.005 mb), we need the mixing
 c ratio profiles from GENLN2, and mebbe files to dump things to
-      CHARACTER*80 caaUpperMixRatio(kGasStore) 
-      CHARACTER*80 caPlanckUAfile,caOutUAfile,caOutUABloatFile
+      CHARACTER*120 caaUpperMixRatio(kGasStore) 
+      CHARACTER*120 caPlanckUAfile,caOutUAfile,caOutUABloatFile
 
 c local variables
       INTEGER iNewLBL,iInt,iNumLayers,iType,iLow,iHigh,iaDumb(kMaxGas)
@@ -1127,7 +1127,7 @@ c this local variable keeps track of the GAS ID's read in by *PRFILE
       INTEGER iResetCldFracs
 c this is is we have 100 layer clouds
       INTEGER iIOUNX,iErrX,iMRO,iNumLaysX
-      CHARACTER*80 caJunk80      
+      CHARACTER*120 caJunk80      
       REAL rTCC,rCfracX1,rCfracX2,rCfracX12
 
       iResetCldFracs = -1   !! if need to do pclsam flux computation, then reset cldfracs to 1.0
@@ -1393,7 +1393,7 @@ c ******** RADNCE section
         IF (IERRX .NE. 0) THEN
           WRITE(kStdErr,*) 'k100layerCloud : make sure file exists'
           WRITE(kStdErr,1010) IERRX, caaTextOverrideDefault
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
         ENDIF
         kTempUnitOpen = 1
@@ -1414,7 +1414,7 @@ c ******** RADNCE section
 	  CALL DOStop
 	END IF	
       END IF
- 1012 FORMAT(A80)
+ 1012 FORMAT(A120)
 
 c now based on iMRO = +1 we do one glorious run (cc(i) varies with each layer (i), also do clear concurrently)
 c                   = -1 we do two runs, one a clear sky only, other a cloudy sky one, then add using tcc
@@ -2141,7 +2141,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raCprtop(kMaxClouds), raCprbot(kMaxClouds)
       REAL raCngwat(kMaxClouds), raCpsize(kMaxClouds)
       INTEGER iaCtype(kMaxClouds),iNclouds_RTP,iaNML_Ctype(kMaxClouds)
-      CHARACTER*80 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
+      CHARACTER*120 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm)
       REAL raSetEmissivity(kMaxAtm) 
       INTEGER iaMPSetForRad(kMaxAtm),iMPSetForRadRTP
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -2157,7 +2157,7 @@ c raS**Azimuth are the azimuth angles for solar beam single scatter
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       INTEGER iRTP
-      CHARACTER*80 caPFName
+      CHARACTER*120 caPFName
 
       INTEGER iI
       
@@ -2251,7 +2251,7 @@ c this subroutine deals with the 'PTHFIL' keyword
       include '../INCLUDE/kcarta.param'
 
 c iAFGLProf  = which AFGL prof to use? 1 .. 6
-c caPFName = character*80 profile name
+c caPFName = character*120 profile name
 c raaAmt/Temp/Press/PartPress = current gas profile parameters
 c iNumGases = total number of gases read in from *GASFIL + *XSCFIL
 c iaGases   = array that tracks which gas ID's should be read in
@@ -2271,14 +2271,14 @@ c iKnowTP = -1 usually (our layers/klayers, +1 if coming from GENLN4)
       REAL raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
       REAL raaPress(kProfLayer,kGasStore)
       REAL raaPartPress(kProfLayer,kGasStore)
-      CHARACTER*80 caPfname
+      CHARACTER*120 caPfname
 
 c local variables
       CHARACTER*7 caWord
       INTEGER iNumLinesRead,iaDispGasID(12),iCount
       INTEGER iGenln4,iL,iLBLDIS
       REAL rP,rPP
-      CHARACTER*80 caStr
+      CHARACTER*120 caStr
       CHARACTER*160 caStr160
 
       iKnowTP = -1
@@ -2389,11 +2389,11 @@ c notice here that gA == first gas in the MOLGAS, usually water
       !!!! this is for LBLDIS =======================<<<<<<< >>>>=============
       !!!! pressures in mb, temps in K, heights in km, gas amounts in mol/cm2
       !!!! only dump gases(1:7) for "var" gases, gas 22 (N2) as the broadener
- 9879   FORMAT(9(E14.8,' '))
- 9878 FORMAT(8(E14.8,' '))
- 9877 FORMAT(7(E14.8,' '))
- 9876 FORMAT(6(E14.8,' '))
- 9872 FORMAT(2(E14.8,' '))
+ 9879 FORMAT(9(E15.8,' '))
+ 9878 FORMAT(8(E15.8,' '))
+ 9877 FORMAT(7(E15.8,' '))
+ 9876 FORMAT(6(E15.8,' '))
+ 9872 FORMAT(2(E15.8,' '))
       caStr='<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>
      $>>>>>>>>>>>'
       IF ((iLBLDIS .GT. 0) .AND. (abs(kLongOrShort) .LE. 1)) THEN
@@ -2470,9 +2470,9 @@ c notice here that gA == first gas in the MOLGAS, usually water
       END DO
 
  5030 FORMAT(A160)
- 5040 FORMAT(A80)
- 5050 FORMAT(I3,' ',6(E11.5,' ')) 
- 5060 FORMAT(I3,' ',11(E11.5,' ')) 
+ 5040 FORMAT(A120)
+ 5050 FORMAT(I3,' ',6(E12.5,' ')) 
+ 5060 FORMAT(I3,' ',11(E12.5,' ')) 
 
       RETURN
       END

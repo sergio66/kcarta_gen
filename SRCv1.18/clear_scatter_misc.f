@@ -155,7 +155,7 @@ c!!!      INTEGER  MAXTAB, MAXGRID
       CHARACTER*(*) SCATFILE
       INTEGER  IMU, ID, IW, K2, K3
 
-      CHARACTER*80 caLine
+      CHARACTER*120 caLine
       CHARACTER cScale
 
       OPEN (UNIT=2, STATUS='OLD', FILE=SCATFILE)
@@ -189,7 +189,7 @@ c!!!      INTEGER  MAXTAB, MAXGRID
          ENDDO
       ENDDO
 
- 30   FORMAT(A80)
+ 30   FORMAT(A120)
 
       CLOSE (UNIT=2)
  
@@ -242,7 +242,7 @@ c********* these are dummy!
       CHARACTER*(*) SCATFILE
       INTEGER  IMU, ID, IW, K2, K3
 
-      CHARACTER*80 caLine
+      CHARACTER*120 caLine
       CHARACTER cScale
 
       NMUOBS = -9999
@@ -271,7 +271,7 @@ c     $       TABSSALB(K2+1), TABASYM(K2+1)
           ENDDO
         ENDDO
 
- 30   FORMAT(A80)
+ 30   FORMAT(A120)
 
       CLOSE (UNIT=2)
 
@@ -811,7 +811,7 @@ c this subroutine parses the line and finds first nonzero character
 
       include '../INCLUDE/kcarta.param' 
   
-      CHARACTER*80 caLine  
+      CHARACTER*120 caLine  
       CHARACTER cScale  
   
       INTEGER iI,iFound  
@@ -3129,7 +3129,7 @@ c local variables
         iKcCldBot = IFindWhereInAtm(iaaRadLayer,iAtm,iNumLayer,N)
 
        !now get the optical properties for the cloud layers 
-       DO iI = 1,kMixFilRows
+       DO iI = 1,kProfLayer
          DO iF = 1,kMaxPts
            raaPhaseJacobASYM(iF,iI) = 0.0
            raaExtJacobIWP(iF,iI)    = 0.0
@@ -6156,7 +6156,7 @@ c local variables
        END DO
 
        !now get the optical properties for the cloud layers 
-       DO iI = 1,kMixFilRows
+       DO iI = 1,kMaxLayer
          DO iF = 1,kMaxPts
            raaPhaseJacobASYM(iF,iI) = 0.0
            raaExtJacobIWP(iF,iI)    = 0.0
@@ -6312,7 +6312,7 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c these are to do with the arbitrary pressure layering
       INTEGER iKnowTP,iProfileLayers
       REAL raThickness(kProfLayer),pProf(kProfLayer),rCO2MixRatio,
@@ -6674,7 +6674,7 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iIOUN
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
 c these are to do with the arbitrary pressure layering
       INTEGER iKnowTP,iProfileLayers
       REAL raThickness(kProfLayer),pProf(kProfLayer),

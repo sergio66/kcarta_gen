@@ -177,6 +177,7 @@ CONTAINS
     END IF
 
     IF (iDownWard == 1) THEN
+      write(kStdWarn,*) 'Doing DownLook jacobian'
       CALL DownWardJacobian(raFreq,iTag,iActualTag, &
         iProfileLayers,raPressLevels, &
         iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
@@ -187,6 +188,7 @@ CONTAINS
         iaJacob,iJacob,raaMix,raSunRefl,rDelta, &
         iNLTEStart,raaPlanckCoeff)
     ELSE IF (iDownWard == -1) THEN
+      write(kStdWarn,*) 'Doing UpLook jacobian'
       CALL UpWardJacobian(raFreq,iTag,iActualTag, &
         iProfileLayers,raPressLevels, &
         iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &

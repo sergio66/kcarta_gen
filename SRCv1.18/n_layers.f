@@ -74,7 +74,7 @@ c for testing just do SUBROUTINE InputMR_profile(caPfName)    !! for testing
       include '../INCLUDE/airslevelheights.param'
 
 c input
-      CHARACTER*80 caPfName
+      CHARACTER*120 caPfName
 c output
       REAL raTout(kProfLayer)                  !! in K
       REAL raAmountOut(kProfLayer)             !! in molecules/cm2
@@ -433,7 +433,7 @@ c local
 
       INTEGER iL,iJ,iMid,ifloor,iErr,iG,iFound,iNumGases0
       REAL rX,raR100Amt(kMaxLayer+10),raR100PartPress(kMaxLayer+10)
-      CHARACTER*80 caRefFName
+      CHARACTER*120 caRefFName
       CHARACTER*3 ca3
       INTEGER iNumLevsX,iIndex
       REAL raPPX(kMaxProfLayer),raQX(kMaxProfLayer) !!US Std layer ppress, amt
@@ -602,8 +602,8 @@ c local
           write(kStdWarn,801) iG,iaG(iG),iaGasUnits(iG),rJunk1
         END IF	  
       END DO
- 800  FORMAT('index=',I3,' gasID=',I3,' InputGasUnits=',I3,' origQ(level1)=',ES12.6,' finalQ_ppmv(level1)=',ES12.6)
- 801  FORMAT('index=',I3,' gasID=',I3,' InputGasUnits=',I3,' origQ(level1)=',ES12.6,' already in ppmv') 
+ 800  FORMAT('index=',I3,' gasID=',I3,' InputGasUnits=',I3,' origQ(level1)=',ES12.5,' finalQ_ppmv(level1)=',ES12.5)
+ 801  FORMAT('index=',I3,' gasID=',I3,' InputGasUnits=',I3,' origQ(level1)=',ES12.5,' already in ppmv') 
  
       iDry2Wet = -1 !! do not adjust dry air to wet air MR
       iDry2Wet = +1 !!        adjust dry air to wet air MR  DEFAULT
@@ -1221,7 +1221,7 @@ c      DO iL = 1,kMaxLayer-iLowestLev+1
 c        write(*,1234) iL,raP(iL),raT(iL),raaG_VMR(iL,1),raPX(iL),raTX(iL),raaG_VMRX(iL,1)
 c      END DO
 c      call dostop
- 1234 FORMAT(I3,2(' ',F10.4),' ',E10.4,2(' ',F10.4),' ',E10.4)
+ 1234 FORMAT(I3,2(' ',F12.5),' ',E12.5,2(' ',F12.5),' ',E12.5)
  
 c need to be careful with last point; linear maybe better than spline if raP(iNumLevs) > raPX(iNumUse)
       iHigh = iNumUse
@@ -1357,7 +1357,7 @@ c      DO iL = 1,iZbnd-iLowestLev+1
 c        write(*,1234) iL,raP(iL),raT(iL),raaG_VMR(iL,1),raPX(iL),raTX(iL),raaG_VMRX(iL,1)
 c      END DO
 c      call dostop
- 1234 FORMAT(I3,2(' ',F10.4),' ',E10.4,2(' ',F10.4),' ',E10.4)
+ 1234 FORMAT(I3,2(' ',F12.5),' ',E12.5,2(' ',F12.5),' ',E12.5)
  
 c need to be careful with last point; linear maybe better than spline if raP(iNumLevs) > raPX(iNumUse)
       iHigh = iNumUse
@@ -1636,7 +1636,7 @@ c output
 c local
       REAL PLEVx110(kMaxLayer+10)
       REAL rLat,raJunk(kMaxLayer+10)
-      CHARACTER*80 caPFname,caStr,caComment
+      CHARACTER*120 caPFname,caStr,caComment
       INTEGER iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec
 
 c first extend PLEV_KCARTADATABASE_AIRS a little above its lwest value, so can do interps well
@@ -1665,7 +1665,7 @@ c      caPFname = '/home/sergio/KCARTA/INCLUDE/glatm_16Aug2010.dat'
           WRITE(kStdErr,1070) iErrIO, caPfname
           CALL DoSTOP
       ENDIF
- 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A120)
       kProfileUnitOpen=1
 
       iAFGL = 0
@@ -1806,7 +1806,7 @@ c        write(kStdWarn,*) 'Reading in minor absorbing GasID ',iG,' profile from
  60   CONTINUE
       CLOSE(iIOUN2) 
       kProfileUnitOpen=-1
- 1080 FORMAT(A80)
+ 1080 FORMAT(A120)
 
       IF (iFoundGas .LT. 0) THEN
         !! finally give up
@@ -1918,7 +1918,7 @@ c http://cimss.ssec.wisc.edu/~paulv/Fortran90/Profile_Utility/profile_units_conv
 c see /home/sergio/KCARTA/DOC/NotesOnAtmosphericProfilesAndQuantities.pdf
 c     /home/sergio/KCARTA/DOC/sci_klayers.txt
 
- 1234 FORMAT(I3,' ',F10.4,' ' ,I3,6(' ',F10.4),1(' ',E10.4),3(' ',F10.4))
+ 1234 FORMAT(I3,' ',F12.5,' ' ,I3,6(' ',F12.5),1(' ',E12.5),3(' ',F12.5))
  
       z = rHSurf !! need to kludge this
       zWoo = rHSurf
@@ -2214,8 +2214,8 @@ c testing
           END IF
         END DO
       END IF
- 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '))
- 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES9.3,' '),A7)
+ 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES10.3,' '))
+ 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(ES10.3,' '),A7)
  113  FORMAT(A90)
 
 c now find pressure output corresponding to HGT output from LBLRTM
@@ -2326,7 +2326,7 @@ c http://cimss.ssec.wisc.edu/~paulv/Fortran90/Profile_Utility/profile_units_conv
 c see /home/sergio/KCARTA/DOC/NotesOnAtmosphericProfilesAndQuantities.pdf
 c     /home/sergio/KCARTA/DOC/sci_klayers.txt
 
- 1234 FORMAT(I3,' ',F10.4,' ' ,I3,6(' ',F10.4),1(' ',E10.4),3(' ',F10.4))
+ 1234 FORMAT(I3,' ',F12.5,' ' ,I3,6(' ',F12.5),1(' ',E12.5),3(' ',F12.5))
  
       z = rHSurf !! need to kludge this
       zWoo = rHSurf
@@ -2646,8 +2646,8 @@ c      END IF
           END IF
         END DO
       END IF
- 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '))
- 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E9.3,' '),A7)
+ 111  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E10.3,' '))
+ 112  FORMAT(2(I3,' '),1(F9.4,' '),6(F8.4,' '),7(E10.3,' '),A7)
  113  FORMAT(A90)
 
 c now find pressure output corresponding to HGT output from LBLRTM
@@ -2685,7 +2685,7 @@ c this will be at whatever gas units eg RH g/kg  VMR etc, but then CONVERTED to 
       INCLUDE '../INCLUDE/kcarta.param'
 
 c input
-      CHARACTER*80 caPfName
+      CHARACTER*120 caPfName
       REAL rPminKCarta,rPmaxKCarta,rHminKCarta,rHmaxKCarta
 c output
       INTEGER iNumLevs,iNumGases,iaG(kMaxGas),iaGasUnits(kMaxGas)
@@ -2695,7 +2695,7 @@ c output
 c local var
       INTEGER iIOUN2,iErr,iErrIO,iL,iJ,iG,iMid,ifloor,iReadInOK,iIgnore,iYes
       REAL raX(kMaxGas),rX,rP,rT,raP_Nm2(2*kProfLayer),rPRefMin,rPRefMax,rPRefMinAugmented
-      CHARACTER*80 caStr
+      CHARACTER*120 caStr
       CHARACTER*40 caaUnit(50)
 
       DO iL = 1,50
@@ -2727,7 +2727,7 @@ c local var
           iErr=1
           WRITE(kStdErr,1070) iErrIO, caPfname
  1070     FORMAT('ERROR! number ',I5,' opening PRFILE path LEVELS profile file'
-     $            ,/,A80)
+     $            ,/,A120)
           CALL DoSTOP
       ENDIF
       kProfileUnitOpen=1
@@ -2822,7 +2822,7 @@ c local var
       END IF
       iNumLevs = iReadInOK
       
- 5030 FORMAT(A80)
+ 5030 FORMAT(A120)
  5040 FORMAT('iReadInOK, rP (mb), rT (K), raG1 = ',I3,' ',F14.6,' ',F8.3,' ',ES12.5)
  5041 FORMAT('Ignore (too low P) rP (mb), rT (K), raG1 = ',I3,' ',ES12.5,' ',F8.3)
  5042 FORMAT('Bad (press below 0.005 mb (UNSORTED PinLEVS??)) rP (mb), rT (K), raG1 = ',I3,' ',ES12.5,' ',F8.3) 
@@ -2938,7 +2938,7 @@ c output
 c local
       REAL raRx110Temp(2*kProfLayer),raRx110MR(2*kProfLayer),raRx110Press(2*kProfLayer)
       REAL rLat,raJunk(kProfLayer*2)
-      CHARACTER*80 caPFname,caStr,caComment
+      CHARACTER*120 caPFname,caStr,caComment
       INTEGER iAFGL,iProf,iIOUN2,iERRIO,iErr,iI,iG,iFoundGas,iXsec,iNumLevsx
 
       caPFname = kcaLevsRefProf
@@ -2957,7 +2957,7 @@ c local
           WRITE(kStdErr,1070) iErrIO, caPfname
           CALL DoSTOP
       ENDIF
- 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening GLATM file ',A120)
       kProfileUnitOpen=1
 
       iAFGL = 0
@@ -3098,7 +3098,7 @@ c        write(kStdWarn,*) 'Reading in minor absorbing GasID ',iG,' profile from
  60   CONTINUE
       CLOSE(iIOUN2) 
       kProfileUnitOpen=-1
- 1080 FORMAT(A80)
+ 1080 FORMAT(A120)
 
       IF (iFoundGas .LT. 0) THEN
         !! finally give up

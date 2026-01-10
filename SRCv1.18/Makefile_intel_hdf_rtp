@@ -2,81 +2,69 @@
 ##          set up the appropriate RTP and HDF paths and libraries        ##
 ##          current options are SGI and LINUX                             ##
 ############################################################################
-# ---------
-# HDF flags
-# ---------
-# HDF_INSTALL : set this to point to the HDF location
-# HDFLIB : hdf lib, relative to install path above
-#
-# set HDFHOME to point to the local HDF installation, pre Aug 2015
-# HDF_INSTALL = /usr/local/hdf
-# HDF_INSTALL = /asl/opt
-# HDFLIB   = -L$(HDF_INSTALL)/lib -lmfhdf -ldf -ljpeg -lz
-
-################### Paul has split things post Aug 2015
-#HDF_INSTALL1 = /asl/opt/hdf/4.2r4
-#HDFLIB1   = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz       ## -lmfhdf
-
-# more libs
-#HDF_INSTALL2 = /asl/opt/szip/2.1
-#HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
-
-################## more recent Jan 2016
-HDF_INSTALL1 = /usr/cluster/contrib/hdf4/4.2.11
-HDFLIB1   = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz       ## -lmfhdf
-
-# more libs
-HDF_INSTALL2 = /usr/cluster/contrib/szip2/szip2.1
-HDFLIB2   = -L$(HDF_INSTALL2)/lib -lsz -L/usr/lib64/libsz.so.2
-
-HDFLIB = $(HDFLIB1) $(HDFLIB2)
 
 # ---------
-# RTP flags
+# HDF flags : see hdf_rtp_old
 # ---------
+
+## from Howard May 2024
+#HDF_INSTALL3 = /usr/ebuild/software/HDF/4.2.14-GCCcore-8.3.0/
+#HDFLIB3 = -L$(HDF_INSTALL1)/lib -ldf -ljpeg -lz
+#HDFLIB = $(HDFLIB3)
+
+#HDFHOME = /usr/ebuild/software/HDF/4.2.14-GCCcore-8.3.0
+HDFHOME = /usr/ebuild/software/HDF/4.2.16-2-GCCcore-13.2.0
+HDFINC = -I$(HDFHOME)/include/hdf
+HDFLIB = -L$(HDFHOME)/lib -ldf
+
+########################################################################
+########################################################################
+########################################################################
+
+#---------------------
+#nf-config -help
+#nf-config --fc
+#nf-config --fflags
+#nf-config --flibs
+
+NETCDFI = -I/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include
+NETCDFX = -I/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include \
+        -L/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/lib -lnetcdff \
+        -L/usr/ebuild/software/icc/2018.3.222-GCC-7.3.0-2.30/lib/intel64 \
+        -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/lib \
+        -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/mkl/lib/intel64 \
+        -L/usr/ebuild/software/imkl/2018.3.222-iimpi-2018b/lib \
+        -L/usr/ebuild/software/netCDF/4.6.1-intel-2018b/lib64 -lnetcdf -lnetcdf -liomp5 -lpthread
+
+NETCDFLIBS = $(NETCDFX)
+
+########################################################################
+########################################################################
+########################################################################
+
+# ---------
+# RTP flags : see hdf_rtp_old
+# ---------
+
 # RTPLIB : point this to the lib you created in RTP/Src_rtp
-#
-# linux
-# these are gases 1 .. 63
-# RTPLIB = -L/asl/packages/rtpV105/lib -lrtp
-# these are gases 1 .. 63 plus clouds 201 - 203
-# RTPLIB = -L/asl/packages/rtpV105_4500/lib -lrtp
-#
-### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
-### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
-#RTPHOME = /asl/packages/rtpV201_g80
-#RTPLIB = -L$(RTPHOME)/lib -lrtp
-### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
-### rtpV201 on taro.umbc.edu for g80, use this this works <<<<<<<<<<<<<<
-#
-### rtpV201 on compiled with ifort
-RTPHOME = /home/sergio/git/rtp/rtpV201
+
+## freshly 2024 compiled ifort F90 rtpdef.f90
+#RTPHOME = /home/sergio/OTHERSTUFF/git/rtp/rtpV201  HMM THIS IS WHERE I THOUGHT I SHOULD BE
+#RTPHOME = /home/sergio/git/rtp/rtpV201/
+RTPHOME = /home/sergio/git/rtp/rtpV221/
+RTPHOME = /home/sergio/git/rtp/rtpV221_80gases/
+RTPHOME = /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/KLAYERS_RTPv221_150levs_120km/rtpV221_80gases/
+
+#RTPLIB = -L$(RTPHOME)/lib -lrtp90
 RTPLIB = -L$(RTPHOME)/lib -lrtp
-#
 
 # ---------------
 # RTP include dir
 # ---------------
 # this is where the RTP package files are stored
 #
-# linux
-# this is on asl.umbc.edu
-# RTPINC = -I/asl/packages/rtpV105_4500/include
-# RTPDEFS_FILE = /asl/packages/rtpV105_4500/include/rtpdefs.f
 #
-### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
-#RTPINC = -I/asl/packages/rtpV201_g80/include
-#RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs.f
-###RTPDEFS_FILE = /asl/packages/rtpV201_g80/include/rtpdefs_f90.f90
-### 80 gases rtpV201 on taro.umbc.edu <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< use this, this works
-#
-### 16 gases rtpV201 with ifort
-#RTPINC = -I/home/sergio/git/rtp/rtpV201/include
-#RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f
-#
-#RTPINC = -I/home/sergio/maya_home/git/rtp/rtpV201/include
-#RTPDEFS_FILE = /home/sergio/maya_home/git/rtp/rtpV201/include/rtpdefs.f90
-#
-RTPINC = -I/home/sergio/git/rtp/rtpV201/include
-RTPDEFS_FILE = /home/sergio/git/rtp/rtpV201/include/rtpdefs.f90
-#
+RTPINC = -I$(RTPHOME)/include
+RTPDEFS_FILE = $(RTPHOME)/include/rtpdefs.f
+
+

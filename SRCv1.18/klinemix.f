@@ -276,8 +276,8 @@ c        print *,dLTE,daF1(iI),daYmix(iI)*dP
 
 c      write(kStdWarn,*) 'f0,df,iLine,ymix= ',sngl(daF1(iLine)),dDiff0,iLine,sngl(daYmix(iLine)*dP)
      
- 1070 FORMAT('ERROR! number ',I5,' opening LINEMIX parameter file:',/,A80) 
- 1080 FORMAT('Opened LineMix parameter file ',A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening LINEMIX parameter file:',/,A120) 
+ 1080 FORMAT('Opened LineMix parameter file ',A120) 
 
       RETURN
       END
@@ -312,7 +312,7 @@ c local variables
       CHARACTER*30  caX
       DOUBLE PRECISION dDiff0,dDiff1,dT1,dT2,dBlah
       CHARACTER*1 caPorR_1(kHITRAN),caPorR_2(kHITRAN)
-      CHARACTER*80 caSkip80
+      CHARACTER*120 caSkip80
       
       iTooFar = -1         !!assume this line DOES exist in linemix files
       iJL = int(dJL)
@@ -478,8 +478,8 @@ c        print *,dLTE,daF1(iI),daYmix(iI)*dP
 
 c      write(kStdWarn,*) 'f0,df,iLine,ymix= ',sngl(daF1(iLine)),dDiff0,iLine,sngl(daYmix(iLine)*dP)
      
- 1070 FORMAT('ERROR! number ',I5,' opening LINEMIX parameter file:',/,A80) 
- 1080 FORMAT('Opened LineMix parameter file ',A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening LINEMIX parameter file:',/,A120) 
+ 1080 FORMAT('Opened LineMix parameter file ',A120) 
 
       RETURN
       END
@@ -595,7 +595,7 @@ c local variables
       DOUBLE PRECISION  vbc,vtc,dvc,temp(ntemp),doc(ndoc)
 
       DOUBLE PRECISION chi(npts,ndoc,ntemp) !!for T=100,150,200,250,300,350,400
-      CHARACTER*80 caFName,caFName1
+      CHARACTER*120 caFName,caFName1
 
 c we have 10 d of c parameters tau2=1e-3*(1,3,5,...,19) (ndoc=10)
 c we have 7 temperatures : 100,150,200,250,300,350,400  (ntemp=7)
@@ -656,7 +656,7 @@ c see birn_lookupNEW.m
         WRITE(kStdErr,1070) iErr, caFName
         CALL DoSTOP 
       END IF 
- 1070 FORMAT('ERROR! number ',I5,' opening birnbaum parameter file:',/,A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening birnbaum parameter file:',/,A120)
       
       kTempUnitOpen = 1  
 
@@ -821,7 +821,7 @@ c local variables
       DOUBLE PRECISION  vbc,vtc,dvc,temp(ntemp),doc(ndoc)
 
       DOUBLE PRECISION chi(npts,ndoc,ntemp) !!for T=100,150,200,250,300,350,400
-      CHARACTER*80 caFName,caFName1
+      CHARACTER*120 caFName,caFName1
       DOUBLE PRECISION t,u,y1,y2,y3,y4,v(kMaxPts)
 
 c we have 10 d of c parameters tau2=1e-3*(1,3,5,...,19) (ndoc=10)
@@ -880,7 +880,7 @@ c see birn_lookupNEW.m
         WRITE(kStdErr,1070) iErr, caFName
         CALL DoSTOP 
       END IF 
- 1070 FORMAT('ERROR! number ',I5,' opening birnbaum coarse parameter file:',/,A80)
+ 1070 FORMAT('ERROR! number ',I5,' opening birnbaum coarse parameter file:',/,A120)
  
       kTempUnitOpen = 1  
 

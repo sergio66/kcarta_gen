@@ -90,9 +90,9 @@ c raTPressLevels,iKnowTP are for temperatures at the LEVELS : LEVEL TEMPERATURES
       REAL raaMix(kMixFilRows,kGasStore)
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iTag,iNpmix,iFileID
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -343,9 +343,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -943,9 +943,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -1733,9 +1733,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -2318,9 +2318,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -2879,9 +2879,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -3482,9 +3482,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot,raSunRefl(kMaxPts)
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -3983,7 +3983,7 @@ c input
       REAL raDensity0(kProfLayer),raThickness(kProfLayer),raDeltaPressure(kProfLayer)
       REAL raPressLevels(kProfLayer+1)
       INTEGER iIOUN,iNumLayer,troplayer,iAtm,iaRadLayer(kProfLayer)
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 
 c local      
       INTEGER iL,iLay,iFr
@@ -4039,7 +4039,7 @@ c input
       REAL raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
       REAL raFreq(kMaxPts),rDelta,raDensityX(kProfLayer),raPressLevels(kProfLayer+1)
       INTEGER iIOUN,iNumLayer,troplayer,iAtm,iaRadLayer(kProfLayer)
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 
 c local      
       INTEGER iL,iLay,iFr,iWhichHeatRateCalc
@@ -4148,7 +4148,7 @@ c input
       REAL raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
       REAL raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
       INTEGER iIOUN,iNumLayer,troplayer,iAtm
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 
 c local      
       INTEGER iL,iLay,iFr,i1,i2
@@ -4205,7 +4205,7 @@ c input
       REAL raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
       REAL raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
       INTEGER iIOUN,iNumLayer,troplayer,iAtm
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 
 c local      
       INTEGER iL,iLay,iFr,i1,i2
@@ -4261,7 +4261,7 @@ c input
       REAL raaUpFlux(kMaxPts,kProfLayer+1),raaDownFlux(kMaxPts,kProfLayer+1)
       REAL raFreq(kMaxPts),rDelta,raDensityX(kProfLayer)
       INTEGER iIOUN,iNumLayer,troplayer,iAtm
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 
 c local      
       INTEGER iL,iLay,iFr,i1,i2
@@ -4526,9 +4526,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 
@@ -5130,9 +5130,9 @@ c                   user specified value if positive
       REAL raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
       INTEGER iNpmix,iFileID,iDownWard,iTag
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is for absorptive clouds
-      CHARACTER*80 caaScatter(kMaxAtm)
+      CHARACTER*120 caaScatter(kMaxAtm)
       REAL raaScatterPressure(kMaxAtm,2),raScatterDME(kMaxAtm)
       REAL raScatterIWP(kMaxAtm)
 

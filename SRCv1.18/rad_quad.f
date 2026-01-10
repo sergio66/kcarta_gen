@@ -1134,7 +1134,7 @@ c      END DO
 	rAngleTr               = rAngleTr + raMeanOD(iL)
         write(kStdWarn,321) raFreq(1),iL,raMeanOD(iL),rAngleTr,raAvgAnglePerLayer(iL),987987
       END DO
- 321  FORMAT(F10.2,'  ',I4,3(' ',ES12.6,' '),I8)
+ 321  FORMAT(F10.2,'  ',I4,3(' ',ES12.5,' '),I8)
 
       RETURN 
       END   

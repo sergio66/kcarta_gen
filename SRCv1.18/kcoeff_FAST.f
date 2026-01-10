@@ -65,7 +65,7 @@ c local vars
 
 c these are to read in the original 100 layers AIRS ref profile for the gas
 c these are to read in the new kProfLayers ref profile for the gas
-      CHARACTER*80 caFName,caStr
+      CHARACTER*120 caFName,caStr
       INTEGER iE,iX
       REAL raOrig100A(kMaxLayer),raOrig100T(kMaxLayer) 
       REAL raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer) 
@@ -616,7 +616,7 @@ c check that the file has the data for the correct gas
       IF (iFileGasID .NE. iGasID) THEN
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
- 1000   FORMAT('Error! file : ',/,A120,/,
+ 1000   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
@@ -625,7 +625,7 @@ c check that the data file has the right number of layers ===== AIRS layers
       IF (iNLay .NE. kMaxLayer) THEN
         iErr=1
         WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
- 1010   FORMAT('Error! file : ',/,A120,/,
+ 1010   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for ',i3,' layers but kMaxLayer = ',I3)
         CALL DoSTOP
       END IF
@@ -871,7 +871,7 @@ c check that the file has the data for the correct gas
       IF (iFileGasID .NE. iGasID) THEN
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
- 1000   FORMAT('Error! file : ',/,A120,/,
+ 1000   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
@@ -880,7 +880,7 @@ c check that the data file has the right number of layers
       IF (iNLay .NE. kMaxLayer) THEN
         iErr=1
         WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
- 1010   FORMAT('Error! file : ',/,A120,/,
+ 1010   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for ',i3,' layers but kMaxLayer = ',I3)
         CALL DoSTOP
       END IF
@@ -1016,7 +1016,7 @@ c check that the file has the data for the correct gas
       IF (iFileGasID .NE. iGasID) THEN
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
- 1000   FORMAT('Error! file : ',/,A120,/,
+ 1000   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
@@ -1025,7 +1025,7 @@ c check that the data file has the right number of layers
       IF (iNLay .NE. kMaxLayer) THEN
         iErr=1
         WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
- 1010   FORMAT('Error! file : ',/,A120,/,
+ 1010   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for ',i3,' layers but kMaxLayer = ',I3)
         CALL DoSTOP
       END IF
@@ -1194,7 +1194,7 @@ c check that the file has the data for the correct gas
       IF (iFileGasID .NE. iGasID) THEN
         iErr=1
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID
- 1000   FORMAT('Error! file : ',/,A120,/,
+ 1000   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for GasID ',I3,' not desired GasID ',I3)
         CALL DoSTOP
       END IF
@@ -1203,7 +1203,7 @@ c check that the data file has the right number of layers
       IF (iNLay .NE. kMaxLayer) THEN
         iErr=1
         WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer
- 1010   FORMAT('Error! file : ',/,A120,/,
+ 1010   FORMAT('Error! file : ',/,A160,/,
      $         'contains data for ',i3,' layers but kMaxLayer = ',I3)
         CALL DoSTOP
       END IF

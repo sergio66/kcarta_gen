@@ -441,7 +441,7 @@ b) the compressed database for other bands eg FIR, NIR, VIS, UV have been tested
 \section{Updates from v1.16}
 Main change is that this code \\
 a) now uses the same uncompression and jacobian routines that are in the Matlab
-   package. This makes the code cleaner. \\
+   package. This makes the code cleaner. See iMatlabORf77 == iaaOverrideDefault(1,4)\\
 b) the code can do limb view calcs; achieved by setting raSpres (at the equivalent 
    tangent height) and raSetEmissivity(iAtm) .GT. 1 if iRTP = -1, or 
      p.nemis(iAtm) = 1, p.emis(iAtm) .GT. 1, and p.spres(iAtm) as appropriate.\\
@@ -3399,6 +3399,27 @@ the radiating/emitting/absorbing atmosphere are set as follows.
                      r1   = prof.efreq(i)  
                      rEms = prof.emis(i)  
                      END DO 
+
+   For constant background thermal angle, see n_rtp.f90 subroutine radnce4rtp
+                IF (abs(kThermalAngle - (-1)) < 0.0000000001) THEN
+                  rKLMThermalAngle = acos(3.0/5.0)*180.0/kPi    
+                ELSE
+                  rKLMThermalAngle = kThermalAngle
+                ENDIF          
+                raKThermalAngle(iC) = iaaOverrideDefault(2,4)*1.0
+                IF ((iaaOverrideDefault(2,4) == 1) .OR. ((iaaOverrideDefault(2,4) == 2)) THEN
+                  rKLMThermalAngle = acos(3.0/5.0)*180.0/kPi
+                  kThermalAngle = rKLMThermalAngle
+                  raKThermalAngle(iC) = rKLMThermalAngle
+                END IF
+
+                !!! new jan 2026, to make sure we have constant acos(3/5) background thermal angle
+                IF ((iaaOverrideDefault(2,3) == 0) .AND. (iaaOverrideDefault(2,4) == 1)) THEN
+                  kSetThermalAngle = +1
+                  kThermalAngle    = +1
+                  iaKThermal(iC)   = +1
+                  raKThermalAngle(iC) = kThermalAngle
+                  END IF		
 
   The sun is turned ON or OFF depending on the value of prof.solzen
   At least one data point is required in prof.rfreq, prof.rho (corresponding

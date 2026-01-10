@@ -2984,7 +2984,7 @@ end
     IF (IERR /= 0) THEN
       WRITE(kStdErr,'(A)')    'In subroutine get_us_std have file I/O error'
       write(kStdErr,'(A,A)')  'reference path = ',caFname0
-      write(kStdErr,'(A,3I)') 'gasID = ',iIDGas
+      write(kStdErr,'(A,I3)') 'gasID = ',iIDGas
       WRITE(kStdErr,1010) IERR, caFname
       CALL DoSTOP
     ENDIF

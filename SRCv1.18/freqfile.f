@@ -25,7 +25,7 @@ c          (not used if kXsecFormat < 0)
 c local variables
       INTEGER iIOUN,iFileErr,iID,iTag
       INTEGER iLine,iNpts,iTemps
-      CHARACTER*80 caLine,caFName
+      CHARACTER*120 caLine,caFName
       REAL rLower,rHigher
 
 c assume GASID , freqs are wrong
@@ -106,7 +106,7 @@ c this is when we WANT to UNCOMPRESS files!
       CLOSE(iIOUN)
       kTempUnitOpen = -1
 
- 5020 FORMAT(A80)
+ 5020 FORMAT(A120)
       RETURN
       END
 
@@ -130,7 +130,7 @@ c iErr   = error status (mainly associated with not finding the relevant file)
 c local variables
       INTEGER iIOUN,iFileErr,iID,iTag
       REAL rLower,rHigher
-      CHARACTER*80 caLine,caFname
+      CHARACTER*120 caLine,caFname
 
 c assume GASID , freqs are wrong
       iCheckCompDataBase = -1
@@ -152,7 +152,7 @@ c      print *,iIOUN,caFName
 
 c read file until GASID, freq bounds match found or EOF
  20   READ(iIOUN,5020,END=777) caLine
- 5020 FORMAT(A80)
+ 5020 FORMAT(A120)
       READ(caLine,*) iID,rLower,rHigher,iTag
 
       IF ((iID .EQ. iGasID) .AND. (rL .LT. 0) .AND. (rH .LT. 0)) THEN

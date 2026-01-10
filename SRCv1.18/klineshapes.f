@@ -497,7 +497,7 @@ c check that the file has the data for the correct gas
       IF (iFileGasID .NE. iGasID) THEN 
         iErr=1 
         WRITE(kStdErr,1000) caFName,iFileGasID,iGasID 
- 1000   FORMAT('Error! file : ',/,A80,/, 
+ 1000   FORMAT('Error! file : ',/,A120,/, 
      $         'contains data for GasID ',I3,' not desired GasID : ',I3) 
         CALL DoSTOP 
       END IF 
@@ -506,7 +506,7 @@ c check that the data file has the right number of layers
       IF (iNLay .NE. kMaxLayer) THEN 
         iErr=1 
         WRITE(kStdErr,1010) caFName,iNLay,kMaxLayer 
- 1010   FORMAT('Error! file : ',/,A80,/, 
+ 1010   FORMAT('Error! file : ',/,A120,/, 
      $         'contains data for ',i3,' layers but kMaxLayer = ',I3) 
         CALL DoSTOP 
       END IF 
@@ -695,7 +695,7 @@ c these are the individual reference profiles
       REAL raRPartPress(kProfLayer),raRPress(kProfLayer)
 
 c local
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       INTEGER iI,iLowerOrUpper,iError
       REAL raDummyThickness(kProfLayer)
 
@@ -746,10 +746,10 @@ c dLineStrneMin = -1 if use all lines, some other number if use lines  >= X
 c iaNLTEBands   tells for each gas, how many are the NON LTE bands bad boys
 c caaaNLTEBands tells the name of the files containing the line parameters
 c iLTEin    tells which set of data to use
-      CHARACTER*80 caStrong
+      CHARACTER*120 caStrong
       DOUBLE PRECISION dLineStrenMin
       INTEGER iaNLTEBands(kGasStore),iLTEin
-      CHARACTER*80 caaaNLTEBands(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaNLTEBands(kGasStore,kNumkCompT) 
 c output params 
       INTEGER iGasID,iNum
       DOUBLE PRECISION daElower(kHITRAN),daLineCenter(kHITRAN),daISO(kHITRAN)
@@ -773,10 +773,10 @@ c local variables
 
       INTEGER iI,iJ,iK,iErr,iIOUN,iNum0,iBands,iLoop,iCumLineSum,iISO
       INTEGER iFound,iRead
-      CHARACTER*80 caFname,caTemp
-      CHARACTER*80 caaCheckNamesIn(kGasStore)
-      CHARACTER*80 caaCheckNamesMatch(kGasStore)
-      CHARACTER*80 caaCheckNamesUse(kGasStore)
+      CHARACTER*120 caFname,caTemp
+      CHARACTER*120 caaCheckNamesIn(kGasStore)
+      CHARACTER*120 caaCheckNamesMatch(kGasStore)
+      CHARACTER*120 caaCheckNamesUse(kGasStore)
       DOUBLE PRECISION dLmin,dLmax
       INTEGER iaBin(10)   !!!to bin the linestrengths
       INTEGER iaOk(kHITRAN),iStrongLTEFound,iStrongNLTEFound
@@ -817,7 +817,7 @@ c first read the names of all strong bands for the molecule
       GOTO 10
       
       kTempUnitOpen = -1 
- 15   FORMAT(A80)
+ 15   FORMAT(A120)
 
  20   write (kStdErr,15) 'Error reading info in ',caFName
 
@@ -951,8 +951,8 @@ c now read the line parameters of the files
         kTempUnitOpen = -1 
       END DO        
 
- 1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A80) 
- 1080 FORMAT(A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A120) 
+ 1080 FORMAT(A120) 
 
       !bin the linestrengths
       DO iI = 1,10
@@ -1054,7 +1054,7 @@ c this subroutine reads in the line parameters for the band in question
 c input params, read from caaNLTETemp(iLTEin)
 c caaaNONLTETemp  tells the name of the files containing the nonLTE temps      
       INTEGER iLTEIn,iBand,iDOVoigtChi
-      CHARACTER*80 caaaNLTEBands(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaNLTEBands(kGasStore,kNumkCompT) 
 c output params 
       INTEGER iGasID,iNum,iISO,iLineMixBand
       DOUBLE PRECISION daElower(kHITRAN),daLineCenter(kHITRAN)
@@ -1065,7 +1065,7 @@ c output params
       CHARACTER*1      caJPQR(kHITRAN)
 
       INTEGER iI,iErr,iIOUN,iJU,iJL
-      CHARACTER*80 caFname
+      CHARACTER*120 caFname
       DOUBLE PRECISION dMax,dL,dR,dC
 
       caFName = caaaNLTEBands(iLTEin,iBand)
@@ -1119,8 +1119,8 @@ c      print *,(caJPQR(iI),iI = 1,iNum)
       iJU = nint(daJU(1))
       iJL = nint(daJL(1))
 
- 1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A80) 
- 1080 FORMAT(A80) 
+ 1070 FORMAT('ERROR! number ',I5,' opening HITRAN parameter file:',/,A120) 
+ 1080 FORMAT(A120) 
 
 c outside of the weaklines, do linemixing for all the bands the user specifies!
 c but be careful about Cousin vs linemix, else code becomes VERY slow
@@ -1562,7 +1562,7 @@ C          go to 8
         endif
       endif
 
-  900 format(2I5, 2F6.0, 2E12.6)
+  900 format(2I5, 2F6.0, 2E12.5)
 
 C        write(*,*) ' Mol, Iso,   T,   gj,     Qr,     Qv'
 

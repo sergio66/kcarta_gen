@@ -111,7 +111,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm
       INTEGER iNpmix,iFileID,iTag,iLayPrintFlux
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c iNclouds tells us how many clouds there are 
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies 
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies 
@@ -354,7 +354,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm 
       INTEGER iNpmix,iFileID,iTag,iDownWard 
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c iNclouds tells us how many clouds there are  
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies  
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies  
@@ -429,7 +429,7 @@ C         Radiative transfer variables:
       REAL    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
       REAL  ABSNU1, ABSNU2, ABSDELNU
       REAL  WAVENO
-      CHARACTER*80 SCATFILE(MAXSCAT)
+      CHARACTER*120 SCATFILE(MAXSCAT)
       CHARACTER*1   RTMODEL
       CHARACTER*1 caScale(MAXSCAT)
 
@@ -439,7 +439,7 @@ C         Radiative transfer variables:
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
 
       INTEGER iaTable(kMaxClouds*kCloudLayers)
-      CHARACTER*80 caName
+      CHARACTER*120 caName
 
       INTEGER iGaussPts,iCloudySky,iAngle
       REAL rSurfaceTemp,rDelta,raLayerTemp(kProfLayer),rAngle,rGaussWeight,raCC(kProfLayer)
@@ -1589,7 +1589,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm 
       INTEGER iNpmix,iFileID,iTag,iDownWard 
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c iNclouds tells us how many clouds there are  
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies  
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies  
@@ -1661,7 +1661,7 @@ C         Radiative transfer variables:
       REAL    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
       REAL  ABSNU1, ABSNU2, ABSDELNU
       REAL  WAVENO
-      CHARACTER*80 SCATFILE(MAXSCAT)
+      CHARACTER*120 SCATFILE(MAXSCAT)
       CHARACTER*1   RTMODEL
       CHARACTER*1 caScale(MAXSCAT)
 
@@ -1675,7 +1675,7 @@ c this is when we have array of clouds from KLAYERS
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
 
       INTEGER iaTable(kMaxClouds*kCloudLayers)
-      CHARACTER*80 caName
+      CHARACTER*120 caName
 
       INTEGER iGaussPts,iCloudySky,iAngle
       REAL rSurfaceTemp,rDelta,raLayerTemp(kProfLayer)
@@ -2128,7 +2128,7 @@ c                   user specified value if positive
       INTEGER iNp,iaOp(kPathsOut),iOutNum,iBinaryFile
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm 
       INTEGER iNpmix,iFileID,iTag,iDownWard 
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c iNclouds tells us how many clouds there are  
 c iaCloudNumLayers tells how many neighboring layers each cloud occupies  
 c iaaCloudWhichLayers tells which kCARTA layers each cloud occupies  
@@ -2200,7 +2200,7 @@ C         Radiative transfer variables:
       REAL    TEMP(MAXNZ), ABSPROF(MAXNZ,MAXABSNU)  !not needed HEIGHT(MAXNZ)
       REAL  ABSNU1, ABSNU2, ABSDELNU
       REAL  WAVENO
-      CHARACTER*80 SCATFILE(MAXSCAT)
+      CHARACTER*120 SCATFILE(MAXSCAT)
       CHARACTER*1   RTMODEL
       CHARACTER*1 caScale(MAXSCAT)
 
@@ -2214,7 +2214,7 @@ c this is when we have array of clouds from KLAYERS
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
 
       INTEGER iaTable(kMaxClouds*kCloudLayers)
-      CHARACTER*80 caName
+      CHARACTER*120 caName
 
       INTEGER iGaussPts,iCloudySky,iAngle
       REAL rSurfaceTemp,rDelta,raLayerTemp(kProfLayer)

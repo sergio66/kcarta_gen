@@ -43,9 +43,9 @@ c this is the MAIN routine
 c input vars
       INTEGER iaNewGasID(kGasStore),iaNewData(kGasStore)
       INTEGER iNumNewGases,iaaNewChunks(kGasStore,kNumkCompT)
-      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaNewChunks(kGasStore,kNumkCompT) 
       INTEGER iaAltComprDirs(kGasStore),iNumAltComprDirs
-      CHARACTER*80 caaAltComprDirs(kGasStore) 
+      CHARACTER*120 caaAltComprDirs(kGasStore) 
       INTEGER iGas,iaGases(kMaxGas)
       INTEGER iProfileLayers,iVertTempSet,iError,iDoDQ
       INTEGER iSplineType,iL_low,iL_high,iTag,iActualTag
@@ -211,7 +211,7 @@ c iDoDQ     = -2 if no amt,temp jacs, -1 if no amt jacs, > 0 if amt,temp jacs
       REAL raVTemp(kProfLayer),raFreq(kMaxPts)
       INTEGER iCount,iGasID,iL,iU,iErr,iRefLayer
       INTEGER iActualTag,iDoDQ,iSplineType
-      CHARACTER*80 caXsecF
+      CHARACTER*120 caXsecF
       REAL raRAmt(kProfLayer),raRTemp(kProfLayer),kFrStep,rFileStartFr
       REAL raRPartPress(kProfLayer),raRPress(kProfLayer)
       DOUBLE PRECISION daaTemp(kMaxPts,kProfLayer)
@@ -359,7 +359,7 @@ c iDoDQ     = -2 if no amt,temp jacs, -1 if no amt jacs, > 0 if amt,temp jacs
       REAL raVTemp(kProfLayer),raFreq(kMaxPts)
       INTEGER iCount,iGasID,iL,iU,iErr,iRefLayer
       INTEGER iActualTag,iDoDQ,iSplineType
-      CHARACTER*80 caXsecF
+      CHARACTER*120 caXsecF
       REAL raRAmt(kProfLayer),raRTemp(kProfLayer),kFrStep,rFileStartFr
       REAL raRPartPress(kProfLayer),raRPress(kProfLayer)
       DOUBLE PRECISION daaTemp(kMaxPts,kProfLayer)
@@ -380,7 +380,7 @@ c the Matlab weights
      $        raQ21(kProfLayer),raQ22(kProfLayer)
 c the alt database
       INTEGER iNewIN,iNumAltComprDirs,iaAltComprDirs(kGasStore)
-      CHARACTER*80 caaAltComprDirs(kGasStore)
+      CHARACTER*120 caaAltComprDirs(kGasStore)
       REAL rAltMinFr,rAltMaxFr,raAltComprDirsScale(kGasStore)
 
 c local variables
@@ -465,7 +465,7 @@ c local variables
         END IF
       END IF
 
- 80   FORMAT(A80)
+ 80   FORMAT(A120)
 
       RETURN
       END
@@ -877,7 +877,7 @@ c df is the frequency step, sf is the start freq
 c iGasID is the GasID
       INTEGER iWhichChunk,iGasID,iNewIn
       DOUBLE PRECISION daaGasAbCoeff(kMaxPts,kProfLayer) 
-      CHARACTER*80 caaaNewChunks(kGasStore,kNumkCompT) 
+      CHARACTER*120 caaaNewChunks(kGasStore,kNumkCompT) 
       REAL df,sf
 c iRefLayer = number of layers in the reference profiles (=kProfLayer)
 c iL,iU     = min/max layer number for each gas profile (=1,kProfLayer)
@@ -900,7 +900,7 @@ c local variables
       INTEGER iIoun,I,J
       INTEGER IDGAS, NPTS, NLAY
       DOUBLE PRECISION SFREQ, FSTEP
-      CHARACTER*80 FNAM
+      CHARACTER*120 FNAM
 
       FNAM=caaaNewChunks(iNewIn,iWhichChunk)
 
@@ -913,7 +913,7 @@ c local variables
       IF (IERR .NE. 0) THEN
           WRITE(kStdErr,*) 'In subroutine ReadNewData'
           WRITE(kStdErr,1010) IERR, FNAM
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
         ENDIF
       kCompUnitOpen=1
@@ -1473,7 +1473,8 @@ c************************************************************************
       DOUBLE PRECISION :: daaDT(kMaxPtsJac,kProfLayerJac)
 
 ! local vars
-      INTEGER :: iCO2Chi,iDefault,iI,iFr,iNumPts,isfinite2
+      LOGICAL :: isfinite2
+      INTEGER :: iCO2Chi,iDefault,iI,iFr,iNumPts
       INTEGER :: iaChiChunks(kMaxGas),iChiChunks,iDoFudge
 
       INTEGER :: iIOUN,iERR
@@ -1506,7 +1507,7 @@ c************************************************************************
         IF (IERR /= 0) THEN
           WRITE(kStdErr,*) 'In subroutine multiply_co2_wv_continuum'
           WRITE(kStdErr,1010) IERR, FNAME
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
         ENDIF
 
@@ -1541,7 +1542,7 @@ c************************************************************************
 
         DO iI = 1,kProfLayer
           rScale = raRho(iI)*raRho(iI)*raXWV(iI)*raXCO2(iI)*raThickness(iI)*100.0      !! thickness m --> cm
-	  if (isfinite2(rScale) .EQ. .false. ) rScale = 0.0
+	  if (isfinite2(rScale) .EQV. .false. ) rScale = 0.0
           DO iFr = 1,kMaxPts
 	    daaAbsCoeff(iFr,iI) = daaAbsCoeff(iFr,iI) + rScale*raX(iFr)
 	  END DO
@@ -1702,7 +1703,7 @@ c      END IF
         IF (IERR .NE. 0) THEN
           WRITE(kStdErr,*) 'In subroutine co2_4um_fudge'
           WRITE(kStdErr,1010) IERR, FNAME
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
         ENDIF
         kTempUnitOpen=1
@@ -1750,7 +1751,7 @@ c  raaAbsCoeff = gas OD
       INTEGER iFr,iLay,iIOUN,iERR,iMin,iMax,iNpts
       REAL raF(kMaxPts),raChi(kMaxPts),raChi2(kMaxPts)
       REAL rF,fixed,water,watercon,o3,co,ch4,nte
-      CHARACTER*80 Fname,caStr
+      CHARACTER*120 Fname,caStr
       REAL raFX(kMaxPts),raChiX(kMaxPts)
 
       REAL raBeginBand(100),raEndBand(100)
@@ -1784,7 +1785,7 @@ c      write(kStdErr,*)  'inside generic_sarta_tunmult for GasID = ',iGasID,' ra
 
       rFileStartFr = raFreq(1)
 
- 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010 FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
 
       IF ((rFileStartFr .GE. 605.0) .AND. (rFileStartFr .LE. 2805.0)) THEN
         OPEN(UNIT=iIOUN,FILE=FNAME,STATUS='OLD',FORM='FORMATTED',
@@ -1922,7 +1923,7 @@ c        END IF
 
       END IF
 
- 80   FORMAT(A80)
+ 80   FORMAT(A120)
 
       RETURN
       END
@@ -2014,7 +2015,7 @@ c rFileStartFr = which chunk
       REAL raFreq(kMaxPts)
       REAL raF(kMaxPts),raChi(kMaxPts),raChi2(kMaxPts)
       REAL rF,fixed,water,watercon,o3,co,ch4,co2
-      CHARACTER*80 Fname,caStr
+      CHARACTER*120 Fname,caStr
 
       iChi = -1
       IF (rFileStartFR .GE. 1380.0 .AND. rFileStartFR .LE. 1680.0) THEN
@@ -2032,7 +2033,7 @@ c rFileStartFr = which chunk
         IF (IERR .NE. 0) THEN
           WRITE(kStdErr,*) 'In subroutine water_sarta_fudge'
           WRITE(kStdErr,1010) IERR, FNAME
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
         ENDIF
         kTempUnitOpen=1
@@ -2070,7 +2071,7 @@ c rFileStartFr = which chunk
         write(kStdWarn,*) 'do not need H2O chifunction for chunk ',rFileStartFr
       END IF        
 
- 80   FORMAT(A80)
+ 80   FORMAT(A120)
 
       RETURN
       END

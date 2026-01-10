@@ -20,7 +20,7 @@ c output params
       REAL raP2(kMaxLayer),raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
 
 c local params
-      CHARACTER*80 caRefgas2Name
+      CHARACTER*120 caRefgas2Name
       INTEGER iIOUN,iI,iFileErr,iJ
       REAL rX,rY
 
@@ -65,7 +65,7 @@ c local params
       CLOSE(iIOUN)
       kTempUnitOpen = -1
 
- 304  FORMAT('ERROR! number ',I5,' unit ',I3,' opening file :  ',/,A80) 
+ 304  FORMAT('ERROR! number ',I5,' unit ',I3,' opening file :  ',/,A120) 
 
       RETURN
       END
@@ -215,7 +215,7 @@ c pressure, and then interpolated in temperature
 
 c these are to read in the original 100 layers AIRS ref profile for the gas
 c these are to read in the new kProfLayers ref profile for the gas
-      CHARACTER*80 caFName
+      CHARACTER*120 caFName
       REAL raP2(kMaxLayer),raPP2(kMaxLayer),raT2(kMaxLayer),raA2(kMaxLayer)
       REAL raOrig100A(kMaxLayer),raOrig100T(kMaxLayer),pAvgUse(kMaxLayer)
       REAL raOrig100P(kMaxLayer),raOrig100PP(kMaxLayer) 

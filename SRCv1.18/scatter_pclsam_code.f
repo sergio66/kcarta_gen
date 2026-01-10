@@ -77,7 +77,7 @@ c TEMP        = tempertaure profile in terms of pressure levels
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iNumLayer,iAtm,iRadOrColJac
       INTEGER iNpmix,iFileID,iTag,iKnowTP
       REAL raaAbs(kMaxPts,kMixFilRows)
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL Temp(MAXNZ)
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
@@ -93,9 +93,9 @@ c this is to do with phase info
       INTEGER iPhase
       REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
 c this is to do with flux
-      CHARACTER*80 caFluxFile
+      CHARACTER*120 caFluxFile
 c this is to do with jacobians
-      CHARACTER*80 caJacobFile,caJacobFile2
+      CHARACTER*120 caJacobFile,caJacobFile2
       INTEGER iNumGases,iaGases(kMaxGas),iNatm
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
       REAL raaaColDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -352,7 +352,7 @@ c                   user specified value if positive
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
       INTEGER iProfileLayers,iIOUN_USE
@@ -366,7 +366,7 @@ c this is to do with NLTE
 c this is local phase info
       INTEGER iPhase
       REAL raPhasePoints(MaxPhase),raComputedPhase(MaxPhase)
-      CHARACTER*80 caJacobFile,caJacobFile2
+      CHARACTER*120 caJacobFile,caJacobFile2
 c this is to do with cloud fracs
       INTEGER iNumOutX
       REAL raaRadsX(kMaxPts,kProfLayer)
@@ -660,7 +660,7 @@ c                   user specified value if positive
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer)
       INTEGER iProfileLayers
@@ -1576,7 +1576,7 @@ c                   user specified value if positive
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
       INTEGER iProfileLayers,iRadorColJac
@@ -2032,7 +2032,7 @@ c                   user specified value if positive
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
       INTEGER iProfileLayers,iRadorColJac
@@ -2551,7 +2551,7 @@ c                   user specified value if positive
       INTEGER iNpmix,iFileID,iNp,iaOp(kPathsOut),iOutNum,iKnowTP
       INTEGER ICLDTOPKCARTA, ICLDBOTKCARTA
       INTEGER iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer,iTag
-      CHARACTER*80 caOutName
+      CHARACTER*120 caOutName
       REAL raThickness(kProfLayer),raPressLevels(kProfLayer+1),
      $     pProf(kProfLayer),raTPressLevels(kProfLayer+1)
       INTEGER iProfileLayers,iRadorColJac

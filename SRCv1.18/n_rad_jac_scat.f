@@ -121,7 +121,7 @@ c iakthermal,iaksolar = turn on/off solar and thermal
 c iakthermaljacob=turn thermal jacobians on/off      
 c raProfileTemp = array containing CO2 gas profile temperature
 c iaSetThermalAngle=use acos(3/5) at upper layers if -1, or user set angle
-      CHARACTER*80 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm) 
+      CHARACTER*120 caEmissivity(kMaxAtm),caSetSolarRefl(kMaxAtm) 
       REAL raSetEmissivity(kMaxAtm) 
       INTEGER iaMPSetForRad(kMaxAtm)
       REAL raPressStart(kMaxAtm),raPressStop(kMaxAtm)
@@ -488,7 +488,7 @@ c iaSetEms eventually has number of wavenumber emiss regions
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2)
       REAL rDefault
       CHARACTER*130 caEmsFile
-      CHARACTER*80 caSetSolarRefl(kMaxAtm),caE
+      CHARACTER*120 caSetSolarRefl(kMaxAtm),caE
       REAL raSetSolarRefl(kMaxAtm) 
 
 c local variables
@@ -653,7 +653,7 @@ c iaSetEms eventually has number of wavenumber emiss regions
       INTEGER iaSetEms(kMaxAtm),iAtm
       REAL raaaSetEmissivity(kMaxAtm,kEmsRegions,2),rDefault
       CHARACTER*130 caEmsFile
-      CHARACTER*80 caEmissivity(kMaxAtm),caE
+      CHARACTER*120 caEmissivity(kMaxAtm),caE
       REAL raSetEmissivity(kMaxAtm) 
 
 c local variables
@@ -1268,7 +1268,7 @@ c local variables
       REAL raCprtop(kMaxClouds),raCprbot(kMaxClouds)
 c these are to check that the scattering table names are unique
       INTEGER iaTable(kCloudLayers*kMaxClouds)
-      CHARACTER*80 caaTable(kCloudLayers*kMaxClouds)
+      CHARACTER*120 caaTable(kCloudLayers*kMaxClouds)
 
       caWord = '*SCATTR'
       iErr = -1
@@ -1346,7 +1346,7 @@ c read the no of clouds to read in
         CALL DoSTOP 
       END IF 
 
- 222  FORMAT(A80)
+ 222  FORMAT(A120)
 
 c      ctype1 = -9999
 c      ctype2 = -9999
@@ -2091,7 +2091,7 @@ c     $                   iK,raPressLevels(iK-1),raPressLevels(iK)
         END DO 
       END DO
 
- 222  FORMAT(' name = ',A80)
+ 222  FORMAT(' name = ',A120)
 
 c then reset the variables 
       DO iI = 1,kMaxClouds

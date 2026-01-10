@@ -439,7 +439,7 @@ c local variables
         IF (IERR .NE. 0) THEN
           WRITE(kStdErr,*) 'In subroutine co2_4um_nlte_fudge'
           WRITE(kStdErr,1010) IERR, FNAME
- 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A80)
+ 1010     FORMAT('ERROR! number ',I5,' opening data file:',/,A120)
           CALL DoSTOP
         ENDIF
         kTempUnitOpen = 1
