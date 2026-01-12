@@ -83,7 +83,7 @@ c 720.5-730.0 : 0.9
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c raWaves is the current wavenumber range
       REAL raWaves(kMaxPts)
@@ -197,7 +197,7 @@ c 720.5-730.0 : 0.9
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c raWaves is the current wavenumber range
       REAL raWaves(kMaxPts)
@@ -1435,7 +1435,7 @@ c Check out subroutine "FastBDRYL2GDiffusiveApprox" in rad_diff.f
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
       
       INTEGER iProfileLayers           !number of layers in KLAYERS file
       REAL raPressLevels(kProfLayer+1) !pressure levels of atmosphere
@@ -1663,7 +1663,7 @@ c this subroutine sets up the BCs for the atmosphere
      $            raSatHeight,raLayerHeight,raaPrBdry,raSatAngle,raLayAngles,
      $            raSunAngles,raTSpace)
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
       INTEGER iAtm                  !this is the atmosphere number
       REAL raFreq(kMaxPts)          !these are the wavenumbers

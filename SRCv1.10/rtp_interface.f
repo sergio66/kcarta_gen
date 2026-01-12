@@ -51,11 +51,17 @@ c        END DO
       rf1 = head.vcmin
       rf2 = head.vcmax
 
-      rf1 = 755.0 
-      rf2 = 805.0 
-      print *,'*********************************************************' 
-      print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for test PCLSAM' 
-      print *,'*********************************************************' 
+c      rf1 = 755.0 
+c      rf2 = 805.0 
+c      print *,'*********************************************************' 
+c      print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for test PCLSAM' 
+c      print *,'*********************************************************' 
+
+      rf1 = 855.0 
+      rf2 = 1055.0 
+      print *,'*******************************************************************' 
+      print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for test jacobians in certain band' 
+      print *,'*******************************************************************' 
 
       IF ((rf1 .LT. 605.0) .OR. (rf1 .GT. 2830.0)) THEN
         write (kStdErr,*) 'KCARTA spans 605-2830 cm-1 ... start wavenumber'
@@ -98,8 +104,8 @@ c local variables for RTP file
       character*32 mode
       character*80 fname
 
-      integer kCHAN
-      parameter(kChan=8461)
+c      integer kCHAN
+c      parameter(kChan=8461)
 
 c other local variables
       integer i,iInstr,iNumChan,iaListChan(kChan)
@@ -112,8 +118,10 @@ c other local variables
       status = rtpopen(fname, mode, head, hatt, patt, rchan)
       kProfileUnitOpen=+1
       write(kStdWarn,*) 'read open status = ', status
+
+      write (kStdWarn,*) 'reading RTP profile from 1 uptil ',iRTP
       DO i = 1, iRTP
-        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
+c        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
         status = rtpread(rchan, prof)
         END DO
       status = rtpclose(rchan)
@@ -145,8 +153,8 @@ c this subroutine finds the freqs for kCARTA
       include '../INCLUDE/kcarta.param'
 
 c input 
-      integer kCHAN
-      parameter(kChan=8461)
+c      integer kCHAN
+c      parameter(kChan=8461)
 
       INTEGER iFileNum,iaFileChan(kChan)      !number of channel, and IDs
       REAL raFileCenterFreq(kChan),raFileWidth(kChan) !center freqs, widths
@@ -199,8 +207,8 @@ c assumes that channel ID numbers are from 1 to MAX
 c input 
       INTEGER iInstr
 c output
-      integer kCHAN
-      parameter(kChan=8461)
+c      integer kCHAN
+c      parameter(kChan=8461)
 
       INTEGER iFileNum,iaFileChan(kChan)      !number of channel, and IDs
       REAL raFileCenterFreq(kChan),raFileWidth(kChan) !center freqs, widths
@@ -351,8 +359,10 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       status = rtpopen(fname, mode, head, hatt, patt, rchan)
       kProfileUnitOpen=+1
       write(kStdWarn,*) 'read open status = ', status
+
+      write (kStdWarn,*) 'radnce4RTP : reading RTP profile from 1 uptil ',iRTP
       DO i = 1, iRTP
-        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
+c        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
         status = rtpread(rchan, prof)
         END DO
       status = rtpclose(rchan)
@@ -804,8 +814,9 @@ c local variables : all copied from ftest1.f (Howard Motteler's example)
       kProfileUnitOpen=+1
       write(kStdWarn,*)  'read open status = ', status
 
+      write (kStdWarn,*) 'READRTP : reading RTP profile from 1 uptil ',iRTP
       DO i = 1, iRTP
-        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
+c        write (kStdWarn,*) 'reading RTP profile ',i,' uptil ',iRTP
         status = rtpread(rchan, prof)
         END DO
       status = rtpclose(rchan)
@@ -1291,7 +1302,7 @@ c this subroutine quickly sets up stuff for ONE atmosphere
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c these are the cloud parameters read in from the RTP file
       REAL    cfrac,cemis,cprtop,cprbot,cngwat,cpsize

@@ -1370,7 +1370,7 @@ c    for the solid angle subtended by the sun as seen from the earth
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c iTag          = 1,2,3 and tells what the wavenumber spacing is
 c raSunAngles   = layer dependent satellite view angles

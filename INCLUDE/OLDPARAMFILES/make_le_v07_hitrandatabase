@@ -1,0 +1,7 @@
+tar -cvf /asl/ftp/pub/packages/v07.ieee-le.tar                 \
+   /asl/data/kcarta/v07.ieee-le/h2o.ieee-le/r*                 \
+   /asl/data/kcarta/v07.ieee-le/etc.ieee-le/r*                 \
+   /carrot/s1/sergio/CO2ppmv385/co2.ieee-le/r*                 \
+   /asl/data/kcarta/KCARTADATA/General/CKDieee_le/CKD*         \
+   /asl/data/kcarta/KCARTADATA/RefProf.For.v107up_CO2ppmv385/* \
+   READMEv07database

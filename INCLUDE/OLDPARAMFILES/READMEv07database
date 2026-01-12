@@ -1,0 +1,8 @@
+Version 07 has updated HITRAN2004 parameters for a few of the gases, such as
+water vapor and HNO3. In addition, we release the CO2 385ppmv database, and 
+corresponding layer profiles for use with this version.
+
+We suggest that CKDv6 is used by the user. This uses the default water 
+continuum coefficients from MT-CKD1, and adds on the tuning done 
+by Scott Hannon, where he compares kCARTA/SARTA calculations with 7+ years
+of AIRS observations.

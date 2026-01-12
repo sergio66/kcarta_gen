@@ -31,7 +31,7 @@ c     Written by Sergio De Souza-Machado, UMBC (sergio@umbc.edu)
 c************************************************************************
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
       INTEGER iIOUN
 
@@ -298,6 +298,9 @@ c do some checks/inits
 
       iError=-1
 c read in the driver namelist file and profile
+
+c      print *,'kapow',kW
+c      print *,'kapow',kaFrStep
      
       CALL ReadNameListFile(iaGases,iNumGases,rFreqStart,rFreqEnd,
      $       raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont,
@@ -512,6 +515,7 @@ c set the frequency range for the current file block
         DO iInt=1,kMaxPts
           raFreq(iInt)=raBlock(iFileID)+(iInt-1)*kaFrStep(iTag)
           END DO
+c        print *,'kapow',iTag,raBlock(iFileID),kaFrStep(iTag),raFreq(1),raFreq(kMaxPts)
 
 c check to see if any of the printing options set iPrinter=1
         iFound=-1

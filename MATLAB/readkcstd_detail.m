@@ -114,6 +114,9 @@ if htype == 0
 end
 
 %%%%
+fprintf(1,'version_number = %8.5f \n',version_number)
+fprintf(1,'kLongOrShort = %2i \n',htype);
+
 % This block added by Scott for version 1.03+
 if ((version_number >= 1.03) & (version_number <= 1.05)) 
   % read in M1000mb,M100mb,MSubLayer,M50mb,M10mb,MThickLayer
@@ -161,6 +164,26 @@ elseif ((version_number >= 1.09))
   end
 end
 
+
+detail.version = version;
+detail.iNumLayers = iNumLayers;
+detail.nparams = nparams;
+detail.rparams = rparams;
+detail.comment = comment;
+detail.fmin = fmin;
+detail.fmax = fmax;
+detail.lowchunk  = lowchunk;
+detail.highchunk = highchunk;
+detail.htype     = htype;
+
+%detail.frlow_all  = frlow_all;
+%detail.frhigh_all = frhigh_all;
+%detail.frinc_all  = frinc_all;
+
+detail
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% GAS PATH HEADER
 
 if htype < 0                 %%%%%%%%%%%%%%%%%%% short version 
@@ -176,6 +199,7 @@ if htype < 0                 %%%%%%%%%%%%%%%%%%% short version
     end
   end
 
+fprintf(1,'  ngasout = %3i \n',ngasout);
 if htype > 0     
   %%%%%%%% long version ..... copied direct from readgaspaths.m
 
@@ -229,6 +253,10 @@ if htype > 0
     end 
   end        %if htype > 0 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % MIXED PATH HEADER
 if htype < 0                    %%%%%%%%%%%%%%%%%%%%short version
   flen      = fread(fin, 1, 'integer*4');
@@ -249,6 +277,7 @@ if htype < 0                    %%%%%%%%%%%%%%%%%%%%short version
     end
   end
 
+fprintf(1,'  nmixpaths = %3i \n',nmixpaths);
 if htype > 0     
   %%%% long version ... copied direct from readmixedpaths.m
   %read in number of mixed paths in *MIXFIL 
@@ -304,6 +333,10 @@ if htype > 0
     end 
   end                %if LS > 0 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % ATMOSPHERE HEADER
 
 % number of atmospheres in *RADFIL
@@ -316,6 +349,7 @@ flen  = fread(fin, 1, 'integer*4');
 nemis = fread(fin, 1, 'integer*4');
 flen  = fread(fin, 1, 'integer*4');
 
+fprintf(1,'  natmos = %2i \n',natmos)
 if (natmos > 0)
 
   for i = 1:natmos
@@ -326,6 +360,7 @@ if (natmos > 0)
     iNumPathsAtmos = fread(fin, 1, 'integer*4');
     flen = fread(fin, 1, 'integer*4');
 
+    fprintf(1,'    i = %2i iNumPathsAtmos = %2i \n',i,iNumPathsAtmos)
     if (iNumPathsAtmos > 0)
 
       %read in paths making up atmosphere
@@ -399,6 +434,13 @@ flen1    = fread(fin, 1, 'integer*4');
 nODBrows = fread(fin, nODBs, 'integer*4'); % rows in each ODB
 flen2    = fread(fin, 1, 'integer*4');
 
+fprintf(1,'nchunk,nODBs = %3i %4i \n',nchunk,nODBs)
+nODBrows
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % sanity checks
 if flen1 ~= flen2
   error('Fortran records out of phase!');
@@ -459,9 +501,9 @@ end
 % read "output data blocks"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-frlow_all = [];
+frlow_all  = [];
 frhigh_all = [];
-frinc_all = [];
+frinc_all  = [];
 
 for chunk = 1:nchunk
 
@@ -481,13 +523,12 @@ for chunk = 1:nchunk
     frlow   = fread(fin, 1, 'real*4');    % low freq of chunk
     frhigh  = fread(fin, 1, 'real*4');    % high freq of chunk
     frinc   = fread(fin, 1, 'real*4');    % frequency increment
+    flen    = fread(fin, 1, 'integer*4');
 
     frlow_all(chunk)  = frlow;
     frhigh_all(chunk) = frhigh;
     frinc_all(chunk)  = frinc;
-
-    flen    = fread(fin, 1, 'integer*4');
-  
+      
     if chunk <= 3 | chunk >= nchunk - 2
       fprintf(1,'chunk = %2i odb = %2i frlow/frhigh = %12.6f %12.6f \n',chunk,odb,frlow,frhigh)
     end
@@ -548,6 +589,15 @@ fclose(fin);
 if nargin == 2 
   fclose (fout);
 end
+
+frlow_all
+frhigh_all
+frinc_all
+
+plot(wnums)
+%max(diff(wnums))
+%min(diff(wnums))
+%max(diff(wnums)) - min(diff(wnums))
 
 dv  = 0.0025;
 dvx = dv;

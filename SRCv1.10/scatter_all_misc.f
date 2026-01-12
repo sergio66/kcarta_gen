@@ -10,7 +10,7 @@ c this file reads a binary made from the ASCII sscatmie.x file
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 C       Reads in the single scattering table for a number of wavenumbers,
 C     particle sizes, and viewing angles.  The scattering properties are
@@ -104,7 +104,7 @@ c ************************************************************************
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 C       Reads in the single scattering table for a number of wavenumbers,
 C     particle sizes, and viewing angles.  The scattering properties are
@@ -198,7 +198,7 @@ C     wavenumber grid lines.
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
       REAL     WAVENO, DME
       REAL     EXTINCT, SSALB, ASYM
@@ -315,7 +315,7 @@ C     grid lines.
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
  
       REAL     MU, WAVENO, DME
       REAL     EXTINCT, SSALB, ASYM, PHI1UP, PHI1DN, PHI2UP, PHI2DN
@@ -516,7 +516,7 @@ C     The file may be in ascii text or binary format.
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
       INTEGER NABSNU, NLEV            !!!!!!!!!!!MAXNZ, MAXABSNU
       LOGICAL BINARYABSFILE
@@ -628,7 +628,7 @@ C     using the Fast Diffusivity Approx
  
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param' 
+      include '../INCLUDE/scatter110.param' 
  
       INTEGER NLEV
       REAL    MU, WAVENO
@@ -995,7 +995,7 @@ c this subroutine sets up the scattering table info from SSCATMIE.F
  
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param' 
+      include '../INCLUDE/scatter110.param' 
  
 c iSergio INTEGER that tells if this is RTSPEC or SERGIO's code
       INTEGER iSergio
@@ -1492,7 +1492,7 @@ C     The temperature (K) of the profile is also returned. (no height needed)
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param' 
+      include '../INCLUDE/scatter110.param' 
 
 c these are variables that come in from kcartamain.f 
       REAL raaAbs(kMaxPts,kMixFilRows),raWaves(kMaxPts),rFracTop,rFracBot
@@ -1679,7 +1679,7 @@ c temperatures of the pressure layers that have been supplied by kLayers
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c these are variables that come in from kcartamain.f 
       REAL raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)
@@ -1765,7 +1765,7 @@ c temperatures of the pressure layers that have been supplied by kLayers
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c these are variables that come in from kcartamain.f 
       REAL raVTemp(kMixFilRows),raPressLevels(kProfLayer+1)
@@ -1915,7 +1915,7 @@ c so this code is a little bit smart and reset temps so they are ok
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c output variable
       REAL TEMP(MAXNZ)     !temperature of layers, in kCARTA layering style
@@ -2017,7 +2017,7 @@ c the total optical depth bewteen TOA and instrument
  
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param' 
+      include '../INCLUDE/scatter110.param' 
  
 c rFracTop tells how much of the upper layer has been used, due to instr posn  
 c iaRadLayer = current radiating atmosphere defn : gnd to instrument 
@@ -2125,7 +2125,7 @@ c however, leaving DELTAM on does not significantly change things
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
       REAL tabextinct(*),tabssalb(*),tabasym(*)
       INTEGER N
@@ -2296,7 +2296,7 @@ c use the formulation of Pat Arnott of the DRI
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c usual variables
       INTEGER iAtm,iNumlayer                  !which atmosphere, num of layers
@@ -2415,7 +2415,7 @@ c assuming there is a temperature profile, and NO scattering
       
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c input parameters      
       REAL raWaves(kMaxPts)             !wavenumbers
@@ -2529,7 +2529,7 @@ c assuming there is a temperature profile and NO scattering
       
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c input parameters      
       REAL raWaves(kMaxPts)             !wavenumbers
@@ -2638,7 +2638,7 @@ c this subroutine adds on the absorptive part of cloud extinction
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c usual variables
       INTEGER iAtm,iNumlayer                  !which atmosphere, num of layers

@@ -32,7 +32,7 @@ c     Written by Sergio De Souza-Machado, UMBC (sergio@umbc.edu)
 c************************************************************************
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
       INTEGER iIOUN
 

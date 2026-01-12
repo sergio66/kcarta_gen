@@ -137,6 +137,8 @@ c iNumberOut   = number of the relevant spectra to look for
         WRITE(iIOUN) kMaxPts,rFrLow,rFrHigh,rDelta
         END IF
 
+c      print *,kMaxPts,rFrLow,rFrHigh,rDelta
+
       RETURN
       END
 c************************************************************************
@@ -963,6 +965,12 @@ c iTotal = how many of the kcomp files are gonna be unchunked
       !this is for kLongOrShort = 0
       INTEGER iTag,iTotalStuff      
 
+      INTEGER iaaOverrideDefault(4,10)   !! to mantain compatibility with SRCv1.18+ 
+      INTEGER iNumNLTEGases,iDoUpperAtmNLTE,iDumpAllUARads
+      iNumNLTEGases = -1
+      iDoUpperAtmNLTE = -1
+      iDumpAllUARads = -1
+
       !compute avg layer pressure, to be output
       DO iI = 1,kProfLayer
         raPActualAvg(iI) = 0.0
@@ -1326,7 +1334,8 @@ c if file error, inform user and stop program
         WRITE(kStdWarn,*) rFrLow,rFrHigh          !!start and stop wavenumber
         WRITE(kStdWarn,*) kaFrStep(iTag)          !!freq step size
         WRITE(kStdWarn,*) kaBlSize(iTag)          !!10000 point freq block size
-        WRITE(kStdWarn,*) iTotalStuff             !!number of outputs
+c        WRITE(kStdWarn,*) iTotalStuff             !!number of outputs
+        WRITE(kStdWarn,*) iImportant              !!number of outputs
 
         GOTO 9999
         END IF
@@ -1344,6 +1353,10 @@ c first output general info -----------------------------------------
 c v1.04 to v1.08 had the next line; now remove it
 c      WRITE(iIOUN1) M1000mb,M100mb,MSubLayer,M50mb,M10mb,MThickLayer
       WRITE(iIOUN1) (raPactualAvg(iI),iI=1,kProfLayer)        
+c this is to mantain compatibility with v118+??? 
+c      WRITE(iIOUN1) (iaaOverrideDefault(1,iI),iI=1,10)    !! general settings
+c      WRITE(iIOUN1) (iaaOverrideDefault(2,iI),iI=1,10)    !! radtrans settings
+c      WRITE(iIOUN1) (iaaOverrideDefault(3,iI),iI=1,10)    !! iLBLRTM settings
 
 c then output path ID stuff ------------------------------------------
       IF (kLongOrShort .GT. 0) THEN
@@ -1498,7 +1511,7 @@ c            IF (iaNp(iJ) .GT. iaNumLayers(iI)) THEN
                 write(kStdErr,*)'Atm# ',iI,' has invalid layer to be output!'
                 CALL DoSTOP
                 END IF
-            ELSE 
+            ELSE !!this is the case when ALL levels need to be printed
               iEnd=iaNumLayers(iI)
               WRITE(iIOUN1) iEnd
               iaOutNumbers(iJ)=iEnd
@@ -1506,6 +1519,18 @@ c            IF (iaNp(iJ) .GT. iaNumLayers(iI)) THEN
               !and instead of outting iaaOp, we are outputting iaaRadLayer
               WRITE(iIOUN1) (iaaRadLayer(iI,iK),iK=1,iEnd)        
               WRITE(iIOUN1) (raaUserPress(iJ,iK),iK=1,iEnd)        
+
+             IF ((iNumNLTEGases .GT. 0) .AND. (iDoUpperAtmNLTE .GT. 0)) THEN
+                iDumpAllUARads = iDumpAllUARads + 1
+                write(kStdWarn,*) iJ,iaNp(iJ)
+                write(kStdWarn,*) 'looks like we will dump UA rads'
+              END IF
+              IF ((iDumpAllUARads .GT. 1) .AND.(iDoUpperAtmNLTE .LE. 0)) THEN
+                write(kStdErr,*) 'this is too complicated!!!'
+                write(kStdErr,*) 'NLTE code assumes ONE radiating atmosphere'
+                CALL DoStop
+              END IF
+
               END IF
             END IF
           END DO
@@ -1557,6 +1582,7 @@ c if file error, inform user and stop program
         kStdJacobOpen=1
 
 c write general header information
+        WRITE(iIOUN2) caVersion
         WRITE(iIOUN2) caComment
         WRITE(iIOUN2) kProfLayer
         WRITE(iIOUN2) rFrLow,rFrHigh
@@ -1607,6 +1633,16 @@ c set the number of layers in this atmosphere
           iI=iI+1
           GOTO 205
           END IF
+
+        !!check to see if we are outputting d/d(DME), d/d(IWP)
+        IF ((kJacobian .GT. 0) .AND. (kScatter .GT. 0)) THEN
+          DO iJ=1,kProfLayer
+            WRITE(iIOUN2) 201,-300.0,01.0
+          END DO
+          DO iJ=1,kProfLayer
+            WRITE(iIOUN2) 201,-300.0,01.0
+          END DO
+        END IF
 
 c recall that at the end, we also compute d/dSurface_temp,d/dSurface_Emis
 c and d Thermal BackGnd/d(Surface_Emis)

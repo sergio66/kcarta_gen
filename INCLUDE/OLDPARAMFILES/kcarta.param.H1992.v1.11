@@ -1,0 +1,356 @@
+c this include file has the parameters necessary to run atmoscomp.f
+c the user defines the parameters in the first section 
+c next section uses parameters set for the version of the program being run
+
+c************************************************************************
+c************* cccc USER DEFINED INFORMATION cccc *********************** 
+c******************* set these as desired *******************************
+c************************************************************************
+
+c kOrigRefPath == path to original 100 layers reference profiles
+c              == these profiles were used in making the kCARTA database
+      CHARACTER*80 kOrigRefPath
+      PARAMETER (kOrigRefPath = 
+     $                '/asl/data/kcarta/KCARTADATA/RefProf.For.v107up/')
+
+c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+c >>>>>>>>>>>>>>>>> little endian vs big endian data files <<<<<<<<<<<<<
+c >>>>>>>> set correct path (iee_le vs ieee_be) as necessary <<<<<<<<<<<
+c kWaterPath   == path to compressed files for water 
+c                 (note gases 101,102 use lookup tables for self, foreign 
+c                 contribution to the continuum)
+c kCompPath    == path to other compressed data files (gasID 2 - 27)
+c also need paths to where the xsec, CKD and Solar Radiance Files are
+      CHARACTER*80 kWaterPath,kCompPath,kCKDPath,kSolarPath,kXsecFile
+      CHARACTER*80 kCO2Path,kCousin_CO2Path,kChiFile
+c ------>  change ieee-le to ieee-be for Intel vs SGI <----------
+c      PARAMETER (kWaterPath     = 
+c     $    '/salsify/production3/motteler/sergio/kcarta/h2o.ieee-be/')
+c      PARAMETER (kCO2Path      = 
+c     $    '/salsify/production3/motteler/sergio/kcarta/etc.ieee-be/')
+c      PARAMETER (kCompPath      = 
+c     $    '/salsify/production3/motteler/sergio/kcarta/etc.ieee-be/')
+c      PARAMETER (kCKDPath       = '../../KCARTADATA/General/CKDieee_be/')
+c      PARAMETER (kSolarPath     = '../../KCARTADATA/General/SOLARieee_be/')
+c      PARAMETER (kXsecFile      = '../../KCARTADATA/General/xsecdata.dat.sgi')
+c ------>   change ieee-be to ieee-le for SGI vs Intel <---------
+      PARAMETER (kCompPath   = '/asl/data/kcarta/v20.ieee-le/etc.ieee-le/')
+      PARAMETER (kWaterPath  = '/asl/data/kcarta/v20.ieee-le/h2o.ieee-le/')
+      PARAMETER (kCKDPath    = 
+     $              '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/')
+      PARAMETER (kSolarPath = 
+     $              '/asl/data/kcarta/KCARTADATA/General/SOLARieee_le/')
+      PARAMETER (kXsecFile  = 
+     $              '/asl/data/kcarta/KCARTADATA/General/xsecdata.dat.intel')
+c stuff for CO2
+c warning : if you use the OLD kcarta database (v10), you will need to bump
+c up CO2 in your mixed paths by 370/330 ~ 1.1212!!!!!!!!!!!!!!!!!!!
+      PARAMETER (kCO2Path    = '/asl/data/kcarta/v10.ieee-le/etc.ieee-le/')
+c warning : if you use the OLD kcarta database (v10), you will need to bump
+c up CO2 in your mixed paths by 370/330 ~ 1.1212!!!!!!!!!!!!!!!!!!!
+      PARAMETER (kCousin_CO2Path = '/asl/data/kcarta/v10.ieee-le/etc.ieee-le/')
+      PARAMETER (kChiFile =  
+     $     '/asl/data/kcarta/KCARTADATA/General/ChiFile/') 
+c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+c need paths to comp.param and xsec.param == files that detail what gasID's
+c and frequency combinations are in the compressed/crosssection databases
+c the names are semi-logical eg H1996  means "built with HITRAN 1996"
+c                            eg H1998  means "built with HITRAN 1998"
+c                            eg HT1998 means "built with HITRAN 1998 + Toth"
+      CHARACTER*80 kXsecParamFile,kCompParamFile
+      PARAMETER (kXsecParamFile = 
+     $              '/asl/data/kcarta/KCARTADATA/General/xsecH1992.param')
+      PARAMETER (kCompParamFile = 
+     $              '/asl/data/kcarta/KCARTADATA/General/compH1992.param')
+
+c this is how many layers are in the user profile 
+      INTEGER kProfLayer
+      PARAMETER (KProfLayer=100)
+
+c kMaxPrint == max number of printing options that can be read in
+c kMaxAtm   == max number of atmosphers we do radiance calculations for
+c kGasStore == max number of gases we allocate storage for 
+c              (from GASFIL + XSCFIL + WaterSelf + WaterFor <= kMaxGas)
+c kMixFilRows== max number of mixfil rows that can be read in
+      INTEGER kMaxAtm,kGasStore,kMixFilRows,kMaxPrint
+      PARAMETER (kMaxAtm=10,kGasStore=40,kMixFilRows=kProfLayer*3)
+      PARAMETER (kMaxPrint=10)
+
+c kEmsRegions=how many wavenumber dependent regions can be read in from 
+c             emissivity file
+      INTEGER kEmsRegions
+      PARAMETER (kEmsRegions=100)
+
+c this is if the user wants to do Jacobians
+c kMaxDQ = max number of gases we do d/dq for (GasID's 1..6) HUGE MEMORY!!!
+c kProfLayerJac = kProfLayer if Jacobians on, 1 otherwise
+c kMaxPtsJac    = 10000 if Jacobians on, 1 otherwise
+      INTEGER kMaxDQ,kProfLayerJac,kMaxPtsJac
+      PARAMETER (kMaxDQ=3,kProfLayerJac=kProfLayer,kMaxPtsJac=10000)
+c when kProfLayerJac,kMaxPtsJac are set to 1, this is "space saver" mode
+c      PARAMETER (kMaxDQ=2,kProfLayerJac=1,kMaxPtsJac=1)
+
+c this is if the user wants to do scattering computations
+c kMaxClouds = max number of clouds the user defines
+      INTEGER kMaxClouds
+      PARAMETER (kMaxClouds=10)
+c kMaxLayersPerCloud = max number of layers each cloud can occupy
+      INTEGER kCloudLayers
+      PARAMETER (kCloudLayers=5)
+
+c this parameter tells the code whether or not the Xsec gases are in the new
+c Hitran98 kcompressed Format (+1), or in the older Hitran92 file format(-1)
+      INTEGER kXsecFormat
+      PARAMETER (KXsecFormat=+1)
+
+c this is where the LineMix files are, for NONLTE 
+c this is where the weak CO2 lines are (HITRAN style parameter file) 
+      CHARACTER*80 caLineMixDir 
+c      PARAMETER (caLineMixDir='/home/sergio/KCARTA/SRCv1.11/NONLTE/LINEMIX/') 
+      PARAMETER (caLineMixDir='/carrot/s1/sergio/AIRSCO2/LINEMIXPARAMS/') 
+c this tells the code how many layers/levels to expect in the NLTE profile 
+      INTEGER kNLTEProfLayer 
+      PARAMETER (kNLTEProfLayer= 150) 
+
+c************************************************************************
+c************* PRE DEFINED PARAMETERS!! DO NOT TOUCH!! ****************** 
+c************************************************************************
+c this sets the version number
+c note that the first four characters HAVE to be vx.xx for readers to work
+      CHARACTER*80 caVersion
+      !!!! info = caVersion='vX.XX YY-MM-DD COMMENT')
+      PARAMETER (caVersion='v1.11 03-09-15 updates')
+
+c this sets the name of the file to which warnings/happy messages are logged to
+c this file is set by default to 'warning.msg' in n_main.f; however the user
+c can reset the name in the *OUTPUT section, as this would be a new parameter
+      CHARACTER*80 kWarnFile
+      COMMON/ComWarnLog/kWarnFile
+
+c When RTP profiles are used, need to keep track of which is the lowest and
+c highest layer, or highest and lowest pressure, that can be used 
+      INTEGER kRTPBot,kRTPTop
+      REAL kRTP_pBot,kRTP_pTop
+      COMMON/ComRTP1/kRTPBot,kRTPTop
+      COMMON/ComRTP2/kRTP_pBot,kRTP_pTop
+
+c this is the parameter DELTA that tells how close view pressure rP is to a 
+c pressure level
+      REAL delta
+      PARAMETER(delta = 1.0e-9)
+
+c this is number of channels to do things for, after reading in the RTP
+      INTEGER kChan
+      PARAMETER (kChan=2400)
+
+c this is to set the number of zenith angles to do angular integration
+c when determining fluxes and/or background thermal
+      INTEGER kGauss 
+      PARAMETER (kGauss=40) 
+      DOUBLE PRECISION daGaussPt(kGauss),daGaussWt(kGauss) 
+
+c this sets the file error and warning file unit numbers
+      INTEGER kStdErr,kStdWarn
+      PARAMETER (kStdErr=0,kStdWarn=1)
+c if the user wants actual files, instead of STDIN,STDOUT, 
+c these set driver file input,kcarta std output, jacobian file unit numbers
+      INTEGER kStdDriverKK,kStdkCartaKK,kStdJacobKK
+      PARAMETER (kStdDriverKK=9,kStdkCartaKK=10,kStdJacobKK=11)
+c this sets the compressed/cross sectional database, profile unit number
+      INTEGER kCompUnit,kProfileUnit
+      PARAMETER (kCompUnit=12,kProfileUnit=13)
+c this sets the temp data file unit number
+      INTEGER kTempUnit
+      PARAMETER (kTempUnit=14)
+c these set driver file input,kcarta std output, jacobian file unit numbers
+c that are used at run time; assignements done at beginning of run
+      INTEGER kStdDriver,kStdkCarta,kStdJacob,kStdFlux
+      PARAMETER (kStdFlux=17)
+
+c these are common blocked integeres that say whther or not the unit is open
+      INTEGER kStdErrOpen,kStdWarnOpen,kStdkCartaOpen,kStdJacobOpen
+      INTEGER kStdDriverOpen,kCompUnitOpen,kProfileUnitOpen,
+     $        kTempUnitOpen,kStdFluxOpen
+      COMMON/OB0/kStdDriver,kStdkCarta,kStdJacob
+      COMMON/OB1/kStdErrOpen,kStdWarnOpen,kStdkCartaOpen,kStdJacobOpen,
+     $           kStdDriverOpen,kStdFluxOpen
+      COMMON/OB2/kCompUnitOpen,kProfileUnitOpen,kTempUnitOpen
+
+c kMaxUserSet == number of variables the user can change w/o recompiling
+c set in setparam.param 
+      INTEGER kMaxUserSet
+      PARAMETER (kMaxUserSet=12)
+c these next kMaxUserSet variables are set in setparam.param 
+c note there is space for 12 variables but only 9 are being used right now
+      INTEGER kLayer2Sp,kCKD,kGasTemp,kLongOrShort
+      INTEGER kJacobOutput,kFlux,kTempJac,kPlanck
+      INTEGER kSurfTemp,kRTP
+      COMMON/ComBlock1/kLayer2Sp,kCKD,kGasTemp,kLongOrShort
+      COMMON/ComBlock2/kJacobOutput,kFlux,kTempJac
+      COMMON/ComBlock3/kSurfTemp,kRTP
+
+c these next few parameters are set in *RADNCE and *JACOBN
+      INTEGER kSolar,kThermal,kThermalJacob,kJacobian,kSetThermalAngle
+      REAL kSolarAngle,kThermalAngle,kSolarRefl
+      COMMON/ComBlock4/kSolar,kThermal,kThermalJacob,kJacobian,
+     $                 kSetThermalAngle
+      COMMON/ComBlock5/kSolarAngle,kThermalAngle,kSolarRefl
+
+c this is to make DISORT run faster, and to be able to check how temperature 
+c variations in TWOSTREAM affect the radiances
+      INTEGER kDis_Nstr,kDis_Pts,kTemperVary
+      COMMON/ComDISORT/kDis_Nstr,kDis_Pts,kTemperVary
+c these next few parameters are set in *SCATTR
+c It also tells the RTP code or the general code when it can do scattering 
+c (kcarta.x) and when it cannot (bkcarta.x)
+      INTEGER kScatter,kWhichScatterCode,kAllowScatter
+      COMMON/ComBlock6/kScatter,kWhichScatterCode,kAllowScatter
+
+c NOTE there are 38 main gases in the HITRAN database;  plus about 13
+c cross section gases; we have added on two new gases, 101 and 102 for 
+c self and foreign water continuum
+c kMaxGas   == number of gases ID's that we can do radiative transfer for
+c              (1 .. 102)
+c kGasComp  == max gas ID for which we have k-comp code (1-28)or(1-kGasComp)
+c kGasXsecLo  == min gas ID for which we have xsec calc (51-63)
+c                                            or(kGasXsecLo-kGasXsecHi)
+c kGasXsecHi  == max gas ID for which we have xsec calc (51-63)
+c                                            or(kGasXsecLo-kGasXsecHi)
+c kNewGasLo  == min gas ID for which we have new gases (101-102)
+c                                            or(kNewGasLo-kNewGasHi)
+c kNewGasHi  == max gas ID for which we have new gases (101-102)
+c                                            or(kNewGasLo-kNewGasHi)
+      INTEGER kMaxGas,kGasComp,kGasXsecLo,kGasXsecHi
+      PARAMETER (kGasComp=28,kGasXsecLo=51,kGasXsecHi=63,kMaxGas=102)
+      INTEGER kNewGasLo,kNewGasHi
+      PARAMETER (kNewGasLo=101,kNewGasHi=102)
+
+c these are number of points/temperatures in CKD
+      INTEGER kTempCKD,kFreqCKD
+      PARAMETER (kTempCKD=31,kFreqCKD=2901)
+
+c kMaxLayer == number of AIRS pressure layers from Ground to Top
+c kMaxPts   == max number of frequencies per kcomp block file
+      INTEGER kMaxLayer,kMaxPts
+      PARAMETER (kMaxLayer=100,kMaxPts=10000)
+
+c kMaxPtsBox   == for NLTE, kcarta does 5 point box car integration
+c so use 5 times asmany points, plus two extra points on either side
+      INTEGER kMaxPtsBox
+      PARAMETER (kMaxPtsBox=10000*5+4)
+
+c kMaxTemp  == number of different temps in compressed files (T-50,..,T+50)
+c kMaxK     == max number of singular vectors used for reconstruction
+c kMaxU     == max number of SVD vectors we wish to use during uncompression
+c              (which must be less than or equal to kMaxK defined above)
+c kMaxWater == max number of water offset profiles
+c kMaxProf  == max number of temperature profiles
+
+      INTEGER kMaxTemp,kMaxK,kMaxU,kMaxProf,kMaxWater
+      PARAMETER (kMaxTemp=11,kMaxK=50,kMaxU=50,kMaxWater=5,kMaxProf=18)
+
+C MXXMOL = maximum number of xsec gases
+C MXXTMP = maximum number of temperature sets for a xsec gas
+C MXXPTS = maximum number of xsec data points
+C MXXSEC = maximum number of xsec data sets
+      INTEGER MXXMOL, MXXTMP, MXXPTS, MXXSEC
+      PARAMETER (MXXMOL=13, MXXTMP=6, MXXPTS=12808, MXXSEC=31)
+
+c kNumWords    == number of keywords that could  be found in input .ip file
+      INTEGER kNumWords
+      PARAMETER (kNumWords=13)
+
+c kPathsOut == the number of outputs per option
+      INTEGER kPathsOut
+ccc  PARAMETER (kPathsOut=max0(kGasStore*kProfLayer,kMixFilRows))!absoft no
+      PARAMETER (kPathsOut=kGasStore*kProfLayer)
+
+c guess what kPi is
+c kAvog = Avogadro Number (kilo)
+c kSunTemp == temperature of the sun
+c kTbdy = Temperature of Space
+c kPlanck1,kPlanck2 are the Planck constants (for blackbody radiance in terms
+c of wavenumbers)
+      DOUBLE PRECISION kPi,kSunTemp,kTSpace,kAvog,kBoltzmann
+      DOUBLE PRECISION kPlanck1,kPlanck2
+      PARAMETER (kPi=3.1415926535898,kSunTemp=5600.0,
+     $             kTSpace=2.7,kAvog=6.022045d26,kBoltzmann=1.380658d-23)
+      PARAMETER (kPlanck1=1.1911d-5,kPlanck2=1.4387863)
+
+c----------------------------------------------------------------------
+
+c kLBL    this is a parameter that was set to 5050 in LBLRTMv5.10 for the
+c         water continuum calculations. Since kCARTA uses chunks of
+c         kMaxPts=10000 pts, while LBLRTM code seemed to use chunks of 5050
+c         for its computations, as well as coarse grids of size about 100
+c         this parameter is set to 5000
+      INTEGER kLBL
+      PARAMETER (kLBL=5000)
+c----------------------------------------------------------------------
+
+c kHITRAN this is a parameter that alllows KCARTA to compute local 
+c         lineshapes for a particular band. eg for 2350 band (strongest 
+c         P-R sigma sigma CO2 band in 4 um), there are about 120 lines
+      INTEGER kHITRAN
+      PARAMETER (kHITRAN = 20000)
+
+c----------------------------------------------------------------------
+
+c kGenln2Water   = self broadening correction for water, using interpolation 
+c                  in water partial pressure (+1) 
+c                = just do what Genln2 does (which would be the same as the
+c                  uncompresssion for CO2 (-1)
+      INTEGER kGenln2Water
+      PARAMETER (kGenln2Water=+1)
+
+c----------------------------------------------------------------------
+c this is new for version 0.97 and higher and some parts will change
+c
+c kW              == how many types of wavenumber spacings we have
+c 1,2,3 refer to q,r,s , depends on wavenumber spacing 0.001, 0.0025, 0.005
+c kaTag           == which of the wavenumber spacings this corresponds to
+c kMinFreq1,2,3   == min wavenumber (cm-1) allowed 
+c kMaxFreq1,2,3   == max wavenumber (cm-1) allowed
+c kFreqStep1,2,3  == wavenumber spacing
+c kBlockSize1,2,3 == wavenumber spread in each kcomp file
+
+c the specs for q,s (1,3) will probably change in the future
+c the specs for r(2) are what we have had since 8/96 till present
+
+c 1,2,3 refer to q,r,s (205-605, 605-2805, 2805-?) cm -1
+c note : if last file is eg r2805_g2.dat, this means end freq for gas2=2830
+c kNumKcomp1,2,3  == number of kcompressed files
+c kNumkCompT=sum of all kNumkComp(1)+kNumkComp(2)+kNumkComp(3)
+
+      INTEGER kW
+      PARAMETER (kW=3)
+      REAL kaMaxFr(kW),kaMinFr(kW),kaFrStep(kW),kaBlSize(kW)
+      INTEGER kaTag(kW)
+      INTEGER kaNumKcomp(kW),kNumKCompT
+c also need stuff for LBL computations at 5 point finer resolution, and also
+c at medium and coarse resolution
+      DOUBLE PRECISION kaFineFrStep(kW),kaMediumFrStep(kW),kaCoarseFrStep(kW)
+
+      PARAMETER (kNumkCompT=122)
+      DATA kaNumkComp / 25,  89,  8/
+
+      DATA kaTag    /1,           2,            3/
+      DATA kaMinFr  /355.00000,   0605.00000,   2830.00000/
+      DATA kaMaxFr  /605.00000,   2830.00000,   3230.00000/
+      DATA kaFrStep /1.000000e-3, 2.500000e-3,  5.000000e-3/
+      DATA kaBlSize /10.00000,    25.00000,     50.00000/
+      DATA kaFineFrStep   /2.000000d-4, 5.000000d-4,  1.000000d-3/
+      DATA kaMediumFrStep /1.000000d-1, 1.000000d-1,  1.000000d-1/
+      DATA kaCoarseFrStep /5.000000d-1, 5.000000d-1,  5.000000d-1/
+            
+c      kaNumkComp(1)=NINT((kaMaxFr(1)-kaMinFr(1))/kaBlSize(1))
+c      kaNumkComp(2)=NINT((kaMaxFr(2)-kaMinFr(2))/kaBlSize(2))
+c      kaNumkComp(3)=NINT((kaMaxFr(3)-kaMinFr(3))/kaBlSize(3))
+c      kNumkCompT=kaNumkComp(1)+kaNumkComp(2)+kaNumkComp(3)
+
+c thus last possible file in q series =  q795_gX.dat has data from  795-805
+c thus last possible file in r series = r2805_gX.dat has data from 2805-2830
+c thus last possible file in s series = s2955_gX.dat has data from 2955-3005
+
+c------------------------------------------------------------------------

@@ -48,7 +48,7 @@ c jacobians and then outputs them
 
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
 c rDelta is the kComp file Step
 c raLayAngles are the layer dependent satellite view angles

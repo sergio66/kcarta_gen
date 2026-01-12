@@ -1,2 +1,4 @@
 # keep the following file
 !scatter_all_misc.f
+
+## see main .gitignore, it saysto ignore all SRCv1.10/scatter*.f files since they are "experimental"

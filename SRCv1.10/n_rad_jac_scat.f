@@ -71,7 +71,7 @@ c               the iProfileLayers defined in the KLAYERS file
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       INTEGER iRTP
-      CHARACTER*130 caPFName
+      CHARACTER*80 caPFName
 
        INTEGER iI
 
@@ -1419,7 +1419,7 @@ c this subroutine will expand the number of cloud layers from 1 to whatever
  
       IMPLICIT NONE
 
-      include '../INCLUDE/scatter.param'
+      include '../INCLUDE/scatter110.param'
 
       INTEGER iProfileLayers
       REAL raPressLevels(kProfLayer+1)

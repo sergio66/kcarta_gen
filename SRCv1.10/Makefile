@@ -447,18 +447,22 @@ EXECS = basic
 EXECS = scat
 all : $(EXECS)
 
-kcartaparam: 
+kcartaparam:
+	echo "making make -f Makefile kcartaparam"; \
 	rm ../INCLUDE/kcarta.param; \
+	rm ../INCLUDE/pre_defined_v110.param; \
       cd ../INCLUDE; \
-      ln -s kcarta_v110.param kcarta.param; \
+      ln -s OLDPARAMFILES/kcarta_v110.param      kcarta.param; \
+      ln -s OLDPARAMFILES/pre_defined_v110.param pre_defined_v110.param; \
       cd ../SRCv1.10
 
 ############## the two executables : 
 ##### (1) complete kcarta (memory hog) with jacobians, all scattering codes
-scat: kcarta.x
+scat: kcarta.x 
 	mv kcarta.x ../BIN/kcarta.x_v1.10
 
 kcarta.x : $(OBJS)
+	make -f Makefile kcartaparam; \
 	$(F77) -o kcarta.x $(FLAGS) $(OBJS) $(LIBS) $(RTPLIB) $(HDFLIB)
 
 kcartamain.o : kcartamain.f $(PARAMS)
@@ -466,6 +470,7 @@ kcartamain.o : kcartamain.f $(PARAMS)
 
 ##### (2) basic kcarta (easy on memory) with no jacobs, fluxes or scattering
 basic: bkcarta.x
+	make -f Makefile kcartaparam; \
 	mv bkcarta.x ../BIN/bkcarta.x_v1.10
 
 bkcarta.x : $(OBJS_BASIC)
