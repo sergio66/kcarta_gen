@@ -14,7 +14,8 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
-      include '../INCLUDE/pre_defined.param'                          !!!
+c!!!      include '../INCLUDE/pre_defined.param'                      !!!
+          include '../INCLUDE/pre_defined_orig605_805res.param'       !!!
 c template file : template_kcartaV118_385_H2012.param                 !!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
       PARAMETER(caVersion='v1.18 16-10-01 template_kcartaV118_385_H2012.param')      !!!
@@ -95,7 +96,7 @@ c kCompPath       == path to other compressed data files (gasID 3 - 27,51-63)
 c kCKDPath        == path to where the CKD lookup tables are
 c kCKD_compr_path == path to where the CKD compressed data files (gasID 101,102)
 c note : this is default, for the "r" or regular gases in 605-2830 cm-1 range
-      CHARACTER*120 kWaterPath,kCompPath,kCKDPath,kCKD_compr_path
+      CHARACTER*160 kWaterPath,kCompPath,kCKDPath,kCKD_compr_path
 c these were generated sometime in year 2000 and were used for NLTE 2005
 c      PARAMETER (kWaterPath = '/home/sergio/asl/rta/kcarta/v20.ieee-le/h2o.ieee-le/')
 c      PARAMETER (kCompPath  = '/home/sergio/asl/rta/kcarta/v20.ieee-le/etc.ieee-le/')

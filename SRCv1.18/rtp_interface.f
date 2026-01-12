@@ -993,7 +993,7 @@ c allocated in GASFIL or XSCFIL
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                            iFound,iGasIndex)
               IF (iFound .GT. 0) THEN 
-                write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0',iIDGas,
+                write(kStdWarn,'(A,I5,A,I5,I5)') 'empty layer gasID, set rAmt = 0.0',iIDGas,
      $ 'gindx,layer ',iGasIndex,i
                 raaAmt(j,iGasIndex)       = rAmt
                 raaTemp(j,iGasIndex)      = rT
@@ -1509,7 +1509,7 @@ c allocated in GASFIL or XSCFIL
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                            iFound,iGasIndex)
               IF (iFound .GT. 0) THEN 
-                write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0',iIDGas,
+                write(kStdWarn,'(A,I5,A,I5,I5)') 'empty layer gasID, set rAmt = 0.0',iIDGas,
      $ 'gindx,layer ',iGasIndex,i
                 raaAmt(j,iGasIndex)       = rAmt
                 raaTemp(j,iGasIndex)      = rT
@@ -2056,7 +2056,7 @@ c allocated in GASFIL or XSCFIL
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,
      $                            iFound,iGasIndex)
               IF (iFound .GT. 0) THEN 
-                write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0',iIDGas,
+                write(kStdWarn,'(A,I5,A,I5,I5)') 'empty layer gasID, set rAmt = 0.0',iIDGas,
      $ 'gindx,layer ',iGasIndex,i
                 raaAmt(j,iGasIndex)       = rAmt
                 raaTemp(j,iGasIndex)      = rT

@@ -14,7 +14,8 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c!!!!!!!!!!!!! PRE DEFINED PARAMETERS!! DO NOT TOUCH!! !!!!!!!!!!!!!!!!!! 
 c!!!                                                                  !!!
-      include '../INCLUDE/pre_defined.param'                          !!!
+c!!!      include '../INCLUDE/pre_defined.param'                      !!!
+          include '../INCLUDE/pre_defined_orig605_805res.param'       !!!
 c template file : template_kcartaV118_385_H2012.param                 !!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!12345678901234567890123456789012345678901234567890123456789012345678901234567890
       PARAMETER(caVersion='v1.18 16-10-01 template_kcartaV118_385_H2012.param')      !!!

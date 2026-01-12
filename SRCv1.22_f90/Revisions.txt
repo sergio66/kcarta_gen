@@ -1315,6 +1315,22 @@ September 2017 f90 version. Made modules, so rearranged subroutines/functions
 	       
 v1.18
 -----
+1/10/2026      Found a big bug in subroutine Get_Temp_Plevs (n_pth_mix.f) where
+               rtp presure levels (TOA->GND = 1-97) were flipped to KCARTA pressure levels (TOA->GND= 4-100)
+               incorrctly, such that the lower three had zeros. Put in the same code as is in v1.22
+
+1/10/2026      Put in the same "test the T/Q jacobians" code into subr Set_Ref_Current_Profs (kcartamisc.f)
+               as is in v1.22
+
+1/10/2026      Rejigged v1.18 so it works on chip cluster; tested the array abounds etc using gfortran
+
+7/6/2018       Added Tran et. al WV/CO2 continuum to the 4.3 um bandhead
+               See SUBROUTINE add_co2_wv_continuum in kcoeff_common.f90
+               The continuum has no temperature dependance so d/dT = 0;
+
+               It depends on path length, density^2, xCO2 and xWV where xi = mole fraction
+                 iaaOverrideDefault(1,9) = +2 keeps it on, can be overturned
+
 3/29/18        Cleaning up the NLTE routines. Made a H2016/400ppm version of weak background lines
                and first order linemix coeffs (as opposed to the ~H2004 or H2008 version we have
 	       been using). This meant that
@@ -2364,7 +2380,6 @@ v1.14
                 3 = upgoing flux at each layer
                 4 = OLR at TOA
                 5 = OLR/flux at tropopause/DNW 
-
 
 01/26/10        Now have gas103 == heavy water (HDO = isotope 4 in HITRAN) for 
                 0.0025 cm-1 resolutions bands 

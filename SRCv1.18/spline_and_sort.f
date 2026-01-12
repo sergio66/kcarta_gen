@@ -1325,7 +1325,7 @@ C      Parameters
        INTEGER N,NOUT
 C
 C      Local Variables
-       INTEGER K,KLO,KHI
+       INTEGER K,KLO,KHI,iI
        REAL A,B,H
 
        IF (NOUT .NE. 1) THEN
@@ -1351,6 +1351,11 @@ C      Determine between which pair of points X falls (bisect loop)
 C
        H=XA(KHI) - XA(KLO)
        IF (H .LE. 0.0) THEN
+          write(kStdErr,'(A,I4,I4)') 'RLINEAR1 error, Nin,Nout = ',N,NOUT
+          DO iI = 1,N
+            print *,iI,XA(iI),YA(iI)
+          END DO
+          print *,X
           WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
  1010     FORMAT('ERROR! linear SPLINT: bad XA array.',/,
      $       'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5,
@@ -1466,6 +1471,7 @@ C      Determine between which pair of points X falls (bisect loop)
 C
        H=XA(KHI) - XA(KLO)
        IF (H .LE. 0.0) THEN
+          write(kStdErr,'(A,I4)') 'dLINEAR_SMART_ONE error, Nin = ',N
           WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
  1010     FORMAT('ERROR! linear SPLINT: bad XA array.',/,
      $       'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5,
@@ -1561,6 +1567,7 @@ C      Determine between which pair of points X falls (bisect loop)
 C
        H=XA(KHI) - XA(KLO)
        IF (H .LE. 0.0) THEN
+          write(kStdErr,'(A,I4)') 'dLINEAR_ONE error, Nin = ',N
           WRITE(kStdErr,1010) KLO,KHI,XA(KLO),XA(KHI)
  1010     FORMAT('ERROR! linear SPLINT: bad XA array.',/,
      $       'KLO=',I5,', KHI=',I5,', XA(KLO)=',1PE12.5,

@@ -1621,20 +1621,20 @@ CONTAINS
     !! overwrite iJax,iJax2,iGasJac
     iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
 
-    iJax = 30
-    iJax = 20
-    iJax = 10
-    iJax = 5
-    iJax = 4
-    iGasJac = 1
-
-    !! overwrite iJax,iJax2,iGasJac
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-
     iJax = 6
     iJax = 20
     iJax = 5
     iGasJac = 2
+
+    !! overwrite iJax,iJax2,iGasJac
+    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+
+    iJax = 30
+    iJax = 20
+    iJax = 10
+    iJax = 4
+    iJax = 5
+    iGasJac = 1
 
     !! *************************
     !! *************************
@@ -2031,11 +2031,11 @@ CONTAINS
       write(kTempUnit,'(A)') &
       '%'
       write(kTempUnit,'(A)') &
-      '% iL     iJ         iGas  iaGases(iGas)  iaProf   raPress    raTemp      raAmt     raRAmt    raAmt/raaRamt'
+      '% iL     iJ         iGas  iaGases(iGas)  iaProf   raPavgLay   raTemp      raAmt     raRAmt    raAmt/raaRamt'
       write(kTempUnit,'(A)') &
-      '%    iaRadLayer(iL)          iGasID      FromRTP'
+      '%    iaRadLayer(iL)          iGasID      FromRTP   (atm)       (K)        <---kmol/cm2--->       []      '
       write(kTempUnit,'(A)') &
-      '%--------------------------------------------------------------------------------------------------------'
+      '%----------------------------------------------------------------------------------------------------------'
 
      DO iL = 1,iaNumLayer(1)
        iJ = iaaRadLayer(1,iL)

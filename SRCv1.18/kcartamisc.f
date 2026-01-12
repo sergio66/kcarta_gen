@@ -3248,8 +3248,8 @@ c get the reference profile for the current gas if GAS ID <= kGasXsecHi
       !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
       !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
       !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
-!      iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
-!      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+      iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs
       !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
       !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
       !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations

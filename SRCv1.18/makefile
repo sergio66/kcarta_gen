@@ -41,6 +41,9 @@
 
 ########################################################################
 
+#########################
+## these are orig res, and 385 pmv only
+## Dec 2025, when we "lost" the disks
 385_H12_default:
 	echo "making 385_H12_default"
 	make -f Makefile datafix385_H2012
@@ -48,6 +51,7 @@
 	make -f Makefile scat		
 	mv ../BIN/bkcarta.x ../BIN/bkcarta.x_385ppmv
 	mv ../BIN/kcarta.x ../BIN/kcarta.x_385ppmv
+#########################
 
 385_H08_default:
 	make -f Makefile datafix385_H2008

@@ -18,7 +18,7 @@ c for me in the RTP file!
 c output
       REAL rf1,rf2           !the low and high end wavenumbers
 c input
-      CHARACTER*130 caPFname !the RTP file to peruse
+      CHARACTER*80 caPFname !the RTP file to peruse
       INTEGER iRTP           !which profile to read
 
 c local variables for RTP file
@@ -85,7 +85,7 @@ c this used to open up a AIRS information file and figure out things
 c output
       REAL rf1,rf2           !the low and high end wavenumbers
 c input
-      CHARACTER*130 caPFname !the RTP file to peruse
+      CHARACTER*80 caPFname !the RTP file to peruse
       INTEGER iRTP           !which profile to read
 
 c local variables for RTP file
@@ -97,6 +97,10 @@ c local variables for RTP file
       integer rchan
       character*32 mode
       character*80 fname
+
+      integer kCHAN
+      parameter(kChan=8461)
+
 c other local variables
       integer i,iInstr,iNumChan,iaListChan(kChan)
       INTEGER iFileNum,iaFileChan(kChan)      !number of channel, and IDs
@@ -141,6 +145,9 @@ c this subroutine finds the freqs for kCARTA
       include '../INCLUDE/kcarta.param'
 
 c input 
+      integer kCHAN
+      parameter(kChan=8461)
+
       INTEGER iFileNum,iaFileChan(kChan)      !number of channel, and IDs
       REAL raFileCenterFreq(kChan),raFileWidth(kChan) !center freqs, widths
       INTEGER iNumChan                        !number of channels set in RTP
@@ -192,6 +199,9 @@ c assumes that channel ID numbers are from 1 to MAX
 c input 
       INTEGER iInstr
 c output
+      integer kCHAN
+      parameter(kChan=8461)
+
       INTEGER iFileNum,iaFileChan(kChan)      !number of channel, and IDs
       REAL raFileCenterFreq(kChan),raFileWidth(kChan) !center freqs, widths
  
@@ -309,7 +319,7 @@ c raPressLevels are the actual pressure levels from the KLAYERS file
       REAL raTSpace(kMaxAtm),raTSurf(kMaxAtm)
       REAL raSatHeight(kMaxAtm),raSatAngle(kMaxAtm)
       INTEGER iRTP     !!!tells which profile info, radiance info, to read
-      CHARACTER*130  caPFName !!!tells which profile 
+      CHARACTER*80  caPFName !!!tells which profile 
 
 c local variables
       CHARACTER*7 caWord
@@ -640,7 +650,8 @@ c now read in the emissivity values
         END IF
  
 c now read in the solar refl values 
-      iaSetSolarRefl(iC) = prof.nrho
+c      iaSetSolarRefl(iC) = prof.nrho
+      iaSetSolarRefl(iC) = prof.nemis
       IF (iaSetSolarRefl(iC) .GT. kEmsRegions) THEN 
         write(kStdErr,*)'Cannot set so many solar refl regions. Change' 
         write(kStdErr,*)'kEmsRegions in kcarta.param and recompile' 
@@ -674,7 +685,8 @@ c now read in the solar refl values
         write(kStdWarn,*) r1,rEms  
       ELSE
         DO i=1,iaSetSolarRefl(iC) 
-          r1   = prof.rfreq(i)
+c          r1   = prof.rfreq(i)
+          r1   = prof.efreq(i)
           rEms = prof.rho(i)
           write(kStdWarn,*) r1,rEms 
           raaaSetSolarRefl(iC,i,1)=r1 
@@ -768,7 +780,7 @@ c raPresslevls,rathickness are the KLAYERS pressure levels and layer thickness
 
 c local variables : all copied from ftest1.f (Howard Motteler's example)
       integer i,j,k,iG
-      REAL raHeight(kProfLayer+1),pProf(kProfLayer)
+      REAL raHeight(kProfLayer+1),pProf(kProfLayer),plays(kProfLayer)
 
       integer rtpopen, rtpread, rtpwrite, rtpclose
       record /RTPHEAD/ head
@@ -929,12 +941,16 @@ c now loop iNpath/iNumGases  times for each gas in the user supplied profile
 
         !!! first fill things out with stuff from the RTP file
         DO i = 1, prof.nlevs - 1
+          plays(i) = (prof.plevs(i)-prof.plevs(i+1))/log(prof.plevs(i)/prof.plevs(i+1))
+        END DO
+
+        DO i = 1, prof.nlevs - 1
           j = iFindJ(kProfLayer,I,iDownWard)
           iIDGas = head.glist(iG)
           iaNpathCounter(iIDgas) = iaNpathCounter(iIDgas)+1
           rAmt = prof.gamnt(i,iG) / kAvog
           rT   = prof.ptemp(i)
-          rP   = prof.plays(i) / 1013.25     !need pressure in ATM, not mb
+          rP   = plays(i) / 1013.25     !need pressure in ATM, not mb
           IF (iDownWard .EQ. -1) THEN
             !!! this automatically puts partial pressure in ATM, assuming 
             !!! gas amount in kilomolecules/cm2, length in cm, T in kelvin

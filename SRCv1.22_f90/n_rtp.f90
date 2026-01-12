@@ -3766,7 +3766,7 @@ CONTAINS
             IF (iaGases(iIDgas) > 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
               IF (iFound > 0) THEN
-                write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0',iIDGas,'gindx,layer ',iGasIndex,i
+                write(kStdWarn,'(A,I5,A,I5,I5)') 'empty layer gasID, set rAmt = 0.0',iIDGas,'gindx,layer ',iGasIndex,i
                 ! write(*,'(A,I4,I4,ES12.5,3(F12.5))') 'moo 1A', iIDGas,j,rAmt,rT,rP*kAtm2mb,rPP*kAtm2mb
                 raaAmt(j,iGasIndex)       = rAmt
                 raaTemp(j,iGasIndex)      = rT
@@ -5064,7 +5064,7 @@ CONTAINS
             IF (iaGases(iIDgas) > 0) THEN
               Call FindIndexPosition(iIDGas,iNumGases,iaInputOrder,iFound,iGasIndex)
               IF (iFound > 0) THEN
-                write(kStdWarn,*) 'empty layer gasID, set rAmt = 0.0',iIDGas,'gindx,layer ',iGasIndex,i
+                write(kStdWarn,'(A,I5,A,I5,I5)') 'empty layer gasID, set rAmt = 0.0',iIDGas,'gindx,layer ',iGasIndex,i
                 raaAmt(j,iGasIndex)       = rAmt
                 raaTemp(j,iGasIndex)      = rT
                 raaPress(j,iGasIndex)     = rP

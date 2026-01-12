@@ -122,7 +122,9 @@ mars_H16_default_f90:
 #	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_400ppmv_G15
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_400ppmv_G15
 
+#########################
 ## these are orig res, and 385 pmv only
+## Dec 2025, when we "lost" the disks
 385_H12_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC
 	cp_param_files_to_f90_v122.sc
@@ -135,7 +137,7 @@ mars_H16_default_f90:
 
 ## these are orig res, and 385 pmv only
 ## Dec 2025, when we "lost" the disks
-385_H12_CO2_UMBC_default_f90_X:
+385_H12_CO2_UMBC_default_f90_X_noneed:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC_X
 	cp_param_files_to_f90_v122.sc
 #	make -f Makefile_v122_Intelf90 basic
@@ -144,6 +146,8 @@ mars_H16_default_f90:
 #	mv ../BIN/bkcarta.x90        ../BIN/bkcarta.x_f90_122_385ppmv_H12_CO2_UMBC_X
 #	mv ../BIN/bkcartaTXT.x90     ../BIN/bkcartaTXT.x_f90_122_385ppmv_H12_CO2_UMBC_X
 	mv ../BIN/kcarta.x90         ../BIN/kcarta.x_f90_122_385ppmv_H12_CO2_UMBC_X
+#########################
+
 
 ## these are orig res, and 385 pmv only
 385_H08_CO2_UMBC_default_f90:

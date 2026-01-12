@@ -12,8 +12,16 @@ echo " "
 make -f Makefile_v122_Intelf90 scat
 ls -lt ../BIN/kcarta.x90
 
+########################################################################
+########################################################################
+########################################################################
+
+###### this depends on which one you are making eg you may have started with this
+######   make clean; make -f makefile 385_H12_CO2_UMBC_default_f90
+###### in which case neiher of these two are appropriate
+
 #mv ../BIN/kcarta.x90 /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
 #ls -lt /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
 
-mv ../BIN/kcarta.x90 ../BIN/kcarta.x_f90_122_400ppmv_H20
-ls -lt ../BIN/kcarta.x_f90_122_400ppmv_H20
+#mv ../BIN/kcarta.x90 ../BIN/kcarta.x_f90_122_400ppmv_H20
+#ls -lt ../BIN/kcarta.x_f90_122_400ppmv_H20

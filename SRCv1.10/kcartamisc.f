@@ -2032,6 +2032,7 @@ c agrees with what one would expect from kaMinFr,kaMaxFr
           END IF
         iI=INT((kaMaxFr(iJ)-kaMinFr(iJ))/rF)
         IF (iI .NE. kaNumKComp(iJ)) THEN
+          write(kStdErr,*) ' '
           write(kStdErr,*) 'iJ = ',iJ
           write(kStdErr,*) 'kcarta.param says that the number of '
           write(kStdErr,*) 'kCompressed files = ',kaNumKComp(iJ)
@@ -2040,7 +2041,11 @@ c agrees with what one would expect from kaMinFr,kaMaxFr
           write(kStdErr,*) kaMaxFr(iJ),kaMinFr(iJ),kMaxPts,kaFrStep(iJ)
           write(kStdErr,*) 'iI=INT((kMaxFreq-kMinFreq)/
      $(kMaxPts*kFreqStep))'
-          CALL DoSTOP
+!          CALL DoSTOP
+          write(kStdErr,*) 'Line 2044 of kcartamis,f I HAVE COMMENTED OUT  CALL DoStop'
+          write(kStdErr,*) 'Line 2044 of kcartamis,f I HAVE COMMENTED OUT  CALL DoStop'
+          write(kStdErr,*) 'Line 2044 of kcartamis,f I HAVE COMMENTED OUT  CALL DoStop'
+          write(kStdErr,*) ' '
           END IF
         END DO
 

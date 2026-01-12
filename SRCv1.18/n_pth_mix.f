@@ -27,10 +27,10 @@ c output
       REAL raTPressLevels(kProfLayer+1)           
 
 c local
-      INTEGER iI,iJ,iOffSet,iCO2_ind,iDefault,iInterpType
+      INTEGER iI,iJ,iOffSet,iCO2_ind,iDefault,iInterpType,iI2
       REAL raT(kProfLayer),raP(kProfLayer),rX,rY,logP(kProfLayer),rPmin,rPmax,dx
       REAL grav0,grav,Re,Rd,raGeopotentialThick1(kProfLayer),raGeopotentialThick2(kProfLayer)
-      REAL rInt,raTX(10),raPX(10),p2h
+      REAL rInt,raTX(10),raPX(10),p2h,rDeltaPrevious,rPrevious
 
       iCO2_ind = 2                 !! assume we have CO2 in profile
 
@@ -51,42 +51,93 @@ c local
 	  call dostopmesg('rathickness < 0 in Get_Temp_Plevs$')
 	end if
       END DO
-      
-      rPmin = +1.0e10
-      rPmax = -1.0e10
+
 c      DO iI = 1,100
 c        print *,iI,iCO2_ind,iProfileLayers,raaPress(iI,iCO2_ind)*kAtm2mb,raaTemp(iI,iCO2_ind)
 c      END DO      
+      rDeltaPrevious = 0.0
+      rPrevious = 0.0      
+      rPmin = +1.0e10
+      rPmax = -1.0e10
       iI = 75   !!! make this really high up      
-      IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND.
-     $    (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) THEN
+
+!!!  OLD
+!!!      IF ((raaPress(iI,iCO2_ind) .GT. raaPress(iI+1,iCO2_ind)) .AND.
+!!!     $    (raaPress(iI+1,iCO2_ind) .GT. raaPress(iI+2,iCO2_ind))) THEN
+!!!        !! pressures decreasing with index; use CO2 temps and pressures
+!!!        DO iI = kProfLayer-iProfileLayers+1,kProfLayer-2
+!!!          iJ = iI-iOffSet
+!!!          raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
+!!!          logP(iJ) = log(raP(iJ))
+!!!          raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
+!!!          IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
+!!!          IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
+!!!ccc           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
+!!!        END DO
+!!!      ELSEIF 
+!!!     $((raaPress(iI,iCO2_ind) .LT. raaPress(iI+1,iCO2_ind)) .AND.
+!!!     $ (raaPress(iI+1,iCO2_ind) .LT. raaPress(iI+2,iCO2_ind))) THEN
+!!!        !! pressures increasing with index; use CO2 temps and pressures
+!!!        DO iI = kProfLayer-iProfileLayers+1,kProfLayer
+!!!          iJ = iI-iOffSet
+!!!          raP(iJ) = raaPress(iJ,iCO2_ind)*kAtm2mb
+!!!          logP(iJ) = log(raP(iJ))
+!!!          raT(iJ) = raaTemp(iJ,iCO2_ind)
+!!!          IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
+!!!          IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
+!!!ccc          print *,'b',iJ,raP(iJ),raT(iJ)
+!!!        END DO
+!!!      ELSE
+!!!        DO iJ = iI-2,iI+2
+!!!	  write(kStdErr,*) 'Get_Temp_Plevs ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
+!!!	END DO
+!!!        write(kStdErr,*) 'In Get_Temp_Plevs, Pressures neither increasing nor decreasing'
+!!!        CALL DoStop
+!!!      END IF
+!!!
+!!! new from SRCv1.22_f90
+
+      IF ((raaPress(iI,iCO2_ind) > raaPress(iI+1,iCO2_ind)) .AND. 
+     &   (raaPress(iI+1,iCO2_ind) > raaPress(iI+2,iCO2_ind))) THEN
         !! pressures decreasing with index; use CO2 temps and pressures
-        DO iI = kProfLayer-iProfileLayers+1,kProfLayer-2
-          iJ = iI-iOffSet
+        DO iI2 = kProfLayer-iProfileLayers+1,kProfLayer
+          iJ = iI2-iOffSet
           raP(iJ) = raaPress(kProfLayer-iJ+1,iCO2_ind)*kAtm2mb
+          if (rPrevious .GT. raP(iJ)) THEN
+            write(kStdErr,'(A,I4,I4,1X,F12.4,1X,F12.4)')  
+     &         'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI2,iJ,raP(iJ),rPrevious = ',iI2,iJ,raP(iJ),rPrevious
+            write(kStdWarn,'(A,I4,I4,1X,F12.4,1X,F12.4)') 
+     &         'SUBR Get_Temp_Plevs : oops rPrevious .GT. raP(iJ) : iI2,iJ,raP(iJ),rPrevious = ',iI2,iJ,raP(iJ),rPrevious
+            raP(iJ) = rPrevious + rDeltaPrevious
+            write(kStdErr,'(A,F12.4,1X,F12.4)')           
+     &         'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious
+            write(kStdWarn,'(A,F12.4,1X,F12.4)')          
+     &         'SUBR Get_Temp_Plevs : ressetting to new value using rDeltaPrevious                     ',raP(iJ),rDeltaPrevious
+          END IF
+          rDeltaPrevious = abs(raP(iJ)-rPrevious)
+          rPrevious = raP(iJ)
           logP(iJ) = log(raP(iJ))
           raT(iJ) = raaTemp(kProfLayer-iJ+1,iCO2_ind)
-          IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
-          IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
-ccc           print *,'a',iI,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
+          IF (logP(iJ) > rPmax) rPmax = logP(iJ)
+  	IF (logP(iJ) < rPmin) rPmin = logP(iJ)
+          ! print *,'a',iI2,iJ,kProfLayer-iJ+1,raP(iJ),raT(iJ)
         END DO
-      ELSEIF 
-     $((raaPress(iI,iCO2_ind) .LT. raaPress(iI+1,iCO2_ind)) .AND.
-     $ (raaPress(iI+1,iCO2_ind) .LT. raaPress(iI+2,iCO2_ind))) THEN
+      ELSEIF ((raaPress(iI,iCO2_ind) < raaPress(iI+1,iCO2_ind)) .AND. 
+     &     (raaPress(iI+1,iCO2_ind) < raaPress(iI+2,iCO2_ind))) THEN
         !! pressures increasing with index; use CO2 temps and pressures
-        DO iI = kProfLayer-iProfileLayers+1,kProfLayer
-          iJ = iI-iOffSet
-          raP(iJ) = raaPress(iJ,iCO2_ind)*kAtm2mb
+        DO iI2 = kProfLayer-iProfileLayers+1,kProfLayer
+          iJ = iI2-iOffSet
+  	raP(iJ) = raaPress(iJ,iCO2_ind)*kAtm2mb
           logP(iJ) = log(raP(iJ))
           raT(iJ) = raaTemp(iJ,iCO2_ind)
-          IF (logP(iJ) .GT. rPmax) rPmax = logP(iJ)
-          IF (logP(iJ) .LT. rPmin) rPmin = logP(iJ)
-ccc          print *,'b',iJ,raP(iJ),raT(iJ)
+          IF (logP(iJ) > rPmax) rPmax = logP(iJ)
+          IF (logP(iJ) < rPmin) rPmin = logP(iJ)
+  	!print *,'b',iJ,raP(iJ),raT(iJ)
         END DO
       ELSE
         DO iJ = iI-2,iI+2
-	  write(kStdErr,*) 'Get_Temp_Plevs ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
-	END DO
+          write(kStdErr,'(A,I3,I3,ES10.3)') 'Get_Temp_Plevs iJ,iCO2_ind,raaPress(iJ,iCO2_ind) = ',iJ,iCO2_ind,raaPress(iJ,iCO2_ind)
+        END DO
         write(kStdErr,*) 'In Get_Temp_Plevs, Pressures neither increasing nor decreasing'
         CALL DoStop
       END IF
@@ -108,7 +159,7 @@ ccc          print *,'b',iJ,raP(iJ),raT(iJ)
       END IF
       
       DO iI = 1,kProfLayer+1
-c        print *,iI,raPressLevels(iI),raP(iI),raT(iI)
+!        print *,'popopo',iI,raPressLevels(iI),raP(iI),raT(iI)
         IF (raPressLevels(iI) .GT. 0) THEN
           IF ((log(raPressLevels(iI)) .GE. rPmin) .AND. (log(raPressLevels(iI)) .LE. rPmax)) THEN
 	    !! most of the points

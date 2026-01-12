@@ -176,6 +176,7 @@ end
 !DO iI = 1,iProfileLayers
 !  print *,iI,logP(iI),raT(iI),raPressLevels(iI)
 !end DO
+!call dostop
 
     DO iI = 1,kProfLayer+1
       IF (raPressLevels(iI) > 0) THEN
