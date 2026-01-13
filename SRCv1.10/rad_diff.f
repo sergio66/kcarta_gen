@@ -337,7 +337,7 @@ c
 c for layers 100..20, it uses acos(3/5)
 c for layers 20 ..1, it does t(i-1->0,x1)-t(i->0,x2) 
 c    where x1 is calculated at layer i-1, x2 is calculated at layer i
-      SUBROUTINE FastBDRYL2GDiffusiveApprox_in_Git(iNumLayer,
+      SUBROUTINE FastBDRYL2GDiffusiveApprox_Orig(iNumLayer,
      $    iProfileLayers,raPressLevels,
      $    iS,iE,iaRadLayer,raVT1,raWaves,raaOrigAbsCoeff,raTemp,
      $    rFracTop,rFracBot,iDefinedTopLayer)

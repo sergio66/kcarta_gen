@@ -93,7 +93,7 @@ SRC_PLAYSANDBOX
 
 # special cases
 # allow this, change Readme so that users are aware scatter*.f are experimental
-SRCv1.07/scatter_*.f
+#SRCv1.07/scatter_*.f
 #SRCv1.10/scatter_*.f
 
 #junk stuff

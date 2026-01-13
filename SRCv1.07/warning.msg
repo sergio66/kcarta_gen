@@ -1,9 +1,64 @@
+ driver file name is
+ ../WORK/quickuseF77_v1.07.nml                                                  
+  
+ output file name is
+ junk.dat                                                                       
+  
  checking parameters in kcarta.param
    
- Max #of atmospheres from *RADFIL =            4
- Max #of gases from *GAS/XSCFIL =           36
- Max #of mixed paths *MIXFIL =          400
+ Max #of atmospheres from *RADFIL =            2
+ Max #of gases from *GAS/XSCFIL =           74
+ Max #of mixed paths *MIXFIL =         4500
    
  checking parameters (from *PARAMS) .... 
    
  Reading in the Namelists ............. 
+ successfully read in params .....
+ checking parameters (from *PARAMS) .... 
+   
+ **********************************************************************
+ successfully read in freqs .....
+ **********************************************************************
+ successfully read in molgas .....
+ **********************************************************************
+ successfully read in xscgas .....
+ **********************************************************************
+ successfully read in prfile .....
+ **********************************************************************
+ successfully read in weight .....
+ **********************************************************************
+ successfully read in radnce .....
+ **********************************************************************
+ successfully read in jacobn .....
+ **********************************************************************
+ successfully read in spectra .....
+ **********************************************************************
+ successfully read in scattr .....
+ **********************************************************************
+ successfully read in output .....
+ **********************************************************************
+ successfully read in endinp .....
+ **********************************************************************
+ checking parameters (from *PARAMS) .... 
+   
+ successfully checked params .....
+ **********************************************************************
+ successfully checked freqs .....
+ **********************************************************************
+ MOLGAS ... gases stored are            8
+      going to use compressed database gas            1
+      going to use compressed database gas            2
+      going to use compressed database gas            3
+      going to use compressed database gas            4
+      going to use compressed database gas            5
+      going to use compressed database gas            6
+      going to use compressed database gas            9
+      going to use compressed database gas           12
+ successfully checked molgas .....
+ **********************************************************************
+ successfully checked xscgas .....
+ **********************************************************************
+ Profile file to be read is  : 
+ ecmwf_airicrad_day092_clear_unitemiss.op.rtp                                   
+  
+ Fatal Error found : closing all units ..

@@ -1272,15 +1272,18 @@ c check that the data file has the right number of layers ===== AIRS layers
         CALL DoSTOP
         END IF
 
+c see ../INCLUDE/OLDPARAMFILES//pre_defined_v110.param
 c kGenln2Water   = self broadening correction for water, using interpolation  
 c                  in water partial pressure (+1)  
 c                = just do what Genln2 does (which would be the same as the 
-c                  uncompresssion for CO2 (-1) 
+c                  uncompresssion for CO2 and other gases (-1) 
 c      INTEGER kGenln2Water 
 c      PARAMETER (kGenln2Water=+1) 
 
 c interpolate compressed data in temperature, and then in partial pressure, 
 c to get abs coeff matrix        
+      write(kStdErr,'(A,4(I4))') 'some d/dq(water) params : kGenln2Water,kJacobian,iDoDQ,iKtype = ',
+     &   kGenln2Water,kJacobian,iDoDQ,iKtype
       IF (kGenln2Water .GT. 0) THEN
         !ie worry about the self broadening corrections
         !this is pretty good 
@@ -1288,27 +1291,34 @@ c to get abs coeff matrix
           CALL GetAbsCoeffWaterJAC(daaAbsCoeff,daToffset,
      $       daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx,
      $       raPTemp,raRTemp,raPPart,raRPart,iaTsort,
-     $       iNk,iKm,iKn,iUm,iUn,daaDQ,daaDT,iDoDQ,iGasID,pProf,iProfileLayers)
-      ELSE
+     $       iNk,iKm,iKn,iUm,iUn,
+     $       daaDQ,daaDT,iDoDQ,
+     $       iGasID,pProf,iProfileLayers)
+        ELSE
           CALL GetAbsCoeffWaterOLD(daaAbsCoeff,daToffset,
-     $      daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx,raPTemp,
-     $      raRTemp,raPPart,raRPart,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,
-     $      pProf,iProfileLayers)
-          END IF
-
+     $      daaaKX1,daaaKX2,daaaKX3,daaaKX4,daaaKX5,daaUx,
+     $      raPTemp,raRTemp,raPPart,raRPart,iaTsort,
+     $      iNk,iKm,iKn,iUm,iUn,
+     $      iGasID,pProf,iProfileLayers)
+        END IF
 c because iKtype=2 do any necessary jacobians calcs HERE!
         IF (kJacobian .GT. 0) THEN
           IF (iDoDQ .GT. 0)  THEN
             CALL FinalWaterAmtDeriv(iKtype,daaAbsCoeff,daaDQ,raPAmt)
-            END IF
-          CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
           END IF
+          CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
+        END IF
           
-      ELSE      
-        !kGenln2Water .LT. 0  ==> do same uncompression as for CO2
+      ELSEIF (kGenln2Water .LE. 0) THEN      
+        !************************************************************************
+        !kGenln2Water .LT. 0  ==> do same uncompression as for CO2, othergases
         !ie do not worry about the slef broadening corrections
         !this is not very good at all!
+        !!  << basically same as subroutibne SUBROUTINE othergases >>
+        !!  << basically same as subroutibne SUBROUTINE othergases >>
 c interpolate compressed data in temperature, to get abs coeff matrix
+        write(kStdErr,*)  'kGenln2Water < 0 : see ../INCLUDE/OLDPARAMFILES//pre_defined_v110.param'
+        write(kStdWarn,*) 'kGenln2Water < 0 : see ../INCLUDE/OLDPARAMFILES//pre_defined_v110.param'
         IF (kJacobian .GE. 0) THEN
           CALL GetAbsCoeffJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx,
      $      raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,
@@ -1317,21 +1327,21 @@ c interpolate compressed data in temperature, to get abs coeff matrix
           CALL GetAbsCoeffOLD(daaAbsCoeff,daToffset,daaaKx2,daaUx,
      $      raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID,
      $      pProf,iProfileLayers)
-          END IF
-
+        END IF
 c because of iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
         IF (kJacobian .GE. 0) THEN
           CALL FinalTempDeriv(iKtype,daaAbsCoeff,daaDT,raPAmt)
           IF (iDoDQ .GT. 0) THEN
             CALL FinalAmtDeriv(daaDQ,iKtype)
-            END IF
           END IF
         END IF
+        !************************************************************************
+      END IF
 
 c convert absorption coefficient correctly if necessary
       IF (iKtype .eq. 2) THEN
         CALL RaisePower(daaAbsCoeff)
-        END IF
+      END IF
 
 c now compute optical depth = gas amount * abs coeff
       CALL AmtScale(daaAbsCoeff,raPAmt)
@@ -1746,7 +1756,7 @@ c get this by saying daaDA --> 4 daaDA q(actual) daaAbsCoeff^3 +  daaAbsCoeff^4
       DO iLay=1,kProfLayer
         rScale=raPAmt(iLay)
         DO iFr=1,kMaxPts
-          daaDA(iFr,iLay)=daaDA(iFr,iLay)*rScale*
+          daaDA(iFr,iLay) = daaDA(iFr,iLay)*rScale*
      $                      4.0*(daaAbsCoeff(iFr,iLay)**3)
      $        + (daaAbsCoeff(iFr,iLay)**4)
           END DO

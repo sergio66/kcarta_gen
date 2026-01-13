@@ -88,26 +88,6 @@ LIBS = -lU77 -L ../LIB/blas.ref -lblas
 #FLAGS = -O3 -dalign -xarch=v8plus
 #LIBS  = -xlic_lib=sunperf
 
-########################################################################
-# Linux with ifort
-#------------------
-F77 = ifort   ## GENERIC should always work since .bashrc automatically loads this!!!
-### warning message 406 gives forrtl: warning (406): fort: (1): In call to I/O Write routine, an array temporary was created for argument #2
-DEBUG_FLAGSA =  -check noarg_temp_created -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -check bounds -assume nounderscore -heap-arrays -g -traceback -debug inline-debug-info -check all -fp-stack-check -diag-disable 8291 -mcmodel=medium
-DEBUG_FLAGS=$(DEBUG_FLAGSA)
-
-### happy and you know it, use the preprocessor >>>>>>>>>>>>>>>>>>
-### happy and you know it, use the preprocessor, Note that -O2/-O3 are paralleliization UGH, so -O1 is safer; also cut out any threads
-USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O1 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -nothreads -noreentrancy
-USUAL_FLAGS = -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared-intel
-### happy and you know it, use the preprocessor
-### happy and you know it, use the preprocessor>>>>>>>>>>>>>>>>>>>
-
-FLAGS=$(DEBUG_FLAGS)
-LIBS  = -L ../LIB -lblas -qmkl
-UFLAG =
-########################################################################
-
 ###### want to change this to /asl/www/pub/kcarta
 # The following variables are used by "make dist" and "make ftp", to
 # bundle up a kcarta distribution.  KTAR is a path and filename for
@@ -152,7 +132,7 @@ OBJS = $(OBJSMAIN) $(OBSSVD) $(OBJSSTRING) $(OBSRAD) $(OBSJAC) \
        $(OBSSCAT) $(OBJSXSEC) $(OBJSCON)
        
 install: kcarta.x
-	mv kcarta.x ../BIN/kcarta.x_v1.07
+	mv kcarta.x ../BIN/kcarta.x
 
 kcarta.x : $(OBJS)
 	$(F77) -o kcarta.x $(FLAGS) $(OBJS) $(LIBS) 

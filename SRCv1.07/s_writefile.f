@@ -1425,6 +1425,7 @@ c if file error, inform user and stop program
         kStdJacobOpen=1
 
 c write general header information
+        WRITE(iIOUN2) caVersion
         WRITE(iIOUN2) caComment
         WRITE(iIOUN2) kProfLayer
         WRITE(iIOUN2) rFrLow,rFrHigh

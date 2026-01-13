@@ -410,7 +410,9 @@ cc      print *,(iaFiles(iaList(iOutnum)),iOutnum=1,iTotal)
 
         iFileID=iaList(iOuterLoop)  !current kComp file being processed
         iFileStartFr=iaFiles(iFileID)
-        iTag=iaTag(iFileID)
+c        iTag=iaTag(iFileID)    !!! this is wierd!!!
+        iTag = iFileID          !!! this makes more sense???
+        iTag = 2                !!! depeseration for debugging see kcarta.param
 
         write(kStdWarn,*) '  '
         write(kStdWarn,*) 'iOuterLoop = ',iOuterLoop,' out of ',iTotal
@@ -433,6 +435,8 @@ c if there will  be mixed path calculations, initialize raaSumAbCoeff
           END IF
 
 c set the frequency range for the current file block
+        write(kStdErr,'(A,I3,I3,F12.5,F12.5)') 
+     $  'kcartmain.f : iFileID, iTag, raBlock(iFileID),kaFrStep(iTag) = ',iFileID,iTag,raBlock(iFileID),kaFrStep(iTag)
         DO iInt=1,kMaxPts
           raFreq(iInt)=raBlock(iFileID)+(iInt-1)*kaFrStep(iTag)
           END DO

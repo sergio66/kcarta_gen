@@ -277,10 +277,16 @@ c now prepend '_g'
 c using caTemp, put together the compressed data file name, starting with 'r'
       IF (iTag .EQ. 1) THEN 
         caTemp(1:1)='q'
-      ELSE IF (iTag .EQ. 20) THEN 
+!      ELSE IF (iTag .EQ. 20) THEN 
+!        caTemp(1:1)='r'
+      ELSE IF (iTag .EQ. 2) THEN 
         caTemp(1:1)='r'
       ELSE IF (iTag .EQ. 3) THEN 
         caTemp(1:1)='s'
+      ELSE
+        write(kStdErr,*) 'subr compfilename : itag is messed up'
+        write(kStdWarn,*) 'subr compfilename : itag is messed up'
+        Call DoStop
         END IF
 
 c followed by the iFileStartFr

@@ -100,6 +100,11 @@ c
 c for layers 100..20, it uses acos(3/5)
 c for layers 20 ..1, it does t(i-1->0,x1)-t(i->0,x2) 
 c    where x1 is calculated at layer i-1, x2 is calculated at layer i
+
+c modified from orig_const_in_tau_FastBDRYL2GDiffusiveApprox in SRCv1.18, SRCv1.22_f90
+c modified from orig_const_in_tau_FastBDRYL2GDiffusiveApprox in SRCv1.18, SRCv1.22_f90
+c modified from orig_const_in_tau_FastBDRYL2GDiffusiveApprox in SRCv1.18, SRCv1.22_f90
+
       SUBROUTINE FastBDRYL2GDiffusiveApprox(iNumLayer,
      $    iS,iE,iaRadLayer,raVT1,raWaves,raaOrigAbsCoeff,raTemp,
      $    rFracTop,rFracBot,iDefinedTopLayer)
@@ -122,6 +127,231 @@ c iS,iE are the start/stop layers between which to do transfer
       REAL raaOrigAbsCoeff(kMaxPts,kMixFilRows),rFracTop,rFracBot
       INTEGER iNumLayer,iaRadLayer(kProfLayer)
       INTEGER iS,iE,iDefinedTopLayer
+
+c local variables
+      INTEGER iFr,iLay,iL,iLm1,iBdry,iBdryP1,iSecondEnd,iCase
+      REAL r1,r2,rPlanck,rMPTemp,raFreqAngle(kMaxPts),
+     $                           raFreqAngle_m1(kMaxPts)
+
+c to do the angular integration
+      REAL rAngleTr_m1,rAngleTr,raL2G(kMaxPts),raL2Gm1(kMaxPts)
+      REAL FindDiffusiveAngleExp,rDiff,rCosDiff,rW
+      INTEGER FindBoundary
+      INTEGER iBdry0,iBdryP1_O,iDiv,iM
+
+      r1=kPlanck1
+      r2=kPlanck2
+
+      iCase=-1
+      iBdry=FindBoundary(raWaves)
+
+      iBdry0 = iBdry
+      iM     = iDiv(iaRadLayer(1),kProfLayer)
+      iBdry  = iBdry + iM*kProfLayer
+      iBdryP1_O = iBdry
+
+c now we have 3 different cases to consider
+c CASE A1 : easy -- this is do ENTIRE atmnosphere
+c iS=100   iE~1   iS > iB > iE    ==> do iS->iB using acos(3/5)
+c                                     do iB->iE using accurate diffusive approx
+c CASE A2 : easy -- this is do instr-gnd
+c iS~50    iE~1   iS > iB > iE    ==> do iS->iB using acos(3/5)
+c                                     do iB->iE using accurate diffusive approx
+       IF ((iS .GE. iBdry) .AND. (iBdry .GE. iE)) THEN
+         iCase=1
+         iBdryP1=iBdry+1
+         iBdryP1_O = iBdry0 + 1
+         END IF
+c CASE B : quite easy -- this is do atmosphere -- instr
+c iS=100   iE>iB                  ==> do iS->iE using acos(3/5)
+       IF ((iS .GE. iBdry) .AND. (iBdry .LE. iE)) THEN
+         iCase=2
+         iBdryP1=iE
+         iBdryP1_O = iE
+         END IF
+c CASE C : easy -- this is do instr-gnd
+c iS~50    iE~1   iB > iS,iE      ==> do iB->iE using accurate diffusive approx
+       IF ((iBdry .GE. iS) .AND. (iBdry .GE. iE)) THEN
+         iCase=3
+         iBdry=iS
+         END IF
+
+      IF (iCase .EQ. -1) THEN
+        write(kStdErr,*)'In FastBDRYL2GDiffusiveApprox, icase = -1'
+        CALL DoSTOP
+        END IF
+
+      !! fixed this in Feb 2010 
+      IF (iBdryP1_O .GT. kProfLayer) THEN 
+        iBdryP1_O = iBdryP1_O - iM*kProfLayer  
+        END IF 
+ 
+      rDiff=(kThermalAngle*kPi/180.0)
+      rCosDiff=cos(rDiff)
+
+c initalize raL2G,raL2Gm1 
+      DO iFr=1,kMaxPts
+        raL2G(iFr)=0.0
+        raL2Gm1(iFr)=0.0
+        END DO
+
+c calculate raL2Gm1 which is the L2G transmission from layer iS-1 to ground
+      DO iLay=iS-1,1,-1
+        iL=iaRadLayer(iLay)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! but have to worry about bottom layer!
+        IF (iLay .NE. 1) THEN
+          DO iFr=1,kMaxPts
+            raL2Gm1(iFr)=raL2Gm1(iFr)+raaOrigAbsCoeff(iFr,iL)
+            END DO
+        ELSE
+          DO iFr=1,kMaxPts
+            raL2Gm1(iFr)=raL2Gm1(iFr)+raaOrigAbsCoeff(iFr,iL)*rFracBot
+            END DO
+          END IF
+        END DO
+
+c calculate raL2G which is the L2G transmission from layer iS to ground
+c and initialise the angles
+      iL=iaRadLayer(iS)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! 
+      DO iFr=1,kMaxPts
+        raL2G(iFr)=raL2Gm1(iFr)+raaOrigAbsCoeff(iFr,iL)
+        END DO
+
+c do top part of atmosphere, where we can use acos(3/5)
+      IF ((iCase .EQ. 1)  .OR. (iCase. EQ. 2)) THEN
+c go from top of atmosphere to boundary
+        DO iLay=iS,iBdryp1,-1
+          iL=iaRadLayer(iLay)
+          iLm1=iaRadLayer(iLay-1)
+          rMPTemp=raVT1(iL)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! but have to worry about bottom layer!
+          IF (iLay .EQ. 2) THEN 
+            rW=rFracBot 
+          ELSE 
+            rW=1.0 
+            END IF
+          DO iFr=1,kMaxPts
+c find the diffusive angles for the layer beneath
+            rAngleTr_m1=exp(-raL2Gm1(iFr)/rCosDiff)
+            rAngleTr=exp(-raL2G(iFr)/rCosDiff)
+c Planckian emissions
+            rPlanck=exp(r2*raWaves(iFr)/rMPTemp)-1.0
+            rPlanck=r1*((raWaves(iFr)**3))/rPlanck
+            raTemp(iFr)=raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+c get ready for the layer beneath
+            raL2G(iFr)=raL2Gm1(iFr)
+            raL2Gm1(iFr)=raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
+            END DO
+          END DO
+        END IF
+
+      IF ((iCase .EQ. 1) .OR. (iCase .EQ. 3)) THEN
+c go from boundary to ground, or iE
+c do bottom part of atmosphere ACCURATELY
+
+        IF (iE .EQ. 1) THEN
+c if iE == bottom layer, then go accurately all the way to the 
+c last-from-bottom layer in this loop, and then accurately add on the effects 
+c of the bottommost layer
+          iSecondEnd=2
+        ELSE
+c if iE <> bottom layer, then do radiative transfer all the way down to iE
+          iSecondEnd=iE
+          END IF
+
+        DO iFr=1,kMaxPts
+          rAngleTr=FindDiffusiveAngleExp(raL2G(iFr))
+          raFreqAngle(iFr)=rAngleTr
+          END DO
+
+        DO iLay=iBdry,iSecondEnd,-1
+          iL=iaRadLayer(iLay)
+          iLm1=iaRadLayer(iLay-1)
+          rMPTemp=raVT1(iL)
+c do not have to worry about fractional top layers here, 'cos abs coeffs are
+c for FULL layers! but have to worry about bottom layer
+          IF (iLay .EQ. 2) THEN 
+            rW=rFracBot 
+          ELSE 
+            rW=1.0 
+            END IF
+          DO iFr=1,kMaxPts
+c find the diffusive angles for the layer beneath
+            rAngleTr_m1=FindDiffusiveAngleExp(raL2Gm1(iFr))
+            raFreqAngle_m1(iFr)=rAngleTr_m1
+            rAngleTr_m1=exp(-raL2Gm1(iFr)/cos(rAngleTr_m1))
+            rAngleTr=raFreqAngle(iFr)
+            rAngleTr=exp(-raL2G(iFr)/cos(rAngleTr))
+c Planckian emissions
+            rPlanck=exp(r2*raWaves(iFr)/rMPTemp)-1.0
+            rPlanck=r1*((raWaves(iFr)**3))/rPlanck
+            raTemp(iFr)=raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+c get ready for the layer beneath
+            raL2G(iFr)=raL2Gm1(iFr)
+            raL2Gm1(iFr)=raL2Gm1(iFr)-raaOrigAbsCoeff(iFr,iLm1)*rW
+            raFreqAngle(iFr)=raFreqAngle_m1(iFr)
+            END DO
+          END DO
+
+        IF (iSecondEnd .EQ. 2) THEN
+c now do the bottommost layer, recalling its transmission = 1.0 always
+          iL=iaRadLayer(1)
+          rMPTemp=raVT1(iL)
+          rAngleTr_m1=1.0
+          DO iFr=1,kMaxPts
+            rAngleTr=raFreqAngle(iFr)
+            rAngleTr=exp(-raL2G(iFr)/cos(rAngleTr))
+            rPlanck=exp(r2*raWaves(iFr)/rMPTemp)-1.0
+            rPlanck=r1*((raWaves(iFr)**3))/rPlanck
+            raTemp(iFr)=raTemp(iFr)+rPlanck*(rAngleTr_m1-rAngleTr)
+            END DO
+          END IF
+
+        END IF
+
+      RETURN
+      END  
+c************************************************************************
+c this subroutine does downward thermalrad tansfer from iS to iE
+c ASSUMPTION IS THAT THE ANGLE IS acos(3/5) FOR TOPMOST LAYERS, AND
+C THEN DONE ACCURATELY FOR BOTTOM LAYERS!!!!!!!
+c and that raTemp has already been initialized with 2.96k Planck fcn
+c 
+c this is QUITE ACCURATE!!!!! as it uses diffusive approx in the upper 
+c layers, which do not contribute too much to the thermal, and then is very
+c accurate in the bottom fifth of the atmosphere.
+c Thus it should not be too SLOW :)
+c 
+c for layers 100..20, it uses acos(3/5)
+c for layers 20 ..1, it does t(i-1->0,x1)-t(i->0,x2) 
+c    where x1 is calculated at layer i-1, x2 is calculated at layer i
+      SUBROUTINE FastBDRYL2GDiffusiveApprox_Orig(iNumLayer,
+     $    iS,iE,iaRadLayer,raVT1,raWaves,raaOrigAbsCoeff,raTemp,
+     $    rFracTop,rFracBot,iDefinedTopLayer)
+
+      include 'kcarta.param'
+
+c rFracTop is the fractional weight of the "uppermost" layer as defined in 
+c      RADNCE; this need not be 100,200,300 but depends on instrument's height
+c      at the top most layer, defined as iDefinedTopLayer
+c raTemp initially has the radiation at beginning
+c        finally has the radiation at the end
+c raFreqAngle has the angular dependence as fcn of freq
+c raWaves    = frequencies of the current 25 cm-1 block being processed
+c raaOrigAbs = matrix containing the mixed path abs coeffs
+c raVT1(    = vertical temperature profile associated with the mixed paths
+c iAtm       = atmosphere number
+c iNumLayer  = total number of layers in current atmosphere
+c iS,iE are the start/stop layers between which to do transfer
+      REAL raWaves(kMaxPts),raVT1(kMixFilRows),raTemp(kMaxPts)
+      REAL raaOrigAbsCoeff(kMaxPts,kMixFilRows),rFracTop,rFracBot
+      INTEGER iNumLayer,iaRadLayer(kProfLayer)
+      INTEGER iS,iE,iDefinedTopLayer
+      INTEGER iBdryP1_O,iM
 
 c local variables
       INTEGER iFr,iLay,iL,iLm1,iBdry,iBdryP1,iSecondEnd,iCase

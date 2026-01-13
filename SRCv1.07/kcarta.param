@@ -24,28 +24,42 @@ c also need paths to where the CKD Data and Solar Radiance Files are
       CHARACTER*80 kXsecParamFile,kCompParamFile,kXsecFile,kWarnFile
       CHARACTER*80 kDumbFile,kCKDPath
 
-      PARAMETER (kCKDPath   = 
-     $         '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/')
-      PARAMETER (kSolarPath =
-     $         '/asl/data/kcarta/KCARTADATA/General/SOLARieee_le/')
-      PARAMETER (kRegrPath      = '../DATA/TestProf/')
+c      PARAMETER (kCKDPath   = 
+c     $         '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/')
+c      PARAMETER (kSolarPath =
+c     $         '/asl/data/kcarta/KCARTADATA/General/SOLARieee_le/')
+c      PARAMETER (kXsecFile      = '../DATA/General/xsecdata.dat')
+      PARAMETER (kCKDPath   = '/asl/data/kcarta/KCARTADATA/General/CKDieee_le/')
+      PARAMETER (kSolarPath = '/asl/data/kcarta/KCARTADATA/General/SOLARieee_le/')
+      PARAMETER (kXsecFile  = '/asl/data/kcarta/KCARTADATA/General/xsecdata.dat.intel')
+
+c      PARAMETER (kRegrPath      = '../DATA/TestProf/')
+c      PARAMETER (kRefPath       = 
+c     $ '/asl/data/kcarta/KCARTADATA/RefProf_July2010.For.v115up_CO2ppmv385/')
+      PARAMETER (kRegrPath = '/asl/data/kcarta/KCARTADATA/TestProf/rtp_regress.op.rtp')
       PARAMETER (kRefPath       = 
-     $ '/asl/data/kcarta/KCARTADATA/RefProf_July2010.For.v115up_CO2ppmv385/')
+     $ '/home/sergio/asl/rta/kcarta_sergio/KCDATA/RefProf.For.v107up_CO2ppmv385/')
+      
+c      PARAMETER (kWaterPath     = 
+c     $    '/strowdata1/s1/sergio/RUN8_NIRDATABASE/IR_605_2830_H08_WV/fbin/h2o_ALLISO.ieee-le/')
+c      PARAMETER (kCO2Path = '/asl/s1/sergio/CO2ppmv385/co2.ieee-le/')
+c      PARAMETER (kCompPath      = 
+c     $    '/asl/s1/sergio/RUN8_NIRDATABASE/IR_605_2830_H08/fbin/etc.ieee-le/')
+      PARAMETER (kWaterPath = '/home/sergio/asl/rta/kcarta_sergio/v07.ieee-le/h2o.ieee-le/')
+      PARAMETER (kCO2Path = '/home/sergio/asl/rta/kcarta_sergio/v07.ieee-le/etc.ieee-le/')      
+      PARAMETER (kCompPath  = '/home/sergio/asl/rta/kcarta_sergio/v07.ieee-le/etc.ieee-le/')
 
-      PARAMETER (kWaterPath     = 
-     $    '/strowdata1/s1/sergio/RUN8_NIRDATABASE/IR_605_2830_H08_WV/fbin/h2o_ALLISO.ieee-le/')
-      PARAMETER (kCO2Path = '/asl/s1/sergio/CO2ppmv385/co2.ieee-le/')
-      PARAMETER (kCompPath      = 
-     $    '/asl/s1/sergio/RUN8_NIRDATABASE/IR_605_2830_H08/fbin/etc.ieee-le/')
-      PARAMETER (kXsecParamFile = 
-     $   '/asl/data/kcarta/KCARTADATA/General/xsecHT2010.param')
-      PARAMETER (kCompParamFile = 
-     $   '/asl/data/kcarta/KCARTADATA/General/compHT2010.param')
-      PARAMETER (kXsecFile      = '../DATA/General/xsecdata.dat')
+c      PARAMETER (kXsecParamFile = 
+c     $   '/asl/data/kcarta/KCARTADATA/General/xsecHT2010.param')
+c      PARAMETER (kCompParamFile = 
+c     $   '/asl/data/kcarta/KCARTADATA/General/compHT2010.param')
+      PARAMETER (kXsecParamFile = '/home/sergio/git/kcarta_gen/INCLUDE/OLDPARAMFILES/xsec107.param')
+      PARAMETER (kCompParamFile = '/home/sergio/git/kcarta_gen/INCLUDE/OLDPARAMFILES/comp107.param')
 
-      PARAMETER (kWarnFile      = 'warning.msg')
 c      PARAMETER (kWarnFile     = '/dev/null')
-      PARAMETER (kDumbFile      = '../DATA/General/dumbfile.dat')
+c      PARAMETER (kDumbFile      = '../DATA/General/dumbfile.dat')
+      PARAMETER (kWarnFile      = 'warning.msg')
+      PARAMETER (kDumbFile      = '../WORK/dumbfile.dat')
 
 c kMaxPrint == max number of printing options that can be read in
 c kMaxAtm   == max number of atmospheres we do radiance calculations for
@@ -67,16 +81,18 @@ c this is how many layers are in the user profile >= kMaxLayer  154
       PARAMETER (KProfLayer=100)
 c this tells where the new reference profiles are ( >= 100 layers)
       CHARACTER*80 kNewRefPath
-      PARAMETER (kNewRefPath   = 
-     $'/asl/data/kcarta/KCARTADATA/RefProf_July2010.For.v115up_CO2ppmv385/')
+c      PARAMETER (kNewRefPath   = 
+c     $'/asl/data/kcarta/KCARTADATA/RefProf_July2010.For.v115up_CO2ppmv385/')
+      PARAMETER (kNewRefPath       = 
+     $ '/home/sergio/asl/rta/kcarta_sergio/KCDATA/RefProf.For.v107up_CO2ppmv385/')
 
 c this is if the user wants to do Jacobians
 c kMaxDQ = max number of gases we do d/dq for (GasID's 1..6) HUGE MEMORY!!!
 c kProfLayerJac = kProfLayer if Jacobians on, 1 otherwise
 c kMaxPtsJac    = 10000 if Jacobians on, 1 otherwise
       INTEGER kMaxDQ,kProfLayerJac,kMaxPtsJac
-c      PARAMETER (kMaxDQ=3,kProfLayerJac=kProfLayer,kMaxPtsJac=10000)
-      PARAMETER (kMaxDQ=2,kProfLayerJac=1,kMaxPtsJac=1)
+      PARAMETER (kMaxDQ=3,kProfLayerJac=kProfLayer,kMaxPtsJac=10000)
+c      PARAMETER (kMaxDQ=2,kProfLayerJac=1,kMaxPtsJac=1)
 
 c this is if the user wants to do scattering computations
 c kMaxClouds = max number of clouds the user defines
@@ -254,11 +270,13 @@ c kNumkCompT=sum of all kNumkComp(1)+kNumkComp(2)+kNumkComp(3)
       REAL kaMaxFr(kW),kaMinFr(kW),kaFrStep(kW),kaBlSize(kW)
       INTEGER kaTag(kW)
       INTEGER kaNumKcomp(kW),kNumKCompT
-
+      CHARACTER kaCTag(kW)
+      
       PARAMETER (kNumkCompT=122)
       DATA kaNumkComp / 25,  89,  8/
 
       DATA kaTag    /1,           20,            3/
+      DATA kaCTag   / 'p',        'r',         's'/      
       DATA kaMinFr  /355.00000,   0605.00000,   2830.00000/
       DATA kaMaxFr  /605.00000,   2830.00000,   3230.00000/
       DATA kaFrStep /1.000000e-3, 2.500000e-3,  5.000000e-3/

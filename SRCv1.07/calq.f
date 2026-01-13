@@ -4,6 +4,7 @@ C      Calculate total internal partition function for XSEC molecule
 C      Also allows for simple computation of d/dT if kJacobian=kSpline=1 ...
 c           this is enabled by setting idQT=+1 at calling time
 
+       INTEGER NXSEC,NTMP,ID1
        PARAMETER (NXSEC=13, NTMP=18, ID1=51)
 C
 C      Arguements
