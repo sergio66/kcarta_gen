@@ -592,23 +592,24 @@ c              raTTemp(iInt)=rDerivTemp+raTTemp(iInt)
 c              raMixVertTemp(iInt)=rDerivTemp+raTTemp(iInt)
 c              print *,'dT = ',rDerivTemp
 
-cjacob, new finite diff d/dT
-              IF (iInt .EQ. iJax) THEN
-                raTTemp(iInt)       = raaTemp(iInt,iGas)+rDerivTemp
-c                raMixVertTemp(iInt) = raMixVertTemp(iInt)+rDerivTemp
-                raMixVertTemp(iInt) = rDummy+rDerivTemp   !!! need this way else raMixVertTemp(iInt) keeps inreasing for each gas
-c                raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
-c                raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
-                write(kStdErr,'(A,3F12.5,I4)') 'dT,raTTemp(iInt),raMixVertTemp(iInt),iGasID = ',
-     $              rDerivTemp,raTTemp(iInt),raMixVertTemp(iInt),iaGases(iGas)
-                END IF
+ccjacob, new finite diff d/dq
+cc             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
+cc               raTAmt(iInt)       = raaAmt(iInt,iGas)*(1.0+rDerivAmt)
+cc               raTPartPress(iInt) = raaPartPress(iInt,iGas)*(1.0+rDerivAmt)
+cc               print *,'dq = ',raaAmt(iInt,iGas)*rDerivAmt
+cc               END IF
 
-cjacob, new finite diff d/dq
-c             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
-c               raTAmt(iInt)       = raaAmt(iInt,iGas)*(1.0+rDerivAmt)
-c               raTPartPress(iInt) = raaPartPress(iInt,iGas)*(1.0+rDerivAmt)
-c               print *,'dq = ',raaAmt(iInt,iGas)*rDerivAmt
-c               END IF
+cjacob, new finite diff d/dT
+c              IF (iInt .EQ. iJax) THEN
+c                raTTemp(iInt)       = raaTemp(iInt,iGas)+rDerivTemp
+cc                raMixVertTemp(iInt) = raMixVertTemp(iInt)+rDerivTemp
+c                raMixVertTemp(iInt) = rDummy+rDerivTemp   !!! need this way else raMixVertTemp(iInt) keeps inreasing for each gas
+cc                raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
+cc                raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
+c                write(kStdErr,'(A,3F12.5,I4)') 'dT,raTTemp(iInt),raMixVertTemp(iInt),iGasID = ',
+c     $              rDerivTemp,raTTemp(iInt),raMixVertTemp(iInt),iaGases(iGas)
+c                END IF
+
 
               END DO
 

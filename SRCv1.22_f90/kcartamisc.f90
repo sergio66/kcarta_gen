@@ -1970,30 +1970,30 @@ CONTAINS
       ! compute particle number density in number/cm3 (N/V = P/kT)
       raNumberDensity(iInt) = raTPress(iInt)*kAtm2mb*100.0/(kBoltzmann * raTTemp(iInt))*1e-6
       ! NLTE avg layer press in lower atm = kCARTA profile
-      pProfNLTE(iInt) = raTPress(iInt)*kAtm2mb
+      pProfNLTE(iInt)       = raTPress(iInt)*kAtm2mb
 
       !! print *,'BB',iInt,pprofNLTE(iInt),raTPress(iInt), &
       !!             pprofNLTE(iInt)/(raTPress(iInt)*kAtm2mb)
 
       !!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       !!c  this stuff is to test the layer temperature jacobians
-      !!    raTTemp(iInt)       = rDerivTemp+raTTemp(iInt)
+      !!    raTTemp(iInt)       = rDerivTemp + raTTemp(iInt)
       !!    raMixVertTemp(iInt) = raTTemp(iInt)
-      !!    raMixVertTemp(iInt) = rDerivTemp+raTTemp(iInt)   !!! bad bad bad since it increments with each gas!
-      !!    raMixVertTemp(iInt) = rDerivTemp+rDummyT0        !!! much better   
+      !!    raMixVertTemp(iInt) = rDerivTemp + raTTemp(iInt)   !!! bad bad bad since it increments with each gas!
+      !!    raMixVertTemp(iInt) = rDerivTemp + rDummyT0        !!! much better   
 
       !!c jacob test temperature jacobian ... old
       !!  IF (iInt .EQ. iJax) THEN
-      !!    raTTemp(iInt)       = raaTemp(iInt,iGas)+rDerivTemp
-      !!    raMixVertTemp(iInt) = raTTemp(iInt)              !!! this works
-      !!    raMixVertTemp(iInt) = rDerivTemp+rDummyT0        !!! much better   
+      !!    raTTemp(iInt)       = raaTemp(iInt,iGas) + rDerivTemp
+      !!    raMixVertTemp(iInt) = raTTemp(iInt)                !!! this works
+      !!    raMixVertTemp(iInt) = rDerivTemp + rDummyT0        !!! much better   
       !!  END IF
       !!  IF ((iInt .EQ. iJax) .AND. (iGas .EQ. 1)) THEN
       !!    !!! this is all wierd, very wierd
       !!    rDummy        = raMixVertTemp(iInt)
-      !!    raMixVertTemp(iInt) = rDummy+rDerivTemp0(iInt)
-      !! c   raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
-      !! c   raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
+      !!    raMixVertTemp(iInt)               = rDummy  + rDerivTemp0(iInt)
+      !! c   raMixVertTemp(iInt+kProfLayer)   = rDummy2 + rDerivTemp
+      !! c   raMixVertTemp(iInt+2*kProfLayer) = rDummy3 + rDerivTemp
       !!    print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
       !!  END IF
 
@@ -2002,9 +2002,9 @@ CONTAINS
       !  IF (iGas .EQ. 1) THEN
       !    rDummy              = raMixVertTemp(iInt)
       !    raMixVertTemp(iInt) = rDummy + rDerivTemp
-      ! c   raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
-      ! c  raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
-      !     print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
+      ! c   raMixVertTemp(iInt+kProfLayer)   = rDummy2 + rDerivTemp
+      ! c   raMixVertTemp(iInt+2*kProfLayer) = rDummy3 + rDerivTemp
+      !    print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
       !  END IF
 
       !c jacob test temperature jacobian ... new, could also be column
@@ -2012,9 +2012,9 @@ CONTAINS
         !!!! rDerivTemp = 1.0
         IF (((iInt .GE. iJax) .AND. (iInt .LE. iJax2)) .OR. (iJax .EQ. -1)) THEN
           rJunk = raMixVertTemp(iInt)
-          raTTemp(iInt) = raaTemp(iInt,iGas)+rDerivTemp
-          raMixVertTemp(iInt) = raTTemp(iInt)              !!! this works
-          raMixVertTemp(iInt) = rDerivTemp+rDummyT0        !!! much better   
+          raTTemp(iInt)       = raaTemp(iInt,iGas) + rDerivTemp
+          raMixVertTemp(iInt) = raTTemp(iInt)                !!! this works
+          raMixVertTemp(iInt) = rDerivTemp + rDummyT0        !!! much better   
           write(kStdErr,'(A,I3.3,1X,A,I3.3,A,1X,I3.3,1X,A,I3.3,1X,A,5F10.3)') &
             'T perturbation : iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101) = ', &
             iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, &

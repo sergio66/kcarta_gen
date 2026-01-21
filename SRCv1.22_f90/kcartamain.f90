@@ -445,11 +445,11 @@
       FORM='FORMATTED',IOSTAT=IERR)
     kStdWarnOpen = 1
 
-    write(kStdWarn,*) 'driver file name is ',caDriverName
-    write(kStdWarn,*) 'output file name is ',caOutName
-    write(kStdWarn,*) 'iRTPCommandLine = ',iRTPCommandLine
+    write(kStdWarn,'(A,A)') 'driver file name is ',caDriverName
+    write(kStdWarn,'(A,A)') 'output file name is ',caOutName
+    write(kStdWarn,'(A,I5)') 'iRTPCommandLine = ',iRTPCommandLine
     IF (iNumOutFiles == 2) THEN
-        write(kStdWarn,*) 'jacob file name is ',caJacobFile
+        write(kStdWarn,'(A,A)') 'jacob file name is ',caJacobFile
     END IF
 
 ! do some checks/inits

@@ -207,7 +207,7 @@ print-%  : ; @echo $* = $($*)
 ALLBASICMOD = $(MOBJSBASIC) $(MOBJSRTP)
 
 basic: bkcarta.x90 
-	mv bkcarta.x90 ../BIN/bkcarta.x90
+	mv bkcarta.x90 ../BIN/bkcarta.x90_v1.22
 
 bkcarta.x90 : $(ALLBASICMOD) $(OBJSBASIC) $(OBJSRTP)
 	$(FORTRANX) -o bkcarta.x90 $(FLAGS) $(OBJSBASIC) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB) 
@@ -232,7 +232,7 @@ kcartabasicTXT.mod kcartabasicTXT.o : kcartabasic.f90 $(PARAMS) $(ALLBASICMODTXT
 ALLMOD = $(MOBJS) $(MOBJSRTP)
 
 scat: kcarta.x90
-	mv kcarta.x90 ../BIN/kcarta.x90
+	mv kcarta.x90 ../BIN/kcarta.x90_v1.22
 
 kcarta.x90 : $(ALLMOD) $(OBJS) $(OBJSRTP)
 	$(FORTRANX) -o kcarta.x90 $(FLAGS) $(OBJS) $(OBJSRTP) $(LIBS) $(RTPLIB) $(HDFLIB)

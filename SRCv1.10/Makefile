@@ -1,3 +1,9 @@
+$(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
+$(info make sure you run    make -f Makefile kcartaparam    before compiling, see ifort_compile.sc)
+$(info make sure you run    make -f Makefile kcartaparam    before compiling, see ifort_compile.sc)
+$(info make sure you run    make -f Makefile kcartaparam    before compiling, see ifort_compile.sc)
+$(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
+
 #
 # makefile to build kcarta.x
 #
@@ -447,6 +453,10 @@ EXECS = basic
 EXECS = scat
 all : $(EXECS)
 
+pause_target:
+	@echo "Press Enter to continue..."
+	@read
+
 kcartaparam:
 	echo "making make -f Makefile kcartaparam"; \
 	rm ../INCLUDE/kcarta.param; \
@@ -458,7 +468,7 @@ kcartaparam:
 
 ############## the two executables : 
 ##### (1) complete kcarta (memory hog) with jacobians, all scattering codes
-scat: kcarta.x 
+scat: kcarta.x kcartaparam
 	mv kcarta.x ../BIN/kcarta.x_v1.10
 
 kcarta.x : $(OBJS)
@@ -469,8 +479,7 @@ kcartamain.o : kcartamain.f $(PARAMS)
 	$(F77) -c $(FLAGS) $(UFLAG) kcartamain.f
 
 ##### (2) basic kcarta (easy on memory) with no jacobs, fluxes or scattering
-basic: bkcarta.x
-	make -f Makefile kcartaparam; \
+basic: bkcarta.x kcartaparam
 	mv bkcarta.x ../BIN/bkcarta.x_v1.10
 
 bkcarta.x : $(OBJS_BASIC)

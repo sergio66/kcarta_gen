@@ -374,7 +374,7 @@ c these are actually used
       INTEGER iDummy,iDummy2,iDummy3,iFound,iWhichChunk,NewDataChunk
       INTEGER iFr,ID,OMP_GET_THREAD_NUM
       INTEGER DoOutputLayer,iJax,iJax2,iGasJac,iOutNum,iCO2,iMicroSoft
-      INTEGER IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
+      INTEGER IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi,iRTPCommandLine
 
 c these are temporary dumy variables
       REAL raX(kMaxPts),raY2(kMaxPts),raY3(kMaxPts),raY4(kMaxPts)
@@ -397,18 +397,24 @@ c set up dummy layer for nonLTE calcs
 
 c this is the command line argument stuff
       iMicroSoft = -1
-      CALL DoCommandLine(iMicrosoft,caDriverName,caOutName,
-     $                   caJacobFile,iOutFileName)
+c      CALL DoCommandLine(iMicrosoft,caDriverName,caOutName,
+c     $                   caJacobFile,iOutFileName)
+      CALL DoCommandLineNew(iMicrosoft,caDriverName,caOutName,
+     $                   caJacobFile,iOutFileName,iRTPCommandLine)
 
       CALL ErrorLogName(caDriverName)
       OPEN(UNIT=kStdWarn,FILE=kWarnFile,STATUS='UNKNOWN',
      $     FORM='FORMATTED',IOSTAT=IERR)
       kStdWarnOpen = 1
 
-      write(kStdWarn,*) 'driver file name is ',caDriverName 
-      write(kStdWarn,*) 'output file name is ',caOutName 
+      write(kStdErr,*)  '<<<< ',iRTPCommandLine,' >>>>'
+      write(kStdWarn,*) '<<<< ',iRTPCommandLine,' >>>>'
+
+      write(kStdWarn,'(A,A)') 'driver file name is ',caDriverName 
+      write(kStdWarn,'(A,A)') 'output file name is ',caOutName 
+      write(kStdWarn,'(A,I5)') 'iRTPCommandLine = ',iRTPCommandLine
       IF (iMicroSoft .EQ. 2) THEN
-         write(kStdWarn,*) 'jacob file name is ',caJacobFile 
+         write(kStdWarn,'(A,A)') 'jacob file name is ',caJacobFile 
       END IF
 
 c do some checks/inits
@@ -419,7 +425,7 @@ c do some checks/inits
       iUpper = -1
 c read in the driver namelist file and profile
 
-      CALL ReadNameListFile(iaGases,iNumGases,rFreqStart,rFreqEnd,
+      CALL ReadNameListFile(iRTPCommandLine,iaGases,iNumGases,rFreqStart,rFreqEnd,
      $         raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont,
      $   iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP,
      $   iNatm,raTSpace,raTSurf,raSatAngle,raSatHeight,

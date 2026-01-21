@@ -205,7 +205,9 @@ CONTAINS
 
     END IF
 
+!*************************
     iDumpJacs = +1
+    iDumpJacs = -1
     IF (iDumpJacs .GT. 0) THEN
       write(kStdWarn,'(A)') 'subr DownwardJacobian : iDumpJacs = +1'
       write(kStdWarn,'(A)') 'compare to the Matlab kcarta (kcmix) code in ~/git/kcarta/JACDOWN/jac_downlook.m'
@@ -229,6 +231,7 @@ CONTAINS
 
       CALL DumpJacobianInfo(raFreq,raaAllDT,iNumLayer,0)
         write(kStdErr,*) 'DownwardJacobian : Dummped raaAllDT'
+
       IF ((iWhichJac == -1) .OR. (iWhichJac == -2) .OR. (iWhichJac == 20)) THEN
         DO iG=1,iNumGases      
           iGasJacList = DoGasJacob(iaGases(iG),iaJacob,iJacob)
@@ -244,6 +247,7 @@ CONTAINS
         END DO
       END IF
     END IF
+!*************************
 
     IF ((iWhichJac == -1) .OR. (iWhichJac == -2) .OR. (iWhichJac == 20)) THEN
       DO iG=1,iNumGases
@@ -660,7 +664,7 @@ CONTAINS
       iLay = iaaRadLayer(iAtm,iL)
       rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
       !raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracTop/rCos)  !! have already accounted for this
-      raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracTop/rCos)
+      raaTau(:,iL) = exp(-raaAbs(:,iLay)/rCos)
       raaOneMinusTau(:,iL) = 1.0-raaTau(:,iL)
     END DO
 
@@ -675,7 +679,8 @@ CONTAINS
       iMM2=1
       ! remember r4 is the 1/cos(theta) weighting factor of the satellite
       ! viewing angle while we need 1/cos(theta_thermal_diffuse)
-      raaLay2Gnd(:,1) = exp(-raaAbs(:,iLay)*rFracBot/rCos)
+      !raaLay2Gnd(:,1) = exp(-raaAbs(:,iLay)*rFracBot/rCos)    !! already account for this
+      raaLay2Gnd(:,1) = exp(-raaAbs(:,iLay)*rCos)
       ! now go layer by layer from the bottom up to build the transmission matrix
       DO iL=2,iNumLayer-1
         iLay = iaaRadLayer(iAtm,iL)
@@ -684,7 +689,8 @@ CONTAINS
       END DO
       DO iL = iNumLayer,iNumLayer
         iLay = iaaRadLayer(iAtm,iL)
-        raaLay2Gnd(:,iL) = raaLay2Gnd(:,iMM2)*exp(-raaAbs(:,iLay)*rFracTop/rCos)
+        !raaLay2Gnd(:,iL) = raaLay2Gnd(:,iMM2)*exp(-raaAbs(:,iLay)*rFracTop/rCos) !! already account for this
+        raaLay2Gnd(:,iL) = raaLay2Gnd(:,iMM2)*exp(-raaAbs(:,iLay)*rCos)
         iMM2 = iL
       END DO
 

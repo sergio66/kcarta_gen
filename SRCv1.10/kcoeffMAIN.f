@@ -1282,8 +1282,8 @@ c      PARAMETER (kGenln2Water=+1)
 
 c interpolate compressed data in temperature, and then in partial pressure, 
 c to get abs coeff matrix        
-      write(kStdErr,'(A,4(I4))') 'some d/dq(water) params : kGenln2Water,kJacobian,iDoDQ,iKtype = ',
-     &   kGenln2Water,kJacobian,iDoDQ,iKtype
+c      write(kStdErr,'(A,4(I4))') 'some d/dq(water) params : kGenln2Water,kJacobian,iDoDQ,iKtype = ',
+c     &   kGenln2Water,kJacobian,iDoDQ,iKtype
       IF (kGenln2Water .GT. 0) THEN
         !ie worry about the self broadening corrections
         !this is pretty good 

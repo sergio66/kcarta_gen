@@ -863,7 +863,7 @@ c iNatm2        = number of atmospheres that *OUTPUT thinks there is
           write (kStdErr,*) 'in subroutine ErrorLogName, error reading'
           write (kStdErr,*) 'namelist file to find name of logfile ... '
           WRITE(kStdErr,1070) iErr, caDriverName 
- 1070     FORMAT('ERROR! number ',I5,' opening namelist file:',/,A120) 
+ 1070     FORMAT('ERROR! number ',I5,' opening namelist file in subr ErrorLogName : ',/,A120) 
           CALL DoSTOP 
         ENDIF 
       END IF 
@@ -871,6 +871,8 @@ c iNatm2        = number of atmospheres that *OUTPUT thinks there is
 
 c      write(kStdWarn,*) 'grepping input nml file for caLogFile name'
 c      print *,'translating x...'
+
+      kWarnFile = 'warning.msg'
 
       namecomment = '******* OUTPUT section *******'
       caLogFile = 'warning.msg'     !this is the default name
@@ -986,6 +988,247 @@ c is CO2
       END
 
 c************************************************************************
+
+      INTEGER FUNCTION InTabooCharSet(cChar)
+
+      IMPLICIT NONE
+
+! input
+      CHARACTER cChar
+
+! local vars
+      CHARACTER*11 caArray
+      INTEGER iLoop,iX
+
+      iX = -1
+      caArray = '-0123456789'
+
+      DO iLoop = 1,11
+        IF (cChar(1:1) .EQ. caArray(iLoop:iLoop)) THEN
+          iX = +1
+        END IF
+      END DO
+  
+      InTabooCharSet = iX
+      RETURN
+      END FUNCTION InTabooCharSet
+
+c************************************************************************     
+
+      INTEGER FUNCTION string10_to_int(char_val)
+  
+      implicit none
+      character(len=10) :: char_val
+      integer           :: int_val
+      integer           :: io_status ! Optional: check for errors
+  
+      ! Assign the string value
+      !char_val = "12345"
+  
+      ! Use internal READ to convert
+      read(char_val, *, iostat=io_status) int_val
+  
+      ! Check if the conversion was successful
+      !if (io_status == 0) then
+      !    print *, "Conversion successful. Integer value:", int_val
+      !else
+      !    print *, "Conversion failed. IOSTAT value:", io_status
+      !end if
+  
+      string10_to_int = int_val
+      RETURN
+      end function string10_to_int
+
+c************************************************************************     
+
+! this subroutine does the command line stuff
+! no more iMicrosoft
+      SUBROUTINE DoCommandLineNew(iNumOutFiles,caDriverName,caOutName, 
+     &    caJacobFile,iOutFileName,iRTPCommandLine)
+
+      IMPLICIT NONE
+  
+      include '../INCLUDE/TempF90/kcarta.param'
+  
+! iRTPCommandLine = iRTP in nm_prfile
+      INTEGER :: iRTPCommandLine
+! caDriverName is the name of the driver file to be processed
+      CHARACTER(120) :: caDriverName
+! caOutName is the name of the unformatted output file name
+! integer iOutFileName tells whether or not there is a driver name, or
+! dump output to Unit 6
+      INTEGER :: iOutFileName
+      CHARACTER(120) :: caOutName
+! caJacobFile is the name of the unformatted output file name for Jacobians
+      CHARACTER(120) :: caJacobFile
+! this tells if we have MS Product ie no command line stuff!
+      INTEGER :: iNumOutFiles
+! this is the number of args
+      INTEGER :: iargc
+  
+      INTEGER :: iDummy,iLoop,iJunk
+  
+      character(len=10) :: char_val
+      integer           :: int_val
+      integer           :: io_status ! Optional: check for errors
+      INTEGER InTabooCharSet,string10_to_int
+  
+      ! use command line stuff, you need AT LEAST one argument!!! the namelist file
+  
+      iNumOutFiles = 0
+      iRTPCommandLine = -9999
+      iDummy = iargc()
+         
+      IF ((iDummy < 1) .OR. (iDummy > 4)) THEN
+        write(kStdErr,'(A)') 'less than one, more than four arguments in command line is NOT allowed'
+        write(kStdErr,'(A)') 'options include : '
+        write(kStdErr,'(A)') '(A) only gasOD/mixedpath/radiance output v0 : generic output name '
+        write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile'
+        write(kStdErr,'(A)') '     this will set outname (binary file) to outjunk.dat, iRTP set from nm_prfile'
+        write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile -iRTPCommandLine'
+        write(kStdErr,'(A)') '     this will set outname (binary file) to outjunk.dat, iRTP = iRTPCommandLine'
+        write(kStdErr,'(A)') ' '
+        write(kStdErr,'(A)') '(B) only gasOD/mixedpath/radiance output v1 : user specified output name'
+        write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile outfile'
+        write(kStdErr,'(A)') '     this will set outname (binary file) to outfile, iRTP set from nm_prfile'
+        write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile outfile -iRTPCommandLine'
+        write(kStdErr,'(A)') '     this will set utname (binary file) to outfile, iRTP = iRTPCommandLine'
+        CALL DoSTOP
+      END IF
+  
+      caOutName = 'NULL'
+      caJacobFile = 'NULL'
+  
+      iOutFileName = -1         !assume no name
+      IF (iDummy .EQ. 1) THEN
+        !! easy : ../BIN/kcarta.x nmlfile
+        CALL getarg(1,caDriverName)
+        IF (caDriverName(1:1) /= '-') THEN
+          kStdDriver = kStdDriverKK
+        END IF
+  
+      !*************************
+      ELSEIF (iDummy .EQ. 2) THEN
+        !! could be : ../BIN/kcarta.x nmlfile outname   or
+        !!          : ../BIN/kcarta.x nmlfile iRTPCommandLine
+  
+        !! first arg has to be the nml file
+        CALL getarg(1,caDriverName)
+        IF (caDriverName(1:1) /= '-') THEN
+          kStdDriver = kStdDriverKK
+        END IF
+  
+        !! second arg is two possible cases : outname or iRTPCommandLine
+        CALL getarg(2,caOutName)
+        iJunk = InTabooCharSet(caOutName(1:1))
+  !      IF (caOutName(1:1) /= '-') THEN
+        IF (iJunk .LT. 0) THEN
+          iOutFileName = 1
+          kStdkCarta = kStdkCartaKK
+          iNumOutFiles = iNumOutFiles + 1
+        ELSEIF ((iJunk  .GT. 0) .AND. (caOutName(1:1) /= '-')) THEN
+          caOutName = 'NULL'
+        ELSEIF ((iJunk  .GT. 0) .AND. (caOutName(1:1) == '-')) THEN
+          caOutName(1:1) = ' '
+          char_val(1:10) = caOutName(1:10)
+          caOutName = 'NULL'
+          int_val = string10_to_int(char_val(1:10)) 
+          IF (int_val .GT. 0) THEN
+            iRTPCommandLine = int_val
+          END IF        
+        END IF
+  
+      !*************************
+      ELSEIF (iDummy .EQ. 3) THEN
+        !! could be : ../BIN/kcarta.x nmlfile outname  jacname    or
+        !!          : ../BIN/kcarta.x nmlfile outname  iRTPCommandLine
+  
+        !! first arg has to be the nml file
+        CALL getarg(1,caDriverName)
+        IF (caDriverName(1:1) /= '-') THEN
+          kStdDriver = kStdDriverKK
+        END IF
+  
+        !! second arg is iOutFileName
+        CALL getarg(2,caOutName)
+        IF (caOutName(1:1) /= '-') THEN
+          iOutFileName = 1
+          kStdkCarta = kStdkCartaKK
+          iNumOutFiles = iNumOutFiles + 1
+        END IF
+  
+        !! third arg is two possible cases : jacame or iRTPCommandLine
+        CALL getarg(3,caJacobFile)
+        iJunk = InTabooCharSet(caJacobFile(1:1))
+        IF (iJunk .LT. 0) THEN
+          kStdJacob = kStdJacobKK
+          iNumOutFiles = iNumOutFiles + 1
+        ELSEIF ((iJunk  .GT. 0) .AND. (caJacobFile(1:1) /= '-')) THEN
+          caJacobFile = 'NULL'
+        ELSEIF ((iJunk  .GT. 0) .AND. (caJacobFile(1:1) == '-')) THEN
+          caJacobFile(1:1) = ' '
+          char_val(1:10) = caJacobFile(1:10)
+          caJacobFile = 'NULL'
+          int_val = string10_to_int(char_val(1:10)) 
+          IF (int_val .GT. 0) THEN
+            iRTPCommandLine = int_val
+          END IF        
+          caJacobFile = 'NULL'
+        END IF
+  
+      !*************************
+      ELSEIF (iDummy .EQ. 4) THEN
+        !! can only be : ../BIN/kcarta.x nmlfile outname  jacname iRTPCommandLine
+        DO iLoop = 1,iDummy
+          IF (iLoop == 1) THEN
+            CALL getarg(1,caDriverName)
+            IF (caDriverName(1:1) /= '-') THEN
+              kStdDriver = kStdDriverKK
+            END IF
+          END IF
+               
+          IF (iLoop == 2) THEN
+            CALL getarg(2,caOutName)
+            IF (caOutName(1:1) /= '-') THEN
+              iOutFileName = 1
+              kStdkCarta = kStdkCartaKK
+              iNumOutFiles = iNumOutFiles + 1
+            END IF
+          END IF
+               
+          IF (iLoop == 3) THEN
+            CALL getarg(3,caJacobFile)
+            IF (caJacobFile(1:1) /= '-') THEN
+              kStdJacob = kStdJacobKK
+              iNumOutFiles = iNumOutFiles + 1
+            END IF
+          END IF
+        
+          IF (iLoop == 4) THEN
+            CALL getarg(4,char_val)
+            IF (char_val(1:1) == '-') THEN
+              char_val(1:1) = ' '
+              int_val = string10_to_int(char_val) 
+              IF (int_val .GT. 0) THEN
+                iRTPCommandLine = int_val
+              END IF
+            END IF
+          END IF
+        END DO
+      END IF
+  
+      write(kStdErr,'(A,A)') 'kStdDriver nml file     = ',caDriverName
+      write(kStdErr,'(A,A)') 'kStdkCarta out std file = ',caOutName
+      write(kStdErr,'(A,A)') 'kStdJacob  out jac file = ',caJacobFile
+      write(kStdErr,'(A,I10)') 'iRTPCommandLine       = ',iRTPCommandLine
+      write(kStdErr,*) 'iNumOutFiles = ',iNumOutFiles
+      write(kStdErr,*) ' '
+         
+      RETURN
+      end SUBROUTINE DoCommandLineNew
+     
+c************************************************************************
+
 c this subroutine does the command line stuff
       SUBROUTINE DoCommandLine(iMicrosoft,caDriverName,caOutName,
      $                         caJacobFile,iOutFileName)
@@ -3408,9 +3651,9 @@ c pcolor(fc,1:iL,qc(:,(1:iL)+iL*2)'); shading flat; colorbar  %% WGT fcn
                   !!! recall kMaxLayer = 100 so we look 001-100 ..... but the atmosphere is eg from 1013 mb so we have iNumLayer = 97 and the radiating layers are (4,5,6 ... 100)
                   !!!    so when we read in the 97 layer jacobins, eg here index iInt = 6 will correspond to radiating layer 3, so the dq here is for J3 of 97
                   write(kStdErr,'(A,I3.3,1X,A,I3.3,A,1X,I3.3,A,1X,4(ES12.5))') 
-     &               'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101): ', 
-     &               iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, 
-     &               '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
+     $               'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101): ', 
+     $               iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, 
+     $               '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
                 END IF
 
       ! ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv

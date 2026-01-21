@@ -965,7 +965,7 @@ c iTotal = how many of the kcomp files are gonna be unchunked
       !this is for kLongOrShort = 0
       INTEGER iTag,iTotalStuff      
 
-      INTEGER iaaOverrideDefault(4,10)   !! to mantain compatibility with SRCv1.18+ 
+!      INTEGER iaaOverrideDefault(4,10)   !! to mantain compatibility with SRCv1.18+ 
       INTEGER iNumNLTEGases,iDoUpperAtmNLTE,iDumpAllUARads
       iNumNLTEGases = -1
       iDoUpperAtmNLTE = -1

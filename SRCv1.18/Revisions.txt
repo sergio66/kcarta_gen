@@ -584,6 +584,27 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.18
 -----
+01/20/26         Found the downlook jacobian bug yayayaya : subr DownwardJacobian now has raaAbs0 as input, and the raaAbs
+                 has the abs coeff adjusted for top/bottom layers. The subr DoPlanck_LookDown does not need to adjust
+                 the ODs at top/bottom 
+
+01/18/26        Subr DownwardJacobian in jac_down.f90 now has internal variable
+                       iDumpJacs = +1/-1     (default setting is -1)
+                  If set to +1, then for every chunk it dumps out the internal jacobian vars into eg dump_jacobian_0955_X.dat
+                  where X = gasID_XYZ,temp,raaGeneral,aaLay2Gnd,raaOneMinusTau,raaTau,raaRad
+                Subr xwater in kcoeff_FAST.f90 has same internal variable, to dump out WV amount and T jacs
+                You can read them all in
+                  [raaRad,raaTau,raaOneMinusTau,raaLay2Gnd,raaGeneral,raaAllDT,raaaAllDQ] = readkc_all_dumpjac(raFreq,iaGasID)
+                  [kcartajacdump] = readkc_all_dumpjac(raFreq,iaGasID)
+                and compare to that from the Matlab kcmix output (temp_jacobian_matrices_' num2str(round(raFreq(1))) '.mat')
+                from  jac_downlook.m
+
+01/20/26        You can now set the iRTP profile on the comand line, by doing -iXYZ for the profile
+                number. This will override iRTP in nm_prfile
+                so path_to_exec/kcarta.x  nmlfile               -iXYZ
+                   path_to_exec/kcarta.x  nmlfile outrad        -iXYZ
+                   path_to_exec/kcarta.x  nmlfile outrad outjac -iXYZ
+
 1/10/2026      Found a big bug in subroutine Get_Temp_Plevs (n_pth_mix.f) where
                rtp presure levels (TOA->GND = 1-97) were flipped to KCARTA pressure levels (TOA->GND= 4-100)
 	       incorrctly, such that the lower three had zeros. Put in the same code as is in v1.22

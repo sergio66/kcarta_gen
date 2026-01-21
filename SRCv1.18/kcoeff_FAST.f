@@ -598,7 +598,8 @@ c local variables associated with uncompressing the water database files
      $                 daaaKX4(kMaxK,kMaxTemp,kMaxLayer),
      $                 daaaKX5(kMaxK,kMaxTemp,kMaxLayer)
       DOUBLE PRECISION daaUX(kMaxPts,kMaxK)
-      INTEGER iDefault,iMultiplyHeavyWater
+      INTEGER iDefault,iMultiplyHeavyWater,iDumpJacs,iFr
+      REAL raFreq(kMaxPts)
 
       IF ((iGasID .NE. 1) .AND. (iGasID .NE. kNewGasHi+1)) THEN
         write(kStdErr,*) 'Expecting to read in water profile/database'
@@ -784,6 +785,18 @@ c because of iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
 c convert absorption coefficient correctly if necessary
       IF (iKtype .eq. 2) THEN
         CALL RaisePower(daaAbsCoeff)
+      END IF
+
+      iDumpJacs = +1
+      iDumpJacs = -1
+      if ((iDumpJacs .GT. 0) .AND. (iGasID == 1)) THEN
+        DO iFr = 1,kMaxPts
+          raFreq(iFr) = rFileStartFr + (iFr-1)*0.0025
+        END DO
+        CALL DumpJacobianInfo(raFreq,real(daaDQ),iProfLayer,201)
+          write(kStdErr,*) 'DownwardJacobian : Dumped raw raaDQ for xwater'
+        CALL DumpJacobianInfo(raFreq,real(daaDT),iProfLayer,-10)
+          write(kStdErr,*) 'DownwardJacobian : Dumped raw raaDT'
       END IF
 
 c now compute optical depth = gas amount * abs coeff

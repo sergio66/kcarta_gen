@@ -66,6 +66,7 @@ CONTAINS
       CALL DoStop
     END IF
 
+   iIOUNJUNK = 41
 ! next open unformatted file as a fresh file to be written to
     OPEN(UNIT=iIOUNJUNK,FILE=caOutNameJunk,STATUS='NEW',FORM='UNFORMATTED',IOSTAT=iFileErr)
       ! if file error, inform user and stop program

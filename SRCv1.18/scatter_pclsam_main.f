@@ -884,10 +884,13 @@ c local
 
       DO iI = 1,kProfLayer
         DO iJ = 1,iNum-1
-	IF ((raCC_start(iI) .LE. raXCfrac(iJ)) .AND. (raCC_stop(iI) .GE. raXCfrac(iJ+1))) iaaCldLaySubPixel(iI,iJ) = +1	  
+      	  IF ((raCC_start(iI) .LE. raXCfrac(iJ)) .AND. (raCC_stop(iI) .GE. raXCfrac(iJ+1))) THEN
+            iaaCldLaySubPixel(iI,iJ) = +1	  
+          END IF 
 	END DO
       END DO
 
+      kOuterLoop = 1
       IF (kOuterLoop .EQ. 1) THEN
         write(kStdWarn,*) ' the subpixels ..... plus if clear frac > 0, there is clear-only subpixel'
         IF (iNum-1 .LE. 5) THEN

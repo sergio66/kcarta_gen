@@ -5,6 +5,83 @@ c All Rights Reserved
 c***********************************************************************
 c**************** MAIN BINARY OUTPUT SUBROUTINES ARE HERE **************
 c***********************************************************************
+
+      SUBROUTINE DumpJacobianInfo(raFreq,raaData,iNumLayer,iWhichData)
+
+      IMPLICIT NONE
+
+      include '../INCLUDE/TempF90/kcarta.param'
+
+! input
+      REAL :: raaData(kMaxPts,kProfLayer)
+      REAL :: raFreq(kMaxPts)
+      INTEGER :: iWhichData,iNumLayer
+
+! local
+      INTEGER iRound,iFr,iL,iFileErr
+      CHARACTER*4  internal_buffer
+      CHARACTER*3  internal_gid
+      CHARACTER*80 caOutNameJunk
+      INTEGER iIounJunk
+  
+      iRound = floor(raFreq(1))
+      write(internal_buffer, '(I4.4)') iRound
+      IF (iWhichData .EQ. 0) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_temp.dat'
+      ELSEIF (iWhichData .EQ. -10) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_rawD_DT_temp.dat'
+      ELSEIF ((iWhichData .GE. 1) .AND. (iWhichData .LE. 103)) THEN
+        write(internal_gid, '(I3.3)') iWhichData
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_gasID_' // internal_gid // '.dat'
+      ELSEIF ((iWhichData .GE. 201) .AND. (iWhichData .LE. 303)) THEN
+        write(internal_gid, '(I3.3)') iWhichData-200
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_rawD_DQ_gasID_' // internal_gid // '.dat'
+      ELSEIF (iWhichData .EQ. 1000) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaRad.dat'
+      ELSEIF (iWhichData .EQ. 1050) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaRadDT.dat'
+      ELSEIF (iWhichData .EQ. 2000) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaTau.dat'
+      ELSEIF (iWhichData .EQ. 2050) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaOneMinusTau.dat'
+      ELSEIF (iWhichData .EQ. 3000) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaLay2Gnd.dat'
+      ELSEIF (iWhichData .EQ. 3050) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaLay2Sp.dat'
+      ELSEIF (iWhichData .EQ. 4000) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaGeneral.dat'
+      ELSEIF (iWhichData .EQ. 4050) THEN
+        caOutNameJunk = 'dump_jacobian_' // internal_buffer // '_raaAbsCoeff.dat'
+      ELSE
+        write(kStdErr,*) 'unknown iWHichData ',iWHichData
+        CALL DoStop
+      END IF
+
+      iIOUNJUNK = 41
+! open unformatted file as a fresh file to be written to
+      OPEN(UNIT=iIOUNJUNK,FILE=caOutNameJunk,STATUS='NEW',FORM='UNFORMATTED',IOSTAT=iFileErr)
+        ! if file error, inform user and stop program
+        IF (iFileErr /= 0) THEN
+          WRITE(kStdErr,103) iFileErr, caOutNameJunk
+          write(kStdErr,*)'make sure the file does not exist!'
+          CALL DoSTOP
+        END IF
+ 103  FORMAT('ERROR! number ',I5,' opening binary data file : ',/,A80)
+
+       write(iIOUNJUNK) raFreq(1),raFreq(kMaxPts)
+       write(iIOUNJUNK) iNumLayer
+       write(iIOUNJUNK) iWhichData
+
+       DO iL = 1,kMaxLayer
+         write(iIOUNJUNK) (raaData(iFr,iL),iFr=1,kMaxPts)
+       END DO
+
+       CLOSE(iIounJunk)
+
+       RETURN
+       END SUBROUTINE DumpJacobianInfo
+
+c***********************************************************************
 c this subroutine writes out the main header for each results section
 c this is a major change from before
 c note the program does not keep on opening and closing the file

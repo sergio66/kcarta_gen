@@ -10,7 +10,7 @@ echo " "
 #ifort    -c -fpp -implicitnone -msse2 -extend-source 132 -O2 -names lowercase -assume nounderscore -heap-arrays -diag-disable 8291 -mcmodel=medium -shared-intel   scatter_pclsam_flux.f90
 
 make -f Makefile_v122_Intelf90 scat
-ls -lt ../BIN/kcarta.x90
+ls -lt ../BIN/kcarta.x90_v1.22
 
 ########################################################################
 ########################################################################
@@ -20,8 +20,8 @@ ls -lt ../BIN/kcarta.x90
 ######   make clean; make -f makefile 385_H12_CO2_UMBC_default_f90
 ###### in which case neiher of these two are appropriate
 
-#mv ../BIN/kcarta.x90 /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
-#ls -lt /home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20
+#mv ../BIN/kcarta.x90 /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20
+#ls -lt /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20
 
-#mv ../BIN/kcarta.x90 ../BIN/kcarta.x_f90_122_400ppmv_H20
-#ls -lt ../BIN/kcarta.x_f90_122_400ppmv_H20
+#mv ../BIN/kcarta.x90 ../BIN/kcarta.x90_v1.22_400ppmv_H20
+#ls -lt ../BIN/kcarta.x90_v1.22_400ppmv_H20

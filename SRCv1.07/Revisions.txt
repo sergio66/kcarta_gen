@@ -14,6 +14,11 @@ If one only wants to see the continuum (eg dump out path spectra of
 self continuum only), one can easily tailor the driver namelist file to
 do this eg set water (gasID = 1) weight to 0.0
 
+01/20/26         Found the downlook jacobian bug yayayaya : subr DownwardJacobian now has raaAbs0 as input, and the raaAbs
+                 has the abs coeff adjusted for top/bottom layers. The subr DoPlanck_LookDown does not need to adjust
+                 the ODs at top/bottom
+                 This fix has only been done for downward look jacs, and only in SRCv1.22_F90, SRCv1.18, SRCv1.10, SRCv1.07
+
 1/14/26         Yes, years later cleaned up some code and made the radiance
                 units mW/m2/sr-1/cm-1
 		

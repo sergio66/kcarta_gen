@@ -44,7 +44,7 @@ CONTAINS
     iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
     rSatAngle,raLayAngles,raSunAngles,raVTemp, &
     iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
-    raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten, &
+    raaaAllDQ,raaAllDT,raaAbs0,raaAmt,raInten, &
     raSurface,raSun,raThermal,rFracTop,rFracBot, &
     iaJacob,iJacob,raaMix,rDelta)
 
@@ -81,7 +81,8 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rFracTop,rFracBot
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts)
     REAL :: raThermal(kMaxPts),rDelta
-    REAL :: raaAbs(kMaxPts,kMixFilRows),raPressLevels(kProfLayer+1)
+    REAL :: raaAbs0(kMaxPts,kMixFilRows)                          !! raw ODs without bottom layer fraction
+    REAL :: raPressLevels(kProfLayer+1)
     REAL :: rTSpace,rTSurface,raUseEmissivity(kMaxPts), &
     raVTemp(kMixFilRows),rSatAngle,raFreq(kMaxPts)
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -93,6 +94,7 @@ CONTAINS
     CHARACTER(160) :: caJacobFile
 
 ! local variables
+    REAL :: raaAbs(kMaxPts,kMixFilRows)                          !! ODs with bottom layer fraction
     REAL :: raaLay2Gnd(kMaxPtsJac,kProfLayerJac),raResults(kMaxPtsJac)
     REAL :: raaRad(kMaxPtsJac,kProfLayerJac)
     REAL :: raaRadDT(kMaxPtsJac,kProfLayerJac)
@@ -107,7 +109,14 @@ CONTAINS
     INTEGER :: iGasPosn
 
     INTEGER :: iDefault,iWhichJac,iFr
-    INTEGER :: iDoAdd,iErr
+    INTEGER :: iDoAdd,iErr,iaRadLayer(kProfLayer)
+
+    iaRadLayer(1:iNumLayer) = iaaRadLayer(iAtm,1:iNumLayer)
+    raaAbs = raaAbs0
+    iLay = iaRadlayer(1)
+    raaAbs(:,iLay) = raaAbs(:,iLay) * rFracTop
+    iLay = iaRadlayer(iNumLayer)
+    raaAbs(:,iLay) = raaAbs(:,iLay) * rFracBot
 
     iDefault  = -1     !! do all jacs (Q,T,W,surface)
 
@@ -365,7 +374,8 @@ CONTAINS
       ! first find the mixed path number
       iLay = iaaRadLayer(iAtm,iL)
       rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
-      raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracTop/rCos)
+      !raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracTop/rCos)   !! have already accounted for this
+      raaTau(:,iL) = exp(-raaAbs(:,iLay)/rCos)
       raaOneMinusTau(:,iL) = 1.0-raaTau(:,iL)
     END DO
     DO iL=2,iNumLayer-1
@@ -379,7 +389,8 @@ CONTAINS
       ! first find the mixed path number
       iLay = iaaRadLayer(iAtm,iL)
       rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
-      raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracBot/rCos)
+      !raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracBot/rCos)   !! have already accounted for this
+      raaTau(:,iL) = exp(-raaAbs(:,iLay)/rCos)
       raaOneMinusTau(:,iL) = 1.0-raaTau(:,iL)
     END DO
 
@@ -392,7 +403,8 @@ CONTAINS
     iLay2 = iaaRadLayer(iAtm,iNumLayer)
     iMM2 = iNumLayer
     rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
-    raaLay2Gnd(:,iMM) = exp(-raaAbs(:,iLay)*rFracBot/rCos)
+    !raaLay2Gnd(:,iMM) = exp(-raaAbs(:,iLay)*rFracBot/rCos)   !! have already accounted for this
+    raaLay2Gnd(:,iMM) = exp(-raaAbs(:,iLay)/rCos)
 ! now go layer by layer from the bottom up to build the transmission matrix
     DO iL = iNumLayer-1,2,-1
       iLay = iaaRadLayer(iAtm,iL)
@@ -405,7 +417,8 @@ CONTAINS
       iLay = iaaRadLayer(iAtm,iL)
       iMM = iL
       rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
-      raaLay2Gnd(:,iMM) = raaLay2Gnd(:,iMM2)*exp(-raaAbs(:,iLay)*rFracTop/rCos)
+      !raaLay2Gnd(:,iMM) = raaLay2Gnd(:,iMM2)*exp(-raaAbs(:,iLay)*rFracTop/rCos)   !! have already accounted for this
+      raaLay2Gnd(:,iMM) = raaLay2Gnd(:,iMM2)*exp(-raaAbs(:,iLay)/rCos) 
       iMM2 = iMM
     END DO
 

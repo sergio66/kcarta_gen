@@ -890,9 +890,9 @@ CONTAINS
 ! now compute optical depth = gas amount * abs coeff
 !    daaDQ = daaAbsCoeff    !!! new Jan 2026
 
-    iDumpJacs = -1
     iDumpJacs = +1
-    if (iDumpJacs .GT. 0) THEN
+    iDumpJacs = -1
+    if ((iDumpJacs .GT. 0) .AND. (iGasID == 1)) THEN
       CALL DumpJacobianInfo(raFreq,real(daaDQ),iProfLayer,201)
         write(kStdErr,*) 'DownwardJacobian : Dumped raw raaDQ for xwater'
       CALL DumpJacobianInfo(raFreq,real(daaDT),iProfLayer,-10)

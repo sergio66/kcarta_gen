@@ -208,8 +208,8 @@ c                  in water partial pressure (+1)
 c                = just do what Genln2 does (which would be the same as the
 c                  uncompresssion for CO2 and other gases (-1)
       INTEGER kGenln2Water
-c      PARAMETER (kGenln2Water = +1)
-      PARAMETER (kGenln2Water = -1)
+      PARAMETER (kGenln2Water = +1)
+c      PARAMETER (kGenln2Water = -1)
 
 c----------------------------------------------------------------------
 c this is new for version 0.97 and higher and some parts will change

@@ -32,7 +32,7 @@ c this subroutine does the Jacobians for downward looking instrument
      $            iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity,
      $            rSatAngle,raLayAngles,raSunAngles,raVTemp,
      $            iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer,
-     $            raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten,
+     $            raaaAllDQ,raaAllDT,raaAbs0,raaAmt,raInten,
      $            raSurface,raSun,raThermal,rFracTop,rFracBot,
      $            iaJacob,iJacob,raaMix,raSunRefl,rDelta)
 
@@ -67,7 +67,7 @@ c raaMix is the mixing table
       REAL raaMix(kMixFilRows,kGasStore),rDelta
       REAL raSunRefl(kMaxPts),rFracTop,rFracBot
       REAL raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
-      REAL raaAbs(kMaxPts,kMixFilRows)
+      REAL raaAbs0(kMaxPts,kMixFilRows)     !!! input, with rFacTop,rFracBot not adjusted
       REAL rTSpace,rTSurface,raUseEmissivity(kMaxPts),
      $     raVTemp(kMixFilRows),rSatAngle,raWaves(kMaxPts)
       REAL raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
@@ -79,6 +79,7 @@ c raaMix is the mixing table
       INTEGER iNumGases,iAtm,iNatm,iaGases(kMaxGas)
 
 c local variables
+      REAL raaAbs(kMaxPts,kMixFilRows)     !!! rFracTop,rFracBot adjusted
       REAL raaLay2Sp(kMaxPtsJac,kProfLayerJac)
       REAL raaLay2Gnd(kMaxPtsJac,kProfLayerJac),raResults(kMaxPtsJac)
       REAL raaRad(kMaxPtsJac,kProfLayerJac)
@@ -90,7 +91,25 @@ c local variables
       REAL raaGeneralTh(kMaxPtsJac,kProfLayerJac)
       REAL radBTdr(kMaxPtsJac),radBackgndThermdT(kMaxPtsJac)
       REAL radSolardT(kMaxPtsJac),rWeight
-      INTEGER iG,iM,DoGasJacob,iGasJacList,iIOUN,iLowest
+      INTEGER iG,iM,DoGasJacob,iGasJacList,iIOUN,iLowest,iFr,iLay,iaRadLayer(kProfLayer)
+
+      DO iLay = 1,kProfLayer
+        DO iFr = 1, kMaxPts
+          raaAbs(iFr,iLay) = raaAbs0(iFr,iLay)
+        END DO
+      END DO
+
+      DO iLay = 1,iNumLayer
+        iaRadLayer(iLay) = iaaRadLayer(iAtm,iLay)
+      END DO
+      iLay = iaRadlayer(1)
+      DO iFr = 1, kMaxPts
+        raaAbs(iFr,iLay) = raaAbs(iFr,iLay) * rFracBot
+      END DO
+      iLay = iaRadlayer(iNumLayer)
+      DO iFr = 1, kMaxPts
+        raaAbs(iFr,iLay) = raaAbs(iFr,iLay) * rFracTop
+      END DO
 
       iLowest=iaaRadLayer(iAtm,1)
       iLowest=MOD(iLowest,kProfLayer)
@@ -438,7 +457,8 @@ c first find the mixed path number
         iM=iaaRadLayer(iAtm,iL)
         rCos=cos(raLayAngles(MP2Lay(iM))*kPi/180.0)
         DO iFr=1,kMaxPts
-          raaTau(iFr,iL)=exp(-raaAbs(iFr,iM)*rFracBot/rCos)
+          !raaTau(iFr,iL) = exp(-raaAbs(iFr,iM)*rFracBot/rCos)   !! already done
+          raaTau(iFr,iL) = exp(-raaAbs(iFr,iM)/rCos)
           raaOneMinusTau(iFr,iL)=1.0-raaTau(iFr,iL)
           END DO
         END DO
@@ -456,7 +476,8 @@ c first find the mixed path number
         iM=iaaRadLayer(iAtm,iL)
         rCos=cos(raLayAngles(MP2Lay(iM))*kPi/180.0)
         DO iFr=1,kMaxPts
-          raaTau(iFr,iL)=exp(-raaAbs(iFr,iM)*rFracTop/rCos)
+          !raaTau(iFr,iL) = exp(-raaAbs(iFr,iM)*rFracTop/rCos) !! already done
+          raaTau(iFr,iL) = exp(-raaAbs(iFr,iM)/rCos)
           raaOneMinusTau(iFr,iL)=1.0-raaTau(iFr,iL)
           END DO
         END DO
@@ -473,22 +494,22 @@ c initialize bottommost layer
 c remember r4 is the 1/cos(theta) weighting factor of the satellite 
 c viewing angle while we need 1/cos(theta_thermal_diffuse)
         DO iFr=1,kMaxPts
-          raaLay2Gnd(iFr,1)=exp(-raaAbs(iFr,iM)*rFracBot/rCos)
+          !raaLay2Gnd(iFr,1) = exp(-raaAbs(iFr,iM)*rFracBot/rCos)  !! already done
+          raaLay2Gnd(iFr,1) = exp(-raaAbs(iFr,iM)/rCos)
           END DO
 c now go layer by layer from the bottom up to build the transmission matrix
         DO iL=2,iNumLayer-1
           iM=iaaRadLayer(iAtm,iL)
           DO iFr=1,kMaxPts
-            raaLay2Gnd(iFr,iL)=raaLay2Gnd(iFr,iMM2)*
-     $                         exp(-raaAbs(iFr,iM)/rCos)
+            raaLay2Gnd(iFr,iL)=raaLay2Gnd(iFr,iMM2)*exp(-raaAbs(iFr,iM)/rCos)
             END DO
           iMM2=iL
           END DO
         DO iL=iNumLayer,iNumLayer
           iM=iaaRadLayer(iAtm,iL)
           DO iFr=1,kMaxPts
-            raaLay2Gnd(iFr,iL)=raaLay2Gnd(iFr,iMM2)*
-     $           exp(-raaAbs(iFr,iM)*rFracTop/rCos)
+            !raaLay2Gnd(iFr,iL) = raaLay2Gnd(iFr,iMM2)*exp(-raaAbs(iFr,iM)*rFracTop/rCos)  !! already dome
+            raaLay2Gnd(iFr,iL) = raaLay2Gnd(iFr,iMM2)*exp(-raaAbs(iFr,iM)/rCos)
             END DO
           iMM2=iL
           END DO

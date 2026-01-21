@@ -12,7 +12,8 @@ c this subroutine reads in the namelists
 c need to set all stuff in gasprofiles, given caPFname
 c need to set iaL_low,iaL_high
 
-      SUBROUTINE TranslateNameListFile(caDriverName,
+      SUBROUTINE TranslateNameListFile(
+     $   iRTPCommandLine,caDriverName,
 c start stop freqs from *FRQNCY
      $   rf_low1,rf_high1,
 c gas types for MOLGAS,XSCGAS, and 
@@ -55,6 +56,9 @@ c  non LTE
       IMPLICIT NONE
 
       include '../INCLUDE/kcarta.param'
+
+c is there iRTP from command line
+      INTEGER :: iRTPCommandLine
 
 c this is the driver file name
       CHARACTER*120 caDriverName
@@ -548,6 +552,11 @@ c        caCloudPFName1 = caCloudPFName
 c      END IF
       iAFGLProf1       = iAFGLProf
       iRTP1            = iRTP
+      IF (iRTPCommandLine .GT. 0) THEN
+        write(kstdWarn,'(A,I5.5,A,I5.5)') 'Overwriting iRTP = ',iRTP,' with iRTPCommandLine = ',iRTPCommandLine
+        write(kstdErr,'(A,I5.5,A,I5.5)')  'Overwriting iRTP = ',iRTP,' with iRTPCommandLine = ',iRTPCommandLine
+        iRTP1 = iRTPCommandLine
+      END IF
       iMPSetForRadRTP1 = iMPSetForRadRTP
       ibinorasc1       = ibinorasc
       iNclouds_RTP1    = iNclouds_RTP
@@ -848,6 +857,7 @@ c this subroutine reads in the namelists and processes them
 c need to set all stuff in gasprofiles, given caPFname
 c need to set iaL_low,iaL_high
       SUBROUTINE ReadNameListFile(
+     $       iRTPCommandLine,
 c gas types for MOLGAS,XSCGAS, and start stop freqs from *FRQNCY
      $      iaGases,iNumGases,rf_low,rf_high,
 c gas profiles and layer info
@@ -897,6 +907,8 @@ c basic output file
 
       include '../INCLUDE/kcarta.param'
 
+c iRTPCommandLine = command line iRTP
+      INTEGER iRTPCommandLine
 c main output filename
       CHARACTER*120 caOutName
 c iaGases       = integer array with list of gasID's in order they were read in
@@ -1147,7 +1159,7 @@ c this is is we have 100 layer clouds
       cbot1 = -100.0
       cbot2 = -100.0
 
-      CALL TranslateNameListFile(caDriverName,
+      CALL TranslateNameListFile(iRTPCommandLine,caDriverName,
      $      rf_low,rf_high,
      $    iNGas,iaGasesNL,iNXsec,iaLXsecNL,
      $      caPFName,caCloudPFName,iRTP,iNclouds_RTP,iAFGLProf,

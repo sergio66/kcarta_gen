@@ -484,11 +484,11 @@ c get the reference profile for the current gas if GAS ID <= kGasXsecHi
 cjacob
 c get actual profiles for the current gas
 
-          rDerivTemp=0.01
-          rDerivTemp=0.1
+          rDerivTemp = 0.01
+          rDerivTemp = 0.1
 
-          rDerivAmt=-0.05
-          rDerivAmt=0.01
+          rDerivAmt = 0.05
+          rDerivAmt = 0.01
 
 c following is to test jacobians; all these are really dummy things
 cjacob
@@ -519,11 +519,12 @@ c                raMixVertTemp(iInt+2*kProfLayer)=rDummy3+rDerivTemp
 c                END IF
 
 cjacob
-             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
-               raTAmt(iInt)=raaAmt(iInt,iGas)*(1.0+rDerivAmt)
-	       raTPartPress(iInt) = raaPartPress(iInt,iGas)*(1.0+rDerivAmt)
-               print *,raaAmt(iInt,iGas)*rDerivAmt
-               END IF
+c             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
+c               raTAmt(iInt)=raaAmt(iInt,iGas)*(1.0+rDerivAmt)
+c	       raTPartPress(iInt) = raaPartPress(iInt,iGas)*(1.0+rDerivAmt)
+c               write(kStdErr,'(A,I4,A,I4,A,ES12.5)') 'gas ID = ',iaGases(iGas),
+c     $           ' iLay = ',iInt,' dq for finite diff = ',raaAmt(iInt,iGas)*rDerivAmt
+c               END IF
 
               END DO
 

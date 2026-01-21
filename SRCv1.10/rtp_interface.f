@@ -51,14 +51,8 @@ c        END DO
       rf1 = head.vcmin
       rf2 = head.vcmax
 
-c      rf1 = 755.0 
-c      rf2 = 805.0 
-c      print *,'*********************************************************' 
-c      print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for test PCLSAM' 
-c      print *,'*********************************************************' 
-
       rf1 = 855.0 
-      rf2 = 1055.0 
+      rf2 = 1555.0 
       print *,'*******************************************************************' 
       print *, 'Set rf1,rf2 =  ',rf1,rf2,' cm-1 for test jacobians in certain band' 
       print *,'*******************************************************************' 
@@ -104,6 +98,9 @@ c local variables for RTP file
       character*32 mode
       character*80 fname
 
+c make sure you run    make -f Makefile kcartaparam    before compiling
+c make sure you run    make -f Makefile kcartaparam    before compiling
+c make sure you run    make -f Makefile kcartaparam    before compiling
 c      integer kCHAN
 c      parameter(kChan=8461)
 
@@ -152,6 +149,9 @@ c this subroutine finds the freqs for kCARTA
 
       include '../INCLUDE/kcarta.param'
 
+c make sure you run    make -f Makefile kcartaparam    before compiling
+c make sure you run    make -f Makefile kcartaparam    before compiling
+c make sure you run    make -f Makefile kcartaparam    before compiling
 c input 
 c      integer kCHAN
 c      parameter(kChan=8461)
@@ -206,6 +206,10 @@ c assumes that channel ID numbers are from 1 to MAX
 
 c input 
       INTEGER iInstr
+
+c make sure you run    make -f Makefile kcartaparam    before compiling
+c make sure you run    make -f Makefile kcartaparam    before compiling
+c make sure you run    make -f Makefile kcartaparam    before compiling
 c output
 c      integer kCHAN
 c      parameter(kChan=8461)
