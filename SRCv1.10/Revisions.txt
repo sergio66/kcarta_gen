@@ -60,6 +60,9 @@ Two main updates in this version :
    so on are no longer needed .. all we need is to compare the information in
    KCARTA_database.param to the KLAYERS layering.
 
+01/14/26        Yes, years later cleaned up some code and made the radiance
+		units mW/m2/sr-1/cm-1
+
 12/01/09        Make sure symbolically link kcarta.param to kcarta_v110.param
                 before compilation!
 
@@ -842,6 +845,9 @@ gases in the profile, and if kCKD >= 0 (ie water continuum is turned on).
 If one only wants to see the continuum (eg dump out path spectra of
 self continuum only), one can easily tailor the driver namelist file to
 do this eg set water (gasID = 1) weight to 0.0
+
+01/14/26        Yes, years later cleaned up some code and made the radiance
+		units mW/m2/sr-1/cm-1
 
 10/27/00        Fixed couple of bugs in kcoeffSPL,kcoeffSPLJAC.f
                 One bug did not allow the thicker upper layers to be 

@@ -332,7 +332,7 @@
 ! this is the mixing table
     REAL :: rCO2Mult   !!! for NLTE
     REAL :: raaMix(kMixFilRows,kGasStore)
-    REAL :: raMixVertTemp(kMixFilRows)
+    REAL :: raMixVertTemp(kMixFilRows),raMixVertTemp0(kMixFilRows)
     INTEGER :: iIpmix,iNpmix,iMixFileLines
     CHARACTER(130) :: caaMixFileLines(kProfLayer)
 
@@ -393,15 +393,15 @@
 
 ! these are actually used
     INTEGER :: iDummy,iDummy2,iDummy3,iFound,iWhichChunk
-    INTEGER :: iFr,ID,iMeanDeltaP
-    INTEGER :: iJax,iJax2,iGasJac
-    INTEGER :: iOutNum,iCO2,iMicroSoft
+    INTEGER :: iFr,ID,iMeanDeltaP,iRTPCommandLine
+    INTEGER :: iJax,iJax2,iGasJac,iPertT,iPertQ
+    INTEGER :: iOutNum,iCO2,iNumOutFiles
     INTEGER :: IERR,iDoDQ,iSplineType,iDefault,iGasX,iSARTAChi
 
 ! these are temporary dumy variables
     REAL :: raX(kMaxPts),raY2(kMaxPts),raY3(kMaxPts),raY4(kMaxPts)
 !      REAL rDummy,rDummy2,rDummy3,rDerivTemp,rDerivAmt,PLKAVG_ORIG, PLKAVG
-    REAL :: rDummy,rDerivTemp,rDerivAmt
+    REAL :: rDummyT0,rDerivTemp,rDerivAmt
     DOUBLE PRECISION :: dDummy
 
 !************************************************************************
@@ -436,18 +436,19 @@
     CALL InitializeFileUnits
 
 ! this is the command line argument stuff
-    iMicroSoft = -1
-    CALL DoCommandLine(iMicrosoft,caDriverName,caOutName, &
-    caJacobFile,iOutFileName)
+    iNumOutFiles = -1
+    CALL DoCommandLineNew(iNumOutFiles,caDriverName,caOutName, &
+      caJacobFile,iOutFileName,iRTPCommandLine)
 
     CALL ErrorLogName(caDriverName)
     OPEN(UNIT=kStdWarn,FILE=kWarnFile,STATUS='UNKNOWN', &
-    FORM='FORMATTED',IOSTAT=IERR)
+      FORM='FORMATTED',IOSTAT=IERR)
     kStdWarnOpen = 1
 
     write(kStdWarn,*) 'driver file name is ',caDriverName
     write(kStdWarn,*) 'output file name is ',caOutName
-    IF (iMicroSoft == 2) THEN
+    write(kStdWarn,*) 'iRTPCommandLine = ',iRTPCommandLine
+    IF (iNumOutFiles == 2) THEN
         write(kStdWarn,*) 'jacob file name is ',caJacobFile
     END IF
 
@@ -459,7 +460,7 @@
     iUpper = -1
 ! read in the driver namelist file and profile
 
-    CALL ReadNameListFile(iaGases,iNumGases,rFreqStart,rFreqEnd, &
+    CALL ReadNameListFile(iRTPCommandLine,iaGases,iNumGases,rFreqStart,rFreqEnd, &
       iaProfFromRTP,raaAmt,raaTemp,raaPress,raaPartPress,raLayerheight,iaCont, &
       iProfileLayers,raPressLevels,raThickness,raTPressLevels,iKnowTP, &
       iNatm,raTSpace,raTSurf,raSatAngle,raSatHeight, &
@@ -535,6 +536,7 @@
     write(kStdWarn,*) 'num of mixed paths = ',iNpmix
 ! get the mixed path vertical temperatures if iNpMix > 0
     CALL CheckMixedPathTemps(raaTemp,iNumGases,raaMix,raMixVertTemp,iNpmix,iCO2,iaGases)
+    raMixVertTemp0 = raMixVertTemp
 
 ! plop out the printing options
     CALL SummaryOutputs(iOutTypes,iaPrinter,iaGPMPAtm,iaNp,iaaOp,raaOp,raaUserPress)
@@ -666,7 +668,7 @@
       iNumGases,iaGases,raaAmt,raaTemp,raaPress,raaPartPress, &
       raaRAmt,       raaRPartPress, &
       raPressLevels,iProfileLayers, &
-      iNpmix,raaMix,caaMixFileLines,iMixFileLines,raMixVertTemp, &
+      iNpmix,raaMix,caaMixFileLines,iMixFileLines,raMixVertTemp0, &
       iNatm,iNatm2,iaNumLayer,iaaRadLayer, &
       raTSpace,raTSurf,raSatAngle,raSatHeight, &
       raaaSetEmissivity,iaSetEms, &
@@ -763,34 +765,51 @@
     END DO
     raFreq = raBlock(iFileID) + iaInt*real(kaFrStep(iTag))
 
-    ! for testing finite difference jacs if needed
+!********************************************************************************
+!!!! NEED THIS OUT HERE, ELSE raMixVertTemp(iJax) increases through each loop!!!!
+!!!! NEED THIS OUT HERE, ELSE raMixVertTemp(iJax) increases through each loop!!!!
+
+    iPertT = -1       ! for testing finite difference T jacs,         set to -1 for NO
+    iPertQ = -1       ! for testing finite difference Q,iGasJac jacs  set to -1 for NO
+    iGasJac = 1
+
+    !! which layer to perturb
     iJax = 5
     iJax = 12  !! for JACK CO
     iJax = 7   !! for STROW CO2
+
+    iJax = 5   !! for testing CWilson WV
+    iJax = 10  !! for testing CWilson WV
     iJax2 = iJax+5    !!! can alter this to do dQ for many adjacent layers
     iJax2 = iJax+0    !!! can alter this to do dQ for many adjacent layers
+
+    !! the delta differences
     rDerivAmt  = 0.1
     rDerivTemp = 0.1
     rDerivAmt  = 0.01
     rDerivTemp = 0.01
+    rDummyT0   = raMixVertTemp0(iJax)
+!!!! NEED THIS OUT HERE, ELSE raMixVertTemp(iJax) increases through each loop!!!!
+!!!! NEED THIS OUT HERE, ELSE raMixVertTemp(iJax) increases through each loop!!!!
+!********************************************************************************
 
     iGas = 1
-    CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag, &
-    iDoAdd,iErr)
+    CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iActualTag,iDoAdd,iErr)
     IF (iDoAdd <= 0) THEN
       write(kStdErr,*) 'need other than gid = 1 to set kComp Interp Wgts'
       write(kSTdErr,*) 'raFreq(1) = ',raFreq(1),' kCompParamFile = '
       write(kStdErr,*) kCompParamFile	
       CALL DoStop
     ELSE
-      !! set up the ref and current profiles
+      !! set up the ref and current profiles : DO NOT WANT ANY PERTURBATIONS HERE!!!!!!!!!!!!!!!
       CALL Set_Ref_Current_Profs( &
-        iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt, &
+!       iPertT,iPertQ,iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt,rDummyT0, &
+        -1,-1,-1,-1,-1,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt,rDummyT0, &
         iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
         raaAmt,raaTemp,raaPress,raaPartPress, &
         raRAmt,raRTemp,raRPress,raRPartPress, &
         raTAmt,raTTemp,raTPress,raTPartPress, &
-        raNumberDensity,pProfNLTE,raMixVertTemp)
+        raNumberDensity,pProfNLTE,raMixVertTemp0,raMixVertTemp)
       CALL xWeights(raTPartPress,raTTemp,pProfNLTE, &
         iProfileLayers,iSplineType, &
         iaP1,iaP2,raP1,raP2, &
@@ -931,12 +950,12 @@
           ! for testing finite difference jacs if needed
           !! set up the ref and current profiles
           CALL Set_Ref_Current_Profs( &
-            iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt, &
+            iPertT,iPertQ,iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt,rDummyT0, &
             iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
             raaAmt,raaTemp,raaPress,raaPartPress, &
             raRAmt,raRTemp,raRPress,raRPartPress, &
             raTAmt,raTTemp,raTPress,raTPartPress, &
-            raNumberDensity,pProfNLTE,raMixVertTemp)
+            raNumberDensity,pProfNLTE,raMixVertTemp0,raMixVertTemp)
 
           ! get contribution of i-th gas to the absorption coeff profile
           ! current gas ID is iaGases(iGas)

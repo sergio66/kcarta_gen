@@ -16,7 +16,28 @@ CONTAINS
 ! this subroutine determines the weights for temp and pressure interpolation
 ! duplicating the Matlab 2011 version
 !************************************************************************
-
+! iSplineType = 2 Introduced in SRCv1.16
+! see kcartamisc.f90 : iSplineType = iaaOverrideDefault(1,2)
+! 
+! 03/18/11        ARBITRARY PLEVS : subr xWeights
+!                 Faster version of v1.15 : the uncompression routines have been 
+!                 rewritten to take advantage of the fact that profile remains
+!                 the same ==> T offset indices remain the same. This duplicates
+!                 the Matlab version, including the fact that we use linear 
+!                 interpolations
+! 
+!                 The code further splits into two, depending on iSplineType
+!                   iSplineType = 1 : kComp Database, klayers pressure levels 
+!                                     differ, so need two pressure interp points
+!                                        use four  weights for most gases
+!                                        use eight weights for water
+!                   iSplineType = 2 : kComp Database, klayers pressure levels 
+!                                     same, so need one pressure interp point
+!                                        use two  weights for most gases
+!                                        use four weights for water
+! 
+!************************************************************************
+! compared to kcoeff_FAST_details2.f90, here 0 < raP1,raP2 < 1
 !************************************************************************
 !  this is for iSplineType = 1  --- SLOWER as the klayers pressure levels
 !                             are NOT same as kCompressed database levels
@@ -94,10 +115,8 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 !  Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix X matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-    iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro, &
-    iLDB,dBeta,daaAbsCoeff,iLDC)
+    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     RETURN
     end SUBROUTINE xGetAbsCoeffNOJAC
@@ -470,7 +489,7 @@ CONTAINS
 ! raOrigP in atm
 ! pAvgUse,pProf in mb
 
-! ead in the orig 100 layer prof
+! read in the orig 100 layer prof
     IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
     (abs(kLongOrShort) <= 1)) THEN
         write (kStdWarn,*) 'Tempr interp for water'
@@ -482,7 +501,7 @@ CONTAINS
 !! use "1" whether gas is 1, 101, 102 or 103
     CALL FindReferenceName(caFName,1,-1)
     CALL ReadRefProf(caFName,kMaxLayer,raOrig100A,raOrig100T, &
-    raOrig100P,raOrig100PP,iE)
+      raOrig100P,raOrig100PP,iE)
 
     daOrig100A = raOrig100A * 1.0d0
     daQ        = daOrig100A**0.25
@@ -721,7 +740,8 @@ CONTAINS
     ! now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
       DO iK=iLowest,kProfLayer   !Loop over the layers
-        daaKpro(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raT11(iK)+ &
+        daaKpro(iI,iK) =  &
+            daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raT11(iK)+ &
             daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raT12(iK)+ &
             daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raT21(iK)+ &
             daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raT22(iK)
@@ -860,13 +880,13 @@ CONTAINS
     DO iI=1,iNk                  !Loop over the K vectors
       DO iK=iLowest,kProfLayer   !Loop over the layers
         daaKpro(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raT11(iK)+ &
-            daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raT12(iK)+ &
-            daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raT21(iK)+ &
-            daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raT22(iK)
-            daaT(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raJT11(iK)+ &
-            daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raJT12(iK)+ &
-            daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raJT21(iK)+ &
-            daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raJT22(iK)
+                         daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raT12(iK)+ &
+                         daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raT21(iK)+ &
+                         daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raT22(iK)
+         daaT(iI,iK) = daaaKxNew(iI,iaT11(iK),iaP1(iK))*raP1(iK)*raJT11(iK)+ &
+                       daaaKxNew(iI,iaT12(iK),iaP1(iK))*raP1(iK)*raJT12(iK)+ &
+                       daaaKxNew(iI,iaT21(iK),iaP2(iK))*raP2(iK)*raJT21(iK)+ &
+                       daaaKxNew(iI,iaT22(iK),iaP2(iK))*raP2(iK)*raJT22(iK)
       ENDDO
     ENDDO
 
@@ -998,10 +1018,8 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha, &
-    iLDA,iLDB,iLDC,dbeta,iUm,iUn)
-    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro, &
-    iLDB,dBeta,daaAbsCoeff,iLDC)
+    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     RETURN
     end SUBROUTINE xGetAbsCoeffWaterNOJAC_old

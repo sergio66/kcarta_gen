@@ -222,11 +222,12 @@ c guess what kPi is
 c kAvog = Avogadro Number (kilo)
 c kSunTemp == temperature of the sun
 c kTbdy = Temperature of Space
-c kPlanck1,kPlanck2 are the Planck constants (for blackbody radiance in terms
+c kPlanck1,kPlanck2 are the Planck constants (for blackbody radiance in terms 
 c of wavenumbers)
       REAL kPi,kSunTemp,kTSpace,kPlanck1,kPlanck2,kAvog
       PARAMETER (kPi=3.1415926535898,kSunTemp=5600.0,kTSpace=2.7)
-      PARAMETER (kPlanck1=1.1911E-8,kPlanck2=1.4387863,kAvog=6.023e26)
+c      PARAMETER (kPlanck1=1.1911E-8,kPlanck2=1.4387863,kAvog=6.023e26) !!!! in W/m2/sr-1/cm-1
+      PARAMETER (kPlanck1=1.1911E-5,kPlanck2=1.4387863,kAvog=6.023e26) !!!! in mW/m2/sr-1/cm-1      
 
 c----------------------------------------------------------------------
 

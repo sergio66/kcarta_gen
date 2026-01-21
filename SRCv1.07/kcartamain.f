@@ -373,15 +373,6 @@ c check Jacobian array sizes
           END IF
         END IF
 
-c following is to test jacobians; all these are really dummy things
-cjacob
-c      raSatAngle(1)=raSatAngle(1)+0.01
-c      raTSurf(1)=raTSurf(1)+rDerivTemp
-      iJax=16
-      rDummy=raMixVertTemp(iJax)
-cc      rDummy2=raMixVertTemp(iJax+kProfLayer)
-cc      rDummy3=raMixVertTemp(iJax+2*kProfLayer)
-
 c set min/max number of layers
       iL_low=1
       iL_high=kProfLayer
@@ -435,8 +426,8 @@ c if there will  be mixed path calculations, initialize raaSumAbCoeff
           END IF
 
 c set the frequency range for the current file block
-        write(kStdErr,'(A,I3,I3,F12.5,F12.5)') 
-     $  'kcartmain.f : iFileID, iTag, raBlock(iFileID),kaFrStep(iTag) = ',iFileID,iTag,raBlock(iFileID),kaFrStep(iTag)
+c        write(kStdErr,'(A,I3,I3,F12.5,F12.5)') 
+c     $  'kcartmain.f : iFileID, iTag, raBlock(iFileID),kaFrStep(iTag) = ',iFileID,iTag,raBlock(iFileID),kaFrStep(iTag)
         DO iInt=1,kMaxPts
           raFreq(iInt)=raBlock(iFileID)+(iInt-1)*kaFrStep(iTag)
           END DO
@@ -495,8 +486,19 @@ c get actual profiles for the current gas
 
           rDerivTemp=0.01
           rDerivTemp=0.1
-          rDerivAmt=0.01
+
           rDerivAmt=-0.05
+          rDerivAmt=0.01
+
+c following is to test jacobians; all these are really dummy things
+cjacob
+c      raSatAngle(1)=raSatAngle(1)+0.01
+c      raTSurf(1)=raTSurf(1)+rDerivTemp
+      iJax=16
+      iJax=5
+      rDummy=raMixVertTemp(iJax)
+cc      rDummy2=raMixVertTemp(iJax+kProfLayer)
+cc      rDummy3=raMixVertTemp(iJax+2*kProfLayer)
 
           DO iInt=1,kProfLayer
             raTAmt(iInt)=raaAmt(iInt,iGas)
@@ -517,10 +519,11 @@ c                raMixVertTemp(iInt+2*kProfLayer)=rDummy3+rDerivTemp
 c                END IF
 
 cjacob
-c             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
-c               raTAmt(iInt)=raaAmt(iInt,iGas)*(1.0+rDerivAmt)
-c               print *,raaAmt(iInt,iGas)*rDerivAmt
-c               END IF
+             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
+               raTAmt(iInt)=raaAmt(iInt,iGas)*(1.0+rDerivAmt)
+	       raTPartPress(iInt) = raaPartPress(iInt,iGas)*(1.0+rDerivAmt)
+               print *,raaAmt(iInt,iGas)*rDerivAmt
+               END IF
 
               END DO
 

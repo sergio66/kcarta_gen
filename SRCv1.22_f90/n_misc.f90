@@ -295,6 +295,10 @@ CONTAINS
     iaaOverrideDefault(1,1) = -1    !!! iSARTAChi = -1  for no tuning, see kcartabasic/kcartamain/kcartajpl
                                     !!!                 kcartaparallel and finally used in kcoeffMAIN.f
     iaaOverrideDefault(1,2) = +1    !!! iSplinetype = +1 for SUBR iSetSplineType in kcartamisc.f
+!     kcartamisc.f90:108:    iSplineType = -1        !!! Linear
+!     kcartamisc.f90:109:    iSplineType = -2        !!! Matlab uncompression (linear weights), slow if rtp plevs <> kcarta database plevs
+!     kcartamisc.f90:110:    iSplineType = +2        !!! Matlab uncompression (linear weights), fast if rtp plevs ~ kcarta database plevs
+!     kcartamisc.f90:111:    iSplineType = +1        !!! Spline  .... DEFAULT
     iaaOverrideDefault(1,3) = +2    !!! iCO2Chi = +2     for SUBR multiply_co2_chi_functions in kcoeffMAIN.f
     iaaOverrideDefault(1,4) = +1    !!! iMatlabORf77 = +1  use Maltab style uncompression,  kcoeffMAIN.f
     iaaOverrideDefault(1,5) = +5    !!! iWHichScatterCode = 5 for PCLSAM in rtp_interface.f

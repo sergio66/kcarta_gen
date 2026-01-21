@@ -167,7 +167,8 @@ CONTAINS
       rDelta = rDelta/iProfileLayers
       write(kStdWarn,*) 'difference between kCARTA database and klayers ...'
       IF ((rMin <= 1.0e-5) .AND. (rMax <= 5.0e-4) .AND. (rMaxAv <= 5.0e-3)) THEN
-        write(kStdWarn,*) '  can use kCARTA database levels for lower atm'
+        write(kStdWarn,'(A)') 'in subr SetSplineType : plevs of rtp file ~ plevs of kCARTA database'
+        write(kStdWarn,'(A)') '   can use kCARTA database levels for lower atm, resetting iSplineType --> iSplineType * 2'
         iSplineType = iSplineType * 2  !!so -1 becomes -2, or +1 becomes +2
       ELSE
         write(kStdWarn,*) '  intrp kCARTA databse lvls for lower part of atm'
@@ -176,13 +177,13 @@ CONTAINS
       write(kStdWarn,*) rMin,rMax,iMax,rP,rDelta
       IF (abs(iSplineType) == 1) THEN
         write(kStdWarn,*) 'iSplineType = ',iSplineType, ' slow : interpolate'
-        write(kStdWarn,*) 'database (pavglayers,abscoeeff) onto new plevels'
-        write(kStdWarn,*) 'before doing the temp interpolation'
+        write(kStdWarn,*) '  database (pavglayers,abscoeeff) onto new plevels'
+        write(kStdWarn,*) '  before doing the temp interpolation'
         write(kStdWarn,*) '  note abscoeff = optical depth/gas amount'
       ELSEIF (abs(iSplineType) == 2) THEN
         write(kStdWarn,*) 'iSplineType = ',iSplineType, ' fast : use '
-        write(kStdWarn,*) 'database (pavglayers,abscoeeff) for temp interp'
-        write(kStdWarn,*) 'as presslevel scheme of klayers = kCARTA database!!'
+        write(kStdWarn,*) '  database (pavglayers,abscoeeff) for temp interp'
+        write(kStdWarn,*) '  as presslevel scheme of klayers = kCARTA database!!'
         write(kStdWarn,*) '  note abscoeff = optical depth/gas amount'
       ELSE
         write(kStdErr,*) 'need abs(iSplineType) = 1 or 2'
@@ -735,14 +736,41 @@ CONTAINS
     end SUBROUTINE CheckMixedPathTemps
 
 !************************************************************************
+    INTEGER FUNCTION string10_to_int(char_val)
+
+    implicit none
+    character(len=10) :: char_val
+    integer           :: int_val
+    integer           :: io_status ! Optional: check for errors
+
+    ! Assign the string value
+    !char_val = "12345"
+
+    ! Use internal READ to convert
+    read(char_val, *, iostat=io_status) int_val
+
+    ! Check if the conversion was successful
+    !if (io_status == 0) then
+    !    print *, "Conversion successful. Integer value:", int_val
+    !else
+    !    print *, "Conversion failed. IOSTAT value:", io_status
+    !end if
+
+    string10_to_int = int_val
+    RETURN
+    end function string10_to_int
+
+!************************************************************************
 ! this subroutine does the command line stuff
     SUBROUTINE DoCommandLine(iMicrosoft,caDriverName,caOutName, &
-    caJacobFile,iOutFileName)
+      caJacobFile,iOutFileName,iRTPCommandLine)
 
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
+! iRTPCommandLine = iRTP in nm_prfile
+    INTEGER :: iRTPCommandLine
 ! caDriverName is the name of the driver file to be processed
     CHARACTER(160) :: caDriverName
 ! caOutName is the name of the unformatted output file name
@@ -757,7 +785,13 @@ CONTAINS
 ! this is the number of args
     INTEGER :: iargc
 
-    INTEGER :: iDummy,iError
+    INTEGER :: iDummy,iLoop
+
+    character(len=10) :: char_val
+    integer           :: int_val
+    integer           :: io_status ! Optional: check for errors
+
+    iRTPCommandLine = -9999
 
     IF (iMicroSoft > 0) THEN                 
       ! do command line options .. do this!
@@ -791,21 +825,20 @@ CONTAINS
       iDummy = iargc()
          
       IF (iDummy > 3) THEN
-        write(kStdErr,*) 'more than three arguments in command line'
-        write(kStdErr,*) 'is NOT allowed'
+        write(kStdErr,*) 'more than three arguments in command line is NOT allowed'
         CALL DoSTOP
       END IF
 
       iOutFileName = -1         !assume no name
-      DO iError = 1,iDummy
-        IF (iError == 1) THEN
+      DO iLoop = 1,iDummy
+        IF (iLoop == 1) THEN
           CALL getarg(1,caDriverName)
           IF (caDriverName(1:1) /= '-') THEN
             kStdDriver = kStdDriverKK
           END IF
         END IF
              
-        IF (iError == 2) THEN
+        IF (iLoop == 2) THEN
           CALL getarg(2,caOutName)
           IF (caOutName(1:1) /= '-') THEN
             iOutFileName = 1
@@ -813,19 +846,247 @@ CONTAINS
           END IF
         END IF
              
-        IF (iError == 3) THEN
+        IF (iLoop == 3) THEN
           CALL getarg(3,caJacobFile)
           IF (caJacobFile(1:1) /= '-') THEN
             kStdJacob = kStdJacobKK
           END IF
         END IF
+
+        IF (iLoop == 4) THEN
+          CALL getarg(4,char_val)
+          IF (char_val(1:1) /= '-') THEN
+            int_val = string10_to_int(char_val) 
+            IF (int_val .GT. 0) THEN
+              iRTPCommandLine = int_val
+            END IF
+          END IF
+        END IF
       END DO
+
+      write(kStdErr,'(A,A)') 'kStdDriver nml file     = ',caDriverName
+      write(kStdErr,'(A,A)') 'kStdkCarta out std file = ',caOutName
+      write(kStdErr,'(A,A)') 'kStdJacob  out jac file = ',caJacobFile
+      write(kStdErr,'(A,I10)') 'iRTPCommandLine       = ',iRTPCommandLine
+      write(kStdErr,*) ' '
          
       iMicrosoft = iDummy-1  !tells number of output files (w/o flux,planck)
     END IF
 
     RETURN
     end SUBROUTINE DoCommandLine
+
+!************************************************************************     
+    INTEGER FUNCTION InTabooCharSet(cChar)
+
+    IMPLICIT NONE
+
+! input
+    CHARACTER cChar
+
+! local vars
+    CHARACTER*11 caArray
+    INTEGER iLoop,iX
+
+    iX = -1
+    caArray = '-0123456789'
+
+    DO iLoop = 1,11
+      IF (cChar(1:1) .EQ. caArray(iLoop:iLoop)) THEN
+        iX = +1
+      END IF
+    END DO
+
+    InTabooCharSet = iX
+    RETURN
+    END FUNCTION InTabooCharSet
+
+!************************************************************************     
+
+! this subroutine does the command line stuff
+! no more iMicrosoft
+    SUBROUTINE DoCommandLineNew(iNumOutFiles,caDriverName,caOutName, &
+      caJacobFile,iOutFileName,iRTPCommandLine)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! iRTPCommandLine = iRTP in nm_prfile
+    INTEGER :: iRTPCommandLine
+! caDriverName is the name of the driver file to be processed
+    CHARACTER(160) :: caDriverName
+! caOutName is the name of the unformatted output file name
+! integer iOutFileName tells whether or not there is a driver name, or
+! dump output to Unit 6
+    INTEGER :: iOutFileName
+    CHARACTER(160) :: caOutName
+! caJacobFile is the name of the unformatted output file name for Jacobians
+    CHARACTER(160) :: caJacobFile
+! this tells if we have MS Product ie no command line stuff!
+    INTEGER :: iNumOutFiles
+! this is the number of args
+    INTEGER :: iargc
+
+    INTEGER :: iDummy,iLoop,iJunk
+
+    character(len=10) :: char_val
+    integer           :: int_val
+    integer           :: io_status ! Optional: check for errors
+
+    ! use command line stuff, you need AT LEAST one argument!!! the namelist file
+
+    iNumOutFiles = 0
+    iRTPCommandLine = -9999
+    iDummy = iargc()
+       
+    IF ((iDummy < 1) .OR. (iDummy > 4)) THEN
+      write(kStdErr,'(A)') 'less than one, more than four arguments in command line is NOT allowed'
+      write(kStdErr,'(A)') 'options include : '
+      write(kStdErr,'(A)') '(A) only gasOD/mixedpath/radiance output v0 : generic output name '
+      write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile'
+      write(kStdErr,'(A)') '     this will set outname (binary file) to outjunk.dat, iRTP set from nm_prfile'
+      write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile -iRTPCommandLine'
+      write(kStdErr,'(A)') '     this will set outname (binary file) to outjunk.dat, iRTP = iRTPCommandLine'
+      write(kStdErr,'(A)') ' '
+      write(kStdErr,'(A)') '(B) only gasOD/mixedpath/radiance output v1 : user specified output name'
+      write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile outfile'
+      write(kStdErr,'(A)') '     this will set outname (binary file) to outfile, iRTP set from nm_prfile'
+      write(kStdErr,'(A)') '  can have for example ../BIN/kcarta.x90 nmlfile outfile -iRTPCommandLine'
+      write(kStdErr,'(A)') '     this will set utname (binary file) to outfile, iRTP = iRTPCommandLine'
+      CALL DoSTOP
+    END IF
+
+    caOutName = 'NULL'
+    caJacobFile = 'NULL'
+
+    iOutFileName = -1         !assume no name
+    IF (iDummy .EQ. 1) THEN
+      !! easy : ../BIN/kcarta.x nmlfile
+      CALL getarg(1,caDriverName)
+      IF (caDriverName(1:1) /= '-') THEN
+        kStdDriver = kStdDriverKK
+      END IF
+
+    !*************************
+    ELSEIF (iDummy .EQ. 2) THEN
+      !! could be : ../BIN/kcarta.x nmlfile outname   or
+      !!          : ../BIN/kcarta.x nmlfile iRTPCommandLine
+
+      !! first arg has to be the nml file
+      CALL getarg(1,caDriverName)
+      IF (caDriverName(1:1) /= '-') THEN
+        kStdDriver = kStdDriverKK
+      END IF
+
+      !! second arg is two possible cases : outname or iRTPCommandLine
+      CALL getarg(2,caOutName)
+      iJunk = InTabooCharSet(caOutName(1:1))
+!      IF (caOutName(1:1) /= '-') THEN
+      IF (iJunk .LT. 0) THEN
+        iOutFileName = 1
+        kStdkCarta = kStdkCartaKK
+        iNumOutFiles = iNumOutFiles + 1
+      ELSEIF ((iJunk  .GT. 0) .AND. (caOutName(1:1) /= '-')) THEN
+        caOutName = 'NULL'
+      ELSEIF ((iJunk  .GT. 0) .AND. (caOutName(1:1) == '-')) THEN
+        caOutName(1:1) = ' '
+        char_val(1:10) = caOutName(1:10)
+        caOutName = 'NULL'
+        int_val = string10_to_int(char_val(1:10)) 
+        IF (int_val .GT. 0) THEN
+          iRTPCommandLine = int_val
+        END IF        
+      END IF
+
+    !*************************
+    ELSEIF (iDummy .EQ. 3) THEN
+      !! could be : ../BIN/kcarta.x nmlfile outname  jacname    or
+      !!          : ../BIN/kcarta.x nmlfile outname  iRTPCommandLine
+
+      !! first arg has to be the nml file
+      CALL getarg(1,caDriverName)
+      IF (caDriverName(1:1) /= '-') THEN
+        kStdDriver = kStdDriverKK
+      END IF
+
+      !! second arg is iOutFileName
+      CALL getarg(2,caOutName)
+      IF (caOutName(1:1) /= '-') THEN
+        iOutFileName = 1
+        kStdkCarta = kStdkCartaKK
+        iNumOutFiles = iNumOutFiles + 1
+      END IF
+
+      !! third arg is two possible cases : jacame or iRTPCommandLine
+      CALL getarg(3,caJacobFile)
+      iJunk = InTabooCharSet(caJacobFile(1:1))
+      IF (iJunk .LT. 0) THEN
+        kStdJacob = kStdJacobKK
+        iNumOutFiles = iNumOutFiles + 1
+      ELSEIF ((iJunk  .GT. 0) .AND. (caJacobFile(1:1) /= '-')) THEN
+        caJacobFile = 'NULL'
+      ELSEIF ((iJunk  .GT. 0) .AND. (caJacobFile(1:1) == '-')) THEN
+        caJacobFile(1:1) = ' '
+        char_val(1:10) = caJacobFile(1:10)
+        caJacobFile = 'NULL'
+        int_val = string10_to_int(char_val(1:10)) 
+        IF (int_val .GT. 0) THEN
+          iRTPCommandLine = int_val
+        END IF        
+        caJacobFile = 'NULL'
+      END IF
+
+    !*************************
+    ELSEIF (iDummy .EQ. 4) THEN
+      !! can only be : ../BIN/kcarta.x nmlfile outname  jacname iRTPCommandLine
+      DO iLoop = 1,iDummy
+        IF (iLoop == 1) THEN
+          CALL getarg(1,caDriverName)
+          IF (caDriverName(1:1) /= '-') THEN
+            kStdDriver = kStdDriverKK
+          END IF
+        END IF
+             
+        IF (iLoop == 2) THEN
+          CALL getarg(2,caOutName)
+          IF (caOutName(1:1) /= '-') THEN
+            iOutFileName = 1
+            kStdkCarta = kStdkCartaKK
+            iNumOutFiles = iNumOutFiles + 1
+          END IF
+        END IF
+             
+        IF (iLoop == 3) THEN
+          CALL getarg(3,caJacobFile)
+          IF (caJacobFile(1:1) /= '-') THEN
+            kStdJacob = kStdJacobKK
+            iNumOutFiles = iNumOutFiles + 1
+          END IF
+        END IF
+      
+        IF (iLoop == 4) THEN
+          CALL getarg(4,char_val)
+          IF (char_val(1:1) == '-') THEN
+            char_val(1:1) = ' '
+            int_val = string10_to_int(char_val) 
+            IF (int_val .GT. 0) THEN
+              iRTPCommandLine = int_val
+            END IF
+          END IF
+        END IF
+      END DO
+    END IF
+
+    write(kStdErr,'(A,A)') 'kStdDriver nml file     = ',caDriverName
+    write(kStdErr,'(A,A)') 'kStdkCarta out std file = ',caOutName
+    write(kStdErr,'(A,A)') 'kStdJacob  out jac file = ',caJacobFile
+    write(kStdErr,'(A,I10)') 'iRTPCommandLine       = ',iRTPCommandLine
+    write(kStdErr,*) 'iNumOutFiles = ',iNumOutFiles
+    write(kStdErr,*) ' '
+       
+    RETURN
+    end SUBROUTINE DoCommandLineNew
      
 !************************************************************************
 ! this subroutine stores the reference gas amts/temps etc
@@ -1291,7 +1552,7 @@ CONTAINS
 
 ! local variables
     INTEGER :: iI,iJ,iL,iBad
-    REAL :: rT,rW
+    REAL :: rT,rW,raMean(kProfLayer)
 
     iBad = 0
     raMixVertTemp = 0.0
@@ -1342,6 +1603,12 @@ CONTAINS
         CALL DoStop
       END IF
     END IF
+
+    raMean = SUM(raaTemp(:,1:iNumGases), DIM=2) / iNumGases
+    write(kStdWarn,'(A,I3)') 'showing off raaTemp(WV) vs raaTemp(CO2) vs raaTemp(Ozone) vs <raaTemp> vs raMixVertTemp : kGasTemp = ',kGasTemp
+    DO iI = 1,kProflayer
+      write(kStdWarn,'(I3,5F12.5)') iI,raaTemp(iI,1),raaTemp(iI,2),raaTemp(iI,3),raMean(iI),raMixVertTemp(iI)
+    END DO
 
     RETURN
     end SUBROUTINE GetMixVertTemp
@@ -1524,21 +1791,23 @@ CONTAINS
 !************************************************************************
 ! this is called by kcartamain and kcartabasic, to set up the profiles
     SUBROUTINE Set_Ref_Current_Profs( &
-    iJax,iJax2,iGasJac,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt, &
+    iPertT0,iPertQ0,iJax0,iJax20,iGasJac0,iaNumLayer,iaaRadLayer,rDerivTemp,rDerivAmt,rDummyT0, &
     iGas,iaGases,raaRAmt,raaRTemp,raaRPress,raaRPartPress, &
     raaAmt,raaTemp,raaPress,raaPartPress, &
     raRAmt,raRTemp,raRPress,raRPartPress, &
     raTAmt,raTTemp,raTPress,raTPartPress, &
-    raNumberDensity,pProfNLTE,raMixVertTemp)
+    raNumberDensity,pProfNLTE,raMixVertTemp0,raMixVertTemp)
 
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
 ! input params
-    INTEGER :: iJax,iJax2             !! when testing jacobians
-    INTEGER :: iGasJac                !! which gas to perturb (-1 for temperature)
+    INTEGER :: iJax0,iJax20             !! when testing jacobians
+    INTEGER :: iGasJac0                !! which gas to perturb (-1 for temperature)
+    INTEGER :: iPertQ0,iPertT0
 
+    REAL :: rDummyT0                  !! "background" raMixVert(iJax), as it gets perturbed additively with each new gas
     REAL :: rDerivTemp,rDerivAmt      !! when testing jacobians
     INTEGER :: iGas,iaGases(kMaxGas)  !! gasID stored in order they were read in
     INTEGER :: iaNumLayer(kMaxAtm),iaaRadLayer(kMaxAtm,kProfLayer)
@@ -1550,7 +1819,7 @@ CONTAINS
     REAL :: raaAmt(kProfLayer,kGasStore),raaTemp(kProfLayer,kGasStore)
     REAL :: raaPress(kProfLayer,kGasStore)
     REAL :: raaPartPress(kProfLayer,kGasStore)
-    REAL :: raMixVertTemp(kMixFilRows)
+    REAL :: raMixVertTemp(kMixFilRows),raMixVertTemp0(kMixFilRows)
 
 ! output params
 ! these are the individual reference profiles, at kProfLayer layers
@@ -1569,8 +1838,28 @@ CONTAINS
 ! local vars
     INTEGER :: iInt,iAtm,iX,iX2,dq_Const_between_layers,iStartKeepTrack
     REAL :: rDQ_Track_Cumulative,rDQ_Track,rAdjust_rDerivAmt,rJunk,rUseDQ
+    INTEGER iOverwriteJaxJax2GasJac
+
+    INTEGER :: iJax,iJax2             !! when testing jacobians
+    INTEGER :: iGasJac                !! which gas to perturb (-1 for temperature)
+    INTEGER :: iPertQ,iPertT
+
+    iJax = iJax0
+    iJax2 = iJax20
+    iGasJac = iGasJac0
+    iPertQ = iPertQ0
+    iPertT = iPertT0
+
+!    print *,'iPertT,iPertQ = ',iPertT,iPertQ,iJax,iJax2,iGasJac
+
+    !!!!! DEFAULT, set either or both to +1 to start perturbing
+!    iPertT = -1                   !! no T pert
+!    iPertQ = -1                   !! no Q pert
+    iOverwriteJaxJax2GasJac = -1  !! keep input params from kcartamain.f90
+    !!!!! DEFAULT, set either or both to +1 to start perturbing
 
     iAtm = 1
+    raMixVertTemp = raMixVertTemp0
 
 ! get the reference profile for the current gas if GAS ID <= kGasXsecHi
     IF ((iaGases(iGas) <= kGasXsecHi) .OR. (iaGases(iGas) == kNewGasHi+1)) THEN
@@ -1602,39 +1891,44 @@ CONTAINS
       rDQ_Track = 1.0
     END IF
 
-    !!!!!!!!!!!!!!!!!!!!!!!!!!
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-    !!!!!!!!!!!!!!!!!!!!!!!!!!
+    IF (iOverwriteJaxJax2GasJac .GT. 0) THEN
+      !! reset iJax,iJax2,iGasJac rather than use what is in kcartamain.f90
+      !! reset iJax,iJax2,iGasJac rather than use what is in kcartamain.f90
 
-    !! overwrite iJax,iJax2,iGasJac
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-
-    iJax = 52
-    iJax = 32
-    iGasJac = 6
-
-    !! overwrite iJax,iJax2,iGasJac
-    iJax = 76
-    iJax = 85
-    iGasJac = 3
-
-    !! overwrite iJax,iJax2,iGasJac
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-
-    iJax = 6
-    iJax = 20
-    iJax = 5
-    iGasJac = 2
-
-    !! overwrite iJax,iJax2,iGasJac
-    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-
-    iJax = 30
-    iJax = 20
-    iJax = 10
-    iJax = 4
-    iJax = 5
-    iGasJac = 1
+      !!!!!!!!!!!!!!!!!!!!!!!!!!
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+      !!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+  
+      iJax = 52
+      iJax = 32
+      iGasJac = 6
+  
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 76
+      iJax = 85
+      iGasJac = 3
+  
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+  
+      iJax = 6
+      iJax = 20
+      iJax = 5
+      iGasJac = 2
+  
+      !! overwrite iJax,iJax2,iGasJac
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+  
+      iJax = 30
+      iJax = 20
+      iJax = 10
+      iJax = 4
+      iJax = 5
+      iGasJac = 1
+    END IF
 
     !! *************************
     !! *************************
@@ -1643,8 +1937,10 @@ CONTAINS
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
-!    iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
-!    iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    if ((iPertQ .LT. 0) .AND. (iPertT .LT. 0))  THEN
+      iGasJac = -9999   !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+      iJax = 600        !!! NO dQ PERTURBATIONS for Q jacs        NO dQ PERTURBATIONS for Q jacs 
+    END IF
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
     !! DEFAULT : leave this UNCOMMENTED if you DO NOT WANT PERTURBATIONS; comment if you want to test perturbations
@@ -1666,7 +1962,7 @@ CONTAINS
     END DO    
 !    print *,'iJax,iJax2,iX,iX2 = ',iJax,iJax2,iX,iX2
 
-    DO iInt=1,kProfLayer
+    DO iInt = 1,kProfLayer
       raTAmt(iInt)          = raaAmt(iInt,iGas)
       raTTemp(iInt)         = raaTemp(iInt,iGas)
       raTPress(iInt)        = raaPress(iInt,iGas)
@@ -1676,46 +1972,55 @@ CONTAINS
       ! NLTE avg layer press in lower atm = kCARTA profile
       pProfNLTE(iInt) = raTPress(iInt)*kAtm2mb
 
-      !!       print *,'BB',iInt,pprofNLTE(iInt),raTPress(iInt), &
-      !!                   pprofNLTE(iInt)/(raTPress(iInt)*kAtm2mb)
+      !! print *,'BB',iInt,pprofNLTE(iInt),raTPress(iInt), &
+      !!             pprofNLTE(iInt)/(raTPress(iInt)*kAtm2mb)
 
       !!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      !!c  this stuff is to test the temperature jacobians
-      !!          raTTemp(iInt)=rDerivTemp+raTTemp(iInt)
-      !!          raMixVertTemp(iInt)=rDerivTemp+raTTemp(iInt)
-      !!          raMixVertTemp(iInt)=raTTemp(iInt)
+      !!c  this stuff is to test the layer temperature jacobians
+      !!    raTTemp(iInt)       = rDerivTemp+raTTemp(iInt)
+      !!    raMixVertTemp(iInt) = raTTemp(iInt)
+      !!    raMixVertTemp(iInt) = rDerivTemp+raTTemp(iInt)   !!! bad bad bad since it increments with each gas!
+      !!    raMixVertTemp(iInt) = rDerivTemp+rDummyT0        !!! much better   
 
       !!c jacob test temperature jacobian ... old
-      !!          IF (iInt .EQ. iJax) THEN
-      !!            raTTemp(iInt) = raaTemp(iInt,iGas)+rDerivTemp
-      !!            raMixVertTemp(iInt)=raTTemp(iInt)
-      !!          END IF
-      !!          IF ((iInt .EQ. iJax) .AND. (iGas .EQ. 1)) THEN
-      !!            rDummy        = raMixVertTemp(iInt)
-      !!            raMixVertTemp(iInt) = rDummy+rDerivTemp
-      !! c          raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
-      !! c          raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
-      !!            print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
-      !!          END IF
+      !!  IF (iInt .EQ. iJax) THEN
+      !!    raTTemp(iInt)       = raaTemp(iInt,iGas)+rDerivTemp
+      !!    raMixVertTemp(iInt) = raTTemp(iInt)              !!! this works
+      !!    raMixVertTemp(iInt) = rDerivTemp+rDummyT0        !!! much better   
+      !!  END IF
+      !!  IF ((iInt .EQ. iJax) .AND. (iGas .EQ. 1)) THEN
+      !!    !!! this is all wierd, very wierd
+      !!    rDummy        = raMixVertTemp(iInt)
+      !!    raMixVertTemp(iInt) = rDummy+rDerivTemp0(iInt)
+      !! c   raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
+      !! c   raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
+      !!    print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
+      !!  END IF
 
       !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      !c jacob test column gas  jacobian
-      !          IF (iGas .EQ. 1) THEN
-      !            rDummy        = raMixVertTemp(iInt)
-      !            raMixVertTemp(iInt) = rDummy+rDerivTemp
-      ! c          raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
-      ! c          raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
-      !            print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
-      !          END IF
+      !c jacob test column gas temperarure jacobian, notic ONLY IF gas == 1 are temps perturbed
+      !  IF (iGas .EQ. 1) THEN
+      !    rDummy              = raMixVertTemp(iInt)
+      !    raMixVertTemp(iInt) = rDummy + rDerivTemp
+      ! c   raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
+      ! c  raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
+      !     print *,iGas,iInt,rDerivTemp,raMixVertTemp(iInt)
+      !  END IF
 
       !c jacob test temperature jacobian ... new, could also be column
-      !          rDerivTemp = 1.0
-      !          IF (((iInt .GE. iJax) .AND. (iInt .LE. iJax2)) .OR. (iJax .EQ. -1)) THEN
-      !            raTTemp(iInt) = raaTemp(iInt,iGas)+rDerivTemp
-      !            raMixVertTemp(iInt)=raTTemp(iInt)
-      !            print *,iJax,raaTemp(iInt,iGas),rDerivTemp,raMixVertTemp(iInt)
-      !          END IF
-
+      IF (iPertT .GT. 0) THEN
+        !!!! rDerivTemp = 1.0
+        IF (((iInt .GE. iJax) .AND. (iInt .LE. iJax2)) .OR. (iJax .EQ. -1)) THEN
+          rJunk = raMixVertTemp(iInt)
+          raTTemp(iInt) = raaTemp(iInt,iGas)+rDerivTemp
+          raMixVertTemp(iInt) = raTTemp(iInt)              !!! this works
+          raMixVertTemp(iInt) = rDerivTemp+rDummyT0        !!! much better   
+          write(kStdErr,'(A,I3.3,1X,A,I3.3,A,1X,I3.3,1X,A,I3.3,1X,A,5F10.3)') &
+            'T perturbation : iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101) = ', &
+            iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, &
+            'iGas = ',iGas,' dT,raaT0,raTnew,raMixVT0,raMixVT = ',rDerivTemp,raaTemp(iInt,iGas),raTTemp(iInt),rJunk,raMixVertTemp(iInt)
+        END IF
+      END IF
       !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       !c jacob test amount jacobian, orig
       !         IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. iGasJac)) THEN
@@ -1730,36 +2035,37 @@ CONTAINS
       !    this varies rAdjust_rDerivAmt so that    rUseDQ = constant for each layer, so dQ/Q   varies layer by layer for the layers iJax..iJax2    if kJacobOutput = -1,2  dr/dq,     dBT/dq
       !                                             dQ/Q = constant for each layer,   so rUseDQ varies layer by layer for the layers iJax..iJax2    if kJacobOutput = 0,1   q dr/dq, q dBT/dq
       !
-                IF ((iInt .GE. iJax) .AND. (iInt .LE. iJax2) .AND. (iaGases(iGas) .EQ. iGasJac)) THEN
-       
-                  IF (dq_Const_between_layers .LT. 0) THEN
-                    !! dR/dq or dBT/dq
-                    IF (iStartKeepTrack .LT. 0) THEN
-                      iStartKeepTrack = +1
-                      rDQ_Track = raaAmt(iInt,iGas)*rDerivAmt
-                      rAdjust_rDerivAmt = 1.0
-                    ELSEIF (iStartKeepTrack .GT. 0) THEN
-                      rJunk = raaAmt(iInt,iGas)*rDerivAmt
-                      rAdjust_rDerivAmt = rDQ_Track/rJunk
-                    END IF
-                  ELSE
-                    !! q dR/dq or q dBT/dq
-                    rAdjust_rDerivAmt = 1.0
-                  END IF 
-       
-                  rUseDQ               = rDerivAmt * rAdjust_rDerivAmt
-                  raTAmt(iInt)         = raaAmt(iInt,iGas) * (1.0+rUseDQ)
-                  raTPartPress(iInt)   = raaPartPress(iInt,iGas) * (1.0+rUseDQ)
-                  rDQ_Track_Cumulative = rDQ_Track_Cumulative + raaAmt(iInt,iGas) * rUseDQ
-       
-                  !!! recall kMaxLayer = 100 so we look 001-100 ..... but the atmosphere is eg from 1013 mb so we have iNumLayer = 97 and the radiating layers are (4,5,6 ... 100)
-                  !!!    so when we read in the 97 layer jacobins, eg here index iInt = 6 will correspond to radiating layer 3, so the dq here is for J3 of 97
-                  write(kStdErr,'(A,I3.3,1X,A,I3.3,A,1X,I3.3,A,1X,4(ES12.5))') &
-                   'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101): ', &
-                   iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, &
-                   '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
-                END IF
-
+      IF (iPertQ .GT. 0) THEN
+        IF ((iInt .GE. iJax) .AND. (iInt .LE. iJax2) .AND. (iaGases(iGas) .EQ. iGasJac)) THEN
+      
+          IF (dq_Const_between_layers .LT. 0) THEN
+            !! dR/dq or dBT/dq
+            IF (iStartKeepTrack .LT. 0) THEN
+              iStartKeepTrack = +1
+              rDQ_Track = raaAmt(iInt,iGas)*rDerivAmt
+              rAdjust_rDerivAmt = 1.0
+            ELSEIF (iStartKeepTrack .GT. 0) THEN
+              rJunk = raaAmt(iInt,iGas)*rDerivAmt
+              rAdjust_rDerivAmt = rDQ_Track/rJunk
+            END IF
+          ELSE
+            !! q dR/dq or q dBT/dq
+            rAdjust_rDerivAmt = 1.0
+          END IF 
+      
+          rUseDQ               = rDerivAmt * rAdjust_rDerivAmt
+          raTAmt(iInt)         = raaAmt(iInt,iGas) * (1.0+rUseDQ)
+          raTPartPress(iInt)   = raaPartPress(iInt,iGas) * (1.0+rUseDQ)
+          rDQ_Track_Cumulative = rDQ_Track_Cumulative + raaAmt(iInt,iGas) * rUseDQ
+      
+          !!! recall kMaxLayer = 100 so we look 001-100 ..... but the atmosphere is eg from 1013 mb so we have iNumLayer = 97 and the radiating layers are (4,5,6 ... 100)
+          !!!    so when we read in the 97 layer jacobins, eg here index iInt = 6 will correspond to radiating layer 3, so the dq here is for J3 of 97
+          write(kStdErr,'(A,I3.3,1X,A,I3.3,A,1X,I3.3,A,1X,4(ES12.5))') &
+           'iIndex into (001-100) layers, <iXint> (actual radiating iaRadlayer of iNumlayer), RTP layer (out of 101): ', &
+           iInt,'<',iX + (iInt-iJax),'>', (kProfLayer+1)-iInt+1, &
+           '   Q,dq, dq/q, dq_cumulative :',raaAmt(iInt,iGas),raaAmt(iInt,iGas)*rUseDQ,rUseDQ,rDQ_Track_Cumulative
+        END IF
+      END IF
       ! ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     END DO

@@ -14,9 +14,30 @@ CONTAINS
 
 !************************************************************************
 ! this subroutine determines the weights for temp and pressure interpolation
-! duplicating the Matlab 2011 version
+! duplicating the Matlab 2011 version. 
 !************************************************************************
-
+! iSplineType = 2 Introduced in SRCv1.16
+! see kcartamisc.f90 : iSplineType = iaaOverrideDefault(1,2)
+!
+! 03/18/11        ARBITRARY PLEVS : subr xWeights
+!                 Faster version of v1.15 : the uncompression routines have been 
+!                 rewritten to take advantage of the fact that profile remains
+!                 the same ==> T offset indices remain the same. This duplicates
+!                 the Matlab version, including the fact that we use linear 
+!                 interpolations
+! 
+!                 The code further splits into two, depending on iSplineType
+!                   iSplineType = 1 : kComp Database, klayers pressure levels 
+!                                     differ, so need two pressure interp points
+!                                        use four  weights for most gases
+!                                        use eight weights for water
+!                   iSplineType = 2 : kComp Database, klayers pressure levels 
+!                                     same, so need one pressure interp point
+!                                        use two  weights for most gases
+!                                        use four weights for water
+! 
+!************************************************************************
+! compared to kcoeff_FAST_details.f90, here raP1 = 1, raP2 = 0
 !************************************************************************
 !  this is for iSplineType = 2  --- FASTER as the klayers pressure levels
 !                                 are same as kCompressed database levels
@@ -94,7 +115,7 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 !  Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix X matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     RETURN
@@ -188,11 +209,11 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 !  Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix x matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
            
     IF (kJacobian > 0) THEN
-        CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+        CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
         CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT,iLDB,dBeta,daaDT,iLDC)
     END IF
 
@@ -350,6 +371,7 @@ CONTAINS
       END DO
     END DO
 
+! compared to kcoeff_FAST_details.f90, we have raP1 = 1, raP2 = 0
 !     now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
       DO iK=iLowest,kProfLayer   !Loop over the layers
@@ -363,7 +385,7 @@ CONTAINS
 
 ! multiply daaUx with daaKpro to get daaAbsCoeff
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     RETURN
@@ -520,6 +542,7 @@ CONTAINS
       END DO
     END DO
 
+! compared to kcoeff_FAST_details.f90 we have raP1 = 1, raP2 = 0
 !     now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
       DO iK=iLowest,kProfLayer   !Loop over the layers
@@ -534,6 +557,7 @@ CONTAINS
             daaaaKxNew(iI,iaT12(iK),iaP1(iK),iaQ11(iK))*raJT12(iK)*raQ11(iK)+ &
             daaaaKxNew(iI,iaT11(iK),iaP1(iK),iaQ12(iK))*raJT11(iK)*raQ12(iK)+ &
             daaaaKxNew(iI,iaT12(iK),iaP1(iK),iaQ12(iK))*raJT12(iK)*raQ12(iK)
+
       ENDDO
     ENDDO
 
@@ -549,16 +573,18 @@ CONTAINS
 
 ! multiply daaUx with daaKpro to get daaAbsCoeff
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     IF (kJacobian > 0) THEN !do temperature jacobians
-! do not need this as have ALREADY computed daaT above!!!
+! do not need this as have ALREADY computed daaT above!!!   ?????
 ! else since daaT1,daaT2 ..daaT5 are all 0, you will reset daaT to 0
 !     CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5, &
 !        raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
 !        pProf,iProfileLayers,iSPlineType)
-      CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+!      CALL WaterTempJAC(daaT,daaT1,daaT2,daaT3,daaT4,daaT5,raPPart,raRPart,iNk,iKm,iKn,iUm,iUn, &
+!                        pProf,iProfileLayers,iSPlineType)
+      CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
       CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT,iLDB,dBeta,daaDT,iLDC)
 
       IF (iDoDQ > 0) THEN       !do amount jacobians
@@ -762,6 +788,7 @@ CONTAINS
       END DO
     END DO
 
+! compared to kcoeff_FAST_details.f90, raP1 = 1, raP2 = 0
 !     now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
       DO iK=iLowest,kProfLayer   !Loop over the layers
@@ -900,6 +927,7 @@ CONTAINS
       END DO
     END DO
 
+! compared to kcoeff_FAST_details.f90, raP1 = 1, raP2 = 0
 !     now do the spline Interpolation of the K vectors in TEMPERATURE
     DO iI=1,iNk                  !Loop over the K vectors
       DO iK=iLowest,kProfLayer   !Loop over the layers
@@ -1038,7 +1066,7 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     RETURN
@@ -1190,7 +1218,7 @@ CONTAINS
 
 ! multiply daaUx with daaKpro to get daaAbsCoeff
 ! Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix times matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     IF (kJacobian > 0) THEN !do temperature jacobians
@@ -1286,7 +1314,7 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 !  Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix X matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
 
     RETURN
@@ -1378,11 +1406,11 @@ CONTAINS
 ! ccc user supplied info
 ! this is the assembly language matrix multiplication
 !  Multiply daaUx*daaKpro = daaAbsCof (using BLAS matrix x matrix multiply)
-    CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+    CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
     CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaKpro,iLDB,dBeta,daaAbsCoeff,iLDC)
            
     IF (kJacobian > 0) THEN
-      CALL  InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
+      CALL InitDGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,iLDA,iLDB,iLDC,dbeta,iUm,iUn)
       CALL DGEMM(cTRANSA,cTRANSB,iM,iN,iK,dAlpha,daaUx,iLDA,daaT,iLDB,dBeta,daaDT,iLDC)
     END IF
 

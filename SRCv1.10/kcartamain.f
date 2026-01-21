@@ -534,6 +534,18 @@ c LOOOOOOOOOOOOOOOP LOOOOOOOOOOOOOOOOOP LOOOOOOOOOOP
 c middle loop : over the gases
 c un k-compress the absorption coefficients, gas by gas, 
 c for present frequency block
+
+c NEED THIS OUT HERE, ELSE raMixVertTemp(iJax) increases through each loop!!!!
+      rDerivTemp=0.01
+      rDerivTemp=0.1
+
+      rDerivAmt=0.1
+      rDerivAmt=0.01
+      iJax = 20
+      iJax = 5
+      rDummy = raMixVertTemp(iJax)
+c NEED THIS OUT HERE, ELSE raMixVertTemp(iJax) increases through each loop!!!!
+
         DO iGas=1,iNumGases
 
           CALL DataBaseCheck(iaGases(iGas),raFreq,iTag,iDoAdd,iErr)
@@ -557,22 +569,12 @@ c get the reference profile for the current gas if GAS ID <= kGasXsecHi
      $            raaRAmt,raaRTemp,raaRPress,raaRPartPress,iGas)
             END IF
 
-cjacob
 c get actual profiles for the current gas
-
-          rDerivTemp=0.01
-          rDerivTemp=0.1
-
-          rDerivAmt=0.1
-          rDerivAmt=0.01
 
 c following is to test jacobians; all these are really dummy things
 cjacob
 c      raSatAngle(1)=raSatAngle(1)+0.01
 c      raTSurf(1)=raTSurf(1)+rDerivTemp
-      iJax = 20
-      iJax = 5
-      rDummy = raMixVertTemp(iJax)
 cc      rDummy2=raMixVertTemp(iJax+kProfLayer)
 cc      rDummy3=raMixVertTemp(iJax+2*kProfLayer)
 
@@ -585,24 +587,28 @@ cc      rDummy3=raMixVertTemp(iJax+2*kProfLayer)
             raNumberDensity(iInt) = raTPress(iInt)*101325/(1.23e-23 * 
      $                              raTTemp(iInt))*1e-6
 
-c this stuff is to test the jacobians
+c this stuff is to test the column d/dT jacobians, old finite diff d/dT
 c              raTTemp(iInt)=rDerivTemp+raTTemp(iInt)
 c              raMixVertTemp(iInt)=rDerivTemp+raTTemp(iInt)
+c              print *,'dT = ',rDerivTemp
 
-cjacob
-c              IF (iInt .EQ. iJax) THEN
-c                raTTemp(iInt)       = raaTemp(iInt,iGas)+rDerivTemp
-c                raMixVertTemp(iInt) = rDummy+rDerivTemp
+cjacob, new finite diff d/dT
+              IF (iInt .EQ. iJax) THEN
+                raTTemp(iInt)       = raaTemp(iInt,iGas)+rDerivTemp
+c                raMixVertTemp(iInt) = raMixVertTemp(iInt)+rDerivTemp
+                raMixVertTemp(iInt) = rDummy+rDerivTemp   !!! need this way else raMixVertTemp(iInt) keeps inreasing for each gas
 c                raMixVertTemp(iInt+kProfLayer)   = rDummy2+rDerivTemp
 c                raMixVertTemp(iInt+2*kProfLayer) = rDummy3+rDerivTemp
-c                END IF
+                write(kStdErr,'(A,3F12.5,I4)') 'dT,raTTemp(iInt),raMixVertTemp(iInt),iGasID = ',
+     $              rDerivTemp,raTTemp(iInt),raMixVertTemp(iInt),iaGases(iGas)
+                END IF
 
-cjacob
-             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
-               raTAmt(iInt)       = raaAmt(iInt,iGas)*(1.0+rDerivAmt)
-               raTPartPress(iInt) = raaPartPress(iInt,iGas)*(1.0+rDerivAmt)
-               print *,raaAmt(iInt,iGas)*rDerivAmt
-               END IF
+cjacob, new finite diff d/dq
+c             IF ((iInt .EQ. iJax).AND.(iaGases(iGas) .EQ. 1)) THEN
+c               raTAmt(iInt)       = raaAmt(iInt,iGas)*(1.0+rDerivAmt)
+c               raTPartPress(iInt) = raaPartPress(iInt,iGas)*(1.0+rDerivAmt)
+c               print *,'dq = ',raaAmt(iInt,iGas)*rDerivAmt
+c               END IF
 
               END DO
 

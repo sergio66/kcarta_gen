@@ -5109,11 +5109,18 @@ convention for variables found in the namelist file :
 \begin{itemize}
 
 \item {\sf kcarta.x} is command line driven. Driver namelist input file and 
-      binary output file names, if not present on the command line, are 
-      automatically defaulted to stdin and stdout. Similarly, if the program 
+      binary output file names, and jacobian output file names, if not present on the command line, are 
+      automatically defaulted to stdin and stdout. \\
+
+      You can also specify the iRTP file as an option,
+      that overrides iRTP in \emphPnm\_prfile}. So for example \\
+        path_to_exec/kcarta.x  nmlfile outrad outjac -iXYZ \\
+      
+      Similarly, if the program 
       runs to completion successfully, it exits(0) to the operating system; if
       it catches a proble, it exits(1) to the operating system. See section 
-      on running the program.  
+      on running the program.
+      
 
 \item The gas ID's that the user should use are those specified by the
   {\sf HITRAN} database, and are summarized in the file ``gasids'' in
@@ -5341,13 +5348,21 @@ kcarta.param.
 
 The kcarta namelist driver and output data files are specified with command
 line arguments.  Valid invocations of kcarta have one of four
-following forms:
+following forms, assuming you want to use iRTP in \emph{nm\_prfile}:
 
 \begin{itemize}
   \item kcarta driver outfile jacfile
   \item kcarta driver outfile
-  \item kcarta driver   
-  \item kcarta
+  \item kcarta driver   (NOT RECOMMENDED)
+  \item kcarta          (NOT RECOMMENDED)
+\end{itemize}
+
+Valid invocations of kcarta have one of the three following forms, assuming you want to override iRTP in \emph{nm\_prfile}:
+
+\begin{itemize}
+  \item kcarta driver outfile jacfile -XYZ
+  \item kcarta driver outfile         -XYZ
+  \item kcarta driver                 -XYZ    (NOT RECOMMENDED)
 \end{itemize}
 
 If the driver namelist file is not specified, or is "{\tt -}", then the

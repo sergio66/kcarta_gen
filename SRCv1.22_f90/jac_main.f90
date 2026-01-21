@@ -76,6 +76,12 @@ CONTAINS
         write(kStdWarn,*)'jacobian d/dT Gas iG, weight rW = ',iG,rW
       END IF
       raaAllDT = raaAllDT + rW*daaDT
+
+!      do iL = 1,10
+!        print *,'cumulative d/dT',iL,raaAllDT(1:3,iL)
+!        print *,'individual d/dT',iL,sngl(daaDT(1:3,iL))
+!      END DO      
+
     END IF
        
     RETURN

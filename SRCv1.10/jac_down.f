@@ -162,8 +162,7 @@ c have to do all the iNumLayer radiances
               ELSEIF (iM .EQ. iNumLayer) THEN
                 rWeight=rWeight*rFracTop
                 END IF
-              write(kStdWarn,*)'gas d/dq gas# layer#',iG,iM,
-     $ iaaRadLayer(iAtm,iM)
+              write(kStdWarn,*)'gas d/dq : gas# iLay# iaaRadlayer# :',iG,iM,iaaRadLayer(iAtm,iM)
               CALL JacobGasAmtFM1(raWaves,raaRad,raaRadDT,iGasJacList,
      $          iM,iNumGases,iaaRadLayer,iAtm,iNumLayer,raUseEmissivity,
      $          raaOneMinusTau,raaTau,raaaAllDQ,
@@ -183,8 +182,7 @@ c then do the temperatures d/dT
       DO iM=1,iNumLayer
 c for each of the iNumLayer radiances, cumulatively add on all 
 c iNumGases contributions (this loop is done in JacobTemp)
-          write(kStdWarn,*)'temp d/dT layer# = ',iM,iaaRadLayer(iAtm,iM)
-
+        write(kStdWarn,*)'temp d/dT iLay# iaaRadlayer# = ',iM,iaaRadLayer(iAtm,iM)
         IF (iNatm .GT. 1) THEN
           rWeight=0.0
           DO iG=1,iNumGases

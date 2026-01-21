@@ -10,6 +10,7 @@ USE kcoeffSPLJAC
 use kcoeff_common
 use kcoeff_FAST_details
 use kcoeff_FAST_details2
+use s_writefile
 
 IMPLICIT NONE
 
@@ -687,16 +688,11 @@ CONTAINS
 ! the weights
     INTEGER :: iaP1(kProfLayer),iaP2(kProfLayer)
     REAL ::    raP1(kProfLayer),raP2(kProfLayer)
-    INTEGER :: iaT11(kProfLayer),iaT12(kProfLayer), &
-    iaT21(kProfLayer),iaT22(kProfLayer)
-    REAL ::    raT11(kProfLayer),raT12(kProfLayer), &
-    raT21(kProfLayer),raT22(kProfLayer)
-    REAL ::    raJT11(kProfLayer),raJT12(kProfLayer), &
-    raJT21(kProfLayer),raJT22(kProfLayer)
-    INTEGER :: iaQ11(kProfLayer),iaQ12(kProfLayer), &
-    iaQ21(kProfLayer),iaQ22(kProfLayer)
-    REAL ::    raQ11(kProfLayer),raQ12(kProfLayer), &
-    raQ21(kProfLayer),raQ22(kProfLayer)
+    INTEGER :: iaT11(kProfLayer),iaT12(kProfLayer),  iaT21(kProfLayer),iaT22(kProfLayer)
+    REAL ::    raT11(kProfLayer),raT12(kProfLayer),  raT21(kProfLayer),raT22(kProfLayer)
+    REAL ::    raJT11(kProfLayer),raJT12(kProfLayer),raJT21(kProfLayer),raJT22(kProfLayer)
+    INTEGER :: iaQ11(kProfLayer),iaQ12(kProfLayer),  iaQ21(kProfLayer),iaQ22(kProfLayer)
+    REAL ::    raQ11(kProfLayer),raQ12(kProfLayer),  raQ21(kProfLayer),raQ22(kProfLayer)
 
 ! local variables associated with uncompressing the water database files
     CHARACTER(160) :: caFName
@@ -704,12 +700,12 @@ CONTAINS
     INTEGER :: iT0,iaTsort(kMaxTemp),iLowerOrUpper
     DOUBLE PRECISION :: dSfreq,dFStep,daToffset(kMaxTemp)
     DOUBLE PRECISION :: daaaKX1(kMaxK,kMaxTemp,kMaxLayer), &
-    daaaKX2(kMaxK,kMaxTemp,kMaxLayer), &
-    daaaKX3(kMaxK,kMaxTemp,kMaxLayer), &
-    daaaKX4(kMaxK,kMaxTemp,kMaxLayer), &
-    daaaKX5(kMaxK,kMaxTemp,kMaxLayer)
+                        daaaKX2(kMaxK,kMaxTemp,kMaxLayer), &
+                        daaaKX3(kMaxK,kMaxTemp,kMaxLayer), &
+                        daaaKX4(kMaxK,kMaxTemp,kMaxLayer), &
+                        daaaKX5(kMaxK,kMaxTemp,kMaxLayer)
     DOUBLE PRECISION :: daaUX(kMaxPts,kMaxK)
-    INTEGER :: iDefault,iMultiplyHeavyWater
+    INTEGER :: iDefault,iMultiplyHeavyWater,iLoop,iDumpJacs
 
     IF ((iGasID /= 1) .AND. (iGasID /= kNewGasHi+1)) THEN
       write(kStdErr,*) 'Expecting to read in water profile/database'
@@ -731,6 +727,13 @@ CONTAINS
 !                  uncompresssion for CO2 (-1)
 !      INTEGER kGenln2Water
 !      PARAMETER (kGenln2Water=+1)
+    IF (kGenln2Water < 0) THEN
+      write(kStdWarn,*) 'kGenln2Water < 0 so doing simple uncompression (no self broadening with pressure), just like for other gases'
+      write(kStdErr,*)  'kGenln2Water < 0 so doing simple uncompression (no self broadening with pressure), just like for other gases'
+    END IF
+
+!    print *,'kGenln2Water,kJacobian,iSplineType = ',kGenln2Water,kJacobian,iSplineType
+!    call dostop
 
 ! interpolate compressed data in temperature, and then in partial pressure,
 ! to get abs coeff matrix
@@ -765,7 +768,7 @@ CONTAINS
                 iaQ21,iaQ22,raQ21,raQ22)
 
         END IF
-      ELSE
+      ELSEif (kJacobian <= 0) THEN
         iLowerOrUpper = -1
         IF (abs(iSplineType) == 2) THEN
           !! very fast
@@ -792,7 +795,7 @@ CONTAINS
                 iaQ21,iaQ22,raQ21,raQ22)
 
           END IF
-        END IF
+        END IF !!  (kJacobian >= 0)
 
         ! because iKtype=2 do any necessary jacobians calcs HERE!
         IF (kJacobian > 0) THEN
@@ -839,8 +842,8 @@ CONTAINS
       ELSE
         iLowerOrUpper = -1
         IF (abs(iSplineType) == 2) THEN
-         !! very fast
-         CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+          !! very fast
+          CALL x2GetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
                 raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
                 pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
                 iaP1,iaP2,raP1,raP2, &
@@ -848,9 +851,9 @@ CONTAINS
                 iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
-       ELSE
-         !! fast
-         CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
+        ELSE
+          !! fast
+          CALL xGetAbsCoeffNOJAC(daaAbsCoeff,daToffset,daaaKx2,daaUx, &
                 raPTemp,raRTemp,iaTsort,iNk,iKm,iKn,iUm,iUn,iGasID, &
                 pProf,iProfileLayers,iSPlineType,iLowerOrUpper, &
                 iaP1,iaP2,raP1,raP2, &
@@ -858,8 +861,8 @@ CONTAINS
                 iaT21,iaT22,raT21,raT22,raJT21,raJT22, &
                 iaQ11,iaQ12,raQ11,raQ12, &
                 iaQ21,iaQ22,raQ21,raQ22)
-       END IF
-     END IF
+        END IF
+      END IF     !!  (kJacobian >= 0)
 
      ! because of iKtype=1,2 possibility, do any necessary jacobians calcs HERE!
      IF (kJacobian >= 0) THEN
@@ -877,13 +880,32 @@ CONTAINS
 
    END IF
 
+!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ! convert absorption coefficient correctly if necessary
     IF (iKtype == 2) THEN
       CALL RaisePower(daaAbsCoeff)
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
+!    daaDQ = daaAbsCoeff    !!! new Jan 2026
+
+    iDumpJacs = -1
+    iDumpJacs = +1
+    if (iDumpJacs .GT. 0) THEN
+      CALL DumpJacobianInfo(raFreq,real(daaDQ),iProfLayer,201)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raw raaDQ for xwater'
+      CALL DumpJacobianInfo(raFreq,real(daaDT),iProfLayer,-10)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raw raaDT'
+    END IF
+
     CALL AmtScale(daaAbsCoeff,raPAmt)
+
+!    DO iLoop = 1,kProfLayer
+!      print *,iLoop,daaAbsCoeff(1,iLoop),raPAmt(iLoop),daaDQ(1,iLoop)
+!!      print *,iLoop,daaAbsCoeff(1,iLoop),raPAmt(iLoop),daaAbsCoeff(1,iLoop)/daaDQ(1,iLoop)
+!!      daaDQ(:,iLoop) = daaAbsCoeff(:,iLoop)/raPAmt(iLoop)
+!    END DO
 
     RETURN
     end SUBROUTINE xwater
@@ -1160,6 +1182,7 @@ CONTAINS
     END IF
 
 ! now compute optical depth = gas amount * abs coeff
+    daaDQ = daaAbsCoeff    !!! new Jan 2026
     CALL AmtScale(daaAbsCoeff,raPAmt)
           
 ! print *,iGasID,int(rFileStartFr),kAltDirs
@@ -1324,6 +1347,8 @@ CONTAINS
     IF (iKtype == 2) THEN
       CALL RaisePower(daaAbsCoeff)
     END IF
+
+    daaDQ = daaAbsCoeff    !!! new Jan 2026
 
 ! now compute optical depth = gas amount * abs coeff
 !     CALL AmtScale(daaAbsCoeff,raPXAmt)

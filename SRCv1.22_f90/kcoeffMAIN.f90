@@ -964,6 +964,10 @@ CONTAINS
 !                  uncompresssion for CO2 (-1)
 !      INTEGER kGenln2Water
 !      PARAMETER (kGenln2Water=+1)
+    IF (kGenln2Water < 0) THEN
+      write(kStdWarn,*) 'kGenln2Water < 0 so doing simple uncompression (no self broadening with pressure), just like for other gases'
+      write(kStdErr,*)  'kGenln2Water < 0 so doing simple uncompression (no self broadening with pressure), just like for other gases'
+    END IF
 
 ! interpolate compressed data in temperature, and then in partial pressure,
 ! to get abs coeff matrix

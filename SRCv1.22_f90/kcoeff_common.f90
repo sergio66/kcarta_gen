@@ -505,43 +505,6 @@ CONTAINS
     end SUBROUTINE AmtScale
          
 !************************************************************************
-! this subroutine finishes the computation of d/dq (absCoeff) for water
-    SUBROUTINE FinalWaterAmtDeriv(iKtype,daaAbsCoeff,daaDA,raPAmt)
-
-    IMPLICIT NONE
-
-    include '../INCLUDE/TempF90/kcartaparam.f90'
-
-! iKtype      = compression type (power = 1 or 4)
-! daaAbsCoeff = uncompressed gas abs coeffs
-! daaDT       = d/dT
-! ra(P/R)Amt  = reference/actual gas amounts
-    INTEGER :: iKtype
-    REAL :: raPAmt(kProfLayer)
-    DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
-    DOUBLE PRECISION :: daaDA(kMaxPtsJac,kProfLayerJac)
-
-! local variables
-    INTEGER :: iFr,iLay
-    REAL :: rScale
-
-! similar to FinalTempDeriv above
-! remember we still have K^1/4 ie daaAbsCoeff = K^1/4 and NOT K!!!!!!!!
-! what comes from the spline interpolation routines is d/dq (K(v,T))^(1/4)
-! or Zget = (1/4) K(v,T)^(-3/4) dK/dq = daaDA
-! we need d/dq(optical depth) = d/dq q(actual) K(v,T) = q(actual) d/dq K(v,T)
-!                                                        + K(v,T)
-! get this by saying daaDA --> 4 daaDA q(actual) daaAbsCoeff^3 +  daaAbsCoeff^4
-    DO iLay=1,kProfLayer
-      rScale=raPAmt(iLay)
-      daaDA(:,iLay) = daaDA(:,iLay)*rScale*4.0*(daaAbsCoeff(:,iLay)**3) &
-                   + (daaAbsCoeff(:,iLay)**4)
-    END DO
-
-    RETURN
-    end SUBROUTINE FinalWaterAmtDeriv
-
-!************************************************************************
 ! this subroutine finishes the calculation of d/dq(abscoeff)
     SUBROUTINE FinalAmtDeriv(daaDQ,iType)
 
@@ -605,6 +568,46 @@ CONTAINS
     end SUBROUTINE FinalTempDeriv
 
 !************************************************************************
+! this subroutine finishes the computation of d/dq (absCoeff) for water
+    SUBROUTINE FinalWaterAmtDeriv(iKtype,daaAbsCoeff,daaDA,raPAmt)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! iKtype      = compression type (power = 1 or 4)
+! daaAbsCoeff = uncompressed gas abs coeffs
+! daaDT       = d/dT
+! ra(P/R)Amt  = reference/actual gas amounts
+    INTEGER :: iKtype
+    REAL :: raPAmt(kProfLayer)
+    DOUBLE PRECISION :: daaAbsCoeff(kMaxPts,kProfLayer)
+    DOUBLE PRECISION :: daaDA(kMaxPtsJac,kProfLayerJac)
+
+! local variables
+    INTEGER :: iFr,iLay
+    REAL :: rScale
+
+! similar to FinalTempDeriv above
+! remember we still have K^1/4 ie daaAbsCoeff = K^1/4 and NOT K!!!!!!!!
+! what comes from the spline interpolation routines is d/dq (K(v,T))^(1/4)
+! or Zget = (1/4) K(v,T)^(-3/4) dK/dq = daaDA
+! we need d/dq(optical depth) = d/dq q(actual) K(v,T) = q(actual) d/dq K(v,T)
+!                                                        + K(v,T)
+! get this by saying daaDA --> 4 daaDA q(actual) daaAbsCoeff^3 +  daaAbsCoeff^4
+    DO iLay=1,kProfLayer
+      !!! the first component is TINY!!!
+      !!! the second component is the larger one
+      rScale=raPAmt(iLay)
+      daaDA(:,iLay) = 1*daaDA(:,iLay)*rScale*4.0*(daaAbsCoeff(:,iLay)**3) &
+                    + 1*(daaAbsCoeff(:,iLay)**4)
+    END DO
+
+    RETURN
+    end SUBROUTINE FinalWaterAmtDeriv
+
+!************************************************************************
+
 ! this subroutine mutiplies the daaGasAbsCoeff by CO2 chi functions
     SUBROUTINE multiply_co2_chi_functions(rFileStartFr,daaAbsCoeff)
 

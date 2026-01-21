@@ -1088,7 +1088,6 @@ c assume GASID , freqs are wrong
       iCheckCompDataBase=-1
 
       caFName=kCompParamFile
-      print *,caFName
       iIOUN=kTempUnit
       OPEN(UNIT=iIOUN,FILE=caFname,STATUS='old',
      $    FORM='FORMATTED',IOSTAT=iFileErr)

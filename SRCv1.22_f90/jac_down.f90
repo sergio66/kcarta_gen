@@ -46,7 +46,7 @@ CONTAINS
     iFileID,caJacobFile,rTSpace,rTSurface,raUseEmissivity, &
     rSatAngle,raLayAngles,raSunAngles,raVTemp, &
     iNumGases,iaGases,iAtm,iNatm,iNumLayer,iaaRadLayer, &
-    raaaAllDQ,raaAllDT,raaAbs,raaAmt,raInten, &
+    raaaAllDQ,raaAllDT,raaAbs0,raaAmt,raInten, &
     raSurface,raSun,raThermal,rFracTop,rFracBot, &
     iaJacob,iJacob,raaMix,raSunRefl,rDelta, &
     iNLTEStart,raaPlanckCoeff)
@@ -84,9 +84,9 @@ CONTAINS
     REAL :: raaMix(kMixFilRows,kGasStore),rDelta,raPressLevels(kProfLayer+1)
     REAL :: raSunRefl(kMaxPts),rFracTop,rFracBot
     REAL :: raSurFace(kMaxPts),raSun(kMaxPts),raThermal(kMaxPts)
-    REAL :: raaAbs(kMaxPts,kMixFilRows)
+    REAL :: raaAbs0(kMaxPts,kMixFilRows)                          !! raw ODs without bottom layer fraction
     REAL :: rTSpace,rTSurface,raUseEmissivity(kMaxPts), &
-    raVTemp(kMixFilRows),rSatAngle,raFreq(kMaxPts)
+      raVTemp(kMixFilRows),rSatAngle,raFreq(kMaxPts)
     REAL :: raaaAllDQ(kMaxDQ,kMaxPtsJac,kProfLayerJac)
     REAL :: raaAllDT(kMaxPtsJac,kProfLayerJac)
     REAL :: raaAmt(kProfLayerJac,kGasStore),raInten(kMaxPts)
@@ -99,6 +99,7 @@ CONTAINS
     REAL :: raaPlanckCoeff(kMaxPts,kProfLayer)
 
 ! local variables
+    REAL :: raaAbs(kMaxPts,kMixFilRows)                          !! ODs with bottom layer fraction
     REAL :: raaLay2Sp(kMaxPtsJac,kProfLayerJac)
     REAL :: raaLay2Gnd(kMaxPtsJac,kProfLayerJac),raResults(kMaxPtsJac)
     REAL :: raaRad(kMaxPtsJac,kProfLayerJac)
@@ -114,20 +115,26 @@ CONTAINS
     INTEGER :: iGasJacList
     INTEGER :: iGasPosn
 
-    INTEGER :: iDefault,iWhichJac,iFr
-    INTEGER :: iDoAdd,iErr
+    INTEGER :: iDefault,iWhichJac,iFr,iDumpJacs
+    INTEGER :: iDoAdd,iErr,iaRadLayer(kProfLayer)
+
+    iaRadLayer(1:iNumLayer) = iaaRadLayer(iAtm,1:iNumLayer)
+    raaAbs = raaAbs0
+    iLay = iaRadlayer(1)
+    raaAbs(:,iLay) = raaAbs(:,iLay) * rFracBot
+    iLay = iaRadlayer(iNumLayer)
+    raaAbs(:,iLay) = raaAbs(:,iLay) * rFracTop
 
     iDefault  = -1     !! do all jacs (Q,T,W,surface)
 
-    iWhichJac = -1     !! do all jacs (Q,T,W,surface)
-    iWhichJac = +20    !! only Q jacs
-    iWhichJac = +30    !! only T jacs
-    iWhichJac = +40    !! only W jacs
-    iWhichJac = +50    !! only S jacs
-
+!    iWhichJac = -1     !! do all jacs (Q,T,W,surface)
+1    iWhichJac = +20    !! only Q jacs
+!    iWhichJac = +30    !! only T jacs
+!    iWhichJac = +40    !! only W jacs
+!    iWhichJac = +50    !! only S jacs
 !! this only uses T(z) contribution from gases in iaJacob{}
-    iWhichJac = -2     !! do all jacs (Q,T,W,surface)
-    iWhichJac = +32    !! only T jacs
+!    iWhichJac = -2     !! do all jacs (Q,T,W,surface)
+!    iWhichJac = +32    !! only T jacs
 
     iWhichJac = kActualJacs
 
@@ -146,10 +153,9 @@ CONTAINS
     iIOUN = kStdJacob
 ! initialise the layer-to-space matrix
     CALL AtmosLayer2Space(raaLay2Sp, &
-    rSatAngle,raaAbs,iAtm,iNumLayer,iaaRadLayer,raLayAngles)
+      rSatAngle,raaAbs,iAtm,iNumLayer,iaaRadLayer,raLayAngles)
 
-    IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
-    (abs(kLongOrShort) <= 1)) THEN
+    IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
         write(kStdWarn,*)'initializing Jac radiances/d/dT(radiances) ...'
     END IF
 
@@ -199,6 +205,46 @@ CONTAINS
 
     END IF
 
+    iDumpJacs = +1
+    IF (iDumpJacs .GT. 0) THEN
+      write(kStdWarn,'(A)') 'subr DownwardJacobian : iDumpJacs = +1'
+      write(kStdWarn,'(A)') 'compare to the Matlab kcarta (kcmix) code in ~/git/kcarta/JACDOWN/jac_downlook.m'
+
+      CALL DumpJacobianInfo(raFreq,raaRad,iNumLayer,1000)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaRad'
+      CALL DumpJacobianInfo(raFreq,raaRadDT,iNumLayer,1050)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaRadDT'
+      CALL DumpJacobianInfo(raFreq,raaTau,iNumLayer,2000)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaTau'
+      CALL DumpJacobianInfo(raFreq,raaOneMinusTau,iNumLayer,2050)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaOneMinusTau'
+      CALL DumpJacobianInfo(raFreq,raaLay2Gnd,iNumLayer,3000)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaLay2Gnd'
+      CALL DumpJacobianInfo(raFreq,raaLay2Sp,iNumLayer,3050)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaLaySp'
+      CALL DumpJacobianInfo(raFreq,raaGeneral,iNumLayer,4000)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaGeneral'
+      CALL DumpJacobianInfo(raFreq,raaAbs,iNumLayer,4050)
+        write(kStdErr,*) 'DownwardJacobian : Dumped raaAbs'
+
+      CALL DumpJacobianInfo(raFreq,raaAllDT,iNumLayer,0)
+        write(kStdErr,*) 'DownwardJacobian : Dummped raaAllDT'
+      IF ((iWhichJac == -1) .OR. (iWhichJac == -2) .OR. (iWhichJac == 20)) THEN
+        DO iG=1,iNumGases      
+          iGasJacList = DoGasJacob(iaGases(iG),iaJacob,iJacob)
+          IF (iGasJacList > 0) THEN
+            iGasPosn = WhichGasPosn(iaGases(iG),iaGases,iNumGases)
+            !! see if this gas does exist for this chunk
+            CALL DataBaseCheck(iaGases(iG),raFreq,iTag,iActualTag,iDoAdd,iErr)
+            IF (iDoAdd > 0) THEN
+              CALL DumpJacobianInfo(raFreq,raaaAllDQ(iG,:,:),iNumLayer,iaGases(iG))
+              write(kStdErr,*) 'DownwardJacobian : Dummped raaaAllDQ for gasID ',iaGases(iG)
+            END IF          
+          END IF
+        END DO
+      END IF
+    END IF
+
     IF ((iWhichJac == -1) .OR. (iWhichJac == -2) .OR. (iWhichJac == 20)) THEN
       DO iG=1,iNumGases
         ! for each of the iNumGases whose ID's <= kMaxDQ
@@ -216,11 +262,12 @@ CONTAINS
               rWeight = raaMix(iaaRadLayer(iAtm,iLay),iG)
               IF (iLay == 1) THEN
                 rWeight = rWeight*rFracBot
+                !rWeight = rWeight
               ELSEIF (iLay == iNumLayer) THEN
                 rWeight = rWeight*rFracTop
               END IF
               IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. (abs(kLongOrShort) <= 1)) THEN
-                write(kStdWarn,*)'gas d/dq : gas# iaaRadlayer# :',iG,iaaRadLayer(iAtm,iLay)
+                write(kStdWarn,*)'gas d/dq : gas# iLay# iaaRadlayer# :',iG,iLay,iaaRadLayer(iAtm,iLay)
               END IF
               CALL JacobGasAmtFM1(raFreq,raaRad,raaRadDT,iGasJacList, &
                         iLay,iNumGases,iaaRadLayer,iAtm,iNumLayer,raUseEmissivity, &
@@ -268,7 +315,7 @@ CONTAINS
         ! iNumGases contributions (this loop is done in JacobTemp)
         IF (((abs(kLongOrShort) == 2) .AND. (kOuterLoop == 1)) .OR. &
             (abs(kLongOrShort) <= 1)) THEN
-          write(kStdWarn,*)'temp d/dT layer# = ',iLay,iaaRadLayer(iAtm,iLay)
+          write(kStdWarn,*)'temp d/dT iLay# iaaRadlayer# = ',iLay,iaaRadLayer(iAtm,iLay)
         END IF
         IF (iNatm > 1) THEN
           rWeight = 0.0
@@ -276,6 +323,7 @@ CONTAINS
             rWeight = rWeight+raaMix(iaaRadLayer(iAtm,iLay),iG)
             IF (iLay == 1) THEN
               rWeight = rWeight*rFracBot
+              !rWeight = rWeight
             ELSEIF (iLay == iNumLayer) THEN
               rWeight = rWeight*rFracTop
             END IF
@@ -363,8 +411,8 @@ CONTAINS
 !************************************************************************
 ! this subroutine computes the Layer_to_Space transmission coeffs for the
 ! current atmosphere
-    SUBROUTINE AtmosLayer2Space(raaLay2Space,rSatAngle, &
-    raaSumAbs,iAtm,iNumLayer,iaaRadLayer,raLayAngles)
+    SUBROUTINE AtmosLayer2SpaceOld(raaLay2Space, & 
+      rSatAngle,raaSumAbs,iAtm,iNumLayer,iaaRadLayer,raLayAngles)
 
     IMPLICIT NONE
 
@@ -420,15 +468,84 @@ CONTAINS
     END DO
 
     RETURN
+    end SUBROUTINE AtmosLayer2SpaceOld
+
+!************************************************************************
+! this subroutine computes the Layer_to_Space transmission coeffs for the
+! current atmosphere
+    SUBROUTINE AtmosLayer2Space(raaLay2Space, &
+      rSatAngle,raaSumAbs,iAtm,iNumLayer,iaaRadLayer,raLayAngles)
+
+    IMPLICIT NONE
+
+    include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! rSatAngle  = current satellite view angle
+! raaLay2Sp  = layer to space transmission coefficients
+! raaSumAbs  = matrix containing the mixed path abs coeffs
+! iAtm       = atmosphere number
+! iNumLayer  = total number of layers in current atmosphere
+! iaaRadLayer = for ALL atmospheres this is a list of layers in each atm
+! raLayAngles    = layer dependent angles
+    REAL :: raaSumAbs(kMaxPts,kMixFilRows),rSatAngle
+    REAL :: raaLay2Space(kMaxPtsJac,kProfLayerJac)
+    REAL :: raLayAngles(kProfLayer)
+    INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer),iAtm,iNumLayer
+    
+! local variables
+    INTEGER :: iFr,iLay,iL1,iLtemp,iaRadLayer(kProfLayerJac)
+    REAL :: rN,rCos
+    REAL :: raJunk(kMaxPts)
+
+    rCos = cos(rSatAngle*kPi/180.0)
+
+    raaLay2Space = 0.0
+
+! set the mixed path numbers for this particular atmosphere
+! since this is being called during Jacobian calculations ==> it must have
+! worked during radiance calculations ==> no need to error check
+! DO NOT SORT THESE NUMBERS!!!!!!!!
+    iaRadLayer(1:iNumLayer) = iaaRadLayer(iAtm,1:iNumLayer)
+
+! now that we know the mixed path numbers, see what layer they correspond to
+! and build up the layer to space transmissions
+! the top most layer is easy
+    iL1    = iNumLayer
+    iLay   = iaRadLayer(iL1)
+    rCos   = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
+    raJunk = max(raaSumAbs(:,iLay),0.0)/rCos;
+    raaLay2Space(:,iL1) = raJunk
+
+! set "higher" layer number
+    iLtemp = iL1
+! now iteratively do the rest of the layers
+    DO iL1 = iNumLayer-1,1,-1
+      iLay   = iaRadLayer(iL1)
+      rCos   = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
+      raJunk = max(raaSumAbs(:,iLay),0.0)/rCos;
+      raaLay2Space(:,iL1) = raJunk + raaLay2Space(:,iLtemp)
+      ! set "higher" layer number
+      iLtemp = iL1
+    END DO
+
+!    do iL1 = 1,kProfLayer
+!      iLay = iaRadLayer(iL1)
+!      write(kStdErr,'(I4,I4,F12.5,ES12.5)')  iNumLayer,iL1,raLayAngles(MP2Lay(iLay)),raaLay2Space(1,iL1)
+!    end do
+!    call dostop
+
+    raaLay2Space = exp(-raaLay2Space)
+
+    RETURN
     end SUBROUTINE AtmosLayer2Space
 
 !************************************************************************
 ! this subroutine calculates the Planck radiances, and the derivatives
 ! for DOWNWARD looking instrument
     SUBROUTINE DoPlanck_LookDown(raVTemp,rFracTop,rFracBot,raFreq, &
-    iAtm,iNumLayer,iaaRadLayer,rSatAngle,raLayAngles,raaAbs, &
-    raaRad,raaRadDT,raaOneMinusTau,raaTau,raaLay2Gnd, &
-    iProfileLayers,raPressLevels)
+      iAtm,iNumLayer,iaaRadLayer,rSatAngle,raLayAngles,raaAbs, &
+      raaRad,raaRadDT,raaOneMinusTau,raaTau,raaLay2Gnd, &
+      iProfileLayers,raPressLevels)
 
     IMPLICIT NONE
 
@@ -438,14 +555,14 @@ CONTAINS
 ! rSatAngle          == Satellite View Angle
 ! raSurface          == planckian emission from surface
 ! raaAbs             == total absorption coeffs
-! raFreq            == frequency array
+! raFreq             == frequency array
 ! raRad              == Planck radiations for the layers
 ! raRadDT            == d/dT(Planck radiations) for the layers
 ! raVTemp            == mix vertical temperature of the layers
 ! iAtm               == atmosphere number
 ! iNumLayer          == number of layers in atmosphere
 ! iaaRadLayer        == radiating atmophere mixed path info
-! raaLay2Gnd       == tau (layer-to-gnd) for the thermal backgnd
+! raaLay2Gnd         == tau (layer-to-gnd) for the thermal backgnd
 ! raaOneMinusTau     == B(Ti)(tau(I+1)-tau(i))
 ! raaTau             == B(Ti)(tau(I+1)-tau(i))
 !              surface,solar and backgrn thermal at the surface
@@ -527,7 +644,8 @@ CONTAINS
       ! first find the mixed path number
       iLay = iaaRadLayer(iAtm,iL)
       rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
-      raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracBot/rCos)
+      !raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracBot/rCos)   !! have already accounted for this
+      raaTau(:,iL) = exp(-raaAbs(:,iLay)/rCos)
       raaOneMinusTau(:,iL) = 1.0-raaTau(:,iL)
     END DO
     DO iL=2,iNumLayer-1
@@ -541,6 +659,7 @@ CONTAINS
       ! first find the mixed path number
       iLay = iaaRadLayer(iAtm,iL)
       rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
+      !raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracTop/rCos)  !! have already accounted for this
       raaTau(:,iL) = exp(-raaAbs(:,iLay)*rFracTop/rCos)
       raaOneMinusTau(:,iL) = 1.0-raaTau(:,iL)
     END DO
@@ -586,19 +705,23 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
-! raLayAngles is the array of layer dependent satellite view angles
-! raSunAngles is the array of layer dependent satellite view angles
-! rSatAngle is the satellite viewing angle
-! raSurface is the surface emission
-! iNumLayer is the number of layers in the atmosphere
-! raaLay2Sp   is the layer-to-space abs coeff matrix
-! raaRad has the Planck radiances
-! raaOneMinusTau has 1-tau
-! iG has the gas number (1 .. iNumGases)
-! raSun,raThermal are the downwelling Solar,thermal contributions
-! raaGeneral has the results
-! raSunRefelct has the solar reflectivity
-! iaaRadLayer has the mixed paths  <--> layer info
+! input
+!  raLayAngles is the array of layer dependent satellite view angles
+!  raSunAngles is the array of layer dependent satellite view angles
+!  rSatAngle is the satellite viewing angle
+!  raSurface is the surface emission
+!  iNumLayer is the number of layers in the atmosphere
+!  raaLay2Sp   is the layer-to-space abs coeff matrix
+!  raaRad has the Planck radiances
+!  raaOneMinusTau has 1-tau
+!  iG has the gas number (1 .. iNumGases)
+!  raSun,raThermal are the downwelling Solar,thermal contributions
+!  raSunRefelct has the solar reflectivity
+!  iaaRadLayer has the mixed paths  <--> layer info
+! output
+!   raaGeneral has the results
+
+! input
     INTEGER :: iaaRadLayer(kMaxAtm,kProfLayer)
     REAL :: raSun(kMaxPts),raThermal(kMaxPts),rSatAngle
     INTEGER :: iAtm
@@ -607,35 +730,37 @@ CONTAINS
     REAL :: raSunRefl(kMaxPts)
     REAL :: raLayAngles(kProfLayer),raSunAngles(kProfLayer)
     REAL :: raaOneMinusTau(kMaxPtsJac,kProfLayerJac)
-    REAL :: raaGeneral(kMaxPtsJac,kProfLayerJac)
     REAL :: raaRad(kMaxPtsJac,kProfLayerJac)
     INTEGER :: iNumLayer
+! output
+    REAL :: raaGeneral(kMaxPtsJac,kProfLayerJac)
 
 ! local variables
     INTEGER :: iFr,iJ,iJ1,iLyr,iLay
     REAL :: raTemp(kMaxPtsJac),raTemp1(kMaxPtsJac),rCos,rWsun
 
-    rCos = cos(rSatAngle*kPi/180.0)
-    rWsun=cos(kSolarAngle*kPi/180.0)
+    rCos  = cos(rSatAngle*kPi/180.0)
+    rWsun = cos(kSolarAngle*kPi/180.0)
 
     ! do the bottommost layer first
-    iLyr=1
+    iLyr = 1
     ! first do the surface term
-    iJ1=1
+    iJ1 = 1
     CALL JacobTerm(iJ1,iLyr,raaLay2Sp,raTemp)
     raaGeneral(:,iLyr) = raUseEmissivity*raSurface*raTemp
 
 ! recall raTemp is raL2S from gnd to top
-    iLay = iaaRadLayer(iAtm,iLyr)
-    rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
-    rWsun=cos(raSunAngles(MP2Lay(iLay))*kPi/180.0)
+    iLay  = iaaRadLayer(iAtm,iLyr)
+    rCos  = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
+    rWsun = cos(raSunAngles(MP2Lay(iLay))*kPi/180.0)
 
     IF (kSolar >= 0) THEN
-      raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+raSunRefl*raSun*raTemp*(1+rCos/rWsun)
+      raaGeneral(:,iLyr) = raaGeneral(:,iLyr) + raSunRefl*raSun*raTemp*(1+rCos/rWsun)
     END IF
+
 ! include the EASY part of thermal contribution
     IF ((kThermal >= 0) .AND. (kThermalJacob > 0)) THEN
-      raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+(1.0-raUseEmissivity)/kPi*raThermal*raTemp
+      raaGeneral(:,iLyr) = raaGeneral(:,iLyr) + (1.0-raUseEmissivity)/kPi*raThermal*raTemp
     END IF
 
 ! cdebug === this aids in turn off surface term for both DB/DT amd D(tau)/DT
@@ -654,9 +779,9 @@ CONTAINS
       iLay = iaaRadLayer(iAtm,iLyr)
       rCos = cos(raLayAngles(MP2Lay(iLay))*kPi/180.0)
       ! first do the surface term
-      iJ1=1
+      iJ1 = 1
       CALL JacobTerm(iJ1,iLyr,raaLay2Sp,raTemp)
-        raaGeneral(:,iLyr) = raUseEmissivity*raSurface*raTemp
+      raaGeneral(:,iLyr) = raUseEmissivity*raSurface*raTemp
 
       ! recall raTemp is raL2S from gnd to top
       IF (kSolar >= 0) THEN
@@ -676,11 +801,11 @@ CONTAINS
       ! c          END IF
 
       ! now loop over the layers that contribute (i.e. < iLyr) ....
-      iJ = iLyr-1
-      iJ1 = iJ+1
+      iJ = iLyr - 1
+      iJ1 = iJ + 1
       CALL JacobTerm(iJ1,iLyr,raaLay2Sp,raTemp)
-      raTemp1 = raTemp1+raaOneMinusTau(:,iJ)*raaRad(:,iJ)*raTemp
-      raaGeneral(:,iLyr) = raaGeneral(:,iLyr)+raTemp1
+      raTemp1 = raTemp1 + raaOneMinusTau(:,iJ)*raaRad(:,iJ)*raTemp
+      raaGeneral(:,iLyr) = raaGeneral(:,iLyr) + raTemp1
 
     END DO
 
@@ -813,7 +938,7 @@ CONTAINS
     INTEGER :: iG,iLay,iNumLayer
 
 ! local variables
-    INTEGER :: iFr,iJ1,iM1
+    INTEGER :: iFr,iJ1,iM1,iJunk
     REAL :: raTemp(kMaxPtsJac),rSec
     REAL :: raResultsTh(kMaxPtsJac)
 
@@ -826,6 +951,7 @@ CONTAINS
 ! bleh
     iM1 = iaaRadLayer(iAtm,iLay)
     iM1 = MP2Lay(iM1)
+!print *,iLay,iM1
 
 ! fix the sat angle weight factor
     rSec = 1.0/cos(rSatAngle*kPi/180.0)
@@ -870,6 +996,13 @@ CONTAINS
     IF (abs(rWeight-1.0000000) >= 1.0E-5) THEN
       raResults = raResults*rWeight
     END IF
+
+      iJunk = 1
+      iJunk = 8970
+ 123  FORMAT(I3,1X,I3,1X,4(ES12.5,' '),3(F12.5,' '),ES12.5)
+!      write(*,123) -1,iLay,raaGeneral(iJunk,iLay),raaaAllDQ(iG,1,iM1),raTemp(iJunk), &
+!                  raaRad(iJunk,iLay),raaRadDT(iJunk,iLay),raaLay2Sp(iJunk,iLay),  &
+!                  raaOneMinusTau(iJunk,iLay),raResults(iJunk)
 
     RETURN
     end SUBROUTINE JacobGasAmtFM1
@@ -1022,8 +1155,8 @@ CONTAINS
 !                 raResults(1)];
 !  fprintf(1,' %3i %3i %10.6e %10.6e %10.6e %10.6e %10.6f %10.6f %10.6f %10.6e \n',data);
 
- 123  FORMAT(I3,1X,I3,1X,4(ES10.4,' '),3(F10.4,' '),E10.4)
-!      write(*,123) +1,iLay,raaGeneral(1,iLay),raaAllDt(1,iLay),raTemp(1), &
+ 123  FORMAT(I3,1X,I3,1X,4(ES12.5,' '),3(F12.5,' '),ES12.5)
+!      write(*,123) +1,iLay,raaGeneral(1,iLay),raaAllDt(1,iM1),raTemp(1), &
 !                  raaRad(1,iLay),raaRadDT(1,iLay),raaLay2Sp(1,iLay),  &
 !                  raaOneMinusTau(1,iLay),raResults(1)
 

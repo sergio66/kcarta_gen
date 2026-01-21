@@ -2434,9 +2434,9 @@ CONTAINS
     raKThermalAngle(iC) = -1.0
 
     FMTX = '(A,3(I3,1X),F12.5)'
-    write(kStdErr,FMTX) &
-         'in radnce4rtp : posn(A) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!         'in radnce4rtp : posn(A) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
           
 !! see n_rad_jac_scat.f, SUBR radnce4 and rtp_interface.f, SUBR radnce4RTP
 !!!     = +1, fast diffusive background at acos(x)   in all layers eg 53.1301 = acos(3/5) << DEFAULT >>
@@ -2467,9 +2467,9 @@ CONTAINS
       raKThermalAngle(iC) = +1
     END IF
 
-    write(kStdErr,FMTX) &
-         'in radnce4rtp : posn(B) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!         'in radnce4rtp : posn(B) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
     IF ((iaaOverrideDefault(2,4) == 1) .AND. (iaaOverrideDefault(2,3) == 10)) THEN
       kThermalAngle = abs(kThermalAngle)
@@ -2485,9 +2485,9 @@ CONTAINS
       write(kStdErr,*)  '  as we are doing Nick Nalli ocean approx for refl them'
     END IF
 
-    write(kStdErr,FMTX) &
-         'in radnce4rtp : posn(C) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!         'in radnce4rtp : posn(C) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
     IF ((abs(raKThermalAngle(iC) - 1.0) <= 0.000001) .AND. (kTemperVary /= 43)) THEN
       write(kStdWarn,'(A90)') '----> warning : set raKthermalangle = 53.3 (acos(3/5)) for ALL layers, kTemperVary /= 43'
@@ -2509,9 +2509,9 @@ CONTAINS
       iaKThermal(iC) = kThermal  ! this is new June 20, 2020
     END IF
 
-    write(kStdErr,FMTX) &
-      'in radnce4rtp : posn(D) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!      'in radnce4rtp : posn(D) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
 !    print *,raKThermalAngle(iC)
 !    call dostop
@@ -2538,9 +2538,9 @@ CONTAINS
     kThermalAngle = raKThermalAngle(iC)
     kThermalJacob = iakThermalJacob(iC)
 
-    write(kStdErr,FMTX) &
-      'in radnce4rtp : posn(E) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!      'in radnce4rtp : posn(E) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
     FMT = '(A,4(I3,1X),F12.5)'
     write(kStdWarn,FMT) '(1) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',&
@@ -2562,9 +2562,9 @@ CONTAINS
       END IF
     END IF
 
-    write(kStdErr,FMTX) &
-      'in radnce4rtp : posn(F) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!      'in radnce4rtp : posn(F) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
     FMT = '(A,4(I3,1X),F12.5)'
     write(kStdWarn,FMT) '(2) in rtp_interface.f --> kFlux,kTemperVary,kThermal,kSetThermalAngle,kThermalAngle = ',&
@@ -2600,9 +2600,9 @@ CONTAINS
       END IF
     END IF
 
-    write(kStdErr,FMTX) &
-         'in radnce4rtp : posn(G) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!         'in radnce4rtp : posn(G) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
     IF (iDirection < 0) THEN
       IF ((kWhichScatterCode == 2) .OR. (kWhichScatterCode == 4)) THEN
@@ -2633,9 +2633,9 @@ CONTAINS
       END IF
     END IF
 
-    write(kStdErr,FMTX) &
-      'in radnce4rtp : posn(H) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
-         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
+!    write(kStdErr,FMTX) &
+!      'in radnce4rtp : posn(H) kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle = ', &
+!         kSetThermalAngle,iaaOverrideDefault(2,3),iaaOverrideDefault(2,4),kThermalAngle
 
 ! So if {\sf iakThermal(iI) = 0}, then {\sf rakThermalAngle(iI)} should be used
 ! with care.  If it is set at a negative value $x$, then for the upper
@@ -3481,7 +3481,7 @@ CONTAINS
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
       raHeight(j) = prof%palts(i)                     !!!! in meters
       raPressLevels(j) = prof%plevs(i)                !!!! in mb
-      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+      !raJunk(j)  = prof%ptemp(j)                      !!!! junk T
       raJunk(j)  = prof%ptemp(i)                      !!!! junk T
       write(kStdWarn,'(A,I3,A,I3,1X,I3,A,3(F12.5,1X))') 'iDownward = ',iDownward,' i,j = ',i,j,' hgt p T = ', &
          raHeight(j),raPressLevels(j),raJunk(j)
@@ -3572,7 +3572,7 @@ CONTAINS
 !    DO i = 1,prof%nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
      DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
+      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'READRTP_1A i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN        
         write(kStdErr,*)  'READRTP_1A NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
         write(kStdWarn,*) 'READRTP_1A NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
@@ -4170,7 +4170,7 @@ CONTAINS
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!! notice the kProf+1
       raHeight(j) = prof%palts(i)                     !!!! in meters
       raPressLevels(j) = prof%plevs(i)                !!!! in mb
-      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+      !raJunk(j)  = prof%ptemp(j)                      !!!! junk T
       raJunk(j)  = prof%ptemp(i)                      !!!! junk T
       write(kStdWarn,'(A,I3,A,I3,1X,I3,A,3(F12.5,1X))') 'iDownward = ',iDownward,' i,j = ',i,j,' hgt p T = ', &
          raHeight(j),raPressLevels(j),raJunk(j)
@@ -4262,7 +4262,7 @@ CONTAINS
 !    DO i = 1,prof%nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
     DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
+      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'READRTP_1B i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN        
         write(kStdErr,*)  'READRTP_1B NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
         write(kStdWarn,*) 'READRTP_1B NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
@@ -4833,7 +4833,8 @@ CONTAINS
       j = iFindJ(kProfLayer+1,I,iDownWard)            !!!!notice the kProf+1
       raHeight(j) = prof%palts(i)                     !!!!in meters
       raPressLevels(j) = prof%plevs(i)                !!!!in mb
-      raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+      !raJunk(j)  = prof%ptemp(j)                      !!!! junk T
+      raJunk(j)  = prof%ptemp(i)                      !!!! junk T
     END DO
     if (prof%nlevs .EQ. kProfLayer) THEN
       raPressLevels(kProfLayer+1) = 1100.00           !! probably need to fix this for Mars
@@ -4879,7 +4880,7 @@ CONTAINS
 !    DO i = 1,prof%nlevs  !! need this to be commented out so NLTE 120 layers can work with klayers 97 layers
     DO i = 1,kProfLayer
       raThickness(i) = (raHeight(i+1)-raHeight(i))*100   !!!!in cm
-      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
+      write(kStdWarn,'(A,I3,3(F20.8,1X))') 'READRTP_2 i,height,thickness,temperature',i,raHeight(i),raThickness(i)/100,raJunk(i)
       IF (raThickness(i) <= 100.00) THEN        
         write(kStdErr,*)  'READRTP_2 NONSENSE! Layer i, thickness in cm ',i,raThickness(i)
         write(kStdWarn,*) 'READRTP_2 NONSENSE! Layer i, thickness in cm ',i,raThickness(i)

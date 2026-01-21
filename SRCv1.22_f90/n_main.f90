@@ -40,7 +40,9 @@ CONTAINS
 ! need to set all stuff in gasprofiles, given caPFname
 ! need to set iaL_low,iaL_high
 
-    SUBROUTINE TranslateNameListFile(caDriverName, &
+    SUBROUTINE TranslateNameListFile(& 
+! is there iRTP from command line, and input file
+    iRTPCommandLine,caDriverName, &
 ! start stop freqs from *FRQNCY
     rf_low1,rf_high1, &
 ! gas types for MOLGAS,XSCGAS, and
@@ -84,6 +86,9 @@ CONTAINS
     IMPLICIT NONE
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
+
+! is there iRTP from command line
+    INTEGER :: iRTPCommandLine
 
 ! this is the driver file name
     CHARACTER(160) :: caDriverName
@@ -578,6 +583,11 @@ CONTAINS
     caCloudPFName1   = caCloudPFName  !!are you sending in 100 layer cld profile
     iAFGLProf1       = iAFGLProf
     iRTP1            = iRTP
+    IF (iRTPCommandLine .GT. 0) THEN
+      write(kstdWarn,'(A,I5.5,A,I5.5)') 'Overwriting iRTP = ',iRTP,' with iRTPCommandLine = ',iRTPCommandLine
+      write(kstdErr,'(A,I5.5,A,I5.5)')  'Overwriting iRTP = ',iRTP,' with iRTPCommandLine = ',iRTPCommandLine
+      iRTP1 = iRTPCommandLine
+    END IF
     iMPSetForRadRTP1 = iMPSetForRadRTP
     iBinOrAsc1       = iBinOrAsc
     iNclouds_RTP1    = iNclouds_RTP
@@ -1084,6 +1094,8 @@ CONTAINS
 ! need to set all stuff in gasprofiles, given caPFname
 ! need to set iaL_low,iaL_high
     SUBROUTINE ReadNameListFile( &
+! is the iRTP from command line
+    iRTPCommandLine,    &
 ! gas types for MOLGAS,XSCGAS, and start stop freqs from *FRQNCY
     iaGases,iNumGases,rf_low,rf_high, &
 ! gas profiles and layer info
@@ -1133,6 +1145,8 @@ CONTAINS
 
     include '../INCLUDE/TempF90/kcartaparam.f90'
 
+! is there iRTP from command line
+    INTEGER :: iRTPCommandLine
 ! main output filename
     CHARACTER(160) :: caOutName
 ! iaGases       = integer array with list of gasID's in order they were read in
@@ -1392,7 +1406,7 @@ CONTAINS
     cbot1 = -100.0
     cbot2 = -100.0
 
-    CALL TranslateNameListFile(caDriverName, &
+    CALL TranslateNameListFile(iRTPCommandLine,caDriverName, &
     rf_low,rf_high, &
     iNGas,iaGasesNL,iNXsec,iaLXsecNL, &
     caPFName,caCloudPFName,iRTP,iNclouds_RTP,iAFGLProf, &

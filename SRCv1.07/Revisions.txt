@@ -14,6 +14,9 @@ If one only wants to see the continuum (eg dump out path spectra of
 self continuum only), one can easily tailor the driver namelist file to
 do this eg set water (gasID = 1) weight to 0.0
 
+1/14/26         Yes, years later cleaned up some code and made the radiance
+                units mW/m2/sr-1/cm-1
+		
 1/16/02         Fixed bug in VACONV; angles were not changing correctly
                 with altitude.  NOTE: Sergio is no longer maintaining
                 V1.07, so the fix has been applied to *this* particular
