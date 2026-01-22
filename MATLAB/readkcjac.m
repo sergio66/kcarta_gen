@@ -149,12 +149,15 @@ blah  = ngases+1+1;                  %ngases d/dq and d/dT,weight fcns
 for jj = 1:natmos       
   nODBrows(jj) = blah*numlay(jj)+4; 
 end
-whos nODBrows
 
 nODBs = natmos;                        %jacobians computed for each atmos
 nODBs = natmos*(blah+1);               %in blah, also have 4 d/d(surface params)
 fprintf(2, 'readkcjac: %d chunks, %d ODBs(num of atmos), %d total rows\n', ...
         nchunk, nODBs, sum(nODBrows));
+
+nlays = (nODBrows - 4)/(nODBs-1);   %% there are 4 surface jacs, and nODBs = G1,G2,G3 ,.. T, Wght,Surface    so (nODBs-1) = number of [G1,G2,G3 ,.. T, Wght] chunks
+fprintf(1,'  will read in %4i nODBrows \n',nODBrows)
+fprintf(1,'  estimate each d/dT or d/dQ set has %3i layers \n',nlays);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % initialize output file or array

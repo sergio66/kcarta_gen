@@ -112,9 +112,10 @@ CONTAINS
     456 FORMAT(I3,6(' ',ES12.5))
      
     CALL print_xWeights_header_info(kStdWarn)
-    IF (iaaOverrideDefault(3,8) .EQ. -1) then
-      CALL print_xWeights_header_info(kStdErr)
-    END IF
+!    IF (iaaOverrideDefault(3,8) .EQ. -1) then
+!      CALL print_xWeights_header_info(kStdErr)
+!    END IF
+
 
 !      DO iL = 1,kProfLayer
 !        print *,iL,xPLEV_KCARTADATABASE_AIRS(iL),raOrig100P(iL),xPLEV_KCARTADATABASE_AIRS(iL+1)
@@ -343,9 +344,9 @@ CONTAINS
       END IF
       !write(kStdWarn,100) iL,rP*1013.25,iX1,rX1,rT,iX2,rX2,rQ,iX3,rX3
       write(kStdWarn,101) iL,rP*1013.25,iX1,rX1,iY1,rY1,rT,iX2,rX2,iY2,rY2,rQ,iX3,rX3,iY3,rY3
-      IF (iaaOverrideDefault(3,8) .EQ. -1) THEN
-        write(kStdErr,101) iL,rP*1013.25,iX1,rX1,iY1,rY1,rT,iX2,rX2,iY2,rY2,rQ,iX3,rX3,iY3,rY3
-      END IF
+!      IF (iaaOverrideDefault(3,8) .EQ. -1) THEN
+!        write(kStdErr,101) iL,rP*1013.25,iX1,rX1,iY1,rY1,rT,iX2,rX2,iY2,rY2,rQ,iX3,rX3,iY3,rY3
+!      END IF
     END DO
 
     iL = (kProfLayer-iLowest+1)

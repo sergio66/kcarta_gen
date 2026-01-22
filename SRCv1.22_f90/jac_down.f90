@@ -897,7 +897,8 @@ CONTAINS
 !************************************************************************
 ! this subroutine does the Jacobians wrt gas amount
     SUBROUTINE JacobGasAmtFM1(raFreq,raaRad,raaRadDT, &
-    iG,iLay,iNumGases,iaaRadLayer,iAtm,iNumLayer, &
+    iG,iLay,iNumGases,&
+    iaaRadLayer,iAtm,iNumLayer, &
     raUseEmissivity, &
     raaOneMinusTau,raaTau,raaaAllDQ,raaLay2Sp,raResults, &
     raThermal,raaLay2Gnd,rSatAngle,raLayAngles,raaGeneral, &
@@ -969,7 +970,6 @@ CONTAINS
 ! set the constant factor we have to multiply results with
 ! this is a gas amt jacobian
     raTemp = raaaAllDQ(iG,:,iM1)
-
     CALL MinusOne(raTemp,raResults)
 
 ! add on the the derivatives wrt radiating layer
@@ -1014,8 +1014,10 @@ CONTAINS
     end SUBROUTINE JacobGasAmtFM1
 !************************************************************************
 ! this subroutine does the Jacobians wrt temperature
-    SUBROUTINE JacobTempFM1(raFreq,raaRad,raaRadDT,iLay,iNumGases, &
-    iaaRadLayer,iAtm,iNumLayer,raUseEmissivity, &
+    SUBROUTINE JacobTempFM1(raFreq,raaRad,raaRadDT,&
+    iLay,iNumGases, &
+    iaaRadLayer,iAtm,iNumLayer, &
+    raUseEmissivity, &
     raaOneMinusTau,raaTau,raaAllDT,raaLay2Sp,raResults, &
     raThermal,raaLay2Gnd,rSatAngle,raLayAngles,raaGeneral, &
     raaGeneralTh,raaOneMinusTauTh,rWeight)
@@ -1125,13 +1127,12 @@ CONTAINS
       iJ1 = iLay
       iJp1 = iLay+1
       raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Sp(:,iJ1) + &
-                     raaOneMinusTau(:,iJ1)*raaRadDT(:,iJ1)/ &
-                     rSec/rWeight*raaLay2Sp(:,iJp1)
+                     raaOneMinusTau(:,iJ1)*raaRadDT(:,iJ1)/rSec/rWeight*raaLay2Sp(:,iJp1)
       raResults = raResults+raEmittance
     ELSE IF (iLay == iNumLayer) THEN
       ! do the topmost layer correctly
       iJ1 = iLay
-      raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Sp(:,iJ1)+ &
+      raEmittance = raTemp*raaRad(:,iJ1)*raaLay2Sp(:,iJ1) + &
             raaOneMinusTau(:,iJ1)*raaRadDT(:,iJ1)/rSec/rWeight
       raResults = raResults+raEmittance
     END IF

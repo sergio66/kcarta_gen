@@ -1,0 +1,261 @@
+ $nm_params
+ namecomment	=  '******* PARAMS section *******'
+ !Paths/mixed paths output is to be layer-to-space optical depth
+ KLayer2Sp = -1
+
+ !water continuum mtCKD 1.0 with my tuning
+ KCKD = 6
+ !KCKD = -1
+ !short header
+ kLongOrShort = -2
+ !kLongOrShort = +1
+
+ kJacobOutput = -1
+
+ !kActualJacs = 100010030
+ !kActualJacs = 102
+ !kActualJacs = -1
+
+ !kRTP = 0
+ !kSurfTemp = -1
+
+ kRTP = 0
+ kSurfTemp = -1
+
+ !! sergio
+ iaaOverride(2,1) = -1    !! to do const temperature variation
+ !iaaOverride(2,4) = +1    !! to do const backgnd thermal angle
+ !kThermalAngle = 60.0
+ kRTP = +1
+
+ !kRTP = 0
+ !iaaOverride(1,4) = -1   !! instead of matlab-algorithm based uncompression, do old old style
+
+ !! override rtp freq header info with rf1,rf2
+ iaaOverride(1,8) = -1
+ iaaOverride(1,8) = 1
+
+ !iaaOverride(1,4) = +1    !!! iMatlabORf77 = +1  use Maltab style uncompression,  kcoeffMAIN.f
+ !iaaOverride(1,4) = -1    !!! iMatlabORf77 = +1  use Maltab style uncompression,  kcoeffMAIN.f 
+ $end
+
+ $nm_frqncy
+ namecomment	=  '******* FRQNCY section *******'
+
+ !! ch4
+ rf1	        = 1255.0
+ rf2    	= 1305.0
+
+ !! O3
+ rf1	        = 905.0
+ rf2    	= 1105.0
+
+ !! co2
+ rf1	        = 605.0
+ rf2    	= 805.0
+
+ !! ch4
+ rf1	        = 1205.0
+ rf2    	= 1455.0
+
+ !! wv window
+ rf1	        = 855.0
+ rf2    	= 880.0
+ !! wv window
+ rf1	        = 855.0
+ rf2    	= 1055.0
+ rf1	        = 855.0
+ rf2   	        = 980.0
+ rf1	        = 955.0
+ rf2   	        = 980.0
+ !! wv
+ rf1	        = 1355.0
+ rf2    	= 1555.0
+ rf1	        = 855.0
+ rf2    	= 1555.0
+
+ rf1	        = 905.0
+ rf2   	        = 930.0
+
+ !! all
+ rf1	        = 605.0
+ rf2    	= 2830.0
+ !! almost all, LW and MW band no SW
+ rf1	        = 605.0 
+ rf2    	= 1680.0
+
+ $end
+
+ $nm_molgas
+ namecomment	=  '******* MOLGAS section *******'
+ !use all gases in MOLGAS
+ iNGas	=            8
+ iaGasesNL = 1,2,3,4,5,6,9,12
+
+ iNGas = -1
+ $end
+
+ $nm_xscgas
+ namecomment	=  '******* XSCGAS section *******'
+ !use all gases in XSCGAS
+ iNxsec	=             0
+
+ iNxsec	=             -1
+ $end
+
+ $nm_prfile
+ namecomment	=  '******* PRFILE section *******'
+ iRTP = 1
+
+ !iAFGLProf = 2
+ caPFname = '//scratch-jpl/pbl_osse/cwilson/VerticalGrid_exp/LBA_25200s_174x_181y_out.rtp'
+ caPFname = 'LBA_25200s_174x_181y_out.rtp'
+ caPFname = 'angle_index_46_1000mb.rp.rtp'
+ caPFname = 'angle_index_46_1000mb_unitemiss.rp.rtp'
+
+ !!! to test SRCV1.18 jacobians
+ iRTP = 4758
+ caPFname = 'ecmwf_airicrad_day092_clear.op.rtp'
+ caPFname = 'ecmwf_airicrad_day092_clear_unitemiss.op.rtp' 
+ !! see driver_test_the_jacs.m
+ iRTP = 1
+ caPFname = 'ecmwf_airicrad_day092_clear_unitemiss_profile_4758.op.rtp'
+ 
+ $end
+
+ $nm_weight
+ namecomment	=  '******* WEIGHT section *******'
+ !this is to develop fast forward models
+ iNpmix	=             1
+ caaMixFileLines(1)	= 
+    '1   -1    1.0    -1'
+ $end
+
+ $nm_radnce
+ namecomment	=  '******* RADNCE section *******'
+  !! sergio
+ iNatm = -1
+
+ !4 atmospheres
+ iNatm          =  -1
+
+
+ !iAtmLoop = -1
+
+ ! Atmos #1: no solar, with refl thermal, angle 0
+ iaMPSetForRad(1)   =  1
+
+ !uplook
+ !raPressStop(1)    =  1000
+ !raPressStart(1)     =  000.0
+
+ !downlook
+ raPressStart(1)    =  1000
+ raPressStop(1)     =  0.005
+
+ raTSpace(1)        =   2.960000
+ raTSurf(1)         =  305.533
+ raSatAngle(1)      =  0
+ raSatHeight(1)     =  705000
+ iakSolar(1)        =  -1
+ rakSolarAngle(1)   =  -1
+ iakThermal(1)      =   -1
+ rakThermalAngle(1) =  -1.000000
+ iakThermalJacob(1) =   -1
+ caEmissivity(1)    =   '/home/cwilson/KCARTA/KCARTADATA/lba_emis.dat'
+ raSetEmissivity(1) =  1
+
+ $end
+
+ $nm_jacobn
+ namecomment	=  '******* JACOBN section *******'
+ !no jacobians
+ iJacob = 0
+
+ !! debugging
+ iJacob	=     1
+ iaJacob(1) = 2 
+ iaJacob(1) = 1
+
+ iJacob	=     2
+ iaJacob(1) = 1 
+ iaJacob(2) = 2
+
+
+ !! let it rip
+ iJacob	=     4
+ iaJacob(1) = 1 
+ iaJacob(2) = 101 
+ iaJacob(3) = 102
+ iaJacob(4) = 103
+
+$end
+
+ $nm_spectr
+ namecomment	=  '******* SPECTRA section ******'
+ !no external spectra
+ iNumNewGases	=             -1
+ $end
+
+ $nm_nonlte
+ namecomment    =  '******* NONLTE section ******'
+ iNumNLTEGases   =             0
+
+ !!use the fast SARTA model
+ iNLTE_SlowORFast =             -1
+
+ iaNLTEGasID(1)      =        2
+ iaNLTEChunks(1)       =        10
+
+ iaaNLTEChunks(1,1)  =         2230
+ iaaNLTEChunks(1,2)  =         2255
+ iaaNLTEChunks(1,3)  =         2280
+ iaaNLTEChunks(1,4)  =         2305
+ iaaNLTEChunks(1,5)  =         2330
+ iaaNLTEChunks(1,6)  =         2355
+ iaaNLTEChunks(1,7)  =         2380
+ iaaNLTEChunks(1,8)  =         2405
+ iaaNLTEChunks(1,9)  =         2430
+ iaaNLTEChunks(1,10) =         2455
+
+ $end
+
+ $nm_scattr
+ namecomment	=  '******* SCATTR section *******'
+ iNclouds          =           -1
+
+ $end
+
+ $nm_output
+ namecomment	=  '******* OUTPUT section *******'
+ caComment      = 'data for reflected thermal fit'
+
+ !dump out ODs for every gas, every layer
+ iaPrinter(1)   =    1
+ iaGPMPAtm(1)   =   -1
+ iaNp(1)        =   -1
+
+ !dump out radiance at TOA
+ iaPrinter(2)   =    3
+ iaGPMPAtm(2)   =   -1
+ iaNp(2)        =    1
+ raaOp(2,1)     =    0.0
+ !raaOp(2,1)     =    0.0
+
+ !dump out ODs for WV gas, every layer
+ iaPrinter(1)   =    1
+ iaGPMPAtm(1)   =    1
+ iaNp(1)        =   -1
+
+ !dump out radiance at TOA
+ iaPrinter(1)   =    3
+ iaGPMPAtm(1)   =   -1
+ iaNp(1)        =    1
+ raaOp(1,1)     =    0.0
+ !raaOp(1,1)     =    0.0
+
+ $end
+
+ $nm_endinp
+ namecomment	=  '******* ENDINP section *******'
+ $end
