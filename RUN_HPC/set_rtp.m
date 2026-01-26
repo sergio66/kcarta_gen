@@ -543,3 +543,6 @@ use_this_rtp = 'RTP/r49_1013_400p_8x2x2_2834_airslay.rtp'; %% 49 profiles x 2 su
 %  compared to original 49
 use_this_rtp = 'RTP/r49_1013_400p_pbl_unitemis_8angs_gas_pert_v1.rtp';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+iInstr = 1; iDoConvolve = 1;
+use_this_rtp = '../WORK/ecmwf_airicrad_day092_clear.rtp';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

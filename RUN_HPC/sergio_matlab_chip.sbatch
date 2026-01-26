@@ -65,22 +65,13 @@
 
 #SBATCH --account=pi_strow
 
-#  Specify the desired partition develop/batch/prod
-##SBATCH --partition=batch
-## can shorthand this as -p high_mem on the command line
-##SBATCH --partition=2018
-
-#SBATCH --partition=2021
 #SBATCH --cluster=chip-cpu
 
 ########################################################################
+
 #  Specify the qos and run time (format:  dd-hh:mm:ss)
 
-## 100 layer clouds
-##SBATCH --qos=medium
-##SBATCH --time=3:59:00
-
-# TwoSlab clouds jacs rads, loop 
+## 100 layer clouds and TwoSlab clouds jacs rads, loop 
 ##SBATCH --qos=medium
 ##SBATCH --time=3:59:00
 
@@ -89,9 +80,27 @@
 ##SBATCH --time=1:59:00
 
 # clear, or TwoSlab clouds, or fluxes
-#SBATCH --qos=short
-#SBATCH --time=0:59:00
+##SBATCH --qos=short
+##SBATCH --time=0:59:00
 
+#########################
+
+#  Specify the desired partition develop/batch/prod
+## can shorthand this as -p high_mem on the command line
+##SBATCH --partition=batch
+##SBATCH --partition=2018
+##SBATCH --partition=2021
+##SBATCH --partition=2024
+
+#### to make sure we have exclusive privilege, two slab jacs
+##SBATCH --qos=pi_strow
+##SBATCH --partition=pi_strow
+##SBATCH --time=3:59:00
+
+#### we run on 2024 but run risk of someone pre-empting, clear sky
+#SBATCH --qos=shared
+#SBATCH --partition=2024
+#SBATCH --time=0:59:00
 ########################################################################
 
 ##  This is in MB, very aggressive but I have been running outta memory
