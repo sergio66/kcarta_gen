@@ -214,12 +214,12 @@ figure(1); plot(fc,jc22(:,97+ind+5),'r.-',fc,deltaR_T10/dT,'m',fc,jc22(:,97+ind+
 %%%% /bin/cp -a quickuse*.nml driver_test_the_jacs.m test_jac.sc text_ecmwf_airicrad_day092_clear_unitemiss_4758.txt ecmwf_airicrad_day092_clear_unitemiss_profile_4758.op.rtp ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp ../TEST_JACS/
 
 %% when you have SARTA jacs (2645 chans) and kcarta run from 605-2830 cm-1
-%[fairs,tjacairs] = readsarta_jac('/home/sergio/git/kcarta_gen/WORK/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacTZ',100);              %% 1-97 = atm, 98 = stemp
+%[fairs,tjacairs] = readsarta_jac('/home/sergio/git/kcarta_gen/TEST_JACS/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacTZ',100);              %% 1-97 = atm, 98 = stemp
 %plot(radsOut.freqAllChunks,sum(jacsOut.tjacAllChunks,2),'b',w22,sum(j10(:,indT),2),'g',w22,sum(j22(:,indT),2),'r',fairs,sum(tjacairs(:,1:97),2),'kx-');
 
-[fsarta,tjacsarta]  = readsarta_jac('/home/sergio/git/kcarta_gen/WORK/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacTZ',100); tjacsarta  = squeeze(tjacsarta);  tjacsarta = tjacsarta(:,1:97);   tjacsarta = fliplr(tjacsarta); %% 98 is surface temp
-[fsarta,q1jacsarta] = readsarta_jac('/home/sergio/git/kcarta_gen/WORK/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacG1',1);   q1jacsarta = squeeze(q1jacsarta); q1jacsarta = q1jacsarta(:,1:97); q1jacsarta = fliplr(q1jacsarta);
-[fsarta,q2jacsarta] = readsarta_jac('/home/sergio/git/kcarta_gen/WORK/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacG2',2);   q2jacsarta = squeeze(q2jacsarta); q2jacsarta = q2jacsarta(:,1:97); q2jacsarta = fliplr(q2jacsarta); 
+[fsarta,tjacsarta]  = readsarta_jac('/home/sergio/git/kcarta_gen/TEST_JACS/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacTZ',100); tjacsarta  = squeeze(tjacsarta);  tjacsarta = tjacsarta(:,1:97);   tjacsarta = fliplr(tjacsarta); %% 98 is surface temp
+[fsarta,q1jacsarta] = readsarta_jac('/home/sergio/git/kcarta_gen/TEST_JACS/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacG1',1);   q1jacsarta = squeeze(q1jacsarta); q1jacsarta = q1jacsarta(:,1:97); q1jacsarta = fliplr(q1jacsarta);
+[fsarta,q2jacsarta] = readsarta_jac('/home/sergio/git/kcarta_gen/TEST_JACS/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp_jacG2',2);   q2jacsarta = squeeze(q2jacsarta); q2jacsarta = q2jacsarta(:,1:97); q2jacsarta = fliplr(q2jacsarta); 
 [hy,hay,py,pay] = rtpread('ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp');
 
 %% run kcarta 1.18, only G1, G2
