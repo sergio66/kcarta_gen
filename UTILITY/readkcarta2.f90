@@ -367,8 +367,8 @@
       SUBROUTINE f77_netcdf(caOutName,raFreq,raaEntire,iTotalChunks,iNumGasPathsOut,iNumMixPathsOut,iNumRadsOut)
 
       implicit none
-      include '/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include/netcdf.inc'
-!      include 'netcdf.inc'
+!      include '/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include/netcdf.inc'
+      include 'netcdf.inc'
 
       include 'convolve.param'
 
@@ -574,8 +574,8 @@
 
       implicit none
 
-      include '/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include/netcdf.inc'
-!      include 'netcdf.inc'
+!      include '/usr/ebuild/software/netCDF-Fortran/4.4.4-intel-2018b/include/netcdf.inc'
+      include 'netcdf.inc'
 
       integer errcode
 

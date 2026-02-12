@@ -17,19 +17,22 @@ read -p "Press [Enter] key to continue ..."
 shome=`pwd`
 
 #first do the water
-cd /asl/data/kcarta/H2020.ieee-le/IR605/hdo.ieee-le/                     ##kWaterPath
+#cd /asl/data/kcarta/H2020.ieee-le/IR605/hdo.ieee-le/                     ## kWaterPath
+cd /umbc/xfs3/strow/asl/rta/kcarta/H2020.ieee-le/IR605/hdo.ieee-le/       ## kWaterPath
 ls -1 *g1.dat >& $shome/waterdatabase_ir605_2830
 cd $shome
 
 #then do CO2   COMMENT THIS OUT AS NEEDED
 cd $shome
-cd /asl/data/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv400.ieee-le/    ##CO2Path
+#cd /asl/data/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv400.ieee-le/                  ## CO2Path
+cd /umbc/xfs3/strow/asl/rta/kcarta_sergio/UMBC_CO2_H1998.ieee-le/CO2ppmv400.ieee-le/    ## CO2Path
 ls -1  >& $shome/co2database_ir605_2830
 cd $shome
 
 #then do the rest of the gases
 cd $shome
-cd /asl/data/kcarta/H2020.ieee-le/IR605/etc.ieee-le/                     ##kCompPath
+#cd /asl/data/kcarta/H2020.ieee-le/IR605/etc.ieee-le/                     ##kCompPath
+cd /umbc/xfs3/strow/asl/rta/kcarta/H2020.ieee-le/IR605/etc.ieee-le/       ##kCompPath
 ls -1  >& $shome/othersdatabase_ir605_2830
 cd $shome
 
@@ -55,7 +58,7 @@ fi
 ln -s compdatabase_ir605_2830 compdatabase
 
 ######### run code compdatabase.x to produce comp.param
-cp -a ../../UTILITY/compdatabase.x .
+cp -a ../../BIN/compdatabase.x .
 ls -lt compdatabase.x
 if [ -r comp.param ]
 then

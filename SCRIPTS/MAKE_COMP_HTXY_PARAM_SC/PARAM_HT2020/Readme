@@ -1,0 +1,40 @@
+-rw-rw-r-- 1 sergio pi_strow 6075 Mar  9 10:11 comp_ir605_2830.param
+-rw-rw-r-- 1 sergio pi_strow 1957 Mar  9 08:59 Readme
+-rw-rw-r-- 1 sergio pi_strow 5985 Mar  9 08:49 comp_ir605_2830.param.orig
+-rw-rw-r-- 1 sergio pi_strow 6030 Mar  9 08:47 comp_ir605_2830.param.orig.tweakg80
+-rw-rw-r-- 1 sergio pi_strow 5985 Mar  9 08:46 comp_ir605_2830.param.yesorig
+-rw-rw-r-- 1 sergio pi_strow 6075 Mar  9 08:41 comp_ir605_2830.param.new
+lrwxrwxrwx 1 sergio pi_strow   86 Nov 23 22:55 comp_ir605_2830 -> /home/sergio/KCARTA/SCRIPTS/MAKE_COMP_HTXY_PARAM_SC/PARAM_HT2016/comp_ir605_2830.param
+
+comp_ir605_2830.param.yesorig : basically made in late Nov 2017
+  molgases : H2016
+  xecgases : H2012
+ 80      605.000000       805.000000      20
+ 80      855.000000      1705.000000      20
+ 80     2205.000000      2355.000000      20
+ 80     2780.000000      2855.000000      20
+ 
+comp_ir605_2830.param.orig : currently same as comp_ir605_2830.param.yesorig
+ 80      605.000000       805.000000      20
+ 80      855.000000      1705.000000      20
+ 80     2205.000000      2355.000000      20
+ 80     2780.000000      2855.000000      20
+
+comp_ir605_2830.param.orig.tweakg80 : basically same as comp_ir605_2830.param.yesorig, but says there are fewer chunks for g80 so code can run
+ 80      855.000000      1155.000000      20
+ 80     1205.000000      1305.000000      20
+ 80     1330.000000      1705.000000      20
+ 80     2205.000000      2355.000000      20
+ 80     2780.000000      2855.000000      20
+
+comp_ir605_2830.param.new : made in March 2018 -- right now it is same as comp_ir605_2830.param
+  Made with the latest rendition of ../comp_IRdatabase_H2016.sc
+  Which used a ../../../UTILITY/compdatabase.x compiled using ifort
+  molgases : H2016
+  xecgases : H2016
+ 80      605.000000       805.000000      20
+ 80      855.000000      1155.000000      20
+ 80     1205.000000      1305.000000      20
+ 80     1330.000000      1705.000000      20
+ 80     2205.000000      2355.000000      20
+ 80     2530.000000      2855.000000      20

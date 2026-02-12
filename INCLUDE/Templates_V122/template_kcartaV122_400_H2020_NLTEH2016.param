@@ -32,6 +32,9 @@ c************* cccc USER DEFINED INFORMATION cccc ***********************
 c******************* set these as desired *******************************
 c************************************************************************
 
+c note some of the parameters are used by more recent versions of kcarta eg 
+c NLTE and scattering are in v1.11
+
 c kOrigRefPath == path to original 100 layers reference profiles
 c              == these profiles were used in making the kCARTA database
       CHARACTER(160) kOrigRefPath

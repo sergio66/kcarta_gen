@@ -1,4 +1,12 @@
-#echo "IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90_v122.sc AFTER doing the datafixXYZ_H20AB"
+## echo "IMPORTANT -- make sure you ALWAYS run cp_param_files_to_f90_v122.sc AFTER doing the datafixXYZ_H20AB"
+##
+## the datafix eg                 make -f Makefile_v122_Intelf90              datafix400_v122_H2016
+##                                make -f Makefile_v122_Intelf90              datafix400_v122_H2020
+##                                make -f Makefile_v122_Intelf90              mars_datafix400_v122_H2016
+##
+## are really called from that Mkefile in Makefile_tar_objs_data_f90_datafix
+##
+########################################################################
 
 $(info   )
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
@@ -9,12 +17,40 @@ $(info IMPORTANT (4) -- if you want to use eg g77 change the make -f Makefile_v1
 $(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>)
 $(info   )
 
+######################### >>>>>>>>>>>>>>>>>>>>>>>>> #########################
+###########################
+## these are orig res, and 400 pmv only
+## Dec 2025 onwards, when we "lost" the disks
+## these "_short" versions are same as versions without _short, they just have the comments removed!!!!
+## see eg 400_H20_default_f90   400_H16_default_f90    385_H12_CO2_UMBC_default_f90
+
 400_H20_default_f90_short:
 	make -f Makefile_v122_Intelf90 datafix400_v122_H2020
 	echo "this datafix400_v122_H2020 looks suspiciously similar to datafix400_v122_H2020_orig605_805res"
 	cp_param_files_to_f90_v122.sc
 	make -f Makefile_v122_Intelf90 scat
 	mv ../BIN/kcarta.x90_v1.22         ../BIN/kcarta.x90_v1.22_400ppmv_H20
+
+400_H16_default_f90_short:
+	make -f Makefile_v122_Intelf90 datafix400_v122_H2016
+	echo "this datafix400_v122_H2016 looks suspiciously similar to datafix400_v122_H2016_orig605_805res"
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/kcarta.x90_v1.22         ../BIN/kcarta.x90_v1.22_400ppmv_H16
+
+385_H12_CO2_UMBC_default_f90_short:
+	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC
+	echo "makes 385_H12_CO2_UMBC_default_f90"
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/kcarta.x90_v1.22         ../BIN/kcarta.x90_v1.22_385ppmv_H12_CO2_UMBC
+
+## these "_short" versions are same as versions without _short, they just have the comments removed!!!!
+## see eg 400_H20_default_f90   400_H16_default_f90    385_H12_CO2_UMBC_default_f90
+## these are orig res, and 400 pmv only
+## Dec 2025 onwards, when we "lost" the disks
+###########################
+######################### >>>>>>>>>>>>>>>>>>>>>>>>> #########################
 
 400_H20_default_f90:
 	make -f Makefile_v122_Intelf90 datafix400_v122_H2020
@@ -122,11 +158,15 @@ mars_H16_default_f90:
 #	mv ../BIN/bkcartaTXT.x90_v1.22     ../BIN/bkcartaTXT.x90_v1.22_400ppmv_G15
 	mv ../BIN/kcarta.x90_v1.22         ../BIN/kcarta.x90_v1.22_400ppmv_G15
 
-#########################
-## these are orig res, and 385 pmv only
-## Dec 2025, when we "lost" the disks
+######################### >>>>>>>>>>>>>>>>>>>>>>>>> #########################
+###########################
+
+## these are orig res, and 400 pmv only
+## Dec 2025 onwards, when we "lost" the disks
+
 385_H12_CO2_UMBC_default_f90:
 	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC
+	echo "makes 385_H12_CO2_UMBC_default_f90"
 	cp_param_files_to_f90_v122.sc
 #	make -f Makefile_v122_Intelf90 basic
 #	make -f Makefile_v122_Intelf90 basicTXT	
@@ -135,19 +175,11 @@ mars_H16_default_f90:
 #	mv ../BIN/bkcartaTXT.x90_v1.22     ../BIN/bkcartaTXT.x90_v1.22_385ppmv_H12_CO2_UMBC
 	mv ../BIN/kcarta.x90_v1.22         ../BIN/kcarta.x90_v1.22_385ppmv_H12_CO2_UMBC
 
-## ## these are orig res, and 385 pmv only
-## ## Dec 2025, when we "lost" the disks
-## 385_H12_CO2_UMBC_default_f90_X_noneed:
-## 	make -f Makefile_v122_Intelf90 datafix385_v122_H2012_CO2_UMBC_X
-## 	cp_param_files_to_f90_v122.sc
-## #	make -f Makefile_v122_Intelf90 basic
-## #	make -f Makefile_v122_Intelf90 basicTXT	
-## 	make -f Makefile_v122_Intelf90 scat
-## #	mv ../BIN/bkcarta.x90_v1.22        ../BIN/bkcarta.x90_v1.22_385ppmv_H12_CO2_UMBC_X
-## #	mv ../BIN/bkcartaTXT.x90_v1.22     ../BIN/bkcartaTXT.x90_v1.22_385ppmv_H12_CO2_UMBC_X
-## 	mv ../BIN/kcarta.x90_v1.22         ../BIN/kcarta.x90_v1.22_385ppmv_H12_CO2_UMBC_X
-###########################
+## these are orig res, and 400 pmv only
+## Dec 2025 onwards, when we "lost" the disks
 
+###########################
+######################### >>>>>>>>>>>>>>>>>>>>>>>>> #########################
 
 ## these are orig res, and 385 pmv only
 385_H08_CO2_UMBC_default_f90:
