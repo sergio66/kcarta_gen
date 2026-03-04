@@ -118,6 +118,8 @@ CONTAINS
 !                                 ... this is the MT_CKD 2.5 version of Feb 2016
 ! AER-STD      32 : self, foreign   is by CKD and modified by Mlawer/Alvarado
 !                                 ... this is the MT_CKD 3.2 version of Feb 2017
+! AER-STD      53 : self, foreign   is by CKD and modified
+!                                 ... this is the MT_CKD 4.3 version of Feb 2026
 ! ----------------------------------------------------------------------------
 ! old versions of AER CKD
 ! AER-CKD      00 : version 00
@@ -182,7 +184,7 @@ CONTAINS
 
 ! origCKD = [0 21 23 24];
 ! MTCKD1  = [ [1] [4 6]];
-! MTCKD25 = [ [25 32]  ];
+! MTCKD25 = [ [25 32 43]];
 ! allowedCKD = [origCKD MTCKD1 MTCKD25];
 ! ----------------------------------------------------------------------------
 
@@ -782,7 +784,7 @@ CONTAINS
 !!! these are MT_CKD1 and research versions from AIRS data
      .AND. (kCKD /= 1) .AND. (kCKD /= 4) .AND. (kCKD /= 6) &
 !!! these are MT_CKD25 owards more recent versions
-     .AND. (kCKD /= 25) .AND. (kCKD /= 27) .AND. (kCKD /= 32)) &
+     .AND. (kCKD /= 25) .AND. (kCKD /= 27) .AND. (kCKD /= 32) .AND. (kCKD /= 43)) &
     THEN
       write(kStdErr,*) 'In *PARAMS, need kCKD = [-1] for no continuum OR'
       write(kStdErr,*) '                 CKD    versions 0,21,23 or 24'
@@ -793,6 +795,7 @@ CONTAINS
       write(kStdErr,*) '       (latest AER versions = 25, released Dec 2010)'
       write(kStdErr,*) '       (latest AER versions = 27, released Feb 2016)'
       write(kStdErr,*) '       (latest AER versions = 32, released Feb 2017)'	
+      write(kStdErr,*) '       (latest AER versions = 43, released Feb 2026)'	
       write(kStdErr,*) '           [ are UMBC modifications of CKD or MT-CKD] '
       write(kStdErr,*) 'kCKD is water continuum calculation version'
       write(kStdErr,*) 'Please reset and retry'

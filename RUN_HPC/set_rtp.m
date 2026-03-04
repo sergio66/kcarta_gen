@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-system_slurm_stats
+% system_slurm_stats
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -542,7 +542,13 @@ use_this_rtp = 'RTP/r49_1013_400p_8x2x2_2834_airslay.rtp'; %% 49 profiles x 2 su
 %  shown here sample difference average 49 profiles with 10% O3
 %  compared to original 49
 use_this_rtp = 'RTP/r49_1013_400p_pbl_unitemis_8angs_gas_pert_v1.rtp';
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 iInstr = 1; iDoConvolve = 1;
 use_this_rtp = '../WORK/ecmwf_airicrad_day092_clear.rtp';
+
+iInstr = 1; iDoConvolve = 1;
+use_this_rtp = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1013_400ppm_unitemiss.op.rtp';
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+iInstr = 1; iDoConvolve = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -4,6 +4,12 @@
 #
 # or check_progress.sc
 #
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch --array=1-49 --output='/dev/null/' sergio_matlab_chip.sbatch 1
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch --array=1-49                       sergio_matlab_chip.sbatch 1
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#
+# run this with   sbatch -p 2018 --array=1-49 --output='/dev/null/' sergio_matlab_chip.sbatch 1
 # run this with   sbatch -p 2018 --array=1-49 --output='testslurm' sergio_matlab_chip.sbatch 1
 # run this with   sbatch -p 2018 --array=1-49 sergio_matlab_chip.sbatch 1
 # run this with   sbatch --exclude=cnode203,cnode267 --array=1-49 sergio_matlab_chip.sbatch 1

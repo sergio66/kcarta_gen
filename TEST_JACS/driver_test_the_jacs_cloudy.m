@@ -3,7 +3,6 @@ addpath /home/sergio/git/matlabcode/matlibSergio/matlab2012/rtptools
 addpath /home/sergio/git/matlabcode/matlibSergio/matlab2012/aslutil
 addpath /home/sergio/git/matlabcode/TIME
 
-
 %%% CLEAR CLEAR CLEAR : see driver_test_the_jacs.m
 [h,ha,p,pa] = rtpread('ecmwf_airicrad_day092_clear_unitemiss_profile_4758.sarta.rtp');
 [yy,mm,dd,hh] = tai2utcSergio(p.rtime(1)); fprintf(1,'%4i/%02i/%02i at %8.5f hrs \n',yy,mm,dd,hh);      %%% ---> 2023/4/2

@@ -45,9 +45,9 @@
  $nm_frqncy
  namecomment	=  '******* FRQNCY section *******'
 
- !! almost all, LW and MW band no SW
- rf1	        = 605.0 
- rf2    	= 1680.0
+ rf1	        = 605.0
+ rf2    	= 1555.0
+
 
  $end
 
@@ -70,47 +70,16 @@
 
  $nm_prfile
  namecomment	=  '******* PRFILE section *******'
-
- iBinOrAsc    = 1
-
- iNclouds_RTP   = 2
- iaNML_Ctype(1)  = 301
-  caaCloudFile(1) =
-        '/asl/s1/sergio/CLOUDS_MIEDATA/VOLCANO/andesite_405_2905_280'
-
- iaNML_Ctype(1)  = 101
- caaCloudFile(1) = '/asl/s1/sergio/CLOUDS_MIEDATA/WATER250/water_405_2905_250'
-
- iaNML_Ctype(2)  = 201
- caaCloudFile(2) =
-       '/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_ICE_AGGREGATES/ice_agg_333_2980_forkcarta'
- caaCloudFile(2) =
-       '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta'
- caaCloudFile(2) =
-             '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'
-
- !iaNML_Ctype(1)  = iCloudType1
- !caaCloudFile(1) = 'strCloudType1'
- !iaNML_Ctype(2)  = iCloudType2
- !caaCloudFile(2) = 'strCloudType2'
-
- iWhichScatterCode_RTP =  3
- iScatter_RTP          =  1
-
- iWhichScatterCode_RTP =  5
- iScatter_RTP          =  -1
- iScatter_RTP          =  2
- iScatter_RTP          =  1
- iScatter_RTP          =  3
+ iRTP = 1
 
  !!! to test SRCV1.18 jacobians
  iRTP = 4758
- caPFname = 'ecmwf_airicrad_day092_clear.op.rtp'
- caPFname = 'ecmwf_airicrad_day092_clear_unitemiss.op.rtp' 
+ caPFname = '../RTPfiles/ecmwf_airicrad_day092_clear.op.rtp'
+ caPFname = '../RTPfiles/ecmwf_airicrad_day092_clear_unitemiss.op.rtp'
+ 
  !! see driver_test_the_jacs.m
  iRTP = 1
  caPFname = '../RTPfiles/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.op.rtp'
- caPFname = '../RTPfiles/ecmwf_airicrad_day092_cloud_unitemiss_profile_4758.op.rtp'
  
  $end
 
@@ -174,12 +143,14 @@
 
 
  !! let it rip
-! iJacob	=     4
-! iaJacob(1) = 1 
-! iaJacob(2) = 101 
-! iaJacob(3) = 102
-! iaJacob(4) = 103
+ iJacob	=     4
+ iaJacob(1) = 1 
+ iaJacob(2) = 101 
+ iaJacob(3) = 102
+ iaJacob(4) = 103
 
+ iJacob = 0
+ 
 $end
 
  $nm_spectr
@@ -214,54 +185,6 @@ $end
  $nm_scattr
  namecomment	=  '******* SCATTR section *******'
  iNclouds          =           -1
- iNclouds          =           -1
-
- !!!use DISORT
- kDis_Pts         =      25
- kDis_Nstr         =      16
- kWhichScatterCode =            3
- kScatter          =            1
-
- !!!use RTSPEC
- kWhichScatterCode =            2
- kScatter          =            3
-
- !!!use 2STREAM
- kWhichScatterCode =            1
- kScatter          =            1
-
- !!!use PCLSAM
- kWhichScatterCode =  5
- kScatter          =  1
-
- iScatBinaryFile   =            1
-
- !first is iwp in g/m2, then <dme> in um
-
- raExp(1) = 0.0
- caaCloudName(1)='happy little desert'
- iaCloudNumLayers(1) = 1
- raaPCloudTop(1,1)   = 913.0
- raaPCloudBot(1,1)   = 914.0
- raaaCloudParams(1,1,1) =  19.8243
- raaaCloudParams(1,1,2) =  0.2418
- iaaScatTable(1,1)=1
- caaaScatTable(1,1)=
-   'MIEDATA/OPAC_TYPE16_RH80_VOLZ_SMALLSIZE_LOGNORMAL_ALPHA2/sand_405_2905_280'
- iaCloudNumAtm(1)=1
-   iaaCloudWhichAtm(1,1)=1
-
- raExp(2) = 0.0
- caaCloudName(2)='happy little ice cloud 1'
- iaCloudNumLayers(2) = 1
- raaPCloudTop(2,1)   = 250.0
- raaPCloudBot(2,1)   = 300.0
- raaaCloudParams(2,1,1) =  2.0
- raaaCloudParams(2,1,2) =  5.0000
- iaaScatTable(2,1)=2
- caaaScatTable(2,1)='MIEDATA/CIRRUS/cirrus_405_2905_220'
- iaCloudNumAtm(2)=1
-   iaaCloudWhichAtm(2,1)=2
 
  $end
 

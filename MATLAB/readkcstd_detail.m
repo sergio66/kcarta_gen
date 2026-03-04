@@ -196,10 +196,10 @@ if htype < 0                 %%%%%%%%%%%%%%%%%%% short version
     flen     = fread(fin, 1, 'integer*4');
     gaspaths = fread(fin, ngasout, 'integer*4');
     flen     = fread(fin, 1, 'integer*4');
-    end
   end
+  fprintf(1,'  ngasout = %3i \n',ngasout);
+end
 
-fprintf(1,'  ngasout = %3i \n',ngasout);
 if htype > 0     
   %%%%%%%% long version ..... copied direct from readgaspaths.m
 
@@ -273,11 +273,11 @@ if htype < 0                    %%%%%%%%%%%%%%%%%%%%short version
       flen     = fread(fin, 1, 'integer*4');
       mixpaths = fread(fin, nmixout, 'integer*4');
       flen     = fread(fin, 1, 'integer*4');
-      end
     end
   end
+  fprintf(1,'  nmixpaths = %3i \n',nmixpaths);  
+end
 
-fprintf(1,'  nmixpaths = %3i \n',nmixpaths);
 if htype > 0     
   %%%% long version ... copied direct from readmixedpaths.m
   %read in number of mixed paths in *MIXFIL 

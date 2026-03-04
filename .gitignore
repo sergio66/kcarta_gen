@@ -9,6 +9,7 @@
 # to see why things are ignored do eg    git check-ignore -v WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/*.m
 
 # data & misc
+fort.1
 *ugh*
 *junk*
 *.h5

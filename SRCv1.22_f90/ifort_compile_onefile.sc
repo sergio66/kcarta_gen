@@ -20,8 +20,14 @@ ls -lt ../BIN/kcarta.x90_v1.22
 ######   make clean; make -f makefile 385_H12_CO2_UMBC_default_f90
 ###### in which case neiher of these two are appropriate
 
-#mv ../BIN/kcarta.x90 /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20
-#ls -lt /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20
+# echo "  ------>>>> moving ../BIN/kcarta.x90_v1.22 to /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20"
+# mv ../BIN/kcarta.x90_v1.22 /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20
+# ls -lt /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20
 
-#mv ../BIN/kcarta.x90 ../BIN/kcarta.x90_v1.22_400ppmv_H20
-#ls -lt ../BIN/kcarta.x90_v1.22_400ppmv_H20
+# echo "  ------>>>> moving ../BIN/kcarta.x90_v1.22 to /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_H20"
+# mv ../BIN/kcarta.x90_v1.22 ../BIN/kcarta.x90_v1.22_400ppmv_H20
+# ls -lt ../BIN/kcarta.x90_v1.22_400ppmv_H20
+
+echo "  ------>>>> moving ../BIN/kcarta.x90_v1.22 to /home/sergio/KCARTA/BIN/kcarta.x90_v1.22_H24"
+mv ../BIN/kcarta.x90_v1.22 ../BIN/kcarta.x90_v1.22_400ppmv_H24
+ls -lt ../BIN/kcarta.x90_v1.22_400ppmv_H24

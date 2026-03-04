@@ -17,7 +17,10 @@
 
  !water continuum mtCKD 1.0 with my tuning
  KCKD = 1
- !KCKD = 32
+ KCKD = 32
+ KCKD = 43
+ KCKD = xyzckd
+ 
  !short header
  kLongOrShort = -2
  kLongOrShort = +1
@@ -70,7 +73,8 @@
  !caPFname = 'feb2002_raw_op_day_airs.rad.constemiss.rtp'
  !caPFname = 'feb2002_raw_op_airs.rad.constemiss.rtp'
  caPFname = 'pin_feb2002_sea_airs45deg_op.so2.latlon.const_emiss_0.9.rtp'
-
+ caPFname = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1013_400ppm_unitemiss.op.rtp'
+ 
  $end
 
  $nm_weight

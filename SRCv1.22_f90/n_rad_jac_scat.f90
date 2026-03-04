@@ -1126,6 +1126,8 @@ CONTAINS
     END IF
 
 ! check the molecular ID's in iaJacob are in iaGases
+    write(kStdWarn,*) 'Number of jacobian gases = ',iJacob
+    write(kStdWarn,*) '  List of jaobian outputs (index, gasID)'    
     DO iC = 1,iJacob
       iFound = -1
       IF (iaGases(iaJacob(iC)) > 0) THEN
@@ -1138,6 +1140,8 @@ CONTAINS
         write(kStdErr,*) 'but this gas does not exist in list from'
         write(kStdErr,*) 'MOLGAS/XSCGAS. Edit input file and retry'
         CALL DoSTOP
+      ELSE
+        write(kStdWarn,*) ' ',iC,iaGases(iaJacob(iC))
       END IF
     END DO
 

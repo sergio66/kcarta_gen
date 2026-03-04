@@ -23,6 +23,16 @@ $(info   )
 ## Dec 2025 onwards, when we "lost" the disks
 ## these "_short" versions are same as versions without _short, they just have the comments removed!!!!
 ## see eg 400_H20_default_f90   400_H16_default_f90    385_H12_CO2_UMBC_default_f90
+##
+## note that the datafix makefile "Makefile_tar_objs_data_f90_datafix" and is called by Makefile_v122_Intelf90
+## note that the datafix makefile "Makefile_tar_objs_data_f90_datafix" and is called by Makefile_v122_Intelf90
+## note that the datafix makefile "Makefile_tar_objs_data_f90_datafix" and is called by Makefile_v122_Intelf90
+
+400_H24_default_f90_short:
+	make -f Makefile_v122_Intelf90 datafix400_v122_H2024
+	cp_param_files_to_f90_v122.sc
+	make -f Makefile_v122_Intelf90 scat
+	mv ../BIN/kcarta.x90_v1.22         ../BIN/kcarta.x90_v1.22_400ppmv_H24
 
 400_H20_default_f90_short:
 	make -f Makefile_v122_Intelf90 datafix400_v122_H2020

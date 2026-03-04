@@ -7,21 +7,7 @@ elseif nargin == 3
   outdir = 'JUNK/';
 end
 
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/KCARTA/MATLAB
-addpath /asl/matlib/h4tools
-addpath /asl/matlib/rtptools
-
-addpath /asl/matlib/fconv
-addpath /asl/packages/ccast/source/
-
-addpath /home/sergio/MATLABCODE/FCONV/
-addpath /home/sergio/MATLABCODE/FFTCONV/
-%addpath /home/sergio/Backup_asl_matlab_Feb2013
-addpath /asl/matlab2012/sconv
-%addpath /asl/matlab2012/fconv
-
-addpath /home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES
+addpath_convolve
 
 [djunk,w,caVers] = readkcstd_smart([outdir '/rad.dat' num2str(ii)]);
 [mm,nn] = size(djunk);  %% if cloudy calc, could have 890000 x 5 rads
@@ -47,9 +33,18 @@ good = 1;
 
 if iInstr == 1
   clist = 1:2378;
-  sfile = '/asl/matlib/srftest/srftables_m140f_withfake_mar08.hdf'; 
-  sfile = '/asl/matlab2012/srftest/srftables_m140f_withfake_mar08.hdf';
+
+  % sfile = '/asl/matlib/srftest/srftables_m140f_withfake_mar08.hdf'; 
+  % sfile = '/asl/matlab2012/srftest/srftables_m140f_withfake_mar08.hdf';
+  % sfile = '/home/sergio/MATLABCODE/matlibSergio/matlab2012/srftest/airs_l1c_srf_tables_lls_20181205.hdf';
+  %
+  % [sergio@c24-52 GENERIC_RADSnJACS_MANYPROFILES]$ ls -lt /home/sergio/MATLABCODE/matlibSergio/matlab2012/srftest/*.hdf
+  % -rw-r--r--+ 1 sergio pi_sergio 10755004 Dec  5  2018 /home/sergio/MATLABCODE/matlibSergio/matlab2012/srftest/airs_l1c_srf_tables_lls_20181205_copy.hdf
+  % -rw-r--r--+ 1 sergio pi_sergio 10755004 Dec  5  2018 /home/sergio/MATLABCODE/matlibSergio/matlab2012/srftest/airs_l1c_srf_tables_lls_20181205.hdf
+  % -rw-rw-r--+ 1 sergio pi_sergio  5385780 Mar 31  2008 /home/sergio/MATLABCODE/matlibSergio/matlab2012/srftest/srftables_m140f_withfake_mar08.hdf
+
   airs_convolve_file_numchans  %% gives latest clist/sfile
+  
   [fKc,rKc] = convolve_airs(w,dall,clist,sfile);
   whos dall fKc rKc
   

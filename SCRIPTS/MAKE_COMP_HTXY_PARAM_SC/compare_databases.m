@@ -8,6 +8,11 @@ if data1(1,4) ~= data2(1,4)
   disp('whoops did you load in like-for-liek database eg IR vs IR or did you do eg IR vs FIR')
 end
 
+data1_gases = unique(data1(:,1));
+data2_gases = unique(data2(:,1));
+disp('diffing the gas lists in set1 vs set2')
+setdiff(data1_gases,data2_gases)
+    
 for gg = 1 : length(glist)
   gid = glist(gg);
   gid1 = find(data1(:,1) == gid);
@@ -18,6 +23,10 @@ for gg = 1 : length(glist)
     freq1Start = data1(gid1,2);     freq1Stop = data1(gid1,3);
     freq2Start = data2(gid2,2);     freq2Stop = data2(gid2,3);
     figure(1); clf
+    %% this is for the legend
+    ii = 1; line([freq1Start(ii) freq1Stop(ii)],[0.99 0.99],'color','b','linewidth',2);
+            line([freq2Start(ii) freq2Stop(ii)],[1.01 1.01],'color','r','linewidth',2);
+    
     for ii = 1:length(freq1Start)
       hold on; line([freq1Start(ii) freq1Stop(ii)],[0.99 0.99],'color','b','linewidth',2);
       plot([freq1Start(ii) freq1Stop(ii)],[0.99 0.99],'bo')
@@ -29,6 +38,7 @@ for gg = 1 : length(glist)
     title(num2str(gid))
     ax = axis; axis([ax(1) ax(2) 0.98 1.02]); grid
     hold off
+    legend('database 1','database 2','location','best');
     disp('ret to continue'); pause    
   end
 end  

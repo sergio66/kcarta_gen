@@ -1,0 +1,19 @@
+Make H2024 database using th Readmes in
+  /home/sergio/git/HITRAN2UMBCLBL/MAKEIR/H2024
+  MAKEIR_ALL_H24  MAKEIR_WV_H24
+
+See for example
+  comp_IRdatabase_H2024.sc
+
+1) echo "mkdir PARAM_HT2024 and edit so all reference to H2020 are change to H2024"
+
+2) Edit/correct the WaterPath
+3) Edit/correct the CO2Path
+4) Edit/correct the kCompPath
+
+5) be careful about ../../BIN/compdatabase.x .... the paths sometimes change
+   compdatabase.f is in ../../UTILITY/compdatabase.f
+  
+6) Be careful at the end where is suggests comparing H2020 vs H2024 (ie you need to get the datescorrect)
+
+7) then to make "all_15_450000_IRH2024.param"     you can edit and run     "cat_all_database_FIR_UV.sc"

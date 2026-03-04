@@ -8,7 +8,8 @@ if iHITRAN == 2008
   kcartaexec = '/home/sergio/KCARTA/BIN/bkcarta.x_385ppmv_H08';                       %% NEWER
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_H08_orig605_805res'; %% H08, v1.21, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_385ppmv_H08_CO2_UMBC';       %% H08, v1.22, UMBC CO2
-
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H08_DNE';            %% H08, v1.22, UMBC CO2
+  
 elseif iHITRAN == 2012  
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_400ppmv';                            %% can do cloudy calcs with this, H2012, v1.18
 %  kcartaexec = '/home/sergio/KCARTA/BIN/bkcarta.x_10gasjac_10MP';                    %% do CLR calcs, H2012; can do 10 jacs, 10 sets of MP DNE
@@ -22,11 +23,14 @@ elseif iHITRAN == 2012
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_H12_orig605_805res'; %% H12, v1.21, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_385ppmv_H12_CO2_UMBC';       %% H12, v1.22, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1
 
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x90_v1.22_385ppmv_H12_CO@_UMBC';       %% H12, v1.22, UMBC CO2
+  
 elseif iHITRAN == 2015
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_400ppmv_G15';                    %% G15, v1.20, allows raAltComprDirsScale
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_G15';                %% G15, v1.21, allows raAltComprDirsScale, set to one thread test
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_G15';                %% G15, v1.22, allows raAltComprDirsScale, set to one thread test
-
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_G15_DNE';            %% G15, v1.22, UMBC CO2
+  
 elseif iHITRAN == 2016 | iHITRAN == 2016.3
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_400ppmv_H16';                        %% H16, v1.18, allows raAltComprDirsScale
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_400ppmv_H16';                    %% H16, v1.20, allows raAltComprDirsScale
@@ -38,7 +42,8 @@ elseif iHITRAN == 2016 | iHITRAN == 2016.3
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_121_400ppmv_H16_orig605_805res'; %% H16, v1.21, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H16_orig605_805res'; %% H16, v1.22, allows raAltComprDirsScale, set to one thread test .. for 605-2830 cm-1, sun-earth dist modification
   %%%%%%%%%%
-
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H16';                %% H16, v1.22, UMBC CO2
+  
 elseif iHITRAN == 2017
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_highres605_1205_12p8';
 elseif iHITRAN == 2018
@@ -50,11 +55,19 @@ elseif iHITRAN == 2020
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20_Oct08_2024_commit_fe1acd67455c713658a4db9108915a186e5bcf7f'; %% see /asl/s1/sergio/JUNK/gitjunk7/kcarta_gen/SRCv1.22_f90
   kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x_f90_122_400ppmv_H20'; 
 
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H20';                %% H20, v1.22, UMBC CO2
+  
 %commit b0a442e10a3ff85d7525036dcae29a96a8a7f8af
 %Author: Sergio Machado <sergio@umbc.edu>
 %Date:   Sat Nov 27 06:28:03 2021 -0500
 %    SSM : SRCV1.22_f90 can now handle H2020 for main gases in the IR, still used H2016 for NLTE
 
+elseif iHITRAN == 2024
+  kcartaexec = '/home/sergio/KCARTA/BIN/kcarta.x90_v1.22_400ppmv_H24';                %% H24, v1.22, UMBC CO2
+
+else
+  iHITRAN
+  error('invalid iHITRAN in set_kcarta_exec_iHITRAN.m')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

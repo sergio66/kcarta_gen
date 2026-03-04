@@ -45,45 +45,6 @@
  $nm_frqncy
  namecomment	=  '******* FRQNCY section *******'
 
- !! ch4
- rf1	        = 1255.0
- rf2    	= 1305.0
-
- !! O3
- rf1	        = 905.0
- rf2    	= 1105.0
-
- !! co2
- rf1	        = 605.0
- rf2    	= 805.0
-
- !! ch4
- rf1	        = 1205.0
- rf2    	= 1455.0
-
- !! all
- rf1	        = 605.0
- rf2    	= 2830.0
- !! almost all, LW and MW band no SW
- rf1	        = 605.0 
- rf2    	= 1680.0
-
- !! wv window
- rf1	        = 855.0
- rf2    	= 880.0
- !! wv window
- rf1	        = 855.0
- rf2    	= 1055.0
- rf1	        = 855.0
- rf2   	        = 980.0
- rf1	        = 955.0
- rf2   	        = 980.0
- !! wv
- rf1	        = 1355.0
- rf2    	= 1555.0
- rf1	        = 905.0
- rf2   	        = 930.0
- 
  rf1	        = 605.0
  rf2    	= 1555.0
 
@@ -111,19 +72,62 @@
  namecomment	=  '******* PRFILE section *******'
  iRTP = 1
 
- !iAFGLProf = 2
- caPFname = '//scratch-jpl/pbl_osse/cwilson/VerticalGrid_exp/LBA_25200s_174x_181y_out.rtp'
- caPFname = 'LBA_25200s_174x_181y_out.rtp'
- caPFname = 'angle_index_46_1000mb.rp.rtp'
- caPFname = 'angle_index_46_1000mb_unitemiss.rp.rtp'
+ iBinOrAsc    = 1
+
+ !/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_ICE_AGGREGATES/   --> /home/sergio/git/OLDKCARTA_from_asl_strow_2019/KCARTA/SCATTERCODE/RTSPEC/BARAN_AGGREGATES/
+ !/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ --> /home/sergio/git/OLDKCARTA_from_asl_strow_2019/KCARTA/SCATTERCODE/RTSPEC/BBAUM_PYANG/
+ iNclouds_RTP   = 2
+ 
+ !!! this is not there AAAAAAGH
+ !iaNML_Ctype(1)  = 301 
+ !caaCloudFile(1) = '/asl/s1/sergio/CLOUDS_MIEDATA/VOLCANO/andesite_405_2905_280'
+ !!! this is not there AAAAAAGH
+ 
+ iaNML_Ctype(1)  = 101
+ !!! this is not there AAAAAAGH        
+ !caaCloudFile(1) = '/asl/s1/sergio/CLOUDS_MIEDATA/WATER250/water_405_2905_250'
+ !!! this is not there AAAAAAGH
+ !!! so for now do
+ caaCloudFile(1) = 'SCATCOEF/BARAN_AGGREGATES/ice_agg_333_2980_forkcarta'
+ 
+ !!!!!!!!!!!!!!!!!!!!!!!!!
+ iaNML_Ctype(2)  = 201
+ caaCloudFile(2) =
+   '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/BBAUM_PYANG/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) =
+   '/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_AGGREGATES/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) =
+   '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta'
+
+ iaNML_Ctype(2)  = 201
+ caaCloudFile(2) = 'SCATCOEF/BBAUM_PYANG/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) = 'SCATCOEF/BARAN_ICE_AGGREGATES/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) = 'SCATCOEF/BBAUM_PYANG/ice_yangbaum_GHM_333_2980_forkcarta'
+
+ !!! this is not there AAAAAAGH       
+ !caaCloudFile(2) =
+ !      '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'
+ !!! this is not there AAAAAAGH
+ !!!!!!!!!!!!!!!!!!!!!!!!!
+
+ iWhichScatterCode_RTP =  3
+ iScatter_RTP          =  1
+
+ iWhichScatterCode_RTP =  5
+ iScatter_RTP          =  -1
+ iScatter_RTP          =  2
+ iScatter_RTP          =  1
+ iScatter_RTP          =  3
 
  !!! to test SRCV1.18 jacobians
  iRTP = 4758
- caPFname = 'ecmwf_airicrad_day092_clear.op.rtp'
- caPFname = 'ecmwf_airicrad_day092_clear_unitemiss.op.rtp' 
+ caPFname = '../RTPfiles/ecmwf_airicrad_day092_clear.op.rtp'
+ caPFname = '../RTPfiles/ecmwf_airicrad_day092_clear_unitemiss.op.rtp'
+ 
  !! see driver_test_the_jacs.m
  iRTP = 1
- caPFname = 'ecmwf_airicrad_day092_clear_unitemiss_profile_4758.op.rtp'
+ caPFname = '../RTPfiles/ecmwf_airicrad_day092_clear_unitemiss_profile_4758.op.rtp' 
+ caPFname = '../RTPfiles/ecmwf_airicrad_day092_cloud_unitemiss_profile_4758.op.rtp'
  
  $end
 
