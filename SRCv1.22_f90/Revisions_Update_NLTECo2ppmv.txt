@@ -4,6 +4,20 @@ line mix coeeffs (/home/sergio/SPECTRA/CO2_COMMON/y1s.m)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+cd /home/sergio/git
+git clone git@github.com:sergio66/IR_NIR_VIS_UV_RTcodes.git
+cd IR_NIR_VIS_UV_RTcodes
+cd NONLTEcode
+
+[sergio@chip-login3 NONLTEcode]$ ls -lt
+total 0
+drwxrwxr-x 27 sergio pi_sergio 31 Mar 21 07:58 NONLTE_PRODUCTION
+drwxrwxr-x 11 sergio pi_sergio 43 Mar 21 07:58 NONLTE4_Jan2025        Manuel Lopez Puertas/Sergio Machado,   2025
+drwxrwxr-x  5 sergio pi_sergio  5 Mar 21 07:58 NONLTE3_Feb2021        Manuel Lopez Puertas/Marco Matricardi, 2017
+drwxrwxr-x  3 sergio pi_sergio  3 Mar 21 07:58 NONLTE2                Manuel Lopez Puertas/Sergio Machado,   2005
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 KCARTA : subroutines findreferencename (s_misc.f) and
                      ua_avg_databasepressures (kcoeffSPL) 
           need to be updated to handle the string "_385" or "_400"

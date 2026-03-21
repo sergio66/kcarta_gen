@@ -22,10 +22,11 @@ with optional guard channels and tweaks to the passband filters, see
 
 %}
 
-%kcarta radiances with kc2cris
+% kcarta radiances with kc2cris
 
-%addpath ../source
-addpath /asl/s1/motteler/cris/ccast/motmsc/
+% see /home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/addpath_convolve.m  
+% addpath ../source
+% addpath /asl/s1/motteler/cris/ccast/motmsc/
 
 if nargin == 2
   nguard = 4;

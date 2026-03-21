@@ -9,3 +9,16 @@ a) mkdir ../INCLUDE/TempF90/JunkTempDir
 b) edit +54 SRCv1.22_F90/Makefile_intel_hdf_rtp and make rtpdir point to eg
      /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/KLAYERS_RTPv221_150levs_120km/rtpV221_80gases
 c) go to LIB, make BLAS and point to that symbolically
+
+I also have not really saved
+  L2SComparisons/
+but you can rgenerate using
+  ../UTILITY/compare_l2s_H16_H20.m:3:h16 = load('../L2SComparisons/l2s_kc122_H16_605_2830.mat');
+  ../UTILITY/compare_l2s_H16_H20.m:4:h20 = load('../L2SComparisons/l2s_kc122_H20_605_2830.mat');
+  ../UTILITY/compare_l2s_H16_H20.m:5:h24 = load('../L2SComparisons/l2s_kc122_H24_605_2830.mat');
+  ../UTILITY/driver_loop_l2s.m:54:      outname = ['../L2SComparisons/l2s_kc122_H' num2str(iHIT-2000) '_' num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
+  ../UTILITY/driver_loop_l2s.m:87:      outname = ['../L2SComparisons/l2s_kc122_H16_'                     num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
+  ../UTILITY/driver_loop_l2s.m:88:      outname = ['../L2SComparisons/l2s_kc122_H' num2str(iHIT-2000) '_' num2str(f1(ii)) '_' num2str(f2(ii)) '.dat'];
+  ../UTILITY/driver_loop_l2s.m:93:        saver = ['save ../L2SComparisons/l2s_kc122_H' num2str(iHIT-2000) '_' num2str(f1(ii)) '_' num2str(f2(ii)) '.mat d w iaGasID CKDCKD'];
+  ../UTILITY/loop_analyze_H2020_H2024.m:5:disp('if you do    load ../L2SComparisons/l2s_kc122_H24_605_2830.mat')
+

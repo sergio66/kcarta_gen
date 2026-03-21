@@ -56,22 +56,13 @@
 #                                        submit_many_disort_run_loops.m   can launch multiple profiles then gather up results using read_disort_chunks
 # >>>>>>>>>>>>>>>>>>>>>>>>> ########################################################################
 
-#  Name of the job:
-#SBATCH --job-name=KCARTA_DRIVER
+#SBATCH --job-name=KCARTA_DRIVER      # Name of the job:
+#SBATCH --requeue                     # requeue; if held type scontrol release JOBID
+#SBATCH -N1                           # N specifies that 1 job step is to be allocated per instance of matlab
+#SBATCH --cpus-per-task 1             # This specifies the number of cores per matlab session will be #available for parallel jobs
 
-# requeue; if held type scontrol release JOBID
-#SBATCH --requeue
-
-#  N specifies that 1 job step is to be allocated per instance of matlab
-#SBATCH -N1
-
-#  This specifies the number of cores per matlab session will be
-#available for parallel jobs
-#SBATCH --cpus-per-task 1
-
-#SBATCH --account=pi_strow
-
-#SBATCH --cluster=chip-cpu
+#SBATCH --cluster=chip-cpu            # desired cluster
+#SBATCH --account=pi_strow            # cpu owner
 
 ########################################################################
 

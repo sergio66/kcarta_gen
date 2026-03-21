@@ -1,13 +1,13 @@
 function [w,d] = do_convolve(iInstr,ii,iDoRad,outdir);
 
+addpath_convolve
+  
 if nargin == 2
   iDoRad = 3;  %% assume radiances so you need last one ......
   outdir = 'JUNK/';
 elseif nargin == 3
   outdir = 'JUNK/';
 end
-
-addpath_convolve
 
 [djunk,w,caVers] = readkcstd_smart([outdir '/rad.dat' num2str(ii)]);
 [mm,nn] = size(djunk);  %% if cloudy calc, could have 890000 x 5 rads

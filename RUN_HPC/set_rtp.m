@@ -550,5 +550,6 @@ iInstr = 1; iDoConvolve = 1;
 use_this_rtp = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1013_400ppm_unitemiss.op.rtp';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-iInstr = 1; iDoConvolve = 1;
+iInstr = 124; iDoConvolve = 1;
+iInstr = 1;   iDoConvolve = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

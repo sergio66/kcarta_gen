@@ -14,9 +14,10 @@
 %%   Will analyze by looping over removing gases, using /home/sergio/KCARTA/UTILITY/clust_run_kcarta_H2020_H2024.m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dirH24_43 = 'H2024_CKD43/';
-dirH24_32 = 'H2024_CKD32/';
-dirH20_32 = 'H2020_CKD32/';
+dir0 = '/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/JUNK/TEST_H2020_H2024_CKD32_CKD43/';
+dirH24_43 = [dir0 'H2024_CKD43/'];
+dirH24_32 = [dir0 'H2024_CKD32/'];
+dirH20_32 = [dir0 'H2020_CKD32/'];
 
 for ii = 1 : 49
   fin = [dirH24_43 '/individual_prof_convolved_kcarta_airs_' num2str(ii) '.mat'];
@@ -64,8 +65,14 @@ addpath /home/sergio/MATLABCODE/matlibSergio/matlib2025/h4tools
 mmw = mmwater_rtp(h,p);
 
 plot(mmw,t2024_43(i900,:)-t2024_32(i900,:),'b.',mmw,t2024_32(i900,:)-t2020_32(i900,:),'gx',mmw,t2024_43(i900,:)-t2020_32(i900,:),'ro')
-legend('H24 CKD43 - H24 CKD32','H24 CKD32 - H20 CKD32','H24 CKD43 - H20 CKD32','location','best');
 xlabel('mmw'); ylabel('BTD (K)')
+ax = axis;
+line([mmw(01) mmw(01)],[ax(3) ax(4)],'color','r');
+line([mmw(49) mmw(49)],[ax(3) ax(4)],'color','b');
+plotaxis2;
+legend('H24 CKD43 - H24 CKD32','H24 CKD32 - H20 CKD32','H24 CKD43 - H20 CKD32','location','best');
+text(mmw(01)+1,1,'TRP','color','r')
+text(mmw(49)+1,1,'STD','color','b')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

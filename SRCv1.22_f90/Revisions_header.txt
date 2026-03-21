@@ -1,7 +1,9 @@
 Differences between rtp versions
 =================================
+Latest rtp is v221, as Howard fixed some clouds bugs
 
  diff /asl/packages/rtpV201_g80/include/rtpdefs.f /asl/packages/rtpV201/include/rtpdefs.f
+
 62c62
 <         parameter ( MAXGAS    =   80 )
 ---
@@ -114,8 +116,31 @@ Basically RAL data was used to improve CS and CF in the 1300-1700 cm-1 region
           AIRS data was used to reduce dependency of bias with water amount, 
           in the window regions (700-1000, 2400-2800 cm-1)
 
+Water continuum
+  CKD : 0, 2.1, 2.3, 2.4
+  UMBC : 2,3,4,5,6
+  MT-CKD : 1.0, 2.5 (not sure when, probably 2012), 3.2 (2018), 4.3 (2026)
+%% see Revisions_backgndtherm.txt  
+! %% this is new list
+! %% 0,21,23,24 are the 1990s CKD
+! %% 1,25,32,43    are new MT-CKD
+! %% 4 6           are derived from MT-CKD1 (cant remember how to derived 2,3,5)
+! %%               are derived from MT-CKD25
+
 NLTE algorithm
 ==============
+
+cd /home/sergio/git
+git clone git@github.com:sergio66/IR_NIR_VIS_UV_RTcodes.git
+cd IR_NIR_VIS_UV_RTcodes
+cd NONLTEcode
+
+[sergio@chip-login3 NONLTEcode]$ ls -lt
+total 0
+drwxrwxr-x 27 sergio pi_sergio 31 Mar 21 07:58 NONLTE_PRODUCTION
+drwxrwxr-x 11 sergio pi_sergio 43 Mar 21 07:58 NONLTE4_Jan2025        Manuel Lopez Puertas/Sergio Machado,   2025
+drwxrwxr-x  5 sergio pi_sergio  5 Mar 21 07:58 NONLTE3_Feb2021        Manuel Lopez Puertas/Marco Matricardi, 2017
+drwxrwxr-x  3 sergio pi_sergio  3 Mar 21 07:58 NONLTE2                Manuel Lopez Puertas/Sergio Machado,   2005
 
 Can do NLTE upto 83 km (usual kCARTA database) and 83-120 km (assuming the NLTE
 vib profile files go up that high) using either LBL mode (slow) or SARTA 
@@ -139,6 +164,29 @@ NLTE temperature profiles
 
 Scattering algorithms
 =====================
+
+03/16/26         << KCARTA_SCATTERCODE is now under git >> 
+                 Clone from git@github.com:sergio66/umbc_scattering_tables_code_for_KCARTA_SARTA.git
+		 Current tables are in /home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/
+		   CIRRUS_BRYANBAUM  VOLZ_SMALLSIZE_LOGNORMAL_ALPHA2_280  WATER_250
+
+		 See the Readme there, it tells you how to take B.Baum/P.Yang cirrus params --> coeffs for KCARTA/SARTA
+		 
+		 See the Readme there, it tells you how to regenerate Mie coeffs for water clouds and aerosols
+		 and thn combine the text coeff files into binary files for kcarta
+		                     text coeff files into binary files for sarta
+
+7/16/22         Fixed interface of DISORT into KCARTA
+                The biggest improvement for DISORT is to change rSatAngle from satzen at GND (raLayAngles(iaNumLayer(1))) 
+                to satzen at TOA ~ scanang (raLayAngles(iaNumLayer(iNumLayer)))
+                See the new lines of code in kcartamain.f90 before calling InterfaceScattering
+
+6/9/22          Implemented the G. Tang/P. Yang fix to the Chou scattering scaling algorithm
+                <<< iaaOverrideDefault(2,9) is now an integer to control Chou adjustment>>>
+                       0 >= iaaOverrideDefault(2,9) >= 100 : Chou adjustment factor = iaaOverrideDefault(2,9)/100
+                       -1 : use Tang 0.3
+                       -2 : use Tang = 0.10 for water clouds, 0.30 for ice cloud
+                       -3 : use parametrized Tang
 
 Both RTSPEC and kTwoStream use exponential-in-radiance variation in optical 
 depth, rather than exponential-in-tau. DISORT uses linear-in-radiance, as does

@@ -77,36 +77,33 @@
  !/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_ICE_AGGREGATES/   --> /home/sergio/git/OLDKCARTA_from_asl_strow_2019/KCARTA/SCATTERCODE/RTSPEC/BARAN_AGGREGATES/
  !/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ --> /home/sergio/git/OLDKCARTA_from_asl_strow_2019/KCARTA/SCATTERCODE/RTSPEC/BBAUM_PYANG/
  iNclouds_RTP   = 2
+
+ ! /asl/s1/sergio/CLOUDS_MIEDATA/ -- > /home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/
+ ! SCATCOEF/ --> /home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/
  
  !!! this is not there AAAAAAGH
  !iaNML_Ctype(1)  = 301 
- !caaCloudFile(1) = '/asl/s1/sergio/CLOUDS_MIEDATA/VOLCANO/andesite_405_2905_280'
- !!! this is not there AAAAAAGH
+ caaCloudFile(1) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/VOLCANO/andesite_405_2905_280'
+ caaCloudFile(1) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/VOLZ_SMALLSIZE_LOGNORMAL_ALPHA2_280/volz_405_2905_mie280.dat'
  
  iaNML_Ctype(1)  = 101
- !!! this is not there AAAAAAGH        
- !caaCloudFile(1) = '/asl/s1/sergio/CLOUDS_MIEDATA/WATER250/water_405_2905_250'
- !!! this is not there AAAAAAGH
- !!! so for now do
- caaCloudFile(1) = 'SCATCOEF/BARAN_AGGREGATES/ice_agg_333_2980_forkcarta'
+ caaCloudFile(1) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/WATER_250/water_405_2905_250'
+ caaCloudFile(1) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/WATER_250/water_405_2905_250_forkcarta' 
  
  !!!!!!!!!!!!!!!!!!!!!!!!!
  iaNML_Ctype(2)  = 201
- caaCloudFile(2) =
-   '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/BBAUM_PYANG/ice_agg_333_2980_forkcarta'
- caaCloudFile(2) =
-   '/asl/s1/sergio/CLOUDS_MIEDATA/BARAN_AGGREGATES/ice_agg_333_2980_forkcarta'
- caaCloudFile(2) =
-   '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta'
+ caaCloudFile(2) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/BBAUM_PYANG/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/BARAN_AGGREGATES/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/ice_yangbaum_GHM_333_2980_forkcarta'
 
  iaNML_Ctype(2)  = 201
- caaCloudFile(2) = 'SCATCOEF/BBAUM_PYANG/ice_agg_333_2980_forkcarta'
- caaCloudFile(2) = 'SCATCOEF/BARAN_ICE_AGGREGATES/ice_agg_333_2980_forkcarta'
- caaCloudFile(2) = 'SCATCOEF/BBAUM_PYANG/ice_yangbaum_GHM_333_2980_forkcarta'
+ caaCloudFile(2) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/BBAUM_PYANG/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/BARAN_ICE_AGGREGATES/ice_agg_333_2980_forkcarta'
+ caaCloudFile(2) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/BBAUM_PYANG/ice_yangbaum_GHM_333_2980_forkcarta'
+ caaCloudFile(2) = '/home/sergio/git/KCARTA_SCATTERCODE/RTSPEC/BBAUM_PYANG/ice_yangbaum_GHM_333_2980_forkcarta'
 
  !!! this is not there AAAAAAGH       
- !caaCloudFile(2) =
- !      '/asl/s1/sergio/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'
+ !caaCloudFile(2) = '/home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/CIRRUS_BRYANBAUM/v2013/kcarta_100_3000_baumGHM.dat'
  !!! this is not there AAAAAAGH
  !!!!!!!!!!!!!!!!!!!!!!!!!
 

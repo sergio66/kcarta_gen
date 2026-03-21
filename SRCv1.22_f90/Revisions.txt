@@ -17,7 +17,7 @@ campaigns.
 The kCARTA code is designed to be fast, accurate and easy-to-use;
 compressed optical depths come from a Matlab-based line-by-line code
 which currently uses the HITRAN 2012 lineshape parameters, with CO2
-linemixing and MT-CKDv2.5 water continuum.
+linemixing and MT-CKD v2.5 water continuum.
 
 In addition, some scattering and radiative flux routines are packaged
 with the code, and the optical depth data base has been extended to
@@ -48,7 +48,32 @@ See   <<< Revisions_header.txt >>> for quick list oof/notes about
   NLTE algorithm
   Scattering algorithms
   Major updates to various kCARTA versions
-  
+
+Every 4 years we update KCARTA databases with new HITRAN database
+  (so H1996, H1998, H2k, H2004, H2008, H2012, H2016, H2020, H2024)
+We have also done GEISA databases, G2015
+
+Water continuum
+  CKD : 0, 2.1, 2.3, 2.4
+  UMBC : 2,3,4,5,6
+  MT-CKD : 1.0, 2.5 (not sure when, probably 2012), 3.2 (2018), 4.3 (2026)
+%% see Revisions_backgndtherm.txt  
+! %% this is new list
+! %% 0,21,23,24 are the 1990s CKD
+! %% 1,25,32,43    are new MT-CKD
+! %% 4 6           are derived from MT-CKD1 (cant remember how to derived 2,3,5)
+! %%               are derived from MT-CKD25
+
+
+Also see
+[sergio@c24-52 SRCv1.22_f90]$ ls -lt Rev*
+-rw-rw-r-- 1 sergio pi_sergio 251411 Mar 21 08:14 Revisions.txt
+-rw-rw-r-- 1 sergio pi_sergio  32121 Mar 21 08:14 Revisions_header.txt
+-rw-rw-r-- 1 sergio pi_sergio  16351 Mar 21 08:13 Revisions_cloud.txt
+-rw-rw-r-- 1 sergio pi_sergio   2785 Mar 21 08:13 Revisions_Update_NLTECo2ppmv.txt
+-rw-rw-r-- 1 sergio pi_sergio   1638 Mar 21 08:10 Revisions_quickfix_after_cloning.txt
+-rw-rw-r-- 1 sergio pi_sergio  28349 Mar 21 08:08 Revisions_backgndtherm.txt
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,7 +84,20 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 
 v1.22 
 -----
+
+03/16/26         << KCARTA_SCATTERCODE is now under git >> 
+                 Clone from git@github.com:sergio66/umbc_scattering_tables_code_for_KCARTA_SARTA.git
+		 Current tables are in /home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/
+		   CIRRUS_BRYANBAUM  VOLZ_SMALLSIZE_LOGNORMAL_ALPHA2_280  WATER_250
+
+		 See the Readme there, it tells you how to take B.Baum/P.Yang cirrus params --> coeffs for KCARTA/SARTA
+		 
+		 See the Readme there, it tells you how to regenerate Mie coeffs for water clouds and aerosols
+		 and thn combine the text coeff files into binary files for kcarta
+		                     text coeff files into binary files for sarta
+
 02/25/26         See /home/sergio/SPECTRA/CKDLINUX/MT_CKD_H2O-4.3/src/drive_mt_ckd_h2o.f90 for netcdf in f90
+AND
 03/05/24         kLongOrShort = 0 was retired but then brought back : UTILITY/readkcarta2.x can produce netcdf files
                  which nicely separate gasODs, mixedpathODs, radiances .. which is now possible with
                  kLongOrShort = 0
@@ -377,6 +415,13 @@ v1.22
                 See "Improvement of the simulation of Cloud LW scattering in Broadband RTMs"
                 G. Tang, P. Yang, G. Kattawar, X. Huang, E. Mlawer, B. Baum, M. King
                 J. Atmos. Sci., July 2018
+
+                <<< iaaOverrideDefault(2,9) is now an integer to control Chou adjustment>>>
+                       0 >= iaaOverrideDefault(2,9) >= 100 : Chou adjustment factor = iaaOverrideDefault(2,9)/100
+                       -1 : use Tang 0.3
+                       -2 : use Tang = 0.10 for water clouds, 0.30 for ice cloud
+                       -3 : use parametrized Tang
+		       
     iDefault = +2
     iScaling = -10 !! this is what I err have been using till May 1999, which is same as +1 (see Bk 47)
     iScaling = +1  !! this is similarity scaling adjustment, Eqn 15 of Tang paper == 1-w/2(1+g)

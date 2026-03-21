@@ -6,13 +6,26 @@ iaNML_Ctype(iI=1,2,3) in nm_prfile .... and assign correct scattering table/file
 So set iNclouds_RTP = 2 even if you only have one or zero cloud (ie cfrac = 0 for other cloud(s))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-v1.22   Fixed interface of DISORT into KCARTA
+v1.22
+
+03/16/26         << KCARTA_SCATTERCODE is now under git >> 
+                 Clone from git@github.com:sergio66/umbc_scattering_tables_code_for_KCARTA_SARTA.git
+		 Current tables are in /home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/
+		   CIRRUS_BRYANBAUM  VOLZ_SMALLSIZE_LOGNORMAL_ALPHA2_280  WATER_250
+
+		 See the Readme there, it tells you how to take B.Baum/P.Yang cirrus params --> coeffs for KCARTA/SARTA
+		 
+		 See the Readme there, it tells you how to regenerate Mie coeffs for water clouds and aerosols
+		 and thn combine the text coeff files into binary files for kcarta
+		                     text coeff files into binary files for sarta
+				     
+7/16/22         Fixed interface of DISORT into KCARTA
                 The biggest improvement for DISORT is to change rSatAngle from satzen at GND (raLayAngles(iaNumLayer(1))) 
                 to satzen at TOA ~ scanang (raLayAngles(iaNumLayer(iNumLayer)))
                 See the new lines of code in kcartamain.f90 before calling InterfaceScattering
 
-        Implemented the G. Tang/P. Yang fix to the Chou scattering scaling algorithm
-                b) <<< iaaOverrideDefault(2,9) is now an integer to control Chou adjustment>>>
+6/9/22          Implemented the G. Tang/P. Yang fix to the Chou scattering scaling algorithm
+                <<< iaaOverrideDefault(2,9) is now an integer to control Chou adjustment>>>
                        0 >= iaaOverrideDefault(2,9) >= 100 : Chou adjustment factor = iaaOverrideDefault(2,9)/100
                        -1 : use Tang 0.3
                        -2 : use Tang = 0.10 for water clouds, 0.30 for ice cloud

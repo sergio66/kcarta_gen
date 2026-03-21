@@ -355,9 +355,9 @@ CONTAINS
 ! now we only allow
 ! %% this is new list
 ! %% 0,21,23,24 are the 1990s CKD
-! %% 1,25       are new MT-CKD
-! %% 4 6        are derived from MT-CKD1 (cant remember how to derived 2,3,5)
-! %%            are derived from MT-CKD25
+! %% 1,25,32,43    are new MT-CKD
+! %% 4 6           are derived from MT-CKD1 (cant remember how to derived 2,3,5)
+! %%               are derived from MT-CKD25
 
 ! origCKD = [0 21 23 24];
 ! MTCKD1  = [ [1] [4 6]];

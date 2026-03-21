@@ -1,4 +1,4 @@
-function [w,d,iaProf,iaNumLay] = readsarta_jac(fname,iGID,rThreshold)
+function [w,d,iaProf,iaNumLay] = readsarta_jacV2(fname,iGID,rThreshold)
 
 if nargin == 2
   %% comparing performance of /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/RODGERS/RODGERS21
@@ -96,7 +96,8 @@ for iP = 1 : numprof
 %  printarray([iP iaNumLay(iP) numprof])
 
   if iNC ~= numchan
-    [iNC numchan]
+    fprintf(1,'readsarta_jacV2.m : [iNC numchan] = %4i %4i \n',[iNC numchan])
+    keyboard_nowindow
     error('iNC (inside file) and numchan (head of file) are different!!!')
   end
   if iWhich ~= iGID
