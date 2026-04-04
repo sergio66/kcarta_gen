@@ -147,7 +147,9 @@
  iRTP = 4758
  caPFname = 'ecmwf_airicrad_day092_clear.op.rtp'
  caPFname = 'ecmwf_airicrad_day092_clear_unitemiss.op.rtp'
- 
+
+ iRTP = 1
+ caPFname = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1013_400ppm_unitemiss.op.rtp'
  $end
 
  $nm_weight
@@ -213,7 +215,7 @@
  $nm_jacobn
  namecomment	=  '******* JACOBN section *******'
  !no jacobians
- iJacob	=     1
+ iJacob	=     0
  iaJacob(1) = 3
  iaJacob(1) = 1 
  iaJacob(1) = 2
