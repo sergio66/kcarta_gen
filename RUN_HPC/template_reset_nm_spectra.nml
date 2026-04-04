@@ -50,8 +50,9 @@
  iaAltComprDirs(1) = 2
  caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/glab/'
 
- !Jun 2016 - Aug 2018 : use new LBLRTMv12.4 databases for gid 2,6,3,5,22,7 >>>>>>>>>>>>>>>>>>>>>>>>
- !Sep 2018 - ABC 20XY : use new LBLRTMv12.8 databases for gid 2,6; LBLRTMv12.4 for gid 3,5,22,7 >>>
+ !Jun 2016 - Aug 2018 : use new LBLRTMv12.4  databases LNFL 3.2  for gid 2,6,3,5,22,7 >>>>>>>>>>>>>>>>>>>>>>>>
+ !Sep 2018 - ABC 20XY : use new LBLRTMv12.8  databases LNFL3.2   for gid 2,6; LBLRTMv12.4 for gid 3,5,22,7 >>>
+ !Apr 2026 - ABC 20XY : use new LBLRTMv12.17 databases LNFL3.8.1 for gid 2,6; LBLRTMv12.4 for gid 3,5,22,7 >>> 
  iNumAltComprDirs = -1
  iNumAltComprDirs = 3
  !iNumAltComprDirs = DOLBLRTM
@@ -70,17 +71,21 @@
  caaAltComprDirs(1)= '/home/sergio/asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/' 
  ! Iouli Gordon LM
  caaAltComprDirs(1)= '/home/sergio/asl/rta/kcarta/H2016.ieee-le/IR605/HITRAN_LM/etc.ieee-le/Mar2021/fullCO2_400ppmv/'
- ! LBLRTM
+ ! LBLRTM, remember the load_refprof loads in a 385 ppmv profile and then I convert to 400 ppmv
  caaAltComprDirs(1)= '/home/sergio/asl/rta/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/CO2_400ppmv/'
  caaAltComprDirs(1)= '/home/sergio/asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/CO2_400ppmv/'
+ caaAltComprDirs(1)= '/home/sergio/asl/rta/kcarta/H2024.ieee-le/IR605/lblrtm12.17/etc.ieee-le/CO2_400ppmv/'
 
  iaAltComprDirs(2) = 6
  caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'
  caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm2/'
  caaAltComprDirs(2)= '/asl/data/kcarta/H2012.ieee-le/IR605/lblrtm12.4/etc.ieee-le/'
  caaAltComprDirs(2)= '/asl/data/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/' 
- caaAltComprDirs(2)= '/home/sergio/asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/' 
+ caaAltComprDirs(2)= '/home/sergio/asl/rta/kcarta/H2016.ieee-le/IR605/lblrtm12.8/etc.ieee-le/'
+ caaAltComprDirs(2)= '/home/sergio/asl/rta/kcarta/H2024.ieee-le/IR605/lblrtm12.17/etc.ieee-le/'  
 
+ !!!!!!!!!!!!!!!!!!!!!!!!! unchanged, no new H2024/LBLRTM 12.17/ LNFL 3.8.1 databases !!!!!!!!!!!!!!!!!!!!!!!!!
+ 
  iaAltComprDirs(3) = 3
  caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/WOBASEMENT/'
  caaAltComprDirs(3)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/lblrtm/'

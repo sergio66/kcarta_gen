@@ -53,6 +53,11 @@ Every 4 years we update KCARTA databases with new HITRAN database
   (so H1996, H1998, H2k, H2004, H2008, H2012, H2016, H2020, H2024)
 We have also done GEISA databases, G2015
 
+O2/N2 continuum
+  CKD 0    for ages
+  CKD 3.2  (2018)
+  CKD 4.3  (2026)
+  
 Water continuum
   CKD : 0, 2.1, 2.3, 2.4
   UMBC : 2,3,4,5,6
@@ -85,6 +90,11 @@ Details : Bug fixes/ clarifications and new features/updates/improvements
 v1.22 
 -----
 
+04/04/26         CKD 4.3   O2/N2 now available for use with run8.m and is in the H2024 compressed database
+                 CKD 4.3   WV    now available for use with run8watercontinuum.m and kCARTA
+		 LNFL3.8.1 CO2/CH4 linemix now available for use with kCARTA
+                   See RUN_HPC/template_reset_nm_spectra.nml
+		   
 03/16/26         << KCARTA_SCATTERCODE is now under git >> 
                  Clone from git@github.com:sergio66/umbc_scattering_tables_code_for_KCARTA_SARTA.git
 		 Current tables are in /home/sergio/nogit/TEMP_CLOUD_PARAM/CLOUDS_MIEDATA/

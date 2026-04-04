@@ -41,6 +41,12 @@ every 4 years 2021,2016,2020,2024 : new kCARTA HITRAN database
                 instead of 
                        /asl/data/kcarta/v20.ieee-le/h2o.ieee-le/
 
+... H2008, H2012, H2016 ...
+
+Sometime 2021   Have updated to H2020
+
+Feb-Apr 2026    Have updated to H2024
+
 CO2 ppmv
 ========
 
@@ -61,6 +67,9 @@ This parameter is now included in kcarta.param, for NLTE purposes
 *** it is HIGHLY recommended to use kcarta3XY database for ppmv of 3XY
 *** eg do NOT try to mix a kcarta370ppmv database and then try to compute NLTE
 ***    effects for 385 ppmv by setting mixratio = 1.04 
+
+Probably 2008 Use 385 ppmv
+Probably 2018 Use 400 ppmv
 
 Improvements to CO2 databases 
 ==============================
@@ -105,6 +114,12 @@ August 8, 2002
   cp /asl/data/kcarta/v23.ieee-le/etc.ieee-le/r2380_g2.dat .
   cp /asl/data/kcarta/v23.ieee-le/etc.ieee-le/r2405_g2.dat .
 
+Sometime 2018
+  Use LBLRTM 12.8 CO2/CH3 LNFL v3.2
+  
+March 2026
+  Use LBLRTM 12.17 CO2/CH3 LNFL v3.8.1
+  
 Updates to water continuum
 ==========================
 
@@ -120,12 +135,19 @@ Water continuum
   CKD : 0, 2.1, 2.3, 2.4
   UMBC : 2,3,4,5,6
   MT-CKD : 1.0, 2.5 (not sure when, probably 2012), 3.2 (2018), 4.3 (2026)
+  
 %% see Revisions_backgndtherm.txt  
 ! %% this is new list
 ! %% 0,21,23,24 are the 1990s CKD
 ! %% 1,25,32,43    are new MT-CKD
 ! %% 4 6           are derived from MT-CKD1 (cant remember how to derived 2,3,5)
 ! %%               are derived from MT-CKD25
+
+Updates to O2/N2
+================
+  CKD 0    for ages
+  CKD 3.2  (2018)
+  CKD 4.3  (2026)
 
 NLTE algorithm
 ==============

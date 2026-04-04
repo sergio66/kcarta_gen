@@ -1,10 +1,12 @@
-Make H2024 database using th Readmes in
+Make H2024 database using the Readme in
   /home/sergio/git/HITRAN2UMBCLBL/MAKEIR/H2024
   MAKEIR_ALL_H24  MAKEIR_WV_H24
 
 See for example
-  comp_IRdatabase_H2024.sc
-
+  << comp_IRdatabase_H2024.sc >>
+  << comp_IRdatabase_H2024.sc >>
+  << comp_IRdatabase_H2024.sc >>
+  
 1) echo "mkdir PARAM_HT2024 and edit so all reference to H2020 are change to H2024"
 
 2) Edit/correct the WaterPath
@@ -13,7 +15,57 @@ See for example
 
 5) be careful about ../../BIN/compdatabase.x .... the paths sometimes change
    compdatabase.f is in ../../UTILITY/compdatabase.f
-  
+
 6) Be careful at the end where is suggests comparing H2020 vs H2024 (ie you need to get the datescorrect)
 
-7) then to make "all_15_450000_IRH2024.param"     you can edit and run     "cat_all_database_FIR_UV.sc"
+7) Run     comp_IRdatabase_H2024.sc
+
+8) [sergio@chip-login2 MAKE_COMP_HTXY_PARAM_SC]$ ls -lt PARAM_HT2024
+total 6
+-rw-rw-r-- 1 sergio pi_sergio 5535 Apr  4 02:44 comp_ir605_2830.param
+
+9) then to make "all_15_450000_IRH2024.param"     you can edit and run     "cat_all_database_FIR_UV.sc"
+
+10) Finally to test, you can go to /home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/, run cluster with set_rtp.m prociessing
+  iInstr = 1; iDoConvolve = 1;
+  use_this_rtp = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1013_400ppm_unitemiss.op.rtp';
+
+  edit   template_reset_nm_spectra.nml     so it knows about newest CKD4.3, LBLRTM12.17 CO2/CH4 and then
+  rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch --array=1-49                       sergio_matlab_chip.sbatch 1
+
+11) Then go to /home/sergio/KCARTA/SRCv1.22_f90
+     Edit /home/sergio/KCARTA/INCLUDE/H2024/NCLUDE/Templates_V122/template_kcartaV122_400_H2024_NLTEH2016.param
+     Edit datafix in /home/sergio/KCARTA/SRCv1.22_f90
+     Edit Makefile
+     make
+     cd TEST_JACS/Test_H12_H16_H20_H24
+     edit test_H12_H16_H20_f90.m so new version can run
+       time ../../BIN/kcarta.x90_v1.22_400ppmv_H24 quickuseF90.nml          junk24.dat
+     edit and run ../../TEST_JACS/Test_H12_H16_H20_H24/test_H12_H16_H20_f90.m
+
+ %% new H2024, CKD3.2, , old N2/O2 CKD3.2, old CO2/CH4 LNFL3.2 (LBLRTM 12.8)
+ rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch --array=1-49                       sergio_matlab_chip.sbatch 1
+ mkdir JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD32
+ mv JUNK/individual_prof_convolved_kcarta_airs_*.mat JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD32
+
+ %% new H2024, CKD4.3, , old N2/O2 CKD3.2, old CO2/CH4 LNFL3.2 (LBLRTM 12.8)
+ rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch --array=1-49                       sergio_matlab_chip.sbatch 1
+ mkdir JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD43
+ mv JUNK/individual_prof_convolved_kcarta_airs_*.mat JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD43
+
+ %% new H2024, CKD4.3, new N2/O2 CKD43, old CO2/CH4 LNFL3.2 (LBLRTM 12.8)
+ rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch --array=1-49                       sergio_matlab_chip.sbatch 1
+ mkdir JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD43_newN2O2
+ mv JUNK/individual_prof_convolved_kcarta_airs_*.mat JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD43_newN2O2
+
+ %% new H2024, CKD4.3, new N2/O2 CKD43, new CO2/CH4 LNFL3.8.1 (LBLRTM 12.17)
+ rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch --array=1-49                       sergio_matlab_chip.sbatch 1
+ mkdir JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD43_newN2O2_newCO2CH4
+ mv JUNK/individual_prof_convolved_kcarta_airs_*.mat JUNK/TEST_H2020_H2024_CKD32_CKD43/H2024_CKD43_newN2O2_newCO2CH4
+
+12) Compare using ompare_the_H16_H20_H24_hitranversions_with_kcarta.m
+[sergio@chip-login2 MAKE_COMP_HTXY_PARAM_SC]$ find /home/sergio/KCARTA -name "compare_the_H16_H20_H24_hitranversions_with_kcarta.m"
+[sergio@chip-login2 MAKE_COMP_HTXY_PARAM_SC]$ find /home/sergio/git/kcarta_gen -name "compare_the_H16_H20_H24_hitranversions_with_kcarta.m"
+/home/sergio/git/kcarta_gen/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/JUNK/TEST_H2020_H2024_CKD32_CKD43/compare_the_H16_H20_H24_hitranversions_with_kcarta.m
+/home/sergio/git/kcarta_gen/UTILITY/compare_the_H16_H20_H24_hitranversions_with_kcarta.m
+
