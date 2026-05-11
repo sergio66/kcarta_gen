@@ -51,7 +51,7 @@
  caaAltComprDirs(1)= '/asl/data/kcarta/H2012.ieee-le/IR605/etc.ieee-le/glab/'
 
  !Jun 2016 - Aug 2018 : use new LBLRTMv12.4  databases LNFL 3.2  for gid 2,6,3,5,22,7 >>>>>>>>>>>>>>>>>>>>>>>>
- !Sep 2018 - ABC 20XY : use new LBLRTMv12.8  databases LNFL3.2   for gid 2,6; LBLRTMv12.4 for gid 3,5,22,7 >>>
+ !Sep 2018 - Mar 2026 : use new LBLRTMv12.8  databases LNFL3.2   for gid 2,6; LBLRTMv12.4 for gid 3,5,22,7 >>>
  !Apr 2026 - ABC 20XY : use new LBLRTMv12.17 databases LNFL3.8.1 for gid 2,6; LBLRTMv12.4 for gid 3,5,22,7 >>> 
  iNumAltComprDirs = -1
  iNumAltComprDirs = 3

@@ -18,7 +18,7 @@
 # run this with   /bin/rm batchout*.* slurm* JUNK/individual_prof_convolved_kcarta* JUNK/rad.dat*; sbatch -p 2018 --array=1-Nmax%128 sergio_matlab_chip.sbatch 1
 # run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p 2018 --array=1-Nmax%128 sergio_matlab_chip.sbatch 1
 # run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p 2018 --exclude=cnode203,cnode267 --array=1-Nmax%128 sergio_matlab_chip.sbatch 1
-# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p 2021                              --array=1-Nmax%128 sergio_matlab_chip.sbatch 1
+# run this with   rmer_slurm_JUNKconv.sc; rmer_slurm_JUNKrad.sc; sbatch -p 2021                             --array=1-Nmax%128 sergio_matlab_chip.sbatch 1
 
 ########################################################################
 ## for DISORT : submit_many_disort_runs.m      can launch jobs for  sbatch -p 2021  --array=1111 sergio_matlab_chip.sbatch 9 profileles A to B, does whole 605-2830 cm-1
@@ -89,12 +89,12 @@
 ##SBATCH --partition=2021
 ##SBATCH --partition=2024
 
-#### to make sure we have exclusive privilege, two slab jacs
+#### to make sure we have exclusive privilege, did this at 10 pm 5/5/2026 to get things moving
 ##SBATCH --qos=pi_strow
 ##SBATCH --partition=pi_strow
-##SBATCH --time=3:59:00
+##SBATCH --time=0:59:00
 
-#### we run on 2024 but run risk of someone pre-empting, clear sky
+#### we run on 2024 but run risk of someone pre-empting, clear sky, did not run on 5/5/2026 though it ran earlier
 #SBATCH --qos=shared
 #SBATCH --partition=2024
 #SBATCH --time=0:59:00
@@ -113,6 +113,16 @@
 
 ########################################################################
 
+source /home/sergio/.bashrc
+
+## module load MATLAB/2023b
+## module load netCDF-Fortran/4.6.1-iimpi-2023a
+## module load HDF/4.2.16-2-GCCcore-13.2.0
+## module load intel-compilers/2023.1.0
+## module load imkl/2023.1.0
+
+########################################################################
+
 if [ $# -gt 0 ]; then
   echo "Your command line contains $# arguments"
 elif [ $# -eq 0 ]; then
@@ -121,6 +131,14 @@ fi
 
 ##  Specify the job array (format:  start-stop:step)
 ## DO NOT USE srun matlab -nodisplay -r "clust_do_kcarta_driver; exit"   but instead matlab -nodisplay -r "clust_do_kcarta_driver; exit" 
+
+# echo " "
+# echo "this is the path"
+# echo "$PATH"
+# echo " "
+# echo " this is the library path"
+# echo "$LD_LIBRARY_PATH"
+# echo " "
 
 if [[ "$1" -eq "" ]]; then
   # this is individual clear/cld runs

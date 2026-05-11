@@ -5,7 +5,7 @@
 %addpath /home/sergio/MATLABCODE
 addpath /home/sergio/git/matlabcode
 
-% system_slurm_stats
+system_slurm_stats
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -56,7 +56,12 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+%% so that we can hadloop through using "loop_clust_do_kcarta_driver.m" when cluster is dead
+if ~exist('JOBB')
+  JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+else
+  JOB = JOBB;
+end  
 if length(JOB) == 0
   JOB = 1;
 end

@@ -548,6 +548,8 @@ use_this_rtp = '../WORK/ecmwf_airicrad_day092_clear.rtp';
 
 iInstr = 1; iDoConvolve = 1;
 use_this_rtp = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1013_400ppm_unitemiss.op.rtp';
+use_this_rtp = '/umbc/rs/pi_sergio/WorkDirDec2025/oem_climate_jacs/Improve_SARTA_vs_KCARTA_Jacs/combine_83_49_370to430ppmv_v0.op.rtp';  %% combine 83 ECM with REG49, span 370:430 CO2/1.6:1.8 CH4/0.3:0.4 N2O
+use_this_rtp = '/umbc/rs/pi_sergio/WorkDirDec2025/oem_climate_jacs/Improve_SARTA_vs_KCARTA_Jacs/combine_83_49_370to430ppmv_v1.op.rtp';  %% combine 83 ECM with REG49, span 370:430 CO2/1.6:1.8 CH4/0.3:0.4 N2O, random perts
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iInstr = 124; iDoConvolve = 1;
