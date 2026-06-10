@@ -1,10 +1,10 @@
 ## /bin/cp -a *.m *.nml *.sbatch *.sc *eadme* .
 
-rsync -avc --progress --dry-run  --exclude='JUNK/' --include='*/' --include='*.m'  --include='*.nml' --include='*.sbatch'  --include='*.sc' --include='*eadme*' --exclude='*' ../WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/ ../RUN_HPC/
+rsync -avc --progress --dry-run  --exclude='JUNK/' --exclude='RTP/' --include='*/' --include='*.m'  --include='*.nml' --include='*.sbatch'  --include='*.sc' --include='*eadme*' --exclude='*' ../WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/ ../RUN_HPC/
 
 read -p "Press [Enter] to continue ...  or Ctrl C to exit"
 
-rsync -avc --progress            --exclude='JUNK/' --include='*/' --include='*.m'  --include='*.nml' --include='*.sbatch'  --include='*.sc' --include='*eadme*' --exclude='*' ../WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/ ../RUN_HPC/
+rsync -avc --progress            --exclude='JUNK/' --exclude='RTP/' --include='*/' --include='*.m'  --include='*.nml' --include='*.sbatch'  --include='*.sc' --include='*eadme*' --exclude='*' ../WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/ ../RUN_HPC/
 
 ########################################################################
 ## no longer need this

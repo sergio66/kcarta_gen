@@ -169,7 +169,7 @@ elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg == 2346
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];
 
 elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud < 0 & gg == 2456
-  disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G2,4,5,6,51,52)')
+  disp('do_kcarta.m here A5 (clr sky rads and col jacs, for G2,4,5,6,51,52) MOSTLY FOR TILES TRENDS/ANOMALIES')
   %% sedder = [sedder ' -e "s/GGG/'    num2str(gg) '/g"'];   %% this gives gasID for jacobian
   sedder = [sedder ' template_Qcol2456_51_52jacobian.nml  > ' outnml];  %currently g 2,4,5,6,51,52    
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname ' ' outnamejac '; echo $? >& ' outstat];

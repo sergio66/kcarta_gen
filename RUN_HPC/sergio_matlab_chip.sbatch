@@ -97,7 +97,8 @@
 #### we run on 2024 but run risk of someone pre-empting, clear sky, did not run on 5/5/2026 though it ran earlier
 #SBATCH --qos=shared
 #SBATCH --partition=2024
-#SBATCH --time=0:59:00
+##SBATCH --time=0:59:00
+#SBATCH --time=11:59:00
 ########################################################################
 
 ##  This is in MB, very aggressive but I have been running outta memory
@@ -113,13 +114,13 @@
 
 ########################################################################
 
-source /home/sergio/.bashrc
+# source /home/sergio/.bashrc
 
-## module load MATLAB/2023b
-## module load netCDF-Fortran/4.6.1-iimpi-2023a
-## module load HDF/4.2.16-2-GCCcore-13.2.0
-## module load intel-compilers/2023.1.0
-## module load imkl/2023.1.0
+module load MATLAB/2023b
+module load netCDF-Fortran/4.6.1-iimpi-2023a
+module load HDF/4.2.16-2-GCCcore-13.2.0
+module load intel-compilers/2023.1.0
+module load imkl/2023.1.0
 
 ########################################################################
 

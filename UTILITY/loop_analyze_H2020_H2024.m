@@ -12,13 +12,16 @@ disp('Therefore g1,g103 in H20 and H24 are essentially identical after convoluti
 disp(' ')
 
 xlim1 = [1050 1300];
+  xlim1 = [1050 1400];
 xlim2 = [2500 2800];
+  xlim2 = [2050 2250];
 xlim3 = [0650 0850];
 xlim4 = [1250 1650];
 
 gg = 0;
 ii = length(glist0) + 1;
 fname = ['JUNK/individual_prof_convolved_kcartaH2020_H2024_' num2str(gg) '.mat'];
+disp('showing RAW all')
 if exist(fname)
   iaDone(ii) = 1;
   iaGasID(ii) = gg;
@@ -51,8 +54,9 @@ iaGasID = nan(1,length(glist0));
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 iaDo = glist0;
-wantlist = [1 103];         [Y,iaDo] = intersect(glist0,wantlist);
-wantlist = [1 4 56 72 103]; [Y,iaDo] = intersect(glist0,wantlist);   %% [4 56 72] are the gases that show differences
+wantlist = [1 103];           [Y,iaDo] = intersect(glist0,wantlist);
+wantlist = [1 4 56 72 103];   [Y,iaDo] = intersect(glist0,wantlist);   %% [4 56 72] are the gases that show differences
+wantlist = [1 4 5 56 72 103]; [Y,iaDo] = intersect(glist0,wantlist);   %% [4 5 56 72] are the gases that show differences
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 

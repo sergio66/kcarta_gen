@@ -347,7 +347,7 @@ elseif gg == 5912 & iDoJac == 1
 %%  dall = [dall1001 dallO3 dallT dallWgtFcn dallSurf];
 %%  ngases = 2;
 
-elseif gg == 2346 & iDoJac == 100
+elseif (gg == 2346 | gg == 2456) & iDoJac == 100
   if iDoCloud <= 0
     fprintf(1,'doing clear sky COL jacobians for gasID %3i ==> 2 3 4 6 51 52 \n',2346)
   elseif iDoCloud == 1
@@ -392,7 +392,7 @@ elseif gg == 2346 & iDoJac == 100
   figure(1); plot(fc,qc); title('CO2 coljac');
 
 else
-  error('kjsklsjglkjgskjgs')
+  error('oops no known combo for do_convolve_jac.m')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

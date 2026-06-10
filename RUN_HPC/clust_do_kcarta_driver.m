@@ -56,7 +56,20 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% so that we can hadloop through using "loop_clust_do_kcarta_driver.m" when cluster is dead
+%{
+check_jobs
+  liststr = 'JUNK/individual_prof_convolved_kcarta_airs_';    %% when only doing AIRS convolve
+  iaFound = check_all_jobs_done(liststr,4608,[],-1);          %% -1 is important because the names are
+                    %% individual_out_1.mat,individual_out_11.mat,individual_out_111.mat,individual_out_1111.mat,
+		    %% so the format is simply %i
+
+OR IF YOU are doing jacs
+  iaFound = check_all_jobs_done(liststr,4608,'jac.mat',-1);
+
+can also edit/run check_files_N_sizes.m as needed
+%}
+
+%% so that we can loop through using "loop_clust_do_kcarta_driver.m" when cluster is dead
 if ~exist('JOBB')
   JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 else
@@ -64,6 +77,7 @@ else
 end  
 if length(JOB) == 0
   JOB = 1;
+  JOB = 3842;
 end
 
 % JOB = 49;
