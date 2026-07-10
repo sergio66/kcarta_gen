@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 addpath /home/sergio/git/matlabcode
-addpath /home/sergio/KCARTA/MATLAB
-addpath /home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES
+addpath /home/sergio/git/kcarta_gen/MATLAB
+addpath /home/sergio/git/kcarta_gen/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES
 addpath /home/sergio/git/matlabcode/matlibSergio/matlib2025/h4tools
 addpath /home/sergio/git/matlabcode/matlibSergio/matlib2025/rtptools
 

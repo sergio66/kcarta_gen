@@ -1,8 +1,16 @@
+General
+-------
+
 1) Make ../BIN
 2) Make ../WORK
 3) See eg ../INCLUDE/Templates_V122/template_kcartaV122_400_H2020_NLTEH2016.param
    if you want 605-2830 cm-1 as 0.0025 cm-1 resolution or
-               500-805 as 0.0005 cm-1, 805-2830 as 0.0025 cm-1 resolution	     
+               500-805 as 0.0005 cm-1, 805-2830 as 0.0025 cm-1 resolution	       
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+LIB and INCLUDE
+---------------
 
 Also
 a) mkdir ../INCLUDE/TempF90/JunkTempDir
@@ -10,6 +18,10 @@ b) edit +54 SRCv1.22_F90/Makefile_intel_hdf_rtp and make rtpdir point to eg
      /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/KLAYERS_RTPv221_150levs_120km/rtpV221_80gases
 c) go to LIB, make BLAS and point to that symbolically
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Can make comparisons between different HITRAN versions
+------------------------------------------------------
 I also have not really saved
   L2SComparisons/
 but you can rgenerate using
@@ -22,3 +34,21 @@ but you can rgenerate using
   ../UTILITY/driver_loop_l2s.m:93:        saver = ['save ../L2SComparisons/l2s_kc122_H' num2str(iHIT-2000) '_' num2str(f1(ii)) '_' num2str(f2(ii)) '.mat d w iaGasID CKDCKD'];
   ../UTILITY/loop_analyze_H2020_H2024.m:5:disp('if you do    load ../L2SComparisons/l2s_kc122_H24_605_2830.mat')
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Running code on cluster
+-----------------------
+
+mkdir -p WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES
+   cp -a RUN_HPC/*.nml    WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/.
+   cp -a RUN_HPC/*.sc     WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/.
+   cp -a RUN_HPC/*.m      WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/.
+   cp -a RUN_HPC/*.sbatch WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/.
+
+cd WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES
+   Also make a "JUNK" dir there, it could be a link to somewhere eg /umbc/xfs3/strow/sergio_test/nogit
+
+check  airs_convolve_file_numchans.m, it maybe symbolic link to eg /home/sergio/git/matlabcode while you want to eg /umbc//xfs3/sergio/git/matlabcode
+edit   airs_convolve_file_numchans.m                                        so you point to correct sfile       eg /home/sergio/MATLABCODE                             
+edit   addpath_convolve.m in WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES   so you point to correct directories eg /home/sergio/git/matlabcode/
+edit   set_gasOD_cumOD_rad_jac_flux_cloud_lblrtm.m                          so you point to correct kcartaexec  eg /home/sergio/git/kcarta_gen/BIN/

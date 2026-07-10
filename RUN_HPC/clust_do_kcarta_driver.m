@@ -69,6 +69,14 @@ OR IF YOU are doing jacs
 can also edit/run check_files_N_sizes.m as needed
 %}
 
+%% so that if we have eg 40000 regression profiles, we can
+%%   set JOB_OFFSET = 00000; run off JOB 00001-20000
+%%   set JOB_OFFSET = 20000; run off JOB 20001-40000
+%%   set JOB_OFFSET = 40000; run off JOB 40001-60000
+if ~exist('JOB_OFFSET')
+  JOB_OFFSET = 0;
+end
+
 %% so that we can loop through using "loop_clust_do_kcarta_driver.m" when cluster is dead
 if ~exist('JOBB')
   JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
@@ -79,6 +87,9 @@ if length(JOB) == 0
   JOB = 1;
   JOB = 3842;
 end
+JOB = JOB_OFFSET + JOB;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % JOB = 49;
 % JOB = 1;
