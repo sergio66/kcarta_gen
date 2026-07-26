@@ -1,0 +1,196 @@
+Contents
+---------
+
+0) General purpose
+1) Edit/run make_arbitrary_TZ_STDparams_f90.m
+2) Check the output has been turned to f90
+3) Recompile kCARTA
+4) the actual revisions to v1.22 (and earlier)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+0) General purpose
+------------------
+
+See   <<< Revisions_arbitrary_plevs.txt >>> for quick notes about how to reset/redo
+  arbitrary proessure levels.
+
+The klayers code for these are developed in
+  /home/sergio/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/
+See for example
+  /home/sergio/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/Src_rtpV221
+  /home/sergio/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/Grid
+
+After the relevant klayers code is compiled, go to
+  /home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA
+and run for example
+  /home/sergio/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/BinV221/klayers_aircraft_50km fin=regr49_1100_with_co2_400ppm_9gases_unitemiss.ip.rtp fout=regr49_1100_with_co2_400ppm_9gases_unitemiss_aircraft_50km.op.rtp
+  /home/sergio/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/BinV221/klayers_aircraft_20km fin=regr49_1100_with_co2_400ppm_9gases_unitemiss.ip.rtp fout=regr49_1100_with_co2_400ppm_9gases_unitemiss_aircraft_20km.op.rtp
+  /home/sergio/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/BinV221/klayers_aircraft_12km fin=regr49_1100_with_co2_400ppm_9gases_unitemiss.ip.rtp fout=regr49_1100_with_co2_400ppm_9gases_unitemiss_aircraft_12km.op.rtp
+  
+Note : Steps 1-3 (in Revisions_arbitrary_plevs.txt)  have to be redone each time you want to process a klayers rtp
+with different layers than L2100 USStd
+ie after each compilation kCARTA can handle two cases only
+a) a 100 layer L2100 USStd pressure levels (fromm 1100 mb to 0.005 mb,
+   with 0.25 km thick layers at ground
+b) a 100 layer abitrary USStd pressure levels (from  <= 1100 mb to >= 0.005 mb)
+Examples of the latter include
+- OCO2 PBL layering for Bill Irion/JPL (1050 mb to 0.005 mb,
+  with 0.125 km thick layers at surface
+- NASA ER2 aircraft at 20 km layering (1100 mb to 56 mb)
+  with 47m (0.047 km) thick layers at surface and 0.71 km thick layers at 56 mb
+- NASA Gulfstream aircraft at 11 km layering (1100 mb to 250 mb)
+  with 25m (0.025 km) thick layers at surface and 0.38 km thick layers at 12 km
+
+We also plan to make a few klayers codes for uplooking instruments at the ground (1013 mb, 980mb, 630 mb)
+
+1) Edit/run make_arbitrary_TZ_STDparams_f90.m
+----------------------------------------------
+
+Whenever you make a new arbitrary layer file for kcarta, YOU HAVE TO RUN
+  ~/git/kcarta_gen/MATLAB/EARTH_MAKEIR/make_arbitrary_TZ_STDparams_f90.m
+and then re-compile KCARTA to pick up these defns  
+
+    [sergio@c24-52 SRCv1.22_f90]$ find /home/sergio/git/kcarta_gen -name "make_arbitrary_TZ_STDparams_f90.m"
+    /home/sergio/git/kcarta_gen/MATLAB/EARTH_MAKEIR/make_arbitrary_TZ_STDparams_f90.m
+    
+    [sergio@c24-52 SRCv1.22_f90]$ find /home/sergio/git/kcarta_gen -name "arbitrary_TZ_STD.param_earth_PBL"
+    /home/sergio/git/kcarta_gen/MATLAB/EARTH_MAKEIR/arbitrary_TZ_STD.param_earth_PBL
+
+07/25/26        ~/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/Grid/ is linked to 
+                ~/git/kcarta_gen/MATLAB/EARTH_MAKEIR/make_arbitrary_TZ_STDparams_f90.m
+
+                Edit it/choose iWhichNewType
+		  iWhichNewType = 1;   %% USSTD for 100 L2 layers --> OCO2 PBL layers (125 m thick at surface)
+  		  iWhichNewType = 50;  %% USSTD for 100 L2 layers --> aircraft at 1 mb   = 50 km
+  		  iWhichNewType = 20;  %% USSTD for 100 L2 layers --> aircraft at 57 mb  = 20 km		  
+  		  iWhichNewType = 12;  %% USSTD for 100 L2 layers --> aircraft at 250 mb = 12 km		  
+
+                it makes a file, and then the code symbolically links eg (if iWhichNewType = 1)
+                   lrwxrwxrwx 1 sergio pi_sergio   32 Dec 19  2025 arbitrary_TZ_STDparam_earth -> arbitrary_TZ_STD.param_earth_PBL
+
+2) Check the output has been turned to f90
+------------------------------------------
+
+After you run the code, check the following
+
+    [sergio@c24-52 WORK]$ find /home/sergio/git/kcarta_gen -name "arbitrary_TZ_STDparam.f90"
+    /home/sergio/git/kcarta_gen/INCLUDE/TempF90/arbitrary_TZ_STDparam.f90
+    
+    [sergio@c24-52 WORK]$ ls -lt /home/sergio/git/kcarta_gen/INCLUDE/TempF90/arbitrary_TZ_STDparam.f90
+    -rw-rw-r-- 1 sergio pi_sergio 9196 Jul 25 22:57 /home/sergio/git/kcarta_gen/INCLUDE/TempF90/arbitrary_TZ_STDparam.f90
+
+3) Recompile kCARTA
+--------------------
+
+Then re-make kcarta executble since it uses that file from compile ime, not link time
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+4) the actual revisions to v1.22
+--------------------------------
+
+v1.22
+-------
+
+07/25/26        ~/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/Grid/ is linked to 
+                ~/git/kcarta_gen/MATLAB/EARTH_MAKEIR/make_arbitrary_TZ_STDparams_f90.m
+
+                Edit it/choose iWhichNewType
+		  iWhichNewType = 1;   %% USSTD for 100 L2 layers --> OCO2 PBL layers (125 m thick at surface)
+  		  iWhichNewType = 50;  %% USSTD for 100 L2 layers --> aircraft at 1 mb   = 50 km
+  		  iWhichNewType = 20;  %% USSTD for 100 L2 layers --> aircraft at 57 mb  = 20 km		  
+  		  iWhichNewType = 12;  %% USSTD for 100 L2 layers --> aircraft at 250 mb = 12 km		  
+
+12/31/24        in kcoeff_common.f90
+                     SUBROUTINE MakeRefProfV01
+		automatically decides between MakeRefProfV0 (usual kCompressed database pressure layers)
+		                           or MakeRefProfV1 (new layering)
+                depending on rtp file read in. If new arbitrary layers, it also checks 
+                that the layering/levels corresponds to what is in 
+                  '../INCLUDE/TempF90/arbitrary_TZ_STDparam.f90'
+
+12/29/24        ARBITRARY PLEVS : MakeRefProfV1 now reads in the STD ARB PLEVS info
+                using     include '../INCLUDE/TempF90/arbitrary_TZ_STDparam.f90'
+                and iUSE_ARB_STD_for_Accuracy = 1
+
+12/23/24        ARBITRARY PLEVS : to go back to the code from Nov 2024, grep for 
+                  "to go back to orig ARB PLEVS with MakeRefProfV0 code"
+                in kcartamain.f90 and in n_rtp.f90
+                comment out the Call DoStop      in n_rtp.f90       (four of them)
+                make sure you call MakeRefProfV0 in kcartamain.f90  (one of them)
+                make sure you call MakeRefProfV0 in kcartabasic.f90 (one of them)
+                And set iaaOverride(3,8) = -1 in your namelist file, esp if 
+                  PLEVS_klayers is NOT same as PLEVS_100_AIRSlayers
+
+                iaaOverrideDefault(3,8) = -1 DEFAULT means klayers plevs can disagree with included ODdatabase plevs
+
+12/23/24        ARBITRARY PLEVS : made MakeRefProfV1 the default 
+
+12/20/24        ARBITRARY PLEVS : 
+                Fixed lots of bugs for ARBITRARY PLEVS; in particualr if gas
+                is NOT in rtp profile, simply reading in the AFGL US
+                Stad AIRS 101 layer amounts as reference, is wrong;
+                this needs to be modified!!! See "SetQ_NotInRTP"
+                called in kcartamain.f90 or kcartabasic.f90
+
+12/17/24        ARBITRARY PLEVS : subr xWeights
+                n_rtp.f90 checks to see how "close" the mean prssure levels in 
+                   PLEV_KCARTADATABASE_AIRS (from ../INCLUDE/TempF90/KCARTA_databaseparam.f90) 
+                and
+                   raPressLevels (from p.plevs, from reading in the rtp file)
+                are. 
+
+                Then on checking iaaOverrideDefault(3,8), the code proceeds or halts
+                  iaaOverrideDefault(3,8) = +1 means klayers plevs must agree   with included ODdatabase plevs
+                  iaaOverrideDefault(3,8) = -1 means klayers plevs can disagree with included ODdatabase plevs
+                So if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = +1 ... yay
+                      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = +1 ... boo
+                while
+                   if PLEV_KCARTADATABASE_AIRS and raPressLevels    agree, and iaaOverrideDefault(3,8) = -1 ... yay, can go ahead (the code will interpolate in T)
+                      PLEV_KCARTADATABASE_AIRS and raPressLevels disagree, and iaaOverrideDefault(3,8) = -1 ... yay the code will interpolate in T and P
+
+                After this the code automatically calls SUBROUTINE xWeights to figure out how to weight the kCompressed Databse layers
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+1/14/16         ARBITRARY PLEVS : subr xWeights
+                Cleaned up/improved subr MakeRefProf (especially for arbitrary layers)
+                Found/fixed a bug in subr xWeights (for arbitrary pressure layers)
+		-- now use 100 <Pavg> to find the layers to do interpoation onto aritrary p_in
+		    (rather than 101 <Plevels>
+		-- had a bug which set weights = 1 if the delta(p1-p2) was 1e-3 atm; since the
+		   pressure layers can be "quite close in psapce" (in atm), this threshold
+		   is now only used if delta(p1-p2) <= 1e-6
+		
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+03/18/11        ARBITRARY PLEVS : subr xWeights
+                Faster version of v1.15 : the uncompression routines have been 
+                rewritten to take advantage of the fact that profile remains
+                the same ==> T offset indices remain the same. This duplicates
+                the Matlab version, including the fact that we use linear 
+                interpolations
+
+                The code further splits into two, depending on iSplineType
+                  iSplineType = 1 : kComp Database, klayers pressure levels 
+                                    differ, so need two pressure interp points
+                                       use four  weights for most gases
+                                       use eight weights for water
+                  iSplineType = 2 : kComp Database, klayers pressure levels 
+                                    same, so need one pressure interp point
+                                       use two  weights for most gases
+                                       use four weights for water
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+11/16/01        ARBITRARY PLEVS
+                While splining KCARTA database defn (mypref.op) onto the 
+                arbitrary pressure levels in the klayers file, it needs to make
+                up a new reference profile set of P,PP,T,A for each gas. This
+                is easily done by splining (old_avgP,oldVar,new_avgP) where 
+                var = PP,T,A for the actual layers that are contained in the
+                KLAYERS file. IF pp < 0 for gases other than water, no problem
+                (this can happen high up in the atm). If gas amts < 0, or
+                partial pressures for water < 0, HALT!!!!!!!!

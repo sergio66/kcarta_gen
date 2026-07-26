@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# after launchung job watch squeue -u sergio
-#
+# after launchung job      watch squeue -u sergio
+#                          watch date; ls -lt JUNK/ind*jac.mat | wc -l; squeue -u sergio  | wc -l
 # or check_progress.sc
 #
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

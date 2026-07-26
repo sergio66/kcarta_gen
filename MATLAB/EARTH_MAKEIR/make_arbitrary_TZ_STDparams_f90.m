@@ -1,12 +1,38 @@
-addpath /asl/matlib/h4tools
-addpath /home/sergio/MATLABCODE
+addpath /home/sergio/git/matlabcode/matlibSergio/matlib2025/h4tools/
+addpath /home/sergio/git/matlabcode
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% <<<<<<<<<< have to define the PBL file here, and define the output name here >>>>>>>>>>>>>>>>>>
-fin = '/home/chepplew/projects/klayers_wrk/regr49_pbl.op.rtp'; iSTD = 49;
-fout = 'arbitrary_TZ_STD.param_earth_PBL';
-comment = '! ARBITRARY Irion/Hepplewhite PBL layer heights and Temperatures and GasAmounts';
-%% <<<<<<<<<< have to define the PBL file here, and define the output name here >>>>>>>>>>>>>>>>>>
+%%%%% lrwxrwxrwx 1 sergio pi_sergio   32 Dec 19  2025 arbitrary_TZ_STDparam_earth -> arbitrary_TZ_STD.param_earth_PBL
+
+% See ~/git/kcarta_gen/SRCv1.22_f90/Revisions_arbitrary_plevs.txt
+%   07/25/26        ~/git/sarta_scatter_rtp_klayers_sergio/KLAYERS_CHepplew_PBL/klayersV205/Grid/ is linked to
+%                   ~/git/kcarta_gen/MATLAB/EARTH_MAKEIR/make_arbitrary_TZ_STDparams_f90.m
+
+iWhichNewType = 1;   %% USSTD for 100 L2 layers --> OCO2 PBL layers (125 m thick at surface)
+iWhichNewType = 50;  %% USSTD for 100 L2 layers --> aircraft at 1 mb   = 50 km
+iWhichNewType = 20;  %% USSTD for 100 L2 layers --> aircraft at 57 mb  = 20 km
+iWhichNewType = 12;  %% USSTD for 100 L2 layers --> aircraft at 250 mb = 12 km
+
+dir0 = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/';
+
+if iWhichNewType == 1
+  %% <<<<<<<<<< have to define the OCO2 PBL file here, and define the output name here >>>>>>>>>>>>>>>>>>
+  fin = '/home/chepplew/projects/klayers_wrk/regr49_pbl.op.rtp';    iSTD = 49;
+  fin = [dir0 /regr49_pbl_probably370ppm.op.rtp'];                  iSTD = 49;  
+  fout = 'arbitrary_TZ_STD.param_earth_PBL';
+  comment = '! ARBITRARY Irion/Hepplewhite PBL layer heights and Temperatures and GasAmounts';
+  %% <<<<<<<<<< have to define the OCO2 PBL file here, and define the output name here >>>>>>>>>>>>>>>>>>
+elseif iWhichNewType == 12
+  %% <<<<<<<<<< have to define the 12 km (250 mb) aircraft  file here, and define the output name here >>>>>>>>>>>>>>>>>>
+  iSTD = 49;    
+  fin = '/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1100_with_co2_400ppm_9gases_unitemiss_aircraft_12km.op.rtp';
+  fout = 'aircraft_12km_250mb_TZ_STD.param_earth';
+  comment = '! ARBITRARY pend = 250 mb (12 km) layer heights and Temperatures and GasAmounts';
+  %% <<<<<<<<<< have to define the 12 km (250 mb) aircraft  file here, and define the output name here >>>>>>>>>>>>>>>>>>
+else
+  error('unknow iWhichNewType')
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -14,12 +40,13 @@ if ~exist(fin)
   error('cannot find your definition rtp file here');
 end
 if exist(fout)
+  fprintf(1,'fout %s exists \n',fout)
   error('fout exists')
 end
 
 [h0,ha0,p0,pa0] = rtpread('klayersV205_Data/Data/adafgl_16Aug2010_op.rtp');
 [h, ha, p, pa ] = rtpread(fin);
-fid = fopen('arbitrary_TZ_STD.param_earth_PBL','w');
+fid = fopen(fout,'w');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -32,7 +59,7 @@ fprintf(fid,'       REAL ARBDatabaseTZ(kMaxLayer)           ! Kelvin \n');
 fprintf(fid,'       REAL ARBDatabaseQZ(kMaxLayer)           ! molecules/cm2 \n');
 fprintf(fid,'       REAL ARBDATABASELEVHEIGHTS(kMaxLayer+1) ! km \n');
 fprintf(fid,'       REAL ARBDATABASEPLEVS(kMaxLayer+1)      ! mb \n');
-!fprintf(fid,'       INTEGER IPLAY \n');
+%%%%% fprintf(fid,'      INTEGER IPLAY \n');
 fprintf(fid,'  \n');
 fprintf(fid,'! note that the program expects T(z) in K and gas amounts in moles/cm2 \n');
 fprintf(fid,'  \n');
@@ -176,14 +203,17 @@ printarray(p.gas_6(1:100,iSTD)./MRlaysHGT * 1e6,'CH4 PPMV')
 disp('QlaysHGT./MRlaysHGT = 0.166666e-26 = 1/(Na*1000) = 0.166666e-26 = 1.66666e-27')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf(1,' >>>> now symbolically linking    arbitrary_TZ_STDparam_earth    to    %s \n',fout);
+
 rmer = ['!/bin/rm arbitrary_TZ_STDparam_earth'];        eval(rmer);
 lner = ['!ln -s ' fout ' arbitrary_TZ_STDparam_earth']; eval(lner)   
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(' ')
 disp('now see Makefile_v122_Intelf90 --> Makefile_tar_objs_data_f90 --> Makefile_tar_objs_data_f90_datafix');
 disp('that has cd ../INCLUDE; cd EARTH_database_params; ./lner_EARTH_database_params.sc')
 disp('that latter has you going back to SRCv1.22_f90 to run "cp_param_files_to_f90_v122.sc" ')
 disp('here we run cp_param_files_to_f90_v122_arb.sc')
+disp(' ')
+disp('now re-Make the kcarta code')
 
 runner = ['!cp_param_files_to_f90_v122_arb.sc']; eval(runner);

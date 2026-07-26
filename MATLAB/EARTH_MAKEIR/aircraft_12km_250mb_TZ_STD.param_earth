@@ -7,7 +7,6 @@
        REAL ARBDatabaseQZ(kMaxLayer)           ! molecules/cm2 
        REAL ARBDATABASELEVHEIGHTS(kMaxLayer+1) ! km 
        REAL ARBDATABASEPLEVS(kMaxLayer+1)      ! mb 
-      INTEGER IPLAY 
   
 ! note that the program expects T(z) in K and gas amounts in moles/cm2 
   

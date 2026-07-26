@@ -75,6 +75,14 @@ can also edit/run check_files_N_sizes.m as needed
 %%   set JOB_OFFSET = 40000; run off JOB 40001-60000
 if ~exist('JOB_OFFSET')
   JOB_OFFSET = 0;
+  %JOB_OFFSET = 20000;  
+end
+if JOB_OFFSET > 0
+  disp(' ')
+  fprintf(1,'warning : JOB_OFFSET = %5i \n',JOB_OFFSET);
+  fprintf(1,'warning : JOB_OFFSET = %5i \n',JOB_OFFSET);
+  fprintf(1,'warning : JOB_OFFSET = %5i \n',JOB_OFFSET);  
+  disp(' ')
 end
 
 %% so that we can loop through using "loop_clust_do_kcarta_driver.m" when cluster is dead
@@ -84,8 +92,8 @@ else
   JOB = JOBB;
 end  
 if length(JOB) == 0
-  JOB = 1;
   JOB = 3842;
+  JOB = 1;
 end
 JOB = JOB_OFFSET + JOB;
 

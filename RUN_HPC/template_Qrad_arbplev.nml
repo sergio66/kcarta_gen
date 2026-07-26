@@ -352,7 +352,7 @@
  iaNp(1)        =    -1
  raaOp(1,1)     =    0.0
 
- !! Jonah SHaw profiles testing wihth RTTOVS, see also template_Qrad_arbplev.nml
+ !! Jonah SHaw profiles testing wihth RTTOVS
  !raaOp(1,1)     =    0.12
  !raaOp(1,1)     =    12.0
 
@@ -360,7 +360,7 @@
  iaPrinter(1)   =    3
  iaGPMPAtm(1)   =   -1
  iaNp(1)        =    1
- raaOp(1,1)     =    0.0
+ raaOp(1,1)     =    iArb_RADatPLEV
 
  $end
 

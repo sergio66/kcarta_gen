@@ -17,7 +17,16 @@ else
   outstat    = fxstat;
 end
 
-if ~exist('%iIRorFIR')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if ~exist('iArb_RADatPLEV')
+  %% this is for radiances ouout at eg 250 mb instead of TOA
+  iArb_RADatPLEV = +1;  
+  iArb_RADatPLEV = -1;  %% default is TOA  
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if ~exist('iIRorFIR')
   iIRorFIR  = -1;
   iIRorFIR = +1;
 end
@@ -207,7 +216,13 @@ elseif iDoJac == 100 & iDoFlux < 0 & iDoCloud == 1 & gg == 2346
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-elseif iDoJac < 0 & iDoFlux < 0 & iDoCloud < 0 & (iHITRAN ~= 2016.3 & iHITRAN ~= 2017 & iHITRAN ~= 2018)
+elseif iDoJac < 0 & iDoFlux < 0 & iDoCloud < 0 & (iHITRAN ~= 2016.3 & iHITRAN ~= 2017 & iHITRAN ~= 2018 & iArb_RADatPLEV > 0)
+  disp('do_kcarta.m here B (clr sky rad, usual res)')
+  sedder = [sedder ' -e "s/iArb_RADatPLEV/'    num2str(iArb_RADatPLEV) '/g"'];
+  sedder = [sedder ' template_Qrad_arbplev.nml  > ' outnml];
+  kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& ' outstat];
+
+elseif iDoJac < 0 & iDoFlux < 0 & iDoCloud < 0 & (iHITRAN ~= 2016.3 & iHITRAN ~= 2017 & iHITRAN ~= 2018 & iArb_RADatPLEV < 0)
   disp('do_kcarta.m here B (clr sky rad, usual res)')
   sedder = [sedder ' template_Qrad.nml  > ' outnml];
   kcartaer = ['!time ' kcartaexec ' ' outnml ' ' outname '; echo $? >& ' outstat];

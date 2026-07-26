@@ -550,6 +550,11 @@ use_this_rtp = 'RTP/summary_12years_all_lat_all_lon_2002_2014_monthlyERA5.rp.rtp
 use_this_rtp = 'RTP/summary_07years_all_lat_all_lon_2012_2019_monthlyERA5.rp.rtp';
 use_this_rtp = 'RTP/summary_20years_all_lat_all_lon_2002_2021_monthlyERA5.rp.rtp';
 use_this_rtp = 'RTP/summary_23years_all_lat_all_lon_2002_2025_monthlyERA5.op.rtp';
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% for NASA research aircraft flying with SHIS or NAST or AERI instruments
+use_this_rtp = 'RTP/regr49_1100_with_co2_400ppm_9gases_unitemiss_aircraft_12km.op.rtp';
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iInstr = 124; iDoConvolve = 1;
 iInstr = 1;   iDoConvolve = 1;
